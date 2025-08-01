@@ -202,7 +202,7 @@ def fetch_dem_rq(runid: str, extent, center, zoom):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def build_channels_rq(runid: str, csa: float, mcl: float, wbt_fill_or_breach: None|str):
+def build_channels_rq(runid: str, csa: float, mcl: float, wbt_fill_or_breach: None|str, wbt_blc_dist: None|int):
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -214,6 +214,10 @@ def build_channels_rq(runid: str, csa: float, mcl: float, wbt_fill_or_breach: No
             if wbt_fill_or_breach is not None:
                 StatusMessenger.publish(status_channel, f'Setting wbt_fill_or_breach to {wbt_fill_or_breach}')
                 watershed.wbt_fill_or_breach = wbt_fill_or_breach
+            if wbt_blc_dist is not None:
+                StatusMessenger.publish(status_channel, f'Setting wbt_blc_dist to {wbt_blc_dist}')
+                watershed.wbt_blc_dist = wbt_blc_dist
+        StatusMessenger.publish(status_channel, f'Building channels with csa={csa}, mcl={mcl}')
         watershed.build_channels(csa, mcl)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   channel_delineation BUILD_CHANNELS_TASK_COMPLETED')
@@ -225,7 +229,7 @@ def build_channels_rq(runid: str, csa: float, mcl: float, wbt_fill_or_breach: No
         raise
 
 
-def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl, wbt_fill_or_breach):
+def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl, wbt_fill_or_breach, wbt_blc_dist):
     try:
         job = get_current_job()
         func_name = inspect.currentframe().f_code.co_name
@@ -238,7 +242,7 @@ def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl, 
             job.meta['jobs:0,func:fetch_dem_rq'] = ajob.id
             job.save()
 
-            bjob = q.enqueue_call(build_channels_rq, (runid, csa, mcl, wbt_fill_or_breach),  depends_on=ajob)
+            bjob = q.enqueue_call(build_channels_rq, (runid, csa, mcl, wbt_fill_or_breach, wbt_blc_dist),  depends_on=ajob)
             job.meta['jobs:1,func:build_channels_rq'] = bjob.id
             job.save()
         

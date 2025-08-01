@@ -1075,6 +1075,9 @@ class Omni(NoDbBase, LogMixin):
 
 
 # [x] add NTU
+# [ ] add NTU for outlet
+# [ ] revise mulching cover model
 # [ ] add peak runoff (50 yr)
 # [x] treat low and moderate severity conditions
 # [ ] rerun https://wepp.cloud/weppcloud/runs/rlew-indecorous-vest/disturbed9002/
+# [ ] run contrast scenarios

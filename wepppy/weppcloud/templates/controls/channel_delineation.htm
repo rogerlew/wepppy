@@ -112,7 +112,20 @@
         <select id="input_wbt_fill_or_breach" name="wbt_fill_or_breach" class="form-control mr-sm-3 disable-readonly">
             <option value="fill" {% if watershed.wbt_fill_or_breach=='fill' %}selected{% endif %}>Fill</option>
             <option value="breach" {% if watershed.wbt_fill_or_breach=='breach' %}selected{% endif %}>Breach</option>
+            <option value="breach_least_cost" {% if watershed.wbt_fill_or_breach=='breach_least_cost' %}selected{% endif %}>Breach (Least Cost)</option>
         </select>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-sm-5">
+        <label for="wbt_blc_dist">Breach Least Cost Distance (m)
+            <a data-toggle="tooltip" data-placement="top" title="Recommended to use default value."><img
+                    src="{{ url_for('static', filename='images/61692-200-24.png') }}" /></a>
+        </label>`
+    </div>
+    <div class="col-sm-3">
+        <input id="wbt_blc_dist" name="wbt_blc_dist" class="form-control mr-sm-3 disable-readonly" type="text"
+            value="{{ watershed.wbt_blc_dist }}" aria-label="Breach Least Cost Distance">
     </div>
 </div>
 {% endif %}

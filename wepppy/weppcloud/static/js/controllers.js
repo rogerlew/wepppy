@@ -28,10 +28,10 @@ function WSClient(formId, channel) {
     this.wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/status/" + runid + ":" + channel;
     this.ws = null;
     this.shouldReconnect = true;
-//    this.connect();
+    //    this.connect();
 }
 
-WSClient.prototype.connect = function() {
+WSClient.prototype.connect = function () {
     if (this.ws) {
         return; // If already connected, do nothing
     }
@@ -41,7 +41,7 @@ WSClient.prototype.connect = function() {
     this.ws.onopen = () => {
         $("#preflight_status").html("Connected");
         if (this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({"type": "init"}));
+            this.ws.send(JSON.stringify({ "type": "init" }));
         } else {
             console.error("WebSocket is not in OPEN state: ", this.ws.readyState);
         }
@@ -50,7 +50,7 @@ WSClient.prototype.connect = function() {
     this.ws.onmessage = (event) => {
         var payload = JSON.parse(event.data);
         if (payload.type === "ping") {
-            this.ws.send(JSON.stringify({"type": "pong"}));
+            this.ws.send(JSON.stringify({ "type": "pong" }));
         } else if (payload.type === "hangup") {
             this.disconnect();
         } else if (payload.type === "status") {
@@ -72,8 +72,8 @@ WSClient.prototype.connect = function() {
                 var job_url = `https://${window.location.host}/weppcloud/rq/jobinfo/${job_id}`;
 
                 // need a short delay here to avoid race condition
-                setTimeout(function() {
-                    $.get(job_url, function(job_info, status) {
+                setTimeout(function () {
+                    $.get(job_url, function (job_info, status) {
                         if (status === 'success') {
                             stacktrace.append(`<pre><small class="text-muted">${job_info.exc_info}</small></pre>`);
                         }
@@ -106,7 +106,7 @@ WSClient.prototype.connect = function() {
     };
 
     this.ws.onclose = () => {
-//        $("#" + this.formId + " #status").html("Connection Closed");
+        //        $("#" + this.formId + " #status").html("Connection Closed");
         this.ws = null;
         if (this.shouldReconnect) {
             setTimeout(() => { this.connect(); }, 5000);
@@ -114,7 +114,7 @@ WSClient.prototype.connect = function() {
     };
 };
 
-WSClient.prototype.disconnect = function() {
+WSClient.prototype.disconnect = function () {
     if (this.ws) {
         this.shouldReconnect = false;
         this.ws.close();
@@ -178,7 +178,7 @@ var Disturbed = function () {
     function createInstance() {
         var that = controlBase();
 
-        that.reset_land_soil_lookup =  function() {
+        that.reset_land_soil_lookup = function () {
             $.get({
                 url: "tasks/reset_disturbed/",
                 cache: false,
@@ -189,7 +189,7 @@ var Disturbed = function () {
                         alert("Error resetting Land Soil Lookup");
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -204,10 +204,10 @@ var Disturbed = function () {
                 url: "api/disturbed/has_sbs/",
                 async: false,  // Makes the request synchronous
                 dataType: 'json',  // Ensures response is parsed as JSON
-                success: function(response) {
+                success: function (response) {
                     result = response.has_sbs;
                 },
-                error: function(jqXHR) {
+                error: function (jqXHR) {
                     console.log(jqXHR.responseJSON);
                     result = false;  // Returns false if the request fails
                 }
@@ -253,7 +253,7 @@ var Project = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -275,7 +275,7 @@ var Project = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -284,7 +284,7 @@ var Project = function () {
             });
         };
 
-        that.clear_locks = function() {
+        that.clear_locks = function () {
 
             $.get({
                 url: "tasks/clear_locks/",
@@ -296,7 +296,7 @@ var Project = function () {
                         alert("Error clearing locks");
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -314,7 +314,7 @@ var Project = function () {
                 dataType: "json",
                 success: function success(response) {
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -333,7 +333,7 @@ var Project = function () {
                 success: function success(response) {
                     self.set_readonly_controls(state);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -344,17 +344,17 @@ var Project = function () {
         that.set_readonly_controls = function (readonly) {
 
             if (readonly === true) {
-                $('.hide-readonly').each( function( index, element ){
+                $('.hide-readonly').each(function (index, element) {
                     $(this).hide();
                 });
-                $('.disable-readonly').each( function( index, element ){
+                $('.disable-readonly').each(function (index, element) {
                     $(this).prop('readonly', true);
                 });
             } else {
-                $('.hide-readonly').each( function( index, element ){
+                $('.hide-readonly').each(function (index, element) {
                     $(this).show();
                 });
-                $('.disable-readonly').each( function( index, element ){
+                $('.disable-readonly').each(function (index, element) {
                     $(this).prop('readonly', false);
                 });
                 Outlet.getInstance().setMode(0);
@@ -365,7 +365,7 @@ var Project = function () {
             return str.replace(new RegExp(find, 'g'), replace);
         }
 
-            that.unitChangeEvent = function () {
+        that.unitChangeEvent = function () {
             var self = instance;
 
             var prefs = $("[name^=unitizer_]");
@@ -389,9 +389,9 @@ var Project = function () {
                 url: site_prefix + "/runs/" + runid + "/" + config + "/tasks/set_unit_preferences/",
                 data: unit_preferences,
                 success: function success(response) {
-                    if (response.Success === true) {} else {}
+                    if (response.Success === true) { } else { }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -468,7 +468,7 @@ var RAP_TS = function () {
                     self.status.html(`fetch_and_analyze_rap_ts_rq job submitted: ${response.job_id}`);
                     self.set_rq_job_id(self, response.job_id);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -521,7 +521,7 @@ var Team = function () {
 
         that.adduser = function (email) {
             var self = instance;
-            var data ={"adduser-email": email};
+            var data = { "adduser-email": email };
 
             $.post({
                 url: "tasks/adduser/",
@@ -533,7 +533,7 @@ var Team = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -556,7 +556,7 @@ var Team = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -574,7 +574,7 @@ var Team = function () {
                 success: function success(response) {
                     self.info.html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -613,6 +613,11 @@ var Map = function () {
 
         that.scrollWheelZoom.disable();
 
+        that.createPane('subcatchmentsGlPane');
+        that.getPane('subcatchmentsGlPane').style.zIndex = 600;
+
+        that.createPane('channelGlPane');
+        that.getPane('channelGlPane').style.zIndex = 650;
         //
         // Elevation feedback on mouseover
         //
@@ -632,19 +637,19 @@ var Map = function () {
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 cache: false,
-                success: function(response) {
+                success: function (response) {
                     var elev = response.Elevation.toFixed(1);
                     var lng = coordRound(ev.latlng.lng);
                     var lat = coordRound(ev.latlng.lat);
                     self.mouseelev.show().text("| Elevation: " + elev + " m | Cursor: " + lng + ", " + lat);
                 },
-                error: function(jqXHR) {
+                error: function (jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
-                complete: function() {
+                complete: function () {
                     // Reset the timer in the complete callback
                     clearTimeout(self.fetchTimer);
-                    self.fetchTimer = setTimeout(function() {
+                    self.fetchTimer = setTimeout(function () {
                         self.isFetchingElevation = false;
                     }, 1000); // Wait for 1 seconds before allowing another request
                 }
@@ -692,12 +697,12 @@ var Map = function () {
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
         });
 
-//        that.nlcd = L.tileLayer.wms(
-//            "https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?", {
-//            layers: "NLCD_2016_Land_Cover_L48",
-//            format: "image/png",
-//            transparent: true
-//        });
+        //        that.nlcd = L.tileLayer.wms(
+        //            "https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?", {
+        //            layers: "NLCD_2016_Land_Cover_L48",
+        //            format: "image/png",
+        //            transparent: true
+        //        });
         that.usgs_gage = L.geoJson.ajax("", {
             onEachFeature: (feature, layer) => {
                 if (feature.properties && feature.properties.Description) {
@@ -706,12 +711,12 @@ var Map = function () {
             },
             pointToLayer: (feature, latlng) => {
                 return L.circleMarker(latlng, {
-                radius: 8,
-                fillColor: "#ff7800",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
+                    radius: 8,
+                    fillColor: "#ff7800",
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
                 });
             }
         });
@@ -724,12 +729,12 @@ var Map = function () {
             },
             pointToLayer: (feature, latlng) => {
                 return L.circleMarker(latlng, {
-                radius: 8,
-                fillColor: "#000078",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
+                    radius: 8,
+                    fillColor: "#000078",
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
                 });
             }
         });
@@ -737,13 +742,13 @@ var Map = function () {
         that.baseMaps = {
             "Satellite": that.googleSat,
             "Terrain": that.googleTerrain,
-//            "2016 NLCD": that.nlcd
+            //            "2016 NLCD": that.nlcd
         };
 
         that.overlayMaps = {
             'USGS Gage Locations': that.usgs_gage,
             'SNOTEL Locations': that.snotel_locations
-         };
+        };
 
         that.googleSat.addTo(that);
         that.googleTerrain.addTo(that);
@@ -759,10 +764,10 @@ var Map = function () {
             var lng = coordRound(center.lng);
             var lat = coordRound(center.lat);
             var map_w = $('#mapid').width()
-            $("#mapstatus").text("Center: " + lng + 
-                                 ", " + lat + 
-                                 " | Zoom: " + zoom +
-                                 " ( Map Width:" + map_w  + "px )");
+            $("#mapstatus").text("Center: " + lng +
+                ", " + lat +
+                " | Zoom: " + zoom +
+                " ( Map Width:" + map_w + "px )");
 
         };
 
@@ -776,7 +781,7 @@ var Map = function () {
                     var project = Project.getInstance();
                     project.set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -817,7 +822,7 @@ var Map = function () {
             var extent = [parseFloat(sw.lng), parseFloat(sw.lat), parseFloat(ne.lng), parseFloat(ne.lat)];
 
             self.usgs_gage.refresh(
-                [ site_prefix + '/resources/usgs/gage_locations/?&bbox=' + self.getBounds().toBBoxString() + '']);
+                [site_prefix + '/resources/usgs/gage_locations/?&bbox=' + self.getBounds().toBBoxString() + '']);
         };
 
         that.loadSnotelLocations = function () {
@@ -836,7 +841,7 @@ var Map = function () {
             var extent = [parseFloat(sw.lng), parseFloat(sw.lat), parseFloat(ne.lng), parseFloat(ne.lat)];
 
             self.snotel_locations.refresh(
-                [ site_prefix + '/resources/snotel/snotel_locations/?&bbox=' + self.getBounds().toBBoxString() + '']);
+                [site_prefix + '/resources/snotel/snotel_locations/?&bbox=' + self.getBounds().toBBoxString() + '']);
         };
 
         return that;
@@ -899,7 +904,7 @@ var Baer = function () {
 
             $.post({
                 url: "tasks/set_firedate/",
-                data: JSON.stringify({ fire_date: fire_date}),
+                data: JSON.stringify({ fire_date: fire_date }),
                 contentType: "application/json; charset=utf-8",
                 success: function success(response) {
                     if (response.Success === true) {
@@ -908,7 +913,7 @@ var Baer = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -942,7 +947,7 @@ var Baer = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -968,7 +973,7 @@ var Baer = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1007,7 +1012,7 @@ var Baer = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1026,7 +1031,7 @@ var Baer = function () {
                 success: function success(response) {
                     self.info.html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1039,9 +1044,9 @@ var Baer = function () {
 
             var self = instance;
             var data = [parseInt($('#baer_brk0').val(), 10),
-                        parseInt($('#baer_brk1').val(), 10),
-                        parseInt($('#baer_brk2').val(), 10),
-                        parseInt($('#baer_brk3').val(), 10)];
+            parseInt($('#baer_brk1').val(), 10),
+            parseInt($('#baer_brk2').val(), 10),
+            parseInt($('#baer_brk3').val(), 10)];
 
             var nodata_vals = $('#baer_nodata').val();
 
@@ -1053,7 +1058,7 @@ var Baer = function () {
 
             $.post({
                 url: "tasks/modify_burn_class/",
-                data: JSON.stringify({ classes: data , nodata_vals: nodata_vals}),
+                data: JSON.stringify({ classes: data, nodata_vals: nodata_vals }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
@@ -1064,7 +1069,7 @@ var Baer = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1080,7 +1085,7 @@ var Baer = function () {
 
             var data = {};
             // Use jQuery to find all select fields that start with "baer_color_"
-            $("select[id^='baer_color_']").each(function() {
+            $("select[id^='baer_color_']").each(function () {
                 var id = $(this).attr('id'); // Get the id of the select element
                 var rgb = id.replace('baer_color_', ''); // Extract the <R>_<G>_<B> part
                 var value = $(this).val(); // Get the selected value of the dropdown
@@ -1106,7 +1111,7 @@ var Baer = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1156,7 +1161,7 @@ var Baer = function () {
                                     map.flyToBounds(self.baer_map._bounds);
                                 }
                             },
-                            error: function error(jqXHR)  {
+                            error: function error(jqXHR) {
                                 self.pushResponseStacktrace(self, jqXHR.responseJSON);
                             },
                             fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1167,7 +1172,7 @@ var Baer = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1184,12 +1189,12 @@ var Baer = function () {
                         map.sbs_legend.html(response);
 
                         map.sbs_legend.append('<div id="slider-container"><p>SBS Map Opacity</p><input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="0.7"></div>');
-                        $('#opacity-slider').on('input change', function() {
+                        $('#opacity-slider').on('input change', function () {
                             var newOpacity = $(this).val();
                             self.baer_map.setOpacity(newOpacity);
                         });
                     },
-                    error: function error(jqXHR)  {
+                    error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1225,9 +1230,10 @@ var ChannelDelineation = function () {
         that.data = null; // JSON from Flask
         that.polys = null; // Leaflet geoJSON layer
         that.topIds = [];
+        that.glLayer = null;        // <- webgl layer
         that.labels = L.layerGroup();
 
-        that.style = function(feature) {
+        that.style = function (feature) {
             let order = parseInt(feature.properties.Order, 6);
 
             if (order > 7) {
@@ -1236,24 +1242,24 @@ var ChannelDelineation = function () {
 
             // simple map for Orders 1–6
             const colors = {
-              0: "#8AE5FE",
-              1: "#65C8FE",
-              2: "#479EFF",
-              3: "#306EFE",
-              4: "#2500F4",
-              5: "#6600cc",
-              6: "#50006b",
-              7: "#6b006b",
+                0: "#8AE5FE",
+                1: "#65C8FE",
+                2: "#479EFF",
+                3: "#306EFE",
+                4: "#2500F4",
+                5: "#6600cc",
+                6: "#50006b",
+                7: "#6b006b",
             };
             // default for everything else (>6 or missing)
             const stroke = colors[order] || "#1F00CF";
-            const fill = colors[order-1] || "#2838FE";
+            const fill = colors[order - 1] || "#2838FE";
             return {
-              color:      stroke,
-              weight:     1,
-              opacity:    1,
-              fillColor:  fill,
-              fillOpacity: 0.9
+                color: stroke,
+                weight: 1,
+                opacity: 1,
+                fillColor: fill,
+                fillOpacity: 0.9
             };
         };
 
@@ -1276,9 +1282,9 @@ var ChannelDelineation = function () {
             var self = instance;
             var map = Map.getInstance();
 
-            if (self.polys !== null) {
-                map.ctrls.removeLayer(self.polys);
-                map.removeLayer(self.polys);
+            if (self.glLayer !== null) {
+                map.ctrls.removeLayer(self.glLayer);
+                map.removeLayer(self.glLayer);
             }
 
             if (self.labels !== null) {
@@ -1294,7 +1300,7 @@ var ChannelDelineation = function () {
                 url: "query/has_dem/",
                 cache: false,
                 success: onSuccessCallback,
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1328,7 +1334,7 @@ var ChannelDelineation = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1340,7 +1346,7 @@ var ChannelDelineation = function () {
         that.onMapChange = function () {
             var self = instance;
             var map = Map.getInstance();
-
+            
             var center = map.getCenter();
             var zoom = map.getZoom();
             var bounds = map.getBounds();
@@ -1375,6 +1381,7 @@ var ChannelDelineation = function () {
             self.remove();
             var task_msg = "Identifying topaz_pass";
 
+
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
@@ -1404,7 +1411,7 @@ var ChannelDelineation = function () {
                     }
                     self.status.html(task_msg + "... Success");
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1415,115 +1422,128 @@ var ChannelDelineation = function () {
 
         // Topaz Pass 1
         // Shows the NETFUL.ARC built by TOPAZ
+        // --- hex → {r,g,b,a} helper (CSS-Tricks / SO recipe) ---
+        const fromHex = hex => {
+            hex = hex.replace(/^#/, '');
+            const num = parseInt(hex, 16);
+            return {
+                r: ((num >> 16) & 255) / 255,
+                g: ((num >> 8) & 255) / 255,
+                b: (num & 255) / 255,
+                a: 1
+            };
+        }; //  [oai_citation:5‡Stack Overflow](https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb?utm_source=chatgpt.com)
+
+        // same palette you used, just no alpha here
+        const palette = [
+            "#8AE5FE", "#65C8FE", "#479EFF", "#306EFE",
+            "#2500F4", "#6600cc", "#50006b", "#6b006b"
+        ].map(fromHex);
+
+        //------------------------------------------------------------------
+        // glify show_1
+        //------------------------------------------------------------------
         that.show_1 = function () {
-            var self = instance;
-
+            const self = instance;
             self.remove();
-            var task_msg = "Displaying Channel Map";
 
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
+            const task_msg = "Displaying Channel Map (WebGL)";
+            self.status.text(`${task_msg}…`);
 
-            $.get({
-                url: "resources/netful.json",
-                cache: false,
-                success: function success(response) {
-                    var map = Map.getInstance();
-                    self.data = response;
-                    self.polys = L.geoJSON(self.data.features, {
-                        style: self.style,
-                        onEachFeature: self.on1EachFeature
-                    });
-                    self.polys.addTo(map);
-                    map.ctrls.addOverlay(self.polys, "Channels");
+            $.getJSON("resources/netful.json")
+                .done(function (fc) {
+                    const map = Map.getInstance();
+                    self.glLayer = L.glify.layer({
+                        geojson: fc,
+                        paneName: 'channelGlPane',
+                        glifyOptions: {
+                            opacity: 0.9,
+                            border: false,
+                            color: (i, feat) => {
+                                let order = parseInt(feat.properties.Order, 10) || 4;
+                                order = Math.min(order, 7);
+                                return palette[order];
+                            }
+                        }
+                    }).addTo(map);
 
-                    self.status.html(task_msg + "... Success");
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+                    map.ctrls.addOverlay(self.glLayer, "Channels");
 
-            self.report();
-        };
-
-        that.on1EachFeature = function (feature, layer) {
-            layer.on({
-                click: function click(ev) {
-                    var topaz_id = ev.target.feature.properties.TopazID;
-                    //                    console.log(feature, topaz_id);
-                }
-            });
+                    self.status.text(`${task_msg} – done`);
+                    self.report();
+                })
+                .fail((jqXHR, textStatus, err) =>
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, err)
+                );
         };
 
         // Topaz Pass 2
         // Shows the channels from SUBWTA.ARC built by TOPAZ (channels end with '4')
+        //------------------------------------------------------------------
+        // glify show_2  – channels from SUBWTA.ARC   (Topaz “4” polygons)
+        //------------------------------------------------------------------
         that.show_2 = function () {
-            var self = instance;
-            self.data = null;
-            $.get({
-                url: "resources/channels.json",
-                cache: false,
-                success: self.on2Success,
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+            const self = instance;
+            self.remove();                                   // clear previous layers
+            self.status.text("Displaying SUBWTA channels…");
 
-            self.report();
-        };
+            $.getJSON("resources/channels.json")
+                .done(function (fc) {
+                    const map = Map.getInstance();
 
-        that.on2Success = function (response) {
-            var self = instance;
-            var map = Map.getInstance();
-            self.topIds = [];
-            self.labels = L.layerGroup();
-            self.data = response;
-            self.polys = L.geoJSON(self.data.features, {
-                style: self.style,
-                onEachFeature: self.on2EachFeature
-            });
-            self.polys.addTo(map);
-            map.ctrls.addOverlay(self.polys, "Channels");
+                    // ---------- WebGL polygons ----------
+                    self.glLayer = L.glify.layer({
+                        geojson: fc,
+                        paneName: 'channelGlPane',
+                        glifyOptions: {
+                            opacity: 0.6,
+                            border: true,
+                            color: (i, feat) => {
+                                // reuse your style logic – fall back to order 4
+                                let order = parseInt(feat.properties.Order, 10) || 4;
+                                order = Math.min(order, 7);
+                                return palette[order];     // palette[] == [{r,g,b,a}, …]
+                            },
+                            click: (e, feat) => {
+                                const map = Map.getInstance();
+                                map.chnQuery(feat.properties.TopazID); // same as before
+                            }
+                        }
+                    }).addTo(map);
 
-            //self.labels.addTo(map);
-            map.ctrls.addOverlay(self.labels, "Channel Labels");
-        };
+                    map.ctrls.addOverlay(self.glLayer, "Channels");
 
-        that.on2EachFeature = function (feature, layer) {
-            var self = instance;
-            var topId = feature.properties.TopazID;
-            layer.on({
-                zoomend: function zoomend() {
-                    self.polys.setStyle(self.style);
-                },
-                click: function click(ev) {
-                    var topaz_id = ev.target.feature.properties.TopazID;
-                    var map = Map.getInstance();
-                    map.chnQuery(topaz_id);
-                }
-            });
-            // build labels
-            if ($.inArray(topId, self.topIds) === -1) {
-                var center = feature.geometry.coordinates[feature.geometry.coordinates.length - 1];
-                center = [center[0][1], center[0][0]];
-                var label = L.marker(center, {
-                    icon: L.divIcon({
-                        iconSize: null,
-                        className: "label",
-                        html: "<div style=\"" + self.labelStyle + "\">" + topId + "</div>"
-                    })
-                });
-                self.topIds.push(topId);
-                self.labels.addLayer(label);
-            }
+                    // ---------- text labels ----------
+                    self.labels = L.layerGroup();
+                    const seen = new Set();
+
+                    fc.features.forEach(f => {
+                        const topId = f.properties.TopazID;
+                        if (seen.has(topId)) return;
+                        seen.add(topId);
+
+                        // crude centroid – last ring, first vertex (matches old code)
+                        const ring = f.geometry.coordinates[0][0];
+                        const center = [ring[1], ring[0]];          // [lat,lng]
+
+                        const lbl = L.marker(center, {
+                            icon: L.divIcon({
+                                className: "label",
+                                html: `<div style="${self.labelStyle}">${topId}</div>`
+                            })
+                        });
+                        self.labels.addLayer(lbl);
+                    });
+
+                    //self.labels.addTo(map);
+                    map.ctrls.addOverlay(self.labels, "Channel Labels");
+
+                    self.status.text("Displaying SUBWTA channels – done");
+                    self.report();
+                })
+                .fail((jq, txt, err) =>
+                    self.pushErrorStacktrace(self, jq, txt, err)
+                );
         };
 
         that.report = function () {
@@ -1535,7 +1555,7 @@ var ChannelDelineation = function () {
                 success: function success(response) {
                     self.info.html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1613,11 +1633,11 @@ var Outlet = function () {
 
                     var offset = cellsize * 5e-6;
 
-                    self.outletMarker.setLatLng([response.lat-offset, response.lng+offset]).addTo(map);
+                    self.outletMarker.setLatLng([response.lat - offset, response.lng + offset]).addTo(map);
                     map.ctrls.addOverlay(self.outletMarker, "Outlet");
                     self.status.html(task_msg + "... Success");
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1631,7 +1651,7 @@ var Outlet = function () {
                 success: function success(response) {
                     self.info.html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1678,7 +1698,7 @@ var Outlet = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1740,7 +1760,7 @@ function render_legend(cmap, canvasID) {
 
     for (var y = 0; y <= height; y++) {
         for (var x = 0; x <= width; x++) {
-            data[(y*width)+x] = x / (width - 1.0);
+            data[(y * width) + x] = x / (width - 1.0);
         }
     }
 
@@ -1774,97 +1794,53 @@ var SubcatchmentDelineation = function () {
             self.stacktrace.hide();
         };
 
-        that.cmap = "default";
+        //----------------------------------------------------------------------
+        // ─── CONSTANTS / HELPERS ──────────────────────────────────────────────
+        //----------------------------------------------------------------------
+        const fromHex = hex => {
+            hex = hex.replace(/^#/, '');
+            const n = parseInt(hex, 16);
+            return {
+                r: ((n >> 16) & 255) / 255,
+                g: ((n >> 8) & 255) / 255,
+                b: (n & 255) / 255,
+                a: 0.5
+            };
+        };
+
+        // default & clear colours in both CSS and WebGL formats
         that.defaultStyle = {
-            "color": "#ff7800",
-            "weight": 2,
-            "opacity": 0.65,
-            "fillColor": "#ff7800",
-            "fillOpacity": 0.3
+            color: '#ff7800',
+            weight: 2,
+            opacity: 0.65,
+            fillColor: '#ff7800',
+            fillOpacity: 0.3
         };
-
         that.clearStyle = {
-            "color": "#ff7800",
-            "weight": 2,
-            "opacity": 0.65,
-            "fillColor": "#ffffff",
-            "fillOpacity": 0.0
+            color: '#ff7800',
+            weight: 2,
+            opacity: 0.65,
+            fillColor: '#ffffff',
+            fillOpacity: 0.0
         };
+        const COLOR_DEFAULT = fromHex(that.defaultStyle.fillColor);
+        const COLOR_CLEAR = fromHex(that.clearStyle.fillColor);
 
-        that.labelStyle = "color: #ff7800; text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
-
-        that.data = null; // JSON from Flask
-        that.polys = null; // Leaflet geoJSON layer
+        //----------------------------------------------------------------------
+        // ─── STATE ────────────────────────────────────────────────────────────
+        //----------------------------------------------------------------------
+        that.data = null;          // FeatureCollection GeoJSON
+        that.glLayer = null;          // current WebGL layer
+        that.labels = L.layerGroup();
+        that.cmapMode = 'default';     // active colour-map key
         that.topIds = [];
-        that.labels = L.layerGroup(); // collection of labels with topaz ids as keys
 
-        // Gridded Plots
-        that.grid = null;
-        that.gridlabel = null;
+        // various query-result dicts filled by cmap*() functions
+        that.dataCover = null;
+        that.dataPhosphorus = null;
+        that.dataRunoff = null;
+        that.dataLoss = null;
 
-        //
-        // View Methods
-        //
-        that.show = function () {
-            var self = instance;
-            self.data = null;
-            $.get({
-                url: "resources/subcatchments.json",
-                cache: false,
-                success: self.onShowSuccess,
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.onShowSuccess = function (response) {
-            var self = instance;
-            var map = Map.getInstance();
-            self.topIds = [];
-            self.labels = L.layerGroup();
-            self.data = response;
-            self.polys = L.geoJSON(self.data.features, {
-                style: self.defaultStyle,
-                onEachFeature: self.onEachFeature
-            });
-            self.polys.addTo(map);
-            map.ctrls.addOverlay(self.polys, "Subcatchments");
-
-            //self.labels.addTo(map);
-            map.ctrls.addOverlay(self.labels, "Subcatchment Labels");
-        };
-
-        that.onEachFeature = function (feature, layer) {
-            var self = instance;
-            var map = Map.getInstance();
-
-            layer.on({
-                click: function click(ev) {
-                    var topaz_id = ev.target.feature.properties.TopazID;
-                    var map = Map.getInstance();
-                    map.subQuery(topaz_id);
-                }
-            });
-
-            var topId = feature.properties.TopazID;
-            if ($.inArray(topId, self.topIds) === -1) {
-                var center = polylabel(feature.geometry.coordinates, 1.0);
-                center = [center[1], center[0]];
-                var label = L.marker(center, {
-                    icon: L.divIcon({
-                        iconSize: null,
-                        className: "label",
-                        html: "<div style=\"" + self.labelStyle + "\">" + topId + "</div>"
-                    })
-                });
-                self.topIds.push(topId);
-                self.labels.addLayer(label);
-            }
-        };
 
         that.enableColorMap = function (cmap_name) {
             if (cmap_name === "dom_lc") {
@@ -1905,573 +1881,268 @@ var SubcatchmentDelineation = function () {
                 self.cmap();
                 Map.getInstance().sub_legend.html("");
             } else if (cmap_name === "slp_asp") {
-                self.cmapSlpAsp();
+                self.renderSlpAsp();
             } else if (cmap_name === "dom_lc") {
-                self.cmapNLCD();
+                self.renderNLCD();
             } else if (cmap_name === "rangeland_cover") {
-                self.cmapRangelandCover();
+                self.renderRangelandCover();
             } else if (cmap_name === "dom_soil") {
-                self.cmapSoils();
+                self.renderSoils();
             } else if (cmap_name === "landuse_cover") {
-                self.cmapCover();
+                self.renderCover();
             } else if (cmap_name === "sub_runoff") {
-                self.cmapRunoff();
+                self.renderRunoff();
             } else if (cmap_name === "sub_subrunoff") {
-                self.cmapSubrunoff();
+                self.renderSubrunoff();
             } else if (cmap_name === "sub_baseflow") {
-                self.cmapBaseflow();
+                self.renderBaseflow();
             } else if (cmap_name === "sub_loss") {
-                self.cmapLoss();
+                self.renderLoss();
             } else if (cmap_name === "sub_phosphorus") {
-                self.cmapPhosphorus();
+                self.renderPhosphorus();
             } else if (cmap_name === "sub_rhem_runoff") {
-                self.cmapRhemRunoff();
+                self.renderRhemRunoff();
             } else if (cmap_name === "sub_rhem_sed_yield") {
-                self.cmapRhemSedYield();
+                self.renderRhemSedYield();
             } else if (cmap_name === "sub_rhem_soil_loss") {
-                self.cmapRhemSoilLoss();
+                self.renderRhemSoilLoss();
             } else if (cmap_name === "ash_load") {
-                self.cmapAshLoad();
+                self.renderAshLoad();
             } else if (cmap_name === "wind_transport (kg/ha)") {
-                self.cmapAshTransport();
+                self.renderAshTransport();
             } else if (cmap_name === "water_transport (kg/ha") {
-                self.cmapAshTransport();
+                self.renderAshTransport();
             } else if (cmap_name === "ash_transport (kg/ha)") {
-                self.cmapAshTransport();
+                self.renderAshTransport();
             }
 
             if (cmap_name === "grd_loss") {
-                self.cmapClear();
+                self.renderClear();
                 self.renderGriddedLoss();
             } else {
                 self.removeGrid();
             }
         };
 
-        that.cmap = function () {
+        //----------------------------------------------------------------------
+        // ─── COMMON COLOUR FUNCTION (used by WebGL callback) ─────────────────
+        //----------------------------------------------------------------------
+        that._colorFn = function (feat) {
+            var self = instance;
+            const id = feat.properties.TopazID;
+
+            switch (self.cmapMode) {
+                case 'default': return COLOR_DEFAULT;
+                case 'clear': return COLOR_CLEAR;
+
+                /* ====== slope / aspect ================================================= */
+                case 'slp_asp': {
+                    const hsvHex = self.dataSlpAsp?.[id];                 // '#aabbcc'
+                    return hsvHex ? fromHex(hsvHex) : COLOR_DEFAULT;
+                }
+
+                /* ====== land-cover % =================================================== */
+                case 'cover': {
+                    if (!self.dataCover) return COLOR_DEFAULT;
+                    const v = self.dataCover[id];                         // 0-100
+                    const hex = self.cmapperCover.map(v);                 // '#rrggbb'
+                    return fromHex(hex);
+                }
+
+                /* ====== phosphorus, runoff, loss – share the same pattern ============= */
+                case 'phosphorus': {
+                    if (!self.dataPhosphorus) return COLOR_DEFAULT;
+                    const v = parseFloat(self.dataPhosphorus[id].value);  // kg/ha
+                    const r = self._rangePhosphorus;                      // current slider
+                    const hex = self.cmapperPhosphorus.map(v / r);
+                    return fromHex(hex);
+                }
+
+                case 'runoff': {
+                    const v = parseFloat(self.dataRunoff[id].value);      // mm
+                    const r = self._rangeRunoff;
+                    const hex = that.cmapperRunoff.map(v / r);
+                    return fromHex(hex);
+                }
+
+                case 'loss': {
+                    const v = parseFloat(self.dataLoss[id].value);        // kg/ha
+                    const r = self._rangeLoss;
+                    const hex = self.cmapperLoss.map(v / r);
+                    return fromHex(hex);
+                }
+
+                default: return COLOR_DEFAULT;
+            }
+        };
+
+        //----------------------------------------------------------------------
+        // ─── GL LAYER (re)BUILDER ────────────────────────────────────────────
+        //----------------------------------------------------------------------
+        that._refreshGlLayer = function () {
             var self = instance;
 
-            self.polys.eachLayer(function (layer) {
-                layer.setStyle(self.defaultStyle);
+            console.debug("SubcatchmentDelineation._refreshGlLayer() called");
+            console.debug("cmapMode:", self.cmapMode);
+            console.log("data:", self.data);
+
+            const map = Map.getInstance();
+
+            if (self.glLayer) {
+                self.glLayer.remove();                      // dispose VBOs & canvas
+                // keep layer-control checkbox position consistent
+                map.ctrls.removeLayer(self.glLayer);
+            }
+
+            self.glLayer = L.glify.layer({
+                geojson: self.data,
+                paneName: 'subcatchmentsGlPane',
+                glifyOptions: {
+                    opacity: 0.5,
+                    border: true,
+                    color: (i, f) => self._colorFn(f),
+                    click: (e, f) => map.subQuery(f.properties.TopazID)
+                }
+            }).addTo(map);
+
+            map.ctrls.addOverlay(self.glLayer, 'Subcatchments');
+        };
+
+        //----------------------------------------------------------------------
+        // ─── LABELS (unchanged, just recalculated once) ──────────────────────
+        //----------------------------------------------------------------------
+        that._buildLabels = function () {
+            that.labels.clearLayers();
+            const seen = new Set();
+
+            that.data.features.forEach(f => {
+                const id = f.properties.TopazID;
+                if (seen.has(id)) return;
+                seen.add(id);
+
+                const center = polylabel(f.geometry.coordinates, 1.0);
+                const marker = L.marker([center[1], center[0]], {
+                    icon: L.divIcon({
+                        className: 'label',
+                        html: `<div style="${that.labelStyle}">${id}</div>`
+                    })
+                });
+                that.labels.addLayer(marker);
             });
         };
 
-        that.cmapClear = function () {
+        //----------------------------------------------------------------------
+        // ─── INITIAL DRAW ────────────────────────────────────────────────────
+        //----------------------------------------------------------------------
+        that.show = function () {
             var self = instance;
 
-            self.polys.eachLayer(function (layer) {
-                layer.setStyle(self.clearStyle);
-            });
-        };
-
-        that.cmapSlpAsp = function () {
-            var self = instance;
+            self.cmapMode = 'default';           // reset to default cmap
 
             $.get({
-                url: "query/watershed/subcatchments/",
+                url: 'resources/subcatchments.json',
                 cache: false,
-                success: that.cmapCallback,
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            }).always(function () {
-                var self = instance;
+                success: self._onShowSuccess,
+                error: jq => self.pushResponseStacktrace(self, jq.responseJSON),
+                fail: (jq, s, e) => that.pushErrorStacktrace(that, jq, s, e)
+            });
+        };
 
-                $.get({
-                    url: "resources/legends/slope_aspect/",
-                    cache: false,
-                    success: function (response) {
-                        var map = Map.getInstance();
-                        map.sub_legend.html(response);
-                    },
-                    error: function error(jqXHR)  {
-                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                    },
-                    fail: function fail(jqXHR, textStatus, errorThrown) {
-                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                    }
+        that._onShowSuccess = function (fc) {
+            var self = instance;
+
+            self.data = fc;                      // GeoJSON FeatureCollection
+            self._buildLabels();                 // hidden by default
+
+            const map = Map.getInstance();
+            self._refreshGlLayer();              // draw polygons
+
+            map.ctrls.addOverlay(self.labels, 'Subcatchment Labels'); // off by default
+            self.report();
+        };
+
+        //----------------------------------------------------------------------
+        // ─── SIMPLE COLOUR-MAPS (default & clear) ────────────────────────────
+        //----------------------------------------------------------------------
+        that.render = function () { that.cmapMode = 'default'; that._refreshGlLayer(); };
+        that.renderClear = function () { that.cmapMode = 'clear'; that._refreshGlLayer(); };
+
+        //----------------------------------------------------------------------
+        // ─── DATA-DRIVEN COLOUR-MAPS (examples shown) ────────────────────────
+        //----------------------------------------------------------------------
+        /* ---------- slope / aspect ------------------------------------------ */
+        that.renderSlpAsp = function () {
+            that.status.text('Loading slope/aspect …');
+            $.get({
+                url: 'query/watershed/subcatchments/',
+                cache: false,
+                success: data => {
+                    that.dataSlpAsp = data;          // {TopazID:'#rrggbb', …}
+                    that.cmapMode = 'slp_asp';
+                    that._refreshGlLayer();
+                },
+                error: jq => that.pushResponseStacktrace(that, jq.responseJSON),
+                fail: (jq, s, e) => that.pushErrorStacktrace(that, jq, s, e)
+            }).always(() => {
+                $.get('resources/legends/slope_aspect/').done(html => {
+                    Map.getInstance().sub_legend.html(html);
                 });
             });
         };
 
-        that.cmapNLCD = function () {
-            var self = instance;
-
-            $.get({
-                url: "query/landuse/subcatchments/",
-                cache: false,
-                success: that.cmapCallback,
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            }).always(function () {
-                var self = instance;
-
-                $.get({
-                    url: "resources/legends/landuse/",
-                    cache: false,
-                    success: function (response) {
-                        var map = Map.getInstance();
-                        map.sub_legend.html(response);
-                    },
-                    error: function error(jqXHR)  {
-                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                    },
-                    fail: function fail(jqXHR, textStatus, errorThrown) {
-                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                    }
-                });
-            });
-        };
-
-
-
-        that.cmapRangelandCover = function () {
-            var self = instance;
-
-            $.get({
-                url: "query/rangeland_cover/subcatchments/",
-                cache: false,
-                success: that.cmapCallback,
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            }).always(function () {
-                var self = instance;
-
-                $.get({
-                    url: "resources/legends/rangeland_cover/",
-                    cache: false,
-                    success: function (response) {
-                        var map = Map.getInstance();
-                        map.sub_legend.html(response);
-                    },
-                    error: function error(jqXHR)  {
-                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                    },
-                    fail: function fail(jqXHR, textStatus, errorThrown) {
-                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                    }
-                });
-            });
-        };
-
-        that.cmapSoils = function () {
-            var self = instance;
-
-            $.get({
-                url: "query/soils/subcatchments/",
-                cache: false,
-                success: that.cmapCallback,
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            }).always(function () {
-                var self = instance;
-
-                $.get({
-                    url: "resources/legends/soil/",
-                    cache: false,
-                    success: function (response) {
-                        var map = Map.getInstance();
-                        map.sub_legend.html(response);
-                    },
-                    error: function error(jqXHR)  {
-                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                    },
-                    fail: function fail(jqXHR, textStatus, errorThrown) {
-                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                    }
-                });
-            });
-        };
-
-        //
-        // Cover
-        //
-        that.dataCover = null;
-        that.labelCoverMin = $('#landuse_sub_cmap_canvas_cover_min');
-        that.labelCoverMax = $('#landuse_sub_cmap_canvas_cover_max');
-        that.labelCoverUnits = $('#wepp_sub_cmap_canvas_cover_units');
-        that.cmapperCover = createColormap({ colormap: 'viridis', nshades: 100 });
-
-        that.cmapCover = function () {
-            var self = instance;
-            $.get({
-                url: "query/landuse/cover/subcatchments/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataCover = data;
-                    self.renderCover();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
+        /* ----------  % land-cover  ------------------------------------------ */
         that.renderCover = function () {
-            var self = instance;
-
-            self.labelCoverMin.html("0");
-            self.labelCoverMax.html("100");
-            self.labelCoverUnits.html("%");
-
-            if (self.polys == null) {
-                return;
-            }
-
-            self.polys.eachLayer(function (layer) {
-                var topId = layer.feature.properties.TopazID;
-                var v = self.dataCover[topId];
-                var c = self.cmapperCover.map(v);
-
-                layer.setStyle({
-                    color: c,
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: c,
-                    fillOpacity: 0.9
-                });
-            });
-        };
-        // end Cover
-
-        //
-        // Phosphorus
-        //
-        that.dataPhosphorus = null;
-        that.rangePhosphorus = $('#wepp_sub_cmap_range_phosphorus');
-        that.labelPhosphorusMin = $('#wepp_sub_cmap_canvas_phosphorus_min');
-        that.labelPhosphorusMax = $('#wepp_sub_cmap_canvas_phosphorus_max');
-        that.labelPhosphorusUnits = $('#wepp_sub_cmap_canvas_phosphorus_units');
-        that.cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
-
-        that.cmapPhosphorus = function () {
-            var self = instance;
-            $.get({
-                url: "query/wepp/phosphorus/subcatchments/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataPhosphorus = data;
-                    self.renderPhosphorus();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+            $.get('query/landuse/cover/subcatchments/')
+                .done(data => {
+                    that.dataCover = data;          // {TopazID:0-100, …}
+                    that.cmapMode = 'cover';
+                    that._refreshGlLayer();
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         };
 
+        /* ---------- phosphorus (kg/ha)  ------------------------------------- */
         that.renderPhosphorus = function () {
-            var self = instance;
-
-            var r = parseFloat(self.rangePhosphorus.val());
-            if (r < 1) {
-                r = Math.pow(r, 2.0);
-            }
-
-            self.labelPhosphorusMin.html("0.000");
-
-
-            $.get({
-                url: "unitizer/",
-                data: {value: r, in_units: 'kg/ha'},
-                cache: false,
-                success: function success(response) {
-                    self.labelPhosphorusMax.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer_units/",
-                data: {in_units: 'kg/ha'},
-                cache: false,
-                success: function success(response) {
-                    self.labelPhosphorusUnits.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            if (self.polys == null) {
-                return;
-            }
-
-            self.polys.eachLayer(function (layer) {
-                var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataPhosphorus[topId].value);
-                var c = self.cmapperPhosphorus.map(v / r);
-
-                layer.setStyle({
-                    color: c,
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: c,
-                    fillOpacity: 0.9
-                });
-            });
-        };
-        // end Phosphorus
-
-        //
-        // Runoff
-        //
-        that.dataRunoff = null;
-        that.rangeRunoff = $('#wepp_sub_cmap_range_runoff');
-        that.labelRunoffMin = $('#wepp_sub_cmap_canvas_runoff_min');
-        that.labelRunoffMax = $('#wepp_sub_cmap_canvas_runoff_max');
-        that.labelRunoffUnits = $('#wepp_sub_cmap_canvas_runoff_units');
-        that.cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
-
-        that.cmapRunoff = function () {
-            var self = instance;
-            $.get({
-                url: "query/wepp/runoff/subcatchments/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataRunoff = data;
-                    self.renderRunoff();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+            $.get('query/wepp/phosphorus/subcatchments/')
+                .done(data => {
+                    that.dataPhosphorus = data;
+                    that._rangePhosphorus = parseFloat($('#wepp_sub_cmap_range_phosphorus').val()) ** 2 || 1;
+                    that.cmapMode = 'phosphorus';
+                    that._refreshGlLayer();
+                    // legend / unitizer calls unchanged …
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         };
 
-        that.cmapSubrunoff = function () {
-            var self = instance;
-            $.get({
-                url: "query/wepp/subrunoff/subcatchments/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataRunoff = data;
-                    self.renderRunoff();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
+        /* ---------- runoff & variants --------------------------------------- */
+        that.renderRunoff = function () { _getRunoff('query/wepp/runoff/subcatchments/', 'runoff'); };
+        that.renderSubrunoff = function () { _getRunoff('query/wepp/subrunoff/subcatchments/', 'runoff'); };
+        that.renderBaseflow = function () { _getRunoff('query/wepp/baseflow/subcatchments/', 'runoff'); };
+        function _getRunoff(url, mode) {
+            $.get(url)
+                .done(data => {
+                    that.dataRunoff = data;
+                    const slider = $('#wepp_sub_cmap_range_runoff').val();
+                    that._rangeRunoff = 25.0 * (parseFloat(slider) ** 2);
+                    that.cmapMode = mode;
+                    that._refreshGlLayer();
+                    // legend / unitizer unchanged
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
+        }
 
-        that.cmapBaseflow = function () {
-            var self = instance;
-            $.get({
-                url: "query/wepp/baseflow/subcatchments/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataRunoff = data;
-                    self.renderRunoff();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.renderRunoff = function () {
-            var self = instance;
-
-            var r = 25.0 * Math.pow(parseFloat(self.rangeRunoff.val()), 2.00);
-            self.labelRunoffMin.html("0.000");
-
-
-            $.get({
-                url: "unitizer/",
-                data: {value: r, in_units: 'mm'},
-                cache: false,
-                success: function success(response) {
-                    self.labelRunoffMax.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer_units/",
-                data: {in_units: 'mm'},
-                cache: false,
-                success: function success(response) {
-                    self.labelRunoffUnits.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-
-            if (self.polys == null) {
-                return;
-            }
-
-            self.polys.eachLayer(function (layer) {
-                var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataRunoff[topId].value);
-
-                var c = self.cmapperRunoff.map(v / r);
-
-                layer.setStyle({
-                    color: c,
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: c,
-                    fillOpacity: 0.9
-                });
-            });
-        };
-        // end Runoff
-
-        //
-        // Loss
-        //
-        that.dataLoss = null;
-        that.rangeLoss = $('#wepp_sub_cmap_range_loss');
-        that.labelLossMin = $('#wepp_sub_cmap_canvas_loss_min');
-        that.labelLossMax = $('#wepp_sub_cmap_canvas_loss_max');
-        that.labelLossUnits = $('#wepp_sub_cmap_canvas_loss_units');
-        that.cmapperLoss = createColormap({ colormap: "jet2", nshades: 64 });
-
-        that.cmapLoss = function () {
-            var self = instance;
-            $.get({
-                url: "query/wepp/loss/subcatchments/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataLoss = data;
-                    self.renderLoss();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
+        /* ---------- loss ----------------------------------------------------- */
         that.renderLoss = function () {
-            var self = instance;
-
-            var r = parseFloat(self.rangeLoss.val());
-            self.labelLossMin.html("0.000");
-
-            $.get({
-                url: "unitizer/",
-                data: {value: r, in_units: 'kg/ha'},
-                cache: false,
-                success: function success(response) {
-                    self.labelLossMax.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer_units/",
-                data: {in_units: 'kg/ha'},
-                cache: false,
-                success: function success(response) {
-                    self.labelLossUnits.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-
-            if (self.polys == null) {
-                return;
-            }
-
-            self.polys.eachLayer(function (layer) {
-                var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataLoss[topId].value);
-                var c = self.cmapperLoss.map(v / r);
-
-                layer.setStyle({
-                    color: c,
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: c,
-                    fillOpacity: 0.9
-                });
-            });
+            $.get('query/wepp/loss/subcatchments/')
+                .done(data => {
+                    that.dataLoss = data;
+                    that._rangeLoss = parseFloat($('#wepp_sub_cmap_range_loss').val()) || 1;
+                    that.cmapMode = 'loss';
+                    that._refreshGlLayer();
+                    // legend / unitizer unchanged
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         };
-        // end Loss
 
         //
         // Gridded Loss
@@ -2527,13 +2198,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: v, in_units: 'kg/m^2'},
+                data: { value: v, in_units: 'kg/m^2' },
                 cache: false,
                 success: function success(response) {
                     self.labelGriddedLossMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2543,13 +2214,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: -1.0 * v, in_units: 'kg/m^2'},
+                data: { value: -1.0 * v, in_units: 'kg/m^2' },
                 cache: false,
                 success: function success(response) {
                     self.labelGriddedLossMin.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2559,13 +2230,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer_units/",
-                data: {in_units: 'kg/m^2'},
+                data: { in_units: 'kg/m^2' },
                 cache: false,
                 success: function success(response) {
                     self.labelGriddedLossUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2622,7 +2293,7 @@ var SubcatchmentDelineation = function () {
                     self.dataRhemRunoff = data;
                     self.renderRhemRunoff();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2639,13 +2310,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: r, in_units: 'mm'},
+                data: { value: r, in_units: 'mm' },
                 cache: false,
                 success: function success(response) {
                     self.labelRhemRunoffMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2655,13 +2326,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer_units/",
-                data: {in_units: 'mm'},
+                data: { in_units: 'mm' },
                 cache: false,
                 success: function success(response) {
                     self.labelRhemRunoffUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2713,7 +2384,7 @@ var SubcatchmentDelineation = function () {
                     self.dataRhemSedYield = data;
                     self.renderRhemSedYield();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2735,13 +2406,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: r, in_units: 'kg/ha'},
+                data: { value: r, in_units: 'kg/ha' },
                 cache: false,
                 success: function success(response) {
                     self.labelRhemSedYieldMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2751,13 +2422,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer_units/",
-                data: {in_units: 'kg/ha'},
+                data: { in_units: 'kg/ha' },
                 cache: false,
                 success: function success(response) {
                     self.labelRhemSedYieldUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2807,7 +2478,7 @@ var SubcatchmentDelineation = function () {
                     self.dataAshLoad = data;
                     self.renderAshLoad();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2823,13 +2494,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: 0 * r, in_units: 'mm'},
+                data: { value: 0 * r, in_units: 'mm' },
                 cache: false,
                 success: function success(response) {
                     self.labelAshLoadMin.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2839,13 +2510,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: r, in_units: 'mm'},
+                data: { value: r, in_units: 'mm' },
                 cache: false,
                 success: function success(response) {
                     self.labelAshLoadMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2855,13 +2526,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer_units/",
-                data: {in_units: 'mm'},
+                data: { in_units: 'mm' },
                 cache: false,
                 success: function success(response) {
                     self.labelAshLoadUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2913,7 +2584,7 @@ var SubcatchmentDelineation = function () {
                     self.dataAshTransport = data;
                     self.renderAshTransport();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2933,13 +2604,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: 0 * r, in_units: 'tonne/ha'},
+                data: { value: 0 * r, in_units: 'tonne/ha' },
                 cache: false,
                 success: function success(response) {
                     self.labelAshTransportMin.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2949,13 +2620,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: r, in_units: 'tonne/ha'},
+                data: { value: r, in_units: 'tonne/ha' },
                 cache: false,
                 success: function success(response) {
                     self.labelAshTransportMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2965,13 +2636,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer_units/",
-                data: {in_units: 'tonne/ha'},
+                data: { in_units: 'tonne/ha' },
                 cache: false,
                 success: function success(response) {
                     self.labelAshTransportUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3023,7 +2694,7 @@ var SubcatchmentDelineation = function () {
                     self.dataRhemSoilLoss = data;
                     self.renderRhemSoilLoss();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3039,13 +2710,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: -1.0 * r, in_units: 'kg/ha'},
+                data: { value: -1.0 * r, in_units: 'kg/ha' },
                 cache: false,
                 success: function success(response) {
                     self.labelRhemSoilLossMin.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3055,13 +2726,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer/",
-                data: {value: r, in_units: 'kg/ha'},
+                data: { value: r, in_units: 'kg/ha' },
                 cache: false,
                 success: function success(response) {
                     self.labelRhemSoilLossMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3071,13 +2742,13 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "unitizer_units/",
-                data: {in_units: 'kg/ha'},
+                data: { in_units: 'kg/ha' },
                 cache: false,
                 success: function success(response) {
                     self.labelRhemSoilLossUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3141,7 +2812,7 @@ var SubcatchmentDelineation = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3167,7 +2838,7 @@ var SubcatchmentDelineation = function () {
                     self.status.html(task_msg + "... Success");
                     project.set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3232,7 +2903,7 @@ var RangelandCover = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3249,7 +2920,7 @@ var RangelandCover = function () {
                 success: function success(response) {
                     self.info.html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3285,7 +2956,7 @@ var RangelandCover = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3295,13 +2966,13 @@ var RangelandCover = function () {
             self.showHideControls(mode);
         };
 
-       that.showHideControls = function (mode) {
+        that.showHideControls = function (mode) {
             if (mode == 2) {
                 $("#rangeland_cover_form #rangeland_cover_rap_year_div").show();
             } else {
                 $("#rangeland_cover_form #rangeland_cover_rap_year_div").hide();
             }
-       };
+        };
 
         return that;
     }
@@ -3350,7 +3021,7 @@ var Landuse = function () {
             self.ws_client.connect();
 
             var formData = new FormData($('#landuse_form')[0]);
-            
+
             $.post({
                 url: "rq/api/build_landuse",
                 data: formData,
@@ -3365,7 +3036,7 @@ var Landuse = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3374,7 +3045,7 @@ var Landuse = function () {
             });
         };
 
-        that.modify_coverage = function(dom, cover, value) {
+        that.modify_coverage = function (dom, cover, value) {
             var data = {
                 dom: dom,
                 cover: cover,
@@ -3388,7 +3059,7 @@ var Landuse = function () {
                 dataType: "json",
                 success: function success(response) {
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3397,7 +3068,7 @@ var Landuse = function () {
             });
         };
 
-        that.modify_mapping = function(dom, newdom) {
+        that.modify_mapping = function (dom, newdom) {
             var self = instance;
 
             var data = {
@@ -3413,7 +3084,7 @@ var Landuse = function () {
                 success: function success(response) {
                     self.report();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3430,7 +3101,7 @@ var Landuse = function () {
                 success: function success(response) {
                     self.info.html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3476,7 +3147,7 @@ var Landuse = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3511,7 +3182,7 @@ var Landuse = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3616,7 +3287,7 @@ var Treatments = function () {
             self.ws_client.connect();
 
             var formData = new FormData($('#treatments_form')[0]);
-            
+
             $.post({
                 url: "rq/api/build_treatments",
                 data: formData,
@@ -3631,7 +3302,7 @@ var Treatments = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3648,7 +3319,7 @@ var Treatments = function () {
                 success: function success(response) {
                     self.info.html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3694,7 +3365,7 @@ var Treatments = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -3820,10 +3491,10 @@ var RangelandCoverModify = function () {
             var bounds = L.latLngBounds(self.ll0, evt.latlng);
 
             if (self.selectionRect === null) {
-                self.selectionRect = L.rectangle(bounds, {color: 'blue', weight: 1}).addTo(map);
+                self.selectionRect = L.rectangle(bounds, { color: 'blue', weight: 1 }).addTo(map);
             } else {
                 self.selectionRect.setLatLngs([bounds.getSouthWest(), bounds.getSouthEast(),
-                                               bounds.getNorthEast(), bounds.getNorthWest()]);
+                bounds.getNorthEast(), bounds.getNorthWest()]);
                 self.selectionRect.redraw();
             }
 
@@ -3863,7 +3534,7 @@ var RangelandCoverModify = function () {
                     that.input_cryptogams.val(covers['cryptogams']);
 
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -3925,13 +3596,13 @@ var RangelandCoverModify = function () {
                     map.removeLayer(that.selectionRect);
                     that.selectionRect = null;
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
                     console.log(error);
                 }
-            }).always(function() {
+            }).always(function () {
                 that.ll0 = null;
             });
         };
@@ -3969,7 +3640,7 @@ var RangelandCoverModify = function () {
                 url: "resources/subcatchments.json",
                 cache: false,
                 success: self.onShowSuccess,
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4053,15 +3724,19 @@ var RangelandCoverModify = function () {
             var topaz_ids = self.textarea.val().split(',');
             $.post({
                 url: "tasks/modify_rangeland_cover/",
-                data: JSON.stringify({ topaz_ids: topaz_ids,
-                        covers: { bunchgrass: self.input_bunchgrass.val(),
-                                  forbs: self.input_forbs.val(),
-                                  sodgrass: self.input_sodgrass.val(),
-                                  shrub: self.input_shrub.val(),
-                                  basal: self.input_basal.val(),
-                                  rock: self.input_rock.val(),
-                                  litter: self.input_litter.val(),
-                                  cryptogams: self.input_cryptogams.val()}}),
+                data: JSON.stringify({
+                    topaz_ids: topaz_ids,
+                    covers: {
+                        bunchgrass: self.input_bunchgrass.val(),
+                        forbs: self.input_forbs.val(),
+                        sodgrass: self.input_sodgrass.val(),
+                        shrub: self.input_shrub.val(),
+                        basal: self.input_basal.val(),
+                        rock: self.input_rock.val(),
+                        litter: self.input_litter.val(),
+                        cryptogams: self.input_cryptogams.val()
+                    }
+                }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
@@ -4077,7 +3752,7 @@ var RangelandCoverModify = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4167,10 +3842,10 @@ var LanduseModify = function () {
             var bounds = L.latLngBounds(self.ll0, evt.latlng);
 
             if (self.selectionRect === null) {
-                self.selectionRect = L.rectangle(bounds, {color: 'blue', weight: 1}).addTo(map);
+                self.selectionRect = L.rectangle(bounds, { color: 'blue', weight: 1 }).addTo(map);
             } else {
                 self.selectionRect.setLatLngs([bounds.getSouthWest(), bounds.getSouthEast(),
-                                               bounds.getNorthEast(), bounds.getNorthWest()]);
+                bounds.getNorthEast(), bounds.getNorthWest()]);
                 self.selectionRect.redraw();
             }
 
@@ -4241,13 +3916,13 @@ var LanduseModify = function () {
                     that.selectionRect = null;
 
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
                     console.log(error);
                 }
-            }).always(function() {
+            }).always(function () {
                 that.ll0 = null;
             });
         };
@@ -4283,7 +3958,7 @@ var LanduseModify = function () {
                 url: "resources/subcatchments.json",
                 cache: false,
                 success: self.onShowSuccess,
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4366,8 +4041,10 @@ var LanduseModify = function () {
 
             $.post({
                 url: "tasks/modify_landuse/",
-                data: { topaz_ids: self.textarea.val(),
-                        landuse: self.selection.val() },
+                data: {
+                    topaz_ids: self.textarea.val(),
+                    landuse: self.selection.val()
+                },
                 success: function success(response) {
                     if (response.Success === true) {
                         self.textarea.val("");
@@ -4380,7 +4057,7 @@ var LanduseModify = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4444,7 +4121,7 @@ var Soil = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4461,7 +4138,7 @@ var Soil = function () {
                 success: function success(response) {
                     self.info.html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4496,7 +4173,7 @@ var Soil = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -4538,7 +4215,7 @@ var Soil = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4672,7 +4349,7 @@ var Climate = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4704,7 +4381,7 @@ var Climate = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4737,7 +4414,7 @@ var Climate = function () {
                         self.stationselection.html(response);
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
-                    error: function error(jqXHR)  {
+                    error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4754,7 +4431,7 @@ var Climate = function () {
                         self.stationselection.html(response);
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
-                    error: function error(jqXHR)  {
+                    error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4771,14 +4448,14 @@ var Climate = function () {
                         self.stationselection.html(response);
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
-                    error: function error(jqXHR)  {
+                    error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                     }
                 });
-            }  else if (mode === 3) {
+            } else if (mode === 3) {
                 // sync climate with nodb
                 $.get({
                     url: "view/au_heuristic_stations/",
@@ -4788,7 +4465,7 @@ var Climate = function () {
                         self.stationselection.html(response);
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
-                    error: function error(jqXHR)  {
+                    error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4824,7 +4501,7 @@ var Climate = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4843,7 +4520,7 @@ var Climate = function () {
                     $("#climate_monthlies").html(response);
                     project.set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4872,7 +4549,7 @@ var Climate = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4892,7 +4569,7 @@ var Climate = function () {
                     self.info.html(response);
                     project.set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -4920,15 +4597,17 @@ var Climate = function () {
             // sync climate with nodb
             $.post({
                 url: "tasks/set_climate_mode/",
-                data: { "mode": mode,
-                        "climate_single_selection": climate_single_selection },
+                data: {
+                    "mode": mode,
+                    "climate_single_selection": climate_single_selection
+                },
                 success: function success(response) {
                     if (response.Success === true) {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5096,7 +4775,7 @@ var Climate = function () {
                 $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
-            }  else if (mode === 8) {
+            } else if (mode === 8) {
                 // EOBS (EU)
                 $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").show();
@@ -5164,10 +4843,10 @@ var Climate = function () {
                 $("#climate_mode13_controls").show();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
-            } 
-//              else {
-//                throw "ValueError: unknown mode";
-//            }
+            }
+            //              else {
+            //                throw "ValueError: unknown mode";
+            //            }
         };
 
         that.setSpatialMode = function (mode) {
@@ -5185,14 +4864,14 @@ var Climate = function () {
             // sync climate with nodb
             $.post({
                 url: "tasks/set_climate_spatialmode/",
-                data: { "spatialmode": mode},
+                data: { "spatialmode": mode },
                 success: function success(response) {
                     if (response.Success === true) {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5210,7 +4889,7 @@ var Climate = function () {
 
             $.post({
                 url: "tasks/set_use_gridmet_wind_when_applicable/",
-                data: JSON.stringify({state: state }),
+                data: JSON.stringify({ state: state }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
@@ -5220,7 +4899,7 @@ var Climate = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -5278,7 +4957,7 @@ var Wepp = function () {
             self.channel_critical_shear.append(new Option('User Defined: CS = ' + x, x, true, true));
         };
 
-        
+
         that.updatePhosphorus = function () {
             var self = instance;
 
@@ -5298,7 +4977,7 @@ var Wepp = function () {
                     if (response.sediment !== null)
                         self.sediment.val(response.sediment.toFixed(0));
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5316,7 +4995,7 @@ var Wepp = function () {
 
             $.post({
                 url: "tasks/set_run_wepp_routine/",
-                data: JSON.stringify({routine: routine, state: state }),
+                data: JSON.stringify({ routine: routine, state: state }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
@@ -5326,7 +5005,7 @@ var Wepp = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -5344,7 +5023,7 @@ var Wepp = function () {
 
             $.post({
                 url: "tasks/set_wepp_bin/",
-                data: JSON.stringify({wepp_bin: wepp_bin}),
+                data: JSON.stringify({ wepp_bin: wepp_bin }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
@@ -5354,7 +5033,7 @@ var Wepp = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -5382,7 +5061,7 @@ var Wepp = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -5414,7 +5093,7 @@ var Wepp = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5438,7 +5117,7 @@ var Wepp = function () {
                 success: function success(response) {
                     $('#wepp-results').html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5454,7 +5133,7 @@ var Wepp = function () {
                     self.status.html(task_msg + "... Success");
                     project.set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5523,7 +5202,7 @@ var Observed = function () {
                         self.hideControl();
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5533,7 +5212,7 @@ var Observed = function () {
 
         };
 
-        that.run_model_fit = function() {
+        that.run_model_fit = function () {
             var self = instance;
             var textdata = self.textarea.val();
 
@@ -5556,7 +5235,7 @@ var Observed = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5606,7 +5285,7 @@ var DebrisFlow = function () {
             self.stacktrace.hide();
         };
 
-        that.run_model = function() {
+        that.run_model = function () {
             var self = instance;
 
             var task_msg = "Running debris_flow model fit";
@@ -5628,7 +5307,7 @@ var DebrisFlow = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5679,7 +5358,7 @@ var Ash = function () {
             self.stacktrace.hide();
         };
 
-        that.run_model = function() {
+        that.run_model = function () {
             var self = instance;
 
             var task_msg = "Running ash model";
@@ -5705,7 +5384,7 @@ var Ash = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5744,7 +5423,7 @@ var Ash = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
@@ -5761,12 +5440,12 @@ var Ash = function () {
                 $("#ash_depth_mode0_controls").hide();
                 $("#ash_depth_mode1_controls").show();
                 $("#ash_depth_mode2_controls").hide();
-            } 
+            }
             else if (self.ash_depth_mode === 2) {
                 $("#ash_depth_mode0_controls").hide();
                 $("#ash_depth_mode1_controls").hide();
                 $("#ash_depth_mode2_controls").show();
-            } 
+            }
             else {
                 $("#ash_depth_mode0_controls").show();
                 $("#ash_depth_mode1_controls").hide();
@@ -5791,7 +5470,7 @@ var Ash = function () {
                     self.status.html(task_msg + "... Success");
                     project.set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5857,7 +5536,7 @@ var Rhem = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5881,7 +5560,7 @@ var Rhem = function () {
                 success: function success(response) {
                     $('#rhem-results').html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5897,7 +5576,7 @@ var Rhem = function () {
                     self.status.html(task_msg + "... Success");
                     project.set_preferred_units();
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -5968,7 +5647,7 @@ var Omni = function () {
             return formData;
         };
 
-        
+
         that.run_omni_scenarios = function () {
             var self = instance;
             var task_msg = "Submitting omni run";
@@ -6036,7 +5715,7 @@ var Omni = function () {
                     console.error("Error loading scenarios:", err);
                 });
         };
-        
+
         that.report_scenarios = function () {
             var self = instance;
             self.status.html("Omni Scenarios Completed")
@@ -6053,7 +5732,7 @@ var Omni = function () {
                 success: function success(response) {
                     self.info.html(response);
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -6098,20 +5777,20 @@ var DssExport = function () {
             that.form.show();
             $('a[href="#partitioned-dss-export-for-hec"]').parent().show()
         };
-        
+
         that.hide = function () {
             that.form.hide();
             $('a[href="#partitioned-dss-export-for-hec"]').parent().hide()
         };
 
-        that.setMode = function (mode) {  
+        that.setMode = function (mode) {
             var self = instance;
 
             // verify mode is 1 or 2
             if (mode !== 1 && mode !== 2) {
                 throw "ValueError: unknown mode";
             }
-            
+
             if (mode === 1) {
                 $("#dss_export_mode1_controls").show();
                 $("#dss_export_mode2_controls").hide();
@@ -6151,7 +5830,7 @@ var DssExport = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
+                error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
