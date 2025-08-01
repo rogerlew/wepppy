@@ -1,170 +1,170 @@
-<script  type="text/javascript">
-"use strict";
+<script type="text/javascript">
+    "use strict";
 
-var site_prefix = "{{ site_prefix }}";
-var runid = "{{ ron.runid }}";
-var config = "{{ ron.config_stem }}";
-var ispoweruser = {{ current_user.has_role('PowerUser') | tojson }};
-var WEPP_channel_critical_shear = null;
+    var site_prefix = "{{ site_prefix }}";
+    var runid = "{{ ron.runid }}";
+    var config = "{{ ron.config_stem }}";
+    var ispoweruser = {{ current_user.has_role('PowerUser') | tojson }};
+    var WEPP_channel_critical_shear = null;
 
-var error = null;
+    var error = null;
 
-var cellsize = {{ron.cellsize}};
+    var cellsize = {{ ron.cellsize }};
 
-var readonly = {{ ron.readonly | tojson }};
+    var readonly = {{ ron.readonly | tojson }};
 
-function window_resize() {
-    var _map = $('#mapid');
-    var w = _map.parent().width();
-    _map.css('min-height', w);
-    _map.css('height', w);
-    _map.css('width', w);
+    function window_resize() {
+        var _map = $('#mapid');
+        var w = _map.parent().width();
+        _map.css('min-height', w);
+        _map.css('height', w);
+        _map.css('width', w);
 
-    Map.getInstance().invalidateSize();
-};
+        Map.getInstance().invalidateSize();
+    };
 
 
-function debounceButton(buttonId, lockImageId, onclickCall) {
-    const button = document.getElementById(buttonId);
-    const lockImage = document.getElementById(lockImageId);
+    function debounceButton(buttonId, lockImageId, onclickCall) {
+        const button = document.getElementById(buttonId);
+        const lockImage = document.getElementById(lockImageId);
 
-    return function() {
-        // Disable the button and show the lock image
-        button.disabled = true;
-        lockImage.style.display = 'inline';
+        return function () {
+            // Disable the button and show the lock image
+            button.disabled = true;
+            lockImage.style.display = 'inline';
 
-        // Run the original function if provided
-        if (onclickCall && typeof onclickCall === 'function') {
-            onclickCall();
+            // Run the original function if provided
+            if (onclickCall && typeof onclickCall === 'function') {
+                onclickCall();
+            }
+
+            // Re-enable the button and hide the lock image after 5 seconds
+            setTimeout(() => {
+                button.disabled = false;
+                lockImage.style.display = 'none';
+            }, 5000);
+        };
+    }
+
+    function upload_cover_transform() {
+        var fileInput = document.getElementById('input_upload_cover_transform');
+        var file = fileInput.files[0]; // Get the file from the input
+
+        if (file) { // Check if any file is selected
+            var formData = new FormData();
+            formData.append('input_upload_cover_transform', file); // Append the file
+
+            $.post({
+                url: "tasks/upload_cover_transform/", // Ensure this URL is correct
+                data: formData,
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function (response) {
+                    console.log("upload successful");
+                },
+                error: function (jqXHR) {
+                    console.log(jqXHR.responseJSON);
+                },
+                fail: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            });
+        } else {
+            console.log("No file selected.");
+        }
+    };
+
+    //jQuery.readyException = function( e ) {
+    //  console.error( e );
+    //  error = e;
+    //};
+
+    function onReady() {
+        "use strict";
+        // globals for JSLint: $, L, polylabel, setTimeout, console
+
+        /*
+         * Controller Singletons
+         * =====================
+         */
+
+
+
+        var project = Project.getInstance();
+        var team = Team.getInstance();
+        var map = Map.getInstance();
+        var channel_ctrl = ChannelDelineation.getInstance();
+        var outlet = Outlet.getInstance();
+        var sub_ctrl = SubcatchmentDelineation.getInstance();
+        var landuse = Landuse.getInstance();
+        var lc_modify = LanduseModify.getInstance();
+        var soil = Soil.getInstance();
+        var climate = Climate.getInstance();
+        var wepp = Wepp.getInstance();
+        var observed = Observed.getInstance();
+        var debris_flow = DebrisFlow.getInstance();
+        var ash = Ash.getInstance();
+        var rap_ts = RAP_TS.getInstance();
+        var disturbed = Disturbed.getInstance();
+        var omni = Omni.getInstance();
+        var dss_export = DssExport.getInstance();
+
+
+        document.getElementById('btn_find_topaz_id').addEventListener('click', function () {
+            findAndFlash('TopazID');
+        });
+
+        document.getElementById('btn_find_wepp_id').addEventListener('click', function () {
+            findAndFlash('WeppID');
+        });
+
+        // TODO: update for glLayer
+        function findAndFlash(idType) {
+            var input = document.getElementById('input_centerloc').value;
+
+            sub_ctrl.polys.eachLayer(function (layer) {
+                var id = layer.feature.properties[idType];
+                if (id == input) {
+                    flashPolygon(layer);
+                }
+            });
         }
 
-        // Re-enable the button and hide the lock image after 5 seconds
-        setTimeout(() => {
-            button.disabled = false;
-            lockImage.style.display = 'none';
-        }, 5000);
-    };
-}
+        function flashPolygon(layer) {
+            var flashLayer = L.geoJSON(layer.feature, {
+                style: {
+                    color: "#ff0000",
+                    weight: 3,
+                    opacity: 1,
+                    fillColor: "#ff0000",
+                    fillOpacity: 0.5
+                }
+            });
+            flashLayer.addTo(map);
+            setTimeout(function () {
+                map.removeLayer(flashLayer);
+            }, 1000);
+        }
 
-function upload_cover_transform() {
-    var fileInput = document.getElementById('input_upload_cover_transform');
-    var file = fileInput.files[0]; // Get the file from the input
-
-    if (file) { // Check if any file is selected
-        var formData = new FormData();
-        formData.append('input_upload_cover_transform', file); // Append the file
-
-        $.post({
-            url: "tasks/upload_cover_transform/", // Ensure this URL is correct
-            data: formData,
-            contentType: false,
-            cache: false,
-            processData: false,
-            success: function (response) {
-                console.log("upload successful");
-            },
-            error: function (jqXHR) {
-                console.log(jqXHR.responseJSON);
-            },
-            fail: function (jqXHR, textStatus, errorThrown) {
-                console.log(textStatus);
-            }
-        });
-    } else {
-        console.log("No file selected.");
-    }
-};
-
-//jQuery.readyException = function( e ) {
-//  console.error( e );
-//  error = e;
-//};
-
-function onReady() {
-    "use strict";
-    // globals for JSLint: $, L, polylabel, setTimeout, console
-
-    /*
-     * Controller Singletons
-     * =====================
-     */
+        team.hideStacktrace();
+        channel_ctrl.hideStacktrace();
+        outlet.hideStacktrace();
+        sub_ctrl.hideStacktrace();
+        landuse.hideStacktrace();
+        lc_modify.hideStacktrace();
+        soil.hideStacktrace();
+        climate.hideStacktrace();
+        wepp.hideStacktrace();
+        dss_export.hideStacktrace();
 
 
-
-    var project = Project.getInstance();
-    var team = Team.getInstance();
-    var map = Map.getInstance();
-    var channel_ctrl = ChannelDelineation.getInstance();
-    var outlet = Outlet.getInstance();
-    var sub_ctrl = SubcatchmentDelineation.getInstance();
-    var landuse = Landuse.getInstance();
-    var lc_modify = LanduseModify.getInstance();
-    var soil = Soil.getInstance();
-    var climate = Climate.getInstance();
-    var wepp = Wepp.getInstance();
-    var observed = Observed.getInstance();
-    var debris_flow = DebrisFlow.getInstance();
-    var ash = Ash.getInstance();
-    var rap_ts = RAP_TS.getInstance();
-    var disturbed = Disturbed.getInstance();
-    var omni = Omni.getInstance();
-    var dss_export = DssExport.getInstance();
-
-
-    document.getElementById('btn_find_topaz_id').addEventListener('click', function() {
-        findAndFlash('TopazID');
-    });
-
-    document.getElementById('btn_find_wepp_id').addEventListener('click', function() {
-        findAndFlash('WeppID');
-    });
-
-    // TODO: update for glLayer
-    function findAndFlash(idType) {
-        var input = document.getElementById('input_centerloc').value;
-        
-        sub_ctrl.polys.eachLayer(function(layer) {
-            var id = layer.feature.properties[idType];
-            if (id == input) {
-                flashPolygon(layer);
-            }
-        });
-    }
-
-    function flashPolygon(layer) {
-        var flashLayer = L.geoJSON(layer.feature, {
-            style: {
-                color: "#ff0000",
-                weight: 3,
-                opacity: 1,
-                fillColor: "#ff0000",
-                fillOpacity: 0.5
-            }
-        });
-        flashLayer.addTo(map);
-        setTimeout(function() {
-            map.removeLayer(flashLayer);
-        }, 1000);
-    }
-
-    team.hideStacktrace();
-    channel_ctrl.hideStacktrace();
-    outlet.hideStacktrace();
-    sub_ctrl.hideStacktrace();
-    landuse.hideStacktrace();
-    lc_modify.hideStacktrace();
-    soil.hideStacktrace();
-    climate.hideStacktrace();
-    wepp.hideStacktrace();
-    dss_export.hideStacktrace();
-
-
-    // kick off websocket clients if the nodb is locked. Likely building or running is in progress
+        // kick off websocket clients if the nodb is locked. Likely building or running is in progress
 
     if ({{ (watershed.islocked()) | tojson }}) {
         sub_ctrl.ws_client.connect();
     }
-    
+
     if ({{ (landuse.islocked()) | tojson }}) {
         landuse.ws_client.connect();
     }
@@ -286,7 +286,7 @@ function onReady() {
             return item !== "";
         });
         if (loc.length < 2) {
-//            alert("Please enter a valid location.");
+            //            alert("Please enter a valid location.");
             return;
         }
 
@@ -315,7 +315,7 @@ function onReady() {
             return item !== "";
         });
         if (loc.length < 2) {
-//            alert("Please enter a valid location.");
+            //            alert("Please enter a valid location.");
             return;
         }
 
@@ -375,7 +375,7 @@ function onReady() {
 
 
     {% if 'skid_trails' in ron.mods %}
-        if ({{ (skid_trails.skid_trails_map != None) | tojson }}) {
+    if ({{ (skid_trails.skid_trails_map != None) | tojson }}) {
         var skid_trails_map = null;
         $.get({
             url: "https://dev.wepp.cloud/weppcloud/static/mods/north_star_fire/Skid_segments.geojson",
@@ -420,7 +420,7 @@ function onReady() {
         setTimeout(baer.load_modify_class, 100);
     });
 
-    if ({{ ron.has_sbs | tojson}})
+    if ({{ ron.has_sbs | tojson }})
     {
         baer.show_sbs();
         baer.load_modify_class();
@@ -444,23 +444,23 @@ function onReady() {
     var input_csa_en = $("#input_csa_en");
 
     input_mcl.on("input", function () {
-        input_mcl_en.val(parseFloat(input_mcl.val()) * 3.28084 );
+        input_mcl_en.val(parseFloat(input_mcl.val()) * 3.28084);
     });
 
     input_mcl_en.on("input", function () {
-        input_mcl.val(parseFloat(input_mcl_en.val()) / 3.28084 );
+        input_mcl.val(parseFloat(input_mcl_en.val()) / 3.28084);
     });
 
     input_csa.on("input", function () {
-        input_csa_en.val(parseFloat(input_csa.val()) * 2.47105 );
+        input_csa_en.val(parseFloat(input_csa.val()) * 2.47105);
     });
 
     input_csa_en.on("input", function () {
-        input_csa.val(parseFloat(input_csa_en.val()) / 2.47105 );
+        input_csa.val(parseFloat(input_csa_en.val()) / 2.47105);
     });
 
     // Event handler for #btn_build_channels
-    $('#btn_build_channels').on('click', function(event) {
+    $('#btn_build_channels').on('click', function (event) {
         // Prevent the default behavior of the button
         event.preventDefault();
 
@@ -486,7 +486,7 @@ function onReady() {
 
 
     // Event handler for #btn_build_channels
-    $('#btn_build_channels_en').on('click', function(event) {
+    $('#btn_build_channels_en').on('click', function (event) {
         // Prevent the default behavior of the button
         event.preventDefault();
 
@@ -533,7 +533,7 @@ function onReady() {
         channel_ctrl.report();
     }
     if ({{ watershed.has_channels | tojson }} && !({{ watershed.has_subcatchments | tojson }})) {
-       channel_ctrl.show();
+        channel_ctrl.show();
     }
 
     /*
@@ -655,73 +655,73 @@ function onReady() {
 
 
     {% if 'rap' in ron.mods %}
-        // Cover
-        render_legend("viridis", "landuse_sub_cmap_canvas_cover");
+    // Cover
+    render_legend("viridis", "landuse_sub_cmap_canvas_cover");
     {% endif %}
-    
+
     //
     // Hillslopes Visualizations
     {% if 'rhem' not in ron.mods %}
-        // Phosphorus
-        render_legend("viridis", "wepp_sub_cmap_canvas_phosphorus");
-        $('#wepp_sub_cmap_range_phosphorus').on('input', function () {
-            sub_ctrl.renderPhosphorus();
-        });
+    // Phosphorus
+    render_legend("viridis", "wepp_sub_cmap_canvas_phosphorus");
+    $('#wepp_sub_cmap_range_phosphorus').on('input', function () {
+        sub_ctrl.renderPhosphorus();
+    });
 
-        // Runoff
-        render_legend("winter", "wepp_sub_cmap_canvas_runoff");
-        $('#wepp_sub_cmap_range_runoff').on('input', function () {
-            sub_ctrl.renderRunoff();
-        });
+    // Runoff
+    render_legend("winter", "wepp_sub_cmap_canvas_runoff");
+    $('#wepp_sub_cmap_range_runoff').on('input', function () {
+        sub_ctrl.renderRunoff();
+    });
 
-        // Loss
-        render_legend("jet2", "wepp_sub_cmap_canvas_loss");
-        $('#wepp_sub_cmap_range_loss').on('input', function () {
-            sub_ctrl.renderLoss();
-        });
+    // Loss
+    render_legend("jet2", "wepp_sub_cmap_canvas_loss");
+    $('#wepp_sub_cmap_range_loss').on('input', function () {
+        sub_ctrl.renderLoss();
+    });
 
 
-        //
-        // Gridded
+    //
+    // Gridded
 
-        // Soil Deposition / Loss
-        render_legend("jet2", "wepp_grd_cmap_canvas_loss");
-        $('#wepp_grd_cmap_range_loss').on('input', function () {
-            sub_ctrl.updateGriddedLoss();
-        });
+    // Soil Deposition / Loss
+    render_legend("jet2", "wepp_grd_cmap_canvas_loss");
+    $('#wepp_grd_cmap_range_loss').on('input', function () {
+        sub_ctrl.updateGriddedLoss();
+    });
     {% else %}
 
-        // Runoff
-        render_legend("winter", "rhem_sub_cmap_canvas_runoff");
-        $('#rhem_sub_cmap_range_runoff').on('input', function () {
-            sub_ctrl.renderRhemRunoff();
-        });
+    // Runoff
+    render_legend("winter", "rhem_sub_cmap_canvas_runoff");
+    $('#rhem_sub_cmap_range_runoff').on('input', function () {
+        sub_ctrl.renderRhemRunoff();
+    });
 
-        // Yield
-        render_legend("viridis", "rhem_sub_cmap_canvas_sed_yield");
-        $('#rhem_sub_cmap_range_sed_yield').on('input', function () {
-            sub_ctrl.renderRhemSedYield();
-        });
+    // Yield
+    render_legend("viridis", "rhem_sub_cmap_canvas_sed_yield");
+    $('#rhem_sub_cmap_range_sed_yield').on('input', function () {
+        sub_ctrl.renderRhemSedYield();
+    });
 
-        // Loss
-        render_legend("jet2", "rhem_sub_cmap_canvas_soil_loss");
-        $('#rhem_sub_cmap_range_soil_loss').on('input', function () {
-            sub_ctrl.renderRhemSoilLoss();
-        });
+    // Loss
+    render_legend("jet2", "rhem_sub_cmap_canvas_soil_loss");
+    $('#rhem_sub_cmap_range_soil_loss').on('input', function () {
+        sub_ctrl.renderRhemSoilLoss();
+    });
     {% endif %}
 
     {% if 'ash' in ron.mods %}
-        // Ash Load
-        render_legend("jet2", "ash_sub_cmap_canvas_load");
-        $('#ash_sub_cmap_range_load').on('input', function () {
-            sub_ctrl.renderAshLoad();
-        });
+    // Ash Load
+    render_legend("jet2", "ash_sub_cmap_canvas_load");
+    $('#ash_sub_cmap_range_load').on('input', function () {
+        sub_ctrl.renderAshLoad();
+    });
 
-        // Ash Transport
-        render_legend("jet2", "ash_sub_cmap_canvas_transport");
-        $('#ash_sub_cmap_range_transport').on('input', function () {
-            sub_ctrl.renderAshTransport();
-        });
+    // Ash Transport
+    render_legend("jet2", "ash_sub_cmap_canvas_transport");
+    $('#ash_sub_cmap_range_transport').on('input', function () {
+        sub_ctrl.renderAshTransport();
+    });
     {% endif %}
 
 
@@ -736,66 +736,66 @@ function onReady() {
     }
 
     {% if 'rangeland_cover' in ron.mods %}
-        /*
-         * Rangeland Cover Initialization
-         * ===============================
-         */
+    /*
+     * Rangeland Cover Initialization
+     * ===============================
+     */
 
-        var rangeland_cover = RangelandCover.getInstance();
-        rangeland_cover.hideStacktrace();
-
-
-        var rangeland_cover_modify = RangelandCoverModify.getInstance();
-        rangeland_cover_modify.hideStacktrace();
-
-        //
-        // Bindings
-        //
-        $("[name='rangeland_cover_mode']").change(function () {
-            rangeland_cover.setMode();
-        });
-        $("[name='rangeland_cover_mode']").trigger("change");
-
-        $("#rangeland_cover_single_selection").on("change", function () {
-            rangeland_cover.setMode();
-        });
-
-        $("#btn_build_rangeland_cover").click(rangeland_cover.build);
-
-        //
-        // Rangeland Cover Event Bindings
-        //
-        rangeland_cover.form.on("RANGELAND_COVER_BUILD_TASK_COMPLETED", function () {
-            sub_ctrl.enableColorMap("rangeland_cover");
-            rangeland_cover.report();
-        });
+    var rangeland_cover = RangelandCover.getInstance();
+    rangeland_cover.hideStacktrace();
 
 
-        if ({{ rangeland_cover.has_covers | tojson }}) {
-            rangeland_cover.report();
-            sub_ctrl.enableColorMap("rangeland_cover");
+    var rangeland_cover_modify = RangelandCoverModify.getInstance();
+    rangeland_cover_modify.hideStacktrace();
+
+    //
+    // Bindings
+    //
+    $("[name='rangeland_cover_mode']").change(function () {
+        rangeland_cover.setMode();
+    });
+    $("[name='rangeland_cover_mode']").trigger("change");
+
+    $("#rangeland_cover_single_selection").on("change", function () {
+        rangeland_cover.setMode();
+    });
+
+    $("#btn_build_rangeland_cover").click(rangeland_cover.build);
+
+    //
+    // Rangeland Cover Event Bindings
+    //
+    rangeland_cover.form.on("RANGELAND_COVER_BUILD_TASK_COMPLETED", function () {
+        sub_ctrl.enableColorMap("rangeland_cover");
+        rangeland_cover.report();
+    });
+
+
+    if ({{ rangeland_cover.has_covers | tojson }}) {
+        rangeland_cover.report();
+        sub_ctrl.enableColorMap("rangeland_cover");
+    }
+
+    /*
+     * Modify RangelandCover Initialization
+     * ======================
+     */
+
+    //
+    // Bindings
+    //
+    $("#checkbox_modify_rangeland_cover").on("change", function () {
+        rangeland_cover_modify.toggle();
+    });
+
+
+    rangeland_cover_modify.form.on("RANGELAND_COVER_MODIFY_TASK_COMPLETED", function () {
+        if (sub_ctrl.getCmapMode() === "rangeland_cover") {
+            sub_ctrl.setColorMap("rangeland_cover");
         }
-
-        /*
-         * Modify RangelandCover Initialization
-         * ======================
-         */
-
-        //
-        // Bindings
-        //
-        $("#checkbox_modify_rangeland_cover").on("change", function () {
-            rangeland_cover_modify.toggle();
-        });
-
-
-        rangeland_cover_modify.form.on("RANGELAND_COVER_MODIFY_TASK_COMPLETED", function () {
-            if (sub_ctrl.getCmapMode() === "rangeland_cover") {
-                sub_ctrl.setColorMap("rangeland_cover");
-            }
-            rangeland_cover.report();
-            sub_ctrl.cmapRangelandCover();
-        });
+        rangeland_cover.report();
+        sub_ctrl.cmapRangelandCover();
+    });
 
 
     {% endif %}
@@ -831,7 +831,7 @@ function onReady() {
     landuse.set_rq_job_id(landuse, {{ rq_job_ids.get("build_landuse_rq") | tojson }});
 
     // load landuse
-    if ( {{ landuse.has_landuse | tojson }} ) {
+    if ({{ landuse.has_landuse | tojson }} ) {
         landuse.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
     }
 
@@ -896,7 +896,7 @@ function onReady() {
         $('#soil_single_dbselection').val('{{ soils.single_dbselection }}').prop('selected', true);
     }
     // load soil
-    if ( {{ soils.has_soils | tojson }} ) {
+    if ({{ soils.has_soils | tojson }} ) {
         soil.form.trigger("SOILS_BUILD_TASK_COMPLETED");
     }
 
@@ -934,25 +934,25 @@ function onReady() {
         var mode = $('input[name="precip_scaling_mode"]:checked').val();
         // Hide all control divs first
         $('#climate_precipscaling_mode1_controls, #climate_precipscaling_mode2_controls, #climate_precipscaling_mode3_controls, #climate_precipscaling_mode4_controls').hide();
-        
+
         // Show the relevant control div if mode is not "No Scaling"
         if (mode === "1") {
-        $('#climate_precipscaling_mode1_controls').show();
+            $('#climate_precipscaling_mode1_controls').show();
         } else if (mode === "2") {
-        $('#climate_precipscaling_mode2_controls').show();
+            $('#climate_precipscaling_mode2_controls').show();
         } else if (mode === "3") {
-        $('#climate_precipscaling_mode3_controls').show();
+            $('#climate_precipscaling_mode3_controls').show();
         } else if (mode === "4") {
-        $('#climate_precipscaling_mode4_controls').show();
+            $('#climate_precipscaling_mode4_controls').show();
         }
     }
 
     // Bind change event to radio buttons
     $('input[name="precip_scaling_mode"]').on('change', togglePrecipScalingControls);
-    
+
     // Initialize on page load
     togglePrecipScalingControls();
-    
+
     //
     // Climate Event Bindings
     //
@@ -979,17 +979,17 @@ function onReady() {
     climate.showHideControls({{ climate.climate_mode | int }});
 
     // load climate
-    if ( {{ climate.has_station | tojson }} ) {
+    if ({{ climate.has_station | tojson }} ) {
         climate.refreshStationSelection();
         climate.viewStationMonthlies();
     }
 
-    if ( {{ climate.has_climate | tojson }} ) {
+    if ({{ climate.has_climate | tojson }} ) {
         climate.report();
     }
 
-    if ( {{ climate.has_observed | tojson }} ||
-         {{ observed.results is not none | tojson }}) {
+    if ({{ climate.has_observed | tojson }} ||
+        {{ observed.results is not none | tojson }}) {
         observed.showControl();
     }
 
@@ -1003,11 +1003,11 @@ function onReady() {
     var ss_design_storm_amount_inches = $("#ss_design_storm_amount_inches");
 
     ss_design_storm_amount_mm.on("input", function () {
-        ss_design_storm_amount_inches.val(parseFloat(ss_design_storm_amount_mm.val()) / 25.4 );
+        ss_design_storm_amount_inches.val(parseFloat(ss_design_storm_amount_mm.val()) / 25.4);
     });
 
     ss_design_storm_amount_inches.on("input", function () {
-        ss_design_storm_amount_mm.val(parseFloat(ss_design_storm_amount_inches.val()) * 25.4 );
+        ss_design_storm_amount_mm.val(parseFloat(ss_design_storm_amount_inches.val()) * 25.4);
     });
 
 
@@ -1015,11 +1015,11 @@ function onReady() {
     var ss_max_intensity_inches_per_hour = $("#ss_max_intensity_inches_per_hour");
 
     ss_max_intensity_mm_per_hour.on("input", function () {
-        ss_max_intensity_inches_per_hour.val(parseFloat(ss_max_intensity_mm_per_hour.val()) / 25.4 );
+        ss_max_intensity_inches_per_hour.val(parseFloat(ss_max_intensity_mm_per_hour.val()) / 25.4);
     });
 
     ss_max_intensity_inches_per_hour.on("input", function () {
-        ss_max_intensity_mm_per_hour.val(parseFloat(ss_max_intensity_inches_per_hour.val()) * 25.4 );
+        ss_max_intensity_mm_per_hour.val(parseFloat(ss_max_intensity_inches_per_hour.val()) * 25.4);
     });
 
     /*
@@ -1046,7 +1046,7 @@ function onReady() {
 
 
     {% if 'omni' in ron.mods %}
-    
+
     omni.form.on("OMNI_SCENARIO_RUN_TASK_COMPLETED", function () {
         omni.ws_client.disconnect();
         omni.report_scenarios();
@@ -1090,7 +1090,7 @@ function onReady() {
         rhem.report();
     });
 
-    if ( {{ rhem.has_run | tojson }} ) {
+    if ({{ rhem.has_run | tojson }} ) {
         rhem.report();
     }
 
@@ -1102,33 +1102,33 @@ function onReady() {
     wepp.set_rq_job_id(wepp, {{ rq_job_ids.get("run_wepp_rq") | tojson }});
 
     // show report if wepp has run
-    if ( {{ wepp.has_run | tojson }} ) {
+    if ({{ wepp.has_run | tojson }} ) {
         wepp.report();
     }
 
     // show report if wepp has run
-    if ( {{ observed.has_results | tojson }} ) {
+    if ({{ observed.has_results | tojson }} ) {
         observed.report();
     }
 
     {% if 'ash' in ron.mods %}
-        ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
+    ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
 
-        $("[name='ash_depth_mode']").change(function () {
-            ash.setAshDepthMode();
-        });
+    $("[name='ash_depth_mode']").change(function () {
+        ash.setAshDepthMode();
+    });
 
-        // show report if ash model has run
-        if ( {{ ron.has_ash_results | tojson }} ) {
-            ash.report();
-        }
+    // show report if ash model has run
+    if ({{ ron.has_ash_results | tojson }} ) {
+        ash.report();
+    }
 
-        ash.setAshDepthMode({{ ash.ash_depth_mode }});
+    ash.setAshDepthMode({{ ash.ash_depth_mode }});
 
-        ash.form.on("ASH_RUN_TASK_COMPLETED", function () {
-            ash.ws_client.disconnect();
-            ash.report();
-        });
+    ash.form.on("ASH_RUN_TASK_COMPLETED", function () {
+        ash.ws_client.disconnect();
+        ash.report();
+    });
     {% endif %}
 
     rap_ts.form.on("RAP_TS_TASK_COMPLETED", function () {
@@ -1163,7 +1163,7 @@ function onReady() {
     });
 
     // show report if wepp has run
-    if ( {{ user.is_authenticated | tojson }} ) {
+    if ({{ user.is_authenticated | tojson }} ) {
         team.report();
     }
 
@@ -1201,11 +1201,11 @@ function onReady() {
 
 
     // konami code!
-    Mousetrap.bind('up up down down left right left right b a', function() {
+    Mousetrap.bind('up up down down left right left right b a', function () {
         $('#btnPuModal').click();
     });
 
-    Mousetrap.bind('f8', function() {
+    Mousetrap.bind('f8', function () {
         window.scrollTo(0, 0);
     });
 
@@ -1213,37 +1213,37 @@ function onReady() {
 
     dss_export.setMode({{ wepp.dss_export_mode | int }});
 
-    if ( {{ wepp.has_dss_zip | tojson }} ) {
+    if ({{ wepp.has_dss_zip | tojson }} ) {
         dss_export.report();
     }
 
-$(function () {
-    var navSelector = "#toc";
-    var $myNav = $(navSelector);
-    Toc.init($myNav);
-});
+    $(function () {
+        var navSelector = "#toc";
+        var $myNav = $(navSelector);
+        Toc.init($myNav);
+    });
 
-  var offset = 80;
+    var offset = 80;
 
-$('.nav li a').click(function(event) {
-    event.preventDefault();
-    $($(this).attr('href'))[0].scrollIntoView();
-    scrollBy(0, -offset);
-});
+    $('.nav li a').click(function (event) {
+        event.preventDefault();
+        $($(this).attr('href'))[0].scrollIntoView();
+        scrollBy(0, -offset);
+    });
 
 
 }$(document).ready(onReady);
 
-$(window).on('load', function() {
-    $(window).on('resize', window_resize);
-    setTimeout(function(){
-        window_resize();
-    }, 100);
+    $(window).on('load', function () {
+        $(window).on('resize', window_resize);
+        setTimeout(function () {
+            window_resize();
+        }, 100);
 
-    initPreflight("{{run_id}}");
-    {% if 'dss_export' not in ron.mods %}
+        initPreflight("{{run_id}}");
+        {% if 'dss_export' not in ron.mods %}
         // Ensure this runs after all other initialization
-        setTimeout(function() {
+        setTimeout(function () {
             // Check if DssExport instance exists before trying to hide it
             var dssExport = DssExport.getInstance();
             if (dssExport && typeof dssExport.hide === 'function') {
@@ -1251,7 +1251,13 @@ $(window).on('load', function() {
                 console.log("DssExport component hidden");
             }
         }, 300);
-    {% endif %}
+        {% endif %}
 
-});
+        // get the preferred units and set the unitizer preference
+        var pref = $("input[name='uni_main_selector']:checked").val();
+        pref = parseInt(pref, 10);
+        setGlobalUnitizerPreference(pref);
+        Project.getInstance().unitChangeEvent();
+
+    });
 </script>
