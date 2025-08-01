@@ -119,6 +119,7 @@ function onReady() {
         findAndFlash('WeppID');
     });
 
+    // TODO: update for glLayer
     function findAndFlash(idType) {
         var input = document.getElementById('input_centerloc').value;
         
@@ -656,7 +657,6 @@ function onReady() {
     {% if 'rap' in ron.mods %}
         // Cover
         render_legend("viridis", "landuse_sub_cmap_canvas_cover");
-        sub_ctrl.renderCover();
     {% endif %}
     
     //
@@ -664,21 +664,18 @@ function onReady() {
     {% if 'rhem' not in ron.mods %}
         // Phosphorus
         render_legend("viridis", "wepp_sub_cmap_canvas_phosphorus");
-        sub_ctrl.renderPhosphorus();
         $('#wepp_sub_cmap_range_phosphorus').on('input', function () {
             sub_ctrl.renderPhosphorus();
         });
 
         // Runoff
         render_legend("winter", "wepp_sub_cmap_canvas_runoff");
-        sub_ctrl.renderRunoff();
         $('#wepp_sub_cmap_range_runoff').on('input', function () {
             sub_ctrl.renderRunoff();
         });
 
         // Loss
         render_legend("jet2", "wepp_sub_cmap_canvas_loss");
-        sub_ctrl.renderLoss();
         $('#wepp_sub_cmap_range_loss').on('input', function () {
             sub_ctrl.renderLoss();
         });
@@ -689,8 +686,6 @@ function onReady() {
 
         // Soil Deposition / Loss
         render_legend("jet2", "wepp_grd_cmap_canvas_loss");
-        sub_ctrl.updateGriddedLoss();
-
         $('#wepp_grd_cmap_range_loss').on('input', function () {
             sub_ctrl.updateGriddedLoss();
         });
@@ -698,21 +693,18 @@ function onReady() {
 
         // Runoff
         render_legend("winter", "rhem_sub_cmap_canvas_runoff");
-        sub_ctrl.renderRunoff();
         $('#rhem_sub_cmap_range_runoff').on('input', function () {
             sub_ctrl.renderRhemRunoff();
         });
 
         // Yield
         render_legend("viridis", "rhem_sub_cmap_canvas_sed_yield");
-        sub_ctrl.renderPhosphorus();
         $('#rhem_sub_cmap_range_sed_yield').on('input', function () {
             sub_ctrl.renderRhemSedYield();
         });
 
         // Loss
         render_legend("jet2", "rhem_sub_cmap_canvas_soil_loss");
-        sub_ctrl.renderLoss();
         $('#rhem_sub_cmap_range_soil_loss').on('input', function () {
             sub_ctrl.renderRhemSoilLoss();
         });
@@ -721,14 +713,12 @@ function onReady() {
     {% if 'ash' in ron.mods %}
         // Ash Load
         render_legend("jet2", "ash_sub_cmap_canvas_load");
-        sub_ctrl.renderAshLoad();
         $('#ash_sub_cmap_range_load').on('input', function () {
             sub_ctrl.renderAshLoad();
         });
 
         // Ash Transport
         render_legend("jet2", "ash_sub_cmap_canvas_transport");
-        sub_ctrl.renderAshTransport();
         $('#ash_sub_cmap_range_transport').on('input', function () {
             sub_ctrl.renderAshTransport();
         });

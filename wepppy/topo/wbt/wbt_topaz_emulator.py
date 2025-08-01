@@ -77,7 +77,7 @@ def remove_if_exists(fn):
 
 
 class WhiteboxToolsTopazEmulator:
-    def __init__(self, wbt_wd, dem_fn=None, verbose=False, raise_on_error=True):
+    def __init__(self, wbt_wd, dem_fn=None, verbose=True, raise_on_error=True):
 
         if dem_fn is not None:
             dem_fn = os.path.abspath(dem_fn)
@@ -353,10 +353,13 @@ class WhiteboxToolsTopazEmulator:
 
         del ds
 
-    def _create_relief(self, fill_or_breach="fill"):
+    def _create_relief(self, fill_or_breach="fill", blc_dist=None):
         """
         Create a relief file from the DEM using WBT using either fill or breach method.
         """
+        if blc_dist is None:
+            blc_dist = 1000
+
         relief_fn = self.relief
 
         remove_if_exists(relief_fn)
@@ -365,8 +368,10 @@ class WhiteboxToolsTopazEmulator:
             ret = self.wbt.fill_depressions(dem=self.dem, output=relief_fn)
         elif fill_or_breach == "breach":
             ret = self.wbt.breach_depressions(dem=self.dem, output=relief_fn)
+        elif fill_or_breach == "breach_least_cost":
+            ret = self.wbt.breach_depressions_least_cost(dem=self.dem, output=relief_fn, dist=int(blc_dist))
         else:
-            raise ValueError("fill_or_breach must be either 'fill' or 'breach'")
+            raise ValueError("fill_or_breach must be either 'fill', 'breach' or 'breach_least_cost'")
 
         if not _exists(relief_fn):
             raise Exception(f"Relief file was not created: {relief_fn}, ret = {ret}")
@@ -493,14 +498,14 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Stream junction file created successfully: {chnjnt_fn}")
 
-    def delineate_channels(self, csa=5.0, mcl=60.0, fill_or_breach="fill"):
+    def delineate_channels(self, csa=5.0, mcl=60.0, fill_or_breach="fill", blc_dist=None):
         """
         Delineate channels from the DEM using WBT.
         """
         self.mcl = mcl
         self.csa = csa
 
-        self._create_relief(fill_or_breach)
+        self._create_relief(fill_or_breach, blc_dist=blc_dist)
         self._create_flow_vector()
         self._create_flow_accumulation()
         self._extract_streams()
