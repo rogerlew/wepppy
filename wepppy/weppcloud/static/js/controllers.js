@@ -15,6 +15,34 @@ function coordRound(v) {
 function pass() {
     return undefined;
 }
+const fromHex = (hex, alpha = 0.5) => {
+    // Validate hex input
+    if (!hex || typeof hex !== 'string') {
+        console.warn(`Invalid hex value: ${hex}. Returning default color.`);
+        return { r: 0, g: 0, b: 0, a: 1 };
+    }
+
+    // Ensure hex is a valid hex string
+    hex = hex.replace(/^#/, '');
+    if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
+        console.warn(`Invalid hex format: ${hex}. Returning default color.`);
+        return { r: 0, g: 0, b: 0, a: 1 };
+    }
+
+    // Validate alpha
+    if (typeof alpha !== 'number' || alpha < 0 || alpha > 1) {
+        console.warn(`Invalid alpha value: ${alpha}. Using default alpha: 1.`);
+        alpha = 1;
+    }
+
+    const num = parseInt(hex, 16);
+    return {
+        r: ((num >> 16) & 255) / 255,
+        g: ((num >> 8) & 255) / 255,
+        b: (num & 255) / 255,
+        a: alpha
+    };
+};
 
 /* ----------------------------------------------------------------------------
  * WebSocketManager
@@ -618,6 +646,10 @@ var Map = function () {
 
         that.createPane('channelGlPane');
         that.getPane('channelGlPane').style.zIndex = 650;
+
+        that.createPane('markerCustomPane');
+        that.getPane('markerCustomPane').style.zIndex = 700;
+
         //
         // Elevation feedback on mouseover
         //
@@ -1346,7 +1378,7 @@ var ChannelDelineation = function () {
         that.onMapChange = function () {
             var self = instance;
             var map = Map.getInstance();
-            
+
             var center = map.getCenter();
             var zoom = map.getZoom();
             var bounds = map.getBounds();
@@ -1423,16 +1455,6 @@ var ChannelDelineation = function () {
         // Topaz Pass 1
         // Shows the NETFUL.ARC built by TOPAZ
         // --- hex → {r,g,b,a} helper (CSS-Tricks / SO recipe) ---
-        const fromHex = hex => {
-            hex = hex.replace(/^#/, '');
-            const num = parseInt(hex, 16);
-            return {
-                r: ((num >> 16) & 255) / 255,
-                g: ((num >> 8) & 255) / 255,
-                b: (num & 255) / 255,
-                a: 1
-            };
-        }; //  [oai_citation:5‡Stack Overflow](https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb?utm_source=chatgpt.com)
 
         // same palette you used, just no alpha here
         const palette = [
@@ -1600,7 +1622,9 @@ var Outlet = function () {
         };
 
         that.outlet = null;
-        that.outletMarker = L.marker();
+        that.outletMarker = L.marker(undefined, {
+            pane: 'markerCustomPane'
+        });
 
         that.remove = function () {
             var self = instance;
@@ -1797,16 +1821,7 @@ var SubcatchmentDelineation = function () {
         //----------------------------------------------------------------------
         // ─── CONSTANTS / HELPERS ──────────────────────────────────────────────
         //----------------------------------------------------------------------
-        const fromHex = hex => {
-            hex = hex.replace(/^#/, '');
-            const n = parseInt(hex, 16);
-            return {
-                r: ((n >> 16) & 255) / 255,
-                g: ((n >> 8) & 255) / 255,
-                b: (n & 255) / 255,
-                a: 0.5
-            };
-        };
+
 
         // default & clear colours in both CSS and WebGL formats
         that.defaultStyle = {
@@ -1873,12 +1888,12 @@ var SubcatchmentDelineation = function () {
         that.setColorMap = function (cmap_name) {
             var self = instance;
 
-            if (self.polys === null) {
+            if (self.glLayer === null) {
                 throw "Subcatchments have not been drawn";
             }
 
             if (cmap_name === "default") {
-                self.cmap();
+                self.render();
                 Map.getInstance().sub_legend.html("");
             } else if (cmap_name === "slp_asp") {
                 self.renderSlpAsp();
@@ -1937,8 +1952,13 @@ var SubcatchmentDelineation = function () {
 
                 /* ====== slope / aspect ================================================= */
                 case 'slp_asp': {
-                    const hsvHex = self.dataSlpAsp?.[id];                 // '#aabbcc'
-                    return hsvHex ? fromHex(hsvHex) : COLOR_DEFAULT;
+                    const rgbHex = self.dataSlpAsp?.[id]?.color;                 // '#aabbcc'
+                    return rgbHex ? fromHex(rgbHex, 1.0) : COLOR_DEFAULT;
+                }
+
+                case 'landuse' {
+                    const rgbHex = self.dataLanduse?.[id]?.color;               // '#aabbcc'
+                    return rgbHex ? fromHex(rgbHex, 1.0) : COLOR_DEFAULT;
                 }
 
                 /* ====== land-cover % =================================================== */
@@ -1981,10 +2001,6 @@ var SubcatchmentDelineation = function () {
         //----------------------------------------------------------------------
         that._refreshGlLayer = function () {
             var self = instance;
-
-            console.debug("SubcatchmentDelineation._refreshGlLayer() called");
-            console.debug("cmapMode:", self.cmapMode);
-            console.log("data:", self.data);
 
             const map = Map.getInstance();
 
@@ -2079,6 +2095,24 @@ var SubcatchmentDelineation = function () {
                 success: data => {
                     that.dataSlpAsp = data;          // {TopazID:'#rrggbb', …}
                     that.cmapMode = 'slp_asp';
+                    that._refreshGlLayer();
+                },
+                error: jq => that.pushResponseStacktrace(that, jq.responseJSON),
+                fail: (jq, s, e) => that.pushErrorStacktrace(that, jq, s, e)
+            }).always(() => {
+                $.get('resources/legends/slope_aspect/').done(html => {
+                    Map.getInstance().sub_legend.html(html);
+                });
+            });
+        };
+        that.renderLanduse = function () {
+            that.status.text('Loading landuse …');
+            $.get({
+                url: 'query/watershed/subcatchments/',
+                cache: false,
+                success: data => {
+                    that.dataLanduse = data;          // {TopazID:'#rrggbb', …}
+                    that.cmapMode = 'landuse';
                     that._refreshGlLayer();
                 },
                 error: jq => that.pushResponseStacktrace(that, jq.responseJSON),
@@ -2253,7 +2287,7 @@ var SubcatchmentDelineation = function () {
                 throw "query returned null, cannot determine colors";
             }
 
-            self.polys.eachLayer(function (layer) {
+            self.glLayer.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var color = lcjson[topId].color;
 
@@ -2341,11 +2375,11 @@ var SubcatchmentDelineation = function () {
             });
 
 
-            if (self.polys == null) {
+            if (self.glLayer == null) {
                 return;
             }
 
-            self.polys.eachLayer(function (layer) {
+            self.glLayer.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataRhemRunoff[topId].value);
 
@@ -2436,11 +2470,11 @@ var SubcatchmentDelineation = function () {
                 }
             });
 
-            if (self.polys == null) {
+            if (self.glLayer == null) {
                 return;
             }
 
-            self.polys.eachLayer(function (layer) {
+            self.glLayer.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataRhemSedYield[topId].value);
                 var c = self.cmapperRhemSedYield.map(v / r);
@@ -2541,11 +2575,11 @@ var SubcatchmentDelineation = function () {
             });
 
 
-            if (self.polys == null) {
+            if (self.glLayer == null) {
                 return;
             }
 
-            self.polys.eachLayer(function (layer) {
+            self.glLayer.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataAshLoad[topId]['ash_ini_depth (mm)']);
                 var c = self.cmapperAshLoad.map(v / r);
@@ -2651,11 +2685,11 @@ var SubcatchmentDelineation = function () {
             });
 
 
-            if (self.polys == null) {
+            if (self.glLayer == null) {
                 return;
             }
 
-            self.polys.eachLayer(function (layer) {
+            self.glLayer.eachLayer(function (layer) {
                 var measure = self.getAshTransportMeasure();
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataAshTransport[topId][measure]) / 1000.0;
@@ -2757,11 +2791,11 @@ var SubcatchmentDelineation = function () {
             });
 
 
-            if (self.polys == null) {
+            if (self.glLayer == null) {
                 return;
             }
 
-            self.polys.eachLayer(function (layer) {
+            self.glLayer.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataRhemSoilLoss[topId].value);
                 var c = self.cmapperRhemSoilLoss.map(v / (2.0 * r) + 0.5);
@@ -2793,9 +2827,9 @@ var SubcatchmentDelineation = function () {
             self.stacktrace.text("");
             self.ws_client.connect();
 
-            if (self.polys !== null) {
-                map.ctrls.removeLayer(self.polys);
-                map.removeLayer(self.polys);
+            if (self.glLayer !== null) {
+                map.ctrls.removeLayer(self.glLayer);
+                map.removeLayer(self.glLayer);
 
                 map.ctrls.removeLayer(self.labels);
                 map.removeLayer(self.labels);
@@ -3503,8 +3537,8 @@ var RangelandCoverModify = function () {
         that.find_layer_id = function (topaz_id) {
             var self = instance;
 
-            for (var id in self.polys._layers) {
-                var topaz_id2 = self.polys._layers[id].feature.properties.TopazID;
+            for (var id in self.glLayer._layers) {
+                var topaz_id2 = self.glLayer._layers[id].feature.properties.TopazID;
 
                 if (topaz_id === topaz_id2) {
                     return id;
@@ -3579,7 +3613,7 @@ var RangelandCoverModify = function () {
                             continue;
                         }
 
-                        var layer = self.polys._layers[id];
+                        var layer = self.glLayer._layers[id];
 
                         if (self.selected.has(topaz_id)) {
                             self.selected.delete(topaz_id);
@@ -3611,7 +3645,7 @@ var RangelandCoverModify = function () {
             var self = instance;
 
             if (self.checkbox.prop("checked") === true) {
-                if (self.polys == null) {
+                if (self.glLayer == null) {
                     self.showModifyMap();
                 }
                 if (self.selected == null) {
@@ -3657,10 +3691,10 @@ var RangelandCoverModify = function () {
             map.off('mousedown', self.boxSelectionModeMouseDown);
             map.off('mousemove', self.boxSelectionModeMouseMove);
             map.off('mouseup', self.boxSelectionModeMouseUp);
-            map.removeLayer(self.polys);
+            map.removeLayer(self.glLayer);
 
             self.data = null;
-            self.polys = null;
+            self.glLayer = null;
             self.ll0 = null;
         };
 
@@ -3668,11 +3702,11 @@ var RangelandCoverModify = function () {
             var self = instance;
             var map = Map.getInstance();
             self.data = response;
-            self.polys = L.geoJSON(self.data.features, {
+            self.glLayer = L.geoJSON(self.data.features, {
                 style: self.style,
                 onEachFeature: self.onEachFeature
             });
-            self.polys.addTo(map);
+            self.glLayer.addTo(map);
         };
 
         that.onEachFeature = function (feature, layer) {
@@ -3854,8 +3888,8 @@ var LanduseModify = function () {
         that.find_layer_id = function (topaz_id) {
             var self = instance;
 
-            for (var id in self.polys._layers) {
-                var topaz_id2 = self.polys._layers[id].feature.properties.TopazID;
+            for (var id in self.glLayer._layers) {
+                var topaz_id2 = self.glLayer._layers[id].feature.properties.TopazID;
 
                 if (topaz_id === topaz_id2) {
                     return id;
@@ -3899,7 +3933,7 @@ var LanduseModify = function () {
                             continue;
                         }
 
-                        var layer = self.polys._layers[id];
+                        var layer = self.glLayer._layers[id];
 
                         if (self.selected.has(topaz_id)) {
                             self.selected.delete(topaz_id);
@@ -3931,7 +3965,7 @@ var LanduseModify = function () {
             var self = instance;
 
             if (self.checkbox.prop("checked") === true) {
-                if (self.polys == null) {
+                if (self.glLayer == null) {
                     self.showModifyMap();
                 }
                 if (self.selected == null) {
@@ -3976,10 +4010,10 @@ var LanduseModify = function () {
             map.off('mousedown', self.boxSelectionModeMouseDown);
             map.off('mousemove', self.boxSelectionModeMouseMove);
             map.off('mouseup', self.boxSelectionModeMouseUp);
-            map.removeLayer(self.polys);
+            map.removeLayer(self.glLayer);
 
             self.data = null;
-            self.polys = null;
+            self.glLayer = null;
             self.ll0 = null;
         };
 
@@ -3987,11 +4021,11 @@ var LanduseModify = function () {
             var self = instance;
             var map = Map.getInstance();
             self.data = response;
-            self.polys = L.geoJSON(self.data.features, {
+            self.glLayer = L.geoJSON(self.data.features, {
                 style: self.style,
                 onEachFeature: self.onEachFeature
             });
-            self.polys.addTo(map);
+            self.glLayer.addTo(map);
         };
 
         that.onEachFeature = function (feature, layer) {
@@ -5658,7 +5692,6 @@ var Omni = function () {
             self.ws_client.connect();
 
             const data = self.serializeScenarios();
-            console.log('Serialized FormData:');
             for (let [key, value] of data.entries()) {
                 console.log(`${key}: ${value instanceof File ? value.name : value}`);
             }
