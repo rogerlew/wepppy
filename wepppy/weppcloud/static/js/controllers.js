@@ -43,6 +43,14 @@ function pass() {
     return { r, g, b, a: alpha };
 };
 
+function linearToLog(value, minLog, maxLog, maxLinear) {
+    if (isNaN(value)) return minLog;
+    value = Math.max(0, Math.min(value, maxLinear));
+
+    // Logarithmic mapping: minLog * (maxLog / minLog) ^ (value / maxLinear)
+    return minLog * Math.pow(maxLog / minLog, value / maxLinear);
+}
+
 /* ----------------------------------------------------------------------------
  * WebSocketManager
  * ----------------------------------------------------------------------------
@@ -456,6 +464,37 @@ var Project = function () {
         }
     };
 }();
+
+const updateRangeMaxLabel_mm = function (r, labelMax) {
+    const in_units = 'mm';
+    const mmValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
+    const inValue = (r * 0.0393701).toFixed(1); // Convert mm to inches
+
+    const currentUnits = $("input[name='unitizer_xs-distance_radio']:checked").val(); // mm or in
+
+    const mmClass = currentUnits === 'mm' ? '' : 'invisible';
+    const inClass = currentUnits === 'in' ? '' : 'invisible';
+
+    labelMax.html(
+        `<div class="unitizer-wrapper"><div class="unitizer units-mm ${mmClass}">${mmValue} mm</div><div class="unitizer units-in ${inClass}">${inValue} in</div></div>`
+    );
+};
+
+
+const updateRangeMaxLabel_kgha = function (r, labelMax) {
+    const in_units = 'kg/ha';
+    const kgHaValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
+    const lbAcValue = (r * 0.892857).toFixed(1); // Convert kg/ha to lb/ac
+
+    const currentUnits = $("input[name='unitizer_xs-surface-density_radio']:checked").val(); // kg/ha or lb/acre
+
+    const kgHaClass = currentUnits === 'kg_ha-_3' ? '' : 'invisible';
+    const lbAcClass = currentUnits === 'lb_acre-_3' ? '' : 'invisible';
+
+    labelMax.html(
+        `<div class="unitizer-wrapper"><div class="unitizer units-kg-ha ${kgHaClass}">${kgHaValue} kg/ha</div><div class="unitizer units-lb-ac ${lbAcClass}">${lbAcValue} lb/ac</div></div>`
+    );
+};
 
 /* ----------------------------------------------------------------------------
  * RAP_TS
@@ -1551,7 +1590,8 @@ var ChannelDelineation = function () {
                             icon: L.divIcon({
                                 className: "label",
                                 html: `<div style="${self.labelStyle}">${topId}</div>`
-                            })
+                            }),
+                            pane: 'markerCustomPane'
                         });
                         self.labels.addLayer(lbl);
                     });
@@ -1823,6 +1863,9 @@ var SubcatchmentDelineation = function () {
 
 
         // default & clear colours in both CSS and WebGL formats
+        that.labelStyle = "color:orange; text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
+
+
         that.defaultStyle = {
             color: '#ff7800',
             weight: 2,
@@ -1996,24 +2039,50 @@ var SubcatchmentDelineation = function () {
                     return (feat) => {
                         const id = feat.properties.TopazID;
                         const v = parseFloat(self.dataRunoff[id].value); // mm
-                        const r = self._rangeRunoff;
+                        const linearValue = parseFloat(that.rangeRunoff.val()); // 0 - 100
+                        const minLog = 0.1; // slider min
+                        const maxLog = 1000;   // slider max
+                        const maxLinear = 100;
+                        const r = linearToLog(linearValue, minLog, maxLog, maxLinear);
+                        self.labelRunoffMin.html("0.000");
+                        updateRangeMaxLabel_mm(r, self.labelRunoffMax);
                         const hex = self.cmapperRunoff.map(v / r);
-                        return fromHex(hex);
+                        return fromHex(hex, 0.9);
                     };
 
                 case 'loss':
                     return (feat) => {
                         const id = feat.properties.TopazID;
-                        const v = parseFloat(self.dataLoss[id].value); // kg/ha
-                        const r = self._rangeLoss;
+                        const v = parseFloat(self.dataLoss[id].value); // mm
+                        const linearValue = parseFloat(that.rangeLoss.val()); // 0 - 100
+                        const minLog = 1; // slider min
+                        const maxLog = 10000;   // slider max
+                        const maxLinear = 100;
+                        const r = linearToLog(linearValue, minLog, maxLog, maxLinear);
+                        self.labelLossMin.html("0.000");
+                        updateRangeMaxLabel_kgha(r, self.labelLossMax);
                         const hex = self.cmapperLoss.map(v / r);
-                        return fromHex(hex);
+                        return fromHex(hex, 0.9);
                     };
-
+                case 'ash_load':
+                    return (feat) => {
+                        const id = feat.properties.TopazID;
+                        const v = parseFloat(self.dataAshLoad[id].value);
+                        const linearValue = parseFloat(that.rangeAshLoad.val()); // 0 - 100
+                        const minLog = 1; // slider min
+                        const maxLog = 10000;   // slider max
+                        const maxLinear = 100;
+                        const r = linearToLog(linearValue, minLog, maxLog, maxLinear);
+                        self.labelAshLoadMin.html("0.000");
+                        updateRangeMaxLabel_kgha(r, self.labelAshLoadMax);
+                        const hex = self.cmapperAshLoad.map(v / r);
+                        return fromHex(hex, 0.9);
+                    };
                 default:
                     return () => COLOR_DEFAULT;
             }
         };
+
 
         //----------------------------------------------------------------------
         // ─── GL LAYER (re)BUILDER ────────────────────────────────────────────
@@ -2027,7 +2096,6 @@ var SubcatchmentDelineation = function () {
                 map.ctrls.removeLayer(self.glLayer); // Keep layer control consistent
             }
 
-            // Get the color mapping function for the current cmapMode
             const cmapFn = self._colorFn();
 
             self.glLayer = L.glify.layer({
@@ -2045,6 +2113,12 @@ var SubcatchmentDelineation = function () {
             map.ctrls.addOverlay(self.glLayer, 'Subcatchments');
         };
 
+        that.updateGlLayerStyle = function () {
+            var self = instance;
+
+            const cmapFn = self._colorFn();
+            self.glLayer.setStyle({ color: (i, f) => cmapFn(f) });
+        };
 
         //----------------------------------------------------------------------
         // ─── LABELS (unchanged, just recalculated once) ──────────────────────
@@ -2063,7 +2137,8 @@ var SubcatchmentDelineation = function () {
                     icon: L.divIcon({
                         className: 'label',
                         html: `<div style="${that.labelStyle}">${id}</div>`
-                    })
+                    }),
+                    pane: 'markerCustomPane'
                 });
                 that.labels.addLayer(marker);
             });
@@ -2176,6 +2251,13 @@ var SubcatchmentDelineation = function () {
         };
 
         /* ---------- runoff & variants --------------------------------------- */
+
+        that.dataRunoff = null;
+        that.labelRunoffMin = $('#wepp_sub_cmap_canvas_runoff_min');
+        that.labelRunoffMax = $('#wepp_sub_cmap_canvas_runoff_max');
+        that.cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
+        that.rangeRunoff = $('#wepp_sub_cmap_range_runoff');
+
         that.renderRunoff = function () { _getRunoff('query/wepp/runoff/subcatchments/', 'runoff'); };
         that.renderSubrunoff = function () { _getRunoff('query/wepp/subrunoff/subcatchments/', 'runoff'); };
         that.renderBaseflow = function () { _getRunoff('query/wepp/baseflow/subcatchments/', 'runoff'); };
@@ -2183,8 +2265,6 @@ var SubcatchmentDelineation = function () {
             $.get(url)
                 .done(data => {
                     that.dataRunoff = data;
-                    const slider = $('#wepp_sub_cmap_range_runoff').val();
-                    that._rangeRunoff = 25.0 * (parseFloat(slider) ** 2);
                     that.cmapMode = mode;
                     that._refreshGlLayer();
                     // legend / unitizer unchanged
@@ -2193,17 +2273,41 @@ var SubcatchmentDelineation = function () {
         }
 
         /* ---------- loss ----------------------------------------------------- */
+
+        that.dataLoss = null;
+        that.labelLossMin = $('#wepp_sub_cmap_canvas_loss_min');
+        that.labelLossMax = $('#wepp_sub_cmap_canvas_loss_max');
+        that.cmapperLoss = createColormap({ colormap: "jet2", nshades: 64 });
+        that.rangeLoss = $('#wepp_sub_cmap_range_loss');
+
         that.renderLoss = function () {
             $.get('query/wepp/loss/subcatchments/')
                 .done(data => {
                     that.dataLoss = data;
-                    that._rangeLoss = parseFloat($('#wepp_sub_cmap_range_loss').val()) || 1;
                     that.cmapMode = 'loss';
                     that._refreshGlLayer();
-                    // legend / unitizer unchanged
                 })
                 .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         };
+
+
+        /* ---------- ash_load ----------------------------------------------------- */
+
+        that.dataAshLoad = null;
+        that.rangeAshLoad = $('#ash_sub_cmap_range_load');
+        that.labelAshLoadMin = $('#ash_sub_cmap_canvas_load_min');
+        that.labelAshLoadMax = $('#ash_sub_cmap_canvas_load_max');
+        that.cmapperAshLoad = createColormap({ colormap: "jet2", nshades: 64 });
+
+        that.renderAshLoad = function () {
+            $.get('query/wepp/loss/subcatchments/')
+                .done(dataAshLoad => {
+                    that.dataAshLoad = data;
+                    that.cmapMode = 'ash_load';
+                    that._refreshGlLayer();
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
+            };
 
         //
         // Gridded Loss
@@ -2516,111 +2620,6 @@ var SubcatchmentDelineation = function () {
             });
         };
         // end RhemSedYield
-
-        //
-        // AshLoad
-        //
-        that.dataAshLoad = null;
-        that.rangeAshLoad = $('#ash_sub_cmap_range_load');
-        that.labelAshLoadMin = $('#ash_sub_cmap_canvas_load_min');
-        that.labelAshLoadMax = $('#ash_sub_cmap_canvas_load_max');
-        that.labelAshLoadUnits = $('#ash_sub_cmap_canvas_load_units');
-        that.cmapperAshLoad = createColormap({ colormap: "jet2", nshades: 64 });
-
-        that.cmapAshLoad = function () {
-            var self = instance;
-            $.get({
-                url: "query/ash_out/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataAshLoad = data;
-                    self.renderAshLoad();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.renderAshLoad = function () {
-            var self = instance;
-
-            var r = parseFloat(self.rangeAshLoad.val());
-
-            $.get({
-                url: "unitizer/",
-                data: { value: 0 * r, in_units: 'mm' },
-                cache: false,
-                success: function success(response) {
-                    self.labelAshLoadMin.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer/",
-                data: { value: r, in_units: 'mm' },
-                cache: false,
-                success: function success(response) {
-                    self.labelAshLoadMax.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer_units/",
-                data: { in_units: 'mm' },
-                cache: false,
-                success: function success(response) {
-                    self.labelAshLoadUnits.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-
-            if (self.glLayer == null) {
-                return;
-            }
-
-            self.glLayer.eachLayer(function (layer) {
-                var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataAshLoad[topId]['ash_ini_depth (mm)']);
-                var c = self.cmapperAshLoad.map(v / r);
-
-                layer.setStyle({
-                    color: c,
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: c,
-                    fillOpacity: 0.9
-                });
-            });
-        };
-        // end AshLoad 
 
 
         //

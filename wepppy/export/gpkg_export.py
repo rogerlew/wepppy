@@ -97,6 +97,8 @@ def gpkg_extract_objective_parameter(gpkg_fn: str, obj_param: str) -> Tuple[List
 
 
 def gpkg_export(wd: str):
+    from wepppy.nodb import Watershed
+    watershed = Watershed.getInstance(wd)
 
     if wd.endswith('/'):
         runid = os.path.basename(os.path.dirname(wd))
@@ -120,7 +122,7 @@ def gpkg_export(wd: str):
     if _exists(gdb_zip_fn):
         os.remove(gdb_zip_fn)
     
-    hill_gdf = gpd.read_file(_join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON'))
+    hill_gdf = gpd.read_file(watershed.subwta_shp) # the SUBCATCHMENTS.WGS.JSON file
     hill_gdf.set_crs("EPSG:4326", inplace=True)
 
     wat_hill_fn = _join(wd, 'watershed/hillslopes.parquet')
@@ -210,7 +212,7 @@ def gpkg_export(wd: str):
 #    hill_gdf.to_file(_join(wd, 'export/subcatchments.geojson'), driver='GeoJSON')
     hill_gdf.to_file(gpkg_fn, driver='GPKG', layer='subcatchments')
 
-    chn_gdf = gpd.read_file(_join(wd, 'dem/topaz/CHANNELS.WGS.JSON'))
+    chn_gdf = gpd.read_file(watershed.channels_shp)  # the CHANNELS.WGS.JSON file
     chn_gdf.set_crs("EPSG:4326", inplace=True)
 
     wat_chn_fn = _join(wd, 'watershed/channels.parquet')

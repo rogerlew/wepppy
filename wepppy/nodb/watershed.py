@@ -441,9 +441,13 @@ class Watershed(NoDbBase, LogMixin):
     def discha(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "DISCHA.ARC")
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.discha
+            else:
+                return None
         else:
             raise NotImplementedError("taudem distance to channel map not specified")
-            return None  # _join(self.taudem_wd, 'subwta.tif')
 
     @property
     def subwta_shp(self):
