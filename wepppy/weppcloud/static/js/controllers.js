@@ -14,16 +14,16 @@ function coordRound(v) {
 
 function pass() {
     return undefined;
-}
-const fromHex = (hex, alpha = 0.5) => {
+
+} const fromHex = (rgbHex, alpha = 0.5) => {
     // Validate hex input
-    if (!hex || typeof hex !== 'string') {
-        console.warn(`Invalid hex value: ${hex}. Returning default color.`);
+    if (!rgbHex || typeof rgbHex !== 'string') {
+        console.warn(`Invalid hex value: ${rgbHex}. Returning default color.`);
         return { r: 0, g: 0, b: 0, a: 1 };
     }
 
     // Ensure hex is a valid hex string
-    hex = hex.replace(/^#/, '');
+    let hex = rgbHex.replace(/^#/, '');
     if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
         console.warn(`Invalid hex format: ${hex}. Returning default color.`);
         return { r: 0, g: 0, b: 0, a: 1 };
@@ -35,13 +35,12 @@ const fromHex = (hex, alpha = 0.5) => {
         alpha = 1;
     }
 
-    const num = parseInt(hex, 16);
-    return {
-        r: ((num >> 16) & 255) / 255,
-        g: ((num >> 8) & 255) / 255,
-        b: (num & 255) / 255,
-        a: alpha
-    };
+    // Convert hex to RGB and normalize to 0-1 range
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+    return { r, g, b, a: alpha };
 };
 
 /* ----------------------------------------------------------------------------
@@ -1460,7 +1459,7 @@ var ChannelDelineation = function () {
         const palette = [
             "#8AE5FE", "#65C8FE", "#479EFF", "#306EFE",
             "#2500F4", "#6600cc", "#50006b", "#6b006b"
-        ].map(fromHex);
+        ].map(color => fromHex(color, 0.9));
 
         //------------------------------------------------------------------
         // glify show_1
@@ -1898,7 +1897,7 @@ var SubcatchmentDelineation = function () {
             } else if (cmap_name === "slp_asp") {
                 self.renderSlpAsp();
             } else if (cmap_name === "dom_lc") {
-                self.renderNLCD();
+                self.renderLanduse();
             } else if (cmap_name === "rangeland_cover") {
                 self.renderRangelandCover();
             } else if (cmap_name === "dom_soil") {
@@ -1940,59 +1939,79 @@ var SubcatchmentDelineation = function () {
         };
 
         //----------------------------------------------------------------------
-        // ─── COMMON COLOUR FUNCTION (used by WebGL callback) ─────────────────
+        // ─── COLOR FUNCTION FACTORY ──────────────────────────────────────────
         //----------------------------------------------------------------------
-        that._colorFn = function (feat) {
-            var self = instance;
-            const id = feat.properties.TopazID;
+        that._colorFn = function () {
+            const self = instance;
 
+            // Return a cmapFn based on cmapMode
             switch (self.cmapMode) {
-                case 'default': return COLOR_DEFAULT;
-                case 'clear': return COLOR_CLEAR;
+                case 'default':
+                    return () => COLOR_DEFAULT;
 
-                /* ====== slope / aspect ================================================= */
-                case 'slp_asp': {
-                    const rgbHex = self.dataSlpAsp?.[id]?.color;                 // '#aabbcc'
-                    return rgbHex ? fromHex(rgbHex, 1.0) : COLOR_DEFAULT;
-                }
+                case 'clear':
+                    return () => COLOR_CLEAR;
 
-                case 'landuse' {
-                    const rgbHex = self.dataLanduse?.[id]?.color;               // '#aabbcc'
-                    return rgbHex ? fromHex(rgbHex, 1.0) : COLOR_DEFAULT;
-                }
+                case 'slp_asp':
+                    return (feat) => {
+                        const id = feat.properties.TopazID;
+                        const rgbHex = self.dataSlpAsp?.[id]?.color; // '#aabbcc'
+                        return rgbHex ? fromHex(rgbHex, 0.7) : COLOR_DEFAULT;
+                    };
 
-                /* ====== land-cover % =================================================== */
-                case 'cover': {
-                    if (!self.dataCover) return COLOR_DEFAULT;
-                    const v = self.dataCover[id];                         // 0-100
-                    const hex = self.cmapperCover.map(v);                 // '#rrggbb'
-                    return fromHex(hex);
-                }
+                case 'landuse':
+                    return (feat) => {
+                        const id = feat.properties.TopazID;
+                        const rgbHex = self.dataLanduse?.[id]?.color; // '#aabbcc'
+                        return rgbHex ? fromHex(rgbHex, 0.7) : COLOR_DEFAULT;
+                    };
 
-                /* ====== phosphorus, runoff, loss – share the same pattern ============= */
-                case 'phosphorus': {
-                    if (!self.dataPhosphorus) return COLOR_DEFAULT;
-                    const v = parseFloat(self.dataPhosphorus[id].value);  // kg/ha
-                    const r = self._rangePhosphorus;                      // current slider
-                    const hex = self.cmapperPhosphorus.map(v / r);
-                    return fromHex(hex);
-                }
+                case 'soils':
+                    return (feat) => {
+                        const id = feat.properties.TopazID;
+                        const rgbHex = self.dataSoils?.[id]?.color; // '#aabbcc'
+                        return rgbHex ? fromHex(rgbHex, 0.7) : COLOR_DEFAULT;
+                    };
 
-                case 'runoff': {
-                    const v = parseFloat(self.dataRunoff[id].value);      // mm
-                    const r = self._rangeRunoff;
-                    const hex = that.cmapperRunoff.map(v / r);
-                    return fromHex(hex);
-                }
+                case 'cover':
+                    return (feat) => {
+                        if (!self.dataCover) return COLOR_DEFAULT;
+                        const id = feat.properties.TopazID;
+                        const v = self.dataCover[id]; // 0-100
+                        const hex = self.cmapperCover.map(v); // '#rrggbb'
+                        return fromHex(hex);
+                    };
 
-                case 'loss': {
-                    const v = parseFloat(self.dataLoss[id].value);        // kg/ha
-                    const r = self._rangeLoss;
-                    const hex = self.cmapperLoss.map(v / r);
-                    return fromHex(hex);
-                }
+                case 'phosphorus':
+                    return (feat) => {
+                        if (!self.dataPhosphorus) return COLOR_DEFAULT;
+                        const id = feat.properties.TopazID;
+                        const v = parseFloat(self.dataPhosphorus[id].value); // kg/ha
+                        const r = self._rangePhosphorus; // current slider
+                        const hex = self.cmapperPhosphorus.map(v / r);
+                        return fromHex(hex);
+                    };
 
-                default: return COLOR_DEFAULT;
+                case 'runoff':
+                    return (feat) => {
+                        const id = feat.properties.TopazID;
+                        const v = parseFloat(self.dataRunoff[id].value); // mm
+                        const r = self._rangeRunoff;
+                        const hex = self.cmapperRunoff.map(v / r);
+                        return fromHex(hex);
+                    };
+
+                case 'loss':
+                    return (feat) => {
+                        const id = feat.properties.TopazID;
+                        const v = parseFloat(self.dataLoss[id].value); // kg/ha
+                        const r = self._rangeLoss;
+                        const hex = self.cmapperLoss.map(v / r);
+                        return fromHex(hex);
+                    };
+
+                default:
+                    return () => COLOR_DEFAULT;
             }
         };
 
@@ -2000,15 +2019,16 @@ var SubcatchmentDelineation = function () {
         // ─── GL LAYER (re)BUILDER ────────────────────────────────────────────
         //----------------------------------------------------------------------
         that._refreshGlLayer = function () {
-            var self = instance;
-
+            const self = instance;
             const map = Map.getInstance();
 
             if (self.glLayer) {
-                self.glLayer.remove();                      // dispose VBOs & canvas
-                // keep layer-control checkbox position consistent
-                map.ctrls.removeLayer(self.glLayer);
+                self.glLayer.remove(); // Dispose VBOs & canvas
+                map.ctrls.removeLayer(self.glLayer); // Keep layer control consistent
             }
+
+            // Get the color mapping function for the current cmapMode
+            const cmapFn = self._colorFn();
 
             self.glLayer = L.glify.layer({
                 geojson: self.data,
@@ -2016,13 +2036,15 @@ var SubcatchmentDelineation = function () {
                 glifyOptions: {
                     opacity: 0.5,
                     border: true,
-                    color: (i, f) => self._colorFn(f),
+                    borderColor: '#ffffff',
+                    color: (i, f) => cmapFn(f),
                     click: (e, f) => map.subQuery(f.properties.TopazID)
                 }
             }).addTo(map);
 
             map.ctrls.addOverlay(self.glLayer, 'Subcatchments');
         };
+
 
         //----------------------------------------------------------------------
         // ─── LABELS (unchanged, just recalculated once) ──────────────────────
@@ -2087,41 +2109,46 @@ var SubcatchmentDelineation = function () {
         // ─── DATA-DRIVEN COLOUR-MAPS (examples shown) ────────────────────────
         //----------------------------------------------------------------------
         /* ---------- slope / aspect ------------------------------------------ */
-        that.renderSlpAsp = function () {
-            that.status.text('Loading slope/aspect …');
+        const _renderLayer = function (type, dataProp, cmapMode, legendUrl) {
+            that.status.text(`Loading ${type} …`);
             $.get({
-                url: 'query/watershed/subcatchments/',
+                url: `query/${type}/subcatchments/`,
                 cache: false,
                 success: data => {
-                    that.dataSlpAsp = data;          // {TopazID:'#rrggbb', …}
-                    that.cmapMode = 'slp_asp';
+                    that[dataProp] = data;
+                    that.cmapMode = cmapMode;
                     that._refreshGlLayer();
                 },
                 error: jq => that.pushResponseStacktrace(that, jq.responseJSON),
                 fail: (jq, s, e) => that.pushErrorStacktrace(that, jq, s, e)
             }).always(() => {
-                $.get('resources/legends/slope_aspect/').done(html => {
-                    Map.getInstance().sub_legend.html(html);
+                $.get({
+                    url: `resources/legends/${legendUrl}/`,
+                    cache: false,
+                    success: function (response) {
+                        var map = Map.getInstance();
+                        map.sub_legend.html(response);
+                    },
+                    error: function (jqXHR) {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                    },
+                    fail: function (jqXHR, textStatus, errorThrown) {
+                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                    }
                 });
             });
         };
+
+        that.renderSlpAsp = function () {
+            _renderLayer('watershed', 'dataSlpAsp', 'slp_asp', 'slope_aspect');
+        };
+
         that.renderLanduse = function () {
-            that.status.text('Loading landuse …');
-            $.get({
-                url: 'query/watershed/subcatchments/',
-                cache: false,
-                success: data => {
-                    that.dataLanduse = data;          // {TopazID:'#rrggbb', …}
-                    that.cmapMode = 'landuse';
-                    that._refreshGlLayer();
-                },
-                error: jq => that.pushResponseStacktrace(that, jq.responseJSON),
-                fail: (jq, s, e) => that.pushErrorStacktrace(that, jq, s, e)
-            }).always(() => {
-                $.get('resources/legends/slope_aspect/').done(html => {
-                    Map.getInstance().sub_legend.html(html);
-                });
-            });
+            _renderLayer('landuse', 'dataLanduse', 'landuse', 'landuse');
+        };
+
+        that.renderSoils = function () {
+            _renderLayer('soils', 'dataSoils', 'soils', 'soils');
         };
 
         /* ----------  % land-cover  ------------------------------------------ */
@@ -2190,7 +2217,7 @@ var SubcatchmentDelineation = function () {
             var self = instance;
             var map = Map.getInstance();
 
-            if (self.grid !== null) {
+            if (self.grid !== undefined && self.grid !== null) {
                 map.ctrls.removeLayer(self.grid);
                 map.removeLayer(self.grid);
             }

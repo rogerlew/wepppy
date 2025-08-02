@@ -2784,8 +2784,8 @@ def resources_landuse_legend(runid, config):
                            legend=Landuse.getInstance(wd).legend)
 
 
-@app.route('/runs/<string:runid>/<config>/resources/legends/soil')
-@app.route('/runs/<string:runid>/<config>/resources/legends/soil/')
+@app.route('/runs/<string:runid>/<config>/resources/legends/soils')
+@app.route('/runs/<string:runid>/<config>/resources/legends/soils/')
 def resources_soil_legend(runid, config):
     wd = get_wd(runid)
 
