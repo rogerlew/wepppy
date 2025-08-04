@@ -496,6 +496,22 @@ const updateRangeMaxLabel_kgha = function (r, labelMax) {
     );
 };
 
+
+const updateRangeMaxLabel_tonneha = function (r, labelMax) {
+    const in_units = 'tonne/ha';
+    const tonneHaValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
+    const tonAcValue = (r * 0.44609).toFixed(1); // Convert tonne/ha to ton/ac
+
+    const currentUnits = $("input[name='unitizer_surface-density_radio']:checked").val(); // tonne/ha or ton/acre
+
+    const tonneHaClass = currentUnits === 'tonne_ha-_3' ? '' : 'invisible';
+    const tonAcClass = currentUnits === 'ton_acre-_3' ? '' : 'invisible';
+
+    labelMax.html(
+        `<div class="unitizer-wrapper"><div class="unitizer units-kg-ha ${tonneHaClass}">${tonneHaValue} tonne/ha</div><div class="unitizer units-lb-ac ${tonAcClass}">${tonAcValue} ton/ac</div></div>`
+    );
+};
+
 /* ----------------------------------------------------------------------------
  * RAP_TS
  * ----------------------------------------------------------------------------
@@ -1894,9 +1910,6 @@ var SubcatchmentDelineation = function () {
 
         // various query-result dicts filled by cmap*() functions
         that.dataCover = null;
-        that.dataPhosphorus = null;
-        that.dataRunoff = null;
-        that.dataLoss = null;
 
 
         that.enableColorMap = function (cmap_name) {
@@ -2027,19 +2040,24 @@ var SubcatchmentDelineation = function () {
 
                 case 'phosphorus':
                     return (feat) => {
-                        if (!self.dataPhosphorus) return COLOR_DEFAULT;
                         const id = feat.properties.TopazID;
                         const v = parseFloat(self.dataPhosphorus[id].value); // kg/ha
-                        const r = self._rangePhosphorus; // current slider
+                        const linearValue = parseFloat(self.rangePhosphorus.val()); // 0 - 100
+                        const minLog = 0.001;  // slider min
+                        const maxLog = 10.0;   // slider max
+                        const maxLinear = 100;
+                        const r = linearToLog(linearValue, minLog, maxLog, maxLinear);
+                        self.labelPhosphorusMin.html("0.000");
+                        updateRangeMaxLabel_kgha(r, self.labelPhosphorusMax);
                         const hex = self.cmapperPhosphorus.map(v / r);
-                        return fromHex(hex);
+                        return fromHex(hex, 0.9);
                     };
 
                 case 'runoff':
                     return (feat) => {
                         const id = feat.properties.TopazID;
                         const v = parseFloat(self.dataRunoff[id].value); // mm
-                        const linearValue = parseFloat(that.rangeRunoff.val()); // 0 - 100
+                        const linearValue = parseFloat(self.rangeRunoff.val()); // 0 - 100
                         const minLog = 0.1; // slider min
                         const maxLog = 1000;   // slider max
                         const maxLinear = 100;
@@ -2054,7 +2072,7 @@ var SubcatchmentDelineation = function () {
                     return (feat) => {
                         const id = feat.properties.TopazID;
                         const v = parseFloat(self.dataLoss[id].value); // mm
-                        const linearValue = parseFloat(that.rangeLoss.val()); // 0 - 100
+                        const linearValue = parseFloat(self.rangeLoss.val()); // 0 - 100
                         const minLog = 1; // slider min
                         const maxLog = 10000;   // slider max
                         const maxLinear = 100;
@@ -2064,6 +2082,7 @@ var SubcatchmentDelineation = function () {
                         const hex = self.cmapperLoss.map(v / r);
                         return fromHex(hex, 0.9);
                     };
+
                 case 'ash_load':
                     return (feat) => {
                         const id = feat.properties.TopazID;
@@ -2078,6 +2097,37 @@ var SubcatchmentDelineation = function () {
                         const hex = self.cmapperAshLoad.map(v / r);
                         return fromHex(hex, 0.9);
                     };
+
+                case 'rhem_runoff':
+                    return (feat) => {
+                        const id = feat.properties.TopazID;
+                        const v = parseFloat(self.dataRhemRunoff[id].value); // mm
+                        const linearValue = parseFloat(self.rangeRhemRunoff.val()); // 0 - 100
+                        const minLog = 0.1; // slider min
+                        const maxLog = 1000;   // slider max
+                        const maxLinear = 100;
+                        const r = linearToLog(linearValue, minLog, maxLog, maxLinear);
+                        self.labelRhemRunoffMin.html("0.000");
+                        updateRangeMaxLabel_mm(r, self.labelRhemRunoffMax);
+                        const hex = self.cmapperRhemRunoff.map(v / r);
+                        return fromHex(hex, 0.9);
+                    };
+
+                case 'rhem_sed_yield':
+                    return (feat) => {
+                        const id = feat.properties.TopazID;
+                        const v = parseFloat(self.dataRhemSedYield[id].value); // mm
+                        const linearValue = parseFloat(self.rangeRhemSedYield.val()); // 0 - 100
+                        const minLog = 1; // slider min
+                        const maxLog = 10000;   // slider max
+                        const maxLinear = 100;
+                        const r = linearToLog(linearValue, minLog, maxLog, maxLinear);
+                        self.labelRhemSedYieldMin.html("0.000");
+                        updateRangeMaxLabel_mm(r, self.labelRhemSedYieldMax);
+                        const hex = self.cmapperRhemSedYield.map(v / r);
+                        return fromHex(hex, 0.9);
+                    };
+
                 default:
                     return () => COLOR_DEFAULT;
             }
@@ -2237,19 +2287,6 @@ var SubcatchmentDelineation = function () {
                 .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         };
 
-        /* ---------- phosphorus (kg/ha)  ------------------------------------- */
-        that.renderPhosphorus = function () {
-            $.get('query/wepp/phosphorus/subcatchments/')
-                .done(data => {
-                    that.dataPhosphorus = data;
-                    that._rangePhosphorus = parseFloat($('#wepp_sub_cmap_range_phosphorus').val()) ** 2 || 1;
-                    that.cmapMode = 'phosphorus';
-                    that._refreshGlLayer();
-                    // legend / unitizer calls unchanged …
-                })
-                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
-        };
-
         /* ---------- runoff & variants --------------------------------------- */
 
         that.dataRunoff = null;
@@ -2308,6 +2345,25 @@ var SubcatchmentDelineation = function () {
                 })
                 .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
             };
+
+        /* ---------- phosphorus (kg/ha)  ------------------------------------- */
+
+        that.dataPhosphorus = null;
+        that.rangePhosphorus = $('#wepp_sub_cmap_range_phosphorus');
+        that.labelPhosphorusMin = $('#wepp_sub_cmap_canvas_phosphorus_min');
+        that.labelPhosphorusMax = $('#wepp_sub_cmap_canvas_phosphorus_max');
+        that.labelPhosphorusUnits = $('#wepp_sub_cmap_canvas_phosphorus_units');
+        that.cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
+
+        that.renderPhosphorus = function () {
+            $.get('query/wepp/phosphorus/subcatchments/')
+                .done(data => {
+                    that.dataPhosphorus = data;
+                    that.cmapMode = 'phosphorus';
+                    that._refreshGlLayer();
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
+        };
 
         //
         // Gridded Loss
@@ -2410,30 +2466,6 @@ var SubcatchmentDelineation = function () {
             });
         };
 
-
-        that.cmapCallback = function (lcjson) {
-            var self = instance;
-
-            if (lcjson === null) {
-                throw "query returned null, cannot determine colors";
-            }
-
-            self.glLayer.eachLayer(function (layer) {
-                var topId = layer.feature.properties.TopazID;
-                var color = lcjson[topId].color;
-
-                layer.setStyle({
-                    color: "#FFFFFF",
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: color,
-                    fillOpacity: 0.9
-                });
-
-                layer.redraw();
-            });
-        };
-
         // Rhem Visualizations
 
         //
@@ -2446,86 +2478,15 @@ var SubcatchmentDelineation = function () {
         that.labelRhemRunoffUnits = $('#rhem_sub_cmap_canvas_runoff_units');
         that.cmapperRhemRunoff = createColormap({ colormap: 'winter', nshades: 64 });
 
-        that.cmapRhemRunoff = function () {
-            var self = instance;
-            $.get({
-                url: "query/rhem/runoff/subcatchments/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataRhemRunoff = data;
-                    self.renderRhemRunoff();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
         that.renderRhemRunoff = function () {
-            var self = instance;
-
-            var r = parseFloat(self.rangeRhemRunoff.val()); // 25.0 * Math.pow(parseFloat(self.rangeRhemRunoff.val()), 2.00);
-            self.labelRhemRunoffMin.html("0.000");
-
-            $.get({
-                url: "unitizer/",
-                data: { value: r, in_units: 'mm' },
-                cache: false,
-                success: function success(response) {
-                    self.labelRhemRunoffMax.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer_units/",
-                data: { in_units: 'mm' },
-                cache: false,
-                success: function success(response) {
-                    self.labelRhemRunoffUnits.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-
-            if (self.glLayer == null) {
-                return;
-            }
-
-            self.glLayer.eachLayer(function (layer) {
-                var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataRhemRunoff[topId].value);
-
-                var c = self.cmapperRhemRunoff.map(v / r);
-
-                layer.setStyle({
-                    color: c,
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: c,
-                    fillOpacity: 0.9
-                });
-            });
+            $.get('query/rhem/runoff/subcatchments/')
+                .done(data => {
+                    that.dataRhemRunoff = data;
+                    that.cmapMode = 'rhem_runoff';
+                    that._refreshGlLayer();
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         };
-        // end RhemRunoff
 
         //
         // RhemSedYield
@@ -2537,89 +2498,15 @@ var SubcatchmentDelineation = function () {
         that.labelRhemSedYieldUnits = $('#rhem_sub_cmap_canvas_sed_yield_units');
         that.cmapperRhemSedYield = createColormap({ colormap: 'viridis', nshades: 64 });
 
-        that.cmapRhemSedYield = function () {
-            var self = instance;
-            $.get({
-                url: "query/rhem/sed_yield/subcatchments/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataRhemSedYield = data;
-                    self.renderRhemSedYield();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
         that.renderRhemSedYield = function () {
-            var self = instance;
-
-            var r = parseFloat(self.rangeRhemSedYield.val());
-            if (r < 1) {
-                r = Math.pow(r, 2.0);
-            }
-
-            self.labelRhemSedYieldMin.html("0.000");
-
-
-            $.get({
-                url: "unitizer/",
-                data: { value: r, in_units: 'kg/ha' },
-                cache: false,
-                success: function success(response) {
-                    self.labelRhemSedYieldMax.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer_units/",
-                data: { in_units: 'kg/ha' },
-                cache: false,
-                success: function success(response) {
-                    self.labelRhemSedYieldUnits.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            if (self.glLayer == null) {
-                return;
-            }
-
-            self.glLayer.eachLayer(function (layer) {
-                var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataRhemSedYield[topId].value);
-                var c = self.cmapperRhemSedYield.map(v / r);
-
-                layer.setStyle({
-                    color: c,
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: c,
-                    fillOpacity: 0.9
-                });
-            });
+            $.get('query/rhem/sed_yield/subcatchments/')
+                .done(data => {
+                    that.dataRhemSedYield = data;
+                    that.cmapMode = 'rhem_sed_yield';
+                    that._refreshGlLayer();
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         };
-        // end RhemSedYield
 
 
         //
@@ -2632,212 +2519,30 @@ var SubcatchmentDelineation = function () {
         that.labelAshTransportUnits = $('#ash_sub_cmap_canvas_transport_units');
         that.cmapperAshTransport = createColormap({ colormap: "jet2", nshades: 64 });
 
-        that.cmapAshTransport = function () {
-            var self = instance;
-            $.get({
-                url: "query/ash_out/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataAshTransport = data;
-                    self.renderAshTransport();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+        that.renderAshTransport = function () {
+            $.get('query/ash_out/')
+                .done(data => {
+                    that.dataAshTransport = data;
+                    that.cmapMode = 'ash_transport';
+                    that._refreshGlLayer();
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         };
+
+        that.renderAshTransportWater = function () {
+            $.get('query/ash_out/')
+                .done(data => {
+                    that.dataAshTransport = data;
+                    that.cmapMode = 'ash_transport';
+                    that._refreshGlLayer();
+                })
+                .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
+        };
+
 
         that.getAshTransportMeasure = function () {
             return $("input[name='wepp_sub_cmap_radio']:checked").val();
         }
-
-        that.renderAshTransport = function () {
-            var self = instance;
-
-            var r = parseFloat(self.rangeAshTransport.val());
-
-            $.get({
-                url: "unitizer/",
-                data: { value: 0 * r, in_units: 'tonne/ha' },
-                cache: false,
-                success: function success(response) {
-                    self.labelAshTransportMin.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer/",
-                data: { value: r, in_units: 'tonne/ha' },
-                cache: false,
-                success: function success(response) {
-                    self.labelAshTransportMax.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer_units/",
-                data: { in_units: 'tonne/ha' },
-                cache: false,
-                success: function success(response) {
-                    self.labelAshTransportUnits.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-
-            if (self.glLayer == null) {
-                return;
-            }
-
-            self.glLayer.eachLayer(function (layer) {
-                var measure = self.getAshTransportMeasure();
-                var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataAshTransport[topId][measure]) / 1000.0;
-                var c = self.cmapperAshTransport.map(v / r);
-
-                layer.setStyle({
-                    color: c,
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: c,
-                    fillOpacity: 0.9
-                });
-            });
-        };
-        // end AshTransport 
-
-        //
-        // RhemSoilLoss
-        //
-        that.dataRhemSoilLoss = null;
-        that.rangeRhemSoilLoss = $('#rhem_sub_cmap_range_soil_loss');
-        that.labelRhemSoilLossMin = $('#rhem_sub_cmap_canvas_soil_loss_min');
-        that.labelRhemSoilLossMax = $('#rhem_sub_cmap_canvas_soil_loss_max');
-        that.labelRhemSoilLossUnits = $('#rhem_sub_cmap_canvas_soil_loss_units');
-        that.cmapperRhemSoilLoss = createColormap({ colormap: "jet2", nshades: 64 });
-
-        that.cmapRhemSoilLoss = function () {
-            var self = instance;
-            $.get({
-                url: "query/rhem/soil_loss/subcatchments/",
-                cache: false,
-                success: function success(data) {
-                    if (data === null) {
-                        throw "query returned null";
-                    }
-                    self.dataRhemSoilLoss = data;
-                    self.renderRhemSoilLoss();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.renderRhemSoilLoss = function () {
-            var self = instance;
-
-            var r = parseFloat(self.rangeRhemSoilLoss.val());
-
-            $.get({
-                url: "unitizer/",
-                data: { value: -1.0 * r, in_units: 'kg/ha' },
-                cache: false,
-                success: function success(response) {
-                    self.labelRhemSoilLossMin.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer/",
-                data: { value: r, in_units: 'kg/ha' },
-                cache: false,
-                success: function success(response) {
-                    self.labelRhemSoilLossMax.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: "unitizer_units/",
-                data: { in_units: 'kg/ha' },
-                cache: false,
-                success: function success(response) {
-                    self.labelRhemSoilLossUnits.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-
-            if (self.glLayer == null) {
-                return;
-            }
-
-            self.glLayer.eachLayer(function (layer) {
-                var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataRhemSoilLoss[topId].value);
-                var c = self.cmapperRhemSoilLoss.map(v / (2.0 * r) + 0.5);
-
-                layer.setStyle({
-                    color: c,
-                    weight: 1,
-                    opacity: 0.9,
-                    fillColor: c,
-                    fillOpacity: 0.9
-                });
-            });
-        };
-        // end RhemSoilLoss
-
-
 
         //
         // Controller Methods
