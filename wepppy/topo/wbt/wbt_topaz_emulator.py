@@ -739,7 +739,7 @@ class WhiteboxToolsTopazEmulator:
 
         remove_if_exists(fvslop_fn)
 
-        self.wbt.slope(dem=self.dem, output=fvslop_fn)
+        self.wbt.slope(dem=self.dem, output=fvslop_fn, units='ratio')
 
         if not _exists(fvslop_fn):
             raise Exception(f"Flow vector slope file was not created: {fvslop_fn}")
