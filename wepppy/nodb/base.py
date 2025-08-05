@@ -248,22 +248,25 @@ class NoDbBase(object):
 
             # noinspection PyUnresolvedReferences
             nodb.getInstance(self.wd)
-
+                
     def dump(self):
         if not self.islocked():
-            raise Exception('cannot dump to unlocked db')
+            raise RuntimeError("cannot dump to unlocked db")
 
         js = jsonpickle.encode(self)
-        # noinspection PyUnresolvedReferences
-        with open(self._nodb, 'w') as fp:
-            fp.write(js)
 
+        # Write-then-sync
+        with open(self._nodb, "w") as fp:
+            fp.write(js)
+            fp.flush()                 # flush Python’s userspace buffer
+            os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
+
+        # record bookkeeping (optional)
         try:
             from wepppy.weppcloud.db_api import update_last_modified
             update_last_modified(self.runid)
-        except:
+        except Exception:
             pass
-
 
     @property
     def locales(self):

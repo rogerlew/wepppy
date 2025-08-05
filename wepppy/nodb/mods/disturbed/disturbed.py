@@ -1071,6 +1071,7 @@ class Disturbed(NoDbBase):
         dom = landuse_instance.domlc_d[topaz_id]
         man = landuse_instance.managements[dom]
 
+        disturbed_mukey = None
         if man.sol_path:
             disturbed_mukey = _split(man.sol_fn)[-1].replace('.sol', '')
             sol_fn =  f'{disturbed_mukey}.sol'
@@ -1103,7 +1104,7 @@ class Disturbed(NoDbBase):
                 key = (texid, man.disturbed_class)
 
             if key not in _land_soil_replacements_d:
-                return
+                return mukey
 
             disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
 
@@ -1133,6 +1134,8 @@ class Disturbed(NoDbBase):
                                                             meta_fn=_soil.meta_fn,
                                                             build_date=str(datetime.now()))
 
+        assert disturbed_mukey is not None, (topaz_id, mukey, dom)
+        
         return disturbed_mukey
 
 
@@ -1140,11 +1143,16 @@ class Disturbed(NoDbBase):
         wd = self.wd
         landuse = Landuse.getInstance(wd)
         soils = Soils.getInstance(wd)
+        watershed = Watershed.getInstance(self.wd)
         _land_soil_replacements_d = self.land_soil_replacements_d
 
         try:
             soils.lock()
 
+            for k in soils.soils:
+                soils.soils[k].area = 0.0
+
+            total_area = 0.0
             for topaz_id, mukey in soils.domsoil_d.items():
 
                 # if is channel skip
@@ -1152,20 +1160,15 @@ class Disturbed(NoDbBase):
                     continue
 
                 disturbed_mukey = self.modify_soil(topaz_id, landuse, soils, _land_soil_replacements_d)
+                assert disturbed_mukey is not None, topaz_id
+
                 soils.domsoil_d[topaz_id] = disturbed_mukey
-
-            # need to recalculate the pct_coverages
-            watershed = Watershed.getInstance(self.wd)
-
-            for k in soils.soils:
-                soils.soils[k].area = 0.0
-
-            total_area = 0.0
-            for topaz_id, k in soils.domsoil_d.items():
                 sub_area = watershed.hillslope_area(topaz_id)
-                soils.soils[k].area += sub_area
+
+                soils.soils[disturbed_mukey].area += sub_area
                 total_area += sub_area
 
+            # need to recalculate the pct_coverages
             for k in soils.soils:
                 coverage = 100.0 * soils.soils[k].area / total_area
                 soils.soils[k].pct_coverage = coverage
