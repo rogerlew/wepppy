@@ -15,6 +15,7 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"
         integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/d3.js') }}"></script>
     <style>
         body {
             font: 16px sans-serif;
@@ -91,12 +92,18 @@
             user-select: none;
         }
 
+        .legend-swatch-group {
+            display: inline-flex;
+            margin: 0 4px 0 4px;
+            /* space before/after the squares */
+        }
+
         .legend-swatch {
             width: 16px;
             height: 12px;
             border: 1px solid #444;
             border-radius: 2px;
-            margin-right: 4px;
+            margin-right: 2px;
         }
 
         svg,
@@ -417,19 +424,18 @@
                 redrawAreas && redrawAreas();      // cheap (3 paths)
 
                 hoverLine && hoverLine.style("opacity", 0);
-
-                // Heavy bar recompute → only on brush END
-                if (event.type === "end") {          // 'start' | 'brush' | 'end'
-                    redrawBars && redrawBars();
-                }
+                redrawBars && redrawBars();
             }
-
             function buildLegend() {
                 const legendData = [
-                    { id: "Runoff", label: "Runoff (mm)", color: flowColors["Runoff"], type: "area" },
-                    { id: "Lateral Flow", label: "Lateral Flow (mm)", color: flowColors["Lateral Flow"], type: "area" },
-                    { id: "Baseflow", label: "Baseflow (mm)", color: flowColors["Baseflow"], type: "area" },
-                    { id: "Bars", label: "Rain+Melt / Precip (mm)", color: meteoColors["Rain + Melt"], type: "bar" }
+                    { id: "Runoff", label: "Runoff (mm)", colors: [flowColors["Runoff"]], type: "area" },
+                    { id: "Lateral Flow", label: "Lateral Flow (mm)", colors: [flowColors["Lateral Flow"]], type: "area" },
+                    { id: "Baseflow", label: "Baseflow (mm)", colors: [flowColors["Baseflow"]], type: "area" },
+                    // one checkbox, two swatches
+                    {
+                        id: "Bars", label: "Rain+Melt / Precip (mm)", colors: [meteoColors["Rain + Melt"],
+                        meteoColors["Precipitation"]], type: "bar"
+                    }
                 ];
 
                 const cont = d3.select("#legend");
@@ -437,21 +443,27 @@
                 const item = cont.selectAll("label.legend-item")
                     .data(legendData)
                     .enter().append("label")
-                    .attr("class", "legend-item");
+                    .attr("class", "legend-item")
+                    .on("pointerdown", e => { e.stopPropagation(); e.preventDefault(); });   // keeps brush drag working
 
-                // checkbox
+                /* checkbox */
                 item.append("input")
                     .attr("type", "checkbox")
                     .attr("checked", true)
-                    .on("change", (event, d) => handleToggle(event.currentTarget.checked, d));
+                    .on("change", (evt, d) => handleToggle(evt.currentTarget.checked, d));
 
-                // color swatch
-                item.append("span")
+                /* colour swatches (1-N per item) */
+                const swatchGroup = item.append("span")
+                    .attr("class", "legend-swatch-group")              // groups multiple squares
+                    .style("opacity", d => d.type === "area" ? 1 : 0.35);  // bars = semi-transparent, areas = solid
+
+                swatchGroup.selectAll("span.swatch")
+                    .data(d => d.colors)                                // array of 1 or 2 colours
+                    .enter().append("span")
                     .attr("class", "legend-swatch")
-                    .style("background", d => d.color)
-                    .style("opacity", d => d.type === "area" ? 1.0 : 0.35);
+                    .style("background", c => c);
 
-                // text
+                /* text label */
                 item.append("span").text(d => d.label);
             }
 
@@ -488,8 +500,6 @@
         integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
         crossorigin="anonymous"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/mousetrap.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/d3.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/d3fc.js') }}"></script>
 </body>
 
 </html>
