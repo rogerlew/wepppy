@@ -2086,14 +2086,14 @@ var SubcatchmentDelineation = function () {
                 case 'ash_load':
                     return (feat) => {
                         const id = feat.properties.TopazID;
-                        const v = parseFloat(self.dataAshLoad[id].value);
-                        const linearValue = parseFloat(that.rangeAshLoad.val()); // 0 - 100
-                        const minLog = 1; // slider min
-                        const maxLog = 10000;   // slider max
+                        const v = parseFloat(self.dataAshLoad[id][self.ashMeasure].value);
+                        const linearValue = parseFloat(self.rangeAshLoad.val()); // 0 - 100
+                        const minLog = 0.001; // slider min
+                        const maxLog = 100;   // slider max
                         const maxLinear = 100;
                         const r = linearToLog(linearValue, minLog, maxLog, maxLinear);
                         self.labelAshLoadMin.html("0.000");
-                        updateRangeMaxLabel_kgha(r, self.labelAshLoadMax);
+                        updateRangeMaxLabel_tonneha(r, self.labelAshLoadMax);
                         const hex = self.cmapperAshLoad.map(v / r);
                         return fromHex(hex, 0.9);
                     };
@@ -2331,16 +2331,18 @@ var SubcatchmentDelineation = function () {
         /* ---------- ash_load ----------------------------------------------------- */
 
         that.dataAshLoad = null;
+        that.ashMeasure = null
         that.rangeAshLoad = $('#ash_sub_cmap_range_load');
         that.labelAshLoadMin = $('#ash_sub_cmap_canvas_load_min');
         that.labelAshLoadMax = $('#ash_sub_cmap_canvas_load_max');
         that.cmapperAshLoad = createColormap({ colormap: "jet2", nshades: 64 });
 
         that.renderAshLoad = function () {
-            $.get('query/wepp/loss/subcatchments/')
+            $.get('query/ash/out/')
                 .done(dataAshLoad => {
-                    that.dataAshLoad = data;
+                    that.dataAshLoad = dataAshLoad;
                     that.cmapMode = 'ash_load';
+                    that.ashMeasure = getAshTransportMeasure();
                     that._refreshGlLayer();
                 })
                 .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
