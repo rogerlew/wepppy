@@ -80,88 +80,101 @@
     //  error = e;
     //};
 
-    function onReady() {
-        "use strict";
-        // globals for JSLint: $, L, polylabel, setTimeout, console
+function onReady() {
+    "use strict";
+    // globals for JSLint: $, L, polylabel, setTimeout, console
 
-        /*
-         * Controller Singletons
-         * =====================
-         */
-
-
-
-        var project = Project.getInstance();
-        var team = Team.getInstance();
-        var map = Map.getInstance();
-        var channel_ctrl = ChannelDelineation.getInstance();
-        var outlet = Outlet.getInstance();
-        var sub_ctrl = SubcatchmentDelineation.getInstance();
-        var landuse = Landuse.getInstance();
-        var lc_modify = LanduseModify.getInstance();
-        var soil = Soil.getInstance();
-        var climate = Climate.getInstance();
-        var wepp = Wepp.getInstance();
-        var observed = Observed.getInstance();
-        var debris_flow = DebrisFlow.getInstance();
-        var ash = Ash.getInstance();
-        var rap_ts = RAP_TS.getInstance();
-        var disturbed = Disturbed.getInstance();
-        var omni = Omni.getInstance();
-        var dss_export = DssExport.getInstance();
+    /*
+        * Controller Singletons
+        * =====================
+        */
 
 
-        document.getElementById('btn_find_topaz_id').addEventListener('click', function () {
-            findAndFlash('TopazID');
-        });
 
-        document.getElementById('btn_find_wepp_id').addEventListener('click', function () {
-            findAndFlash('WeppID');
-        });
+    var project = Project.getInstance();
+    var team = Team.getInstance();
+    var map = Map.getInstance();
+    var channel_ctrl = ChannelDelineation.getInstance();
+    var outlet = Outlet.getInstance();
+    var sub_ctrl = SubcatchmentDelineation.getInstance();
+    var landuse = Landuse.getInstance();
+    var lc_modify = LanduseModify.getInstance();
+    var soil = Soil.getInstance();
+    var climate = Climate.getInstance();
+    var wepp = Wepp.getInstance();
+    var observed = Observed.getInstance();
+    var debris_flow = DebrisFlow.getInstance();
+    var ash = Ash.getInstance();
+    var rap_ts = RAP_TS.getInstance();
+    var disturbed = Disturbed.getInstance();
+    var omni = Omni.getInstance();
+    var dss_export = DssExport.getInstance();
 
-        // TODO: update for glLayer
-        function findAndFlash(idType) {
-            var input = document.getElementById('input_centerloc').value;
+    // ---------------------------------------------------------------------------
+    // Find and Flash by ID
+    // ---------------------------------------------------------------------------
+    function getInputValue() {
+        return document.getElementById('input_centerloc').value.trim();
+    }
 
-            sub_ctrl.polys.eachLayer(function (layer) {
-                var id = layer.feature.properties[idType];
-                if (id == input) {
-                    flashPolygon(layer);
-                }
-            });
+    function featureMatches(f, idType, val) {
+        // handle numbers that came in as strings, etc.
+        return String(f.properties[idType]) === String(val);
+    }
+
+    function findAndFlash(idType) {
+        const val = getInputValue();
+        const features = sub_ctrl.glLayer._shapes.features;
+
+        const hit = features.find(f => featureMatches(f, idType, val));
+
+        if (!hit) {
+            console.warn(`No feature with ${idType} = ${val}`);
+            return;
         }
 
-        function flashPolygon(layer) {
-            var flashLayer = L.geoJSON(layer.feature, {
+        // Re-use your flash routine
+        flashPolygon(
+            L.geoJSON(hit, {
                 style: {
-                    color: "#ff0000",
+                    color: "#ffffff",
                     weight: 3,
                     opacity: 1,
-                    fillColor: "#ff0000",
-                    fillOpacity: 0.5
+                    fillColor: "#ffffff",
+                    fillOpacity: 1.0
                 }
-            });
-            flashLayer.addTo(map);
-            setTimeout(function () {
-                map.removeLayer(flashLayer);
-            }, 1000);
-        }
+            })
+        );
+    }
 
-        team.hideStacktrace();
-        channel_ctrl.hideStacktrace();
-        outlet.hideStacktrace();
-        sub_ctrl.hideStacktrace();
-        landuse.hideStacktrace();
-        lc_modify.hideStacktrace();
-        soil.hideStacktrace();
-        climate.hideStacktrace();
-        wepp.hideStacktrace();
-        dss_export.hideStacktrace();
+    document.getElementById('btn_find_topaz_id')
+        .addEventListener('click', () => findAndFlash('TopazID'));
+
+    document.getElementById('btn_find_wepp_id')
+        .addEventListener('click', () => findAndFlash('WeppID'));
+
+    function flashPolygon(layer) {
+        layer.addTo(map);
+        // map.fitBounds(layer.getBounds());     // optional: zoom to the hit
+        setTimeout(() => map.removeLayer(layer), 1000);
+    }
 
 
-        // kick off websocket clients if the nodb is locked. Likely building or running is in progress
+    team.hideStacktrace();
+    channel_ctrl.hideStacktrace();
+    outlet.hideStacktrace();
+    sub_ctrl.hideStacktrace();
+    landuse.hideStacktrace();
+    lc_modify.hideStacktrace();
+    soil.hideStacktrace();
+    climate.hideStacktrace();
+    wepp.hideStacktrace();
+    dss_export.hideStacktrace();
 
-    if ({{ (watershed.islocked()) | tojson }}) {
+
+    // kick off websocket clients if the nodb is locked. Likely building or running is in progress
+
+    if ({{ (watershed.islocked()) | tojson }} ) {
         sub_ctrl.ws_client.connect();
     }
 
@@ -300,50 +313,6 @@
 
         map.flyTo([lat, lon], zoom);
     });
-
-    $("#btn_find_topaz_id").click(function () {
-        var input = $("#input_centerloc").val();
-
-        // Remove unwanted characters: a-z, A-Z, and specified special characters
-        var sanitizedInput = input.replace(/[a-zA-Z{}[\]\\|\/<>;:]/g, '');
-
-        // Split the sanitized input by any sequence of spaces or commas
-        var loc = sanitizedInput.split(/[\s,]+/);
-
-        // through away empty strings
-        loc = loc.filter(function (item) {
-            return item !== "";
-        });
-        if (loc.length < 2) {
-            //            alert("Please enter a valid location.");
-            return;
-        }
-
-        var lon = parseFloat(loc[0]);
-        var lat = parseFloat(loc[1]);
-
-        var zoom = map.getZoom();
-        if (loc.length === 3) {
-            zoom = parseInt(loc[2], 10);
-        }
-
-        map.flyTo([lat, lon], zoom);
-    });
-
-
-    /* requires https
-    $("#btn_currentloc").click(function (){
-        console.log('btn_currentloc');
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function () {
-                map.flyTo([position.coords.latitude,
-                           position.coords.longitude], 12);
-            });
-        } else {
-            alert("Geolocation is not supported by this browser.");
-        }
-    });
-    */
 
     //
     // Initial Configuration
