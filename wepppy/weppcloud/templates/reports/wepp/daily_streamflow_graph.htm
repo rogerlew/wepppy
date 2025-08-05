@@ -75,8 +75,35 @@
             stroke-dasharray: 3 3;
         }
 
-        #legend svg {
-            overflow: visible;
+        /* horizontal legend */
+        .legend-horizontal {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+            font: 12px sans-serif;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            user-select: none;
+        }
+
+        .legend-swatch {
+            width: 16px;
+            height: 12px;
+            border: 1px solid #444;
+            border-radius: 2px;
+            margin-right: 4px;
+        }
+
+        svg,
+        .focus,
+        .context,
+        body {
+            user-select: none;
         }
     </style>
 </head>
@@ -86,14 +113,10 @@
     <div role="main" class="container-full">
         <h2>Daily Runoff/Lateral Flow/Baseflow for {{ ron.runid }}</h2>
 
-        <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-        <label style="margin-left:8px;">
-            <input type="checkbox" id="toggleBars" checked>
-            Show Rain+Melt / Precip bars
-        </label>
+
+        <div id="legend" class="legend-horizontal"></div>
         <div id="area1"></div>
-        <div id="legend"></div>
-        <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
         <script>
             /* ===== Layout / sizes ===== */
             const margin = { top: 10, right: 100, bottom: (window.innerHeight - 80) * 0.2, left: 40 },
@@ -113,10 +136,11 @@
             const yC = d3.scaleLinear().range([height2, 0]);
 
             /* ===== Axes ===== */
+            const yTick = d => `${d} mm`;  // add units on ticks
             const xAxis = d3.axisBottom(x);
             const xAxisC = d3.axisBottom(xC);
-            const yAxis = d3.axisLeft(y);
-            const yAxisC = d3.axisLeft(yC).ticks(2);
+            const yAxis = d3.axisLeft(y).tickFormat(yTick);
+            const yAxisC = d3.axisLeft(yC).ticks(2).tickFormat(yTick);
 
             /* ===== Brush ===== */
             const brush = d3.brushX()
@@ -131,7 +155,7 @@
             svg.append("defs").append("clipPath")
                 .attr("id", "clip")
                 .append("rect")
-                .attr("x", margin.left)      /* make the clip match the focus pane */
+                .attr("x", margin.left)
                 .attr("y", margin.top)
                 .attr("width", width)
                 .attr("height", height);
@@ -158,13 +182,12 @@
                 .style("opacity", 0);
 
             /* ===== Globals ===== */
-            let flowsG, barsG, barsGC, hoverLine, redrawBars, redrawAreas;
+            let flowsG, barsG, barsGC, hoverLine, redrawBars, redrawAreas, legendOverlay;
             const flowColors = {
                 "Baseflow": "#1e90ff",
                 "Lateral Flow": "#32cd32",
                 "Runoff": "#FF3B30"
             };
-
             const meteoColors = {
                 "Precipitation": "#FF6F30",
                 "Rain + Melt": "#00B2A9"
@@ -197,9 +220,11 @@
                 /* --- Meteo for bars --- */
                 const meteo = rows.map(d => ({ date: d.date, p: d["Precipitation"], rm: d["Rain + Melt"] }));
                 const pMax = d3.max(meteo, d => d.rm);
+
+                // Note: this right-side scale is pixel-height oriented as in your original code.
                 const yPbar = d3.scaleLinear().domain([0, pMax]).range([0, height]);
                 const yPC = d3.scaleLinear().domain([0, pMax]).range([height2, 0]);
-                const yAxisRight = d3.axisRight(yPbar).ticks(3);
+                const yAxisRight = d3.axisRight(yPbar).ticks(3).tickFormat(yTick); // add units on ticks
 
                 /* --- Axes (focus) --- */
                 focus.append("g")
@@ -234,6 +259,7 @@
                         .y0(yS(0))
                         .y1(d => yS(d[k]));
                 }
+
                 flowsG = focus.append("g")
                     .attr("clip-path", "url(#clip)")
                     .attr("class", "flows");
@@ -241,9 +267,11 @@
                 flowsG.selectAll("path")
                     .data(flowKeys)
                     .enter().append("path")
+                    .attr("class", d => `area area-${d.replace(/\s+/g, '-')}`)  // e.g. area-Runoff
                     .attr("fill", d => flowColors[d])
                     .attr("opacity", 1.0)
                     .attr("d", k => areaGen(k, x, y)(rows));
+
 
                 redrawAreas = () => flowsG.selectAll("path")
                     .attr("d", k => areaGen(k, x, y)(rows));
@@ -303,11 +331,7 @@
                         .attr("x", d => xScale(d.date) - w / 2)
                         .attr("width", w)
                         .attr("height", d => yScale(d.rm))
-                        // old line → .attr("display", clipToDomain && (d.date < d0 || d.date > d1) ? "none" : null);
-                        .attr("display", d =>
-                            clipToDomain && (d.date < d0 || d.date > d1) ? "none" : null
-                        );
-
+                        .attr("display", d => clipToDomain && (d.date < d0 || d.date > d1) ? "none" : null);
                 }
 
                 barsG.selectAll("rect")
@@ -323,8 +347,7 @@
                  Precip: ${d.p.toFixed(2)} mm<br>
                  Rain+Melt: ${d.rm.toFixed(2)} mm`);
                     })
-                    .on("mousemove", e => tooltip.style("left", (e.clientX + 12) + "px")
-                        .style("top", (e.clientY - 28) + "px"))
+                    .on("mousemove", e => tooltip.style("left", (e.clientX + 12) + "px").style("top", (e.clientY - 28) + "px"))
                     .on("mouseleave", function () { d3.select(this).attr("opacity", 0.35); tooltip.style("opacity", 0); });
 
                 drawBars(barsG.selectAll("rect"), x, yPbar, true);
@@ -377,7 +400,7 @@
                     .style("text-anchor", "middle")
                     .text("Date");
 
-                /* --- Legend --- */
+
                 buildLegend();
 
                 /* === initial clipping === */
@@ -385,51 +408,73 @@
             });
 
             /* ===== Brush handler ===== */
+
             function brushed(event) {
                 const sel = event.selection;
                 x.domain(sel ? sel.map(xC.invert) : xC.domain());
                 focus.select(".x.axis").call(xAxis);
-                redrawAreas && redrawAreas();
+
+                redrawAreas && redrawAreas();      // cheap (3 paths)
+
                 hoverLine && hoverLine.style("opacity", 0);
-                redrawBars && redrawBars();
+
+                // Heavy bar recompute → only on brush END
+                if (event.type === "end") {          // 'start' | 'brush' | 'end'
+                    redrawBars && redrawBars();
+                }
             }
 
-            /* ===== Legend ===== */
             function buildLegend() {
                 const legendData = [
-                    { label: "Runoff (mm)", color: flowColors["Runoff"], type: "area" },
-                    { label: "Lateral Flow (mm)", color: flowColors["Lateral Flow"], type: "area" },
-                    { label: "Baseflow (mm)", color: flowColors["Baseflow"], type: "area" },
-                    { label: "Rain+Melt (mm)", color: meteoColors["Rain + Melt"], type: "bar" },
-                    { label: "Precip (mm)", color: meteoColors["Precipitation"], type: "bar" }
+                    { id: "Runoff", label: "Runoff (mm)", color: flowColors["Runoff"], type: "area" },
+                    { id: "Lateral Flow", label: "Lateral Flow (mm)", color: flowColors["Lateral Flow"], type: "area" },
+                    { id: "Baseflow", label: "Baseflow (mm)", color: flowColors["Baseflow"], type: "area" },
+                    { id: "Bars", label: "Rain+Melt / Precip (mm)", color: meteoColors["Rain + Melt"], type: "bar" }
                 ];
-                const itemH = 18, itemW = 18, gap = 6;
-                const svgLeg = d3.select("#legend").append("svg")
-                    .attr("height", legendData.length * (itemH + gap))
-                    .attr("width", 240);
-                const g = svgLeg.selectAll("g.legend-item")
-                    .data(legendData).enter().append("g")
-                    .attr("transform", (d, i) => `translate(0,${i * (itemH + gap)})`);
-                g.append("rect")
-                    .attr("width", itemW).attr("height", itemH)
-                    .attr("rx", 2).attr("ry", 2)
-                    .attr("fill", d => d.color)
-                    .attr("fill-opacity", d => d.type === "area" ? 1.0 : 0.35)
-                    .attr("stroke", "#444");
-                g.append("text")
-                    .attr("x", itemW + 8).attr("y", itemH / 2).attr("dy", "0.35em")
-                    .style("font", "12px sans-serif")
-                    .text(d => d.label);
+
+                const cont = d3.select("#legend");
+
+                const item = cont.selectAll("label.legend-item")
+                    .data(legendData)
+                    .enter().append("label")
+                    .attr("class", "legend-item");
+
+                // checkbox
+                item.append("input")
+                    .attr("type", "checkbox")
+                    .attr("checked", true)
+                    .on("change", (event, d) => handleToggle(event.currentTarget.checked, d));
+
+                // color swatch
+                item.append("span")
+                    .attr("class", "legend-swatch")
+                    .style("background", d => d.color)
+                    .style("opacity", d => d.type === "area" ? 1.0 : 0.35);
+
+                // text
+                item.append("span").text(d => d.label);
+            }
+
+            function handleToggle(checked, d) {
+                if (d.id === "Bars") {
+                    // toggle precip + rain/melt bars and their y-axis
+                    d3.selectAll(".precip,.precipC").style("display", checked ? null : "none");
+                    d3.selectAll(".precip-axis").style("display", checked ? null : "none");
+                } else {
+                    const cls = `.area-${d.id.replace(/\s+/g, '-')}`;
+                    d3.selectAll(cls).style("display", checked ? null : "none");
+                }
             }
 
             /* ===== Toggle bars ===== */
             d3.select("#toggleBars").on("change", function () {
                 const show = this.checked;
-                barsG.style("display", show ? null : "none");
-                barsGC.style("display", show ? null : "none");
+                d3.selectAll(".precip").style("display", show ? null : "none");
+                d3.selectAll(".precipC").style("display", show ? null : "none");
                 d3.selectAll(".precip-axis").style("display", show ? null : "none");
             });
         </script>
+
         {% include 'controls/unitizer_modal.htm'%}
         {% include 'controls/poweruser_panel.htm'%}
     </div>
@@ -443,6 +488,8 @@
         integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
         crossorigin="anonymous"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/mousetrap.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/d3.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/d3fc.js') }}"></script>
 </body>
 
 </html>
