@@ -586,6 +586,11 @@ function redirectToDiff() {{
             html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
             #html = csv_to_html(path)
 
+        if path_lower.endswith('.tsv'):
+            skiprows = 0
+            df = pd.read_table(path, sep='\t', skiprows=skiprows)
+            html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
+
         if html is not None:
             c = ['<!DOCTYPE html>',
                  '<html>',
