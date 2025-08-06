@@ -2154,7 +2154,6 @@ var SubcatchmentDelineation = function () {
                 glifyOptions: {
                     opacity: 0.5,
                     border: true,
-                    borderColor: '#ffffff',
                     color: (i, f) => cmapFn(f),
                     click: (e, f) => map.subQuery(f.properties.TopazID)
                 }
