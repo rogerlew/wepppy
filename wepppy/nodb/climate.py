@@ -13,6 +13,8 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
+from functools import partial
+
 from wepppy.all_your_base.geo import read_raster
 
 from datetime import datetime, date
@@ -557,7 +559,6 @@ def mod_func_wrapper_factory(mod_func):
 
 def get_monthlies(fn, lng, lat):
     cmd = ['gdallocationinfo', '-wgs84', '-valonly', fn, str(lng), str(lat)]
-    #    print cmd
 
     p = Popen(cmd, stdout=PIPE)
     p.wait()
@@ -567,22 +568,22 @@ def get_monthlies(fn, lng, lat):
     return [float(v) for v in out.decode('utf-8').strip().split('\n')]
 
 
-def cli_revision(cli: ClimateFile, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmins: np.array,
+def cli_revision(cli_fn: str, is_breakpoint: bool, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmins: np.array,
                  ppt_fn: str, tmin_fn: str, tmax_fn: str, hill_lng: float, hill_lat: float, new_cli_path: str):
 
     hill_ppts = get_monthlies(ppt_fn, hill_lng, hill_lat)
     hill_tmins = get_monthlies(tmin_fn, hill_lng, hill_lat)
     hill_tmaxs = get_monthlies(tmax_fn, hill_lng, hill_lat)
 
-    if wepppyo3 is not None and not cli.breakpoint:
-        pyo3_cli_revision(cli.cli_fn, new_cli_path,
+    if not is_breakpoint:
+        pyo3_cli_revision(cli_fn, new_cli_path,
                           ws_ppts, ws_tmaxs, ws_tmins,
                           hill_ppts, hill_tmaxs, hill_tmins)
         assert _exists(new_cli_path), 'wepppyo3.climate.cli_revision failed'
         return new_cli_path
 
 
-    cli2 = deepcopy(cli)
+    cli2 = ClimateFile(cli_fn)
 
     df = cli2.as_dataframe()
     rev_ppt = np.zeros(df.prcp.shape)
@@ -605,6 +606,9 @@ def cli_revision(cli: ClimateFile, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmi
 
     cli2.write(new_cli_path)
     del cli2
+
+    assert _exists(new_cli_path), 'ClimateFile.revision failed'
+    return new_cli_path
 
 
 # noinspection PyUnusedLocal
@@ -2120,91 +2124,98 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-
-    def _prism_revision(self, verbose=False):
-
-        wd = self.wd
-        cli_dir = self.cli_dir
-
+    def _prism_revision(self, verbose: bool = False):
+        wd         = self.wd
+        cli_dir    = self.cli_dir
         self.lock()
 
-        # noinspection PyBroadInspection
         try:
             self.log('  running _prism_revision... ')
-            wd = self.wd
             climatestation = self.climatestation
-            years = self._input_years
+            years          = self._input_years
 
             monthlies = self.monthlies
-            par_fn = self.par_fn
-            cli_fn = self.cli_fn
-            cli_dir = self.cli_dir
-            cli_path = self.cli_path
+            par_fn    = self.par_fn
+            cli_fn    = self.cli_fn
+            cli_path  = self.cli_path
 
             _map = Ron.getInstance(self.wd).map
 
-            ppt_fn = _join(cli_dir, 'ppt.tif')
+            ppt_fn  = _join(cli_dir, 'ppt.tif')
             tmin_fn = _join(cli_dir, 'tmin.tif')
             tmax_fn = _join(cli_dir, 'tmax.tif')
 
-            wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='cubic')
+            # Acquire PRISM tiles
+            wmesque_retrieve('prism/ppt',  _map.extent, ppt_fn,  _map.cellsize, resample='cubic')
             ppt_data, _transform, _proj = read_raster(ppt_fn)
-                    
+
             if np.any(ppt_data < 0):
-                self.log('    prism/ppt contains < values do to cubic resampling, reacquiring with bilinear resampling... ')
+                self.log('    prism/ppt contains <0 values (cubic); reacquiring with bilinear...')
                 wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='bilinear')
                 self.done()
-            
-            wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='bilinear')
-            wmesque_retrieve('prism/tmin', _map.extent, _join(cli_dir, 'tmin.tif'), _map.cellsize, resample='cubic')
-            wmesque_retrieve('prism/tmax', _map.extent, _join(cli_dir, 'tmax.tif'), _map.cellsize, resample='cubic')
+
+            # Always use bilinear for the working stack
+            wmesque_retrieve('prism/ppt',  _map.extent, ppt_fn,  _map.cellsize, resample='bilinear')
+            wmesque_retrieve('prism/tmin', _map.extent, tmin_fn, _map.cellsize, resample='cubic')
+            wmesque_retrieve('prism/tmax', _map.extent, tmax_fn, _map.cellsize, resample='cubic')
 
             watershed = Watershed.getInstance(wd)
             ws_lng, ws_lat = watershed.centroid
-            ws_ppts = get_monthlies(ppt_fn, ws_lng, ws_lat)
+            ws_ppts  = get_monthlies(ppt_fn,  ws_lng, ws_lat)
             ws_tmins = get_monthlies(tmin_fn, ws_lng, ws_lat)
             ws_tmaxs = get_monthlies(tmax_fn, ws_lng, ws_lat)
 
-
             self.log('  building climates for hillslopes... \n')
-
 
             cli = ClimateFile(cli_path)
 
-            pool = multiprocessing.Pool(NCPU)
-            jobs = []
+            sub_par_fns: dict[str, str] = {}
+            sub_cli_fns: dict[str, str] = {}
 
-            def callback(res):
+            def _proc_ok(res):
                 self.log(f'_prism_revision() -> {res}')
                 self.log_done()
 
-            # build a climate for each subcatchment
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, (hill_lng, hill_lat) in watershed.centroid_hillslope_iter():
-                self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
-
-                hill_lng, hill_lat = watershed.hillslope_centroid_lnglat(topaz_id)
-                suffix = f'_{topaz_id}'
-                new_cli_fn = f'{suffix}.cli'
-                args = (cli, ws_ppts, ws_tmaxs, ws_tmins,
-                        _join(cli_dir, 'ppt.tif'),
-                        _join(cli_dir, 'tmin.tif'),
-                        _join(cli_dir, 'tmax.tif'),
-                        hill_lng, hill_lat, _join(cli_dir, new_cli_fn))
-
-                result = pool.apply_async(cli_revision, args=args, callback=callback)
-                jobs.append(result)
-
-                sub_par_fns[topaz_id] = '.par'
-                sub_cli_fns[topaz_id] = new_cli_fn
-
+            def _proc_err(err):
+                self.log(f'_prism_revision() -> {err}')
                 self.log_done()
 
-            pool.close()
-            pool.join()
+            with ThreadPoolExecutor(max_workers=NCPU) as executor:
+                future_map = {}
 
-            self.log_done()
+                for topaz_id, (hill_lng, hill_lat) in watershed.centroid_hillslope_iter():
+                    self.log(f'submitting climate build for {topaz_id} to thread pool... ')
+                    hill_lng, hill_lat = watershed.hillslope_centroid_lnglat(topaz_id)
+
+                    suffix      = f'_{topaz_id}'
+                    new_cli_fn  = f'{suffix}.cli'
+                    new_cli_path = _join(cli_dir, new_cli_fn)
+
+                    args = (
+                        cli.cli_fn,     # original .cli template
+                        cli.breakpoint, # bool
+                        ws_ppts, ws_tmaxs, ws_tmins,
+                        ppt_fn, tmin_fn, tmax_fn,
+                        hill_lng, hill_lat,
+                        new_cli_path
+                    )
+
+                    fut = executor.submit(cli_revision, *args)
+                    future_map[fut] = topaz_id
+
+                    sub_par_fns[topaz_id] = '.par'
+                    sub_cli_fns[topaz_id] = new_cli_fn
+                    self.log_done()
+
+                for fut in as_completed(future_map):
+                    try:
+                        res = fut.result()
+                        _proc_ok(res)
+                    except Exception as e:
+                        _proc_err(e)
+                        for f in future_map:
+                            f.cancel()  
+                        raise
 
             self.sub_par_fns = sub_par_fns
             self.sub_cli_fns = sub_cli_fns
