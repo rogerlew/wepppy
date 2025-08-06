@@ -1620,7 +1620,7 @@ class Wepp(NoDbBase, LogMixin):
                 futures.append(pool.submit(lambda p: prep_soil(p), task_args))
                 futures[-1].add_done_callback(oncomplete)
 
-                wait(futures, return_when=FIRST_EXCEPTION)
+            wait(futures, return_when=FIRST_EXCEPTION)
 
     def _prep_climates(self, translator):
         climate = Climate.getInstance(self.wd)
