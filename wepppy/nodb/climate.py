@@ -37,6 +37,8 @@ import multiprocessing
 
 import pandas as pd
 
+import rasterio
+
 # non-standard
 import jsonpickle
 
@@ -559,10 +561,27 @@ def mod_func_wrapper_factory(mod_func):
 
 def get_monthlies(fn, lng, lat):
     cmd = ['gdallocationinfo', '-wgs84', '-valonly', fn, str(lng), str(lat)]
-
     p = Popen(cmd, stdout=PIPE)
     p.wait()
+    out = p.stdout.read()
+    
+    try:
+        return [float(v) for v in out.decode('utf-8').strip().split('\n')]
+    except ValueError:
+        pass
 
+    with rasterio.open(fn) as src:
+        # Transform geographic coordinates to pixel coordinates
+        x, y = src.index(lng, lat)  # Returns column, row indices
+        
+        # Snap to nearest valid pixel if outside bounds
+        x = max(0, min(x, src.width - 1))
+        y = max(0, min(y, src.height - 1))
+
+    # Second attempt: Use pixel coordinates
+    cmd = ['gdallocationinfo', '-valonly', fn, str(x), str(y)]
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    p.wait()
     out = p.stdout.read()
 
     return [float(v) for v in out.decode('utf-8').strip().split('\n')]
@@ -2226,7 +2245,6 @@ class Climate(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-
 
     def _post_defined_climate(self, verbose=False, attrs=None):
         self.lock()
