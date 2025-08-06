@@ -178,32 +178,32 @@ def run_wepp_rq(runid):
             jobs0_hillslopes_prep = []
 
             if wepp.multi_ofe:
-                job_prep_soils = q.enqueue_call(_prep_multi_ofe_rq, (runid,), timeout='1h')
+                job_prep_soils = q.enqueue_call(_prep_multi_ofe_rq, (runid,), timeout='4h')
                 job.meta['jobs:0,func:_prep_multi_ofe_rq'] = job_prep_soils.id
                 jobs0_hillslopes_prep.append(job_prep_soils)
                 job.save()
             else:
-                _job = q.enqueue_call(_prep_slopes_rq, (runid,), timeout='1h')
+                _job = q.enqueue_call(_prep_slopes_rq, (runid,), timeout='4h')
                 job.meta['jobs:0,func:_prep_slopes_rq'] = _job.id
                 jobs0_hillslopes_prep.append(_job)
                 job.save()
 
-                _job = q.enqueue_call(_prep_managements_rq, (runid,), timeout='1h')
+                _job = q.enqueue_call(_prep_managements_rq, (runid,), timeout='4h')
                 job.meta['jobs:0,func:_prep_managements_rq'] = _job.id
                 jobs0_hillslopes_prep.append(_job)
                 job.save()
 
-                job_prep_soils = q.enqueue_call(_prep_soils_rq, (runid,), timeout='1h')
+                job_prep_soils = q.enqueue_call(_prep_soils_rq, (runid,), timeout='4h')
                 job.meta['jobs:0,func:_prep_soils_rq'] = job_prep_soils.id
                 jobs0_hillslopes_prep.append(job_prep_soils)
                 job.save()
 
-            _job = q.enqueue_call(_prep_climates_rq, (runid,), timeout='1h')
+            _job = q.enqueue_call(_prep_climates_rq, (runid,), timeout='4h')
             job.meta['jobs:0,func:_prep_climates_rq'] = _job.id
             jobs0_hillslopes_prep.append(_job)
             job.save()
 
-            job_prep_remaining = q.enqueue_call(_prep_remaining_rq, (runid,), timeout='1h', depends_on=jobs0_hillslopes_prep)
+            job_prep_remaining = q.enqueue_call(_prep_remaining_rq, (runid,), timeout='4h', depends_on=jobs0_hillslopes_prep)
             job.meta['jobs:0,func:_prep_remaining_rq'] = job_prep_remaining.id
             job.save()
 
