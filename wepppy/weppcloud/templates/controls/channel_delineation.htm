@@ -98,7 +98,7 @@
         </div>
         {% endif %}
     </div>
-</div> <!-- close Unitzer -->
+</div> <!-- close Unitizer -->
 
 {% if watershed.delineation_backend_is_wbt %}
 <div class="form-group row">
@@ -109,19 +109,21 @@
         </label>
     </div>
     <div class="col-sm-3">
-        <select id="input_wbt_fill_or_breach" name="wbt_fill_or_breach" class="form-control mr-sm-3 disable-readonly">
+        <select id="input_wbt_fill_or_breach" name="wbt_fill_or_breach" class="form-control mr-sm-3 disable-readonly"
+            onchange="toggleBreachDistance()">
             <option value="fill" {% if watershed.wbt_fill_or_breach=='fill' %}selected{% endif %}>Fill</option>
             <option value="breach" {% if watershed.wbt_fill_or_breach=='breach' %}selected{% endif %}>Breach</option>
-            <option value="breach_least_cost" {% if watershed.wbt_fill_or_breach=='breach_least_cost' %}selected{% endif %}>Breach (Least Cost)</option>
+            <option value="breach_least_cost" {% if watershed.wbt_fill_or_breach=='breach_least_cost' %}selected{% endif
+                %}>Breach (Least Cost)</option>
         </select>
     </div>
 </div>
-<div class="form-group row">
+<div id="wbt_blc_dist_container" class="form-group row">
     <div class="col-sm-5">
         <label for="wbt_blc_dist">Breach Least Cost Distance (m)
             <a data-toggle="tooltip" data-placement="top" title="Recommended to use default value."><img
                     src="{{ url_for('static', filename='images/61692-200-24.png') }}" /></a>
-        </label>`
+        </label>
     </div>
     <div class="col-sm-3">
         <input id="wbt_blc_dist" name="wbt_blc_dist" class="form-control mr-sm-3 disable-readonly" type="text"
@@ -145,4 +147,16 @@
         <small id="hint_build_channels_en" class="text-muted"></small>
     </div>
 </div>
+
+<script>
+    function toggleBreachDistance() {
+        var select = document.getElementById('input_wbt_fill_or_breach');
+        var container = document.getElementById('wbt_blc_dist_container');
+        if (select.value === 'breach_least_cost') {
+            container.style.display = '';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+</script>
 {% endblock %}
