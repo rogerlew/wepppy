@@ -1121,7 +1121,7 @@ def create_index():
     configs = get_configs()
     x = ['<tr><td><a href="{0}" rel="nofollow">{0}</a></td>'
          '<td><a href="{0}?general:dem_db=ned1/2016" rel="nofollow">{0} ned1/2016</a></td>'
-         '<td><a href="{0}?watershed:delineation_backend=taudem" rel="nofollow">{0} TauDEM</a></td></tr>'
+         '<td><a href="{0}?watershed:delineation_backend=wbt" rel="nofollow">{0} WhiteBoxTools</a></td></tr>'
          .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
     return '<!DOCTYPE html><html><body>'\
            '<link rel="stylesheet" '\
