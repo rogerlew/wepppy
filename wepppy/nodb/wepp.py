@@ -1583,12 +1583,48 @@ class Wepp(NoDbBase, LogMixin):
         kslast_map_fn = self.kslast_map
         kslast_map = RasterDatasetInterpolator(kslast_map_fn) if kslast_map_fn is not None else None
 
-        def oncomplete(prep_soils_task):
-            topaz_id, elapsed_time = prep_soils_task.result()
-            self.log('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
+        run_concurrent = 0
 
-        with ThreadPoolExecutor() as pool:
-            futures = []
+        if run_concurrent:
+            def oncomplete(prep_soils_task):
+                topaz_id, elapsed_time = prep_soils_task.result()
+                self.log('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
+
+            with ThreadPoolExecutor(max_workers=8) as pool:
+                futures = []
+                for topaz_id, soil in soils.sub_iter():
+                    wepp_id = translator.wepp(top=int(topaz_id))
+                    src_fn = _join(soils_dir, soil.fname)
+                    dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
+
+                    _kslast = None
+                    modify_kslast_pars = None
+
+                    if kslast_map is not None:
+                        lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
+                        try:
+                            _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
+                            modify_kslast_pars = dict(map_fn=kslast_map, lng=lng, lat=lat, kslast=_kslast)
+                        except RDIOutOfBoundsException:
+                            _kslast = None
+
+                        if not isfloat(_kslast):
+                            _kslast = kslast if kslast is not None else None
+                        elif _kslast <= 0.0:
+                            _kslast = kslast if kslast is not None else None
+                    elif kslast is not None:
+                        _kslast = kslast
+
+                    task_args = (
+                        topaz_id, src_fn, dst_fn, 
+                        _kslast, modify_kslast_pars, 
+                        initial_sat, 
+                        clip_soils, clip_soils_depth)
+                    futures.append(pool.submit(lambda p: prep_soil(p), task_args))
+                    futures[-1].add_done_callback(oncomplete)
+
+                wait(futures, return_when=FIRST_EXCEPTION)
+        else:
             for topaz_id, soil in soils.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
                 src_fn = _join(soils_dir, soil.fname)
@@ -1616,11 +1652,11 @@ class Wepp(NoDbBase, LogMixin):
                     topaz_id, src_fn, dst_fn, 
                     _kslast, modify_kslast_pars, 
                     initial_sat, 
-                    clip_soils, clip_soils_depth)
-                futures.append(pool.submit(lambda p: prep_soil(p), task_args))
-                futures[-1].add_done_callback(oncomplete)
+                        clip_soils, clip_soils_depth)
+                topaz_id, elapsed_time = prep_soil(task_args)
+                self.log('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
 
-            wait(futures, return_when=FIRST_EXCEPTION)
+        self.log_done()
 
     def _prep_climates(self, translator):
         climate = Climate.getInstance(self.wd)
