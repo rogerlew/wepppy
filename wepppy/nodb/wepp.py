@@ -1584,6 +1584,8 @@ class Wepp(NoDbBase, LogMixin):
         kslast_map = RasterDatasetInterpolator(kslast_map_fn) if kslast_map_fn is not None else None
 
         run_concurrent = 0
+        # concurrency doesn't seem to make this any faster on NAS
+        # should be revisited if running on a local drive
 
         if run_concurrent:
             def oncomplete(prep_soils_task):
