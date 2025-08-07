@@ -5,6 +5,7 @@ import os
 from os.path import exists as _exists
 
 import subprocess
+import rasterio
 
 import numpy as np
 import utm
@@ -730,3 +731,33 @@ class FlowpathSummary(SummaryBase):
     @property
     def fname(self) -> str:
         return 'flow_%i.slp' % self.topaz_id
+
+
+def identify_edge_hillslopes(raster_path):
+    """
+    Identifies hillslopes (pixel values) on the edge of a watershed raster map.
+    Returns a set of pixel values > 0 found on the map's edges.
+    
+    Args:
+        raster_path (str): Path to the subcatchments raster file (subwta.tif)
+    
+    Returns:
+        set: Set of positive pixel values on the edge, empty if none
+    """
+    with rasterio.open(raster_path) as src:
+        # Read the raster data
+        data = src.read(1)  # Assuming single-band raster
+        
+        # Get edge pixels: top, bottom, left, right
+        top_edge = data[0, :]
+        bottom_edge = data[-1, :]
+        left_edge = data[:, 0]
+        right_edge = data[:, -1]
+        
+        # Combine all edge pixels into a single array
+        edge_pixels = np.concatenate([top_edge, bottom_edge, left_edge, right_edge])
+        
+        # Filter for positive values (> 0) and convert to set to remove duplicates
+        valid_edge_values = set(edge_pixels[edge_pixels > 0])
+        
+        return valid_edge_values

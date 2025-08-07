@@ -40,7 +40,7 @@ from wepppy.topo.peridot.flowpath import (
     PeridotChannel,
 )
 from wepppy.topo.watershed_abstraction import SlopeFile
-from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummary
+from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummary, identify_edge_hillslopes
 from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
 from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 from wepppy.all_your_base.geo import read_raster, haversine
@@ -155,7 +155,7 @@ class Watershed(NoDbBase, LogMixin):
                 self._csa = self.config_get_float("watershed.wbt", "csa")
                 self._mcl = self.config_get_float("watershed.wbt", "mcl")
                 self._wbt_fill_or_breach = self.config_get_str(
-                    "watershed.wbt", "fill_or_breach", "fill"
+                    "watershed.wbt", "fill_or_breach", "breach_least_cost"
                 )
                 self._wbt_blc_dist = self.config_get_int(
                     "watershed.wbt", "blc_dist", 1000
@@ -836,6 +836,7 @@ class Watershed(NoDbBase, LogMixin):
         elif self.delineation_backend_is_wbt:
             wbt = self.wbt
             wbt.delineate_subcatchments()
+            self.identify_edge_hillslopes()
         else:
             self.lock()
             try:
@@ -847,6 +848,29 @@ class Watershed(NoDbBase, LogMixin):
                 self.unlock("-f")
                 raise
             self._taudem_build_subcatchments()
+
+    def identify_edge_hillslopes(self):
+        """
+        Identify edge hillslopes in the watershed.
+        This is used to determine which hillslopes are at the edge of the watershed.
+        """
+        self.lock()
+        try:
+            self._edge_hillslopes = identify_edge_hillslopes(self.subwta)
+        except Exception:
+            self.unlock("-f")
+            raise
+        else:
+            self.dump_and_unlock()
+
+    @property
+    def edge_hillslopes(self):
+        """
+        Get the edge hillslopes in the watershed.
+        """
+        if not hasattr(self, "_edge_hillslopes"):
+            self.identify_edge_hillslopes()
+        return self._edge_hillslopes
 
     @property
     def pkcsa(self):
