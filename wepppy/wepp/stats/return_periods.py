@@ -44,6 +44,7 @@ class ReturnPeriods:
         if '15-min Peak Rainfall Intensity (mm/hour)' in cli_df:
             df['15-min Peak Rainfall Intensity'] = cli_df['15-min Peak Rainfall Intensity (mm/hour)']
         df['30-min Peak Rainfall Intensity'] = cli_df['30-min Peak Rainfall Intensity (mm/hour)']
+        df['Storm Duration'] = cli_df['dur']
 
         _years = sorted(set(df['year']))
         _y0 = _years[0]
@@ -124,6 +125,7 @@ class ReturnPeriods:
         self.units_d['30-min Peak Rainfall Intensity'] = 'mm/hour'
         self.units_d['Peak Discharge'] = 'm^3/s'
         self.units_d['Sediment Yield'] = 'tonne'
+        self.units_d['Storm Duration'] = 'hours'
 
     def to_dict(self):
         return {
@@ -244,7 +246,7 @@ class ReturnPeriods:
                     headers = [
                         "Recurrence Interval (years)",
                         "Date (mm/dd/yyyy)",
-                        f"Precipitation Depth ({self.units_d.get('Precipitation Depth', '')})",
+                        f"Precipitation Depth ({self.units_d.get('Precipitation Depth', 'mm')})",
                         f"Runoff ({self.units_d.get('Runoff', '')})",
                         f"Peak Discharge ({self.units_d.get('Peak Discharge', '')})"
                     ]
@@ -254,6 +256,8 @@ class ReturnPeriods:
                         headers.append(f"15-min Peak Rainfall Intensity ({self.units_d.get('15-min Peak Rainfall Intensity', '')})")
                     if '30-min Peak Rainfall Intensity' in self.return_periods:
                         headers.append(f"30-min Peak Rainfall Intensity ({self.units_d.get('30-min Peak Rainfall Intensity', '')})")
+                    if 'Storm Duration' in self.return_periods:
+                        headers.append(f"Storm Duration ({self.units_d.get('Storm Duration', '')})")
                     headers.append(f"Sediment Yield ({self.units_d.get('Sediment Yield', '')})")
                     if self.has_phosphorus:
                         headers.extend([
@@ -281,6 +285,8 @@ class ReturnPeriods:
                             row.append(f"{data.get('15-min Peak Rainfall Intensity', 0):.2f}")
                         if '30-min Peak Rainfall Intensity' in self.return_periods:
                             row.append(f"{data.get('30-min Peak Rainfall Intensity', 0):.2f}")
+                        if 'Storm Duration' in self.return_periods:
+                            row.append(f"{data.get('Storm Duration', 0):.2f}")
                         row.append(f"{data.get('Sediment Yield', 0):.2f}")
                         if self.has_phosphorus:
                             row.extend([

@@ -1,107 +1,147 @@
-  <h5><b>{{ key }}</b>
+{% macro dash_if_zero(value, units) %}
+{% set val = value | float %}
+{% if val == 0.0 %}
+&mdash;
+{% else %}
+{{ unitizer(val, units) | safe }}
+{% endif %}
+{% endmacro %}
+<h5><b>{{ key }}</b>
   <a onclick="javascript:copytable('{{ key | replace(' ', '') }}_tbl')">
-      <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/>
+    <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}" />
   </a>
-  </h5>
-  <table class="table table-condensed" id="{{ key | replace(' ', '') }}_tbl">
-    <thead>
-      <tr>
-        <th>Recurrence Interval</th>
-        <th>Date</th>
-        <th class="{{ 'table-active' if key == 'Precipitation Depth' }}">Precipitation</th>
-        <th class="{{ 'table-active' if key == 'Runoff' }}">Runoff</th>
-        <th class="{{ 'table-active' if key == 'Peak Discharge' }}">Peak Discharge</th>
-        {% if '10-min Peak Rainfall Intensity' in report.return_periods %}
-          <th class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">10-min Peak Rainfall Intensity</th>
-        {% endif %}
-        {% if '15-min Peak Rainfall Intensity' in report.return_periods %}
-          <th class="{{ 'table-active' if key == '15-min Peak Rainfall Intensity' }}">15-min Peak Rainfall Intensity</th>
-        {% endif %}
-        {% if '30-min Peak Rainfall Intensity' in report.return_periods %}
-          <th class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">30-min Peak Rainfall Intensity</th>
-        {% endif %}
-        <th class="{{ 'table-active' if key == 'Sediment Yield' }}">Sediment Yield</th>
-        {% if report.has_phosphorus %}
-        <th class="{{ 'table-active' if key == 'Soluble Reactive P' }}">Soluble Reactive P</th>
-        <th class="{{ 'table-active' if key == 'Particulate P' }}">Particulate P</th>
-        <th class="{{ 'table-active' if key == 'Total P' }}">Total P</th>
-        {% endif %}
-        <th>Rank</th>
-        <th>Weibull T</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>years</td>
-        <td>mm/dd/yyyy</td>
-        <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer_units(report.units_d['Precipitation Depth']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Runoff' }}">{{ unitizer_units(report.units_d['Runoff']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{ unitizer_units(report.units_d['Peak Discharge']) | safe }}</td>
-        {% if '10-min Peak Rainfall Intensity' in report.return_periods %}
-          <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['10-min Peak Rainfall Intensity']) | safe }}</td>
-        {% endif %}        
-        {% if '15-min Peak Rainfall Intensity' in report.return_periods %}
-          <td class="{{ 'table-active' if key == '15-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['15-min Peak Rainfall Intensity']) | safe }}</td>
-        {% endif %}
-        {% if '30-min Peak Rainfall Intensity' in report.return_periods %}
-          <td class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['30-min Peak Rainfall Intensity']) | safe }}</td>
-        {% endif %}
-        <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{ unitizer_units(report.units_d['Sediment Yield']) | safe }}</td>
-        {% if report.has_phosphorus %}
-        <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{ unitizer_units(report.units_d['Soluble Reactive P']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Particulate P' }}">{{ unitizer_units(report.units_d['Particulate P']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer_units(report.units_d['Total P']) | safe }}</td>
-        {% endif %}
-        <td> </td>
-        <td> </td>
-      </tr>
+</h5>
+<table class="table table-condensed" id="{{ key | replace(' ', '') }}_tbl">
+  <thead>
+    <tr>
+      <th>Recurrence Interval</th>
+      <th>Date</th>
+      <th class="{{ 'table-active' if key == 'Precipitation Depth' }}">Precipitation</th>
+      <th class="{{ 'table-active' if key == 'Runoff' }}">Runoff</th>
+      <th class="{{ 'table-active' if key == 'Peak Discharge' }}">Peak Discharge</th>
+      {% if '10-min Peak Rainfall Intensity' in report.return_periods %}
+      <th class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">10-min Peak Rainfall Intensity</th>
+      {% endif %}
+      {% if '15-min Peak Rainfall Intensity' in report.return_periods %}
+      <th class="{{ 'table-active' if key == '15-min Peak Rainfall Intensity' }}">15-min Peak Rainfall Intensity</th>
+      {% endif %}
+      {% if '30-min Peak Rainfall Intensity' in report.return_periods %}
+      <th class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">30-min Peak Rainfall Intensity</th>
+      {% endif %}
+      {% if 'Storm Duration' in report.return_periods %}
+      <th class="{{ 'table-active' if key == 'Storm Duration' }}">Storm Duration</th>
+      {% endif %}
+      <th class="{{ 'table-active' if key == 'Sediment Yield' }}">Sediment Yield</th>
+      {% if report.has_phosphorus %}
+      <th class="{{ 'table-active' if key == 'Soluble Reactive P' }}">Soluble Reactive P</th>
+      <th class="{{ 'table-active' if key == 'Particulate P' }}">Particulate P</th>
+      <th class="{{ 'table-active' if key == 'Total P' }}">Total P</th>
+      {% endif %}
+      <th>Rank</th>
+      <th>Weibull T</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>years</td>
+      <td>mm/dd/yyyy</td>
+      <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer_units(report.units_d['Precipitation Depth']) | safe }}</td>
+      <td class="{{ 'table-active' if key == 'Runoff' }}">{{ unitizer_units(report.units_d['Runoff']) | safe }}</td>
+      <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{ unitizer_units(report.units_d['Peak Discharge']) |
+        safe }}</td>
+      {% if '10-min Peak Rainfall Intensity' in report.return_periods %}
+      <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">{{
+        unitizer_units(report.units_d['10-min Peak Rainfall Intensity']) | safe }}</td>
+      {% endif %}
+      {% if '15-min Peak Rainfall Intensity' in report.return_periods %}
+      <td class="{{ 'table-active' if key == '15-min Peak Rainfall Intensity' }}">{{
+        unitizer_units(report.units_d['15-min Peak Rainfall Intensity']) | safe }}</td>
+      {% endif %}
+      {% if '30-min Peak Rainfall Intensity' in report.return_periods %}
+      <td class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">{{
+        unitizer_units(report.units_d['30-min Peak Rainfall Intensity']) | safe }}</td>
+      {% endif %}
+      {% if 'Storm Duration' in report.return_periods %}
+      <td class="{{ 'table-active' if key == 'Storm Duration' }}">{{ unitizer_units(report.units_d['Storm Duration']) |
+        safe }}</td>
+      {% endif %}
+      <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{ unitizer_units(report.units_d['Sediment Yield']) |
+        safe }}</td>
+      {% if report.has_phosphorus %}
+      <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{ unitizer_units(report.units_d['Soluble Reactive
+        P']) | safe }}</td>
+      <td class="{{ 'table-active' if key == 'Particulate P' }}">{{ unitizer_units(report.units_d['Particulate P']) |
+        safe }}</td>
+      <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer_units(report.units_d['Total P']) | safe }}</td>
+      {% endif %}
+      <td> </td>
+      <td> </td>
+    </tr>
     {% for rec_interval in report.intervals | sort_numeric(reverse=True) %}
-      <tr>
-        <td>&quot;{{ rec_interval }}&quot;</td>
-        <td>{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{ 
-                                  '%02d' % (report.return_periods[key][rec_interval]['da'] | int) }}/{{ 
-                                  '%04d' % (report.return_periods[key][rec_interval]['year'] + report.y0 - 1 | int) }}</td>
-        <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer(report.return_periods[key][rec_interval]['Precipitation Depth'],
-                        report.units_d['Precipitation Depth']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Runoff' }}">{{ unitizer(report.return_periods[key][rec_interval]['Runoff'],
-                        report.units_d['Runoff']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{ unitizer(report.return_periods[key][rec_interval]['Peak Discharge'],
-                        report.units_d['Peak Discharge']) | safe }}</td>
-        {% if '10-min Peak Rainfall Intensity' in report.return_periods %}
-          <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['10-min Peak Rainfall Intensity'],
-                        report.units_d['10-min Peak Rainfall Intensity']) | safe }}</td>
-        {% endif %}
-        {% if '15-min Peak Rainfall Intensity' in report.return_periods %}
-          <td class="{{ 'table-active' if key == '15-min Peak Rainfall Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['15-min Peak Rainfall Intensity'],
-                        report.units_d['15-min Peak Rainfall Intensity']) | safe }}</td>
-        {% endif %}
-        {% if '30-min Peak Rainfall Intensity' in report.return_periods %}
-          <td class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['30-min Peak Rainfall Intensity'],
-                        report.units_d['30-min Peak Rainfall Intensity']) | safe }}</td>
-        {% endif %}
-        <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{ unitizer(report.return_periods[key][rec_interval]['Sediment Yield'],
-                        report.units_d['Sediment Yield']) | safe }}</td>
-        {% if report.has_phosphorus %}
-        <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Soluble Reactive P'],
-                        report.units_d['Soluble Reactive P']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Particulate P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Particulate P'],
-                        report.units_d['Particulate P']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Total P'],
-                        report.units_d['Total P']) | safe }}</td>
-        {% endif %}
-        {% if "weibull_rank" in report.return_periods[key][rec_interval] %}
-        <td>{{ report.return_periods[key][rec_interval]['weibull_rank'] }}</td>
-        {% else %}
-        <td> </td>
-        {% endif %}
+    <tr>
+      <td>&quot;{{ rec_interval }}&quot;</td>
+      <td>{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{
+        '%02d' % (report.return_periods[key][rec_interval]['da'] | int) }}/{{
+        '%04d' % (report.return_periods[key][rec_interval]['year'] + report.y0 - 1 | int) }}</td>
+      <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">
+        {{ dash_if_zero(report.return_periods[key][rec_interval]['Precipitation Depth'], report.units_d['Precipitation Depth']) }}
+      </td>
+      <td class="{{ 'table-active' if key == 'Runoff' }}">{{
+        unitizer(report.return_periods[key][rec_interval]['Runoff'],
+        report.units_d['Runoff']) | safe }}</td>
+      <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{
+        unitizer(report.return_periods[key][rec_interval]['Peak Discharge'],
+        report.units_d['Peak Discharge']) | safe }}</td>
+      {% if '10-min Peak Rainfall Intensity' in report.return_periods %}
+      <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">
+        {{ dash_if_zero(report.return_periods[key][rec_interval]['10-min Peak Rainfall Intensity'],
+        report.units_d['10-min Peak Rainfall Intensity']) }}
+      </td>
+      {% endif %}
+      {% if '15-min Peak Rainfall Intensity' in report.return_periods %}
+      <td class="{{ 'table-active' if key == '15-min Peak Rainfall Intensity' }}">
+        {{ dash_if_zero(report.return_periods[key][rec_interval]['15-min Peak Rainfall Intensity'],
+        report.units_d['15-min Peak Rainfall Intensity']) }}
+      </td>
+      {% endif %}
+      {% if '30-min Peak Rainfall Intensity' in report.return_periods %}
+      <td class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">
+        {{ dash_if_zero(report.return_periods[key][rec_interval]['30-min Peak Rainfall Intensity'],
+        report.units_d['30-min Peak Rainfall Intensity']) }}
+      </td>
+      {% endif %}
+      {% if 'Storm Duration' in report.return_periods %}
+      <td class="{{ 'table-active' if key == 'Storm Duration' }}">
+        {{ dash_if_zero(report.return_periods[key][rec_interval]['Storm Duration'], report.units_d['Storm Duration']) }}
+      </td>
+      {% endif %}
+      <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{
+        unitizer(report.return_periods[key][rec_interval]['Sediment Yield'],
+        report.units_d['Sediment Yield']) | safe }}</td>
+      {% if report.has_phosphorus %}
+      <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{
+        unitizer(report.return_periods[key][rec_interval]['Soluble Reactive P'],
+        report.units_d['Soluble Reactive P']) | safe }}</td>
+      <td class="{{ 'table-active' if key == 'Particulate P' }}">{{
+        unitizer(report.return_periods[key][rec_interval]['Particulate P'],
+        report.units_d['Particulate P']) | safe }}</td>
+      <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Total
+        P'],
+        report.units_d['Total P']) | safe }}</td>
+      {% endif %}
+      {% if "weibull_rank" in report.return_periods[key][rec_interval] %}
+      <td>{{ report.return_periods[key][rec_interval]['weibull_rank'] }}</td>
+      {% else %}
+      <td> </td>
+      {% endif %}
 
-        {% if "weibull_T" in report.return_periods[key][rec_interval] %}
-        <td>{{ report.return_periods[key][rec_interval]['weibull_T'] | round(5)}}</td>
-        {% else %}
-        <td> </td>
-        {% endif %}
+      {% if "weibull_T" in report.return_periods[key][rec_interval] %}
+      <td>{{ report.return_periods[key][rec_interval]['weibull_T'] | round(5)}}</td>
+      {% else %}
+      <td> </td>
+      {% endif %}
 
-      </tr>
+    </tr>
     {% endfor %}
-    </tbody>
-  </table>
+  </tbody>
+</table>
