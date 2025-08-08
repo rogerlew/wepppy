@@ -1517,15 +1517,16 @@ class Wepp(NoDbBase, LogMixin):
                     texid = simple_texture(clay=clay, sand=sand)
 
                     if (texid, disturbed_class) not in _land_soil_replacements_d:
+                        self.log(f'     _prep_managements: {texid}:{disturbed_class} not in replacements_d')
                         texid = 'all'
 
                     if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
                         rdmax = None
                         xmxlai = None
                     else:
-                        rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
+                        rdmax = _land_soil_replacements_d[(texid, disturbed_class)].get('rdmax', None)
                         if man_summary.cancov_override is None:
-                            xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
+                            xmxlai = _land_soil_replacements_d[(texid, disturbed_class)].get('xmxlai', None)
                         else:
                             rdmax = None
                             xmxlai = None
@@ -1535,6 +1536,10 @@ class Wepp(NoDbBase, LogMixin):
 
                     if isfloat(xmxlai):
                         management.set_xmxlai(float(xmxlai))
+
+                    for (attr, value) in _land_soil_replacements_d[(texid, disturbed_class)].items():
+                        if attr.startswith('plant.data.') or attr.startswith('ini.data.'):
+                            management[attr] = value
 
                     meoization_key = (mukey, dom, disturbed_class)
 

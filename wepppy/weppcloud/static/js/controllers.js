@@ -228,7 +228,27 @@ var Disturbed = function () {
                     console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
-                    alert("Error clearing locks");
+                    alert("Error resetting Land Soil Lookup");
+                }
+            });
+        };
+
+        that.load_extended_land_soil_lookup = function () {
+            $.get({
+                url: "tasks/load_extended_land_soil_lookup/",
+                cache: false,
+                success: function success(response) {
+                    if (response.Success == true) {
+                        alert("Land Soil Lookup has been extended");
+                    } else {
+                        alert("Error extending Land Soil Lookup");
+                    }
+                },
+                error: function error(jqXHR) {
+                    console.log(jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    alert("Error  extending Land Soil Lookup");
                 }
             });
         };
