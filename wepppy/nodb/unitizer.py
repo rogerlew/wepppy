@@ -20,7 +20,7 @@ import jsonpickle
 # weppy submodules
 from .base import NoDbBase
 
-from wepppy.all_your_base import isfloat
+from wepppy.all_your_base import isfloat, isnan
 
 converters = {
     'temperature': {
@@ -513,6 +513,15 @@ class Unitizer(NoDbBase):
                         return '%0.E' % float(value)
                     else:
                         return '%0.1f' % float(value)
+
+                return '<i>{}</i>'.format(value)
+            
+            if in_units == 'hours':
+                # convert to HH:MM representation
+                if isfloat(value) and not isnan(value):
+                    hours = int(value)
+                    minutes = int((value - hours) * 60)
+                    return f'{hours}:{minutes:02}'
 
                 return '<i>{}</i>'.format(value)
 
