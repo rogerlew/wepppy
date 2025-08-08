@@ -1386,6 +1386,43 @@ def reset_disturbed(runid, config):
         return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
     
 
+@app.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup')
+@app.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup/')
+def load_extended_land_soil_lookup(runid, config):
+    assert config is not None
+
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    try:
+        ron = Ron.getInstance(wd)
+    except FileNotFoundError:
+        abort(404)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if not owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if ron.public:
+        should_abort = False
+
+    if should_abort:
+        abort(404)
+
+    try:
+        disturbed = Disturbed.getInstance(wd)
+        disturbed.build_extended_land_soil_lookup()
+
+        return success_factory()
+    except:
+        return exception_factory('Error Building Extended Land Soil Lookup', runid=runid)
+
+
 @app.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs')
 @app.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs/')
 def has_sbs(runid, config):

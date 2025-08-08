@@ -2030,6 +2030,36 @@ class Management(object):
         for i in range(len(self.plants)):
             self.plants[i].data.xmxlai = value
 
+    def __setitem__(self, attr, value):
+        """
+        This is a helper function to set attributes on the Management object.
+        It is used to set attributes like bdtill, cancov, rdmax, and xmxlai.
+        """
+        
+        if attr.startswith('plant.data.'):
+            for i in range(len(self.plants)):
+                _attr = attr[11:]  # remove 'plant.data.'
+                if _attr in ['iresd', 'imngmt', 'rtyp']:
+                    setattr(self.plants[i].data, _attr, int(value))
+                else:
+                    setattr(self.plants[i].data, _attr, float(value))
+
+            return 0
+                
+        if attr.startswith('ini.data.'):
+            for i in range(len(self.inis)):
+                _attr = attr[9:]  # remove 'ini.data.'
+                if _attr in ['mfocod', 'xmxlai']:
+                    setattr(self.inis[i].data, _attr, int(value))
+                else:
+                    setattr(self.inis[i].data, _attr, float(value))
+
+            return 0
+
+        raise NotImplementedError(
+            f"Setting attribute '{attr}' is not implemented."
+        )
+
     def make_multiple_ofe(self, nofe):
         assert self.nofe == 1
         assert nofe >= 2
@@ -2192,6 +2222,8 @@ man:{man}
     years=repr(self.years),
     man=repr(self.man)
 )
+
+
 
 
 #    def merge_loops(self, other):

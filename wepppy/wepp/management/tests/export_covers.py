@@ -90,7 +90,14 @@ with open(extended_landsoil_lookup, 'w') as f:
 
         del _d['luse']
 
-        _d = {'sev_enum': sev_enum,  'luse': luse, 'disturbed_class': disturbed_class, **_d}
+        _d = {'sev_enum': sev_enum,  'landuse': luse, 'disturbed_class': disturbed_class, **_d}
+
+        _d['plant.data.rdmax'] = _d['rdmax']
+        del _d['rdmax']
+
+        _d['plant.data.xmxlai'] = _d['xmxlai']
+        del _d['xmxlai']
+
 
         if wtr is None:
             wtr = csv.DictWriter(f, fieldnames=_d.keys())
