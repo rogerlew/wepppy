@@ -258,13 +258,11 @@ class Loss(object):
 
         yearlies = {}
         for yr_indx, yr in yr_indxs:
-            hill0, chn0, out0 = _find_tbl_starts(yr_indx, lines)
-            hill_tbl = _parse_tbl(lines[hill0:], hill_hdr)
-            chn_tbl = _parse_tbl(lines[chn0:], chn_hdr)
-            out_tbl = _parse_out(lines[out0:])
-            yearlies[yr] = dict(hill_tbl=deepcopy(hill_tbl),
-                                chn_tbl=deepcopy(chn_tbl),
-                                out_tbl=deepcopy(out_tbl))
+            #hill0, chn0, out0 = _find_tbl_starts(yr_indx, lines)
+            #hill_tbl = _parse_tbl(lines[hill0:], hill_hdr)
+            #chn_tbl = _parse_tbl(lines[chn0:], chn_hdr)
+            #out_tbl = _parse_out(lines[out0:])
+            yearlies[yr] = None
 
         hill0, chn0, out0 = _find_tbl_starts(avg_indx, lines)
         hill_tbl = _parse_tbl(lines[hill0:], hill_avg_hdr)
