@@ -1033,9 +1033,6 @@ class Disturbed(NoDbBase):
                     elif 'thinning' in disturbed_class:
                         disturbed_class = 'thinning'
 
-                if (texid, disturbed_class) not in _land_soil_replacements_d:
-                    texid = 'all'
-
                 if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
                     kcb = 0.95
                     rawb = 0.80
@@ -1085,11 +1082,6 @@ class Disturbed(NoDbBase):
                     assert man is not None, dom
 
                     key = (texid, man.disturbed_class)
-
-                    if key not in _land_soil_replacements_d:
-                        texid = 'all'
-                        key = (texid, man.disturbed_class)
-
                     replacements = _land_soil_replacements_d.get(key, None)
 
                     if replacements is None:
@@ -1198,11 +1190,6 @@ class Disturbed(NoDbBase):
             texid = simple_texture(clay=clay, sand=sand)
 
             key = (texid, man.disturbed_class)
-
-            if key not in _land_soil_replacements_d:
-                texid = 'all'
-                key = (texid, man.disturbed_class)
-
             if key not in _land_soil_replacements_d:
                 return mukey
 

@@ -1518,7 +1518,7 @@ class Wepp(NoDbBase, LogMixin):
 
                     if (texid, disturbed_class) not in _land_soil_replacements_d:
                         self.log(f'     _prep_managements: {texid}:{disturbed_class} not in replacements_d')
-                        texid = 'all'
+
 
                     if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
                         rdmax = None
@@ -1537,9 +1537,10 @@ class Wepp(NoDbBase, LogMixin):
                     if isfloat(xmxlai):
                         management.set_xmxlai(float(xmxlai))
 
-                    for (attr, value) in _land_soil_replacements_d[(texid, disturbed_class)].items():
-                        if attr.startswith('plant.data.') or attr.startswith('ini.data.'):
-                            management[attr] = value
+                    if (texid, disturbed_class) in _land_soil_replacements_d:
+                        for (attr, value) in _land_soil_replacements_d[(texid, disturbed_class)].items():
+                            if attr.startswith('plant.data.') or attr.startswith('ini.data.'):
+                                management[attr] = value
 
                     meoization_key = (mukey, dom, disturbed_class)
 
