@@ -36,6 +36,8 @@ from ..baer.sbs_map import SoilBurnSeverityMap
 from ..disturbed import Disturbed
 from ...mixins.log_mixin import LogMixin
 
+from .mulch_application import ground_cover_change as mulch_ground_cover_change
+
 from wepppyo3.raster_characteristics import identify_mode_single_raster_key
 
 gdal.UseExceptions()
@@ -406,33 +408,27 @@ class Treatments(NoDbBase, LogMixin):
 
         man = man_summary.get_management()  # Management instance, reads from disk
 
-        mulch_cover_change = treatment.replace('mulch_', '')
-        mulch_cover_change = int(mulch_cover_change) / 100.0
+        mulch_application = treatment.replace('mulch_', '')
+        mulch_application = float(mulch_application) / 30.0 # in tons per acre
 
         if disturbed_class in ['grass high sev fire', 'grass moderate sev fire', 'grass low sev fire',
                                'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire',
                                'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
 
  #       if disturbed_class in ['grass high sev fire', 'shrub high sev fire',  'forest high sev fire']:
- 
-            inrcov = man.inis[0].data.inrcov
-            new_inrcov = min(1.0, inrcov + mulch_cover_change)
-
-            # TODO: use matrix to determine ground cover change
-            # high sev forest fire, 0.5 -> final cover
-            # high sev forest fire, 1 -> final cover = 0.5
-            # high sev forest fire, 2 -> final cover = 0.8
-            
-            
-
 
             self.log(f'Applying mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+
+            inrcov = man.inis[0].data.inrcov
+            new_inrcov = mulch_ground_cover_change(initial_ground_cover_pct=inrcov * 100.0,
+                                                   mulch_tonperacre=mulch_application) / 100.0
             self.log(f'Old inrcov: {inrcov}\t New inrcov: {new_inrcov}\n')
             man.inis[0].data.inrcov = new_inrcov
 
             rilcov = man.inis[0].data.rilcov
-            self.log(f'Old rilcov: {inrcov}\t New rilcov: {new_inrcov}\n')
-            new_rilcov = min(1.0, rilcov + mulch_cover_change)
+            new_rilcov = mulch_ground_cover_change(initial_ground_cover_pct=rilcov * 100.0,
+                                                   mulch_tonperacre=mulch_application) / 100.0
+            self.log(f'Old rilcov: {rilcov}\t New rilcov: {new_rilcov}\n')
             man.inis[0].data.rilcov = new_rilcov
 
             # write the management to disk
@@ -562,11 +558,6 @@ class Treatments(NoDbBase, LogMixin):
             disturbed_class = man.disturbed_class
 
         key = (texid, disturbed_class)
-
-        if key not in land_soil_replacements_d:
-            texid = 'all'
-            key = (texid, disturbed_class)
-
         if key not in land_soil_replacements_d:
             self.log(f'No soil replacements for {key} in {land_soil_replacements_d}')
             return
