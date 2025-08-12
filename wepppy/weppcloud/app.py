@@ -32,7 +32,7 @@ from deprecated import deprecated
 
 from flask import (
     Flask, jsonify, request, render_template,
-    redirect, send_file, Response, abort, make_response,
+    redirect, send_file, Response, abort, make_response, send_from_directory,
     stream_with_context, url_for, current_app
 )
 
@@ -237,6 +237,7 @@ from routes.browse import browse_bp
 from routes.gdalinfo import gdalinfo_bp
 from routes.wepprepr import repr_bp
 from routes.diff import diff_bp
+from routes.pivottable import pivottable_bp
 from routes.rq.api.jobinfo import rq_jobinfo_bp
 from routes.rq.api.api import rq_api_bp
 from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
@@ -244,6 +245,7 @@ from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
 app.register_blueprint(download_bp)
 app.register_blueprint(browse_bp)
 app.register_blueprint(gdalinfo_bp)
+app.register_blueprint(pivottable_bp)
 app.register_blueprint(repr_bp)
 app.register_blueprint(diff_bp)
 app.register_blueprint(rq_api_bp)
@@ -1890,6 +1892,12 @@ def runs0(runid, config):
                                run_id=runid)
     except:
         return exception_factory(runid=runid)
+
+@app.route('/sw.js')
+def service_worker():
+    response = make_response(send_from_directory('static/js', 'webpush_service_worker.js'))
+    response.headers['Service-Worker-Allowed'] = '/'
+    return response
 
 
 # https://wepp.cloud/weppcloud/runs/proletarian-respondent/baer/hillslope/21/ash/?fire_date=8.4&ash_type=white&ini_ash_depth=5.0
