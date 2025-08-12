@@ -78,7 +78,14 @@ def read_disturbed_land_soil_lookup(fname):
                         row[k] = None
 
             if texid != '' and disturbed_class != '':
-                d[(texid, disturbed_class)] = row
+
+                if texid == 'all':
+                    d[('clay loam', disturbed_class)] = row
+                    d[('loam', disturbed_class)] = row
+                    d[('sand loam', disturbed_class)] = row
+                    d[('silt loam', disturbed_class)] = row
+                else:
+                    d[(texid, disturbed_class)] = row
 
             if disturbed_class in disturbed_class_aliases:
                 alias = disturbed_class_aliases[disturbed_class]
@@ -86,7 +93,6 @@ def read_disturbed_land_soil_lookup(fname):
                     d[(texid, alias)] = row
 
     return d
-
 
 def migrate_land_soil_lookup(src_fn, target_fn, pars, defaults):
     src = read_disturbed_land_soil_lookup(src_fn)
