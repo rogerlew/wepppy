@@ -107,9 +107,11 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
         shutil.rmtree(omni_dir)
 
     os.makedirs(omni_dir)
+    os.makedirs(_join(omni_dir, 'soils'), exist_ok=True)
+    os.makedirs(_join(omni_dir, 'landuse'), exist_ok=True)
 
     for fn in os.listdir(wd):
-        if fn in ['climate', 'watershed', 'climate.nodb', 'watershed.nodb']:
+        if fn in ['climate', 'watershed', 'climate.nodb', 'watershed.nodb', 'landuse.nodb', 'soils.nodb']:
             src = _join(wd, fn)
             dst = _join(omni_dir, fn)
             if not _exists(dst):
@@ -146,6 +148,7 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
 
     wepp.make_watershed_run(wepp_id_paths=list(contrasts.values()))
     wepp.run_watershed()
+    wepp.report_loss()
 
 
 def _omni_clone(scenario_def: dict, wd: str):
@@ -250,7 +253,7 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str):
     shutil.copytree(_join(sibling_wd, 'soils'), _join(new_wd, 'soils'))
 
 
-def _scenario_name_from_scenario_definition(scenario_def):
+def _scenario_name_from_scenario_definition(scenario_def) -> str:
     """
     Get the scenario name from the scenario definition.
     :param scenario_def: The scenario definition.
@@ -267,10 +270,12 @@ def _scenario_name_from_scenario_definition(scenario_def):
         base_scenario = scenario_def.get('base_scenario')
         return f'{_scenario}_{ground_cover_increase}_{base_scenario}'.replace('%', '')
     elif _scenario == OmniScenario.SBSmap:
-        sbs_file_path = scenario_def.get('sbs_file_path')
-        sbs_fn = _split(sbs_file_path)[-1]
-        sbs_hash = base64.b64encode(bytes(sbs_fn, 'utf-8')).decode('utf-8').rstrip('=')
-        return f'{_scenario}_{sbs_hash}'
+        sbs_file_path = scenario_def.get('sbs_file_path', None)
+        if sbs_file_path is not None:
+            sbs_fn = _split(sbs_file_path)[-1]
+            sbs_hash = base64.b64encode(bytes(sbs_fn, 'utf-8')).decode('utf-8').rstrip('=')
+            return f'{_scenario}_{sbs_hash}'
+        return f'{_scenario}'
     else:
         return str(_scenario)
 
@@ -292,31 +297,31 @@ class Omni(NoDbBase, LogMixin):
         - Generating summary reports and parquet outputs for scenarios and contrasts
     Key Responsibilities:
         • Initialization & Locking
-            – __init__(wd, cfg_fn='0.cfg'): load or create omni.nodb, set up working directory,
+            - __init__(wd, cfg_fn='0.cfg'): load or create omni.nodb, set up working directory,
                 acquire a lock during modifications
-            – getInstance / getInstanceFromRunID: load a persisted Omni instance, honoring locks
+            - getInstance / getInstanceFromRunID: load a persisted Omni instance, honoring locks
         • Scenario Management
-            – scenarios (property): list of scenario definitions (dicts)
-            – parse_scenarios(parsed_inputs): validate and store a list of (scenario_enum, params)
-            – run_omni_scenario(scenario_def): build and run one scenario, append to scenarios list
-            – run_omni_scenarios(): execute all parsed scenarios in a consistent order
-            – clean_scenarios(): remove and recreate the omni/scenarios directory
+            - scenarios (property): list of scenario definitions (dicts)
+            - parse_scenarios(parsed_inputs): validate and store a list of (scenario_enum, params)
+            - run_omni_scenario(scenario_def): build and run one scenario, append to scenarios list
+            - run_omni_scenarios(): execute all parsed scenarios in a consistent order
+            - clean_scenarios(): remove and recreate the omni/scenarios directory
         • Contrast Management
-            – contrasts (property): mapping of contrast_name → per-hillslope path dict
-            – parse_inputs(kwds): read control/contrast scenario parameters from keyword dict
-            – build_contrasts(control_scenario_def, contrast_scenario_def, …): compute and save
+            - contrasts (property): mapping of contrast_name → per-hillslope path dict
+            - parse_inputs(kwds): read control/contrast scenario parameters from keyword dict
+            - build_contrasts(control_scenario_def, contrast_scenario_def, …): compute and save
                 per-hillslope contrasts up to a cumulative objective-parameter fraction
-            – run_omni_contrasts(): invoke _run_contrast for each saved contrast
+            - run_omni_contrasts(): invoke _run_contrast for each saved contrast
         • Reporting
-            – scenarios_report(): concatenate per-scenario loss_pw0 parquet files into one DataFrame
-            – compile_hillslope_summaries(exclude_yr_indxs=None): build and save detailed
+            - scenarios_report(): concatenate per-scenario loss_pw0 parquet files into one DataFrame
+            - compile_hillslope_summaries(exclude_yr_indxs=None): build and save detailed
                 hillslope summaries across base and all parsed scenarios
     Public Attributes (stored in omni.nodb):
-        – wd: working directory for WEPP inputs/outputs
-        – _scenarios: list of scenario definition dicts
-        – _contrasts: dict mapping contrast names to input/output path mappings
-        – _control_scenario, _contrast_scenario: OmniScenario enums
-        – _contrast_object_param, _contrast_cumulative_obj_param_threshold_fraction, etc.: parameters
+        - wd: working directory for WEPP inputs/outputs
+        - _scenarios: list of scenario definition dicts
+        - _contrasts: dict mapping contrast names to input/output path mappings
+        - _control_scenario, _contrast_scenario: OmniScenario enums
+        - _contrast_object_param, _contrast_cumulative_obj_param_threshold_fraction, etc.: parameters
             controlling contrast selection and filtering
     Usage Example:
             omni = Omni.getInstance(wd="/path/to/project")
@@ -355,7 +360,8 @@ class Omni(NoDbBase, LogMixin):
                 os.makedirs(self.omni_dir)
 
             self._scenarios = []
-            self._contrasts = self.config_get_list('omni', 'contrasts')
+            self._contrasts = None
+            self._contrast_names = None
 
             self._contrast_scenario = None
             self._control_scenario = None
@@ -512,6 +518,21 @@ class Omni(NoDbBase, LogMixin):
             raise
 
     @property
+    def contrast_names(self):
+        return self._contrast_names
+
+    @contrast_names.setter
+    def contrast_names(self, value):
+
+        self.lock()
+        try:
+            self._contrast_names = value
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
     def omni_dir(self):
         return _join(self.wd, 'omni')
     
@@ -541,7 +562,17 @@ class Omni(NoDbBase, LogMixin):
 
         objective_parameter_descending, total_objective_parameter = gpkg_extract_objective_parameter(gpkg_fn, obj_param=objective_parameter)
         return objective_parameter_descending, total_objective_parameter
-    
+
+    def clear_contrasts(self):
+        self.lock()
+        try:
+            self._contrasts = None
+            self._contrast_names = None
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def build_contrasts(self, control_scenario_def, contrast_scenario_def,
                         obj_param='Runoff_mm',
                         contrast_cumulative_obj_param_threshold_fraction=0.8,
@@ -581,8 +612,8 @@ class Omni(NoDbBase, LogMixin):
 
         self.log('Omni::build_contrasts')
 
-        control_scenario = OmniScenario.parse(control_scenario_def.get('type'))
-        contrast_scenario = OmniScenario.parse(contrast_scenario_def.get('type'))
+        control_scenario = _scenario_name_from_scenario_definition(control_scenario_def)
+        contrast_scenario = _scenario_name_from_scenario_definition(contrast_scenario_def)
 
         # save parameters for defining contrasts
         self.lock()
@@ -621,6 +652,11 @@ class Omni(NoDbBase, LogMixin):
         contrast_scenario = self._contrast_scenario
         control_scenario = self._control_scenario
 
+        if contrast_scenario == str(self.base_scenario):
+            contrast_scenario = None
+
+        if control_scenario == str(self.base_scenario):
+            control_scenario = None
 
         # TODO
         # filter
@@ -644,13 +680,12 @@ class Omni(NoDbBase, LogMixin):
         # soils_erosion_descending is a list of ObjectiveParameter named_tuples with fields: topaz_id, wepp_id, and value
         obj_param_descending, total_erosion_kg = self.get_objective_parameter_from_gpkg(obj_param, scenario=control_scenario)
 
-        from pprint import pprint
-        pprint(obj_param_descending)
-
         if len(obj_param_descending) == 0:
             raise Exception('No soil erosion data found!')
         
-        contrasts = {}
+        contrasts = []
+        contrast_names = []
+
         running_obj_param = 0.0
         for i, d in enumerate(obj_param_descending):
             if contrast_hillslope_limit is not None and i >= contrast_hillslope_limit:
@@ -663,11 +698,9 @@ class Omni(NoDbBase, LogMixin):
             topaz_id = d.topaz_id
             wepp_id = d.wepp_id
             if contrast_scenario is None:
-                contrast_name = f'{control_scenario},{topaz_id}_to_{self.base_scenario}'
+                contrast_name = f'{control_scenario},{topaz_id}__to__{self.base_scenario}'
             else:
-                contrast_name = f'{control_scenario},{topaz_id}_to_{contrast_scenario}'
-            
-#            contrast_dir = _join(wd, f'omni/contrasts/{contrast_name}/wepp/runs/')
+                contrast_name = f'{control_scenario},{topaz_id}__to__{contrast_scenario}'
             
             contrast = {}
             for _topaz_id, _wepp_id in top2wepp.items():
@@ -685,17 +718,94 @@ class Omni(NoDbBase, LogMixin):
                         wepp_id_path = _join(wd, f'omni/scenarios/{control_scenario}/wepp/output/H{_wepp_id}')
                 contrast[_topaz_id] = wepp_id_path  # os.path.relpath(wepp_id_path, contrast_dir)
 
-            contrasts[contrast_name] = contrast
+            contrasts.append(contrast)
+            contrast_names.append(contrast_name)
 
-        self.contrasts = contrasts
+        try:
+            self.lock()
+            if self._contrasts is None:
+                self._contrasts = contrasts
+                self._contrast_names = contrast_names
+            else:
+                self._contrasts.extend(contrasts)
+                self._contrast_names.extend(contrast_names)
 
-      
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def run_omni_contrasts(self):
 
         self.log('Omni::run_omni_contrasts')
 
-        for contrast_id, (contrast_name, _contrasts) in enumerate(self.contrasts.items()):
+        for contrast_id, (contrast_name, _contrasts) in enumerate(zip(self.contrast_names, self.contrasts), start=1):
+            print(f'Running contrast {contrast_id} of {len(self.contrasts)}: {contrast_name}')
             _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
+
+    def contrasts_report(self):
+        from wepppy.nodb.wepp import Wepp
+
+        parquet_files = {}
+
+        for contrast_id, (contrast_name, _contrasts) in enumerate(zip(self.contrast_names, self.contrasts), start=1):
+            parquet_files[contrast_name] = _join(self.wd, 'omni', 'contrasts', str(contrast_id), 'wepp', 'output', 'loss_pw0.out.parquet')
+
+        dfs = []
+        for contrast_id, (contrast_name, path) in enumerate(parquet_files.items(), start=1):
+            if not os.path.isfile(path):
+                continue
+
+            control_scenario, contrast_scenario = contrast_name.split('__to__')
+            control_scenario, topaz_id = control_scenario.split(',')
+
+            if control_scenario == 'None':
+                control_scenario = str(self.base_scenario)
+                ctrl_parquet = _join(self.wd, 'wepp', 'output', 'loss_pw0.out.parquet')
+            else:
+                ctrl_parquet = _join(self.wd, 'omni', 'scenarios', control_scenario, 'wepp', 'output', 'loss_pw0.out.parquet')
+
+            if not _exists(ctrl_parquet):
+                raise FileNotFoundError(f"Control scenario parquet file '{ctrl_parquet}' does not exist!")
+
+            df = pd.read_parquet(path)         # expects columns: key, v, units
+            df['control_scenario'] = control_scenario
+            df['contrast_topaz_id'] = topaz_id
+            df['contrast'] = contrast_name
+            df['_contrast_name'] = str(contrast_name)
+            df['contrast_id'] = contrast_id
+
+            ctrl_df = pd.read_parquet(ctrl_parquet)
+
+            # Join control metrics by 'key' and add difference (control - contrast)
+            _ctrl = (
+                ctrl_df[['key', 'v', 'units']]
+                .drop_duplicates(subset=['key'])
+                .rename(columns={'v': 'control_v', 'units': 'control_units'})
+            )
+
+            df = df.merge(_ctrl, on='key', how='left')
+
+            # Sanity check: units should match between control and contrast
+            _bad = df[df['control_units'].notna() & (df['units'] != df['control_units'])]
+            if not _bad.empty:
+                self.log(f"WARNING[contrasts_report]: units mismatch for keys -> {sorted(_bad['key'].unique())}\n")
+
+            # Requested measure: control - contrast
+            df['control-contrast_v'] = df['control_v'] - df['v']
+
+            dfs.append(df)
+
+        if not dfs:
+            # nothing to do
+            return pd.DataFrame(columns=['key', 'v', 'units', 'contrast'])
+
+        combined = pd.concat(dfs, ignore_index=True)
+        out_path = _join(self.wd, 'omni', 'contrasts.out.parquet')
+        combined.to_parquet(out_path)
+
+        return combined
 
     #
     # Required for NoDbBase Subclass
@@ -1026,10 +1136,8 @@ class Omni(NoDbBase, LogMixin):
         out_path = _join(self.wd, 'omni', 'scenarios.out.parquet')
         combined.to_parquet(out_path)
 
-        # todo: add turbidity
-
         return combined
-
+    
     def compile_hillslope_summaries(self, exclude_yr_indxs=None):
         from wepppy.nodb import Wepp
         from wepppy.wepp.stats import HillSummary
@@ -1081,3 +1189,4 @@ class Omni(NoDbBase, LogMixin):
 # [x] treat low and moderate severity conditions
 # [ ] rerun https://wepp.cloud/weppcloud/runs/rlew-indecorous-vest/disturbed9002/
 # [ ] run contrast scenarios
+
