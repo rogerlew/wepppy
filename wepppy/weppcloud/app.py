@@ -1744,9 +1744,15 @@ def runs0_nocfg(runid):
     return redirect(url_for('runs0', runid=runid, config=ron.config_stem))
 
 
+VAPID_PUBLIC_KEY = ''
+if _exists('/workdir/weppcloud2/microservices/wepppush/vapid.json'):
+    with open('/workdir/weppcloud2/microservices/wepppush/vapid.json') as fp:
+        vapid = json.load(fp)
+        VAPID_PUBLIC_KEY = vapid.get('publicKey', '')
+
 @app.route('/runs/<string:runid>/<config>/')
 def runs0(runid, config):
-
+    global VAPID_PUBLIC_KEY
     from wepppy.nodb.mods.revegetation import Revegetation
 
     assert config is not None
@@ -1889,7 +1895,8 @@ def runs0(runid, config):
                                soildboptions=soildboptions,
                                critical_shear_options=critical_shear_options,
                                precisions=wepppy.nodb.unitizer.precisions,
-                               run_id=runid)
+                               run_id=runid,
+                               VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
     except:
         return exception_factory(runid=runid)
 

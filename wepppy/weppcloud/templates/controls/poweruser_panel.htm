@@ -1,152 +1,341 @@
 <!-- Modal -->
 <div class="modal fade" id="puModal" role="dialog">
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script>
-reset_land_soil_lookup =  function() {
-  $.get({
-      url: "{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/reset_disturbed/",
-      cache: false,
-      success: function success(response) {
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    reset_land_soil_lookup = function () {
+      $.get({
+        url: "{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/reset_disturbed/",
+        cache: false,
+        success: function success(response) {
           if (response.Success == true) {
-              alert("Land Soil Lookup has been reset");
+            alert("Land Soil Lookup has been reset");
           } else {
-              alert("Error resetting Land Soil Lookup");
+            alert("Error resetting Land Soil Lookup");
           }
-      },
-      error: function error(jqXHR)  {
+        },
+        error: function error(jqXHR) {
           console.log(jqXHR.responseJSON);
-      },
-      fail: function fail(error) {
+        },
+        fail: function fail(error) {
           alert("Error clearing locks");
-      }
-  });
-};
+        }
+      });
+    };
 
-clear_locks = function() {
-  $.get({
-      url: "{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/clear_locks/",
-      cache: false,
-      success: function success(response) {
+    clear_locks = function () {
+      $.get({
+        url: "{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/clear_locks/",
+        cache: false,
+        success: function success(response) {
           if (response.Success == true) {
-              alert("Locks have been cleared");
+            alert("Locks have been cleared");
           } else {
-              alert("Error clearing locks");
+            alert("Error clearing locks");
           }
-      },
-      error: function error(jqXHR)  {
+        },
+        error: function error(jqXHR) {
           console.log(jqXHR.responseJSON);
-      },
-      fail: function fail(error) {
+        },
+        fail: function fail(error) {
           alert("Error clearing locks");
+        }
+      });
+    };
+
+    // System Notifications
+    const WEBPUSH_BASE = "/weppcloud-microservices/webpush";
+    const SW_URL = "{{ site_prefix }}/sw.js";
+    const SW_SCOPE = "{{ site_prefix }}/";
+    const RUN_ID = (typeof runid !== "undefined") ? runid : null;
+
+    const SUB_ID_KEY = "wepppush.sub.id";
+    const VAPID_PK_KEY = "{{ VAPID_PUBLIC_KEY }}";
+
+    // base64url -> Uint8Array
+    function urlB64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
       }
-  });
-};
-</script>
-<div class="modal-dialog">
-  <!-- Modal content-->
-  <div class="modal-content">
-    <div class="modal-header">
-      <h4 data-toc-skip class="modal-title">PowerUser Panel</h4>
-      <button type="button" class="close" data-dismiss="modal">&times;</button>
-    </div>
-    <div class="modal-body">
+      return outputArray;
+    }
+
+    async function initPush() {
+      // 1) Register SW and wait until it’s active/controlling
+      const reg = await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE });
+      await navigator.serviceWorker.ready; // robust across Chrome/Safari/Firefox
+
+      // 2) Always (re)create the PushSubscription
+      const existing = await reg.pushManager.getSubscription();
+      if (existing) {
+        
+      }
+
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8Array(VAPID_PK_KEY)
+      });
+
+      // 3) Send subscription to backend (shape matches your handler)
+      const payload = {
+        subscription: sub.toJSON ? sub.toJSON() : {
+          endpoint: sub.endpoint,
+          keys: sub.keys || {}
+        },
+        run_id: RUN_ID
+      };
+
+      const res = await fetch(`${WEBPUSH_BASE}/subscriptions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        console.error("[wepppush] subscriptions POST failed:", res.status, await res.text());
+        return;
+      }
+
+      const data = await res.json();
+      if (data && data.id) {
+        localStorage.setItem(SUB_ID_KEY, data.id);
+        console.log("[wepppush] Subscribed with ID:", data.id);
+      }
+
+      // 4) Enable notifications for this run (7-day TTL)
+      if (RUN_ID) {
+        await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(data.id)}/runs`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ run_id: RUN_ID, enabled: true, ttl_days: 7 })
+        });
+      }
+    }
+
+    // Call this when the user flips your PowerUser toggle ON
+    async function enableNotifications() {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        console.warn("[wepppush] SW/Push not supported");
+        return;
+      }
+      if (!RUN_ID) {
+        console.warn("[wepppush] Missing runid on page");
+        return;
+      }
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") return;
+      await initPush();
+    }
+
+    // Call this when the user flips the toggle OFF (per-run disable, keep subscription)
+    async function disableNotifications() {
+      const id = localStorage.getItem(SUB_ID_KEY);
+      if (!id || !RUN_ID) return;
+      await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(id)}/runs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ run_id: RUN_ID, enabled: false })
+      });
+    }
+
+    // Hook up your existing toggle
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const toggle = document.getElementById("notificationToggle");
+      const toggleLabel = document.getElementById("notificationToggleLabel");
+
+      // Handle toggle changes
+      toggle.addEventListener("change", async () => {
+        if (toggle.checked) {
+          toggleLabel.textContent = "Enabling...";
+          try {
+            await enableNotifications();
+            toggleLabel.textContent = "Enabled";
+          } catch (err) {
+            console.error("[wepppush] Enable error:", err);
+            toggle.checked = false;
+            toggleLabel.textContent = "Failed to enable";
+          }
+        } else {
+          toggleLabel.textContent = "Disabling...";
+          try {
+            await disableNotifications();
+            toggleLabel.textContent = "Disabled";
+          } catch (err) {
+            console.error("[wepppush] Disable error:", err);
+            toggle.checked = true; // revert toggle
+            toggleLabel.textContent = "Failed to disable";
+          }
+        }
+      });
+
+    });
+  </script>
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 data-toc-skip class="modal-title">PowerUser Panel</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
         <div class="row">
           <div class="col-md-6">
+            <h5>System Notifications</h5>
+            <div class="list-group" style="margin-bottom: 5px;">
+              <div class="list-group-item">
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="notificationToggle">
+                  <label class="custom-control-label" for="notificationToggle" id="notificationToggleLabel">Enable
+                    System Notifications</label>
+                </div>
+              </div>
+            </div>
             <h5>NoDbs</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ron.nodb">nodb.ron</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/topaz.nodb">nodb.topaz</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed.nodb">nodb.watershed</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ron.nodb">nodb.ron</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/topaz.nodb">nodb.topaz</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed.nodb">nodb.watershed</a>
               {% if 'rhem' not in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse.nodb">nodb.landuse</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse.nodb">nodb.landuse</a>
               {% endif %}
               {% if 'shrubland' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/shrubland.nodb">nodb.shrubland</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/shrubland.nodb">nodb.shrubland</a>
               {% endif %}
               {% if 'rangeland_cover' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rangeland_cover.nodb">nodb.rangeland_cover</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rangeland_cover.nodb">nodb.rangeland_cover</a>
               {% endif %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils.nodb">nodb.soils</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/climate.nodb">nodb.climate</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils.nodb">nodb.soils</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/climate.nodb">nodb.climate</a>
               {% if 'rhem' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem.nodb">nodb.rhem</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhempost.nodb">nodb.rhempost</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem.nodb">nodb.rhem</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhempost.nodb">nodb.rhempost</a>
               {% endif %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp.nodb">nodb.wepp</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepppost.nodb">nodb.wepppost</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/observed.nodb">nodb.observed</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/unitizer.nodb">nodb.unitizer</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp.nodb">nodb.wepp</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepppost.nodb">nodb.wepppost</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/observed.nodb">nodb.observed</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/unitizer.nodb">nodb.unitizer</a>
               {% if 'baer' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/baer.nodb">nodb.baer</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/baer.nodb">nodb.baer</a>
               {% endif %}
               {% if 'disturbed' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/disturbed.nodb">nodb.disturbed</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/disturbed.nodb">nodb.disturbed</a>
               {% endif %}
               {% if 'rred' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred.nodb">nodb.rred</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred.nodb">nodb.rred</a>
               {% endif %}
               {% if 'lt' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/lt.nodb">nodb.lt</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/lt.nodb">nodb.lt</a>
               {% endif %}
               {% if 'ash' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ash.nodb">nodb.ash</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ashpost.nodb">nodb.ashpost</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ash.nodb">nodb.ash</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ashpost.nodb">nodb.ashpost</a>
               {% endif %}
               {% if 'debris_flow' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/debris_flow.nodb">nodb.debris_flow</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/debris_flow.nodb">nodb.debris_flow</a>
               {% endif %}
             </div>
             <br>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action text-danger" onclick="clear_locks()" href="#">Clear Locks</a>
+              <a class="list-group-item list-group-item-action text-danger" onclick="clear_locks()" href="#">Clear
+                Locks</a>
             </div>
           </div>
           <div class="col-md-6">
             <h5>Directory Views</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/">/</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/">/</a>
               {% if 'rred' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred/">rred/</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred/">rred/</a>
               {% endif %}
-              {%  if 'rhem' not in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/runs/">wepp/runs/</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/output/">wepp/output/</a>
+              {% if 'rhem' not in ron.mods %}
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/runs/">wepp/runs/</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/output/">wepp/output/</a>
               {% else %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/runs/">rhem/runs/</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/output/">rhem/output/</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/runs/">rhem/runs/</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/output/">rhem/output/</a>
               {% endif %}
               {% if 'ash' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ash/">ash/</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ash/">ash/</a>
               {% endif %}
             </div>
             <br>
             <h5>Data Tables</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/hillslopes.parquet/">Hillslope</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/channels.parquet">Channels</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse/landuse.parquet/">Landuse</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils/soils.parquet/">Soils</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/hillslopes.parquet/">Hillslope</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/channels.parquet">Channels</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse/landuse.parquet/">Landuse</a>
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils/soils.parquet/">Soils</a>
             </div>
             <br>
             {% if 'disturbed' in ron.mods %}
             <h5>Disturbed</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/modify_disturbed" target="_blank">Modify Disturbed Parameters</a>
-              <a class="list-group-item list-group-item-action" onclick="Disturbed.getInstance().reset_land_soil_lookup()" href="#">Reset Disturbed Parameters</a>
-              <a class="list-group-item list-group-item-action" onclick="Disturbed.getInstance().load_extended_land_soil_lookup()" href="#">Load Extended Disturbed Parameters</a>
-              <a class="list-group-item list-group-item-action" href="https://doc.wepp.cloud/disturbed_land_soil_lookup_doc.html" target="_blank">Disturbed Parameters Documentation</a>
+              <a class="list-group-item list-group-item-action"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/modify_disturbed"
+                target="_blank">Modify Disturbed Parameters</a>
+              <a class="list-group-item list-group-item-action"
+                onclick="Disturbed.getInstance().reset_land_soil_lookup()" href="#">Reset Disturbed Parameters</a>
+              <a class="list-group-item list-group-item-action"
+                onclick="Disturbed.getInstance().load_extended_land_soil_lookup()" href="#">Load Extended Disturbed
+                Parameters</a>
+              <a class="list-group-item list-group-item-action"
+                href="https://doc.wepp.cloud/disturbed_land_soil_lookup_doc.html" target="_blank">Disturbed Parameters
+                Documentation</a>
             </div>
             {% endif %}
             <br>
             <h5>Omni (Experimental)</h5>
             {% if 'omni' not in ron.mods %}
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/omni_migration" target="_blank">Omni Migration</a>
+              <a class="list-group-item list-group-item-action"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/omni_migration"
+                target="_blank">Omni Migration</a>
             </div>
             {% endif %}
           </div>
         </div>
+      </div>
     </div>
   </div>
-</div>
 </div>
