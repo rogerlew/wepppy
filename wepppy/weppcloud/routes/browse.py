@@ -393,6 +393,10 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
             if file_lower.endswith('.man') or  file_lower.endswith('.sol'):
                 repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/repr/')
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
+            elif file_lower.endswith('.parquet') or file_lower.endswith('.csv') or file_lower.endswith('.tsv'):
+                repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/pivottable/')
+                repr_link = f'  <a href="{repr_url}">pivot</a>    '
+
             diff_link = '    '
             if diff_wd and not file_lower.endswith(('.tif', '.parquet', '.gz', '.img')):
                 diff_path = _join(diff_wd, os.path.relpath(path, wd))
