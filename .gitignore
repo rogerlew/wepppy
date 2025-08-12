@@ -15,3 +15,4 @@ wepppy/taudem/tests/*/*
 .env
 wepppy/locales/global/soils/isric/test
 wepppy/climates/cligen/_scripts/*.db
+wepppy/climates/daymet/test/*
