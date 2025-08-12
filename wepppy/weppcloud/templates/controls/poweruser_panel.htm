@@ -41,8 +41,9 @@
         }
       });
     };
-
     // System Notifications
+
+    // ---- constants ----
     const WEBPUSH_BASE = "/weppcloud-microservices/webpush";
     const SW_URL = "{{ site_prefix }}/sw.js";
     const SW_SCOPE = "{{ site_prefix }}/";
@@ -52,105 +53,151 @@
     const VAPID_PK_KEY = "{{ VAPID_PUBLIC_KEY }}";
 
     // base64url -> Uint8Array
-    function urlB64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-      }
-      return outputArray;
+    function urlB64ToUint8Array(s) {
+      const base64 = (s + "=".repeat((4 - (s.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
+      const raw = atob(base64), out = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+      return out;
     }
 
-    async function initPush() {
-      // 1) Register SW and wait until it’s active/controlling
+    // ---- core helpers ----
+    async function ensureRegistration() {
       const reg = await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE });
-      await navigator.serviceWorker.ready; // robust across Chrome/Safari/Firefox
+      await navigator.serviceWorker.ready;
+      return reg;
+    }
 
-      // 2) Always (re)create the PushSubscription
-      const existing = await reg.pushManager.getSubscription();
-      if (existing) {
-        
+    async function ensureSubscription(reg) {
+      // Only attempt subscribe if permission is already granted
+      if (Notification.permission !== "granted") return null;
+
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlB64ToUint8Array(VAPID_PK_KEY)
+        });
       }
+      return sub;
+    }
 
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlB64ToUint8Array(VAPID_PK_KEY)
-      });
-
-      // 3) Send subscription to backend (shape matches your handler)
-      const payload = {
-        subscription: sub.toJSON ? sub.toJSON() : {
-          endpoint: sub.endpoint,
-          keys: sub.keys || {}
-        },
-        run_id: RUN_ID
-      };
-
+    async function upsertSubscriptionOnServer(sub) {
+      const payload = { subscription: sub.toJSON ? sub.toJSON() : { endpoint: sub.endpoint, keys: sub.keys || {} }, run_id: RUN_ID };
       const res = await fetch(`${WEBPUSH_BASE}/subscriptions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
         body: JSON.stringify(payload)
       });
-
-      if (!res.ok) {
-        console.error("[wepppush] subscriptions POST failed:", res.status, await res.text());
-        return;
-      }
-
+      if (!res.ok) throw new Error(`subscriptions POST failed: ${res.status} ${await res.text()}`);
       const data = await res.json();
-      if (data && data.id) {
-        localStorage.setItem(SUB_ID_KEY, data.id);
-        console.log("[wepppush] Subscribed with ID:", data.id);
-      }
-
-      // 4) Enable notifications for this run (7-day TTL)
-      if (RUN_ID) {
-        await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(data.id)}/runs`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "same-origin",
-          body: JSON.stringify({ run_id: RUN_ID, enabled: true, ttl_days: 7 })
-        });
-      }
+      if (!data?.id) throw new Error("subscriptions POST missing id");
+      localStorage.setItem(SUB_ID_KEY, data.id);
+      return data.id;
     }
 
-    // Call this when the user flips your PowerUser toggle ON
-    async function enableNotifications() {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        console.warn("[wepppush] SW/Push not supported");
-        return;
+    // Registers SW and (if allowed) ensures a subscription exists + is upserted.
+    // Safe to call on page load; it will no-op until permission is granted.
+    async function initPush() {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+      // Request permission if not already granted
+      if (Notification.permission !== "granted") {
+        const perm = await Notification.requestPermission();
+        if (perm !== "granted") return;
       }
-      if (!RUN_ID) {
-        console.warn("[wepppush] Missing runid on page");
-        return;
-      }
-      const perm = await Notification.requestPermission();
-      if (perm !== "granted") return;
-      await initPush();
+
+      const reg = await ensureRegistration();
+      console.log("[wepppush] Service Worker registered:", reg);
+
+      const sub = await ensureSubscription(reg);
+      console.log("[wepppush] Subscription ensured:", sub);
+
+      if (sub) await upsertSubscriptionOnServer(sub);
     }
 
-    // Call this when the user flips the toggle OFF (per-run disable, keep subscription)
-    async function disableNotifications() {
-      const id = localStorage.getItem(SUB_ID_KEY);
-      if (!id || !RUN_ID) return;
-      await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(id)}/runs`, {
+    // ---- per-run enable/disable ----
+    async function enableForRun(runId, subId) {
+      if (!runId || !subId) return;
+      const r = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ run_id: RUN_ID, enabled: false })
+        body: JSON.stringify({ run_id: runId, enabled: true, ttl_days: 7 })
       });
+      if (!r.ok && r.status !== 204) throw new Error(`runs enable failed: ${r.status} ${await r.text()}`);
     }
 
-    // Hook up your existing toggle
-    document.addEventListener("DOMContentLoaded", () => {
+    async function disableForRun(runId, subId) {
+      if (!runId || !subId) return;
+      const r = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ run_id: runId, enabled: false })
+      });
+      if (!r.ok && r.status !== 204) throw new Error(`runs disable failed: ${r.status} ${await r.text()}`);
+    }
+
+    // ---- public entry points for your toggle ----
+    async function enableNotifications() {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+      if (!RUN_ID) return;
+      
+      await initPush();
+
+      const subId = localStorage.getItem(SUB_ID_KEY);
+      await enableForRun(RUN_ID, subId);
+    }
+
+    async function disableNotifications() {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+      if (!RUN_ID) return;
+
+      await initPush();
+
+      const subId = localStorage.getItem(SUB_ID_KEY);
+      await disableForRun(RUN_ID, subId);
+    }
+
+    // ---- wire up your toggle ----
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Kick off SW registration and (if permitted) backend upsert
+      try { await initPush(); } catch (e) { console.warn("[wepppush] initPush:", e); }
 
       const toggle = document.getElementById("notificationToggle");
       const toggleLabel = document.getElementById("notificationToggleLabel");
+
+      const subId = localStorage.getItem(SUB_ID_KEY);
+      if (!subId || !RUN_ID) {
+        console.warn("[wepppush] Missing subId or runId, toggle left off");
+        toggle.checked = false;
+        toggleLabel.textContent = "Disabled";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs/${encodeURIComponent(RUN_ID)}`, {
+          method: "GET",
+          credentials: "same-origin"
+        });
+
+        if (!res.ok) {
+          console.error("[wepppush] GET runs failed:", res.status, await res.text());
+          toggle.checked = false;
+          toggleLabel.textContent = "Disabled";
+          return;
+        }
+
+        const data = await res.json();
+        toggle.checked = !!data.enabled;
+        toggleLabel.textContent = data.enabled ? "Enabled" : "Disabled";
+
+      } catch (err) {
+        console.error("[wepppush] Error checking run state:", err);
+        toggle.checked = false;
+        toggleLabel.textContent = "Disabled";
+      }
 
       // Handle toggle changes
       toggle.addEventListener("change", async () => {
@@ -171,12 +218,11 @@
             toggleLabel.textContent = "Disabled";
           } catch (err) {
             console.error("[wepppush] Disable error:", err);
-            toggle.checked = true; // revert toggle
+            toggle.checked = true;
             toggleLabel.textContent = "Failed to disable";
           }
         }
       });
-
     });
   </script>
   <div class="modal-dialog">

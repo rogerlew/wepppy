@@ -11,17 +11,11 @@ self.addEventListener("push", (event) => {
   try {
     if (!event.data) return;
     const payload = event.data.json();
-    const { run_id, type, ts } = payload;
+    const { run_id, type, message, ts } = payload;
 
     // Basic title/body; tune as needed.
-    const title = type === "EXCEPTION"
-      ? `WEPPcloud: Run ${run_id} failed`
-      : type === "COMPLETED"
-        ? `WEPPcloud: Run ${run_id} completed`
-        : `WEPPcloud: Run ${run_id} update`;
-
-    const tsStr = ts ? new Date(ts).toLocaleString() : "";
-    const body = tsStr ? `${type} at ${tsStr}` : type;
+    const title =  `WEPPcloud: Run ${run_id} ${type}`;
+    const body = message;
 
     // Use a stable tag to coalesce notifications per run
     const tag = `run:${run_id}`;
@@ -39,9 +33,7 @@ self.addEventListener("push", (event) => {
         tag,
         renotify: true,
         requireInteraction: false,
-        data,
-        icon: "/static/img/weppcloud-icon-192.png", // optional
-        badge: "/static/img/weppcloud-badge-72.png" // optional
+        data
       })
     );
   } catch (e) {
