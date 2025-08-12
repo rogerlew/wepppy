@@ -15,11 +15,8 @@ _thisdir = os.path.dirname(__file__)
 
 
 def _get_bin():
-    if _exists('/lib/libgdal.so.30'):
-        _bin = _join(_thisdir, 'bin', 'abstract_watershed')
-    else:
-        _bin = _join(_thisdir, 'bin', 'abstract_watershed.conda310.ub2404') 
-
+    _bin = _join(_thisdir, 'bin', 'abstract_watershed')
+    
     if not _exists(_bin):
         raise RuntimeError('abstract_watershed binary not found')
     return _bin
