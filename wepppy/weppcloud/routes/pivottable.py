@@ -8,7 +8,7 @@ from subprocess import check_output
 
 import pandas as pd
 
-from flask import abort, Blueprint, request, Response, jsonify
+from flask import abort, Blueprint, request, Response, jsonify, current_app
 
 from utils.helpers import get_wd, htmltree, error_factory
 
@@ -26,12 +26,12 @@ _html = r"""
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
         <script src="https://cdn.plot.ly/plotly-basic-latest.min.js"></script>
 
-        <!-- PivotTable.js libs from /static/pivottable/ -->
-        <link rel="stylesheet" type="text/css" href="/static/pivottable/pivot.css">
-        <script type="text/javascript" src="/static/pivottable/pivot.js"></script>
-        <script type="text/javascript" src="/static/pivottable/d3_renderers.js"></script>
-        <script type="text/javascript" src="/static/pivottable/plotly_renderers.js"></script>
-        <script type="text/javascript" src="/static/pivottable/export_renderers.js"></script>
+        <!-- PivotTable.js libs from __SITE_PREFIX__/static/pivottable/ -->
+        <link rel="stylesheet" type="text/css" href="__SITE_PREFIX__/static/pivottable/pivot.css">
+        <script type="text/javascript" src="__SITE_PREFIX__/static/pivottable/pivot.js"></script>
+        <script type="text/javascript" src="__SITE_PREFIX__/static/pivottable/d3_renderers.js"></script>
+        <script type="text/javascript" src="__SITE_PREFIX__/static/pivottable/plotly_renderers.js"></script>
+        <script type="text/javascript" src="__SITE_PREFIX__/static/pivottable/export_renderers.js"></script>
 
         <!-- CSV payload injected server-side -->
         <script type="text/javascript">
@@ -214,5 +214,7 @@ def pivottable_response(path, subpath):
     # Safely embed as a JSON string in JS; also neutralize </script> to avoid early script termination
     csv_json = json.dumps(csv).replace("</", "<\\/")
 
-    page = _html.replace("__CSV_JSON__", csv_json).replace("__FILE__", subpath)
+    page = _html.replace("__CSV_JSON__", csv_json)\
+                .replace("__FILE__", subpath)\
+                .replace("__SITE_PREFIX__", current_app.config.get('SITE_PREFIX', ''))
     return Response(page, mimetype='text/html; charset=utf-8')
