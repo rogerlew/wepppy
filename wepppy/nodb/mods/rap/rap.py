@@ -133,24 +133,25 @@ class RAP(NoDbBase):
         with open(_join(wd, 'rap.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
 
-            if db.data is not None:
-                db.data = {key: value for key, (_key, value) in zip(RAP_Band, db.data.items())}
+        if db.data is not None:
+            db.data = {key: value for key, (_key, value) in zip(RAP_Band, db.data.items())}
 
-            if db.mofe_data is not None:
-                db.mofe_data = {key: value for key, (_key, value) in zip(RAP_Band, db.mofe_data.items())}
+        if db.mofe_data is not None:
+            db.mofe_data = {key: value for key, (_key, value) in zip(RAP_Band, db.mofe_data.items())}
 
-            assert isinstance(db, RAP), db
+        assert isinstance(db, RAP), db
 
-            if _exists(_join(wd, 'READONLY')):
-                db.wd = os.path.abspath(wd)
-                return db
+        if _exists(_join(wd, 'READONLY')):
+            db.wd = os.path.abspath(wd)
+            return db
 
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            if not db.islocked():
                 db.wd = wd
                 db.lock()
                 db.dump_and_unlock()
 
-            return db
+        return db
 
     @staticmethod
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
