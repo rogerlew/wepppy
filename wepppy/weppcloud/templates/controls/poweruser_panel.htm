@@ -99,10 +99,14 @@
     // Registers SW and (if allowed) ensures a subscription exists + is upserted.
     // Safe to call on page load; it will no-op until permission is granted.
     async function initPush() {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        console.warn("[wepppush] Push API not supported in this browser");
+        return;
+      }
 
       // Request permission if not already granted
       if (Notification.permission !== "granted") {
+        console.log("[wepppush] Requesting notification permission...");
         const perm = await Notification.requestPermission();
         if (perm !== "granted") return;
       }
@@ -143,7 +147,7 @@
     async function enableNotifications() {
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
       if (!RUN_ID) return;
-      
+
       await initPush();
 
       const subId = localStorage.getItem(SUB_ID_KEY);
