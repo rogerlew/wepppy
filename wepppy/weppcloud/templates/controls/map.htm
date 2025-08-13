@@ -75,26 +75,26 @@
             <h6>Subcatchment Colormapping</h6>
             <div class="radio radio-primary">
                 <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_default" value="default" checked>
-                <label for="sub_cmap_radio1">
+                <label for="sub_cmap_radio_default">
                     Default
                 </label>
             </div>
             <div class="radio radio-primary">
                 <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_slp_asp" value="slp_asp" disabled>
-                <label for="sub_cmap_radio2">
+                <label for="sub_cmap_radio_slp_asp">
                     Slope/Aspect
                 </label>
             </div>
             <div class="radio radio-primary">
                 <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_lc" value="dom_lc" disabled>
-                <label for="sub_cmap_radio2">
+                <label for="sub_cmap_radio_dom_lc">
                     Dominant Landcover
                 </label>
             </div>
             {% if 'rangeland_cover' in ron.mods %}
             <div class="radio radio-primary">
                 <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_rangeland_cover" value="rangeland_cover" disabled>
-                <label for="sub_cmap_radio2">
+                <label for="sub_cmap_radio_rangeland_cover">
                     Rangeland Cover
                 </label>
             </div>
@@ -102,7 +102,7 @@
             {% if 'rap' in ron.mods %}
             <div class="radio radio-primary">
               <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_landuse_cover" value="landuse_cover" >
-              <label for="landuse_sub_cmap_radio_cover">
+              <label for="sub_cmap_radio_landuse_cover">
                   Vegetation Cover (%)
               </label>
               <br/>
@@ -122,7 +122,7 @@
             {% endif %}
             <div class="radio radio-primary">
                 <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_soil" value="dom_soil" disabled>
-                <label for="sub_cmap_radio3">
+                <label for="sub_cmap_radio_dom_soil">
                     Dominant Soil
                 </label>
             </div><br/>
