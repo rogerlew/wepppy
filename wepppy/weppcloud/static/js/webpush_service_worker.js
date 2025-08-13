@@ -1,46 +1,45 @@
 // /static/js/sw.js
 /* global self, clients */
 
+// sw.js
 const LOG_PREFIX = "[wepppush-sw]";
 
 /**
- * Minimal push payload:
- * { "run_id": "<awesome_codename>", "type": "COMPLETED"|"EXCEPTION"|"TRIGGER", "ts": 1733962190123 }
+ * Expected payload:
+ * { run_id: "<id>", type: "COMPLETED"|"EXCEPTION"|"TRIGGER", message: "<string>", ts: <ms> }
  */
 self.addEventListener("push", (event) => {
-  try {
-    if (!event.data) return;
-    const payload = event.data.json();
-    const { run_id, type, message, ts } = payload;
+  let raw = "(no payload)";
+  try { if (event.data) raw = event.data.text(); } catch (_) {}
 
-    // Basic title/body; tune as needed.
-    const title =  `WEPPcloud: Run ${run_id} ${type}`;
-    const body = message;
-
-    // Use a stable tag to coalesce notifications per run
-    const tag = `run:${run_id}`;
-    const data = {
-      run_id,
-      // You can change this to your canonical route
-      url: `${self.registration.scope}runs/${encodeURIComponent(run_id)}/`,
-      // keep raw payload if you want to hydrate later
-      payload
-    };
-
-    event.waitUntil(
-      self.registration.showNotification(title, {
-        body,
-        tag,
-        renotify: true,
-        requireInteraction: false,
-        data
-      })
-    );
-  } catch (e) {
-    // swallow; SW should never throw
+  let payload = null;
+  try { payload = event.data && event.data.json(); } catch (e) {
     // eslint-disable-next-line no-console
-    console.warn(LOG_PREFIX, "push handler error:", e);
+    console.warn(LOG_PREFIX, "JSON parse failed; using fallback text:", raw);
   }
+
+  const run_id = payload?.run_id || "unknown";
+  const type   = payload?.type   || "PUSH";
+  // Prefer payload.message; otherwise fall back to raw text so user sees *something*
+  const body   = (payload?.message && String(payload.message).trim()) || raw;
+
+  const title  = `WEPPcloud: Run ${run_id} ${type}`;
+  const tag    = `run:${run_id}`; // stable: coalesces toasts for same run
+  const data   = {
+    run_id,
+    url: `${self.registration.scope}runs/${encodeURIComponent(run_id)}/`,
+    payload: payload || { raw }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      tag,
+      renotify: true,
+      requireInteraction: false,
+      data
+    })
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {
@@ -66,7 +65,6 @@ self.addEventListener("notificationclick", (event) => {
   })());
 });
 
-// Optional: manage versioned cleanup if you later add caches
 self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
