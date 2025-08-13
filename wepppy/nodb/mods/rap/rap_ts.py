@@ -95,16 +95,17 @@ class RAP_TS(NoDbBase, LogMixin):
                 db.data = data
             assert isinstance(db, RAP_TS), db
 
-            if _exists(_join(wd, 'READONLY')):
-                db.wd = os.path.abspath(wd)
-                return db
+        if _exists(_join(wd, 'READONLY')):
+            db.wd = os.path.abspath(wd)
+            return db
 
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            if not db.islocked():
                 db.wd = wd
                 db.lock()
                 db.dump_and_unlock()
 
-            return db
+        return db
 
     @staticmethod
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):

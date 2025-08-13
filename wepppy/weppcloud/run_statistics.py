@@ -133,12 +133,13 @@ class RunStatistics(object):
         with open(_join(wd, 'run_statistics.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
 
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            if not db.islocked():
                 db.wd = wd
                 db.lock()
                 db.dump_and_unlock()
 
-            return db
+        return db
 
 
 if __name__ == "__main__":

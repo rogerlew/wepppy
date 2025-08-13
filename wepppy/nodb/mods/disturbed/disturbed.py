@@ -271,9 +271,10 @@ class Disturbed(NoDbBase):
             return db
 
         if os.path.abspath(wd) != os.path.abspath(db.wd):
-            db.wd = wd
-            db.lock()
-            db.dump_and_unlock()
+            if not db.islocked():
+                db.wd = wd
+                db.lock()
+                db.dump_and_unlock()
 
         return db
 
