@@ -22,7 +22,7 @@ if __name__ == '__main__':
                             obj_param='Soil_Loss_kg',
                             contrast_cumulative_obj_param_threshold_fraction=0.8)
         
-    from pprint import pprint
-    pprint(omni.contrasts)
+    #from pprint import pprint
+    #pprint(omni.contrasts)
 
-    omni.run_omni_contrasts()
+    #omni.run_omni_contrasts()
