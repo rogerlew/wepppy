@@ -8,6 +8,8 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import isdir
 
+from csv import DictWriter
+
 import base64
 
 import pandas as pd
@@ -686,6 +688,9 @@ class Omni(NoDbBase, LogMixin):
         contrasts = []
         contrast_names = []
 
+        report_fn = _join(self.wd, 'omni', 'contrasts', 'build_report.ndjson')
+        report_fp = open(report_fn, 'a')
+
         running_obj_param = 0.0
         for i, d in enumerate(obj_param_descending):
             if contrast_hillslope_limit is not None and i >= contrast_hillslope_limit:
@@ -720,7 +725,18 @@ class Omni(NoDbBase, LogMixin):
 
             contrasts.append(contrast)
             contrast_names.append(contrast_name)
+            
+            report_fp.write(json.dumps({
+                'control_scenario': control_scenario,
+                'contrast_scenario': contrast_scenario,
+                'wepp_id': wepp_id,
+                'topaz_id': topaz_id,
+                'obj_param': d.value,
+                'running_obj_param': running_obj_param,
+                'pct_cumulative': running_obj_param / total_erosion_kg * 100
+            }) + '\n')
 
+        report_fp.close()
         try:
             self.lock()
             if self._contrasts is None:
