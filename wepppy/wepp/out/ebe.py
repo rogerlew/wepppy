@@ -95,13 +95,27 @@ class Ebe(object):
           'Total P': 'kg'
         }
 
+    def to_parquet(self, fn):
+        self.df.to_parquet(fn)
 
 if __name__ == "__main__":
-    from pprint import  pprint
+    import os
+    from time import time
+    from os.path import exists as _exists
 
-    loss_rtp = Loss('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2output.txt')
-    ebe_rpt = Ebe('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2events.txt')
-    pprint(ebe_rpt.years)
-    pprint(ebe_rpt.df.keys())
 
-#    report = EbeReport('/home/weppdev/PycharmProjects/wepppy/wepppy/validation/blackwood_MultPRISM/wepp/output/ebe_pw0.txt')
+    ebe_fn = '/wc1/runs/rl/rlew-confirmed-complementarity/wepp/output/ebe_pw0.txt'
+    ebe_parquet = ebe_fn.replace('.txt', '.parquet')
+    times = []
+    for i in range(10):
+        if _exists(ebe_parquet):
+            os.remove(ebe_parquet)
+
+        t0 = time()
+        ebe_fn = '/wc1/runs/rl/rlew-confirmed-complementarity/wepp/output/ebe_pw0.txt'
+        ebe = Ebe(ebe_fn)
+        ebe.to_parquet(ebe_parquet)
+        elapsed = time() - t0
+        times.append(elapsed)
+
+    print(f'Average time to read and convert EBE: {sum(times) / len(times):.3f} seconds')
