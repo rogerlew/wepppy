@@ -290,8 +290,8 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', foo2='', bar2='', 
                                        force_zone_number=utm_number)
 
     # check size
+    width_px = int((lr_x - ul_x) / cellsize)
     height_px = int((ul_y - lr_y) / cellsize)
-    width_px = int((ul_x - lr_y) / cellsize)
 
     if height_px > 4096 or width_px > 4096:
         return jsonify({'Error:': 'output size cannot exceed 4096 x 4096'})
