@@ -29,49 +29,64 @@ import os
 import shlex
 from uuid import uuid4
 
+from datetime import datetime
+
 import utm
-from flask import Flask, jsonify, url_for, request, make_response, send_file, after_this_request
+from flask import (
+    Flask,
+    jsonify,
+    url_for,
+    request,
+    make_response,
+    send_file,
+    after_this_request,
+)
 from osgeo import gdal
 import xml.etree.ElementTree as ET
+import base64, json, hashlib
 
-geodata_dir = '/geodata'
-resample_methods = 'near bilinear cubic cubicspline lanczos ' \
-                   'average mode max min med q1 q1'.split()
+
+def _b64url(obj: dict) -> str:
+    b = json.dumps(obj, separators=(",", ":")).encode("utf-8")
+    return base64.urlsafe_b64encode(b).decode("ascii").rstrip("=")
+
+
+geodata_dir = "/geodata"
+resample_methods = (
+    "near bilinear cubic cubicspline lanczos " "average mode max min med q1 q1".split()
+)
 resample_methods = tuple(resample_methods)
 
-ext_d = {'GTiff': '.tif',
-         'AAIGrid': '.asc',
-         'PNG': '.png',
-         'ENVI': '.raw'}
+ext_d = {"GTiff": ".tif", "AAIGrid": ".asc", "PNG": ".png", "ENVI": ".raw"}
 
 format_drivers = tuple(list(ext_d.keys()))
 
-gdaldem_modes = 'hillshade slope aspect tri tpi roughnesshillshade '\
-                'slope aspect tri tpi roughness'.split()
+gdaldem_modes = (
+    "hillshade slope aspect tri tpi roughnesshillshade "
+    "slope aspect tri tpi roughness".split()
+)
 gdaldem_modes = tuple(gdaldem_modes)
 
 _this_dir = os.path.dirname(__file__)
-_catalog = os.path.join(_this_dir, 'catalog')
+_catalog = os.path.join(_this_dir, "catalog")
 
 
-SCRATCH = '/media/ramdisk'
+SCRATCH = "/media/ramdisk"
+
 
 def raster_stats(src):
-    cmd = 'gdalinfo %s -stats' % src
+    cmd = "gdalinfo %s -stats" % src
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    output = p.stdout \
-              .read() \
-              .decode('utf-8') \
-              .replace('\n','|')
+    output = p.stdout.read().decode("utf-8").replace("\n", "|")
 
-    stat_fn = src + '.aux.xml'
+    stat_fn = src + ".aux.xml"
     assert os.path.exists(stat_fn), (src, stat_fn)
 
     d = {}
     tree = ET.parse(stat_fn)
     root = tree.getroot()
-    for stat in root.iter('MDI'):
-        key = stat.attrib['key']
+    for stat in root.iter("MDI"):
+        key = stat.attrib["key"]
         value = float(stat.text)
         d[key] = value
 
@@ -80,18 +95,20 @@ def raster_stats(src):
 
 def format_convert(src, _format):
     dst = src[:-4] + ext_d[_format]
-    if _format == 'ENVI':
+    if _format == "ENVI":
         stats = raster_stats(src)
-        cmd = 'gdal_translate -of %s -ot Uint16 -scale %s %s 0 65535 %s %s' % \
-              (_format, stats['STATISTICS_MINIMUM'], stats['STATISTICS_MAXIMUM'], src, dst)
+        cmd = "gdal_translate -of %s -ot Uint16 -scale %s %s 0 65535 %s %s" % (
+            _format,
+            stats["STATISTICS_MINIMUM"],
+            stats["STATISTICS_MAXIMUM"],
+            src,
+            dst,
+        )
     else:
-        cmd = 'gdal_translate -of %s %s %s' % (_format, src, dst)
+        cmd = "gdal_translate -of %s %s %s" % (_format, src, dst)
 
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    output = p.stdout \
-              .read() \
-              .decode('utf-8') \
-              .replace('\n','|')
+    output = p.stdout.read().decode("utf-8").replace("\n", "|")
 
     if os.path.exists(dst):
         return dst
@@ -106,28 +123,6 @@ def determine_band_type(vrt):
 
     band = ds.GetRasterBand(1)
     return gdal.GetDataTypeName(band.DataType)
-
-
-def build_catalog(geodata):
-    """
-    recursively searches for .vrt files from the
-    path speicified by {geodata_dir}
-    """
-    fp = open(_catalog, 'w')
-
-
-    dirs = [os.path.join(geodata, o) for o in os.listdir(geodata)
-            if os.path.isdir(os.path.join(geodata, o))]
-
-    dirs = [d for d in dirs if 'weppcloud_runs' not in d]
-
-    for _dir in dirs:
-        for root, dirnames, filenames in os.walk(_dir):
-
-            for filename in fnmatch.filter(filenames, '.vrt'):
-                path = os.path.join(root, filename)
-                fp.write(path + '\n')
-    fp.close()
 
 
 def find_maps(geodata):
@@ -157,13 +152,13 @@ def parse_bbox(bbox):
     in a fault tolerate manner
     """
     try:
-        coords = bbox.split(',')
+        coords = bbox.split(",")
     except:
         return (None, None, None, None)
 
     n = len(coords)
     if n < 4:
-        coords.extend([None for i in xrange(4-n)])
+        coords.extend([None for i in xrange(4 - n)])
     if n > 4:
         coords = coords[:4]
 
@@ -173,55 +168,37 @@ def parse_bbox(bbox):
 app = Flask(__name__)
 
 
-@app.route('/health')
+@app.route("/health")
 def health():
     return jsonify("OK")
 
-
-@app.route('/')
-def api_root():
+@app.route("/catalog")
+def catalog():
     """
     Return a list of available maps
     """
-    d = []
-    for map in find_maps(geodata_dir):
-        path = os.path.split(map)[0].replace(geodata_dir, '')
-        d.append(path)
-    return jsonify(d)
+    maps = find_maps(geodata_dir)
+    return jsonify(maps)
 
-
-@app.route('/<dataset>')
-@app.route('/<dataset>/')
-def api_dataset(dataset):
-    """
-    Return a list of available years
-    """
-
-    path = os.path.join(geodata_dir, dataset)
-    if os.path.exists(path):
-        return jsonify(find_maps(path))
-    else:
-        return 'error: cannot find dataset: %s' % dataset
-
-
-
-@app.route('/<dataset>/<year>')
-@app.route('/<dataset>/<year>/')
-@app.route('/<dataset>/<year>/<layer>')
-@app.route('/<dataset>/<year>/<layer>/')
-@app.route('/<dataset>/<year>/<layer>/<foo>')
-@app.route('/<dataset>/<year>/<layer>/<foo>/')
-@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>')
-@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/')
-@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>')
-@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/')
-@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/<bar2>')
-@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/<bar2>/')
-def api_dataset_year(dataset, year, layer='', foo='', bar='', foo2='', bar2='', methods=['GET', 'POST']):
+@app.route("/<dataset>/<year>")
+@app.route("/<dataset>/<year>/")
+@app.route("/<dataset>/<year>/<layer>")
+@app.route("/<dataset>/<year>/<layer>/")
+@app.route("/<dataset>/<year>/<layer>/<foo>")
+@app.route("/<dataset>/<year>/<layer>/<foo>/")
+@app.route("/<dataset>/<year>/<layer>/<foo>/<bar>")
+@app.route("/<dataset>/<year>/<layer>/<foo>/<bar>/")
+@app.route("/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>")
+@app.route("/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/")
+@app.route("/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/<bar2>")
+@app.route("/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/<bar2>/")
+def api_dataset_year(
+    dataset, year, layer="", foo="", bar="", foo2="", bar2="", methods=["GET", "POST"]
+):
     """
     Constructs a file path for a given dataset and year, with optional additional parameters for layering.
     The path dynamically adjusts to include layer, foo, bar, foo2, and bar2 directories if provided.
-    
+
     :param dataset: Name of the dataset.
     :param year: Year of the dataset.
     :param layer: Optional layer within the dataset.
@@ -234,114 +211,120 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', foo2='', bar2='', 
     """
     # Initialize the path with dataset and year
     path_parts = [geodata_dir, dataset, year]
-    
+
     # Add optional parts if they are not empty
     for part in [layer, foo, bar, foo2, bar2]:
         if part:
             path_parts.append(part)
-    
+
     # Append the .vrt filename at the end
-    path_parts.append('.vrt')
-    
+    path_parts.append(".vrt")
+
     # Construct and return the full file path
     src = os.path.join(*path_parts)
 
-    fn_uuid = str(uuid4().hex) + '.tif'
+    fn_uuid = str(uuid4().hex) + ".tif"
     dst = os.path.join(SCRATCH, fn_uuid)
 
     # if the src file doesn't exist we can abort
     if not os.path.exists(src):
-        return jsonify({'Error': f'Cannot find dataset: {src}'})
+        return jsonify({"Error": f"Cannot find dataset: {src}"})
 
     # if request is not GET we should abort
     # need to implement POST
-    if request.method not in ['GET']:
-        return jsonify({'Error': 'Expecting GET'})
+    if request.method not in ["GET"]:
+        return jsonify({"Error": "Expecting GET"})
 
     # if cellsize argument is not supplied assume 30m
-    if 'cellsize' not in request.args:
-        cellsize = 30.0 # in meters
+    if "cellsize" not in request.args:
+        cellsize = 30.0  # in meters
     else:
-        cellsize = safe_float_parse(request.args['cellsize'])
+        cellsize = safe_float_parse(request.args["cellsize"])
         if cellsize == None:
-            return jsonify({'Error': 'Cellsize should be a float'})
+            return jsonify({"Error": "Cellsize should be a float"})
 
     if cellsize < 1.0:
-        return jsonify({'Error': 'Cellsize must be greater than 1'})
+        return jsonify({"Error": "Cellsize must be greater than 1"})
 
     # parse bbox
-    if 'bbox' not in request.args:
-        return jsonify({'Error': 'bbox is required (left, bottom, right, top)'})
+    if "bbox" not in request.args:
+        return jsonify({"Error": "bbox is required (left, bottom, right, top)"})
 
-    bbox = request.args['bbox']
+    bbox = request.args["bbox"]
     bbox = parse_bbox(bbox)
 
-    if any([x==None for x in bbox]):
-        return jsonify({'Error': 'bbox contains non float values'})
+    if any([x == None for x in bbox]):
+        return jsonify({"Error": "bbox contains non float values"})
 
-    if bbox[1] > bbox [3] or bbox[0] > bbox[2]:
-        return jsonify({'Error': 'Expecting bbox defined as: left, bottom, right, top'})
+    if bbox[1] > bbox[3] or bbox[0] > bbox[2]:
+        return jsonify({"Error": "Expecting bbox defined as: left, bottom, right, top"})
 
     # determine UTM coordinate system of top left corner
     ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(bbox[3], bbox[0])
 
     # bottom right
-    lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2], 
-                                       force_zone_number=utm_number)
+    lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2], force_zone_number=utm_number)
 
     # check size
     width_px = int((lr_x - ul_x) / cellsize)
     height_px = int((ul_y - lr_y) / cellsize)
 
     if height_px > 4096 or width_px > 4096:
-        return jsonify({'Error:': 'output size cannot exceed 4096 x 4096'})
+        return jsonify({"Error:": "output size cannot exceed 4096 x 4096"})
 
-    proj4 = "+proj=utm +zone={zone} +{hemisphere} +datum=WGS84 +ellps=WGS84" \
-            .format(zone=utm_number, hemisphere=('south', 'north')[bbox[3] > 0])
+    proj4 = "+proj=utm +zone={zone} +{hemisphere} +datum=WGS84 +ellps=WGS84".format(
+        zone=utm_number, hemisphere=("south", "north")[bbox[3] > 0]
+    )
 
     # determine resample method
-    if 'resample' not in request.args:
+    if "resample" not in request.args:
         src_dtype = determine_band_type(src)
-        resample = ('near', 'bilinear')['float' in src_dtype.lower()]
+        resample = ("near", "bilinear")["float" in src_dtype.lower()]
     else:
-        resample = request.args['resample']
+        resample = request.args["resample"]
         if resample not in resample_methods:
-            return jsonify({'Error': 'resample method not valid'})
+            return jsonify({"Error": "resample method not valid"})
 
     # determine output format
-    if 'format' not in request.args:
-        _format = 'GTiff'
+    if "format" not in request.args:
+        _format = "GTiff"
     else:
-        _format = request.args['format']
+        _format = request.args["format"]
         if _format not in format_drivers:
-            return jsonify({'Error': 'format driver not valid' + _format})
+            return jsonify({"Error": "format driver not valid" + _format})
 
     # build command to warp, crop, and scale dataset
-    cmd = "gdalwarp -t_srs '{proj4}' -tr {cellsize} {cellsize} " \
-          "-te {xmin} {ymin} {xmax} {ymax} -r {resample} {src} {dst}".format(
-          proj4=proj4, cellsize=cellsize,
-          xmin=ul_x, xmax=lr_x, ymin=lr_y, ymax=ul_y,
-          resample=resample, src=src, dst=dst)
+    cmd = (
+        "gdalwarp -t_srs '{proj4}' -tr {cellsize} {cellsize} "
+        "-te {xmin} {ymin} {xmax} {ymax} -r {resample} {src} {dst}".format(
+            proj4=proj4,
+            cellsize=cellsize,
+            xmin=ul_x,
+            xmax=lr_x,
+            ymin=lr_y,
+            ymax=ul_y,
+            resample=resample,
+            src=src,
+            dst=dst,
+        )
+    )
 
     # delete destination file if it exists
     if os.path.exists(dst):
         os.remove(dst)
 
-#    with open(dst + '.cmd', 'w') as fp:
-#        fp.write(cmd)
+    #    with open(dst + '.cmd', 'w') as fp:
+    #        fp.write(cmd)
 
     # run command, check_output returns standard output
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    output = p.stdout \
-              .read() \
-              .decode('utf-8') \
-              .replace('\n','|')
+    output = p.stdout.read().decode("utf-8").replace("\n", "|")
 
     # check to see if file was created
     if not os.path.exists(dst):
-        return jsonify({'Error': 'gdalwarp failed unexpectedly',
-                        'cmd': cmd,
-                        'stdout': output})
+        return jsonify(
+            {"Error": "gdalwarp failed unexpectedly", "cmd": cmd, "stdout": output}
+        )
 
     fn_list = []
     fn_list.append(dst)
@@ -349,76 +332,98 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', foo2='', bar2='', 
     # gdaldem processing
     dst2 = None
     gdaldem = None
-    if 'gdaldem' in request.args:
-        if dataset not in ['ned1']:
-            return jsonify({'Error': 'gdaldem cannot be applied to dataset'})
+    if "gdaldem" in request.args:
+        if dataset not in ["ned1"]:
+            return jsonify({"Error": "gdaldem cannot be applied to dataset"})
 
-        gdaldem = request.args['gdaldem'].lower()
+        gdaldem = request.args["gdaldem"].lower()
         if gdaldem not in gdaldem_modes:
-            return jsonify({'Error': 'Invalid gdaldem mode: %s' % gdaldem})
+            return jsonify({"Error": "Invalid gdaldem mode: %s" % gdaldem})
 
-        fn_uuid2 = str(uuid4().hex) + '.tif'
+        fn_uuid2 = str(uuid4().hex) + ".tif"
         dst2 = os.path.join(SCRATCH, fn_uuid)
 
-        cmd2 = 'gdaldem %s %s %s' % (gdaldem, dst, dst2)
+        cmd2 = "gdaldem %s %s %s" % (gdaldem, dst, dst2)
 
-        output2 = subprocess.Popen(cmd2, shell=True, stdout=subprocess.PIPE).stdout.read()
-        output2 = output2.replace('\n','|')
+        output2 = subprocess.Popen(
+            cmd2, shell=True, stdout=subprocess.PIPE
+        ).stdout.read()
+        output2 = output2.replace("\n", "|")
 
         # check to see if file was created
         if not os.path.exists(dst2):
-            return jsonify({'Error': 'gdaldem failed unexpectedly',
-                            'cmd2': cmd2,
-                            'stdout2': output2})
+            return jsonify(
+                {
+                    "Error": "gdaldem failed unexpectedly",
+                    "cmd2": cmd2,
+                    "stdout2": output2,
+                }
+            )
 
         fn_list.list(dst2)
 
     # build response
     dst_final = (dst, dst2)[dst2 != None]
-    if layer == '':
-        fname = '%s_%s%s' % (dataset, year, ext_d[_format])
+    if layer == "":
+        fname = "%s_%s%s" % (dataset, year, ext_d[_format])
     else:
-        fname = '%s_%s_%s%s' % (dataset, year, layer, ext_d[_format])
+        fname = "%s_%s_%s%s" % (dataset, year, layer, ext_d[_format])
 
-    if _format != 'GTiff':
+    if _format != "GTiff":
         dst3 = format_convert(dst, _format)
         if dst3 == None:
-            return jsonify({'Error': 'failed to convert to output format'})
+            return jsonify({"Error": "failed to convert to output format"})
         else:
             dst_final = dst3
             fn_list.append(dst3)
 
     response = make_response(send_file(dst_final))
 
-    if _format == 'AAIGrid':
-        response.headers['Content-Type'] = 'text/plain'
-    elif _format == 'PNG':
-        response.headers['Content-Type'] = 'text/png'
-    elif _format == 'ENVI':
-        response.headers['Content-Type'] = 'application/octet-stream'
+    if _format == "AAIGrid":
+        response.headers["Content-Type"] = "text/plain"
+    elif _format == "PNG":
+        response.headers["Content-Type"] = "text/png"
+    elif _format == "ENVI":
+        response.headers["Content-Type"] = "application/octet-stream"
     else:
-        response.headers['Content-Type'] = 'image/tiff'
+        response.headers["Content-Type"] = "image/tiff"
 
-    response.headers['Content-Disposition'] = 'attachment; filename=' + fname
-    response.headers['Meta'] = {'bbox': bbox,
-                                'cache': dst,
-                                'dataset': dataset,
-                                'year': year,
-                                'cellsize': cellsize,
-                                'ul': {'ul_x':ul_x,
-                                       'ul_y':ul_y,
-                                       'utm_number':utm_number,
-                                       'utm_letter':utm_letter},
-                                'proj4': proj4,
-                                'cmd': cmd,
-                                'url': request.url,
-                                'stdout': output}
+    meta_fn = src.replace(".vrt", "metadata.json")
+
+    meta = {}
+    if os.path.exists(meta_fn):
+        with open(meta_fn) as f:
+            meta = json.load(f)
+
+    meta["wmesque"] = {
+        "bbox": bbox,
+        "cache": dst,
+        "dataset": dataset,
+        "year": year,
+        "cellsize": cellsize,
+        "ul": {
+            "ul_x": ul_x,
+            "ul_y": ul_y,
+            "utm_number": utm_number,
+            "utm_letter": utm_letter,
+        },
+        "proj4": proj4,
+        "cmd": cmd,
+        "url": request.url,
+        "stdout": output,
+        "timestamp": datetime.now().isoformat()
+    }
 
     if gdaldem != None:
-        response.headers['Meta-gdaldem'] = {'mode': gdaldem,
-                                            'cmd': cmd2,
-                                            'stdout': output2,
-                                            'cache': dst2}
+        meta["wmesque"]["gdaldem"] = {
+            "mode": gdaldem,
+            "cmd": cmd2,
+            "stdout": output2,
+            "cache": dst2,
+        }
+
+    response.headers["Content-Disposition"] = "attachment; filename=" + fname
+    response.headers["WMesque-Meta"] = _b64url(meta)
 
     # Define a function to delete the files
     def delete_files(response):
@@ -431,17 +436,40 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', foo2='', bar2='', 
 
     # Register the delete_files function to be executed after the request is completed
     after_this_request(delete_files)
-    
+
     # return response
     return response
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
-    if 'build' in sys.argv[-1]:
-        build_catalog('/geodata')
+    def build_catalog(geodata):
+        """
+        recursively searches for .vrt files from the
+        path speicified by {geodata_dir}
+        """
+        fp = open(_catalog, "w")
+
+        dirs = [
+            os.path.join(geodata, o)
+            for o in os.listdir(geodata)
+            if os.path.isdir(os.path.join(geodata, o))
+        ]
+
+        dirs = [d for d in dirs if "weppcloud_runs" not in d]
+
+        for _dir in dirs:
+            for root, dirnames, filenames in os.walk(_dir):
+
+                for filename in fnmatch.filter(filenames, ".vrt"):
+                    path = os.path.join(root, filename)
+                    fp.write(path + "\n")
+        fp.close()
+
+
+    if "build" in sys.argv[-1]:
+        build_catalog("/geodata")
 
     else:
         app.run()
-
