@@ -73,6 +73,11 @@ _query_template = """\
   </soap12:Body>
 </soap12:Envelope>"""
 
+_metadata = {
+    "dataset": " Soil Survey Geographic Database (SSURGO)/Digital General Soil Map of the United States (STATSGO2)",
+    "publisher": "USDA National Resources Conservation Service (NRCS)",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx",
+}
 
 class SsurgoRequestError(Exception):
     """
