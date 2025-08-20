@@ -5,22 +5,22 @@
 #
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
-
 import numpy as np
 from pandas import DataFrame, Series
 from wepppy.all_your_base.stats import weibull_series
 from .row_data import parse_name, parse_units, RowData
 
-from wepppy.wepp.out import Loss, Ebe
+from wepppy.wepp.out import Loss, Ebe, TotalWatSed2
 
 from copy import deepcopy
 
 class ReturnPeriods:
-    def __init__(self, ebe: Ebe = None, loss: Loss = None, 
+    def __init__(self, ebe: Ebe = None, loss: Loss = None,
                  cli_df: DataFrame = None, 
                  recurrence=(2, 5, 10, 20, 25),
                  exclude_yr_indxs=None,
-                 method='cta', gringorten_correction=False):
+                 method='cta', gringorten_correction=False, 
+                 totwatsed2: TotalWatSed2 = None):
         """
         Args:
             ebe (Ebe): The event by event  report.
@@ -30,6 +30,7 @@ class ReturnPeriods:
             exclude_yr_indxs (list): A list of year indexes to exclude from the analysis.
             method (str): The method used to calculate the return periods. Options are 'cta' (default) complete time series analysis or 'am' or annual maxima.
             gringorten_correction (bool): If True, applies the Gringorten correction to the Weibull formula.
+            totwatsed2 (pandas.DataFrame or None): if not None provides Hill SedDel and Hill StreamFlow
         """
 
         if ebe is None or loss is None or cli_df is None:
@@ -39,12 +40,16 @@ class ReturnPeriods:
 
         df = deepcopy(ebe.df)
 
-
         df['10-min Peak Rainfall Intensity'] = cli_df['10-min Peak Rainfall Intensity (mm/hour)']
         if '15-min Peak Rainfall Intensity (mm/hour)' in cli_df:
             df['15-min Peak Rainfall Intensity'] = cli_df['15-min Peak Rainfall Intensity (mm/hour)']
         df['30-min Peak Rainfall Intensity'] = cli_df['30-min Peak Rainfall Intensity (mm/hour)']
         df['Storm Duration'] = cli_df['dur']
+
+        if totwatsed2 is not None:
+            wsarea_m2 = totwatsed2.wsarea
+            df['Hill Sed Del'] = totwatsed2.d['Sed Del (kg)']  # kg
+            df['Hill StreamFlow'] = totwatsed2.d['Streamflow (mm)'] / 1000.0 * wsarea_m2  # m^3/s
 
         _years = sorted(set(df['year']))
         _y0 = _years[0]
@@ -110,7 +115,7 @@ class ReturnPeriods:
 
                 row['Runoff'] = round(row['Runoff'] / (wsarea * 10000.0) * 1000.0, 2)
                 row['weibull_rank'] = indx + 1
-                row['weibull_T'] = ((len(df) + 1) / (indx + 1)) / days_in_year # T = (n + 1)  / m, where m is the rank and n is the number of observations
+                row['weibull_T'] = ((len(df) + 1) / (indx + 1)) / days_in_year  # T = (n + 1)  / m, where m is the rank and n is the number of observations
                 row['Sediment Yield'] /= 1000.0
 
                 results[colname][retperiod] = row
@@ -126,6 +131,9 @@ class ReturnPeriods:
         self.units_d['Peak Discharge'] = 'm^3/s'
         self.units_d['Sediment Yield'] = 'tonne'
         self.units_d['Storm Duration'] = 'hours'
+        self.units_d['Storm Duration'] = 'hours'
+        self.units_d['Hill Sed Del'] = 'kg'
+        self.units_d['Hill StreamFlow'] = 'm^3/s'
 
     def to_dict(self):
         return {

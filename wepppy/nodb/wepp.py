@@ -2299,9 +2299,12 @@ class Wepp(NoDbBase, LogMixin):
         cli = ClimateFile(_join(climate.cli_dir, climate.cli_fn))
         cli_df = cli.as_dataframe(calc_peak_intensities=True)
 
+        totwatsed2 = TotalWatSed2(self.wd)
+
         return_periods = ReturnPeriods(ebe_rpt, loss_rpt, cli_df, recurrence=rec_intervals,
                                        exclude_yr_indxs=exclude_yr_indxs,
-                                       method=method, gringorten_correction=gringorten_correction)
+                                       method=method, gringorten_correction=gringorten_correction,
+                                       totwatsed2=totwatsed2)
 
         if return_periods_fn is not None:
             with open(return_periods_fn, 'w') as fp:
