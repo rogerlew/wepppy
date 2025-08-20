@@ -62,7 +62,9 @@ based on statistical analysis of historical data and does not imply that such an
                '10-min Peak Rainfall Intensity',
                '15-min Peak Rainfall Intensity',
                '30-min Peak Rainfall Intensity',
-               'Sediment Yield'] %}
+               'Sediment Yield',
+               'Hill Sed Del',
+               'Hill StreamFlow'] %}
     {% if key in report.return_periods %}
         {% if extraneous %}
             {% include("reports/wepp/_return_period_extraneous_table.htm") %}
