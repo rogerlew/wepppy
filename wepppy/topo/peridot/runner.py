@@ -49,7 +49,7 @@ def run_peridot_abstract_watershed(
     if verbose:
         print(' '.join(cmd))
 
-    _log = open(_join(wd, '_peridot.log'), 'w')
+    _log = open(_join(wd, 'watershed/_peridot.log'), 'w')
     p = Popen(cmd, stdout=_log, stderr=_log)
     p.wait()
 
@@ -84,7 +84,7 @@ def run_peridot_wbt_abstract_watershed(
     if verbose:
         print(' '.join(cmd))
 
-    _log = open(_join(wd, '_peridot.log'), 'w')
+    _log = open(_join(wd, 'watershed/_peridot.log'), 'w')
     p = Popen(cmd, stdout=_log, stderr=_log)
     p.wait()
 
