@@ -1884,8 +1884,32 @@ class Wepp(NoDbBase, LogMixin):
         if not _exists(src_fn):
             src_fn = _join(wat_dir, 'channels.slp')
 
-        dst_fn = _join(runs_dir, 'pw0.slp')
-        _copyfile(src_fn, dst_fn)
+
+        with open(src_fn) as f:
+            lines = f.readlines()
+            version = lines[0].strip()
+
+            if version.startswith('2023'):
+                with open(_join(runs_dir, 'pw0.slp'), 'w') as f:
+                    f.write('99')
+                    n_chns = int(lines[1].strip())
+
+                    i = 2
+                    for j in range(n_chns):
+                        aspect, width, elevation, order = lines[i].strip().split()
+                        width = float(width)
+                        if width < 0.305:
+                            width = 0.305
+
+                        f.write(f'\n{aspect} {width}\n')
+                        f.write(lines[i])
+                        f.write(lines[i + 1])
+                        f.write(lines[i + 2])
+
+                        i += 3
+            else:
+                dst_fn = _join(runs_dir, 'pw0.slp')
+                _copyfile(src_fn, dst_fn)
 
     def _prep_channel_chn(self, translator, erodibility, critical_shear,
                           channel_routing_method=ChannelRoutingMethod.MuskingumCunge,
