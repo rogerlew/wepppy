@@ -889,7 +889,7 @@ class Ron(NoDbBase):
         _watershed = None
         if _exists(_join(wd, 'watershed/channels.parquet')):
             from .duckdb_agents import get_watershed_chn_summary
-            _watershed = get_watershed_chn_summary(wd, topaz_id=topaz_id).as_dict()
+            _watershed = get_watershed_chn_summary(wd, topaz_id=topaz_id)
             chn_enum = _watershed['chn_enum']
             wepp_id = _watershed['wepp_id']
         else:
