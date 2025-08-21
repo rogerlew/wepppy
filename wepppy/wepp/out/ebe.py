@@ -11,6 +11,7 @@ from datetime import datetime
 import pandas as pd
 
 from wepppy.wepp.out import Loss
+from wepppy.topo.watershed_abstraction import WeppTopTranslator
 
 
 def _get_lines(fn):
@@ -55,7 +56,7 @@ class HillslopeEbe(object):
 
 
 class Ebe(object):
-    def __init__(self, fn):
+    def __init__(self, fn, wepp_top_translator: WeppTopTranslator = None):
         lines = _get_lines(fn)
 
         header = ['da', 'mo', 'year',
@@ -65,9 +66,10 @@ class Ebe(object):
                   'Sediment Yield (kg)',
                   'Soluble Reactive P (kg)',
                   'Particulate P (kg)',
-                  'Total P (kg)']
+                  'Total P (kg)',
+                  'WeppID']
 
-        units = [int, int, int, float, float, float, float, float, float, float]
+        units = [int, int, int, float, float, float, float, float, float, float, int]
 
         data = [[u(v) for v, u in zip(L.split(), units)] for L in lines]
         data = list(map(list, zip(*data)))
@@ -80,6 +82,10 @@ class Ebe(object):
             df[colname] = L
 
         df['Sed. Del (kg)'] = df['Sediment Yield (kg)']
+
+        if wepp_top_translator is not None:
+            header.append('TopazID')
+            df['TopazID'] = df['WeppID'].apply(wepp_top_translator.top)
 
         self.df = df
         self.years = int(max(df['year']))
@@ -103,6 +109,9 @@ if __name__ == "__main__":
     from time import time
     from os.path import exists as _exists
 
+    from wepppy.nodb import Watershed
+
+    translator = Watershed.getInstanceFromRunID('rlew-confirmed-complementarity/').translator_factory()
 
     ebe_fn = '/wc1/runs/rl/rlew-confirmed-complementarity/wepp/output/ebe_pw0.txt'
     ebe_parquet = ebe_fn.replace('.txt', '.parquet')
@@ -113,7 +122,7 @@ if __name__ == "__main__":
 
         t0 = time()
         ebe_fn = '/wc1/runs/rl/rlew-confirmed-complementarity/wepp/output/ebe_pw0.txt'
-        ebe = Ebe(ebe_fn)
+        ebe = Ebe(ebe_fn, wepp_top_translator=translator)
         ebe.to_parquet(ebe_parquet)
         elapsed = time() - t0
         times.append(elapsed)

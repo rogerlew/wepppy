@@ -4438,28 +4438,36 @@ def report_wepp_return_periods(runid, config):
     except:
         exclude_months = None
 
-    # get method and gringorten_correction
-    # method default is cta gringorten_correction default is False
-    method = request.args.get('method', 'cta')
-    if method not in ['cta', 'am']:
-        return error_factory('method must be either cta or am')
-    
-    gringorten_correction = request.args.get('gringorten_correction', 'false').lower() == 'true'
-
     try:
-        wd = get_wd(runid)
+        # get method and gringorten_correction
+        # method default is cta gringorten_correction default is False
+        method = request.args.get('method', 'cta')
+        if method not in ['cta', 'am']:
+            return error_factory('method must be either cta or am')
+        
+        gringorten_correction = request.args.get('gringorten_correction', 'false').lower() == 'true'
+
         extraneous = request.args.get('extraneous', None) == 'true'
+
+        chn_topaz_id_of_interest = request.args.get('chn_topaz_id_of_interest', None)
+        if chn_topaz_id_of_interest is not None:
+            chn_topaz_id_of_interest = int(chn_topaz_id_of_interest)
+
+        wd = get_wd(runid)
 
         climate = Climate.getInstance(wd)
         rec_intervals = _parse_rec_intervals(request, climate.years)
 
         ron = Ron.getInstance(wd)
-        report = Wepp.getInstance(wd).report_return_periods(
+        wepp = Wepp.getInstance(wd)
+        report = wepp.report_return_periods(
             rec_intervals=rec_intervals, 
             exclude_yr_indxs=exclude_yr_indxs,
             method=method, 
             gringorten_correction=gringorten_correction, 
-            exclude_months=exclude_months)
+            exclude_months=exclude_months,
+            chn_topaz_id_of_interest=chn_topaz_id_of_interest
+        )
 
         translator = Watershed.getInstance(wd).translator_factory()
 
@@ -4467,6 +4475,8 @@ def report_wepp_return_periods(runid, config):
 
         return render_template('reports/wepp/return_periods.htm',
                                extraneous=extraneous,
+                               chn_topaz_id_of_interest=chn_topaz_id_of_interest,
+                               chn_topaz_id_options=wepp.chn_topaz_ids_of_interest,
                                gringorten_correction=gringorten_correction,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,

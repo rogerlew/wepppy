@@ -3,28 +3,49 @@
 {% block report_content %}
 <h3>WEPPcloud Return Period Analysis</h3>
 
-<select id="yearSelection" class="form-control" style="width: 200px;">
-  <option value="./?extraneous={{ extraneous | tojson }}" {{ 'selected' if report.exclude_yr_indxs is none }}>
-    All years included
-  </option>
-  <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0" {{ 'selected' if
-    report.exclude_yr_indxs==[0] }}>
-    Exclude first year
-  </option>
-  <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0,1" {{ 'selected' if
-    report.exclude_yr_indxs==[0, 1] }}>
-    Exclude first two years
-  </option>
-  <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0,1,2,3,4" {{ 'selected' if
-    report.exclude_yr_indxs==[0, 1, 2, 3, 4] }}>
-    Exclude first five years
-  </option>
-  {% if report.exclude_yr_indxs and report.exclude_yr_indxs not in ([], [0], [0,1], [0,1,2,3,4]) %}
-  <option value="./?exclude_yr_indxs={{ report.exclude_yr_indxs|join(',') }}" selected>
-    Custom: {{ report.exclude_yr_indxs|join(', ') }}
-  </option>
-  {% endif %}
-</select>
+<div class="mt-2">
+  <label for="yearSelection">Year Selection:</label>
+  <select id="yearSelection" class="form-control" style="width: 200px;">
+    <option value="./?extraneous={{ extraneous | tojson }}" {{ 'selected' if report.exclude_yr_indxs is none }}>
+      All years included
+    </option>
+    <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0" {{ 'selected' if
+      report.exclude_yr_indxs==[0] }}>
+      Exclude first year
+    </option>
+    <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0,1" {{ 'selected' if
+      report.exclude_yr_indxs==[0, 1] }}>
+      Exclude first two years
+    </option>
+    <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0,1,2,3,4" {{ 'selected' if
+      report.exclude_yr_indxs==[0, 1, 2, 3, 4] }}>
+      Exclude first five years
+    </option>
+    {% if report.exclude_yr_indxs and report.exclude_yr_indxs not in ([], [0], [0,1], [0,1,2,3,4]) %}
+    <option value="./?exclude_yr_indxs={{ report.exclude_yr_indxs|join(',') }}" selected>
+      Custom: {{ report.exclude_yr_indxs|join(', ') }}
+    </option>
+    {% endif %}
+  </select>
+</div>
+
+<br />
+
+<!-- Channel of interest -->
+<div class="mt-2" {% if chn_topaz_id_options|length < 2 %} style="display: none;" {% endif %}>
+  <label for="chnTopazSelect">Channel of Interest:</label>
+  <select id="chnTopazSelect" class="form-control" style="width: 200px;">
+    {% for topaz_id in (chn_topaz_id_options|sort) %}
+    <option value="{{ topaz_id }}" {{ 'selected' if chn_topaz_id_of_interest==topaz_id }}>
+      {% if topaz_id == 24 %}
+      Outlet (24)
+      {% else %}
+      Channel {{ topaz_id }}
+      {% endif %}
+    </option>
+    {% endfor %}
+  </select>
+</div>
 
 <!-- Advanced Options -->
 <div class="mt-3">
@@ -245,7 +266,7 @@ Courtesy of William J. Elliot
       if (clearBtn) clearBtn.addEventListener('click', () => boxes().forEach(cb => cb.checked = false));
       if (allBtn) allBtn.addEventListener('click', () => boxes().forEach(cb => cb.checked = true));
     }
-    
+
     // yearSelection: preserve extraneous + other advanced params
     const sel = document.getElementById('yearSelection');
     if (sel) {
@@ -253,16 +274,25 @@ Courtesy of William J. Elliot
         const target = new URL(this.value, window.location.href);
         const cur = new URL(window.location.href);
 
-        // Carry over these params if present on current URL
-        ['gringorten_correction', 'exclude_months', 'extraneous'].forEach(k => {
-          if (cur.searchParams.has(k)) {
-            target.searchParams.set(k, cur.searchParams.get(k));
-          } else {
-            target.searchParams.delete(k);
-          }
-        });
+        ['gringorten_correction', 'exclude_months', 'extraneous', 'chn_topaz_id_of_interest']
+          .forEach(k => {
+            if (cur.searchParams.has(k)) target.searchParams.set(k, cur.searchParams.get(k));
+            else target.searchParams.delete(k);
+          });
 
         window.location.href = target.pathname + '?' + target.searchParams.toString();
+      });
+    }
+
+    // Channel select: set/remove chn_topaz_id_of_interest, preserve others
+    const chnSel = document.getElementById('chnTopazSelect');
+    if (chnSel) {
+      chnSel.addEventListener('change', function () {
+        const url = new URL(window.location.href);
+        const v = (this.value || '').trim();
+        if (v) url.searchParams.set('chn_topaz_id_of_interest', v);
+        else url.searchParams.delete('chn_topaz_id_of_interest');
+        window.location.href = url.pathname + '?' + url.searchParams.toString();
       });
     }
 

@@ -19,9 +19,11 @@ class ReturnPeriods:
                  cli_df: DataFrame = None, 
                  recurrence=(2, 5, 10, 20, 25),
                  exclude_yr_indxs=None,
-                 method='cta', gringorten_correction=False, 
+                 method='cta', 
+                 gringorten_correction=False, 
                  totwatsed2: TotalWatSed2=None,
-                 exclude_months=None):
+                 exclude_months: list[int] = None,
+                 chn_topaz_id_of_interest: int = None):
         """
         Args:
             ebe (Ebe): The event by event  report.
@@ -32,26 +34,40 @@ class ReturnPeriods:
             method (str): The method used to calculate the return periods. Options are 'cta' (default) complete time series analysis or 'am' or annual maxima.
             gringorten_correction (bool): If True, applies the Gringorten correction to the Weibull formula.
             totwatsed2 (pandas.DataFrame or None): if not None provides Hill SedDel and Hill Streamflow
+            exclude_months (list): A list of months to exclude from the analysis. e.g. January -> 1, February -> 2, ...
+            chn_topaz_id_of_interest (int): The Topaz ID of the channel of interest.
         """
 
         if ebe is None or loss is None or cli_df is None:
             return
 
+        # loss is used to set these attributes
         self.has_phosphorus = loss.has_phosphorus
+        self.wsarea = wsarea = loss.wsarea
 
+        # copy the ebe to avoid potential consequencies of modifying the ebe by reference
         df = deepcopy(ebe.df)
 
+        # filter the channel topaz id of interest
+        if chn_topaz_id_of_interest is None:
+            chn_topaz_id_of_interest = 24
+        
+        df = df[df['TopazID'] == int(chn_topaz_id_of_interest)]
+
+        # load in climate measures
         df['10-min Peak Rainfall Intensity'] = cli_df['10-min Peak Rainfall Intensity (mm/hour)']
         if '15-min Peak Rainfall Intensity (mm/hour)' in cli_df:
             df['15-min Peak Rainfall Intensity'] = cli_df['15-min Peak Rainfall Intensity (mm/hour)']
         df['30-min Peak Rainfall Intensity'] = cli_df['30-min Peak Rainfall Intensity (mm/hour)']
         df['Storm Duration'] = cli_df['dur']
 
+        # load in hillslope measures
         if totwatsed2 is not None:
             wsarea_m2 = totwatsed2.wsarea
             df['Hill Sed Del'] = totwatsed2.d['Sed Del (kg)'] / 1000.0  # tonne
             df['Hill Streamflow'] = totwatsed2.d['Streamflow (mm)']
 
+        # filter by exclude_yr_indxs
         _years = sorted(set(df['year']))
         _y0 = _years[0]
         if exclude_yr_indxs is not None:
@@ -64,23 +80,26 @@ class ReturnPeriods:
 
             df = df[df['year'].isin(_years)]
 
+        # filter by exclude_months
         if exclude_months is not None:
             df = df[~df['mo'].isin(exclude_months)]
 
+        # build the header for the view
         header = list(df.keys())
         header.remove('da')
         header.remove('mo')
         header.remove('year')
 
+        # save attributes
         self.header = header
         self.method = method
         self.gringorten_correction = gringorten_correction
         self.y0 = _y0
         self.years = years = len(_years)
-        self.wsarea = wsarea = loss.wsarea
         self.recurrence = recurrence = sorted(recurrence)
         self.exclude_yr_indxs = exclude_yr_indxs
 
+        # do the return period analysis
         rec = weibull_series(recurrence, years, 
                              method=method, gringorten_correction=gringorten_correction)
 
