@@ -32,6 +32,12 @@
       <th class="{{ 'table-active' if key == 'Storm Duration' }}">Storm Duration</th>
       {% endif %}
       <th class="{{ 'table-active' if key == 'Sediment Yield' }}">Sediment Yield</th>
+      {% if 'Hillslope Sed Del' in report.return_periods %}
+      <th class="{{ 'table-active' if key == 'Hillslope Sed Del' }}">Hillslope Sed Del</th>
+      {% endif %}
+      {% if 'Hillslope Streamflow' in report.return_periods %}
+      <th class="{{ 'table-active' if key == 'Hillslope Streamflow' }}">Hillslope Streamflow</th>
+      {% endif %}
       {% if report.has_phosphorus %}
       <th class="{{ 'table-active' if key == 'Soluble Reactive P' }}">Soluble Reactive P</th>
       <th class="{{ 'table-active' if key == 'Particulate P' }}">Particulate P</th>
@@ -67,6 +73,14 @@
       {% endif %}
       <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{ unitizer_units(report.units_d['Sediment Yield']) |
         safe }}</td>
+      {% if 'Hillslope Sed Del' in report.return_periods %}
+      <td class="{{ 'table-active' if key == 'Hillslope Sed Del' }}">{{ unitizer_units(report.units_d['Hillslope Sed Del']) |
+        safe }}</td>
+      {% endif %}
+      {% if 'Hillslope Streamflow' in report.return_periods %}
+      <td class="{{ 'table-active' if key == 'Hillslope Streamflow' }}">{{ unitizer_units(report.units_d['Hillslope Streamflow']) |
+        safe }}</td>
+      {% endif %}
       {% if report.has_phosphorus %}
       <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{ unitizer_units(report.units_d['Soluble Reactive
         P']) | safe }}</td>
@@ -118,6 +132,16 @@
       <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{
         unitizer(report.return_periods[key][rec_interval]['Sediment Yield'],
         report.units_d['Sediment Yield']) | safe }}</td>
+      {% if 'Hillslope Sed Del' in report.return_periods %}
+      <td class="{{ 'table-active' if key == 'Hillslope Sed Del' }}">
+        {{ dash_if_zero(report.return_periods[key][rec_interval]['Hillslope Sed Del'], report.units_d['Hillslope Sed Del']) }}
+      </td>
+      {% endif %}
+      {% if 'Hillslope Streamflow' in report.return_periods %}
+      <td class="{{ 'table-active' if key == 'Hillslope Streamflow' }}">
+        {{ dash_if_zero(report.return_periods[key][rec_interval]['Hillslope Streamflow'], report.units_d['Hillslope Streamflow']) }}
+      </td>
+      {% endif %}
       {% if report.has_phosphorus %}
       <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{
         unitizer(report.return_periods[key][rec_interval]['Soluble Reactive P'],
