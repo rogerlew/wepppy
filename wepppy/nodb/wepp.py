@@ -448,6 +448,9 @@ class Wepp(NoDbBase, LogMixin):
             self._dss_excluded_channel_orders = self.config_get_list('wepp', 'dss_excluded_channel_orders', [1, 2])  # view model property
             self._dss_export_channel_ids = [] # specifies which channels are exported
 
+            self._dtchr_override = None
+            self._chn_topaz_ids_of_interest = [24]
+
             self.run_flowpaths = False
             self.loss_grid_d_path = None
 
@@ -761,6 +764,24 @@ class Wepp(NoDbBase, LogMixin):
             _wepp_bin = kwds.get('wepp_bin', None)
             if _wepp_bin is not None:
                 self._wepp_bin = _wepp_bin
+
+            _dtchr_override = kwds.get('dtchr_override', None)
+            if isfloat(_dtchr_override):
+                _dtchr_override = int(_dtchr_override)
+                if _dtchr_override < 60:
+                    raise ValueError("dtchr_override must be at least 60")
+                self._dtchr_override = _dtchr_override
+
+            _chn_topaz_ids_of_interest = kwds.get('chn_topaz_ids_of_interest', None)
+            if _chn_topaz_ids_of_interest is not None:
+                if ',' in _chn_topaz_ids_of_interest:
+                    _chn_topaz_ids_of_interest = _chn_topaz_ids_of_interest.split(',')
+                elif ' ' in _chn_topaz_ids_of_interest:
+                    _chn_topaz_ids_of_interest = _chn_topaz_ids_of_interest.split(' ')
+                else:
+                    _chn_topaz_ids_of_interest = [_chn_topaz_ids_of_interest]
+                _chn_topaz_ids_of_interest = [int(v) for v in _chn_topaz_ids_of_interest]
+                self._chn_topaz_ids_of_interest = _chn_topaz_ids_of_interest
 
             self.dump_and_unlock()
 
@@ -1976,27 +1997,70 @@ class Wepp(NoDbBase, LogMixin):
         with open(_join(runs_dir, 'pw0.imp'), 'w') as fp:
             fp.write('99.1\n0\n')
 
-    def _prep_channel_input(self):
+    @property
+    def dtchr_override(self):
+        if hasattr(self, '_dtchr_override'):
+            return self._dtchr_override
+        return None
 
-        wat = Watershed.getInstance(self.wd)
+    @dtchr_override.setter
+    def dtchr_override(self, value: int):
+        if value < 60:
+            raise ValueError(f"Expected dtchr_override to be at least 60, got {value}")
+
+        self.lock()
+
+        try:
+            self._dtchr_override = value
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def chn_topaz_ids_of_interest(self):
+        if hasattr(self, '_chn_topaz_ids_of_interest'):
+            if not self._chn_topaz_ids_of_interest:
+                return [24]
+            return self._chn_topaz_ids_of_interest
+        return [24]
+    
+    @chn_topaz_ids_of_interest.setter
+    def chn_topaz_ids_of_interest(self, value: list[int]):
+        for topaz_id in value:
+            if not str(topaz_id).endswith("4"):
+                raise ValueError(f"Expected topaz_id to end with '4', got {topaz_id}")
+
+        self.lock()
+
+        try:
+            self._chn_topaz_ids_of_interest = [int(v) for v in value]
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _prep_channel_input(self):
+        translator = Watershed.getInstance(self.wd).translator_factory()
         climate = Climate.getInstance(self.wd)
 
-        chn_n = wat.chn_n
-        sub_n = wat.sub_n
-        total = chn_n + sub_n
-
-        flag = 1
-        rate = 600
+        ichout = 1
+        dtchr = 600
         if climate.is_single_storm:  # and climate.is_breakpoint:
-            flag = 3
-            rate = 60
+            ichout = 3
+            dtchr = 60
+
+        if hasattr(self, '_dtchr_override'):
+            if isint(self._dtchr_override):
+                dtchr = self._dtchr_override
+
+        ichnum = [int(translator.wepp(top=topaz_id)) for topaz_id in self.chn_topaz_ids_of_interest]
+        nchnum = len(ichnum)
+        ichnum_str = ' '.join(map(str, ichnum))
 
         runs_dir = self.runs_dir
         with open(_join(runs_dir, 'chan.inp'), 'w') as fp:
-            # 1 is the Peak Flow time and rate, 600s is the interval
-            # 2 Daily average discharge, 600 probably doesn't do anything
-
-            fp.write(f'{flag} {rate}\n0\n1\n{total}\n') ## TODO: specify multiple channel ids for dss
+            fp.write(f'{ichout} {dtchr}\n0\n{nchnum}\n{ichnum_str}\n')
 
     def _prep_channel_soils(self, translator, erodibility, critical_shear, avke=None):
 
