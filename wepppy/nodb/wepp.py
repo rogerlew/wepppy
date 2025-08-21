@@ -1901,7 +1901,7 @@ class Wepp(NoDbBase, LogMixin):
                         if width < 0.305:
                             width = 0.305
 
-                        f.write(f'\n{aspect} {width}\n')
+                        f.write(f'{aspect} {width}\n')
                         f.write(lines[i + 1])
                         f.write(lines[i + 2])
 
