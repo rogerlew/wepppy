@@ -4426,9 +4426,17 @@ def report_wepp_return_periods(runid, config):
         for yr in res.split(','):
             if isint(yr):
                 exclude_yr_indxs.append(int(yr))
-
     except:
         exclude_yr_indxs = None
+
+    try:
+        res = request.args.get('exclude_months')
+        exclude_months = []
+        for month in res.split(','):
+            if isint(month):
+                exclude_months.append(int(month))
+    except:
+        exclude_months = None
 
     # get method and gringorten_correction
     # method default is cta gringorten_correction default is False
@@ -4447,15 +4455,19 @@ def report_wepp_return_periods(runid, config):
 
         ron = Ron.getInstance(wd)
         report = Wepp.getInstance(wd).report_return_periods(
-            rec_intervals=rec_intervals, exclude_yr_indxs=exclude_yr_indxs,
-            method=method, gringorten_correction=gringorten_correction)
-        
+            rec_intervals=rec_intervals, 
+            exclude_yr_indxs=exclude_yr_indxs,
+            method=method, 
+            gringorten_correction=gringorten_correction, 
+            exclude_months=exclude_months)
+
         translator = Watershed.getInstance(wd).translator_factory()
 
         unitizer = Unitizer.getInstance(wd)
 
         return render_template('reports/wepp/return_periods.htm',
                                extraneous=extraneous,
+                               gringorten_correction=gringorten_correction,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                report=report,

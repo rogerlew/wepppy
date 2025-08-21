@@ -2360,28 +2360,41 @@ class Wepp(NoDbBase, LogMixin):
     def report_return_periods(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
                               exclude_yr_indxs=None, 
                               method='cta', gringorten_correction=True, 
-                              meoization=True):
+                              meoization=True,
+                              exclude_months=None):
 
         output_dir = self.output_dir
 
         return_periods_fn = None
         if meoization:
-            if exclude_yr_indxs is None:
-                return_periods_fn = _join(output_dir, 'return_periods.json')
-            else:
-                x = ','.join(str(v) for v in exclude_yr_indxs)
-                return_periods_fn = _join(output_dir, f'return_periods__exclude_yr_indxs={x}.json')
+            # Normalize inputs: treat None/[] the same; dedupe+sort; keep as tuples or None
+            req_yrs = None if not exclude_yr_indxs else tuple(sorted({int(x) for x in exclude_yr_indxs}))
+            req_mos = None if not exclude_months    else tuple(sorted({int(x) for x in exclude_months}))
 
+            # Build cache filename
+            parts = []
+            if req_yrs:
+                parts.append("exclude_yr_indxs=" + ",".join(map(str, req_yrs)))
+            if req_mos:
+                parts.append("exclude_months=" + ",".join(map(str, req_mos)))
+            if gringorten_correction:
+                parts.append("gringorten_correction=True")
+            suffix = ("__" + "__".join(parts)) if parts else ""
+            return_periods_fn = _join(output_dir, f"return_periods{suffix}.json")
+
+            # Lazy load if cache exists and matches request args
             if _exists(return_periods_fn):
                 with open(return_periods_fn) as fp:
                     report = ReturnPeriods.from_dict(json.load(fp))
-                    if exclude_yr_indxs is None and report.exclude_yr_indxs is None:
-                        return report
-                    elif exclude_yr_indxs is None or report.exclude_yr_indxs is None:
-                        pass
-                    elif list(sorted(exclude_yr_indxs)) == list(sorted(report.exclude_yr_indxs)):
-                        return report
 
+                rep_yrs = getattr(report, "exclude_yr_indxs", None)
+                rep_mos = getattr(report, "exclude_months", None)
+                rep_yrs = None if not rep_yrs else tuple(sorted({int(x) for x in rep_yrs}))
+                rep_mos = None if not rep_mos else tuple(sorted({int(x) for x in rep_mos}))
+
+                if req_yrs == rep_yrs and req_mos == rep_mos:
+                    return report
+                
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
@@ -2397,7 +2410,8 @@ class Wepp(NoDbBase, LogMixin):
         return_periods = ReturnPeriods(ebe_rpt, loss_rpt, cli_df, recurrence=rec_intervals,
                                        exclude_yr_indxs=exclude_yr_indxs,
                                        method=method, gringorten_correction=gringorten_correction,
-                                       totwatsed2=totwatsed2)
+                                       totwatsed2=totwatsed2,
+                                       exclude_months=exclude_months)
 
         if return_periods_fn is not None:
             with open(return_periods_fn, 'w') as fp:

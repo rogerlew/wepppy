@@ -20,7 +20,8 @@ class ReturnPeriods:
                  recurrence=(2, 5, 10, 20, 25),
                  exclude_yr_indxs=None,
                  method='cta', gringorten_correction=False, 
-                 totwatsed2: TotalWatSed2 = None):
+                 totwatsed2: TotalWatSed2=None,
+                 exclude_months=None):
         """
         Args:
             ebe (Ebe): The event by event  report.
@@ -62,6 +63,9 @@ class ReturnPeriods:
             _years = __years
 
             df = df[df['year'].isin(_years)]
+
+        if exclude_months is not None:
+            df = df[~df['mo'].isin(exclude_months)]
 
         header = list(df.keys())
         header.remove('da')
