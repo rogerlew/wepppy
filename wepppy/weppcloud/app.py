@@ -4591,20 +4591,25 @@ def query_ron_chn_summary(runid, config, topaz_id):
 @app.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>')
 @app.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>/')
 def query_ron_sub_summary(runid, config, topaz_id):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    return jsonify(ron.sub_summary(topaz_id))
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        return jsonify(ron.sub_summary(topaz_id))
+    except Exception:
+        return exception_factory(runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>')
 @app.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>/')
 def report_ron_chn_summary(runid, config, topaz_id):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    return render_template('reports/hill.htm',
-                           ron=ron,
-                           d=ron.chn_summary(topaz_id))
-
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        return render_template('reports/hill.htm',
+                            ron=ron,
+                            d=ron.chn_summary(topaz_id))
+    except Exception:
+        return exception_factory(runid=runid)
 
 @app.route('/runs/<string:runid>/<config>/query/topaz_wepp_map')
 @app.route('/runs/<string:runid>/<config>/query/topaz_wepp_map/')
