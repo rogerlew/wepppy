@@ -49,7 +49,7 @@ class ReturnPeriods:
         if totwatsed2 is not None:
             wsarea_m2 = totwatsed2.wsarea
             df['Hill Sed Del'] = totwatsed2.d['Sed Del (kg)'] / 1000.0  # tonne
-            df['Hill Streamflow'] = totwatsed2.d['Streamflow (mm)'] / 1000.0 * wsarea_m2  # m^3/s
+            df['Hill Streamflow'] = totwatsed2.d['Streamflow (mm)'] / 1000.0 * wsarea_m2  # m^3
 
         _years = sorted(set(df['year']))
         _y0 = _years[0]
@@ -132,7 +132,7 @@ class ReturnPeriods:
         self.units_d['Sediment Yield'] = 'tonne'
         self.units_d['Storm Duration'] = 'hours'
         self.units_d['Hill Sed Del'] = 'tonne'
-        self.units_d['Hill Streamflow'] = 'm^3/s'
+        self.units_d['Hill Streamflow'] = 'm^3'
 
     def to_dict(self):
         return {
