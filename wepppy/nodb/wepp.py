@@ -1902,7 +1902,6 @@ class Wepp(NoDbBase, LogMixin):
                             width = 0.305
 
                         f.write(f'\n{aspect} {width}\n')
-                        f.write(lines[i])
                         f.write(lines[i + 1])
                         f.write(lines[i + 2])
 
