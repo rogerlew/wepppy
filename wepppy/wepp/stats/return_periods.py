@@ -30,7 +30,7 @@ class ReturnPeriods:
             exclude_yr_indxs (list): A list of year indexes to exclude from the analysis.
             method (str): The method used to calculate the return periods. Options are 'cta' (default) complete time series analysis or 'am' or annual maxima.
             gringorten_correction (bool): If True, applies the Gringorten correction to the Weibull formula.
-            totwatsed2 (pandas.DataFrame or None): if not None provides Hill SedDel and Hill StreamFlow
+            totwatsed2 (pandas.DataFrame or None): if not None provides Hill SedDel and Hill Streamflow
         """
 
         if ebe is None or loss is None or cli_df is None:
