@@ -1891,8 +1891,9 @@ class Wepp(NoDbBase, LogMixin):
 
             if version.startswith('2023'):
                 with open(_join(runs_dir, 'pw0.slp'), 'w') as f:
-                    f.write('99')
+                    f.write('99.1\n')
                     n_chns = int(lines[1].strip())
+                    f.write(f'{n_chns}\n')
 
                     i = 2
                     for j in range(n_chns):
