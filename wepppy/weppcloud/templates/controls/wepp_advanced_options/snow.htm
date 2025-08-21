@@ -1,12 +1,14 @@
 <h5>Snow</h5>
 <p>Adjustments for snow.</p>
 <div style="padding-left:3em;">
-<label class="form-check-label">
-    <input id="checkbox_wepp_snow" type="checkbox" class="form-check-input disable-readonly"
-     onchange="Wepp.getInstance().set_run_wepp_routine('snow', this.checked);"
-     {% if wepp.run_snow %}checked{% endif %}>
-    Run Snow (snow.txt)
-</label>
+    <label class="form-check-label">
+        <input id="checkbox_wepp_snow" type="checkbox" class="form-check-input disable-readonly"
+            onchange="Wepp.getInstance().set_run_wepp_routine('snow', this.checked);" {% if wepp.run_snow %}checked{%
+            endif %}>
+        Write Snow (snow.txt)
+    </label><small class="form-text text-muted">
+        Internal defaults are used if snow.txt is not written.</code>
+    </small>
 </div>
 
 <div class="form-group row" id="snow_opts_rst_container">
@@ -15,7 +17,7 @@
     </div>
     <div class="col-sm-4">
         <input id="snow_opts_rst" name="snow_opts_rst" class="form-control mr-sm-3" type="text"
-         value="{{ wepp.snow_opts.rst }}" aria-label="Rain Snow Threshold">
+            value="{{ wepp.snow_opts.rst }}" aria-label="Rain Snow Threshold">
     </div>
 </div>
 
@@ -25,7 +27,7 @@
     </div>
     <div class="col-sm-4">
         <input id="snow_opts_newsnw" name="snow_opts_newsnw" class="form-control mr-sm-3" type="text"
-         value="{{ wepp.snow_opts.newsnw }}" aria-label="Density of New Snow">
+            value="{{ wepp.snow_opts.newsnw }}" aria-label="Density of New Snow">
     </div>
 </div>
 
@@ -35,6 +37,6 @@
     </div>
     <div class="col-sm-4">
         <input id="snow_opts_ssd" name="snow_opts_ssd" class="form-control mr-sm-3" type="text"
-         value="{{ wepp.snow_opts.ssd }}" aria-label="Snow Settling Density">
+            value="{{ wepp.snow_opts.ssd }}" aria-label="Snow Settling Density">
     </div>
 </div>
