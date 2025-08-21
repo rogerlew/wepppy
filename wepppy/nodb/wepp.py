@@ -1898,6 +1898,11 @@ class Wepp(NoDbBase, LogMixin):
                     i = 2
                     for j in range(n_chns):
                         aspect, width, elevation, order = lines[i].strip().split()
+
+                        aspect = float(aspect)
+                        if aspect < 0.0:
+                            aspect += 360.0
+
                         width = float(width)
                         if width < 0.305:
                             width = 0.305
