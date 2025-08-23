@@ -124,28 +124,21 @@ function onReady() {
 
     function findAndFlash(idType) {
         const val = getInputValue();
-        const features = sub_ctrl.glLayer._shapes.features;
 
-        const hit = features.find(f => featureMatches(f, idType, val));
+        const collectMatches = (ctrl) =>
+            (ctrl?.glLayer?._shapes?.features ?? []).filter(f => featureMatches(f, idType, val));
 
-        if (!hit) {
+        let hits = collectMatches(sub_ctrl);
+        if (hits.length === 0) {
+            hits = collectMatches(channel_ctrl);
+        }
+
+        if (hits.length === 0) {
             console.warn(`No feature with ${idType} = ${val}`);
             return;
         }
 
-        // Re-use your flash routine
-        flashPolygon(
-            L.geoJSON(hit, {
-                style: {
-                    color: "#ffffff",
-                    weight: 3,
-                    opacity: 1,
-                    fillColor: "#ffffff",
-                    fillOpacity: 1.0
-                },
-                pane: 'markerCustomPane'
-            })
-        );
+        flashFeatures(hits, { duration: 1000, fit: false });
     }
 
     document.getElementById('btn_find_topaz_id')
@@ -154,12 +147,32 @@ function onReady() {
     document.getElementById('btn_find_wepp_id')
         .addEventListener('click', () => findAndFlash('WeppID'));
 
-    function flashPolygon(layer) {
-        layer.addTo(map);
-        // map.fitBounds(layer.getBounds());     // optional: zoom to the hit
-        setTimeout(() => map.removeLayer(layer), 1000);
+    function flashFeatures(features, { duration = 1000, fit = false } = {}) {
+    // Ensure pane exists and sits above vector layers
+    if (!map.getPane('markerCustomPane')) {
+        map.createPane('markerCustomPane');
+        map.getPane('markerCustomPane').style.zIndex = 650;
     }
 
+    const layer = L.geoJSON(
+        { type: "FeatureCollection", features },
+        {
+        style: {
+            color: "#ffffff",
+            weight: 3,
+            opacity: 1,
+            fillColor: "#ffffff",
+            fillOpacity: 1.0
+        },
+        pane: "markerCustomPane",
+        interactive: false
+        }
+    ).addTo(map);
+
+    if (fit) map.fitBounds(layer.getBounds());
+
+    setTimeout(() => map.removeLayer(layer), duration);
+    }
 
     team.hideStacktrace();
     channel_ctrl.hideStacktrace();
