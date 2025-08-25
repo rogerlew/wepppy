@@ -5394,6 +5394,13 @@ def report_contaminant(runid, config):
 def combined_ws_viewer():
     return render_template('combined_ws_viewer.htm')
 
+
+@app.route('/combined_ws_viewer2')
+@app.route('/combined_ws_viewer2/')
+def combined_ws_viewer2():
+    return render_template('combined_ws_viewer2.j2')
+
+
 @app.route('/bounds_ws_viewer')
 @app.route('/bounds_ws_viewer/')
 def bounds_ws_viewer():
