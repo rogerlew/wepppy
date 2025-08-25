@@ -301,14 +301,15 @@ def run_wepp_rq(runid):
                 job.meta['jobs:5,func:_run_hillslope_watbal_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
-
-                _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
-                job.meta['jobs:5,func:_post_make_loss_grid_rq'] = _job.id
-                jobs5_post.append(_job)
-                job.save()
                 
                 _job = q.enqueue_call(_analyze_return_periods_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_analyze_return_periods_rq'] = _job.id
+                jobs5_post.append(_job)
+                job.save()
+
+            if not wepp.multi_ofe:
+                _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
+                job.meta['jobs:5,func:_post_make_loss_grid_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
 

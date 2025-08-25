@@ -1091,13 +1091,20 @@ class Disturbed(NoDbBase):
                     key = (texid, man.disturbed_class)
                     replacements = _land_soil_replacements_d.get(key, None)
 
-                    if replacements is None:
+                    if replacements is None:  # e.g. developed low intensity
+                        if sol_ver == 9002.0:
+                            replacements = dict(
+                                luse=man.disturbed_class,
+                                stext=texid,
+                                ksatfac=0.0,
+                                ksatrec=0.0
+                            )
+
                         disturbed_mukey = f'{mukey}-{texid}'
                     else:
                         disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
 
                     disturbed_fn = f'{disturbed_mukey}.sol'
-
                     if disturbed_mukey not in soils.soils:
                         _h0_max_om = None
                         if man.disturbed_class is not None:
@@ -1198,6 +1205,8 @@ class Disturbed(NoDbBase):
 
             key = (texid, man.disturbed_class)
             if key not in _land_soil_replacements_d:
+                # this is different from mofe.
+                # for mofe we have to migrate to 9002...
                 return mukey
 
             disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'

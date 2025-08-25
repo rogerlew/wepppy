@@ -14,6 +14,7 @@ from wepppy.all_your_base import try_parse, isfloat
 
 
 def _replace_parameter(original, replacement):
+    replacement = str(replacement)
     if replacement is None or replacement.lower().replace('none', '').strip() == '':
         return original
 
