@@ -1402,10 +1402,9 @@ class Wepp(NoDbBase, LogMixin):
             lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
 
             # slope files
-            if not omni:
-                src_fn = _join(wat_dir, slp_fn.replace('.slp', '.mofe.slp'))
-                dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-                _copyfile(src_fn, dst_fn)
+            src_fn = _join(wat_dir, f'slope_files/hillslopes/hill_{topaz_id}.mofe.slp')
+            dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
+            _copyfile(src_fn, dst_fn)
 
             # soils
             src_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
