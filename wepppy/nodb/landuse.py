@@ -678,12 +678,16 @@ class Landuse(NoDbBase, LogMixin):
             lc = LandcoverMap(self.lc_fn)
             domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
         else:
-            domlc_d = identify_mode_multiple_raster_key(
+            domlc_d = identify_mode_intersecting_raster_keys(
                 key_fn=watershed.subwta,
                 key2_fn=watershed.mofe_map,
                 parameter_fn=self.lc_fn
             )
 
+            for k, v in domlc_d.items():
+                for k2, v2 in v.items():
+                    domlc_d[k][k2] = str(v2)
+                    
         self.log(f'domlc_d = {domlc_d}')
         self.log_done()
 
