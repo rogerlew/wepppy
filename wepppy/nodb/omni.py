@@ -1199,11 +1199,41 @@ class Omni(NoDbBase, LogMixin):
         combined.to_parquet(out_path)
 
 
+    def compile_channel_summaries(self, exclude_yr_indxs=None):
+        from wepppy.nodb import Wepp
+        from wepppy.wepp.stats import ChannelSummary
+
+        scenario_wds = {str(self.base_scenario): self.wd}
+
+        for scenario_def in self.scenarios:
+            scenario = scenario_def.get('type')
+            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            scenario_wds[_scenario_name] = _join(self.wd, 'omni', 'scenarios', _scenario_name)
+
+        dfs = []
+        for scenario, wd in scenario_wds.items():
+            loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+            is_singlestorm = loss.is_singlestorm
+            channel_rpt = ChannelSummary(loss)
+            df = channel_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
+            df['scenario'] = scenario
+            dfs.append(df)
+
+        combined = pd.concat(dfs, ignore_index=True)
+
+        # WeppID,TopazID,Landuse,Soil,Length (m),Hillslope Area (ha),Runoff (mm),Lateral Flow (mm),Baseflow (mm),Soil Loss (kg/ha),Sediment Deposition (kg/ha),Sediment Yield (kg/ha),scenario
+
+
+        out_path = _join(self.wd, 'omni', 'scenarios.channel_summaries.parquet')
+        combined.to_parquet(out_path)
+
 # [x] add NTU
 # [ ] add NTU for outlet
-# [ ] revise mulching cover model
+# [x] revise mulching cover model
 # [ ] add peak runoff (50 yr)
 # [x] treat low and moderate severity conditions
-# [ ] rerun https://wepp.cloud/weppcloud/runs/rlew-indecorous-vest/disturbed9002/
-# [ ] run contrast scenarios
+# [x] rerun https://wepp.cloud/weppcloud/runs/rlew-indecorous-vest/disturbed9002/
+# [x] run contrast scenarios
 
+
+# [ ] solution scenario for PATH with specified treatments across hillslopes
