@@ -35,7 +35,6 @@ def run_peridot_abstract_watershed(
     bieger2015_widths: bool = False,
     verbose: bool = True
 ):
-    _log = open(_join(wd, 'watershed/_peridot.log'), 'a')
     assert _exists(_join(wd, 'dem/topaz/SUBWTA.ARC'))
 
     cmd = [_get_bin(), wd, '--ncpu', '24']
@@ -50,12 +49,9 @@ def run_peridot_abstract_watershed(
     if verbose:
         print(' '.join(cmd))
 
-    _log.write(' '.join(cmd) + '\n')
-
+    _log = open(_join(wd, '_peridot.log'), 'w')
     p = Popen(cmd, stdout=_log, stderr=_log)
     p.wait()
-
-    _log.close()
 
 def run_peridot_wbt_abstract_watershed(
     wd: str,
@@ -76,8 +72,6 @@ def run_peridot_wbt_abstract_watershed(
     """
     assert _exists(_join(wd, 'dem/wbt/subwta.tif'))
 
-    _log = open(_join(wd, 'watershed/_peridot.log'), 'a')
-
     cmd = [_get_wbt_bin(), wd, '--ncpu', '24']
 
     if clip_hillslopes:
@@ -90,12 +84,9 @@ def run_peridot_wbt_abstract_watershed(
     if verbose:
         print(' '.join(cmd))
 
-    _log.write(' '.join(cmd) + '\n')
-
+    _log = open(_join(wd, '_peridot.log'), 'w')
     p = Popen(cmd, stdout=_log, stderr=_log)
     p.wait()
-
-    _log.close()
 
 
 def post_abstract_watershed(wd: str, verbose: bool = True):
