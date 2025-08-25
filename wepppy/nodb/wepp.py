@@ -2361,7 +2361,8 @@ class Wepp(NoDbBase, LogMixin):
                               exclude_yr_indxs=None, 
                               method='cta', gringorten_correction=True, 
                               meoization=True,
-                              exclude_months=None):
+                              exclude_months=None,
+                              chn_topaz_id_of_interest=None):
 
         output_dir = self.output_dir
 
@@ -2378,7 +2379,9 @@ class Wepp(NoDbBase, LogMixin):
             if req_mos:
                 parts.append("exclude_months=" + ",".join(map(str, req_mos)))
             if gringorten_correction:
-                parts.append("gringorten_correction=True")
+                parts.append("gringorten=True")
+            if chn_topaz_id_of_interest is not None:
+                parts.append("chn_topaz_id=" + str(chn_topaz_id_of_interest))
             suffix = ("__" + "__".join(parts)) if parts else ""
             return_periods_fn = _join(output_dir, f"return_periods{suffix}.json")
 
@@ -2399,7 +2402,7 @@ class Wepp(NoDbBase, LogMixin):
         loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
         ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
-        ebe_rpt = Ebe(ebe_pw0)
+        ebe_rpt = Ebe(ebe_pw0, wepp_top_translator=self.watershed_instance.translator_factory())
 
         climate = Climate.getInstance(self.wd)
         cli = ClimateFile(_join(climate.cli_dir, climate.cli_fn))
@@ -2411,7 +2414,8 @@ class Wepp(NoDbBase, LogMixin):
                                        exclude_yr_indxs=exclude_yr_indxs,
                                        method=method, gringorten_correction=gringorten_correction,
                                        totwatsed2=totwatsed2,
-                                       exclude_months=exclude_months)
+                                       exclude_months=exclude_months,
+                                       chn_topaz_id_of_interest=chn_topaz_id_of_interest)
 
         if return_periods_fn is not None:
             with open(return_periods_fn, 'w') as fp:
