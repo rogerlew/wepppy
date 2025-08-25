@@ -1,446 +1,782 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <title>Combined Watershed Viewer</title>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.css"/>
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
-  <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
-
-  <!-- Core libs -->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"
-          integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
-
-  <script type="text/javascript">
-    var site_prefix = "{{ site_prefix }}";
-
-    // --- small helpers -------------------------------------------------------
-    function getURLParameter(sParam) {
-      var sPageURL = window.location.search.substring(1);
-      var sURLVariables = sPageURL.split('&');
-      for (var i = 0; i < sURLVariables.length; i++) {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] === sParam) return sParameterName[1];
-      }
-    }
-
-    // Convert "#rrggbb" to [r,g,b,a] in 0..1; alpha default 1.0
-    function fromHex(hex, a) {
-      if (!hex) hex = "#ff7800";
-      if (hex[0] === '#') hex = hex.slice(1);
-      var bigint = parseInt(hex, 16);
-      var r = (bigint >> 16) & 255, g = (bigint >> 8) & 255, b = bigint & 255;
-      return [r / 255, g / 255, b / 255, (a == null ? 1.0 : a)];
-    }
-
-    function render_legend_cmap(cmap, canvasID) {
-      var canvas = $("#" + canvasID);
-      var width = canvas.outerWidth();
-      var height = canvas.outerHeight();
-      var data = new Float32Array(height * width);
-      for (var y = 0; y <= height; y++) {
-        for (var x = 0; x <= width; x++) {
-          data[(y * width) + x] = x / (width - 1.0);
-        }
-      }
-      var plot = new plotty.plot({
-        canvas: canvas["0"], data: data, width: width, height: height,
-        domain: [0, 1], colorScale: cmap
-      });
-      plot.render();
-    }
-
-    $(document).ready(function () {
-      var center, zoom, display_units, ws, varopts, varname, title;
-
-      // --- map + base layers --------------------------------------------------
-      var map = L.map('map');
-      var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
-        maxZoom: 20, subdomains: ["mt0", "mt1", "mt2", "mt3"]
-      });
-      var googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
-        maxZoom: 20, subdomains: ["mt0", "mt1", "mt2", "mt3"]
-      });
-      var baseMaps = { "Satellite": googleSat, "Terrain": googleTerrain };
-      var overlayMaps = {};
-      googleSat.addTo(map);
-      var ctrls = L.control.layers(baseMaps, overlayMaps);
-      ctrls.addTo(map);
-
-      // --- state --------------------------------------------------------------
-      var tolerance, units = '', numvars, defaultStyle;
-      var cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
-      var cmapperLoss = createColormap({ colormap: "jet2", nshades: 64 });
-      var cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
-
-      var cmap, r, vmin = 0.0, vmax, cmapname;
-      var Legend, legend, VarSelection, varSelection, TitleBox;
-      var popup;
-
-      // per-run stores
-      var subGeo = {};      // runid -> FeatureCollection
-      var glOverlays = {};  // runid -> Leaflet layer wrapper controlling glify shapes
-      var results = {};     // runid -> { TopazID: {value: ...}, ... }
-      var data;             // legacy flag for fetch gating (undefined => fetch)
-
-      // --- data_uri boot ------------------------------------------------------
-      var data_uri = getURLParameter("data_uri");
-      if (data_uri !== undefined) {
-        $.getJSON(data_uri, function (data_) {
-          center = data_.center; zoom = data_.zoom; display_units = data_.units;
-          ws = data_.ws; varopts = data_.varopts; varname = data_.varname; title = data_.title;
-          callback();
-        });
-      } else {
-        center = getURLParameter("center");
-        center = (center === undefined) ? [39.0, -99.0] : JSON.parse(decodeURIComponent((center + '').replace(/\+/g, '%20')));
-        zoom = getURLParameter("zoom"); zoom = (zoom === undefined) ? 5 : JSON.parse(zoom);
-        display_units = getURLParameter("units"); if (display_units === undefined) display_units = 'SI';
-
-        ws = getURLParameter("ws");
-        if (ws !== undefined) ws = JSON.parse(decodeURIComponent((ws + '').replace(/\+/g, '%20')));
-
-        varopts = getURLParameter("varopts");
-        if (varopts !== undefined) {
-          varopts = JSON.parse(decodeURIComponent((varopts + '').replace(/\+/g, '%20')));
-          if (display_units !== 'SI') {
-            if ("runoff" in varopts) varopts["runoff"] *= 25.4;
-            if ("subrunoff" in varopts) varopts["subrunoff"] *= 25.4;
-            if ("baseflow" in varopts) varopts["baseflow"] *= 25.4;
-            if ("phosphorus" in varopts) varopts["phosphorus"] *= 1.12085;
-            if ("loss" in varopts) varopts["loss"] *= 1.12085;
-          }
-        }
-        varname = getURLParameter("varname");
-        if (varname === undefined) varname = Object.keys(varopts)[0];
-
-        title = getURLParameter("title");
-        if (title !== undefined) title = decodeURIComponent((title + '').replace(/\+/g, '%20'));
-        callback();
-      }
-
-      // --- color map prep per var --------------------------------------------
-      function prep_render() {
-        if (varname === 'runoff' || varname === 'subrunoff' || varname === 'baseflow') {
-          r = tolerance; cmap = v => cmapperRunoff.map(v / r);
-          vmin = 0.0; vmax = tolerance; cmapname = 'winter'; units = 'mm';
-        } else if (varname === 'loss') {
-          r = tolerance; cmap = v => cmapperLoss.map(v / r);
-          vmin = 0.0; vmax = tolerance; cmapname = 'jet2'; units = 'kg/ha';
-        } else if (varname === 'phosphorus') {
-          r = tolerance; if (r < 1) r = Math.pow(r, 2.0);
-          cmap = v => cmapperPhosphorus.map(v / r);
-          vmin = 0.0; vmax = tolerance; cmapname = 'viridis'; units = 'kg/ha';
-        }
-      }
-
-      // --- tolerance / legend -------------------------------------------------
-      function set_tolerance() {
-        var _scale = (display_units === 'SI') ? 1 : (units === 'mm' ? 25.4 : 1.12085);
-        tolerance = parseFloat($('#tolerance-input').val()) * _scale;
-        prep_render();
-        render_legend();
-        // No refetch; recolor with existing data
-        recolorAll();
-      }
-      function render_legend() {
-        if (legend !== undefined) legend.remove();
-        legend = new Legend();
-        map.addControl(legend);
-        render_legend_cmap(cmapname, 'legend_canvas');
-        $('#set-tolerance-btn').off('click').on('click', set_tolerance);
-      }
-
-      // --- glify overlay wrapper (works with layer control) ------------------
-      function makeGlifyOverlay(runid, featureCollection, colorFn, clickFn) {
-        var shape = null;
-        var overlay = L.layerGroup();
-        overlay.onAdd = function (m) {
-          shape = L.glify.shapes({
-            map: m,
-            data: featureCollection,
-            color: function (i, f) { return colorFn(f); },
-            click: function (e, f) { clickFn(e, f); },
-            opacity: 1.0,
-            border: true
-          });
-          overlay._map = m;
-        };
-        overlay.onRemove = function () {
-          if (shape && shape.remove) { shape.remove(); }
-          shape = null;
-          overlay._map = null;
-        };
-        overlay.redraw = function (newColorFn) {
-          if (newColorFn) colorFn = newColorFn;
-          if (overlay._map) {
-            if (shape && shape.remove) shape.remove();
-            shape = L.glify.shapes({
-              map: overlay._map,
-              data: featureCollection,
-              color: function (i, f) { return colorFn(f); },
-              click: function (e, f) { clickFn(e, f); },
-              opacity: 1.0,
-              border: true
-            });
-          }
-        };
-        return overlay;
-      }
-
-      function featureColorFnFor(runid) {
-        return function (feat) {
-          var id = feat.properties.TopazID;
-          if (!results[runid]) return fromHex('#ff7800', 0.30);
-          var rec = results[runid][id];
-          if (!rec) return fromHex('#ff7800', 0.30);
-          var v = parseFloat(rec.value);
-          var hex = cmap(v);              // '#rrggbb'
-          return fromHex(hex, 0.90);
-        };
-      }
-
-      function handleClick(runid, e, feat) {
-        var topaz_id = feat.properties.TopazID;
-        var cfg = (ws.find(w => w.runid === runid) || {}).cfg;
-        var query_url = site_prefix + "/runs/" + runid + "/cfg/report/sub_summary/" + topaz_id + "/";
-        $.get({
-          url: query_url,
-          success: function (response) {
-            if (popup) popup.remove();
-            var content = '<h5>' + runid + '</h5>' + response +
-              '<a href="' + site_prefix + '/runs/' + runid + '/' + cfg + '/" target="_blank">View Watershed Run</a>';
-            var ll = e && e.latlng ? e.latlng : map.getCenter();
-            popup = L.popup().setLatLng(ll).setContent(content).openOn(map);
-            if (display_units !== 'SI') {
-              $(".units-m").removeClass("invisible"); $(".units-ft").addClass("invisible");
-              $(".units-ha").removeClass("invisible"); $(".units-acre").addClass("invisible");
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Combined Watershed Viewer</title>
+    <!-- Style Sheets -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+      crossorigin="anonymous"
+    />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossorigin="anonymous" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.css"
+    />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='favicon/favicon.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='favicon/favicon.ico') }}"
+      type="image/x-icon"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.min.js"
+      integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet-src.js" crossorigin></script>
+    <script src="{{ url_for('static', filename='js/glify-browser.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/leaflet-glify-layer.js') }}"></script>
+  
+  
+    <script type="text/javascript">
+      // Helper function to convert HEX color to an object for glify
+      function fromHex(hex, opacity = 1.0) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result
+          ? {
+              r: parseInt(result[1], 16) / 255,
+              g: parseInt(result[2], 16) / 255,
+              b: parseInt(result[3], 16) / 255,
+              a: opacity,
             }
+          : { r: 0, g: 0, b: 0, a: 1 }; // Default to black if parse fails
+      }
+
+      var site_prefix = "{{ site_prefix }}";
+
+      function getURLParameter(sParam) {
+        var sPageURL = window.location.search.substring(1);
+        var sURLVariables = sPageURL.split("&");
+        for (var i = 0; i < sURLVariables.length; i++) {
+          var sParameterName = sURLVariables[i].split("=");
+          if (sParameterName[0] === sParam) {
+            return sParameterName[1];
           }
-        });
+        }
       }
 
-      // recolor existing overlays with current tolerance/cmap/results
-      function recolorAll() {
-        Object.keys(glOverlays).forEach(function (runid) {
-          var ov = glOverlays[runid];
-          if (ov) ov.redraw(featureColorFnFor(runid));
+      function render_legend_cmap(cmap, canvasID) {
+        var canvas = $("#" + canvasID);
+
+        var width = canvas.outerWidth();
+        var height = canvas.outerHeight();
+        var data = new Float32Array(height * width);
+
+        for (var y = 0; y <= height; y++) {
+          for (var x = 0; x <= width; x++) {
+            data[y * width + x] = x / (width - 1.0);
+          }
+        }
+
+        var plot = new plotty.plot({
+          canvas: canvas["0"],
+          data: data,
+          width: width,
+          height: height,
+          domain: [0, 1],
+          colorScale: cmap,
         });
+        plot.render();
       }
 
-      // fetch + paint results for all runs for current varname
-      function render() {
-        if (data === undefined) {
-          map.spin(true);
-          data = {}; // init container
-          var pending = ws.length;
-          ws.forEach(function (w) {
-            var runid = w.runid;
-            $.get({
-              url: site_prefix + "/runs/" + runid + "/cfg/query/wepp/" + varname + "/subcatchments/",
-              success: function (_data) {
-                results[runid] = _data || {};
-                if (glOverlays[runid]) glOverlays[runid].redraw(featureColorFnFor(runid));
-              },
-              complete: function () {
-                pending -= 1;
-                if (pending === 0) map.spin(false);
-              }
-            });
+      $(document).ready(function () {
+        console.log("Document ready. Initializing map viewer.");
+        var center;
+        var zoom;
+        var display_units;
+        var ws;
+        var varopts;
+        var varname;
+        var title;
+
+        var map = L.map("map");
+
+        var googleTerrain = L.tileLayer(
+          "https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}",
+          {
+            maxZoom: 20,
+            subdomains: ["mt0", "mt1", "mt2", "mt3"],
+          }
+        );
+
+        var googleSat = L.tileLayer(
+          "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+          {
+            maxZoom: 20,
+            subdomains: ["mt0", "mt1", "mt2", "mt3"],
+          }
+        );
+
+        var baseMaps = {
+          Satellite: googleSat,
+          Terrain: googleTerrain,
+        };
+
+        var overlayMaps = {};
+
+        googleSat.addTo(map);
+        googleTerrain.addTo(map);
+
+        var ctrls = L.control.layers(baseMaps, overlayMaps);
+        ctrls.addTo(map);
+
+        var tolerance;
+        var units = "";
+        var numvars;
+        var defaultStyle;
+
+        var cmapperRunoff = createColormap({ colormap: "winter", nshades: 64 });
+        var cmapperLoss = createColormap({ colormap: "jet2", nshades: 64 });
+        var cmapperPhosphorus = createColormap({
+          colormap: "viridis",
+          nshades: 64,
+        });
+
+        var cmap, r;
+        var vmin = 0.0;
+        var vmax;
+        var cmapname;
+
+        var Legend;
+        var legend;
+
+        var VarSelection;
+        var varSelection;
+
+        var TitleBox;
+
+        // NEW: glLayers will hold the glify layers instead of L.geoJSON layers
+        var glLayers;
+        // NEW: dataCache will store the fetched variable data (runoff, loss, etc.)
+        var dataCache;
+        var popup;
+
+        var data_uri = getURLParameter("data_uri");
+
+        if (data_uri !== undefined) {
+          console.log("Fetching data from data_uri:", data_uri);
+          $.getJSON(data_uri, function (data) {
+            center = data.center;
+            zoom = data.zoom;
+            display_units = data.units;
+            ws = data.ws;
+            varopts = data.varopts;
+            varname = data.varname;
+            title = data.title;
+
+            callback();
           });
         } else {
-          recolorAll();
+          console.log("Fetching data from URL parameters.");
+          center = getURLParameter("center");
+          if (center === undefined) {
+            center = [39.0, -99.0];
+          } else {
+            center = decodeURIComponent(("" + center).replace(/\+/g, "%20"));
+            center = JSON.parse(center);
+          }
+
+          zoom = getURLParameter("zoom");
+          if (zoom === undefined) {
+            zoom = 5;
+          } else {
+            zoom = JSON.parse(zoom);
+          }
+
+          display_units = getURLParameter("units");
+          if (display_units === undefined) {
+            display_units = "SI";
+          }
+
+          ws = getURLParameter("ws");
+          if (ws !== undefined) {
+            ws = decodeURIComponent(("" + ws).replace(/\+/g, "%20"));
+            ws = JSON.parse(ws);
+          }
+
+          varopts = getURLParameter("varopts");
+          if (varopts !== undefined) {
+            varopts = decodeURIComponent(("" + varopts).replace(/\+/g, "%20"));
+            varopts = JSON.parse(varopts);
+
+            if (display_units !== "SI") {
+              if ("runoff" in varopts) {
+                varopts["runoff"] *= 25.4;
+              }
+              if ("subrunoff" in varopts) {
+                varopts["subrunoff"] *= 25.4;
+              }
+              if ("baseflow" in varopts) {
+                varopts["baseflow"] *= 25.4;
+              }
+              if ("phosphorus" in varopts) {
+                varopts["phosphorus"] *= 1.12085;
+              }
+              if ("loss" in varopts) {
+                varopts["loss"] *= 1.12085;
+              }
+            }
+          }
+
+          varname = getURLParameter("varname");
+          if (varname === undefined) {
+            varname = Object.keys(varopts)[0];
+          }
+
+          title = getURLParameter("title");
+          if (title !== undefined) {
+            title = decodeURIComponent(("" + title).replace(/\+/g, "%20"));
+          }
+
+          callback();
         }
-      }
 
-      // --- initial callback ---------------------------------------------------
-      function callback() {
-        map.setView(center, zoom);
-        tolerance = varopts[varname];
-        units = '';
-        numvars = Object.keys(varopts).length;
-
-        defaultStyle = {
-          color: "#ff7800", weight: 2, opacity: 0.65,
-          fillColor: "#ff7800", fillOpacity: 0.3
-        };
-
-        Legend = L.Control.extend({
-          options: { position: 'bottomleft' },
-          onAdd: function () {
-            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-            container.style.backgroundColor = 'white';
-            container.style.width = '240px';
-            container.style.height = '150px';
-
-            if (display_units === 'SI') {
-              container.innerHTML =
-                '<div style="padding-left:10px;padding-right:10px;padding-top:5px;">' +
-                '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
-                '<div>' + units + '</div>' +
-                '<canvas id="legend_canvas" width=180 height=20 style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
-                '<div class="row">' +
-                '<div class="col-md-4"><span id="legend_vmin">' + vmin + '</span></div>' +
-                '<div class="col-md-4" style="text-align:center;">0</div>' +
-                '<div class="col-md-4" style="text-align:right;"><span id="legend_vmax">' + vmax + '</span></div>' +
-                '</div>' +
-                '<div class="row" style="padding-top:18px;">' +
-                '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + tolerance + '"></div>' +
-                '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
-                '</div>' +
-                '</div>';
-            } else {
-              var scale, _units;
-              if (units === 'mm') { scale = 0.0393701; _units = 'in'; }
-              else if (units === 'kg/ha') { scale = 0.892179; _units = 'lb/ha'; }
-              var _vmin = parseFloat(vmin * scale).toFixed(2);
-              var _vmax = parseFloat(vmax * scale).toFixed(2);
-              var _tolerance = parseFloat(tolerance * scale).toFixed(2);
-              container.innerHTML =
-                '<div style="padding-left:10px;padding-right:10px;padding-top:5px;">' +
-                '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
-                '<div>' + _units + '</div>' +
-                '<canvas id="legend_canvas" width=180 height=20 style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
-                '<div class="row">' +
-                '<div class="col-md-4"><span id="legend_vmin">' + _vmin + '</span></div>' +
-                '<div class="col-md-4" style="text-align:center;">0</div>' +
-                '<div class="col-md-4" style="text-align:right;"><span id="legend_vmax">' + _vmax + '</span></div>' +
-                '</div>' +
-                '<div class="row" style="padding-top:18px;">' +
-                '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + _tolerance + '"></div>' +
-                '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
-                '</div>' +
-                '</div>';
+        function prep_render() {
+          console.log(`Preparing to render variable: ${varname}`);
+          if (
+            varname === "runoff" ||
+            varname === "subrunoff" ||
+            varname === "baseflow"
+          ) {
+            r = tolerance;
+            cmap = function (v) {
+              return cmapperRunoff.map(v / r);
+            };
+            vmin = 0.0;
+            vmax = tolerance;
+            cmapname = "winter";
+            units = "mm";
+          } else if (varname === "loss") {
+            r = tolerance;
+            cmap = function (v) {
+              return cmapperLoss.map(v / r);
+            };
+            vmin = 0.0;
+            vmax = tolerance;
+            cmapname = "jet2";
+            units = "kg/ha";
+          } else if (varname === "phosphorus") {
+            r = tolerance;
+            if (r < 1) {
+              r = Math.pow(r, 2.0);
             }
-            return container;
+            cmap = function (v) {
+              return cmapperPhosphorus.map(v / r);
+            };
+            vmin = 0.0;
+            vmax = tolerance;
+            cmapname = "viridis";
+            units = "kg/ha";
           }
-        });
+        }
 
-        VarSelection = L.Control.extend({
-          options: { position: 'bottomleft' },
-          onAdd: function () {
-            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-            container.style.backgroundColor = 'white';
-            container.style.width = '240px';
-            container.style.height = (30 + 28 * numvars) + 'px';
-            let html = '<div style="padding-left:10px;padding-top:5px;"><h6>Select Variable</h6>';
-            for (let key in varopts) {
-              html += '<div class="radio"><label><input type="radio" id="varRadio" name="varRadio" value="' + key + '"';
-              if (key === varname) html += ' checked';
-              if (key === 'runoff') html += '> Runoff</label></div>';
-              else if (key === 'subrunoff') html += '> Lateral Flow</label></div>';
-              else if (key === 'baseflow') html += '> Baseflow</label></div>';
-              else if (key === 'phosphorus') html += '> Total Phosphorus</label></div>';
-              else if (key === 'loss') html += '> Soil Deposition/Loss</label></div>';
-              else html += '> ' + key + '</label></div>';
+        function set_tolerance() {
+          var _scale;
+          if (display_units === "SI") {
+            _scale = 1;
+          } else {
+            if (units === "mm") {
+              _scale = 25.4;
+            } else if (units === "kg/ha") {
+              _scale = 1.12085;
             }
-            html += '</div>';
-            container.innerHTML = html;
-            return container;
           }
-        });
 
-        varSelection = new VarSelection();
-        map.addControl(varSelection);
-
-        TitleBox = L.Control.extend({
-          options: { position: 'bottomright' },
-          onAdd: function () {
-            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-            container.style.backgroundColor = 'transparent';
-            container.style.borderColor = 'transparent';
-            container.style.width = '500px';
-            container.style.height = '40px';
-            container.innerHTML = '<h4 style="text-shadow:-1px -1px 0 #FFF,1px -1px 0 #FFF,-1px 1px 0 #FFF,1px 1px 0 #FFF;">' + title + '</h4>';
-            return container;
-          }
-        });
-        // map.addControl(new TitleBox()); // optional
-
-        $('input[type=radio][name=varRadio]').change(function () {
-          varname = this.value;
-          tolerance = varopts[varname];
-          // force re-fetch for new variable
-          data = undefined;
+          tolerance = parseFloat($("#tolerance-input").val()) * _scale;
+          console.log("Tolerance set to:", tolerance);
           prep_render();
           render_legend();
           render();
-        });
+        }
 
-        // fetch subcatchments and build overlays
-        if (ws !== null) {
-          let pending = ws.length;
-          map.spin(true);
-          ws.forEach(function (w) {
-            let runid = w.runid;
-            let cfg = w.cfg;
-            $.get({
-              url: site_prefix + "/runs/" + runid + "/cfg/resources/subcatchments.json",
-              cache: false,
-              success: function (response) {
-                // response is a FeatureCollection; keep entire FC (preserves properties)
-                subGeo[runid] = response;
-                // build overlay with default colors first
-                var overlay = makeGlifyOverlay(
-                  runid,
-                  subGeo[runid],
-                  function () { return fromHex('#ff7800', 0.30); },
-                  function (e, f) { handleClick(runid, e, f); }
-                );
-                glOverlays[runid] = overlay;
-                overlay.addTo(map);
-                ctrls.addOverlay(overlay, runid);
-              },
-              complete: function () {
-                pending -= 1;
-                if (pending === 0) {
-                  prep_render();
-                  render_legend();
-                  render();   // fetch values + recolor
-                  map.spin(false);
+        function render_legend() {
+          if (legend !== undefined) {
+            legend.remove();
+          }
+          legend = new Legend();
+          map.addControl(legend);
+          render_legend_cmap(cmapname, "legend_canvas");
+          $("#set-tolerance-btn").on("click", set_tolerance);
+          console.log("Legend rendered.");
+        }
+
+        function render() {
+          if (dataCache === undefined) {
+            console.log(
+              "Data cache is empty, fetching new data for varname:",
+              varname
+            );
+            map.spin(true);
+            let i = 0;
+            dataCache = {}; // Initialize cache object
+            for (let w of ws) {
+              let runid = w.runid;
+
+              $.get({
+                url:
+                  site_prefix +
+                  "/runs/" +
+                  runid +
+                  "/cfg/query/wepp/" +
+                  varname +
+                  "/subcatchments/",
+                success: function success(_data) {
+                  if (_data === null) {
+                    console.error("Query returned null for runid:", runid);
+                    throw "query returned null";
+                  }
+                  console.log(`Successfully fetched value data for ${runid}`);
+                  dataCache[runid] = _data;
+                  _render(runid, _data);
+
+                  i += 1;
+                  if (i === ws.length) {
+                    map.spin(false);
+                    console.log("All data fetched and rendered.");
+                  }
+                },
+                fail: function fail(error) {
+                  console.error(
+                    `Failed to fetch value data for ${runid}:`,
+                    error
+                  );
+                  dataCache[runid] = null;
+                  i += 1;
+                  if (i === ws.length) {
+                    map.spin(false);
+                  }
+                },
+              });
+            }
+          } else {
+            console.log("Using cached data to re-render.");
+            for (let w of ws) {
+              let runid = w.runid;
+              if (dataCache[runid]) {
+                _render(runid, dataCache[runid]);
+              }
+            }
+          }
+        }
+
+        // REWRITTEN: _render now updates the style of a glify layer
+        function _render(runid, _data) {
+          console.log(
+            `Rendering styles for runid: ${runid} with varname: ${varname}`
+          );
+          if (!glLayers[runid] || !_data) {
+            console.error(
+              `Cannot render styles for ${runid}. Layer or data is missing.`
+            );
+            return;
+          }
+
+          const colorFunction = (i, feature) => {
+            const topId = feature.properties.TopazID;
+            if (_data[topId]) {
+              const v = parseFloat(_data[topId].value);
+              const hexColor = cmap(v); // cmap is defined in prep_render
+              return fromHex(hexColor, 0.9);
+            }
+            // Return a default/error color if data for this feature is missing
+            return fromHex("#808080", 0.5); // Grey for missing data
+          };
+
+          glLayers[runid].setStyle({
+            color: colorFunction,
+          });
+          console.log(`Successfully updated styles for ${runid}`);
+        }
+
+        function callback() {
+          console.log("Executing main callback function.");
+          map.setView(center, zoom);
+          tolerance = varopts[varname];
+          units = "";
+          numvars = Object.keys(varopts).length;
+
+          defaultStyle = {
+            color: "#ff7800",
+            weight: 2,
+            opacity: 0.65,
+            fillColor: "#ff7800",
+            fillOpacity: 0.3,
+          };
+
+          Legend = L.Control.extend({
+            options: {
+              position: "bottomleft",
+            },
+            initialize: function (options) {
+              // constructor
+            },
+            onAdd: function (map) {
+              var container = L.DomUtil.create(
+                "div",
+                "leaflet-bar leaflet-control leaflet-control-custom"
+              );
+
+              container.style.backgroundColor = "white";
+              container.style.width = "240px";
+              container.style.height = "150px";
+
+              if (display_units === "SI") {
+                container.innerHTML =
+                  '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
+                  "<h6>" +
+                  varname.charAt(0).toUpperCase() +
+                  varname.slice(1) +
+                  " Legend</h6>" +
+                  "<div>" +
+                  units +
+                  "</div>" +
+                  '<canvas id="legend_canvas" width=180 height=20 ' +
+                  'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
+                  '<div class="row">' +
+                  '<div class="col-md-4"><span id="legend_vmin">' +
+                  vmin +
+                  "</span></div>" +
+                  '<div class="col-md-4" style="text-align: center;">0</div>' +
+                  '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' +
+                  vmax +
+                  "</span></div>" +
+                  "</div>" +
+                  '<div class="row" style="padding-top: 18px;">' +
+                  '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' +
+                  tolerance +
+                  '"></div>' +
+                  '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
+                  "</div>" +
+                  "</div>";
+              } else {
+                var scale;
+                var _units;
+                if (units === "mm") {
+                  scale = 0.0393701;
+                  _units = "in";
+                } else if (units === "kg/ha") {
+                  scale = 0.892179;
+                  _units = "lb/ha";
+                }
+
+                var _vmin = parseFloat(vmin * scale).toFixed(2);
+                var _vmax = parseFloat(vmax * scale).toFixed(2);
+                var _tolerance = parseFloat(tolerance * scale).toFixed(2);
+
+                container.innerHTML =
+                  '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
+                  "<h6>" +
+                  varname.charAt(0).toUpperCase() +
+                  varname.slice(1) +
+                  " Legend</h6>" +
+                  "<div>" +
+                  _units +
+                  "</div>" +
+                  '<canvas id="legend_canvas" width=180 height=20 ' +
+                  'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
+                  '<div class="row">' +
+                  '<div class="col-md-4"><span id="legend_vmin">' +
+                  _vmin +
+                  "</span></div>" +
+                  '<div class="col-md-4" style="text-align: center;">0</div>' +
+                  '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' +
+                  _vmax +
+                  "</span></div>" +
+                  "</div>" +
+                  '<div class="row" style="padding-top: 18px;">' +
+                  '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' +
+                  _tolerance +
+                  '"></div>' +
+                  '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
+                  "</div>" +
+                  "</div>";
+              }
+              L.DomEvent.disableClickPropagation(container);
+              L.DomEvent.disableScrollPropagation(container);
+
+              return container;
+            },
+            onRemove: function (map) {
+              // when removed
+            },
+          });
+
+          VarSelection = L.Control.extend({
+            options: {
+              position: "bottomleft",
+            },
+            initialize: function (options) {
+              // constructor
+            },
+            onAdd: function (map) {
+              var container = L.DomUtil.create(
+                "div",
+                "leaflet-bar leaflet-control leaflet-control-custom"
+              );
+
+              container.style.backgroundColor = "white";
+              container.style.width = "240px";
+              container.style.height = 30 + 28 * numvars + "px";
+
+              let html =
+                '<div style="padding-left: 10px; padding-top: 5px;">';
+              html += "<h6>Select Variable</h6>";
+
+              for (let key in varopts) {
+                html +=
+                  '<div class="radio"><label><input type="radio" id="varRadio" name="varRadio" value="' +
+                  key +
+                  '"';
+
+                if (key === varname) {
+                  html += "checked";
+                }
+
+                if (key === "runoff") {
+                  html += "> Runoff</label></div>";
+                } else if (key === "subrunoff") {
+                  html += "> Lateral Flow</label></div>";
+                } else if (key === "baseflow") {
+                  html += "> Baseflow</label></div>";
+                } else if (key === "phosphorus") {
+                  html += "> Total Phosphorus</label></div>";
+                } else if (key === "loss") {
+                  html += "> Soil Deposition/Loss</label></div>";
+                } else {
+                  html += "> " + key + "</label></div>";
                 }
               }
-            });
+              html += "</div>";
+              container.innerHTML = html;
+              return container;
+            },
+            onRemove: function (map) {
+              // when removed
+            },
           });
+
+          varSelection = new VarSelection();
+          map.addControl(varSelection);
+
+          TitleBox = L.Control.extend({
+            options: {
+              position: "bottomright",
+            },
+            initialize: function (options) {
+              // constructor
+            },
+            onAdd: function (map) {
+              var container = L.DomUtil.create(
+                "div",
+                "leaflet-bar leaflet-control leaflet-control-custom"
+              );
+
+              container.style.backgroundColor = "transparent";
+              container.style.borderColor = "transparent";
+              container.style.width = "500px";
+              container.style.height = "40px";
+
+              container.innerHTML =
+                '<h4 style="text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;">' +
+                title +
+                "</h4>";
+              return container;
+            },
+            onRemove: function (map) {
+              // when removed
+            },
+          });
+          // titleBox = TitleBox();
+          // map.addControl(titleBox);
+
+          $("input[type=radio][name=varRadio]").change(function () {
+            varname = this.value;
+            tolerance = varopts[varname];
+            // BUG FIX: Reset the data cache to force a re-fetch of new variable data
+            dataCache = undefined;
+
+            console.log(`Variable changed to: ${varname}. Re-rendering.`);
+            prep_render();
+            render_legend();
+            render();
+          });
+
+          // REWRITTEN: Initialize glLayers and fetch GeoJSON
+          glLayers = {};
+          dataCache;
+          popup;
+
+          if (ws !== null) {
+            for (let w of ws) {
+              let runid = w.runid;
+              let cfg = w.cfg;
+              glLayers[runid] = {};
+
+              console.log(`Fetching subcatchments for runid: ${runid}`);
+              $.get({
+                url:
+                  site_prefix +
+                  "/runs/" +
+                  runid +
+                  "/cfg/resources/subcatchments.json",
+                async: false, // Using sync to ensure layers are created before render() is called
+                success: function (response) {
+                  console.log(`Successfully fetched subcatchments for ${runid}`);
+
+                  const defaultColor = fromHex(
+                    defaultStyle.fillColor,
+                    defaultStyle.fillOpacity
+                  );
+
+                  glLayers[runid] = L.glify.layer({
+                    geojson: response,
+                    pane: "overlayPane",
+                    glifyOptions: {
+                      opacity: 0.9,
+                      color: defaultColor, // Start with default color
+                      click: (e, feature) => {
+                        console.log("Glify layer clicked, feature:", feature);
+                        var topaz_id = feature.properties.TopazID;
+                        var query_url =
+                          site_prefix +
+                          "/runs/" +
+                          runid +
+                          "/cfg/report/sub_summary/" +
+                          topaz_id +
+                          "/";
+                        $.get({
+                          url: query_url,
+                          success: function success(response) {
+                            if (popup !== undefined) {
+                              popup.remove();
+                            }
+                            const content =
+                              "<h5>" +
+                              runid +
+                              "</h5>" +
+                              response +
+                              '<a href="' +
+                              site_prefix +
+                              "/runs/" +
+                              runid +
+                              "/" +
+                              cfg +
+                              '/" target="_blank">View Watershed Run</a>';
+
+                            popup = L.popup()
+                              .setLatLng(e.latlng)
+                              .setContent(content)
+                              .openOn(map);
+
+                            if (display_units !== "SI") {
+                              $(".units-m").removeClass("invisible");
+                              $(".units-ft").addClass("invisible");
+
+                              $(".units-ha").removeClass("invisible");
+                              $(".units-acre").addClass("invisible");
+                            }
+                          },
+                          fail: function fail(error) {
+                            console.log(error);
+                          },
+                        });
+                      },
+                    },
+                  });
+
+                  glLayers[runid].name = response.name;
+                  glLayers[runid].addTo(map);
+                  ctrls.addOverlay(glLayers[runid], runid);
+                  console.log(`Glify layer for ${runid} added to map.`);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                  console.log(textStatus, errorThrown);
+                },
+              });
+            }
+
+            prep_render();
+            render_legend();
+            render();
+          }
         }
+      });
+    </script>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
       }
-    });
-  </script>
-
-  <style>
-    body { padding: 0; margin: 0; }
-    html, body, #map { height: 100%; width: 100%; }
-  </style>
-</head>
-<body>
-  <div id="map"></div>
-
-  <!-- Placed at end for faster load -->
-  <script type="text/javascript" src="{{ url_for('static', filename='js/spin.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/colormap.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/plotty.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-spin.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
-
-  <!-- Leaflet.glify (WebGL polygons) -->
-  <script src="https://unpkg.com/leaflet.glify/dist/leaflet.glify.min.js"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
-          crossorigin="anonymous"></script>
-</body>
+      html,
+      body,
+      #map {
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/spin.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/tinyqueue.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/polylabel.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/underscore.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/colormap.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/geotiff.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/plotty.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/leaflet-spin.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>
