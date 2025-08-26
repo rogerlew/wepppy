@@ -31,6 +31,7 @@
     {% endfor %}
   </tbody>
 </table>
+
 <h4>Outlet</h4>
 <table class="table table-condensed" style="width: auto !important;">
   <tbody>
@@ -41,44 +42,61 @@
     </tr>
   </tbody>
 </table>
+
 <h5>Distribution by Sediment Class
     <a onclick="javascript:copytable('class_fractions')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="class_fractions">
   <thead>
     <tr>
-      <td>Class</td>
-      <td>Fraction</td>
+      <th>Class</th>
+      <th>Fraction</th>
+      <th>Sediment Discharge</th>
     </tr>
   </thead>
   <tbody>
+    <tr>
+      <td></td>
+      <td>ratio</td>
+      <td>{{ unitizer_units('tonne/yr') | safe }}</td>
+    </tr>
     {% for fraction in sed_del.class_fractions %}
     <tr>
       <td> {{ loop.index }} </td>
       <td> {{'%0.3f'| format(fraction | float)}} </td>
+      <td>{{ unitizer(fraction * sed_del.sed_discharge, 'tonne/yr') | safe }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 <h5>Distribution of Primary Particles and Organic Matter
     <a onclick="javascript:copytable('part_dist')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="part_dist">
   <thead>
     <tr>
-      <td>Type</td>
-      <td>Fraction</td>
+      <th>Type</th>
+      <th>Fraction</th>
+      <th>Sediment Discharge</th>
     </tr>
   </thead>
   <tbody>
+    <tr>
+      <td></td>
+      <td>ratio</td>
+      <td>{{ unitizer_units('tonne/yr') | safe }}</td>
+    </tr>
     {% for ptype, fraction in sed_del.particle_distribution.items() %}
     <tr>
       <td> {{ ptype }} </td>
       <td> {{'%0.3f'| format(fraction | float)}} </td>
+      <td>{{ unitizer(fraction * sed_del.sed_discharge, 'tonne/yr') | safe }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 <h4>Hillslopes</h4>
 <table class="table table-condensed" style="width: auto !important;">
   <tbody>
@@ -89,44 +107,61 @@
     </tr>
   </tbody>
 </table>
+
 <h5>Distribution by Sediment Class
     <a onclick="javascript:copytable('hill_class_fractions')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="hill_class_fractions">
   <thead>
     <tr>
-      <td>Class</td>
-      <td>Fraction</td>
+      <th>Class</th>
+      <th>Fraction</th>
+      <th>Sediment Delivery</th>
     </tr>
   </thead>
   <tbody>
+    <tr>
+      <td></td>
+      <td>ratio</td>
+      <td>{{ unitizer_units('tonne/yr') | safe }}</td>
+    </tr>
     {% for fraction in sed_del.hill_class_fractions %}
     <tr>
       <td>{{ loop.index }} </td>
-      <td> {{'%0.3f'| format(fraction | float)}}
+      <td> {{'%0.3f'| format(fraction | float)}}</td>
+      <td>{{ unitizer(fraction * sed_del.hill_sed_delivery, 'tonne/yr') | safe }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 <h5>Distribution of Primary Particles and Organic Matter
     <a onclick="javascript:copytable('hill_part_dist')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="hill_part_dist">
   <thead>
     <tr>
-      <td>Type</td>
-      <td>Fraction</td>
+      <th>Type</th>
+      <th>Fraction</th>
+      <th>Sediment Delivery</th>
     </tr>
   </thead>
   <tbody>
+    <tr>
+      <td></td>
+      <td>ratio</td>
+      <td>{{ unitizer_units('tonne/yr') | safe }}</td>
+    </tr>
     {% for ptype, fraction in sed_del.hill_particle_distribution.items() %}
     <tr>
       <td> {{ ptype }} </td>
       <td> {{'%0.3f'| format(fraction | float)}} </td>
+      <td>{{ unitizer(fraction * sed_del.hill_sed_delivery, 'tonne/yr') | safe }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
  <p>The Sediment Particle Class Information Leaving Channel is from the watershed loss file (loss_pw0.txt) the outlet class
 distribution and soil component distributions are also from the watershed loss file. The hillslope statistics are
 aggregated from the hillslope pass file and the soil components are calculated based on the class information leaving
