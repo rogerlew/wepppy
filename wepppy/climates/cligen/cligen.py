@@ -1658,195 +1658,202 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         curdir = '../'
 
     os.chdir(wd)
-    fp_log = open("cligen.log", "w")
+    with open("cligen.log", "w") as fp_log:
 
-    stationManager = CligenStationsManager(version=version)
-    stationMeta = stationManager.get_station_fromid(par)
+        stationManager = CligenStationsManager(version=version)
+        stationMeta = stationManager.get_station_fromid(par)
 
-    if stationMeta is None:
-        raise Exception('Cannot find station')
+        if stationMeta is None:
+            raise Exception('Cannot find station')
 
-    station = stationMeta.get_station()
-    par_monthlies = station.ppts * station.nwds
+        station = stationMeta.get_station()
+        par_monthlies = station.ppts * station.nwds
 
-    if logger is not None:
-        logger.log('  prism_mod:fetching climates...')
+        if logger is not None:
+            logger.log('  prism_mod:fetching climates...')
 
-    if monthly_dataset.lower() == 'prism':
-        prism_ppts = get_prism_monthly_ppt(lng, lat, units='inch')
-        prism_tmaxs = get_prism_monthly_tmax(lng, lat, units='f')
-        prism_tmins = get_prism_monthly_tmin(lng, lat, units='f')
-        #        p_stds = get_daymet_prcp_std(lng, lat, units='inch')
-        #        p_skew = get_daymet_prcp_skew(lng, lat, units='inch')
-    elif monthly_dataset.lower() == 'eobs':
-        prism_ppts = get_eobs_monthly_ppt(lng, lat, units='inch')
-        prism_tmaxs = get_eobs_monthly_tmax(lng, lat, units='f')
-        prism_tmins = get_eobs_monthly_tmin(lng, lat, units='f')
-    elif monthly_dataset.lower() == 'agdc':
-        prism_ppts = get_agdc_monthly_ppt(lng, lat, units='inch')
-        prism_tmaxs = get_agdc_monthly_tmax(lng, lat, units='f')
-        prism_tmins = get_agdc_monthly_tmin(lng, lat, units='f')
-    else:
-        raise Exception
+        if monthly_dataset.lower() == 'prism':
+            prism_ppts = get_prism_monthly_ppt(lng, lat, units='inch')
+            prism_tmaxs = get_prism_monthly_tmax(lng, lat, units='f')
+            prism_tmins = get_prism_monthly_tmin(lng, lat, units='f')
+            #        p_stds = get_daymet_prcp_std(lng, lat, units='inch')
+            #        p_skew = get_daymet_prcp_skew(lng, lat, units='inch')
+        elif monthly_dataset.lower() == 'eobs':
+            prism_ppts = get_eobs_monthly_ppt(lng, lat, units='inch')
+            prism_tmaxs = get_eobs_monthly_tmax(lng, lat, units='f')
+            prism_tmins = get_eobs_monthly_tmin(lng, lat, units='f')
+        elif monthly_dataset.lower() == 'agdc':
+            prism_ppts = get_agdc_monthly_ppt(lng, lat, units='inch')
+            prism_tmaxs = get_agdc_monthly_tmax(lng, lat, units='f')
+            prism_tmins = get_agdc_monthly_tmin(lng, lat, units='f')
+        else:
+            raise Exception
 
-    fp_log.write('monthly_dataset = {}\n'.format(monthly_dataset))
-    fp_log.write('prism_ppts (in) = {}\n'.format(prism_ppts))
-    fp_log.write('prism_tmaxs (F) = {}\n'.format(prism_tmaxs))
-    fp_log.write('prism_tmins (F) = {}\n'.format(prism_tmins))
+        fp_log.write('monthly_dataset = {}\n'.format(monthly_dataset))
+        fp_log.write('prism_ppts (in) = {}\n'.format(prism_ppts))
+        fp_log.write('prism_tmaxs (F) = {}\n'.format(prism_tmaxs))
+        fp_log.write('prism_tmins (F) = {}\n'.format(prism_tmins))
 
-    # calculate number of wet days
-    if nwds_method.lower() == 'daymet':
-        assert monthly_dataset == 'prism'
-        p_wws = get_daymet_prcp_pww(lng, lat)
-        p_wds = get_daymet_prcp_pwd(lng, lat)
-        nwds = days_in_mo * (p_wds / (1.0 - p_wws + p_wds))
+        # calculate number of wet days
+        if nwds_method.lower() == 'daymet':
+            assert monthly_dataset == 'prism'
+            p_wws = get_daymet_prcp_pww(lng, lat)
+            p_wds = get_daymet_prcp_pwd(lng, lat)
+            nwds = days_in_mo * (p_wds / (1.0 - p_wws + p_wds))
 
-    else:
-        station_nwds = days_in_mo * (station.pwds / (1.0 - station.pwws + station.pwds))
-        delta = prism_ppts / par_monthlies
-        nwds = [float(v)for v in station_nwds]
+        else:
+            station_nwds = days_in_mo * (station.pwds / (1.0 - station.pwws + station.pwds))
+            delta = prism_ppts / par_monthlies
+            nwds = [float(v)for v in station_nwds]
 
-        # clamp between 50% and 200% of original value
-        # and between 0.1 days and the number of days in the month
-        for i, (d, nwd, days) in enumerate(zip(delta, nwds, days_in_mo)):
+            # clamp between 50% and 200% of original value
+            # and between 0.1 days and the number of days in the month
+            # don't change for months with very little or no precip
+            for i, (d, nwd, days, prism_p, cligen_p) in enumerate(zip(delta, nwds, days_in_mo, prism_ppts, par_monthlies)):
 
-            if d > 1.0:
-                nwd *= 1.0 + (d - 1.0) / 2.0
+                if prism_p < 0.05 or cligen_p < 0.05:
+                    continue
+
+                if d > 1.0:
+                    nwd *= 1.0 + (d - 1.0) / 2.0
+                else:
+                    nwd *= 1.0 - (1.0 - d) / 2.0
+
+                if nwd < station_nwds[i] / 2.0:
+                    nwd = station_nwds[i] / 2.0
+                if nwd > station_nwds[i] * 2.0:
+                    nwd = station_nwds[i] * 2.0
+                if nwd > days - 0.25:
+                    nwd = days - 0.25
+                if nwd < 0.1:
+                    nwd = 0.1
+
+                nwds[i] = nwd
+
+            pw = nwds / days_in_mo
+
+            assert np.all(pw >= 0.0)
+            assert np.all(pw <= 1.0), pw
+
+            ratio = station.pwds / station.pwws
+            p_wws = 1.0 / (1.0 - ratio + ratio / pw)
+            p_wds = ((p_wws - 1.0) * pw) / (pw - 1.0)
+
+        if logger is not None:
+            logger.log_done()
+
+        if randseed is None:
+            randseed = 12345
+        randseed = str(randseed)
+
+        daily_ppts = prism_ppts / nwds  # in inches / day
+
+        fp_log.write('daily_ppts (in) = {}\n'.format(daily_ppts))
+        fp_log.write('nwds = {}\n'.format(nwds))
+
+        # build par file
+        par_fn = '{}{}.par'.format(par, suffix)
+
+        fp_log.write('par_fn = {}\n'.format(par_fn))
+
+        if _exists(par_fn):
+            os.remove(par_fn)
+
+        # p_stds = station.pstds * x[3]
+
+        s2 = deepcopy(station)
+        s2.lines[3] = ' MEAN P  ' + _row_formatter(daily_ppts) + '\r\n'
+        #        s2.lines[4] = ' S DEV P ' + _row_formatter(pstds) + '\r\n'
+        s2.lines[6] = ' P(W/W)  ' + _row_formatter(p_wws) + '\r\n'
+        s2.lines[7] = ' P(W/D)  ' + _row_formatter(p_wds) + '\r\n'
+        s2.lines[8] = ' TMAX AV ' + _row_formatter(prism_tmaxs) + '\r\n'
+        s2.lines[9] = ' TMIN AV ' + _row_formatter(prism_tmins) + '\r\n'
+
+        s2.write(par_fn)
+
+        assert _exists(par_fn)
+
+        # run cligen
+        cli_fn = '{}{}.cli'.format(par, suffix)
+
+        if _exists(cli_fn):
+            os.remove(cli_fn)
+
+        # create cligen input file
+        _clinp_path = _make_clinp(wd, cliver, years, cli_fn, par_fn, clinp_fn='{}{}.inp'.format(par, suffix))
+
+        # build cmd
+        if cliver == "4.3":
+            if IS_WINDOWS:
+                raise NotImplementedError('Cligen43.exe is not available on Windows')
             else:
-                nwd *= 1.0 - (1.0 - d) / 2.0
-
-            if nwd < station_nwds[i] / 2.0:
-                nwd = station_nwds[i] / 2.0
-            if nwd < 0.1:
-                nwd = 0.1
-            if nwd > station_nwds[i] * 2.0:
-                nwd = station_nwds[i] * 2.0
-            if nwd > days - 0.25:
-                nwd = days - 0.25
-
-            nwds[i] = nwd
-
-        pw = nwds / days_in_mo
-
-        assert np.all(pw >= 0.0)
-        assert np.all(pw <= 1.0), pw
-
-        ratio = station.pwds / station.pwws
-        p_wws = 1.0 / (1.0 - ratio + ratio / pw)
-        p_wds = ((p_wws - 1.0) * pw) / (pw - 1.0)
-
-    if logger is not None:
-        logger.log_done()
-
-    if randseed is None:
-        randseed = 12345
-    randseed = str(randseed)
-
-    daily_ppts = prism_ppts / nwds  # in inches / day
-
-    fp_log.write('daily_ppts (in) = {}\n'.format(daily_ppts))
-    fp_log.write('nwds = {}\n'.format(nwds))
-
-    # build par file
-    par_fn = '{}{}.par'.format(par, suffix)
-
-    fp_log.write('par_fn = {}\n'.format(par_fn))
-
-    if _exists(par_fn):
-        os.remove(par_fn)
-
-    # p_stds = station.pstds * x[3]
-
-    s2 = deepcopy(station)
-    s2.lines[3] = ' MEAN P  ' + _row_formatter(daily_ppts) + '\r\n'
-    #        s2.lines[4] = ' S DEV P ' + _row_formatter(pstds) + '\r\n'
-    s2.lines[6] = ' P(W/W)  ' + _row_formatter(p_wws) + '\r\n'
-    s2.lines[7] = ' P(W/D)  ' + _row_formatter(p_wds) + '\r\n'
-    s2.lines[8] = ' TMAX AV ' + _row_formatter(prism_tmaxs) + '\r\n'
-    s2.lines[9] = ' TMIN AV ' + _row_formatter(prism_tmins) + '\r\n'
-
-    s2.write(par_fn)
-
-    assert _exists(par_fn)
-
-    # run cligen
-    cli_fn = '{}{}.cli'.format(par, suffix)
-
-    if _exists(cli_fn):
-        os.remove(cli_fn)
-
-    # create cligen input file
-    _clinp_path = _make_clinp(wd, cliver, years, cli_fn, par_fn, clinp_fn='{}{}.inp'.format(par, suffix))
-
-    # build cmd
-    if cliver == "4.3":
-        if IS_WINDOWS:
-            raise NotImplementedError('Cligen43.exe is not available on Windows')
+                cmd = [_join(_bin_dir, 'cligen43')]
+        elif cliver == "5.2":
+            if IS_WINDOWS:
+                raise NotImplementedError('Cligen52.exe is not available on Windows')
+            else:
+                cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
         else:
-            cmd = [_join(_bin_dir, 'cligen43')]
-    elif cliver == "5.2":
+            if IS_WINDOWS:
+                cmd = [_join(_bin_dir, 'cligen532.exe'), "-i%s" % par_fn]
+            else:
+                cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
+
+        if randseed is not None:
+            cmd.append('-r%s' % randseed)
+
+        # run cligen
+        _clinp = open(_clinp_path)
+
         if IS_WINDOWS:
-            raise NotImplementedError('Cligen52.exe is not available on Windows')
+            process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE)
         else:
-            cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
-    else:
-        if IS_WINDOWS:
-            cmd = [_join(_bin_dir, 'cligen532.exe'), "-i%s" % par_fn]
-        else:
-            cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
+            process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid)
+        process.wait(timeout=50)
 
-    if randseed is not None:
-        cmd.append('-r%s' % randseed)
+        output = process.stdout.read()
+        output += process.stderr.read()
 
-    # run cligen
-    _clinp = open(_clinp_path)
+        fp_log.write(str(output))
 
-    if IS_WINDOWS:
-        process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE)
-    else:
-        process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid)
-    process.wait(timeout=50)
+        assert _exists(cli_fn), (cli_fn, cmd)
 
-    output = process.stdout.read()
-    output += process.stderr.read()
+        cli = ClimateFile(cli_fn)
 
-    fp_log.write(str(output))
+        sim_ppts = cli.header_ppts() * days_in_mo
+        if np.any(np.isnan(sim_ppts)):
+            
+            raise Exception('Cligen failed to produce precipitation')
 
-    assert _exists(cli_fn), (cli_fn, cmd)
+        sim_nwds = cli.count_wetdays()
 
-    cli = ClimateFile(cli_fn)
+        if logger is not None:
+            logger.log(''.join(
+                ['Note: CLIGEN uses English Units.\n\n',
+                'Station : %s\n' % _rowfmt(par_monthlies),
+                '%s   : %s\n' % (monthly_dataset, _rowfmt(prism_ppts)),
+                'Cligen  : %s\n' % _rowfmt(sim_ppts),
+                'Monthly number wet days\n',
+                'Station : %s\n' % _rowfmt(station.nwds),
+                'Target  : %s\n' % _rowfmt(nwds),
+                'Cligen  : %s\n' % _rowfmt(sim_nwds),
+                'p(w|w) and p(w|d)\n',
+                'Station p(w|w) : %s\n' % _rowfmt(station.pwws),
+                'Cligen p(w|w)  : %s\n' % _rowfmt(p_wws),
+                'Station p(w|d) : %s\n' % _rowfmt(station.pwds),
+                'Cligen p(w|d)  : %s\n' % _rowfmt(p_wds),
+                'Daily P for day precipitation occurs\n',
+                'Station : %s\n' % _rowfmt(station.ppts),
+                'Target  : %s\n' % _rowfmt(daily_ppts),
+                '%s TMAX (F): %s\n' % (monthly_dataset, _rowfmt(prism_tmaxs)),
+                '%s TMIN (F) : %s\n' % (monthly_dataset, _rowfmt(prism_tmins)),
+                ]))
 
-    sim_ppts = cli.header_ppts() * days_in_mo
-    if np.any(np.isnan(sim_ppts)):
-        raise Exception('Cligen failed to produce precipitation')
-
-    sim_nwds = cli.count_wetdays()
-
-    if logger is not None:
-        logger.log(''.join(
-            ['Note: CLIGEN uses English Units.\n\n',
-              'Station : %s\n' % _rowfmt(par_monthlies),
-              '%s   : %s\n' % (monthly_dataset, _rowfmt(prism_ppts)),
-              'Cligen  : %s\n' % _rowfmt(sim_ppts),
-              'Monthly number wet days\n',
-              'Station : %s\n' % _rowfmt(station.nwds),
-              'Target  : %s\n' % _rowfmt(nwds),
-              'Cligen  : %s\n' % _rowfmt(sim_nwds),
-              'p(w|w) and p(w|d)\n',
-              'Station p(w|w) : %s\n' % _rowfmt(station.pwws),
-              'Cligen p(w|w)  : %s\n' % _rowfmt(p_wws),
-              'Station p(w|d) : %s\n' % _rowfmt(station.pwds),
-              'Cligen p(w|d)  : %s\n' % _rowfmt(p_wds),
-              'Daily P for day precipitation occurs\n',
-              'Station : %s\n' % _rowfmt(station.ppts),
-              'Target  : %s\n' % _rowfmt(daily_ppts),
-              '%s TMAX (F): %s\n' % (monthly_dataset, _rowfmt(prism_tmaxs)),
-              '%s TMIN (F) : %s\n' % (monthly_dataset, _rowfmt(prism_tmins)),
-             ]))
-
-    os.chdir(curdir)
+        os.chdir(curdir)
 
     return cli.calc_monthlies()
+
+
 
 
 if __name__ == "__main__":
