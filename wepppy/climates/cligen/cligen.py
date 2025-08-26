@@ -1689,6 +1689,8 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         else:
             raise Exception
 
+        prism_ppts = [min(0.01, v) for v in prism_ppts]
+
         fp_log.write('monthly_dataset = {}\n'.format(monthly_dataset))
         fp_log.write('prism_ppts (in) = {}\n'.format(prism_ppts))
         fp_log.write('prism_tmaxs (F) = {}\n'.format(prism_tmaxs))
