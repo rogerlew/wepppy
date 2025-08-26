@@ -1739,6 +1739,13 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
             p_wws = 1.0 / (1.0 - ratio + ratio / pw)
             p_wds = ((p_wws - 1.0) * pw) / (pw - 1.0)
 
+
+        # replace p_wws p_wds and  nan values with station original values
+        for i, (pww, spww, pwd, spwd) in enumerate(zip(p_wws, station.pwws, p_wds, station.pwds)):
+            if np.isnan(pww) or np.isnan(pwd):
+                p_wws[i] = spww
+                p_wds[i] = spwd
+           
         if logger is not None:
             logger.log_done()
 
