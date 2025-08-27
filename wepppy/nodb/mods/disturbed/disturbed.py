@@ -1082,7 +1082,9 @@ class Disturbed(NoDbBase):
 
                 assert len(landuse.domlc_mofe_d[topaz_id]) > 0, topaz_id
 
-                for _id in landuse.domlc_mofe_d[topaz_id]:
+                for _id in sorted([int(_id) for _id in landuse.domlc_mofe_d[topaz_id]]):
+                    _id = str(_id)
+                    
                     dom = landuse.domlc_mofe_d[topaz_id][_id]
                     man = landuse.managements[dom]
 
