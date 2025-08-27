@@ -692,7 +692,7 @@ class Landuse(NoDbBase, LogMixin):
             disturbed_key_lookup = disturbed.get_disturbed_key_lookup()
             burn_shrubs = disturbed.burn_shrubs
             burn_grass = disturbed.burn_grass
-            
+
             sbs_lc_d = identify_mode_intersecting_raster_keys(
                 key_fn=watershed.subwta,
                 key2_fn=watershed.mofe_map,
@@ -713,7 +713,7 @@ class Landuse(NoDbBase, LogMixin):
 
                 for mofe_id, val in hill_sbs_d.items():
                     dom = domlc_d[topaz_id][mofe_id]
-                    man = self.managements[dom]
+                    man = man = get_management_summary(dom, self.mapping)
 
                     burn_class = class_pixel_map[val]
 
