@@ -165,6 +165,15 @@ class Landuse(NoDbBase, LogMixin):
                 db.lock()
                 db.dump_and_unlock()
 
+        if hasattr(db, 'domlc_mofe_d'):
+            if db.domlc_mofe_d is not None:
+                for topaz_id in db.domlc_mofe_d:
+                    mofe_d = {}
+                    for _id in sorted([int(_id) for _id in db.domlc_mofe_d[topaz_id]]):
+                        _id = str(_id)
+                        mofe_d[_id] = db.domlc_mofe_d[topaz_id][_id]
+                    db.domlc_mofe_d[topaz_id] = mofe_d
+
         return db
 
     @staticmethod
