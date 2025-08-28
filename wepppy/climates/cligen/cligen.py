@@ -1689,12 +1689,12 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         else:
             raise Exception
 
-        prism_ppts = [min(0.01, v) for v in prism_ppts]
+        prism_ppts = [max(0.01, v) for v in prism_ppts]
 
-        fp_log.write('monthly_dataset = {}\n'.format(monthly_dataset))
-        fp_log.write('prism_ppts (in) = {}\n'.format(prism_ppts))
-        fp_log.write('prism_tmaxs (F) = {}\n'.format(prism_tmaxs))
-        fp_log.write('prism_tmins (F) = {}\n'.format(prism_tmins))
+        fp_log.write(f'monthly_dataset = {monthly_dataset} at ({lng}, {lat})\n')
+        fp_log.write(f'prism_ppts (in) = {prism_ppts}\n')
+        fp_log.write(f'prism_tmaxs (F) = {prism_tmaxs}\n')
+        fp_log.write(f'prism_tmins (F) = {prism_tmins}\n')
 
         # calculate number of wet days
         if nwds_method.lower() == 'daymet':
@@ -1755,7 +1755,8 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
             randseed = 12345
         randseed = str(randseed)
 
-        daily_ppts = prism_ppts / nwds  # in inches / day
+        daily_ppts = [float(p)/float(n) for p, n in zip(prism_ppts, nwds)]  # in inches / day
+        daily_ppts = [max(0.01, v) for v in daily_ppts]
 
         fp_log.write('daily_ppts (in) = {}\n'.format(daily_ppts))
         fp_log.write('nwds = {}\n'.format(nwds))
