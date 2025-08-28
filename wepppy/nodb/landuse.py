@@ -694,13 +694,14 @@ class Landuse(NoDbBase, LogMixin):
             )
 
             for k, v in domlc_d.items():
-                for k2, v2 in v.items():
-                    domlc_d[k][k2] = str(v2)
-                    
+                for k2 in sorted(v.keys()):
+                    domlc_d[k][k2] = str(v[k2])
+
         if disturbed is not None:
             disturbed_key_lookup = disturbed.get_disturbed_key_lookup()
             burn_shrubs = disturbed.burn_shrubs
             burn_grass = disturbed.burn_grass
+            sbs = disturbed.get_sbs()
 
             sbs_lc_d = identify_mode_intersecting_raster_keys(
                 key_fn=watershed.subwta,
@@ -712,7 +713,6 @@ class Landuse(NoDbBase, LogMixin):
                 for k2, v2 in v.items():
                     sbs_lc_d[k][k2] = str(v2)
                     
-            sbs = disturbed.get_sbs()
             class_pixel_map = sbs.class_pixel_map
            
             meta = {}
