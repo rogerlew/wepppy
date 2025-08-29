@@ -760,6 +760,12 @@ class Omni(NoDbBase, LogMixin):
             print(f'Running contrast {contrast_id} of {len(self.contrasts)}: {contrast_name}')
             _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
 
+    def run_omni_contrast(self, contrast_id: int):
+        self.log(f'Omni::run_omni_contrast {contrast_id}')
+        contrast_name = self.contrast_names[contrast_id - 1]
+        _contrasts = self.contrasts[contrast_id - 1]
+        _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
+
     def contrasts_report(self):
         from wepppy.nodb.wepp import Wepp
 
@@ -1236,4 +1242,4 @@ class Omni(NoDbBase, LogMixin):
 # [x] run contrast scenarios
 
 
-# [ ] solution scenario for PATH with specified treatments across hillslopes
+# [ ] ability to run solution scenario for PATH with specified treatments across hillslopes
