@@ -2,6 +2,57 @@
 {% block form_id %}ash_form{% endblock %}
 {% block form_title %}Wildfire Ash Transport And Risk (WATAR){% endblock %}
 {% block inputs %}
+
+<script>
+  // Embed all model parameters from Python/Jinja2 into a JS object
+  const modelParams = {
+    multi: { // Corresponds to Srivastava2023
+      white: {{ ash.anu_white_ash_model_pars.to_dict() | tojson | safe }},
+      black: {{ ash.anu_black_ash_model_pars.to_dict() | tojson | safe }}
+    },
+    alex: { // Corresponds to Watanabe2025
+      white: {{ ash.alex_white_ash_model_pars.to_dict() | tojson | safe }},
+      black: {{ ash.alex_black_ash_model_pars.to_dict() | tojson | safe }}
+    }
+  };
+
+  function updateAshModelForm() {
+    const modelSelector = document.getElementById('ash_model_select');
+    if (!modelSelector) return;
+
+    const selectedModel = modelSelector.value;
+    const params = modelParams[selectedModel];
+
+    // 1. Update visibility based on the selected model
+    const anuOnlyParams = document.querySelectorAll('.anu-only-param');
+    const alexOnlyParams = document.querySelectorAll('.alex-only-param');
+
+    if (selectedModel === 'alex') {
+      anuOnlyParams.forEach(el => el.style.display = 'none');
+      alexOnlyParams.forEach(el => el.style.display = 'flex');
+    } else {
+      anuOnlyParams.forEach(el => el.style.display = 'flex');
+      alexOnlyParams.forEach(el => el.style.display = 'none');
+    }
+
+    // 2. Update all input values based on the selected model's parameters
+    for (const color of ['white', 'black']) {
+      for (const key in params[color]) {
+        const inputId = `${color}_${key}`;
+        const inputElement = document.getElementById(inputId);
+        if (inputElement) {
+          inputElement.value = params[color][key];
+        }
+      }
+    }
+  }
+
+  // Run the function on page load to set the correct initial state
+  window.addEventListener('DOMContentLoaded', (event) => {
+    updateAshModelForm();
+  });
+</script>
+
 <p>
     The ash transport analysis is available for continuous climates (no single storm).
     A climate with at least 100 years is recommended. The ash transport relies on WEPP outputs.
@@ -129,6 +180,9 @@
 
 <div><a href="#ash_advanced_opts_con" data-toggle="collapse">Advanced Options</a>
     <div id="ash_advanced_opts_con" style="padding-left: 2em;" class="collapse">
+        {% set white_pars = ash.alex_white_ash_model_pars if ash.model == 'alex' else ash.anu_white_ash_model_pars %}
+        {% set black_pars = ash.alex_black_ash_model_pars if ash.model == 'alex' else ash.anu_black_ash_model_pars %}
+
         <h5>Wind Transport</h5>
         <div class="form-group row">
             <div class="col-sm-4" style="padding-left: 3em;">
@@ -142,6 +196,20 @@
         </div>
 
         <h5>Ash Model Parameters</h5>
+
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="ash_model_select">Ash Model</label>
+            </div>
+            <div class="col-sm-6">
+                <select id="ash_model_select" name="ash_model" class="form-control" onchange="updateAshModelForm()">
+                    {% for value, text in ash.available_models %}
+                        <option value="{{ value }}" {% if value == ash.model %}selected{% endif %}>{{ text }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
         <div class="form-group row">
             <div class="col-sm-4">
                 <span><b>Parameter</b> </span>
@@ -155,77 +223,91 @@
         </div>
         <div class="form-group row">
             <div class="col-sm-4">
-                <label for="ini_bulk_den">Initial bulk density (gm/cm<sup>3</sup>): </label>
+                <label for="white_ini_bulk_den">Initial bulk density (gm/cm<sup>3</sup>): </label>
             </div>
             <div class="col-sm-3">
                 <input id="white_ini_bulk_den" name="white_ini_bulk_den" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_white_ash_model_pars.ini_bulk_den }}" aria-label="White Ash Initial Bulk Density">
+                    value="{{ white_pars.ini_bulk_den }}" aria-label="White Ash Initial Bulk Density">
             </div>
             <div class="col-sm-3">
                 <input id="black_ini_bulk_den" name="black_ini_bulk_den" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_black_ash_model_pars.ini_bulk_den }}" aria-label="Black Ash Initial Bulk Density">
+                    value="{{ black_pars.ini_bulk_den }}" aria-label="Black Ash Initial Bulk Density">
             </div>
         </div>
 
         <div class="form-group row">
             <div class="col-sm-4">
-                <label for="fin_bulk_den">Final bulk density (gm/cm<sup>3</sup>): </label>
+                <label for="white_fin_bulk_den">Final bulk density (gm/cm<sup>3</sup>): </label>
             </div>
             <div class="col-sm-3">
                 <input id="white_fin_bulk_den" name="white_fin_bulk_den" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_white_ash_model_pars.fin_bulk_den }}" aria-label="White Ash Final Bulk Density">
+                    value="{{ white_pars.fin_bulk_den }}" aria-label="White Ash Final Bulk Density">
             </div>
             <div class="col-sm-3">
                 <input id="black_fin_bulk_den" name="black_fin_bulk_den" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_black_ash_model_pars.fin_bulk_den }}" aria-label="Black Ash Final Bulk Density">
+                    value="{{ black_pars.fin_bulk_den }}" aria-label="Black Ash Final Bulk Density">
             </div>
         </div>
 
         <div class="form-group row">
             <div class="col-sm-4">
-                <label for="bulk_den_fac">Bulk density factor: </label>
+                <label for="white_bulk_den_fac">Bulk density factor: </label>
             </div>
             <div class="col-sm-3">
                 <input id="white_bulk_den_fac" name="white_bulk_den_fac" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_white_ash_model_pars.bulk_den_fac }}" aria-label="White Bulk Density Factor">
+                    value="{{ white_pars.bulk_den_fac }}" aria-label="White Bulk Density Factor">
             </div>
             <div class="col-sm-3">
                 <input id="black_bulk_den_fac" name="black_bulk_den_fac" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_black_ash_model_pars.bulk_den_fac }}" aria-label="Black Bulk Density Factor">
+                    value="{{ black_pars.bulk_den_fac }}" aria-label="Black Bulk Density Factor">
             </div>
         </div>
 
         <div class="form-group row">
             <div class="col-sm-4">
-                <label for="par_den">Ash particle density (gm/cm<sup>3</sup>): </label>
+                <label for="white_par_den">Ash particle density (gm/cm<sup>3</sup>): </label>
             </div>
             <div class="col-sm-3">
                 <input id="white_par_den" name="white_par_den" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_white_ash_model_pars.par_den }}" aria-label="White Particle Density">
+                    value="{{ white_pars.par_den }}" aria-label="White Particle Density">
             </div>
             <div class="col-sm-3">
                 <input id="black_par_den" name="black_par_den" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_black_ash_model_pars.par_den }}" aria-label="Black Particle Density">
+                    value="{{ black_pars.par_den }}" aria-label="Black Particle Density">
             </div>
         </div>
 
         <div class="form-group row">
             <div class="col-sm-4">
-                <label for="decomp_fac">Ash decomposition factor (per day): </label>
+                <label for="white_decomp_fac">Ash decomposition factor (per day): </label>
             </div>
             <div class="col-sm-3">
                 <input id="white_decomp_fac" name="white_decomp_fac" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_white_ash_model_pars.decomp_fac }}" aria-label="White Ash Decomposition Factor">
+                    value="{{ white_pars.decomp_fac }}" aria-label="White Ash Decomposition Factor">
             </div>
             <div class="col-sm-3">
                 <input id="black_decomp_fac" name="black_decomp_fac" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_black_ash_model_pars.decomp_fac }}" aria-label="Black Ash Decomposition Factor">
+                    value="{{ black_pars.decomp_fac }}" aria-label="Black Ash Decomposition Factor">
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="form-group row alex-only-param">
             <div class="col-sm-4">
-                <label for="ini_erod">Initial erodibility (t/ha): </label>
+                <label for="white_org_mat">Organic Matter (fraction): </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="white_org_mat" name="white_org_mat" class="form-control mr-sm-3" type="text"
+                    value="{{ white_pars.org_mat }}" aria-label="White Ash Organic Matter">
+            </div>
+            <div class="col-sm-3">
+                <input id="black_org_mat" name="black_org_mat" class="form-control mr-sm-3" type="text"
+                    value="{{ black_pars.org_mat }}" aria-label="Black Ash Organic Matter">
+            </div>
+        </div>
+
+        <div class="form-group row anu-only-param">
+            <div class="col-sm-4">
+                <label for="white_ini_erod">Initial erodibility (t/ha): </label>
             </div>
             <div class="col-sm-3">
                 <input id="white_ini_erod" name="white_ini_erod" class="form-control mr-sm-3" type="text"
@@ -237,9 +319,9 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="form-group row anu-only-param">
             <div class="col-sm-4">
-                <label for="fin_erod">Final erodibility (t/ha): </label>
+                <label for="white_fin_erod">Final erodibility (t/ha): </label>
             </div>
             <div class="col-sm-3">
                 <input id="white_fin_erod" name="white_fin_erod" class="form-control mr-sm-3" type="text"
@@ -253,15 +335,15 @@
 
         <div class="form-group row">
             <div class="col-sm-4">
-                <label for="roughness_limit">Roughness Limit (mm): </label>
+                <label for="white_roughness_limit">Roughness Limit (mm): </label>
             </div>
             <div class="col-sm-3">
                 <input id="white_roughness_limit" name="white_roughness_limit" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_white_ash_model_pars.roughness_limit }}" aria-label="White Ash Roughness Limit">
+                    value="{{ white_pars.roughness_limit }}" aria-label="White Ash Roughness Limit">
             </div>
             <div class="col-sm-3">
                 <input id="black_roughness_limit" name="black_roughness_limit" class="form-control mr-sm-3" type="text"
-                    value="{{ ash.anu_black_ash_model_pars.roughness_limit }}" aria-label="Black Ash Roughness Limit">
+                    value="{{ black_pars.roughness_limit }}" aria-label="Black Ash Roughness Limit">
             </div>
         </div>
     </div>

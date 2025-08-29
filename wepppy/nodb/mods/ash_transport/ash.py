@@ -42,7 +42,7 @@ from wepppy.all_your_base.dateutils import YearlessDate
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
-MULTIPROCESSING = False
+MULTIPROCESSING = True
 
 from .ash_multi_year_model import WHITE_ASH_BD, BLACK_ASH_BD, AshType
 from .ash_multi_year_model import WhiteAshModel as WhiteAshModelAnu
@@ -282,6 +282,7 @@ class Ash(NoDbBase, LogMixin):
 
         # noinspection PyBroadException
         try:
+            self._model = kwds.get('ash_model', self._model)
             self._field_black_ash_bulkdensity = kwds.get('field_black_bulkdensity', self._field_black_ash_bulkdensity)
             self._field_white_ash_bulkdensity = kwds.get('field_white_bulkdensity', self._field_white_ash_bulkdensity)
 
@@ -292,13 +293,14 @@ class Ash(NoDbBase, LogMixin):
                 self._alex_white_ash_model_pars.par_den = kwds.get('white_par_den', self._alex_white_ash_model_pars.par_den)
                 self._alex_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac', self._alex_white_ash_model_pars.decomp_fac)
                 self._alex_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit', self._alex_white_ash_model_pars.roughness_limit)
+                self._alex_white_ash_model_pars.org_mat = kwds.get('white_org_mat', self._alex_white_ash_model_pars.org_mat)
                 self._alex_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den', self._alex_black_ash_model_pars.ini_bulk_den)
                 self._alex_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den', self._alex_black_ash_model_pars.fin_bulk_den)
                 self._alex_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac', self._alex_black_ash_model_pars.bulk_den_fac)
                 self._alex_black_ash_model_pars.par_den = kwds.get('black_par_den', self._alex_black_ash_model_pars.par_den)
                 self._alex_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac', self._alex_black_ash_model_pars.decomp_fac)
                 self._alex_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit', self._alex_black_ash_model_pars.roughness_limit )
-
+                self._alex_black_ash_model_pars.org_mat = kwds.get('black_org_mat', self._alex_black_ash_model_pars.org_mat)    
             else:
                 self._anu_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den', self._anu_white_ash_model_pars.ini_bulk_den)
                 self._anu_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den', self._anu_white_ash_model_pars.fin_bulk_den)
@@ -873,8 +875,10 @@ class Ash(NoDbBase, LogMixin):
                             area_ha=area_ha,
                             run_wind_transport=run_wind_transport,
                             ash_model=ash_model,
-                            slope=slope,
                             logger=self)
+
+                if model == 'alex':
+                    kwds['slope'] = slope
 
                 args.append(kwds)
 
@@ -967,6 +971,10 @@ class Ash(NoDbBase, LogMixin):
                 return self.ini_white_ash_depth_mm
             else:
                 return load_d[str(topaz_id)] * 0.1 / white_bd
+
+    @property
+    def available_models(self):
+        return [('multi', 'Srivastava2023'), ('alex', 'Watanabe2025')]
 
     @property
     def black_ash_bulkdensity(self):

@@ -460,6 +460,18 @@ class WhiteAshModel(AshModelAlex):
             alpha=30.644,
             beta=0.0146,
             gamma=12.0101) 
+        
+    def to_dict(self):
+        return {
+            'ash_type': self.ash_type,
+            'ini_bulk_den': self.ini_bulk_den,
+            'fin_bulk_den': self.fin_bulk_den,
+            'bulk_den_fac': self.bulk_den_fac,
+            'par_den': self.par_den,
+            'decomp_fac': self.decomp_fac,
+            'org_mat': self.org_mat,
+            'roughness_limit': self.roughness_limit
+        }
 
 
 class BlackAshModel(AshModelAlex):
@@ -479,10 +491,14 @@ class BlackAshModel(AshModelAlex):
             beta=0.0146,
             gamma=12.0101)
 
-# per Sarah
-# 40 mm of Rain over 3 months 2 to 3 storms (13-20 mm per storm).
-# Removed 10 to 20 mm of ash. 15 mm of ash 46.5 tonne/ha
-# Removed all the Ash
-
-
-
+    def to_dict(self):
+        return {
+            'ash_type': self.ash_type,
+            'ini_bulk_den': self.ini_bulk_den,
+            'fin_bulk_den': self.fin_bulk_den,
+            'bulk_den_fac': self.bulk_den_fac,
+            'par_den': self.par_den,
+            'decomp_fac': self.decomp_fac,
+            'org_mat': self.org_mat,
+            'roughness_limit': self.roughness_limit
+        }
