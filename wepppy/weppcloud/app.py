@@ -5349,14 +5349,26 @@ def report_contaminant(runid, config):
         wd = get_wd(runid)
 
         climate = Climate.getInstance(wd)
-        rec_intervals = _parse_rec_intervals(request, climate.years)
-        contaminants = request.args.get('contaminants', 'Ca,Pb,P,Hg')
-        contaminants = contaminants.split(',')
-
-
         ron = Ron.getInstance(wd)
         ash = Ash.getInstance(wd)
         ashpost = AshPost.getInstance(wd)
+
+        rec_intervals = _parse_rec_intervals(request, climate.years)
+        contaminants = request.args.get('contaminants', None)
+        contaminant_keys = sorted(ash.high_contaminant_concentrations.keys())
+
+        if contaminants is not None:
+            contaminants = contaminants.split(',')
+        else:
+            # defaults
+            contaminants = []
+            for c in ['Ca', 'Pb', 'P', 'Hg']:
+                if c in contaminant_keys:
+                    contaminants.append(c)
+        
+            # defaults not available
+            if len(contaminants) == 0:
+                contaminants = contaminant_keys
 
         if request.method == 'POST':
             ash.parse_cc_inputs(dict(request.form))

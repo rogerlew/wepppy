@@ -50,12 +50,6 @@ from .ash_multi_year_model import BlackAshModel as BlackAshModelAnu
 from .ash_multi_year_model_alex import WhiteAshModel as WhiteAshModelAlex
 from .ash_multi_year_model_alex import BlackAshModel as BlackAshModelAlex
 
-ContaminantConcentrations = namedtuple('ContaminantConcentrations',
-                                       ['C', 'N', 'K',
-                                        'PO4', 'Al', 'Si', 'Ca', 'Pb', 'Na', 'Mg', 'P',
-                                        'Mn', 'Fe', 'Ni', 'Cu', 'Zn', 'As', 'Cd', 'Hg',
-                                        'Cr', 'Co'])
-
 def run_ash_model(kwds):
     """
     global function for running ash model to add with multiprocessing
@@ -168,122 +162,113 @@ class Ash(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-        self._load_default_contaminants()
-
-    @property
-    def cc_high_default(self):
-        return ContaminantConcentrations(
-                C=248.4,
-                N=5.4,
-                K=1.5,
-                PO4=3950,  # mg*Kg-1
-                Al=7500,
-                Si=880,
-                Ca=20300,
-                Pb=25.0,
-                Na=553,
-                Mg=980,
-                P=1289,
-                Mn=42.0,
-                Fe=5600,
-                Ni=13.0,
-                Cu=11.0,
-                Zn=35.0,
-                As=2441,  # µg*Kg-1
-                Cd=413,
-                Hg=7.71,
-                Cr=49.0,
-                Co=7.2)
-
-    @property
-    def cc_moderate_default(self):
-        return ContaminantConcentrations(
-            C=273.5,
-            N=5.42,
-            K=1.1,
-            PO4=9270,
-            Al=1936,
-            Si=2090,
-            Ca=18100,
-            Pb=70.0,
-            Na=1213,
-            Mg=4100,
-            P=3025,
-            Mn=910,
-            Fe=2890,
-            Ni=26.0,
-            Cu=59.0,
-            Zn=150,
-            As=713,
-            Cd=802,
-            Hg=42.9,
-            Cr=36.1,
-            Co=5.0)
-
-    @property
-    def cc_moderate_default(self):
-        return ContaminantConcentrations(
-            C=273.5,
-            N=5.42,
-            K=1.1,
-            PO4=9270,
-            Al=1936,
-            Si=2090,
-            Ca=18100,
-            Pb=70.0,
-            Na=1213,
-            Mg=4100,
-            P=3025,
-            Mn=910,
-            Fe=2890,
-            Ni=26.0,
-            Cu=59.0,
-            Zn=150,
-            As=713,
-            Cd=802,
-            Hg=42.9,
-            Cr=36.1,
-            Co=5.0)
-
-    @property
-    def cc_low_default(self):
-        return ContaminantConcentrations(
-                C=273.5,
-                N=5.42,
-                K=1.1,
-                PO4=9270,
-                Al=1936,
-                Si=2090,
-                Ca=18100,
-                Pb=70.0,
-                Na=1213,
-                Mg=4100,
-                P=3025,
-                Mn=910,
-                Fe=2890,
-                Ni=26.0,
-                Cu=59.0,
-                Zn=150,
-                As=714,
-                Cd=803,
-                Hg=42.9,
-                Cr=36.1,
-                Co=5.0)
-
-    def _load_default_contaminants(self):
+        self._load_contaminants_from_config()
+    
+    def _load_contaminants_from_config(self):
         self.lock()
-
-        # noinspection PyBroadException
         try:
-            self.high_contaminant_concentrations = self.cc_high_default
-            self.moderate_contaminant_concentrations = self.cc_moderate_default
-            self.low_contaminant_concentrations = self.cc_low_default
+            # Define the severity levels and corresponding attribute names
+            severities = {
+                'low': 'low_contaminant_concentrations',
+                'moderate': 'moderate_contaminant_concentrations',
+                'high': 'high_contaminant_concentrations'
+            }
+
+            for severity, attr_name in severities.items():
+                section = f'ash.contaminants.{severity}'
+                contaminants_dict = {}
+
+                # Check if the section exists in the config
+                if self._configparser.has_section(section):
+                    # Get all key-value pairs from the section
+                    for name, value in self._configparser.items(section):
+                        try:
+                            contaminants_dict[name] = float(value)
+                        except (ValueError, TypeError):
+                            # Log or handle cases where conversion fails
+                            self.log(f"Warning: Could not convert contaminant value for '{name}' in section '{section}' to float.")
+                else:
+                    contaminants_dict = self.get_cc_default(severity)
+
+                # Set the dictionary to the corresponding instance attribute
+                setattr(self, attr_name, contaminants_dict)
 
             self.dump_and_unlock()
-
         except Exception:
             self.unlock('-f')
             raise
+
+    def get_cc_default(self, severity):
+        if severity == 'high':
+            return dict(
+                    C=248.4,
+                    N=5.4,
+                    K=1.5,
+                    PO4=3950,  # mg*Kg-1
+                    Al=7500,
+                    Si=880,
+                    Ca=20300,
+                    Pb=25.0,
+                    Na=553,
+                    Mg=980,
+                    P=1289,
+                    Mn=42.0,
+                    Fe=5600,
+                    Ni=13.0,
+                    Cu=11.0,
+                    Zn=35.0,
+                    As=2441,  # µg*Kg-1
+                    Cd=413,
+                    Hg=7.71,
+                    Cr=49.0,
+                    Co=7.2)
+        elif severity == 'moderate':
+                return dict(
+                    C=273.5,
+                    N=5.42,
+                    K=1.1,
+                    PO4=9270,
+                    Al=1936,
+                    Si=2090,
+                    Ca=18100,
+                    Pb=70.0,
+                    Na=1213,
+                    Mg=4100,
+                    P=3025,
+                    Mn=910,
+                    Fe=2890,
+                    Ni=26.0,
+                    Cu=59.0,
+                    Zn=150,
+                    As=713,
+                    Cd=802,
+                    Hg=42.9,
+                    Cr=36.1,
+                    Co=5.0)
+        
+        else:  # low
+            return dict(
+                    C=273.5,
+                    N=5.42,
+                    K=1.1,
+                    PO4=9270,
+                    Al=1936,
+                    Si=2090,
+                    Ca=18100,
+                    Pb=70.0,
+                    Na=1213,
+                    Mg=4100,
+                    P=3025,
+                    Mn=910,
+                    Fe=2890,
+                    Ni=26.0,
+                    Cu=59.0,
+                    Zn=150,
+                    As=714,
+                    Cd=803,
+                    Hg=42.9,
+                    Cr=36.1,
+                    Co=5.0)
 
     def parse_inputs(self, kwds):
 
@@ -339,99 +324,40 @@ class Ash(NoDbBase, LogMixin):
             raise
 
     def parse_cc_inputs(self, kwds):
-
+        # Convert all possible numeric values in kwds to float
         for k in kwds:
             try:
                 kwds[k] = float(kwds[k])
-            except TypeError:
+            except (ValueError, TypeError):
                 try:
                     kwds[k] = float(kwds[k][0])
-                except:
-                    assert 0, (k, kwds[k])
+                except (ValueError, TypeError, IndexError):
+                    pass  # Keep original value if conversion fails
 
         self.lock()
-
-        cc_high_default = self.cc_high_default
-        cc_moderate_default = self.cc_moderate_default
-        cc_low_default = self.cc_low_default
-
-        # noinspection PyBroadException
         try:
+            # Map form prefixes to the instance's contaminant dictionaries
+            severity_map = {
+                'low': self.low_contaminant_concentrations,
+                'mod': self.moderate_contaminant_concentrations,
+                'high': self.high_contaminant_concentrations
+            }
 
-            self.high_contaminant_concentrations = ContaminantConcentrations(
-                C=kwds.get('high_C', cc_high_default.C),
-                N=kwds.get('high_N', cc_high_default.N),
-                K=kwds.get('high_K', cc_high_default.K),
-                PO4=kwds.get('high_PO4', cc_high_default.K),
-                Al=kwds.get('high_Al', cc_high_default.Al),
-                Si=kwds.get('high_Si', cc_high_default.Si),
-                Ca=kwds.get('high_Ca', cc_high_default.Ca),
-                Pb=kwds.get('high_Pb', cc_high_default.Pb),
-                Na=kwds.get('high_Na', cc_high_default.Na),
-                Mg=kwds.get('high_Mg', cc_high_default.Mg),
-                P=kwds.get('high_P', cc_high_default.P),
-                Mn=kwds.get('high_Mn', cc_high_default.Mn),
-                Fe=kwds.get('high_Fe', cc_high_default.Fe),
-                Ni=kwds.get('high_Ni', cc_high_default.Ni),
-                Cu=kwds.get('high_Cu', cc_high_default.Cu),
-                Zn=kwds.get('high_Zn', cc_high_default.Zn),
-                As=kwds.get('high_As', cc_high_default.As),
-                Cd=kwds.get('high_Cd', cc_high_default.Cd),
-                Hg=kwds.get('high_Hg', cc_high_default.Hg),
-                Cr=kwds.get('high_Cr', cc_high_default.Cr),
-                Co=kwds.get('high_Co', cc_high_default.Co))
+            # Iterate through each severity level (low, mod, high)
+            for prefix, contaminants_dict in severity_map.items():
+                # Iterate through the contaminants defined in the config for that level
+                for contaminant_key in contaminants_dict:
+                    # Construct the expected key from the input dictionary (e.g., 'high_C')
+                    kwds_key = f'{prefix}_{contaminant_key}'
+                    if kwds_key in kwds:
+                        # If the key exists, update the value in our dictionary
+                        contaminants_dict[contaminant_key] = kwds[kwds_key]
 
-            self.moderate_contaminant_concentrations = ContaminantConcentrations(
-                C=kwds.get('mod_C', cc_moderate_default.C),
-                N=kwds.get('mod_N', cc_moderate_default.N),
-                K=kwds.get('mod_K', cc_moderate_default.K),
-                PO4=kwds.get('mod_PO4', cc_moderate_default.K),
-                Al=kwds.get('mod_Al', cc_moderate_default.Al),
-                Si=kwds.get('mod_Si', cc_moderate_default.Si),
-                Ca=kwds.get('mod_Ca', cc_moderate_default.Ca),
-                Pb=kwds.get('mod_Pb', cc_moderate_default.Pb),
-                Na=kwds.get('mod_Na', cc_moderate_default.Na),
-                Mg=kwds.get('mod_Mg', cc_moderate_default.Mg),
-                P=kwds.get('mod_P', cc_moderate_default.P),
-                Mn=kwds.get('mod_Mn', cc_moderate_default.Mn),
-                Fe=kwds.get('mod_Fe', cc_moderate_default.Fe),
-                Ni=kwds.get('mod_Ni', cc_moderate_default.Ni),
-                Cu=kwds.get('mod_Cu', cc_moderate_default.Cu),
-                Zn=kwds.get('mod_Zn', cc_moderate_default.Zn),
-                As=kwds.get('mod_As', cc_moderate_default.As),
-                Cd=kwds.get('mod_Cd', cc_moderate_default.Cd),
-                Hg=kwds.get('mod_Hg', cc_moderate_default.Hg),
-                Cr=kwds.get('mod_Cr', cc_moderate_default.Cr),
-                Co=kwds.get('mod_Co', cc_moderate_default.Co))
-            
-            self.low_contaminant_concentrations = ContaminantConcentrations(
-                C=kwds.get('low_C', cc_low_default.C),
-                N=kwds.get('low_N', cc_low_default.N),
-                K=kwds.get('low_K', cc_low_default.K),
-                PO4=kwds.get('low_PO4', cc_low_default.K),
-                Al=kwds.get('low_Al', cc_low_default.Al),
-                Si=kwds.get('low_Si', cc_low_default.Si),
-                Ca=kwds.get('low_Ca', cc_low_default.Ca),
-                Pb=kwds.get('low_Pb', cc_low_default.Pb),
-                Na=kwds.get('low_Na', cc_low_default.Na),
-                Mg=kwds.get('low_Mg', cc_low_default.Mg),
-                P=kwds.get('low_P', cc_low_default.P),
-                Mn=kwds.get('low_Mn', cc_low_default.Mn),
-                Fe=kwds.get('low_Fe', cc_low_default.Fe),
-                Ni=kwds.get('low_Ni', cc_low_default.Ni),
-                Cu=kwds.get('low_Cu', cc_low_default.Cu),
-                Zn=kwds.get('low_Zn', cc_low_default.Zn),
-                As=kwds.get('low_As', cc_low_default.As),
-                Cd=kwds.get('low_Cd', cc_low_default.Cd),
-                Hg=kwds.get('low_Hg', cc_low_default.Hg),
-                Cr=kwds.get('low_Cr', cc_low_default.Cr),
-                Co=kwds.get('low_Co', cc_low_default.Co))
-
-            self._reservoir_capacity_m3 = kwds.get('reservoir_capacity')
-            self._reservoir_storage = kwds.get('reservoir_storage')
+            # Update reservoir properties
+            self._reservoir_capacity_m3 = kwds.get('reservoir_capacity', self._reservoir_capacity_m3)
+            self._reservoir_storage = kwds.get('reservoir_storage', self._reservoir_storage)
 
             self.dump_and_unlock()
-
         except Exception:
             self.unlock('-f')
             raise
@@ -1078,18 +1004,23 @@ class Ash(NoDbBase, LogMixin):
         return burn_class in [2, 3, 4]
 
     def contaminants_iter(self):
-        high_contaminant_concentrations = self.high_contaminant_concentrations
-        moderate_contaminant_concentrations = self.moderate_contaminant_concentrations
-        low_contaminant_concentrations = self.low_contaminant_concentrations
+        # Use the keys from one of the dictionaries as the master list of contaminants.
+        # Sorting ensures a consistent order.
+        if not self.high_contaminant_concentrations:
+            return
 
-        for contaminant in high_contaminant_concentrations._fields:
-            high = getattr(high_contaminant_concentrations, contaminant)
-            mod = getattr(moderate_contaminant_concentrations, contaminant)
-            low = getattr(low_contaminant_concentrations, contaminant)
+        contaminant_keys = sorted(self.high_contaminant_concentrations.keys())
 
-            if contaminant in ['C', 'N', 'K']:
+        for contaminant in contaminant_keys:
+            # Use .get() for safe access in case dictionaries are ever inconsistent
+            high = self.high_contaminant_concentrations.get(contaminant)
+            mod = self.moderate_contaminant_concentrations.get(contaminant)
+            low = self.low_contaminant_concentrations.get(contaminant)
+
+            # This unit logic can be expanded or moved to the config if needed
+            if contaminant in ['C', 'N', 'K', 'dC', 'dN', 'dK']:
                 units = 'g/kg'
-            elif contaminant in ['As', 'Cd', 'Hg']:
+            elif contaminant in ['As', 'Cd', 'Hg', 'dAs', 'dCd', 'dHg']:
                 units = 'μg/kg'
             else:
                 units = 'mg/kg'
