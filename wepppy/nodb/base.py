@@ -173,6 +173,14 @@ class NoDbBase(object):
         except (NoSectionError, NoOptionError):
             return default
 
+    def config_iter_section(self, section):
+        try:
+            options = self._configparser.options(section)
+            for option in options:
+                yield option, self.config_get_str(section, option)
+        except NoSectionError:
+            return
+
     def config_get_str(self, section: str, option: str, default=None):
 
         try:
