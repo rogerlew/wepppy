@@ -4,14 +4,21 @@
 <script>
 </script>
 
-{% if contaminants | length == 4 %}
-<a href="./?contaminants=C,N,K,PO4,Al,Si,Ca,Pb,Na,Mg,P,Mn,Fe,Ni,Cu,Zn,As,Cd,Hg,Cr,Co">Show extended contaminant tables (C,N,K,PO4,Al,Si,Ca,Pb,Na,Mg,P,Mn,Fe,Ni,Cu,Zn,As,Cd,Hg,Cr,Co)</a>
-{% else %}
-<a href="./?">Show simple contaminant tables (Ca,Pb,P,Hg)</a>
-<br/>
-<br/>
+{# Dynamically generate the list of all contaminants for the link #}
+{% set all_contaminants = [] %}
+{% for contaminant, _, _, _, _ in ash.contaminants_iter() %}
+  {% set _ = all_contaminants.append(contaminant) %}
+{% endfor %}
 
-{% endif %}<h2>Ash Contaminant Analysis Results</h2>
+{% if contaminants | length < all_contaminants | length %}
+<a href="./?contaminants={{ all_contaminants | join(',') }}">Show extended contaminant tables ({{ all_contaminants | join(', ') }})</a>
+{% else %}
+<a href="./?">Show simple contaminant tables ({{ contaminants | join(', ') }})</a>
+<br/>
+<br/>
+{% endif %}
+
+<h2>Ash Contaminant Analysis Results</h2>
 
 <form action="" method="post">
 <h3>Contaminant Concentrations</h3>
