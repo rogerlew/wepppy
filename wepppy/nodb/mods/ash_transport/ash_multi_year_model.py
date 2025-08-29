@@ -441,6 +441,19 @@ class WhiteAshModel(AshModel):
             ini_erod=10,  # Initial erodibility, t/ha
             fin_erod=0.1,  # Final erodibility, t/ha
             roughness_limit=1)  # TODO: Verify Roughness limit, mm
+        
+    def to_dict(self):
+        return {
+            'ash_type': self.ash_type,
+            'ini_bulk_den': self.ini_bulk_den,
+            'fin_bulk_den': self.fin_bulk_den,
+            'bulk_den_fac': self.bulk_den_fac,
+            'par_den': self.par_den,
+            'decomp_fac': self.decomp_fac,
+            'ini_erod': self.ini_erod,
+            'fin_erod': self.fin_erod,
+            'roughness_limit': self.roughness_limit
+        }
 
 
 class BlackAshModel(AshModel):
@@ -457,6 +470,20 @@ class BlackAshModel(AshModel):
             ini_erod=1.0,  # Initial erodibility, t/ha
             fin_erod=0.1,  # Final erodibility, t/ha
             roughness_limit=1)   # TODO: Verify Roughness limit, mm
+        
+    def to_dict(self):
+        return {
+            'ash_type': self.ash_type,
+            'ini_bulk_den': self.ini_bulk_den,
+            'fin_bulk_den': self.fin_bulk_den,
+            'bulk_den_fac': self.bulk_den_fac,
+            'par_den': self.par_den,
+            'decomp_fac': self.decomp_fac,
+            'ini_erod': self.ini_erod,
+            'fin_erod': self.fin_erod,
+            'roughness_limit': self.roughness_limit
+        }
+
 
 # per Sarah
 # 40 mm of Rain over 3 months 2 to 3 storms (13-20 mm per storm).
