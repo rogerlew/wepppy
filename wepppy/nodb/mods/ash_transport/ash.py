@@ -42,9 +42,13 @@ from wepppy.all_your_base.dateutils import YearlessDate
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
-MULTIPROCESSING = True
+MULTIPROCESSING = False
 
-from wepppy.nodb.mods.ash_transport.ash_multi_year_model import WHITE_ASH_BD, BLACK_ASH_BD
+from .ash_multi_year_model import WHITE_ASH_BD, BLACK_ASH_BD, AshType
+from .ash_multi_year_model import WhiteAshModel as WhiteAshModelAnu
+from .ash_multi_year_model import BlackAshModel as BlackAshModelAnu
+from .ash_multi_year_model_alex import WhiteAshModel as WhiteAshModelAlex
+from .ash_multi_year_model_alex import BlackAshModel as BlackAshModelAlex
 
 ContaminantConcentrations = namedtuple('ContaminantConcentrations',
                                        ['C', 'N', 'K',
@@ -146,11 +150,12 @@ class Ash(NoDbBase, LogMixin):
             self._white_ash_bulkdensity = WHITE_ASH_BD
 
             self._run_wind_transport = self.config_get_bool('ash', 'run_wind_transport')
-            self._model = 'multi' #: self.config_get_str('ash', 'model')
+            self._model = self.config_get_str('ash', 'model', 'multi')
 
-            from .ash_multi_year_model import AshType, WhiteAshModel, BlackAshModel
-            self._anu_white_ash_model_pars = WhiteAshModel()
-            self._anu_black_ash_model_pars = BlackAshModel()
+            self._alex_white_ash_model_pars = WhiteAshModelAlex()
+            self._alex_black_ash_model_pars = BlackAshModelAlex()
+            self._anu_white_ash_model_pars = WhiteAshModelAnu()
+            self._anu_black_ash_model_pars = BlackAshModelAnu()
             
             self.dump_and_unlock()
 
@@ -295,22 +300,37 @@ class Ash(NoDbBase, LogMixin):
             self._field_black_ash_bulkdensity = kwds.get('field_black_bulkdensity', self._field_black_ash_bulkdensity)
             self._field_white_ash_bulkdensity = kwds.get('field_white_bulkdensity', self._field_white_ash_bulkdensity)
 
-            self._anu_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den', self._anu_white_ash_model_pars.ini_bulk_den)
-            self._anu_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den', self._anu_white_ash_model_pars.fin_bulk_den)
-            self._anu_white_ash_model_pars.bulk_den_fac = kwds.get('white_bulk_den_fac', self._anu_white_ash_model_pars.bulk_den_fac)
-            self._anu_white_ash_model_pars.par_den = kwds.get('white_par_den', self._anu_white_ash_model_pars.par_den)
-            self._anu_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac', self._anu_white_ash_model_pars.decomp_fac)
-            self._anu_white_ash_model_pars.ini_erod = kwds.get('white_ini_erod', self._anu_white_ash_model_pars.ini_erod)
-            self._anu_white_ash_model_pars.fin_erod = kwds.get('white_fin_erod', self._anu_white_ash_model_pars.fin_erod)
-            self._anu_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit', self._anu_white_ash_model_pars.roughness_limit)
-            self._anu_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den', self._anu_black_ash_model_pars.ini_bulk_den)
-            self._anu_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den', self._anu_black_ash_model_pars.fin_bulk_den)
-            self._anu_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac', self._anu_black_ash_model_pars.bulk_den_fac)
-            self._anu_black_ash_model_pars.par_den = kwds.get('black_par_den', self._anu_black_ash_model_pars.par_den)
-            self._anu_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac', self._anu_black_ash_model_pars.decomp_fac)
-            self._anu_black_ash_model_pars.ini_erod = kwds.get('black_ini_erod', self._anu_black_ash_model_pars.ini_erod)
-            self._anu_black_ash_model_pars.fin_erod = kwds.get('black_fin_erod', self._anu_black_ash_model_pars.fin_erod)
-            self._anu_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit', self._anu_black_ash_model_pars.roughness_limit )
+            if self.model == 'alex':
+                self._alex_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den', self._alex_white_ash_model_pars.ini_bulk_den)
+                self._alex_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den', self._alex_white_ash_model_pars.fin_bulk_den)
+                self._alex_white_ash_model_pars.bulk_den_fac = kwds.get('white_bulk_den_fac', self._alex_white_ash_model_pars.bulk_den_fac)
+                self._alex_white_ash_model_pars.par_den = kwds.get('white_par_den', self._alex_white_ash_model_pars.par_den)
+                self._alex_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac', self._alex_white_ash_model_pars.decomp_fac)
+                self._alex_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit', self._alex_white_ash_model_pars.roughness_limit)
+                self._alex_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den', self._alex_black_ash_model_pars.ini_bulk_den)
+                self._alex_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den', self._alex_black_ash_model_pars.fin_bulk_den)
+                self._alex_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac', self._alex_black_ash_model_pars.bulk_den_fac)
+                self._alex_black_ash_model_pars.par_den = kwds.get('black_par_den', self._alex_black_ash_model_pars.par_den)
+                self._alex_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac', self._alex_black_ash_model_pars.decomp_fac)
+                self._alex_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit', self._alex_black_ash_model_pars.roughness_limit )
+
+            else:
+                self._anu_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den', self._anu_white_ash_model_pars.ini_bulk_den)
+                self._anu_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den', self._anu_white_ash_model_pars.fin_bulk_den)
+                self._anu_white_ash_model_pars.bulk_den_fac = kwds.get('white_bulk_den_fac', self._anu_white_ash_model_pars.bulk_den_fac)
+                self._anu_white_ash_model_pars.par_den = kwds.get('white_par_den', self._anu_white_ash_model_pars.par_den)
+                self._anu_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac', self._anu_white_ash_model_pars.decomp_fac)
+                self._anu_white_ash_model_pars.ini_erod = kwds.get('white_ini_erod', self._anu_white_ash_model_pars.ini_erod)
+                self._anu_white_ash_model_pars.fin_erod = kwds.get('white_fin_erod', self._anu_white_ash_model_pars.fin_erod)
+                self._anu_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit', self._anu_white_ash_model_pars.roughness_limit)
+                self._anu_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den', self._anu_black_ash_model_pars.ini_bulk_den)
+                self._anu_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den', self._anu_black_ash_model_pars.fin_bulk_den)
+                self._anu_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac', self._anu_black_ash_model_pars.bulk_den_fac)
+                self._anu_black_ash_model_pars.par_den = kwds.get('black_par_den', self._anu_black_ash_model_pars.par_den)
+                self._anu_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac', self._anu_black_ash_model_pars.decomp_fac)
+                self._anu_black_ash_model_pars.ini_erod = kwds.get('black_ini_erod', self._anu_black_ash_model_pars.ini_erod)
+                self._anu_black_ash_model_pars.fin_erod = kwds.get('black_fin_erod', self._anu_black_ash_model_pars.fin_erod)
+                self._anu_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit', self._anu_black_ash_model_pars.roughness_limit )
 
             self.dump_and_unlock()
 
@@ -461,14 +481,14 @@ class Ash(NoDbBase, LogMixin):
     def has_ash_results(self):
         return _exists(self.status_log) and len(glob(_join(self.ash_dir, 'post', '*.pkl'))) > 0
 
+    # These are setup this way for the html views
     @property
     def anu_white_ash_model_pars(self):
         pars = getattr(self, '_anu_white_ash_model_pars', None)
         if pars is None:
             try:
-                from .ash_multi_year_model import AshType, WhiteAshModel, BlackAshModel
                 self.lock()
-                pars = self._anu_white_ash_model_pars = WhiteAshModel()
+                pars = self._anu_white_ash_model_pars = WhiteAshModelAnu()
                 
                 self.dump_and_unlock()
     
@@ -482,10 +502,9 @@ class Ash(NoDbBase, LogMixin):
         pars = getattr(self, '_anu_black_ash_model_pars', None)
         if pars is None:
             try:
-                from .ash_multi_year_model import AshType, WhiteAshModel, BlackAshModel
                  
                 self.lock()
-                pars = self._anu_black_ash_model_pars = BlackAshModel()
+                pars = self._anu_black_ash_model_pars = BlackAshModelAnu()
                 
                 self.dump_and_unlock()
     
@@ -495,8 +514,39 @@ class Ash(NoDbBase, LogMixin):
         return pars
 
     @property
+    def alex_white_ash_model_pars(self):
+        pars = getattr(self, '_alex_white_ash_model_pars', None)
+        if pars is None:
+            try:
+                self.lock()
+                pars = self._alex_white_ash_model_pars = WhiteAshModelAlex()
+                
+                self.dump_and_unlock()
+    
+            except Exception:
+                self.unlock('-f')
+                raise
+        return pars
+
+    @property
+    def alex_black_ash_model_pars(self):
+        pars = getattr(self, '_alex_black_ash_model_pars', None)
+        if pars is None:
+            try:
+                 
+                self.lock()
+                pars = self._alex_black_ash_model_pars = BlackAshModelAlex()
+                
+                self.dump_and_unlock()
+    
+            except Exception:
+                self.unlock('-f')
+                raise
+        return pars
+    
+    @property
     def model(self):
-        return 'multi'
+        return self._model
 
     @model.setter
     def model(self, value):
@@ -706,7 +756,8 @@ class Ash(NoDbBase, LogMixin):
     def ash_type_map_cropped_fn(self):
         return _join(self.ash_dir, 'ash_type_map_cropped.tif')
 
-    def run_ash(self, fire_date='8/4', ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0):
+    def run_ash(self, fire_date='8/4', ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0,
+                slope=None):
         run_wind_transport=self.run_wind_transport
 
         self.clean_log()
@@ -726,11 +777,6 @@ class Ash(NoDbBase, LogMixin):
             wd = self.wd
             ash_dir = self.ash_dir
             model = self.model
-
-            if 'multi' in model:
-                from .ash_multi_year_model import AshType, WhiteAshModel, BlackAshModel
-            else:
-                raise NotImplementedError
 
             if _exists(ash_dir):
 
@@ -788,6 +834,7 @@ class Ash(NoDbBase, LogMixin):
                 meta[topaz_id] = {}
                 wepp_id = translator.wepp(top=topaz_id)
                 area_ha = watershed.hillslope_area(topaz_id) / 10000
+                slope = watershed.hillslope_slope(topaz_id)
 
                 burn_class = landuse.identify_burn_class(topaz_id)
                 burn_class = ['Unburned', 'Low', 'Moderate', 'High'].index(burn_class)
@@ -865,10 +912,17 @@ class Ash(NoDbBase, LogMixin):
 
                 assert ini_ash_load > 0.0, (ini_ash_load, ini_white_ash_depth_mm, ini_black_ash_depth_mm, field_white_ash_bulkdensity, field_black_ash_bulkdensity)
 
-                if ash_type == AshType.BLACK:
-                    ash_model = self.anu_black_ash_model_pars  # BlackAshModel instance with properties set by parse_inputs
+
+                if model == "alex":
+                    if ash_type == AshType.BLACK:
+                        ash_model = self.alex_black_ash_model_pars  # BlackAshModel instance with properties set by parse_inputs
+                    else:
+                        ash_model = self.alex_white_ash_model_pars  # WhiteAshModel instance with properties set by parse_inputs
                 else:
-                    ash_model = self.anu_white_ash_model_pars  # WhiteAshModel instance with properties set by parse_inputs
+                    if ash_type == AshType.BLACK:
+                        ash_model = self.anu_black_ash_model_pars  # BlackAshModel instance with properties set by parse_inputs
+                    else:
+                        ash_model = self.anu_white_ash_model_pars  # WhiteAshModel instance with properties set by parse_inputs
 
                 meta[topaz_id]['ini_ash_depth'] = ini_ash_depth
                 meta[topaz_id]['field_ash_bulkdensity'] = field_ash_bulkdensity
@@ -893,6 +947,7 @@ class Ash(NoDbBase, LogMixin):
                             area_ha=area_ha,
                             run_wind_transport=run_wind_transport,
                             ash_model=ash_model,
+                            slope=slope,
                             logger=self)
 
                 args.append(kwds)
