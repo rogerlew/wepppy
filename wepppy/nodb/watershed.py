@@ -152,8 +152,8 @@ class Watershed(NoDbBase, LogMixin):
                 if not _exists(wbt_dir):
                     os.mkdir(wbt_dir)
                 self._wbt = None
-                self._csa = self.config_get_float("watershed.wbt", "csa")
-                self._mcl = self.config_get_float("watershed.wbt", "mcl")
+                self._csa = self.config_get_float("watershed.wbt", "csa", 5)
+                self._mcl = self.config_get_float("watershed.wbt", "mcl", 60)
                 self._wbt_fill_or_breach = self.config_get_str(
                     "watershed.wbt", "fill_or_breach", "breach_least_cost"
                 )
@@ -1512,6 +1512,24 @@ class Watershed(NoDbBase, LogMixin):
                 return self._sub_area_lookup[str(topaz_id)]
 
         return self._deprecated_area_of(topaz_id)
+
+    def hillslope_slope(self, topaz_id):
+        if hasattr(self, "_sub_slope_lookup"):
+            return self._sub_slope_lookup[str(topaz_id)]
+
+        if _exists(_join(self.wat_dir, "hillslopes.parquet")):
+            import duckdb
+
+            with duckdb.connect() as con:
+                parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
+                # lazy load self._sub_area_lookup with duckdb
+                result = con.execute(
+                    f"SELECT topaz_id, slope_scalar FROM read_parquet('{parquet_fn}')"
+                ).fetchall()
+                self._sub_slope_lookup = {str(row[0]): row[1] for row in result}
+                return self._sub_slope_lookup[str(topaz_id)]
+
+        raise Exception('Cannot find slope without hillslope.parquet file')
 
     def channel_area(self, topaz_id):
         if hasattr(self, "_chn_area_lookup"):
