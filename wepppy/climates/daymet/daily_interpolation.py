@@ -1,13 +1,3 @@
-
-"""
-Deprecated Module
-This entire file has been marked as deprecated. Any functionality previously
-provided by this code may no longer be maintained or supported. Users are
-encouraged to refrain from relying on it in new or existing projects and to
-migrate to updated solutions as they become available.
-"""
-
-
 import pandas as pd
 import numpy as np
 from calendar import isleap
@@ -293,20 +283,15 @@ if __name__ == "__main__":
 
     hillslope_locations = identify_pixel_coords(hillslope_locations)
 
+    print(hillslope_locations)
 
-    import cProfile
-    import pstats
-    import io
 
-    pr = cProfile.Profile()
-    pr.enable()
-    interpolate_daily_timeseries(hillslope_locations, start_year=1980, end_year=2023, output_dir='test')
-    pr.disable()
+    """
+    on wepp.cloud the netcdf/h5py/gdal libraries SNAFU
 
-    # Save profiling results
-    s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats(pstats.SortKey.TIME)
-    ps.print_stats()
-
-    with open("executor_profile.txt", "w") as f:
-        f.write(s.getvalue())
+    work around is this /var/www/.bashrc
+export LD_LIBRARY_PATH=/workdir/miniconda3/envs/wepppy310-env/lib:$LD_LIBRARY_PATH
+export LD_PRELOAD=/workdir/miniconda3/envs/wepppy310-env/lib/libhdf5.so
+source /workdir/miniconda3/etc/profile.d/conda.sh
+conda activate wepppy310-env
+    """
