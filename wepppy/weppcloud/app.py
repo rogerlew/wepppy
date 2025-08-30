@@ -27,6 +27,7 @@ from subprocess import check_output, Popen, PIPE
 import awesome_codename
 
 from werkzeug.utils import secure_filename
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from deprecated import deprecated
 
@@ -231,6 +232,8 @@ app = config_app(app)
 # Configure SameSite for session cookies
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True  # Require a secure context (HTTPS)
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
 
 from routes.download import download_bp
 from routes.browse import browse_bp
@@ -685,10 +688,11 @@ def exception_factory(msg='Error Handling Request',
 
     if runid is not None:
         wd = get_wd(runid)
-        with open(_join(wd, 'exceptions.log'), 'a') as fp:
-            fp.write(f'[{datetime.now()}]\n')
-            fp.write(stacktrace)
-            fp.write('\n\n')
+        if _exists(wd):
+            with open(_join(wd, 'exceptions.log'), 'a') as fp:
+                fp.write(f'[{datetime.now()}]\n')
+                fp.write(stacktrace)
+                fp.write('\n\n')
 
     with open('/var/log/exceptions.log', 'a') as fp:
         fp.write(f'[{datetime.now()}] ')

@@ -185,15 +185,6 @@ def browse_tree(runid, config, subpath):
 def get_entries(directory, filter_pattern, start, end, page_size):
     """
     Retrieve paginated directory entries using ls -l with ISO time style.
-    
-    Args:
-        directory (str): Directory path to list.
-        filter_pattern (str): Sanitized shell glob pattern (e.g., '*.txt').
-        page (int): Page number (1-based).
-        page_size (int): Number of entries per page.
-    
-    Returns:
-        list: List of tuples (name, is_dir, modified_time, hr_size, is_symlink, sym_target).
     """
  
     # Construct the ls command with --time-style=long-iso
@@ -220,6 +211,8 @@ def get_entries(directory, filter_pattern, start, end, page_size):
     
     # Handle command failure
     if result.returncode != 0:
+        # This can happen if the directory is empty and the filter matches nothing, which is not an error.
+        # Or if ls fails for another reason. Returning [] is safe.
         return []
     
     entries = []
@@ -229,20 +222,16 @@ def get_entries(directory, filter_pattern, start, end, page_size):
         if line == '':
             break
         
-        # Split the line into parts, limiting to 7 splits to handle filenames with spaces
         parts = line.split(maxsplit=7)
         if len(parts) < 8:
             continue
         
-        # Extract file type flags
         flag = parts[0]
         is_dir = flag.startswith('d')
         is_symlink = flag.startswith('l')
         
-        # Extract ISO modification time (YYYY-MM-DD HH:MM)
         modified_time = f"{parts[5]} {parts[6]}"
         
-        # Extract filename or symlink information
         file_field = parts[7]
         if is_symlink and " -> " in file_field:
             name, _, sym_target = file_field.partition(" -> ")
@@ -252,7 +241,6 @@ def get_entries(directory, filter_pattern, start, end, page_size):
             name = file_field
             sym_target = ""
         
-        # Calculate human-readable size for files (not directories)
         if is_dir:
             hr_size = ""
             dir_indices.append((index, _join(directory, name)))
@@ -264,25 +252,22 @@ def get_entries(directory, filter_pattern, start, end, page_size):
             if size_bytes == 0:
                 hr_size = "0 B"
             else:
-                size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-                i = int(math.floor(math.log(size_bytes, 1024)))
+                size_name = ("B", "KB", "MB", "GB", "TB")
+                i = int(math.floor(math.log(size_bytes, 1024))) if size_bytes > 0 else 0
                 p = math.pow(1024, i)
                 s = round(size_bytes / p, 2)
                 hr_size = f"{s} {size_name[i]}"
         
-        # Add entry to the list
         entries.append((name, is_dir, modified_time, hr_size, is_symlink, sym_target))
         index += 1
     
     if dir_indices:
         with ThreadPoolExecutor(max_workers=10) as executor:
-            # Call get_total_items for each subdirectory, without filter_pattern
             futures = {executor.submit(get_total_items, dir_path): i for i, dir_path in dir_indices}
             for future in futures:
                 index = futures[future]
                 total_items = future.result()
                 entry = entries[index]
-                # Replace the entry with updated total items
                 entries[index] = (entry[0], entry[1], entry[2], f"{total_items} items", entry[4], entry[5])
                 
     return entries
@@ -433,7 +418,6 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
     rel_path = os.path.relpath(path, wd)
     breadcrumbs = ''
     
-
     if os.path.isdir(path):
         # build bread crumb links
         _url = f'/weppcloud/runs/{runid}/{config}/browse/'
