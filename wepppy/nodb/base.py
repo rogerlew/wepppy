@@ -41,6 +41,9 @@ _config_dir = _join(_thisdir, 'configs')
 _default_config = _join(_config_dir, '_defaults.toml')
 
 
+class CaseSensitiveRawConfigParser(RawConfigParser):
+    def optionxform(self, s): return s
+
 def get_configs():
     return [Path(fn).stem for fn in glob(_join(_config_dir, '*.cfg'))]
 
@@ -458,7 +461,7 @@ class NoDbBase(object):
 
         cfg = _join(_config_dir, _config[0])
 
-        parser = RawConfigParser(allow_no_value=True)
+        parser = CaseSensitiveRawConfigParser(allow_no_value=True)
         with open(_default_config) as fp:
             parser.read_file(fp)
 
