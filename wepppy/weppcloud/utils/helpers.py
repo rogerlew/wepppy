@@ -39,10 +39,11 @@ def exception_factory(msg='Error Handling Request',
 
     if runid is not None:
         wd = get_wd(runid)
-        with open(_join(wd, 'exceptions.log'), 'a') as fp:
-            fp.write(f'[{datetime.now()}]\n')
-            fp.write(stacktrace)
-            fp.write('\n\n')
+        if _exists(wd):
+            with open(_join(wd, 'exceptions.log'), 'a') as fp:
+                fp.write(f'[{datetime.now()}]\n')
+                fp.write(stacktrace)
+                fp.write('\n\n')
 
     with open('/var/log/exceptions.log', 'a') as fp:
         fp.write(f'[{datetime.now()}] ')
