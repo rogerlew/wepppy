@@ -8,7 +8,11 @@ from os.path import split as _split
 from os.path import exists as _exists
 import inspect
 import time
-
+import shutil
+import queue
+import stat
+import threading
+from queue import Queue
 from functools import wraps
 from subprocess import Popen, PIPE, call
 
@@ -470,51 +474,155 @@ def _finish_fork_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def fork_rq(runid: str, new_runid: str, undisturbify=False):
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:fork'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
+def _clean_env_for_system_tools():
+    env = {
+        "PATH": "/usr/sbin:/usr/bin:/bin",
+        "LANG": os.environ.get("LANG", "C.UTF-8"),
+        "LC_ALL": os.environ.get("LC_ALL", "C.UTF-8"),
+        # Add anything else you *explicitly* need here (e.g., TZ)
+    }
+    return env
+
+
+def fork_rq(runid: str, new_runid: str, undisturbify=False):
+    job = get_current_job()
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f'{runid}:fork'
+
+    # DEBUG HELPER: This function will run in a thread to read a stream
+    # line-by-line and put the lines into a queue.
+    def stream_reader(stream, queue):
+        """Reads lines from a stream and puts them into a queue."""
+        try:
+            for line in iter(stream.readline, ''):
+                queue.put(line)
+        finally:
+            stream.close()
+
+    try:
+        StatusMessenger.publish(
+            status_channel, f'rq:{job.id} STARTED {func_name}({runid})'
+        )
         StatusMessenger.publish(status_channel, f'undisturbify: {undisturbify}')
 
+        # 1. Verify rsync exists
+        rsync_path = shutil.which('rsync')
+        StatusMessenger.publish(status_channel, f"Checking for rsync...")
+        if not rsync_path:
+            error_msg = "ERROR: 'rsync' command not found in PATH for rqworker user."
+            StatusMessenger.publish(status_channel, error_msg)
+            raise FileNotFoundError(error_msg)
+        StatusMessenger.publish(status_channel, f"Found rsync at: {rsync_path}")
+
+        wd = get_wd(runid)
         new_wd = get_wd(new_runid)
 
-        run_left = wd
-        if not run_left.endswith('/'):
-            run_left += '/'
+        run_left = wd if wd.endswith('/') else f'{wd}/'
+        run_right = new_wd if new_wd.endswith('/') else f'{new_wd}/'
 
-        run_right = new_wd
-        if not run_right.endswith('/'):
-            run_right += '/'
-
+        # 2. Verify destination directory can be created
         right_parent = os.path.dirname(run_right.rstrip('/'))
+        StatusMessenger.publish(
+            status_channel, f"Destination parent directory: {right_parent}"
+        )
         if not os.path.exists(right_parent):
+            StatusMessenger.publish(
+                status_channel, f"Parent does not exist. Creating..."
+            )
             os.makedirs(right_parent)
+        else:
+            StatusMessenger.publish(status_channel, f"Parent already exists.")
+
+        if not os.path.exists(right_parent):
+            error_msg = f"FATAL: Failed to create parent directory: {right_parent}"
+            StatusMessenger.publish(status_channel, error_msg)
+            raise FileNotFoundError(error_msg)
 
         cmd = ['rsync', '-av', '--progress', '.', run_right]
-
         if undisturbify:
             cmd.extend(['--exclude', 'wepp/runs', '--exclude', 'wepp/output'])
 
         _cmd = ' '.join(cmd)
-        StatusMessenger.publish(status_channel, f'cmd: {_cmd}')
+        StatusMessenger.publish(status_channel, f'Running cmd: {_cmd}')
+        StatusMessenger.publish(status_channel, f'In directory: {run_left}')
 
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=run_left, bufsize=1, universal_newlines=True)
+        env = _clean_env_for_system_tools()
+        # 3. Run rsync and process streams in real-time
+        p = Popen(
+            cmd,
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd=run_left,
+            text=True,
+            bufsize=1,
+            env=env
+        )
 
-        for line in iter(p.stdout.readline, ''):
-            StatusMessenger.publish(status_channel, line.strip())
-        
+        # Create queues and threads to handle stdout and stderr
+        stdout_q = queue.Queue()
+        stderr_q = queue.Queue()
+        stdout_thread = threading.Thread(
+            target=stream_reader, args=(p.stdout, stdout_q)
+        )
+        stderr_thread = threading.Thread(
+            target=stream_reader, args=(p.stderr, stderr_q)
+        )
+        stdout_thread.start()
+        stderr_thread.start()
+
+        stdout_output = []
+        stderr_output = []
+
+        # Process output until the command finishes
+        while p.poll() is None:
+            # Live stream stdout to the user
+            while not stdout_q.empty():
+                line = stdout_q.get()
+                StatusMessenger.publish(status_channel, line)
+                stdout_output.append(line)
+
+            # Live stream stderr to the user
+            while not stderr_q.empty():
+                line = stderr_q.get()
+                StatusMessenger.publish(status_channel, f"rsync stderr: {line}")
+                stderr_output.append(line)
+
+            time.sleep(0.01)  # Prevent busy-waiting
+
+        # Wait for the process and threads to finish
         p.wait()
-        
+        stdout_thread.join()
+        stderr_thread.join()
+
+        # Process any remaining output in the queues
+        while not stdout_q.empty():
+            line = stdout_q.get()
+            stripped_line = line.strip()
+            if stripped_line:
+                StatusMessenger.publish(status_channel, stripped_line)
+            stdout_output.append(line)
+
+        while not stderr_q.empty():
+            line = stderr_q.get()
+            stripped_line = line.strip()
+            if stripped_line:
+                StatusMessenger.publish(status_channel, f"rsync stderr: {stripped_line}")
+            stderr_output.append(line)
+
+        # 4. Check results and report errors
         if p.returncode != 0:
-            error_output = "".join(iter(p.stderr.readline, ''))
-            StatusMessenger.publish(status_channel, f"ERROR: {error_output.strip()}")
-            raise Exception(f"rsync command failed with return code {p.returncode}")
-            
-        StatusMessenger.publish(status_channel, 'Setting wd in .nodbs...\n')
+            full_stdout = "".join(stdout_output).strip()
+            full_stderr = "".join(stderr_output).strip()
+            error_msg = (
+                f"ERROR: rsync failed with return code {p.returncode}:\n"
+                f"stdout:\n---\n{full_stdout}\n---\n"
+                f"stderr:\n---\n{full_stderr}\n---"
+            )
+            StatusMessenger.publish(status_channel, error_msg)
+            raise Exception(error_msg)
+
+        StatusMessenger.publish(status_channel, 'rsync successful. Setting wd in .nodbs...\n')
 
         nodbs = glob(os.path.join(new_wd, '*.nodb'))
         for fn in nodbs:
@@ -525,7 +633,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
             s = s.replace(wd, new_wd).replace(runid, new_runid)
             with open(fn, 'w') as fp:
                 fp.write(s)
-                
+
         StatusMessenger.publish(status_channel, 'Setting wd in .nodbs... done.\n')
         StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC...\n')
 
@@ -575,13 +683,13 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
                 )
 
         else:
-            # If not undisturbify, complete synchronously as before
             StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
 
 def fetch_and_analyze_rap_ts_rq(runid: str):
     try:
