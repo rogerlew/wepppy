@@ -57,6 +57,7 @@
           };
 
           this.ws.onmessage = (event) => {
+              console.log(event);
               var payload = JSON.parse(event.data);
               if (payload.type === "ping") {
                   this.ws.send(JSON.stringify({"type": "pong"}));
