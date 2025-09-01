@@ -100,22 +100,36 @@ def make_hashable_ct(v, ct, offset, nodata_val):
     return (v, ct_tuple, offset, nodata_val)
 
 @lru_cache(maxsize=None)
-def memoized_ct_classify(args):
-    v, ct, offset, nodata_val = args
-    ct_dict = {key: list(values) for key, values in ct}
-    return _ct_classify(v, ct_dict, offset, nodata_val)
+def _get_ct_classification_code(v, ct_tuple):
+    """
+    Internal helper to classify a single value.
+    `ct_tuple` is a hashable representation of the color table.
+    """
+    # Rebuild the dictionary with sets for efficient lookup inside the cached function
+    ct = {k: set(int(x) for x in vs) for k, vs in ct_tuple}
+    v = int(v)
 
-def _ct_classify(v, ct, offset=0, nodata_val=255):
-    for i, burn_class in enumerate(['unburned', 'low', 'mod', 'high']):
-        for k in ct[burn_class]:
-            if k == v:
-                return i + offset
-    return nodata_val
+    class_to_code = {'unburned': 0, 'low': 1, 'mod': 2, 'high': 3}
+    for cls, code in class_to_code.items():
+        if v in ct.get(cls, set()):
+            return code
+    return None  # Return None for unclassified values
+
 
 def ct_classify(v, ct, offset=0, nodata_val=255):
-    args = make_hashable_ct(v, ct, offset, nodata_val)
-    return memoized_ct_classify(args)
+    """
+    Classifies a pixel value `v` based on the color table dictionary `ct`.
+    This function is now a safe, non-mutating wrapper.
+    """
+    ct_tuple = tuple(sorted((k, tuple(sorted(v))) for k, v in ct.items()))
 
+    code = _get_ct_classification_code(v, ct_tuple)
+
+    if code is None:
+        return nodata_val
+    else:
+        return code + offset
+    
 def sbs_map_sanity_check(fname):
     if not _exists(fname):
         return 1, 'File does not exist'
