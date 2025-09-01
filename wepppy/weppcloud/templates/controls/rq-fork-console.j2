@@ -70,7 +70,7 @@
                       this.stacktrace.show();
                       this.stacktrace.html("<h6>Error</h6><p>" + data + "</p>");
                       var job_id_extracted = data.split(' ')[0].slice(3);
-                      var job_url = `https://${window.location.host}/rq/jobinfo/${job_id_extracted}`;
+                      var job_url = `https://${window.location.host}/weppcloud/rq/jobinfo/${job_id_extracted}`;
                       // Use a delay to avoid race condition
                       setTimeout(function() {
                           $.get(job_url, function(job_info, status) {
@@ -93,7 +93,7 @@
                               $("#cancel_button").hide();
                               $('#submit_button').show();
                               $('#submit_button').prop('disabled', false);
-                              $("#bottom").html(`<a href="https://${window.location.host}/runs/${new_runid}/cfg">Load ${new_runid} Project</a>`);
+                              $("#bottom").html(`<a href="https://${window.location.host}/weppcloud/runs/${new_runid}/cfg">Load ${new_runid} Project</a>`);
                           }
                       }
                   } else {
