@@ -233,7 +233,9 @@ app = config_app(app)
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True  # Require a secure context (HTTPS)
 
-app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1
+)
 
 from routes.download import download_bp
 from routes.browse import browse_bp
