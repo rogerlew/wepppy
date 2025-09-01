@@ -2712,12 +2712,8 @@ class Climate(NoDbBase, LogMixin):
 
 
     def _build_climate_observed_daymet_multiple(self, verbose=False, attrs=None):
-        from wepppy.climates.daymet.daily_interpolation import (
-            identify_pixel_coords
-        )
-        from wepppy.climates.daymet.daymet_singlelocation_client import (
-            interpolate_daily_timeseries
-        )
+        from wepppy.climates.daymet.daily_interpolation import identify_pixel_coords
+        from wepppy.climates.daymet.daymet_singlelocation_client import interpolate_daily_timeseries
 
         self.lock()
 
