@@ -694,7 +694,7 @@ class Disturbed(NoDbBase):
         assert _exists(disturbed_cropped), ' '.join(cmd)
 
         return SoilBurnSeverityMap(disturbed_cropped, breaks=self.breaks, nodata_vals=self._nodata_vals)
-     
+    
     def get_sbs_4class(self):
         sbs = self.get_sbs()
         sbs.export_4class_map(self.sbs_4class_path)
@@ -728,7 +728,10 @@ class Disturbed(NoDbBase):
         wd = self.wd
 
         landuse = Landuse.getInstance(wd)
+        landuse.log(f'Disturbed::remap_landuse')
+
         disturbed_key_lookup = self.get_disturbed_key_lookup()
+        landuse.log(f'  disturbed_key_lookup keys: {list(disturbed_key_lookup.keys())}')
         #assert landuse.mode != LanduseMode.Single
 
         burn_shrubs = self.burn_shrubs
@@ -748,12 +751,15 @@ class Disturbed(NoDbBase):
 
             self._calc_sbs_coverage(sbs)
 
+            landuse.log(f'  running identify_mode_single_raster_key on {self.disturbed_cropped}')
             sbs_lc_d = identify_mode_single_raster_key(
                 key_fn=watershed.subwta, parameter_fn=self.disturbed_cropped, ignore_channels=True, ignore_keys=set())
+            landuse.log_done()
             sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
            
             class_pixel_map = sbs.class_pixel_map
 
+            landuse.log(f'  iterating over sbs_lc_d')
             for topaz_id, val in sbs_lc_d.items():
                 if (int(topaz_id) - 4) % 10 == 0:
                     continue
@@ -763,18 +769,23 @@ class Disturbed(NoDbBase):
 
                 burn_class = class_pixel_map[val]
 
+                landuse.log(f'    topaz_id: {topaz_id}, sbs_lc: {val}, dom: {dom}, man.disturbed_class: {man.disturbed_class}, burn_class: {burn_class}')
+                # topaz_id: 8632, sbs_lc: 2, dom: 42, man.disturbed_class: forest, burn_class: 255
                 if burn_class in ['131', '132', '133']:
                     if man.disturbed_class in ['forest', 'young forest']:
+                        landuse.log(f'     burning {topaz_id} forest')
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['forest_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['forest_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['forest_high_sev_fire']}[burn_class]
 
                     elif man.disturbed_class == 'shrub' and burn_shrubs:
+                        landuse.log(f'     burning {topaz_id} shrub')
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['shrub_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['shrub_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['shrub_high_sev_fire']}[burn_class]
                         
                     elif man.disturbed_class in ['tall grass'] and burn_grass:
+                        landuse.log(f'     burning {topaz_id} grass')
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['grass_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['grass_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['grass_high_sev_fire']}[burn_class]
