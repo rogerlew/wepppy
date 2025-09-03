@@ -1,0 +1,14 @@
+{
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/__pycache__": true,
+    "**/wepppy/nodb/mods/locations/seattle/**": true,
+    "**/_scripts/**": true,
+    "**/_scripts_hwd/**": true
+  },
+  "python.analysis.exclude": [
+    "**/_scripts",
+    "**/_scripts_hwd",
+    "**/__pycache__"
+  ]
+}
