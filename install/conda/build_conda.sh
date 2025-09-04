@@ -13,7 +13,7 @@ fi
 conda clean --all
 conda update -n base conda
 conda config --set channel_priority flexible
-conda env create -f /workdir/wepppy/install/conda/wepppy310-env.yaml --yes
+conda env create -f /workdir/wepppy/install/conda/wepppy310-env.yml --yes
 
 # copy .pth files to site-packages
 cp /workdir/wepppy/install/conda/*.pth /workdir/miniconda3/envs/wepppy310-env/lib/python3.10/site-packages/
