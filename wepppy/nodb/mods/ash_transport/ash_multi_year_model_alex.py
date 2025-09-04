@@ -59,9 +59,10 @@ class AshModelAlex(object):
                  roughness_limit=None,
                  run_wind_transport=False,
                  org_mat=None,
-                 alpha=30.644,
-                 beta=0.0146,
-                 gamma=12.0101):
+                 beta0=14.33,
+                 beta1=0.22,
+                 beta2=5.85,
+                 beta3=-0.36):
 
         assert fin_bulk_den >= ini_bulk_den, (fin_bulk_den, ini_bulk_den)
 
@@ -77,9 +78,10 @@ class AshModelAlex(object):
         self.org_mat = org_mat  # percent organic matter as ratio
         self.run_wind_transport = run_wind_transport
         self.slope = None
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = gamma
+        self.beta0 = beta0
+        self.beta1 = beta1
+        self.beta2 = beta2
+        self.beta3 = beta3
 
     @property
     def ini_material_available_mm(self):
