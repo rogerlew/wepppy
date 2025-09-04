@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-2025, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
@@ -7,10 +7,14 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 """
-Parses Erin Brooks's totalwatsed.txt files produced from the .wat.txt and .pass.txt hillslope
+Python implementation of Erin Brooks's totalwatsed.txt files produced from the .wat.txt, .pass.txt, and WATAR ash outputs (when available) wepp hillslope outputs.
 WEPP outputs and performs streamflow and water balance calculations.
 
 The calculations were provided by Mariana Dobre.
+
+TotalWatSed2 exports .parquet files. 
+
+
 """
 
 from abc import ABC, abstractmethod
@@ -212,6 +216,24 @@ def process_measures_df(d, totarea_m2, baseflow_opts, phos_opts):
 
 class AbstractTotalWatSed2(ABC):
     def __init__(self, wd, baseflow_opts=None, phos_opts=None, chn_id=None, rebuild=False):
+        """
+        Initialize an AbstractTotalWatSed2 instance.
+
+        Parameters:
+        ----------
+        wd : str
+            Path to the WEPPcloud project working directory.
+        baseflow_opts : wepppy.nodb.wepp.BaseflowOpts, optional
+            Configuration object containing baseflow-related parameters.
+        phos_opts : wepppy.nodb.wepp.PhosphorusOpts, optional
+            Configuration object containing phosphorus-related parameters.
+        chn_id : int or str, optional
+            The ID of the channel of interest used to determine upstream hillslopes.
+            If None, the outlet channel is assumed. If a string is provided, it must
+            follow the format "chn_<id>" and will be parsed accordingly.
+        rebuild : bool, default=False
+            If True, deletes and regenerates the cached `.parquet` and `.pickle` output files.
+        """
         self.wd = wd
         self.baseflow_opts = baseflow_opts
         self.phos_opts = phos_opts
@@ -360,19 +382,28 @@ class AbstractTotalWatSed2(ABC):
 
         # Write the table to a Parquet file
         pq.write_table(table, self.parquet_fn)
-
+        
     def to_dss(self, fn):
         from pydsstools.heclib.dss import HecDss
         from pydsstools.core import TimeSeriesContainer
-        
+
+        # Create a copy of the dataframe to avoid modifying the original object
+        d = self.d.copy()
+
+        # Calculate Streamflow in m^3/s and add it as a new column named 'Q (m^3/s)'
+        # This new measure is directly usable by HEC-RAS.
+        # Q (m^3/s) = [Streamflow (mm/day) * Area (m^2)] / (1000 mm/m * 86400 s/day)
+        if 'Streamflow (mm)' in d.columns and self.wsarea is not None:
+            d['Q (m^3/s)'] = (d['Streamflow (mm)'] * self.wsarea) / (1000.0 * 86400.0)
+
         start_date = datetime(self.d['Year'][0], 1, 1)
 
         # iterate over the series in the DataFrame and write to the DSS file
-        for measure, series in self.d.items():
+        for measure, series in d.items():
             series = series.to_numpy()
 
             # measure contains measure name and units in ()
-            _measure = measure.split('(')[0].strip()
+            _measure = measure.split('(')[0].strip().replace('. ', '-')
             try:
                 units = measure.split('(')[1].split(')')[0].strip()
             except IndexError:
@@ -717,6 +748,11 @@ class TotalWatSed(object):
 
 
 def totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_channel=None):
+    """
+    Runs TotalWatSed2 report for each channel in teh export_channel_ids list containing topaz_id list of channels
+
+    The TotalWatSed2 aggregates daily values from the .wat.txt and .pass.txt files of all the upstream hillslopes to the channel
+    """
     from wepppy.nodb.status_messenger import StatusMessenger
     from wepppy.nodb import Watershed
 
