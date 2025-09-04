@@ -226,9 +226,10 @@ class AshModelAlex(object):
 
         org_mat = self.org_mat
         slope = self.slope
-        alpha = self.alpha
-        beta = self.beta
-        gamma = self.gamma
+        beta0 = self.beta0
+        beta1 = self.beta1
+        beta2 = self.beta2
+        beta3 = self.beta3
 
 
         # number of days in the file
@@ -261,6 +262,7 @@ class AshModelAlex(object):
         transportable_ash_tonspha = np.ones(s_len) * np.nan
         tau = np.zeros(s_len)
         k_r = np.zeros(s_len)
+        M_0 = np.zeros(s_len)
         ash_depth_mm = np.ones(s_len) * np.nan
         ash_runoff_mm = np.zeros(s_len)
         transport_tonspha = np.zeros(s_len)
@@ -293,7 +295,9 @@ class AshModelAlex(object):
         porosity[i] = 1.0 - (bulk_density_gmpcm3[i] / self.par_den)
         ash_depth_mm[i], transportable_ash_tonspha[i] = \
             self._calc_transportable_ash(remaining_ash_tonspha[i], self.ini_bulk_den)
-
+        if transportable_ash_tonspha[i] > 0.0:
+            M_0[i] = transportable_ash_tonspha[i] ** beta3
+        
         i += 1
 
         # No transport on the day of the fire!
@@ -320,7 +324,7 @@ class AshModelAlex(object):
 
                 if ash_runoff_mm[i] > 0.0:
                     tau[i] = 9810 * slope * (ash_runoff_mm[i] / 1000.0)
-                    k_r[i] = math.exp(alpha) * tau[i] ** beta * org_mat ** gamma
+                    k_r[i] = math.exp(beta0) * tau[i] ** beta1 * org_mat ** beta2 * M_0[i-1] ** beta3
                     transport_tonspha[i] = \
                         transportable_ash_tonspha[i-1] * (1.0 - math.exp(-k_r[i] * ash_runoff_mm[i]))
 
@@ -379,6 +383,9 @@ class AshModelAlex(object):
             assert not math.isnan(ash_depth_mm[i]), f'ash_depth_mm is nan on day {i}'
             assert not math.isnan(transportable_ash_tonspha[i]), f'transportable_ash_tonspha is nan on day {i}'
 
+            if transportable_ash_tonspha[i] > 0.0:
+                M_0[i] = transportable_ash_tonspha[i] ** beta3
+
             # balance check
             assert math.isclose(ini_ash_load - remaining_ash_tonspha[i],
                                 cum_ash_transport_tonspha[i] + cum_ash_decomp_tonspha[i]), \
@@ -420,6 +427,7 @@ class AshModelAlex(object):
             'transport (tonne/ha)': transport_tonspha[:i].flatten(),
             'tau': tau[:i].flatten(),
             'k_r': k_r[:i].flatten(),
+            'M_0': M_0[:i].flatten(),
             'cum_ash_runoff (mm)': cum_ash_runoff_mm[:i].flatten(),
             'water_transport (tonne/ha)': water_transport_tonspha[:i].flatten(),
             'wind_transport (tonne/ha)': wind_transport_tonspha[:i].flatten(),
@@ -457,10 +465,11 @@ class WhiteAshModel(AshModelAlex):
             decomp_fac=0.00018,  # Ash decomposition factor, per day
             roughness_limit=1,
             org_mat=0.04,
-            alpha=30.644,
-            beta=0.0146,
-            gamma=12.0101) 
-        
+            beta0=14.33,
+            beta1=0.22,
+            beta2=5.85,
+            beta3=-0.36)
+
     def to_dict(self):
         return {
             'ash_type': self.ash_type,
@@ -487,10 +496,11 @@ class BlackAshModel(AshModelAlex):
             decomp_fac=0.00018,  # Ash decomposition factor, per day
             roughness_limit=1,
             org_mat=0.065,
-            alpha=30.644,
-            beta=0.0146,
-            gamma=12.0101)
-
+            beta0=14.33,
+            beta1=0.22,
+            beta2=5.85,
+            beta3=-0.36)
+        
     def to_dict(self):
         return {
             'ash_type': self.ash_type,
