@@ -71,7 +71,6 @@
             {% include 'controls/wepp.htm'%}
             <div id="wepp-results"></div>
 
-            {% include 'controls/dss_export.htm'%}
 
             {% else %}
             {% include 'controls/rhem.htm'%}
@@ -90,6 +89,8 @@
             {% include 'controls/ash.htm'%}
             {% endif %}
 
+            {% include 'controls/dss_export.htm'%}
+            
             {% if 'omni' in ron.mods %}
             {% include 'controls/omni/omni_scenarios.htm'%}
             {% include 'controls/omni/omni_contrasts_definition.htm'%}
