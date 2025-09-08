@@ -19,7 +19,7 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import GDT_Byte
 
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, run
 
 from wepppy.all_your_base import isint
 from wepppy.all_your_base.geo import read_raster, wgs84_proj4, validate_srs
@@ -299,12 +299,21 @@ class SoilBurnSeverityMap(LandcoverMap):
         if _exists(fn):
             os.remove(fn)
 
-        cmd = ['gdalwarp', '-t_srs', 'EPSG:4326',
-               '-r', 'near', self.fname, fn]
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        p.wait()
 
-        assert _exists(fn), ' '.join(cmd)
+        cmd = [
+            "gdalwarp",
+            "-t_srs", "EPSG:4326",
+            "-r", "near",
+            "-dstnodata", "255",
+            "-of", "GTiff",
+            "-co", "COMPRESS=LZW", "-co", "TILED=YES",
+            self.fname, fn,
+        ]
+
+        res = run(cmd, stdout=PIPE, stderr=PIPE, text=True)
+        if res.returncode != 0:
+            raise RuntimeError(f"gdalwarp failed ({res.returncode}):\n{res.stderr}\ncmd: {' '.join(cmd)}")
+
 
         ds = gdal.Open(fn)
         assert ds is not None
