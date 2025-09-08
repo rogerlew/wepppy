@@ -299,7 +299,7 @@ class SoilBurnSeverityMap(LandcoverMap):
         if _exists(fn):
             os.remove(fn)
 
-        cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
+        cmd = ['gdalwarp', '-t_srs', 'EPSG:4326',
                '-r', 'near', self.fname, fn]
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()
