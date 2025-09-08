@@ -303,11 +303,17 @@ class SoilBurnSeverityMap(LandcoverMap):
         conda = "/workdir/miniconda3/envs/wepppy310-env"
         gdalwarp = f"{conda}/bin/gdalwarp"  # use the conda one explicitly
 
-        env = {
-            "PATH":      f"{conda}/bin:/usr/bin",
-            "PROJ_LIB":  f"{conda}/share/proj",
-            "GDAL_DATA": f"{conda}/share/gdal",
-        }
+        env = os.environ.copy()
+        if 'PROJ_LIB' in env:
+            del env['PROJ_LIB']
+
+        if 'GDAL_DATA' in env:
+            del env['GDAL_DATA']
+
+        env["PROJ_LIB"]  = f"{conda}/share/proj"
+        env["GDAL_DATA"] = f"{conda}/share/gdal"
+        env["PATH"]      = f"{conda}/bin:" + env.get("PATH","")
+
         cmd = [
             gdalwarp,
             "-t_srs", "EPSG:4326",    # or "+proj=longlat +datum=WGS84 +no_defs +type=crs"
@@ -318,7 +324,7 @@ class SoilBurnSeverityMap(LandcoverMap):
             self.fname, fn,
         ]
 
-        res = run(cmd, stdout=PIPE, stderr=PIPE, text=True)
+        res = run(cmd, stdout=PIPE, stderr=PIPE, text=True, env=env)
         if res.returncode != 0:
             raise RuntimeError(f"gdalwarp failed ({res.returncode}):\n{res.stderr}\ncmd: {' '.join(cmd)}")
 
