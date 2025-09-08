@@ -304,6 +304,9 @@ class SoilBurnSeverityMap(LandcoverMap):
         gdalwarp = f"{conda}/bin/gdalwarp"  # use the conda one explicitly
 
         env = os.environ.copy()
+        if 'PROJ_LIB' in env:
+            del env['PROJ_LIB']
+            
         env["PROJ_LIB"]  = f"{conda}/share/proj"
         env["GDAL_DATA"] = f"{conda}/share/gdal"
         env["PATH"]      = f"{conda}/bin:" + env.get("PATH","")
