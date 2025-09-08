@@ -4,6 +4,7 @@ import re
 import math
 import json
 
+import urllib
 from urllib.parse import urlencode
 
 from concurrent.futures import ThreadPoolExecutor
@@ -500,12 +501,14 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
         # Combine UI elements
         tree = f'<pre>{showing_text}{pagination_html}\n{breadcrumbs}\n{listing_html}\n{pagination_html}</pre>'
         
-        return Response('''
+        return Response(f'''\
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>{runid} browser</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
+<title>{runid}</title>
 <script>
 function redirectToDiff() {{
     var runId = document.getElementById('runIdInput').value;
@@ -514,12 +517,12 @@ function redirectToDiff() {{
 </script>
 </head>
 <body>
-    <input type="text" value="{value}" id="runIdInput" placeholder="runid">
+    <input type="text" value="{diff_runid}" id="runIdInput" placeholder="runid">
     <button onclick="redirectToDiff()">Compare project</button>
     {tree}
 </body>
-</html>'''.format(runid=runid, value=diff_runid, tree=tree))
-    
+</html>''')
+
     else:
         if path_lower.endswith('.gz'):
             with gzip.open(path, 'rt') as fp:
@@ -554,8 +557,17 @@ function redirectToDiff() {{
 
         if path_lower.endswith('.arc'):
             assert contents is not None
-            c = '<pre style="font-size:xx-small;">\n{}</pre>'.format(contents)
-            return Response(c, mimetype='text/html')
+            _content = f'''\
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
+<title>{basename(path)} - {runid}</title>
+</head><body>
+<pre style="font-size:xx-small;">\n{contents}</pre>
+</body></html>'''
+            return Response(_content, mimetype='text/html')
 
         html = None
         if path_lower.endswith('.pkl'):
@@ -580,22 +592,27 @@ function redirectToDiff() {{
             html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
 
         if html is not None:
-            c = ['<!DOCTYPE html>',
-                 '<html>',
-                 '<head>',
-                 '<link rel="stylesheet" '
-                 'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"'
-                 'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"'
-                 'crossorigin="anonymous">',
-                 '<script src="/weppcloud/static/js/sorttable.js"></script>',
-                 '<style>.table-nonfluid {width: auto !important;}</style>'
-                 '</head>'
-                 '<body>',
-                 '<a href="?download">Download File</a><hr>' + html,
-                 '</body>',
-                 '</html>']
+            _content = f'''\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
+<title>{basename(path)} - {runid}</title>
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+crossorigin="anonymous">
+<script src="/weppcloud/static/js/sorttable.js"></script>
+<style>.table-nonfluid {{width: auto !important;}}</style>
+</head>
+<body>
+<a href="?download">Download File</a><hr>{html}
+</body>
+</html>'''
 
-            return Response('\n'.join(c), mimetype='text/html')
+            return Response(_content, mimetype='text/html')
 
         with open(path) as fp:
             try:
@@ -603,8 +620,15 @@ function redirectToDiff() {{
             except UnicodeDecodeError:
                 return send_file(path, as_attachment=True, download_name=_split(path)[-1])
 
-        r = Response(response=contents, status=200, mimetype="text/plain")
-        r.headers["Content-Type"] = "text/plain; charset=utf-8"
-        return r
-
-
+        _content = f'''\
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
+<title>{basename(path)} - {runid}</title>
+</head><body>
+<pre>\n{contents}</pre>
+</body></html>'''
+        return Response(_content, mimetype='text/html')
+        
