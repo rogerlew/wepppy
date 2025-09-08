@@ -371,8 +371,17 @@ class Ash(NoDbBase, LogMixin):
     # noinspection PyPep8Naming
     @staticmethod
     def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
+        from .ash_multi_year_model import AshType
         with open(_join(wd, 'ash.nodb')) as fp:
+
             db = jsonpickle.decode(fp.read())
+
+            if hasattr(db, '_anu_white_ash_model_pars'):
+                db._anu_white_ash_model_pars.ash_type = AshType.WHITE
+            
+            if hasattr(db, '_anu_black_ash_model_pars'):
+                db._anu_black_ash_model_pars.ash_type = AshType.BLACK
+
             assert isinstance(db, Ash), db
 
         if _exists(_join(wd, 'READONLY')):
@@ -446,11 +455,12 @@ class Ash(NoDbBase, LogMixin):
         pars = getattr(self, '_alex_white_ash_model_pars', None)
         if pars is None:
             try:
-                self.lock()
                 pars = self._alex_white_ash_model_pars = WhiteAshModelAlex()
                 
-                self.dump_and_unlock()
-    
+                if not self.readonly:
+                    self.lock()
+                    self.dump_and_unlock()
+        
             except Exception:
                 self.unlock('-f')
                 raise
@@ -461,11 +471,11 @@ class Ash(NoDbBase, LogMixin):
         pars = getattr(self, '_alex_black_ash_model_pars', None)
         if pars is None:
             try:
-                 
-                self.lock()
                 pars = self._alex_black_ash_model_pars = BlackAshModelAlex()
                 
-                self.dump_and_unlock()
+                if not self.readonly:
+                    self.lock()
+                    self.dump_and_unlock()
     
             except Exception:
                 self.unlock('-f')

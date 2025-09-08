@@ -474,7 +474,7 @@ class WhiteAshModel(AshModelAlex):
 
     def to_dict(self):
         return {
-            'ash_type': self.ash_type,
+            'ash_type': str(self.ash_type),
             'ini_bulk_den': self.ini_bulk_den,
             'fin_bulk_den': self.fin_bulk_den,
             'bulk_den_fac': self.bulk_den_fac,
@@ -505,7 +505,7 @@ class BlackAshModel(AshModelAlex):
         
     def to_dict(self):
         return {
-            'ash_type': self.ash_type,
+            'ash_type': str(self.ash_type),
             'ini_bulk_den': self.ini_bulk_den,
             'fin_bulk_den': self.fin_bulk_den,
             'bulk_den_fac': self.bulk_den_fac,
