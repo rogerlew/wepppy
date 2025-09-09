@@ -38,7 +38,6 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-import zipfile
 
 from deprecated import deprecated
 
@@ -765,8 +764,11 @@ def totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_chann
 
     if _exists(dss_export_dir):
         if status_channel is not None:
-            StatusMessenger.publish(status_channel, 'cleaning export/dss\n')
-        shutil.rmtree(dss_export_dir)
+            StatusMessenger.publish(status_channel, 'cleaning export/dss/totwatsed2_chn_*.dss\n')
+            
+        old_dss_files = glob(_join(dss_export_dir, 'totwatsed2_chn_*.dss'))
+        for fn in old_dss_files:
+            os.remove(fn)
 
     if not _exists(dss_export_dir):
         os.makedirs(dss_export_dir, exist_ok=True)
@@ -783,10 +785,16 @@ def totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_chann
         totwatsed = TotalWatSed2(wd, chn_id=chn_id)
         totwatsed.to_dss(dss_file)
 
-        
+
+def archive_dss_export_zip(wd, status_channel=None):
+    from wepppy.nodb.status_messenger import StatusMessenger
+    import zipfile
+
     if status_channel is not None:
         StatusMessenger.publish(status_channel, 'zipping export/dss\n')
-        
+
+    dss_export_dir = _join(wd, 'export/dss')
+
     # zip the dss_export_dir to a zip file
     zip_file = _join(wd, 'export/dss.zip')
     with zipfile.ZipFile(zip_file, 'w') as zipf:
