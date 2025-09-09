@@ -178,12 +178,12 @@ class ChanOut:
                 
                 # DSS Pathname Parts: /A/B/C/D/E/F/
                 # A: Project -> WEPP
-                # B: Location -> Channel ID
+                # B: Version -> CHAN-OUT
                 # C: Parameter -> PEAK-FLOW
                 # D: Time Window -> IR-YEAR (Irregular Yearly)
                 # E: Interval -> Blank for irregular data
-                # F: Version -> CHAN-OUT
-                tsc.pathname = f"/WEPP/{chn_id}/PEAK-FLOW//IR-YEAR/CHAN-OUT/"
+                # F: Location -> Channel ID
+                tsc.pathname = f"/WEPP/CHAN-OUT/PEAK-FLOW//IR-YEAR/{chn_id}/"
                 
                 tsc.times = times
                 tsc.values = values
