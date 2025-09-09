@@ -23,7 +23,6 @@ import json
 # non-standard
 import jsonpickle
 
-
 from configparser import (
     RawConfigParser,
     NoOptionError,

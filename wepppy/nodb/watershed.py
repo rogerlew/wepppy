@@ -16,6 +16,9 @@ from os.path import join as _join
 from os.path import exists as _exists
 
 import jsonpickle
+import jsonpickle.ext.numpy as jsonpickle_numpy
+jsonpickle_numpy.register_handlers()
+
 import pandas as pd
 import numpy as np
 
@@ -228,7 +231,15 @@ class Watershed(NoDbBase, LogMixin):
                     "wepppy.topo.watershed_abstraction.support.CentroidSummary",
                 )
             )
-            db = jsonpickle.decode(_json)
+
+            try:
+                db = jsonpickle.decode(_json)
+            except TypeError as e:
+                if "scalar() argument 1 must be numpy.dtype" in str(e):
+                    db = Watershed._decode_watershed_safe(_json)
+                else:
+                    raise
+
             assert isinstance(db, Watershed)
 
         if _exists(_join(wd, "READONLY")) or ignore_lock:
@@ -242,6 +253,62 @@ class Watershed(NoDbBase, LogMixin):
                 db.dump_and_unlock()
 
         return db
+
+    @staticmethod
+    def _decode_watershed_safe(s: str):
+        """
+        Sanitizes jsonpickle payloads that store NumPy scalars via
+        numpy.core.multiarray.scalar with base64-encoded IEEE-754 doubles.
+        Converts them to plain Python floats (bypassing dtype reconstruction).
+        """
+        import json, base64, struct, jsonpickle
+
+        def _decode_numpy_scalar_from_reduce(red):
+            # Expect: red == [ {"py/function": "numpy.core.multiarray.scalar"},
+            #                  {"py/tuple": [ <dtype or {"py/id": n}>, <valSpec>] } ]
+            if not (isinstance(red, list) and len(red) >= 2 and isinstance(red[0], dict)):
+                return None, False
+            fn = red[0].get("py/function", "")
+            if not fn.endswith("multiarray.scalar"):
+                return None, False
+
+            args = red[1]
+            # args is a dict with "py/tuple": [dtype_ref, value_spec]
+            if isinstance(args, dict) and "py/tuple" in args:
+                tup = args["py/tuple"]
+                if isinstance(tup, list) and len(tup) >= 2:
+                    val_spec = tup[1]
+                    # common spec is {"py/b64": "..."} for little-endian float64
+                    if isinstance(val_spec, dict) and "py/b64" in val_spec:
+                        bs = base64.b64decode(val_spec["py/b64"])
+                        try:
+                            return struct.unpack("<d", bs)[0], True
+                        except Exception:
+                            pass
+                    # sometimes it’s already numeric or stringy
+                    try:
+                        return float(val_spec), True
+                    except Exception:
+                        return val_spec, True
+            return None, False
+
+        def fix(o):
+            if isinstance(o, dict):
+                # handle numpy scalar reduction
+                red = o.get("py/reduce")
+                if isinstance(red, list):
+                    val, matched = _decode_numpy_scalar_from_reduce(red)
+                    if matched:
+                        return val
+                # recurse into dict
+                return {k: fix(v) for k, v in o.items()}
+            if isinstance(o, list):
+                return [fix(v) for v in o]
+            return o
+
+        data = json.loads(s)
+        data = fix(data)
+        return jsonpickle.decode(json.dumps(data))
 
     @staticmethod
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
