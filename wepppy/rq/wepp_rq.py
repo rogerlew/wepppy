@@ -8,10 +8,11 @@ from os.path import split as _split
 from os.path import exists as _exists
 import inspect
 import time
+import shutil
 
 from functools import wraps
 from subprocess import Popen, PIPE, call
-
+import time
 import redis
 from rq import Queue, get_current_job
 
@@ -736,15 +737,33 @@ def _post_gpkg_export_rq(runid):
 
 def post_dss_export_rq(runid):
     try:
-        from wepppy.wepp.out import totalwatsed_partitioned_dss_export
+        from wepppy.wepp.out import totalwatsed_partitioned_dss_export, chanout_dss_export, archive_dss_export_zip
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:dss_export'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
-        
+
+
+        dss_export_dir = _join(wd, 'export/dss')
+
+        if _exists(dss_export_dir):
+            if status_channel is not None:
+                StatusMessenger.publish(status_channel, 'cleaning export/dss/\n')
+            shutil.rmtree(dss_export_dir)
+
+        dss_export_zip = _join(wd, 'export/dss.zip')
+        if _exists(dss_export_zip):
+            if status_channel is not None:
+                StatusMessenger.publish(status_channel, 'removing export/dss.zip\n')
+            os.remove(dss_export_zip)
+                
+        time.sleep(1)
         totalwatsed_partitioned_dss_export(wd, wepp.dss_export_channel_ids, status_channel=status_channel)
+        chanout_dss_export(wd, status_channel=status_channel)
+        archive_dss_export_zip(wd, status_channel=status_channel)
+
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
 
         try:
