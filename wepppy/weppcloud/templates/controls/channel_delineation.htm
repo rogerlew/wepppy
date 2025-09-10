@@ -6,8 +6,27 @@
 <input type="hidden" id="map_zoom" name="map_zoom" />
 <input type="hidden" id="map_bounds" name="map_bounds" />
 <input type="hidden" id="map_distance" name="map_distance" />
-<div style="height:150px;" class="unitizer-wrapper">
 
+<div class="form-group row">
+    <div class="col-sm-4">
+        <label class="radio-inline">
+            <input type="radio" value="0" name="set_extent_mode" {% if watershed.set_extent_mode == 0 %} checked {% endif %}> Use Map Extent</label>
+    </div>
+    <div class="col-sm-6">
+        <label class="radio-inline">
+            <input type="radio" value="1" name="set_extent_mode" {% if watershed.set_extent_mode == 1 %} checked {% endif %}> Specify Extent</label>
+    </div>
+</div>
+
+<div id="map_bounds_text_group" class="form-group row">
+    <div class="col-sm-10">
+        <input id="map_bounds_text" name="map_bounds_text" class="form-control mr-sm-3" type="text"
+            value="{{ watershed.map_bounds_text }}"
+            placeholder="-122.52, 44.16, -122.41, 44.23" aria-label="south, west, north, east">
+    </div>
+</div>
+
+<div style="height:150px;" class="unitizer-wrapper">
     <div class="unitizer units-m">
         {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
         <div class="form-group row">
@@ -158,5 +177,16 @@
             container.style.display = 'none';
         }
     }
+
+    function toggleExtentInput() {
+        const mode = $('input[name=set_extent_mode]:checked').val(); // "0" or "1"
+        if (mode === "1") {
+            $('#map_bounds_text_group').show();
+        } else {
+            $('#map_bounds_text_group').hide();
+        }
+    }
+    $('input[name=set_extent_mode]').on('change', toggleExtentInput);
+    toggleExtentInput();
 </script>
 {% endblock %}
