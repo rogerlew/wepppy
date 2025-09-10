@@ -234,8 +234,10 @@ class Watershed(NoDbBase, LogMixin):
 
             try:
                 db = jsonpickle.decode(_json)
-            except TypeError as e:
-                if "scalar() argument 1 must be numpy.dtype" in str(e):
+            except TypeError as e:    
+                if ("scalar() argument 1 must be numpy.dtype" in str(e) \
+                    or "numpy" in str(e) \
+                    or "dtype" in str(e)):
                     db = Watershed._decode_watershed_safe(_json)
                 else:
                     raise
@@ -253,61 +255,88 @@ class Watershed(NoDbBase, LogMixin):
                 db.dump_and_unlock()
 
         return db
-
+    
     @staticmethod
     def _decode_watershed_safe(s: str):
         """
-        Sanitizes jsonpickle payloads that store NumPy scalars via
-        numpy.core.multiarray.scalar with base64-encoded IEEE-754 doubles.
-        Converts them to plain Python floats (bypassing dtype reconstruction).
+        Normalize jsonpickle payloads that contain NumPy scalars so they
+        become plain Python numbers (floats/ints). Also strips read-only
+        'dtype' fields that cause setattr errors during unpickling.
         """
-        import json, base64, struct, jsonpickle
+        import json, base64, struct
+
+        def _from_b64_f64(b64):
+            try:
+                return struct.unpack("<d", base64.b64decode(b64))[0]
+            except Exception:
+                return None
 
         def _decode_numpy_scalar_from_reduce(red):
-            # Expect: red == [ {"py/function": "numpy.core.multiarray.scalar"},
-            #                  {"py/tuple": [ <dtype or {"py/id": n}>, <valSpec>] } ]
-            if not (isinstance(red, list) and len(red) >= 2 and isinstance(red[0], dict)):
+            # [ {"py/function":"numpy.core.multiarray.scalar"},
+            #   {"py/tuple": [ <dtype or {"py/id":n}>, <valSpec>] } ]
+            if not (isinstance(red, list) and red and isinstance(red[0], dict)):
                 return None, False
-            fn = red[0].get("py/function", "")
-            if not fn.endswith("multiarray.scalar"):
+            if not str(red[0].get("py/function","")).endswith("multiarray.scalar"):
                 return None, False
-
             args = red[1]
-            # args is a dict with "py/tuple": [dtype_ref, value_spec]
-            if isinstance(args, dict) and "py/tuple" in args:
-                tup = args["py/tuple"]
-                if isinstance(tup, list) and len(tup) >= 2:
-                    val_spec = tup[1]
-                    # common spec is {"py/b64": "..."} for little-endian float64
-                    if isinstance(val_spec, dict) and "py/b64" in val_spec:
-                        bs = base64.b64decode(val_spec["py/b64"])
-                        try:
-                            return struct.unpack("<d", bs)[0], True
-                        except Exception:
-                            pass
-                    # sometimes it’s already numeric or stringy
-                    try:
-                        return float(val_spec), True
-                    except Exception:
-                        return val_spec, True
-            return None, False
+            tup = isinstance(args, dict) and args.get("py/tuple")
+            if not (isinstance(tup, list) and len(tup) >= 2):
+                return None, False
+            val_spec = tup[1]
+            if isinstance(val_spec, dict) and "py/b64" in val_spec:
+                v = _from_b64_f64(val_spec["py/b64"])
+                if v is not None:
+                    return v, True
+            # sometimes value is already numeric/stringy
+            try:
+                return float(val_spec), True
+            except Exception:
+                return val_spec, True
+
+        def _maybe_cast_int(v):
+            # optional: keep ints as ints if representable exactly
+            try:
+                fv = float(v)
+                return int(fv) if fv.is_integer() else fv
+            except Exception:
+                return v
 
         def fix(o):
             if isinstance(o, dict):
-                # handle numpy scalar reduction
+                # Drop read-only dtype fields that will be assigned via setattr
+                if "dtype" in o and not isinstance(o["dtype"], str):
+                    o = {k: v for k, v in o.items() if k != "dtype"}
+
+                # numpy scalar via py/reduce
                 red = o.get("py/reduce")
                 if isinstance(red, list):
                     val, matched = _decode_numpy_scalar_from_reduce(red)
                     if matched:
-                        return val
-                # recurse into dict
+                        return _maybe_cast_int(val)
+
+                # numpy scalar/object with value (e.g., {"py/object":"numpy.float64", "value": ...})
+                pobj = o.get("py/object", "")
+                if isinstance(pobj, str) and pobj.startswith("numpy."):
+                    if "value" in o:
+                        v = o["value"]
+                        if isinstance(v, dict) and "py/b64" in v:
+                            v = _from_b64_f64(v["py/b64"])
+                        return _maybe_cast_int(v)
+                    # also strip dtype here if present
+                    if "dtype" in o:
+                        o = {k: v for k, v in o.items() if k != "dtype"}
+
+                # Recurse
                 return {k: fix(v) for k, v in o.items()}
+
             if isinstance(o, list):
                 return [fix(v) for v in o]
             return o
 
         data = json.loads(s)
         data = fix(data)
+        # decode again, now free of problematic numpy scalars/dtype attrs
+        import jsonpickle
         return jsonpickle.decode(json.dumps(data))
 
     @staticmethod
