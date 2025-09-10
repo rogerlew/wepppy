@@ -395,23 +395,29 @@ var Project = function () {
                 }
             });
         };
-
+                
         that.set_readonly_controls = function (readonly) {
-
             if (readonly === true) {
-                $('.hide-readonly').each(function (index, element) {
-                    $(this).hide();
-                });
-                $('.disable-readonly').each(function (index, element) {
-                    $(this).prop('readonly', true);
+                $('.hide-readonly').hide();
+
+                $('.disable-readonly').each(function () {
+                    if ($(this).is(':radio, :checkbox, select, button')) {
+                        $(this).prop('disabled', true);
+                    } else {
+                        $(this).prop('readonly', true);
+                    }
                 });
             } else {
-                $('.hide-readonly').each(function (index, element) {
-                    $(this).show();
+                $('.hide-readonly').show();
+
+                $('.disable-readonly').each(function () {
+                    if ($(this).is(':radio, :checkbox, select, button')) {
+                        $(this).prop('disabled', false);
+                    } else {
+                        $(this).prop('readonly', false);
+                    }
                 });
-                $('.disable-readonly').each(function (index, element) {
-                    $(this).prop('readonly', false);
-                });
+
                 Outlet.getInstance().setMode(0);
             }
         };

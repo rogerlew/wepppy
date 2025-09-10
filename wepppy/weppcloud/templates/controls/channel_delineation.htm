@@ -10,17 +10,17 @@
 <div class="form-group row">
     <div class="col-sm-4">
         <label class="radio-inline">
-            <input type="radio" value="0" name="set_extent_mode" {% if watershed.set_extent_mode == 0 %} checked {% endif %}> Use Map Extent</label>
+            <input type="radio" class="disable-readonly" value="0" name="set_extent_mode" {% if watershed.set_extent_mode == 0 %} checked {% endif %}> Use Map Extent</label>
     </div>
     <div class="col-sm-6">
         <label class="radio-inline">
-            <input type="radio" value="1" name="set_extent_mode" {% if watershed.set_extent_mode == 1 %} checked {% endif %}> Specify Extent</label>
+            <input type="radio" class="disable-readonly" value="1" name="set_extent_mode" {% if watershed.set_extent_mode == 1 %} checked {% endif %}> Specify Extent</label>
     </div>
 </div>
 
 <div id="map_bounds_text_group" class="form-group row">
     <div class="col-sm-10">
-        <input id="map_bounds_text" name="map_bounds_text" class="form-control mr-sm-3" type="text"
+        <input id="map_bounds_text" name="map_bounds_text" class="form-control mr-sm-3 disable-readonly" type="text"
             value="{{ watershed.map_bounds_text }}"
             placeholder="-122.52, 44.16, -122.41, 44.23" aria-label="south, west, north, east">
     </div>
