@@ -124,6 +124,8 @@ class Watershed(NoDbBase, LogMixin):
             self._centroid = None
             self._outlet_top_id = None
             self._outlet = None
+            self._set_extent_mode = 0
+            self._map_bounds_text = ""
 
             self._wepp_chn_type = self.config_get_str("soils", "wepp_chn_type")
 
@@ -199,6 +201,45 @@ class Watershed(NoDbBase, LogMixin):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+
+    @property
+    def set_extent_mode(self):
+        if not hasattr(self, "_set_extent_mode"):
+            return 0
+        return self._set_extent_mode
+    
+    @set_extent_mode.setter
+    def set_extent_mode(self, value: int):
+        _value = int(value)
+        self.lock()
+
+        try:
+            assert _value in [0, 1], f"Invalid set_extent_mode value: {_value}"
+            self._set_extent_mode = _value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock("-f")
+            raise
+
+    @property
+    def map_bounds_text(self):
+        if not hasattr(self, "_map_bounds_text"):
+            return ""
+        return self._map_bounds_text
+    
+    @map_bounds_text.setter
+    def map_bounds_text(self, value: str):
+        _value = str(value)
+        self.lock()
+
+        try:
+            self._map_bounds_text = _value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock("-f")
+            raise
 
     #
     # Required for NoDbBase Subclass

@@ -1323,6 +1323,32 @@ var Baer = function () {
     };
 }();
 
+function parseBboxText(text) {
+    // Keep digits, signs, decimal, scientific notation, commas and spaces
+    const toks = text
+        .replace(/[^\d\s,.\-+eE]/g, '')
+        .split(/[\s,]+/)
+        .filter(Boolean)
+        .map(Number);
+
+    if (toks.length !== 4 || toks.some(Number.isNaN)) {
+        throw new Error("Extent must have exactly 4 numeric values: minLon, minLat, maxLon, maxLat.");
+    }
+
+    let [x1, y1, x2, y2] = toks;
+    // Normalize (user might give two corners in any order)
+    const minLon = Math.min(x1, x2);
+    const minLat = Math.min(y1, y2);
+    const maxLon = Math.max(x1, x2);
+    const maxLat = Math.max(y1, y2);
+
+    // Basic sanity check
+    if (minLon >= maxLon || minLat >= maxLat) {
+        throw new Error("Invalid extent: ensure minLon < maxLon and minLat < maxLat.");
+    }
+    return [minLon, minLat, maxLon, maxLat];
+}
+
 /* ----------------------------------------------------------------------------
  * Channel Delineation
  * ----------------------------------------------------------------------------
@@ -1429,6 +1455,20 @@ var ChannelDelineation = function () {
             self.stacktrace.text("");
             self.ws_client.connect();
 
+            try {
+                const mode = $('input[name=set_extent_mode]:checked').val();
+                if (mode === "1") {
+                    // User-specified extent → parse and write into hidden #map_bounds
+                    const raw = $('#map_bounds_text').val() || '';
+                    const bbox = parseBboxText(raw);
+                    $('#map_bounds').val(bbox.join(','));
+                }
+            } catch (e) {
+                // Surface a friendly error and abort
+                self.status.html('<span class="text-danger">Invalid extent: ' + e.message + '</span>');
+                return;
+            }
+
             $.post({
                 url: "rq/api/fetch_dem_and_build_channels",
                 data: self.form.serialize(),
@@ -1463,8 +1503,8 @@ var ChannelDelineation = function () {
 
             $("#map_center").val([center.lng, center.lat]);
             $("#map_zoom").val(zoom);
-            $("#map_bounds").val(extent);
             $("#map_distance").val(distance);
+            $("#map_bounds").val(extent.join(","));
 
             if (zoom >= self.zoom_min || ispoweruser) {
                 $("#btn_build_channels").prop("disabled", false);

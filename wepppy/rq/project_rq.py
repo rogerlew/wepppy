@@ -233,12 +233,17 @@ def build_channels_rq(runid: str, csa: float, mcl: float, wbt_fill_or_breach: No
         raise
 
 
-def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl, wbt_fill_or_breach, wbt_blc_dist):
+def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text):
     try:
         job = get_current_job()
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        watershed = Watershed.getInstance(get_wd(runid))
+        watershed.set_extent_mode = set_extent_mode
+        watershed.map_bounds_text = map_bounds_text
+
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
             

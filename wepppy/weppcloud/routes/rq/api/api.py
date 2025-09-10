@@ -154,6 +154,8 @@ def _parse_map_change(form):
     csa = form.get('csa', None)
     wbt_fill_or_breach = form.get('wbt_fill_or_breach', None)
     wbt_blc_dist = form.get('wbt_blc_dist', None)
+    set_extent_mode = form.get('set_extent_mode', 0)
+    map_bounds_text = form.get('map_bounds_text', '')
 
     if center is None or zoom is None or bounds is None \
             or mcl is None or csa is None:
@@ -182,7 +184,7 @@ def _parse_map_change(form):
         error = exception_factory('Could not parse csa')
         return error, None
 
-    return None,  [extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist]
+    return None,  [extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text]
 
 
 @rq_api_bp.route('/rq/api/landuse_and_soils', methods=['POST'])
@@ -235,7 +237,7 @@ def fetch_dem_and_build_channels(runid, config):
         if error is not None:
             return jsonify(error)
 
-        extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist = args
+        extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text = args
 
         wd = get_wd(runid)
         prep = RedisPrep.getInstance(wd)
@@ -244,7 +246,7 @@ def fetch_dem_and_build_channels(runid, config):
         
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(fetch_dem_and_build_channels_rq, (runid, extent, center, zoom, csa, mcl, wbt_fill_or_breach, wbt_blc_dist), timeout=TIMEOUT)
+            job = q.enqueue_call(fetch_dem_and_build_channels_rq, (runid, extent, center, zoom, csa, mcl, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text), timeout=TIMEOUT)
             prep.set_rq_job_id('fetch_dem_and_build_channels_rq', job.id)
     except Exception as e:
         if isinstance(e, MinimumChannelLengthTooShortError):
