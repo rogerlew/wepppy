@@ -297,7 +297,7 @@ class ClimatePrecipScalingMode(IntEnum):
 
     @staticmethod
     def parse(x):
-        if x == None or x == 'no_scaling':
+        if   x == 'no_scaling':
             return ClimatePrecipScalingMode.NoScaling
         elif x == 'scalar':
             return ClimatePrecipScalingMode.Scalar
@@ -707,8 +707,10 @@ class Climate(NoDbBase, LogMixin):
                 sf = [1 for i in range(12)]
             self._precip_monthly_scale_factors = sf
             
-            self._precip_scaling_mode = ClimatePrecipScalingMode.parse(self.config_get_str('climate', 'precip_scale_mode', None))
-            
+            if self.config_get_str('climate', 'precip_scale_mode', None) is not None:
+                self._precip_scaling_mode = ClimatePrecipScalingMode.parse(
+                    self.config_get_str('climate', 'precip_scale_mode'))
+
             self._climate_daily_temp_ds = None
 
             self._orig_cli_fn = None
@@ -1751,12 +1753,6 @@ class Climate(NoDbBase, LogMixin):
                 if self.climate_spatialmode == ClimateSpatialMode.Multiple:
                     self._prism_revision(verbose=verbose)
 
-            if self.daymet_precip_scale_factor is not None:
-                self._scale_precip(self.daymet_precip_scale_factor)
-
-            if self.daymet_precip_scale_factor_map is not None:
-                self._spatial_scale_precip(self.daymet_precip_scale_factor_map)
-
         # future
         elif climate_mode == ClimateMode.Future:
             self._build_climate_future(verbose=verbose, attrs=attrs)
@@ -1937,6 +1933,7 @@ class Climate(NoDbBase, LogMixin):
             raise
 
     def _spatial_scale_precip(self, scale_factor_map):
+        self.log(f'  running _spatial_scale_precip with {scale_factor_map} \n')
 
         self.lock()
 
@@ -1951,6 +1948,8 @@ class Climate(NoDbBase, LogMixin):
             watershed = Watershed.getInstance(wd)
             ws_lng, ws_lat = watershed.centroid
             scale_factor = rdi.get_location_info(ws_lng, ws_lat)
+
+            self.log(f'    scaling watershed .cli ({ws_lng}, {ws_lat}) -> {scale_factor} \n')
             if scale_factor is not None:
                 if scale_factor > 0:
                     pyo3_cli_p_scale(
@@ -1965,7 +1964,9 @@ class Climate(NoDbBase, LogMixin):
                 for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
                     lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
                     scale_factor = rdi.get_location_info(lng, lat)
+
                     if scale_factor is not None:
+                        self.log(f'    scaling {sub_cli_fn} ({lng}, {lat}) -> {scale_factor} \n')
                         if scale_factor > 0:
                             pyo3_cli_p_scale( 
                                 _join(cli_dir, sub_cli_fn), 
