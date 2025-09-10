@@ -290,6 +290,7 @@ def build_subcatchments_rq(runid: str):
         watershed = Watershed.getInstance(wd)
         watershed.build_subcatchments()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        time.sleep(1)
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation BUILD_SUBCATCHMENTS_TASK_COMPLETED')
 
         prep = RedisPrep.getInstance(wd)
