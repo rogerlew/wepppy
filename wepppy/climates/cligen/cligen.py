@@ -9,22 +9,20 @@
 from typing import Union
 from collections.abc import Iterable
 
-import os
 import json
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
-import datetime
+import os, shlex, signal, time
+import subprocess
+from subprocess import Popen, PIPE, TimeoutExpired
 
-from subprocess import (
-    Popen, PIPE
-)
+import datetime
 
 import numpy as np
 
 import datetime
-import subprocess
 import shutil
 import math
 from copy import deepcopy
@@ -1627,6 +1625,91 @@ class Cligen:
             raise AssertionError(f'Failed to create {cli_fn}')
 
 
+def _tail(s: str, n: int = 80) -> str:
+    return "\n".join(s.splitlines()[-n:])
+
+def _run_cligen_posix(cmd, clinp_path, timeout_sec, log_fp):
+    """
+    Linux-only runner with strong timeout diagnostics.
+    Captures partial stdout/stderr on timeout and kills the whole group.
+    """
+    cmd_str = " ".join(shlex.quote(x) for x in cmd)
+    start = time.time()
+
+    # ensure deterministic text decoding
+    env = os.environ.copy()
+    env.setdefault("LC_ALL", "C")
+    env.setdefault("LANG", "C")
+
+    with open(clinp_path, "r", encoding="utf-8", errors="replace") as fin:
+        # start_new_session=True (3.11+) is the safer replacement for preexec_fn=os.setsid
+        p = Popen(
+            cmd,
+            stdin=fin,
+            stdout=PIPE,
+            stderr=PIPE,
+            text=True,
+            start_new_session=True,
+            env=env,
+        )
+        try:
+            out, err = p.communicate(timeout=timeout_sec)
+        except TimeoutExpired:
+            # send SIGTERM to the whole process group, then SIGKILL if needed
+            try:
+                os.killpg(p.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+            try:
+                p.wait(timeout=5)
+            except TimeoutExpired:
+                try:
+                    os.killpg(p.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+
+            # harvest whatever was written
+            try:
+                out, err = p.communicate(timeout=5)
+            except Exception:
+                out, err = "", ""
+
+            elapsed = time.time() - start
+            log_fp.write(
+                f"\n=== CLIGEN TIMEOUT after {elapsed:.1f}s ===\n"
+                f"cmd: {cmd_str}\n"
+                f"cwd: {os.getcwd()}\n"
+                f"PATH={env.get('PATH','')}\n"
+                f"LD_LIBRARY_PATH={env.get('LD_LIBRARY_PATH','')}\n"
+                f"stdout (tail):\n{_tail(out)}\n"
+                f"stderr (tail):\n{_tail(err)}\n"
+                f"===========================================\n"
+            )
+            log_fp.flush()
+            raise RuntimeError(f"cligen timeout after {elapsed:.1f}s")
+
+        elapsed = time.time() - start
+        if p.returncode != 0:
+            log_fp.write(
+                f"\n=== CLIGEN EXIT {p.returncode} after {elapsed:.1f}s ===\n"
+                f"cmd: {cmd_str}\n"
+                f"stdout (tail):\n{_tail(out)}\n"
+                f"stderr (tail):\n{_tail(err)}\n"
+                f"=====================================\n"
+            )
+            log_fp.flush()
+            raise RuntimeError(f"cligen exited {p.returncode}")
+
+        log_fp.write(
+            f"\n=== CLIGEN OK in {elapsed:.1f}s ===\n"
+            f"cmd: {cmd_str}\n"
+            f"stdout (tail):\n{_tail(out)}\n"
+            f"stderr (tail):\n{_tail(err)}\n"
+            f"===================================\n"
+        )
+        log_fp.flush()
+        return out, err
+
 def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_dataset='prism',
             nwds_method='', randseed=None, cliver=None, suffix='', logger=None, version='2015'):
     """
@@ -1695,6 +1778,9 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         fp_log.write(f'prism_ppts (in) = {prism_ppts}\n')
         fp_log.write(f'prism_tmaxs (F) = {prism_tmaxs}\n')
         fp_log.write(f'prism_tmins (F) = {prism_tmins}\n')
+
+        if logger is not None:
+            logger.log('  prism_mod:revising .par file...')
 
         # calculate number of wet days
         if nwds_method.lower() == 'daymet':
@@ -1783,6 +1869,9 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
 
         assert _exists(par_fn)
 
+
+        if logger is not None:
+            logger.log('  prism_mod:running cligen...')
         # run cligen
         cli_fn = '{}{}.cli'.format(par, suffix)
 
@@ -1812,27 +1901,35 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         if randseed is not None:
             cmd.append('-r%s' % randseed)
 
-        # run cligen
-        _clinp = open(_clinp_path)
 
         if IS_WINDOWS:
+            # run cligen
+            _clinp = open(_clinp_path)
             process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE)
+            process.wait(timeout=50)
+            output = process.stdout.read()
+            output += process.stderr.read()
+            fp_log.write(str(output))
+            fp_log.flush()
+            _clinp.close()
         else:
-            process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid)
-        process.wait(timeout=50)
-
-        output = process.stdout.read()
-        output += process.stderr.read()
-
-        fp_log.write(str(output))
+            stdout_str, stderr_str = _run_cligen_posix(
+                cmd=cmd,
+                clinp_path=_clinp_path,
+                timeout_sec=50,
+                log_fp=fp_log,
+            )
+            output = stdout_str + stderr_str
 
         assert _exists(cli_fn), (cli_fn, cmd)
+
+        if not _exists(cli_fn):
+            raise Exception(f'Cligen failed to produce cli file: {cli_fn}\n{output}\ncmd: {cmd}')
 
         cli = ClimateFile(cli_fn)
 
         sim_ppts = cli.header_ppts() * days_in_mo
         if np.any(np.isnan(sim_ppts)):
-            
             raise Exception('Cligen failed to produce precipitation')
 
         sim_nwds = cli.count_wetdays()
