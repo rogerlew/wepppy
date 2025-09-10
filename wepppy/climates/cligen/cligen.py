@@ -1924,7 +1924,8 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         assert _exists(cli_fn), (cli_fn, cmd)
 
         if not _exists(cli_fn):
-            raise Exception(f'Cligen failed to produce cli file: {cli_fn}\n{output}\ncmd: {'\n'.join(cmd)}')
+            _cmd = "\n".join(cmd)
+            raise Exception(f'Cligen failed to produce cli file: {cli_fn}\n{output}\ncmd: {_cmd}')
 
         cli = ClimateFile(cli_fn)
 
