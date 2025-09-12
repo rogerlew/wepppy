@@ -1198,8 +1198,10 @@ def create(config):
 
     try:
         runid, wd = create_run_dir(current_user)
+    except PermissionError:
+        return exception_factory('Could not create run directory. NAS may be down.')
     except Exception:
-        return exception_factory('Could not create run directory')
+        return exception_factory('Could not create run directory.')
 
     try:
         Ron(wd, cfg)
