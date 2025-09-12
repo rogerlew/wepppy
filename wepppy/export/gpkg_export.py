@@ -292,9 +292,10 @@ def gpkg_export(wd: str):
 def _chown_and_rmtree(dir_path):
     assert os.path.isdir(dir_path), f"{dir_path} is not a directory"
 
-    cmd = f"chown -R www-data:webgroup {dir_path}"
+    cmd = f"sudo /bin/chown -R www-data:webgroup {dir_path}"
     os.system(cmd)
     shutil.rmtree(dir_path)
+
 
 def create_difference_map(scenario1_gpkg_fn, scenario2_gpkg_fn, difference_attributes, output_geojson_fn,  meta_attributes=None):
     layer_name = "subcatchments"
