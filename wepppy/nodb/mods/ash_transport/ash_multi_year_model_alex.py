@@ -326,7 +326,7 @@ class AshModelAlex(object):
 
                 if ash_runoff_mm[i] > 0.0:
                     tau[i] = 9810 * slope * (ash_runoff_mm[i] / 1000.0)
-                    k_r[i] = math.exp(beta0) * tau[i] ** beta1 * org_mat ** beta2 * M_0[i-1] ** beta3
+                    k_r[i] = math.exp(beta0) * tau[i] ** beta1 * org_mat ** beta2 * M_0[i-1]
                     transport_tonspha[i] = \
                         transportable_ash_tonspha[i-1] * (1.0 - math.exp(-k_r[i] * ash_runoff_mm[i]))
 
