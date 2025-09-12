@@ -1196,7 +1196,10 @@ def create(config):
     if len(overrides) > 0:
         cfg += '?%s' % overrides
 
-    runid, wd = create_run_dir(current_user)
+    try:
+        runid, wd = create_run_dir(current_user)
+    except Exception:
+        return exception_factory('Could not create run directory')
 
     try:
         Ron(wd, cfg)
