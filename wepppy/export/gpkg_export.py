@@ -280,20 +280,25 @@ def gpkg_export(wd: str):
             try:
                 _chown_and_rmtree(gdb_fn)
                 f_esri.gpkg_to_gdb(gpkg_fn, gdb_fn, user='www-data', group='webgroup')
+                _chown(gdb_fn)
             except:
                 pass
         else:
             try:
                 f_esri.gpkg_to_gdb(gpkg_fn, gdb_fn, user='www-data', group='webgroup')
+                _chown(gdb_fn)
             except:
                 pass
         
-
-def _chown_and_rmtree(dir_path):
+def _chown(dir_path):
     assert os.path.isdir(dir_path), f"{dir_path} is not a directory"
 
     cmd = f"sudo /bin/chown -R www-data:webgroup {dir_path}"
     os.system(cmd)
+
+def _chown_and_rmtree(dir_path):
+    assert os.path.isdir(dir_path), f"{dir_path} is not a directory"
+    _chown(dir_path)
     shutil.rmtree(dir_path)
 
 
