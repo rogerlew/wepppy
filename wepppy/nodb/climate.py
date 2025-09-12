@@ -1486,6 +1486,9 @@ class Climate(NoDbBase, LogMixin):
             if kwds.get('precip_scale_reference', None) is not None:
                 self._precip_scaling_reference = kwds['precip_scale_reference']
 
+            if kwds.get('precip_scale_factor_map', None) is not None:
+                self._precip_scale_factor_map = kwds['precip_scale_factor_map']
+
             self.dump_and_unlock()
 
         except Exception:
