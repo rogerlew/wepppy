@@ -1,3 +1,4 @@
+import shutil
 from typing import List, Tuple
 import json
 
@@ -275,8 +276,25 @@ def gpkg_export(wd: str):
     chn_gdf.to_file(gpkg_fn, driver='GPKG', layer='channels')
 
     if f_esri.has_f_esri():
-        f_esri.gpkg_to_gdb(gpkg_fn, gdb_fn, user='www-data', group='webgroup')
+        if _exists(gdb_fn):
+            try:
+                _chown_and_rmtree(gdb_fn)
+                f_esri.gpkg_to_gdb(gpkg_fn, gdb_fn, user='www-data', group='webgroup')
+            except:
+                pass
+        else:
+            try:
+                f_esri.gpkg_to_gdb(gpkg_fn, gdb_fn, user='www-data', group='webgroup')
+            except:
+                pass
+        
 
+def _chown_and_rmtree(dir_path):
+    assert os.path.isdir(dir_path), f"{dir_path} is not a directory"
+
+    cmd = f"chown -R www-data:webgroup {dir_path}"
+    os.system(cmd)
+    shutil.rmtree(dir_path)
 
 def create_difference_map(scenario1_gpkg_fn, scenario2_gpkg_fn, difference_attributes, output_geojson_fn,  meta_attributes=None):
     layer_name = "subcatchments"
