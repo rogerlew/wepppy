@@ -30,10 +30,11 @@ def retrieve_historical_precip(lon, lat, start_year, end_year):
 
     url = f"https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&"\
           f"lat={lat}&lon={lon}&positive-east-longitude=False&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_pr_1979_CurrentYear_CONUS.nc&variable=precipitation_amount&variable-name=pr&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_pr_1979_CurrentYear_CONUS.nc&variable=precipitation_amount&variable-name=pr&start-date={start_year}-01-01&end-date={end_date}&"\
           f"filename=gridmet_ts.shaw"
 
     headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
+
     response = requests.get(url, headers=headers)
 
     if response.status_code != 200:
@@ -62,8 +63,8 @@ def retrieve_historical_wind(lon, lat, start_year, end_year):
 
     url = f"https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&"\
           f"lat={lat}&lon={lon}&positive-east-longitude=False&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_vs_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_speed&variable-name=vs&start-date={start_year}-01-01&end-date={end_date}&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_th_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_direction&variable-name=th&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_vs_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_speed&variable-name=vs&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_th_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_direction&variable-name=th&start-date={start_year}-01-01&end-date={end_date}&"\
           f"filename=gridmet_ts.shaw"
 
     headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
@@ -97,18 +98,18 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
 
     url = f"https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&"\
           f"lat={lat}&lon={lon}&positive-east-longitude=False&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_pr_1979_CurrentYear_CONUS.nc&variable=precipitation_amount&variable-name=pr&start-date={start_year}-01-01&end-date={end_date}&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_srad_1979_CurrentYear_CONUS.nc&variable=daily_mean_shortwave_radiation_at_surface&variable-name=srad&start-date={end_date}-01-01&end-date={end_date}&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_tmmx_1979_CurrentYear_CONUS.nc&variable=daily_maximum_temperature&variable-name=tmmx&start-date={start_year}-01-01&end-date={end_date}&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_tmmn_1979_CurrentYear_CONUS.nc&variable=daily_minimum_temperature&variable-name=tmmn&start-date={start_year}-01-01&end-date={end_date}&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_vs_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_speed&variable-name=vs&start-date={start_year}-01-01&end-date={end_date}&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_th_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_direction&variable-name=th&start-date={start_year}-01-01&end-date={end_date}&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_rmin_1979_CurrentYear_CONUS.nc&variable=daily_minimum_relative_humidity&variable-name=rmin&start-date={start_year}-01-01&end-date={end_date}&"\
-          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_rmax_1979_CurrentYear_CONUS.nc&variable=daily_maximum_relative_humidity&variable-name=rmax&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_pr_1979_CurrentYear_CONUS.nc&variable=precipitation_amount&variable-name=pr&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_srad_1979_CurrentYear_CONUS.nc&variable=daily_mean_shortwave_radiation_at_surface&variable-name=srad&start-date={end_date}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_tmmx_1979_CurrentYear_CONUS.nc&variable=daily_maximum_temperature&variable-name=tmmx&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_tmmn_1979_CurrentYear_CONUS.nc&variable=daily_minimum_temperature&variable-name=tmmn&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_vs_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_speed&variable-name=vs&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_th_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_direction&variable-name=th&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_rmin_1979_CurrentYear_CONUS.nc&variable=daily_minimum_relative_humidity&variable-name=rmin&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_rmax_1979_CurrentYear_CONUS.nc&variable=daily_maximum_relative_humidity&variable-name=rmax&start-date={start_year}-01-01&end-date={end_date}&"\
           f"filename=gridmet_ts.shaw"
 
-#          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_sph_1979_CurrentYear_CONUS.nc&variable=daily_mean_specific_humidity&variable-name=sph&start-date={start_year}-01-01&end-date={end_date}&"\
-#          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_vpd_1979_CurrentYear_CONUS.nc&variable=daily_mean_vapor_pressure_deficit&variable-name=vpd&start-date={start_year}-01-01&end-date={end_date}&"\
+#          f"data-path=PATH_TO_DODS/agg_met_sph_1979_CurrentYear_CONUS.nc&variable=daily_mean_specific_humidity&variable-name=sph&start-date={start_year}-01-01&end-date={end_date}&"\
+#          f"data-path=PATH_TO_DODS/agg_met_vpd_1979_CurrentYear_CONUS.nc&variable=daily_mean_vapor_pressure_deficit&variable-name=vpd&start-date={start_year}-01-01&end-date={end_date}&"\
 
     headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
     response = requests.get(url, headers=headers)
