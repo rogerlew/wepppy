@@ -1,0 +1,26 @@
+[Unit]
+Description=Gunicorn for weppcloud preflight microservice
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/workdir
+Environment="LD_LIBRARY_PATH=/workdir/miniconda3/envs/wepppy310-env/lib"
+Environment="PATH=/workdir/miniconda3/envs/wepppy310-env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/workdir/miniconda3/envs/wepppy310-env/bin/gunicorn \
+  -k tornado \
+  -w 3 \
+  --max-requests 500 \
+  --max-requests-jitter 50 \
+  --graceful-timeout 30 \
+  --keep-alive 5 \
+  --bind 0.0.0.0:9001 \
+  --log-level info \
+  --error-logfile - --access-logfile - \
+  wepppy.microservices.preflight:app
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
