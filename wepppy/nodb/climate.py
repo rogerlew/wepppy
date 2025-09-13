@@ -1840,14 +1840,6 @@ class Climate(NoDbBase, LogMixin):
                     self.log('  climate_spatialmode is Multiple, running _prism_revision\n')
                     self._prism_revision(verbose=verbose)
 
-            if self.gridmet_precip_scale_factor is not None:
-                self.log('  gridmet_precip_scale_factor is set, scaling precip\n')
-                self._scale_precip(self.gridmet_precip_scale_factor)
-
-            if self.gridmet_precip_scale_factor_map is not None:
-                self.log('  gridmet_precip_scale_factor_map is set, spatially scaling precip\n')
-                self._spatial_scale_precip(self.gridmet_precip_scale_factor_map)
-
         self.log('  routing by precip_scaling_mode...\n')
         if self.precip_scaling_mode == ClimatePrecipScalingMode.Scalar:
             self.log('  precip_scaling_mode is Scalar, running _scale_precip\n')
