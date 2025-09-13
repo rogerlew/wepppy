@@ -42,7 +42,7 @@ import rasterio
 # non-standard
 import jsonpickle
 
-from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
+from wepppy.climates.downscale_nmme_client import retrieve_rcp85_timeseries
 
 # wepppy
 from wepppy.climates import cligen_client as cc
@@ -2007,10 +2007,10 @@ class Climate(NoDbBase, LogMixin):
                     self.log(f'    pyo3_cli_p_scale() \n')
                     pyo3_cli_p_scale(
                         _join(cli_dir, self.cli_fn), 
-                        _join(cli_dir, f'scaled_{self.cli_fn}' ),
+                        _join(cli_dir, f'scale_{self.cli_fn}' ),
                         scale_factor)
                     self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'scale_{self.cli_fn}'))
-                    self.cli_fn = f'scaled_{self.cli_fn}'
+                    self.cli_fn = f'scale_{self.cli_fn}'
                 else:
                     self.log(f'    scale factor {scale_factor} out of range, skipping for {self.cli_fn}\n')
         
@@ -2028,13 +2028,13 @@ class Climate(NoDbBase, LogMixin):
                             self.log(f'    pyo3_cli_p_scale() \n')
                             pyo3_cli_p_scale( 
                                 _join(cli_dir, sub_cli_fn), 
-                                _join(cli_dir, f'scaled_{sub_cli_fn}' ),
+                                _join(cli_dir, f'scale_{sub_cli_fn}' ),
                                 scale_factor)
                         else:
                             self.log(f'    scale factor {scale_factor} out of range, skipping for {sub_cli_fn}\n')
 
-                    if _exists(_join(cli_dir, f'scaled_{sub_cli_fn}')):
-                        sub_cli_fns[topaz_id] = f'scaled_{sub_cli_fn}'
+                    if _exists(_join(cli_dir, f'scale_{sub_cli_fn}')):
+                        sub_cli_fns[topaz_id] = f'scale_{sub_cli_fn}'
                     else:
                         sub_cli_fns[topaz_id] = sub_cli_fn
 
