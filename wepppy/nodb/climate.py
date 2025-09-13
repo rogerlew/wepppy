@@ -42,7 +42,7 @@ import rasterio
 # non-standard
 import jsonpickle
 
-from wepppy.climates.downscale_nmme_client import retrieve_rcp85_timeseries
+from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
 
 # wepppy
 from wepppy.climates import cligen_client as cc
