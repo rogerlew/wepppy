@@ -1663,55 +1663,70 @@ class Climate(NoDbBase, LogMixin):
             raise
 
     def build(self, verbose=False, attrs=None):
-        self.log('Build Climates')
+        self.log('Build Climates\n')
+        self.log('  assert not self.islocked()\n')
         assert not self.islocked()
 
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
+            self.log('  watershed is not abstracted, raising error\n')
             raise WatershedNotAbstractedError()
 
         if self.climatestation is None and self.orig_cli_fn is None:
+            self.log('  no climate station selected, raising error\n')
             raise NoClimateStationSelectedError()
 
         cli_dir = self.cli_dir
         if _exists(cli_dir):
+            self.log('  cli_dir exists, attempting to remove\n')
             try:
                 shutil.rmtree(cli_dir)
             except:
                 pass
 
         if not _exists(cli_dir):
+            self.log('  cli_dir does not exist, creating\n')
             os.mkdir(cli_dir)
 
+        self.log('  locking...')
         self.lock()
+        self.log_done()
         try:
             self.cli_fn = None
             self.par_fn = None
             self.sub_cli_fns = None
             self.sub_par_fns = None
             self.dump_and_unlock()
+            self.log('  dumped and unlocked\n')
         except Exception:
             self.unlock('-f')
+            self.log('  exception during dump, unlocking')
             raise
 
         climate_mode = self.climate_mode
+        self.log(f'  climate_mode: {climate_mode}\n')
 
         if climate_mode == ClimateMode.Undefined:
+            self.log('  climate_mode is Undefined, raising error\n')
             raise ClimateModeIsUndefinedError()
         
         # precip scaling mode validation
         
         precip_scaling_mode  = self.precip_scaling_mode
+        self.log(f'  precip_scaling_mode: {precip_scaling_mode}')
         if precip_scaling_mode == ClimatePrecipScalingMode.Scalar:
+            self.log('  precip_scaling_mode is Scalar, validating\n')
             if self.precip_scale_factor is None:
-                raise ValueError('precip_scale_factor is None')
+                raise ValueError('precip_scale_factor is None\n')
             
         elif precip_scaling_mode == ClimatePrecipScalingMode.Spatial:
+            self.log('  precip_scaling_mode is Spatial, validating\n')
             if self.precip_scale_factor_map is None:
-                raise ValueError('precip_scale_factor_map is None')
+                raise ValueError('precip_scale_factor_map is None\n')
             
         elif precip_scaling_mode == ClimatePrecipScalingMode.Monthlies:
+            self.log('  precip_scaling_mode is Monthlies, validating\n')
             if self.precip_monthly_scale_factors is None:
                 raise ValueError('precip_monthly_scale_factors is None')
             
@@ -1723,6 +1738,7 @@ class Climate(NoDbBase, LogMixin):
                     raise ValueError('precip_monthly_scale_factors contains non-floats')
                 
         elif precip_scaling_mode == ClimatePrecipScalingMode.AnnualMonthlies:
+            self.log('  precip_scaling_mode is AnnualMonthlies, validating\n')
             if self.precip_scaling_reference is None:
                 raise ValueError('precip_scaling_reference is None')
             
@@ -1730,117 +1746,154 @@ class Climate(NoDbBase, LogMixin):
                 raise ValueError('precip_scaling_reference is not prism, daymet, or gridmet')
             
             if self.precip_scaling_reference == 'prism':
+                self.log('  precip_scaling_reference is prism\n')
                 if self.observed_start_year < 1981:
                     raise ValueError('prism only available 1981 to present')
+        
+        self.log('  precip_scaling_mode validation passed\n')
 
         if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
+            self.log('  climate_spatialmode is MultipleInterpolated, validating climate_mode\n')
             # check climate mode is observedprism or gridmetprism
             if self.climate_mode not in [ClimateMode.ObservedPRISM, ClimateMode.GridMetPRISM]:
                 raise ValueError('climate_spatialmode is MultipleInterpolated but climate_mode is not ObservedPRISM or GridMetPRISM')
+            self.log('  climate_mode validated for MultipleInterpolated\n')
 
+        self.log('  routing by climate_mode...\n')
         # vanilla Cligen
         if climate_mode == ClimateMode.Vanilla:
+            self.log('  climate_mode is Vanilla\n')
             self._build_climate_vanilla(verbose=verbose, attrs=attrs)
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self.log('  climate_spatialmode is Multiple, running _prism_revision\n')
                 self._prism_revision(verbose=verbose)
 
         # observed
         elif climate_mode == ClimateMode.ObservedPRISM:
-
+            self.log('  climate_mode is ObservedPRISM\n')
             if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
+                self.log('  climate_spatialmode is MultipleInterpolated, running _build_climate_observed_daymet_multiple')
                 # the climate_mode naming is kind of shitty, this doesn't use prism at all
                 # but kind of stuck with it for backwards compatibility
                 self._build_climate_observed_daymet_multiple(verbose=verbose, attrs=attrs) 
             else:
+                self.log('  running _build_climate_observed_daymet\n')
                 self._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
                 if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                    self.log('  climate_spatialmode is Multiple, running _prism_revision\n')
                     self._prism_revision(verbose=verbose)
 
         # future
         elif climate_mode == ClimateMode.Future:
+            self.log('  climate_mode is Future\n')
             self._build_climate_future(verbose=verbose, attrs=attrs)
 
         # single storm
         elif climate_mode == ClimateMode.SingleStorm:
+            self.log('  climate_mode is SingleStorm\n')
             self._build_climate_single_storm(verbose=verbose, attrs=attrs)
 
         # single storm batch
         elif climate_mode == ClimateMode.SingleStormBatch:
+            self.log('  climate_mode is SingleStormBatch\n')
             self._build_climate_single_storm_batch(verbose=verbose, attrs=attrs)
 
         # PRISM
         elif climate_mode == ClimateMode.PRISM:
+            self.log('  climate_mode is PRISM\n')
             self._build_climate_prism(verbose=verbose, attrs=attrs)
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self.log('  climate_spatialmode is Multiple, running _prism_revision\n')
                 self._prism_revision(verbose=verbose)
 
         # NEXRAD
         elif climate_mode == ClimateMode.DepNexrad:
+            self.log('  climate_mode is DepNexrad\n')
             self._build_climate_depnexrad(verbose=verbose, attrs=attrs)
 
         elif climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
+            self.log('  climate_mode is ObservedDb or FutureDb\n')
             assert self.orig_cli_fn is not None
             self._post_defined_climate(verbose=verbose, attrs=attrs)
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self.log('  climate_spatialmode is Multiple, running _prism_revision\n')
                 self._prism_revision(verbose=verbose)
 
         # EOBS
         elif climate_mode == ClimateMode.EOBS:
+            self.log('  climate_mode is EOBS\n')
             self._build_climate_mod(mod_function=eobs_mod, verbose=verbose, attrs=attrs)
 
         elif climate_mode == ClimateMode.AGDC:
+            self.log('  climate_mode is AGDC\n')
             self._build_climate_mod(mod_function=agdc_mod, verbose=verbose, attrs=attrs)
 
         elif climate_mode == ClimateMode.GridMetPRISM:
+            self.log('  climate_mode is GridMetPRISM\n')
             if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
+                self.log('  climate_spatialmode is MultipleInterpolated, running _build_climate_observed_gridmet_multiple\n')
                 self._build_climate_observed_gridmet_multiple(verbose=verbose, attrs=attrs)
             else:
+                self.log('  running _build_climate_observed_gridmet\n')
                 self._build_climate_observed_gridmet(verbose=verbose, attrs=attrs)
                 if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                    self.log('  climate_spatialmode is Multiple, running _prism_revision\n')
                     self._prism_revision(verbose=verbose)
 
             if self.gridmet_precip_scale_factor is not None:
+                self.log('  gridmet_precip_scale_factor is set, scaling precip\n')
                 self._scale_precip(self.gridmet_precip_scale_factor)
 
             if self.gridmet_precip_scale_factor_map is not None:
+                self.log('  gridmet_precip_scale_factor_map is set, spatially scaling precip\n')
                 self._spatial_scale_precip(self.gridmet_precip_scale_factor_map)
 
-
+        self.log('  routing by precip_scaling_mode...\n')
         if self.precip_scaling_mode == ClimatePrecipScalingMode.Scalar:
+            self.log('  precip_scaling_mode is Scalar, running _scale_precip\n')
             assert self.precip_scale_factor is not None
             self._scale_precip(self.precip_scale_factor)
         
         elif self.precip_scaling_mode == ClimatePrecipScalingMode.Spatial:
+            self.log('  precip_scaling_mode is Spatial, running _spatial_scale_precip\n')
             assert self.precip_scale_factor_map is not None
             self._spatial_scale_precip(self.precip_scale_factor_map)
         
         elif self.precip_scaling_mode == ClimatePrecipScalingMode.Monthlies:
+            self.log('  precip_scaling_mode is Monthlies, running _scale_precip_monthlies\n')
             assert self.precip_monthly_scale_factors is not None
             self._scale_precip_monthlies(self.precip_monthly_scale_factors, pyo3_cli_p_scale_monthlies)
             
         elif self.precip_scaling_mode == ClimatePrecipScalingMode.AnnualMonthlies:
+            self.log('  precip_scaling_mode is AnnualMonthlies\n')
             assert self.precip_scaling_reference in ['prism', 'daymet', 'gridmet']
             
             ws_lng, ws_lat = watershed.centroid
             start_year, end_year = self.observed_start_year, self.observed_end_year
+            self.log(f'    reference: {self.precip_scaling_reference}, years: {start_year}-{end_year}\n')
             
             og_annual_monthlies = pyo3_cli_calculate_annual_monthlies(_join(cli_dir, self.cli_fn))
             if self.precip_scaling_reference == 'prism':
+                self.log('    getting prism reference data\n')
                 reference_annual_monthlies = get_prism_p_annual_monthlies(ws_lng, ws_lat, start_year, end_year)
             elif self.precip_scaling_reference == 'daymet':
+                self.log('    getting daymet reference data\n')
                 reference_annual_monthlies = get_daymet_p_annual_monthlies(ws_lng, ws_lat, start_year, end_year)
             elif self.precip_scaling_reference == 'gridmet':
+                self.log('    getting gridmet reference data\n')
                 reference_annual_monthlies = get_gridmet_p_annual_monthlies(ws_lng, ws_lat, start_year, end_year)
                 
-            assert og_annual_monthlies.shape == reference_annual_monthlies.shape, (og_annual_monthlies.shape, reference_annual_monthlies.shape)
+            assert len(og_annual_monthlies) == len(reference_annual_monthlies), (len(og_annual_monthlies), len(reference_annual_monthlies))
             
             monthly_scale_factors = []
+            self.log('    calculating monthly scale factors\n')
             for ref, og in zip(reference_annual_monthlies, og_annual_monthlies):
                 if og == 0:
                     monthly_scale_factors.append(1.0)
                 else:
                     monthly_scale_factors.append(ref / og)
-            
+
+            self.log('    writing reference_annual_monthlies.csv\n')
             with open(_join(cli_dir, 'reference_annual_monthlies.csv'), 'w') as fp:
                 writer = csv.writer(fp)
                 # Write header 
@@ -1852,16 +1905,19 @@ class Climate(NoDbBase, LogMixin):
                     if i > 0 and i % 12 == 0:
                         year += 1
                     writer.writerow([year, month, ref, scale])
-                    
+
+            self.log('    running _scale_precip_monthlies with annual factors\n')
             self._scale_precip_monthlies(monthly_scale_factors, pyo3_cli_p_scale_annual_monthlies)
 
         try:
+            self.log('  timestamping build_climate task\n')
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.build_climate)
         except FileNotFoundError:
+            self.log('  RedisPrep not found, skipping timestamp\n')
             pass
 
-        self.log('Climate Build Successful.')
+        self.log('Climate Build Successful.\n')
         self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
         
     def _scale_precip(self, scale_factor):
