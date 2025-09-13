@@ -1779,11 +1779,11 @@ class Watershed(NoDbBase, LogMixin):
                 result = con.execute(
                     f"SELECT topaz_id, centroid_lon, centroid_lat FROM read_parquet('{parquet_fn}')"
                 ).fetchall()
-                for row in result:
-                    yield row[0], (row[1], row[2])
+                for topaz_id, lon, lat in result:
+                    yield topaz_id, (lon, lat)
 
         else:
-            return self._deprecated_centroid_hillslope_iter()
+            yield from self._deprecated_centroid_hillslope_iter()
 
     @deprecated
     def _deprecated_centroid_hillslope_iter(self):
