@@ -1787,8 +1787,12 @@ class Watershed(NoDbBase, LogMixin):
 
     @deprecated
     def _deprecated_centroid_hillslope_iter(self):
+        i = 0
         for topaz_id, wat_ss in self._subs_summary.items():
             yield topaz_id, wat_ss.centroid.lnglat
+            i += 1
+
+        assert i == self.sub_n, (i, self.sub_n)
 
 
 class Outlet(object):
