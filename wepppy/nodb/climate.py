@@ -2000,15 +2000,20 @@ class Climate(NoDbBase, LogMixin):
             ws_lng, ws_lat = watershed.centroid
             scale_factor = rdi.get_location_info(ws_lng, ws_lat)
 
-            self.log(f'    scaling watershed .cli ({ws_lng}, {ws_lat}) -> {scale_factor} \n')
+            self.log(f'    Scaling {self.cli_fn}\n')
+            self.log(f'      RasterDatasetInterpolator({scale_factor_map}).({ws_lng}, {ws_lat}) -> {scale_factor} \n')
             if scale_factor is not None:
-                if scale_factor > 0:
+                if scale_factor > 0.1 and scale_factor < 10.0:
+                    self.log(f'    pyo3_cli_p_scale() \n')
                     pyo3_cli_p_scale(
                         _join(cli_dir, self.cli_fn), 
-                        _join(cli_dir, f'adj_{self.cli_fn}' ),
+                        _join(cli_dir, f'scaled_{self.cli_fn}' ),
                         scale_factor)
                     self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'adj_{self.cli_fn}'))
-                    self.cli_fn = f'adj_{self.cli_fn}'
+                    self.cli_fn = f'scaled_{self.cli_fn}'
+                else:
+                    self.log(f'    scale factor {scale_factor} out of range, skipping for {self.cli_fn}\n')
+        
 
             if self.sub_cli_fns is not None:
                 sub_cli_fns = {}
@@ -2016,15 +2021,23 @@ class Climate(NoDbBase, LogMixin):
                     lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
                     scale_factor = rdi.get_location_info(lng, lat)
 
+                    self.log(f'    RasterDatasetInterpolator({scale_factor_map}).({lng}, {lat}) -> {scale_factor} \n')
                     if scale_factor is not None:
                         self.log(f'    scaling {sub_cli_fn} ({lng}, {lat}) -> {scale_factor} \n')
-                        if scale_factor > 0:
+                        if scale_factor > 0.1 and scale_factor < 10.0:
+                            self.log(f'    pyo3_cli_p_scale() \n')
                             pyo3_cli_p_scale( 
                                 _join(cli_dir, sub_cli_fn), 
-                                _join(cli_dir, f'adj_{sub_cli_fn}' ),
+                                _join(cli_dir, f'scaled_{sub_cli_fn}' ),
                                 scale_factor)
-                            sub_cli_fns[topaz_id] = f'adj_{sub_cli_fn}'
-                    
+                        else:
+                            self.log(f'    scale factor {scale_factor} out of range, skipping for {sub_cli_fn}\n')
+
+                    if _exists(_join(cli_dir, f'scaled_{sub_cli_fn}')):
+                        sub_cli_fns[topaz_id] = f'scaled_{sub_cli_fn}'
+                    else:
+                        sub_cli_fns[topaz_id] = sub_cli_fn
+
                 self.sub_cli_fns = sub_cli_fns
 
             self.dump_and_unlock()
