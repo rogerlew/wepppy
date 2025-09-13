@@ -1926,19 +1926,19 @@ class Climate(NoDbBase, LogMixin):
             
             pyo3_cli_p_scale(
                 _join(cli_dir, self.cli_fn), 
-                _join(cli_dir, f'adj_{self.cli_fn}' ),
+                _join(cli_dir, f'scale_{self.cli_fn}' ),
                 scale_factor)
-            self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'adj_{self.cli_fn}'))
-            self.cli_fn = f'adj_{self.cli_fn}'
+            self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'scale_{self.cli_fn}'))
+            self.cli_fn = f'scale_{self.cli_fn}'
                     
             if self.sub_cli_fns is not None:
                 sub_cli_fns = {}
                 for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
                     pyo3_cli_p_scale( 
                         _join(cli_dir, sub_cli_fn), 
-                        _join(cli_dir, f'adj_{sub_cli_fn}' ),
+                        _join(cli_dir, f'scale_{sub_cli_fn}' ),
                         scale_factor)
-                    sub_cli_fns[topaz_id] = f'adj_{sub_cli_fn}'
+                    sub_cli_fns[topaz_id] = f'scale_{sub_cli_fn}'
                     
                 self.sub_cli_fns = sub_cli_fns
             self.dump_and_unlock()
@@ -1962,19 +1962,19 @@ class Climate(NoDbBase, LogMixin):
             
             scale_func(
                 _join(cli_dir, self.cli_fn), 
-                _join(cli_dir, f'adj_{self.cli_fn}' ),
+                _join(cli_dir, f'scale_{self.cli_fn}' ),
                 monthly_scale_factors)
-            self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'adj_{self.cli_fn}'))
-            self.cli_fn = f'adj_{self.cli_fn}'
+            self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'scale_{self.cli_fn}'))
+            self.cli_fn = f'scale_{self.cli_fn}'
                     
             if self.sub_cli_fns is not None:
                 sub_cli_fns = {}
                 for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
                     scale_func(
                         _join(cli_dir, sub_cli_fn), 
-                        _join(cli_dir, f'adj_{sub_cli_fn}' ),
+                        _join(cli_dir, f'scale_{sub_cli_fn}' ),
                         monthly_scale_factors)
-                    sub_cli_fns[topaz_id] = f'adj_{sub_cli_fn}'
+                    sub_cli_fns[topaz_id] = f'scale_{sub_cli_fn}'
                     
                 self.sub_cli_fns = sub_cli_fns
             self.dump_and_unlock()
@@ -2009,7 +2009,7 @@ class Climate(NoDbBase, LogMixin):
                         _join(cli_dir, self.cli_fn), 
                         _join(cli_dir, f'scaled_{self.cli_fn}' ),
                         scale_factor)
-                    self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'adj_{self.cli_fn}'))
+                    self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'scale_{self.cli_fn}'))
                     self.cli_fn = f'scaled_{self.cli_fn}'
                 else:
                     self.log(f'    scale factor {scale_factor} out of range, skipping for {self.cli_fn}\n')
