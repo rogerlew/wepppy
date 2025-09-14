@@ -414,7 +414,8 @@ class Landuse(NoDbBase, LogMixin):
         lc_fn = self.lc_fn
 
         if retrieve_nlcd:
-            wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize)
+            wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize, 
+                             v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
         elif not _exists(lc_fn):
             raise FileNotFoundError(f"'{lc_fn}' not found!")
             
@@ -455,7 +456,8 @@ class Landuse(NoDbBase, LogMixin):
         # Get NLCD 2011 from wmesque webservice
         lc_fn = self.lc_fn
 
-        wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize)
+        wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize, 
+                         v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
 
         # read the keys out of the raster
         nlcd, transform, proj = read_raster(lc_fn, dtype=np.int32)
@@ -646,7 +648,8 @@ class Landuse(NoDbBase, LogMixin):
         dom_d = {}
         for frac in fractionals:
             lc_fn = _join(frac_dir, frac.replace('/', '_') + '.tif')
-            wmesque_retrieve(frac, _map.extent, lc_fn, _map.cellsize)
+            wmesque_retrieve(frac, _map.extent, lc_fn, _map.cellsize, 
+                             v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
 
             if wepppyo3 is None:
                 lc = LandcoverMap(lc_fn)

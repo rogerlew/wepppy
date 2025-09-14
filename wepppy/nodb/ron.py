@@ -706,7 +706,8 @@ class Ron(NoDbBase):
                 self.map.cellsize, dataset=self.dem_db, resample='bilinear')
         else:
             wmesque_retrieve(self.dem_db, self.map.extent,
-                             self.dem_fn, self.map.cellsize)
+                             self.dem_fn, self.map.cellsize, 
+                             v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
 
         assert _exists(self.dem_fn)
 

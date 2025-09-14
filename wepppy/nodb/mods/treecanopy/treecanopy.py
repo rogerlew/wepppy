@@ -122,7 +122,9 @@ class Treecanopy(NoDbBase):
         _map = Ron.getInstance(self.wd).map
 
         wmesque_retrieve('nlcd_treecanopy/2016', _map.extent,
-                         self.treecanopy_fn, _map.cellsize)
+                         self.treecanopy_fn, _map.cellsize,
+                         v=self.wmesque_version, 
+                         wmesque_endpoint=self.wmesque_endpoint)
 
     def on(self, evt):
         pass

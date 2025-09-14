@@ -389,7 +389,7 @@ class Soils(NoDbBase, LogMixin):
                 self._ksflag = bool(ksflag)
 
             ssurgo_fn = self.ssurgo_fn
-            wmesque_retrieve(self.soils_map, _map.extent, ssurgo_fn, _map.cellsize)
+            wmesque_retrieve(self.soils_map, _map.extent, ssurgo_fn, _map.cellsize, v=self.wmesque_version)
 
             domsoil_d = identify_mode_single_raster_key(
                 key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys=set())
@@ -724,7 +724,9 @@ class Soils(NoDbBase, LogMixin):
         soils_dir = self.soils_dir
 
         wmesque_retrieve(self.ssurgo_db, _map.extent,
-                            ssurgo_fn, _map.cellsize)
+                            ssurgo_fn, _map.cellsize, 
+                            v=self.wmesque_version, 
+                            wmesque_endpoint=self.wmesque_endpoint)
 
         # Make SSURGO Soils
         sm = SurgoMap(ssurgo_fn)
@@ -1116,7 +1118,9 @@ class Soils(NoDbBase, LogMixin):
             ssurgo_fn = self.ssurgo_fn
 
             wmesque_retrieve(self.ssurgo_db, _map.extent,
-                             ssurgo_fn, _map.cellsize)
+                             ssurgo_fn, _map.cellsize,
+                             v=self.wmesque_version, 
+                             wmesque_endpoint=self.wmesque_endpoint)
 
             # Make SSURGO Soils
             sm = SurgoMap(ssurgo_fn)

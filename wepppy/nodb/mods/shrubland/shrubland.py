@@ -180,7 +180,8 @@ class Shrubland(NoDbBase):
 
             fn = _join(self.shrubland_dir, '%s.asc' % ds)
             wmesque_retrieve('nlcd_shrubland/2016/%s' % ds, _map.extent,
-                             fn, _map.cellsize)
+                             fn, _map.cellsize, v=self.wmesque_version,
+                             wmesque_endpoint=self.wmesque_endpoint)
 
     def on(self, evt):
         pass

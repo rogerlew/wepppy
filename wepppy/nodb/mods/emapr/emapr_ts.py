@@ -14,8 +14,6 @@ from os.path import exists as _exists
 
 from osgeo import gdal
 
-from wepppy.all_your_base.geo.webclients import wmesque_retrieve
-
 from ...ron import Ron
 from ...base import NoDbBase, TriggerEvents
 from ...watershed import Watershed

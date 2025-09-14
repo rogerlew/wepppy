@@ -2231,18 +2231,23 @@ class Climate(NoDbBase, LogMixin):
             tmax_fn = _join(cli_dir, 'tmax.tif')
 
             # Acquire PRISM tiles
-            wmesque_retrieve('prism/ppt',  _map.extent, ppt_fn,  _map.cellsize, resample='cubic')
+            wmesque_retrieve('prism/ppt',  _map.extent, ppt_fn,  _map.cellsize, resample='cubic', 
+                             v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
             ppt_data, _transform, _proj = read_raster(ppt_fn)
 
             if np.any(ppt_data < 0):
                 self.log('    prism/ppt contains <0 values (cubic); reacquiring with bilinear...')
-                wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='bilinear')
+                wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='bilinear', 
+                                 v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
                 self.done()
 
             # Always use bilinear for the working stack
-            wmesque_retrieve('prism/ppt',  _map.extent, ppt_fn,  _map.cellsize, resample='bilinear')
-            wmesque_retrieve('prism/tmin', _map.extent, tmin_fn, _map.cellsize, resample='cubic')
-            wmesque_retrieve('prism/tmax', _map.extent, tmax_fn, _map.cellsize, resample='cubic')
+            wmesque_retrieve('prism/ppt',  _map.extent, ppt_fn,  _map.cellsize, resample='bilinear', 
+                             v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
+            wmesque_retrieve('prism/tmin', _map.extent, tmin_fn, _map.cellsize, resample='cubic', 
+                             v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
+            wmesque_retrieve('prism/tmax', _map.extent, tmax_fn, _map.cellsize, resample='cubic', 
+                             v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
 
             watershed = Watershed.getInstance(wd)
             ws_lng, ws_lat = watershed.centroid
