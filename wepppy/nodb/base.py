@@ -649,3 +649,11 @@ class NoDbBase(object):
     def ash_dir(self):
         return _join(self.wd, 'ash')
 
+    @property
+    def wmesque_version(self) -> int:
+        return self.config_get_int('wmesque', 'version', 1)
+
+    @property
+    def wmesque_endpoint(self) -> None|str:
+        return self.config_get_str('wmesque', 'endpoint', None)
+
