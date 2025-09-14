@@ -11,6 +11,8 @@ import numpy as np
 import utm
 from osgeo import gdal, osr, ogr
 
+import geopandas as gpd
+
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo import get_utm_zone, utm_srid
 
@@ -327,32 +329,44 @@ def rect_to_polar(d):
 
     return angle
 
-
 def json_to_wgs(src_fn, s_srs=None):
+    """
+    Reprojects a GeoJSON file to WGS84 (EPSG:4326) using geopandas.
 
-    assert _exists(src_fn)
+    Args:
+        src_fn (str): Path to the source GeoJSON file.
+        s_srs (str, optional): The Coordinate Reference System (CRS) of the
+                             source file (e.g., 'EPSG:3857'). If None,
+                             geopandas will attempt to read it from the file.
 
-    dst_wgs_fn = src_fn.split('.')
-    dst_wgs_fn.insert(-1, 'WGS')
-    dst_wgs_fn = '.'.join(dst_wgs_fn)
+    Returns:
+        str: The path to the newly created WGS84 GeoJSON file.
+    """
+    # 1. Check if the source file exists
+    if not os.path.exists(src_fn):
+        raise FileNotFoundError(f"Source file not found: {src_fn}")
 
-    if _exists(dst_wgs_fn):
-        os.remove(dst_wgs_fn)
+    # 2. Construct the destination filename
+    path_parts = os.path.splitext(src_fn)
+    dst_wgs_fn = f"{path_parts[0]}.WGS{path_parts[1]}"
 
-    cmd = ['ogr2ogr', '-f', 'GeoJSON', '-t_srs', 'EPSG:4326']
-    if s_srs is not None:
-        cmd.extend(['-s_srs', s_srs])
-    cmd.extend([dst_wgs_fn, src_fn])
+    # 3. Read the source file into a GeoDataFrame
+    gdf = gpd.read_file(src_fn)
 
-    # run command, check_output returns standard output
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output = p.stdout \
-              .read() \
-              .decode('utf-8')
+    # 4. Set the source CRS if it's not defined in the file
+    # If the file has no CRS info, we must be given one to proceed.
+    if gdf.crs is None:
+        if s_srs is None:
+            raise ValueError("Source file has no CRS information. Please specify it using the 's_srs' argument.")
+        gdf.crs = s_srs
 
-    if not _exists(dst_wgs_fn):
-        print(' '.join(cmd))
-        raise Exception(output)
+    # 5. Reproject the GeoDataFrame to WGS84 (EPSG:4326)
+    gdf_wgs = gdf.to_crs(epsg=4326)
+
+    # 6. Save the reprojected data to the new file
+    gdf_wgs.to_file(dst_wgs_fn, driver='GeoJSON')
+
+    return dst_wgs_fn
 
 
 def polygonize_netful(src_fn, dst_fn):

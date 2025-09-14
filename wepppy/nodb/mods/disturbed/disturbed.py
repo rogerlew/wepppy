@@ -20,6 +20,9 @@ from os.path import split as _split
 from copy import deepcopy
 from collections import Counter
 
+import rasterio
+from rasterio.warp import reproject, Resampling
+from rasterio.transform import from_origin
 import math
 import numpy as np
 from osgeo import gdal
@@ -365,7 +368,6 @@ class Disturbed(NoDbBase):
         return _join(self.disturbed_dir, self._disturbed_fn)
 
     def build_uniform_sbs(self, value=4):
-        import rasterio
         sbs_fn = _join(self.disturbed_dir, 'uniform_sbs.tif')
 
         # Open the input raster file
@@ -679,19 +681,10 @@ class Disturbed(NoDbBase):
         if _exists(disturbed_cropped):
             os.remove(disturbed_cropped)
 
-        map = Ron.getInstance(wd).map
-        xmin, ymin, xmax, ymax = [str(v) for v in map.utm_extent]
-        cellsize = str(Ron.getInstance(wd).map.cellsize)
 
-        cmd = ['gdalwarp', '-t_srs',  'epsg:%s' % map.srid,
-               '-tr', cellsize, cellsize,
-               '-te', xmin, ymin, xmax, ymax,
-               '-r', 'near', disturbed_path, disturbed_cropped]
+        dem_fn = Ron.getInstance(wd).dem_fn
 
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        p.wait()
-
-        assert _exists(disturbed_cropped), ' '.join(cmd)
+        raster_stacker(disturbed_path, dem_fn, disturbed_cropped, resample='near')
 
         return SoilBurnSeverityMap(disturbed_cropped, breaks=self.breaks, nodata_vals=self._nodata_vals, color_map=self.color_to_severity_map)
 
@@ -1312,7 +1305,10 @@ class Disturbed(NoDbBase):
                 bounds, transform, proj = read_raster(watershed.bound)
 
                 if not sbs.data.shape == bounds.shape:
-                    dst_fn = watershed.bound.replace('.ARC', '.fixed.tif')
+                    if watershed.bound.endswith('.tif'):
+                        dst_fn = watershed.bound.replace('.tif', '.fixed.tif')
+                    else:
+                        dst_fn = watershed.bound.replace('.ARC', '.fixed.tif')
                     raster_stacker(watershed.bound, sbs.fname, dst_fn)
                     bounds, transform, proj = read_raster(dst_fn, dtype=np.int32)
 
