@@ -13,11 +13,10 @@ ExecStart=/workdir/miniconda3/envs/wepppy310-env/bin/gunicorn \
   -w 3 \
   --max-requests 500 \
   --max-requests-jitter 50 \
-  --graceful-timeout 30 \
-  --keep-alive 5 \
   --bind 0.0.0.0:9001 \
   --log-level info \
   --error-logfile - --access-logfile - \
+  --config /etc/gunicorn/preflight_conf.py \
   wepppy.microservices.preflight:app
 Restart=always
 RestartSec=5s

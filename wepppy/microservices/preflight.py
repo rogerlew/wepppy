@@ -272,7 +272,7 @@ app = tornado.web.Application([
 
 
 # Schedule the async startup tasks to run once the IOLoop starts
-tornado.ioloop.IOLoop.current().spawn_callback(startup_event)
+#tornado.ioloop.IOLoop.current().spawn_callback(startup_event)
     
 #if __name__ == "__main__":
 #    tornado.ioloop.IOLoop.current().run_sync(main)
