@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/workdir/wepppy/wctl/.venv/bin/python3
 import typer
 import subprocess
 import requests
@@ -189,8 +189,8 @@ class MonitorApp(App):
 
     def on_mount(self) -> None:
         grid = self.query_one("#main_grid")
-        grid.styles.grid_size_columns = "1fr 1fr"
-        grid.styles.grid_size_rows = "1fr 1fr"
+        grid.styles.grid_size_rows = 2
+        grid.styles.grid_size_columns = 2
 
 
 # --- CLI Commands ---
@@ -263,31 +263,52 @@ def status():
 
     console.print("[bold green]✅ All checks complete.[/bold green]")
 
+def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, check=check)
+    except subprocess.SubprocessError as e:
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr=str(e))
 
-@service_cli.command(name="status", help="Get the status of a specific service.")
+@service_cli.command(name="status", help="Run systemctl status for a specific service.")
 def service_status(
     service: Annotated[str, typer.Argument(
         help="The short name of the service (e.g., 'weppcloud').",
         autocompletion=lambda: SERVICE_ORDER
-    )]
+    )],
+    interval: Annotated[float, typer.Option(
+        help="Refresh interval in seconds for continuous updates (0 for single run).",
+        min=0.0
+    )] = 1.0
 ):
-    """Show detailed systemctl status for a single service."""
+    """Run systemctl status for a single service, optionally updating continuously."""
     if service not in SERVICE_CONFIG:
-        console.print(f"[bold red]Error:[/bold red] Unknown service '{service}'.")
+        print(f"Error: Unknown service '{service}'.")
         raise typer.Exit(code=1)
-    
-    systemd_name = SERVICE_CONFIG[service]['systemd']
-    console.print(f"[bold]Querying status for [cyan]{systemd_name}[/cyan]...[/]")
-    
-    result = run_command(["systemctl", "status", systemd_name, "--no-pager"])
-    
-    # Colorize the output based on status
-    output_style = "green" if "Active: active (running)" in result.stdout else "yellow"
-    console.print(Panel(
-        f"[{output_style}]{result.stdout}[/{output_style}]",
-        title=f"Status: {service}",
-        border_style=output_style
-    ))
+
+    systemd_name = SERVICE_CONFIG[service]["systemd"]
+    cmd = ["systemctl", "status", systemd_name]
+
+    if interval == 0.0:
+        # Single run: execute and print directly
+        result = run_command(cmd, check=False)
+        if result.returncode == 0:
+            print(result.stdout)
+        else:
+            print(result.stderr, file=sys.stderr)
+            raise typer.Exit(code=result.returncode)
+    else:
+        # Continuous updates
+        try:
+            while True:
+                os.system("clear")  # Clear terminal (use "cls" for Windows if needed)
+                result = run_command(cmd, check=False)
+                if result.returncode == 0:
+                    print(result.stdout)
+                else:
+                    print(result.stderr, file=sys.stderr)
+                time.sleep(interval)
+        except KeyboardInterrupt:
+            print("\nStopped continuous status updates.")
 
 
 @service_cli.command(name="log", help="Tail the logs for a specific service.")
