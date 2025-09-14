@@ -263,7 +263,8 @@ def status():
 
     console.print("[bold green]✅ All checks complete.[/bold green]")
 
-def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
+def run_command(cmd: list[str], check: bool = True, sudo: bool = True) -> subprocess.CompletedProcess:
+    cmd = ["sudo"] + cmd if sudo else cmd
     try:
         return subprocess.run(cmd, capture_output=True, text=True, check=check)
     except subprocess.SubprocessError as e:
