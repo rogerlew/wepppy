@@ -14,8 +14,9 @@ from wepppy.wepp.soils import  HorizonMixin
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture
 from wepppy.wepp.soils.utils import WeppSoilUtil
-from rosetta import Rosetta
+from wepppy.nodb.status_messenger import StatusMessenger
 
+from rosetta import Rosetta
 import hashlib
 import base64
 
@@ -121,10 +122,12 @@ isric_conversion_factors = {
     'wv0010': 10   # Water content at 10 kPa
 }
 
-def fetch_layer(wms_url, layer, crs, adj_bbox, size, format, soils_dir):
+def fetch_layer(wms_url, layer, crs, adj_bbox, size, format, soils_dir, status_channel=None):
     """
     Fetch a single ISRIC soil layer.
     """
+    if status_channel:
+            StatusMessenger.publish(status_channel, f'    fetch_layer({layer}:{wms_url})')
     wms = WebMapService(wms_url)
     response = wms.getmap(layers=[layer],
                           srs=crs,
@@ -135,10 +138,13 @@ def fetch_layer(wms_url, layer, crs, adj_bbox, size, format, soils_dir):
     with open(os.path.join(soils_dir, filename), 'wb') as out:
         out.write(response.read())
 
-def fetch_isric_soil_layers(wgs_bbox, soils_dir='./'):
+def fetch_isric_soil_layers(wgs_bbox, soils_dir='./', status_channel=None):
     """
     Fetches the ISRIC soil layers for the given bounding box in parallel.
     """
+    if status_channel:
+         StatusMessenger.publish(status_channel, f'  fetch_isric_soil_layers({wgs_bbox})')
+
     global isric_maps
 
     adj_bbox, size = adjust_to_grid(wgs_bbox)
@@ -153,22 +159,25 @@ def fetch_isric_soil_layers(wgs_bbox, soils_dir='./'):
         for layer in wms.contents:
             if 'Q0.5' not in layer:
                 continue
-            task = (wms_url, layer, crs, adj_bbox, size, format, soils_dir)
+            task = (wms_url, layer, crs, adj_bbox, size, format, soils_dir, status_channel)
             tasks.append(task)
 
     # Execute tasks in parallel
     with ThreadPoolExecutor(max_workers=16) as executor:
         futures = [executor.submit(fetch_layer, *task) for task in tasks]
-        futures.append(executor.submit(fetch_isric_wrb, wgs_bbox, soils_dir))
+        futures.append(executor.submit(fetch_isric_wrb, wgs_bbox, soils_dir, status_channel))
         for future in futures:
             future.result()  # Wait for each task to complete
 
 
-def fetch_isric_wrb(wgs_bbox, soils_dir='./'):
+def fetch_isric_wrb(wgs_bbox, soils_dir='./', status_channel=None):
     """
     Fetches the ISRIC soil layers for the given bounding box.
     """
     global isric_wrb_map
+
+    if status_channel:
+         StatusMessenger.publish(status_channel, f'    fetch_isric_wrb({wgs_bbox})')
 
     adj_bbox, size = adjust_to_grid(wgs_bbox)
 
@@ -255,9 +264,9 @@ class ISRICSoilData:
         self.soils_dir = soils_dir
         self.wgs_bbox = None
 
-    def fetch(self, wgs_bbox):
+    def fetch(self, wgs_bbox, status_channel=None):
         self.wgs_bbox = wgs_bbox
-        fetch_isric_soil_layers(wgs_bbox, self.soils_dir)
+        fetch_isric_soil_layers(wgs_bbox, self.soils_dir, status_channel=status_channel)
 
     def extract_soil_data(self, lng, lat):
         global isric_measures, isric_depths, isric_conversion_factors
