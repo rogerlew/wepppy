@@ -1612,7 +1612,6 @@ var ChannelDelineation = function () {
                     map.ctrls.addOverlay(self.glLayer, "Channels");
 
                     self.status.text(`${task_msg} – done`);
-                    self.report();
                 })
                 .fail((jqXHR, textStatus, err) =>
                     self.pushErrorStacktrace(self, jqXHR, textStatus, err)
@@ -1682,7 +1681,6 @@ var ChannelDelineation = function () {
                     map.ctrls.addOverlay(self.labels, "Channel Labels");
 
                     self.status.text("Displaying SUBWTA channels – done");
-                    self.report();
                 })
                 .fail((jq, txt, err) =>
                     self.pushErrorStacktrace(self, jq, txt, err)
@@ -2286,7 +2284,6 @@ var SubcatchmentDelineation = function () {
             self._refreshGlLayer();              // draw polygons
 
             map.ctrls.addOverlay(self.labels, 'Subcatchment Labels'); // off by default
-            self.report();
         };
 
         //----------------------------------------------------------------------
