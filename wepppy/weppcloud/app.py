@@ -9,6 +9,9 @@
 import os
 import sys
 import csv
+import pathlib
+import io
+
 from datetime import datetime
 
 from ast import literal_eval
@@ -18,6 +21,10 @@ from os.path import split as _split
 
 from collections import Counter
 
+import re
+import socket
+import hashlib
+import logging
 import json
 import shutil
 import traceback
@@ -49,7 +56,6 @@ from flask_security import (
     login_required, current_user, roles_required
 )
 
-import re
 
 from wtforms.validators import DataRequired as Required
 from flask_mail import Mail
@@ -146,7 +152,7 @@ except:
 
 
 # load app configuration based on deployment
-import socket
+
 _hostname = socket.gethostname()
 config_app = None
 if 'wepp1' in _hostname or 'forest' in _hostname:
@@ -165,9 +171,6 @@ if config_app is None:
 
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
-
-import hashlib
-import logging
 
 class HealthFilter(logging.Filter):
     def filter(self, record):
@@ -243,6 +246,7 @@ from routes.gdalinfo import gdalinfo_bp
 from routes.wepprepr import repr_bp
 from routes.diff import diff_bp
 from routes.pivottable import pivottable_bp
+from routes.weppcloudr import weppcloudr_bp
 from routes.rq.api.jobinfo import rq_jobinfo_bp
 from routes.rq.api.api import rq_api_bp
 from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
@@ -250,9 +254,10 @@ from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
 app.register_blueprint(download_bp)
 app.register_blueprint(browse_bp)
 app.register_blueprint(gdalinfo_bp)
-app.register_blueprint(pivottable_bp)
 app.register_blueprint(repr_bp)
 app.register_blueprint(diff_bp)
+app.register_blueprint(pivottable_bp)
+app.register_blueprint(weppcloudr_bp)
 app.register_blueprint(rq_api_bp)
 app.register_blueprint(rq_jobinfo_bp)
 app.register_blueprint(rq_job_dashboard_bp)
@@ -2149,25 +2154,27 @@ def resources_subcatchments_geojson(runid, config):
     except Exception:
         return exception_factory(runid=runid)
 
-
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/resources/bound.json')
-def resources_bounds_geojson(runid, config):
+def resources_bounds_geojson(runid, config, simplify=False):
     try:
         wd = get_wd(runid)
         watershed = Watershed.getInstance(wd)
         fn = watershed.bound_shp
 
-        fn2 = fn.split('.')
-        fn2.insert(-1, 'opt')
-        fn2 = '.'.join(fn2)
-        if _exists(fn2):
-            return send_file(fn2)
-        
-        cmd = ['ogr2ogr', fn2, fn, '-simplify', '0.002']
+        if simplify:
+            fn2 = fn.split('.')
+            fn2.insert(-1, 'opt')
+            fn2 = '.'.join(fn2)
+            if _exists(fn2):
+                return send_file(fn2)
+            
+            cmd = ['ogr2ogr', fn2, fn, '-simplify', '0.002']
 
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        p.wait()
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            p.wait()
+        else:
+            fn2 = fn
 
         js = json.load(open(fn2))
         ron = Ron.getInstance(wd)
@@ -2299,27 +2306,6 @@ def report_outlet(runid, config):
                            ron=Ron.getInstance(wd))
 
 
-# noinspection PyBroadException
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/set_outlet/', methods=['POST'])
-def task_set_outlet(runid, config):
-    try:
-        lat = float(request.form.get('latitude', None))
-        lng = float(request.form.get('longitude', None))
-    except Exception:
-        return exception_factory('latitude and longitude must be provided as floats', runid=runid)
-
-    wd = get_wd(runid)
-    watershed = Watershed.getInstance(wd)
-
-    try:
-        watershed.set_outlet(lng, lat)
-    except Exception:
-        return exception_factory('Could not set outlet', runid=runid)
-
-    return success_factory()
-
-
 @app.route('/runs/<string:runid>/<config>/query/has_dem')
 @app.route('/runs/<string:runid>/<config>/query/has_dem/')
 def query_has_dem(runid, config):
@@ -2378,54 +2364,6 @@ def export_geodatabase(runid, config):
         return exception_factory('Error running gpkg_export', runid=runid)
 
 
-@deprecated
-@app.route('/runs/<string:runid>/<config>/export/arcmap')
-@app.route('/runs/<string:runid>/<config>/export/arcmap/')
-def export_arcmap(runid, config):
-    from wepppy.export import gpkg_export, archive_project, legacy_arc_export
-
-    # get working dir of original directory
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-
-    legacy = request.args.get('legacy', None) is not None
-    no_cache = True
-
-    if legacy:
-        try:
-            if len(glob(_join(ron.export_legacy_arc_dir, '*.shp'))) == 0:
-                legacy_arc_export(wd)
-        except Exception:
-            return exception_factory('Error running legacy_arc_export', runid=runid)
-
-        try:
-            if not request.args.get('no_retrieve', None) is not None:
-                archive_path = archive_project(ron.export_legacy_arc_dir)
-                return send_file(archive_path, as_attachment=True, download_name=f'{runid}_arcmap.zip')
-            else:
-                return success_factory()
-
-        except Exception:
-            return exception_factory('Error running arc_export', runid=runid)
-
-    else:
-        try:
-            if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0 or no_cache:
-                gpkg_export(wd)
-        except Exception:
-            return exception_factory('Error running arc_export', runid=runid)
-
-        try:
-            if not request.args.get('no_retrieve', None) is not None:
-                archive_path = archive_project(ron.export_arc_dir)
-                return send_file(archive_path, as_attachment=True, download_name=f'{runid}_arcmap.zip')
-            else:
-                return success_factory()
-
-        except Exception:
-            return exception_factory('Error running arc_export', runid=runid)
-
-
 @app.route('/runs/<string:runid>/<config>/export/prep_details')
 @app.route('/runs/<string:runid>/<config>/export/prep_details/')
 def export_prep_details(runid, config):
@@ -2455,99 +2393,6 @@ def export_winwepp(runid, config):
     wd = get_wd(runid)
     export_winwepp_path = export_winwepp(wd)
     return send_file(export_winwepp_path, as_attachment=True, download_name='{}_winwepp.zip'.format(runid))
-
-
-
-
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/build_subcatchments/', methods=['POST'])
-def task_build_subcatchments(runid, config):
-
-    pkcsa = request.form.get('pkcsa', None)
-    try:
-        pkcsa = float(pkcsa)
-    except:
-        pass
-
-    clip_hillslope_length = request.form.get('clip_hillslope_length', None)
-    try:
-        clip_hillslope_length = float(clip_hillslope_length)
-    except:
-        pass
-
-    clip_hillslopes = request.form.get('clip_hillslopes', 'off')
-    try:
-        clip_hillslopes = clip_hillslopes.lower().startswith('on')
-    except:
-        pass
-
-    walk_flowpaths = request.form.get('walk_flowpaths', 'off')
-    try:
-        walk_flowpaths = walk_flowpaths.lower().startswith('on')
-    except:
-        pass
-
-    mofe_target_length = request.form.get('mofe_target_length', None)
-    try:
-        mofe_target_length = float(mofe_target_length)
-    except:
-        pass
-
-    mofe_buffer = request.form.get('mofe_buffer', 'off')
-    try:
-        mofe_buffer = mofe_buffer.lower().startswith('on')
-    except:
-        pass
-
-    bieger2015_widths = request.form.get('bieger2015_widths', 'off')
-    try:
-        bieger2015_widths = bieger2015_widths.lower().startswith('on')
-    except:
-        pass
-
-    mofe_buffer_length = request.form.get('mofe_buffer_length', None)
-    try:
-        mofe_buffer_length = float(mofe_buffer_length)
-    except:
-        pass
-
-    try:
-        wd = get_wd(runid)
-        watershed = Watershed.getInstance(wd)
-        wepp = Watershed.getInstance(wd)
-
-        if clip_hillslopes is not None:
-            watershed.clip_hillslopes = clip_hillslopes
-
-        if walk_flowpaths is not None:
-            watershed.walk_flowpaths = walk_flowpaths
-
-        if clip_hillslope_length is not None:
-            watershed.clip_hillslope_length = clip_hillslope_length
-
-        if mofe_target_length is not None:
-            watershed.mofe_target_length = mofe_target_length
-
-        if mofe_buffer is not None:
-            watershed.mofe_buffer = mofe_buffer
-
-        if mofe_buffer_length is not None:
-            watershed.mofe_buffer_length = mofe_buffer_length
-
-        if bieger2015_widths is not None:
-            watershed.bieger2015_widths = bieger2015_widths
-
-        try:
-            watershed.build_subcatchments(pkcsa=pkcsa)
-        except Exception as e:
-            if isinstance(e, WatershedBoundaryTouchesEdgeError):
-                return exception_factory(e.__name__, e.__doc__, runid=runid)
-            else:
-                return exception_factory('Building Subcatchments Failed', runid=runid)
-
-        return success_factory()
-    except:
-        return exception_factory('Building Subcatchments Failed', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/query/watershed/subcatchments')
@@ -2948,69 +2793,6 @@ def view_channel_def(runid, config, chn_key):
 
     return jsonify(chn_d)
 
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/build_landuse/', methods=['POST'])
-def task_build_landuse(runid, config):
-    mofe_buffer_selection = request.form.get('mofe_buffer_selection', None)
-    try:
-        mofe_buffer_selection = int(mofe_buffer_selection)
-    except:
-        pass
-
-    wd = get_wd(runid)
-    landuse = Landuse.getInstance(wd)
-
-    if mofe_buffer_selection is not None:
-        landuse.mofe_buffer_selection = mofe_buffer_selection
-
-    # check for file for mode 4, mode is set asynchronously
-
-    if landuse.mode == LanduseMode.UserDefined:
-        from wepppy.all_your_base.geo import raster_stacker
-
-        mapping = request.form.get('landuse_management_mapping_selection', None)
-        if mapping is None:
-            return error_factory('landuse_management_mapping_selection must be provided')
-        else:
-            landuse.mapping = mapping
-        
-        try:
-            file = request.files['input_upload_landuse']
-        except Exception:
-            return exception_factory('Could not find file', runid=runid)
-
-        try:
-            if file.filename == '':
-                return error_factory('no filename specified')
-
-            filename = secure_filename(file.filename)
-        except Exception:
-            return exception_factory('Could not obtain filename', runid=runid)
-
-        user_defined_fn = _join(landuse.lc_dir, f'_{filename}')
-        try:
-            file.save(_join(landuse.lc_dir, f'_{filename}'))
-        except Exception:
-            return exception_factory('Could not save file', runid=runid)
-
-        try:
-            raster_stacker(user_defined_fn, landuse.subwta, landuse.lc_fn)
-        except Exception:
-            return exception_factory('Failed validating file', runid=runid)
-
-        if not _exists(landuse.lc_fn):
-            return error_factory('Failed creating landuse file')
-
-    try:
-        landuse.build()
-    except Exception as e:
-        if isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__, runid=runid)
-        else:
-            return exception_factory('Building Landuse Failed', runid=runid)
-
-    return success_factory()
-
 
 @app.route('/runs/<string:runid>/<config>/tasks/build_rangeland_cover/', methods=['POST'])
 def task_build_rangeland_cover(runid, config):
@@ -3140,29 +2922,6 @@ def report_soils(runid, config):
                                report=Soils.getInstance(wd).report)
     except Exception as e:
         return exception_factory('Building Soil Failed', runid=runid)
-
-
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/build_soil/', methods=['POST'])
-def task_build_soil(runid, config):
-    wd = get_wd(runid)
-
-    try:
-        soils = Soils.getInstance(wd)
-        initial_sat = float(request.form.get('initial_sat'))
-
-        if 'disturbed' in soils.mods:
-            disturbed = Disturbed.getInstance(wd)
-            disturbed.sol_ver = float(request.form.get('sol_ver'))
-
-        soils.build(initial_sat=initial_sat)
-    except Exception as e:
-        if isinstance(e, NoValidSoilsException) or isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__, runid=runid)
-        else:
-            return exception_factory('Building Soil Failed', runid=runid)
-
-    return success_factory()
 
 
 # noinspection PyBroadException
@@ -3436,32 +3195,6 @@ def view_climate_monthlies(runid, config):
     return render_template('controls/climate_monthlies.htm',
                            title='Summary for the selected station',
                            station=station_meta.as_dict(include_monthlies=True))
-
-
-# noinspection PyBroadException
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/build_climate', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/build_climate/', methods=['POST'])
-def task_build_climate(runid, config):
-    wd = get_wd(runid)
-    climate = Climate.getInstance(wd)
-
-    try:
-        climate.parse_inputs(request.form)
-    except Exception:
-        return exception_factory('Error parsing climate inputs', runid=runid)
-
-    try:
-        climate.build()
-    except Exception as e:
-        if isinstance(e, NoClimateStationSelectedError) or \
-           isinstance(e, ClimateModeIsUndefinedError) or \
-           isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__, runid=runid)
-        else:
-            return exception_factory('Error building climate', runid=runid)
-
-    return success_factory()
 
 
 # noinspection PyBroadException
@@ -3855,158 +3588,6 @@ def get_wepp_prep_details(runid, config):
                                ron=ron)
     except:
         return exception_factory('Error building summary', runid=runid)
-
-
-# noinspection PyBroadException
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/run_wepp', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/run_wepp/', methods=['POST'])
-def submit_task_run_wepp(runid, config):
-    wd = get_wd(runid)
-    wepp = Wepp.getInstance(wd)
-
-    try:
-        wepp.parse_inputs(request.form)
-    except Exception:
-        return exception_factory('Error parsing climate inputs', runid=runid)
-
-    soils = Soils.getInstance(wd)
-
-    try:
-        run_flowpaths = request.form.get('run_flowpaths') == 'on'
-        wepp.set_run_flowpaths(run_flowpaths)
-    except:
-        run_flowpaths = None
-
-    try:
-        clip_soils = request.form.get('clip_soils') == 'on'
-    except:
-        clip_soils = None
-
-
-    if clip_soils is not None:
-        soils.clip_soils = clip_soils
-
-    try:
-        clip_soils_depth = int(request.form.get('clip_soils_depth'))
-    except:
-        clip_soils_depth = None
-
-    if clip_soils_depth is not None:
-        soils.clip_soils_depth = clip_soils_depth
-
-    watershed = Watershed.getInstance(wd)
-
-    try:
-        clip_hillslopes = request.form.get('clip_hillslopes') == 'on'
-    except:
-        clip_hillslopes = None
-
-    if clip_hillslopes is not None:
-        watershed.clip_hillslopes = clip_hillslopes
-
-    try:
-        clip_hillslope_length = int(request.form.get('clip_hillslope_length'))
-    except:
-        clip_hillslope_length = None
-
-    if clip_hillslope_length is not None:
-        watershed.clip_hillslope_length = clip_hillslope_length
-
-    try:
-        initial_sat = float(request.form.get('initial_sat'))
-    except:
-        initial_sat = None
-
-    if initial_sat is not None:
-        soils.initial_sat = initial_sat
-
-
-    try:
-        reveg_scenario = request.form.get('reveg_scenario', None)
-    except:
-        reveg_scenario = None
-
-    if reveg_scenario is not None:
-        from wepppy.nodb.mods.revegetation import Revegetation
-        reveg = Revegetation.getInstance(wd)
-        reveg.load_cover_transform(reveg_scenario)
-
-    try:
-        prep_details_on_run_completion = request.form.get('prep_details_on_run_completion') == 'on'
-    except:
-        prep_details_on_run_completion = None
-
-    try:
-        arc_export_on_run_completion = request.form.get('arc_export_on_run_completion') == 'on'
-    except:
-        arc_export_on_run_completion = None
-
-    try:
-        legacy_arc_export_on_run_completion = request.form.get('legacy_arc_export_on_run_completion') == 'on'
-    except:
-        legacy_arc_export_on_run_completion = None
-
-    try:
-        dss_export_on_run_completion = request.form.get('dss_export_on_run_completion') == 'on'
-    except:
-        dss_export_on_run_completion = None
-
-    try:
-        wepp.lock()
-        if prep_details_on_run_completion is not None:
-            wepp._prep_details_on_run_completion = prep_details_on_run_completion
-
-        if arc_export_on_run_completion is not None:
-            wepp._arc_export_on_run_completion = arc_export_on_run_completion
-
-        if legacy_arc_export_on_run_completion is not None:
-            wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
-
-
-        if dss_export_on_run_completion is not None:
-            wepp._dss_export_on_run_completion = dss_export_on_run_completion
-
-        wepp.dump_and_unlock()
-    except:
-        wepp.unlock('-f')
-        return exception_factory('Error running wepp', runid=runid)
-
-    try:
-        wepp.clean()
-    except Exception:
-        return exception_factory('Error cleaning wepp directories', runid=runid)
-
-    try:
-
-
-        watershed = Watershed.getInstance(wd)
-        translator = Watershed.getInstance(wd).translator_factory()
-        runs_dir = os.path.abspath(wepp.runs_dir)
-
-        #
-        # Prep Hillslopes
-        wepp.prep_hillslopes()
-
-        wepp.lock()
-        wepp.run_hillslopes()
-        #
-        # Prep Watershed
-        wepp.prep_watershed()
-
-        #
-        # Run Watershed
-        wepp.run_watershed()
-        wepp.unlock()
-
-        wepp.post_discord_wepp_run_complete()
-
-
-    except Exception:
-        wepp.unlock('-f')
-        return exception_factory('Error running wepp', runid=runid)
-
-    return success_factory()
 
 
 # noinspection PyBroadException
@@ -4889,26 +4470,6 @@ def set_firedate(runid, config):
 
 
 # noinspection PyBroadException
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/acquire_rap_ts/', methods=['POST'])
-def task_rap_ts_acquire(runid, config):
-    from wepppy.nodb.mods import RAP_TS
-    wd = get_wd(runid)
-    rap_ts = RAP_TS.getInstance(wd)
-    climate = Climate.getInstance(wd)
-    try:
-        assert climate.observed_start_year is not None
-        assert climate.observed_end_year is not None
-
-        rap_ts.acquire_rasters(start_year=climate.observed_start_year,
-                               end_year=climate.observed_end_year)
-        rap_ts.analyze()
-        return success_factory("RAP TS acquired and analyzed")
-    except Exception:
-        return exception_factory("failed to acquire RAP TS", runid=runid)
-
-
-# noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/upload_sbs/', methods=['POST'])
 def task_upload_sbs(runid, config):
     wd = get_wd(runid)
@@ -5025,118 +4586,6 @@ def task_build_uniform_sbs(runid, config, value):
         return exception_factory('Failed validating file', runid=runid)
 
     return success_factory()
-
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow/', methods=['POST'])
-def run_debris_flow(runid, config):
-    # get working dir of original directory
-    wd = get_wd(runid)
-
-    try:
-        debris_flow = DebrisFlow.getInstance(wd)
-        debris_flow.run_debris_flow()
-        return success_factory()
-
-    except:
-        return exception_factory('Error Running Debris Flow', runid=runid)
-
-
-@deprecated
-def _task_upload_ash_map(wd, request, file_input_id):
-    ash = Ash.getInstance(wd)
-
-    file = request.files[file_input_id]
-    if file.filename == '':
-        return None
-        # raise Exception('no filename specified')
-
-    filename = secure_filename(file.filename)
-
-    file.save(_join(ash.ash_dir, filename))
-
-#    try:
-#        res = baer.validate(filename)
-#    except Exception:
-#        return exception_factory('Failed validating file')
-
-    return filename
-
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/run_ash', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/run_ash/', methods=['POST'])
-def run_ash(runid, config):
-    # get working dir of original directory
-    wd = get_wd(runid)
-
-    #return jsonify(request.form)
-    '''
-    {
-      "ash_depth_mode": "1", 
-      "field_black_bulkdensity": "0.31", 
-      "field_white_bulkdensity": "0.14", 
-      "fire_date": "8/13", 
-      "ini_black_depth": "15", 
-      "ini_black_load": "1.55", 
-      "ini_white_depth": "15", 
-      "ini_white_load": "0.7000000000000001"
-    }
-    
-    '''
-
-    fire_date = request.form.get('fire_date', None)
-    ash_depth_mode = request.form.get('ash_depth_mode', None)
-    ini_black_ash_depth_mm = request.form.get('ini_black_depth', None)
-    ini_white_ash_depth_mm = request.form.get('ini_white_depth', None)
-    ini_black_ash_load_kgm2 = request.form.get('ini_black_load', None)
-    ini_white_ash_load_kgm2 = request.form.get('ini_white_load', None)
-    field_black_ash_bulkdensity = request.form.get('field_black_bulkdensity', None)
-    field_white_ash_bulkdensity = request.form.get('field_white_bulkdensity', None)
-
-    try:
-        assert isint(ash_depth_mode), ash_depth_mode
-
-        if int(ash_depth_mode) == 1:
-            assert isfloat(ini_black_ash_depth_mm), ini_black_ash_depth_mm
-            assert isfloat(ini_white_ash_depth_mm), ini_white_ash_depth_mm
-        else:
-            assert isfloat(ini_black_ash_load_kgm2), ini_black_ash_load_kgm2
-            assert isfloat(ini_white_ash_load_kgm2), ini_white_ash_load_kgm2
-            assert isfloat(field_black_ash_bulkdensity), field_black_ash_bulkdensity
-            assert isfloat(field_white_ash_bulkdensity), field_white_ash_bulkdensity
-
-            ini_black_ash_depth_mm = float(ini_black_ash_load_kgm2) / float(field_black_ash_bulkdensity)
-            ini_white_ash_depth_mm = float(ini_white_ash_load_kgm2) / float(field_white_ash_bulkdensity)
-
-        ash = Ash.getInstance(wd)
-
-        if request.method == 'POST':
-            ash.parse_inputs(dict(request.form))
-            ash = Ash.getInstance(wd)
-
-        if int(ash_depth_mode) == 2:
-          
-            ash.lock()
-
-            try:
-                ash._spatial_mode = AshSpatialMode.Gridded
-                ash._ash_load_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_load')
-                ash._ash_type_map_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_type_map')
-                ash.dump_and_unlock()
-            except Exception:
-                ash.unlock('-f')
-                raise
-
-            if ash.ash_load_fn is None:
-                raise Exception('Expecting ashload map')
-
-        ash.ash_depth_mode = 1
-
-        ash.run_ash(fire_date, float(ini_white_ash_depth_mm), float(ini_black_ash_depth_mm))
-        return success_factory()
-
-    except:
-        return exception_factory('Error Running Ash Transport', runid=runid)
 
 
 # noinspection PyBroadException
@@ -5480,291 +4929,3 @@ def runid_query():
         return jsonify([_join('weppcloud/runs', _split(wd)[-1], get_config_stem(wd)) for wd in wds])
     else:
         return error_factory('not authorized')
-
-
-# noinspection PyBroadException
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/run_rhem', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/run_rhem/', methods=['POST'])
-def submit_task_run_rhem(runid, config):
-    wd = get_wd(runid)
-    rhem = Rhem.getInstance(wd)
-
-    try:
-        rhem.clean()
-    except Exception:
-        return exception_factory('Error cleaning rhem directories', runid=runid)
-
-    try:
-        rhem.prep_hillslopes()
-        rhem.run_hillslopes()
-
-    except Exception:
-        return exception_factory('Error running rhem', runid=runid)
-
-    return success_factory()
-
-import pathlib
-import io
-VIZ_RSCRIPT_DIR = '/workdir/viz-weppcloud/scripts/R/'
-VIZ_RMARKDOWN_DIR = '/workdir/viz-weppcloud/scripts/Rmd'
-
-@app.route('/runs/<string:runid>/<config>/viz/<r_format>/<routine>')
-@app.route('/runs/<string:runid>/<config>/viz/<r_format>/<routine>/')
-def viz_r(runid, config, r_format, routine):
-    assert config is not None
-
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
-    try:
-        ron = Ron.getInstance(wd)
-    except FileNotFoundError:
-        abort(404)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if not owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if ron.public:
-        should_abort = False
-
-    if should_abort:
-        abort(404)
-
-    viz_export_dir = _join(wd, 'export/viz')
-    if not _exists(viz_export_dir):
-        os.mkdir(viz_export_dir)
-        
-    try:
-        rpt_fn = _join(viz_export_dir, f'{routine}.htm')
-
-        if r_format.lower() == 'r':
-            rscript = _join(VIZ_RSCRIPT_DIR, f'{routine}.R')
-            assert _exists(rscript)
-            cmd = ['Rscript', rscript, runid]
-        elif r_format.lower() == "rmd":
-            rscript = _join(VIZ_RMARKDOWN_DIR, f'{routine}.Rmd')
-            assert _exists(rscript)
-            cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{routine}.htm", output_dir="{viz_export_dir}")']
-
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        output, errors = p.communicate()
-        with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
-            fp.write(output.decode('utf-8'))
-        with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
-            fp.write(errors.decode('utf-8'))
-
-        assert _exists(rpt_fn)
-        with io.open(rpt_fn, encoding='utf8') as fp:
-            return fp.read()
-
-    except:
-        return exception_factory('Error running script', runid=runid)
-
-
-WEPPCLOUDR_DIR = '/workdir/WEPPcloudR/scripts'
-
-
-def _weppcloudr_script_locator(routine, user=None):
-    global WEPPCLOUDR_DIR 
-    if user is None:
-        return _join(WEPPCLOUDR_DIR, routine)
-    else:
-        rscript =  _join(WEPPCLOUDR_DIR, 'users', user, routine)
-        assert pathlib.Path(WEPPCLOUDR_DIR) in  pathlib.Path(rscript).parents
-        return rscript
-
-
-@app.route('/runs/<string:runid>/<config>/WEPPcloudR/<routine>')
-@app.route('/runs/<string:runid>/<config>/WEPPcloudR/<routine>/')
-def weppcloudr(runid, config, routine):
-    assert config is not None
-
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
-    try:
-        ron = Ron.getInstance(wd)
-    except FileNotFoundError:
-        abort(404)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if not owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if ron.public:
-        should_abort = False
-
-    if should_abort:
-        abort(404)
-
-    user = request.args.get('user', None)
-    
-    return weppcloudr_runner(runid, config, routine, user)
-
-
-def weppcloudr_runner(runid, config, routine, user):
-    wd = get_wd(runid)
-
-    viz_export_dir = _join(wd, 'export/WEPPcloudR')
-    if not _exists(viz_export_dir):
-        os.mkdir(viz_export_dir)
-        
-    sub_fn = _join(wd, 'export', 'totalwatsed2.csv')
-    sub_sha = get_file_sha1(sub_fn)
-
-    try:
-        assert routine.endswith('.R') or routine.endswith('.Rmd'), routine
-
-        # routine_stem = '.'.join(routine.split('.')[:-1]) 
-        r_format = routine.split('.')[-1] 
-        rpt_fn = _join(viz_export_dir, f'{routine}.{sub_sha}.htm')
-
-        if not _exists(rpt_fn):
-            rscript = _weppcloudr_script_locator(routine, user=user)
-            assert _exists(rscript)
-
-            if r_format.lower() == 'r':
-                cmd = ['Rscript', rscript, runid]
-            elif r_format.lower() == "rmd":
-                cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{rpt_fn}", output_dir="{viz_export_dir}")']
-
-            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            output, errors = p.communicate()
-            output = output.decode('utf-8')
-            errors = errors.decode('utf-8')
-            with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
-                fp.write(output)
-            with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
-                fp.write(errors)
-
-        if not _exists(rpt_fn):
-            return f'''
-<html>
-<h3>Error running script</h3>
-
-<h5>stdout</h5>
-<pre>
-{output}
-</pre>
-
-<h5>stderr</h5>
-<pre>
-{errors}
-</pre>
-</html>'''
-
-        with io.open(rpt_fn, encoding='utf8') as fp:
-            return fp.read()
-
-    except:
-        return exception_factory('Error running script')
-
-
-@app.route('/runs/<string:runid>/<config>/report/deval_details')
-@app.route('/runs/<string:runid>/<config>/report/deval_details/')
-def deval_details(runid, config):
-    try:
-        wd = get_wd(runid)
-        from wepppy.export import arc_export
-        arc_export(wd)
-    except:
-        return exception_factory('Error running script', runid=runid)
-
-    return weppcloudr_runner(runid, config, routine='new_report.Rmd', user='chinmay')
-
-
-@app.route('/WEPPcloudR/proxy/<routine>', methods=['GET', 'POST'])
-@app.route('/WEPPcloudR/proxy/<routine>/', methods=['GET', 'POST'])
-def weppcloudr_proxy(routine):
-    if current_user.is_authenticated:
-        if not current_user.roles:
-            user_datastore.add_role_to_user(current_user.email, 'User')
-
-    user = request.args.get('user', None)
-    runids = request.args.get('runids', '')
-    runids = runids.replace(',', ' ').split()
-
-    try:
-
-        ws = []
-        for i, runid in enumerate(runids):
-            if runid.endswith('/'):
-                runid = runid[:-1]
-
-            wd = get_wd(runid)
-            try:
-                ron = Ron.getInstance(wd)
-                wepp = Wepp.getInstance(wd)
-                watershed = Watershed.getInstance(wd)
-            except:
-                raise Exception('Error acquiring nodb instances from ' + wd)
-
-            name = ron.name
-            scenario = ron.scenario
-
-            ws.append(dict(runid=runid, cfg=ron.config_stem, name=name, scenario=scenario, location_hash=ron.location_hash))
-
-        
-        js = json.dumps(ws)
-
-    except:
-        return exception_factory('Error running script')
-
-    wd = get_wd(runids[0]) 
-    viz_export_dir = _join(wd, 'export/WEPPcloudR')
-    if not _exists(viz_export_dir):
-        os.mkdir(viz_export_dir)
-        
-    try:
-        assert routine.endswith('.R') or routine.endswith('.Rmd'), routine
-
-        # routine_stem = '.'.join(routine.split('.')[:-1]) 
-        r_format = routine.split('.')[-1] 
-        rpt_fn = _join(viz_export_dir, f'{routine}.htm')
-
-        rscript = _weppcloudr_script_locator(routine, user=user)
-        assert _exists(rscript)
-
-        if r_format.lower() == 'r':
-            cmd = ['Rscript', rscript, runid]
-        elif r_format.lower() == "rmd":
-            cmd = ['R', '-e', f'''library("rmarkdown"); rmarkdown::render("{rscript}", params=list(ws='{js}'), output_file="{rpt_fn}", output_dir="{viz_export_dir}")''']
-
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        output, errors = p.communicate()
-        with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
-            fp.write(output.decode('utf-8'))
-        with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
-            fp.write(errors.decode('utf-8'))
-
-        assert _exists(rpt_fn)
-        with io.open(rpt_fn, encoding='utf8') as fp:
-            return fp.read()
-
-    except:
-        return exception_factory('Error processing request')
-
-
-#  R -e 'library("rmarkdown"); rmarkdown::render("03_Rmarkdown_to_generate_reports.Rmd", params=list(proj_runid="lt_202012_26_Bliss_Creek_CurCond"), output_file="rmd_rpt.htm")'
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5003)
-
-    # sudo docker run -i -p 5003:80 -v /Users/roger/geodata:/geodata -v /Users/roger/wepppy/wepppy:/workdir/wepppy/wepppy  -t wepppydocker-base
-
-#rsync -av --progress --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /home/roger/wepppy/wepppy/  roger@wepp.cloud:/usr/lib/python3/dist-packages/wepppy/
-#rsync -av --progress --no-times --no-perms --no-owner --no-group --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /workdir/wepppy/wepppy/  roger@wepp.cloud:/usr/lib/python3/dist-packages/wepppy/
-
-
