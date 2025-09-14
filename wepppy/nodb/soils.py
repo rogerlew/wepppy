@@ -469,7 +469,7 @@ class Soils(NoDbBase, LogMixin):
 
             isric = ISRICSoilData(soils_dir)
             self.log('fetching soil maps...')
-            isric.fetch(ron.map.extent)
+            isric.fetch(ron.map.extent, status_channel=self._status_channel)
             self.log_done()
 
             domsoil_d = {}
