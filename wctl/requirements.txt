@@ -1,4 +1,4 @@
-typer[all]
+typer
 rich
 requests
 textual

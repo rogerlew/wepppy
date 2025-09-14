@@ -30,6 +30,9 @@ def safe_float_parse(x):
 
 app = Flask(__name__)
 
+@app.route('/health')
+def health():
+    return jsonify("OK")
 
 @app.route('/', methods=['GET', 'POST'])
 def query_elevation():
