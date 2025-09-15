@@ -7,18 +7,17 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 """
-WMSesque is a flask web application that provides an endpoint for acquiring
-tiled raster datasets. The web application reprojects (warps) the map to UTM
-based on the top left corner of the bounding box {bbox} provided to the
-application. It also scales the map data based on arguments supplied in the
-request {cellsize}. Returns GeoTiff. Header contains information related to
-the request and the map processing.
+WMSesque is a high-performance FastAPI web service providing an endpoint for
+on-the-fly acquisition and processing of tiled raster datasets.
 
-The WMSesque server assumes that the datasets have been downloaded onto the
-machine running EMSeque. The datasets should be in the {geodata_dir}. Each
-should have its own directory with a subdirectory for each year. Tiles or
-single maps should be combined as a gdal virtual dataset (vrt). WMSesque
-looks for: {geodata_dir}/{dataset}/{year}/.vrt
+The service reprojects (warps) source data to a UTM projection derived from a
+request's bounding box (`bbox`) and scales it to a specified `cellsize`. It
+returns the processed raster in various formats (e.g., GeoTiff, PNG) and
+includes detailed processing metadata in a custom response header.
+
+The service expects source data to be structured as GDAL Virtual Datasets (VRTs)
+within a local directory, typically following a path like:
+`{geodata_dir}/{dataset}/{...}/.vrt`
 """
 
 import subprocess
@@ -26,23 +25,27 @@ import os
 import logging
 import sys
 from uuid import uuid4
-
 from datetime import datetime
+from typing import List, Tuple, Optional, Any
+import asyncio
 
 import utm
-from flask import (
-    Flask,
-    jsonify,
-    request,
-    make_response,
-    send_file,
-    after_this_request,
+from fastapi import (
+    FastAPI,
+    Query,
+    Path,
+    HTTPException,
+    BackgroundTasks,
+    Response,
+    Request,
+    Depends,
 )
+from fastapi.responses import FileResponse, JSONResponse
+
 from osgeo import gdal
 import xml.etree.ElementTree as ET
 import base64, json, hashlib
 import zlib
-
 
 import dotenv
 dotenv.load_dotenv()
@@ -50,27 +53,25 @@ dotenv.load_dotenv()
 gdal.UseExceptions()
 
 logging.basicConfig(
-    level=logging.INFO,  # or DEBUG
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)]
+    handlers=[logging.StreamHandler(sys.stdout)],
 )
+logger = logging.getLogger(__name__)
 
 def _b64url(obj: dict) -> str:
     b = json.dumps(obj, separators=(",", ":"), ensure_ascii=False).encode()
     return base64.urlsafe_b64encode(b).decode("ascii").rstrip("=")
-
 
 def from_b64url(s: str) -> dict:
     s += "=" * ((4 - len(s) % 4) % 4)
     b = base64.urlsafe_b64decode(s)
     return json.loads(b.decode("utf-8"))
 
-
 def b64url_compact(obj: dict) -> str:
     raw = json.dumps(obj, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     z = zlib.compress(raw, level=9)  # max compression
     return base64.urlsafe_b64encode(z).decode("ascii").rstrip("=")
-
 
 def from_b64url_compact(s: str) -> dict:
     s += "=" * ((4 - len(s) % 4) % 4)
@@ -78,41 +79,37 @@ def from_b64url_compact(s: str) -> dict:
     raw = zlib.decompress(z)
     return json.loads(raw.decode("utf-8"))
 
-
 geodata_dir = os.environ.get("GEODATA_DIR", "/geodata")
-
-resample_methods = (
-    "near bilinear cubic cubicspline lanczos " "average mode max min med q1 q1".split()
-)
-resample_methods = tuple(resample_methods)
-
-ext_d = {"GTiff": ".tif", "AAIGrid": ".asc", "PNG": ".png", "ENVI": ".raw"}
-
-format_drivers = tuple(list(ext_d.keys()))
-
-gdaldem_modes = (
-    "hillshade slope aspect tri tpi roughnesshillshade "
-    "slope aspect tri tpi roughness".split()
-)
-gdaldem_modes = tuple(gdaldem_modes)
-
+SCRATCH = "/media/ramdisk"
 _this_dir = os.path.dirname(__file__)
 _catalog = os.environ.get(
     'CATALOG_PATH', 
     os.path.join(_this_dir, "catalog"))
 
+resample_methods = tuple("near bilinear cubic cubicspline lanczos average mode max min med q1 q1".split())
+ext_d = {"GTiff": ".tif", "AAIGrid": ".asc", "PNG": ".png", "ENVI": ".raw"}
+format_drivers = tuple(ext_d.keys())
+gdaldem_modes = tuple("hillshade slope aspect tri tpi roughness".split())
 
-SCRATCH = "/media/ramdisk"
 
+def determine_band_type(vrt: str) -> Optional[str]:
+    ds = gdal.Open(vrt)
+    if ds is None:
+        return None
+    band = ds.GetRasterBand(1)
+    return gdal.GetDataTypeName(band.DataType)
 
-def raster_stats(src):
+def load_maps(geodata: str) -> List[str]:
+    with open(_catalog) as f:
+        maps = f.readlines()
+    return [fn.strip() for fn in maps if fn.strip().startswith(geodata)]
+
+def raster_stats(src: str) -> dict:
     cmd = ["gdalinfo", src, "-stats"]
-
-    res = subprocess.run(cmd, capture_output=True, text=True)
-    output = (res.stdout or "") + (res.stderr or "")
-
+    subprocess.run(cmd, capture_output=True, check=True)
     stat_fn = src + ".aux.xml"
-    assert os.path.exists(stat_fn), (src, stat_fn)
+    if not os.path.exists(stat_fn):
+        raise FileNotFoundError(f"Statistics file not created: {stat_fn}")
 
     d = {}
     tree = ET.parse(stat_fn)
@@ -121,331 +118,218 @@ def raster_stats(src):
         key = stat.attrib["key"]
         value = float(stat.text)
         d[key] = value
-
     return d
 
-
-def format_convert(src, _format):
+def format_convert(src: str, _format: str) -> Tuple[str, str]:
     dst = src[:-4] + ext_d[_format]
     if _format == "ENVI":
         stats = raster_stats(src)
         cmd = [
-            "gdal_translate",
-            "-of",
-            _format,
-            "-ot",
-            "Uint16",
-            "-scale",
-            str(stats["STATISTICS_MINIMUM"]),
-            str(stats["STATISTICS_MAXIMUM"]),
-            "0",
-            "65535",
-            src,
-            dst,
+            "gdal_translate", "-of", _format, "-ot", "Uint16",
+            "-scale", str(stats["STATISTICS_MINIMUM"]), str(stats["STATISTICS_MAXIMUM"]), "0", "65535",
+            src, dst,
         ]
     else:
         cmd = ["gdal_translate", "-of", _format, src, dst]
 
     res = subprocess.run(cmd, capture_output=True, text=True)
-    output = (res.stdout or "") + (res.stderr or "")
-
-    if os.path.exists(dst):
-        return dst, 200
-
-    return output, 400
-
-
-def determine_band_type(vrt):
-    ds = gdal.Open(vrt)
-    if ds == None:
-        return None
-
-    band = ds.GetRasterBand(1)
-    return gdal.GetDataTypeName(band.DataType)
+    if not os.path.exists(dst):
+        output = (res.stdout or "") + (res.stderr or "")
+        raise RuntimeError(f"gdal_translate failed: {output}")
+    
+    return dst
 
 
-def load_maps(geodata):
+def process_raster(
+    dataset: str,
+    bbox: Tuple[float, float, float, float],
+    cellsize: float,
+    resample: Optional[str],
+    _format: str,
+    gdaldem: Optional[str],
+) -> Tuple[str, dict, List[str]]:
     """
-    recursively searches for .vrt files from the
-    path speicified by {geodata_dir}
+    This is the main synchronous, blocking function that runs all the GDAL subprocesses.
+    It is designed to be run in a separate thread via asyncio.to_thread.
     """
-    maps = open(_catalog).readlines()
-    maps = [fn.strip() for fn in maps if fn.startswith(geodata)]
-
-    return maps
-
-
-def safe_float_parse(x):
-    """
-    Tries to parse {x} as a float. Returns None if it fails.
-    """
-    try:
-        return float(x)
-    except:
-        return None
-
-
-def parse_bbox(bbox):
-    """
-    Tries to parse the bbox argument supplied by the request
-    in a fault tolerate manner
-    """
-    try:
-        coords = bbox.split(",")
-    except:
-        return (None, None, None, None)
-
-    n = len(coords)
-    if n < 4:
-        coords.extend([None for i in range(4 - n)])
-    if n > 4:
-        coords = coords[:4]
-
-    return tuple(map(safe_float_parse, coords))
-
-
-app = Flask(__name__)
-
-
-@app.route("/health")
-def health():
-    return jsonify("OK")
-
-
-@app.route("/catalog")
-def catalog():
-    """
-    Return a list of available maps
-    """
-    maps = load_maps(geodata_dir)
-    return jsonify(maps)
-
-
-@app.route("/retrieve/<path:dataset>", methods=["GET"])
-def api_dataset_retrieve(dataset: str):
-    """
-    Build: {geodata_dir}/{dataset}/{subpath}/.vrt
-    subpath is optional and may include multiple '/.../...' segments.
-    """
-    logging.info(f"api_dataset_retrieve({dataset})")
-
-    # Build the VRT path safely
+    # 1. Path validation and setup
     parts = dataset.split("/")
-
     src = os.path.normpath(os.path.join(geodata_dir, *[p for p in parts if p], ".vrt"))
     base = os.path.normpath(geodata_dir)
     if not src.startswith(base + os.sep) and src != base:
-        return jsonify({"Error": "Invalid path."}), 400
-
-    # if the src file doesn't exist we can abort
+        raise HTTPException(status_code=400, detail="Invalid dataset path.")
     if not os.path.exists(src):
-        return jsonify({"Error": f"Cannot find dataset: {src}"}), 404
+        raise HTTPException(status_code=404, detail=f"Cannot find dataset: {src}")
 
-    fn_uuid = str(uuid4().hex) + ".tif"
-    dst = os.path.join(SCRATCH, fn_uuid)
+    fn_uuid = str(uuid4().hex)
+    dst = os.path.join(SCRATCH, fn_uuid + ".tif")
+    fn_list_to_cleanup = [dst]
 
-    # if cellsize argument is not supplied assume 30m
-    if "cellsize" not in request.args:
-        cellsize = 30.0  # in meters
-    else:
-        cellsize = safe_float_parse(request.args["cellsize"])
-        if cellsize == None:
-            return jsonify({"Error": "Cellsize should be a float"}), 400
+    # 2. Determine UTM projection
+    left, bottom, right, top = bbox
+    ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(top, left)
+    lr_x, lr_y, _, _ = utm.from_latlon(bottom, right, force_zone_number=utm_number)
 
-    if cellsize < 1.0:
-        return jsonify({"Error": "Cellsize must be  > 1.0"}), 400
-
-    # parse bbox
-    if "bbox" not in request.args:
-        return jsonify({"Error": "bbox is required (left, bottom, right, top)"}), 400
-
-    bbox = request.args["bbox"]
-    bbox = parse_bbox(bbox)
-
-    if any([x == None for x in bbox]):
-        return jsonify({"Error": "bbox contains non float values"}), 400
-
-    if bbox[1] > bbox[3] or bbox[0] > bbox[2]:
-        return jsonify({"Error": "Expecting bbox defined as: left, bottom, right, top"}), 400
-
-    # determine UTM coordinate system of top left corner
-    ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(bbox[3], bbox[0])
-
-    # bottom right
-    lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2], force_zone_number=utm_number)
-
-    # check size
     width_px = int((lr_x - ul_x) / cellsize)
     height_px = int((ul_y - lr_y) / cellsize)
-
     if height_px > 4096 or width_px > 4096:
-        return jsonify({"Error:": "output size cannot exceed 4096 x 4096"}), 400
+        raise HTTPException(status_code=400, detail="Output size cannot exceed 4096x4096 pixels")
 
-    proj4 = "+proj=utm +zone={zone} +{hemisphere} +datum=WGS84 +ellps=WGS84".format(
-        zone=utm_number, hemisphere=("south", "north")[bbox[3] > 0]
-    )
+    proj4 = f"+proj=utm +zone={utm_number} +{'south' if top < 0 else 'north'} +datum=WGS84 +ellps=WGS84"
 
-    # determine resample method
-    if "resample" not in request.args:
+    # 3. Determine resample method
+    if resample is None:
         src_dtype = determine_band_type(src)
-        resample = ("near", "bilinear")["float" in src_dtype.lower()]
-    else:
-        resample = request.args["resample"]
-        if resample not in resample_methods:
-            return jsonify({"Error": "resample method not valid"}), 400
+        resample = "near" if "float" not in (src_dtype or "").lower() else "bilinear"
 
-    # determine output format
-    if "format" not in request.args:
-        _format = "GTiff"
-    else:
-        _format = request.args["format"]
-        if _format not in format_drivers:
-            return jsonify({"Error": "format driver not valid" + _format}), 400
-
-    # build command to warp, crop, and scale dataset
-    cmd = [
-        "gdalwarp",
-        "-t_srs",
-        proj4,
-        "-tr",
-        str(cellsize),
-        str(cellsize),
-        "-te",
-        str(ul_x),
-        str(lr_y),
-        str(lr_x),
-        str(ul_y),
-        "-r",
-        resample,
-        src,
-        dst,
+    # 4. Build and run gdalwarp
+    cmd_warp = [
+        "gdalwarp", "-t_srs", proj4,
+        "-tr", str(cellsize), str(cellsize),
+        "-te", str(ul_x), str(lr_y), str(lr_x), str(ul_y),
+        "-r", resample, src, dst,
     ]
-
-    # delete destination file if it exists
-    if os.path.exists(dst):
-        os.remove(dst)
-
-    # run command, check_output returns standard output
-    res = subprocess.run(cmd, capture_output=True, text=True)
-    output = (res.stdout or "") + (res.stderr or "")
-
-    # check to see if file was created
+    if os.path.exists(dst): os.remove(dst)
+    
+    res_warp = subprocess.run(cmd_warp, capture_output=True, text=True)
+    out_warp = (res_warp.stdout or "") + (res_warp.stderr or "")
     if not os.path.exists(dst):
-        return jsonify(
-            {"Error": "gdalwarp failed unexpectedly", "cmd": ' '.join(cmd), "stdout": output}
-        ), 400
+        raise HTTPException(status_code=400, detail={
+            "Error": "gdalwarp failed unexpectedly", "cmd": ' '.join(cmd_warp), "stdout": out_warp
+        })
 
-    fn_list = []
-    fn_list.append(dst)
-
-    # gdaldem processing
-    dst2 = None
-    gdaldem = None
-    if "gdaldem" in request.args:
-
-        gdaldem = request.args["gdaldem"].lower()
-        if gdaldem not in gdaldem_modes:
-            return jsonify({"Error": "Invalid gdaldem mode: %s" % gdaldem})
-
-        fn_uuid2 = str(uuid4().hex) + ".tif"
-        dst2 = os.path.join(SCRATCH, fn_uuid2)
-
-        cmd2 = ["gdaldem", gdaldem, dst, dst2]
-
-        res = subprocess.run(cmd2, capture_output=True, text=True)
-        output2 = (res.stdout or "") + (res.stderr or "")
-
-        # check to see if file was created
-        if not os.path.exists(dst2):
-            return (
-                jsonify(
-                    {
-                        "Error": "gdaldem failed unexpectedly",
-                        "cmd2": ' '.join(cmd2),
-                        "stdout2": output2,
-                    }
-                ),
-                400,
-            )
-
-        fn_list.append(dst2)
-
-    # build response
-    dst_final = (dst, dst2)[dst2 != None]
-
-    fname = "_".join(parts) + ext_d[_format]
-
-    if _format != "GTiff":
-        dst3, status_code = format_convert(dst, _format)
-        if status_code != 200:
-            return jsonify({"Error": f"failed to convert to output format {dst3}"}), 400
-        else:
-            dst_final = dst3
-            fn_list.append(dst3)
-
-    logging.info('build resposnse')
-    response = send_file(dst_final)
-    logging.info('post build resposnse')
-
-    if _format == "AAIGrid":
-        response.headers["Content-Type"] = "text/plain"
-    elif _format == "PNG":
-        response.headers["Content-Type"] = "image/png"
-    elif _format == "ENVI":
-        response.headers["Content-Type"] = "application/octet-stream"
-    else:
-        response.headers["Content-Type"] = "image/tiff"
-
+    # 5. Handle metadata
     meta_fn = src.replace(".vrt", "metadata.json")
-
     meta = {}
     if os.path.exists(meta_fn):
         with open(meta_fn) as f:
             meta = json.load(f)
-
+    
     meta["wmesque"] = {
-        "bbox": bbox,
-        "cache": dst,
-        "dataset": dataset,
-        "cellsize": cellsize,
-        "ul": {
-            "ul_x": ul_x,
-            "ul_y": ul_y,
-            "utm_number": utm_number,
-            "utm_letter": utm_letter,
-        },
-        "proj4": proj4,
-        "cmd": cmd,
-        "stdout": output,
-        "timestamp": datetime.now().isoformat(),
+        "bbox": bbox, "cache": dst, "dataset": dataset, "cellsize": cellsize,
+        "ul": {"ul_x": ul_x, "ul_y": ul_y, "utm_number": utm_number, "utm_letter": utm_letter},
+        "proj4": proj4, "cmd": cmd_warp, "stdout": out_warp, "timestamp": datetime.now().isoformat(),
     }
+    
+    # 6. Run optional gdaldem processing
+    dst_current = dst
+    if gdaldem:
+        dst2 = os.path.join(SCRATCH, f"{fn_uuid}_dem.tif")
+        fn_list_to_cleanup.append(dst2)
+        cmd_dem = ["gdaldem", gdaldem, dst, dst2]
+        res_dem = subprocess.run(cmd_dem, capture_output=True, text=True)
+        out_dem = (res_dem.stdout or "") + (res_dem.stderr or "")
+        
+        if not os.path.exists(dst2):
+            raise HTTPException(status_code=400, detail={
+                "Error": "gdaldem failed unexpectedly", "cmd2": ' '.join(cmd_dem), "stdout2": out_dem,
+            })
+        
+        meta["wmesque"]["gdaldem"] = {"mode": gdaldem, "cmd": cmd_dem, "stdout": out_dem, "cache": dst2}
+        dst_current = dst2
 
-    if gdaldem != None:
-        meta["wmesque"]["gdaldem"] = {
-            "mode": gdaldem,
-            "cmd": cmd2,
-            "stdout": output2,
-            "cache": dst2,
-        }
+    # 7. Handle final format conversion
+    dst_final = dst_current
+    if _format != "GTiff":
+        try:
+            dst3 = format_convert(dst_current, _format)
+            fn_list_to_cleanup.append(dst3)
+            dst_final = dst3
+        except (RuntimeError, FileNotFoundError) as e:
+            raise HTTPException(status_code=400, detail=f"Failed to convert to output format: {e}")
 
-    response.headers["Content-Disposition"] = "attachment; filename=" + fname
+    return dst_final, meta, fn_list_to_cleanup
 
-    response.headers["WMesque-Meta"] = _b64url(meta)
-    response.headers["Access-Control-Expose-Headers"] = "WMesque-Meta"
 
-    logging.info(str(meta)) ## this isn't printing 
+# --- FastAPI App and Endpoints ---
+app = FastAPI(
+    title="WMSesque Service",
+    description="Provides tiled, reprojected raster datasets.",
+)
 
-    # Define a function to delete the files
-    def delete_files(response):
-        for file in fn_list:
-            try:
-                os.remove(file)
-            except OSError:
-                pass
-        return response
+def parse_bbox(bbox: str = Query(..., description="Bounding box: left,bottom,right,top")) -> Tuple[float, float, float, float]:
+    try:
+        coords = [float(c) for c in bbox.split(",")]
+        if len(coords) != 4:
+            raise ValueError
+        left, bottom, right, top = coords
+        if bottom > top or left > right:
+            raise ValueError("Expecting bbox defined as: left,bottom,right,top")
+        return (left, bottom, right, top)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid bbox format. Use four comma-separated floats: left,bottom,right,top"
+        )
 
-    # Register the delete_files function to be executed after the request is completed
-    after_this_request(delete_files)
+def cleanup_files(files: List[str]):
+    """Synchronous function to remove a list of files."""
+    for file in files:
+        try:
+            os.remove(file)
+            logger.info(f"Cleaned up {file}")
+        except OSError:
+            pass
 
-    # return response
-    return response
+@app.get("/health")
+async def health():
+    return {"status": "OK"}
+
+@app.get("/catalog", response_model=List[str])
+async def catalog():
+    """Returns a list of available map datasets."""
+    return load_maps(geodata_dir)
+
+@app.get("/retrieve/{dataset:path}")
+async def api_dataset_retrieve(
+    background_tasks: BackgroundTasks,
+    dataset: str = Path(..., description="Path to the dataset, e.g., 'fire/severity/2020'"),
+    bbox: Tuple[float, float, float, float] = Depends(parse_bbox),
+    cellsize: float = Query(30.0, gt=0, description="Output cell size in meters."),
+    resample: Optional[str] = Query(None, enum=resample_methods),
+    _format: str = Query("GTiff", enum=format_drivers, alias="format"),
+    gdaldem: Optional[str] = Query(None, enum=gdaldem_modes),
+):
+    """
+    Retrieves a reprojected and clipped raster dataset based on the provided parameters.
+    """
+    try:
+        # Run the entire blocking process in a separate thread
+        dst_final, meta, fn_list_to_cleanup = await asyncio.to_thread(
+            process_raster, dataset, bbox, cellsize, resample, _format, gdaldem
+        )
+    except HTTPException as e:
+        # If the blocking function raised an HTTP exception, re-raise it
+        raise e
+    except Exception as e:
+        # Catch any other unexpected errors from the processing function
+        logger.error(f"Unhandled exception during raster processing: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="An internal error occurred during processing.")
+
+    # Schedule the temp files to be deleted after the response is sent
+    background_tasks.add_task(cleanup_files, fn_list_to_cleanup)
+
+    # Determine filename and content type for the response
+    fname = "_".join(dataset.replace('/', '_').split()) + ext_d[_format]
+    media_type_map = {
+        "GTiff": "image/tiff",
+        "AAIGrid": "text/plain",
+        "PNG": "image/png",
+        "ENVI": "application/octet-stream",
+    }
+    
+    # Log metadata before returning response
+    logger.info(json.dumps(meta, indent=2))
+
+    # Return the file as a response
+    return FileResponse(
+        path=dst_final,
+        media_type=media_type_map.get(_format, "application/octet-stream"),
+        filename=fname,
+        headers={
+            "Content-Disposition": f"attachment; filename={fname}",
+            "WMesque-Meta": _b64url(meta),
+            "Access-Control-Expose-Headers": "WMesque-Meta",
+        },
+    )
+ 

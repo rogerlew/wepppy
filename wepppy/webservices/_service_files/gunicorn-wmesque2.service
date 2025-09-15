@@ -1,5 +1,6 @@
+# /etc/systemd/system/gunicorn-wmesque-fastapi.service
 [Unit]
-Description=Gunicorn for wmesque
+Description=Gunicorn for WMSesque (FastAPI)
 After=network.target
 
 [Service]
@@ -8,9 +9,15 @@ Group=www-data
 WorkingDirectory=/workdir
 Environment="LD_LIBRARY_PATH=/workdir/miniconda3/envs/wepppy310-env/lib"
 Environment="PATH=/workdir/miniconda3/envs/wepppy310-env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ExecStart=/workdir/miniconda3/envs/wepppy310-env/bin/gunicorn --workers 4 --bind 0.0.0.0:8030 wepppy.webservices.wmesque2:app
+
+ExecStart=/workdir/miniconda3/envs/wepppy310-env/bin/gunicorn \
+    --workers 20 \
+    --bind 0.0.0.0:8030 \
+    -k uvicorn.workers.UvicornWorker \
+    wepppy.webservices.wmesque2:app
+
 Restart=always
-RestartSec=5s# /etc/systemd/system/gunicorn-wmesque2.service
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
