@@ -1,0 +1,197 @@
+# <wepppy.wepp.management.ManagementMultipleOfeSynth>
+# This file was synthesized from multiple management files.
+# Number of OFEs: 3
+# Source Stack:
+# high_sev.man
+# low_sev.man
+# shrub.man
+98.4
+3 # number of ofes or channels
+1 # sim_years
+
+#############################
+#   Plant Growth Section    #
+#############################
+3 # ncrop
+Tah_6892
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 0.30000 1.00000 0.00500
+0.50000 1.00000 0.45000 0.99000 17.00000 0.00000 0.42000 0.20000
+2
+0.00000 0.00000 20.00000 0.10000 0.50000 0.30000 0.33000 0.20000 90 40.00000
+-40.00000 2.00000 0.00000 
+
+OFE2_Tah_2823
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 0.30000 1.00000 0.00500
+0.50000 1.00000 0.55000 0.99000 17.00000 0.00000 0.42000 0.30000
+2
+0.00000 0.00000 20.00000 0.10000 0.50000 0.30000 0.33000 0.20000 90 40.00000
+-40.00000 4.00000 0.00000 
+
+OFE3_Shr_6877
+Shrub prairie including sage and Pinyon-Juniper
+for disturbed WEPP with WSU Senescence Modifications
+W. Elliot  01/07
+1 # Landuse - <Cropland>
+WeppWillSet
+1.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 1.20000 0.40000 0.10000
+0.50000 0.40000 0.90000 0.99000 13.00000 0.00000 0.42000 1.00000
+2
+0.00000 0.00000 20.00000 0.10000 0.50000 0.40000 0.33000 0.20000 45 40.00000
+-40.00000 2.00000 0.00000 
+
+#############################
+#     Operation Section     #
+#############################
+0 # nop
+
+#############################
+# Initial Condition Section
+#############################
+3 # nini
+Tah_4436
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.40000 330 1000 0.00000 0.30000
+1
+2
+400.00000 0.06000 0.30000 0.06000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.20000 0.20000  
+
+OFE2_Tah_2307
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.75000 330 1000 0.00000 0.85000
+2
+2
+400.00000 0.04000 0.85000 0.04000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.10000 0.10000  
+
+OFE3_Shr_7020
+Shrub Rangeland including sage and Pinyon Juniper
+for WEPP with WSU senescence modification
+W. Elliot 01/07
+1 # Landuse - <Cropland>
+1.10000 0.40000 1000 1000 0.00000 0.85000
+3
+2
+1000.00000 0.10000 0.85000 0.10000 0.00000
+1
+0.00000 0.00000 0.10000 0.20000 0.00000
+0.20000 0.20000  
+
+#############################
+#  Surface Effects Section  #
+#############################
+0 # nseq
+
+#############################
+#      Contour Section      #
+#############################
+0 # ncnt
+
+#############################
+#      Drainage Section     #
+#############################
+0 # ndrain
+
+#############################
+#       Yearly Section      #
+#############################
+3 # nscen
+Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+1 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE2_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+2 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE3_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+3 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+#############################
+#     Management Section    #
+#############################
+Manage
+description 1
+description 2
+description 3
+3 # number of ofes in the rotation (nofe)
+# Initial Condition Scenario indices used for each OFE
+  1
+  2
+  3
+1 # number of times the rotation is repeated (nrots)
+1 # number of years in a single rotation
+   1 	# plants/year; <Year: 1 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 2>  (nycrop)
+      2 	# yearly index <OFE2_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 3>  (nycrop)
+      3 	# yearly index <OFE3_Year 1>
+
+

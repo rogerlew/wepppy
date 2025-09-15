@@ -389,80 +389,83 @@ class TestManagementMultipleOfeSynth(unittest.TestCase):
         Tests the synthesis of three different management files into a single
         file representing a 3-OFE hillslope.
         """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Arrange: Write the input files and load them
-            man1_path = os.path.join(temp_dir, 'high_sev.man')
-            man2_path = os.path.join(temp_dir, 'low_sev.man')
-            man3_path = os.path.join(temp_dir, 'shrub.man')
-            output_path = os.path.join(temp_dir, 'synthesized.man')
+        temp_dir = 'mofe_dir'
+        if not os.path.exists(temp_dir):
+            os.mkdir(temp_dir)
+        
+        # Arrange: Write the input files and load them
+        man1_path = os.path.join(temp_dir, 'high_sev.man')
+        man2_path = os.path.join(temp_dir, 'low_sev.man')
+        man3_path = os.path.join(temp_dir, 'shrub.man')
+        output_path = os.path.join(temp_dir, 'synthesized.man')
 
-            with open(man1_path, 'w') as f: f.write(HIGH_SEVERITY_FIRE_MAN)
-            with open(man2_path, 'w') as f: f.write(LOW_SEVERITY_FIRE_MAN)
-            with open(man3_path, 'w') as f: f.write(SHRUB_MAN)
+        with open(man1_path, 'w') as f: f.write(HIGH_SEVERITY_FIRE_MAN)
+        with open(man2_path, 'w') as f: f.write(LOW_SEVERITY_FIRE_MAN)
+        with open(man3_path, 'w') as f: f.write(SHRUB_MAN)
 
-            man1 = read_management(man1_path)
-            man2 = read_management(man2_path)
-            man3 = read_management(man3_path)
+        man1 = read_management(man1_path)
+        man2 = read_management(man2_path)
+        man3 = read_management(man3_path)
 
-            stack = [man1, man2, man3]
-            synth = ManagementMultipleOfeSynth(stack=stack)
+        stack = [man1, man2, man3]
+        synth = ManagementMultipleOfeSynth(stack=stack)
 
-            # Act: Run the synthesis process
-            synth.write(output_path)
+        # Act: Run the synthesis process
+        synth.write(output_path)
 
-            # Assert: Verify the contents of the synthesized file
-            self.assertTrue(os.path.exists(output_path))
-            result_man = read_management(output_path)
+        # Assert: Verify the contents of the synthesized file
+        self.assertTrue(os.path.exists(output_path))
+        result_man = read_management(output_path)
 
-            # 1. Check top-level properties
-            self.assertEqual(result_man.nofe, 3)
-            self.assertEqual(result_man.man.nofes, 3)
+        # 1. Check top-level properties
+        self.assertEqual(result_man.nofe, 3)
+        self.assertEqual(result_man.man.nofes, 3)
 
-            # 2. Check counts in each section
-            self.assertEqual(len(result_man.plants), 3)
-            self.assertEqual(len(result_man.ops), 0)
-            self.assertEqual(len(result_man.inis), 3)
-            self.assertEqual(len(result_man.years), 3)
+        # 2. Check counts in each section
+        self.assertEqual(len(result_man.plants), 3)
+        self.assertEqual(len(result_man.ops), 0)
+        self.assertEqual(len(result_man.inis), 3)
+        self.assertEqual(len(result_man.years), 3)
 
-            # 3. Check for unique, prefixed scenario names
-            self.assertEqual(result_man.plants[0].name, 'Tah_6892')
-            self.assertEqual(result_man.plants[1].name, 'OFE2_Tah_2823')
-            self.assertEqual(result_man.plants[2].name, 'OFE3_Shr_6877')
-            
-            self.assertEqual(result_man.inis[0].name, 'Tah_4436')
-            self.assertEqual(result_man.inis[1].name, 'OFE2_Tah_2307')
-            self.assertEqual(result_man.inis[2].name, 'OFE3_Shr_7020')
+        # 3. Check for unique, prefixed scenario names
+        self.assertEqual(result_man.plants[0].name, 'Tah_6892')
+        self.assertEqual(result_man.plants[1].name, 'OFE2_Tah_2823')
+        self.assertEqual(result_man.plants[2].name, 'OFE3_Shr_6877')
+        
+        self.assertEqual(result_man.inis[0].name, 'Tah_4436')
+        self.assertEqual(result_man.inis[1].name, 'OFE2_Tah_2307')
+        self.assertEqual(result_man.inis[2].name, 'OFE3_Shr_7020')
 
-            self.assertEqual(result_man.years[0].name, 'Year 1')
-            self.assertEqual(result_man.years[1].name, 'OFE2_Year 1')
-            self.assertEqual(result_man.years[2].name, 'OFE3_Year 1')
+        self.assertEqual(result_man.years[0].name, 'Year 1')
+        self.assertEqual(result_man.years[1].name, 'OFE2_Year 1')
+        self.assertEqual(result_man.years[2].name, 'OFE3_Year 1')
 
-            # 4. Check critical references to ensure they were updated correctly
-            # OFE 1 (the base case)
-            ofe1_ini_ref = result_man.man.ofeindx[0]
-            self.assertEqual(ofe1_ini_ref.loop_name, 'Tah_4436')
-            self.assertEqual(result_man.inis[0].data.iresd.loop_name, 'Tah_6892')  # plant reference
+        # 4. Check critical references to ensure they were updated correctly
+        # OFE 1 (the base case)
+        ofe1_ini_ref = result_man.man.ofeindx[0]
+        self.assertEqual(ofe1_ini_ref.loop_name, 'Tah_4436')
+        self.assertEqual(result_man.inis[0].data.iresd.loop_name, 'Tah_6892')  # plant reference
 
-            # OFE 2
-            ofe2_ini_ref = result_man.man.ofeindx[1]
-            self.assertEqual(ofe2_ini_ref.loop_name, 'OFE2_Tah_2307')
-            self.assertEqual(result_man.inis[1].data.iresd.loop_name, 'OFE2_Tah_2823')  # plant reference
+        # OFE 2
+        ofe2_ini_ref = result_man.man.ofeindx[1]
+        self.assertEqual(ofe2_ini_ref.loop_name, 'OFE2_Tah_2307')
+        self.assertEqual(result_man.inis[1].data.iresd.loop_name, 'OFE2_Tah_2823')  # plant reference
 
-            # OFE 3
-            ofe3_ini_ref = result_man.man.ofeindx[2]
-            self.assertEqual(ofe3_ini_ref.loop_name, 'OFE3_Shr_7020')
-            self.assertEqual(result_man.inis[2].data.iresd.loop_name, 'OFE3_Shr_6877')  # plant reference
+        # OFE 3
+        ofe3_ini_ref = result_man.man.ofeindx[2]
+        self.assertEqual(ofe3_ini_ref.loop_name, 'OFE3_Shr_7020')
+        self.assertEqual(result_man.inis[2].data.iresd.loop_name, 'OFE3_Shr_6877')  # plant reference
 
-            # 5. Check the final management loops
-            self.assertEqual(len(result_man.man.loops[0].years[0]), 3, "Should be 3 OFEs defined for year 1")
-            
-            # Check yearly reference for OFE 3
-            ofe3_year_man_loop = result_man.man.loops[0].years[0][2]
-            self.assertEqual(ofe3_year_man_loop.manindx[0].loop_name, 'OFE3_Year 1')
+        # 5. Check the final management loops
+        self.assertEqual(len(result_man.man.loops[0].years[0]), 3, "Should be 3 OFEs defined for year 1")
+        
+        # Check yearly reference for OFE 3
+        ofe3_year_man_loop = result_man.man.loops[0].years[0][2]
+        self.assertEqual(ofe3_year_man_loop.manindx[0].loop_name, 'OFE3_Year 1')
 
-            # 6. Check that the yearly scenario for OFE 3 points to the correct plant
-            year_scenario_for_ofe3 = result_man.years[2] # This is 'OFE3_Year 1'
-            self.assertEqual(year_scenario_for_ofe3.data.itype.loop_name, 'OFE3_Shr_6877')
+        # 6. Check that the yearly scenario for OFE 3 points to the correct plant
+        year_scenario_for_ofe3 = result_man.years[2] # This is 'OFE3_Year 1'
+        self.assertEqual(year_scenario_for_ofe3.data.itype.loop_name, 'OFE3_Shr_6877')
 
 
 if __name__ == '__main__':
