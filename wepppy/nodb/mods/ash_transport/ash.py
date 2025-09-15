@@ -38,6 +38,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.all_your_base.dateutils import YearlessDate
 
+from wepppy.all_your_base.geo import raster_stacker
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
@@ -74,26 +75,6 @@ def run_ash_model(kwds):
     logger.log(f'  finished ash model for {prefix}\n')
 
     return out_fn
-
-
-def reproject_map(wd, src, dst):
-
-    if _exists(dst):
-        os.remove(dst)
-
-    map = Ron.getInstance(wd).map
-    xmin, ymin, xmax, ymax = [str(v) for v in map.utm_extent]
-    cellsize = str(map.cellsize)
-
-    cmd = ['gdalwarp', '-t_srs',  'epsg:%s' % map.srid,
-           '-tr', cellsize, cellsize,
-           '-te', xmin, ymin, xmax, ymax,
-           '-r', 'near', src, dst]
-
-    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    p.wait()
-
-    assert _exists(dst), ' '.join(cmd)
 
 
 class AshSpatialMode(IntEnum):
@@ -743,7 +724,7 @@ class Ash(NoDbBase, LogMixin):
 
             if self.ash_load_fn is not None:
                 self.log(f"  Reading ash load map {self.ash_load_fn}\n")
-                reproject_map(wd, self.ash_load_fn, self.ash_load_cropped_fn)
+                raster_stacker(watershed.dem_fn, self.ash_load_fn, self.ash_load_cropped_fn)
                 load_map = ParameterMap(self.ash_load_cropped_fn)
                 load_d = load_map.build_ave_grid(watershed.subwta)
             else:
@@ -752,7 +733,7 @@ class Ash(NoDbBase, LogMixin):
 
             if self.ash_type_map_fn is not None:
                 self.log(f"  Reading ash type map {self.ash_type_map_fn}\n")
-                reproject_map(wd, self.ash_type_map_fn, self.ash_type_map_cropped_fn)
+                raster_stacker(watershed.dem_fn, self.ash_type_map_fn, self.ash_type_map_cropped_fn)
                 bd_map = ParameterMap(self.ash_type_map_cropped_fn)
                 ash_type_d = bd_map.build_ave_grid(watershed.subwta)
             else:
