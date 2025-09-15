@@ -10,7 +10,7 @@
 """
 Provides functionality for reading and manipulating WEPP management files
 
-weppy uses .man files to store managements for each landcover type. The mapping
+wepppy uses .man files to store managements for each landcover type. The mapping
 of landcover to particular managements is determined by the map.json file in
 the wepppy/wepp/management/data folder.
 
@@ -19,6 +19,7 @@ used with the other versions of WEPP. The .dbs are difficult to management from
 one installation to another, and having multiple dbs with the same condition
 entries can cause ambiguity. The rotations break if the condition cannot be found
 in the db.
+
 """
 
 from glob import glob
@@ -1625,8 +1626,13 @@ class YearLoop(Loop):
         elif landuse == 4:
             self.data = YearLoopRoads(lines, root)
 
+# In your managements.py file, find the ManagementLoopManLoop class...
+
+# ... (import Loops if it's not available)
+from .managements import Loops # Or adjust the import path as needed
 
 class ManagementLoopManLoop(object):
+    # --- CHANGE 1: Correct the __init__ method ---
     def __init__(self, lines, parent, root, year=None, ofe=None):
         self.root = root
         self.parent = parent
@@ -1634,7 +1640,7 @@ class ManagementLoopManLoop(object):
         self._year = year
         self._ofe = ofe
 
-        self.manindx = []
+        self.manindx = Loops()
         for j in range(self.nycrop):
             i = int(lines.pop(0))
             scn = _scenario_reference_factory(i, SectionType.Year, root, self)
@@ -1642,7 +1648,7 @@ class ManagementLoopManLoop(object):
 
     def setroot(self, root):
         self.root = root
-        self.manindx.root = root
+        self.manindx.setroot(root)
 
     def __str__(self):
         s = ["   {0.nycrop} \t# plants/year; <Year: {0._year} - OFE: {0._ofe}>  (nycrop)".format(self)]
