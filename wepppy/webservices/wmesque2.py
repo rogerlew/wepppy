@@ -97,7 +97,9 @@ gdaldem_modes = (
 gdaldem_modes = tuple(gdaldem_modes)
 
 _this_dir = os.path.dirname(__file__)
-_catalog = os.path.join(_this_dir, "catalog")
+_catalog = os.environ.get(
+    'CATALOG_PATH', 
+    os.path.join(_this_dir, "catalog"))
 
 
 SCRATCH = "/media/ramdisk"
