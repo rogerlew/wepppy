@@ -29,6 +29,7 @@ from datetime import datetime
 from typing import List, Tuple, Optional, Any
 import asyncio
 
+
 import utm
 from fastapi import (
     FastAPI,
@@ -242,9 +243,11 @@ def process_raster(
 
 
 # --- FastAPI App and Endpoints ---
+ROOT_PATH = os.environ.get("ROOT_PATH", "").rstrip("/")
 app = FastAPI(
     title="WMSesque Service",
     description="Provides tiled, reprojected raster datasets.",
+    root_path=ROOT_PATH,
 )
 
 def parse_bbox(bbox: str = Query(..., description="Bounding box: left,bottom,right,top")) -> Tuple[float, float, float, float]:
