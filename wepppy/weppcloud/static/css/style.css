@@ -150,3 +150,7 @@ p.title {
     visibility: visible;
     opacity: 1;
 }
+
+.leaflet-container {
+    cursor: pointer !important;
+}
