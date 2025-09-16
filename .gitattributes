@@ -3,7 +3,6 @@
 *.mpk filter=lfs diff=lfs merge=lfs -text
 wepppy/_scripts/Test_Watershed_15/wepp/output/chnwb.txt filter=lfs diff=lfs merge=lfs -text
 *.pdf filter=lfs diff=lfs merge=lfs -text
-<<<<<<< HEAD
 wepppy/weppcloud/static/mods/lt/LTWS_RoadAnalysis/MapPackages/*.mpk filter=lfs diff=lfs merge=lfs -text
 wepppy/weppcloud/templates/locations/caldor/*.html filter=lfs diff=lfs merge=lfs -text
 wepppy/_scripts/Test_Watershed_15/wepp/output/*.txt filter=lfs diff=lfs merge=lfs -text
@@ -11,5 +10,3 @@ wepppy/soils/ssurgo/data/statsgo/*.db filter=lfs diff=lfs merge=lfs -text
 wepppy/soils/ssurgo/data/surgo/*.db filter=lfs diff=lfs merge=lfs -text
 wepppy/soils/ssurgo/data/statsgo/statsgo_tabular.db filter=lfs diff=lfs merge=lfs -text
 wepppy/soils/ssurgo/data/surgo/surgo_tabular.db filter=lfs diff=lfs merge=lfs -text
-=======
->>>>>>> d156e7995da682472cafe5bee673db1ba540bebe
