@@ -129,6 +129,94 @@ def _validate_filter_pattern(pattern):
     safe_pattern = r'^[a-zA-Z0-9_*?[\]\-\.]+$'
     return bool(re.match(safe_pattern, pattern))
 
+
+def _path_not_found_response(runid, subpath, wd, request, config):
+    """
+    Generates an HTML response for a path that was not found,
+    mimicking the style of the standard directory browser.
+    """
+    args = request.args
+    
+    # Preserve the diff parameter if it exists
+    diff_runid = args.get('diff', '')
+    if '?' in diff_runid:
+        diff_runid = diff_runid.split('?')[0]
+    diff_arg = f'?diff={diff_runid}' if diff_runid else ''
+
+    # Build breadcrumbs up to the point of failure
+    base_browse_url = f'/weppcloud/runs/{runid}/{config}/browse/'
+    breadcrumbs = [f'<a href="{base_browse_url}{diff_arg}"><b>{runid}</b></a>']
+    
+    # Clean the subpath for display and split into components
+    # This handles cases where a search pattern like "wepp/runs/p100.*" was used
+    path_to_check = subpath.split('*')[0].strip('/')
+    parts = [p for p in path_to_check.split('/') if p]
+
+    # Create links for the parts of the path that do exist
+    current_rel_path = ''
+    for part in parts:
+        # Check if the next segment of the path exists
+        next_path_segment = os.path.join(wd, current_rel_path, part)
+        if os.path.isdir(next_path_segment):
+            current_rel_path = os.path.join(current_rel_path, part)
+            part_url = f'{base_browse_url}{current_rel_path}/{diff_arg}'
+            breadcrumbs.append(f'<a href="{part_url}"><b>{part}</b></a>')
+        else:
+            # This part and the rest of the path do not exist
+            breadcrumbs.append(f'<b>{part}</b>')
+            # Once we find a non-existent part, we stop creating links
+            # and just show the rest of the requested path as bold text.
+            remaining_index = parts.index(part) + 1
+            if remaining_index < len(parts):
+                breadcrumbs.extend([f'<b>{p}</b>' for p in parts[remaining_index:]])
+            break
+
+    breadcrumbs.append('<input type="text" id="pathInput" placeholder="../output/p1.*" size="50">')
+    breadcrumbs_html = ' ❯ '.join(breadcrumbs)
+    
+    # Create the main content tree with the error message
+    error_message = f"""
+<div style="padding: 1em 0 0 2em;">
+    <h3 style="color: #d9534f;">404 - Directory Not Found</h3>
+    <p>The path '<b style="font-family: monospace;">{subpath}</b>' could not be found on the server.</p>
+</div>"""
+    
+    project_href = f'<a href="/weppcloud/runs/{runid}/{config}">☁️</a> '
+    tree = f'<pre>{project_href}{breadcrumbs_html}{error_message}</pre>'
+
+    # Construct the full HTML page, reusing the template from the main browse response
+    html_content = f'''\
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
+<title>{runid} - Not Found</title>
+<script>
+// This script is needed for the diff and path input functionality
+function redirectToDiff() {{
+    var runId = document.getElementById('runIdInput').value;
+    window.location.href = '?diff=' + encodeURIComponent(runId);
+}}
+const runid = "{runid}";
+const config = "{config}";
+</script>
+<style>
+  input[type='text'] {{ font-family: monospace; }}
+  a {{ text-decoration: none; }}
+</style>
+</head>
+<body>
+    <input type="text" value="{diff_runid}" id="runIdInput" placeholder="runid">
+    <button onclick="redirectToDiff()">Compare project</button>
+    {tree}
+    </body>
+</html>'''
+
+    return Response(html_content, status=404)
+
+    
 def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_default=''):
     """
     Helper function to handle common browse tree logic.
@@ -162,7 +250,7 @@ def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_defa
             abort(403)  # Prevent directory traversal
             
         if not os.path.isdir(dir_path):
-            abort(404, f"Directory not found: {dir_path}")
+            return _path_not_found_response(runid, subpath, wd, request, config)
             
         if not _validate_filter_pattern(filter_pattern):
             abort(400, f"Invalid filter pattern: {filter_pattern}")
@@ -399,6 +487,51 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
     return ''.join(s), total_items
 
 
+on_load_script = """<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const pathInput = document.getElementById('pathInput');
+    const rows = document.querySelectorAll('span.odd-row, span.even-row');
+    const prompt = document.getElementById('filter-prompt');
+
+    /**
+     * Handles navigation when the Enter key is pressed in the path input.
+     */
+    function handleNavigation(event) {
+        if (event.key !== 'Enter') {
+            return;
+        }
+
+        event.preventDefault(); // Prevent any default form submission
+        const path = pathInput.value.trim();
+        if (!path) {
+            return;
+        }
+
+        const currentUrl = new URL(window.location.href);
+        const searchParams = currentUrl.search; // Retain existing GET parameters
+        let newUrl;
+
+        if (path.startsWith('/')) {
+            // Absolute path from the project root
+            const baseUrl = `/weppcloud/runs/${runid}/${config}/browse`;
+            newUrl = baseUrl + path;
+        } else {
+            // Relative path (e.g., "output" or "../../dem")
+            // The URL constructor correctly resolves relative paths like '..'
+            const resolvedUrl = new URL(path, currentUrl);
+            newUrl = resolvedUrl.pathname;
+        }
+
+        // Redirect to the new URL, keeping the query string
+        window.location.href = newUrl + searchParams;
+    }
+    
+    // Attach event listeners
+    pathInput.addEventListener('keydown', handleNavigation);
+});
+</script>
+"""
+
 def browse_response(path, runid, wd, request, config, filter_pattern=''):
     args = request.args
     headers = request.headers
@@ -436,6 +569,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
                 breadcrumbs.append(f'<a href="{_url}{diff_arg}"><b>{part}</b></a>')
             breadcrumbs.append(f'<b>{parts[-1]}</b>')
 
+        breadcrumbs.append(f'<input type="text" id="pathInput" value="{filter_pattern}" placeholder="../output/p1.*" size="50">')
         breadcrumbs = ' ❯ '.join(breadcrumbs)
 
         # Get page and filter from query parameters
@@ -502,8 +636,8 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
         
         # Combine UI elements
         project_href = f'<a href="/weppcloud/runs/{runid}/{config}">☁️</a> '
-        tree = f'<pre>{showing_text}{pagination_html}\n{project_href}{breadcrumbs}\n{listing_html}\n{pagination_html}</pre>'
-        
+        tree = f'<pre id="file-tree">{showing_text}{pagination_html}\n{project_href}{breadcrumbs}\n{listing_html}\n{pagination_html}</pre>'
+
         return Response(f'''\
 <!DOCTYPE html>
 <html lang="en">
@@ -517,11 +651,14 @@ function redirectToDiff() {{
     var runId = document.getElementById('runIdInput').value;
     window.location.href = '?diff=' + encodeURIComponent(runId);
 }}
+const runid = "{runid}";
+const config = "{config}";
 </script>
 <style>
+  input[type='text'] {{ font-family: monospace; }}
   a {{ text-decoration: none; }}
-  span.even-row {{ background-color: #f6f6f6; }}
-  span.odd-row {{ background-color: #ffffff; }}
+  span.even-row {{ background-color: #f6f6f6;  display: block; }}
+  span.odd-row {{ background-color: #ffffff;  display: block; }}
   span.even-row:hover, 
   span.odd-row:hover {{
     background-color: #d0ebff;
@@ -533,6 +670,7 @@ function redirectToDiff() {{
     <input type="text" value="{diff_runid}" id="runIdInput" placeholder="runid">
     <button onclick="redirectToDiff()">Compare project</button>
     {tree}
+    {on_load_script}
 </body>
 </html>''')
 
