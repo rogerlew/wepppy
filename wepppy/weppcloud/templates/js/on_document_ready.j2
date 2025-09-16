@@ -122,51 +122,116 @@ function onReady() {
         return String(f.properties[idType]) === String(val);
     }
 
+    const ID_TYPE = {
+        TOPAZ: 'TopazID',
+        WEPP: 'WeppID'
+    };
+
+    const FEATURE_TYPE = {
+        SUBCATCHMENT: 'subcatchment',
+        CHANNEL: 'channel'
+    };
+
+    /**
+    * Finds a feature by a given ID, flashes it on the map, and
+    * executes a specific query based on the feature's type.
+    *
+    * @param {string} idType - The type of ID to search for (e.g., 'TopazID' or 'WeppID').
+    * It's best to use the ID_TYPE constants.
+    */
     function findAndFlash(idType) {
-        const val = getInputValue();
+        const valueToFind = getInputValue(); // Assuming getInputValue() is defined elsewhere
 
-        const collectMatches = (ctrl) =>
-            (ctrl?.glLayer?._shapes?.features ?? []).filter(f => featureMatches(f, idType, val));
+        /**
+        * Searches for features across a prioritized list of data layers (controllers).
+        * @returns An object { hits: Array, type: string|null } containing the
+        * found features and their corresponding type.
+        */
+        const searchForFeature = () => {
+            // Define data sources and their types in order of search priority.
+            const searchLayers = [
+                { ctrl: sub_ctrl, type: FEATURE_TYPE.SUBCATCHMENT },
+                { ctrl: channel_ctrl, type: FEATURE_TYPE.CHANNEL }
+            ];
 
-        let hits = collectMatches(sub_ctrl);
+            for (const layer of searchLayers) {
+                // Using optional chaining (?.) for safety against null/undefined properties
+                const hits = (layer.ctrl?.glLayer?._shapes?.features ?? [])
+                    .filter(f => featureMatches(f, idType, valueToFind));
+
+                if (hits.length > 0) {
+                    return { hits, type: layer.type };
+                }
+            }
+
+            return { hits: [], type: null }; // Return a consistent object if nothing is found
+        };
+
+        const { hits, type } = searchForFeature();
+
         if (hits.length === 0) {
-            hits = collectMatches(channel_ctrl);
-        }
-
-        if (hits.length === 0) {
-            console.warn(`No feature with ${idType} = ${val}`);
+            console.warn(`No feature found with ${idType} = ${valueToFind}`);
             return;
         }
 
+        // 1. Visual feedback: Flash the feature(s) on the map.
         flashFeatures(hits, { duration: 1000, fit: false });
+
+        // 2. Data query: Execute the query for the primary feature found.
+        const mapInstance = Map.getInstance();
+        if (!mapInstance) {
+            console.error("Map instance is not available to perform query.");
+            return;
+        }
+
+        const primaryFeature = hits[0];
+
+        // Determine the TopazID. If searching by WeppID, get it from the feature's properties.
+        const topazID = (idType === ID_TYPE.TOPAZ)
+            ? valueToFind
+            : primaryFeature?.properties?.TopazID;
+
+        if (!topazID) {
+            console.error('Could not determine a valid TopazID for the query.', primaryFeature);
+            return;
+        }
+
+        // Select the correct query function based on the feature type and execute it.
+        // The .call() method ensures 'this' is correctly bound to mapInstance.
+        if (type === FEATURE_TYPE.SUBCATCHMENT) {
+            mapInstance.subQuery.call(mapInstance, topazID);
+        } else if (type === FEATURE_TYPE.CHANNEL) {
+            mapInstance.chnQuery.call(mapInstance, topazID);
+        }
     }
 
+    // Update event listeners to use the new constants for consistency.
     document.getElementById('btn_find_topaz_id')
-        .addEventListener('click', () => findAndFlash('TopazID'));
+        .addEventListener('click', () => findAndFlash(ID_TYPE.TOPAZ));
 
     document.getElementById('btn_find_wepp_id')
-        .addEventListener('click', () => findAndFlash('WeppID'));
+        .addEventListener('click', () => findAndFlash(ID_TYPE.WEPP));
 
     function flashFeatures(features, { duration = 1000, fit = false } = {}) {
-    // Ensure pane exists and sits above vector layers
-    if (!map.getPane('markerCustomPane')) {
-        map.createPane('markerCustomPane');
-        map.getPane('markerCustomPane').style.zIndex = 650;
-    }
-
-    const layer = L.geoJSON(
-        { type: "FeatureCollection", features },
-        {
-        style: {
-            color: "#ffffff",
-            weight: 3,
-            opacity: 1,
-            fillColor: "#ffffff",
-            fillOpacity: 1.0
-        },
-        pane: "markerCustomPane",
-        interactive: false
+        // Ensure pane exists and sits above vector layers
+        if (!map.getPane('markerCustomPane')) {
+            map.createPane('markerCustomPane');
+            map.getPane('markerCustomPane').style.zIndex = 650;
         }
+
+        const layer = L.geoJSON(
+            { type: "FeatureCollection", features },
+            {
+            style: {
+                color: "#ffffff",
+                weight: 3,
+                opacity: 1,
+                fillColor: "#ffffff",
+                fillOpacity: 1.0
+            },
+            pane: "markerCustomPane",
+            interactive: false
+            }
     ).addTo(map);
 
     if (fit) map.fitBounds(layer.getBounds());
