@@ -117,6 +117,67 @@ MAX_FILE_LIMIT = 100
 browse_bp = Blueprint('browse', __name__)
 
 
+
+on_load_script = """<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const pathInput = document.getElementById('pathInput');
+    const rows = document.querySelectorAll('span.odd-row, span.even-row');
+    const prompt = document.getElementById('filter-prompt');
+
+    /**
+     * Handles navigation when the Enter key is pressed in the path input.
+     */
+    function handleNavigation(event) {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+
+        const path = pathInput.value.trim();
+        if (!path) return;
+
+        const currentUrl = new URL(window.location.href);
+        const searchParams = currentUrl.search;
+
+        let newUrl;
+
+        if (path.startsWith('/')) {
+            // absolute from your browse root
+            const baseUrl = `/weppcloud/runs/${runid}/${config}/browse`;
+            newUrl = baseUrl + path; // e.g., "/.../browse/output"
+        } else {
+            // ensure the base ends with "/" so it's treated as a directory
+            const baseHref =
+                currentUrl.origin +
+                currentUrl.pathname +
+                (currentUrl.pathname.endsWith('/') ? '' : '/');
+
+            const resolvedUrl = new URL(path, baseHref);
+            newUrl = resolvedUrl.pathname;
+        }
+
+        window.location.href = newUrl + searchParams;
+    }
+    
+    // Attach event listeners
+    pathInput.addEventListener('keydown', handleNavigation);
+
+    const el = document.getElementById('pathInput');
+    if (!el) return;
+
+    // in case something made it inert
+    el.disabled = false;
+    el.readOnly = false;
+
+    // delay one frame so the URL bar/layout settles and other scripts attach
+    requestAnimationFrame(() => {
+        el.focus({ preventScroll: true });
+        // put caret at end
+        const pos = el.value.length;
+        try { el.setSelectionRange(pos, pos); } catch (_) {}
+    });
+});
+</script>
+"""
+
 def _validate_filter_pattern(pattern):
     """
     Validate filter_pattern to ensure it’s a safe wildcard pattern.
@@ -211,7 +272,8 @@ const config = "{config}";
     <input type="text" value="{diff_runid}" id="runIdInput" placeholder="runid">
     <button onclick="redirectToDiff()">Compare project</button>
     {tree}
-    </body>
+    {on_load_script}
+</body>
 </html>'''
 
     return Response(html_content, status=404)
@@ -486,51 +548,6 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
     
     return ''.join(s), total_items
 
-
-on_load_script = """<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const pathInput = document.getElementById('pathInput');
-    const rows = document.querySelectorAll('span.odd-row, span.even-row');
-    const prompt = document.getElementById('filter-prompt');
-
-    /**
-     * Handles navigation when the Enter key is pressed in the path input.
-     */
-    function handleNavigation(event) {
-        if (event.key !== 'Enter') {
-            return;
-        }
-
-        event.preventDefault(); // Prevent any default form submission
-        const path = pathInput.value.trim();
-        if (!path) {
-            return;
-        }
-
-        const currentUrl = new URL(window.location.href);
-        const searchParams = currentUrl.search; // Retain existing GET parameters
-        let newUrl;
-
-        if (path.startsWith('/')) {
-            // Absolute path from the project root
-            const baseUrl = `/weppcloud/runs/${runid}/${config}/browse`;
-            newUrl = baseUrl + path;
-        } else {
-            // Relative path (e.g., "output" or "../../dem")
-            // The URL constructor correctly resolves relative paths like '..'
-            const resolvedUrl = new URL(path, currentUrl);
-            newUrl = resolvedUrl.pathname;
-        }
-
-        // Redirect to the new URL, keeping the query string
-        window.location.href = newUrl + searchParams;
-    }
-    
-    // Attach event listeners
-    pathInput.addEventListener('keydown', handleNavigation);
-});
-</script>
-"""
 
 def browse_response(path, runid, wd, request, config, filter_pattern=''):
     args = request.args
