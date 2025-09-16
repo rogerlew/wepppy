@@ -62,7 +62,11 @@ class AshModelAlex(object):
                  beta0=14.33,
                  beta1=0.22,
                  beta2=5.85,
-                 beta3=-0.36):
+                 beta3=-0.36,
+                 transport_mode='dynamic',
+                 initranscap=0.8,
+                 depletcoeff=0.009
+                 ):
 
         assert fin_bulk_den >= ini_bulk_den, (fin_bulk_den, ini_bulk_den)
 
@@ -82,6 +86,9 @@ class AshModelAlex(object):
         self.beta1 = beta1
         self.beta2 = beta2
         self.beta3 = beta3
+        self.transport_mode = transport_mode
+        self.initranscap = initranscap
+        self.depletcoeff = depletcoeff
 
     @property
     def ini_material_available_mm(self):
@@ -232,8 +239,10 @@ class AshModelAlex(object):
         beta1 = self.beta1
         beta2 = self.beta2
         beta3 = self.beta3
-
-
+        transport_mode = self.transport_mode
+        A = self.initranscap
+        B = self.depletcoeff
+        
         # number of days in the file
         s_len = hill_wat.days_in_sim
 
@@ -324,11 +333,20 @@ class AshModelAlex(object):
             if q[i] > _ash_saturated_storage_mm:
                 ash_runoff_mm[i] = np.clip(q[i] - _ash_saturated_storage_mm, 0.0, None)
 
+                # Dynamic transport tau, organic matter, and remaining transportable ash
+                # Static transport based on exponential decay
+
                 if ash_runoff_mm[i] > 0.0:
-                    tau[i] = 9810 * slope * (ash_runoff_mm[i] / 1000.0)
-                    k_r[i] = math.exp(beta0) * tau[i] ** beta1 * org_mat ** beta2 * M_0[i-1]
-                    transport_tonspha[i] = \
-                        transportable_ash_tonspha[i-1] * (1.0 - math.exp(-k_r[i] * ash_runoff_mm[i]))
+                    if transport_mode == 'dynamic':
+                        tau[i] = 9810 * slope * (ash_runoff_mm[i] / 1000.0)
+                        k_r[i] = math.exp(beta0) * tau[i] ** beta1 * org_mat ** beta2 * M_0[i-1]
+                        transport_tonspha[i] = \
+                            transportable_ash_tonspha[i-1] * (1.0 - math.exp(-k_r[i] * ash_runoff_mm[i]))
+                    elif transport_mode == 'static':
+                        transport_tonspha[i] = ( A / B ) * (
+                            math.exp(-B * cum_ash_runoff_mm[:i] - ash_runoff_mm[i]) -
+                            math.exp(-B * cum_ash_runoff_mm[i])
+                        )
 
                     water_transport_tonspha[i] = np.clip(transport_tonspha[i],
                                                          0, remaining_ash_tonspha[i-1])
@@ -470,7 +488,10 @@ class WhiteAshModel(AshModelAlex):
             beta0=14.33,
             beta1=0.22,
             beta2=5.85,
-            beta3=-0.36)
+            beta3=-0.36,
+            transport_mode='dynamic',
+            initranscap=0.8,    # Initial Transport Capacity (t ha^-1 mm^-1)
+            depletcoeff=0.009)  # Depletion coefficient (mm^-1)
 
     def to_dict(self):
         return {
@@ -481,7 +502,9 @@ class WhiteAshModel(AshModelAlex):
             'par_den': self.par_den,
             'decomp_fac': self.decomp_fac,
             'org_mat': self.org_mat,
-            'roughness_limit': self.roughness_limit
+            'roughness_limit': self.roughness_limit,
+            'initranscap': self.initranscap,
+            'depletcoeff': self.depletcoeff
         }
 
 
@@ -501,7 +524,10 @@ class BlackAshModel(AshModelAlex):
             beta0=14.33,
             beta1=0.22,
             beta2=5.85,
-            beta3=-0.36)
+            beta3=-0.36,
+            transport_mode='dynamic',
+            initranscap=0.8,    # Initial Transport Capacity (t ha^-1 mm^-1)
+            depletcoeff=0.009)  # Depletion coefficient (mm^-1)
         
     def to_dict(self):
         return {
@@ -512,5 +538,7 @@ class BlackAshModel(AshModelAlex):
             'par_den': self.par_den,
             'decomp_fac': self.decomp_fac,
             'org_mat': self.org_mat,
-            'roughness_limit': self.roughness_limit
+            'roughness_limit': self.roughness_limit,
+            'initranscap': self.initranscap,
+            'depletcoeff': self.depletcoeff
         }

@@ -940,60 +940,66 @@ def run_omni_contrasts(runid, config):
 
     return jsonify({'Success': True, 'job_id': job.id})
 
-
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_ash', methods=['POST'])
 def api_run_ash(runid, config):
-    # get working dir of original directory
-    wd = get_wd(runid)
-
-    #return jsonify(request.form)
-    '''
-    {
-      "ash_depth_mode": "1", 
-      "field_black_bulkdensity": "0.31", 
-      "field_white_bulkdensity": "0.14", 
-      "fire_date": "8/13", 
-      "ini_black_depth": "15", 
-      "ini_black_load": "1.55", 
-      "ini_white_depth": "15", 
-      "ini_white_load": "0.7000000000000001"
-    }
-    '''
-
-    fire_date = request.form.get('fire_date', None)
-    ash_depth_mode = request.form.get('ash_depth_mode', None)
-    ini_black_ash_depth_mm = request.form.get('ini_black_depth', None)
-    ini_white_ash_depth_mm = request.form.get('ini_white_depth', None)
-    ini_black_ash_load_kgm2 = request.form.get('ini_black_load', None)
-    ini_white_ash_load_kgm2 = request.form.get('ini_white_load', None)
-    field_black_ash_bulkdensity = request.form.get('field_black_bulkdensity', None)
-    field_white_ash_bulkdensity = request.form.get('field_white_bulkdensity', None)
-
     try:
-        assert isint(ash_depth_mode), ash_depth_mode
+        wd = get_wd(runid)
+        form = request.form
 
-        if int(ash_depth_mode) == 1:
-            assert isfloat(ini_black_ash_depth_mm), ini_black_ash_depth_mm
-            assert isfloat(ini_white_ash_depth_mm), ini_white_ash_depth_mm
-        else:
-            assert isfloat(ini_black_ash_load_kgm2), ini_black_ash_load_kgm2
-            assert isfloat(ini_white_ash_load_kgm2), ini_white_ash_load_kgm2
-            assert isfloat(field_black_ash_bulkdensity), field_black_ash_bulkdensity
-            assert isfloat(field_white_ash_bulkdensity), field_white_ash_bulkdensity
+        # ash_depth_mode
+        mode_raw = form.get('ash_depth_mode')
+        if mode_raw is None:
+            return exception_factory("ash_depth_mode is required (1=depths, 2=loads)", runid=runid)
+        try:
+            ash_depth_mode = int(mode_raw)
+        except ValueError:
+            return exception_factory("ash_depth_mode must be an integer (1 or 2)", runid=runid)
+        if ash_depth_mode not in (0, 1, 2):
+            return exception_factory("ash_depth_mode must be 0, 1, or 2", runid=runid)
 
-            ini_black_ash_depth_mm = float(ini_black_ash_load_kgm2) / float(field_black_ash_bulkdensity)
-            ini_white_ash_depth_mm = float(ini_white_ash_load_kgm2) / float(field_white_ash_bulkdensity)
+        fire_date = form.get('fire_date')
 
+        # Gather numeric fields
+        def _req_float(name):
+            v = form.get(name)
+            if v is None:
+                raise KeyError(name)
+            try:
+                return float(v)
+            except ValueError:
+                raise ValueError(name)
+
+        if ash_depth_mode == 1:
+            try:
+                ini_black_ash_depth_mm = _req_float('ini_black_depth')
+                ini_white_ash_depth_mm = _req_float('ini_white_depth')
+            except KeyError as k:
+                return exception_factory(f"Missing field: {k.args[0]} when ash_depth_mode=1", runid=runid)
+            except ValueError as k:
+                return exception_factory(f"Field must be numeric: {k.args[0]}", runid=runid)
+        elif ash_depth_mode == 0:
+            # mode 2: convert loads to depths using bulk densities
+            required = ('ini_black_load', 'ini_white_load', 'field_black_bulkdensity', 'field_white_bulkdensity')
+            missing = [n for n in required if form.get(n) is None]
+            if missing:
+                return exception_factory(f"Missing fields for ash_depth_mode=2: {', '.join(missing)}", runid=runid)
+            try:
+                ini_black_ash_depth_mm = float(form['ini_black_load']) / float(form['field_black_bulkdensity'])
+                ini_white_ash_depth_mm = float(form['ini_white_load']) / float(form['field_white_bulkdensity'])
+            except ValueError:
+                return exception_factory('All mode 2 fields must be numeric"', runid=runid)
+            except ZeroDivisionError:
+                return exception_factory('Bulk density cannot be zero"', runid=runid)
+        else:  # ash_depth_mode == 2
+            ini_black_ash_depth_mm = 3.0  # dummy values, will be replaced by ash load map
+            ini_white_ash_depth_mm = 3.0  # dummy values, will be replaced by ash load map
+
+        # Parse and persist other inputs
         ash = Ash.getInstance(wd)
+        ash.parse_inputs(dict(form))
 
-        if request.method == 'POST':
-            ash.parse_inputs(dict(request.form))
-            ash = Ash.getInstance(wd)
-
-        if int(ash_depth_mode) == 2:
-          
+        if ash_depth_mode == 2:
             ash.lock()
-
             try:
                 ash._spatial_mode = AshSpatialMode.Gridded
                 ash._ash_load_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_load')
@@ -1002,24 +1008,30 @@ def api_run_ash(runid, config):
             except Exception:
                 ash.unlock('-f')
                 raise
-
             if ash.ash_load_fn is None:
-                raise Exception('Expecting ashload map')
+                return exception_factory('Expecting ashload map"', runid=runid)
+        
+        # remember mode for the view
+        ash.ash_depth_mode = ash_depth_mode
 
-        ash.ash_depth_mode = 1
-
+        # RQ job
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_watar)
+        rq_timeout = globals().get('TIMEOUT', 600)
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_ash_rq, (runid, fire_date, float(ini_white_ash_depth_mm), float(ini_black_ash_depth_mm)), timeout=TIMEOUT)
+            job = q.enqueue_call(
+                run_ash_rq,
+                (runid, fire_date, float(ini_white_ash_depth_mm), float(ini_black_ash_depth_mm)),
+                timeout=rq_timeout
+            )
             prep.set_rq_job_id('run_ash_rq', job.id)
+
+        return jsonify(Success=True, job_id=job.id), 200
 
     except Exception as e:
         return exception_factory('Error Running Ash Transport', runid=runid)
-        
-    return jsonify({'Success': True, 'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_debris_flow', methods=['POST'])

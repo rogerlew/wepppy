@@ -23,14 +23,30 @@
     const selectedModel = modelSelector.value;
     const params = modelParams[selectedModel];
 
-    // 1. Update visibility based on the selected model
+    // 1. Update visibility based on the selected model (ANU vs Alex)
     const anuOnlyParams = document.querySelectorAll('.anu-only-param');
     const alexOnlyParams = document.querySelectorAll('.alex-only-param');
 
     if (selectedModel === 'alex') {
       anuOnlyParams.forEach(el => el.style.display = 'none');
       alexOnlyParams.forEach(el => el.style.display = 'flex');
-    } else {
+
+      // Handle transport mode visibility within Alex model
+      const transportModeSelector = document.getElementById('ash_transport_mode_select');
+      const selectedTransportMode = transportModeSelector.value;
+
+      const dynamicParams = document.querySelectorAll('.alex-dynamic-param');
+      const staticParams = document.querySelectorAll('.alex-static-param');
+
+      if (selectedTransportMode === 'static') {
+        dynamicParams.forEach(el => el.style.display = 'none');
+        staticParams.forEach(el => el.style.display = 'flex');
+      } else { // 'dynamic'
+        dynamicParams.forEach(el => el.style.display = 'flex');
+        staticParams.forEach(el => el.style.display = 'none');
+      }
+
+    } else { // 'multi' (ANU model)
       anuOnlyParams.forEach(el => el.style.display = 'flex');
       alexOnlyParams.forEach(el => el.style.display = 'none');
     }
@@ -209,6 +225,24 @@
                 </select>
             </div>
         </div>
+        
+        <div class="form-group row alex-only-param">
+            <div class="col-sm-4">
+                <label for="ash_transport_mode_select">Transport Mode:</label>
+                 <small class="form-text text-muted">
+                    <b>Dynamic formulation with K(x):</b> The transport coefficient K is expressed as a function of physical predictors such as hydraulic shear stress (τ), organic matter content (OM), and initial ash availability (Mo). Consequently, both the initial transport capacity and the rate of depletion vary across successive runoff events. This formulation explicitly accounts for the evolving interplay between erosive forcing and material properties, allowing the exponential transport function to adapt dynamically to event-specific conditions.
+                </small>
+                <small class="form-text text-muted">
+                    <b>Static fixed exponential formulation with A, B:</b> Ash transport can be described using a single exponential trajectory, where the parameters A (initial transport capacity) and B (depletion coefficient) remain constant throughout the sequence of events. In this representation, cumulative runoff R is tracked continuously, and depletion follows a monotonic decay curve independent of individual event characteristics. Physically, this reflects a system where ash availability and depletion are governed by a uniform decay law, rather than by event-scale hydraulic or material variability.
+                </small>
+            </div>
+            <div class="col-sm-6">
+                <select id="ash_transport_mode_select" name="transport_mode" class="form-control" onchange="updateAshModelForm()">
+                    <option value="dynamic" {% if ash.transport_mode == 'dynamic' %}selected{% endif %}>Dynamic</option>
+                    <option value="static" {% if ash.transport_mode == 'static' %}selected{% endif %}>Static</option>
+                </select>
+            </div>
+        </div>
 
         <div class="form-group row">
             <div class="col-sm-4">
@@ -290,8 +324,8 @@
                     value="{{ black_pars.decomp_fac }}" aria-label="Black Ash Decomposition Factor">
             </div>
         </div>
-
-        <div class="form-group row alex-only-param">
+        
+        <div class="form-group row alex-only-param alex-dynamic-param">
             <div class="col-sm-4">
                 <label for="white_org_mat">Organic Matter (fraction): </label>
             </div>
@@ -304,7 +338,35 @@
                     value="{{ black_pars.org_mat }}" aria-label="Black Ash Organic Matter">
             </div>
         </div>
-
+        
+        <div class="form-group row alex-only-param alex-static-param">
+            <div class="col-sm-4">
+                <label for="white_initranscap">Initial Transport Capacity (t ha<sup>-1</sup> mm<sup>-1</sup>):</label>
+            </div>
+            <div class="col-sm-3">
+                <input id="white_initranscap" name="white_initranscap" class="form-control mr-sm-3" type="text"
+                    value="{{ white_pars.initranscap }}" aria-label="White Ash Initial Transport Capacity">
+            </div>
+            <div class="col-sm-3">
+                <input id="black_initranscap" name="black_initranscap" class="form-control mr-sm-3" type="text"
+                    value="{{ black_pars.initranscap }}" aria-label="Black Ash Initial Transport Capacity">
+            </div>
+        </div>
+        
+        <div class="form-group row alex-only-param alex-static-param">
+            <div class="col-sm-4">
+                <label for="white_depletcoeff">Depletion Coefficient (mm<sup>-1</sup>):</label>
+            </div>
+            <div class="col-sm-3">
+                <input id="white_depletcoeff" name="white_depletcoeff" class="form-control mr-sm-3" type="text"
+                    value="{{ white_pars.depletcoeff }}" aria-label="White Ash Depletion Coefficient">
+            </div>
+            <div class="col-sm-3">
+                <input id="black_depletcoeff" name="black_depletcoeff" class="form-control mr-sm-3" type="text"
+                    value="{{ black_pars.depletcoeff }}" aria-label="Black Ash Depletion Coefficient">
+            </div>
+        </div>
+        
         <div class="form-group row anu-only-param">
             <div class="col-sm-4">
                 <label for="white_ini_erod">Initial erodibility (t/ha): </label>
