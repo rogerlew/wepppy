@@ -503,8 +503,9 @@ class WhiteAshModel(AshModelAlex):
             'decomp_fac': self.decomp_fac,
             'org_mat': self.org_mat,
             'roughness_limit': self.roughness_limit,
-            'initranscap': self.initranscap,
-            'depletcoeff': self.depletcoeff
+            'transport_mode': getattr(self, 'transport_mode', 'dynamic'),
+            'initranscap': getattr(self, 'initranscap', 0.8),
+            'depletcoeff': getattr(self, 'depletcoeff', 0.009)
         }
 
 
@@ -539,6 +540,7 @@ class BlackAshModel(AshModelAlex):
             'decomp_fac': self.decomp_fac,
             'org_mat': self.org_mat,
             'roughness_limit': self.roughness_limit,
-            'initranscap': self.initranscap,
-            'depletcoeff': self.depletcoeff
+            'transport_mode': getattr(self, 'transport_mode', 'dynamic'),
+            'initranscap': getattr(self, 'initranscap', 0.8),
+            'depletcoeff': getattr(self, 'depletcoeff', 0.009)
         }
