@@ -392,7 +392,9 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
             s.append(_padding + f'{_tree_char} <a href="{file_link}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
         
         if i % 2:
-            s[-1] = f'<span style="background-color:#f6f6f6;">{s[-1]}</span>'
+            s[-1] = f'<span class="even-row">{s[-1]}</span>'
+        else:
+            s[-1] = f'<span class="odd-row">{s[-1]}</span>'
     
     return ''.join(s), total_items
 
@@ -418,7 +420,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
     rel_path = os.path.relpath(path, wd)
     breadcrumbs = ''
-    
+
     if os.path.isdir(path):
         # build bread crumb links
         _url = f'/weppcloud/runs/{runid}/{config}/browse/'
@@ -499,7 +501,8 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
                         if total_items > 0 else '<p>No items to display</p>')
         
         # Combine UI elements
-        tree = f'<pre>{showing_text}{pagination_html}\n{breadcrumbs}\n{listing_html}\n{pagination_html}</pre>'
+        project_href = f'<a href="/weppcloud/runs/{runid}/{config}">☁️</a> '
+        tree = f'<pre>{showing_text}{pagination_html}\n{project_href}{breadcrumbs}\n{listing_html}\n{pagination_html}</pre>'
         
         return Response(f'''\
 <!DOCTYPE html>
@@ -515,6 +518,16 @@ function redirectToDiff() {{
     window.location.href = '?diff=' + encodeURIComponent(runId);
 }}
 </script>
+<style>
+  a {{ text-decoration: none; }}
+  span.even-row {{ background-color: #f6f6f6; }}
+  span.odd-row {{ background-color: #ffffff; }}
+  span.even-row:hover, 
+  span.odd-row:hover {{
+    background-color: #d0ebff;
+    cursor: pointer;
+  }}
+</style>
 </head>
 <body>
     <input type="text" value="{diff_runid}" id="runIdInput" placeholder="runid">
