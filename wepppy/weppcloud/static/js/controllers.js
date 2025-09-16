@@ -884,6 +884,11 @@ var Map = function () {
         };
 
         that.hillQuery = function (query_url) {
+            // show the drilldown tab
+            const drilldownTabTrigger = document.querySelector('a[href="#drilldown"]');
+            const tab = new bootstrap.Tab(drilldownTabTrigger);
+            tab.show();
+
             var self = instance;
             $.get({
                 url: query_url,
