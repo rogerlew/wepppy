@@ -507,7 +507,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
             sym_target = entry[5]
             item_pad = get_pad(8 - len(item_count.split()[0]))
             end_pad = ' ' * 32
-            s.append(_padding + f'{_tree_char} <a href="{file_link}/{diff_arg}"><b>{_file}</b></a>{ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}  \n')
+            s.append(_padding + f'{_tree_char} <a href="{file_link}/{diff_arg}"><b>{_file}{ts_pad}</b></a>{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}  \n')
         else:
             file_link = '/weppcloud' + _join(request_path, _file)
             is_symlink = entry[4]
@@ -539,7 +539,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
                 if _exists(diff_path):
                     diff_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
                     diff_link = f'  <a href="{diff_url}">diff</a>'
-            s.append(_padding + f'{_tree_char} <a href="{file_link}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
+            s.append(_padding + f'{_tree_char} <a href="{file_link}">{_file}{ts_pad}</a>{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
         
         if i % 2:
             s[-1] = f'<span class="even-row">{s[-1]}</span>'
