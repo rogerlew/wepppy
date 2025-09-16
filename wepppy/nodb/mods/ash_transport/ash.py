@@ -275,6 +275,10 @@ class Ash(NoDbBase, LogMixin):
                 self._alex_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac', self._alex_white_ash_model_pars.decomp_fac)
                 self._alex_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit', self._alex_white_ash_model_pars.roughness_limit)
                 self._alex_white_ash_model_pars.org_mat = kwds.get('white_org_mat', self._alex_white_ash_model_pars.org_mat)
+                self._alex_white_ash_model_pars.transport_mode = kwds.get('white_transport_mode', getattr(self._alex_white_ash_model_pars, 'transport_mode', 'dynamic'))
+                self._alex_white_ash_model_pars.initranscap = kwds.get('white_initranscap', getattr(self._alex_white_ash_model_pars, 'initranscap', 0.8))
+                self._alex_white_ash_model_pars.depletcoeff = kwds.get('white_depletcoeff', getattr(self._alex_white_ash_model_pars, 'depletcoeff', 0.009))
+
                 self._alex_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den', self._alex_black_ash_model_pars.ini_bulk_den)
                 self._alex_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den', self._alex_black_ash_model_pars.fin_bulk_den)
                 self._alex_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac', self._alex_black_ash_model_pars.bulk_den_fac)
@@ -282,6 +286,9 @@ class Ash(NoDbBase, LogMixin):
                 self._alex_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac', self._alex_black_ash_model_pars.decomp_fac)
                 self._alex_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit', self._alex_black_ash_model_pars.roughness_limit )
                 self._alex_black_ash_model_pars.org_mat = kwds.get('black_org_mat', self._alex_black_ash_model_pars.org_mat)    
+                self._alex_black_ash_model_pars.transport_mode = kwds.get('black_transport_mode', getattr(self._alex_black_ash_model_pars, 'transport_mode', 'dynamic'))
+                self._alex_black_ash_model_pars.initranscap = kwds.get('black_initranscap', getattr(self._alex_black_ash_model_pars, 'initranscap', 0.8))
+                self._alex_black_ash_model_pars.depletcoeff = kwds.get('black_depletcoeff', getattr(self._alex_black_ash_model_pars, 'depletcoeff', 0.009))
             else:
                 self._anu_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den', self._anu_white_ash_model_pars.ini_bulk_den)
                 self._anu_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den', self._anu_white_ash_model_pars.fin_bulk_den)
@@ -291,6 +298,7 @@ class Ash(NoDbBase, LogMixin):
                 self._anu_white_ash_model_pars.ini_erod = kwds.get('white_ini_erod', self._anu_white_ash_model_pars.ini_erod)
                 self._anu_white_ash_model_pars.fin_erod = kwds.get('white_fin_erod', self._anu_white_ash_model_pars.fin_erod)
                 self._anu_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit', self._anu_white_ash_model_pars.roughness_limit)
+                
                 self._anu_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den', self._anu_black_ash_model_pars.ini_bulk_den)
                 self._anu_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den', self._anu_black_ash_model_pars.fin_bulk_den)
                 self._anu_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac', self._anu_black_ash_model_pars.bulk_den_fac)
