@@ -74,7 +74,7 @@ class LandcoverMap:
 
         if not self.data.shape == subwta.shape:
             dst_fn = subwta_fn.replace('.ARC', '.fixed.tif')
-            raster_stacker(subwta_fn, self.fname, dst_fn)
+            raster_stacker(self.fname, subwta_fn, dst_fn)
             subwta, transform, proj = read_raster(dst_fn, dtype=np.int32)
 
         assert self.data.shape == subwta.shape, [self.data.shape, subwta.shape]

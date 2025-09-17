@@ -1305,12 +1305,7 @@ class Disturbed(NoDbBase):
                 bounds, transform, proj = read_raster(watershed.bound)
 
                 if not sbs.data.shape == bounds.shape:
-                    if watershed.bound.endswith('.tif'):
-                        dst_fn = watershed.bound.replace('.tif', '.fixed.tif')
-                    else:
-                        dst_fn = watershed.bound.replace('.ARC', '.fixed.tif')
-                    raster_stacker(watershed.bound, sbs.fname, dst_fn)
-                    bounds, transform, proj = read_raster(dst_fn, dtype=np.int32)
+                    raise Exception(f'SBS map and watershed.bound do not align: {sbs.data.shape} != {bounds.shape}')
 
                 assert sbs.data.shape == bounds.shape, [sbs.data.shape, bounds.shape]
 
