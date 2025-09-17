@@ -237,7 +237,7 @@ class Treatments(NoDbBase, LogMixin):
         if not _exists(subwta_fn):
             raise FileNotFoundError(f"'{subwta_fn}' not found!")
 
-        raster_stacker(fn, subwta_fn self.treatments_map)
+        raster_stacker(fn, subwta_fn, self.treatments_map)
 
         self.lock()
 
