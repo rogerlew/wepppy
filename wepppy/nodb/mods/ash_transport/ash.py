@@ -40,6 +40,8 @@ from wepppy.all_your_base.dateutils import YearlessDate
 
 from wepppy.all_your_base.geo import raster_stacker
 
+from wepppyo3.raster_characteristics import identify_median_single_raster_key
+
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
@@ -732,18 +734,18 @@ class Ash(NoDbBase, LogMixin):
 
             if self.ash_load_fn is not None:
                 self.log(f"  Reading ash load map {self.ash_load_fn}\n")
-                raster_stacker(watershed.dem_fn, self.ash_load_fn, self.ash_load_cropped_fn)
-                load_map = ParameterMap(self.ash_load_cropped_fn)
-                load_d = load_map.build_ave_grid(watershed.subwta)
+                raster_stacker(self.ash_load_fn, watershed.dem_fn, self.ash_load_cropped_fn)
+                load_d = identify_median_single_raster_key(
+                    key_fn=watershed.subwta, parameter_fn=self.ash_load_cropped_fn)
             else:
                 self.log(f"  No ash load map found\n")
                 load_d = None
 
             if self.ash_type_map_fn is not None:
                 self.log(f"  Reading ash type map {self.ash_type_map_fn}\n")
-                raster_stacker(watershed.dem_fn, self.ash_type_map_fn, self.ash_type_map_cropped_fn)
-                bd_map = ParameterMap(self.ash_type_map_cropped_fn)
-                ash_type_d = bd_map.build_ave_grid(watershed.subwta)
+                raster_stacker(self.ash_type_map_fn, watershed.dem_fn,  self.ash_type_map_cropped_fn)
+                ash_type_d = identify_median_single_raster_key(
+                    key_fn=watershed.subwta, parameter_fn=self.ash_type_map_cropped_fn)
             else:
                 self.log(f"  No ash type map found\n")
                 ash_type_d = None
@@ -817,8 +819,8 @@ class Ash(NoDbBase, LogMixin):
                     self.log(f'      load_d: {load_d[topaz_id]} tonne/ha\n')
                     _load_kg_m2 = load_d[topaz_id] * 0.1
 
-                    white_ash_depth = _load_kg_m2 / field_white_ash_bulkdensity
-                    black_ash_depth = _load_kg_m2 / field_black_ash_bulkdensity
+                    white_ash_depth = _load_kg_m2 / field_white_ash_bulkdensity  # in g/cm3
+                    black_ash_depth = _load_kg_m2 / field_black_ash_bulkdensity  # in g/cm3
 
                     self.log('      setting ash depth based on load_d and field bulk densities\n')
                     self.log(f'        white_ash_depth: {white_ash_depth}\n')

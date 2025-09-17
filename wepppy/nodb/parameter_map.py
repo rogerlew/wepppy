@@ -12,7 +12,9 @@ import numpy as np
 
 from wepppy.all_your_base.geo import read_raster        
 
+from deprecated import deprecated
 
+@deprecated(reason="Use wepppyo3.raster_characteristics instead")
 class ParameterMap:
     def __init__(self, fname, nodata_vals=None):
 
