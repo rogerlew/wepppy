@@ -1,0 +1,16 @@
+[Unit]
+Description=Gunicorn for RQ Dashboard
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/workdir
+Environment="LD_LIBRARY_PATH=/workdir/miniconda3/envs/wepppy310-env/lib"
+Environment="PATH=/workdir/miniconda3/envs/wepppy310-env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/workdir/miniconda3/envs/wepppy310-env/bin/gunicorn --workers 2 --bind 127.0.0.1:8040 wepppy.webservices.rq_dashboard:app
+Restart=always
+RestartSec=5s# /etc/systemd/system/gunicorn-rq-dashboard.service
+
+[Install]
+WantedBy=multi-user.target
