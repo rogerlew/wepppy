@@ -31,9 +31,26 @@ from configparser import (
 
 from pathlib import Path
 
-
 from .redis_prep import RedisPrep
 from wepppy.all_your_base import isfloat, isint, isbool
+
+# Configure redis
+import redis
+
+import redis
+
+redis_nodb_cache_client = None
+REDIS_HOST = os.environ.get('REDIS_HOST', None)
+REDIS_NODB_CACHE_DB = 13
+if REDIS_HOST is not None:
+    try:
+        redis_nodb_cache_client = redis.StrictRedis(
+            host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, decode_responses=True)
+        redis_nodb_cache_client.ping()
+    except Exception as e:
+        print(f'Error connecting to Redis: {e}')
+        redis_nodb_cache_client = None
+    
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
