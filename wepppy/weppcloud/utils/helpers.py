@@ -14,16 +14,59 @@ from datetime import datetime
 import socket
 _hostname = socket.gethostname()
 
-def get_wd(runid):
-    legacy = _join('/geodata/weppcloud_runs', runid)
-    if _exists(legacy):
-        return legacy
+import redis
 
-    prefix = runid[:2]
-    if _hostname.startswith('forest'):
-        return _join('/wc1/runs', prefix, runid)
- 
-    return _join('/geodata/wc1/runs', prefix, runid)
+redis_wd_cache_client = None
+REDIS_HOST = os.environ.get('REDIS_HOST', None)
+REDIS_WD_CACHE_DB = 11
+if REDIS_HOST is not None:
+    try:
+        redis_wd_cache_client = redis.StrictRedis(
+            host=REDIS_HOST, port=6379, db=REDIS_WD_CACHE_DB, decode_responses=True)
+        redis_wd_cache_client.ping()
+    except Exception as e:
+        print(f'Error connecting to Redis: {e}')
+        redis_wd_cache_client = None
+    
+
+def get_wd(runid: str) -> str:
+    """
+    Gets the working directory path for a given run ID, using a Redis cache
+    to speed up lookups.
+    """
+    global redis_wd_cache_client
+
+    # 1. Attempt to fetch the working directory from the cache
+    if redis_wd_cache_client:
+        try:
+            cached_wd = redis_wd_cache_client.get(runid)
+            if cached_wd:
+                return cached_wd
+        except redis.exceptions.ConnectionError as e:
+            print(f"Warning: Redis connection error during GET. Falling back to filesystem. Error: {e}")
+
+    # 2. If not in cache or Redis is down, determine path from the filesystem
+    # Check the primary, non-prefixed location first
+    path = _join('/geodata/weppcloud_runs', runid)
+
+    # If not found, fall back to the prefixed, partitioned locations
+    if not _exists(path):
+        prefix = runid[:2]
+        if _hostname.startswith('forest'):
+            path = _join('/wc1/runs', prefix, runid)
+        else:
+            path = _join('/geodata/wc1/runs', prefix, runid)
+
+    # 3. Store the determined path in the cache for future requests
+    if redis_wd_cache_client:
+        try:
+            # Cache the result with a 72-hour (259200 seconds) expiration
+            redis_wd_cache_client.set(runid, path, ex=72 * 3600)
+        except redis.exceptions.ConnectionError as e:
+            # If caching fails, the function still succeeds. Just log the issue.
+            print(f"Warning: Redis connection error during SET. Error: {e}")
+
+    return path
     
 
 def error_factory(msg='Error Handling Request'):
