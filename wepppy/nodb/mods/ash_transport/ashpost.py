@@ -552,9 +552,9 @@ class AshPost(NoDbBase):
                 ash_out[topaz_id]['ash_transport (kg/ha)'] = 0.0
                 ash_out[topaz_id]['ash_ini_depth (mm)'] = 0.0
             else:
-                ash_out[topaz_id]['water_transport (kg/ha)'] = hillslope_annuals[topaz_id]['water_transport (tonne/ha)'] * 1000.0
-                ash_out[topaz_id]['wind_transport (kg/ha)'] = hillslope_annuals[topaz_id]['wind_transport (tonne/ha)'] * 1000.0
-                ash_out[topaz_id]['ash_transport (kg/ha)'] = hillslope_annuals[topaz_id]['ash_transport (tonne/ha)'] * 1000.0
+                ash_out[topaz_id]['water_transport (tonne/ha)'] = hillslope_annuals[topaz_id]['water_transport (tonne/ha)']
+                ash_out[topaz_id]['wind_transport (tonne/ha)'] = hillslope_annuals[topaz_id]['wind_transport (tonne/ha)']
+                ash_out[topaz_id]['ash_transport (tonne/ha)'] = hillslope_annuals[topaz_id]['ash_transport (tonne/ha)']
                 ash_out[topaz_id]['ash_ini_depth (mm)'] = ash_out[topaz_id]['ini_ash_depth']
                 ash_out[topaz_id]['area (ha)'] = ash_out[topaz_id]['area_ha']
 
