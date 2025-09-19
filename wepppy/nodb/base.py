@@ -88,26 +88,6 @@ _config_dir = _join(_thisdir, 'configs')
 _default_config = _join(_config_dir, '_defaults.toml')
 
 
-def cache_project_nodbs_to_redis(wd):
-    global redis_nodb_cache_client
-
-    if redis_nodb_cache_client is None:
-        return
-    
-    runid = _split(os.path.abspath(wd))[-1]
-    from glob import glob
-
-    for filepath in glob(_join(wd, '*.nodb')):
-        filename = _split(filepath)[-1]
-        _redis_cache_key = f'{runid}:{filename}'
-        if redis_nodb_cache_client.exists(_redis_cache_key):
-            continue
-
-        with open(filepath) as f:
-            data = f.read()
-            redis_nodb_cache_client.set(_redis_cache_key, data)
-
-
 class CaseSensitiveRawConfigParser(RawConfigParser):
     def optionxform(self, s): return s
 
