@@ -65,7 +65,7 @@ if REDIS_HOST is not None:
         redis_nodb_cache_client = redis.StrictRedis(connection_pool=redis_nodb_cache_pool)
         redis_nodb_cache_client.ping()
     except Exception as e:
-        print(f'Error connecting to Redis with pool: {e}')
+        logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
         redis_nodb_cache_client = None
 
 
@@ -77,7 +77,7 @@ if REDIS_HOST is not None:
         redis_status_client = redis.StrictRedis(connection_pool=redis_status_pool)
         redis_status_client.ping()
     except Exception as e:
-        print(f'Error connecting to Redis with pool: {e}')
+        logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
         redis_status_client = None
 
 # to check keys use: redis-cli -n 13 KEYS "*"    
@@ -130,23 +130,33 @@ class NoDbBase(object):
     @property
     def class_name(self):
         return self.filename.replace('.nodb', '')
-    
+
     def _init_logging(self):
+        # Initialize loggers
         self.runid_logger = logging.getLogger(f'wepppy.run.{self.runid}')
         self.logger = logging.getLogger(f'wepppy.run.{self.runid}.{self.class_name}')
 
+        # Clear existing handlers from logger
         for handler in list(self.logger.handlers):
             self.logger.removeHandler(handler)
 
         self.logger.setLevel(logging.INFO)
         self.logger.propagate = True
 
+        # Check if queue handler exists
         queue_handler = getattr(self.runid_logger, '_wepp_queue_handler', None)
 
+        # Define a standard log format
+        log_format = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        date_format = '%Y-%m-%d %H:%M:%S,%:z'  # Local time with milliseconds and timezone
+        formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
+
         if queue_handler is None:
+            # Initialize queue and queue handler
             self._log_queue = queue.Queue(-1)
             self._queue_handler = QueueHandler(self._log_queue)
 
+            # Clear existing handlers from runid_logger
             for handler in list(self.runid_logger.handlers):
                 self.runid_logger.removeHandler(handler)
 
@@ -154,23 +164,34 @@ class NoDbBase(object):
             self.runid_logger.propagate = False
             self.runid_logger.addHandler(self._queue_handler)
 
+            # Initialize handlers
+            # Redis handler
             self._redis_handler = RedisStreamLogHandler(
                 redis_client=redis_status_client,
-                stream_name=self._status_channel)
+                stream_name=self._status_channel
+            )
+            self._redis_handler.setLevel(logging.INFO)
 
+            # File handler for run logs
             log_path = _join(self.wd, self.filename.replace('.nodb', '.log'))
             self._run_file_handler = FileHandler(log_path)
             self._run_file_handler.setLevel(logging.INFO)
+            self._run_file_handler.setFormatter(formatter)
             Path(log_path).touch(exist_ok=True)
 
+            # File handler for exceptions
             exceptions_path = _join(self.wd, 'exceptions.log')
             self._exception_file_handler = FileHandler(exceptions_path)
             self._exception_file_handler.setLevel(logging.ERROR)
+            self._exception_file_handler.setFormatter(formatter)
             Path(exceptions_path).touch(exist_ok=True)
 
+            # Console handler
             self._console_handler = StreamHandler()
             self._console_handler.setLevel(logging.ERROR)
+            self._console_handler.setFormatter(formatter)
 
+            # Initialize queue listener with all handlers
             self._queue_listener = QueueListener(
                 self._log_queue,
                 self._redis_handler,
@@ -182,6 +203,7 @@ class NoDbBase(object):
             self._queue_listener.start()
             atexit.register(self._queue_listener.stop)
 
+            # Attach handlers to runid_logger for reuse
             self.runid_logger._wepp_log_queue = self._log_queue
             self.runid_logger._wepp_queue_handler = self._queue_handler
             self.runid_logger._wepp_queue_listener = self._queue_listener
@@ -190,6 +212,7 @@ class NoDbBase(object):
             self.runid_logger._wepp_exception_file_handler = self._exception_file_handler
             self.runid_logger._wepp_console_handler = self._console_handler
         else:
+            # Reuse existing handlers
             self._queue_handler = queue_handler
             self._log_queue = self.runid_logger._wepp_log_queue
             self._queue_listener = self.runid_logger._wepp_queue_listener
