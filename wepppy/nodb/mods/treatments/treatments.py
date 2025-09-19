@@ -52,7 +52,7 @@ class TreatmentsMode(IntEnum):
     UserDefinedMap = 4
 
 
-class Treatments(NoDbBase, LogMixin):
+class Treatments(NoDbBase):
     """
     Treatments class for WEPPcloud.
 

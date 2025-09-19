@@ -51,7 +51,7 @@ class RAPNoDbLockedException(Exception):
     pass
 
 
-class RAP_TS(NoDbBase, LogMixin):
+class RAP_TS(NoDbBase):
     __name__ = 'RAP_TS'
     filename = 'rap_ts.nodb'
 

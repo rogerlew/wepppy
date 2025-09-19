@@ -51,7 +51,7 @@ class RhemNoDbLockedException(Exception):
     pass
 
 
-class Rhem(NoDbBase, LogMixin):
+class Rhem(NoDbBase):
     __name__ = 'Rhem'
     filename = 'rhem.nodb'
 

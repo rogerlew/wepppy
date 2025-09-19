@@ -71,7 +71,7 @@ class SoilsMode(IntEnum):
 
 
 # noinspection PyPep8Naming
-class Soils(NoDbBase, LogMixin):
+class Soils(NoDbBase):
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.

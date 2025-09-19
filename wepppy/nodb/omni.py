@@ -284,7 +284,7 @@ class OmniNoDbLockedException(Exception):
     pass
 
 
-class Omni(NoDbBase, LogMixin):
+class Omni(NoDbBase):
     """
     Omni: Manage and execute nested WEPP scenarios and contrasts without a database.
     This class persists its state in a NoDb file (omni.nodb) and provides a high-level

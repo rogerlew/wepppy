@@ -1753,7 +1753,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         par_monthlies = station.ppts * station.nwds
 
         if logger is not None:
-            logger.log('  prism_mod:fetching climates...')
+            logger.info('  prism_mod:fetching climates...')
 
         if monthly_dataset.lower() == 'prism':
             prism_ppts = get_prism_monthly_ppt(lng, lat, units='inch')
@@ -1780,7 +1780,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         fp_log.write(f'prism_tmins (F) = {prism_tmins}\n')
 
         if logger is not None:
-            logger.log('  prism_mod:revising .par file...')
+            logger.info('  prism_mod:revising .par file...')
 
         # calculate number of wet days
         if nwds_method.lower() == 'daymet':
@@ -1871,7 +1871,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
 
 
         if logger is not None:
-            logger.log('  prism_mod:running cligen...')
+            logger.info('  prism_mod:running cligen...')
         # run cligen
         cli_fn = '{}{}.cli'.format(par, suffix)
 
@@ -1936,7 +1936,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         sim_nwds = cli.count_wetdays()
 
         if logger is not None:
-            logger.log(''.join(
+            logger.info(''.join(
                 ['Note: CLIGEN uses English Units.\n\n',
                 'Station : %s\n' % _rowfmt(par_monthlies),
                 '%s   : %s\n' % (monthly_dataset, _rowfmt(prism_ppts)),

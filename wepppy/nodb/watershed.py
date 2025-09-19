@@ -106,7 +106,7 @@ def process_subcatchment(args):
 TRANSIENT_FIELDS = ["_sub_area_lookup", "_sub_length_lookup", "_sub_centroid_lookup"]
 
 
-class Watershed(NoDbBase, LogMixin):
+class Watershed(NoDbBase):
     __name__ = "Watershed"
     filename = 'watershed.nodb'
     _js_decode_replacements = (

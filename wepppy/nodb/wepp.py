@@ -369,7 +369,7 @@ def extract_slps_fn(slps_fn, fp_runs_dir):
             f.close()
 
 
-class Wepp(NoDbBase, LogMixin):
+class Wepp(NoDbBase):
     __name__ = 'Wepp'
     filename = 'wepp.nodb'
 

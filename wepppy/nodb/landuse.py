@@ -78,7 +78,7 @@ def read_cover_defaults(fn):
     return d
 
 
-class Landuse(NoDbBase, LogMixin):
+class Landuse(NoDbBase):
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
