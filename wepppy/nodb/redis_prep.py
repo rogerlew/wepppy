@@ -44,11 +44,10 @@ class TaskEnum(Enum):
 
 class RedisPrep:
     def __init__(self, wd, cfg_fn=None):
-        wd = wd.rstrip('/')
         self.wd = wd
         self.cfg_fn = cfg_fn
         self.redis = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
-        parent, run_id = _split(wd)
+        parent, run_id = _split(wd.rstrip('/'))
         self.run_id = run_id
         if not _exists(self.dump_filepath):
             self._set_bool_config('loaded', True)
