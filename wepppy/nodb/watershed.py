@@ -369,10 +369,6 @@ class Watershed(NoDbBase):
         return f"{self.runid}:watershed"
 
     @property
-    def status_log(self):
-        return os.path.abspath(_join(self.wat_dir, "status.log"))
-
-    @property
     def delineation_backend(self):
         delineation_backend = getattr(self, "_delineation_backend", None)
         if delineation_backend is None:
