@@ -24,7 +24,6 @@ import geopandas as gpd
 
 import json
 # non-standard
-import jsonpickle
 
 from operator import itemgetter
 from osgeo import gdal, osr
@@ -171,6 +170,7 @@ def n_neighbors(a, indx):
 
 class SkidTrails(NoDbBase, LogMixin):
     __name__ = 'skid_trails'
+    filename = 'skid_trails.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(SkidTrails, self).__init__(wd, cfg_fn)
@@ -383,35 +383,6 @@ class SkidTrails(NoDbBase, LogMixin):
     def status_log(self):
         return os.path.abspath(_join(self.runs_dir, 'status.log'))
 
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        with open(_join(wd, 'skid_trails.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, SkidTrails)
-
-        if _exists(_join(wd, 'READONLY')):
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return SkidTrails.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
-    
     @property
     def _nodb(self):
         return _join(self.wd, 'skid_trails.nodb')

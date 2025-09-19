@@ -11,7 +11,6 @@ import ast
 import csv
 import shutil
 from collections import Counter
-import jsonpickle
 from datetime import datetime
 from subprocess import Popen, PIPE
 from os.path import join as _join
@@ -149,6 +148,7 @@ class InvalidProjection(Exception):
 
 
 class Disturbed(NoDbBase):
+    filename = 'disturbed.nodb'
     __name__ = 'Disturbed'
 
     def __init__(self, wd, cfg_fn):
@@ -249,43 +249,6 @@ class Disturbed(NoDbBase):
             os.remove(_lookup)
 
         shutil.copyfile(self.default_land_soil_lookup_fn, _lookup)
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'disturbed.nodb')
-
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Disturbed), db
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Disturbed.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):

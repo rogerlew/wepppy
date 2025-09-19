@@ -25,7 +25,6 @@ import shutil
 from time import sleep
 
 # non-standard
-import jsonpickle
 import utm
 
 # wepppy
@@ -342,6 +341,7 @@ class Omni(NoDbBase, LogMixin):
             omni.run_omni_contrasts()
             contrasts_df = pd.read_parquet(os.path.join(omni.wd, "omni", "contrasts.out.parquet"))
     """
+    filename = 'omni.nodb'
     __name__ = 'Omni'
 
     __exclude__ = ('_w3w', 
@@ -828,43 +828,6 @@ class Omni(NoDbBase, LogMixin):
         combined.to_parquet(out_path)
 
         return combined
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'omni.nodb')
-
-        if not _exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Omni), db
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Omni.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _status_channel(self):

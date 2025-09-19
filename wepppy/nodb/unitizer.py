@@ -15,7 +15,6 @@ from os.path import exists as _exists
 from collections import OrderedDict
 
 # non-standard
-import jsonpickle
 
 # weppy submodules
 from .base import NoDbBase
@@ -292,6 +291,7 @@ class UnitizerNoDbLockedException(Exception):
 
 
 class Unitizer(NoDbBase):
+    filename = 'unitizer.nodb'
     __name__ = 'Unitizer'
 
     def __init__(self, wd, cfg_fn):
@@ -360,43 +360,6 @@ class Unitizer(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'unitizer.nodb')
-
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Unitizer), db
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Unitizer.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):

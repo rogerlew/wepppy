@@ -16,7 +16,6 @@ from glob import glob
 import shutil
 
 # non-standard
-import jsonpickle
 import numpy as np
 
 # wepppy submodules
@@ -30,6 +29,7 @@ class RhemPostNoDbLockedException(Exception):
 
 
 class RhemPost(NoDbBase):
+    filename = 'rhempost.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
@@ -51,35 +51,6 @@ class RhemPost(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        with open(_join(wd, 'rhempost.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, RhemPost), db
-
-        if _exists(_join(wd, 'READONLY')):
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return RhemPost.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):

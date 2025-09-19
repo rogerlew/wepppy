@@ -8,7 +8,6 @@
 
 import os
 import shutil
-import jsonpickle
 
 from os.path import join as _join
 from os.path import exists as _exists
@@ -76,6 +75,7 @@ class RangelandCoverMode(IntEnum):
 
 
 class RangelandCover(NoDbBase):
+    filename = 'rangeland_cover.nodb'
     __name__ = 'RangelandCover'
 
     def __init__(self, wd, cfg_fn):
@@ -105,35 +105,6 @@ class RangelandCover(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        with open(_join(wd, 'rangeland_cover.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, RangelandCover), db
-
-        if _exists(_join(wd, 'READONLY')):
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return RangelandCover.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):

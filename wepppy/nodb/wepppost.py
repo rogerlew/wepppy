@@ -14,7 +14,6 @@ from glob import glob
 
 
 # non-standard
-import jsonpickle
 import numpy as np
 
 # wepppy
@@ -29,6 +28,7 @@ class WeppPostNoDbLockedException(Exception):
 
 
 class WeppPost(NoDbBase):
+    filename = 'wepppost.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
@@ -60,43 +60,6 @@ class WeppPost(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'wepppost.nodb')
-
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, WeppPost), db
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return WeppPost.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):
