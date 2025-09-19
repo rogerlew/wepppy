@@ -11,6 +11,7 @@ from os.path import exists as _exists
 import numpy as np
 import pandas as pd
 import json
+import inspect
 
 from wepppy.all_your_base.geo import get_utm_zone, utm_srid
 
@@ -77,14 +78,19 @@ def remove_if_exists(fn):
 
 
 class WhiteboxToolsTopazEmulator:
-    def __init__(self, wbt_wd, dem_fn=None, verbose=True, raise_on_error=True):
+    def __init__(self, wbt_wd, dem_fn=None, verbose=True, raise_on_error=True, logger=None):
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(wbt_wd={wbt_wd}, dem_fn={dem_fn}, verbose={verbose}, raise_on_error={raise_on_error})"
+            )
 
         if dem_fn is not None:
             dem_fn = os.path.abspath(dem_fn)
             if not _exists(dem_fn):
                 raise FileNotFoundError(f"DEM file does not exist: {dem_fn}")
 
-            self._parse_dem(dem_fn)
+            self._parse_dem(dem_fn, logger=logger)
 
         self.wbt_wd = os.path.abspath(wbt_wd)
         if not _exists(self.wbt_wd):
@@ -111,6 +117,7 @@ class WhiteboxToolsTopazEmulator:
         """
         Sets whether to raise an error on failure.
         """
+        
         if not isinstance(value, bool):
             raise ValueError("raise_on_error must be a boolean value")
         self._raise_on_error = value
@@ -273,7 +280,10 @@ class WhiteboxToolsTopazEmulator:
         """
         return _join(self.wbt_wd, "netw.tsv")
 
-    def _parse_dem(self, dem_fn):
+    def _parse_dem(self, dem_fn, logger=None):
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}({dem_fn})")
         # open the dataset
         ds = gdal.Open(dem_fn)
 
@@ -353,10 +363,15 @@ class WhiteboxToolsTopazEmulator:
 
         del ds
 
-    def _create_relief(self, fill_or_breach="fill", blc_dist=None):
+    def _create_relief(self, fill_or_breach="fill", blc_dist=None, logger=None):
         """
         Create a relief file from the DEM using WBT using either fill or breach method.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(fill_or_breach={fill_or_breach}, blc_dist={blc_dist})"
+            )
         if blc_dist is None:
             blc_dist = 1000
 
@@ -379,10 +394,13 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Relief file created successfully: {relief_fn}")
 
-    def _create_flow_vector(self):
+    def _create_flow_vector(self, logger=None):
         """
         Create a flow vector file from the relief file using WBT.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         relief_fn = self.relief
 
         if not _exists(relief_fn):
@@ -400,10 +418,13 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Flow vector file created successfully: {flovec_fn}")
 
-    def _create_flow_accumulation(self):
+    def _create_flow_accumulation(self, logger=None):
         """
         Create a flow accumulation file from the flow vector file using WBT.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         flovec_fn = self.flovec
 
         if not _exists(flovec_fn):
@@ -429,7 +450,7 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Flow accumulation file created successfully: {floaccum_fn}")
 
-    def _extract_streams(self):
+    def _extract_streams(self, logger=None):
         """
         Extract streams from the flow accumulation file using WBT.
 
@@ -442,6 +463,12 @@ class WhiteboxToolsTopazEmulator:
 
         if self.csa is None or self.mcl is None:
             raise ValueError("csa and mcl must be set before extracting streams")
+
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(csa={self.csa}, mcl={self.mcl})"
+            )
 
         floaccum_fn = self.floaccum
 
@@ -475,10 +502,13 @@ class WhiteboxToolsTopazEmulator:
             esri_pntr=False,
         )
 
-    def _identify_stream_junctions(self):
+    def _identify_stream_junctions(self, logger=None):
         """
         Identify stream junctions from the stream network file using WBT.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         netful_fn = self.netful
 
         if not _exists(netful_fn):
@@ -498,23 +528,33 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Stream junction file created successfully: {chnjnt_fn}")
 
-    def delineate_channels(self, csa=5.0, mcl=60.0, fill_or_breach="fill", blc_dist=None):
+    def delineate_channels(self, csa=5.0, mcl=60.0, fill_or_breach="fill", blc_dist=None, logger=None):
         """
         Delineate channels from the DEM using WBT.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(csa={csa}, mcl={mcl}, fill_or_breach={fill_or_breach}, blc_dist={blc_dist})"
+            )
         self.mcl = mcl
         self.csa = csa
 
-        self._create_relief(fill_or_breach, blc_dist=blc_dist)
-        self._create_flow_vector()
-        self._create_flow_accumulation()
-        self._extract_streams()
-        self._identify_stream_junctions()
+        self._create_relief(fill_or_breach, blc_dist=blc_dist, logger=logger)
+        self._create_flow_vector(logger=logger)
+        self._create_flow_accumulation(logger=logger)
+        self._extract_streams(logger=logger)
+        self._identify_stream_junctions(logger=logger)
 
         polygonize_netful(self.netful, self.netful_json)
         json_to_wgs(self.netful_json)
 
-    def _make_outlet_geojson(self, dst=None, easting=None, northing=None):
+    def _make_outlet_geojson(self, dst=None, easting=None, northing=None, logger=None):
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(dst={dst}, easting={easting}, northing={northing})"
+            )
         assert dst is not None
 
         assert isfloat(easting), easting
@@ -530,7 +570,13 @@ class WhiteboxToolsTopazEmulator:
         assert _exists(dst), dst
         return dst
 
-    def _make_multiple_outlets_geojson(self, dst, en_points_dict):
+    def _make_multiple_outlets_geojson(self, dst, en_points_dict, logger=None):
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            count = len(en_points_dict) if en_points_dict is not None else 0
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(dst={dst}, points={count})"
+            )
         points = []
         for id, (easting, northing) in en_points_dict.items():
             points.append(
@@ -549,14 +595,24 @@ class WhiteboxToolsTopazEmulator:
         assert _exists(dst), dst
         return dst
 
-    def set_outlet(self, lng, lat, pixelcoords=False):
+    def set_outlet(self, lng, lat, pixelcoords=False, logger=None):
         from wepppy.nodb.watershed import Outlet
 
-        (x, y), distance = self.find_closest_channel2(lng, lat, pixelcoords=pixelcoords)
-        _lng, _lat = self.pixel_to_lnglat(x, y)
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(lng={lng}, lat={lat}, pixelcoords={pixelcoords})"
+            )
 
-        _e, _n = self.pixel_to_utm(x, y)
-        self._make_outlet_geojson(easting=_e, northing=_n, dst=self.outlet_geojson)
+        (x, y), distance = self.find_closest_channel2(
+            lng, lat, pixelcoords=pixelcoords, logger=logger
+        )
+        _lng, _lat = self.pixel_to_lnglat(x, y, logger=logger)
+
+        _e, _n = self.pixel_to_utm(x, y, logger=logger)
+        self._make_outlet_geojson(
+            easting=_e, northing=_n, dst=self.outlet_geojson, logger=logger
+        )
 
         self._outlet = Outlet(
             requested_loc=(lng, lat),
@@ -567,7 +623,7 @@ class WhiteboxToolsTopazEmulator:
 
         return self._outlet
 
-    def find_closest_channel2(self, lng, lat, pixelcoords=False):
+    def find_closest_channel2(self, lng, lat, pixelcoords=False, logger=None):
         """
         Find the closest channel given a lng and lat or pixel coords (pixelcoords=True).
 
@@ -577,6 +633,12 @@ class WhiteboxToolsTopazEmulator:
         """
 
         # Unpack variables for instance
+
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(lng={lng}, lat={lat}, pixelcoords={pixelcoords})"
+            )
 
         chnjnt_fn = self.chnjnt
 
@@ -588,7 +650,7 @@ class WhiteboxToolsTopazEmulator:
         if pixelcoords:
             x, y = lng, lat
         else:
-            x, y = self.lnglat_to_pixel(lng, lat)
+            x, y = self.lnglat_to_pixel(lng, lat, logger=logger)
 
         # Early return if the starting pixel is already a channel
         if junction_mask[y, x] == 1:
@@ -626,10 +688,14 @@ class WhiteboxToolsTopazEmulator:
 
         return None, math.inf
 
-    def lnglat_to_pixel(self, lng, lat):
+    def lnglat_to_pixel(self, lng, lat, logger=None):
         """
         return the x,y pixel coords of lng, lat
         """
+
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}(lng={lng}, lat={lat})")
 
         # unpack variables for instance
         cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
@@ -655,7 +721,7 @@ class WhiteboxToolsTopazEmulator:
 
         return _x, _y
 
-    def pixel_to_utm(self, col, row, centre=True):
+    def pixel_to_utm(self, col, row, centre=True, logger=None):
         """
         Convert a raster (col,row) index to UTM easting / northing
         using the GeoTransform stored in ``self.transform``.
@@ -672,6 +738,12 @@ class WhiteboxToolsTopazEmulator:
         -------
         (easting, northing) : tuple[float, float]
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(col={col}, row={row}, centre={centre})"
+            )
+
         gt = self.transform  # (x0, dx, rx, y0, ry, dy)
         off = 0.5 if centre else 0.0  # shift to cell centre if requested
 
@@ -679,11 +751,15 @@ class WhiteboxToolsTopazEmulator:
         northing = gt[3] + gt[4] * (col + off) + gt[5] * (row + off)
         return easting, northing
 
-    def pixel_to_lnglat(self, x, y):
+    def pixel_to_lnglat(self, x, y, logger=None):
         """
         return the lng/lat (WGS84) coords from pixel coords
         """
-        easting, northing = self.pixel_to_utm(x, y)
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}(x={x}, y={y})")
+
+        easting, northing = self.pixel_to_utm(x, y, logger=logger)
         lat, lng = utm.to_latlon(
             easting=easting,
             northing=northing,
@@ -693,10 +769,13 @@ class WhiteboxToolsTopazEmulator:
         lng, lat = float(lng), float(lat)
         return lng, lat
 
-    def _create_bound(self):
+    def _create_bound(self, logger=None):
         """
         Create a bound raster from the DEM using WBT.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         bound_fn = self.bound
 
         remove_if_exists(bound_fn)
@@ -713,10 +792,13 @@ class WhiteboxToolsTopazEmulator:
 
         return bound_fn
 
-    def _create_aspect(self):
+    def _create_aspect(self, logger=None):
         """
         Create an aspect raster from the DEM using WBT.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         aspect_fn = self.aspect
 
         remove_if_exists(aspect_fn)
@@ -731,10 +813,13 @@ class WhiteboxToolsTopazEmulator:
 
         return aspect_fn
 
-    def _create_flow_vector_slope(self):
+    def _create_flow_vector_slope(self, logger=None):
         """
         Create a flow vector slope raster from the flow vector file using WBT.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         fvslop_fn = self.fvslop
 
         remove_if_exists(fvslop_fn)
@@ -749,11 +834,14 @@ class WhiteboxToolsTopazEmulator:
 
         return fvslop_fn
 
-    def _create_netw0(self):
+    def _create_netw0(self, logger=None):
         """
         Create a netw0 raster from the stream network and bound using WBT.
         This is the stream network masked to the watershed bound.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         netw0_fn = self.netw0
 
         remove_if_exists(netw0_fn)
@@ -768,10 +856,13 @@ class WhiteboxToolsTopazEmulator:
 
         return netw0_fn
 
-    def _create_distance_to_channel(self):
+    def _create_distance_to_channel(self, logger=None):
         """
         Create a distance to channel raster from the stream network using WBT.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         discha_fn = self.discha
 
         remove_if_exists(discha_fn)
@@ -788,10 +879,13 @@ class WhiteboxToolsTopazEmulator:
 
         return discha_fn
 
-    def _create_strahler_order(self):
+    def _create_strahler_order(self, logger=None):
         """
         Create a Strahler order raster from the stream network using WBT.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         strahler_fn = self.strahler
 
         remove_if_exists(strahler_fn)
@@ -808,10 +902,13 @@ class WhiteboxToolsTopazEmulator:
 
         return strahler_fn
 
-    def _create_subcatchments(self):
+    def _create_subcatchments(self, logger=None):
         """
         Create subcatchments from the stream network.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         subwta_fn = self.subwta
         remove_if_exists(subwta_fn)
 
@@ -870,25 +967,31 @@ class WhiteboxToolsTopazEmulator:
         """
         return _join(self.wbt_wd, "channels.WGS.geojson")
 
-    def delineate_subcatchments(self):
+    def delineate_subcatchments(self, logger=None):
         """
         Delineate subcatchments from the stream network and outlet.
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
 
-        self._create_bound()
-        self._create_aspect()
-        self._create_flow_vector_slope()
-        self._create_netw0()
-        self._create_strahler_order()
-        self._create_distance_to_channel()
-        self._create_subcatchments()
+        self._create_bound(logger=logger)
+        self._create_aspect(logger=logger)
+        self._create_flow_vector_slope(logger=logger)
+        self._create_netw0(logger=logger)
+        self._create_strahler_order(logger=logger)
+        self._create_distance_to_channel(logger=logger)
+        self._create_subcatchments(logger=logger)
         polygonize_subcatchments(self.subwta, self.subwta_json, self.subcatchments_json)
-        self._polygonize_channels()
+        self._polygonize_channels(logger=logger)
 
-    def _read_chn_order_from_netw_tab(self):
+    def _read_chn_order_from_netw_tab(self, logger=None):
         """
         returns a dictionary of topaz ids strings and their order
         """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
 
         tbl = pd.read_table(self.netw_tab)
 
@@ -896,12 +999,16 @@ class WhiteboxToolsTopazEmulator:
         return dict(zip([str(v) for v in tbl["topaz_id"]], 
                         [int(v) for v in tbl["order"]]))
 
-    def _polygonize_channels(self):
+    def _polygonize_channels(self, logger=None):
         from wepppy.topo.watershed_abstraction import WeppTopTranslator
+
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
 
         subwta_fn = self.subwta
 
-        chn_order_dict = self._read_chn_order_from_netw_tab()
+        chn_order_dict = self._read_chn_order_from_netw_tab(logger=logger)
 
         assert _exists(subwta_fn)
         src_ds = gdal.Open(subwta_fn)

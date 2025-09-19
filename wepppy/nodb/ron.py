@@ -15,6 +15,7 @@ from os.path import split as _split
 from os.path import isdir
 
 import shutil
+import inspect
 
 # non-standard
 import utm
@@ -446,37 +447,38 @@ class Ron(NoDbBase):
             raise
 
     def clean_export_dir(self):
-        export_dir = self.export_dir
-        if _exists(export_dir):
-            shutil.rmtree(export_dir)
+        with self.timed("Cleaning export directory"):
+            export_dir = self.export_dir
+            if _exists(export_dir):
+                shutil.rmtree(export_dir)
 
-        os.mkdir(export_dir)
+            os.mkdir(export_dir)
 
     # this is here because it makes it agnostic to the modules
     # that use it. e.g. it doesn't depend on Disturbed or Baer, or ...
     def init_sbs_map(self, sbs_map, baer):
-        
-        sbs_name = _split(sbs_map)[1]
-        sbs_path = _join(baer.baer_dir, sbs_name)
+        with self.timed("Initializing SBS map"):
+            sbs_name = _split(sbs_map)[1]
+            sbs_path = _join(baer.baer_dir, sbs_name)
 
-        if sbs_map.startswith('http'):
-            r = requests.get(sbs_map)
-            r.raise_for_status()
+            if sbs_map.startswith('http'):
+                r = requests.get(sbs_map)
+                r.raise_for_status()
 
-            with open(sbs_path, 'wb') as f:
-                f.write(r.content)
-            baer.validate(_split(sbs_path)[-1])
-        else:
-            from wepppy.nodb.mods import MODS_DIR
-            sbs_map = sbs_map.replace('MODS_DIR', MODS_DIR)
+                with open(sbs_path, 'wb') as f:
+                    f.write(r.content)
+                baer.validate(_split(sbs_path)[-1])
+            else:
+                from wepppy.nodb.mods import MODS_DIR
+                sbs_map = sbs_map.replace('MODS_DIR', MODS_DIR)
 
-            # sbs_map = _join(_thisdir, sbs_map)
-            assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
-            assert not isdir(sbs_map)
+                # sbs_map = _join(_thisdir, sbs_map)
+                assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
+                assert not isdir(sbs_map)
 
-            shutil.copyfile(sbs_map, sbs_path)
+                shutil.copyfile(sbs_map, sbs_path)
 
-            baer.validate(_split(sbs_path)[-1])
+                baer.validate(_split(sbs_path)[-1])
 
     @property
     def _nodb(self):
@@ -531,6 +533,9 @@ class Ron(NoDbBase):
         return self._map
 
     def set_map(self, extent, center, zoom):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(extent={extent}, center={center}, zoom={zoom}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -579,6 +584,9 @@ class Ron(NoDbBase):
 
     @name.setter
     def name(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -599,6 +607,9 @@ class Ron(NoDbBase):
 
     @scenario.setter
     def scenario(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -625,6 +636,8 @@ class Ron(NoDbBase):
 
     @dem_db.setter
     def dem_db(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 
@@ -646,6 +659,8 @@ class Ron(NoDbBase):
 
     @dem_map.setter
     def dem_map(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 

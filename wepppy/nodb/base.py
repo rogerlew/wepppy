@@ -7,16 +7,21 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 # standard library
-import ast
 import os
 
+from dotenv import load_dotenv
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 
+_thisdir = os.path.dirname(__file__)
+load_dotenv(_join(_thisdir, '.env'))
+
+import ast
 from time import time
 from enum import Enum, IntEnum
 from glob import glob
+from contextlib import contextmanager
 
 import json
 
@@ -31,25 +36,48 @@ from configparser import (
 
 from pathlib import Path
 
+import logging
+import queue
+from logging.handlers import QueueHandler, QueueListener
+import atexit
+
+from wepppy.logging.redis_stream_handlers import RedisStreamLogHandler
+from logging import FileHandler, StreamHandler
+
 from .redis_prep import RedisPrep
 from wepppy.all_your_base import isfloat, isint, isbool
 
 # Configure redis
 import redis
 
-import redis
-
 redis_nodb_cache_client = None
-REDIS_HOST = os.environ.get('REDIS_HOST', None)
+redis_status_client = None
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 REDIS_NODB_CACHE_DB = 13
+REDIS_STATUS_DB = 2
 if REDIS_HOST is not None:
     try:
-        redis_nodb_cache_client = redis.StrictRedis(
-            host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, decode_responses=True)
+        redis_nodb_cache_pool = redis.ConnectionPool(
+            host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, 
+            decode_responses=True, max_connections=50
+        )
+        redis_nodb_cache_client = redis.StrictRedis(connection_pool=redis_nodb_cache_pool)
         redis_nodb_cache_client.ping()
     except Exception as e:
-        print(f'Error connecting to Redis: {e}')
+        print(f'Error connecting to Redis with pool: {e}')
         redis_nodb_cache_client = None
+
+
+    try:
+        redis_status_pool = redis.ConnectionPool(
+            host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, 
+            decode_responses=True, max_connections=50
+        )
+        redis_status_client = redis.StrictRedis(connection_pool=redis_status_pool)
+        redis_status_client.ping()
+    except Exception as e:
+        print(f'Error connecting to Redis with pool: {e}')
+        redis_status_client = None
 
 # to check keys use: redis-cli -n 13 KEYS "*"    
 
@@ -115,7 +143,118 @@ class NoDbBase(object):
         # noinspection PyUnresolvedReferences
         if _exists(self._nodb):
             raise Exception('NoDb has already been initialized')
+
+        self._init_logging()
         
+    @property
+    def class_name(self):
+        return self.filename.replace('.nodb', '')
+    
+    def _init_logging(self):
+        self.runid_logger = logging.getLogger(f'wepppy.run.{self.runid}')
+        self.logger = logging.getLogger(f'wepppy.run.{self.runid}.{self.class_name}')
+
+        for handler in list(self.logger.handlers):
+            self.logger.removeHandler(handler)
+
+        self.logger.setLevel(logging.INFO)
+        self.logger.propagate = True
+
+        queue_handler = getattr(self.runid_logger, '_wepp_queue_handler', None)
+
+        if queue_handler is None:
+            self._log_queue = queue.Queue(-1)
+            self._queue_handler = QueueHandler(self._log_queue)
+
+            for handler in list(self.runid_logger.handlers):
+                self.runid_logger.removeHandler(handler)
+
+            self.runid_logger.setLevel(logging.INFO)
+            self.runid_logger.propagate = False
+            self.runid_logger.addHandler(self._queue_handler)
+
+            self._redis_handler = RedisStreamLogHandler(
+                redis_client=redis_status_client,
+                stream_name=self._status_channel)
+
+            log_path = _join(self.wd, self.filename.replace('.nodb', '.log'))
+            self._run_file_handler = FileHandler(log_path)
+            self._run_file_handler.setLevel(logging.INFO)
+
+            exceptions_path = _join(self.wd, 'exceptions.log')
+            self._exception_file_handler = FileHandler(exceptions_path)
+            self._exception_file_handler.setLevel(logging.ERROR)
+
+            self._console_handler = StreamHandler()
+            self._console_handler.setLevel(logging.ERROR)
+
+            self._queue_listener = QueueListener(
+                self._log_queue,
+                self._redis_handler,
+                self._run_file_handler,
+                self._exception_file_handler,
+                self._console_handler
+            )
+
+            self._queue_listener.start()
+            atexit.register(self._queue_listener.stop)
+
+            self.runid_logger._wepp_log_queue = self._log_queue
+            self.runid_logger._wepp_queue_handler = self._queue_handler
+            self.runid_logger._wepp_queue_listener = self._queue_listener
+            self.runid_logger._wepp_redis_handler = self._redis_handler
+            self.runid_logger._wepp_run_file_handler = self._run_file_handler
+            self.runid_logger._wepp_exception_file_handler = self._exception_file_handler
+            self.runid_logger._wepp_console_handler = self._console_handler
+        else:
+            self._queue_handler = queue_handler
+            self._log_queue = self.runid_logger._wepp_log_queue
+            self._queue_listener = self.runid_logger._wepp_queue_listener
+            self._redis_handler = self.runid_logger._wepp_redis_handler
+            self._run_file_handler = self.runid_logger._wepp_run_file_handler
+            self._exception_file_handler = self.runid_logger._wepp_exception_file_handler
+            self._console_handler = self.runid_logger._wepp_console_handler
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        for attr in (
+            'runid_logger',
+            'logger',
+            '_queue_handler',
+            '_log_queue',
+            '_queue_listener',
+            '_redis_handler',
+            '_run_file_handler',
+            '_exception_file_handler',
+            '_console_handler',
+        ):
+            state.pop(attr, None)
+        return state
+
+    @property
+    def _status_channel(self):
+        __status_channel = f'{self.runid}:{self.class_name}'
+
+        run_dir = os.path.abspath(self.runs_dir)
+        if '/omni/' in run_dir:
+            _parent_runid = run_dir.split('/omni/')[0].split('/')[-1]
+            __status_channel = f'{_parent_runid}:omni'
+        else:
+            __status_channel = f'{self.runid}:wepp'
+
+        return  __status_channel
+
+    @contextmanager
+    def timed(self, task_name: str, level=logging.INFO):
+        """Context manager to log the start, end, and duration of a task."""
+        self.logger.log(level, f"{task_name}...")
+        start_time = time.perf_counter()
+        try:
+            yield
+        finally:
+            end_time = time.perf_counter()
+            duration = end_time - start_time
+            self.logger.log(level, f"{task_name}... done. ({duration:.2f}s)")
 
     @property
     def _redis_cache_key(self):
@@ -125,6 +264,7 @@ class NoDbBase(object):
     def getInstance(cls, wd='.', allow_nonexistent=False, ignore_lock=False):
         global redis_nodb_cache_client
 
+        # if redis_nodb_cache_client is available try to load from cache
         if redis_nodb_cache_client is not None:
             runid = _split(os.path.abspath(wd))[-1]
             cache_key = f'{runid}:{cls.filename}'
@@ -133,11 +273,13 @@ class NoDbBase(object):
                 try:
                     db = cls._decode_jsonpickle(cached_data)
                     if isinstance(db, cls):
+                        db._init_logging()
                         return db
                 except Exception as e:
                     print(f'Error decoding cached data for {cache_key}: {e}')
                     redis_nodb_cache_client.delete(cache_key)
 
+        # fall back to loading from file
         filepath = cls._get_nodb_path(wd)
 
         if not _exists(filepath):
@@ -151,6 +293,15 @@ class NoDbBase(object):
         json_text = cls._preprocess_json_for_decode(json_text)
         db = cls._decode_jsonpickle(json_text)
 
+        # update cache if it is available
+        if redis_nodb_cache_client:
+            try:
+                # Cache the newly loaded object for next time
+                redis_nodb_cache_client.set(cache_key, jsonpickle.encode(db), ex=72*3600) 
+            except Exception as e:
+                print(f"Warning: Could not update Redis cache for {cache_key}: {e}")
+                
+        # validate and return
         if not isinstance(db, cls):
             raise TypeError(f"Decoded object type {type(db)} does not match expected {cls}")
 
@@ -161,6 +312,7 @@ class NoDbBase(object):
 
         if _exists(_join(wd, 'READONLY')) or ignore_lock:
             db.wd = abs_wd
+            db._init_logging()
             return db
 
         if abs_wd != os.path.abspath(db_wd):
@@ -169,6 +321,7 @@ class NoDbBase(object):
                 db.lock()
                 db.dump_and_unlock()
 
+        db._init_logging()
         return db
 
     @classmethod
@@ -219,6 +372,7 @@ class NoDbBase(object):
         if cls.filename is None:
             raise AttributeError(f"{cls.__name__} must define a class attribute 'filename'")
         return _join(wd, cls.filename)
+
 
     @classmethod
     def _preprocess_json_for_decode(cls, json_text):
@@ -463,6 +617,9 @@ class NoDbBase(object):
         # noinspection PyUnresolvedReferences
         with open(self._lock, 'w') as fp:
             fp.write(str(time()))
+
+        if redis_nodb_cache_client is not None:
+            redis_nodb_cache_client.delete(self._redis_cache_key)
 
         try:
                 RedisPrep.getInstance(self.wd).set_locked_status(self.basename, True)

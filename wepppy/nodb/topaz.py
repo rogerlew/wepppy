@@ -11,6 +11,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 
 import math
+import inspect
 
 import numpy as np
 import numpy.ma as ma
@@ -139,6 +140,9 @@ class Topaz(NoDbBase):
         return _exists(self.netful_arc)
 
     def build_channels(self, csa=4, mcl=60):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(csa={csa}, mcl={mcl})')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -188,6 +192,8 @@ class Topaz(NoDbBase):
 
     def set_outlet(self, lng, lat, pixelcoords=False, da=0.0):
         from wepppy.nodb.watershed import Outlet
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(lng={lng}, lat={lat}, pixelcoords={pixelcoords}, da={da})')
 
         self.lock()
 
@@ -220,6 +226,9 @@ class Topaz(NoDbBase):
         return _exists(self.subwta_arc)
 
     def build_subcatchments(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+        
         self.lock()
 
         # noinspection PyBroadException

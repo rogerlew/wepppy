@@ -12,11 +12,13 @@ import utm
 from osgeo import gdal, osr, ogr
 
 import geopandas as gpd
+import inspect
 
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo import get_utm_zone, utm_srid
 
 from .wepp_top_translator import WeppTopTranslator
+
 
 gdal.UseExceptions()
 
@@ -747,7 +749,7 @@ class FlowpathSummary(SummaryBase):
         return 'flow_%i.slp' % self.topaz_id
 
 
-def identify_edge_hillslopes(raster_path):
+def identify_edge_hillslopes(raster_path, logger=None):
     """
     Identifies hillslopes (pixel values) on the edge of a watershed raster map.
     Returns a set of pixel values > 0 found on the map's edges.
@@ -758,6 +760,10 @@ def identify_edge_hillslopes(raster_path):
     Returns:
         set: Set of positive pixel values on the edge, empty if none
     """
+    if logger is not None:
+        func_name = inspect.currentframe().f_code.co_name
+        logger.info(f'wepppy.topo.watershed_abstraction.support.{func_name}(raster_path={raster_path})')
+
     with rasterio.open(raster_path) as src:
         # Read the raster data
         data = src.read(1)  # Assuming single-band raster
