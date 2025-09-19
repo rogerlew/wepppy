@@ -62,7 +62,7 @@ class RevegetationNoDbLockedException(Exception):
     pass
 
 
-class Revegetation(NoDbBase, LogMixin):
+class Revegetation(NoDbBase):
     __name__ = 'Revegetation'
     filename = 'revegetation.nodb'
 

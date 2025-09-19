@@ -167,7 +167,7 @@ def n_neighbors(a, indx):
     return np.sum(np.logical_not(a.mask[px0:pxend, py0:pyend]))
 
 
-class SkidTrails(NoDbBase, LogMixin):
+class SkidTrails(NoDbBase):
     __name__ = 'skid_trails'
     filename = 'skid_trails.nodb'
 

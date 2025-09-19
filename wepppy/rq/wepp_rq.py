@@ -148,7 +148,7 @@ def run_wepp_rq(runid):
             raise Exception(f'{runid} is locked')
 
         # send feedback to user
-        wepp.log('Running Wepp\n')
+        wepp.logger.info('Running Wepp\n')
 
         wepp.clean()
         
@@ -169,7 +169,7 @@ def run_wepp_rq(runid):
         fp_runs_dir = wepp.fp_runs_dir
         wepp_bin = wepp.wepp_bin
 
-        wepp.log('    wepp_bin:{}'.format(wepp_bin))
+        wepp.logger.info('    wepp_bin:{}'.format(wepp_bin))
 
         # everything below here is asyncronous performed by workers
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
@@ -242,7 +242,7 @@ def run_wepp_rq(runid):
 
             #
             # Run Watershed
-            wepp.log(f'Running Watershed wepp_bin:{wepp_bin}... ')
+            wepp.logger.info(f'Running Watershed wepp_bin:{wepp_bin}... ')
 
             # jobs:3
             jobs3_watersheds = []
@@ -581,13 +581,13 @@ def _post_run_cleanup_out_rq(runid):
                 ss_batch_key = d['ss_batch_key']
                 ss_batch_id = d['ss_batch_id']
 
-                wepp.log('    moving .out files...')
+                wepp.logger.info('    moving .out files...')
                 for fn in glob(_join(wepp.runs_dir, '*.out')):
                     dst_path = _join(wepp.output_dir, ss_batch_key, _split(fn)[1])
                     shutil.move(fn, dst_path)
                 wepp.log_done()
         else:
-            wepp.log('    moving .out files...')
+            wepp.logger.info('    moving .out files...')
             for fn in glob(_join(wepp.runs_dir, '*.out')):
                 dst_path = _join(wepp.output_dir, _split(fn)[1])
                 shutil.move(fn, dst_path)

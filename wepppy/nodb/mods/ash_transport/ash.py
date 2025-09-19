@@ -86,7 +86,7 @@ class AshNoDbLockedException(Exception):
     pass
 
 
-class Ash(NoDbBase, LogMixin):
+class Ash(NoDbBase):
     filename = 'ash.nodb'
     """
     Manager that keeps track of project details

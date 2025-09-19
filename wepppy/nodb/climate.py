@@ -629,7 +629,7 @@ def cli_revision(cli_fn: str, is_breakpoint: bool, ws_ppts: np.array, ws_tmaxs: 
 
 
 # noinspection PyUnusedLocal
-class Climate(NoDbBase, LogMixin):
+class Climate(NoDbBase):
     filename = 'climate.nodb'
     _js_decode_replacements = (("\"orig_cli_fn\"", "\"_orig_cli_fn\""),)
 
