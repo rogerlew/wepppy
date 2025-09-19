@@ -112,7 +112,6 @@ from .redis_prep import RedisPrep, TaskEnum
 
 from wepppy.wepp.soils.utils import simple_texture
 
-from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.nodb.mods.disturbed import Disturbed
 
 
@@ -766,7 +765,7 @@ class Wepp(NoDbBase, LogMixin):
     # hillslopes
     #
     def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None, omni=False):
-        self.log('Prepping Hillslopes... ')
+        self.logger.info('Prepping Hillslopes... ')
 
         # get translator
         watershed = Watershed.getInstance(self.wd)
@@ -823,12 +822,12 @@ class Wepp(NoDbBase, LogMixin):
         if reveg:
             self._prep_revegetation()
 
-        self.log_done()
+        self.logger.info('done')
 
     def _prep_revegetation(self):
-        self.log('    _prep_revegetation... ')
+        self.logger.info('    _prep_revegetation... ')
 
-        self.log('      prep pw0.cov... ')
+        self.logger.info('      prep pw0.cov... ')
         from wepppy.nodb.mods import RAP_TS
         rap_ts = RAP_TS.getInstance(self.wd)
         climate = Climate.getInstance(self.wd)
@@ -838,15 +837,15 @@ class Wepp(NoDbBase, LogMixin):
         assert max(years) == rap_ts.rap_end_year, 'RAP_TS end year does not match climate'
 
         rap_ts.prep_cover(self.runs_dir)
-        self.log_done()
+        self.logger.info('done')
 
         self._prep_firedate()
 
-        self.log_done()
+        self.logger.info('done')
 
     def _prep_firedate(self):
 
-        self.log('    prep firedate.txt... ')
+        self.logger.info('    prep firedate.txt... ')
         disturbed = Disturbed.getInstance(self.wd)
         if disturbed.fire_date is not None:
             with open(_join(self.runs_dir, 'firedate.txt'), 'w') as fp:
@@ -856,7 +855,7 @@ class Wepp(NoDbBase, LogMixin):
                 assert isint(da), da
                 assert isint(yr), yr
                 fp.write(firedate)
-        self.log_done()
+        self.logger.info('done')
 
     @property
     def sol_versions(self):
@@ -960,10 +959,10 @@ class Wepp(NoDbBase, LogMixin):
     def _prep_pmet(self, kcb=None, rawp=None):
 
         if kcb is not None and rawp is not None:
-            self.log(f'nodb.Wepp._prep_pmet::kwargs routine')
+            self.logger.info(f'nodb.Wepp._prep_pmet::kwargs routine')
             pmetpara_prep(self.runs_dir, kcb=kcb, rawp=rawp)
             assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
-            self.log_done()
+            self.logger.info('done')
             return
 
         pmet_kcb_map = self.pmet_kcb_map
@@ -984,25 +983,25 @@ class Wepp(NoDbBase, LogMixin):
                 kcb = None
 
             if kcb is not None:
-                self.log(f'nodb.Wepp._prep_pmet::kcb_map routine')
+                self.logger.info(f'nodb.Wepp._prep_pmet::kcb_map routine')
                 pmetpara_prep(self.runs_dir, kcb=kcb, rawp=self.pmet_rawp)
                 assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
-                self.log_done()
+                self.logger.info('done')
                 return
 
         if 'disturbed' not in self.mods:
-            self.log(f'nodb.Wepp._prep_pmet::defaults routine')
+            self.logger.info(f'nodb.Wepp._prep_pmet::defaults routine')
             pmetpara_prep(self.runs_dir, kcb=self.pmet_kcb, rawp=self.pmet_rawp)
             assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
-            self.log_done()
+            self.logger.info('done')
             return
 
-        self.log(f'nodb.Wepp._prep_pmet::disturbed routine')
+        self.logger.info(f'nodb.Wepp._prep_pmet::disturbed routine')
         from wepppy.nodb.mods import Disturbed
         disturbed = Disturbed.getInstance(self.wd)
         disturbed.pmetpara_prep()
         assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
-        self.log_done()
+        self.logger.info('done')
 
 
     def _remove_pmet(self):
@@ -1031,30 +1030,30 @@ class Wepp(NoDbBase, LogMixin):
         if p_surf_runoff_map is not None:
             p_surf_runoff = RasterDatasetInterpolator(p_surf_runoff_map).get_location_info(lng, lat, method='nearest')
             if p_surf_runoff > 0.0:
-                self.log('wepp:_prep_phosphorus setting surf_runoff to {} from map'.format(p_surf_runoff))
+                self.logger.info('wepp:_prep_phosphorus setting surf_runoff to {} from map'.format(p_surf_runoff))
                 phos_opts.surf_runoff = float(p_surf_runoff)
-                self.log_done()
+                self.logger.info('done')
 
         if p_lateral_flow_map is not None:
             p_lateral_flow = RasterDatasetInterpolator(p_lateral_flow_map).get_location_info(lng, lat, method='nearest')
             if p_lateral_flow > 0.0:
-                self.log('wepp:_prep_phosphorus setting lateral_flow to {} from map'.format(p_lateral_flow))
+                self.logger.info('wepp:_prep_phosphorus setting lateral_flow to {} from map'.format(p_lateral_flow))
                 phos_opts.lateral_flow = float(p_lateral_flow)
-                self.log_done()
+                self.logger.info('done')
 
         if p_baseflow_map is not None:
             p_baseflow = RasterDatasetInterpolator(p_baseflow_map).get_location_info(lng, lat, method='nearest')
             if p_baseflow > 0.0:
-                self.log('wepp:_prep_phosphorus setting baseflow to {} from map'.format(p_baseflow))
+                self.logger.info('wepp:_prep_phosphorus setting baseflow to {} from map'.format(p_baseflow))
                 phos_opts.baseflow = float(p_baseflow)
-                self.log_done()
+                self.logger.info('done')
 
         if  p_sediment_map is not None:
             p_sediment = RasterDatasetInterpolator(p_sediment_map).get_location_info(lng, lat, method='nearest')
             if p_sediment > 0.0:
-                self.log('wepp:_prep_phosphorus setting sediment to {} from map'.format(p_sediment))
+                self.logger.info('wepp:_prep_phosphorus setting sediment to {} from map'.format(p_sediment))
                 phos_opts.sediment = float(p_sediment)
-                self.log_done()
+                self.logger.info('done')
 
         # save the phosphorus parameters to the .nodb
         self.lock()
@@ -1111,30 +1110,30 @@ class Wepp(NoDbBase, LogMixin):
         if gwstorage_map is not None:
             gwstorage = RasterDatasetInterpolator(gwstorage_map).get_location_info(lng, lat, method='nearest')
             if gwstorage >= 0.0:
-                self.log('wepp:_prep_baseflow setting gwstorage to {} from map'.format(gwstorage))
+                self.logger.info('wepp:_prep_baseflow setting gwstorage to {} from map'.format(gwstorage))
                 baseflow_opts.gwstorage = float(gwstorage)
-                self.log_done()
+                self.logger.info('done')
 
         if bfcoeff_map is not None:
             bfcoeff = RasterDatasetInterpolator(bfcoeff_map).get_location_info(lng, lat, method='nearest')
             if bfcoeff >= 0.0:
-                self.log('wepp:_prep_baseflow setting bfcoeff to {} from map'.format(bfcoeff))
+                self.logger.info('wepp:_prep_baseflow setting bfcoeff to {} from map'.format(bfcoeff))
                 baseflow_opts.bfcoeff = float(bfcoeff)
-                self.log_done()
+                self.logger.info('done')
 
         if dscoeff_map is not None:
             dscoeff = RasterDatasetInterpolator(dscoeff_map).get_location_info(lng, lat, method='nearest')
             if dscoeff >= 0.0:
-                self.log('wepp:_prep_baseflow setting dscoeff to {} from map'.format(dscoeff))
+                self.logger.info('wepp:_prep_baseflow setting dscoeff to {} from map'.format(dscoeff))
                 baseflow_opts.dscoeff = float(dscoeff)
-                self.log_done()
+                self.logger.info('done')
 
         if bfthreshold_map is not None:
             bfthreshold = RasterDatasetInterpolator(bfthreshold_map).get_location_info(lng, lat, method='nearest')
             if bfthreshold >= 0.0:
-                self.log('wepp:_prep_baseflow setting bfthreshold to {} from map'.format(bfthreshold))
+                self.logger.info('wepp:_prep_baseflow setting bfthreshold to {} from map'.format(bfthreshold))
                 baseflow_opts.bfthreshold = float(bfthreshold)
-                self.log_done()
+                self.logger.info('done')
 
         # save the baseflow parameters to the .nodb
         self.lock()
@@ -1192,7 +1191,7 @@ class Wepp(NoDbBase, LogMixin):
                     os.makedirs(ss_batch_dir)
 
     def prep_and_run_flowpaths(self, clean_after_run=True):
-        self.log('  Prepping _prep_flowpaths... ')
+        self.logger.info('  Prepping _prep_flowpaths... ')
         wat_dir = self.wat_dir
 
         fp_slps_fns = glob(_join(self.wat_dir, 'slope_files/flowpaths/*.slps'))
@@ -1205,7 +1204,7 @@ class Wepp(NoDbBase, LogMixin):
             wait(futures, return_when=FIRST_EXCEPTION)
 
 
-        self.log('  Creating flowpath run files... ')
+        self.logger.info('  Creating flowpath run files... ')
 
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -1219,12 +1218,12 @@ class Wepp(NoDbBase, LogMixin):
                 wepp_id = translator.wepp(top=int(topaz_id))
                 for fp_enum  in fps_summary[topaz_id]:
                     fp_id = f'fp_{wepp_id}_{fp_enum}'
-                    self.log(f'  Creating {fp_id}.run... ')
+                    self.logger.info(f'  Creating {fp_id}.run... ')
                     futures.append(pool.submit(make_flowpath_run, fp_id, wepp_id, sim_years, self.fp_runs_dir))
 
             wait(futures, return_when=FIRST_EXCEPTION)
 
-        self.log('  Running _run_flowpaths... ')
+        self.logger.info('  Running _run_flowpaths... ')
 
         futures = []
         with ThreadPoolExecutor(max_workers=10) as pool:
@@ -1232,7 +1231,7 @@ class Wepp(NoDbBase, LogMixin):
                 wepp_id = translator.wepp(top=int(topaz_id))
                 for fp_enum  in fps_summary[topaz_id]:
                     fp_id = f'fp_{wepp_id}_{fp_enum}'
-                    self.log(f'  Running {fp_id}... ')
+                    self.logger.info(f'  Running {fp_id}... ')
                     futures.append(pool.submit(run_flowpath, fp_id, wepp_id, self.runs_dir, self.fp_runs_dir, self.wepp_bin))
 
             wait(futures, return_when=FIRST_EXCEPTION)
@@ -1243,7 +1242,7 @@ class Wepp(NoDbBase, LogMixin):
             os.remove(loss_grid_path)
             time.sleep(1)
 
-        self.log(f'  Creating flowpaths loss grid... ')
+        self.logger.info(f'  Creating flowpaths loss grid... ')
         make_soil_loss_grid_fps(watershed.discha, self.fp_runs_dir, loss_grid_path)
  
         assert _exists(loss_grid_path)
@@ -1263,17 +1262,17 @@ class Wepp(NoDbBase, LogMixin):
         assert _exists(loss_grid_wgs)
 
         if clean_after_run:
-            self.log('  Cleaning up flowpath run files... ')
+            self.logger.info('  Cleaning up flowpath run files... ')
             shutil.rmtree(self.fp_runs_dir)
             shutil.rmtree(self.fp_output_dir)
 
             os.makedirs(self.fp_runs_dir)
             os.makedirs(self.fp_output_dir)
 
-        self.log_done()
+        self.logger.info('done')
 
     def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
-        self.log('    Prepping _prep_slopes_peridot... ')
+        self.logger.info('    Prepping _prep_slopes_peridot... ')
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
@@ -1288,10 +1287,10 @@ class Wepp(NoDbBase, LogMixin):
             else:
                 _copyfile(src_fn, dst_fn)
 
-        self.log_done()
+        self.logger.info('done')
 
     def _prep_slopes(self, translator, clip_hillslopes, clip_hillslope_length):
-        self.log('    Prepping _prep_slopes... ')
+        self.logger.info('    Prepping _prep_slopes... ')
 
         watershed = Watershed.getInstance(self.wd)
         if watershed.abstraction_backend == 'peridot':
@@ -1311,12 +1310,12 @@ class Wepp(NoDbBase, LogMixin):
             else:
                 _copyfile(src_fn, dst_fn)
 
-        self.log_done()
+        self.logger.info('done')
 
     def _prep_multi_ofe(self, translator, omni=False):
         from wepppy.topo.watershed_abstraction import HillSummary as WatHillSummary
 
-        self.log('    Prepping _prep_multi_ofe... ')
+        self.logger.info('    Prepping _prep_multi_ofe... ')
         wd = self.wd
 
         landuse = Landuse.getInstance(wd)
@@ -1408,7 +1407,7 @@ class Wepp(NoDbBase, LogMixin):
 
 
     def _prep_managements(self, translator):
-        self.log('    _prep_managements... ')
+        self.logger.info('    _prep_managements... ')
 
         wd = self.wd
 
@@ -1445,7 +1444,7 @@ class Wepp(NoDbBase, LogMixin):
                 continue
             dom = landuse.domlc_d[topaz_id]
 
-            self.log(f'    _prep_managements:{topaz_id}:{mukey} - {dom}... ')
+            self.logger.info(f'    _prep_managements:{topaz_id}:{mukey} - {dom}... ')
 
             man_summary = landuse.managements[dom]
 
@@ -1463,8 +1462,8 @@ class Wepp(NoDbBase, LogMixin):
             if meoization_key in build_d:
                 shutil.copyfile(build_d[meoization_key], dst_fn)
 
-                self.log(f"     copying build_d['{meoization_key}'] -> {dst_fn}")
-                self.log_done()
+                self.logger.info(f"     copying build_d['{meoization_key}'] -> {dst_fn}")
+                self.logger.info('done')
 
             else:
                 management = man_summary.get_management()
@@ -1489,7 +1488,7 @@ class Wepp(NoDbBase, LogMixin):
                     texid = simple_texture(clay=clay, sand=sand)
 
                     if (texid, disturbed_class) not in _land_soil_replacements_d:
-                        self.log(f'     _prep_managements: {texid}:{disturbed_class} not in replacements_d')
+                        self.logger.info(f'     _prep_managements: {texid}:{disturbed_class} not in replacements_d')
 
 
                     if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
@@ -1529,12 +1528,12 @@ class Wepp(NoDbBase, LogMixin):
                     fp.write(fn_contents)
 
                 build_d[meoization_key] = dst_fn
-                self.log(f'     meoization_key: {meoization_key} -> {dst_fn}')
+                self.logger.info(f'     meoization_key: {meoization_key} -> {dst_fn}')
 
-                self.log_done()
+                self.logger.info('done')
 
         if 'emapr_ts' in self.mods:
-            self.log('    _prep_managements:emapr_ts.analyze... ')
+            self.logger.info('    _prep_managements:emapr_ts.analyze... ')
             from wepppy.nodb.mods import OSUeMapR_TS
             assert climate.observed_start_year is not None
             assert climate.observed_end_year is not None
@@ -1543,10 +1542,10 @@ class Wepp(NoDbBase, LogMixin):
             emapr_ts.acquire_rasters(start_year=climate.observed_start_year,
                                      end_year=climate.observed_end_year)
             emapr_ts.analyze()
-            self.log_done()
+            self.logger.info('done')
 
     def _prep_soils(self, translator):
-        self.log('    _prep_soils... ')
+        self.logger.info('    _prep_soils... ')
 
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
@@ -1568,7 +1567,7 @@ class Wepp(NoDbBase, LogMixin):
         if run_concurrent:
             def oncomplete(prep_soils_task):
                 topaz_id, elapsed_time = prep_soils_task.result()
-                self.log('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
+                self.logger.info('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
 
             with ThreadPoolExecutor(max_workers=8) as pool:
                 futures = []
@@ -1634,23 +1633,23 @@ class Wepp(NoDbBase, LogMixin):
                     initial_sat, 
                         clip_soils, clip_soils_depth)
                 topaz_id, elapsed_time = prep_soil(task_args)
-                self.log('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
+                self.logger.info('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
 
-        self.log_done()
+        self.logger.info('done')
 
     def _prep_climates(self, translator):
         climate = Climate.getInstance(self.wd)
         if climate.climate_mode == ClimateMode.SingleStormBatch:
             return self._prep_climates_ss_batch(translator)
 
-        self.log('    _prep_climates... ')
+        self.logger.info('    _prep_climates... ')
         watershed = Watershed.getInstance(self.wd)
         cli_dir = self.cli_dir
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
 
         for topaz_id in watershed._subs_summary:
-            self.log(f'    _prep_climates:{topaz_id}... ')
+            self.logger.info(f'    _prep_climates:{topaz_id}... ')
 
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
@@ -1659,14 +1658,14 @@ class Wepp(NoDbBase, LogMixin):
             src_fn = _join(cli_dir, cli_summary['cli_fn'])
             _copyfile(src_fn, dst_fn) 
 
-            self.log_done()
+            self.logger.info('done')
 
-        self.log_done()
+        self.logger.info('done')
 
     def _prep_climates_ss_batch(self, translator):
         climate = Climate.getInstance(self.wd)
 
-        self.log('    _prep_climates_ss_batch... ')
+        self.logger.info('    _prep_climates_ss_batch... ')
         watershed = Watershed.getInstance(self.wd)
         cli_dir = self.cli_dir
         runs_dir = self.runs_dir
@@ -1677,7 +1676,7 @@ class Wepp(NoDbBase, LogMixin):
             cli_fn = d['cli_fn']
 
             for topaz_id in watershed._subs_summary:
-                self.log(f'    _prep_climates:{topaz_id}... ')
+                self.logger.info(f'    _prep_climates:{topaz_id}... ')
 
                 wepp_id = translator.wepp(top=int(topaz_id))
                 dst_fn = _join(runs_dir, f'p{wepp_id}.{ss_batch_id}.cli')
@@ -1685,16 +1684,16 @@ class Wepp(NoDbBase, LogMixin):
                 src_fn = _join(cli_dir, cli_fn)
                 _copyfile(src_fn, dst_fn)
 
-                self.log_done()
+                self.logger.info('done')
 
             dst_fn = _join(runs_dir, f'pw0.{ss_batch_id}.cli')
             src_fn = _join(cli_dir, cli_fn)
             _copyfile(src_fn, dst_fn)
 
-        self.log_done()
+        self.logger.info('done')
 
     def _make_hillslope_runs(self, translator, reveg=False, omni=False):
-        self.log('    Prepping _make_hillslope_runs... ')
+        self.logger.info('    Prepping _make_hillslope_runs... ')
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
@@ -1721,11 +1720,11 @@ class Wepp(NoDbBase, LogMixin):
                 wepp_id = translator.wepp(top=int(topaz_id))
                 make_hillslope_run(wepp_id, years, runs_dir, reveg=reveg, omni=omni)
 
-        self.log_done()
+        self.logger.info('done')
 
 
     def run_hillslopes(self, omni=False):
-        self.log('Running Hillslopes\n')
+        self.logger.info('Running Hillslopes\n')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
         climate = Climate.getInstance(self.wd)
@@ -1733,13 +1732,13 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
         wepp_bin = self.wepp_bin
 
-        self.log(f'    wepp_bin:{wepp_bin}')
-        self.log(f'    omni: {omni}')
+        self.logger.info(f'    wepp_bin:{wepp_bin}')
+        self.logger.info(f'    omni: {omni}')
 
         def oncomplete(wepprun):
             status, _id, elapsed_time = wepprun.result()
             assert status
-            self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
+            self.logger.info('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
         sub_n = watershed.sub_n
 
@@ -1753,7 +1752,7 @@ class Wepp(NoDbBase, LogMixin):
                         ss_batch_id = d['ss_batch_id']
                         ss_batch_key = d['ss_batch_key']
 
-                        self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id}  of {ss_n}).\n')
+                        self.logger.info(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id}  of {ss_n}).\n')
                         wepp_id = translator.wepp(top=int(topaz_id))
                         futures.append(pool.submit(
                             run_ss_batch_hillslope,
@@ -1767,7 +1766,7 @@ class Wepp(NoDbBase, LogMixin):
 
             else:
                 for i, topaz_id in enumerate(watershed._subs_summary):
-                    self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
+                    self.logger.info(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
                     wepp_id = translator.wepp(top=int(topaz_id))
                     futures.append(pool.submit(
                         run_hillslope,
@@ -1787,7 +1786,7 @@ class Wepp(NoDbBase, LogMixin):
                        tcr=None, avke=None,
                        channel_manning_roughness_coefficient_bare=None,
                        channel_manning_roughness_coefficient_veg=None):
-        self.log('Prepping Watershed... ')
+        self.logger.info('Prepping Watershed... ')
 
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -1799,8 +1798,8 @@ class Wepp(NoDbBase, LogMixin):
                 lng, lat = watershed.centroid
                 rdi = RasterDatasetInterpolator(crit_shear_map)
                 critical_shear = rdi.get_location_info(lng, lat, method='nearest')
-                self.log(f'critical_shear from map {crit_shear_map} at {watershed.centroid} ={critical_shear}... ')
-                self.log_done()
+                self.logger.info(f'critical_shear from map {crit_shear_map} at {watershed.centroid} ={critical_shear}... ')
+                self.logger.info('done')
         if critical_shear is None:
             critical_shear = self.channel_critical_shear
 
@@ -1820,12 +1819,12 @@ class Wepp(NoDbBase, LogMixin):
         self._prep_watershed_managements(translator)
         self._make_watershed_run(translator)
 
-        self.log_done()
+        self.logger.info('done')
 
         self.trigger(TriggerEvents.WEPP_PREP_WATERSHED_COMPLETE)
 
     def _prep_structure(self, translator):
-        self.log('    Prepping _prep_structure... ')
+        self.logger.info('    Prepping _prep_structure... ')
 
         watershed = Watershed.getInstance(self.wd)
         structure = watershed.structure
@@ -1845,7 +1844,7 @@ class Wepp(NoDbBase, LogMixin):
         with open(_join(runs_dir, 'pw0.str'), 'w') as fp:
             fp.write('\n'.join(s) + '\n')
 
-        self.log_done()
+        self.logger.info('done')
 
     def _prep_channel_slopes(self):
         wat_dir = self.wat_dir
@@ -1893,9 +1892,9 @@ class Wepp(NoDbBase, LogMixin):
                           channel_manning_roughness_coefficient_veg=None):
 
         if erodibility is not None or critical_shear is not None:
-            self.log('nodb.Wepp._prep_channel_chn::erodibility = {}, critical_shear = {} '
+            self.logger.info('nodb.Wepp._prep_channel_chn::erodibility = {}, critical_shear = {} '
                      .format(erodibility, critical_shear))
-            self.log_done()
+            self.logger.info('done')
 
         if erodibility is None:
             erodibility = self.channel_erodibility
@@ -2026,9 +2025,9 @@ class Wepp(NoDbBase, LogMixin):
 
     def _prep_7778_channel_soils(self, erodibility, critical_shear):
         if erodibility is not None or critical_shear is not None:
-            self.log('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
+            self.logger.info('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
                      .format(erodibility, critical_shear))
-            self.log_done()
+            self.logger.info('done')
 
         if erodibility is None:
             erodibility = self.channel_erodibility
@@ -2059,9 +2058,9 @@ class Wepp(NoDbBase, LogMixin):
 
     def _prep_2006_channel_soils(self, translator, erodibility, critical_shear, avke):
         if erodibility is not None or critical_shear is not None:
-            self.log('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
+            self.logger.info('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
                      .format(erodibility, critical_shear))
-            self.log_done()
+            self.logger.info('done')
 
         if erodibility is None:
             erodibility = self.channel_erodibility
@@ -2070,9 +2069,9 @@ class Wepp(NoDbBase, LogMixin):
             critical_shear = self.channel_critical_shear
 
         if avke is not None:
-            self.log('nodb.Wepp._prep_channel_soils::avke = {} '
+            self.logger.info('nodb.Wepp._prep_channel_soils::avke = {} '
                      .format(avke))
-            self.log_done()
+            self.logger.info('done')
 
         if avke is None:
             avke = self.channel_2006_avke
@@ -2170,7 +2169,7 @@ class Wepp(NoDbBase, LogMixin):
         wd = self.wd
         climate = Climate.getInstance(wd)
         wepp_bin = self.wepp_bin
-        self.log(f'Running Watershed wepp_bin:{self.wepp_bin}... ')
+        self.logger.info(f'Running Watershed wepp_bin:{self.wepp_bin}... ')
 
         runs_dir = self.runs_dir
 
@@ -2181,29 +2180,29 @@ class Wepp(NoDbBase, LogMixin):
                 ss_batch_id = d['ss_batch_id']
                 run_ss_batch_watershed(runs_dir, wepp_bin, ss_batch_id)
 
-                self.log('    moving .out files...')
+                self.logger.info('    moving .out files...')
                 for fn in glob(_join(self.runs_dir, '*.out')):
                     dst_path = _join(self.output_dir, ss_batch_key, _split(fn)[1])
                     shutil.move(fn, dst_path)
-                self.log_done()
+                self.logger.info('done')
 
         else:
             assert run_watershed(runs_dir, wepp_bin, status_channel=self._status_channel)
 
-            self.log('    moving .out files...')
+            self.logger.info('    moving .out files...')
             for fn in glob(_join(self.runs_dir, '*.out')):
                 dst_path = _join(self.output_dir, _split(fn)[1])
                 shutil.move(fn, dst_path)
-            self.log_done()
+            self.logger.info('done')
 
-        self.log_done()
+        self.logger.info('done')
 
         if not self.is_omni_contrasts_run:
             if self.prep_details_on_run_completion:
-                self.log('    exporting prep details...')
+                self.logger.info('    exporting prep details...')
                 export_channels_prep_details(wd)
                 export_hillslopes_prep_details(wd)
-                self.log_done()
+                self.logger.info('done')
 
             if not _exists(_join(wd, 'wepppost.nodb')):
                 WeppPost(wd, '0.cfg')
@@ -2211,45 +2210,45 @@ class Wepp(NoDbBase, LogMixin):
             climate = Climate.getInstance(wd)
 
             if not climate.is_single_storm:
-                self.log(' running wepppost... ')
+                self.logger.info(' running wepppost... ')
                 self._run_wepppost()
-                self.log_done()
+                self.logger.info('done')
 
-                self.log(' running totalwatsed2... ')
+                self.logger.info(' running totalwatsed2... ')
                 self._build_totalwatsed2()
-                self.log_done()
+                self.logger.info('done')
 
-                self.log(' running hillslope_watbal... ')
+                self.logger.info(' running hillslope_watbal... ')
                 self._run_hillslope_watbal()
-                self.log_done()
+                self.logger.info('done')
 
-                self.log(' compressing pass_pw0.txt... ')
+                self.logger.info(' compressing pass_pw0.txt... ')
                 compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
-                self.log_done()
+                self.logger.info('done')
 
-                self.log(' compressing soil_pw0.txt... ')
+                self.logger.info(' compressing soil_pw0.txt... ')
                 compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
-                self.log_done()
+                self.logger.info('done')
 
                 if self.legacy_arc_export_on_run_completion:
-                    self.log(' running legacy arcexport... ')
+                    self.logger.info(' running legacy arcexport... ')
                     from wepppy.export import  legacy_arc_export
                     legacy_arc_export(self.wd)
-                    self.log_done()
+                    self.logger.info('done')
 
 
             _ = self.loss_report # make the .parquet files for loss report
 
 
             if self.arc_export_on_run_completion:
-                self.log(' running gpkg_export... ')
+                self.logger.info(' running gpkg_export... ')
                 from wepppy.export.gpkg_export import gpkg_export
                 gpkg_export(self.wd)
-                self.log_done()
+                self.logger.info('done')
 
                 self.make_loss_grid()
 
-        self.log('Watershed Run Complete')
+        self.logger.info('Watershed Run Complete')
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -2279,28 +2278,28 @@ class Wepp(NoDbBase, LogMixin):
             send_discord_message(f':fireworks: [{link}](https://wepp.cloud/weppcloud/runs/{runid}/{config}/)')
 
     def _run_hillslope_watbal(self):
-        self.log('Calculating Hillslope Water Balance...')
+        self.logger.info('Calculating Hillslope Water Balance...')
         HillslopeWatbal(self.wd)
-        self.log_done()
+        self.logger.info('done')
 
     def _run_wepppost(self):
-        self.log('Running WeppPost... ')
+        self.logger.info('Running WeppPost... ')
         wepppost = WeppPost.getInstance(self.wd)
         wepppost.run_post()
-        self.log_done()
+        self.logger.info('done')
 
     def _build_totalwatsed2(self):
-        self.log('Building totalwatsed2.parquet... ')
+        self.logger.info('Building totalwatsed2.parquet... ')
         totwatsed2 = TotalWatSed2(self.wd, rebuild=True)
         fn = _join(self.export_dir, 'totalwatsed2.csv')
         totwatsed2.export(fn)
-        self.log_done()
+        self.logger.info('done')
 
     def _export_partitioned_totalwatsed2_dss(self):
-        self.log('Exporting totalwatsed2.dss... ')
+        self.logger.info('Exporting totalwatsed2.dss... ')
         from wepppy.wepp.out import totalwatsed_partitioned_dss_export
         totalwatsed_partitioned_dss_export(self.wd)
-        self.log_done()
+        self.logger.info('done')
 
     def report_loss(self, exclude_yr_indxs=None):
         output_dir = self.output_dir

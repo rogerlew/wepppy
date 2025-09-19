@@ -47,7 +47,6 @@ from .base import (
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
 from .redis_prep import RedisPrep, TaskEnum
-from .mixins.log_mixin import LogMixin
 
 try:
     import wepppyo3
@@ -137,10 +136,6 @@ class Soils(NoDbBase, LogMixin):
             nodb.getInstance(self.wd)
 
         self.dump_soils_parquet()
-
-    @property
-    def _status_channel(self):
-        return f'{self.runid}:soils'
 
     @property
     def _nodb(self):
@@ -330,7 +325,7 @@ class Soils(NoDbBase, LogMixin):
             raise
 
     def build_chile(self, initial_sat=None, ksflag=None):
-        self.log("wepp.nodb.Soils.build_chile()...\n")
+        self.logger.info("wepp.nodb.Soils.build_chile()...\n")
         from wepppy.locales.chile.soils import get_soil_fn
         from wepppy.wepp.soils.utils import WeppSoilUtil
 
@@ -359,7 +354,7 @@ class Soils(NoDbBase, LogMixin):
                 key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys=set())
             domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
 
-            self.log(f'domsoil_d: {repr(domsoil_d)}')
+            self.logger.info(f'domsoil_d: {repr(domsoil_d)}')
 
             soils = {}
             for topaz_id in watershed._subs_summary:
@@ -384,7 +379,7 @@ class Soils(NoDbBase, LogMixin):
                         pct_coverage=0.0
                     )
 
-            self.log(repr(soils))
+            self.logger.info(repr(soils))
 
             for topaz_id, k in domsoil_d.items():
                 soils[k].area += watershed.hillslope_area(topaz_id)
@@ -410,7 +405,7 @@ class Soils(NoDbBase, LogMixin):
             raise
 
     def build_isric(self, initial_sat=None, ksflag=None):
-        self.log("wepp.nodb.Soils.build_isric()...\n")
+        self.logger.info("wepp.nodb.Soils.build_isric()...\n")
         from wepppy.locales.earth.soils.isric import ISRICSoilData
 
         wd = self.wd
@@ -432,15 +427,15 @@ class Soils(NoDbBase, LogMixin):
                 self._ksflag = bool(ksflag)
 
             isric = ISRICSoilData(soils_dir)
-            self.log('fetching soil maps...')
+            self.logger.info('fetching soil maps...')
             isric.fetch(ron.map.extent, status_channel=self._status_channel)
-            self.log_done()
+            self.logger.info('done')
 
             domsoil_d = {}
             soils = {}
             valid_k_counts = Counter()
 
-            self.log('building soils...')
+            self.logger.info('building soils...')
 
             # Prepare arguments for multiprocessing
 
@@ -465,7 +460,7 @@ class Soils(NoDbBase, LogMixin):
                         valid_k_counts[mukey] += watershed.hillslope_area(topaz_id)
                         soils[mukey] = soil_summary
 
-            self.log_done()
+            self.logger.info('done')
 
             # now assign hillslopes with invalid mukeys the most common valid mukey
             most_common_k = valid_k_counts.most_common()[0][0]
@@ -500,7 +495,7 @@ class Soils(NoDbBase, LogMixin):
 
 
     def build_statsgo(self, initial_sat=None, ksflag=None):
-        self.log("wepp.nodb.Soils.build_statsgo()...\n")
+        self.logger.info("wepp.nodb.Soils.build_statsgo()...\n")
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
@@ -571,7 +566,7 @@ class Soils(NoDbBase, LogMixin):
             raise
 
     def _build_by_identify(self, build_func, status_channel):
-        self.log("wepp.nodb.Soils._build_by_identify()...\n")
+        self.logger.info("wepp.nodb.Soils._build_by_identify()...\n")
         soils_dir = self.soils_dir
         wd = self.wd
         self.lock()
@@ -610,7 +605,7 @@ class Soils(NoDbBase, LogMixin):
 
 
     def _build_from_map_db(self):
-        self.log("wepp.nodb.Soils._build_from_map_db()...\n")
+        self.logger.info("wepp.nodb.Soils._build_from_map_db()...\n")
         from wepppy.wepp.soils.utils import WeppSoilUtil
 
         wd = self.wd
@@ -635,7 +630,7 @@ class Soils(NoDbBase, LogMixin):
                 key_fn=watershed.subwta, parameter_fn=soils_fn, ignore_channels=True, ignore_keys=set())
             domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
 
-            self.log(f'domsoil_d: {repr(domsoil_d)}')
+            self.logger.info(f'domsoil_d: {repr(domsoil_d)}')
 
             soils = {}
             for topaz_id, mukey in domsoil_d.items():
@@ -654,7 +649,7 @@ class Soils(NoDbBase, LogMixin):
                         pct_coverage=0.0
                     )
 
-            self.log(repr(soils))
+            self.logger.info(repr(soils))
 
             for topaz_id, k in domsoil_d.items():
                 soils[k].area += watershed.hillslope_area(topaz_id)
@@ -695,8 +690,8 @@ class Soils(NoDbBase, LogMixin):
         # Make SSURGO Soils
         sm = SurgoMap(ssurgo_fn)
         mukeys = set(sm.mukeys)
-        self.log(f"ssurgo mukeys: {mukeys}")
-        self.log_done()
+        self.logger.info(f"ssurgo mukeys: {mukeys}")
+        self.logger.info('done')
 
         surgo_c = SurgoSoilCollection(mukeys)
         surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
@@ -705,14 +700,14 @@ class Soils(NoDbBase, LogMixin):
         soils = {str(k): v for k, v in soils.items()}
         surgo_c.logInvalidSoils(wd=soils_dir)
 
-        self.log(f"valid mukeys: {soils.keys()}")
-        self.log_done()
+        self.logger.info(f"valid mukeys: {soils.keys()}")
+        self.logger.info('done')
 
         valid = list(int(v) for v in soils.keys())
 
         if len(valid) == 0:
             # falling back to statsgo
-            self.log(f"falling back to statsgo")
+            self.logger.info(f"falling back to statsgo")
 
             statsgoSpatial = StatsgoSpatial()
 
@@ -734,7 +729,7 @@ class Soils(NoDbBase, LogMixin):
 
         
     def build(self, initial_sat=None, ksflag=None):
-        self.log("wepp.nodb.Soils.build()...\n")
+        self.logger.info("wepp.nodb.Soils.build()...\n")
 
         if self._mode == SoilsMode.SpatialAPI:
             self._build_spatial_api()
@@ -1089,8 +1084,8 @@ class Soils(NoDbBase, LogMixin):
             # Make SSURGO Soils
             sm = SurgoMap(ssurgo_fn)
             mukeys = set(sm.mukeys)
-            self.log(f"ssurgo mukeys: {mukeys}")
-            self.log_done()
+            self.logger.info(f"ssurgo mukeys: {mukeys}")
+            self.logger.info('done')
 
             surgo_c = SurgoSoilCollection(mukeys)
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
@@ -1099,24 +1094,24 @@ class Soils(NoDbBase, LogMixin):
             soils = {str(k): v for k, v in soils.items()}
             surgo_c.logInvalidSoils(wd=soils_dir)
 
-            self.log(f"valid mukeys: {soils.keys()}")
-            self.log_done()
+            self.logger.info(f"valid mukeys: {soils.keys()}")
+            self.logger.info('done')
 
 
             valid = list(int(v) for v in soils.keys())
 
             if wepppyo3 is None:
-                self.log(f"using build_soilgrid {valid}")
+                self.logger.info(f"using build_soilgrid {valid}")
                 domsoil_d = sm.build_soilgrid(
                     watershed.subwta
                 )
-                self.log_done()
+                self.logger.info('done')
             else:
-                self.log(f"using wepppyo3 {valid}")
+                self.logger.info(f"using wepppyo3 {valid}")
                 domsoil_d = identify_mode_single_raster_key(
                     key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys={-2147483648,})
                 domsoil_d = {k: str(v) for k, v in domsoil_d.items() if int(k) > 0}
-                self.log_done()
+                self.logger.info('done')
 
             dom_mukey = None
             for mukey, count in Counter(domsoil_d.values()).most_common():
@@ -1130,7 +1125,7 @@ class Soils(NoDbBase, LogMixin):
 
 
             if dom_mukey is None:
-                self.log('no surgo keys found, falling back to statsgo')
+                self.logger.info('no surgo keys found, falling back to statsgo')
                 self.dump_and_unlock()
                 self.build_statsgo(initial_sat=self.initial_sat,
                                    ksflag=self.ksflag)
@@ -1142,7 +1137,7 @@ class Soils(NoDbBase, LogMixin):
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
-            self.log('calculating soil coverage')
+            self.logger.info('calculating soil coverage')
             for k in soils:
                 soils[k].area = 0.0
 
@@ -1162,7 +1157,7 @@ class Soils(NoDbBase, LogMixin):
 
             self.dump_and_unlock()
 
-            self.log('triggering SOILS_BUILD_COMPLETE')
+            self.logger.info('triggering SOILS_BUILD_COMPLETE')
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
 
             # noinspection PyMethodFirstArgAssignment
@@ -1244,7 +1239,7 @@ class Soils(NoDbBase, LogMixin):
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
-        self.log('creating soils parquet table')
+        self.logger.info('creating soils parquet table')
         
         dict_result = self._subs_summary_gen()
         if dict_result is None or len(dict_result) == 0:
