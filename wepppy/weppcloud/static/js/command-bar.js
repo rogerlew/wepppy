@@ -42,6 +42,32 @@
             document.addEventListener('keydown', this.handleDocumentKeyDown);
             this.inputEl.addEventListener('keydown', this.handleInputKeyDown);
         }
+
+        focusInput(selectAll = false) {
+            if (!this.inputEl) {
+                return;
+            }
+
+            const applyFocus = () => {
+                try {
+                    this.inputEl.focus({ preventScroll: true });
+                } catch (error) {
+                    this.inputEl.focus();
+                }
+
+                if (selectAll) {
+                    if (typeof this.inputEl.select === 'function') {
+                        this.inputEl.select();
+                    }
+                }
+            };
+
+            applyFocus();
+
+            if (document.activeElement !== this.inputEl) {
+                window.requestAnimationFrame(applyFocus);
+            }
+        }
         createCommands() {
             return {
                 help: {
@@ -132,6 +158,11 @@
                 if (event.key === 'Escape') {
                     event.preventDefault();
                     this.deactivate();
+                    return;
+                }
+
+                if (event.target !== this.inputEl && !this.shouldIgnoreTriggerTarget(event.target)) {
+                    this.focusInput();
                 }
                 return;
             }
@@ -157,7 +188,7 @@
             this.inputWrapperEl.hidden = false;
             this.tipEl.textContent = TIP_ACTIVE;
             this.inputEl.value = '';
-            this.inputEl.focus();
+            this.focusInput();
         }
 
         deactivate() {
@@ -165,6 +196,9 @@
             this.inputWrapperEl.hidden = true;
             this.tipEl.textContent = TIP_DEFAULT;
             this.inputEl.value = '';
+            if (document.activeElement === this.inputEl) {
+                this.inputEl.blur();
+            }
         }
 
         executeCommand(fullCommand) {
@@ -243,15 +277,19 @@
             const baseUrl = this.projectBaseUrl + 'browse/';
             const resource = Array.isArray(args) ? args.join(' ').trim() : '';
 
-            let targetUrl;
             if (!resource) {
-                targetUrl = baseUrl;
-            } else {
-                const cleanedResource = resource.replace(/^\/+/, '');
-                targetUrl = baseUrl + cleanedResource;
+                window.location.href = baseUrl;
+                this.hideResult();
+                return;
             }
 
+            const cleanedResource = resource.replace(/^\/+/, '');
+            const targetUrl = baseUrl + cleanedResource;
+
             const newWindow = window.open(targetUrl, '_blank', 'noopener');
+            if (!newWindow) {
+                window.location.href = targetUrl;
+            }
             this.hideResult();
         }
 
