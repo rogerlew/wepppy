@@ -1,50 +1,55 @@
 <style>
 .command-bar-container {
-  color: white; 
-  background:#343a40; /* Match navbar dark theme */
-  position:fixed; 
-  bottom:0; 
-  left:0; 
-  z-index:1050; /* Higher than other elements */
-  width:100%; 
-  display: flex; 
+  color: #ffffff;
+  background: #343a40;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 1050;
+  width: 100%;
+  display: flex;
   flex-direction: column;
-  padding: 4px 8px;
+  gap: 4px;
+  padding: 6px 10px;
   font-family: monospace;
   font-size: x-small;
 }
-#command-bar-input {
-    padding: 2px 6px;
-    height: auto;
-    font-family: monospace;
-    font-size: x-small;
+.command-bar-input-wrapper[hidden],
+.command-bar-result[hidden] {
+  display: none;
 }
-#command-bar-result {
-    padding: 4px 6px;
-    background: #495057;
-    margin-top: 4px;
-    border-radius: 3px;
-    display: none; /* Initially hidden */
-    font-family: monospace;
-    font-size: x-small;
+.command-bar-input-wrapper input {
+  padding: 2px 6px;
+  height: auto;
+  font-family: monospace;
+  font-size: x-small;
 }
-#command-bar-result pre {
-    color: #f8f9fa;
-    margin: 0;
-    white-space: pre-wrap;
-    word-break: break-all;
-    font-family: monospace;
-    font-size: x-small;
+.command-bar-result {
+  padding: 4px 6px;
+  background: #495057;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: x-small;
+}
+.command-bar-result pre {
+  color: #f8f9fa;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: monospace;
+  font-size: x-small;
 }
 </style>
-<div class="command-bar-container">
-  <span id="command-bar">Tip: Press ':' to activate the command bar</span>
-  <span id="command-bar-result"></span>
+<div class="command-bar-container" data-command-bar>
+  <div data-command-tip>Tip: Press ':' to activate the command bar</div>
+  <div class="command-bar-input-wrapper" data-command-input-wrapper hidden>
+    <input type="text" class="form-control form-control-sm" placeholder="Enter command..." data-command-input autocomplete="off">
+  </div>
+  <div class="command-bar-result" data-command-result hidden></div>
 </div>
 <script type="text/javascript" src="{{ url_for('static', filename='js/command-bar.js') }}"></script>
 <script>
-    $(window).on('load', function () {
-      var command_bar = CommandBar.getInstance();
-      command_bar.init();
-    });
+  if (typeof window.initializeCommandBar === 'function') {
+    window.initializeCommandBar();
+  }
 </script>

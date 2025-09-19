@@ -1,181 +1,281 @@
 // static/js/command-bar.js
+(() => {
+    'use strict';
 
-class CommandBar {
-    static instance;
+    const KEY_TRIGGER = ':';
+    const TIP_DEFAULT = "Tip: Press ':' to activate the command bar";
+    const TIP_ACTIVE = 'Command mode - press Enter to run, Esc to cancel';
+    const INSTANCE_DATA_KEY = '__commandBarInstance';
+    const STAY_ACTIVE_COMMANDS = new Set(['help', 'status', 'clear']);
 
-    constructor() {
-        // DOM elements
-        this.container = document.querySelector('.command-bar-container');
-        this.span = document.getElementById('command-bar');
-        this.result_span = document.getElementById('command-bar-result');
+    class CommandBar {
+        constructor(container) {
+            this.container = container;
+            this.tipEl = container.querySelector('[data-command-tip]');
+            this.resultEl = container.querySelector('[data-command-result]');
+            this.inputWrapperEl = container.querySelector('[data-command-input-wrapper]');
+            this.inputEl = container.querySelector('[data-command-input]');
 
-        // State
-        this.is_active = false;
-        this.input_field = null;
-        this.project_base_url = null;
-        
-        // Command definitions
-        this._commands = {
-            'help': {
-                description: 'Show available commands',
-                action: (args) => {
-                    const command_list = Object.keys(this._commands)
-                        .map(cmd => `  ${cmd.padEnd(10)} - ${this._commands[cmd].description}`)
-                        .join('\n');
-                    this._show_result(`Available Commands:\n${command_list}`);
-                }
-            },
-            'home': {
-                description: 'Go to the wepp.cloud homepage',
-                action: () => window.location.href = '/weppcloud'
-            },
-            'report': {
-                description: 'Go to the project report page',
-                action: () => this._navigate_to_project_page('report/')
-            },
-            'browse': {
-                description: 'Go to the project file browser',
-                action: () => this._navigate_to_project_page('browse/')
-            },
-            'view': {
-                description: 'Go to the project map view',
-                action: () => this._navigate_to_project_page('view/')
-            },
-            'status': {
-                description: 'Check the project run status',
-                action: async () => {
-                    if (!this.project_base_url) {
-                        this._show_result('Error: Cannot check status, not on a project page.');
-                        return;
-                    }
-                    try {
-                        const response = await fetch(`${this.project_base_url}status.json`);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        const data = await response.json();
-                        const formatted_json = JSON.stringify(data, null, 2);
-                        this._show_result(formatted_json);
+            this.active = false;
+            this.projectBaseUrl = this.getProjectBaseUrl();
+            this.commands = this.createCommands();
 
-                    } catch (error) {
-                        console.error('Error fetching status:', error);
-                        this._show_result(`Error: Could not fetch status. ${error.message}`);
-                    }
-                }
-            },
-            'clear': {
-                description: 'Clear the command bar result',
-                action: () => this._hide_result()
+            this.handleDocumentKeyDown = this.handleDocumentKeyDown.bind(this);
+            this.handleInputKeyDown = this.handleInputKeyDown.bind(this);
+        }
+
+        init() {
+            if (!this.tipEl || !this.resultEl || !this.inputWrapperEl || !this.inputEl) {
+                console.warn('CommandBar: Missing required elements in the template.');
+                return;
             }
-        };
-    }
 
-    /**
-     * Singleton pattern to ensure only one instance of CommandBar exists.
-     */
-    static getInstance() {
-        if (!CommandBar.instance) {
-            CommandBar.instance = new CommandBar();
+            this.tipEl.textContent = TIP_DEFAULT;
+            this.hideResult();
+            this.deactivate();
+
+            document.addEventListener('keydown', this.handleDocumentKeyDown);
+            this.inputEl.addEventListener('keydown', this.handleInputKeyDown);
         }
-        return CommandBar.instance;
-    }
-    
-    /**
-     * Extracts the project base URL from the window's current path.
-     * The pattern matches /weppcloud/runs/<run_id>/<cfg>/.
-     * @returns {string|null} The base URL if found, otherwise null.
-     */
-    _get_project_base_url() {
-        const regex = /^(?:\/weppcloud)?\/runs\/[^\/]+\/[^\/]+\//;
-        const match = window.location.pathname.match(regex);
-        return match ? match[1] : null;
-    }
-    
-    /**
-     * Helper function to navigate to a sub-page of the current project.
-     * @param {string} subpath - The path to append to the project base URL.
-     */
-    _navigate_to_project_page(subpath) {
-        if (this.project_base_url) {
-            window.location.href = this.project_base_url + subpath;
-        } else {
-            this._show_result('Error: This command is only available on a project page.');
-        }
-    }
-
-    /**
-     * Initializes the command bar, sets up listeners, and finds the base URL.
-     */
-    init() {
-        // Determine the project context on initialization
-        this.project_base_url = this._get_project_base_url();
-        
-        document.addEventListener('keydown', (e) => this._handle_key_down(e));
-        console.log("CommandBar initialized.");
-        if (this.project_base_url) {
-            console.log(`Project context set to: ${this.project_base_url}`);
-        }
-    }
-
-    _handle_key_down(e) {
-        if (e.key === ':' && !this.is_active && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-            e.preventDefault();
-            this._activate();
-        } else if (e.key === 'Escape' && this.is_active) {
-            e.preventDefault();
-            this._deactivate();
-        } else if (e.key === 'Enter' && this.is_active) {
-            e.preventDefault();
-            this._execute_command();
-        }
-    }
-
-    _activate() {
-        this.is_active = true;
-        this.span.innerHTML = '<input type="text" id="command-bar-input" class="form-control form-control-sm" placeholder="Enter command...">';
-        this.input_field = document.getElementById('command-bar-input');
-        this.input_field.focus();
-    }
-
-    _deactivate() {
-        this.is_active = false;
-        this.span.textContent = 'Tip: Press \':\' to activate the command bar';
-        this._hide_result();
-    }
-
-    _execute_command() {
-        const full_command = this.input_field.value.trim();
-        if (!full_command) {
-            this._deactivate();
-            return;
+        createCommands() {
+            return {
+                help: {
+                    description: 'Show available commands',
+                    action: () => this.showHelp()
+                },
+                map: {
+                    description: 'Navigate to Map',
+                    action: () => this.navigateToSelector('a[href^="#map"]')
+                },
+                sbs: {
+                    description: 'Navigate to Soil Burn Severity',
+                    action: () => this.navigateToSelector('a[href^="#soil-burn-severity-optional"]')
+                },
+                channels: {
+                    description: 'Navigate to Channel Delineation',
+                    action: () => this.navigateToSelector('a[href="#channel-delineation"]')
+                },
+                outlet: {
+                    description: 'Navigate to Outlet',
+                    action: () => this.navigateToSelector('a[href="#outlet"]')
+                },
+                subcatchments: {
+                    description: 'Navigate to Subcatchments Delineation',
+                    action: () => this.navigateToSelector('a[href="#subcatchments-delineation"]')
+                },
+                landuse: {
+                    description: 'Navigate to Landuse Options',
+                    action: () => this.navigateToSelector('a[href="#landuse-options"]')
+                },
+                soils: {
+                    description: 'Navigate to Soil Options',
+                    action: () => this.navigateToSelector('a[href="#soil-options"]')
+                },
+                climate: {
+                    description: 'Navigate to Climate Options',
+                    action: () => this.navigateToSelector('a[href="#climate-options"]')
+                },
+                rap_ts: {
+                    description: 'Navigate to RAP Time Series Acquisition',
+                    action: () => this.navigateToSelector('a[href="#rap-time-series-acquisition"]')
+                },
+                wepp: {
+                    description: 'Navigate to WEPP',
+                    action: () => this.navigateToSelector('a[href="#wepp"]')
+                },
+                observed: {
+                    description: 'Navigate to Observed Data Model Fit',
+                    action: () => this.navigateToSelector('a[href="#observed-data-model-fit"]')
+                },
+                debris: {
+                    description: 'Navigate to Debris Flow Analysis',
+                    action: () => this.navigateToSelector('a[href="#debris-flow-analysis"]')
+                },
+                watar: {
+                    description: 'Navigate to Wildfire Ash Transport and Risk (WATAR)',
+                    action: () => this.navigateToSelector('a[href="#wildfire-ash-transport-and-risk-watar"]')
+                },
+                dss_export: {
+                    description: 'Navigate to Partitioned DSS Export for HEC',
+                    action: () => this.navigateToSelector('a[href="#partitioned-dss-export-for-hec"]')
+                },
+                browse: {
+                    description: 'Go to the project file browser',
+                    action: () => this.navigateToProjectPage('browse/')
+                },
+                clear: {
+                    description: 'Clear the command bar result',
+                    action: () => this.hideResult()
+                }
+            };
         }
 
-        const [command, ...args] = full_command.split(/\s+/);
-        const command_obj = this._commands[command.toLowerCase()];
-
-        if (command_obj) {
-            command_obj.action(args);
-        } else {
-            this._show_result(`Error: Command not found "${command}"`);
+        shouldIgnoreTriggerTarget(target) {
+            if (!target) {
+                return false;
+            }
+            const tagName = target.tagName;
+            return target.isContentEditable || tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT';
         }
 
-        if (command.toLowerCase() !== 'help' && command.toLowerCase() !== 'status' && command.toLowerCase() !== 'clear') {
-            this._deactivate();
+        handleDocumentKeyDown(event) {
+            if (this.active) {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    this.deactivate();
+                }
+                return;
+            }
+
+            if (event.key === KEY_TRIGGER && !this.shouldIgnoreTriggerTarget(event.target)) {
+                event.preventDefault();
+                this.activate();
+            }
+        }
+
+        handleInputKeyDown(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                this.executeCommand(this.inputEl.value.trim());
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                this.deactivate();
+            }
+        }
+
+        activate() {
+            this.active = true;
+            this.inputWrapperEl.hidden = false;
+            this.tipEl.textContent = TIP_ACTIVE;
+            this.inputEl.value = '';
+            this.inputEl.focus();
+        }
+
+        deactivate() {
+            this.active = false;
+            this.inputWrapperEl.hidden = true;
+            this.tipEl.textContent = TIP_DEFAULT;
+            this.inputEl.value = '';
+        }
+
+        executeCommand(fullCommand) {
+            if (!fullCommand) {
+                this.deactivate();
+                return;
+            }
+
+            const [commandName, ...rawArgs] = fullCommand.split(/\s+/);
+            const command = this.commands[commandName.toLowerCase()];
+
+            if (!command) {
+                this.showResult(`Error: Command not found "${commandName}"`);
+                this.deactivate();
+                return;
+            }
+
+            try {
+                const result = command.action(rawArgs);
+                if (result instanceof Promise) {
+                    result.catch((error) => {
+                        console.error('CommandBar error:', error);
+                        this.showResult(`Error: ${error.message || 'Unknown error'}`);
+                    });
+                }
+            } catch (error) {
+                console.error('CommandBar error:', error);
+                this.showResult(`Error: ${error.message || 'Unknown error'}`);
+            }
+
+            if (!STAY_ACTIVE_COMMANDS.has(commandName.toLowerCase())) {
+                this.deactivate();
+            }
+        }
+
+        showResult(message) {
+            this.resultEl.hidden = false;
+            this.resultEl.textContent = '';
+            const pre = document.createElement('pre');
+            pre.textContent = message;
+            this.resultEl.appendChild(pre);
+        }
+
+        hideResult() {
+            this.resultEl.hidden = true;
+            this.resultEl.textContent = '';
+        }
+
+        showHelp() {
+            const lines = Object.entries(this.commands)
+                .map(([name, meta]) => `${name.padEnd(10)} - ${meta.description}`)
+                .join('\n');
+            this.showResult(`Available Commands:\n${lines}`);
+        }
+
+        getProjectBaseUrl() {
+            const match = window.location.pathname.match(/^(?:\/weppcloud)?\/runs\/[^\/]+\/[^\/]+\//);
+            return match ? match[0] : null;
+        }
+
+        navigateToProjectPage(subpath) {
+            if (this.projectBaseUrl) {
+                window.location.href = this.projectBaseUrl + subpath;
+            } else {
+                this.showResult('Error: This command is only available on a project page.');
+            }
+        }
+
+        navigateToSelector(selector) {
+            if (!selector) {
+                return;
+            }
+            const anchorLink = document.querySelector(selector);
+            if (anchorLink) {
+                anchorLink.click();
+                this.hideResult();
+                return;
+            }
+            this.showResult('Error: Could not find the specified section on this page.');
+        }
+
+        async fetchStatus() {
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: Cannot check status outside of a project page.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${this.projectBaseUrl}status.json`, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                const data = await response.json();
+                this.showResult(JSON.stringify(data, null, 2));
+            } catch (error) {
+                console.error('Error fetching status:', error);
+                this.showResult(`Error: Could not fetch status. ${error.message || error}`);
+            }
         }
     }
 
-    _show_result(message) {
-        // To display JSON nicely, we wrap it in <pre> tags
-        if (message.trim().startsWith('{') || message.trim().startsWith('[')) {
-            this.result_span.innerHTML = `<pre>${message}</pre>`;
-        } else {
-            this.result_span.innerHTML = `<pre>${message}</pre>`;
+    function initializeCommandBar(root = document) {
+        const container = root.querySelector('[data-command-bar]');
+        if (!container) {
+            return null;
         }
-        this.result_span.style.display = 'block';
+
+        if (container[INSTANCE_DATA_KEY]) {
+            return container[INSTANCE_DATA_KEY];
+        }
+
+        const commandBar = new CommandBar(container);
+        commandBar.init();
+        container[INSTANCE_DATA_KEY] = commandBar;
+        return commandBar;
     }
 
-    _hide_result() {
-        this.result_span.style.display = 'none';
-        this.result_span.innerHTML = '';
-    }
-}
+    window.initializeCommandBar = initializeCommandBar;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeCommandBar();
+    });
+})();
