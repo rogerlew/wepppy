@@ -109,8 +109,8 @@
                     action: () => this.navigateToSelector('a[href="#partitioned-dss-export-for-hec"]')
                 },
                 browse: {
-                    description: 'Go to the project file browser',
-                    action: () => this.navigateToProjectPage('browse/')
+                    description: 'Go to the project file browser (optionally jump to a resource)',
+                    action: (args) => this.navigateToProjectBrowse(args)
                 },
                 clear: {
                     description: 'Clear the command bar result',
@@ -232,6 +232,27 @@
             } else {
                 this.showResult('Error: This command is only available on a project page.');
             }
+        }
+
+        navigateToProjectBrowse(args = []) {
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: The browse command is only available on a project page.');
+                return;
+            }
+
+            const baseUrl = this.projectBaseUrl + 'browse/';
+            const resource = Array.isArray(args) ? args.join(' ').trim() : '';
+
+            let targetUrl;
+            if (!resource) {
+                targetUrl = baseUrl;
+            } else {
+                const cleanedResource = resource.replace(/^\/+/, '');
+                targetUrl = baseUrl + cleanedResource;
+            }
+
+            const newWindow = window.open(targetUrl, '_blank', 'noopener');
+            this.hideResult();
         }
 
         navigateToSelector(selector) {
