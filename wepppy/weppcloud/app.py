@@ -3504,33 +3504,6 @@ def report_wepp_results(runid, config):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/<config>/report/<nodb>/log')
-@app.route('/runs/<string:runid>/<config>/report/<nodb>/log/')
-def get_wepp_run_status_full(runid, config, nodb):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-
-    try:
-        if nodb == 'wepp':
-            wepp = Wepp.getInstance(wd)
-            with open(wepp.status_log) as fp:
-                status_log = fp.read()
-        elif nodb == 'climate':
-            climate = Climate.getInstance(wd)
-            with open(climate.status_log) as fp:
-                status_log = fp.read()
-        else:
-            status_log = 'error'
-
-        return render_template('reports/wepp/log.htm',
-                               status_log=status_log,
-                               ron=ron,
-                               user=current_user)
-    except:
-        return exception_factory('Error reading status.log', runid=runid)
-
-
-# noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/query/subcatchments_summary')
 @app.route('/runs/<string:runid>/<config>/query/subcatchments_summary/')
 def query_subcatchments_summary(runid, config):
