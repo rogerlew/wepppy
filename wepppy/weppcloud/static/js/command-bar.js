@@ -7,6 +7,11 @@
     const TIP_ACTIVE = 'Command mode - press Enter to run, Esc to cancel';
     const INSTANCE_DATA_KEY = '__commandBarInstance';
     const STAY_ACTIVE_COMMANDS = new Set(['help', 'status', 'clear']);
+    const SET_HELP_LINES = [
+        "set units <si|english>    - Switch global unit preferences",
+        "set name <project name>   - Update the project name",
+        "set scenario <name>       - Update the project scenario"
+    ];
 
     class CommandBar {
         constructor(container) {
@@ -50,6 +55,10 @@
                 sbs: {
                     description: 'Navigate to Soil Burn Severity',
                     action: () => this.navigateToSelector('a[href^="#soil-burn-severity-optional"]')
+                },
+                set: {
+                    description: 'Update project settings (see help for usage)',
+                    action: (args) => this.handleSetCommand(args)
                 },
                 channels: {
                     description: 'Navigate to Channel Delineation',
@@ -208,7 +217,8 @@
             const lines = Object.entries(this.commands)
                 .map(([name, meta]) => `${name.padEnd(10)} - ${meta.description}`)
                 .join('\n');
-            this.showResult(`Available Commands:\n${lines}`);
+            const setHelp = SET_HELP_LINES.map((line) => `  ${line}`).join('\n');
+            this.showResult(`Available Commands:\n${lines}\n\nSet command usage:\n${setHelp}`);
         }
 
         getProjectBaseUrl() {
@@ -235,6 +245,123 @@
                 return;
             }
             this.showResult('Error: Could not find the specified section on this page.');
+        }
+
+        handleSetCommand(args = []) {
+            if (!Array.isArray(args) || args.length === 0) {
+                this.showResult('Usage:\n' + SET_HELP_LINES.join('\n'));
+                return;
+            }
+
+            const [subcommandRaw, ...rest] = args;
+            const subcommand = (subcommandRaw || '').toLowerCase();
+
+            switch (subcommand) {
+                case 'units':
+                    this.routeSetUnits(rest);
+                    break;
+                case 'name':
+                    this.routeSetName(rest);
+                    break;
+                case 'scenario':
+                    this.routeSetScenario(rest);
+                    break;
+                default:
+                    this.showResult(`Error: Unknown set option "${subcommandRaw}"`);
+            }
+        }
+
+        routeSetUnits(args = []) {
+            if (args.length === 0) {
+                this.showResult('Usage: set units <si|english>');
+                return;
+            }
+
+            const unitType = (args[0] || '').toLowerCase();
+            if (unitType !== 'si' && unitType !== 'english') {
+                this.showResult('Error: Unit type must be "si" or "english".');
+                return;
+            }
+
+            if (typeof window.setGlobalUnitizerPreference !== 'function') {
+                this.showResult('Error: setGlobalUnitizerPreference is not available.');
+                return;
+            }
+
+            try {
+                window.setGlobalUnitizerPreference(0);
+                this.hideResult();
+            } catch (error) {
+                console.error('Error setting unit preference:', error);
+                this.showResult(`Error: Unable to set units. ${error.message || error}`);
+            }
+        }
+
+        routeSetName(args = []) {
+            const name = args.join(' ').trim();
+            if (!name) {
+                this.showResult('Usage: set name <project name>');
+                return;
+            }
+
+            const project = this.getProjectInstance();
+            if (!project) {
+                return;
+            }
+
+            if (typeof project.setName !== 'function') {
+                this.showResult('Error: Project.setName is not available.');
+                return;
+            }
+
+            try {
+                project.setName(name);
+                this.hideResult();
+            } catch (error) {
+                console.error('Error setting project name:', error);
+                this.showResult(`Error: Unable to set project name. ${error.message || error}`);
+            }
+        }
+
+        routeSetScenario(args = []) {
+            const scenario = args.join(' ').trim();
+            if (!scenario) {
+                this.showResult('Usage: set scenario <name>');
+                return;
+            }
+
+            const project = this.getProjectInstance();
+            if (!project) {
+                return;
+            }
+
+            if (typeof project.setScenario !== 'function') {
+                this.showResult('Error: Project.setScenario is not available.');
+                return;
+            }
+
+            try {
+                project.setScenario(scenario);
+                this.hideResult();
+            } catch (error) {
+                console.error('Error setting project scenario:', error);
+                this.showResult(`Error: Unable to set project scenario. ${error.message || error}`);
+            }
+        }
+
+        getProjectInstance() {
+            if (!window.Project || typeof window.Project.getInstance !== 'function') {
+                this.showResult('Error: Project instance is not available.');
+                return null;
+            }
+
+            try {
+                return window.Project.getInstance();
+            } catch (error) {
+                console.error('Error retrieving Project instance:', error);
+                this.showResult(`Error: Unable to access project. ${error.message || error}`);
+                return null;
+            }
         }
 
         async fetchStatus() {
