@@ -1738,7 +1738,7 @@ def meta_subcatchmets_wgs(runid, config):
 def log_access(wd, current_user, ip):
     assert _exists(wd)
 
-    fn, runid = _split(wd)
+    fn, runid = _split(wd.rstrip('/'))
     fn = _join(fn, '.{}'.format(runid))
     with open(fn, 'a') as fp:
         email = getattr(current_user, 'email', '<anonymous>')
