@@ -1770,10 +1770,13 @@ if _exists('/workdir/weppcloud2/microservices/wepppush/vapid.json'):
 def runs0(runid, config):
     global VAPID_PUBLIC_KEY
     from wepppy.nodb.mods.revegetation import Revegetation
+    from wepppy.nodb.base import cache_project_nodbs_to_redis
 
     assert config is not None
 
     wd = get_wd(runid)
+    cache_project_nodbs_to_redis(wd)
+
     owners = get_run_owners(runid)
     try:
         ron = Ron.getInstance(wd)
