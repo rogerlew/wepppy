@@ -87,10 +87,6 @@ class Rhem(NoDbBase):
         return _join(self.wd, 'rhem', 'output')
 
     @property
-    def status_log(self):
-        return os.path.abspath(_join(self.runs_dir, 'status.log'))
-
-    @property
     def _nodb(self):
         return _join(self.wd, 'rhem.nodb')
 
@@ -169,9 +165,6 @@ class Rhem(NoDbBase):
         self.logger.info('done')
 
     def clean(self):
-        if _exists(self.status_log):
-            os.remove(self.status_log)
-
         runs_dir = self.runs_dir
         if _exists(runs_dir):
             try:

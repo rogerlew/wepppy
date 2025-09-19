@@ -1054,10 +1054,6 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-    @property
-    def status_log(self):
-        return os.path.abspath(_join(self.soils_dir, 'status.log'))
-
     def _build_gridded(self, initial_sat=None, ksflag=None):
         global wepppyo3
 

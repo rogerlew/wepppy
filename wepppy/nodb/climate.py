@@ -863,10 +863,6 @@ class Climate(NoDbBase):
         return cli.breakpoint
 
     @property
-    def status_log(self):
-        return os.path.abspath(_join(self.cli_dir, 'status.log'))
-
-    @property
     def observed_clis(self):
         wc = getattr(self, '_observed_clis_wc', None)
         if wc is None:

@@ -379,10 +379,6 @@ class SkidTrails(NoDbBase):
         return _join(self.wd, 'skid_trails', 'output')
 
     @property
-    def status_log(self):
-        return os.path.abspath(_join(self.runs_dir, 'status.log'))
-
-    @property
     def _nodb(self):
         return _join(self.wd, 'skid_trails.nodb')
 
