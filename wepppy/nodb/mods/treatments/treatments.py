@@ -4,7 +4,6 @@ import ast
 import csv
 import shutil
 from collections import Counter
-import jsonpickle
 from datetime import datetime
 from subprocess import Popen, PIPE
 from os.path import join as _join
@@ -61,6 +60,7 @@ class Treatments(NoDbBase, LogMixin):
     Treatments are applied to the hillslopes based on the landuse and sbs state, after building the landuse and applying disturbed adjustments.
     """
     __name__ = 'Treatments'
+    filename = 'treatments.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(Treatments, self).__init__(wd, cfg_fn)
@@ -82,43 +82,6 @@ class Treatments(NoDbBase, LogMixin):
             raise
 
     
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'treatments.nodb')
-
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Treatments), db
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Treatments.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
-
     @property
     def _nodb(self):
         return _join(self.wd, 'treatments.nodb')

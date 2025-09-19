@@ -12,7 +12,6 @@ import shutil
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
-import jsonpickle
 
 from ....base import NoDbBase
 
@@ -48,6 +47,7 @@ _soils_map = {
 
 class TurkeyMod(NoDbBase, LocationMixin):
     __name__ = 'PortlandMod'
+    filename = 'turkey.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(TurkeyMod, self).__init__(wd, cfg_fn)
@@ -64,29 +64,6 @@ class TurkeyMod(NoDbBase, LocationMixin):
         except Exception:
             self.unlock('-f')
             raise
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'turkey.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, TurkeyMod), db
-
-        if _exists(_join(wd, 'READONLY')):
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
 
     @property
     def _nodb(self):

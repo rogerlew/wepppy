@@ -26,7 +26,6 @@ import pandas as pd
 import numpy as np
 
 # non-standard
-import jsonpickle
 
 from datetime import datetime
 
@@ -66,6 +65,7 @@ class RevegetationNoDbLockedException(Exception):
 
 class Revegetation(NoDbBase, LogMixin):
     __name__ = 'Revegetation'
+    filename = 'revegetation.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(Revegetation, self).__init__(wd, cfg_fn)
@@ -173,35 +173,6 @@ class Revegetation(NoDbBase, LogMixin):
     @property
     def status_log(self):
         return os.path.abspath(_join(self.revegetation_dir, 'status.log'))
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        with open(_join(wd, 'revegetation.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Revegetation)
-
-        if _exists(_join(wd, 'READONLY')):
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Revegetation.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):

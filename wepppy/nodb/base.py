@@ -81,6 +81,8 @@ class TriggerEvents(Enum):
 
 class NoDbBase(object):
     DEBUG = 0
+    filename = None
+    _js_decode_replacements = ()
 
     def __init__(self, wd, cfg_fn):
         assert _exists(wd)
@@ -91,6 +93,69 @@ class NoDbBase(object):
         # noinspection PyUnresolvedReferences
         if _exists(self._nodb):
             raise Exception('NoDb has already been initialized')
+
+    @classmethod
+    def getInstance(cls, wd='.', allow_nonexistent=False, ignore_lock=False):
+        filepath = cls._get_nodb_path(wd)
+
+        if not _exists(filepath):
+            if allow_nonexistent:
+                return None
+            raise FileNotFoundError(f"'{filepath}' not found!")
+
+        with open(filepath) as fp:
+            json_text = fp.read()
+
+        json_text = cls._preprocess_json_for_decode(json_text)
+        db = cls._decode_jsonpickle(json_text)
+
+        if not isinstance(db, cls):
+            raise TypeError(f"Decoded object type {type(db)} does not match expected {cls}")
+
+        db = cls._post_instance_loaded(db)
+
+        abs_wd = os.path.abspath(wd)
+        db_wd = getattr(db, 'wd', abs_wd)
+
+        if _exists(_join(wd, 'READONLY')) or ignore_lock:
+            db.wd = abs_wd
+            return db
+
+        if abs_wd != os.path.abspath(db_wd):
+            if not db.islocked():
+                db.wd = wd
+                db.lock()
+                db.dump_and_unlock()
+
+        return db
+
+    @classmethod
+    def getInstanceFromRunID(cls, runid, allow_nonexistent=False, ignore_lock=False):
+        from wepppy.weppcloud.utils.helpers import get_wd
+
+        return cls.getInstance(
+            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
+
+    @classmethod
+    def _get_nodb_path(cls, wd):
+        if cls.filename is None:
+            raise AttributeError(f"{cls.__name__} must define a class attribute 'filename'")
+        return _join(wd, cls.filename)
+
+    @classmethod
+    def _preprocess_json_for_decode(cls, json_text):
+        for old, new in getattr(cls, '_js_decode_replacements', ()):
+            json_text = json_text.replace(old, new)
+        return json_text
+
+    @classmethod
+    def _decode_jsonpickle(cls, json_text):
+        return jsonpickle.decode(json_text)
+
+    @classmethod
+    def _post_instance_loaded(cls, instance):
+        # hook for subclasses needing to mutate the decoded instance
+        return instance
 
     @property
     def watershed_instance(self):
@@ -673,4 +738,3 @@ class NoDbBase(object):
     @property
     def wmesque_endpoint(self) -> None|str:
         return self.config_get_str('wmesque', 'endpoint', None)
-

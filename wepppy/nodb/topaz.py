@@ -11,7 +11,6 @@ from os.path import join as _join
 from os.path import exists as _exists
 
 import math
-import jsonpickle
 
 import numpy as np
 import numpy.ma as ma
@@ -47,6 +46,7 @@ class TopazNoDbLockedException(Exception):
 
 
 class Topaz(NoDbBase):
+    filename = 'topaz.nodb'
     __name__ = 'Topaz'
 
     def __init__(self, wd, cfg_fn):
@@ -77,43 +77,6 @@ class Topaz(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'topaz.nodb')
-
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Topaz)
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Topaz.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
-
     @property
     def _nodb(self):
         return _join(self.wd, 'topaz.nodb')

@@ -21,7 +21,6 @@ import time
 from copy import deepcopy
 
 # non-standard
-import jsonpickle
 import numpy as np
 import pandas as pd
 
@@ -86,6 +85,7 @@ class Landuse(NoDbBase, LogMixin):
     and coordinates access of NoDb instances.
     """
     __name__ = 'Landuse'
+    filename = 'landuse.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(Landuse, self).__init__(wd, cfg_fn)
@@ -136,51 +136,19 @@ class Landuse(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-    #
-    # Required for NoDbBase Subclass
-    #
+    @classmethod
+    def _post_instance_loaded(cls, instance):
+        instance = super()._post_instance_loaded(instance)
 
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'landuse.nodb')
+        if hasattr(instance, 'domlc_mofe_d') and instance.domlc_mofe_d is not None:
+            for topaz_id in instance.domlc_mofe_d:
+                mofe_d = {}
+                for _id in sorted(int(_id) for _id in instance.domlc_mofe_d[topaz_id]):
+                    _id = str(_id)
+                    mofe_d[_id] = instance.domlc_mofe_d[topaz_id][_id]
+                instance.domlc_mofe_d[topaz_id] = mofe_d
 
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Landuse)
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        if hasattr(db, 'domlc_mofe_d'):
-            if db.domlc_mofe_d is not None:
-                for topaz_id in db.domlc_mofe_d:
-                    mofe_d = {}
-                    for _id in sorted([int(_id) for _id in db.domlc_mofe_d[topaz_id]]):
-                        _id = str(_id)
-                        mofe_d[_id] = db.domlc_mofe_d[topaz_id][_id]
-                    db.domlc_mofe_d[topaz_id] = mofe_d
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Landuse.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
+        return instance
 
     @property
     def _status_channel(self):

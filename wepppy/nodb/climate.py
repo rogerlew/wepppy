@@ -40,7 +40,6 @@ import pandas as pd
 import rasterio
 
 # non-standard
-import jsonpickle
 
 from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
 
@@ -632,6 +631,9 @@ def cli_revision(cli_fn: str, is_breakpoint: bool, ws_ppts: np.array, ws_tmaxs: 
 
 # noinspection PyUnusedLocal
 class Climate(NoDbBase, LogMixin):
+    filename = 'climate.nodb'
+    _js_decode_replacements = (("\"orig_cli_fn\"", "\"_orig_cli_fn\""),)
+
     def __init__(self, wd, cfg_fn):
         super(Climate, self).__init__(wd, cfg_fn)
 
@@ -745,43 +747,6 @@ class Climate(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'climate.nodb')
-
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read().replace('"orig_cli_fn"', '"_orig_cli_fn"'))
-            assert isinstance(db, Climate)
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Climate.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _status_channel(self):

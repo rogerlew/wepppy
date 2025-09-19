@@ -15,7 +15,6 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 
-import jsonpickle
 
 # from wepppy.all_your_base import RasterDatasetInterpolator
 

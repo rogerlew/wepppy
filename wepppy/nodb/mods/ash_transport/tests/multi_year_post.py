@@ -13,6 +13,9 @@ from wepppy.nodb import Watershed
 from wepppy.nodb.mods import Ash
 import sys
 
+
+# This file is from Anurag. it was used to debug the multi-year ash statistics
+
 common_cols =  ['area (ha)', 'topaz_id', 'year', 'mo', 'da', 'julian', 'year0', 'days_from_fire (days)']
 
 

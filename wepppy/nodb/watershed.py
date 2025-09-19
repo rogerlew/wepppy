@@ -107,6 +107,21 @@ TRANSIENT_FIELDS = ["_sub_area_lookup", "_sub_length_lookup", "_sub_centroid_loo
 
 class Watershed(NoDbBase, LogMixin):
     __name__ = "Watershed"
+    filename = 'watershed.nodb'
+    _js_decode_replacements = (
+        (
+            "wepppy.watershed_abstraction.support.HillSummary",
+            "wepppy.topo.watershed_abstraction.support.HillSummary",
+        ),
+        (
+            "wepppy.watershed_abstraction.support.ChannelSummary",
+            "wepppy.topo.watershed_abstraction.support.ChannelSummary",
+        ),
+        (
+            "wepppy.watershed_abstraction.support.CentroidSummary",
+            "wepppy.topo.watershed_abstraction.support.CentroidSummary",
+        ),
+    )
 
     def __init__(self, wd, cfg_fn):
         super(Watershed, self).__init__(wd, cfg_fn)
@@ -241,62 +256,20 @@ class Watershed(NoDbBase, LogMixin):
             self.unlock("-f")
             raise
 
-    #
-    # Required for NoDbBase Subclass
-    #
+    @classmethod
+    def _decode_jsonpickle(cls, json_text):
+        try:
+            return super()._decode_jsonpickle(json_text)
+        except TypeError as e:
+            if (
+                "scalar() argument 1 must be numpy.dtype" in str(e)
+                or "numpy" in str(e)
+                or "dtype" in str(e)
+            ):
+                return cls._decode_watershed_safe(json_text)
+            raise
 
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd=".", allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, "watershed.nodb")
 
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            _json = fp.read()
-            _json = (
-                _json.replace(
-                    "wepppy.watershed_abstraction.support.HillSummary",
-                    "wepppy.topo.watershed_abstraction.support.HillSummary",
-                )
-                .replace(
-                    "wepppy.watershed_abstraction.support.ChannelSummary",
-                    "wepppy.topo.watershed_abstraction.support.ChannelSummary",
-                )
-                .replace(
-                    "wepppy.watershed_abstraction.support.CentroidSummary",
-                    "wepppy.topo.watershed_abstraction.support.CentroidSummary",
-                )
-            )
-
-            try:
-                db = jsonpickle.decode(_json)
-            except TypeError as e:    
-                if ("scalar() argument 1 must be numpy.dtype" in str(e) \
-                    or "numpy" in str(e) \
-                    or "dtype" in str(e)):
-                    db = Watershed._decode_watershed_safe(_json)
-                else:
-                    raise
-
-            assert isinstance(db, Watershed)
-
-        if _exists(_join(wd, "READONLY")) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-    
     @staticmethod
     def _decode_watershed_safe(s: str):
         """
@@ -380,13 +353,7 @@ class Watershed(NoDbBase, LogMixin):
         import jsonpickle
         return jsonpickle.decode(json.dumps(data))
 
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
 
-        return Watershed.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock
-        )
 
     @property
     def _status_channel(self):

@@ -4,7 +4,6 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 from time import sleep
-import jsonpickle
 import multiprocessing
 from subprocess import Popen, PIPE
 from enum import IntEnum
@@ -89,6 +88,7 @@ class AshNoDbLockedException(Exception):
 
 
 class Ash(NoDbBase, LogMixin):
+    filename = 'ash.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
@@ -355,43 +355,19 @@ class Ash(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    #
-    # Required for NoDbBase Subclass
-    #
+    @classmethod
+    def _post_instance_loaded(cls, instance):
+        instance = super()._post_instance_loaded(instance)
 
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
         from .ash_multi_year_model import AshType
-        with open(_join(wd, 'ash.nodb')) as fp:
 
-            db = jsonpickle.decode(fp.read())
+        if hasattr(instance, '_anu_white_ash_model_pars') and instance._anu_white_ash_model_pars is not None:
+            instance._anu_white_ash_model_pars.ash_type = AshType.WHITE
 
-            if hasattr(db, '_anu_white_ash_model_pars'):
-                db._anu_white_ash_model_pars.ash_type = AshType.WHITE
-            
-            if hasattr(db, '_anu_black_ash_model_pars'):
-                db._anu_black_ash_model_pars.ash_type = AshType.BLACK
+        if hasattr(instance, '_anu_black_ash_model_pars') and instance._anu_black_ash_model_pars is not None:
+            instance._anu_black_ash_model_pars.ash_type = AshType.BLACK
 
-            assert isinstance(db, Ash), db
-
-        if _exists(_join(wd, 'READONLY')):
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Ash.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
+        return instance
 
     @property
     def _nodb(self):

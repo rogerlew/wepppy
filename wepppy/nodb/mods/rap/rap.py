@@ -7,7 +7,6 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
-import jsonpickle
 
 from os.path import join as _join
 from os.path import exists as _exists
@@ -103,6 +102,7 @@ class RAPPointData(object):
 
 class RAP(NoDbBase):
     __name__ = 'RAP'
+    filename = 'rap.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(RAP, self).__init__(wd, cfg_fn)
@@ -123,41 +123,21 @@ class RAP(NoDbBase):
             self.unlock('-f')
             raise
 
-    #
-    # Required for NoDbBase Subclass
-    #
+    @classmethod
+    def _post_instance_loaded(cls, instance):
+        instance = super()._post_instance_loaded(instance)
 
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        with open(_join(wd, 'rap.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
+        if getattr(instance, 'data', None) is not None:
+            instance.data = {
+                key: value for key, (_key, value) in zip(RAP_Band, instance.data.items())
+            }
 
-        if db.data is not None:
-            db.data = {key: value for key, (_key, value) in zip(RAP_Band, db.data.items())}
+        if getattr(instance, 'mofe_data', None) is not None:
+            instance.mofe_data = {
+                key: value for key, (_key, value) in zip(RAP_Band, instance.mofe_data.items())
+            }
 
-        if db.mofe_data is not None:
-            db.mofe_data = {key: value for key, (_key, value) in zip(RAP_Band, db.mofe_data.items())}
-
-        assert isinstance(db, RAP), db
-
-        if _exists(_join(wd, 'READONLY')):
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return RAP.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
+        return instance
 
     @property
     def _nodb(self):
@@ -293,4 +273,3 @@ class RAP(NoDbBase):
                 d[band.name.lower()] = self.data[band][topaz_id]
 
             yield topaz_id, RAPPointData(**d)
-

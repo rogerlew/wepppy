@@ -22,7 +22,6 @@ from concurrent.futures import ProcessPoolExecutor
 from collections import Counter
 
 # non-standard
-import jsonpickle
 import pandas as pd
 from deprecated import deprecated
 import duckdb
@@ -79,6 +78,17 @@ class Soils(NoDbBase, LogMixin):
     and coordinates access of NoDb instances.
     """
     __name__ = 'Soils'
+    filename = 'soils.nodb'
+    _js_decode_replacements = (
+        ("\"simple_texture\"", "\"_simple_texture\""),
+        ("\"texture\"", "\"_texture\""),
+        ("\"clay_pct\"", "\"_old_clay_pct\""),
+        ("\"sand\"", "\"_old_sand\""),
+        ("\"avke\"", "\"_old_avke\""),
+        ("\"ll\"", "\"_old_ll\""),
+        ("\"liquid_limit\"", "\"_old_liquid_limit\""),
+        ("\"clay\"", "\"_old_clay\""),
+    )
 
     def __init__(self, wd, cfg_fn):
         super(Soils, self).__init__(wd, cfg_fn)
@@ -116,46 +126,6 @@ class Soils(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'soils.nodb')
-
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read().replace('"simple_texture"', '"_simple_texture"')
-                                            .replace('"texture"', '"_texture"')
-                                            .replace('"clay_pct"', '"_old_clay_pct"')
-                                            .replace('"sand"', '"_old_sand"')
-                                            .replace('"avke"', '"_old_avke"')
-                                            .replace('"ll"', '"_old_ll"')
-                                            .replace('"liquid_limit"', '"_old_liquid_limit"')
-                                            .replace('"clay"', '"_old_clay"')
-                                            )
-            assert isinstance(db, Soils)
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-
     def dump_and_unlock(self, validate=True):
         self.dump()
         self.unlock()
@@ -167,12 +137,6 @@ class Soils(NoDbBase, LogMixin):
             nodb.getInstance(self.wd)
 
         self.dump_soils_parquet()
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Soils.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _status_channel(self):
@@ -1376,4 +1340,3 @@ class Soils(NoDbBase, LogMixin):
             return soils[k]
     
         raise IndexError
-

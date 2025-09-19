@@ -16,7 +16,6 @@ import time
 from deprecated import deprecated
 
 # non-standard
-import jsonpickle
 
 # weppy submodules
 from .base import NoDbBase
@@ -27,6 +26,7 @@ class PrepNoDbLockedException(Exception):
 
 @deprecated
 class Prep(NoDbBase):
+    filename = 'prep.nodb'
     __name__ = 'Prep'
 
     def __init__(self, wd, cfg_fn):
@@ -45,39 +45,6 @@ class Prep(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'prep.nodb')
-
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Prep), db
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Prep.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def sbs_required(self):

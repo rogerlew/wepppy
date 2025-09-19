@@ -9,7 +9,6 @@ import json
 import shutil
 
 # non-standard
-import jsonpickle
 import utm
 import what3words
 
@@ -29,6 +28,7 @@ class SubbasinsNoDbLockedException(Exception):
 
 
 class Subbasins(NoDbBase):
+    filename = 'subbasins.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
@@ -69,43 +69,6 @@ class Subbasins(NoDbBase):
     @property
     def subbasins_dir(self):
         return _join(self.wd, 'wepp', 'subbasins')
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'subbasins.nodb')
-
-        if not _exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Subbasins), db
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Subbasins.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):

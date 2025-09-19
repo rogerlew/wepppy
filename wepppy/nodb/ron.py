@@ -17,7 +17,6 @@ from os.path import isdir
 import shutil
 
 # non-standard
-import jsonpickle
 import utm
 import what3words
 
@@ -284,6 +283,7 @@ class RonNoDbLockedException(Exception):
 
 
 class Ron(NoDbBase):
+    filename = 'ron.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
@@ -477,43 +477,6 @@ class Ron(NoDbBase):
             shutil.copyfile(sbs_map, sbs_path)
 
             baer.validate(_split(sbs_path)[-1])
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'ron.nodb')
-
-        if not os.path.exists(filepath):
-            if allow_nonexistent:
-                return None
-            else:
-                raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Ron), db
-
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-                
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Ron.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):

@@ -38,7 +38,6 @@ import shutil
 from time import sleep
 
 # non-standard
-import jsonpickle
 
 # wepppy
 
@@ -55,6 +54,7 @@ class RhemNoDbLockedException(Exception):
 
 class Rhem(NoDbBase, LogMixin):
     __name__ = 'Rhem'
+    filename = 'rhem.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(Rhem, self).__init__(wd, cfg_fn)
@@ -90,35 +90,6 @@ class Rhem(NoDbBase, LogMixin):
     @property
     def status_log(self):
         return os.path.abspath(_join(self.runs_dir, 'status.log'))
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        with open(_join(wd, 'rhem.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Rhem)
-
-        if _exists(_join(wd, 'READONLY')):
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Rhem.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _status_channel(self):
@@ -277,4 +248,3 @@ class Rhem(NoDbBase, LogMixin):
         wepp = Wepp.getInstance(self.wd)
         wepp.prep_hillslopes()
         wepp.run_hillslopes()
-

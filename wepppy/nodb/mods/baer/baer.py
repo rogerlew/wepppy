@@ -10,7 +10,6 @@ import os
 import ast
 import shutil
 from collections import Counter
-import jsonpickle
 from copy import deepcopy
 
 from subprocess import Popen, PIPE
@@ -58,6 +57,7 @@ sbs_soil_replacements = dict(
 
 @deprecated("supplanted by Disturbed, needed for Portland")
 class Baer(NoDbBase):
+    filename = 'baer.nodb'
     __name__ = 'Baer'
 
     def __init__(self, wd, cfg_fn):
@@ -86,35 +86,6 @@ class Baer(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        with open(_join(wd, 'baer.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, Baer), db
-
-        if _exists(_join(wd, 'READONLY')):
-            db.wd = os.path.abspath(wd)
-            return db
-
-        if os.path.abspath(wd) != os.path.abspath(db.wd):
-            if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-        return db
-
-    @staticmethod
-    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
-        from wepppy.weppcloud.utils.helpers import get_wd
-        return Baer.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):
