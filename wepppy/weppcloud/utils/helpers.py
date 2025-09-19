@@ -21,8 +21,11 @@ REDIS_HOST = os.environ.get('REDIS_HOST', None)
 REDIS_WD_CACHE_DB = 11
 if REDIS_HOST is not None:
     try:
-        redis_wd_cache_client = redis.StrictRedis(
-            host=REDIS_HOST, port=6379, db=REDIS_WD_CACHE_DB, decode_responses=True)
+        redis_wd_cache_pool = redis.ConnectionPool(
+            host=REDIS_HOST, port=6379, db=REDIS_WD_CACHE_DB,
+            decode_responses=True, max_connections=50
+        )
+        redis_wd_cache_client = redis.StrictRedis(connection_pool=redis_wd_cache_pool)
         redis_wd_cache_client.ping()
     except Exception as e:
         print(f'Error connecting to Redis: {e}')
