@@ -310,7 +310,12 @@
             }
 
             try {
-                window.setGlobalUnitizerPreference(0);
+                if (unitType === 'si') {
+                    window.setGlobalUnitizerPreference(0);
+                } else {
+                    window.setGlobalUnitizerPreference(1);
+                }
+                Project.getInstance().unitChangeEvent();
                 this.hideResult();
             } catch (error) {
                 console.error('Error setting unit preference:', error);
