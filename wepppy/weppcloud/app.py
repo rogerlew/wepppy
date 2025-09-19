@@ -696,17 +696,11 @@ def exception_factory(msg='Error Handling Request',
     if runid is not None:
         wd = get_wd(runid)
         if _exists(wd):
-            with open(_join(wd, 'exceptions.log'), 'a') as fp:
+            with open(_join(wd, 'wc_exceptions.log'), 'a') as fp:
                 fp.write(f'[{datetime.now()}]\n')
                 fp.write(stacktrace)
                 fp.write('\n\n')
 
-    with open('/var/log/exceptions.log', 'a') as fp:
-        fp.write(f'[{datetime.now()}] ')
-        if runid is not None:
-            fp.write(f'{runid}\n')
-        fp.write(stacktrace)
-        fp.write('\n\n')
 
     return make_response(jsonify({'Success': False,
                          'Error': msg,
