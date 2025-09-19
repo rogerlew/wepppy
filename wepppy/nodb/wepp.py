@@ -461,19 +461,7 @@ class Wepp(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-    @property
-    def _status_channel(self):
-        __status_channel = getattr(self, '__status_channel', None)
         
-        run_dir = os.path.abspath(self.runs_dir)
-        if 'omni' in run_dir:
-            _parent_runid = run_dir.split('/omni/')[0].split('/')[-1]
-            self.__status_channel = __status_channel = f'{_parent_runid}:omni'
-        else:
-            self.__status_channel = __status_channel = f'{self.runid}:wepp'
-
-        return  __status_channel
-
     @property
     def dss_export_mode(self) -> int:
         return getattr(self, '_dss_export_mode', self.config_get_int('wepp', 'dss_export_mode', 2))

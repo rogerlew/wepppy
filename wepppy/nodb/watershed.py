@@ -10,6 +10,8 @@ from typing import Generator, Dict, Union, Tuple
 
 import time
 import os
+import inspect
+
 from enum import IntEnum
 
 from os.path import join as _join
@@ -225,6 +227,9 @@ class Watershed(NoDbBase, LogMixin):
     
     @set_extent_mode.setter
     def set_extent_mode(self, value: int):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+        
         _value = int(value)
         self.lock()
 
@@ -246,6 +251,10 @@ class Watershed(NoDbBase, LogMixin):
     @map_bounds_text.setter
     def map_bounds_text(self, value: str):
         _value = str(value)
+
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {_value}')
+
         self.lock()
 
         try:
@@ -383,6 +392,9 @@ class Watershed(NoDbBase, LogMixin):
 
     @wbt_fill_or_breach.setter
     def wbt_fill_or_breach(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+
         self.lock()
 
         try:
@@ -404,6 +416,9 @@ class Watershed(NoDbBase, LogMixin):
 
     @wbt_blc_dist.setter
     def wbt_blc_dist(self, value: int):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+
         self.lock()
 
         try:
@@ -435,6 +450,8 @@ class Watershed(NoDbBase, LogMixin):
 
     @clip_hillslopes.setter
     def clip_hillslopes(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 
@@ -453,6 +470,8 @@ class Watershed(NoDbBase, LogMixin):
 
     @clip_hillslope_length.setter
     def clip_hillslope_length(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 
@@ -471,6 +490,8 @@ class Watershed(NoDbBase, LogMixin):
 
     @bieger2015_widths.setter
     def bieger2015_widths(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 
@@ -489,6 +510,8 @@ class Watershed(NoDbBase, LogMixin):
 
     @walk_flowpaths.setter
     def walk_flowpaths(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 
@@ -766,6 +789,9 @@ class Watershed(NoDbBase, LogMixin):
 
     @outlet.setter
     def outlet(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+        
         assert isinstance(value, Outlet) or value is None
 
         self.lock()
@@ -825,8 +851,11 @@ class Watershed(NoDbBase, LogMixin):
     # build channels
     #
     def build_channels(self, csa=None, mcl=None):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(csa={csa}, mcl={mcl})')
+
         assert not self.islocked()
-        self.log("Building Channels")
+        self.logger.info("Building Channels")
 
         if csa or mcl:
             self.lock()
@@ -846,23 +875,32 @@ class Watershed(NoDbBase, LogMixin):
             self.remove_outlet()
 
         if self.delineation_backend_is_topaz:
+            self.logger.info(f' delineation_backend_is_topaz')
             Topaz.getInstance(self.wd).build_channels(csa=self.csa, mcl=self.mcl)
         elif self.delineation_backend_is_wbt:
-            wbt = WhiteboxToolsTopazEmulator(self.wbt_wd, self.dem_fn)
+            self.logger.info(f' delineation_backend_is_wbt')
+            wbt = WhiteboxToolsTopazEmulator(
+                self.wbt_wd,
+                self.dem_fn,
+                logger=self.logger,
+            )
             wbt.delineate_channels(
                 csa=self.csa,
                 mcl=self.mcl,
                 fill_or_breach=self.wbt_fill_or_breach,
                 blc_dist=self.wbt_blc_dist,
+                logger=self.logger,
             )
             self.wbt = wbt
 
         else:
+            self.logger.info(f' delineation_backend_is_taudem')
             TauDEMTopazEmulator(self.taudem_wd, self.dem_fn).build_channels(
                 csa=self.csa
             )
 
         if _exists(self.subwta):
+            self.logger.info(f' Removing subcatchment: {self.subwta}')
             os.remove(self.subwta)
 
         prep = RedisPrep.getInstance(self.wd)
@@ -876,6 +914,9 @@ class Watershed(NoDbBase, LogMixin):
     def wbt(self, value):
         assert isinstance(value, WhiteboxToolsTopazEmulator)
 
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+        
         self.lock()
         try:
             if value is None:
@@ -892,21 +933,27 @@ class Watershed(NoDbBase, LogMixin):
     # set outlet
     #
     def set_outlet(self, lng=None, lat=None, da=0.0):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(lng={lng}, lat={lat}, da={da})')
+        
         assert not self.islocked()
-        self.log("Setting Outlet")
+        self.logger.info("Setting Outlet")
 
         assert float(lng), lng
         assert float(lat), lat
 
         if self.delineation_backend_is_topaz:
+            self.logger.info(f' delineation_backend_is_topaz')
             topaz = Topaz.getInstance(self.wd)
             topaz.set_outlet(lng=lng, lat=lat, da=da)
             self.outlet = topaz.outlet
         elif self.delineation_backend_is_wbt:
+            self.logger.info(f' delineation_backend_is_wbt')
             wbt = self.wbt
-            self.outlet = wbt.set_outlet(lng=lng, lat=lat)
+            self.outlet = wbt.set_outlet(lng=lng, lat=lat, logger=self.logger)
             self.wbt = wbt
         else:
+            self.logger.info(f' delineation_backend_is_taudem')
             taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
             taudem.set_outlet(lng=lng, lat=lat)
 
@@ -927,22 +974,30 @@ class Watershed(NoDbBase, LogMixin):
             pass
 
     def remove_outlet(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         self.outlet = None
 
     #
     # build subcatchments
     #
     def build_subcatchments(self, pkcsa=None):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(pkcsa={pkcsa})')
+
         assert not self.islocked()
-        self.log("Building Subcatchments")
 
         if self.delineation_backend_is_topaz:
+            self.logger.info(f' delineation_backend_is_topaz')
             Topaz.getInstance(self.wd).build_subcatchments()
         elif self.delineation_backend_is_wbt:
+            self.logger.info(f' delineation_backend_is_wbt')
             wbt = self.wbt
-            wbt.delineate_subcatchments()
+            wbt.delineate_subcatchments(self.logger)
             self.identify_edge_hillslopes()
         else:
+            self.logger.info(f' delineation_backend_is_taudem')
             self.lock()
             try:
                 if pkcsa is not None:
@@ -959,9 +1014,12 @@ class Watershed(NoDbBase, LogMixin):
         Identify edge hillslopes in the watershed.
         This is used to determine which hillslopes are at the edge of the watershed.
         """
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         self.lock()
         try:
-            self._edge_hillslopes = identify_edge_hillslopes(self.subwta)
+            self._edge_hillslopes = identify_edge_hillslopes(self.subwta, self.logger)
         except Exception:
             self.unlock("-f")
             raise
@@ -998,6 +1056,8 @@ class Watershed(NoDbBase, LogMixin):
         return taudem.drop_analysis_threshold
 
     def _taudem_build_subcatchments(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
 
         self.lock()
 
@@ -1029,7 +1089,7 @@ class Watershed(NoDbBase, LogMixin):
 
     def abstract_watershed(self):
         assert not self.islocked()
-        self.log("Abstracting Watershed")
+        self.logger.info("Abstracting Watershed")
 
         if self.abstraction_backend_is_peridot:
             if self.delineation_backend_is_topaz:
@@ -1065,7 +1125,7 @@ class Watershed(NoDbBase, LogMixin):
             pass
 
     def _peridot_post_abstract_watershed(self):
-        self.log("_peridot_post_abstract_watershed")
+        self.logger.info("_peridot_post_abstract_watershed")
 
         self.lock()
         try:
@@ -1120,6 +1180,8 @@ class Watershed(NoDbBase, LogMixin):
 
     @mofe_target_length.setter
     def mofe_target_length(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 
@@ -1138,6 +1200,8 @@ class Watershed(NoDbBase, LogMixin):
 
     @mofe_buffer.setter
     def mofe_buffer(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 
@@ -1156,6 +1220,8 @@ class Watershed(NoDbBase, LogMixin):
 
     @mofe_max_ofes.setter
     def mofe_max_ofes(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 
@@ -1174,6 +1240,8 @@ class Watershed(NoDbBase, LogMixin):
 
     @mofe_buffer_length.setter
     def mofe_buffer_length(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
         self.lock()
 
@@ -1187,6 +1255,8 @@ class Watershed(NoDbBase, LogMixin):
             raise
 
     def _build_multiple_ofe(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
         _mofe_nsegments = {}
         for topaz_id, wat_ss in self.subs_summary.items():
             not_top = not str(topaz_id).endswith("1")
@@ -1221,6 +1291,8 @@ class Watershed(NoDbBase, LogMixin):
         return _join(self.wat_dir, "mofe.tif")
 
     def _build_mofe_map(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
         subwta, transform_s, proj_s = read_raster(self.subwta, dtype=np.int32)
         discha, transform_d, proj_d = read_raster(self.discha, dtype=np.int32)
         mofe_nsegments = self.mofe_nsegments
@@ -1292,6 +1364,7 @@ class Watershed(NoDbBase, LogMixin):
 
         assert _exists(self.mofe_map)
 
+    @deprecated
     def _taudem_abstract_watershed(self):
         from wepppy.nodb import Wepp
 
