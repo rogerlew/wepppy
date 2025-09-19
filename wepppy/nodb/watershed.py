@@ -210,7 +210,8 @@ class Watershed(NoDbBase):
             raise
 
     def __getstate__(self):
-        state = self.__dict__.copy()
+        state = super().__getstate__()
+
         for field in TRANSIENT_FIELDS:
             state.pop(field, None)
         return state
