@@ -584,10 +584,6 @@ class Wepp(NoDbBase):
                        self.config_get_bool('wepp', 'dss_export_on_run_completion', False))
 
     @property
-    def status_log(self):
-        return os.path.abspath(_join(self.runs_dir, 'status.log'))
-
-    @property
     def run_tcr(self):
         return getattr(self, '_run_tcr', self.config_get_bool('wepp', 'tcr'))
 
@@ -1164,9 +1160,6 @@ class Wepp(NoDbBase):
             os.remove(fn)
 
     def clean(self):
-        if _exists(self.status_log):
-            os.remove(self.status_log)
-
         for _dir in (self.runs_dir, self.output_dir, self.plot_dir,
                      self.stats_dir, self.fp_runs_dir, self.fp_output_dir):
             if _exists(_dir):

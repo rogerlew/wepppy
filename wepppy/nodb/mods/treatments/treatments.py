@@ -90,10 +90,6 @@ class Treatments(NoDbBase):
         return _join(self.wd, 'treatments.nodb.lock')
     
     @property
-    def status_log(self):
-        return os.path.abspath(_join(self.treatments_dir, 'status.log'))
-
-    @property
     def mode(self) -> TreatmentsMode:
         return self._mode
     
@@ -125,10 +121,6 @@ class Treatments(NoDbBase):
         The treatments directory.
         """
         return _join(self.wd, 'treatments')
-
-    @property
-    def status_log(self):
-        return os.path.abspath(_join(self.treatments_dir, 'status.log'))
 
     @property
     def treatments_map(self):
