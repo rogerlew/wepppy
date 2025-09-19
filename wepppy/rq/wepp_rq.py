@@ -585,13 +585,11 @@ def _post_run_cleanup_out_rq(runid):
                 for fn in glob(_join(wepp.runs_dir, '*.out')):
                     dst_path = _join(wepp.output_dir, ss_batch_key, _split(fn)[1])
                     shutil.move(fn, dst_path)
-                wepp.log_done()
         else:
             wepp.logger.info('    moving .out files...')
             for fn in glob(_join(wepp.runs_dir, '*.out')):
                 dst_path = _join(wepp.output_dir, _split(fn)[1])
                 shutil.move(fn, dst_path)
-            wepp.log_done()
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:

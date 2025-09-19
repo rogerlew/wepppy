@@ -2158,7 +2158,7 @@ class Climate(NoDbBase):
 
             self.monthlies = prism_mod(par=climatestation,
                                      years=years, lng=lng, lat=lat, wd=cli_dir,
-                                     logger=self, nwds_method='')
+                                     logger=self.logger, nwds_method='')
             self.dump_and_unlock()
 
         except Exception:
@@ -2348,7 +2348,7 @@ class Climate(NoDbBase):
 
             monthlies = mod_function(par=climatestation,
                                      years=years, lng=lng, lat=lat, wd=cli_dir,
-                                     logger=self, nwds_method='')
+                                     logger=self.logger, nwds_method='')
             self.monthlies = monthlies
 
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
