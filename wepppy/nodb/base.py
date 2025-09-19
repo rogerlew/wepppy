@@ -22,6 +22,7 @@ from time import time
 from enum import Enum, IntEnum
 from glob import glob
 from contextlib import contextmanager
+from pathlib import Path
 
 import json
 
@@ -180,10 +181,12 @@ class NoDbBase(object):
             log_path = _join(self.wd, self.filename.replace('.nodb', '.log'))
             self._run_file_handler = FileHandler(log_path)
             self._run_file_handler.setLevel(logging.INFO)
+            Path(log_path).touch(exist_ok=True)
 
             exceptions_path = _join(self.wd, 'exceptions.log')
             self._exception_file_handler = FileHandler(exceptions_path)
             self._exception_file_handler.setLevel(logging.ERROR)
+            Path(exceptions_path).touch(exist_ok=True)
 
             self._console_handler = StreamHandler()
             self._console_handler.setLevel(logging.ERROR)
