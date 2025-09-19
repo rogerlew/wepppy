@@ -93,9 +93,29 @@ class NoDbBase(object):
         # noinspection PyUnresolvedReferences
         if _exists(self._nodb):
             raise Exception('NoDb has already been initialized')
+        
+
+    @property
+    def _redis_cache_key(self):
+        return f'{self.runid}:{self.filename}'
 
     @classmethod
     def getInstance(cls, wd='.', allow_nonexistent=False, ignore_lock=False):
+        global redis_nodb_cache_client
+
+        if redis_nodb_cache_client is not None:
+            runid = _split(os.path.abspath(wd))[-1]
+            cache_key = f'{runid}:{cls.filename}'
+            cached_data = redis_nodb_cache_client.get(cache_key)
+            if cached_data is not None:
+                try:
+                    db = cls._decode_jsonpickle(cached_data)
+                    if isinstance(db, cls):
+                        return db
+                except Exception as e:
+                    print(f'Error decoding cached data for {cache_key}: {e}')
+                    redis_nodb_cache_client.delete(cache_key)
+
         filepath = cls._get_nodb_path(wd)
 
         if not _exists(filepath):
@@ -135,6 +155,42 @@ class NoDbBase(object):
 
         return cls.getInstance(
             get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
+
+    def dump_and_unlock(self, validate=True):
+        self.dump()
+        self.unlock()
+
+        if validate:
+            nodb = type(self)
+
+            # noinspection PyUnresolvedReferences
+            nodb.getInstance(self.wd)
+                
+    def dump(self):
+        global redis_nodb_cache_client
+
+        if not self.islocked():
+            raise RuntimeError("cannot dump to unlocked db")
+
+        js = jsonpickle.encode(self)
+
+        # Write-then-sync
+        with open(self._nodb, "w") as fp:
+            fp.write(js)
+            fp.flush()                 # flush Python’s userspace buffer
+            os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
+
+        if redis_nodb_cache_client is not None:
+            try:
+                redis_nodb_cache_client.set(self._redis_cache_key, js)
+            except Exception as e:
+                print(f'Error caching NoDb instance to Redis: {e}')
+
+        try:
+            from wepppy.weppcloud.db_api import update_last_modified
+            update_last_modified(self.runid)
+        except Exception:
+            pass
 
     @classmethod
     def _get_nodb_path(cls, wd):
@@ -330,35 +386,6 @@ class NoDbBase(object):
             except Exception:
                 self.unlock('-f')
                 raise
-
-    def dump_and_unlock(self, validate=True):
-        self.dump()
-        self.unlock()
-
-        if validate:
-            nodb = type(self)
-
-            # noinspection PyUnresolvedReferences
-            nodb.getInstance(self.wd)
-                
-    def dump(self):
-        if not self.islocked():
-            raise RuntimeError("cannot dump to unlocked db")
-
-        js = jsonpickle.encode(self)
-
-        # Write-then-sync
-        with open(self._nodb, "w") as fp:
-            fp.write(js)
-            fp.flush()                 # flush Python’s userspace buffer
-            os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
-
-        # record bookkeeping (optional)
-        try:
-            from wepppy.weppcloud.db_api import update_last_modified
-            update_last_modified(self.runid)
-        except Exception:
-            pass
 
     @property
     def locales(self):
