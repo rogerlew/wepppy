@@ -42,7 +42,6 @@ from .base import (
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
 from .redis_prep import RedisPrep, TaskEnum
-from .mixins.log_mixin import LogMixin
 
 
 from wepppy.landcover.rap import RAP_Band
@@ -149,10 +148,6 @@ class Landuse(NoDbBase, LogMixin):
                 instance.domlc_mofe_d[topaz_id] = mofe_d
 
         return instance
-
-    @property
-    def _status_channel(self):
-        return f'{self.runid}:landuse'
 
     @property
     def status_log(self):
@@ -391,7 +386,7 @@ class Landuse(NoDbBase, LogMixin):
         subwta_fn = Watershed.getInstance(self.wd).subwta
 
         if wepppyo3 is None:
-            self.log('Building landcover grid from NLCD raster using LandcoverMap.build_lcgrid')
+            self.logger.info('Building landcover grid from NLCD raster using LandcoverMap.build_lcgrid')
             # create LandcoverMap instance
             lc = LandcoverMap(lc_fn)
 
@@ -400,7 +395,7 @@ class Landuse(NoDbBase, LogMixin):
             # domlc_d is a dictionary with topaz_id keys
             self.domlc_d = lc.build_lcgrid(subwta_fn, None)
         else:
-            self.log('Building landcover grid from NLCD raster using wepppyo3 identify_mode_single_raster_key')
+            self.logger.info('Building landcover grid from NLCD raster using wepppyo3 identify_mode_single_raster_key')
             domlc_d = identify_mode_single_raster_key(
                 key_fn=subwta_fn, parameter_fn=lc_fn, ignore_channels=True, ignore_keys=set())
             self.domlc_d = {k: str(v) for k, v in domlc_d.items()}
@@ -451,7 +446,7 @@ class Landuse(NoDbBase, LogMixin):
 
     def build(self):
         assert not self.islocked()
-        self.log('Building landuse')
+        self.logger.info('Building landuse')
 
         wd = self.wd
 
@@ -501,7 +496,7 @@ class Landuse(NoDbBase, LogMixin):
             raise
 
         if 'rap' in self.mods:
-            self.log('Running RAP')
+            self.logger.info('Running RAP')
 
             from wepppy.nodb.mods.rap import RAP
 
@@ -509,7 +504,7 @@ class Landuse(NoDbBase, LogMixin):
             year = int(self.nlcd_db[-4:])
             rap.acquire_rasters(year)
             rap.analyze()
-            self.log_done()
+            self.logger.info('done')
         else:
             rap = None
 
@@ -524,7 +519,7 @@ class Landuse(NoDbBase, LogMixin):
 
         self.set_cover_defaults()
         if rap:
-            self.log('Calculating covers from RAP')
+            self.logger.info('Calculating covers from RAP')
 
             cancov_d = {}
             for i, (topaz_id, dom) in enumerate(self.domlc_d.items()):
@@ -539,8 +534,8 @@ class Landuse(NoDbBase, LogMixin):
 
                 # rhem has rap but no disturbed class
                 disturbed_class = getattr(man_summary, 'disturbed_class', None)
-                self.log(f'topaz_id: {topaz_id}\t dom:{dom}\t disturbed_class: {disturbed_class}')
-                self.log_done()
+                self.logger.info(f'topaz_id: {topaz_id}\t dom:{dom}\t disturbed_class: {disturbed_class}')
+                self.logger.info('done')
 
                 if disturbed_class is None or disturbed_class == '':
                     continue
@@ -554,7 +549,7 @@ class Landuse(NoDbBase, LogMixin):
                     cancov = _grass_cov + _shrub_cov + _tree_cov
                 cancov_d[topaz_id] = max(cancov, 0.05)
 
-#            self.log(f"cancov: {cancov_d}")
+#            self.logger.info(f"cancov: {cancov_d}")
 
             if cancov_d:
                 self.hillslope_cancovs = cancov_d
@@ -715,11 +710,11 @@ class Landuse(NoDbBase, LogMixin):
 
                     meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
         
-        self.log(f'domlc_d = {domlc_d}')
-        self.log_done()
+        self.logger.info(f'domlc_d = {domlc_d}')
+        self.logger.info('done')
 
         if 'rap' in self.mods:
-            self.log(f'acquiring rap')
+            self.logger.info(f'acquiring rap')
             from wepppy.nodb.mods.rap import RAP
 
             rap = RAP.getInstance(wd)
@@ -736,7 +731,7 @@ class Landuse(NoDbBase, LogMixin):
             if rap is not None:
                 cancov_d[topaz_id] = {}
 
-            self.log(f'building management for hillslope: {topaz_id}')
+            self.logger.info(f'building management for hillslope: {topaz_id}')
 
             nsegments = int(watershed.mofe_nsegments[str(topaz_id)])
             mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
@@ -802,14 +797,14 @@ class Landuse(NoDbBase, LogMixin):
                     pf.write(str(stack[0]))
             else:
 
-                self.log(f"building management for hillslope: {topaz_id} with doms {doms}")
+                self.logger.info(f"building management for hillslope: {topaz_id} with doms {doms}")
                 mofe_synth = ManagementMultipleOfeSynth()
 
                 # just replicate the dom
                 mofe_synth.stack = stack
                 merged = mofe_synth.write(mofe_lc_fn)
 
-            self.log_done()
+            self.logger.info('done')
 
         self.lock()
 

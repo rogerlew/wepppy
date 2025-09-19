@@ -8,7 +8,6 @@ from wepppy.topo.watershed_abstraction import SlopeFile
 
 
 # wepppy submodules
-from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.mods import RangelandCover
 from wepppy.nodb.watershed import Watershed
@@ -92,10 +91,6 @@ class Rhem(NoDbBase, LogMixin):
         return os.path.abspath(_join(self.runs_dir, 'status.log'))
 
     @property
-    def _status_channel(self):
-        return f'{self.runid}:rhem'
-
-    @property
     def _nodb(self):
         return _join(self.wd, 'rhem.nodb')
 
@@ -111,11 +106,11 @@ class Rhem(NoDbBase, LogMixin):
     # hillslopes
     #
     def prep_hillslopes(self):
-        self.log('Ceaning runs and output dir... ')
+        self.logger.info('Ceaning runs and output dir... ')
         self.clean()
-        self.log_done()
+        self.logger.info('done')
 
-        self.log('Prepping Hillslopes... ')
+        self.logger.info('Prepping Hillslopes... ')
 
         wd = self.wd
 
@@ -171,7 +166,7 @@ class Rhem(NoDbBase, LogMixin):
             run_fn = _join(runs_dir, 'hill_{}.run'.format(topaz_id))
             make_hillslope_run(run_fn, par_fn, stm_fn, _join(out_dir, 'hill_{}.sum'.format(topaz_id)), scn_name)
 
-        self.log_done()
+        self.logger.info('done')
 
     def clean(self):
         if _exists(self.status_log):
@@ -200,7 +195,7 @@ class Rhem(NoDbBase, LogMixin):
     def run_hillslopes(self):
         from wepppy.export import arc_export
 
-        self.log('Running Hillslopes\n')
+        self.logger.info('Running Hillslopes\n')
         watershed = Watershed.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
 
@@ -210,29 +205,29 @@ class Rhem(NoDbBase, LogMixin):
         def oncomplete(rhemrun):
             status, _id, elapsed_time = rhemrun.result()
             assert status
-            self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
+            self.logger.info('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
         sub_n = watershed.sub_n
         for i, topaz_id in enumerate(watershed._subs_summary):
-            self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})\n')
-            self.log(f'      runs_dir: {runs_dir}\n')
+            self.logger.info(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})\n')
+            self.logger.info(f'      runs_dir: {runs_dir}\n')
 
 #            run_hillslope(topaz_id, runs_dir)
-#            self.log(f'  {topaz_id} completed run\n')
+#            self.logger.info(f'  {topaz_id} completed run\n')
 
             futures.append(pool.submit(run_hillslope, topaz_id, runs_dir))
             futures[-1].add_done_callback(oncomplete)
 
         wait(futures, return_when=FIRST_EXCEPTION)
 
-        self.log('Running RhemPost... ')
+        self.logger.info('Running RhemPost... ')
         rhempost = RhemPost.getInstance(self.wd)
         rhempost.run_post()
 
         arc_export(self.wd)
 
 #        self.run_wepp_hillslopes()
-        self.log_done()
+        self.logger.info('done')
 
     def report_loss(self):
         output_dir = self.output_dir

@@ -33,7 +33,6 @@ from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
 from ..disturbed import Disturbed
-from ...mixins.log_mixin import LogMixin
 
 from .mulch_application import ground_cover_change as mulch_ground_cover_change
 
@@ -280,7 +279,7 @@ class Treatments(NoDbBase, LogMixin):
             raise ValueError("Treatments dictionary is not set!")
 
         if len(treatments_domlc_d) == 0:
-            self.log("Treatments dictionary is empty!")
+            self.logger.info("Treatments dictionary is empty!")
             return
 
         landuse = Landuse.getInstance(self.wd)
@@ -334,9 +333,9 @@ class Treatments(NoDbBase, LogMixin):
             raise RuntimeError("Treatments.nodb is not locked!")
         
         if topaz_id.endswith('4'):
-            self.log(f"Skipping treatment for {topaz_id} because it is a channel.")
+            self.logger.info(f"Skipping treatment for {topaz_id} because it is a channel.")
             return
-        self.log(f'topaz_id: {topaz_id}\t treatment:{treatment}\t disturbed_class: {disturbed_class}\n')
+        self.logger.info(f'topaz_id: {topaz_id}\t treatment:{treatment}\t disturbed_class: {disturbed_class}\n')
 
         retcode = 0
         if 'mulch' in treatment:
@@ -349,7 +348,7 @@ class Treatments(NoDbBase, LogMixin):
             retcode = self._apply_thinning(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
             
-        self.log(f'  _apply_treatment: {topaz_id} -> {landuse_instance.domlc_d[topaz_id]}\n')
+        self.logger.info(f'  _apply_treatment: {topaz_id} -> {landuse_instance.domlc_d[topaz_id]}\n')
 
         return retcode
     
@@ -380,18 +379,18 @@ class Treatments(NoDbBase, LogMixin):
 
  #       if disturbed_class in ['grass high sev fire', 'shrub high sev fire',  'forest high sev fire']:
 
-            self.log(f'Applying mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+            self.logger.info(f'Applying mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
 
             inrcov = man.inis[0].data.inrcov
             new_inrcov = mulch_ground_cover_change(initial_ground_cover_pct=inrcov * 100.0,
                                                    mulch_tonperacre=mulch_application) / 100.0
-            self.log(f'Old inrcov: {inrcov}\t New inrcov: {new_inrcov}\n')
+            self.logger.info(f'Old inrcov: {inrcov}\t New inrcov: {new_inrcov}\n')
             man.inis[0].data.inrcov = new_inrcov
 
             rilcov = man.inis[0].data.rilcov
             new_rilcov = mulch_ground_cover_change(initial_ground_cover_pct=rilcov * 100.0,
                                                    mulch_tonperacre=mulch_application) / 100.0
-            self.log(f'Old rilcov: {rilcov}\t New rilcov: {new_rilcov}\n')
+            self.logger.info(f'Old rilcov: {rilcov}\t New rilcov: {new_rilcov}\n')
             man.inis[0].data.rilcov = new_rilcov
 
             # write the management to disk
@@ -411,14 +410,14 @@ class Treatments(NoDbBase, LogMixin):
 
             new_dom = f'{landuse_instance.domlc_d[topaz_id]}-{treatment}'
             landuse_instance.domlc_d[topaz_id] = new_dom
-            self.log(f'  _apply_mulch: {topaz_id} -> {new_dom}\n')
+            self.logger.info(f'  _apply_mulch: {topaz_id} -> {new_dom}\n')
 
             if new_dom not in landuse_instance.managements:
                 landuse_instance.managements[new_dom] = new_man_summary
 
             return 1
 
-        self.log(f'Could not apply mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+        self.logger.info(f'Could not apply mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
         
 
     def _apply_prescribed_fire(self, 
@@ -439,21 +438,21 @@ class Treatments(NoDbBase, LogMixin):
         prescribed_dom = None
         if 'forest' in disturbed_class:
             prescribed_dom = disturbed_key_lookup['forest_prescribed_fire']
-            self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+            self.logger.info(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
             landuse_instance.domlc_d[topaz_id] = prescribed_dom
-            self.log(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
+            self.logger.info(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
 
         elif 'shrub' in disturbed_class:
             prescribed_dom = disturbed_key_lookup['shrub_prescribed_fire']
-            self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+            self.logger.info(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
             landuse_instance.domlc_d[topaz_id] = prescribed_dom
-            self.log(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
+            self.logger.info(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
 
         elif 'grass' in disturbed_class:
             prescribed_dom = disturbed_key_lookup['grass_prescribed_fire']
-            self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+            self.logger.info(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
             landuse_instance.domlc_d[topaz_id] = prescribed_dom
-            self.log(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
+            self.logger.info(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
 
         if prescribed_dom is not None and prescribed_dom not in landuse_instance.managements:
             man = get_management_summary(prescribed_dom, landuse_instance.mapping)
@@ -476,9 +475,9 @@ class Treatments(NoDbBase, LogMixin):
         treatment_dom = disturbed_key_lookup[treatment]
 
         if disturbed_class in ['forest']:
-            self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+            self.logger.info(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
             landuse_instance.domlc_d[topaz_id] = treatment_dom
-            self.log(f'  _apply_thinning: {topaz_id} -> {treatment_dom}\n')
+            self.logger.info(f'  _apply_thinning: {topaz_id} -> {treatment_dom}\n')
 
         if treatment_dom is not None and treatment_dom not in landuse_instance.managements:
             man = get_management_summary(treatment_dom, landuse_instance.mapping)
@@ -522,7 +521,7 @@ class Treatments(NoDbBase, LogMixin):
 
         key = (texid, disturbed_class)
         if key not in land_soil_replacements_d:
-            self.log(f'No soil replacements for {key} in {land_soil_replacements_d}')
+            self.logger.info(f'No soil replacements for {key} in {land_soil_replacements_d}')
             return
 
         disturbed_mukey = f'{mukey}-{texid}-{disturbed_class}'
@@ -554,4 +553,4 @@ class Treatments(NoDbBase, LogMixin):
                                                         build_date=str(datetime.now()))
 
         soils_instance.domsoil_d[topaz_id] = disturbed_mukey
-        self.log(f'  _modify_soil: {topaz_id} -> {disturbed_mukey}\n')
+        self.logger.info(f'  _modify_soil: {topaz_id} -> {disturbed_mukey}\n')

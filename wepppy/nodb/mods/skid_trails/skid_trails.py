@@ -3,7 +3,6 @@
 # wepppy
 
 # wepppy submodules
-from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.nodb.base import NoDbBase
 
 from wepppy.all_your_base.geo import read_raster, get_utm_zone, utm_srid

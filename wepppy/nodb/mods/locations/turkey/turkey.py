@@ -220,7 +220,7 @@ class TurkeyMod(NoDbBase, LocationMixin):
             climate.par_fn = user_par
             climate.cli_fn = cli_fn
             climate.dump_and_unlock()
-            climate.log_done()
+            climate.logger.info('done')
 
         except Exception:
             climate.unlock('-f')

@@ -71,10 +71,6 @@ class Observed(NoDbBase):
             raise
 
     @property
-    def _status_channel(self):
-        return f'{self.runid}:observed'
-
-    @property
     def _nodb(self):
         return _join(self.wd, 'observed.nodb')
 

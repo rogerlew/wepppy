@@ -23,7 +23,6 @@ from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from ...ron import Ron
 from ...base import NoDbBase, TriggerEvents
 from ...watershed import Watershed
-from ...mixins.log_mixin import LogMixin
 
 from wepppy.landcover.rap import (
     RangelandAnalysisPlatformV2,
@@ -92,10 +91,6 @@ class RAP_TS(NoDbBase, LogMixin):
 
 
     @property
-    def _status_channel(self):
-        return f'{self.runid}:rap_ts'
-
-    @property
     def _nodb(self):
         return _join(self.wd, 'rap_ts.nodb')
 
@@ -148,16 +143,16 @@ class RAP_TS(NoDbBase, LogMixin):
     def acquire_rasters(self, start_year=None, end_year=None):
 
         def retrieve_rap_year(year):
-            self.log(f'  retrieving rap {year}...')
+            self.logger.info(f'  retrieving rap {year}...')
             retries = rap_mgr.retrieve([year])
             if retries > 0:
-                self.log(f'  retries: {retries}\n')
-            self.log_done()
+                self.logger.info(f'  retries: {retries}\n')
+            self.logger.info('done')
             return year
 
         def oncomplete(future):
             year = future.result()
-            self.log(f'  retrieving rap {year} completed.\n')
+            self.logger.info(f'  retrieving rap {year} completed.\n')
 
         self.lock()
 
@@ -231,7 +226,7 @@ class RAP_TS(NoDbBase, LogMixin):
                 if band not in data_ds:
                     data_ds[band] = {}
 
-                self.log(f'  analyzing rap {year} {band}...')
+                self.logger.info(f'  analyzing rap {year} {band}...')
 
                 rap_ds_fn = rap_mgr.get_dataset_fn(year=year)
                 if self.multi_ofe:
@@ -242,12 +237,12 @@ class RAP_TS(NoDbBase, LogMixin):
                         key_fn=watershed.subwta, parameter_fn=rap_ds_fn, band_indx=band)
 
                 data_ds[band][year] = result
-                self.log_done()
+                self.logger.info('done')
                 return year, band
 
             def oncomplete(future):
                 year, band = future.result()
-                self.log(f'  analyzing rap {year} {band} completed.\n')
+                self.logger.info(f'  analyzing rap {year} {band} completed.\n')
 
             futures = []
             with ThreadPoolExecutor() as pool:
@@ -267,8 +262,8 @@ class RAP_TS(NoDbBase, LogMixin):
             self.data = data_ds
             self.dump_and_unlock()
 
-            self.log('analysis complete...')
-            self.log_done()
+            self.logger.info('analysis complete...')
+            self.logger.info('done')
 
         except Exception:
             self.unlock('-f')
@@ -308,7 +303,7 @@ class RAP_TS(NoDbBase, LogMixin):
         if fire_date is not None and  cover_transform is not None:
             return self._prep_transformed_cover(runs_dir)
 
-        self.log('RAP_TS::prep_cover\n')
+        self.logger.info('RAP_TS::prep_cover\n')
         data = self.data
 
         watershed = Watershed.getInstance(self.wd)
@@ -328,7 +323,7 @@ class RAP_TS(NoDbBase, LogMixin):
 
                 if self.multi_ofe:
                     for fp_id in sorted(data[RAP_Band.TREE][years[0]][str(topaz_id)]):
-                        self.log(f'  topaz_id={topaz_id}, fp_id={fp_id}\n')
+                        self.logger.info(f'  topaz_id={topaz_id}, fp_id={fp_id}\n')
 
                         for band in [RAP_Band.TREE,
                                      RAP_Band.SHRUB,
@@ -341,7 +336,7 @@ class RAP_TS(NoDbBase, LogMixin):
                             fp.write('\n')
 
                 else:
-                    self.log(f'  topaz_id={topaz_id}\n')
+                    self.logger.info(f'  topaz_id={topaz_id}\n')
 
                     for band in [RAP_Band.TREE,
                                  RAP_Band.SHRUB,
@@ -366,7 +361,7 @@ class RAP_TS(NoDbBase, LogMixin):
         from wepppy.nodb.mods.revegetation import Revegetation
         from wepppy.nodb.landuse import Landuse
 
-        self.log('RAP_TS::_prep_transformed_cover\n')
+        self.logger.info('RAP_TS::_prep_transformed_cover\n')
 
         wd = self.wd
 
@@ -415,7 +410,7 @@ class RAP_TS(NoDbBase, LogMixin):
                                     ]:
                             key = (burn_class, name)
 
-                            self.log(f'  topaz_id={topaz_id}, mofe_id={mofe_id}, burn_class={burn_class}, rap_band={name}\n')
+                            self.logger.info(f'  topaz_id={topaz_id}, mofe_id={mofe_id}, burn_class={burn_class}, rap_band={name}\n')
                             
                             if key in cover_transform:
                                 x = []
@@ -448,7 +443,7 @@ class RAP_TS(NoDbBase, LogMixin):
                                  ]:
                         key = (burn_class, name)
                         
-                        self.log(f'  topaz_id={topaz_id}, burn_class={burn_class}, rap_band={name}\n')
+                        self.logger.info(f'  topaz_id={topaz_id}, burn_class={burn_class}, rap_band={name}\n')
 
                         if key in cover_transform:
                             x = []

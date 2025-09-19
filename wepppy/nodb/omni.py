@@ -28,7 +28,6 @@ from time import sleep
 import utm
 
 # wepppy
-from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
 from .base import (
@@ -612,7 +611,7 @@ class Omni(NoDbBase, LogMixin):
             A list of topaz_ids to use for the contrast. If None, all topaz_ids are selected.
         """
 
-        self.log('Omni::build_contrasts')
+        self.logger.info('Omni::build_contrasts')
 
         control_scenario = _scenario_name_from_scenario_definition(control_scenario_def)
         contrast_scenario = _scenario_name_from_scenario_definition(contrast_scenario_def)
@@ -754,14 +753,14 @@ class Omni(NoDbBase, LogMixin):
 
     def run_omni_contrasts(self):
 
-        self.log('Omni::run_omni_contrasts')
+        self.logger.info('Omni::run_omni_contrasts')
 
         for contrast_id, (contrast_name, _contrasts) in enumerate(zip(self.contrast_names, self.contrasts), start=1):
             print(f'Running contrast {contrast_id} of {len(self.contrasts)}: {contrast_name}')
             _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
 
     def run_omni_contrast(self, contrast_id: int):
-        self.log(f'Omni::run_omni_contrast {contrast_id}')
+        self.logger.info(f'Omni::run_omni_contrast {contrast_id}')
         contrast_name = self.contrast_names[contrast_id - 1]
         _contrasts = self.contrasts[contrast_id - 1]
         _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
@@ -812,7 +811,7 @@ class Omni(NoDbBase, LogMixin):
             # Sanity check: units should match between control and contrast
             _bad = df[df['control_units'].notna() & (df['units'] != df['control_units'])]
             if not _bad.empty:
-                self.log(f"WARNING[contrasts_report]: units mismatch for keys -> {sorted(_bad['key'].unique())}\n")
+                self.logger.info(f"WARNING[contrasts_report]: units mismatch for keys -> {sorted(_bad['key'].unique())}\n")
 
             # Requested measure: control - contrast
             df['control-contrast_v'] = df['control_v'] - df['v']
@@ -830,10 +829,6 @@ class Omni(NoDbBase, LogMixin):
         return combined
 
     @property
-    def _status_channel(self):
-        return f'{self.runid}:omni'
-
-    @property
     def _nodb(self):
         return _join(self.wd, 'omni.nodb')
 
@@ -844,7 +839,7 @@ class Omni(NoDbBase, LogMixin):
     def run_omni_scenario(self, scenario_def: dict):
         scenario = scenario_def.get('type')
 
-        self.log(f'Omni::run_scenario({scenario})\n')
+        self.logger.info(f'Omni::run_scenario({scenario})\n')
 
         if not isinstance(scenario, OmniScenario):
             raise TypeError('scenario must be an instance of OmniScenario')
@@ -854,7 +849,7 @@ class Omni(NoDbBase, LogMixin):
         if scenario not in self.scenarios:
             self.scenarios = self.scenarios + [scenario_def]
             
-        self.log(f'  Omni::run_scenario({scenario}): {scenario} completed\n')
+        self.logger.info(f'  Omni::run_scenario({scenario}): {scenario} completed\n')
 
     @property
     def ran_scenarios(self) -> List[str]:
@@ -871,12 +866,12 @@ class Omni(NoDbBase, LogMixin):
         return ran_scenarios
     
     def run_omni_scenarios(self):
-        self.log('Omni::run_omni_scenarios\n')
+        self.logger.info('Omni::run_omni_scenarios\n')
 
         self.clean_scenarios()
 
         if not self.scenarios:
-            self.log('  Omni::run_omni_scenarios: No scenarios to run\n')
+            self.logger.info('  Omni::run_omni_scenarios: No scenarios to run\n')
             raise Exception('No scenarios to run')
 
         ran_scenarios = []
@@ -891,24 +886,24 @@ class Omni(NoDbBase, LogMixin):
                 continue
 
             _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            self.log(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
+            self.logger.info(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
             self._build_scenario(scenario_def)
             ran_scenarios.append(_scenario_name)
 
         for scenario_def in self.scenarios:
-            self.log(f'  Omni::run_omni_scenarios: djskd {scenario_def}\n')
+            self.logger.info(f'  Omni::run_omni_scenarios: djskd {scenario_def}\n')
             
             _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
             if _scenario_name in ran_scenarios:
                 continue
 
-            self.log(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
+            self.logger.info(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
             self._build_scenario(scenario_def)
-            self.log_done()
+            self.logger.info('done')
 
-        self.log('  Omni::run_omni_scenarios: compiling hillslope summaries\n')
+        self.logger.info('  Omni::run_omni_scenarios: compiling hillslope summaries\n')
         self.compile_hillslope_summaries()
-        self.log_done()
+        self.logger.info('done')
 
     def _build_scenario(
             self,
@@ -935,12 +930,12 @@ class Omni(NoDbBase, LogMixin):
         assert isinstance(scenario, OmniScenario)
         new_wd = _omni_clone(scenario_def, wd)
 
-        self.log(f'  Omni::_build_scenario: new_wd:{new_wd}\n')
+        self.logger.info(f'  Omni::_build_scenario: new_wd:{new_wd}\n')
 
         if omni_base_scenario_name is not None:
             if not omni_base_scenario_name == str(base_scenario):  # base scenario is either sbs_map or undisturbed
                 # e.g. scenario is mulch and omni_base_scenario is uniform_low, uniform_moderate, uniform_high, or sbs_map
-                self.log(f'  Omni::_build_scenario: _omni_clone_sibling:{omni_base_scenario_name}\n')
+                self.logger.info(f'  Omni::_build_scenario: _omni_clone_sibling:{omni_base_scenario_name}\n')
                 _omni_clone_sibling(new_wd, omni_base_scenario_name)
                 
         # get disturbed and landuse instances
@@ -953,7 +948,7 @@ class Omni(NoDbBase, LogMixin):
             scenario == OmniScenario.UniformModerate or \
             scenario == OmniScenario.UniformHigh:
 
-            self.log(f'  Omni::_build_scenario: uniform burn severity\n')
+            self.logger.info(f'  Omni::_build_scenario: uniform burn severity\n')
 
             # identify burn class
             sbs = None
@@ -970,7 +965,7 @@ class Omni(NoDbBase, LogMixin):
             soils.build()
 
         elif scenario == OmniScenario.Undisturbed:
-            self.log(f'  Omni::_build_scenario: undisturbed\n')
+            self.logger.info(f'  Omni::_build_scenario: undisturbed\n')
 
             if not Disturbed.getInstance(wd).has_sbs:
                 raise Exception('Undisturbed scenario requires a base scenario with sbs')
@@ -979,7 +974,7 @@ class Omni(NoDbBase, LogMixin):
             soils.build()
 
         elif scenario == OmniScenario.SBSmap:
-            self.log(f'  Omni::_build_scenario: sbs\n')
+            self.logger.info(f'  Omni::_build_scenario: sbs\n')
 
             sbs_file_path = scenario_def.get('sbs_file_path')
             if not _exists(sbs_file_path):
@@ -996,7 +991,7 @@ class Omni(NoDbBase, LogMixin):
             soils.build()
 
         elif scenario == OmniScenario.Mulch:
-            self.log(f'  Omni::_build_scenario: mulch\n')
+            self.logger.info(f'  Omni::_build_scenario: mulch\n')
 
             assert omni_base_scenario_name is not None, \
                 'Mulching scenario requires a base scenario'
@@ -1023,7 +1018,7 @@ class Omni(NoDbBase, LogMixin):
             treatments.build_treatments()
             
         elif scenario == OmniScenario.PrescribedFire:
-            self.log(f'  Omni::_build_scenario: prescribed fire\n')
+            self.logger.info(f'  Omni::_build_scenario: prescribed fire\n')
 
             # should have cloned undisturbed
             if disturbed.has_sbs:
@@ -1048,7 +1043,7 @@ class Omni(NoDbBase, LogMixin):
             treatments.build_treatments()
 
         elif scenario == OmniScenario.Thinning:
-            self.log(f'  Omni::_build_scenario: thinning\n')
+            self.logger.info(f'  Omni::_build_scenario: thinning\n')
 
             # should have cloned undisturbed
             if disturbed.has_sbs:

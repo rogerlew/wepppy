@@ -54,7 +54,6 @@ from .ron import Ron
 from .base import NoDbBase, TriggerEvents
 from .topaz import Topaz
 from .redis_prep import RedisPrep, TaskEnum
-from .mixins.log_mixin import LogMixin
 
 from wepppy.all_your_base import NCPU
 

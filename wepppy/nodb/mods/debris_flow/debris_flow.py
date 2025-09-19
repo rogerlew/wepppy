@@ -250,7 +250,7 @@ class DebrisFlow(NoDbBase):
                     # B (in km2) is the area of the basin burned at high and moderate severity,
                     # T (in mm) is the total storm rainfall, and 0.3 is a bias correction that changes
                     # the predicted estimate from a median to a mean value (Helsel and Hirsch, 2002).
-                    v = np.exp(7.2 + 0.6 * math.log(A) + 0.7 * B ** 0.5 + 0.2 * T ** 0.5 + 0.3)
+                    v = np.exp(7.2 + 0.6 * math.logger.info(A) + 0.7 * B ** 0.5 + 0.2 * T ** 0.5 + 0.3)
 
                     # where
                     # %A is the percentage of the basin area with gradients greater than or equal to 30%,

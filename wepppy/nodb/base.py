@@ -247,14 +247,14 @@ class NoDbBase(object):
     @contextmanager
     def timed(self, task_name: str, level=logging.INFO):
         """Context manager to log the start, end, and duration of a task."""
-        self.logger.log(level, f"{task_name}...")
+        self.logger.logger.info(level, f"{task_name}...")
         start_time = time.perf_counter()
         try:
             yield
         finally:
             end_time = time.perf_counter()
             duration = end_time - start_time
-            self.logger.log(level, f"{task_name}... done. ({duration:.2f}s)")
+            self.logger.logger.info(level, f"{task_name}... done. ({duration:.2f}s)")
 
     @property
     def _redis_cache_key(self):

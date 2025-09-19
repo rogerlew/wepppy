@@ -37,7 +37,6 @@ from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture
 
 # wepppy submodules
-from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.nodb.base import NoDbBase
 
 from wepppy.nodb.mods import RangelandCover
