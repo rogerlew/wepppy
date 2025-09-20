@@ -64,7 +64,8 @@ class RevegetationNoDbLockedException(Exception):
 
 class Revegetation(NoDbBase):
     __name__ = 'Revegetation'
-    filename = 'revegetation.nodb'
+
+    filename = 'revegetation.nodb'  
 
     def __init__(self, wd, cfg_fn):
         super(Revegetation, self).__init__(wd, cfg_fn)
@@ -168,14 +169,6 @@ class Revegetation(NoDbBase):
             data_dict[key] = np.array(data_dict[key], dtype=np.float32)
 
         return data_dict
-
-    @property
-    def status_log(self):
-        return os.path.abspath(_join(self.revegetation_dir, 'status.log'))
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'revegetation.nodb')
 
     @property
     def _lock(self):

@@ -46,9 +46,10 @@ _soils_map = {
 }
 
 class TurkeyMod(NoDbBase, LocationMixin):
-    __name__ = 'PortlandMod'
-    filename = 'turkey.nodb'
+    __name__ = 'TurkeyMod'
 
+    filename = 'turkey.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(TurkeyMod, self).__init__(wd, cfg_fn)
 
@@ -64,10 +65,6 @@ class TurkeyMod(NoDbBase, LocationMixin):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'turkey.nodb')
 
     @property
     def _lock(self):

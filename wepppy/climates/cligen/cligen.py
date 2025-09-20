@@ -1834,9 +1834,6 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
                 p_wws[i] = spww
                 p_wds[i] = spwd
            
-        if logger is not None:
-            logger.log_done()
-
         if randseed is None:
             randseed = 12345
         randseed = str(randseed)

@@ -630,9 +630,11 @@ def cli_revision(cli_fn: str, is_breakpoint: bool, ws_ppts: np.array, ws_tmaxs: 
 
 # noinspection PyUnusedLocal
 class Climate(NoDbBase):
-    filename = 'climate.nodb'
+    
     _js_decode_replacements = (("\"orig_cli_fn\"", "\"_orig_cli_fn\""),)
 
+    filename = 'climate.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(Climate, self).__init__(wd, cfg_fn)
 
@@ -840,10 +842,6 @@ class Climate(NoDbBase):
     @property
     def daymet_precip_scale_factor_map(self):
         return getattr(self, '_daymet_precip_scale_factor_map', None)
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'climate.nodb')
 
     @property
     def _lock(self):

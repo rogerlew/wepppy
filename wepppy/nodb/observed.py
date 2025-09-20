@@ -39,13 +39,14 @@ class ObservedNoDbLockedException(Exception):
 
 
 class Observed(NoDbBase):
-    filename = 'observed.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
     """
     __name__ = 'Observed'
 
+    filename = 'observed.nodb'
+    
     measures = ['Streamflow (mm)',
                 'Sed Del (kg)',
                 'Total P (kg)',
@@ -69,10 +70,6 @@ class Observed(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'observed.nodb')
 
     @property
     def _lock(self):

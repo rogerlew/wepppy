@@ -57,8 +57,9 @@ sbs_soil_replacements = dict(
 
 @deprecated("supplanted by Disturbed, needed for Portland")
 class Baer(NoDbBase):
-    filename = 'baer.nodb'
     __name__ = 'Baer'
+
+    filename = 'baer.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(Baer, self).__init__(wd, cfg_fn)
@@ -86,10 +87,6 @@ class Baer(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'baer.nodb')
 
     @property
     def _lock(self):

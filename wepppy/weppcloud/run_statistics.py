@@ -69,10 +69,6 @@ class RunStatistics(object):
             nodb.getInstance(self.wd)
 
     @property
-    def _nodb(self):
-        return _join(self.wd, 'run_statistics.nodb')
-
-    @property
     def _lock(self):
         return _join(self.wd, 'run_statistics.nodb.lock')
 

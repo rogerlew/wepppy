@@ -87,13 +87,14 @@ class AshNoDbLockedException(Exception):
 
 
 class Ash(NoDbBase):
-    filename = 'ash.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
     """
     __name__ = 'Ash'
 
+    filename = 'ash.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(Ash, self).__init__(wd, cfg_fn)
 
@@ -369,20 +370,12 @@ class Ash(NoDbBase):
         return instance
 
     @property
-    def _nodb(self):
-        return _join(self.wd, 'ash.nodb')
-
-    @property
     def _lock(self):
         return _join(self.wd, 'ash.nodb.lock')
 
     @property
-    def status_log(self):
-        return os.path.abspath(_join(self.ash_dir, 'status.log'))
-
-    @property
     def has_ash_results(self):
-        return _exists(self.status_log) and len(glob(_join(self.ash_dir, 'post', '*.pkl'))) > 0
+        return len(glob(_join(self.ash_dir, 'post', '*.pkl'))) > 0
 
     # These are setup this way for the html views
     @property

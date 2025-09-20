@@ -169,6 +169,7 @@ def n_neighbors(a, indx):
 
 class SkidTrails(NoDbBase):
     __name__ = 'skid_trails'
+
     filename = 'skid_trails.nodb'
 
     def __init__(self, wd, cfg_fn):
@@ -377,10 +378,6 @@ class SkidTrails(NoDbBase):
     @property
     def output_dir(self):
         return _join(self.wd, 'skid_trails', 'output')
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'skid_trails.nodb')
 
     @property
     def _lock(self):

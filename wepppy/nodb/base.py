@@ -41,9 +41,8 @@ import logging
 import queue
 from logging.handlers import QueueHandler, QueueListener
 import atexit
-
-from wepppy.logging.redis_stream_handlers import RedisStreamLogHandler
 from logging import FileHandler, StreamHandler
+from wepppy.nodb.status_messenger import StatusMessengerHandler
 
 from .redis_prep import RedisPrep
 from wepppy.all_your_base import isfloat, isint, isbool
@@ -54,8 +53,8 @@ import redis
 redis_nodb_cache_client = None
 redis_status_client = None
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-REDIS_NODB_CACHE_DB = 13
-REDIS_STATUS_DB = 2
+REDIS_NODB_CACHE_DB = 13  # to check keys use: redis-cli -n 13 KEYS "*"    
+REDIS_STATUS_DB = 2       # to monitor db 2 in real-time use: redis-cli MONITOR | grep '\[2 '
 if REDIS_HOST is not None:
     try:
         redis_nodb_cache_pool = redis.ConnectionPool(
@@ -79,9 +78,6 @@ if REDIS_HOST is not None:
     except Exception as e:
         logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
         redis_status_client = None
-
-# to check keys use: redis-cli -n 13 KEYS "*"    
-
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
@@ -112,8 +108,13 @@ class TriggerEvents(Enum):
 
 class NoDbBase(object):
     DEBUG = 0
-    filename = None
     _js_decode_replacements = ()
+
+    filename = None
+
+    @property
+    def _nodb(self):
+        return _join(self.wd, self.filename)
 
     def __init__(self, wd, cfg_fn):
         assert _exists(wd)
@@ -144,7 +145,7 @@ class NoDbBase(object):
         self.logger.propagate = True
 
         # Check if queue handler exists
-        queue_handler = getattr(self.runid_logger, '_wepp_queue_handler', None)
+        queue_handler = getattr(self.runid_logger, '_queue_handler', None)
 
         # Define a standard log format
         log_format = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
@@ -166,11 +167,10 @@ class NoDbBase(object):
 
             # Initialize handlers
             # Redis handler
-            self._redis_handler = RedisStreamLogHandler(
-                redis_client=redis_status_client,
-                stream_name=self._status_channel
+            self._redis_handler = StatusMessengerHandler(
+                channel=self._status_channel
             )
-            self._redis_handler.setLevel(logging.INFO)
+            self._redis_handler.setLevel(logging.DEBUG)
 
             # File handler for run logs
             log_path = _join(self.wd, self.filename.replace('.nodb', '.log'))
@@ -204,22 +204,22 @@ class NoDbBase(object):
             atexit.register(self._queue_listener.stop)
 
             # Attach handlers to runid_logger for reuse
-            self.runid_logger._wepp_log_queue = self._log_queue
-            self.runid_logger._wepp_queue_handler = self._queue_handler
-            self.runid_logger._wepp_queue_listener = self._queue_listener
-            self.runid_logger._wepp_redis_handler = self._redis_handler
-            self.runid_logger._wepp_run_file_handler = self._run_file_handler
-            self.runid_logger._wepp_exception_file_handler = self._exception_file_handler
-            self.runid_logger._wepp_console_handler = self._console_handler
+            self.runid_logger._log_queue = self._log_queue
+            self.runid_logger._queue_handler = self._queue_handler
+            self.runid_logger._queue_listener = self._queue_listener
+            self.runid_logger._redis_handler = self._redis_handler
+            self.runid_logger._run_file_handler = self._run_file_handler
+            self.runid_logger._exception_file_handler = self._exception_file_handler
+            self.runid_logger._console_handler = self._console_handler
         else:
             # Reuse existing handlers
             self._queue_handler = queue_handler
-            self._log_queue = self.runid_logger._wepp_log_queue
-            self._queue_listener = self.runid_logger._wepp_queue_listener
-            self._redis_handler = self.runid_logger._wepp_redis_handler
-            self._run_file_handler = self.runid_logger._wepp_run_file_handler
-            self._exception_file_handler = self.runid_logger._wepp_exception_file_handler
-            self._console_handler = self.runid_logger._wepp_console_handler
+            self._log_queue = self.runid_logger._log_queue
+            self._queue_listener = self.runid_logger._queue_listener
+            self._redis_handler = self.runid_logger._redis_handler
+            self._run_file_handler = self.runid_logger._run_file_handler
+            self._exception_file_handler = self.runid_logger._exception_file_handler
+            self._console_handler = self.runid_logger._console_handler
 
     def __getstate__(self):
         state = self.__dict__.copy()

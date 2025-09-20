@@ -385,13 +385,16 @@ class AshPostNoDbLockedException(Exception):
 
 
 class AshPost(NoDbBase):
-    filename = 'ashpost.nodb'
-    _js_decode_replacements = (("\"pw0_stats\"", "\"_pw0_stats\""),)
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
     """
+    
     __name__ = 'AshPost'
+
+    _js_decode_replacements = (("\"pw0_stats\"", "\"_pw0_stats\""),)
+
+    filename = 'ashpost.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(AshPost, self).__init__(wd, cfg_fn)
@@ -407,10 +410,6 @@ class AshPost(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'ashpost.nodb')
 
     @property
     def _lock(self):

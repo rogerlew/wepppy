@@ -59,10 +59,6 @@ class OSUeMapR_TS(NoDbBase):
             raise
 
     @property
-    def _nodb(self):
-        return _join(self.wd, 'emapr_ts.nodb')
-
-    @property
     def _lock(self):
         return _join(self.wd, 'emapr_ts.nodb.lock')
 

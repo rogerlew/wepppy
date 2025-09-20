@@ -77,7 +77,7 @@ class Soils(NoDbBase):
     and coordinates access of NoDb instances.
     """
     __name__ = 'Soils'
-    filename = 'soils.nodb'
+    
     _js_decode_replacements = (
         ("\"simple_texture\"", "\"_simple_texture\""),
         ("\"texture\"", "\"_texture\""),
@@ -89,6 +89,8 @@ class Soils(NoDbBase):
         ("\"clay\"", "\"_old_clay\""),
     )
 
+    filename = 'soils.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(Soils, self).__init__(wd, cfg_fn)
 
@@ -136,10 +138,6 @@ class Soils(NoDbBase):
             nodb.getInstance(self.wd)
 
         self.dump_soils_parquet()
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'soils.nodb')
 
     @property
     def _lock(self):

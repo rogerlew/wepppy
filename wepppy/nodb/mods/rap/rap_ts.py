@@ -53,8 +53,9 @@ class RAPNoDbLockedException(Exception):
 
 class RAP_TS(NoDbBase):
     __name__ = 'RAP_TS'
-    filename = 'rap_ts.nodb'
 
+    filename = 'rap_ts.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(RAP_TS, self).__init__(wd, cfg_fn)
 
@@ -89,18 +90,9 @@ class RAP_TS(NoDbBase):
 
         return instance
 
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'rap_ts.nodb')
-
     @property
     def _lock(self):
         return _join(self.wd, 'rap_ts.nodb.lock')
-
-    @property
-    def status_log(self):
-        return os.path.abspath(_join(self.rap_dir, 'status.log'))
 
     @property
     def rap_end_year(self):

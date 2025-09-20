@@ -56,10 +56,6 @@ class GeneralMod(NoDbBase, LocationMixin):
             raise
 
     @property
-    def _nodb(self):
-        return _join(self.wd, 'general.nodb')
-
-    @property
     def _lock(self):
         return _join(self.wd, 'general.nodb.lock')
 

@@ -148,8 +148,9 @@ class InvalidProjection(Exception):
 
 
 class Disturbed(NoDbBase):
-    filename = 'disturbed.nodb'
     __name__ = 'Disturbed'
+
+    filename = 'disturbed.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(Disturbed, self).__init__(wd, cfg_fn)
@@ -249,10 +250,6 @@ class Disturbed(NoDbBase):
             os.remove(_lookup)
 
         shutil.copyfile(self.default_land_soil_lookup_fn, _lookup)
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'disturbed.nodb')
 
     @property
     def _lock(self):

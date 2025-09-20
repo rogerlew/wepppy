@@ -28,7 +28,6 @@ class SubbasinsNoDbLockedException(Exception):
 
 
 class Subbasins(NoDbBase):
-    filename = 'subbasins.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
@@ -41,6 +40,8 @@ class Subbasins(NoDbBase):
                    '_dem_db',
                    '_boundary')
 
+    filename = 'subbasins.nodb'
+    
     def __init__(self, wd, cfg_fn='0.cfg'):
         super(Subbasins, self).__init__(wd, cfg_fn)
 
@@ -69,10 +70,6 @@ class Subbasins(NoDbBase):
     @property
     def subbasins_dir(self):
         return _join(self.wd, 'wepp', 'subbasins')
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'subbasins.nodb')
 
     @property
     def _lock(self):

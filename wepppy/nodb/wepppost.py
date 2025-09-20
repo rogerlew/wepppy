@@ -28,13 +28,14 @@ class WeppPostNoDbLockedException(Exception):
 
 
 class WeppPost(NoDbBase):
-    filename = 'wepppost.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
     """
     __name__ = 'WeppPost'
 
+    filename = 'wepppost.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(WeppPost, self).__init__(wd, cfg_fn)
 
@@ -60,10 +61,6 @@ class WeppPost(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'wepppost.nodb')
 
     @property
     def _lock(self):

@@ -115,6 +115,7 @@ class ShrublandPointData(object):
 
 class Shrubland(NoDbBase):
     __name__ = 'Shrubland'
+
     filename = 'shrubland.nodb'
 
     def __init__(self, wd, cfg_fn):
@@ -132,10 +133,6 @@ class Shrubland(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'shrubland.nodb')
 
     @property
     def _lock(self):

@@ -84,8 +84,9 @@ class Landuse(NoDbBase):
     and coordinates access of NoDb instances.
     """
     __name__ = 'Landuse'
-    filename = 'landuse.nodb'
 
+    filename = 'landuse.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(Landuse, self).__init__(wd, cfg_fn)
 
@@ -148,14 +149,6 @@ class Landuse(NoDbBase):
                 instance.domlc_mofe_d[topaz_id] = mofe_d
 
         return instance
-
-    @property
-    def status_log(self):
-        return os.path.abspath(_join(self.lc_dir, 'status.log'))
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'landuse.nodb')
 
     @property
     def _lock(self):

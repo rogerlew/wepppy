@@ -75,9 +75,10 @@ class RangelandCoverMode(IntEnum):
 
 
 class RangelandCover(NoDbBase):
-    filename = 'rangeland_cover.nodb'
     __name__ = 'RangelandCover'
 
+    filename = 'rangeland_cover.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(RangelandCover, self).__init__(wd, cfg_fn)
 
@@ -105,10 +106,6 @@ class RangelandCover(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'rangeland_cover.nodb')
 
     @property
     def _lock(self):
