@@ -364,12 +364,6 @@ class Watershed(NoDbBase):
         import jsonpickle
         return jsonpickle.decode(json.dumps(data))
 
-
-
-    @property
-    def _status_channel(self):
-        return f"{self.runid}:watershed"
-
     @property
     def delineation_backend(self):
         delineation_backend = getattr(self, "_delineation_backend", None)
