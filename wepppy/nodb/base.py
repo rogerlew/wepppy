@@ -168,8 +168,9 @@ class NoDbBase(object):
 
             # Initialize handlers
             # Redis handler
+            _channel = self.filename.replace('.nodb', '')
             self._redis_handler = StatusMessengerHandler(
-                channel=self._status_channel
+                channel=f'{self.runid}:{_channel}'
             )
             self._redis_handler.setLevel(logging.DEBUG)
 
@@ -243,11 +244,12 @@ class NoDbBase(object):
         __status_channel = f'{self.runid}:{self.class_name}'
 
         run_dir = os.path.abspath(self.runs_dir)
-        if '/omni/' in run_dir:
-            _parent_runid = run_dir.split('/omni/')[0].split('/')[-1]
-            __status_channel = f'{_parent_runid}:omni'
-        else:
-            __status_channel = f'{self.runid}:wepp'
+
+#        if '/omni/' in run_dir:
+#            _parent_runid = run_dir.split('/omni/')[0].split('/')[-1]
+#            __status_channel = f'{_parent_runid}:omni'
+#        else:
+#            __status_channel = f'{self.runid}:wepp'  # bug is here. 
 
         return  __status_channel
 
