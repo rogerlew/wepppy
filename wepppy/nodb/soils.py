@@ -1148,10 +1148,10 @@ class Soils(NoDbBase):
             valid = list(int(v) for v in soils.keys())
 
             if wepppyo3 is None:
-                with self.timed('  Identifying dominant soils with wepppyo3'):
+                with self.timed('  Identifying dominant soils  (wepppyo3 not available)'):
                     domsoil_d = sm.build_soilgrid(watershed.subwta)
             else:
-                with self.timed('  Identifying dominant soils (wepppyo3 not available)'):
+                with self.timed('  Identifying dominant soils with wepppyo3 (rustlang)'):
                     domsoil_d = identify_mode_single_raster_key(
                         key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys={-2147483648,})
                     domsoil_d = {k: str(v) for k, v in domsoil_d.items() if int(k) > 0}
