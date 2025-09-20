@@ -55,10 +55,6 @@ class GeneralMod(NoDbBase, LocationMixin):
             self.unlock('-f')
             raise
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'general.nodb.lock')
-
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
             self.remap_landuse()

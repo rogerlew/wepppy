@@ -135,10 +135,6 @@ class Shrubland(NoDbBase):
             raise
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'shrubland.nodb.lock')
-
-    @property
     def shrubland_dir(self):
         return _join(self.wd, 'shrubland')
 

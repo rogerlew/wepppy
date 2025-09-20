@@ -79,10 +79,6 @@ class Treatments(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _lock(self):
-        return _join(self.wd, 'treatments.nodb.lock')
     
     @property
     def mode(self) -> TreatmentsMode:

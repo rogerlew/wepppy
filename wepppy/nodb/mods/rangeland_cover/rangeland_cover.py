@@ -107,10 +107,6 @@ class RangelandCover(NoDbBase):
             self.unlock('-f')
             raise
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'rangeland_cover.nodb.lock')
-
     def on(self, evt):
         pass
 

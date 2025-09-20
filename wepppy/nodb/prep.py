@@ -75,10 +75,6 @@ class Prep(NoDbBase):
             self.unlock('-f')
             raise
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'prep.nodb.lock')
-
     def timestamp(self, key):
         now = int(time.time())
         self.__setitem__(key, now)

@@ -66,10 +66,6 @@ class TurkeyMod(NoDbBase, LocationMixin):
             self.unlock('-f')
             raise
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'turkey.nodb.lock')
-
     def on(self, evt):
         pass
         """

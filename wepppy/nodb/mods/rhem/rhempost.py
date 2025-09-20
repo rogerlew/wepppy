@@ -54,10 +54,6 @@ class RhemPost(NoDbBase):
             raise
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'rhempost.nodb.lock')
-
-    @property
     def missing_summaries_count(self):
         return getattr(self, '_missing_summaries_count', 0)
 

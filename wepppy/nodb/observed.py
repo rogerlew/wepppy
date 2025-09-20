@@ -71,10 +71,6 @@ class Observed(NoDbBase):
             self.unlock('-f')
             raise
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'observed.nodb.lock')
-
     def read_observed_fn(self, fn):
         with open(fn) as fp:
             textdata = fp.read()

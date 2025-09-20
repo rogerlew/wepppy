@@ -555,10 +555,6 @@ class Wepp(NoDbBase):
             self.unlock('-f')
             raise
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'wepp.nodb.lock')
-
 
     @property
     def prep_details_on_run_completion(self):

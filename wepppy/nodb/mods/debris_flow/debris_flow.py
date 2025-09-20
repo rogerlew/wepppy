@@ -87,10 +87,6 @@ class DebrisFlow(NoDbBase):
             self.unlock('-f')
             raise
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'debris_flow.nodb.lock')
-
     def fetch_precip_data(self):
 
         self.lock()

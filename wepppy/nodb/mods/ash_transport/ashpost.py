@@ -412,10 +412,6 @@ class AshPost(NoDbBase):
             raise
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'ashpost.nodb.lock')
-
-    @property
     def return_periods(self):
         return self._return_periods
 

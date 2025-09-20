@@ -88,10 +88,6 @@ class Rhem(NoDbBase):
         return _join(self.wd, 'rhem', 'output')
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'rhem.nodb.lock')
-
-    @property
     def has_run(self):
         return len(glob(_join(self.output_dir, '*.sum'))) > 0
 

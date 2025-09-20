@@ -151,10 +151,6 @@ class Landuse(NoDbBase):
         return instance
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'landuse.nodb.lock')
-
-    @property
     def mapping(self):
         if hasattr(self, '_mapping'):
             return self._mapping

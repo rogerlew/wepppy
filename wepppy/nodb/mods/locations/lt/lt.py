@@ -52,10 +52,6 @@ class LakeTahoe(NoDbBase, LocationMixin):
         except Exception:
             self.unlock('-f')
             raise
-        
-    @property
-    def _lock(self):
-        return _join(self.wd, 'lt.nodb.lock')
 
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:

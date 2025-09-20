@@ -59,10 +59,6 @@ class OSUeMapR_TS(NoDbBase):
             raise
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'emapr_ts.nodb.lock')
-
-    @property
     def emapr_end_year(self):
         return self._emapr_end_year
 

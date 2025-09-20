@@ -73,10 +73,6 @@ class Treecanopy(NoDbBase):
             raise
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'treecanopy.nodb.lock')
-
-    @property
     def treecanopy_dir(self):
         return _join(self.wd, 'treecanopy')
 

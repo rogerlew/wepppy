@@ -141,10 +141,6 @@ class Soils(NoDbBase):
         self.dump_soils_parquet()
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'soils.nodb.lock')
-
-    @property
     def clip_soils(self):
         return getattr(self, '_clip_soils', False)
 

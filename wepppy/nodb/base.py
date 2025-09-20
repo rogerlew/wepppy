@@ -56,29 +56,42 @@ redis_status_client = None
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 REDIS_NODB_CACHE_DB = 13  # to check keys use: redis-cli -n 13 KEYS "*"    
 REDIS_STATUS_DB = 2       # to monitor db 2 in real-time use: redis-cli MONITOR | grep '\[2 '
-if REDIS_HOST is not None:
-    try:
-        redis_nodb_cache_pool = redis.ConnectionPool(
-            host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, 
-            decode_responses=True, max_connections=50
-        )
-        redis_nodb_cache_client = redis.StrictRedis(connection_pool=redis_nodb_cache_pool)
-        redis_nodb_cache_client.ping()
-    except Exception as e:
-        logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
-        redis_nodb_cache_client = None
+REDIS_LOCK_DB = 14
+
+try:
+    redis_nodb_cache_pool = redis.ConnectionPool(
+        host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, 
+        decode_responses=True, max_connections=50
+    )
+    redis_nodb_cache_client = redis.StrictRedis(connection_pool=redis_nodb_cache_pool)
+    redis_nodb_cache_client.ping()
+except Exception as e:
+    logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
+    redis_nodb_cache_client = None
 
 
-    try:
-        redis_status_pool = redis.ConnectionPool(
-            host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, 
-            decode_responses=True, max_connections=50
-        )
-        redis_status_client = redis.StrictRedis(connection_pool=redis_status_pool)
-        redis_status_client.ping()
-    except Exception as e:
-        logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
-        redis_status_client = None
+try:
+    redis_status_pool = redis.ConnectionPool(
+        host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, 
+        decode_responses=True, max_connections=50
+    )
+    redis_status_client = redis.StrictRedis(connection_pool=redis_status_pool)
+    redis_status_client.ping()
+except Exception as e:
+    logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
+    redis_status_client = None
+
+try:
+    redis_lock_pool = redis.ConnectionPool(
+        host=REDIS_HOST, port=6379, db=REDIS_LOCK_DB, 
+        decode_responses=True, max_connections=50
+    )
+    redis_lock_client = redis.StrictRedis(connection_pool=redis_lock_pool)
+    redis_lock_client.ping()
+except Exception as e:
+    logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
+    redis_lock_client = None
+
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
@@ -116,6 +129,10 @@ class NoDbBase(object):
     @property
     def _nodb(self):
         return _join(self.wd, self.filename)
+
+    @property
+    def _lock_key(self):
+        return f"{self.runid}:{self.filename}"
 
     def __init__(self, wd, cfg_fn):
         assert _exists(wd)
@@ -609,48 +626,43 @@ class NoDbBase(object):
                     del obj[attr]
         return obj
 
-        # noinspection PyUnresolvedReferences
-        with open(self._nodb, 'w') as fp:
-            fp.write(js)
-
     def lock(self):
-        if self.islocked():
-            raise Exception('lock() called on an already locked nodb')
-
         if self.readonly:
             raise Exception('lock() called on readonly project')
 
-        # noinspection PyUnresolvedReferences
-        with open(self._lock, 'w') as fp:
-            fp.write(str(time()))
+        if redis_lock_client is None:
+            raise RuntimeError('Redis lock client is unavailable')
+
+        lock_acquired = redis_lock_client.set(self._lock_key, str(time()), nx=True)
+        if not lock_acquired:
+            raise Exception('lock() called on an already locked nodb')
 
         if redis_nodb_cache_client is not None:
             redis_nodb_cache_client.delete(self._redis_cache_key)
 
         try:
-                RedisPrep.getInstance(self.wd).set_locked_status(self.basename, True)
+            RedisPrep.getInstance(self.wd).set_locked_status(self.class_name, True)
         except:
             pass
 
-    @property
-    def basename(self):
-        return _split(self._lock)[-1].replace('.nodb.lock', '')
-
     def unlock(self, flag=None):
-        if self.islocked():
-            # noinspection PyUnresolvedReferences
-            os.remove(self._lock)
+        if redis_lock_client is None:
+            raise RuntimeError('Redis lock client is unavailable')
+
+        removed = redis_lock_client.delete(self._lock_key)
+        if removed:
             try:
-                RedisPrep.getInstance(self.wd).set_locked_status(self.basename, False)
+                RedisPrep.getInstance(self.wd).set_locked_status(self.class_name, False)
             except:
                 pass
-        else:
-            if flag != '-f':
-                raise Exception('unlock() called on an already unlocked nodb')
+        elif flag != '-f':
+            raise Exception('unlock() called on an already unlocked nodb')
 
     def islocked(self):
-        # noinspection PyUnresolvedReferences
-        return _exists(self._lock)
+        if redis_lock_client is None:
+            raise RuntimeError('Redis lock client is unavailable')
+
+        return bool(redis_lock_client.exists(self._lock_key))
 
     @property
     def runid(self):

@@ -262,10 +262,6 @@ class Disturbed(NoDbBase):
         shutil.copyfile(self.default_land_soil_lookup_fn, _lookup)
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'disturbed.nodb.lock')
-
-    @property
     def disturbed_dir(self):
         return _join(self.wd, 'disturbed')
 

@@ -362,10 +362,6 @@ class Unitizer(NoDbBase):
             self.unlock('-f')
             raise
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'unitizer.nodb.lock')
-
     @staticmethod
     def context_processor_package():
         global converters, precisions

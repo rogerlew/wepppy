@@ -170,10 +170,6 @@ class Revegetation(NoDbBase):
 
         return data_dict
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'revegetation.nodb.lock')
-
     def clean(self):
         revegetation_dir = self.revegetation_dir
         if _exists(revegetation_dir):
