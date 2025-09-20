@@ -6,8 +6,8 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-# standard library
 import os
+import inspect
 
 from os.path import join as _join
 from os.path import exists as _exists
@@ -127,6 +127,7 @@ class Soils(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
     def dump_and_unlock(self, validate=True):
         self.dump()
         self.unlock()
@@ -149,6 +150,9 @@ class Soils(NoDbBase):
 
     @clip_soils.setter
     def clip_soils(self, value: bool):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -165,6 +169,9 @@ class Soils(NoDbBase):
 
     @clip_soils_depth.setter
     def clip_soils_depth(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -181,6 +188,9 @@ class Soils(NoDbBase):
 
     @initial_sat.setter
     def initial_sat(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -200,6 +210,9 @@ class Soils(NoDbBase):
 
     @ksflag.setter
     def ksflag(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
+
         assert value in (True, False)
 
         self.lock()
@@ -219,6 +232,9 @@ class Soils(NoDbBase):
 
     @mode.setter
     def mode(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -248,6 +264,9 @@ class Soils(NoDbBase):
 
     @single_selection.setter
     def single_selection(self, mukey):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> value={mukey}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -265,6 +284,9 @@ class Soils(NoDbBase):
 
     @single_dbselection.setter
     def single_dbselection(self, sol):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> value={sol}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -311,6 +333,9 @@ class Soils(NoDbBase):
 
     @ssurgo_db.setter
     def ssurgo_db(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -323,7 +348,9 @@ class Soils(NoDbBase):
             raise
 
     def build_chile(self, initial_sat=None, ksflag=None):
-        self.logger.info("wepp.nodb.Soils.build_chile()...\n")
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
+
         from wepppy.locales.chile.soils import get_soil_fn
         from wepppy.wepp.soils.utils import WeppSoilUtil
 
@@ -403,7 +430,9 @@ class Soils(NoDbBase):
             raise
 
     def build_isric(self, initial_sat=None, ksflag=None):
-        self.logger.info("wepp.nodb.Soils.build_isric()...\n")
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
+
         from wepppy.locales.earth.soils.isric import ISRICSoilData
 
         wd = self.wd
@@ -425,9 +454,8 @@ class Soils(NoDbBase):
                 self._ksflag = bool(ksflag)
 
             isric = ISRICSoilData(soils_dir)
-            self.logger.info('fetching soil maps...')
-            isric.fetch(ron.map.extent, status_channel=self._status_channel)
-            self.logger.info('done')
+            with self.timed('  Fetching ISRIC data'):
+                isric.fetch(ron.map.extent, status_channel=self._status_channel)
 
             domsoil_d = {}
             soils = {}
@@ -491,9 +519,10 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-
     def build_statsgo(self, initial_sat=None, ksflag=None):
-        self.logger.info("wepp.nodb.Soils.build_statsgo()...\n")
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
+
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
@@ -563,8 +592,10 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-    def _build_by_identify(self, build_func, status_channel):
-        self.logger.info("wepp.nodb.Soils._build_by_identify()...\n")
+    def _build_by_identify(self, build_func):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(build_func={build_func})')
+
         soils_dir = self.soils_dir
         wd = self.wd
         self.lock()
@@ -577,7 +608,7 @@ class Soils(NoDbBase):
             for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
                 orders.append([topaz_id, (lng, lat)])
 
-            soils, domsoil_d = build_func(orders, soils_dir, status_channel=status_channel)
+            soils, domsoil_d = build_func(orders, soils_dir, status_channel=self._status_channel)
             for topaz_id, k in domsoil_d.items():
                 soils[k].area += watershed.hillslope_area(topaz_id)
 
@@ -601,9 +632,10 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-
     def _build_from_map_db(self):
-        self.logger.info("wepp.nodb.Soils._build_from_map_db()...\n")
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         from wepppy.wepp.soils.utils import WeppSoilUtil
 
         wd = self.wd
@@ -673,23 +705,24 @@ class Soils(NoDbBase):
             raise
 
     def _build_spatial_api(self):
-        # fetch landcover map
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
 
         _map = Ron.getInstance(self.wd).map
 
         ssurgo_fn = self.ssurgo_fn
         soils_dir = self.soils_dir
 
-        wmesque_retrieve(self.ssurgo_db, _map.extent,
-                            ssurgo_fn, _map.cellsize, 
-                            v=self.wmesque_version, 
-                            wmesque_endpoint=self.wmesque_endpoint)
+        with self.timed('  Retrieving ssurgo data'):
+            wmesque_retrieve(self.ssurgo_db, _map.extent,
+                                ssurgo_fn, _map.cellsize, 
+                                v=self.wmesque_version, 
+                                wmesque_endpoint=self.wmesque_endpoint)
 
         # Make SSURGO Soils
         sm = SurgoMap(ssurgo_fn)
         mukeys = set(sm.mukeys)
         self.logger.info(f"ssurgo mukeys: {mukeys}")
-        self.logger.info('done')
 
         surgo_c = SurgoSoilCollection(mukeys)
         surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
@@ -699,7 +732,6 @@ class Soils(NoDbBase):
         surgo_c.logInvalidSoils(wd=soils_dir)
 
         self.logger.info(f"valid mukeys: {soils.keys()}")
-        self.logger.info('done')
 
         valid = list(int(v) for v in soils.keys())
 
@@ -727,7 +759,10 @@ class Soils(NoDbBase):
 
         
     def build(self, initial_sat=None, ksflag=None):
-        self.logger.info("wepp.nodb.Soils.build()...\n")
+        self.logger.info(f'='*100)
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
+        self.logger.info(f' SoilsMode: {self._mode}')
 
         if self._mode == SoilsMode.SpatialAPI:
             self._build_spatial_api()
@@ -739,27 +774,38 @@ class Soils(NoDbBase):
             raise WatershedNotAbstractedError()
 
         if 'ChileCayumanque' in self.locales:
+            self.logger.info('  Locale: ChileCayumanque')
             self.build_chile(initial_sat=initial_sat, ksflag=ksflag)
         elif self.soils_map is not None:
+            self.logger.info(f'  Using soils map: {self.soils_map}')
             self._build_from_map_db()
         elif self.config_stem.startswith('ak'):
+            self.logger.info('  Locale: Alaska')
             self._build_ak()
         elif self.mode == SoilsMode.Gridded:
+            self.logger.info('  Gridded Soils Mode')
             if self.ssurgo_db == 'isric':
+                self.logger.info('    Using ISRIC database')
                 self.build_isric(initial_sat=initial_sat, ksflag=ksflag)
             elif 'eu' in self.locales:
+                self.logger.info('    Using ESDAC database')
                 from wepppy.eu.soils import build_esdac_soils
-                self._build_by_identify(build_esdac_soils, self._status_channel)
+                self._build_by_identify(build_esdac_soils)
             elif 'au' in self.locales:
+                self.logger.info('    Using ASRIS database')
                 from wepppy.au.soils import build_asris_soils
-                self._build_by_identify(build_asris_soils, self._status_channel)
+                self._build_by_identify(build_asris_soils)
             else:
+                self.logger.info('    Using SSURGO/STATSGO database')
                 self._build_gridded(initial_sat=initial_sat, ksflag=ksflag)
         elif self.mode == SoilsMode.Single:
+            self.logger.info('  Single Soil Mode')
             self._build_single(initial_sat=initial_sat, ksflag=ksflag)
         elif self.mode == SoilsMode.SingleDb:
+            self.logger.info('  Single Soil from Database Mode')
             self._build_singledb()
         elif self._mode in [SoilsMode.RRED_Burned, SoilsMode.RRED_Unburned]:
+            self.logger.info('  RRED Soils Mode')
             import wepppy
             rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
             rred.build_soils(self._mode)
@@ -902,6 +948,9 @@ class Soils(NoDbBase):
         return ll_pct
 
     def _build_ak(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         wd = self.wd
         self.lock()
 
@@ -943,6 +992,9 @@ class Soils(NoDbBase):
             raise
 
     def _build_single(self, initial_sat=None, ksflag=True):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+        
 
         soils_dir = self.soils_dir
 
@@ -996,7 +1048,9 @@ class Soils(NoDbBase):
             raise
 
     def _build_singledb(self):
-
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+        
         wd = self.wd
 
         if self.single_dbselection is None:
@@ -1053,6 +1107,9 @@ class Soils(NoDbBase):
             raise
 
     def _build_gridded(self, initial_sat=None, ksflag=None):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
+
         global wepppyo3
 
         soils_dir = self.soils_dir
@@ -1068,44 +1125,36 @@ class Soils(NoDbBase):
             _map = Ron.getInstance(self.wd).map
             watershed = Watershed.getInstance(self.wd)
 
-            ssurgo_fn = self.ssurgo_fn
+            with self.timed('  Retrieving ssurgo data'):
+                ssurgo_fn = self.ssurgo_fn
+                wmesque_retrieve(self.ssurgo_db, _map.extent,
+                                ssurgo_fn, _map.cellsize,
+                                v=self.wmesque_version, 
+                                wmesque_endpoint=self.wmesque_endpoint)
 
-            wmesque_retrieve(self.ssurgo_db, _map.extent,
-                             ssurgo_fn, _map.cellsize,
-                             v=self.wmesque_version, 
-                             wmesque_endpoint=self.wmesque_endpoint)
+            with self.timed('  Building SSURGO Soils'):
+                sm = SurgoMap(ssurgo_fn)
+                mukeys = set(sm.mukeys)
+                self.logger.info(f"    ssurgo mukeys: {mukeys}")
 
-            # Make SSURGO Soils
-            sm = SurgoMap(ssurgo_fn)
-            mukeys = set(sm.mukeys)
-            self.logger.info(f"ssurgo mukeys: {mukeys}")
-            self.logger.info('done')
+                surgo_c = SurgoSoilCollection(mukeys)
+                surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag, logger=self.logger)
 
-            surgo_c = SurgoSoilCollection(mukeys)
-            surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
-
-            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
-            soils = {str(k): v for k, v in soils.items()}
-            surgo_c.logInvalidSoils(wd=soils_dir)
+                soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+                soils = {str(k): v for k, v in soils.items()}
+                surgo_c.logInvalidSoils(wd=soils_dir)
 
             self.logger.info(f"valid mukeys: {soils.keys()}")
-            self.logger.info('done')
-
-
             valid = list(int(v) for v in soils.keys())
 
             if wepppyo3 is None:
-                self.logger.info(f"using build_soilgrid {valid}")
-                domsoil_d = sm.build_soilgrid(
-                    watershed.subwta
-                )
-                self.logger.info('done')
+                with self.timed('  Identifying dominant soils with wepppyo3'):
+                    domsoil_d = sm.build_soilgrid(watershed.subwta)
             else:
-                self.logger.info(f"using wepppyo3 {valid}")
-                domsoil_d = identify_mode_single_raster_key(
-                    key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys={-2147483648,})
-                domsoil_d = {k: str(v) for k, v in domsoil_d.items() if int(k) > 0}
-                self.logger.info('done')
+                with self.timed('  Identifying dominant soils (wepppyo3 not available)'):
+                    domsoil_d = identify_mode_single_raster_key(
+                        key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys={-2147483648,})
+                    domsoil_d = {k: str(v) for k, v in domsoil_d.items() if int(k) > 0}
 
             dom_mukey = None
             for mukey, count in Counter(domsoil_d.values()).most_common():
@@ -1131,25 +1180,24 @@ class Soils(NoDbBase):
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
-            self.logger.info('calculating soil coverage')
-            for k in soils:
-                soils[k].area = 0.0
+            with self.timed('  Calculating soil coverage'):
+                for k in soils:
+                    soils[k].area = 0.0
 
-            total_area = watershed.wsarea
-            for topaz_id, k in domsoil_d.items():
-                soils[k].area += watershed.hillslope_area(topaz_id)
+                total_area = watershed.wsarea
+                for topaz_id, k in domsoil_d.items():
+                    soils[k].area += watershed.hillslope_area(topaz_id)
 
-            for k in soils:
-                coverage = 100.0 * soils[k].area / total_area
-                soils[k].pct_coverage = coverage
+                for k in soils:
+                    coverage = 100.0 * soils[k].area / total_area
+                    soils[k].pct_coverage = coverage
 
+            with self.timed('  Storing soils'):
+                self.domsoil_d = domsoil_d
+                self.ssurgo_domsoil_d = deepcopy(domsoil_d)
+                self.soils = {str(k): v for k, v in soils.items()}
 
-            # store the soils dict
-            self.domsoil_d = domsoil_d
-            self.ssurgo_domsoil_d = deepcopy(domsoil_d)
-            self.soils = {str(k): v for k, v in soils.items()}
-
-            self.dump_and_unlock()
+                self.dump_and_unlock()
 
             self.logger.info('triggering SOILS_BUILD_COMPLETE')
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
@@ -1233,7 +1281,8 @@ class Soils(NoDbBase):
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
-        self.logger.info('creating soils parquet table')
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
         
         dict_result = self._subs_summary_gen()
         if dict_result is None or len(dict_result) == 0:
