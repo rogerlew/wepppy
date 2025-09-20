@@ -1,6 +1,7 @@
 import os
 from os.path import join as _join
 import redis
+import logging
 
 from dotenv import load_dotenv
 _thisdir = os.path.dirname(__file__)
@@ -28,3 +29,33 @@ class StatusMessenger:
         # Use the lazy-initialized client for publishing messages
         return cls._get_client().publish(channel, message)
 
+
+class StatusMessengerHandler(logging.Handler):
+    """
+    A logging handler that publishes log records to a Redis channel
+    using the StatusMessenger class.
+    """
+    def __init__(self, channel: str):
+        """
+        Initializes the handler.
+
+        Args:
+            channel (str): The Redis channel to publish messages to.
+        """
+        super().__init__()
+        if not isinstance(channel, str) or not channel:
+            raise ValueError("A valid channel name is required.")
+        self.channel = channel
+
+    def emit(self, record: logging.LogRecord):
+        """
+        Formats the record and publishes it to the specified Redis channel.
+
+        Args:
+            record (logging.LogRecord): The log record to be processed.
+        """
+        # Get the formatted log message from the record
+        msg = record.getMessage()
+        
+        # Use the existing StatusMessenger to publish the message
+        StatusMessenger.publish(self.channel, msg)
