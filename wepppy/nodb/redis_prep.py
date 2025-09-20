@@ -70,9 +70,10 @@ class RedisPrep:
 
     def dump(self):
         all_fields_and_values = self.redis.hgetall(self.run_id)
+        filtered_fields_and_values = {k: v for k, v in all_fields_and_values.items() if not k.startswith('locked:')}
 
         with open(self.dump_filepath, 'w') as dump_file:
-            json.dump(all_fields_and_values, dump_file)
+            json.dump(filtered_fields_and_values, dump_file)
 
     def lazy_load(self):
         if self._get_bool_config('loaded'):
@@ -136,7 +137,19 @@ class RedisPrep:
         v = self.redis.hget(self.run_id, f'locked:{key}')
         if v is None:
             return False
-        return v
+        return v == 'true'
+    
+    def clear_locked_status(self, key):
+        """
+        Clear the locked status for a given key only if it is set and true.
+        This is to prevent spamming emits to the front end.
+        """
+        v = self.redis.hget(self.run_id, f'locked:{key}')
+        if v is None:
+            return
+        if v == 'true':
+            self.redis.hset(self.run_id, f'locked:{key}', 'false')
+            self.dump()
     
     def set_rq_job_id(self, key, job_id):
         self.redis.hset(self.run_id, f'rq:{key}', job_id)
