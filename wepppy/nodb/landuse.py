@@ -489,15 +489,12 @@ class Landuse(NoDbBase):
             raise
 
         if 'rap' in self.mods:
-            self.logger.info('Running RAP')
-
             from wepppy.nodb.mods.rap import RAP
-
-            rap = RAP.getInstance(wd)
-            year = int(self.nlcd_db[-4:])
-            rap.acquire_rasters(year)
-            rap.analyze()
-            self.logger.info('done')
+            with self.timed('  Calculating RAP'):
+                rap = RAP.getInstance(wd)
+                year = int(self.nlcd_db[-4:])
+                rap.acquire_rasters(year)
+                rap.analyze()
         else:
             rap = None
 
