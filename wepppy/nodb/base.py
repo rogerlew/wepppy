@@ -637,6 +637,7 @@ class NoDbBase(object):
         if not lock_acquired:
             raise Exception('lock() called on an already locked nodb')
 
+        # invalidate the cache assuming the object is being modified
         if redis_nodb_cache_client is not None:
             redis_nodb_cache_client.delete(self._redis_cache_key)
 
@@ -648,15 +649,13 @@ class NoDbBase(object):
     def unlock(self, flag=None):
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
-
+        
         removed = redis_lock_client.delete(self._lock_key)
         if removed:
             try:
                 RedisPrep.getInstance(self.wd).set_locked_status(self.class_name, False)
             except:
                 pass
-        elif flag != '-f':
-            raise Exception('unlock() called on an already unlocked nodb')
 
     def islocked(self):
         if redis_lock_client is None:
@@ -962,3 +961,35 @@ class NoDbBase(object):
     @property
     def wmesque_endpoint(self) -> None|str:
         return self.config_get_str('wmesque', 'endpoint', None)
+
+
+def _iter_nodb_subclasses():
+    seen = set()
+    stack = [NoDbBase]
+    while stack:
+        cls = stack.pop()
+        for subcls in cls.__subclasses__():
+            if subcls not in seen:
+                seen.add(subcls)
+                stack.append(subcls)
+                yield subcls
+
+
+def clear_locks(runid):
+    if redis_lock_client is None:
+        raise RuntimeError('Redis lock client is unavailable')
+
+    subclasses = list(_iter_nodb_subclasses())
+    filenames = [getattr(cls, 'filename', None) for cls in subclasses]
+
+    cleared = []
+    for filename in filenames:
+        if not filename:
+            continue
+
+        lock_key = f"{runid}:{filename}"
+        removed = redis_lock_client.delete(lock_key)
+        if removed:
+            cleared.append(lock_key)
+
+    return cleared
