@@ -535,10 +535,6 @@ class Watershed(NoDbBase):
         return self._subs_summary is not None and self._chns_summary is not None
 
     @property
-    def _lock(self):
-        return _join(self.wd, "watershed.nodb.lock")
-
-    @property
     def wepp_chn_type(self):
         return getattr(
             self, "_wepp_chn_type", self.config_get_str("soils", "wepp_chn_type")

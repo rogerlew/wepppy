@@ -844,10 +844,6 @@ class Climate(NoDbBase):
         return getattr(self, '_daymet_precip_scale_factor_map', None)
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'climate.nodb.lock')
-
-    @property
     def cligen_db(self):
         return getattr(self, '_cligen_db', self.config_get_str('climate', 'cligen_db'))
 

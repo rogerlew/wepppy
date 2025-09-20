@@ -824,10 +824,6 @@ class Omni(NoDbBase):
         combined.to_parquet(out_path)
 
         return combined
-
-    @property
-    def _lock(self):
-        return _join(self.wd, 'omni.nodb.lock')
     
     def run_omni_scenario(self, scenario_def: dict):
         scenario = scenario_def.get('type')

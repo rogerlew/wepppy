@@ -63,10 +63,6 @@ class Rred(NoDbBase):
             raise
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'rred.nodb.lock')
-
-    @property
     def rred_dir(self):
         return _join(self.wd, 'rred')
 

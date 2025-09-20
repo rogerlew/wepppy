@@ -141,10 +141,6 @@ class RAP(NoDbBase):
         return instance
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'rap.nodb.lock')
-
-    @property
     def rap_year(self):
         return self._rap_year
 

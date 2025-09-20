@@ -378,7 +378,3 @@ class SkidTrails(NoDbBase):
     @property
     def output_dir(self):
         return _join(self.wd, 'skid_trails', 'output')
-
-    @property
-    def _lock(self):
-        return _join(self.wd, 'skid_trails.nodb.lock')

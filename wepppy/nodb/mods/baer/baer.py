@@ -89,10 +89,6 @@ class Baer(NoDbBase):
             raise
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'baer.nodb.lock')
-
-    @property
     def legacy_mode(self):
         return getattr(self, '_legacy_mode', False)
 

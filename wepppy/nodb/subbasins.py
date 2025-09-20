@@ -71,10 +71,6 @@ class Subbasins(NoDbBase):
     def subbasins_dir(self):
         return _join(self.wd, 'wepp', 'subbasins')
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'subbasins.nodb.lock')
-
     def _Subbasins_builder(self):
         for scenario in self.channels:
             _build_scenario(scenario, self.runid)

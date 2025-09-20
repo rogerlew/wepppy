@@ -79,10 +79,6 @@ class Topaz(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-        
-    @property
-    def _lock(self):
-        return _join(self.wd, 'topaz.nodb.lock')
 
     @property
     def subwta_arc(self):

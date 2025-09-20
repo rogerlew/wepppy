@@ -62,10 +62,6 @@ class WeppPost(NoDbBase):
             self.unlock('-f')
             raise
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'wepppost.nodb.lock')
-
     def run_post(self):
 
         self.lock()

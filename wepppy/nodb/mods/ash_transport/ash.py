@@ -370,10 +370,6 @@ class Ash(NoDbBase):
         return instance
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'ash.nodb.lock')
-
-    @property
     def has_ash_results(self):
         return len(glob(_join(self.ash_dir, 'post', '*.pkl'))) > 0
 

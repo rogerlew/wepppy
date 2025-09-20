@@ -482,10 +482,6 @@ class Ron(NoDbBase):
                 baer.validate(_split(sbs_path)[-1])
 
     @property
-    def _lock(self):
-        return _join(self.wd, 'ron.nodb.lock')
-
-    @property
     def configname(self) -> str:
         return self._configname
 
