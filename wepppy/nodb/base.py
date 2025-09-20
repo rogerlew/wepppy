@@ -23,6 +23,7 @@ from enum import Enum, IntEnum
 from glob import glob
 from contextlib import contextmanager
 from pathlib import Path
+from typing import ClassVar
 
 import json
 
@@ -110,7 +111,7 @@ class NoDbBase(object):
     DEBUG = 0
     _js_decode_replacements = ()
 
-    filename = None
+    filename: ClassVar[str] = None
 
     @property
     def _nodb(self):
@@ -130,7 +131,7 @@ class NoDbBase(object):
         
     @property
     def class_name(self):
-        return self.filename.replace('.nodb', '')
+        return type(self).filename.removesuffix(".nodb")
 
     def _init_logging(self):
         # Initialize loggers
