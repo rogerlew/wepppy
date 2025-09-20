@@ -10,6 +10,7 @@ import os
 import ast
 import csv
 import shutil
+import inspect
 from collections import Counter
 from datetime import datetime
 from subprocess import Popen, PIPE
@@ -191,6 +192,9 @@ class Disturbed(NoDbBase):
     
     @burn_shrubs.setter
     def burn_shrubs(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -208,6 +212,9 @@ class Disturbed(NoDbBase):
     
     @burn_grass.setter
     def burn_grass(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -225,6 +232,9 @@ class Disturbed(NoDbBase):
 
     @fire_date.setter
     def fire_date(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -303,6 +313,9 @@ class Disturbed(NoDbBase):
 
     @sol_ver.setter
     def sol_ver(self, value):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+
         self.lock()
   
         try:
@@ -328,38 +341,42 @@ class Disturbed(NoDbBase):
         return _join(self.disturbed_dir, self._disturbed_fn)
 
     def build_uniform_sbs(self, value=4):
-        sbs_fn = _join(self.disturbed_dir, 'uniform_sbs.tif')
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}({value})')
 
-        # Open the input raster file
-        with rasterio.open(self.dem_fn) as src:
-            # Read the input raster data as a numpy array
-            dem = src.read(1)
+        with self.timed('  Building uniform SBS raster'):
+            sbs_fn = _join(self.disturbed_dir, 'uniform_sbs.tif')
 
-            # Define the output raster metadata based on the input raster metadata
-            out_meta = src.meta.copy()
-            out_meta.update(dtype=rasterio.uint8, count=1, nodata=255)
+            # Open the input raster file
+            with rasterio.open(self.dem_fn) as src:
+                # Read the input raster data as a numpy array
+                dem = src.read(1)
 
-            # Create the output raster data as a numpy array
-            out_arr = np.full_like(dem, fill_value=value, dtype=rasterio.uint8)
+                # Define the output raster metadata based on the input raster metadata
+                out_meta = src.meta.copy()
+                out_meta.update(dtype=rasterio.uint8, count=1, nodata=255)
 
-            # Write the output raster data to a new geotiff file
-            with rasterio.open(sbs_fn, 'w', **out_meta) as dst:
-                dst.write(out_arr, 1)
+                # Create the output raster data as a numpy array
+                out_arr = np.full_like(dem, fill_value=value, dtype=rasterio.uint8)
 
-        # Open the written raster file with GDAL to set color table
-        ds = gdal.Open(sbs_fn, gdal.GA_Update)
-        band = ds.GetRasterBand(1)
-        color_table = gdal.ColorTable()
-        color_table.SetColorEntry(0, (0, 100, 0, 255))  # unburned
-        color_table.SetColorEntry(1, (127, 255, 212, 255))  # low
-        color_table.SetColorEntry(2, (255, 255, 0, 255))  # moderate
-        color_table.SetColorEntry(3, (255, 0, 0, 255))  # high
-        color_table.SetColorEntry(255, (255, 255, 255, 0))  # n/a
-        band.SetColorTable(color_table)
-        band = None  # Dereference to make sure all data is written
-        ds = None  # Dereference to make sure all data is written
+                # Write the output raster data to a new geotiff file
+                with rasterio.open(sbs_fn, 'w', **out_meta) as dst:
+                    dst.write(out_arr, 1)
 
-        return sbs_fn
+            # Open the written raster file with GDAL to set color table
+            ds = gdal.Open(sbs_fn, gdal.GA_Update)
+            band = ds.GetRasterBand(1)
+            color_table = gdal.ColorTable()
+            color_table.SetColorEntry(0, (0, 100, 0, 255))  # unburned
+            color_table.SetColorEntry(1, (127, 255, 212, 255))  # low
+            color_table.SetColorEntry(2, (255, 255, 0, 255))  # moderate
+            color_table.SetColorEntry(3, (255, 0, 0, 255))  # high
+            color_table.SetColorEntry(255, (255, 255, 255, 0))  # n/a
+            band.SetColorTable(color_table)
+            band = None  # Dereference to make sure all data is written
+            ds = None  # Dereference to make sure all data is written
+
+            return sbs_fn
 
     @property
     def sbs_4class_path(self):
@@ -455,6 +472,9 @@ class Disturbed(NoDbBase):
         return sbs.class_map
 
     def modify_burn_class(self, breaks, nodata_vals):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(breaks={breaks}, nodata_vals={nodata_vals})')
+
         assert len(breaks) == 4
         assert breaks[0] <= breaks[1]
         assert breaks[1] <= breaks[2]
@@ -475,6 +495,8 @@ class Disturbed(NoDbBase):
             pass
 
     def modify_color_map(self, color_map):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(color_map={color_map})')
 
         self.validate(self.disturbed_path, color_map=color_map)
 
@@ -499,6 +521,9 @@ class Disturbed(NoDbBase):
         return {tuple(map(int, rgb.split('_'))): v for rgb, v in color_map.items()}
 
     def remove_sbs(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         self.lock()
 
         # noinspection PyBroadException
@@ -531,6 +556,8 @@ class Disturbed(NoDbBase):
             pass
 
     def validate(self, fn, breaks=None, nodata_vals=None, color_map=None):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(fn={fn}, breaks={breaks}, nodata_vals={nodata_vals}, color_map={color_map})')
 
         assert nodata_vals is None or isinstance(nodata_vals, (list, tuple)), nodata_vals
         assert not isinstance(nodata_vals, str), nodata_vals
@@ -549,10 +576,11 @@ class Disturbed(NoDbBase):
             if not validate_srs(disturbed_path):
                 raise InvalidProjection("Map contains an invalid projection. Try reprojecting to UTM.")
 
-            sbs = SoilBurnSeverityMap(disturbed_path, breaks=breaks, nodata_vals=nodata_vals, color_map=color_map)
+            with self.timed('  Validating SBS raster and exporting maps'):
+                sbs = SoilBurnSeverityMap(disturbed_path, breaks=breaks, nodata_vals=nodata_vals, color_map=color_map)
 
-            self._bounds = sbs.export_wgs_map(self.disturbed_wgs)
-            sbs.export_rgb_map(self.disturbed_wgs, self.disturbed_rgb, self.disturbed_rgb_png)
+                self._bounds = sbs.export_wgs_map(self.disturbed_wgs)
+                sbs.export_rgb_map(self.disturbed_wgs, self.disturbed_rgb, self.disturbed_rgb_png)
 
             self._ct = sbs.ct
             self._is256 = sbs.is256
@@ -578,22 +606,45 @@ class Disturbed(NoDbBase):
             pass
 
     def on(self, evt):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}({evt})')
+
         multi_ofe = self.multi_ofe
 
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
-            self.remap_landuse()
-            self.spatialize_treecanopy()
+            self.logger.info(f'  Routing to LANDUSE_DOMLC_COMPLETE')
+            landuse = self.landuse_instance
+            
+            landuse.logger.info(f'Disturbed::on {evt}')
+            with self.timed('  Remapping landuse'):
+                landuse.logger.info(f'  Disturbed::Modifying landuse')
+                self.remap_landuse()
+            
+            with self.timed('  Calling spatialize_treecanopy hook'):
+                ran_spatialize = self.spatialize_treecanopy()
+                if ran_spatialize:
+                    landuse.logger.info(f'  Disturbed::Modified landuse with treecanopy')
 
             if multi_ofe:
+                landuse.logger.info(f'  Disturbed::Modifying MOFE soils')
                 self.remap_mofe_landuse()
 
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
+            self.logger.info(f'  Routing to SOILS_BUILD_COMPLETE')
+            soils = self.soils_instance
             if self.multi_ofe:
-                self.modify_mofe_soils()
+                with self.timed('  Modifying MOFE soils'):
+                    soils.logger.info(f'  Disturbed::Modifying MOFE soils')
+                    self.modify_mofe_soils()
             else:
-                self.modify_soils()
+                with self.timed('  Modifying soils'):
+                    soils.logger.info(f'  Disturbed::Modifying soils')
+                    self.modify_soils()
 
     def spatialize_treecanopy(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         wd = self.wd
 
         if 'treecanopy' in self.mods:
@@ -602,13 +653,16 @@ class Disturbed(NoDbBase):
             treecanopy.acquire_raster()
             treecanopy.analyze()
         else:
-            return
+            self.logger.info(f'  No treecanopy mod found')
+            return 0
 
-        landuse = Landuse.getInstance(wd)
+        self.logger.info(f'  Found treecanopy mod')
+        landuse = self.landuse_instance
 
         try:
             landuse.lock()
 
+            self.logger.info(f'  Running spatialize_treecanopy')
             for topaz_id, treecanopy_pointdata in treecanopy:
                 dom = landuse.domlc_d[topaz_id]
                 man = landuse.managements[dom]
@@ -623,10 +677,12 @@ class Disturbed(NoDbBase):
                     landuse.managements[_dom] = _man
 
             landuse.dump_and_unlock()
+            return 1
             
         except Exception:
             landuse.unlock('-f')
             raise
+
 
     def get_sbs(self):
 
@@ -678,10 +734,12 @@ class Disturbed(NoDbBase):
         return d
 
     def remap_landuse(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         wd = self.wd
 
-        landuse = Landuse.getInstance(wd)
-        landuse.logger.info(f'Disturbed::remap_landuse\n')
+        landuse = self.landuse_instance
 
         disturbed_key_lookup = self.get_disturbed_key_lookup()
         landuse.logger.info(f'  disturbed_key_lookup keys: {list(disturbed_key_lookup.keys())}\n')
@@ -872,10 +930,12 @@ class Disturbed(NoDbBase):
         shutil.move(extended_landsoil_lookup, self.lookup_fn)
 
     def remap_mofe_landuse(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         wd = self.wd
 
-        landuse = Landuse.getInstance(wd)
-        #assert landuse.mode != LanduseMode.Single
+        landuse = self.landuse_instance
 
         watershed = Watershed.getInstance(wd)
 
@@ -963,14 +1023,18 @@ class Disturbed(NoDbBase):
         return lookup
 
     def pmetpara_prep(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         from wepppy.nodb import Wepp
         _land_soil_replacements_d = self.land_soil_replacements_d
 
         wd = self.wd
-        landuse = Landuse.getInstance(wd)
-        soils = Soils.getInstance(wd)
+        landuse = self.landuse_instance
+        soils = self.soils_instance
         wepp = Wepp.getInstance(wd)
 
+        self.logger.info('  Identifying landuse for pmetpara.txt')
         domlc_d = {}
         for topaz_id, dom in landuse.domlc_d.items():
             if (int(topaz_id) - 4) % 10 == 0:
@@ -983,6 +1047,7 @@ class Disturbed(NoDbBase):
             fp.write('{n}\n'.format(n=n))
 
             for i, (topaz_id, dom) in enumerate(domlc_d.items()):
+                self.logger.info(f'    pmetpara.txt gen for topaz_id: {topaz_id}, dom: {dom}')
 
                 man_summary = landuse.managements[dom]
                 man = man_summary.get_management()
@@ -1005,9 +1070,11 @@ class Disturbed(NoDbBase):
                         disturbed_class = 'thinning'
 
                 if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
+                    self.logger.info('      setting kcb and rawp for unclassified disturbed_class or developed')
                     kcb = 0.95
                     rawb = 0.80
                 else:
+                    self.logger.info(f'      setting kcb and rawp for {texid}-{disturbed_class} from land_soil_lookup')
                     kcb = _land_soil_replacements_d[(texid, disturbed_class)]['pmet_kcb']        
                     rawb = _land_soil_replacements_d[(texid, disturbed_class)]['pmet_rawp']        
 
@@ -1016,14 +1083,19 @@ class Disturbed(NoDbBase):
                 fp.write(f'{plant_name},{kcb},{rawb},{i+1},{description}\n')
 
     def modify_mofe_soils(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         wd = self.wd
         sol_ver = self.sol_ver
 
         ron = Ron.getInstance(wd)
-        landuse = Landuse.getInstance(wd)
-        soils = Soils.getInstance(wd)
+        landuse = self.landuse_instance
+        soils = self.soils_instance
 
         _land_soil_replacements_d = self.land_soil_replacements_d
+
+        soils.logger.info(f'Disturbed::modify_mofe_soils, sol_ver: {sol_ver}')
 
         try:
             soils.lock()
@@ -1031,6 +1103,9 @@ class Disturbed(NoDbBase):
             for topaz_id, mukey in soils.domsoil_d.items():
                 if str(topaz_id).endswith('4'):
                     continue
+
+                self.logger.info(f'  topaz_id: {topaz_id}, mukey: {mukey}')
+                soils.logger.info(f'  topaz_id: {topaz_id}, mukey: {mukey}')
 
                 stack = []
                 desc = []
@@ -1098,10 +1173,10 @@ class Disturbed(NoDbBase):
                     stack.append(_join(soils.soils_dir, disturbed_fn))
 
                 key = f'hill_{topaz_id}.mofe'
-                sol_fn = f'{key}.sol'
-                mofe_synth = SoilMultipleOfeSynth()
-                mofe_synth.stack = stack
-                mofe_synth.write(_join(soils.soils_dir, sol_fn))
+                with self.timed('  Generating MOFE soil file with SoilMultipleOfeSynth'):
+                    sol_fn = f'{key}.sol'
+                    mofe_synth = SoilMultipleOfeSynth(stack=stack)
+                    mofe_synth.write(_join(soils.soils_dir, sol_fn))
                
                 soils.domsoil_d[topaz_id] = key
                 soils.soils[key] = SoilSummary(mukey=key,
@@ -1111,22 +1186,21 @@ class Disturbed(NoDbBase):
                                                meta_fn=None,
                                                build_date=str(datetime.now()))
            
+            with self.timed('  Recalculating soil areas and pct_coverage'):
+                watershed = self.watershed_instance
 
-            # need to recalculate the pct_coverages
-            watershed = Watershed.getInstance(self.wd)
+                for k in soils.soils:
+                    soils.soils[k].area = 0.0
 
-            for k in soils.soils:
-                soils.soils[k].area = 0.0
+                total_area = 0.0
+                for topaz_id, k in soils.domsoil_d.items():
+                    sub_area = watershed.hillslope_area(topaz_id)
+                    soils.soils[k].area += sub_area
+                    total_area += sub_area
 
-            total_area = 0.0
-            for topaz_id, k in soils.domsoil_d.items():
-                sub_area = watershed.hillslope_area(topaz_id)
-                soils.soils[k].area += sub_area
-                total_area += sub_area
-
-            for k in soils.soils:
-                coverage = 100.0 * soils.soils[k].area / total_area
-                soils.soils[k].pct_coverage = coverage
+                for k in soils.soils:
+                    coverage = 100.0 * soils.soils[k].area / total_area
+                    soils.soils[k].pct_coverage = coverage
 
             soils.dump_and_unlock()
 
@@ -1135,6 +1209,8 @@ class Disturbed(NoDbBase):
             raise
 
     def modify_soil(self, topaz_id: str, landuse_instance: Landuse, soils_instance: Soils, _land_soil_replacements_d) -> str:
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(topaz_id={topaz_id})')
 
         wd = self.wd
         sol_ver = self.sol_ver
@@ -1143,8 +1219,11 @@ class Disturbed(NoDbBase):
         dom = landuse_instance.domlc_d[topaz_id]
         man = landuse_instance.managements[dom]
 
+        soils_instance.logger.info(f'  Disturbed:: Disturbed.modify_soil(topaz_id={topaz_id}, mukey={mukey}, dom={dom})')
+
         disturbed_mukey = None
         if man.sol_path:
+            self.logger.info(f'  Using soil file from man.sol_path {man.sol_path}')
             disturbed_mukey = _split(man.sol_fn)[-1].replace('.sol', '')
             sol_fn =  f'{disturbed_mukey}.sol'
             new_sol_path = _join(soils_instance.soils_dir, sol_fn)
@@ -1160,6 +1239,7 @@ class Disturbed(NoDbBase):
                                                             meta_fn=None,
                                                             build_date=str(datetime.now()))
         else:
+            self.logger.info(f'  Identifying soil')
             _soil = soils_instance.soils[mukey]
             clay = _soil.clay
             sand = _soil.sand
@@ -1178,6 +1258,7 @@ class Disturbed(NoDbBase):
             disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
 
             if disturbed_mukey not in soils_instance.soils:
+                self.logger.info(f'  Generating disturbed soil for topaz_id: {topaz_id}, mukey: {mukey}, dom: {dom}, disturbed_mukey: {disturbed_mukey}')
                 disturbed_fn = disturbed_mukey + '.sol'
                 replacements = _land_soil_replacements_d[key]
 
@@ -1209,11 +1290,16 @@ class Disturbed(NoDbBase):
 
 
     def modify_soils(self):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
         wd = self.wd
-        landuse = Landuse.getInstance(wd)
-        soils = Soils.getInstance(wd)
-        watershed = Watershed.getInstance(self.wd)
+        landuse = self.landuse_instance
+        soils = self.soils_instance
+        watershed = self.watershed_instance
         _land_soil_replacements_d = self.land_soil_replacements_d
+
+        soils.logger.info(f'Disturbed::  Disturbed.modify_soils, sol_ver: {self.sol_ver}')
 
         try:
             soils.lock()
@@ -1249,6 +1335,8 @@ class Disturbed(NoDbBase):
             raise
 
     def _calc_sbs_coverage(self, sbs):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(sbs={sbs})')
 
         self.lock()
 
@@ -1261,7 +1349,7 @@ class Disturbed(NoDbBase):
                     'high': 0.0
                 }
             else:
-                watershed = Watershed.getInstance(self.wd)
+                watershed = self.watershed_instance
                 bounds, transform, proj = read_raster(watershed.bound)
 
                 if not sbs.data.shape == bounds.shape:
