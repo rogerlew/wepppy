@@ -162,15 +162,13 @@ class NoDbBase(object):
             for handler in list(self.runid_logger.handlers):
                 self.runid_logger.removeHandler(handler)
 
-            self.runid_logger.setLevel(logging.INFO)
+            self.runid_logger.setLevel(logging.WARNING)
             self.runid_logger.propagate = False
             self.runid_logger.addHandler(self._queue_handler)
 
-            # Initialize handlers
-            # Redis handler
-            _channel = self.filename.replace('.nodb', '')
+            # Redis handler to proxy to web clients
             self._redis_handler = StatusMessengerHandler(
-                channel=f'{self.runid}:{_channel}'
+                channel=self._status_channel
             )
             self._redis_handler.setLevel(logging.DEBUG)
 
@@ -241,15 +239,12 @@ class NoDbBase(object):
 
     @property
     def _status_channel(self):
-        __status_channel = f'{self.runid}:{self.class_name}'
-
         run_dir = os.path.abspath(self.runs_dir)
-
-#        if '/omni/' in run_dir:
-#            _parent_runid = run_dir.split('/omni/')[0].split('/')[-1]
-#            __status_channel = f'{_parent_runid}:omni'
-#        else:
-#            __status_channel = f'{self.runid}:wepp'  # bug is here. 
+        if '/omni/' in run_dir:
+            _parent_runid = run_dir.split('/omni/')[0].split('/')[-1]
+            __status_channel = f'{_parent_runid}:omni'
+        else:
+            __status_channel = f'{self.runid}:{self.class_name}'
 
         return  __status_channel
 
