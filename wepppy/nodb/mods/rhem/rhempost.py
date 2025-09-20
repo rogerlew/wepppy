@@ -29,12 +29,13 @@ class RhemPostNoDbLockedException(Exception):
 
 
 class RhemPost(NoDbBase):
-    filename = 'rhempost.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
     """
     __name__ = 'RhemPost'
+
+    filename = 'rhempost.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(RhemPost, self).__init__(wd, cfg_fn)
@@ -51,10 +52,6 @@ class RhemPost(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'rhempost.nodb')
 
     @property
     def _lock(self):

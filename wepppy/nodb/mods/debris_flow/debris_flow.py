@@ -48,12 +48,13 @@ class DebrisFlowNoDbLockedException(Exception):
 
 # noinspection PyPep8Naming
 class DebrisFlow(NoDbBase):
-    filename = 'debris_flow.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
     """
     __name__ = 'DebrisFlow'
+
+    filename = 'debris_flow.nodb'
 
     def __init__(self, wd, cfg_fn):
         super(DebrisFlow, self).__init__(wd, cfg_fn)
@@ -85,10 +86,6 @@ class DebrisFlow(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'debris_flow.nodb')
 
     @property
     def _lock(self):

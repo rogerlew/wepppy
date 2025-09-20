@@ -47,9 +47,10 @@ class TopazNoDbLockedException(Exception):
 
 
 class Topaz(NoDbBase):
-    filename = 'topaz.nodb'
     __name__ = 'Topaz'
 
+    filename = 'topaz.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(Topaz, self).__init__(wd, cfg_fn)
 
@@ -78,10 +79,7 @@ class Topaz(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'topaz.nodb')
-
+        
     @property
     def _lock(self):
         return _join(self.wd, 'topaz.nodb.lock')

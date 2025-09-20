@@ -371,8 +371,9 @@ def extract_slps_fn(slps_fn, fp_runs_dir):
 
 class Wepp(NoDbBase):
     __name__ = 'Wepp'
-    filename = 'wepp.nodb'
 
+    filename = 'wepp.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(Wepp, self).__init__(wd, cfg_fn)
 
@@ -553,10 +554,6 @@ class Wepp(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'wepp.nodb')
 
     @property
     def _lock(self):

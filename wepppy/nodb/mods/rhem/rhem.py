@@ -53,6 +53,7 @@ class RhemNoDbLockedException(Exception):
 
 class Rhem(NoDbBase):
     __name__ = 'Rhem'
+
     filename = 'rhem.nodb'
 
     def __init__(self, wd, cfg_fn):
@@ -85,10 +86,6 @@ class Rhem(NoDbBase):
     @property
     def output_dir(self):
         return _join(self.wd, 'rhem', 'output')
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'rhem.nodb')
 
     @property
     def _lock(self):

@@ -108,7 +108,7 @@ TRANSIENT_FIELDS = ["_sub_area_lookup", "_sub_length_lookup", "_sub_centroid_loo
 
 class Watershed(NoDbBase):
     __name__ = "Watershed"
-    filename = 'watershed.nodb'
+
     _js_decode_replacements = (
         (
             "wepppy.watershed_abstraction.support.HillSummary",
@@ -124,6 +124,8 @@ class Watershed(NoDbBase):
         ),
     )
 
+    filename = 'watershed.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(Watershed, self).__init__(wd, cfg_fn)
 
@@ -537,10 +539,6 @@ class Watershed(NoDbBase):
     @property
     def is_abstracted(self):
         return self._subs_summary is not None and self._chns_summary is not None
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, "watershed.nodb")
 
     @property
     def _lock(self):

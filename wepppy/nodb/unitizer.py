@@ -291,9 +291,10 @@ class UnitizerNoDbLockedException(Exception):
 
 
 class Unitizer(NoDbBase):
-    filename = 'unitizer.nodb'
     __name__ = 'Unitizer'
 
+    filename = 'unitizer.nodb'
+    
     def __init__(self, wd, cfg_fn):
         global precisions
 
@@ -360,10 +361,6 @@ class Unitizer(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'unitizer.nodb')
 
     @property
     def _lock(self):

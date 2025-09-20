@@ -340,7 +340,6 @@ class Omni(NoDbBase):
             omni.run_omni_contrasts()
             contrasts_df = pd.read_parquet(os.path.join(omni.wd, "omni", "contrasts.out.parquet"))
     """
-    filename = 'omni.nodb'
     __name__ = 'Omni'
 
     __exclude__ = ('_w3w', 
@@ -348,6 +347,8 @@ class Omni(NoDbBase):
                    '_enable_landuse_change',
                    '_dem_db',
                    '_boundary')
+
+    filename = 'omni.nodb'
 
     def __init__(self, wd, cfg_fn='0.cfg'):
         super(Omni, self).__init__(wd, cfg_fn)
@@ -537,10 +538,6 @@ class Omni(NoDbBase):
     def omni_dir(self):
         return _join(self.wd, 'omni')
     
-    @property
-    def status_log(self):
-        return os.path.abspath(_join(self.omni_dir, 'status.log'))
-
     def clean(self):
         shutil.rmtree(self.omni_dir)
         sleep(1)
@@ -827,10 +824,6 @@ class Omni(NoDbBase):
         combined.to_parquet(out_path)
 
         return combined
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'omni.nodb')
 
     @property
     def _lock(self):

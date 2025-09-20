@@ -41,6 +41,7 @@ class RredNoDbLockedException(Exception):
 
 class Rred(NoDbBase):
     __name__ = 'Rred'
+
     filename = 'rred.nodb'
 
     def __init__(self, wd, cfg_fn):
@@ -60,10 +61,6 @@ class Rred(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'rred.nodb')
 
     @property
     def _lock(self):

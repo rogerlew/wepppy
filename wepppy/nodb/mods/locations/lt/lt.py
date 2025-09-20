@@ -32,8 +32,9 @@ DEFAULT_WEPP_TYPE = 'Granitic'
 @deprecated(reason='Use Disturbed instead')
 class LakeTahoe(NoDbBase, LocationMixin):
     __name__ = 'LakeTahoe'
-    filename = 'lt.nodb'
 
+    filename = 'lt.nodb'
+    
     def __init__(self, wd, cfg_fn):
         super(LakeTahoe, self).__init__(wd, cfg_fn)
 
@@ -51,11 +52,7 @@ class LakeTahoe(NoDbBase, LocationMixin):
         except Exception:
             self.unlock('-f')
             raise
-            
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'lt.nodb')
-
+        
     @property
     def _lock(self):
         return _join(self.wd, 'lt.nodb.lock')

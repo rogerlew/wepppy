@@ -102,6 +102,7 @@ class RAPPointData(object):
 
 class RAP(NoDbBase):
     __name__ = 'RAP'
+
     filename = 'rap.nodb'
 
     def __init__(self, wd, cfg_fn):
@@ -138,10 +139,6 @@ class RAP(NoDbBase):
             }
 
         return instance
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'rap.nodb')
 
     @property
     def _lock(self):

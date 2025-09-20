@@ -80,11 +80,6 @@ class Treatments(NoDbBase):
             self.unlock('-f')
             raise
 
-    
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'treatments.nodb')
-
     @property
     def _lock(self):
         return _join(self.wd, 'treatments.nodb.lock')

@@ -284,7 +284,6 @@ class RonNoDbLockedException(Exception):
 
 
 class Ron(NoDbBase):
-    filename = 'ron.nodb'
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
@@ -297,6 +296,8 @@ class Ron(NoDbBase):
                    '_dem_db',
                    '_boundary')
 
+    filename = 'ron.nodb'
+    
     def __init__(self, wd, cfg_fn='0.cfg'):
         super(Ron, self).__init__(wd, cfg_fn)
 
@@ -479,10 +480,6 @@ class Ron(NoDbBase):
                 shutil.copyfile(sbs_map, sbs_path)
 
                 baer.validate(_split(sbs_path)[-1])
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'ron.nodb')
 
     @property
     def _lock(self):

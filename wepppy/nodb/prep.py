@@ -26,8 +26,9 @@ class PrepNoDbLockedException(Exception):
 
 @deprecated
 class Prep(NoDbBase):
-    filename = 'prep.nodb'
     __name__ = 'Prep'
+
+    filename = 'prep.nodb'
 
     def __init__(self, wd, cfg_fn):
 
@@ -73,10 +74,6 @@ class Prep(NoDbBase):
         except:
             self.unlock('-f')
             raise
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, 'prep.nodb')
 
     @property
     def _lock(self):
