@@ -138,7 +138,6 @@ class RedisPrep:
             return False
         return v
     
-
     def set_rq_job_id(self, key, job_id):
         self.redis.hset(self.run_id, f'rq:{key}', job_id)
         self.dump()
