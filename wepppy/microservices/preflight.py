@@ -213,7 +213,11 @@ async def redis_listener():
                 except (ConnectionError, TimeoutError):
                     raise
 
-                payload = json.dumps({"type": "preflight", "checklist": preflight(hashmap)})
+                payload = json.dumps({
+                    "type": "preflight", 
+                    "checklist": preflight(hashmap), 
+                    "lock_statuses": lock_statuses(hashmap)
+                })
                 for ws in list(sockset):
                     try:
                         await ws.write_message(payload)
