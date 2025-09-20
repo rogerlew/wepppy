@@ -976,20 +976,27 @@ def _iter_nodb_subclasses():
 
 
 def clear_locks(runid):
+    """
+    Clear all locks for the given runid.
+    Low-level function that interacts directly with Redis.
+    """
     if redis_lock_client is None:
         raise RuntimeError('Redis lock client is unavailable')
 
     subclasses = list(_iter_nodb_subclasses())
     filenames = [getattr(cls, 'filename', None) for cls in subclasses]
-
+    
+    redis_prep = RedisPrep.getInstanceFromRunID(runid)
     cleared = []
     for filename in filenames:
         if not filename:
             continue
 
+        class_name = filename.removesuffix('.nodb')
         lock_key = f"{runid}:{filename}"
         removed = redis_lock_client.delete(lock_key)
-        if removed:
-            cleared.append(lock_key)
+        
+        redis_prep.set_locked_status(class_name, False)
+        cleared.append(lock_key)
 
     return cleared
