@@ -16,6 +16,8 @@ from os.path import exists as _exists
 import warnings
 import numpy as np
 import hashlib
+import inspect
+import logging
 
 from datetime import datetime
 
@@ -23,10 +25,12 @@ from xml.etree import ElementTree
 from math import exp
 from collections import OrderedDict
 import jsonpickle
-
+import shutil
 import sqlite3
 
 from rosetta import Rosetta2, Rosetta3
+
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from wepppy.all_your_base import try_parse, try_parse_float, isfloat, isint
 
@@ -38,13 +42,16 @@ __version__ = "v.0.1.0"
 ERIN_ADJUST_FCWP = True
 
 _thisdir = os.path.dirname(__file__)
-# _ssurgo_cache_db = ":memory:"  # _join(_thisdir, 'ssurgo_cache.db')
-if _exists("/media/ramdisk"):
-    _ssurgo_cache_db = "/media/ramdisk/surgo_tabular.db"
-else:
-    _ssurgo_cache_db = _join(_thisdir, "data", "surgo", "surgo_tabular.db")
 
-_statsgo_cache_db = _join(_thisdir, "data", "statsgo", "statsgo_tabular.db")
+# lazy load sqlite db to /dev/shm if available
+if _exists("/dev/shm"):
+    _ssurgo_cache_db = "/dev/shm/surgo_tabular.db"
+    if not _exists(_ssurgo_cache_db):
+        shutil.copyfile(_join(_thisdir, "data", "surgo", "surgo_tabular.db"), _ssurgo_cache_db)
+
+    _statsgo_cache_db = "/dev/shm/statsgo_tabular.db"
+    if not _exists(_statsgo_cache_db):
+        shutil.copyfile(_join(_thisdir, "data", "statsgo", "statsgo_tabular.db"), _statsgo_cache_db)
 
 # Developer Notes
 ###################
@@ -444,6 +451,7 @@ colors = [
     "#95c485",
 ]
 
+# used to exclude fields from pickling
 TRANSIENT_FIELDS = ["_weppsoilutil"]
 
 
@@ -606,7 +614,6 @@ class SoilSummary(object):
         return meta.getFirstHorizon().ll_r
 
 
-# noinspection PyPep8Naming,PyProtectedMember
 class WeppSoil:
     def __init__(
         self,
@@ -706,7 +713,6 @@ POSSIBILITY OF SUCH DAMAGE."""
                 self._analyze_restrictive_layer()
                 self._build_description()
 
-                self.log.append("done")
                 return 1
 
         # is urban?
@@ -1409,6 +1415,93 @@ def _fetch_corestrictions(cokeys):
     return _extract_unique(xml)
 
 
+class _SurgoCollectionWorkerView:
+    """Minimal, picklable view of Surgo soil data for ProcessPool workers."""
+
+    __slots__ = ("_db_path", "mukeys", "source_data")
+
+    def __init__(self, db_path: str, mukeys, source_data: str):
+        self._db_path = db_path
+        self.mukeys = mukeys
+        self.source_data = source_data
+
+    def _connect(self):
+        conn = sqlite3.connect(self._db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def get_components(self, mukey):
+        query = (
+            "SELECT * FROM component WHERE mukey=? "
+            "ORDER BY comppct_r DESC"
+        )
+        with self._connect() as conn:
+            cur = conn.execute(query, (mukey,))
+            return [dict(row) for row in cur.fetchall()]
+
+    def get_layers(self, cokey):
+        query = "SELECT * FROM chorizon WHERE cokey=? ORDER BY hzdepb_r"
+        with self._connect() as conn:
+            cur = conn.execute(query, (cokey,))
+            return [dict(row) for row in cur.fetchall()]
+
+    def get_fragvol_r(self, chkey):
+        query = "SELECT avg(fragvol_r) AS fragvol FROM chfrags WHERE chkey=?"
+        with self._connect() as conn:
+            cur = conn.execute(query, (chkey,))
+            row = cur.fetchone()
+            return None if row is None else row["fragvol"]
+
+    def get_texture(self, chkey):
+        query = "SELECT texture FROM chtexturegrp WHERE chkey=?"
+        with self._connect() as conn:
+            cur = conn.execute(query, (chkey,))
+            row = cur.fetchone()
+            return "N/A" if row is None else row["texture"]
+
+    def get_reskind(self, cokey):
+        query = "SELECT reskind FROM corestrictions WHERE cokey=?"
+        with self._connect() as conn:
+            cur = conn.execute(query, (cokey,))
+            row = cur.fetchone()
+            return "N/A" if row is None else row["reskind"]
+
+
+def _build_soil_for_process(
+    mukey,
+    db_path,
+    source_data,
+    initial_sat,
+    horizon_defaults,
+    ksflag,
+    verbose,
+    logger_name,
+):
+    worker_logger = logging.getLogger(logger_name) if logger_name else None
+    if worker_logger is not None:
+        worker_logger.info("worker start mukey=%s", mukey)
+
+    adapter = _SurgoCollectionWorkerView(db_path, (mukey,), source_data)
+
+    try:
+        ws = WeppSoil(
+            adapter,
+            mukey,
+            initial_sat,
+            horizon_defaults=horizon_defaults,
+            ksflag=ksflag,
+        )
+        valid = ws.valid()
+        logs = "\n".join(ws.log) if verbose else None
+        if worker_logger is not None:
+            worker_logger.info("worker end mukey=%s valid=%s", mukey, valid)
+        return mukey, ws, valid, logs
+    except Exception:
+        if worker_logger is not None:
+            worker_logger.exception("worker failed mukey=%s", mukey)
+        raise
+
+
 # noinspection PyPep8Naming
 class SurgoSoilCollection(object):
     """
@@ -1426,12 +1519,14 @@ class SurgoSoilCollection(object):
         mukeys = [v for v in mukeys if isint(v)]
         mukeys = [int(v) for v in mukeys]
         if use_statsgo:
-            self.conn = sqlite3.connect(_statsgo_cache_db)
+            db_path = _statsgo_cache_db
             self.source_data = "StatsGo"
         else:
-            self.conn = sqlite3.connect(_ssurgo_cache_db)
+            db_path = _ssurgo_cache_db
             self.source_data = "Surgo"
 
+        self._db_path = db_path
+        self.conn = sqlite3.connect(db_path)
         self.cur = cur = self.conn.cursor()
         self._initialize_cache_db()
 
@@ -1503,8 +1598,29 @@ class SurgoSoilCollection(object):
         csvfile.close()
 
     def makeWeppSoils(
-        self, initial_sat=0.75, verbose=False, horizon_defaults=None, ksflag=True
+        self,
+        initial_sat=0.75,
+        verbose=False,
+        horizon_defaults=None,
+        ksflag=True,
+        logger=None,
+        max_workers=None
     ):
+        """
+        Build WeppSoil objects concurrently per mukey and populate:
+            self.weppSoils, self.invalidSoils
+
+        Notes:
+        - Work executes in separate processes; arguments and results must be picklable.
+        - Exceptions propagate to the caller; failed mukeys go to invalidSoils with value=None.
+        - Defaults to using the available CPU cores when max_workers is not provided.
+        """
+        if logger is not None:
+            logger.info(
+                f"wepppy.soils.ssurgo.SurgoSoilCollection.makeWeppSoils("
+                f"initial_sat={initial_sat}, horizon_defaults={horizon_defaults}, ksflag={ksflag})"
+            )
+
         if horizon_defaults is None:
             horizon_defaults = OrderedDict(
                 [
@@ -1520,27 +1636,53 @@ class SurgoSoilCollection(object):
         ksflag = int(ksflag)
         assert ksflag in (0, 1)
 
+        if max_workers is None:
+            max_workers = 16
+        else:
+            max_workers = max(1, int(max_workers))
+
         weppSoils = {}
         invalidSoils = {}
-        for mukey in self.mukeys:
-            weppSoil = WeppSoil(
-                self,
-                mukey,
-                initial_sat,
-                horizon_defaults=horizon_defaults,
-                ksflag=ksflag,
-            )
 
-            if weppSoil.valid():
-                weppSoils[mukey] = weppSoil
-            else:
-                invalidSoils[mukey] = weppSoil
+        logger_name = logger.name if logger is not None else None
 
-            if verbose:
-                print("\n".join(weppSoil.log))
+        with ProcessPoolExecutor(max_workers=max_workers) as pool:
+            futures = []
+            for mukey in self.mukeys:
+                if logger is not None:
+                    logger.info(f"  processing mukey {mukey}")
+                futures.append(
+                    pool.submit(
+                        _build_soil_for_process,
+                        mukey,
+                        self._db_path,
+                        self.source_data,
+                        initial_sat,
+                        horizon_defaults,
+                        ksflag,
+                        verbose,
+                        logger_name,
+                    )
+                )
+
+            for fut in as_completed(futures):
+                mukey, ws, valid, logs = fut.result()
+                if logger is not None:
+                    logger.info(f"  completed mukey {mukey} -> {valid}")
+                    if logger.level <= logging.DEBUG and logs is not None:
+                        logger.debug(f"    log:\n{logs}")
+                if valid and ws is not None:
+                    weppSoils[mukey] = ws
+                else:
+                    invalidSoils[mukey] = ws  # None for exceptions; a WeppSoil if .valid() == False
+
 
         self.weppSoils = weppSoils
         self.invalidSoils = invalidSoils
+        if logger is not None:
+            logger.info(
+                f"completed makeWeppSoils: {len(weppSoils)} valid, {len(invalidSoils)} invalid"
+            )
 
     def getValidWeppSoils(self) -> List[int]:
         return list(self.weppSoils.keys())
@@ -1732,60 +1874,46 @@ class SurgoSoilCollection(object):
 
         conn.commit()
 
-    def get_components(self, mukey):
-        conn, cur = self.conn, self.cur
+    def _connect(self):
+        conn = sqlite3.connect(self._db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
 
-        query = "SELECT * FROM component WHERE mukey={mukey} ORDER BY comppct_r DESC".format(
-            mukey=mukey
+    def get_components(self, mukey):
+        query = (
+            "SELECT * FROM component WHERE mukey=? "
+            "ORDER BY comppct_r DESC"
         )
-        cur = conn.execute(query)
-        hdr = [desc[0] for desc in cur.description]
-        return [dict(zip(hdr, r)) for r in cur.fetchall()]
+        with self._connect() as conn:
+            cur = conn.execute(query, (mukey,))
+            return [dict(row) for row in cur.fetchall()]
 
     def get_layers(self, cokey):
-        conn, cur = self.conn, self.cur
-
-        query = "SELECT * FROM chorizon WHERE cokey={cokey} ORDER BY hzdepb_r".format(
-            cokey=cokey
-        )
-        cur = conn.execute(query)
-        hdr = [desc[0] for desc in cur.description]
-        return [dict(zip(hdr, r)) for r in cur.fetchall()]
+        query = "SELECT * FROM chorizon WHERE cokey=? ORDER BY hzdepb_r"
+        with self._connect() as conn:
+            cur = conn.execute(query, (cokey,))
+            return [dict(row) for row in cur.fetchall()]
 
     def get_fragvol_r(self, chkey):
-        conn, cur = self.conn, self.cur
-
-        query = "SELECT avg(fragvol_r) FROM chfrags WHERE chkey={chkey}".format(
-            chkey=chkey
-        )
-        cur.execute(query)
-        return cur.fetchone()[0]
+        query = "SELECT avg(fragvol_r) AS fragvol FROM chfrags WHERE chkey=?"
+        with self._connect() as conn:
+            cur = conn.execute(query, (chkey,))
+            row = cur.fetchone()
+            return None if row is None else row["fragvol"]
 
     def get_texture(self, chkey):
-        conn, cur = self.conn, self.cur
-
-        query = "SELECT texture FROM chtexturegrp WHERE chkey={chkey}".format(
-            chkey=chkey
-        )
-        cur.execute(query)
-        try:
-            return cur.fetchall()[0][0]
-        except IndexError:
-            return "N/A"
+        query = "SELECT texture FROM chtexturegrp WHERE chkey=?"
+        with self._connect() as conn:
+            cur = conn.execute(query, (chkey,))
+            row = cur.fetchone()
+            return "N/A" if row is None else row["texture"]
 
     def get_reskind(self, cokey):
-        conn, cur = self.conn, self.cur
-
-        query = "SELECT reskind FROM corestrictions WHERE cokey={cokey}".format(
-            cokey=cokey
-        )
-        cur.execute(query)
-        res = cur.fetchall()
-
-        if len(res) == 0:
-            return "N/A"
-        else:
-            return res[0][0]
+        query = "SELECT reskind FROM corestrictions WHERE cokey=?"
+        with self._connect() as conn:
+            cur = conn.execute(query, (cokey,))
+            row = cur.fetchone()
+            return "N/A" if row is None else row["reskind"]
 
 
 if __name__ == "__main__":
