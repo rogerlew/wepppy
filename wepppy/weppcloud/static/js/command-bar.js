@@ -6,7 +6,7 @@
     const TIP_DEFAULT = "Tip: Press ':' to activate the command bar";
     const TIP_ACTIVE = 'Command mode - press Enter to run, Esc to cancel';
     const INSTANCE_DATA_KEY = '__commandBarInstance';
-    const STAY_ACTIVE_COMMANDS = new Set(['help', 'status', 'clear']);
+    const STAY_ACTIVE_COMMANDS = new Set(['help', 'status']);
     const SET_HELP_LINES = [
         "set units <si|english>    - Switch global unit preferences",
         "set name <project name>   - Update the project name",
@@ -139,8 +139,8 @@
                     action: (args) => this.navigateToProjectBrowse(args)
                 },
                 clear: {
-                    description: 'Clear the command bar result',
-                    action: () => this.hideResult()
+                    description: 'Clear the NoDb locks',
+                    action: () => this.clearLocks()
                 }
             };
         }
@@ -291,6 +291,24 @@
                 window.location.href = targetUrl;
             }
             this.hideResult();
+        }
+
+
+        clearLocks() {
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: The browse command is only available on a project page.');
+                return;
+            }
+            const targetUrl = this.projectBaseUrl + 'tasks/clear_locks';
+
+            fetch(targetUrl, { method: 'GET', cache: 'no-store' })
+                .then((response) => {
+                    if (response.ok) {
+                        this.showResult('Success: Cleared NoDb locks.');
+                    } else {
+                        this.showResult(`Error: Could not clear locks. HTTP ${response.status}`);
+                    }
+                });
         }
 
         navigateToSelector(selector) {
@@ -463,6 +481,7 @@
         container[INSTANCE_DATA_KEY] = commandBar;
         return commandBar;
     }
+
 
     window.initializeCommandBar = initializeCommandBar;
 
