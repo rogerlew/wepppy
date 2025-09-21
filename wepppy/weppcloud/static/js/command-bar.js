@@ -398,7 +398,6 @@
 
             try {
                 project.setName(name);
-                this.hideResult();
             } catch (error) {
                 console.error('Error setting project name:', error);
                 this.showResult(`Error: Unable to set project name. ${error.message || error}`);
@@ -424,7 +423,6 @@
 
             try {
                 project.setScenario(scenario);
-                this.hideResult();
             } catch (error) {
                 console.error('Error setting project scenario:', error);
                 this.showResult(`Error: Unable to set project scenario. ${error.message || error}`);

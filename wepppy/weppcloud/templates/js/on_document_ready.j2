@@ -283,26 +283,43 @@ function onReady() {
     //
     // Bindings
     //
-    $("#input_name").keyup(function (event) {
-        if (event.keyCode === 13) {
-            $("#btn_setname").click();
-        }
+    var NAME_DEBOUNCE_MS = 800;
+    var SCENARIO_DEBOUNCE_MS = 800;
+    var nameTimerId = null;
+    var scenarioTimerId = null;
+
+    function flushName(value) {
+        project.setName(value);
+    }
+
+    function flushScenario(value) {
+        project.setScenario(value);
+    }
+
+    $("#input_name").on('input', function () {
+        var value = $(this).val();
+        clearTimeout(nameTimerId);
+        nameTimerId = setTimeout(function () {
+            flushName(value);
+        }, NAME_DEBOUNCE_MS);
     });
 
-    $("#btn_setname").click(function () {
-        var name = $("#input_name").val();
-        project.setName(name);
+    $("#input_name").on('blur', function () {
+        clearTimeout(nameTimerId);
+        flushName($(this).val());
     });
 
-    $("#input_scenario").keyup(function (event) {
-        if (event.keyCode === 13) {
-            $("#btn_setscenario").click();
-        }
+    $("#input_scenario").on('input', function () {
+        var value = $(this).val();
+        clearTimeout(scenarioTimerId);
+        scenarioTimerId = setTimeout(function () {
+            flushScenario(value);
+        }, SCENARIO_DEBOUNCE_MS);
     });
 
-    $("#btn_setscenario").click(function () {
-        var scenario = $("#input_scenario").val();
-        project.setScenario(scenario);
+    $("#input_scenario").on('blur', function () {
+        clearTimeout(scenarioTimerId);
+        flushScenario($(this).val());
     });
 
     //
