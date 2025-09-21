@@ -24,7 +24,7 @@ from rq.job import Job
 
 from wepppy.soils.ssurgo import NoValidSoilsException
 
-from wepppy.nodb import Wepp, Soils, Watershed, Climate, Disturbed, Landuse, Ron, Ash, AshSpatialMode, Omni, LanduseMode, OmniScenario
+from wepppy.nodb import Wepp, Soils, Watershed, Climate, Disturbed, Landuse, Ron, Ash, AshSpatialMode, Omni, LanduseMode, OmniScenario, lock_statuses
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.rq.project_rq import (
@@ -38,7 +38,8 @@ from wepppy.rq.project_rq import (
     run_debris_flow_rq,
     run_rhem_rq,
     fetch_and_analyze_rap_ts_rq,
-    fork_rq
+    fork_rq,
+    archive_rq
 )
 from wepppy.rq.wepp_rq import run_wepp_rq, post_dss_export_rq
 from wepppy.rq.omni_rq import run_omni_rq
@@ -1172,3 +1173,39 @@ def api_fork(runid, config):
     return jsonify({'Success': True, 'job_id': job.id, 'new_runid': new_runid, 'undisturbify': undisturbify})
 
 
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/archive', methods=['POST'])
+def api_archive(runid, config):
+    try:
+        wd = get_wd(runid)
+        if not _exists(wd):
+            return exception_factory(f'Project {runid} not found', runid=runid)
+
+        locked = [name for name, state in lock_statuses(runid).items() if name.endswith('.nodb') and state]
+        if locked:
+            return exception_factory('Cannot archive while files are locked: ' + ', '.join(locked), runid=runid)
+
+        prep = RedisPrep.getInstance(wd)
+        existing_job_id = prep.get_archive_job_id()
+        if existing_job_id:
+            try:
+                with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+                    job = Job.fetch(existing_job_id, connection=redis_conn)
+                    status = job.get_status(refresh=True)
+            except Exception:
+                status = None
+
+            if status in ('queued', 'started', 'deferred'):
+                return exception_factory('An archive job is already running for this project', runid=runid)
+            else:
+                prep.clear_archive_job_id()
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            queue = Queue(connection=redis_conn)
+            job = queue.enqueue_call(archive_rq, (runid,), timeout=TIMEOUT)
+
+        prep.set_archive_job_id(job.id)
+        StatusMessenger.publish(f'{runid}:archive', f'rq:{job.id} ENQUEUED archive_rq({runid})')
+
+        return jsonify({'Success': True, 'job_id': job.id})
+    except Exception:
+        return exception_factory('Error enqueueing archive job', runid=runid)

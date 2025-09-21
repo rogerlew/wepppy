@@ -146,3 +146,14 @@ class RedisPrep:
             if key.startswith('rq:'):
                 job_ids[key[3:]] = self.redis.hget(self.run_id, key)
         return job_ids
+
+    def set_archive_job_id(self, job_id):
+        self.redis.hset(self.run_id, 'archive:job_id', job_id)
+        self.dump()
+
+    def get_archive_job_id(self):
+        return self.redis.hget(self.run_id, 'archive:job_id')
+
+    def clear_archive_job_id(self):
+        self.redis.hdel(self.run_id, 'archive:job_id')
+        self.dump()

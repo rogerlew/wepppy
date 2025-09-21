@@ -151,6 +151,23 @@ except:
     send_discord_message = None
 
 
+# Track number of busy workers
+from multiprocessing import Semaphore
+
+accesslog = "-"
+access_log_format =  '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" rt=%(L)s busy=%({x-busy}i)s'
+
+busy = Semaphore(0)
+
+def pre_request(worker, req):
+    busy.release()
+    req.headers.append(("x-busy", str(busy._value)))
+
+def post_request(worker, req, environ, resp):
+    busy.acquire()
+
+
+
 # load app configuration based on deployment
 
 _hostname = socket.gethostname()
@@ -1296,11 +1313,9 @@ def rq_fork_console(runid, config):
     return render_template('controls/rq-fork-console.j2', runid=runid, config=config, undisturbify=undisturbify)
 
 
-@app.route('/runs/<string:runid>/<config>/rq-archive-console', strict_slashes=False)
-@app.route('/runs/<string:runid>/<config>/rq-archive-console/', strict_slashes=False)
-def rq_archive_console(runid, config):
-    
-    # get working dir of original directory
+@app.route('/runs/<string:runid>/<config>/rq-archive-dashboard', strict_slashes=False)
+@app.route('/runs/<string:runid>/<config>/rq-archive-dashboard/', strict_slashes=False)
+def rq_archive_dashboard(runid, config):
     wd = get_wd(runid)
     owners = get_run_owners(runid)
 
@@ -1323,7 +1338,39 @@ def rq_archive_console(runid, config):
     if should_abort:
         abort(403)
 
-    return render_template('controls/rq-archive-console.j2', runid=runid, config=config, undisturbify=undisturbify)
+    return render_template('controls/rq-archive-dashboard.j2', runid=runid, config=config)
+
+
+@app.route('/runs/<string:runid>/<config>/rq-archive-dashboard/archives', strict_slashes=False)
+def rq_archive_list(runid, config):
+    wd = get_wd(runid)
+    archives_dir = os.path.join(wd, 'archives')
+    os.makedirs(archives_dir, exist_ok=True)
+
+    entries = []
+    pattern = os.path.join(archives_dir, '*.zip')
+    for path in sorted(glob(pattern), reverse=True):
+        try:
+            stat = os.stat(path)
+        except FileNotFoundError:
+            continue
+
+        rel_name = os.path.basename(path)
+        entries.append({
+            'name': rel_name,
+            'size': stat.st_size,
+            'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+            'download_url': url_for('download.download_tree', runid=runid, config=config, subpath=f'archives/{rel_name}')
+        })
+
+    prep = RedisPrep.getInstance(wd)
+    archive_job_id = prep.get_archive_job_id()
+
+    return jsonify({
+        'archives': entries,
+        'in_progress': archive_job_id is not None,
+        'job_id': archive_job_id,
+    })
 
 
 @app.route('/runs/<string:runid>/<config>/modify_disturbed')

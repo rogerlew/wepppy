@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Archive Project</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+          integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+            crossorigin="anonymous"></script>
+    <style>
+      #status_log {
+        background-color: #f5f5f5;
+        color: #333;
+        font-family: 'Courier New', Courier, monospace;
+        padding: 10px;
+        height: 260px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+    </style>
+    <script type="text/javascript">
+      const runid = {{ runid | tojson }};
+      const config = {{ config | tojson }};
+      const archivesUrl = {{ url_for('rq_archive_list', runid=runid, config=config) | tojson }};
+      const archiveApiUrl = {{ url_for('rq_api.api_archive', runid=runid, config=config) | tojson }};
+      let currentJobId = null;
+
+      class WSClient {
+        constructor(runid, channel) {
+          this.channel = channel;
+          this.wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/status/" + runid + ":" + channel;
+          this.ws = null;
+          this.shouldReconnect = true;
+          this.status = document.getElementById('status_log');
+        }
+
+        connect() {
+          if (this.ws) {
+            return;
+          }
+          this.shouldReconnect = true;
+          this.ws = new WebSocket(this.wsUrl);
+          this.ws.onopen = () => {
+            if (this.ws.readyState === WebSocket.OPEN) {
+              this.ws.send(JSON.stringify({ type: 'init' }));
+            }
+          };
+
+          this.ws.onmessage = (event) => {
+            try {
+              const payload = JSON.parse(event.data);
+              if (payload.type === 'ping') {
+                this.ws.send(JSON.stringify({ type: 'pong' }));
+                return;
+              }
+              if (payload.type === 'status') {
+                const data = payload.data;
+                appendStatus(data);
+                if (typeof data === 'string' && data.includes('TRIGGER')) {
+                  const parts = data.trim().split(/\s+/);
+                  const eventName = parts[parts.length - 1];
+                  const controller = parts[parts.length - 2];
+                  if (controller === this.channel && eventName === 'ARCHIVE_COMPLETE') {
+                    archiveFinished();
+                  }
+                }
+              }
+            } catch (err) {
+              console.error('WS message error', err);
+            }
+          };
+
+          this.ws.onerror = (err) => {
+            console.error('WebSocket error', err);
+          };
+
+          this.ws.onclose = () => {
+            this.ws = null;
+            if (this.shouldReconnect) {
+              setTimeout(() => this.connect(), 5000);
+            }
+          };
+        }
+
+        disconnect() {
+          if (this.ws) {
+            this.shouldReconnect = false;
+            this.ws.close();
+            this.ws = null;
+          }
+        }
+      }
+
+      function appendStatus(message) {
+        const statusEl = document.getElementById('status_log');
+        if (!message) {
+          return;
+        }
+        statusEl.textContent += message + '\n';
+        statusEl.scrollTop = statusEl.scrollHeight;
+      }
+
+      function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        const value = bytes / Math.pow(k, i);
+        return value.toFixed(value >= 10 || i === 0 ? 0 : 1) + ' ' + sizes[i];
+      }
+
+      function populateArchiveTable(data) {
+        const tbody = document.querySelector('#archives_table tbody');
+        const emptyMsg = document.getElementById('archive_empty');
+        tbody.innerHTML = '';
+
+        if (!data || !data.archives || data.archives.length === 0) {
+          emptyMsg.style.display = 'block';
+        } else {
+          emptyMsg.style.display = 'none';
+          data.archives.forEach((item) => {
+            const tr = document.createElement('tr');
+            const nameTd = document.createElement('td');
+            nameTd.textContent = item.name;
+            const sizeTd = document.createElement('td');
+            sizeTd.textContent = formatBytes(item.size || 0);
+            const modTd = document.createElement('td');
+            modTd.textContent = item.modified || '';
+            const linkTd = document.createElement('td');
+            const link = document.createElement('a');
+            link.href = item.download_url;
+            link.textContent = 'Download';
+            link.rel = 'nofollow';
+            link.target = '_blank';
+            linkTd.appendChild(link);
+            tr.appendChild(nameTd);
+            tr.appendChild(sizeTd);
+            tr.appendChild(modTd);
+            tr.appendChild(linkTd);
+            tbody.appendChild(tr);
+          });
+        }
+
+        if (data && data.in_progress) {
+          document.getElementById('archive_button').disabled = true;
+          currentJobId = data.job_id || null;
+        } else if (!currentJobId) {
+          document.getElementById('archive_button').disabled = false;
+        }
+      }
+
+      function fetchArchives() {
+        fetch(archivesUrl, { cache: 'no-store' })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch archives');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            populateArchiveTable(data);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+
+      function archiveFinished() {
+        currentJobId = null;
+        document.getElementById('archive_button').disabled = false;
+        fetchArchives();
+      }
+
+      function startArchive() {
+        document.getElementById('archive_button').disabled = true;
+        appendStatus('Submitting archive job...');
+        fetch(archiveApiUrl, {
+          method: 'POST',
+        })
+          .then((response) => response.json())
+          .then((body) => {
+            if (!body.Success) {
+              throw new Error(body.Error || 'Archive submission failed');
+            }
+            currentJobId = body.job_id;
+            appendStatus(`Archive job submitted: ${currentJobId}`);
+          })
+          .catch((err) => {
+            appendStatus(`ERROR: ${err.message || err}`);
+            document.getElementById('archive_button').disabled = false;
+          });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('project_label').textContent = `${runid} / ${config}`;
+        document.getElementById('archive_button').addEventListener('click', startArchive);
+        fetchArchives();
+        const wsClient = new WSClient(runid, 'archive');
+        wsClient.connect();
+      });
+    </script>
+  </head>
+  <body>
+    <div class="container mt-4">
+      <h1>Project Archive Dashboard</h1>
+      <p>Project: <code id="project_label"></code></p>
+      <button type="button" class="btn btn-primary" id="archive_button">Create Archive</button>
+
+      <div class="mt-4">
+        <h5>Status</h5>
+        <pre id="status_log"></pre>
+      </div>
+
+      <div class="mt-4">
+        <h5>Existing Archives</h5>
+        <div id="archive_empty" class="text-muted">No archives available.</div>
+        <table class="table table-striped" id="archives_table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Modified</th>
+              <th>Download</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

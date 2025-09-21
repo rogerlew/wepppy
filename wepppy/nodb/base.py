@@ -985,10 +985,28 @@ def clear_locks(runid):
 
         v = redis_lock_client.hget(runid, lock_key)
         if v is None:
-            return
+            continue
         if v == 'true':
             redis_lock_client.hset(runid, lock_key, 'false')
 
         cleared.append(lock_key)
 
     return cleared
+
+
+def lock_statuses(runid):
+    """Return a mapping of `.nodb` filenames to lock booleans for the run."""
+    if redis_lock_client is None:
+        raise RuntimeError('Redis lock client is unavailable')
+
+    statuses = {}
+    for cls in _iter_nodb_subclasses():
+        filename = getattr(cls, 'filename', None)
+        if not filename:
+            continue
+
+        key = f'locked:{filename}'
+        value = redis_lock_client.hget(runid, key)
+        statuses[filename] = (value == 'true') if value is not None else False
+
+    return statuses
