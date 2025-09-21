@@ -129,28 +129,6 @@ class RedisPrep:
             return None
         return int(v)
     
-    def set_locked_status(self, key, status: bool):
-        self.redis.hset(self.run_id, f'locked:{key}', str(bool(status)).lower())
-        self.dump()
-
-    def get_locked_status(self, key):
-        v = self.redis.hget(self.run_id, f'locked:{key}')
-        if v is None:
-            return False
-        return v == 'true'
-    
-    def clear_locked_status(self, key):
-        """
-        Clear the locked status for a given key only if it is set and true.
-        This is to prevent spamming emits to the front end.
-        """
-        v = self.redis.hget(self.run_id, f'locked:{key}')
-        if v is None:
-            return
-        if v == 'true':
-            self.redis.hset(self.run_id, f'locked:{key}', 'false')
-            self.dump()
-    
     def set_rq_job_id(self, key, job_id):
         self.redis.hset(self.run_id, f'rq:{key}', job_id)
         self.dump()
