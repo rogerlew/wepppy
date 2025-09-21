@@ -1632,42 +1632,6 @@ def clear_locks(runid, config):
         return exception_factory('Error Clearing Locks', runid=runid)
 
 
-@app.route('/runs/<string:runid>/<config>/archive')
-@app.route('/runs/<string:runid>/<config>/archive/')
-def archive(runid, config):
-
-    try:
-        # get working dir of original directory
-        wd = get_wd(runid)
-
-        from wepppy.export import archive_project, arc_export, legacy_arc_export
-        from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
-
-        legacy = request.args.get('legacy', None) is not None
-
-        if legacy:
-            try:
-                ron = Ron.getInstance(wd)
-                if len(glob(_join(ron.export_arc_dir, '*.shp'))) == 0:
-                    legacy_arc_export(wd)
-            except Exception:
-                return exception_factory('Error running legacy_arc_export', runid=runid)
-
-        ron = Ron.getInstance(wd)
-        if not _exists( _join(ron.export_dir, 'prep_details', 'hillslopes.csv')):
-            export_hillslopes_prep_details(wd)
-
-        if not _exists(_join(ron.export_dir, 'prep_details', 'channels.csv')):
-            export_channels_prep_details(wd)
-
-
-        archive_path = archive_project(wd)
-        return send_file(archive_path, as_attachment=True, download_name='{}.zip'.format(runid))
-
-    except:
-        return exception_factory('Error Archiving Project', runid=runid)
-
-
 @app.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')
 @app.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json/')
 def meta_subcatchmets_wgs(runid, config):
