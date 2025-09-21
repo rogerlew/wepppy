@@ -463,7 +463,6 @@ def get_run_owners(runid):
 def health():
     return jsonify('OK')
 
-
 @app.route('/profile')
 @app.route('/profile/')
 @login_required
@@ -2082,7 +2081,7 @@ def resources_bounds_geojson(runid, config, simplify=False):
         watershed = Watershed.getInstance(wd)
         fn = watershed.bound_shp
 
-        if simplify:
+        if 0:  #  disable simplify branch
             fn2 = fn.split('.')
             fn2.insert(-1, 'opt')
             fn2 = '.'.join(fn2)
@@ -2246,7 +2245,7 @@ def export_ermit(runid, config):
     except:
         return exception_factory('Error exporting ERMiT', runid=runid)
 
-
+# TODO move to RQ or disbale lazy build
 @app.route('/runs/<string:runid>/<config>/export/geopackage')
 def export_geopackage(runid, config):
     from wepppy.export import gpkg_export, archive_project, legacy_arc_export
@@ -2265,6 +2264,8 @@ def export_geopackage(runid, config):
     except Exception:
         return exception_factory('Error running gpkg_export', runid=runid)
 
+
+# TODO move to RQ or disable lazy build
 @app.route('/runs/<string:runid>/<config>/export/geodatabase')
 def export_geodatabase(runid, config):
     from wepppy.export import gpkg_export, archive_project, legacy_arc_export
@@ -3483,38 +3484,7 @@ def get_wepp_prep_details(runid, config):
         return exception_factory('Error building summary', runid=runid)
 
 
-# noinspection PyBroadException
-@app.route('/runs/<string:runid>/<config>/tasks/run_wepp_watershed', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/run_wepp_watershed/', methods=['POST'])
-def submit_task_run_wepp_watershed(runid, config):
-    wd = get_wd(runid)
-    wepp = Wepp.getInstance(wd)
-
-    try:
-        wepp.parse_inputs(request.form)
-    except Exception:
-        return exception_factory('Error parsing climate inputs', runid=runid)
-
-    try:
-
-        watershed = Watershed.getInstance(wd)
-        translator = Watershed.getInstance(wd).translator_factory()
-        runs_dir = os.path.abspath(wepp.runs_dir)
-
-        #
-        # Prep Watershed
-        wepp.prep_watershed()
-
-        #
-        # Run Watershed
-        wepp.run_watershed()
-
-    except Exception:
-        return exception_factory('Error running wepp', runid=runid)
-
-    return success_factory()
-
-
+# TODO refactor as RQ task?
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/run_model_fit', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_model_fit/', methods=['POST'])
@@ -4503,7 +4473,6 @@ def task_set_ash_wind_transport(runid, config):
 
     return success_factory()
 
-
 @app.route('/runs/<string:runid>/<config>/report/debris_flow')
 @app.route('/runs/<string:runid>/<config>/report/debris_flow/')
 def report_debris_flow(runid, config):
@@ -4511,13 +4480,6 @@ def report_debris_flow(runid, config):
 
     ron = Ron.getInstance(wd)
     debris_flow = DebrisFlow.getInstance(wd)
-
-    cc = request.args.get('cc', None)
-    ll = request.args.get('ll', None)
-    datasource = request.args.get('datasource', None)
-    if cc is not None or ll is not None:
-        debris_flow.run_debris_flow(cc=cc, ll=ll, req_datasource=datasource)
-
     unitizer = Unitizer.getInstance(wd)
 
     return render_template('reports/debris_flow.htm',
