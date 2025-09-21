@@ -290,6 +290,11 @@ migrate = Migrate(app, db, directory='/workdir/wepppy/wepppy/weppcloud/migration
 def inject_site_prefix():
     return dict(site_prefix=app.config['SITE_PREFIX'])
 
+def render_project_template(template_name, runid, config, **context):
+    context.setdefault('runid', runid)
+    context.setdefault('config', config)
+    return render_template(template_name, **context)
+
 # Define models
 roles_users = db.Table(
     'roles_users',
@@ -1878,6 +1883,8 @@ def runs0(runid, config):
                                critical_shear_options=critical_shear_options,
                                precisions=wepppy.nodb.unitizer.precisions,
                                run_id=runid,
+                               runid=runid,
+                               config=config,
                                VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
     except:
         return exception_factory(runid=runid)
@@ -1982,7 +1989,7 @@ def hillslope0_ash(runid, config, topaz_id):
 
         #return jsonify(dict(results=results, recurrence_intervals=recurrence))
 
-        return render_template('reports/ash/ash_hillslope.htm',
+        return render_project_template('reports/ash/ash_hillslope.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                sub=sub,
@@ -2084,7 +2091,7 @@ def report_users(runid, config):
     if should_abort:
         return error_factory('Authentication Error')
 
-    return render_template('reports/users.htm', owners=owners)
+    return render_project_template('reports/users.htm', runid, config, owners=owners)
 
 
 # noinspection PyBroadException
@@ -2248,7 +2255,7 @@ def query_extent(runid, config):
 def report_channel(runid, config):
     wd = get_wd(runid)
 
-    return render_template('reports/channel.htm',
+    return render_project_template('reports/channel.htm', runid, config,
                            map=Ron.getInstance(wd).map)
 
 
@@ -2267,7 +2274,7 @@ def query_outlet(runid, config):
 def report_outlet(runid, config):
     wd = get_wd(runid)
 
-    return render_template('reports/outlet.htm',
+    return render_project_template('reports/outlet.htm', runid, config,
                            outlet=Watershed.getInstance(wd).outlet,
                            ron=Ron.getInstance(wd))
 
@@ -2424,7 +2431,7 @@ def query_omni_scenarios_report(runid, config):
         # Sort scenarios for consistent display
         scenarios.sort(key=lambda x: x['name'])
 
-        return render_template('reports/omni/omni_scenarios_summary.htm',
+        return render_project_template('reports/omni/omni_scenarios_summary.htm', runid, config,
                                user=current_user,
                                watershed=Watershed.getInstance(wd),
                                scenarios=scenarios)
@@ -2438,7 +2445,7 @@ def query_omni_scenarios_report(runid, config):
 def query_watershed_summary(runid, config):
     try:
         wd = get_wd(runid)
-        return render_template('reports/subcatchments.htm',
+        return render_project_template('reports/subcatchments.htm', runid, config,
                                user=current_user,
                                watershed=Watershed.getInstance(wd))
     except:
@@ -2722,7 +2729,7 @@ def report_landuse(runid, config):
         landuse = Landuse.getInstance(wd)
         landuseoptions = landuse.landuseoptions
 
-        return render_template('reports/landuse.j2',
+        return render_project_template('reports/landuse.j2', runid, config,
                                landuse=landuse,
                                landuseoptions=landuseoptions,
                                report=landuse.report)
@@ -2744,7 +2751,7 @@ def report_rangeland_cover(runid, config):
     ron = Ron.getInstance(wd)
     rangeland_cover = RangelandCover.getInstance(wd)
 
-    return render_template('reports/rangeland_cover.htm',
+    return render_project_template('reports/rangeland_cover.htm', runid, config,
                            rangeland_cover=rangeland_cover)
 
 
@@ -2886,7 +2893,7 @@ def query_soils_channels(runid, config):
 def report_soils(runid, config):
     try:
         wd = get_wd(runid)
-        return render_template('reports/soils.htm',
+        return render_project_template('reports/soils.htm', runid, config,
                                report=Soils.getInstance(wd).report)
     except Exception as e:
         return exception_factory('Building Soil Failed', runid=runid)
@@ -2985,7 +2992,7 @@ def report_climate(runid, config):
     wd = get_wd(runid)
  
     climate = Climate.getInstance(wd)
-    return render_template('reports/climate.htm',
+    return render_project_template('reports/climate.htm', runid, config,
                            station_meta=climate.climatestation_meta,
                            climate=climate)
 
@@ -3520,7 +3527,7 @@ def get_wepp_prep_details(runid, config):
 
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/prep_details.htm',
+        return render_project_template('reports/wepp/prep_details.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                subcatchments_summary=subcatchments_summary,
@@ -3562,7 +3569,7 @@ def report_observed(runid, config):
     ron = Ron.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
 
-    return render_template('reports/wepp/observed.htm',
+    return render_project_template('reports/wepp/observed.htm', runid, config,
                            results=observed.results,
                            stat_names=observed.stat_names,
                            ron=ron,
@@ -3589,7 +3596,7 @@ def plot_observed(runid, config, selected):
     else:
         parseDate_fmt = "%Y"
 
-    return render_template('reports/wepp/observed_comparison_graph.htm',
+    return render_project_template('reports/wepp/observed_comparison_graph.htm', runid, config,
                            graph_series=sorted(graph_series),
                            selected=selected,
                            parseDate_fmt=parseDate_fmt,
@@ -3635,7 +3642,7 @@ def report_wepp_run_summary(runid, config):
     subs_n = len(glob(_join(wd, 'wepp/output/*.pass.dat')))
     subs_n += len(glob(_join(wd, 'wepp/output/*/*.pass.dat')))
 
-    return render_template('reports/wepp_run_summary.htm',
+    return render_project_template('reports/wepp_run_summary.htm', runid, config,
                            flowpaths_n=flowpaths_n,
                            subs_n=subs_n,
                            ron=ron)
@@ -3649,7 +3656,7 @@ def report_rhem_run_summary(runid, config):
     rhempost = RhemPost.getInstance(wd)
     subs_n = len(glob(_join(wd, 'rhem/output/*.sum')))
 
-    return render_template('reports/rhem_run_summary.htm',
+    return render_project_template('reports/rhem_run_summary.htm', runid, config,
                            subs_n=subs_n,
                            rhempost=rhempost,
                            ron=ron)
@@ -3663,7 +3670,7 @@ def report_rhem_avg_annuals(runid, config):
     rhempost = RhemPost.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
 
-    return render_template('reports/rhem/avg_annual_summary.htm',
+    return render_project_template('reports/rhem/avg_annual_summary.htm', runid, config,
                            rhempost=rhempost,
                            ron=ron,
                            unitizer_nodb=unitizer,
@@ -3709,7 +3716,7 @@ def report_wepp_loss(runid, config):
         translator = Watershed.getInstance(wd).translator_factory()
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/summary.htm',
+        return render_project_template('reports/wepp/summary.htm', runid, config,
                                extraneous=extraneous,
                                out_rpt=out_rpt,
                                hill_rpt=hill_rpt,
@@ -3749,7 +3756,7 @@ def report_wepp_yearly_watbal(runid, config):
 
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/yearly_watbal.htm',
+        return render_project_template('reports/wepp/yearly_watbal.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                rpt=totwatbal,
@@ -3771,7 +3778,7 @@ def report_wepp_avg_annual_by_landuse(runid, config):
         dwat = DisturbedTotalWatSed2(wd, wepp.baseflow_opts, wepp.phosphorus_opts)
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/avg_annuals_by_landuse.htm',
+        return render_project_template('reports/wepp/avg_annuals_by_landuse.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                report=dwat.annual_averages_report,
@@ -3794,7 +3801,7 @@ def report_wepp_avg_annual_watbal(runid, config):
 
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/avg_annual_watbal.htm',
+        return render_project_template('reports/wepp/avg_annual_watbal.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                hill_rpt=hill_rpt,
@@ -3887,7 +3894,7 @@ def plot_wepp_streamflow(runid, config):
         unitizer = Unitizer.getInstance(wd)
 
         # stack basefow, lateral flow, runoff
-        return render_template('reports/wepp/daily_streamflow_graph.htm',
+        return render_project_template('reports/wepp/daily_streamflow_graph.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
@@ -3909,7 +3916,7 @@ def report_rhem_return_periods(runid, config):
 
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/rhem/return_periods.htm',
+        return render_project_template('reports/rhem/return_periods.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                rhempost=rhempost,
@@ -3975,7 +3982,7 @@ def report_wepp_return_periods(runid, config):
 
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/return_periods.htm',
+        return render_project_template('reports/wepp/return_periods.htm', runid, config,
                                extraneous=extraneous,
                                chn_topaz_id_of_interest=chn_topaz_id_of_interest,
                                chn_topaz_id_options=wepp.chn_topaz_ids_of_interest,
@@ -4001,7 +4008,7 @@ def report_wepp_frq_flood(runid, config):
 
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/frq_flood.htm',
+        return render_project_template('reports/wepp/frq_flood.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                report=report,
@@ -4024,7 +4031,7 @@ def report_wepp_sediment_delivery(runid, config):
 
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/sediment_characteristics.htm',
+        return render_project_template('reports/wepp/sediment_characteristics.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                sed_del=sed_del,
@@ -4129,7 +4136,7 @@ def report_ron_chn_summary(runid, config, topaz_id):
     try:
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
-        return render_template('reports/hill.htm',
+        return render_project_template('reports/hill.htm', runid, config,
                             ron=ron,
                             d=ron.chn_summary(topaz_id))
     except Exception:
@@ -4151,7 +4158,7 @@ def query_topaz_wepp_map(runid, config):
 def report_ron_sub_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    return render_template('reports/hill.htm',
+    return render_project_template('reports/hill.htm', runid, config,
                            ron=ron,
                            d=ron.sub_summary(topaz_id))
 
@@ -4529,7 +4536,7 @@ def report_debris_flow(runid, config):
     debris_flow = DebrisFlow.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
 
-    return render_template('reports/debris_flow.htm',
+    return render_project_template('reports/debris_flow.htm', runid, config,
                            unitizer_nodb=unitizer,
                            precisions=wepppy.nodb.unitizer.precisions,
                            debris_flow=debris_flow,
@@ -4565,7 +4572,7 @@ def report_run_ash(runid, config):
         wd = get_wd(runid)
         ash = Ash.getInstance(wd)
 
-        return render_template('reports/ash/run_summary.htm',
+        return render_project_template('reports/ash/run_summary.htm', runid, config,
                                ash=ash)
 
     except Exception:
@@ -4605,7 +4612,7 @@ def report_ash(runid, config):
 
         #return jsonify(dict(return_periods=return_periods, cum_return_period=cum_return_periods))
 
-        return render_template('reports/ash/ash_watershed.htm',
+        return render_project_template('reports/ash/ash_watershed.htm', runid, config,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                fire_date=fire_date,
@@ -4682,7 +4689,7 @@ def report_ash_by_hillslope(runid, config):
         burn_class_summary = ash.burn_class_summary()
         ash_out = ashpost.ash_out
 
-        return render_template('reports/ash/ash_watershed_by_hillslope.htm',
+        return render_project_template('reports/ash/ash_watershed_by_hillslope.htm', runid, config,
                                out_rpt=out_rpt,
                                hill_rpt=hill_rpt,
                                chn_rpt=chn_rpt,
@@ -4747,7 +4754,7 @@ def report_contaminant(runid, config):
 
         pw0_stats = ashpost.pw0_stats
 
-        return render_template('reports/ash/ash_contaminant.htm',
+        return render_project_template('reports/ash/ash_contaminant.htm', runid, config,
                                rec_intervals=recurrence_intervals,
                                rec_results=results,
                                return_periods=return_periods,
