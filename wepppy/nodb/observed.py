@@ -149,7 +149,7 @@ class Observed(NoDbBase):
         sim['Day'] = sim['da']
         sim['Streamflow (mm)'] = chanwb.calc_streamflow(totwatsed.wsarea)
 
-        # TODO: Use chan.out for daily dischange
+        # TODO: Use chan.out for peak flow
 
         results['Channels'] = self.run_measures(df, sim, 'Channels')
 
