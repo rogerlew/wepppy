@@ -6,9 +6,10 @@
   ...).<br /></div>
 <div class="form-group row hide-readonly">
   <div class="col-sm-4">
-    <button 
-      onclick="lockButton('btn_build_subcatchments', 'build_subcatchments_lock'); DebrisFlow.getInstance().run_model();"
+    <button id="btn_run_debris_flow"
+      onclick="lockButton('btn_run_debris_flow', 'run_debris_flow_lock'); DebrisFlow.getInstance().run_model();"
       class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
+      <img id="run_debris_flow_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
       Run Model
     </button>
   </div>

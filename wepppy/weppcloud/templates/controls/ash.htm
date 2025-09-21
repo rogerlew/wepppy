@@ -441,9 +441,12 @@
 
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
-        <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-            onclick="lockButton('btn_build_subcatchments', 'build_subcatchments_lock'); Ash.getInstance().run_model();"
-            type="button">Run Model</button>
+        <button id="btn_run_ash" class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
+            onclick="lockButton('btn_run_ash', 'run_ash_lock'); Ash.getInstance().run_model();"
+            type="button">
+            <img id="run_ash_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
+            Run Model
+        </button>
     </div>
     <div class="col-sm-5">
         <small id="hint_run_ash"></small>
