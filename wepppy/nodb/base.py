@@ -56,7 +56,7 @@ redis_status_client = None
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 REDIS_NODB_CACHE_DB = 13  # to check keys use: redis-cli -n 13 KEYS "*"    
 REDIS_STATUS_DB = 2       # to monitor db 2 in real-time use: redis-cli MONITOR | grep '\[2 '
-REDIS_LOCK_DB = 14
+REDIS_LOCK_DB = 0  # this is the same db as RedisPrep
 
 try:
     redis_nodb_cache_pool = redis.ConnectionPool(
@@ -626,42 +626,32 @@ class NoDbBase(object):
                     del obj[attr]
         return obj
 
+    def islocked(self):
+        if redis_lock_client is None:
+            raise RuntimeError('Redis lock client is unavailable')
+
+        v = redis_lock_client.hget(self.runid, f'locked:{self.filename}')
+        if v is None:
+            return False
+        return v == 'true'
+
     def lock(self):
         if self.readonly:
             raise Exception('lock() called on readonly project')
 
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
-
-        lock_acquired = redis_lock_client.set(self._lock_key, str(time()), nx=True)
-        if not lock_acquired:
+        
+        if self.islocked():
             raise Exception('lock() called on an already locked nodb')
 
-        # invalidate the cache assuming the object is being modified
-        if redis_nodb_cache_client is not None:
-            redis_nodb_cache_client.delete(self._redis_cache_key)
-
-        try:
-            RedisPrep.getInstance(self.wd).set_locked_status(self.class_name, True)
-        except:
-            pass
+        redis_lock_client.hset(self.runid, f'locked:{self.filename}', 'true')
 
     def unlock(self, flag=None):
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
-        
-        removed = redis_lock_client.delete(self._lock_key)
-        if removed:
-            try:
-                RedisPrep.getInstance(self.wd).set_locked_status(self.class_name, False)
-            except:
-                pass
 
-    def islocked(self):
-        if redis_lock_client is None:
-            raise RuntimeError('Redis lock client is unavailable')
-
-        return bool(redis_lock_client.exists(self._lock_key))
+        redis_lock_client.hset(self.runid, f'locked:{self.filename}', 'false')
 
     @property
     def runid(self):
@@ -986,17 +976,19 @@ def clear_locks(runid):
     subclasses = list(_iter_nodb_subclasses())
     filenames = [getattr(cls, 'filename', None) for cls in subclasses]
     
-    redis_prep = RedisPrep.getInstanceFromRunID(runid)
     cleared = []
     for filename in filenames:
         if not filename:
             continue
 
-        class_name = filename.removesuffix('.nodb')
-        lock_key = f"{runid}:{filename}"
-        removed = redis_lock_client.delete(lock_key)
-        
-        redis_prep.set_locked_status(class_name, False)
+        lock_key = f'locked:{filename}'
+
+        v = redis_lock_client.hget(runid, lock_key)
+        if v is None:
+            return
+        if v == 'true':
+            redis_lock_client.hset(runid, lock_key, 'false')
+
         cleared.append(lock_key)
 
     return cleared
