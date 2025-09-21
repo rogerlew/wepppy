@@ -17,7 +17,6 @@ const LOCKABLE_FILES = Object.freeze({
     "treatments.nodb": { buttonId: "btn_build_treatments", lockImageId: "build_treatments_lock" },
     "wepppost.nodb": { buttonId: "btn_export_dss", lockImageId: "btn_export_dss_lock" },
     "observed.nodb": { buttonId: "btn_run_observed", lockImageId: "run_observed_lock" },
-    // Modules that reuse the subcatchment build controls for locking feedback.
     "debris_flow.nodb": { buttonId: "btn_run_debris_flow", lockImageId: "run_debris_flow_lock" },
     "ash.nodb": { buttonId: "btn_run_ash", lockImageId: "run_ash_lock" },
     "ashpost.nodb": { buttonId: "btn_run_ash", lockImageId: "run_ash_lock" }
