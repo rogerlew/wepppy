@@ -51,6 +51,25 @@ function linearToLog(value, minLog, maxLog, maxLinear) {
     return minLog * Math.pow(maxLog / minLog, value / maxLinear);
 }
 
+
+function lockButton(buttonId, lockImageId) {
+    const button = document.getElementById(buttonId);
+    const lockImage = document.getElementById(lockImageId);
+
+    // Disable the button and show the lock image
+    button.disabled = true;
+    lockImage.style.display = 'inline';
+}
+
+function unlockButton(buttonId, lockImageId) {
+    const button = document.getElementById(buttonId);
+    const lockImage = document.getElementById(lockImageId);
+
+    // Re-enable the button and hide the lock image
+    button.disabled = false;
+    lockImage.style.display = 'none';
+}
+
 /* ----------------------------------------------------------------------------
  * WebSocketManager
  * ----------------------------------------------------------------------------

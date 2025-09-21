@@ -23,29 +23,6 @@
         Map.getInstance().invalidateSize();
     };
 
-
-    function debounceButton(buttonId, lockImageId, onclickCall) {
-        const button = document.getElementById(buttonId);
-        const lockImage = document.getElementById(lockImageId);
-
-        return function () {
-            // Disable the button and show the lock image
-            button.disabled = true;
-            lockImage.style.display = 'inline';
-
-            // Run the original function if provided
-            if (onclickCall && typeof onclickCall === 'function') {
-                onclickCall();
-            }
-
-            // Re-enable the button and hide the lock image after 5 seconds
-            setTimeout(() => {
-                button.disabled = false;
-                lockImage.style.display = 'none';
-            }, 5000);
-        };
-    }
-
     function upload_cover_transform() {
         var fileInput = document.getElementById('input_upload_cover_transform');
         var file = fileInput.files[0]; // Get the file from the input

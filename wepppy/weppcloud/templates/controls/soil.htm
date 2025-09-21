@@ -104,7 +104,7 @@
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
           <button id="btn_build_soil"
-              onclick="debounceButton('btn_build_soil', 'build_soil_lock', () => Soil.getInstance().build())()"
+              onclick="lockButton('btn_build_soil', 'build_soil_lock'); Soil.getInstance().build();"
               class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
               type="button">
             <img  id="build_soil_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
