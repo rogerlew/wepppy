@@ -440,7 +440,7 @@ class WhiteAshModel(AshModel):
             decomp_fac=0.00018,  # Ash decomposition factor, per day
             ini_erod=10,  # Initial erodibility, t/ha
             fin_erod=0.1,  # Final erodibility, t/ha
-            roughness_limit=1)  # TODO: Verify Roughness limit, mm
+            roughness_limit=1)  # Verify Roughness limit, mm
         
     def to_dict(self):
         return {
@@ -469,7 +469,7 @@ class BlackAshModel(AshModel):
             decomp_fac=0.00018,  # Ash decomposition factor, per day
             ini_erod=1.0,  # Initial erodibility, t/ha
             fin_erod=0.1,  # Final erodibility, t/ha
-            roughness_limit=1)   # TODO: Verify Roughness limit, mm
+            roughness_limit=1)   # Verify Roughness limit, mm
         
     def to_dict(self):
         return {
