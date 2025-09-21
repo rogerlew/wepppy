@@ -442,7 +442,7 @@
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
         <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-            onclick="debounceButton('btn_build_subcatchments', 'build_subcatchments_lock', ()=>Ash.getInstance().run_model())()"
+            onclick="lockButton('btn_build_subcatchments', 'build_subcatchments_lock'); Ash.getInstance().run_model();"
             type="button">Run Model</button>
     </div>
     <div class="col-sm-5">

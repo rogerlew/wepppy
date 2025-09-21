@@ -4,6 +4,24 @@ var preflight_ws;
 let lastPreflightChecklist = null;
 let controller_lock_statuses = null;
 
+// Map .nodb files to the UI elements we toggle via lockButton/unlockButton.
+// NOTE: if a new controller needs to react to lock status pushes, add the
+// appropriate (buttonId, lockImageId) pair here so updateLocks can drive it.
+const LOCKABLE_FILES = Object.freeze({
+    "wepp.nodb": { buttonId: "btn_run_wepp", lockImageId: "run_wepp_lock" },
+    "topaz.nodb": { buttonId: "btn_build_channels_en", lockImageId: "build_channels_en_lock" },
+    "watershed.nodb": { buttonId: "btn_build_subcatchments", lockImageId: "build_subcatchments_lock" },
+    "landuse.nodb": { buttonId: "btn_build_landuse", lockImageId: "build_landuse_lock" },
+    "soils.nodb": { buttonId: "btn_build_soil", lockImageId: "build_soil_lock" },
+    "climate.nodb": { buttonId: "btn_build_climate", lockImageId: "build_climate_lock" },
+    "treatments.nodb": { buttonId: "btn_build_treatments", lockImageId: "build_treatments_lock" },
+    "wepppost.nodb": { buttonId: "btn_export_dss", lockImageId: "btn_export_dss_lock" },
+    // Modules that reuse the subcatchment build controls for locking feedback.
+    "debris_flow.nodb": { buttonId: "btn_build_subcatchments", lockImageId: "build_subcatchments_lock" },
+    "ash.nodb": { buttonId: "btn_build_subcatchments", lockImageId: "build_subcatchments_lock" },
+    "ashpost.nodb": { buttonId: "btn_build_subcatchments", lockImageId: "build_subcatchments_lock" }
+});
+
 function initPreflight(runid) {
     var wsUrl = `wss://${window.location.host}/weppcloud-microservices/preflight/${runid}`;
 
@@ -24,7 +42,7 @@ function initPreflight(runid) {
                 preflight_ws = null;
             } else if (payload.type === "preflight") {
                 updateUI(payload.checklist);
-                //updateLocks(payload.lock_statuses);
+                updateLocks(payload.lock_statuses);
 
                 lastPreflightChecklist = payload.checklist;
                 controller_lock_statuses = payload.lock_statuses;
@@ -54,17 +72,33 @@ function initPreflight(runid) {
     });
 }
 
-function updateLock(btn_id, lock_id, lock_status) {
-    var button = $("#" + btn_id);
-    var lock = $("#" + lock_id);
-
-    if (lock_status) {
-        button.attr('disabled', true);
-        lock.show();
-    } else {
-        button.attr('disabled', false);
-        lock.hide();
+function updateLocks(lockStatuses) {
+    if (!lockStatuses || typeof lockStatuses !== "object") {
+        return;
     }
+
+    Object.entries(lockStatuses).forEach(([fileName, isLocked]) => {
+        const target = LOCKABLE_FILES[fileName];
+        if (!target) {
+            return; // This .nodb file does not control a button directly.
+        }
+
+        const { buttonId, lockImageId } = target;
+        const button = document.getElementById(buttonId);
+        const lockImage = document.getElementById(lockImageId);
+
+        // Some legacy views reuse button ids; skip gracefully if the elements
+        // are not on the current page to avoid raising exceptions.
+        if (!button || !lockImage) {
+            return;
+        }
+
+        if (isLocked) {
+            lockButton(buttonId, lockImageId);
+        } else {
+            unlockButton(buttonId, lockImageId);
+        }
+    });
 }
 
 
@@ -108,4 +142,3 @@ function getSelectorForKey(key) {
 
     return mapping[key];
 }
-

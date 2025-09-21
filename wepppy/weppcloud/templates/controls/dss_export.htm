@@ -80,7 +80,7 @@
 <div class="form-group row hide-readonly" id="btn_export_dss_container">
     <div class="col-sm-4">
         <button 
-            onclick="debounceButton('btn_export_dss', 'btn_export_dss_lock', () => DssExport.getInstance().export())()"
+            onclick="lockButton('btn_export_dss', 'btn_export_dss_lock'); DssExport.getInstance().export();"
             id="btn_export_dss" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
 
           <img  id="btn_export_dss_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
@@ -93,4 +93,3 @@
 </div>
 
 {% endblock %}
-
