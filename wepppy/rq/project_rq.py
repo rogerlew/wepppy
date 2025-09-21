@@ -15,6 +15,8 @@ import threading
 from queue import Queue
 from functools import wraps
 from subprocess import Popen, PIPE, call
+import zipfile
+from datetime import datetime
 
 import redis
 from rq import Queue, get_current_job
@@ -695,6 +697,81 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
+
+def archive_rq(runid: str):
+    job = get_current_job()
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f'{runid}:archive'
+    StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+    prep = None
+    archive_path_tmp = None
+    try:
+        prep = RedisPrep.getInstanceFromRunID(runid)
+        wd = get_wd(runid)
+
+        archives_dir = os.path.join(wd, 'archives')
+        os.makedirs(archives_dir, exist_ok=True)
+
+        timestamp = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+        archive_name = f'{runid}.{timestamp}.zip'
+        archive_path = os.path.join(archives_dir, archive_name)
+        archive_path_tmp = archive_path + '.tmp'
+
+        for candidate in (archive_path, archive_path_tmp):
+            if os.path.exists(candidate):
+                os.remove(candidate)
+
+        StatusMessenger.publish(status_channel, f'Creating archive {archive_name}')
+
+        with zipfile.ZipFile(archive_path_tmp, mode='w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
+            for root, dirs, files in os.walk(wd):
+                rel_root = os.path.relpath(root, wd)
+                if rel_root == '.':
+                    rel_root = ''
+
+                # Skip the archives directory entirely
+                if rel_root.startswith('archives'):
+                    dirs[:] = []
+                    continue
+
+                dirs[:] = [d for d in dirs if not os.path.relpath(os.path.join(root, d), wd).startswith('archives')]
+
+                for filename in files:
+                    abs_path = os.path.join(root, filename)
+                    arcname = os.path.relpath(abs_path, wd)
+                    if arcname.startswith('archives'):
+                        continue
+
+                    StatusMessenger.publish(status_channel, f'Adding {arcname}')
+                    zf.write(abs_path, arcname)
+
+        os.replace(archive_path_tmp, archive_path)
+        StatusMessenger.publish(status_channel, f'Archive ready: {archive_name}')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   archive ARCHIVE_COMPLETE')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+    finally:
+        if archive_path_tmp and os.path.exists(archive_path_tmp):
+            try:
+                os.remove(archive_path_tmp)
+            except OSError:
+                pass
+
+        if prep is None:
+            try:
+                prep = RedisPrep.getInstanceFromRunID(runid)
+            except Exception:
+                prep = None
+
+        if prep is not None:
+            try:
+                prep.clear_archive_job_id()
+            except Exception:
+                pass
 
 
 def fetch_and_analyze_rap_ts_rq(runid: str):
