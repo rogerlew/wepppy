@@ -156,10 +156,6 @@ def run_wepp_rq(runid):
         wepp._check_and_set_baseflow_map()
         wepp._check_and_set_phosphorus_map()
 
-        # lock wepp
-        # Nothing beyond this point should require writing to nodb
-        wepp.lock()
-
         #
         # Run Hillslopes
         watershed = Watershed.getInstance(wd)
