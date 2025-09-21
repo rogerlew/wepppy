@@ -54,12 +54,10 @@ def _safe_gt(a, b):
 
 def lock_statuses(prep: dict) -> dict:
     d = {}
-    d['watershed'] = prep.get('locked:watershed', False) == 'true'
-    d['climate'] = prep.get('locked:climate', False) == 'true'
-    d['wepp'] = prep.get('locked:wepp', False) == 'true'
-    d['soils'] = prep.get('locked:soils', False) == 'true'
-    d['landuse'] = prep.get('locked:landuse', False) == 'true'
-    d['disturbed'] = prep.get('locked:disturbed', False) == 'true'
+    for k, v in prep.items():
+        if k.startswith('locked:'):
+            key = k.split(':', 1)[1]
+            d[key] = (v == 'true')
     return d
 
 def preflight(prep: dict) -> dict:
