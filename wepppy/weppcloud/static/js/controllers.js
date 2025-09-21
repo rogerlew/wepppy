@@ -314,48 +314,123 @@ var Project = function () {
     function createInstance() {
         var that = controlBase();
 
-        that.setName = function (name) {
-            var self = instance;
-            $.post({
-                url: "tasks/setname/",
-                data: $("#setname_form").serialize(),
-                success: function success(response) {
-                    if (response.Success === true) {
-                        $("#input_name").val(name);
-                        document.title = document.title.split(" - ")[0] + ' - ' + name;
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    console.log(jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    console.log(error);
-                }
-            });
+        that._currentName = $("#input_name").val() || '';
+        that._currentScenario = $("#input_scenario").val() || '';
+        that._notifyTimer = null;
+
+        that._notifyCommandBar = function (message, options) {
+            options = options || {};
+            var duration = options.duration;
+            if (duration === undefined) {
+                duration = 2500;
+            }
+
+            if (typeof window.initializeCommandBar !== 'function') {
+                return;
+            }
+
+            var commandBar = window.initializeCommandBar();
+            if (!commandBar || typeof commandBar.showResult !== 'function') {
+                return;
+            }
+
+            commandBar.showResult(message);
+
+            if (that._notifyTimer) {
+                clearTimeout(that._notifyTimer);
+            }
+
+            if (duration !== null && typeof commandBar.hideResult === 'function') {
+                that._notifyTimer = setTimeout(function () {
+                    commandBar.hideResult();
+                }, duration);
+            }
         };
 
-        that.setScenario = function (scenario) {
-            var self = instance;
-            $.post({
-                url: "tasks/setscenario/",
-                data: $("#setscenario_form").serialize(),
+        that.setName = function (name, options) {
+            options = options || {};
+            var trimmed = (name || '').trim();
+            if (trimmed === that._currentName) {
+                return $.Deferred().resolve().promise();
+            }
+
+            var previous = that._currentName;
+            var request = $.post({
+                url: "tasks/setname/",
+                data: { name: trimmed },
                 success: function success(response) {
                     if (response.Success === true) {
-                        $("#input_scenario").val(scenario);
-                        document.title = document.title.split(" - ")[0] + ' - ' + scenario;
+                        that._currentName = trimmed;
+                        $("#input_name").val(trimmed);
+                        try {
+                            document.title = document.title.split(" - ")[0] + ' - ' + (trimmed || 'Untitled');
+                        } catch (err) {}
+                        if (options.notify !== false) {
+                            var displayName = trimmed || 'Untitled';
+                            that._notifyCommandBar('Saved project name to "' + displayName + '"');
+                        }
                     } else {
-                        self.pushResponseStacktrace(self, response);
+                        that._currentName = previous;
+                        that.pushResponseStacktrace(that, response);
+                        if (options.notify !== false) {
+                            that._notifyCommandBar('Error saving project name', { duration: null });
+                        }
                     }
                 },
                 error: function error(jqXHR) {
+                    that._currentName = previous;
                     console.log(jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    console.log(error);
+                    if (options.notify !== false) {
+                        that._notifyCommandBar('Error saving project name', { duration: null });
+                    }
+                    $("#input_name").val(previous);
                 }
             });
+
+            return request;
+        };
+
+        that.setScenario = function (scenario, options) {
+            options = options || {};
+            var trimmed = (scenario || '').trim();
+            if (trimmed === that._currentScenario) {
+                return $.Deferred().resolve().promise();
+            }
+
+            var previous = that._currentScenario;
+            var request = $.post({
+                url: "tasks/setscenario/",
+                data: { scenario: trimmed },
+                success: function success(response) {
+                    if (response.Success === true) {
+                        that._currentScenario = trimmed;
+                        $("#input_scenario").val(trimmed);
+                        try {
+                            document.title = document.title.split(" - ")[0] + ' - ' + trimmed;
+                        } catch (err) {}
+                        if (options.notify !== false) {
+                            var message = trimmed ? ('Saved scenario to "' + trimmed + '"') : 'Cleared scenario';
+                            that._notifyCommandBar(message);
+                        }
+                    } else {
+                        that._currentScenario = previous;
+                        that.pushResponseStacktrace(that, response);
+                        if (options.notify !== false) {
+                            that._notifyCommandBar('Error saving scenario', { duration: null });
+                        }
+                    }
+                },
+                error: function error(jqXHR) {
+                    that._currentScenario = previous;
+                    console.log(jqXHR.responseJSON);
+                    if (options.notify !== false) {
+                        that._notifyCommandBar('Error saving scenario', { duration: null });
+                    }
+                    $("#input_scenario").val(previous);
+                }
+            });
+
+            return request;
         };
 
         that.clear_locks = function () {
