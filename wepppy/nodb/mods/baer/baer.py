@@ -527,7 +527,6 @@ class Baer(NoDbBase):
                                 landuse.domlc_d[k] = '105'  # lt high forest
 
                 else:
-                    # TODO: implement shrub wepp-pep managements
                     landuse.domlc_d = domlc_d
 
             landuse.dump_and_unlock()
@@ -758,7 +757,6 @@ class Baer(NoDbBase):
 
                 total_px = float(sum(c.values()))
 
-                # todo: calcuate based on disturbed burn classes
                 self.sbs_coverage = {
                                      'noburn': c[130] / total_px,
                                      'low': c[131] / total_px,

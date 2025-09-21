@@ -316,8 +316,6 @@ class TauDEMTopazEmulator(TauDEMRunner):
                 slope_scalar = float(slopes[px, py])
                 slope = np.array([slope_scalar, slope_scalar])
 
-                # todo: don't think head and tail are being used any where, but these
-                #       are inconsistent with case when there is more than one pixel
                 head = enz_coords[-1][:-1]
                 tail = enz_coords[0][:-1]
                 direction = compute_direction(head, tail)
