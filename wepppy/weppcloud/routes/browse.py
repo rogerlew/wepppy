@@ -252,6 +252,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
 <title>{runid} - Not Found</title>
 <script>
@@ -661,6 +662,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
 <title>{runid}</title>
 <script>
@@ -730,6 +732,7 @@ const config = "{config}";
 <html><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
 <title>{basename(path)} - {runid}</title>
 </head><body>
@@ -766,6 +769,7 @@ const config = "{config}";
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
 <title>{basename(path)} - {runid}</title>
 <link rel="stylesheet"
@@ -793,6 +797,7 @@ crossorigin="anonymous">
 <html><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
 <title>{basename(path)} - {runid}</title>
 </head><body>
