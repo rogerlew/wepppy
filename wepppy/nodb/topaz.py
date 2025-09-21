@@ -23,7 +23,6 @@ from .base import NoDbBase
 
 
 # this needs to be here to unpickle old projects
-# todo: migrate all the topaz.nodb
 # wepppy.nodb.topaz.Outlet should be wepppy.nodb.watershed.Outlet
 # then it should be possible to remove this class
 class Outlet(object):

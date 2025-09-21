@@ -614,7 +614,6 @@ def cli_revision(cli_fn: str, is_breakpoint: bool, ws_ppts: np.array, ws_tmaxs: 
         rev_tmax[index] = row.tmax - ws_tmaxs[mo] + hill_tmaxs[mo]
         rev_tmin[index] = row.tmin - ws_tmins[mo] + hill_tmins[mo]
 
-        # todo check that tdew is >= tmin
         dates.append((int(row.year), int(row.mo), int(row.da)))
 
     cli2.replace_var('prcp', dates, rev_ppt)
