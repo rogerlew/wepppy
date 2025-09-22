@@ -24,7 +24,7 @@
 </head>
 <body>
   <div class="container-fluid">
-    <h1>WEPPcloud Job Dashboard</h1>
+    <h2 class="mb-1"><a href='{{ url_for("runs0", runid=runid, config=config) }}'>{{ runid }}</a> RQ Job Dashboard</h2>
     <dl>
     <dt>Job ID</dt>
     <dd>{{ job_id }}</dd>
