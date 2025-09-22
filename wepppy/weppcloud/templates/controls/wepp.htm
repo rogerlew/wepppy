@@ -47,7 +47,7 @@
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_run_wepp"
-            onclick="lockButton('btn_run_wepp', 'run_wepp_lock'); Wepp.getInstance().run();"
+            onclick="Wepp.getInstance().run();"
             class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
             type="button">
                 <img id="run_wepp_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />

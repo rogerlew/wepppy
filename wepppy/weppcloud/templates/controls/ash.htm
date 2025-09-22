@@ -442,7 +442,7 @@
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
         <button id="btn_run_ash" class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-            onclick="lockButton('btn_run_ash', 'run_ash_lock'); Ash.getInstance().run_model();"
+            onclick="Ash.getInstance().run_model();"
             type="button">
             <img id="run_ash_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
             Run Model
