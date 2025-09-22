@@ -353,11 +353,7 @@ class Omni(NoDbBase):
     def __init__(self, wd, cfg_fn='0.cfg'):
         super(Omni, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
-            
+        with self.locked():
             if not _exists(self.omni_dir):
                 os.makedirs(self.omni_dir)
 
@@ -376,35 +372,21 @@ class Omni(NoDbBase):
             self._contrast_select_topaz_ids = None
             self._mulching_base_scenario = None
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     @property
     def scenarios(self):
         return self._scenarios
     
     @scenarios.setter
     def scenarios(self, value: set[OmniScenario]):
-
-        self.lock()
-        try:
+        with self.locked():
             self._scenarios = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def parse_scenarios(self, parsed_inputs):
         """
         Parse the scenarios and their parameters into the NoDb structure.
         :param parsed_inputs: List of (scenario_enum, params) tuples
         """
-        self.lock()
-
-        try:
+        with self.locked():
             self._scenarios = []  # Reset scenarios
 
             for scenario_enum, params in parsed_inputs:
@@ -446,22 +428,11 @@ class Omni(NoDbBase):
                         'type': scenario_type
                     })
 
-            self.dump_and_unlock()
-
-        except Exception as e:
-            self.unlock()
-            raise Exception(f'Failed to parse inputs: {str(e)}')
-
-
     def parse_inputs(self, kwds):
         """
         this is called from the web backend to set the parameters in the nodb
         """
-        self.lock()
-
-        # noinspection PyBroadException
-        try:        
-
+        with self.locked():
             control_scenario = kwds.get('omni_control_scenario', None)
             if control_scenario is not None:
                 self._control_scenario =OmniScenario.parse(control_scenario)
@@ -498,26 +469,14 @@ class Omni(NoDbBase):
             if select_topaz_ids is not None:
                 self._contrast_select_topaz_ids = select_topaz_ids
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     @property
     def contrasts(self):
         return self._contrasts
     
     @contrasts.setter
     def contrasts(self, value):
-
-        self.lock()
-        try:
+        with self.locked():
             self._contrasts = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def contrast_names(self):
@@ -526,13 +485,8 @@ class Omni(NoDbBase):
     @contrast_names.setter
     def contrast_names(self, value):
 
-        self.lock()
-        try:
+        with self.locked():
             self._contrast_names = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def omni_dir(self):
@@ -562,14 +516,9 @@ class Omni(NoDbBase):
         return objective_parameter_descending, total_objective_parameter
 
     def clear_contrasts(self):
-        self.lock()
-        try:
+        with self.locked():
             self._contrasts = None
             self._contrast_names = None
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def build_contrasts(self, control_scenario_def, contrast_scenario_def,
                         obj_param='Runoff_mm',
@@ -614,8 +563,7 @@ class Omni(NoDbBase):
         contrast_scenario = _scenario_name_from_scenario_definition(contrast_scenario_def)
 
         # save parameters for defining contrasts
-        self.lock()
-        try:
+        with self.locked():
             self._contrast_scenario = contrast_scenario
             self._control_scenario = control_scenario
             self._contrast_object_param = obj_param
@@ -625,12 +573,7 @@ class Omni(NoDbBase):
             self._contrast_hill_max_slope = hill_max_slope
             self._contrast_select_burn_severities = select_burn_severities
             self._contrast_select_topaz_ids = select_topaz_ids
-
-            self.dump_and_unlock()
-        except:
-            self.unlock('-f')
-            raise
-
+            
         self._build_contrasts()
 
     @property
@@ -733,20 +676,14 @@ class Omni(NoDbBase):
             }) + '\n')
 
         report_fp.close()
-        try:
-            self.lock()
+
+        with self.locked():
             if self._contrasts is None:
                 self._contrasts = contrasts
                 self._contrast_names = contrast_names
             else:
                 self._contrasts.extend(contrasts)
                 self._contrast_names.extend(contrast_names)
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def run_omni_contrasts(self):
 
