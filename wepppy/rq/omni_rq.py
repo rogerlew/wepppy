@@ -17,7 +17,7 @@ from rq import Queue, get_current_job
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from wepppy.nodb import Omni
+from wepppy.nodb.mods.omni import Omni
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.nodb.status_messenger import StatusMessenger

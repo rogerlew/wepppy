@@ -299,6 +299,10 @@ class Ron(NoDbBase):
     filename = 'ron.nodb'
     
     def __init__(self, wd, cfg_fn='0.cfg'):
+        import wepppy
+        from wepppy.nodb.base import iter_nodb_mods_subclasses
+        from wepppy.nodb.watershed import DelineationBackend
+
         super(Ron, self).__init__(wd, cfg_fn)
 
         with self.locked():
@@ -342,8 +346,6 @@ class Ron(NoDbBase):
 
             # initialize the other controllers here
             # this will create the other .nodb files
-            import wepppy
-            from wepppy.nodb.watershed import DelineationBackend
 
             # gotcha: need to import the nodb submodules
             # through wepppy to avoid circular references
@@ -361,76 +363,22 @@ class Ron(NoDbBase):
             prep = wepppy.nodb.RedisPrep(wd, cfg_fn)
             prep.timestamp(TaskEnum.project_init)
 
-            if 'lt' in self.mods:
-                wepppy.nodb.mods.locations.LakeTahoe(wd, cfg_fn)
+            # Initialize mods
+            mods_registry = {mod: cls for mod, cls in iter_nodb_mods_subclasses()}
+            
+            for mod in self.mods:
+                if mod not in mods_registry:
+                    raise Exception(f'unknown mod {mod}')
+                mod_instance = mods_registry[mod](wd, cfg_fn)
 
-            if 'portland' in self.mods:
-                wepppy.nodb.mods.locations.PortlandMod(wd, cfg_fn)
+                if mod in ['baer', 'disturbed']:
+                    if mod == 'baer':
+                        prep.sbs_required = True
 
-            if 'seattle' in self.mods:
-                wepppy.nodb.mods.locations.SeattleMod(wd, cfg_fn)
-
-            if 'general' in self.mods:
-                wepppy.nodb.mods.locations.GeneralMod(wd, cfg_fn)
-
-            if 'baer' in self.mods or 'disturbed' in self.mods:
-                assert not ('baer' in self.mods and 'disturbed' in self.mods)
-
-                if 'baer' in self.mods:
-                    Mod = wepppy.nodb.mods.Baer
-                    prep.sbs_required = True
-                else:
-                    Mod = wepppy.nodb.mods.Disturbed
-
-                baer = Mod(wd, cfg_fn)
-                sbs_map = self.config_get_path('landuse', 'sbs_map')
-
-                if sbs_map is not None:
-                    self.init_sbs_map(sbs_map, baer)
-
-            if 'revegetation' in self.mods:
-                wepppy.nodb.mods.Revegetation(wd, cfg_fn)
-
-            if 'rred' in self.mods:
-                wepppy.nodb.mods.Rred(wd, cfg_fn)
-
-            if 'debris_flow' in self.mods:
-                wepppy.nodb.mods.DebrisFlow(wd, cfg_fn)
-
-            if 'ash' in self.mods:
-                wepppy.nodb.mods.Ash(wd, cfg_fn)
-                wepppy.nodb.mods.AshPost(wd, cfg_fn)
-
-            if 'rap' in self.mods:
-                wepppy.nodb.mods.RAP(wd, cfg_fn)
-
-            if 'rap_ts' in self.mods:
-                wepppy.nodb.mods.RAP_TS(wd, cfg_fn)
-
-            if 'emapr_ts' in self.mods:
-                wepppy.nodb.mods.OSUeMapR_TS(wd, cfg_fn)
-
-            if 'shrubland' in self.mods:
-                wepppy.nodb.mods.Shrubland(wd, cfg_fn)
-
-            if 'rangeland_cover' in self.mods:
-                wepppy.nodb.mods.RangelandCover(wd, cfg_fn)
-
-            if 'rhem' in self.mods:
-                wepppy.nodb.mods.Rhem(wd, cfg_fn)
-                wepppy.nodb.mods.RhemPost(wd, cfg_fn)
-
-            if 'treecanopy' in self.mods:
-                wepppy.nodb.mods.Treecanopy(wd, cfg_fn)
-
-            if 'skid_trails' in self.mods:
-                wepppy.nodb.mods.SkidTrails(wd, cfg_fn)
-
-            if 'omni' in self.mods:
-                wepppy.nodb.Omni(wd, cfg_fn)
-
-            if 'treatments' in self.mods:
-                wepppy.nodb.mods.Treatments(wd, cfg_fn)
+                    sbs_map = self.config_get_path('landuse', 'sbs_map')
+                    if sbs_map is not None:
+                        self.init_sbs_map(sbs_map, mod_instance)
+                        
         
         self.trigger(TriggerEvents.ON_INIT_FINISH)
 

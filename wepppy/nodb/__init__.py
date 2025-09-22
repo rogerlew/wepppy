@@ -57,9 +57,3 @@ from .unitizer import (
     Unitizer, 
     UnitizerNoDbLockedException
 )
-
-from .omni import (
-    Omni,
-    OmniNoDbLockedException,
-    OmniScenario
-)

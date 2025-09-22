@@ -136,6 +136,9 @@ class Ash(NoDbBase):
             shutil.rmtree(ash_dir)
         os.mkdir(ash_dir)
         self._load_contaminants_from_config()
+
+        import wepppy
+        wepppy.nodb.mods.AshPost(wd, cfg_fn)
     
     def _load_contaminants_from_config(self):
         with self.locked():
