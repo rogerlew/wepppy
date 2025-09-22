@@ -376,7 +376,7 @@ class NoDbBase(object):
             self.unlock()
             raise
         else:
-            self.dump_and_unlock(validate=validate_on_success)
+            self.dump_and_unlock()
 
     def dump_and_unlock(self, validate=True):
         self.dump()
