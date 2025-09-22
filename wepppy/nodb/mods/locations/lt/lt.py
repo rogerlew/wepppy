@@ -38,20 +38,10 @@ class LakeTahoe(NoDbBase, LocationMixin):
     def __init__(self, wd, cfg_fn):
         super(LakeTahoe, self).__init__(wd, cfg_fn)
 
-        self._lc_lookup_fn = 'landSoilLookup.csv'
-        self._default_wepp_type = DEFAULT_WEPP_TYPE
-        self._data_dir = _data_dir
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        with self.locked():
+            self._lc_lookup_fn = 'landSoilLookup.csv'
+            self._default_wepp_type = DEFAULT_WEPP_TYPE
+            self._data_dir = _data_dir
 
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
@@ -72,16 +62,8 @@ class LakeTahoe(NoDbBase, LocationMixin):
 
     @lc_lookup_fn.setter
     def lc_lookup_fn(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._lc_lookup_fn = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def default_wepp_type(self):
@@ -92,16 +74,8 @@ class LakeTahoe(NoDbBase, LocationMixin):
 
     @default_wepp_type.setter
     def default_wepp_type(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._default_wepp_type = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def data_dir(self):

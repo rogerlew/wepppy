@@ -121,18 +121,9 @@ class Shrubland(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Shrubland, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             os.mkdir(self.shrubland_dir)
             self.data = None
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def shrubland_dir(self):
@@ -167,9 +158,7 @@ class Shrubland(NoDbBase):
 
         assert _exists(subwta_fn)
 
-        self.lock()
-        try:
-
+        with self.locked():
             data_ds = {}
             for ds in nlcd_shrubland_layers:
                 shrubland_map = self.load_shrub_map(ds)
@@ -180,11 +169,6 @@ class Shrubland(NoDbBase):
                 data[topaz_id] = {ds: data_ds[ds][topaz_id] for ds in nlcd_shrubland_layers}
 
             self.data = data
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def report(self):

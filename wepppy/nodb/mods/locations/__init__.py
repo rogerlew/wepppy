@@ -9,5 +9,4 @@ try:
 except ImportError:
     pass
 
-from .turkey import TurkeyMod
 from .general import GeneralMod

@@ -39,10 +39,7 @@ class WeppPost(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(WeppPost, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._hill_areas = {}
             self._chn_areas = {}
             self._wsarea = None
@@ -56,20 +53,10 @@ class WeppPost(NoDbBase):
             self._hill_streamflow = None
             self._chn_streamflow = None
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def run_post(self):
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             output_dir = self.output_dir
-
             chnwb_fn = _join(output_dir, 'chnwb.txt')
 
             _chn_areas = {}
@@ -147,11 +134,6 @@ class WeppPost(NoDbBase):
             self._ndays = len(self._julians)
             self._hill_streamflow = None
             self._chn_streamflow = None
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def export_streamflow(self, fn, source='Hillslopes', exclude_yr_indxs=(0, 1), stacked=False):
         ndays = self._ndays
@@ -327,15 +309,14 @@ class WeppPost(NoDbBase):
         assert len(latqcc) == ndays
         assert len(baseflow) == ndays
 
-        self.lock()
-        self._chn_streamflow = {
-            'Daily Precipitation (mm)': precip,
-            'Daily Runoff (mm)': runoff,
-            'Daily Sediment (tonne/ha)': sed_yield,
-            'Daily Soluble Reactive P (kg)': solub_reactive_p,
-            'Daily Particulate P (kg)': particulate_p,
-            'Daily Total P (kg)': total_p,
-            'Daily Lateral Flow (mm)': latqcc,
-            'Daily Baseflow (mm)': baseflow
-        }
-        self.dump_and_unlock()
+        with self.locked():
+            self._chn_streamflow = {
+                'Daily Precipitation (mm)': precip,
+                'Daily Runoff (mm)': runoff,
+                'Daily Sediment (tonne/ha)': sed_yield,
+                'Daily Soluble Reactive P (kg)': solub_reactive_p,
+                'Daily Particulate P (kg)': particulate_p,
+                'Daily Total P (kg)': total_p,
+                'Daily Lateral Flow (mm)': latqcc,
+                'Daily Baseflow (mm)': baseflow
+            }

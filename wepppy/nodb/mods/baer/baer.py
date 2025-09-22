@@ -64,10 +64,7 @@ class Baer(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Baer, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             os.mkdir(self.baer_dir)
 
             self._baer_fn = None
@@ -81,12 +78,6 @@ class Baer(NoDbBase):
             self._legacy_mode = self.config_get_bool('baer', 'legacy_mode')
 
             self.sbs_coverage = None
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def legacy_mode(self):
@@ -289,10 +280,7 @@ class Baer(NoDbBase):
         return [(v, self.classify(v), self._counts[str(v)]) for v in self.classes]
 
     def modify_burn_class(self, breaks, nodata_vals):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             assert len(breaks) == 4
             assert breaks[0] <= breaks[1]
             assert breaks[1] <= breaks[2]
@@ -308,12 +296,6 @@ class Baer(NoDbBase):
             self.write_color_table()
             self.build_color_map()
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.landuse_map)
@@ -322,10 +304,7 @@ class Baer(NoDbBase):
             pass
 
     def remove_sbs(self):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if _exists(self._baer_fn):
                 os.remove(self._baer_fn)
 
@@ -337,23 +316,15 @@ class Baer(NoDbBase):
             self._counts = None
             self._breaks = None
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.landuse_map)
             prep.has_sbs = False
         except FileNotFoundError:
             pass
-    def validate(self, fn):
-        self.lock()
 
-        # noinspection PyBroadException
-        try:
+    def validate(self, fn):
+        with self.locked():
             self._baer_fn = fn
             self._nodata_vals = None
 
@@ -427,12 +398,6 @@ class Baer(NoDbBase):
             self.write_color_table()
             self.build_color_map()
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.landuse_map)
@@ -496,10 +461,8 @@ class Baer(NoDbBase):
         assert _exists(baer_cropped), ' '.join(cmd)
 
         landuse = Landuse.getInstance(wd)
-        landuse.lock()
 
-        # noinspection PyBroadException
-        try:
+        with landuse.locked():
             sbs = SoilBurnSeverityMap(baer_cropped, self.breaks, self._nodata_vals, ignore_ct=True)
             self._calc_sbs_coverage(sbs)
 
@@ -529,14 +492,8 @@ class Baer(NoDbBase):
                 else:
                     landuse.domlc_d = domlc_d
 
-            landuse.dump_and_unlock()
             landuse = landuse.getInstance(wd)
             landuse.build_managements(_map='default')
-            landuse.dump_landuse_parquet()
-
-        except Exception:
-            landuse.unlock('-f')
-            raise
 
     def _assign_eu_soils(self):
 
@@ -546,10 +503,7 @@ class Baer(NoDbBase):
         soils = Soils.getInstance(wd)
         landuse = Landuse.getInstance(wd)
 
-        # noinspection PyBroadExpection
-        try:
-            soils.lock()
-
+        with soils.locked():
             _domsoil_d = deepcopy(soils.domsoil_d)
             _soils = deepcopy(soils.soils)
 
@@ -579,11 +533,6 @@ class Baer(NoDbBase):
 
             soils.soils = _soils
             soils.domsoil_d = _domsoil_d
-            soils.dump_and_unlock()
-
-        except Exception:
-            soils.unlock('-f')
-            raise
 
     def _assign_au_soils(self):
 
@@ -593,10 +542,7 @@ class Baer(NoDbBase):
         soils = Soils.getInstance(wd)
         landuse = Landuse.getInstance(wd)
 
-        # noinspection PyBroadExpection
-        try:
-            soils.lock()
-
+        with soils.locked():
             _domsoil_d = deepcopy(soils.domsoil_d)
             _soils = deepcopy(soils.soils)
 
@@ -626,11 +572,6 @@ class Baer(NoDbBase):
 
             soils.soils = _soils
             soils.domsoil_d = _domsoil_d
-            soils.dump_and_unlock()
-
-        except Exception:
-            soils.unlock('-f')
-            raise
 
     def modify_soils(self):
 
@@ -685,10 +626,7 @@ class Baer(NoDbBase):
         if soils.mode != SoilsMode.Gridded:
             return
 
-        # noinspection PyBroadExpection
-        try:
-            soils.lock()
-
+        with soils.locked():
             _domsoil_d = {}
             landuse = Landuse.getInstance(wd)
             domlc_d = landuse.domlc_d
@@ -724,18 +662,9 @@ class Baer(NoDbBase):
 
             soils.soils.update(_soils)
             soils.domsoil_d = _domsoil_d
-            soils.dump_and_unlock()
-
-        except Exception:
-            soils.unlock('-f')
-            raise
-
 
     def _calc_sbs_coverage(self, sbs):
-
-        self.lock()
-
-        try:
+        with self.locked():
             if sbs is None:
                 self.sbs_coverage = {
                     'noburn': 1.0,
@@ -763,8 +692,3 @@ class Baer(NoDbBase):
                                      'moderate': c[132] / total_px,
                                      'high': c[133] / total_px
                                      }
-            self.dump_and_unlock()
-
-        except:
-            self.unlock('-f')
-            raise

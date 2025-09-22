@@ -631,19 +631,13 @@ def api_post_dss_export_rq(runid, config):
                 continue
             dss_export_channel_ids.append(int(chn_id))
 
-    wepp.lock()
-
-    try:
+    with wepp.locked():
         if dss_export_mode is not None:
             wepp._dss_export_mode = dss_export_mode
         if dss_excluded_channel_orders is not None:
             wepp._dss_excluded_channel_orders = dss_excluded_channel_orders
         if dss_export_channel_ids is not None:
             wepp._dss_export_channel_ids = dss_export_channel_ids
-        wepp.dump_and_unlock()
-    except Exception:
-        wepp.unlock('-f')
-        return exception_factory('Error setting dss export mode', runid=runid)
     
     try:
         prep = RedisPrep.getInstance(wd)
@@ -753,8 +747,7 @@ def api_run_wepp(runid, config):
     except:
         dss_export_exclude_orders = None
 
-    try:
-        wepp.lock()
+    with wepp.locked():
         if prep_details_on_run_completion is not None:
             wepp._prep_details_on_run_completion = prep_details_on_run_completion
 
@@ -769,11 +762,6 @@ def api_run_wepp(runid, config):
 
         if dss_export_exclude_orders is not None:
             wepp._dss_export_exclude_orders = dss_export_exclude_orders
-
-        wepp.dump_and_unlock()
-    except:
-        wepp.unlock('-f')
-        return exception_factory()
 
     try:
         prep = RedisPrep.getInstance(wd)
@@ -1000,15 +988,11 @@ def api_run_ash(runid, config):
         ash.parse_inputs(dict(form))
 
         if ash_depth_mode == 2:
-            ash.lock()
-            try:
+            with ash.locked():
                 ash._spatial_mode = AshSpatialMode.Gridded
                 ash._ash_load_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_load')
                 ash._ash_type_map_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_type_map')
-                ash.dump_and_unlock()
-            except Exception:
-                ash.unlock('-f')
-                raise
+                
             if ash.ash_load_fn is None:
                 return exception_factory('Expecting ashload map"', runid=runid)
         

@@ -59,21 +59,12 @@ class RAP_TS(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(RAP_TS, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             os.mkdir(self.rap_dir)
             self.data = None
             self._rap_start_year = None
             self._rap_end_year = None
             self._rap_mgr = None
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @classmethod
     def _post_instance_loaded(cls, instance):
@@ -96,16 +87,8 @@ class RAP_TS(NoDbBase):
 
     @rap_end_year.setter
     def rap_end_year(self, value: int):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._rap_end_year = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def rap_start_year(self):
@@ -113,16 +96,8 @@ class RAP_TS(NoDbBase):
 
     @rap_start_year.setter
     def rap_start_year(self, value: int):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._rap_start_year = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def rap_dir(self):
@@ -142,9 +117,7 @@ class RAP_TS(NoDbBase):
             year = future.result()
             self.logger.info(f'  retrieving rap {year} completed.\n')
 
-        self.lock()
-
-        try:
+        with self.locked():
             if start_year is not None:
                 self._rap_start_year = start_year
             else:
@@ -168,11 +141,6 @@ class RAP_TS(NoDbBase):
                 wait(futures, return_when=FIRST_EXCEPTION)
 
             self._rap_mgr = rap_mgr
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def on(self, evt):
         pass
@@ -203,8 +171,7 @@ class RAP_TS(NoDbBase):
         watershed = Watershed.getInstance(wd)
         rap_mgr = self._rap_mgr
 
-        self.lock()
-        try:
+        with self.locked():
             data_ds = {}
 
             def analyze_band_year(year, band):
@@ -248,14 +215,10 @@ class RAP_TS(NoDbBase):
                 wait(futures, return_when=FIRST_EXCEPTION)
 
             self.data = data_ds
-            self.dump_and_unlock()
 
-            self.logger.info('analysis complete...')
-            self.logger.info('done')
+        self.logger.info('analysis complete...')
+        self.logger.info('done')
 
-        except Exception:
-            self.unlock('-f')
-            raise
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.fetch_rap_ts)

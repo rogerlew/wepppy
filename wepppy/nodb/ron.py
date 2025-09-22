@@ -301,10 +301,7 @@ class Ron(NoDbBase):
     def __init__(self, wd, cfg_fn='0.cfg'):
         super(Ron, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._configname = self.config_get_str('general', 'name')
 
             # Map
@@ -376,9 +373,6 @@ class Ron(NoDbBase):
             if 'general' in self.mods:
                 wepppy.nodb.mods.locations.GeneralMod(wd, cfg_fn)
 
-            if 'turkey' in self.mods:
-                wepppy.nodb.mods.locations.TurkeyMod(wd, cfg_fn)
-
             if 'baer' in self.mods or 'disturbed' in self.mods:
                 assert not ('baer' in self.mods and 'disturbed' in self.mods)
 
@@ -437,15 +431,8 @@ class Ron(NoDbBase):
 
             if 'treatments' in self.mods:
                 wepppy.nodb.mods.Treatments(wd, cfg_fn)
-            
-
-            self.dump_and_unlock()
-
-            self.trigger(TriggerEvents.ON_INIT_FINISH)
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        
+        self.trigger(TriggerEvents.ON_INIT_FINISH)
 
     def clean_export_dir(self):
         with self.timed("Cleaning export directory"):
@@ -529,19 +516,10 @@ class Ron(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(extent={extent}, center={center}, zoom={zoom}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._map = Map(extent, center, zoom, self.cellsize)
             lng, lat = self.map.center
             self._w3w = None
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def w3w(self):
@@ -580,16 +558,8 @@ class Ron(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._name = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     #
     # scenario
@@ -603,16 +573,8 @@ class Ron(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._scenario = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def has_ash_results(self):
@@ -632,16 +594,8 @@ class Ron(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._dem_db = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def dem_map(self):
@@ -655,16 +609,8 @@ class Ron(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._dem_map = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     #
     # dem

@@ -70,33 +70,16 @@ class Revegetation(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Revegetation, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.clean()
             self._cover_transform_fn = ''
             self._user_defined_cover_transform = False
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def validate_user_defined_cover_transform(self, fn):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             assert _exists(_join(self.revegetation_dir, fn)), fn
-
             self._cover_transform_fn = fn
             self._user_defined_cover_transform = True
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def user_defined_cover_transform(self) -> bool:
@@ -121,16 +104,8 @@ class Revegetation(NoDbBase):
     
     @cover_transform_fn.setter
     def cover_transform_fn(self, value: str) -> str:
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._cover_transform_fn = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def revegetation_dir(self):

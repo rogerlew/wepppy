@@ -59,10 +59,7 @@ class DebrisFlow(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(DebrisFlow, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             # config = self.config
             self.I = None
             self.T = None
@@ -81,23 +78,13 @@ class DebrisFlow(NoDbBase):
             self.R = None
             self.wsarea = None
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def fetch_precip_data(self):
+        with self.locked():
+            self.T = {}
+            self.I = {}
+            self.durations = {}
+            self.rec_intervals = {}
 
-        self.lock()
-
-        self.T = {}
-        self.I = {}
-        self.durations = {}
-        self.rec_intervals = {}
-
-        # noinspection PyBroadException
-        try:
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
             pf = noaa_precip_freqs_client.fetch_pf(lat=lat, lng=lng)
@@ -142,12 +129,6 @@ class DebrisFlow(NoDbBase):
                 self.I[_datasource] = self.I[_datasource].tolist()
                 self.T[_datasource] = self.T[_datasource].tolist()
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     @property
     def datasource(self):
         return getattr(self, '_datasource', 'NOAA')
@@ -160,10 +141,7 @@ class DebrisFlow(NoDbBase):
         return self.I.keys()
 
     def run_debris_flow(self, cc=None, ll=None, req_datasource=None):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             wd = self.wd
             soils = Soils.getInstance(wd)
             watershed = Watershed.getInstance(wd)
@@ -223,50 +201,43 @@ class DebrisFlow(NoDbBase):
             self.R = R
             self.wsarea = watershed.wsarea
 
-            self.dump_and_unlock()
+        self.fetch_precip_data()
 
-            self.fetch_precip_data()
+        if self.T is None or self.I is None:
+            raise DebrisFlowNoDbLockedException("No precipitation data found. Please run fetch_precip_data() first.")
 
-            if self.T is not None and self.I is not None:
-                self.lock()
+        with self.locked():
+            self.volume = {}
+            self.prob_occurrence = {}
 
-                self.volume = {}
-                self.prob_occurrence = {}
+            for _datasource in self.T:
 
-                for _datasource in self.T:
+                T = np.array(self.T[_datasource])
+                I = np.array(self.I[_datasource])
 
-                    T = np.array(self.T[_datasource])
-                    I = np.array(self.I[_datasource])
+                # where
+                # A (in km2) is the area of the basin having slopes greater than or equal to 30%,
+                # B (in km2) is the area of the basin burned at high and moderate severity,
+                # T (in mm) is the total storm rainfall, and 0.3 is a bias correction that changes
+                # the predicted estimate from a median to a mean value (Helsel and Hirsch, 2002).
+                v = np.exp(7.2 + 0.6 * math.logger.info(A) + 0.7 * B ** 0.5 + 0.2 * T ** 0.5 + 0.3)
 
-                    # where
-                    # A (in km2) is the area of the basin having slopes greater than or equal to 30%,
-                    # B (in km2) is the area of the basin burned at high and moderate severity,
-                    # T (in mm) is the total storm rainfall, and 0.3 is a bias correction that changes
-                    # the predicted estimate from a median to a mean value (Helsel and Hirsch, 2002).
-                    v = np.exp(7.2 + 0.6 * math.logger.info(A) + 0.7 * B ** 0.5 + 0.2 * T ** 0.5 + 0.3)
+                # where
+                # %A is the percentage of the basin area with gradients greater than or equal to 30%,
+                # R is basin ruggedness,
+                # %B is the percentage of the basin area burned at high and moderate severity,
+                # I is average storm rainfall intensity (in mm/h),
+                # C is clay content (in %),
+                # LL is the liquid limit
+                x = -0.7 + 0.03 * A_pct - 1.6 * R + 0.06 * B_pct + 0.07 * I + 0.2 * C - 0.4 * LL
+                prob_occurrence = np.exp(x) / (1.0 + np.exp(x))
 
-                    # where
-                    # %A is the percentage of the basin area with gradients greater than or equal to 30%,
-                    # R is basin ruggedness,
-                    # %B is the percentage of the basin area burned at high and moderate severity,
-                    # I is average storm rainfall intensity (in mm/h),
-                    # C is clay content (in %),
-                    # LL is the liquid limit
-                    x = -0.7 + 0.03 * A_pct - 1.6 * R + 0.06 * B_pct + 0.07 * I + 0.2 * C - 0.4 * LL
-                    prob_occurrence = np.exp(x) / (1.0 + np.exp(x))
+                self.volume[_datasource] = deepcopy(v.tolist())
+                self.prob_occurrence[_datasource] = deepcopy(prob_occurrence.tolist())
 
-                    self.volume[_datasource] = deepcopy(v.tolist())
-                    self.prob_occurrence[_datasource] = deepcopy(prob_occurrence.tolist())
-
-                if req_datasource is not None:
-                    assert req_datasource in self.volume
-                    self._datasource = req_datasource
-
-                self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
+            if req_datasource is not None:
+                assert req_datasource in self.volume
+                self._datasource = req_datasource
 
         try:
             prep = RedisPrep.getInstance(self.wd)

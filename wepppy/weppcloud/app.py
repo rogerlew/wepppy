@@ -1622,18 +1622,12 @@ def omni_migration(runid, config):
         if 'omni' in ron._mods:
             return error_factory('omni already in mods')
         
-        ron.lock()
-        try:
+        with ron.locked():
             ron._mods.append('omni')
 
             if 'treatments' not in ron._mods:
                 ron._mods.append('treatments')
-
-            ron.dump_and_unlock()
-        except:
-            ron.unlock('-f')
-            return exception_factory('Error adding omni to mods', runid=runid)
-    
+                
         cfg_fn = f'{config}.cfg'
         Omni(wd, cfg_fn)
 

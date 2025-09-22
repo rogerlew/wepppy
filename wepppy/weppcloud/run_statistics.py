@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from os.path import exists as _exists
 from os.path import join as _join
 from time import time
@@ -7,56 +8,69 @@ import os
 
 from collections import Counter
 
+"""
+This is a ViewModel that deserializes the run statistics from a json file.
+It is not a NoDbBase subclass, but it does implement similiar locking and dumping
+functionality similar to NoDbBase subclasses.
+"""
 
 class RunStatistics(object):
     def __init__(self, wd):
         assert _exists(wd)
         self.wd = wd
 
-        self.lock()
-        self._counter = Counter()
-
         if _exists(self._nodb):
             raise Exception('NoDb has already been initialized')
-
-        self.dump_and_unlock()
+        
+        with self.locked():
+            self._counter = Counter()
 
     def increment(self, cfg, num_hills=0, increment_project=True):
         num_hills = int(num_hills)
         assert int(num_hills) == int(float(num_hills))
         assert isinstance(cfg, str)
 
-        self.lock()
-        try:
+        with self.locked():
             self._counter['%s_hillruns' % cfg] += num_hills
             if increment_project:
                 self._counter['%s_projects' % cfg] += 1
-
-            self.dump_and_unlock()
-        except:
-            self.unlock()
 
     def increment_hillruns(self, cfg, num_hills):
         num_hills = int(num_hills)
         assert int(num_hills) == int(float(num_hills))
         assert isinstance(cfg, str)
 
-        self.lock()
-        try:
+        with self.locked():
             self._counter['%s_hillruns' % cfg] += num_hills
-            self.dump_and_unlock()
-        except:
-            self.unlock()
-
+            
     def increment_projects(self, cfg):
         assert isinstance(cfg, str)
 
+        with self.locked():
+            self._counter['%s_projects' % cfg] += 1
+
+    @contextmanager
+    def locked(self, validate_on_success=True):
+        """
+        A context manager to handle the lock -> modify -> dump/unlock pattern.
+
+        Usage:
+            with self.locked():
+                # modify attributes here
+                self.foo = 'bar'
+        
+        On successful exit from the 'with' block, it calls dump_and_unlock().
+        If an exception occurs, it calls unlock() and re-raises the exception.
+        """
+
         self.lock()
         try:
-            self._counter['%s_projects' % cfg] += 1
-            self.dump_and_unlock()
-        except:
+            yield
+        except Exception:
             self.unlock()
+            raise
+        else:
+            self.dump_and_unlock()
 
     def dump_and_unlock(self, validate=True):
         self.dump()
@@ -131,8 +145,8 @@ class RunStatistics(object):
 
         if os.path.abspath(wd) != os.path.abspath(db.wd):
             if not db.islocked():
-                db.wd = wd
                 db.lock()
+                db.wd = wd
                 db.dump_and_unlock()
 
         return db

@@ -108,21 +108,12 @@ class RAP(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(RAP, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             os.mkdir(self.rap_dir)
             self.data = None
             self.mofe_data = None
             self._rap_year = None
             self._rap_mgr = None
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @classmethod
     def _post_instance_loaded(cls, instance):
@@ -146,16 +137,8 @@ class RAP(NoDbBase):
 
     @rap_year.setter
     def rap_year(self, value: int):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._rap_year = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def rap_dir(self):
@@ -166,17 +149,9 @@ class RAP(NoDbBase):
         rap_mgr = RangelandAnalysisPlatformV3(wd=self.rap_dir, bbox=_map.extent)
         rap_mgr.retrieve([year])
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._rap_year = year
             self._rap_mgr = rap_mgr
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def on(self, evt):
         pass
@@ -195,8 +170,7 @@ class RAP(NoDbBase):
         rap_mgr = self._rap_mgr
         rap_ds_fn = rap_mgr.get_dataset_fn(year=self.rap_year)
 
-        self.lock()
-        try:
+        with self.locked():
             data_ds = {}
             mofe_data = {}
             for i, band in enumerate([RAP_Band.ANNUAL_FORB_AND_GRASS,
@@ -216,12 +190,6 @@ class RAP(NoDbBase):
 
             self.data = data_ds
             self.mofe_data = mofe_data
-            self.dump_and_unlock()
-
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def get_cover(self, topaz_id):
         cover = 0.0

@@ -94,10 +94,7 @@ class Soils(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Soils, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mode = SoilsMode.Gridded
             self._single_selection = 0
             self._single_dbselection = None
@@ -122,24 +119,6 @@ class Soils(NoDbBase):
 
             self._soils_map = self.config_get_path('soils', 'soils_map', None)
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    def dump_and_unlock(self, validate=True):
-        self.dump()
-        self.unlock()
-
-        if validate:
-            nodb = type(self)
-
-            # noinspection PyUnresolvedReferences
-            nodb.getInstance(self.wd)
-
-        self.dump_soils_parquet()
-
     @property
     def clip_soils(self):
         return getattr(self, '_clip_soils', False)
@@ -149,15 +128,8 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._clip_soils = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def clip_soils_depth(self):
@@ -168,15 +140,8 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._clip_soils_depth = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def initial_sat(self):
@@ -187,15 +152,8 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._initial_sat = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def ksflag(self):
@@ -211,16 +169,8 @@ class Soils(NoDbBase):
 
         assert value in (True, False)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._ksflag = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def mode(self):
@@ -231,25 +181,14 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if isinstance(value, SoilsMode):
                 self._mode = value
-
             elif isinstance(value, int):
                 self._mode = SoilsMode(value)
-
             else:
                 raise ValueError('most be SoilsMode or int')
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
     @property
     def soils_map(self):
         return getattr(self, '_soils_map', None)
@@ -263,16 +202,8 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> value={mukey}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._single_selection = mukey
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def single_dbselection(self):
@@ -283,16 +214,8 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> value={sol}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._single_dbselection = sol
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
         
     @property
     def has_soils(self):
@@ -332,16 +255,8 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._ssurgo_db = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def build_chile(self, initial_sat=None, ksflag=None):
         func_name = inspect.currentframe().f_code.co_name
@@ -360,9 +275,7 @@ class Soils(NoDbBase):
 
         soils_dir = self.soils_dir
 
-        self.lock()
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if initial_sat is not None:
                 self._initial_sat = initial_sat
             if ksflag is not None:
@@ -414,16 +327,9 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
             self.soils = soils
 
-            self.dump_and_unlock()
-
-            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(self.wd)  # reload instance from .nodb
-
-        except:
-            self.unlock('-f')
-            raise
+        self.logger.info('triggering SOILS_BUILD_COMPLETE')
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+        self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     def build_isric(self, initial_sat=None, ksflag=None):
         func_name = inspect.currentframe().f_code.co_name
@@ -440,10 +346,7 @@ class Soils(NoDbBase):
 
         soils_dir = self.soils_dir
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if initial_sat is not None:
                 self._initial_sat = initial_sat
             if ksflag is not None:
@@ -504,16 +407,9 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
             self.soils = soils
 
-            self.dump_and_unlock()
-
-            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(wd)  # reload instance from .nodb
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.logger.info('triggering SOILS_BUILD_COMPLETE')
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+        self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     def build_statsgo(self, initial_sat=None, ksflag=None):
         func_name = inspect.currentframe().f_code.co_name
@@ -526,10 +422,7 @@ class Soils(NoDbBase):
 
         soils_dir = self.soils_dir
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if initial_sat is not None:
                 self._initial_sat = initial_sat
             if ksflag is not None:
@@ -577,16 +470,9 @@ class Soils(NoDbBase):
             self.soils = soils
 #            self.clay_pct = self._calc_clay_pct(clay_d)
 
-            self.dump_and_unlock()
-
-            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(wd)  # reload instance from .nodb
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.logger.info('triggering SOILS_BUILD_COMPLETE')
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+        self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     def _build_by_identify(self, build_func):
         func_name = inspect.currentframe().f_code.co_name
@@ -594,10 +480,7 @@ class Soils(NoDbBase):
 
         soils_dir = self.soils_dir
         wd = self.wd
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             watershed = Watershed.getInstance(wd)
 
             orders = []
@@ -617,16 +500,9 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
             self.soils = soils
 
-            self.dump_and_unlock()
-
-            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(self.wd)  # reload instance from .nodb
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.logger.info('triggering SOILS_BUILD_COMPLETE')
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+        self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     def _build_from_map_db(self):
         func_name = inspect.currentframe().f_code.co_name
@@ -639,10 +515,7 @@ class Soils(NoDbBase):
 
         soils_dir = self.soils_dir
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             assert _exists(self.soils_map)
             soils_db_dir = _join(_split(self.soils_map)[0], 'db')
 
@@ -689,16 +562,9 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
             self.soils = soils
 
-            self.dump_and_unlock()
-
-            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(self.wd)  # reload instance from .nodb
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.logger.info('triggering SOILS_BUILD_COMPLETE')
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+        self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     def _build_spatial_api(self):
         func_name = inspect.currentframe().f_code.co_name
@@ -744,16 +610,9 @@ class Soils(NoDbBase):
             soils = {str(k): v for k, v in soils.items()}
             surgo_c.logInvalidSoils(wd=soils_dir)
 
-        self.lock()
-        try:
+        with self.locked():
             self._soils = soils
-            self.dump_and_unlock()
 
-        except Exception:
-            self.unlock('-f')
-            raise
-
-        
     def build(self, initial_sat=None, ksflag=None):
         self.logger.info(f'='*100)
         func_name = inspect.currentframe().f_code.co_name
@@ -948,11 +807,7 @@ class Soils(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}()')
 
         wd = self.wd
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
-
+        with self.locked():
             watershed = Watershed.getInstance(wd)
             mukey = -9999
 
@@ -976,16 +831,9 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
             self.soils = soils
 
-            self.dump_and_unlock()
-
-            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(self.wd)  # reload instance from .nodb
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.logger.info('triggering SOILS_BUILD_COMPLETE')
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+        self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     def _build_single(self, initial_sat=None, ksflag=True):
         func_name = inspect.currentframe().f_code.co_name
@@ -994,10 +842,7 @@ class Soils(NoDbBase):
 
         soils_dir = self.soils_dir
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if initial_sat is not None:
                 self._initial_sat = initial_sat
             if ksflag is not None:
@@ -1012,7 +857,6 @@ class Soils(NoDbBase):
             assert surgo_c.weppSoils[mukey].valid()
             soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
             soils = {str(k): v for k, v in soils.items()}
-
 
             domsoil_d = {}
             for topaz_id in watershed._subs_summary:
@@ -1032,16 +876,9 @@ class Soils(NoDbBase):
             self.soils = soils
             #self.clay_pct = self._calc_clay_pct(clay_d)
 
-            self.dump_and_unlock()
-
-            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(self.wd)  # reload instance from .nodb
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.logger.info('triggering SOILS_BUILD_COMPLETE')
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+        self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     def _build_singledb(self):
         func_name = inspect.currentframe().f_code.co_name
@@ -1055,10 +892,7 @@ class Soils(NoDbBase):
 
         soils_dir = self.soils_dir
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             watershed = Watershed.getInstance(wd)
             key = self.single_dbselection
 
@@ -1092,15 +926,10 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
 
             self.soils = soils
-            self.dump_and_unlock()
 
-            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(self.wd)  # reload instance from .nodb
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.logger.info('triggering SOILS_BUILD_COMPLETE')
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+        self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     def _build_gridded(self, initial_sat=None, ksflag=None):
         func_name = inspect.currentframe().f_code.co_name
@@ -1109,10 +938,7 @@ class Soils(NoDbBase):
         global wepppyo3
 
         soils_dir = self.soils_dir
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if initial_sat is not None:
                 self._initial_sat = initial_sat
             if ksflag is not None:
@@ -1165,7 +991,6 @@ class Soils(NoDbBase):
 
             if dom_mukey is None:
                 self.logger.info('no surgo keys found, falling back to statsgo')
-                self.dump_and_unlock()
                 self.build_statsgo(initial_sat=self.initial_sat,
                                    ksflag=self.ksflag)
                 return
@@ -1193,17 +1018,10 @@ class Soils(NoDbBase):
                 self.ssurgo_domsoil_d = deepcopy(domsoil_d)
                 self.soils = {str(k): v for k, v in soils.items()}
 
-                self.dump_and_unlock()
+        self.logger.info('triggering SOILS_BUILD_COMPLETE')
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+        self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-            self.logger.info('triggering SOILS_BUILD_COMPLETE')
-            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(self.wd)  # reload instance from .nodb
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def report(self):
@@ -1292,6 +1110,10 @@ class Soils(NoDbBase):
         df['mukey'] = df['mukey'].astype(str)
         df.to_parquet(_join(self.soils_dir, 'soils.parquet'))
         
+    def _post_dump_and_unlock(self):
+        self.dump_soils_parquet()
+        return self
+
     @property
     def hill_table(self):
         """

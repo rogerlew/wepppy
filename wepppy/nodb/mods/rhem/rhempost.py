@@ -40,18 +40,10 @@ class RhemPost(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(RhemPost, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.hill_summaries = None
             self.periods = None
             self.watershed_annuals = None
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def missing_summaries_count(self):
@@ -61,10 +53,7 @@ class RhemPost(NoDbBase):
         from wepppy.nodb import Rhem
 
         wd = self.wd
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             output_dir = self.output_dir
             watershed = Watershed.getInstance(wd)
             rhem = Rhem.getInstance(wd)
@@ -151,12 +140,6 @@ class RhemPost(NoDbBase):
                 watershed_ret_freqs[k] = [float(v) for v in watershed_ret_freqs[k]]
 
             self.watershed_ret_freqs = watershed_ret_freqs
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def query_sub_val(self, measure):
         _measure = measure.strip().lower()

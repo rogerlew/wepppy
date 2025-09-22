@@ -42,21 +42,12 @@ class OSUeMapR_TS(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(OSUeMapR_TS, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             os.mkdir(self.emapr_dir)
             self.data = None
             self._emapr_start_year = None
             self._emapr_end_year = None
             self._emapr_mgr = None
-            
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def emapr_end_year(self):
@@ -64,16 +55,8 @@ class OSUeMapR_TS(NoDbBase):
 
     @emapr_end_year.setter
     def emapr_end_year(self, value: int):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._emapr_end_year = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
   
     @property
     def emapr_start_year(self):
@@ -81,27 +64,15 @@ class OSUeMapR_TS(NoDbBase):
 
     @emapr_start_year.setter
     def emapr_start_year(self, value: int):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._emapr_start_year = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
   
     @property
     def emapr_dir(self):
         return _join(self.wd, 'emapr')
 
     def acquire_rasters(self, start_year=None, end_year=None):
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if start_year is not None:
                 self._emapr_start_year = start_year
             else:
@@ -117,11 +88,6 @@ class OSUeMapR_TS(NoDbBase):
             emapr_mgr.retrieve(list(range(start_year, end_year+1)))
 
             self._emapr_mgr = emapr_mgr
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
         
     def on(self, evt):
         pass
@@ -142,9 +108,7 @@ class OSUeMapR_TS(NoDbBase):
 
         emapr_mgr = self._emapr_mgr
 
-        self.lock()
-        try:
-
+        with self.locked():
             data_ds = {}
 
             for year in range(start_year, end_year+1):
@@ -165,8 +129,3 @@ class OSUeMapR_TS(NoDbBase):
                         data[topaz_id][year][(measure, statistic)] = data_ds[key][topaz_id]
 
             self.data = data
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise

@@ -94,7 +94,6 @@ def read_disturbed_land_soil_lookup(fname):
                 alias = disturbed_class_aliases[disturbed_class]
                 if texid != '' and alias != '':
                     d[(texid, alias)] = row
-
     return d
 
 def migrate_land_soil_lookup(src_fn, target_fn, pars, defaults):
@@ -156,10 +155,7 @@ class Disturbed(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Disturbed, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             os.mkdir(self.disturbed_dir)
 
             self._disturbed_fn = None
@@ -180,12 +176,6 @@ class Disturbed(NoDbBase):
             self._burn_shrubs = self.config_get_bool('disturbed', 'burn_shrubs', True)
             self._burn_grass = self.config_get_bool('disturbed', 'burn_grass', False)
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     @property
     def burn_shrubs(self):
         return getattr(self, '_burn_shrubs', True)
@@ -195,16 +185,8 @@ class Disturbed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._burn_shrubs = bool(value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def burn_grass(self):
@@ -215,16 +197,8 @@ class Disturbed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._burn_grass = bool(value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def fire_date(self):
@@ -235,16 +209,8 @@ class Disturbed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._fire_date = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def default_land_soil_lookup_fn(self):
@@ -312,15 +278,8 @@ class Disturbed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-  
-        try:
-            self._sol_ver = float(value)            
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        with self.locked():
+            self._sol_ver = float(value)
 
     @property
     def nodata_vals(self):
@@ -520,10 +479,7 @@ class Disturbed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             disturbed_fn = getattr(self, '_disturbed_fn', None)
 
             if disturbed_fn is not None and  _exists(disturbed_fn):
@@ -537,12 +493,6 @@ class Disturbed(NoDbBase):
             self._classes = None
             self._counts = None
             self._breaks = None
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -558,14 +508,9 @@ class Disturbed(NoDbBase):
         assert nodata_vals is None or isinstance(nodata_vals, (list, tuple)), nodata_vals
         assert not isinstance(nodata_vals, str), nodata_vals
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._disturbed_fn = fn
-            
             self._nodata_vals = nodata_vals
-
             disturbed_path = self.disturbed_path
             assert _exists(disturbed_path), disturbed_path
 
@@ -588,11 +533,6 @@ class Disturbed(NoDbBase):
                 self._color_map = {'_'.join(str(x) for x in rgb): v for rgb, v in sbs.color_map.items()}
             self._breaks = sbs.breaks
             self._nodata_vals = sbs.nodata_vals
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -655,9 +595,7 @@ class Disturbed(NoDbBase):
         self.logger.info(f'  Found treecanopy mod')
         landuse = self.landuse_instance
 
-        try:
-            landuse.lock()
-
+        with landuse.locked():
             self.logger.info(f'  Running spatialize_treecanopy')
             for topaz_id, treecanopy_pointdata in treecanopy:
                 dom = landuse.domlc_d[topaz_id]
@@ -672,33 +610,22 @@ class Disturbed(NoDbBase):
                     landuse.domlc_d[topaz_id] = _dom
                     landuse.managements[_dom] = _man
 
-            landuse.dump_and_unlock()
-            return 1
-            
-        except Exception:
-            landuse.unlock('-f')
-            raise
-
+        return 1
 
     def get_sbs(self):
-
         wd = self.wd
-
         if not self.has_map:
             return
 
         disturbed_path = self.disturbed_path
-
         disturbed_cropped = self.disturbed_cropped
         if _exists(disturbed_cropped):
             os.remove(disturbed_cropped)
 
-
         dem_fn = Ron.getInstance(wd).dem_fn
-
         raster_stacker(disturbed_path, dem_fn, disturbed_cropped, resample='near')
-
-        return SoilBurnSeverityMap(disturbed_cropped, breaks=self.breaks, nodata_vals=self._nodata_vals, color_map=self.color_to_severity_map)
+        return SoilBurnSeverityMap(
+            disturbed_cropped, breaks=self.breaks, nodata_vals=self._nodata_vals, color_map=self.color_to_severity_map)
 
     def get_sbs_4class(self):
         sbs = self.get_sbs()
@@ -752,10 +679,7 @@ class Disturbed(NoDbBase):
         if sbs is None:
             return
 
-        # noinspection PyBroadException
-        try:
-            landuse.lock()
-
+        with landuse.locked():
             self._calc_sbs_coverage(sbs)
 
             landuse.logger.info(f'  running identify_mode_single_raster_key on {self.disturbed_cropped}\n')
@@ -799,24 +723,11 @@ class Disturbed(NoDbBase):
 
                 meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
 
-            landuse.dump_and_unlock()
-
-        except Exception:
-            landuse.unlock('-f')
-            raise
-
-        # noinspection PyBroadException
-        try:
-            self.lock()
+        with self.locked():
             self._meta = meta
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
         landuse = landuse.getInstance(wd)
         landuse.build_managements()
-        landuse.dump_landuse_parquet()
 
     @property
     def meta(self):
@@ -940,10 +851,7 @@ class Disturbed(NoDbBase):
         if sbs is None:
             return
 
-        # noinspection PyBroadException
-        try:
-            landuse.lock()
-
+        with landuse.locked():
             self._calc_sbs_coverage(sbs)
 
             sbs_lc_d = sbs.build_lcgrid(watershed.subwta, watershed.mofe_map)
@@ -965,15 +873,8 @@ class Disturbed(NoDbBase):
                         elif man.disturbed_class in ['short grass', 'tall grass']:
                             landuse.domlc_mofe_d[topaz_id][_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
 
-            landuse.dump_and_unlock()
-
-        except Exception:
-            landuse.unlock('-f')
-            raise
-
         landuse = landuse.getInstance(wd)
         landuse.build_managements()
-        landuse.dump_landuse_parquet()
 
     @property
     def lookup_fn(self):
@@ -1093,9 +994,7 @@ class Disturbed(NoDbBase):
 
         soils.logger.info(f'Disturbed::modify_mofe_soils, sol_ver: {sol_ver}')
 
-        try:
-            soils.lock()
-
+        with soils.locked():
             for topaz_id, mukey in soils.domsoil_d.items():
                 if str(topaz_id).endswith('4'):
                     continue
@@ -1198,12 +1097,6 @@ class Disturbed(NoDbBase):
                     coverage = 100.0 * soils.soils[k].area / total_area
                     soils.soils[k].pct_coverage = coverage
 
-            soils.dump_and_unlock()
-
-        except Exception:
-            soils.unlock('-f')
-            raise
-
     def modify_soil(self, topaz_id: str, landuse_instance: Landuse, soils_instance: Soils, _land_soil_replacements_d) -> str:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(topaz_id={topaz_id})')
@@ -1281,9 +1174,7 @@ class Disturbed(NoDbBase):
                                                             build_date=str(datetime.now()))
 
         assert disturbed_mukey is not None, (topaz_id, mukey, dom)
-        
         return disturbed_mukey
-
 
     def modify_soils(self):
         func_name = inspect.currentframe().f_code.co_name
@@ -1297,9 +1188,7 @@ class Disturbed(NoDbBase):
 
         soils.logger.info(f'Disturbed::  Disturbed.modify_soils, sol_ver: {self.sol_ver}')
 
-        try:
-            soils.lock()
-
+        with soils.locked():
             for k in soils.soils:
                 soils.soils[k].area = 0.0
 
@@ -1324,19 +1213,11 @@ class Disturbed(NoDbBase):
                 coverage = 100.0 * soils.soils[k].area / total_area
                 soils.soils[k].pct_coverage = coverage
 
-            soils.dump_and_unlock()
-
-        except Exception:
-            soils.unlock('-f')
-            raise
-
     def _calc_sbs_coverage(self, sbs):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(sbs={sbs})')
 
-        self.lock()
-
-        try:
+        with self.locked():
             if sbs is None:
                 self.sbs_coverage = {
                     'noburn': 1.0,
@@ -1365,8 +1246,4 @@ class Disturbed(NoDbBase):
                                      'moderate': c[132] / total_px,
                                      'high': c[133] / total_px
                                      }
-            self.dump_and_unlock()
-
-        except:
-            self.unlock('-f')
-            raise
+        
