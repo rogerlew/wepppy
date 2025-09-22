@@ -47,22 +47,12 @@ class LocationMixin(object):
             lc_map = json.load(fp)
 
         location_doms = self.location_doms
-
         landuse = Landuse.getInstance(self.wd)
-        landuse.lock()
 
-        # noinspection PyBroadException
-        try:
+        with landuse.locked():
             for topaz_id, dom in landuse.domlc_d.items():
                 if int(dom) not in location_doms:
                     landuse.domlc_d[topaz_id] = lc_map[dom]
-
-            landuse.dump_and_unlock()
-            landuse.dump_landuse_parquet()
-
-        except Exception:
-            landuse.unlock('-f')
-            raise
 
     def modify_soils(self, default_wepp_type=None, lc_lookup_fn=None):
         data_dir = self.data_dir
@@ -80,10 +70,8 @@ class LocationMixin(object):
             soil_type_map = json.load(fp)
 
         soils = Soils.getInstance(wd)
-        soils.lock()
 
-        # noinspection PyBroadException
-        try:
+        with soils.locked():
             domsoil_d = soils.domsoil_d
 
             landuse = Landuse.getInstance(wd)
@@ -131,8 +119,3 @@ class LocationMixin(object):
 
             soils.soils = _soils
             soils.domsoil_d = domsoil_d
-            soils.dump_and_unlock()
-
-        except Exception:
-            soils.unlock('-f')
-            raise

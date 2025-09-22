@@ -82,10 +82,7 @@ class RangelandCover(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(RangelandCover, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mode = RangelandCoverMode(self.config_get_int('rhem', 'mode'))
             self._rap_year = self.config_get_int('rhem', 'rap_year')
 
@@ -101,12 +98,6 @@ class RangelandCover(NoDbBase):
 
             self.covers = None
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def on(self, evt):
         pass
 
@@ -116,16 +107,8 @@ class RangelandCover(NoDbBase):
 
     @rap_year.setter
     def rap_year(self, value: int):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._rap_year = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def mode(self):
@@ -133,41 +116,22 @@ class RangelandCover(NoDbBase):
 
     @mode.setter
     def mode(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if isinstance(value, RangelandCoverMode):
                 self._mode = value
-
             elif isinstance(value, int):
                 self._mode = RangelandCoverMode(value)
-
             else:
                 raise ValueError('most be RangelandCoverMode or int')
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
     @property
     def bunchgrass_cover_default(self):
         return self._bunchgrass_cover_default
 
     @bunchgrass_cover_default.setter
     def bunchgrass_cover_default(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._bunchgrass_cover_default = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def forbs_cover_default(self):
@@ -175,33 +139,17 @@ class RangelandCover(NoDbBase):
 
     @forbs_cover_default.setter
     def forbs_cover_default(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._forbs_cover_default = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
     @property
     def sodgrass_cover_default(self):
         return self._sodgrass_cover_default
 
     @sodgrass_cover_default.setter
     def sodgrass_cover_default(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._sodgrass_cover_default = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def shrub_cover_default(self):
@@ -209,50 +157,26 @@ class RangelandCover(NoDbBase):
 
     @shrub_cover_default.setter
     def shrub_cover_default(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._shrub_cover_default = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
     @property
     def basal_cover_default(self):
         return self._basal_cover_default
 
     @basal_cover_default.setter
     def basal_cover_default(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._basal_cover_default = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
     @property
     def rock_cover_default(self):
         return self._rock_cover_default
 
     @rock_cover_default.setter
     def rock_cover_default(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._rock_cover_default = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def litter_cover_default(self):
@@ -260,16 +184,8 @@ class RangelandCover(NoDbBase):
 
     @litter_cover_default.setter
     def litter_cover_default(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._litter_cover_default = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def cryptogams_cover_default(self):
@@ -277,22 +193,11 @@ class RangelandCover(NoDbBase):
 
     @cryptogams_cover_default.setter
     def cryptogams_cover_default(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._cryptogams_cover_default = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def set_default_covers(self, default_covers):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             v = default_covers['bunchgrass']
             self._bunchgrass_cover_default = float(v)
 
@@ -317,16 +222,9 @@ class RangelandCover(NoDbBase):
             v = default_covers['cryptogams']
             self._cryptogams_cover_default = float(v)
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def build(self, rap_year=None, default_covers=None):
         if default_covers is not None:
             self.set_default_covers(default_covers)
-            time.sleep(2)
 
         mode = self.mode
         if mode == RangelandCoverMode.Gridded:
@@ -341,8 +239,7 @@ class RangelandCover(NoDbBase):
     def _build_single(self):
         wd = self.wd
 
-        self.lock()
-        try:
+        with self.locked():
             watershed = Watershed.getInstance(wd)
             covers = {}
             for topaz_id in watershed._subs_summary:
@@ -357,11 +254,6 @@ class RangelandCover(NoDbBase):
                 covers[topaz_id] = cover
 
             self.covers = covers
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def rap_report(self):
@@ -372,8 +264,7 @@ class RangelandCover(NoDbBase):
         wd = self.wd
         from wepppy.nodb.mods import RAP
 
-        self.lock()
-        try:
+        with self.locked():
             if rap_year is not None:
                 rap_year = int(rap_year)
                 self._rap_year = rap_year
@@ -445,11 +336,6 @@ class RangelandCover(NoDbBase):
                 covers[topaz_id] = cover
 
             self.covers = covers
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def usgs_shrubland_report(self):
@@ -460,9 +346,7 @@ class RangelandCover(NoDbBase):
         wd = self.wd
         from wepppy.nodb.mods import Shrubland, nlcd_shrubland_layers
 
-        self.lock()
-        try:
-
+        with self.locked():
             shrubland = Shrubland.getInstance(wd)
             shrubland.acquire_rasters()
             shrubland.analyze()
@@ -523,12 +407,7 @@ class RangelandCover(NoDbBase):
                 covers[topaz_id] = cover
 
             self.covers = covers
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
     @property
     def has_covers(self):
         return self.covers is not None
@@ -572,8 +451,7 @@ class RangelandCover(NoDbBase):
         for topaz_id in topaz_ids:
             assert topaz_id in self.covers, (topaz_id, self.covers)
 
-        self.lock()
-        try:
+        with self.locked():
             covers = self.covers
 
             for topaz_id in topaz_ids:
@@ -581,12 +459,7 @@ class RangelandCover(NoDbBase):
                     covers[topaz_id][measure] = value
 
             self.covers = covers
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
     @property
     def subs_summary(self):
         """

@@ -59,18 +59,9 @@ class Treecanopy(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Treecanopy, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             os.mkdir(self.treecanopy_dir)
             self.data = None
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def treecanopy_dir(self):
@@ -106,17 +97,10 @@ class Treecanopy(NoDbBase):
 
         assert _exists(subwta_fn)
 
-        self.lock()
-        try:         
+        with self.locked():
             treecanopy_map = self.load_map()
             self.data = treecanopy_map.spatial_aggregation(subwta_fn)
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
     @property
     def report(self):
         if self.data is None:

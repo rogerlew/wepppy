@@ -72,7 +72,7 @@ def run_ash_model(kwds):
 
     del kwds['logger']
     out_fn = ash_model.run_model(**kwds)
-    logger.logger.info(f'  finished ash model for {prefix}\n')
+    logger.info(f'  finished ash model for {prefix}\n')
 
     return out_fn
 
@@ -98,10 +98,7 @@ class Ash(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Ash, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             # config = self.config
             self.fire_date = YearlessDate(8, 4) 
             self.ini_black_ash_depth_mm = 5.0
@@ -134,22 +131,14 @@ class Ash(NoDbBase):
             self._anu_white_ash_model_pars = WhiteAshModelAnu()
             self._anu_black_ash_model_pars = BlackAshModelAnu()
             
-            self.dump_and_unlock()
-
-            ash_dir = self.ash_dir
-            if _exists(ash_dir):
-                shutil.rmtree(ash_dir)
-            os.mkdir(ash_dir)
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+        ash_dir = self.ash_dir
+        if _exists(ash_dir):
+            shutil.rmtree(ash_dir)
+        os.mkdir(ash_dir)
         self._load_contaminants_from_config()
     
     def _load_contaminants_from_config(self):
-        self.lock()
-        try:
+        with self.locked():
             # Define the severity levels and corresponding attribute names
             severities = {
                 'low': 'low_contaminant_concentrations',
@@ -175,11 +164,6 @@ class Ash(NoDbBase):
 
                 # Set the dictionary to the corresponding instance attribute
                 setattr(self, attr_name, contaminants_dict)
-
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def get_cc_default(self, severity):
         if severity == 'high':
@@ -261,10 +245,7 @@ class Ash(NoDbBase):
             except ValueError:
                 pass
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._model = kwds.get('ash_model', self._model)
             self._field_black_ash_bulkdensity = kwds.get('field_black_bulkdensity', self._field_black_ash_bulkdensity)
             self._field_white_ash_bulkdensity = kwds.get('field_white_bulkdensity', self._field_white_ash_bulkdensity)
@@ -310,12 +291,6 @@ class Ash(NoDbBase):
                 self._anu_black_ash_model_pars.fin_erod = kwds.get('black_fin_erod', self._anu_black_ash_model_pars.fin_erod)
                 self._anu_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit', self._anu_black_ash_model_pars.roughness_limit )
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def parse_cc_inputs(self, kwds):
         # Convert all possible numeric values in kwds to float
         for k in kwds:
@@ -327,8 +302,7 @@ class Ash(NoDbBase):
                 except (ValueError, TypeError, IndexError):
                     pass  # Keep original value if conversion fails
 
-        self.lock()
-        try:
+        with self.locked():
             # Map form prefixes to the instance's contaminant dictionaries
             severity_map = {
                 'low': self.low_contaminant_concentrations,
@@ -349,11 +323,6 @@ class Ash(NoDbBase):
             # Update reservoir properties
             self._reservoir_capacity_m3 = kwds.get('reservoir_capacity', self._reservoir_capacity_m3)
             self._reservoir_storage = kwds.get('reservoir_storage', self._reservoir_storage)
-
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @classmethod
     def _post_instance_loaded(cls, instance):
@@ -378,63 +347,32 @@ class Ash(NoDbBase):
     def anu_white_ash_model_pars(self):
         pars = getattr(self, '_anu_white_ash_model_pars', None)
         if pars is None:
-            try:
-                self.lock()
+            with self.locked():
                 pars = self._anu_white_ash_model_pars = WhiteAshModelAnu()
-                
-                self.dump_and_unlock()
-    
-            except Exception:
-                self.unlock('-f')
-                raise
         return pars
 
     @property
     def anu_black_ash_model_pars(self):
         pars = getattr(self, '_anu_black_ash_model_pars', None)
         if pars is None:
-            try:
-                 
-                self.lock()
+            with self.locked():
                 pars = self._anu_black_ash_model_pars = BlackAshModelAnu()
-                
-                self.dump_and_unlock()
-    
-            except Exception:
-                self.unlock('-f')
-                raise
         return pars
 
     @property
     def alex_white_ash_model_pars(self):
         pars = getattr(self, '_alex_white_ash_model_pars', None)
         if pars is None:
-            try:
+            with self.locked():
                 pars = self._alex_white_ash_model_pars = WhiteAshModelAlex()
-                
-                if not self.readonly:
-                    self.lock()
-                    self.dump_and_unlock()
-        
-            except Exception:
-                self.unlock('-f')
-                raise
         return pars
 
     @property
     def alex_black_ash_model_pars(self):
         pars = getattr(self, '_alex_black_ash_model_pars', None)
         if pars is None:
-            try:
+            with self.locked():
                 pars = self._alex_black_ash_model_pars = BlackAshModelAlex()
-                
-                if not self.readonly:
-                    self.lock()
-                    self.dump_and_unlock()
-    
-            except Exception:
-                self.unlock('-f')
-                raise
         return pars
     
     @property
@@ -443,37 +381,20 @@ class Ash(NoDbBase):
 
     @model.setter
     def model(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._model = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
             
     @property
     def reservoir_storage(self):
         if not getattr(self, '_reservoir_storage'):
             self.reservoir_storage = 1000000
-
         return self._reservoir_storage
 
     @reservoir_storage.setter
     def reservoir_storage(self, value):
         assert isfloat(value), value
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._reservoir_storage = float(value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def run_wind_transport(self):
@@ -481,16 +402,8 @@ class Ash(NoDbBase):
 
     @run_wind_transport.setter
     def run_wind_transport(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._run_wind_transport = bool(value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def ash_load_d(self):
@@ -511,16 +424,8 @@ class Ash(NoDbBase):
         
     @ash_load_fn.setter
     def ash_load_fn(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._ash_load_fn = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def ash_type_map_fn(self):
@@ -532,16 +437,8 @@ class Ash(NoDbBase):
 
     @ash_type_map_fn.setter
     def ash_type_map_fn(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._ash_type_map_fn = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     @deprecated
@@ -555,16 +452,8 @@ class Ash(NoDbBase):
     @ash_bulk_density_fn.setter
     @deprecated
     def ash_bulk_density_fn(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._ash_bulk_density_fn = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def ash_spatial_mode(self):
@@ -576,17 +465,8 @@ class Ash(NoDbBase):
     @ash_spatial_mode.setter
     def ash_spatial_mode(self, value):
         assert isinstance(self, AshSpatialMode), value
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._ash_spatial_mode = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def ash_depth_mode(self):
@@ -598,17 +478,8 @@ class Ash(NoDbBase):
     @ash_depth_mode.setter
     def ash_depth_mode(self, value):
         assert isfloat(value), value
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._ash_depth_mode = int(value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def reservoir_capacity_m3(self):
@@ -624,17 +495,8 @@ class Ash(NoDbBase):
     @reservoir_capacity_m3.setter
     def reservoir_capacity_m3(self, value):
         assert isfloat(value), value
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._reservoir_capacity_m3 = float(value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     @deprecated
@@ -653,12 +515,7 @@ class Ash(NoDbBase):
                 slope=None):
         run_wind_transport=self.run_wind_transport
 
-        self.clean_log()
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.logger.info(f"Ash::run_ash(fire_date='{fire_date}', ini_white_ash_depth_mm={ini_white_ash_depth_mm}, ini_black_ash_depth_mm={ini_black_ash_depth_mm}\n")
             self.fire_date = fire_date = YearlessDate.from_string(fire_date)
             self.ini_white_ash_depth_mm = ini_white_ash_depth_mm
@@ -840,7 +697,7 @@ class Ash(NoDbBase):
                             area_ha=area_ha,
                             run_wind_transport=run_wind_transport,
                             ash_model=ash_model,
-                            logger=self)
+                            logger=self.logger)
 
                 if model == 'alex':
                     kwds['slope'] = slope
@@ -868,12 +725,6 @@ class Ash(NoDbBase):
                 self.fire_years = climate.input_years - 1
             except:
                 pass
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
         from wepppy.nodb import AshPost
 

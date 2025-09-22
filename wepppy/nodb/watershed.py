@@ -129,10 +129,7 @@ class Watershed(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Watershed, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._subs_summary = None  # deprecated watershed/hillslopes.csv
             self._fps_summary = None  # deprecated watershed/flowpaths.csv
             self._structure = None
@@ -205,12 +202,6 @@ class Watershed(NoDbBase):
             )
             self._mofe_max_ofes = self.config_get_int("watershed", "mofe_max_ofes", 19)
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
-
     def __getstate__(self):
         state = super().__getstate__()
 
@@ -233,16 +224,9 @@ class Watershed(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
         
         _value = int(value)
-        self.lock()
-
-        try:
+        with self.locked():
             assert _value in [0, 1], f"Invalid set_extent_mode value: {_value}"
             self._set_extent_mode = _value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def map_bounds_text(self):
@@ -257,15 +241,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {_value}')
 
-        self.lock()
-
-        try:
+        with self.locked():
             self._map_bounds_text = _value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @classmethod
     def _decode_jsonpickle(cls, json_text):
@@ -386,21 +363,14 @@ class Watershed(NoDbBase):
     def wbt_fill_or_breach(self, value):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+        assert value in [
+            "fill",
+            "breach",
+            "breach_least_cost",
+        ], f"Invalid wbt_fill_or_breach value: {value}"
 
-        self.lock()
-
-        try:
-            assert value in [
-                "fill",
-                "breach",
-                "breach_least_cost",
-            ], f"Invalid wbt_fill_or_breach value: {value}"
+        with self.locked():
             self._wbt_fill_or_breach = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def wbt_blc_dist(self) -> int:
@@ -411,15 +381,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        try:
+        with self.locked():
             self._wbt_blc_dist = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def max_points(self):
@@ -445,16 +408,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._clip_hillslopes = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def clip_hillslope_length(self):
@@ -465,16 +420,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._clip_hillslope_length = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def bieger2015_widths(self):
@@ -485,16 +432,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._bieger2015_widths = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def walk_flowpaths(self):
@@ -505,16 +444,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._walk_flowpaths = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def delineation_backend_is_taudem(self):
@@ -778,16 +709,8 @@ class Watershed(NoDbBase):
         
         assert isinstance(value, Outlet) or value is None
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._outlet = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def has_outlet(self):
@@ -839,21 +762,16 @@ class Watershed(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}(csa={csa}, mcl={mcl})')
 
         assert not self.islocked()
+
         self.logger.info("Building Channels")
 
         if csa or mcl:
-            self.lock()
-            try:
+            with self.locked():
                 if csa is not None:
                     self._csa = csa
 
                 if mcl is not None:
                     self._mcl = mcl
-
-                self.dump_and_unlock()
-            except:
-                self.unlock("-f")
-                raise
 
         if self.outlet is not None:
             self.remove_outlet()
@@ -901,17 +819,12 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
         
-        self.lock()
-        try:
+        with self.locked():
             if value is None:
                 self._wbt = None
             else:
                 assert isinstance(value, WhiteboxToolsTopazEmulator)
                 self._wbt = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock("-f")
-            raise
 
     #
     # set outlet
@@ -982,15 +895,9 @@ class Watershed(NoDbBase):
             self.identify_edge_hillslopes()
         else:
             self.logger.info(f' delineation_backend_is_taudem')
-            self.lock()
-            try:
+            with self.locked():
                 if pkcsa is not None:
                     self._pkcsa = pkcsa
-
-                self.dump_and_unlock()
-            except:
-                self.unlock("-f")
-                raise
             self._taudem_build_subcatchments()
 
     def identify_edge_hillslopes(self):
@@ -1001,14 +908,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
-        self.lock()
-        try:
+        with self.locked():
             self._edge_hillslopes = identify_edge_hillslopes(self.subwta, self.logger)
-        except Exception:
-            self.unlock("-f")
-            raise
-        else:
-            self.dump_and_unlock()
 
     @property
     def edge_hillslopes(self):
@@ -1043,21 +944,13 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
 
             pkcsa = self.pkcsa
             if pkcsa == "auto":
                 pkcsa = None
             taudem.build_subcatchments(threshold=pkcsa)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def network(self):
@@ -1111,8 +1004,7 @@ class Watershed(NoDbBase):
     def _peridot_post_abstract_watershed(self):
         self.logger.info("_peridot_post_abstract_watershed")
 
-        self.lock()
-        try:
+        with self.locked():
             sub_area, chn_area, ws_centroid, sub_ids, chn_ids = post_abstract_watershed(
                 self.wd
             )
@@ -1130,11 +1022,6 @@ class Watershed(NoDbBase):
             translator = self.translator_factory()
             translator.build_structure(network, pickle_fn=structure_fn)
             self._structure = structure_fn
-
-            self.dump_and_unlock()
-        except:
-            self.unlock("-f")
-            raise
 
     @property
     def sub_area(self):
@@ -1167,16 +1054,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mofe_target_length = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def mofe_buffer(self):
@@ -1187,16 +1066,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mofe_buffer = bool(value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def mofe_max_ofes(self):
@@ -1207,16 +1078,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mofe_max_ofes = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     @property
     def mofe_buffer_length(self):
@@ -1227,16 +1090,8 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name} -> {value}')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mofe_buffer_length = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock("-f")
-            raise
 
     def _build_multiple_ofe(self):
         func_name = inspect.currentframe().f_code.co_name
@@ -1258,15 +1113,8 @@ class Watershed(NoDbBase):
                 max_ofes=self.mofe_max_ofes,
             )
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mofe_nsegments = _mofe_nsegments
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock("-f")
-            raise
 
         self._build_mofe_map()
 
@@ -1352,10 +1200,7 @@ class Watershed(NoDbBase):
     def _taudem_abstract_watershed(self):
         from wepppy.nodb import Wepp
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
             taudem.abstract_watershed(
                 wepp_chn_type=self.wepp_chn_type,
@@ -1387,32 +1232,23 @@ class Watershed(NoDbBase):
 
             self._structure = taudem.structure
 
-            self.dump_and_unlock()
+        ron = Ron.getInstance(self.wd)
+        if any(
+            [
+                "lt" in ron.mods,
+                "portland" in ron.mods,
+                "seattle" in ron.mods,
+                "general" in ron.mods,
+            ]
+        ):
+            wepp = Wepp.getInstance(self.wd)
+            wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
 
-            ron = Ron.getInstance(self.wd)
-            if any(
-                [
-                    "lt" in ron.mods,
-                    "portland" in ron.mods,
-                    "seattle" in ron.mods,
-                    "general" in ron.mods,
-                ]
-            ):
-                wepp = Wepp.getInstance(self.wd)
-                wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
-
-            self.trigger(TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE)
-
-        except Exception:
-            self.unlock("-f")
-            raise
+        self.trigger(TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE)
 
     @deprecated
     def _topaz_abstract_watershed(self):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             wat_dir = self.wat_dir
             assert _exists(wat_dir)
 
@@ -1498,27 +1334,21 @@ class Watershed(NoDbBase):
             pool.close()
             pool.join()
 
-            self.dump_and_unlock()
+        ron = Ron.getInstance(self.wd)
+        if any(
+            [
+                "lt" in ron.mods,
+                "portland" in ron.mods,
+                "seattle" in ron.mods,
+                "general" in ron.mods,
+            ]
+        ):
+            from wepppy.nodb import Wepp
 
-            ron = Ron.getInstance(self.wd)
-            if any(
-                [
-                    "lt" in ron.mods,
-                    "portland" in ron.mods,
-                    "seattle" in ron.mods,
-                    "general" in ron.mods,
-                ]
-            ):
-                from wepppy.nodb import Wepp
+            wepp = Wepp.getInstance(self.wd)
+            wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
 
-                wepp = Wepp.getInstance(self.wd)
-                wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
-
-            self.trigger(TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE)
-
-        except Exception:
-            self.unlock("-f")
-            raise
+        self.trigger(TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE)
 
     @property
     def report(self):

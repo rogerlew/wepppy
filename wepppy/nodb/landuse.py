@@ -812,8 +812,6 @@ class Landuse(NoDbBase):
             self = self.getInstance(self.wd)  # reload instance from .nodb
 
         self.build_managements()
-        self.dump_landuse_parquet()
-
 
     @property
     def landuseoptions(self):
@@ -842,7 +840,7 @@ class Landuse(NoDbBase):
         if _map is None:
             _map = self.mapping
 
-        with self.locked():
+        with self.locked(): 
             watershed = Watershed.getInstance(self.wd)
             ron = Ron.getInstance(self.wd)
             cell2 = ron.cellsize ** 2
@@ -902,6 +900,7 @@ class Landuse(NoDbBase):
             # store the managements dict
             self.managements = managements
 
+        self.dump_landuse_parquet()
         self.trigger(TriggerEvents.LANDUSE_BUILD_COMPLETE)
 
     @property

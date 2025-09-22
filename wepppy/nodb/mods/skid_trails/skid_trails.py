@@ -175,10 +175,7 @@ class SkidTrails(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(SkidTrails, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             skid_trails_dir = self.skid_trails_dir
             if not _exists(skid_trails_dir):
                 os.mkdir(skid_trails_dir)
@@ -195,12 +192,6 @@ class SkidTrails(NoDbBase):
                 _, _fn = _split(_skid_trails_map)
                 shutil.copyfile(_skid_trails_map, _join(skid_trails_dir , _fn))
                 self._skid_trial_fn = _fn
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def skid_trails_path(self):
@@ -348,15 +339,8 @@ class SkidTrails(NoDbBase):
         with open(_join(self.skid_trails_dir, 'skid_trails0.geojson'), 'w') as fp:
             fp.write(js)
 
-        self.lock()
-
-        try:
+        with self.locked():
             self.skidtrails = skidtrails
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def skid_trails_dir(self):

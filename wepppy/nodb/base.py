@@ -375,8 +375,7 @@ class NoDbBase(object):
         except Exception:
             self.unlock()
             raise
-        else:
-            self.dump_and_unlock()
+        self.dump_and_unlock()
 
     def dump_and_unlock(self, validate=True):
         self.dump()
@@ -387,7 +386,14 @@ class NoDbBase(object):
 
             # noinspection PyUnresolvedReferences
             nodb.getInstance(self.wd)
+
+        self = type(self)._post_dump_and_unlock(self)
                 
+    @classmethod
+    def _post_dump_and_unlock(cls, instance):
+        # hook for subclasses needing to mutate the decoded instance
+        return instance
+
     def dump(self):
         global redis_nodb_cache_client
 
@@ -806,6 +812,8 @@ class NoDbBase(object):
         self._mods = mods
 
     def trigger(self, evt):
+        # TODO: refactor to use reflection to get NoDbBase subclasses in wepppy.nodb.mods
+        # and call on(evt) if the subclass name is in self.mods
         assert isinstance(evt, TriggerEvents)
         import wepppy.nodb.mods
 

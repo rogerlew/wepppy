@@ -297,25 +297,13 @@ class Unitizer(NoDbBase):
     
     def __init__(self, wd, cfg_fn):
         global precisions
-
         super(Unitizer, self).__init__(wd, cfg_fn)
-
-        self.lock()
-
         is_english = self.config_get_bool('unitizer', 'is_english')
 
-        # noinspection PyBroadException
-        try:
-
+        with self.locked():
             # make the second in the list the default (English Units)
             self._preferences = \
                 {k: list(v.keys())[is_english] for k, v in precisions.items()}
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def preferences(self):
@@ -343,24 +331,14 @@ class Unitizer(NoDbBase):
         return None
 
     def set_preferences(self, kwds):
-
-        # noinspection PyBroadException
-        try:
-            self.lock()
-
+        with self.locked():
             for k, v in kwds.items():
                 v = v.replace('-/', ',')
                 assert k in precisions, k
                 assert v in precisions[k], v
                 self._preferences[k] = v
 
-            self.dump_and_unlock()
-
-            return self._preferences
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        return self._preferences
 
     @staticmethod
     def context_processor_package():

@@ -39,21 +39,11 @@ class GeneralMod(NoDbBase, LocationMixin):
     def __init__(self, wd, cfg_fn):
         super(GeneralMod, self).__init__(wd, cfg_fn)
 
-        self._lc_lookup_fn = self.config_get_path('nodb', 'lc_lookup_fn', 'landSoilLookup.csv')
-        self._default_wepp_type = self.config_get_str('nodb', 'default_wepp_type')
-        self._kslast = self.config_get_float('nodb', 'kslast')
-        self._data_dir = _data_dir
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        with self.locked():
+            self._lc_lookup_fn = self.config_get_path('nodb', 'lc_lookup_fn', 'landSoilLookup.csv')
+            self._default_wepp_type = self.config_get_str('nodb', 'default_wepp_type')
+            self._kslast = self.config_get_float('nodb', 'kslast')
+            self._data_dir = _data_dir
 
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
@@ -75,16 +65,8 @@ class GeneralMod(NoDbBase, LocationMixin):
 
     @lc_lookup_fn.setter
     def lc_lookup_fn(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._lc_lookup_fn = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def kslast(self):
@@ -95,16 +77,8 @@ class GeneralMod(NoDbBase, LocationMixin):
 
     @kslast.setter
     def kslast(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._kslast = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def modify_soils_kslast(self):
         wd = self.wd
@@ -144,10 +118,9 @@ class GeneralMod(NoDbBase, LocationMixin):
 
             _domsoil_d[str(topaz_id)] = _dom
 
-        soils.lock()
-        soils.domsoil_d = _domsoil_d
-        soils.soils = _soils
-        soils.dump_and_unlock()
+        with soils.locked():
+            soils.domsoil_d = _domsoil_d
+            soils.soils = _soils
 
     @property
     def default_wepp_type(self):
@@ -155,16 +128,8 @@ class GeneralMod(NoDbBase, LocationMixin):
 
     @default_wepp_type.setter
     def default_wepp_type(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._default_wepp_type = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def data_dir(self):

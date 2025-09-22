@@ -34,18 +34,10 @@ class Prep(NoDbBase):
 
         super(Prep, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._sbs_required = False
             self._has_sbs = False
             self._timestamps = {}
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def sbs_required(self):
@@ -53,13 +45,8 @@ class Prep(NoDbBase):
 
     @sbs_required.setter
     def sbs_required(self, v: bool):
-        self.lock()
-        try:
+        with self.locked():
             self._sbs_required = v
-            self.dump_and_unlock()
-        except:
-            self.unlock('-f')
-            raise
 
     @property
     def has_sbs(self):
@@ -67,26 +54,16 @@ class Prep(NoDbBase):
 
     @has_sbs.setter
     def has_sbs(self, v: bool):
-        self.lock()
-        try:
+        with self.locked():
             self._has_sbs = v
-            self.dump_and_unlock()
-        except:
-            self.unlock('-f')
-            raise
 
     def timestamp(self, key):
         now = int(time.time())
         self.__setitem__(key, now)
 
     def __setitem__(self, key, value: int):
-        self.lock()
-        try:
+        with self.locked():
             self._timestamps[key] = value
-            self.dump_and_unlock()
-        except:
-            self.unlock('-f')
-            raise
 
     def __getitem__(self, key):
         return self._timestamps.get(key, None)

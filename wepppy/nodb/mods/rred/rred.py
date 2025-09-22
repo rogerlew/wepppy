@@ -47,20 +47,11 @@ class Rred(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Rred, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             os.mkdir(self.rred_dir)
             self.rred_key = None
             self.wgs_extent = None
             self.wgs_center = None
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def rred_dir(self):
@@ -74,10 +65,7 @@ class Rred(NoDbBase):
 
     def import_project(self, rred_key):
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             rred_api.retrieve_rred(rred_key, self.rred_dir)
             self.rred_key = rred_key
 
@@ -97,17 +85,8 @@ class Rred(NoDbBase):
             self.wgs_extent = [wgs_lr[0], wgs_lr[1], wgs_ul[0], wgs_ul[1]]
             self.wgs_center = (wgs_lr[0] + wgs_ul[0]) / 2.0, (wgs_lr[1] + wgs_ul[1]) / 2.0
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def build_landuse(self, landuse_mode=LanduseMode.RRED_Burned):
         assert landuse_mode in [LanduseMode.RRED_Burned, LanduseMode.RRED_Unburned]
-
-        landuse = Landuse.getInstance(self.wd)
-        landuse.clean()
 
         # create LandcoverMap instance
         if landuse_mode == LanduseMode.RRED_Unburned:
@@ -115,19 +94,13 @@ class Rred(NoDbBase):
         else:
             lc = LandcoverMap(_join(self.rred_dir, 'landcov_burned.asc'))
 
-        landuse.lock()
-
+        landuse = Landuse.getInstance(self.wd)
         watershed = Watershed.getInstance(self.wd)
 
-        # noinspection PyBroadException
-        try:
+        with landuse.locked():
+            landuse.clean()
             landuse._mode = landuse_mode
             landuse.domlc_d = lc.build_lcgrid(watershed.subwta, None)
-            landuse.dump_and_unlock()
-            landuse.dump_landuse_parquet()
-        except Exception:
-            landuse.unlock('-f')
-            raise
 
     def copy_soils(self):
         soil_fns = glob(_join(self.rred_dir, '*', '*.sol'))
@@ -138,31 +111,28 @@ class Rred(NoDbBase):
         assert soils_mode in [SoilsMode.RRED_Burned, SoilsMode.RRED_Unburned]
 
         soils = Soils.getInstance(self.wd)
-        soils.clean()
-        self.copy_soils()
+        with soils.locked():
+            soils.clean()
+            self.copy_soils()
 
-        soilsmap_fn = _join(self.rred_dir, 'soilsmap.txt')
+            soilsmap_fn = _join(self.rred_dir, 'soilsmap.txt')
 
-        assert _exists(soilsmap_fn)
-        soilsmap = {}
-        with open(soilsmap_fn) as fp:
-            for line in fp.readlines():
-                line = line.strip().split(',')
-                if len(line) == 3:
-                    soilsmap[line[0]] = line[2]
+            assert _exists(soilsmap_fn)
+            soilsmap = {}
+            with open(soilsmap_fn) as fp:
+                for line in fp.readlines():
+                    line = line.strip().split(',')
+                    if len(line) == 3:
+                        soilsmap[line[0]] = line[2]
 
-        # create LandcoverMap instance
-        if soils_mode == SoilsMode.RRED_Unburned:
-            lc = LandcoverMap(_join(self.rred_dir, 'soil_unburned.asc'))
-        else:
-            lc = LandcoverMap(_join(self.rred_dir, 'soil_burned.asc'))
+            # create LandcoverMap instance
+            if soils_mode == SoilsMode.RRED_Unburned:
+                lc = LandcoverMap(_join(self.rred_dir, 'soil_unburned.asc'))
+            else:
+                lc = LandcoverMap(_join(self.rred_dir, 'soil_burned.asc'))
 
-        soils.lock()
-
-        watershed = Watershed.getInstance(self.wd)
-
-        # noinspection PyBroadException
-        try:
+            watershed = Watershed.getInstance(self.wd)
+            
             _domsoil_d = lc.build_lcgrid(watershed.subwta, None)
             _soils = {}
             for k, v in _domsoil_d.items():
@@ -200,10 +170,6 @@ class Rred(NoDbBase):
             soils._mode = soils_mode
             soils.domsoil_d = _domsoil_d
             soils.soils = _soils
-            soils.dump_and_unlock()
-        except Exception:
-            soils.unlock('-f')
-            raise
-
+            
     def on(self, evt):
         pass

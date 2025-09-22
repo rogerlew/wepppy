@@ -64,21 +64,11 @@ class Treatments(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Treatments, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             os.makedirs(self.treatments_dir, exist_ok=True)
-
             self._treatments_domlc_d = {}
             self._treatments = {}
             self._mode = TreatmentsMode.Undefined
-            
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
     
     @property
     def mode(self) -> TreatmentsMode:
@@ -86,26 +76,14 @@ class Treatments(NoDbBase):
     
     @mode.setter
     def mode(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if isinstance(value, TreatmentsMode):
                 self._mode = value
-
             elif isinstance(value, int):
                 self._mode = TreatmentsMode(value)
-
             else:
                 raise ValueError('most be TreatmentsMode or int')
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    
+            
     @property
     def treatments_dir(self):
         """
@@ -140,13 +118,8 @@ class Treatments(NoDbBase):
             if v not in valid_treatment_keys:
                 raise ValueError(f"Invalid treatment key: {k} not in {valid_treatment_keys}")
             
-        self.lock()
-        try:
+        with self.locked():
             self._treatments_domlc_d = _domlc_d
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def validate(self, fn):
         """
@@ -184,10 +157,7 @@ class Treatments(NoDbBase):
 
         raster_stacker(fn, subwta_fn, self.treatments_map)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             # identify treatments from map
             domlc_d = identify_mode_single_raster_key(
                 key_fn=subwta_fn, 
@@ -199,14 +169,7 @@ class Treatments(NoDbBase):
             # filter out non treatment keys
             valid_keys = self.get_valid_treatment_keys()
             domlc_d = {k: v for k, v in domlc_d.items() if k in valid_keys}
-
             self._treatments_dom_lc = {k: str(v) for k, v in domlc_d.items()}
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -270,11 +233,7 @@ class Treatments(NoDbBase):
 
         disturbed = Disturbed.getInstance(self.wd)
 
-        landuse.lock()
-        try:
-            # loop over the treatments_domlc_d and apply the treatments to the hillslope based on it's
-            # existing landuse and sbs state
-
+        with landuse.locked():
             for topaz_id, treatment_dom in treatments_domlc_d.items():
                 treatment = mapping[treatment_dom]['DisturbedClass']  # 'mulch_30', 'mulch_60', 'thinning_40_90', 'prescribed_fire'
                 dom = landuse.domlc_d[topaz_id]  # -> key from map
@@ -283,23 +242,13 @@ class Treatments(NoDbBase):
                 disturbed_class = getattr(man_summary, 'disturbed_class', None)  # 'tall grass', 'shrub', 'forest', 'forest high sev' etc.
                 self._apply_treatment(landuse, disturbed, topaz_id, treatment, man_summary, disturbed_class)
 
-            landuse.dump_and_unlock()
-            landuse.dump_landuse_parquet()
-        except Exception:
-            landuse.unlock('-f')
-            raise
-
         land_soil_replacements_d = disturbed.land_soil_replacements_d
+
         soils = Soils.getInstance(self.wd)
-        soils.lock()
-        try:
+        with soils.locked():
             for topaz_id, treatment_dom in treatments_domlc_d.items():
                 self._modify_soil(landuse, soils, disturbed, topaz_id)
 
-            soils.dump_and_unlock()
-        except Exception:
-            soils.unlock('-f')
-            raise
 
     def _apply_treatment(self, 
                          landuse_instance: Landuse, 

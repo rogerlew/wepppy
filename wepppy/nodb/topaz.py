@@ -53,10 +53,7 @@ class Topaz(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Topaz, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.csa = self.config_get_float('topaz', 'csa')
             self.mcl = self.config_get_float('topaz', 'mcl')
             # self.zoom_min = self.config_get_int('topaz', 'zoom_min')
@@ -72,12 +69,6 @@ class Topaz(NoDbBase):
             topaz_wd = self.topaz_wd
             if not _exists(topaz_wd):
                 os.mkdir(topaz_wd)
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def subwta_arc(self):
@@ -136,10 +127,7 @@ class Topaz(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(csa={csa}, mcl={mcl})')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             top_runner = TopazRunner(self.topaz_wd, self.dem_fn,
                                      csa=csa, mcl=mcl)
 
@@ -166,12 +154,6 @@ class Topaz(NoDbBase):
             self._utmproj4 = proj
             self._utmextent = xmin, ymin, xmax, ymax
         
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     #
     # outlet
     #
@@ -188,10 +170,7 @@ class Topaz(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(lng={lng}, lat={lat}, pixelcoords={pixelcoords}, da={da})')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             top_runner = TopazRunner(self.topaz_wd, self.dem_fn,
                                      csa=self.csa, mcl=self.mcl)
 
@@ -205,12 +184,6 @@ class Topaz(NoDbBase):
             self._outlet = Outlet(requested_loc=(lng, lat), actual_loc=(_lng, _lat),
                                   distance_from_requested=distance, pixel_coords=(x, y))
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-            
     #
     # subcatchments
     #
@@ -222,10 +195,7 @@ class Topaz(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
         
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             top_runner = TopazRunner(self.topaz_wd, self.dem_fn,
                                      csa=self.csa, mcl=self.mcl)
 
@@ -257,9 +227,3 @@ class Topaz(NoDbBase):
             self.ruggedness = ruggedness
             self.minz = minz
             self.maxz = maxz
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise

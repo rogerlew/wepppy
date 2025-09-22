@@ -399,17 +399,9 @@ class AshPost(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(AshPost, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._return_periods = None
             self._cum_return_periods = None
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def return_periods(self):
@@ -455,20 +447,12 @@ class AshPost(NoDbBase):
         return [str(k) for k in rec_int]
 
     def run_post(self, recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             res = watershed_daily_aggregated(self.wd, recurrence=recurrence)
             if res != None:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = res
             else:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = None, None, None
-
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def meta(self):

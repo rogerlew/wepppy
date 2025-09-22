@@ -59,21 +59,13 @@ class Rhem(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Rhem, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             rhem_dir = self.rhem_dir
             if not _exists(rhem_dir):
                 os.mkdir(rhem_dir)
 
             self.clean()
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def rhem_dir(self):
@@ -212,7 +204,6 @@ class Rhem(NoDbBase):
 
         arc_export(self.wd)
 
-#        self.run_wepp_hillslopes()
         self.logger.info('done')
 
     def report_loss(self):
