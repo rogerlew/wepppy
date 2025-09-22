@@ -54,6 +54,39 @@
         border: 1px solid #ccc;
         background-color: #ffffff;
       }
+
+      .readme-lock-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.65);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        z-index: 2050;
+      }
+
+      .readme-lock-overlay[hidden] {
+        display: none;
+      }
+
+      .readme-lock-dialog {
+        max-width: 420px;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 0.5rem;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.35);
+      }
+
+      .readme-lock-dialog h4 {
+        margin-bottom: 0.75rem;
+      }
+
+      .readme-lock-dialog p {
+        margin-bottom: 1.25rem;
+      }
     </style>
   </head>
   <body>
@@ -61,7 +94,7 @@
     <div class="container-fluid mt-4">
       <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
         <div>
-          <h2 class="mb-1">README.md Editor</h2>
+          <h2 class="mb-1"><a href='{{ url_for("runs0", runid=runid, config=config) }}'>{{ runid }}</a> README.md Editor</h2>
           <p class="text-muted mb-2">Changes are saved automatically (and with Ctrl+S).</p>
         </div>
         <div class="btn-group btn-group-toggle btn-group-lg" data-toggle="buttons" role="group" aria-label="README mode">
@@ -88,21 +121,44 @@
         </div>
       </div>
     </div>
+    <div id="readme-lock-overlay" class="readme-lock-overlay" hidden role="alertdialog" aria-modal="true" aria-labelledby="readme-lock-title">
+      <div class="readme-lock-dialog">
+        <h4 id="readme-lock-title">Editor Locked</h4>
+        <p>Another README editor tab has taken over this project. This editor is now read-only.</p>
+        <button id="readme-lock-reload" type="button" class="btn btn-primary">Reload Editor</button>
+      </div>
+    </div>
     <script>
       (function() {
         const runid = {{ runid | tojson }};
         const config = {{ config | tojson }};
+        const clientUuid = {{ editor_client_uuid | tojson }};
+        const initialRonName = {{ (ron.name or '') | tojson }};
+        const initialRonScenario = {{ (ron.scenario or '') | tojson }};
         const editor = document.getElementById('readme-editor');
         const previewEl = document.getElementById('readme-preview');
         const saveUrl = {{ url_for('readme.readme_save', runid=runid, config=config) | tojson }};
         const previewUrl = {{ url_for('readme.readme_preview', runid=runid, config=config) | tojson }};
         const rawUrl = {{ url_for('readme.readme_raw', runid=runid, config=config) | tojson }};
+        const lockOverlay = document.getElementById('readme-lock-overlay');
+        const reloadButton = document.getElementById('readme-lock-reload');
         let saveTimer = null;
         let previewTimer = null;
         const SAVE_DEBOUNCE = 2000;
         const PREVIEW_DEBOUNCE = 600;
+        const baseDocumentTitle = `${runid}/README Editor`;
+        let currentRonName = initialRonName;
+        let currentRonScenario = initialRonScenario;
+        let invalidated = false;
 
         const commandProject = window.Project ? window.Project.getInstance() : null;
+
+        function updateDocumentTitle() {
+          const suffix = currentRonName ? ` - ${currentRonName}` : '';
+          document.title = `${baseDocumentTitle}${suffix}`;
+        }
+
+        updateDocumentTitle();
 
         function notify(message) {
           if (commandProject && typeof commandProject._notifyCommandBar === 'function') {
@@ -110,16 +166,72 @@
           }
         }
 
+        function invalidateEditor() {
+          if (invalidated) {
+            return;
+          }
+          invalidated = true;
+          clearTimeout(saveTimer);
+          clearTimeout(previewTimer);
+          editor.setAttribute('disabled', 'disabled');
+          if (lockOverlay) {
+            lockOverlay.hidden = false;
+          }
+          notify('This README editor tab is no longer active.');
+        }
+
+        if (reloadButton) {
+          reloadButton.addEventListener('click', () => {
+            window.location.reload();
+          });
+        }
+
+        function requestPreview() {
+          if (invalidated) {
+            return;
+          }
+          fetch(previewUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ markdown: editor.value, uuid: clientUuid })
+          })
+            .then(resp => resp.json())
+            .then(body => {
+              if (body && typeof body.html === 'string') {
+                previewEl.innerHTML = body.html;
+              }
+            })
+            .catch(err => console.error('Preview failed:', err));
+        }
+
+        function refreshPreviewNow() {
+          requestPreview();
+        }
+
         function performSave() {
+          if (invalidated) {
+            return;
+          }
           saveTimer = null;
           fetch(saveUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ markdown: editor.value })
+            body: JSON.stringify({ markdown: editor.value, uuid: clientUuid })
           })
             .then(resp => resp.json())
             .then(body => {
-              if (body && body.Success) {
+              if (!body) {
+                notify('Error saving README.md');
+                return;
+              }
+              if (body.invalidated) {
+                invalidateEditor();
+                return;
+              }
+              if (body.Success) {
+                if (body.ronUpdate) {
+                  handleRonUpdate(body.ronUpdate);
+                }
                 notify('Saved README.md');
               } else {
                 notify('Error saving README.md');
@@ -132,6 +244,9 @@
         }
 
         function fetchLatest() {
+          if (invalidated) {
+            return;
+          }
           fetch(rawUrl)
             .then(resp => resp.json())
             .then(body => {
@@ -144,26 +259,19 @@
         }
 
         function queueSave() {
+          if (invalidated) {
+            return;
+          }
           clearTimeout(saveTimer);
           saveTimer = setTimeout(performSave, SAVE_DEBOUNCE);
         }
 
         function queuePreview() {
+          if (invalidated) {
+            return;
+          }
           clearTimeout(previewTimer);
-          previewTimer = setTimeout(() => {
-            fetch(previewUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ markdown: editor.value })
-            })
-              .then(resp => resp.json())
-              .then(body => {
-                if (body && typeof body.html === 'string') {
-                  previewEl.innerHTML = body.html;
-                }
-              })
-              .catch(err => console.error('Preview failed:', err));
-          }, PREVIEW_DEBOUNCE);
+          previewTimer = setTimeout(requestPreview, PREVIEW_DEBOUNCE);
         }
 
         editor.addEventListener('input', () => {
@@ -172,6 +280,9 @@
         });
 
         window.addEventListener('keydown', event => {
+          if (invalidated) {
+            return;
+          }
           if ((event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 'S')) {
             event.preventDefault();
             clearTimeout(saveTimer);
@@ -184,6 +295,18 @@
 
         // Optionally refresh from server if another user modified it
         // fetchLatest();
+
+        function handleRonUpdate(update) {
+          const updates = update || {};
+          if (Object.prototype.hasOwnProperty.call(updates, 'name')) {
+            currentRonName = updates.name || '';
+          }
+          if (Object.prototype.hasOwnProperty.call(updates, 'scenario')) {
+            currentRonScenario = updates.scenario || '';
+          }
+          updateDocumentTitle();
+          refreshPreviewNow();
+        }
       })();
     </script>
   </body>

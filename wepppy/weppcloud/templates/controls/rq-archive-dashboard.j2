@@ -205,7 +205,7 @@
   </head>
   <body>
     <div class="container mt-4">
-      <h1>Project Archive Dashboard</h1>
+      <h2 class="mb-1"><a href='{{ url_for("runs0", runid=runid, config=config) }}'>{{ runid }}</a> Project Archive Dashboard</h2>
       <p>Project: <code id="project_label"></code></p>
       <button type="button" class="btn btn-primary" id="archive_button">Create Archive</button>
 
