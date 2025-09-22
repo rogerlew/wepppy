@@ -90,10 +90,7 @@ class Landuse(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Landuse, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mode = LanduseMode.Gridded
             self._single_selection = 0  # No Data
             self._single_man = None
@@ -131,11 +128,6 @@ class Landuse(NoDbBase):
             self._hillslope_cancovs = None
             self._hillslope_mofe_cancovs = None
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
     @classmethod
     def _post_instance_loaded(cls, instance):
         instance = super()._post_instance_loaded(instance)
@@ -167,16 +159,8 @@ class Landuse(NoDbBase):
     
     @mapping.setter
     def mapping(self, value: str):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mapping = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def get_mapping_dict(self) -> dict[str, dict]:
         """
@@ -193,24 +177,13 @@ class Landuse(NoDbBase):
     
     @mode.setter
     def mode(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if isinstance(value, LanduseMode):
                 self._mode = value
-
             elif isinstance(value, int):
                 self._mode = LanduseMode(value)
-
             else:
                 raise ValueError('most be LanduseMode or int')
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def single_selection(self):
@@ -221,19 +194,10 @@ class Landuse(NoDbBase):
 
     @single_selection.setter
     def single_selection(self, landuse_single_selection):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             k = landuse_single_selection
             self._single_selection = k
             self._single_man = get_management_summary(k)
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def single_man(self):
@@ -251,18 +215,9 @@ class Landuse(NoDbBase):
 
     @mofe_buffer_selection.setter
     def mofe_buffer_selection(self, k):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._mofe_buffer_selection = str(k)
             self._buffer_man = get_management_summary(k)
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def buffer_man(self):
@@ -328,17 +283,8 @@ class Landuse(NoDbBase):
 
     @fractionals.setter
     def fractionals(self, value):
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._fractionals = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def nlcd_db(self):
@@ -346,16 +292,8 @@ class Landuse(NoDbBase):
 
     @nlcd_db.setter
     def nlcd_db(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._nlcd_db = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _build_NLCD(self, retrieve_nlcd=True):
         global wepppyo3
@@ -371,7 +309,6 @@ class Landuse(NoDbBase):
         elif not _exists(lc_fn):
             raise FileNotFoundError(f"'{lc_fn}' not found!")
             
-
         subwta_fn = Watershed.getInstance(self.wd).subwta
 
         if wepppyo3 is None:
@@ -425,13 +362,8 @@ class Landuse(NoDbBase):
             shutil.copyfile(_join(man.man_dir, man.man_fn), _join(self.lc_dir, _split(man.man_fn)[-1]))
             managements[dom].man_dir = self.lc_dir
 
-        self.lock()
-        try:
+        with self.locked():
             self._managements = managements
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def build(self):
         assert not self.islocked()
@@ -455,34 +387,22 @@ class Landuse(NoDbBase):
             self.build_managements()
             return
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             if self._mode != LanduseMode.UserDefined:
                 self.clean()
-
             if self._mode == LanduseMode.UserDefined:
                 self._build_NLCD(retrieve_nlcd=False)
-
             elif self._mode == LanduseMode.Gridded:
                 if 'au' in self.locales:
                     self._build_lu10v5ua()
                 else:
                     self._build_NLCD()
-
             elif self._mode == LanduseMode.Single:
                 self._build_single_selection()
-
             elif self._mode == LanduseMode.Undefined:
                 raise Exception('LanduseMode is not set')
 
-            self.dump_and_unlock()
-            self.build_managements()
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.build_managements()
 
         if 'rap' in self.mods:
             from wepppy.nodb.mods.rap import RAP
@@ -554,22 +474,14 @@ class Landuse(NoDbBase):
                 if _cancov is not None:
                     area_data[dom].append(dict(area=area, cancov=_cancov))
 
-            self.lock()
-
-            cancov = 0.0
-            # noinspection PyBroadException
-            try:
+            with self.locked():
+                cancov = 0.0
                 for dom, values in area_data.items():
                     dom_total_area = sum(d['area'] for d in values)
                     x = sum(d['area'] * d['cancov'] for d in values)
                     if dom_total_area > 0.0:
                         cancov = x / dom_total_area
                     self._modify_coverage(dom, 'cancov', cancov)
-
-                self.dump_and_unlock()
-            except Exception:
-                self.unlock('-f')
-                raise
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -792,17 +704,11 @@ class Landuse(NoDbBase):
 
             self.logger.info('done')
 
-        self.lock()
-
-        try:
+        with self.locked():
             if cancov_d:
                 self._hillslope_mofe_cancovs = cancov_d
             self.domlc_mofe_d = domlc_d
             self.managements = managements
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def identify_disturbed_class(self, topaz_id, mofe_id = None):
 
@@ -862,23 +768,17 @@ class Landuse(NoDbBase):
         if defaults is None:
             return
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             for dom in self.managements:
                 dom = str(dom)
                 if dom in defaults:
                     for cover in ['cancov', 'inrcov', 'rilcov']:
                         self._modify_coverage(dom, cover, defaults[dom][cover])
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def _modify_coverage(self, dom, cover, value):
+        if not self.islocked():
+            raise Exception('must be locked to call _modify_coverage')
+        
         dom = str(dom)
         assert dom in self.managements
 
@@ -896,22 +796,11 @@ class Landuse(NoDbBase):
             self.managements[dom].rilcov_override = value
 
     def modify_coverage(self, dom, cover, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._modify_coverage(dom, cover, value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def modify_mapping(self, dom, newdom):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             dom = str(dom)
             newdom = str(newdom)
             assert dom in self.managements
@@ -920,16 +809,11 @@ class Landuse(NoDbBase):
                 if self.domlc_d[topazid] == dom:
                     self.domlc_d[topazid] = newdom
 
-            self.dump_and_unlock()
-
-            # noinspection PyMethodFirstArgAssignment
             self = self.getInstance(self.wd)  # reload instance from .nodb
-            self.build_managements()
-            self.dump_landuse_parquet()
 
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.build_managements()
+        self.dump_landuse_parquet()
+
 
     @property
     def landuseoptions(self):
@@ -955,13 +839,10 @@ class Landuse(NoDbBase):
         return landuseoptions
 
     def build_managements(self, _map=None):
-        self.lock()
-
         if _map is None:
             _map = self.mapping
 
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             watershed = Watershed.getInstance(self.wd)
             ron = Ron.getInstance(self.wd)
             cell2 = ron.cellsize ** 2
@@ -1020,13 +901,8 @@ class Landuse(NoDbBase):
 
             # store the managements dict
             self.managements = managements
-            self.dump_and_unlock()
 
-            self.trigger(TriggerEvents.LANDUSE_BUILD_COMPLETE)
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.trigger(TriggerEvents.LANDUSE_BUILD_COMPLETE)
 
     @property
     def report(self):
@@ -1043,10 +919,7 @@ class Landuse(NoDbBase):
     # modify
     #
     def modify(self, topaz_ids, landuse):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             landuse = str(int(landuse))
             assert self.domlc_d is not None
 
@@ -1054,13 +927,8 @@ class Landuse(NoDbBase):
                 assert topaz_id in self.domlc_d
                 self.domlc_d[topaz_id] = landuse
 
-            self.dump_and_unlock()
-            self.build_managements()
-            self.set_cover_defaults()
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.build_managements()
+        self.set_cover_defaults()
 
     def _x_summary(self, topaz_id: str):
         
@@ -1109,17 +977,8 @@ class Landuse(NoDbBase):
 
     @hillslope_cancovs.setter
     def hillslope_cancovs(self, value):
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._hillslope_cancovs = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def hillslope_mofe_cancovs(self):
