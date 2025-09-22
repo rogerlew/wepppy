@@ -794,14 +794,86 @@ crossorigin="anonymous">
 
         _content = f'''\
 <!DOCTYPE html>
-<html><head>
+<html>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
 <title>{basename(path)} - {runid}</title>
-</head><body>
-<pre>\n{contents}</pre>
-</body></html>'''
-        return Response(_content, mimetype='text/html')
-        
+<style>
+  body {{
+    margin: 0;
+    font-family: monospace;
+    /* Add padding to prevent content from being hidden by fixed header/footer */
+    padding-top: 45px;
+    padding-bottom: 45px;
+  }}
+  header, footer {{
+    position: fixed;
+    left: 0;
+    width: 100%;
+    background-color: #343a40;
+    color: #ecf0f1;
+    padding: 10px 10px;
+    box-sizing: border-box; /* Ensures padding is included in the width */
+    z-index: 1000;
+    font-size: 12px;
+  }}
+  header {{
+    top: 0;
+  }}
+  footer {{
+    bottom: 0;
+    text-align: center;
+  }}
+  pre {{
+    margin: 0 10px; /* Add some horizontal margin for readability */
+    white-space: pre-wrap;       /* CSS3 */
+    white-space: -moz-pre-wrap;  /* Mozilla */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  }}
+</style>
+</head>
+<body>
+
+<header><b>File:</b> {path}</header>
+
+<pre>{contents}</pre>
+
+<footer>
+  <b>Shortcuts:</b> Shift + G (End) | Shift + U (Page Up) | Shift + H (Page Down)
+</footer>
+
+<script>
+  document.addEventListener('keydown', function(event) {{
+    // We only care about events with the Shift key
+    if (!event.shiftKey) {{
+      return;
+    }}
+
+    // Use a switch statement for different key presses
+    switch (event.key.toUpperCase()) {{
+      case 'G':
+        event.preventDefault(); // Prevent any default browser action
+        window.scrollTo(0, document.body.scrollHeight);
+        break;
+      case 'U':
+        event.preventDefault();
+        // Scroll up by 90% of the window's height for context overlap
+        window.scrollBy(0, -window.innerHeight * 0.9);
+        break;
+      case 'H':
+        event.preventDefault();
+        // Scroll down by 90% of the window's height
+        window.scrollBy(0, window.innerHeight * 0.9);
+        break;
+    }}
+  }});
+</script>
+
+</body>
+</html>'''
+    return Response(_content, mimetype='text/html')
