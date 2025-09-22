@@ -56,20 +56,10 @@ class Observed(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Observed, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.results = None
-
             if not _exists(self.observed_dir):
                 os.mkdir(self.observed_dir)
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def read_observed_fn(self, fn):
         with open(fn) as fp:
@@ -78,10 +68,7 @@ class Observed(NoDbBase):
 
     def parse_textdata(self, textdata):
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             with io.StringIO(textdata) as fp:
                 df = pd.read_csv(fp)
 
@@ -106,12 +93,7 @@ class Observed(NoDbBase):
             df['Julian'] = juls
 
             df.to_csv(self.observed_fn)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
     @property
     def has_observed(self):
         return _exists(self.observed_fn)
@@ -153,18 +135,9 @@ class Observed(NoDbBase):
 
         results['Channels'] = self.run_measures(df, sim, 'Channels')
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.results = results
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.run_observed)
