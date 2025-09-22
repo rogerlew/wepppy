@@ -194,11 +194,35 @@ class HealthFilter(logging.Filter):
         msg = record.getMessage()
         return not ("OPTIONS /health" in msg or "Closing connection" in msg)
 
-# apply to both access & error loggers
-for name in ("gunicorn.access", "gunicorn.error"):
-    logger = logging.getLogger(name)
-    logger.addFilter(HealthFilter())
-    
+def setup_logging():
+    """Configure gunicorn loggers while keeping error output intact."""
+    filter_type = HealthFilter
+
+    # Apply filter only to the access logger to hide noisy health checks.
+    access_logger = logging.getLogger("gunicorn.access")
+    if access_logger:
+        if not any(isinstance(f, filter_type) for f in access_logger.filters):
+            access_logger.addFilter(filter_type())
+
+        for handler in access_logger.handlers:
+            if not any(isinstance(f, filter_type) for f in handler.filters):
+                handler.addFilter(filter_type())
+
+    # Ensure the error logger has no HealthFilter attached so stack traces remain visible.
+    error_logger = logging.getLogger("gunicorn.error")
+    if error_logger:
+        for f in list(error_logger.filters):
+            if isinstance(f, filter_type):
+                error_logger.removeFilter(f)
+
+        for handler in error_logger.handlers:
+            for f in list(handler.filters):
+                if isinstance(f, filter_type):
+                    handler.removeFilter(f)
+
+
+setup_logging()
+
 
 def sort_numeric_keys(value, reverse=False):
     return sorted(value.items(), key=lambda x: int(x[0]), reverse=reverse)
@@ -264,6 +288,7 @@ from routes.wepprepr import repr_bp
 from routes.diff import diff_bp
 from routes.pivottable import pivottable_bp
 from routes.weppcloudr import weppcloudr_bp
+from routes.readme import readme_bp, ensure_readme
 from routes.rq.api.jobinfo import rq_jobinfo_bp
 from routes.rq.api.api import rq_api_bp
 from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
@@ -278,6 +303,7 @@ app.register_blueprint(weppcloudr_bp)
 app.register_blueprint(rq_api_bp)
 app.register_blueprint(rq_jobinfo_bp)
 app.register_blueprint(rq_job_dashboard_bp)
+app.register_blueprint(readme_bp)
 
 mail = Mail(app)
 
@@ -293,7 +319,10 @@ def inject_site_prefix():
 def render_project_template(template_name, runid, config, **context):
     context.setdefault('runid', runid)
     context.setdefault('config', config)
-    return render_template(template_name, **context)
+    try:
+        return render_template(template_name, **context)
+    except Exception:
+        return jsonify(context)
 
 # Define models
 roles_users = db.Table(
@@ -1209,34 +1238,39 @@ def create_run_dir(current_user):
 @app.route('/create/<config>/')
 def create(config):
 
-    cfg = "%s.cfg" % config
-
-    overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
-
-    if len(overrides) > 0:
-        cfg += '?%s' % overrides
-
     try:
-        runid, wd = create_run_dir(current_user)
-    except PermissionError:
-        return exception_factory('Could not create run directory. NAS may be down.')
-    except Exception:
-        return exception_factory('Could not create run directory.')
+        cfg = "%s.cfg" % config
 
-    try:
-        Ron(wd, cfg)
-    except Exception:
-        return exception_factory('Could not create run')
+        overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
 
-    url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config)
+        if len(overrides) > 0:
+            cfg += '?%s' % overrides
 
-    if not current_user.is_anonymous:
         try:
-            user_datastore.create_run(runid, config, current_user)
+            runid, wd = create_run_dir(current_user)
+        except PermissionError:
+            return exception_factory('Could not create run directory. NAS may be down.')
         except Exception:
-            return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
+            return exception_factory('Could not create run directory.')
 
-    return redirect(url)
+        try:
+            Ron(wd, cfg)
+        except Exception:
+            return exception_factory('Could not create run')
+
+        url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config)
+
+        if not current_user.is_anonymous:
+            try:
+                user_datastore.create_run(runid, config, current_user)
+            except Exception:
+                return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
+
+        ensure_readme(runid, config)
+
+        return redirect(url)
+    except Exception:
+        return exception_factory()
 
 @app.route('/create-legacy/<config>')
 @app.route('/create-legacy/<config>/')
@@ -1263,6 +1297,8 @@ def create_legacy(config):
             user_datastore.create_run(runid, config, current_user)
         except Exception:
             return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
+
+    ensure_readme(runid, config)
 
     return redirect(url)
 
