@@ -4,8 +4,8 @@ var preflight_ws;
 let lastPreflightChecklist = null;
 let controller_lock_statuses = null;
 
-// Map .nodb files to the UI elements we toggle via lockButton/unlockButton.
-// NOTE: if a new controller needs to react to lock status pushes, add the
+// Map .nodb files to the UI elements we surface lock icons for.
+// NOTE: if a new controller needs visual lock feedback, add the
 // appropriate (buttonId, lockImageId) pair here so updateLocks can drive it.
 const LOCKABLE_FILES = Object.freeze({
     "wepp.nodb": { buttonId: "btn_run_wepp", lockImageId: "run_wepp_lock" },
@@ -84,19 +84,19 @@ function updateLocks(lockStatuses) {
         }
 
         const { buttonId, lockImageId } = target;
-        const button = document.getElementById(buttonId);
         const lockImage = document.getElementById(lockImageId);
+        const buttonExists = document.getElementById(buttonId) !== null;
 
         // Some legacy views reuse button ids; skip gracefully if the elements
         // are not on the current page to avoid raising exceptions.
-        if (!button || !lockImage) {
+        if (!buttonExists || !lockImage) {
             return;
         }
 
         if (isLocked) {
-            lockButton(buttonId, lockImageId);
+            lockImage.style.display = 'inline';
         } else {
-            unlockButton(buttonId, lockImageId);
+            lockImage.style.display = 'none';
         }
     });
 }

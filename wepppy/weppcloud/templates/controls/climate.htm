@@ -599,7 +599,7 @@
 <div class="form-group row hide-readonly" id="btn_build_climate_container">
     <div class="col-sm-4">
         <button 
-            onclick="lockButton('btn_build_climate', 'build_climate_lock'); Climate.getInstance().build();"
+            onclick="Climate.getInstance().build();"
             id="btn_build_climate" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
 
           <img  id="build_climate_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />

@@ -22,7 +22,7 @@
       <div class="col-sm-4">
         <button id="btn_run_observed" class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
                 type="button"
-                onclick="lockButton('btn_run_observed', 'run_observed_lock'); Observed.getInstance().run_model_fit();">
+                onclick="Observed.getInstance().run_model_fit();">
           <img id="run_observed_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
           Run Model Fit
         </button>
