@@ -167,7 +167,7 @@ class NoDbBase(object):
 
         # Define a standard log format
         log_format = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-        date_format = '%Y-%m-%d %H:%M:%S,%:z'  # Local time with milliseconds and timezone
+        date_format = '%Y-%m-%d %H:%M:%S'  # Local time with milliseconds and timezone
         formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
 
         if queue_handler is None:
@@ -340,9 +340,8 @@ class NoDbBase(object):
 
         if abs_wd != os.path.abspath(db_wd):
             if not db.islocked():
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
+                with db.locked():
+                    db.wd = wd
 
         db._init_logging()
         return db
@@ -353,6 +352,31 @@ class NoDbBase(object):
 
         return cls.getInstance(
             get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
+
+    @contextmanager
+    def locked(self, validate_on_success=True):
+        """
+        A context manager to handle the lock -> modify -> dump/unlock pattern.
+
+        Usage:
+            with self.locked():
+                # modify attributes here
+                self.foo = 'bar'
+        
+        On successful exit from the 'with' block, it calls dump_and_unlock().
+        If an exception occurs, it calls unlock() and re-raises the exception.
+        """
+        if self.readonly:
+            raise Exception('Cannot use locked context on a readonly project.')
+
+        self.lock()
+        try:
+            yield
+        except Exception:
+            self.unlock()
+            raise
+        else:
+            self.dump_and_unlock(validate=validate_on_success)
 
     def dump_and_unlock(self, validate=True):
         self.dump()
