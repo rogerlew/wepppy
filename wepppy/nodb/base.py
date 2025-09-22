@@ -601,14 +601,9 @@ class NoDbBase(object):
             for k, v in attrs.items():
                 setattr(self, k, v)
         else:
-            self.lock()
-            try:
+            with self.locked():
                 for k, v in attrs.items():
                     setattr(self, k, v)
-                self.dump_and_unlock()
-            except Exception:
-                self.unlock('-f')
-                raise
 
     @property
     def locales(self):
