@@ -412,7 +412,7 @@ function controlBase() {
             const parts = [];
 
             parts.push(`<div>job_id: <a href="${jobDashboardUrl(self.rq_job_id)}" target="_blank">${escapeHtml(self.rq_job_id)}</a></div>`);
-            parts.push(`<div>Status: ${escapeHtml(statusLabel)}</div>`);
+            parts.push(`<div class="small text-muted">Status: ${escapeHtml(statusLabel)}</div>`);
 
             const _times = [];
 
@@ -433,7 +433,7 @@ function controlBase() {
                     `<div class="small text-muted d-flex flex-wrap align-items-baseline">${_times.join("")}</div>`
                 );
             }
-            
+
             if (self._job_status_error) {
                 parts.push(`<div class="text-danger small">${escapeHtml(self._job_status_error)}</div>`);
             }
