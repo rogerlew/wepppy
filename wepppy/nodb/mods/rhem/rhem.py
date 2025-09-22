@@ -66,6 +66,8 @@ class Rhem(NoDbBase):
 
             self.clean()
 
+        import wepppy
+        wepppy.nodb.mods.RhemPost(wd, cfg_fn)
 
     @property
     def rhem_dir(self):

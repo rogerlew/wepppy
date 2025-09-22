@@ -991,6 +991,18 @@ def _iter_nodb_subclasses():
                 stack.append(subcls)
                 yield subcls
 
+def iter_nodb_mods_subclasses():
+    seen = set()
+    stack = [NoDbBase]
+    while stack:
+        cls = stack.pop()
+        for subcls in cls.__subclasses__():
+            if subcls not in seen:
+                seen.add(subcls)
+                stack.append(subcls)
+                _module = subcls.__module__
+                if 'mods' in _module:
+                    yield subcls.filename.removesuffix('.nodb'), subcls
 
 def clear_locks(runid):
     """
@@ -1037,3 +1049,4 @@ def lock_statuses(runid):
         statuses[filename] = (value == 'true') if value is not None else False
 
     return statuses
+

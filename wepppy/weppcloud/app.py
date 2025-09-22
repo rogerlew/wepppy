@@ -132,7 +132,7 @@ from wepppy.nodb.mods.ash_transport import (
     AshType, 
 )
 
-from wepppy.nodb.omni import (
+from wepppy.nodb.mods.omni import (
     Omni,
     OmniNoDbLockedException,
     OmniScenario # IntEnum
@@ -287,6 +287,7 @@ from routes.gdalinfo import gdalinfo_bp
 from routes.wepprepr import repr_bp
 from routes.diff import diff_bp
 from routes.pivottable import pivottable_bp
+from routes.jsoncrack import jsoncrack_bp
 from routes.weppcloudr import weppcloudr_bp
 from routes.readme import readme_bp, ensure_readme
 from routes.rq.api.jobinfo import rq_jobinfo_bp
@@ -299,6 +300,7 @@ app.register_blueprint(gdalinfo_bp)
 app.register_blueprint(repr_bp)
 app.register_blueprint(diff_bp)
 app.register_blueprint(pivottable_bp)
+app.register_blueprint(jsoncrack_bp)
 app.register_blueprint(weppcloudr_bp)
 app.register_blueprint(rq_api_bp)
 app.register_blueprint(rq_jobinfo_bp)

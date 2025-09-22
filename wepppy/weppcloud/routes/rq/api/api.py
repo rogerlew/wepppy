@@ -24,7 +24,11 @@ from rq.job import Job
 
 from wepppy.soils.ssurgo import NoValidSoilsException
 
-from wepppy.nodb import Wepp, Soils, Watershed, Climate, Disturbed, Landuse, Ron, Ash, AshSpatialMode, Omni, LanduseMode, OmniScenario, lock_statuses
+from wepppy.nodb import (
+    Wepp, Soils, Watershed, Climate, Disturbed, Landuse, Ron, Ash, AshSpatialMode, LanduseMode, lock_statuses
+)
+
+from wepppy.nodb.mods.omni import Omni, OmniNoDbLockedException, OmniScenario
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.rq.project_rq import (

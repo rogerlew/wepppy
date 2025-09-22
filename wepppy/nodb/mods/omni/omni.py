@@ -30,7 +30,7 @@ import utm
 # wepppy
 from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
-from .base import (
+from ...base import (
     NoDbBase,
     TriggerEvents
 )
