@@ -377,10 +377,7 @@ class Wepp(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Wepp, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             wepp_dir = self.wepp_dir
             if not _exists(wepp_dir):
                 os.mkdir(wepp_dir)
@@ -456,11 +453,6 @@ class Wepp(NoDbBase):
 
             self.clean()
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
         
     @property
     def dss_export_mode(self) -> int:
@@ -468,16 +460,8 @@ class Wepp(NoDbBase):
     
     @dss_export_mode.setter
     def dss_export_mode(self, value: isint):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._dss_export_mode = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def dss_excluded_channel_orders(self) -> list:
@@ -486,16 +470,8 @@ class Wepp(NoDbBase):
 
     @dss_excluded_channel_orders.setter
     def dss_excluded_channel_orders(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._dss_excluded_channel_orders = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def dss_export_channel_ids(self) -> list:
@@ -503,16 +479,8 @@ class Wepp(NoDbBase):
 
     @dss_export_channel_ids.setter
     def dss_export_channel_ids(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._dss_export_channel_ids = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def has_dss_zip(self):
@@ -524,16 +492,8 @@ class Wepp(NoDbBase):
 
     @multi_ofe.setter
     def multi_ofe(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._multi_ofe = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def wepp_bin(self):
@@ -544,16 +504,8 @@ class Wepp(NoDbBase):
 
     @wepp_bin.setter
     def wepp_bin(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._wepp_bin = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
 
     @property
@@ -626,42 +578,23 @@ class Wepp(NoDbBase):
         return 'omni/contrasts' in run_dir
 
     def set_baseflow_opts(self, gwstorage=None, bfcoeff=None, dscoeff=None, bfthreshold=None):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.baseflow_opts = BaseflowOpts(
                 gwstorage=gwstorage,
                 bfcoeff=bfcoeff,
                 dscoeff=dscoeff,
                 bfthreshold=bfthreshold)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def set_phosphorus_opts(self, surf_runoff=None, lateral_flow=None, baseflow=None, sediment=None):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.phosphorus_opts = PhosphorusOpts(
                 surf_runoff=surf_runoff,
                 lateral_flow=lateral_flow,
                 baseflow=baseflow,
                 sediment=sediment)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def parse_inputs(self, kwds):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.baseflow_opts.parse_inputs(kwds)
             self.phosphorus_opts.parse_inputs(kwds)
             if hasattr(self, 'tcr_opts'):
@@ -722,11 +655,6 @@ class Wepp(NoDbBase):
                 _chn_topaz_ids_of_interest = [int(v) for v in _chn_topaz_ids_of_interest]
                 self._chn_topaz_ids_of_interest = _chn_topaz_ids_of_interest
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def has_run(self):
@@ -917,16 +845,8 @@ class Wepp(NoDbBase):
 
     @pmet_kcb.setter
     def pmet_kcb(self, value):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self._pmet_kcb = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def pmet_rawp(self):
@@ -934,16 +854,8 @@ class Wepp(NoDbBase):
 
     @pmet_rawp.setter
     def pmet_rawp(self, value):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self._pmet_ramp = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _prep_pmet(self, kcb=None, rawp=None):
 
@@ -1045,16 +957,8 @@ class Wepp(NoDbBase):
                 self.logger.info('done')
 
         # save the phosphorus parameters to the .nodb
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.phosphorus_opts = phos_opts
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _prep_phosphorus(self):
         phos_opts = self.phosphorus_opts
@@ -1125,16 +1029,8 @@ class Wepp(NoDbBase):
                 self.logger.info('done')
 
         # save the baseflow parameters to the .nodb
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.baseflow_opts = baseflow_opts
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _prep_baseflow(self):
         climate = Climate.getInstance(self.wd)
@@ -1942,15 +1838,8 @@ class Wepp(NoDbBase):
     def dtchr_override(self, value: int):
         if value < 60:
             raise ValueError(f"Expected dtchr_override to be at least 60, got {value}")
-
-        self.lock()
-
-        try:
+        with self.locked():
             self._dtchr_override = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def chn_topaz_ids_of_interest(self):
@@ -1965,15 +1854,8 @@ class Wepp(NoDbBase):
         for topaz_id in value:
             if not str(topaz_id).endswith("4"):
                 raise ValueError(f"Expected topaz_id to end with '4', got {topaz_id}")
-
-        self.lock()
-
-        try:
+        with self.locked():
             self._chn_topaz_ids_of_interest = [int(v) for v in value]
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _prep_channel_input(self):
         translator = Watershed.getInstance(self.wd).translator_factory()
@@ -2404,101 +2286,38 @@ class Wepp(NoDbBase):
 
     def set_run_flowpaths(self, state):
         assert state in [True, False]
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self.run_flowpaths = state
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def set_run_wepp_ui(self, state):
         assert state in [True, False]
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._run_wepp_ui = state
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def set_run_pmet(self, state):
         assert state in [True, False]
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._run_pmet = state
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def set_run_frost(self, state):
         assert state in [True, False]
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._run_frost = state
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def set_run_snow(self, state):
         assert state in [True, False]
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._run_snow = state
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def set_run_tcr(self, state):
         assert state in [True, False]
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._run_tcr = state
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def set_run_baseflow(self, state):
         assert state in [True, False]
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._run_baseflow = state
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def loss_report(self):
@@ -2609,13 +2428,5 @@ class Wepp(NoDbBase):
 
     @kslast.setter
     def kslast(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._kslast = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
