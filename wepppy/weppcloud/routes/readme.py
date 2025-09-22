@@ -1,7 +1,8 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from os.path import join as _join
 from pathlib import Path
+import uuid
 
 from flask import (
     Blueprint,
@@ -20,6 +21,27 @@ from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # pip
 from wepppy.weppcloud.utils.helpers import get_wd, exception_factory
 from wepppy.nodb import Ron
 from wepppy.nodb.base import _iter_nodb_subclasses
+
+
+import redis
+
+redis_readme_client = None
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+REDIS_README_DB = 14
+_LOCK_TTL_SECONDS = 1800  # 30 minutes to keep session locks fresh
+_CLIENT_STATE_TTL_SECONDS = 3600
+_STALE_CLIENT_TTL_SECONDS = 600
+
+try:
+    redis_readme_pool = redis.ConnectionPool(
+        host=REDIS_HOST, port=6379, db=REDIS_README_DB,
+        decode_responses=True, max_connections=50
+    )
+    redis_readme_client = redis.StrictRedis(connection_pool=redis_readme_pool)
+    redis_readme_client.ping()
+except Exception as e:
+    redis_readme_client = None
+
 
 readme_bp = Blueprint("readme", __name__)
 
@@ -97,6 +119,115 @@ def _write_markdown(runid, config, markdown_text):
     Path(path).write_text(markdown_text, encoding="utf-8")
 
 
+def _editor_lock_key(runid, config):
+    return f"readme:lock:{runid}:{config}"
+
+
+def _editor_client_key(runid, config, client_uuid):
+    return f"readme:client:{runid}:{config}:{client_uuid}"
+
+
+def _utc_iso_now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _record_editor_session(runid, config, client_uuid, ron):
+    global redis_readme_client
+    if redis_readme_client is None:
+        return
+    
+    lock_key = _editor_lock_key(runid, config)
+    client_key = _editor_client_key(runid, config, client_uuid)
+    now = _utc_iso_now()
+    try:
+        previous_uuid = redis_readme_client.get(lock_key)
+        pipe = redis_readme_client.pipeline()
+        pipe.set(lock_key, client_uuid, ex=_LOCK_TTL_SECONDS)
+        pipe.hset(client_key, mapping={
+            "runid": runid,
+            "config": config,
+            "uuid": client_uuid,
+            "status": "active",
+            "ron_name": getattr(ron, "name", ""),
+            "ron_scenario": getattr(ron, "scenario", ""),
+            "updated_at": now,
+            "created_at": now,
+        })
+        pipe.expire(client_key, _CLIENT_STATE_TTL_SECONDS)
+        if previous_uuid and previous_uuid != client_uuid:
+            prev_key = _editor_client_key(runid, config, previous_uuid)
+            pipe.hset(prev_key, mapping={
+                "status": "stale",
+                "stale_at": now,
+            })
+            pipe.expire(prev_key, _STALE_CLIENT_TTL_SECONDS)
+        pipe.execute()
+    except redis.RedisError:
+        pass
+
+
+def _refresh_editor_session(runid, config, client_uuid, ron):
+    if redis_readme_client is None:
+        return
+    lock_key = _editor_lock_key(runid, config)
+    client_key = _editor_client_key(runid, config, client_uuid)
+    now = _utc_iso_now()
+    try:
+        pipe = redis_readme_client.pipeline()
+        pipe.set(lock_key, client_uuid, ex=_LOCK_TTL_SECONDS)
+        pipe.hset(client_key, mapping={
+            "status": "active",
+            "ron_name": getattr(ron, "name", ""),
+            "ron_scenario": getattr(ron, "scenario", ""),
+            "updated_at": now,
+        })
+        pipe.expire(client_key, _CLIENT_STATE_TTL_SECONDS)
+        pipe.execute()
+    except redis.RedisError:
+        pass
+
+
+def _get_editor_state(runid, config, client_uuid):
+    if redis_readme_client is None:
+        return {}
+    client_key = _editor_client_key(runid, config, client_uuid)
+    try:
+        state = redis_readme_client.hgetall(client_key)
+    except redis.RedisError:
+        return {}
+    return state or {}
+
+
+def _invalidate_editor_session(runid, config, client_uuid):
+    if redis_readme_client is None or not client_uuid:
+        return
+    client_key = _editor_client_key(runid, config, client_uuid)
+    now = _utc_iso_now()
+    try:
+        redis_readme_client.hset(client_key, mapping={
+            "status": "invalidated",
+            "invalidated_at": now,
+        })
+        redis_readme_client.expire(client_key, _STALE_CLIENT_TTL_SECONDS)
+    except redis.RedisError:
+        pass
+
+
+def _session_has_lock(runid, config, client_uuid):
+    if redis_readme_client is None:
+        return True
+    if not client_uuid:
+        return False
+    lock_key = _editor_lock_key(runid, config)
+    try:
+        current_uuid = redis_readme_client.get(lock_key)
+    except redis.RedisError:
+        return True
+    if current_uuid is None:
+        return False
+    return current_uuid == client_uuid
+
+
 def _authorize(runid, config, require_owner=False):
     from wepppy.weppcloud.app import get_run_owners
 
@@ -141,8 +272,14 @@ def readme_editor(runid, config):
             return redirect(url_for("readme.readme_render", runid=runid, config=config))
         markdown = _load_markdown(runid, config)
         html = _render_markdown(markdown, context)
+        client_uuid = uuid.uuid4().hex
+        _record_editor_session(runid, config, client_uuid, ron)
         return render_template(
-            "readme/editor.html", initial_markdown=markdown, initial_html=html, **context
+            "readme/editor.html",
+            initial_markdown=markdown,
+            initial_html=html,
+            editor_client_uuid=client_uuid,
+            **context,
         )
     except:
         return exception_factory("Could not load README editor")
@@ -162,10 +299,34 @@ def readme_save(runid, config):
         _authorize(runid, config, require_owner=True)
         data = request.get_json() or {}
         markdown = data.get("markdown", "")
+        client_uuid = data.get("uuid")
         if not isinstance(markdown, str):
             abort(400)
+        lock_ok = _session_has_lock(runid, config, client_uuid)
+        if not lock_ok:
+            reason = "lock_mismatch"
+            if not client_uuid:
+                reason = "missing_uuid"
+            _invalidate_editor_session(runid, config, client_uuid)
+            return jsonify({"Success": False, "invalidated": True, "reason": reason})
         _write_markdown(runid, config, markdown)
-        return jsonify({"Success": True})
+        ron = Ron.getInstance(get_wd(runid))
+        previous_state = _get_editor_state(runid, config, client_uuid) if client_uuid else {}
+        previous_name = (previous_state.get("ron_name") or "") if previous_state else ""
+        previous_scenario = (previous_state.get("ron_scenario") or "") if previous_state else ""
+        current_name = getattr(ron, "name", "")
+        current_scenario = getattr(ron, "scenario", "")
+        ron_update = {}
+        if previous_name != current_name:
+            ron_update["name"] = current_name
+        if previous_scenario != current_scenario:
+            ron_update["scenario"] = current_scenario
+        if client_uuid:
+            _refresh_editor_session(runid, config, client_uuid, ron)
+        response = {"Success": True}
+        if ron_update:
+            response["ronUpdate"] = ron_update
+        return jsonify(response)
     except:
         return exception_factory("Could not save README")
 
