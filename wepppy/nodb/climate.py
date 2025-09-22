@@ -637,10 +637,7 @@ class Climate(NoDbBase):
     def __init__(self, wd, cfg_fn):
         super(Climate, self).__init__(wd, cfg_fn)
 
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._input_years = 100
             self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
@@ -742,12 +739,6 @@ class Climate(NoDbBase):
 
             self._use_gridmet_wind_when_applicable = self.config_get_bool('climate', 'use_gridmet_wind_when_applicable')
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     @property
     def daymet_last_available_year(self):
         return 2023
@@ -758,15 +749,8 @@ class Climate(NoDbBase):
     
     @use_gridmet_wind_when_applicable.setter
     def use_gridmet_wind_when_applicable(self, value: bool):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._use_gridmet_wind_when_applicable = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def precip_scale_reference(self):
@@ -774,18 +758,9 @@ class Climate(NoDbBase):
     
     @precip_scale_reference.setter
     def precip_scale_reference(self, value):
-        
         assert value is None or value in ['prism', 'daymet', 'gridmet']
-        
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self._precip_scale_reference = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def precip_monthly_scale_factors(self):
@@ -793,18 +768,9 @@ class Climate(NoDbBase):
     
     @precip_monthly_scale_factors.setter
     def precip_monthly_scale_factors(self, value):
-        
         assert value is None or len(value) == 12
-        
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self._precip_monthly_scale_factors = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def precip_scale_factor(self):
@@ -812,15 +778,8 @@ class Climate(NoDbBase):
 
     @precip_scale_factor.setter
     def precip_scale_factor(self, value):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self._precip_scale_factor = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def precip_scale_factor_map(self):
@@ -922,16 +881,8 @@ class Climate(NoDbBase):
 
     @ss_batch.setter
     def ss_batch(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._ss_batch = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def climate_daily_temp_ds(self):
@@ -939,16 +890,8 @@ class Climate(NoDbBase):
 
     @climate_daily_temp_ds.setter
     def climate_daily_temp_ds(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._climate_daily_temp_ds = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def daymet_version(self):
@@ -957,16 +900,8 @@ class Climate(NoDbBase):
 
     @daymet_version.setter
     def daymet_version(self, value):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
+        with self.locked():
             self._daymet_version = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     #
     # climatestation_mode
@@ -982,24 +917,13 @@ class Climate(NoDbBase):
 
     @climatestation_mode.setter
     def climatestation_mode(self, value):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             if isinstance(value, ClimateStationMode):
                 self._climatestation_mode = value
-
             elif isinstance(value, int):
                 self._climatestation_mode = ClimateStationMode(value)
-
             else:
                 raise ValueError('most be ClimateStationMode or int')
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     # noinspection PyPep8Naming
     @property
@@ -1047,15 +971,8 @@ class Climate(NoDbBase):
 
     @climatestation.setter
     def climatestation(self, value):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self._climatestation = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def climatestation_meta(self):
@@ -1085,22 +1002,13 @@ class Climate(NoDbBase):
 
     @climate_mode.setter
     def climate_mode(self, value):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             if isinstance(value, ClimateMode):
                 self._climate_mode = value
             elif isint(value):
                 self._climate_mode = ClimateMode(int(value))
             else:
                 self._climate_mode = ClimateMode.parse(value)
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def is_single_storm(self):
@@ -1123,25 +1031,14 @@ class Climate(NoDbBase):
 
     @precip_scaling_mode.setter
     def precip_scaling_mode(self, value):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             if isinstance(value, ClimatePrecipScalingMode):
                 self._precip_scaling_mode = value
-
             elif isinstance(value, int):
                 self._precip_scaling_mode = ClimatePrecipScalingMode(value)
-
             else:
                 self._precip_scaling_mode = ClimatePrecipScalingMode.parse(value)
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-        
     #
     # precip_scaling_reference
     #
@@ -1154,16 +1051,8 @@ class Climate(NoDbBase):
 
     @precip_scaling_reference.setter
     def precip_scaling_reference(self, value):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self._precip_scaling_reference = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     #
     # climate_spatial mode
@@ -1174,38 +1063,23 @@ class Climate(NoDbBase):
 
     @climate_spatialmode.setter
     def climate_spatialmode(self, value):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             if isinstance(value, ClimateSpatialMode):
                 self._climate_spatialmode = value
-
             elif isinstance(value, int):
                 self._climate_spatialmode = ClimateSpatialMode(value)
-
             else:
                 self._climate_spatialmode = ClimateSpatialMode.parse(value)
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     #
     # station search
     #
-
     def find_closest_stations(self, num_stations=10):
 
         if self.islocked() and self._closest_stations is not None:
             return self.closest_stations
         
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
             station_manager = CligenStationsManager(version=self.cligen_db)
@@ -1214,13 +1088,8 @@ class Climate(NoDbBase):
             self._closest_stations = results
 
             self._climatestation = results[0].id
-            self.dump_and_unlock()
             return self.closest_stations
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+        
     @property
     def closest_stations(self):
         """
@@ -1241,31 +1110,18 @@ class Climate(NoDbBase):
         if 'au' in self.locales:
             return self.find_au_heuristic_stations(num_stations=num_stations)
 
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
-
             station_manager = CligenStationsManager(version=self.cligen_db)
             results = station_manager\
                 .get_stations_heuristic_search((lng, lat), num_stations)
             self._heuristic_stations = results
-
             self._climatestation = results[0].id
-            self.dump_and_unlock()
             return self.heuristic_stations
 
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def find_eu_heuristic_stations(self, num_stations=10):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
 
@@ -1278,18 +1134,10 @@ class Climate(NoDbBase):
             self._heuristic_stations = results
 
             self._climatestation = results[0].id
-            self.dump_and_unlock()
             return self.heuristic_stations
 
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def find_au_heuristic_stations(self, num_stations=None):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
 
@@ -1302,13 +1150,8 @@ class Climate(NoDbBase):
             self._heuristic_stations = results
 
             self._climatestation = results[0].id
-            self.dump_and_unlock()
             return self.heuristic_stations
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+        
     @property
     def heuristic_stations(self):
         """
@@ -1325,17 +1168,8 @@ class Climate(NoDbBase):
 
     @orig_cli_fn.setter
     def orig_cli(self, value):
-
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self._orig_cli_fn = value
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def input_years(self):
@@ -1343,17 +1177,8 @@ class Climate(NoDbBase):
 
     @input_years.setter
     def input_years(self, value):
-
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self._input_years = int(value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     @property
     def has_station(self):
@@ -1372,10 +1197,7 @@ class Climate(NoDbBase):
             return self.cli_fn is not None
 
     def parse_inputs(self, kwds):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             climate_mode = kwds['climate_mode']
             climate_mode = ClimateMode(int(climate_mode))
 
@@ -1438,12 +1260,6 @@ class Climate(NoDbBase):
             if kwds.get('precip_scale_factor_map', None) is not None:
                 self._precip_scale_factor_map = kwds['precip_scale_factor_map']
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
         # mode 2: observed
         self.set_observed_pars(
             **dict(start_year=kwds['observed_start_year'],
@@ -1458,10 +1274,7 @@ class Climate(NoDbBase):
         self.set_single_storm_pars(**kwds)
 
     def set_observed_pars(self, **kwds):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             start_year = kwds['start_year']
             end_year = kwds['end_year']
 
@@ -1487,17 +1300,8 @@ class Climate(NoDbBase):
             self._observed_start_year = start_year
             self._observed_end_year = end_year
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def set_future_pars(self,  **kwds):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             start_year = kwds['start_year']
             end_year = kwds['end_year']
 
@@ -1523,17 +1327,8 @@ class Climate(NoDbBase):
             self._future_start_year = start_year
             self._future_end_year = end_year
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def set_single_storm_pars(self, **kwds):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             ss_storm_date = kwds['ss_storm_date']
             ss_design_storm_amount_inches = \
                 kwds['ss_design_storm_amount_inches']
@@ -1605,12 +1400,6 @@ class Climate(NoDbBase):
                 ss_time_to_peak_intensity_pct
             self._ss_batch = ss_batch
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def build(self, verbose=False, attrs=None):
         self.logger.info('Build Climates\n')
         self.logger.info('  assert not self.islocked()\n')
@@ -1638,20 +1427,11 @@ class Climate(NoDbBase):
             self.logger.info('  cli_dir does not exist, creating\n')
             os.mkdir(cli_dir)
 
-        self.logger.info('  locking...')
-        self.lock()
-        self.logger.info('done')
-        try:
+        with self.locked():
             self.cli_fn = None
             self.par_fn = None
             self.sub_cli_fns = None
             self.sub_par_fns = None
-            self.dump_and_unlock()
-            self.logger.info('  dumped and unlocked\n')
-        except Exception:
-            self.unlock('-f')
-            self.logger.info('  exception during dump, unlocking')
-            raise
 
         climate_mode = self.climate_mode
         self.logger.info(f'  climate_mode: {climate_mode}\n')
@@ -1865,10 +1645,7 @@ class Climate(NoDbBase):
         """
         scalar scaling of precipitation
         """
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.logger.info('  running _scale_precip... \n')
 
             cli_dir = os.path.abspath(self.cli_dir)
@@ -1890,21 +1667,13 @@ class Climate(NoDbBase):
                     sub_cli_fns[topaz_id] = f'scale_{sub_cli_fn}'
                     
                 self.sub_cli_fns = sub_cli_fns
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _scale_precip_monthlies(self, monthly_scale_factors, scale_func):
         """
         monthly scaling of precipitation
         """
         
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.logger.info('  running _scale_precip... \n')
 
             cli_dir = os.path.abspath(self.cli_dir)
@@ -1926,19 +1695,11 @@ class Climate(NoDbBase):
                     sub_cli_fns[topaz_id] = f'scale_{sub_cli_fn}'
                     
                 self.sub_cli_fns = sub_cli_fns
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _spatial_scale_precip(self, scale_factor_map):
         self.logger.info(f'  running _spatial_scale_precip with {scale_factor_map} \n')
 
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             cli_dir = os.path.abspath(self.cli_dir)
 
             assert _exists(scale_factor_map), scale_factor_map
@@ -1989,19 +1750,10 @@ class Climate(NoDbBase):
 
                 self.sub_cli_fns = sub_cli_fns
 
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def _build_climate_depnexrad(self, verbose=False, attrs=None):
         self.logger.info('  running _build_climate_depnexrad... \n')
 
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
 
             cli_dir = os.path.abspath(self.cli_dir)
@@ -2112,20 +1864,10 @@ class Climate(NoDbBase):
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
 
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def _build_climate_prism(self, verbose=False, attrs=None):
         self.logger.info('  running _build_climate_prism... \n')
 
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
 
             # cligen can accept a 5 digit random number seed
@@ -2152,18 +1894,11 @@ class Climate(NoDbBase):
             self.monthlies = prism_mod(par=climatestation,
                                      years=years, lng=lng, lat=lat, wd=cli_dir,
                                      logger=self.logger, nwds_method='')
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _prism_revision(self, verbose: bool = False):
         wd         = self.wd
         cli_dir    = self.cli_dir
-        self.lock()
-
-        try:
+        with self.locked():
             self.logger.info('  running _prism_revision... ')
             climatestation = self.climatestation
             years          = self._input_years
@@ -2259,18 +1994,8 @@ class Climate(NoDbBase):
             self.sub_par_fns = sub_par_fns
             self.sub_cli_fns = sub_cli_fns
 
-            self.dump_and_unlock()
-            self.logger.info('done')
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def _post_defined_climate(self, verbose=False, attrs=None):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
 
             self.logger.info('Copying original climate file...')
@@ -2299,23 +2024,11 @@ class Climate(NoDbBase):
             self.logger.info('Calculating monthlies...')
             cli = ClimateFile(_join(cli_dir, cli_fn))
             self.monthlies = cli.calc_monthlies()
-            self.logger.info('done')
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-
 
     def _build_climate_mod(self, mod_function, verbose=False, attrs=None):
         self.logger.info('  running _build_climate_mod{}... \n'.format(mod_function.__name__))
 
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
 
             # cligen can accept a 5 digit random number seed
@@ -2382,20 +2095,8 @@ class Climate(NoDbBase):
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
 
-            self.logger.info('  finalizing climate build... ')
-            self.dump_and_unlock()
-            self.logger.info('done')
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def set_user_defined_cli(self, cli_fn, verbose=False):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-
+        with self.locked():
             self.logger.info('  running set_userdefined_cli... ')
             self._orig_cli_fn = _join(self.cli_dir, cli_fn)
 #            cli_path = self.cli_path
@@ -2406,13 +2107,7 @@ class Climate(NoDbBase):
 
             self._input_years = cli.input_years
             self.monthlies = cli.calc_monthlies()
-            self.dump_and_unlock()
-            self.logger.info('done')
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
+            
         self._post_defined_climate(verbose=verbose)
 
         if self.climate_spatialmode == ClimateSpatialMode.Multiple:
@@ -2425,10 +2120,7 @@ class Climate(NoDbBase):
             pass
 
     def _build_climate_vanilla(self, verbose=False, attrs=None):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
 
             self.logger.info('  running _build_climate_vanilla... ')
@@ -2450,18 +2142,9 @@ class Climate(NoDbBase):
             self.monthlies = monthlies
             self.par_fn = par_fn
             self.cli_fn = cli_fn
-            self.dump_and_unlock()
-            self.logger.info('done')
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _build_climate_observed_daymet(self, verbose=False, attrs=None):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_daymet')
 
@@ -2494,15 +2177,6 @@ class Climate(NoDbBase):
             self.monthlies = climate.calc_monthlies()
             self.cli_fn = cli_fn
             self.par_fn = par_fn
-
-            self.logger.info('done')
-
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
-
-
 
     def _build_climate_observed_gridmet_multiple(self, verbose=False, attrs=None):
         from wepppy.climates.gridmet.client import (
@@ -2556,10 +2230,7 @@ class Climate(NoDbBase):
             }
         }
 
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_gridmet_multiple')
 
@@ -2722,22 +2393,12 @@ class Climate(NoDbBase):
 
             self.sub_par_fns = sub_par_fns
             self.sub_cli_fns = sub_cli_fns
-            self.logger.info('done')
-
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
-
 
     def _build_climate_observed_daymet_multiple(self, verbose=False, attrs=None):
         from wepppy.climates.daymet.daily_interpolation import identify_pixel_coords
         from wepppy.climates.daymet.daymet_singlelocation_client import interpolate_daily_timeseries
 
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_daymet_multiple')
 
@@ -2830,18 +2491,9 @@ class Climate(NoDbBase):
 
             self.sub_par_fns = sub_par_fns
             self.sub_cli_fns = sub_cli_fns
-            self.logger.info('done')
-
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _build_climate_observed_gridmet(self, verbose=False, attrs=None):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_gridmet')
 
@@ -2872,19 +2524,8 @@ class Climate(NoDbBase):
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
-            self.logger.info('done')
-
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
-
-
     def _build_climate_future(self, verbose=False, attrs=None):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_future')
 
@@ -2915,14 +2556,6 @@ class Climate(NoDbBase):
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
-            self.logger.info('done')
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
     def _build_climate_single_storm_batch(self, verbose=False, attrs=None):
         """
         single storm
@@ -2947,9 +2580,7 @@ class Climate(NoDbBase):
                               ss_time_to_peak_intensity_pct=float(tp),
                               ss_max_intensity_inches_per_hour=float(tp))
 
-        self.lock()
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
 
             self.logger.info('  running _build_climate_single_storm... ')
@@ -2981,21 +2612,12 @@ class Climate(NoDbBase):
             self.monthlies = monthlies
             self.par_fn = par_fn
             self.cli_fn = cli_fn
-            self.dump_and_unlock()
-            self.logger.info('done')
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _build_climate_single_storm(self, verbose=False, attrs=None):
         """
         single storm
         """
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
+        with self.locked():
             self.set_attrs(attrs)
 
             self.logger.info('  running _build_climate_single_storm... ')
@@ -3020,12 +2642,6 @@ class Climate(NoDbBase):
             self.monthlies = monthlies
             self.par_fn = par_fn
             self.cli_fn = cli_fn
-            self.dump_and_unlock()
-            self.logger.info('done')
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def sub_summary(self, topaz_id):
         if not self.has_climate:
