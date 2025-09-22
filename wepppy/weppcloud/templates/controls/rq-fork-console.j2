@@ -206,9 +206,10 @@ Undisturbify: ${_undisturbify}<br>
         </div>
         <div class="form-group form-check">
           <input type="checkbox" class="form-check-input" id="undisturbify_checkbox" name="undisturbify_checkbox">
-          <label class="form-check-label" for="undisturbify_checkbox">Undisturbify
-            <a data-toggle="tooltip" data-placement="top" title="Removes SBS Map (if applicable), rebuilds landuse, soils, and runs WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-          </label>
+          <label class="form-check-label" for="undisturbify_checkbox">Undisturbify</label>  
+          <small class="form-text text-muted">
+                       Removes SBS Map (if applicable), rebuilds landuse, soils, and runs WEPP
+          </small>
         </div>
         <button type="submit" class="btn btn-primary" id="submit_button" rel="nofollow" data-purpose="human-interaction">Fork Project</button>
         <!-- This button is intended for human interaction only, not for bots or crawlers -->
