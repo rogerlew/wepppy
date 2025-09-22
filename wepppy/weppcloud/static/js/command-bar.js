@@ -10,7 +10,8 @@
     const SET_HELP_LINES = [
         "set units <si|english>    - Switch global unit preferences",
         "set name <project name>   - Update the project name",
-        "set scenario <name>       - Update the project scenario"
+        "set scenario <name>       - Update the project scenario",
+        "set outlet                - Use cursor location for outlet delineation"
     ];
 
     class CommandBar {
@@ -343,6 +344,9 @@
                 case 'scenario':
                     this.routeSetScenario(rest);
                     break;
+                case 'outlet':
+                    this.routeSetOutlet(rest);
+                    break;
                 default:
                     this.showResult(`Error: Unknown set option "${subcommandRaw}"`);
             }
@@ -426,6 +430,21 @@
             } catch (error) {
                 console.error('Error setting project scenario:', error);
                 this.showResult(`Error: Unable to set project scenario. ${error.message || error}`);
+            }
+        }
+
+        routeSetOutlet(args = []) {
+            if (Array.isArray(args) && args.length > 0) {
+                this.showResult('Usage: set outlet');
+                return;
+            }
+
+            const outlet = Outlet.getInstance()
+            outlet.setCursorSelection(!outlet.cursorSelectionOn);
+            if (outlet.cursorSelectionOn === true){
+                this.showResult('Cursor selection for outlet is now active. Click on the map to set the outlet location.');
+            } else {
+                this.showResult('Cursor selection for outlet is now deactivated.');
             }
         }
 
