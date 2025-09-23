@@ -1546,31 +1546,8 @@ def get_scenarios(runid, config):
 @app.route('/runs/<string:runid>/<config>/tasks/omni_migration/')
 def omni_migration(runid, config):
     authorize(runid, config, require_owner=True)
-    
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
     try:
-        ron = Ron.getInstance(wd)
-    except FileNotFoundError:
-        abort(404)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if not owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if ron.public:
-        should_abort = False
-
-    if should_abort:
-        abort(404)
-
-    try:
+        wd = get_wd(runid)
         ron = Ron.getInstance(wd)
         if 'omni' in ron._mods:
             return error_factory('omni already in mods')
