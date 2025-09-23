@@ -17,8 +17,8 @@ import math
 
 from subprocess import Popen, PIPE, call
 from concurrent.futures import (
-    ThreadPoolExecutor, ProcessPoolExecutor, wait, FIRST_EXCEPTION,
-    TimeoutError
+    ThreadPoolExecutor, ProcessPoolExecutor, wait, FIRST_COMPLETED,
+    FIRST_EXCEPTION
 )
 import time
 import inspect
@@ -1487,16 +1487,22 @@ class Wepp(NoDbBase):
 
                 futures_n = len(futures)
                 count = 0
-                for future in futures:
-                    try:
-                        # This will wait a maximum of 5 seconds for THIS specific future
-                        topaz_id, elapsed_time = future.result(timeout=5)
-                        count += 1
-                        self.logger.info(f'  ({count}/{futures_n}) Completed soil prep for {topaz_id} in {elapsed_time}s')
-                    except TimeoutError:
-                        self.logger.error("  A soil prep task timed out after 5 seconds.")
-                    except Exception as e:
-                        self.logger.error(f"  A soil prep task failed with an error: {e}")
+                pending = set(futures)
+
+                while pending:
+                    done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
+
+                    if not done:
+                        self.logger.error('  A soil prep task timed out after 5 seconds.')
+                        continue
+
+                    for future in done:
+                        try:
+                            topaz_id, elapsed_time = future.result()
+                            count += 1
+                            self.logger.info(f'  ({count}/{futures_n}) Completed soil prep for {topaz_id} in {elapsed_time}s')
+                        except Exception as e:
+                            self.logger.error(f'  A soil prep task failed with an error: {e}')
         else:
             for topaz_id, soil in soils.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
