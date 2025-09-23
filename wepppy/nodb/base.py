@@ -132,54 +132,7 @@ class NoDbBase(object):
 
     @property
     def _lock_key(self):
-        return f"{self._lock_hash_runid}:{self._lock_relative_filename}"
-
-    @property
-    def _omni_parent_and_relative(self):
-        abs_wd = Path(self.wd).resolve()
-        for candidate in (abs_wd, *abs_wd.parents):
-            if candidate.name != 'omni':
-                continue
-            parent = candidate.parent
-            try:
-                relative = abs_wd.relative_to(parent)
-            except ValueError:
-                continue
-            return parent, relative
-        return None, None
-
-    @property
-    def is_omni_run(self) -> bool:
-        _, relative = self._omni_parent_and_relative
-        return relative is not None
-
-    @property
-    def _lock_root_path(self) -> Path:
-        parent, _ = self._omni_parent_and_relative
-        if parent is not None:
-            return parent
-        return Path(self.wd).resolve()
-
-    @property
-    def _lock_hash_runid(self) -> str:
-        parent, _ = self._omni_parent_and_relative
-        if parent is not None:
-            runid = parent.name
-            if runid:
-                return runid
-        return self.runid
-
-    @property
-    def _lock_relative_filename(self) -> str:
-        try:
-            rel_path = Path(self._nodb).resolve().relative_to(self._lock_root_path)
-            return rel_path.as_posix()
-        except ValueError:
-            return self.filename
-
-    @property
-    def _lock_field(self) -> str:
-        return f'locked:{self._lock_relative_filename}'
+        return f"{self.runid}:{self.filename}"
 
     def __init__(self, wd, cfg_fn):
         assert _exists(wd)
@@ -702,7 +655,7 @@ class NoDbBase(object):
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
 
-        v = redis_lock_client.hget(self._lock_hash_runid, self._lock_field)
+        v = redis_lock_client.hget(self.runid, f'locked:{self.filename}')
         if v is None:
             return False
         return v == 'true'
@@ -713,17 +666,17 @@ class NoDbBase(object):
 
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
-
+        
         if self.islocked():
             raise Exception('lock() called on an already locked nodb')
 
-        redis_lock_client.hset(self._lock_hash_runid, self._lock_field, 'true')
+        redis_lock_client.hset(self.runid, f'locked:{self.filename}', 'true')
 
     def unlock(self, flag=None):
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
 
-        redis_lock_client.hset(self._lock_hash_runid, self._lock_field, 'false')
+        redis_lock_client.hset(self.runid, f'locked:{self.filename}', 'false')
 
     @property
     def runid(self):
@@ -1058,17 +1011,24 @@ def clear_locks(runid):
     """
     if redis_lock_client is None:
         raise RuntimeError('Redis lock client is unavailable')
-    cleared = []
-    fields = redis_lock_client.hgetall(runid) or {}
 
-    for key, value in fields.items():
-        if not key.startswith('locked:'):
+    subclasses = list(_iter_nodb_subclasses())
+    filenames = [getattr(cls, 'filename', None) for cls in subclasses]
+    
+    cleared = []
+    for filename in filenames:
+        if not filename:
             continue
 
-        if value == 'true':
-            redis_lock_client.hset(runid, key, 'false')
+        lock_key = f'locked:{filename}'
 
-        cleared.append(key)
+        v = redis_lock_client.hget(runid, lock_key)
+        if v is None:
+            continue
+        if v == 'true':
+            redis_lock_client.hset(runid, lock_key, 'false')
+
+        cleared.append(lock_key)
 
     return cleared
 
@@ -1081,15 +1041,11 @@ def lock_statuses(runid):
     statuses = {}
     for cls in _iter_nodb_subclasses():
         filename = getattr(cls, 'filename', None)
-        if filename:
-            statuses[filename] = False
-
-    fields = redis_lock_client.hgetall(runid) or {}
-    for key, value in fields.items():
-        if not key.startswith('locked:'):
+        if not filename:
             continue
 
-        filename = key[len('locked:'):]
-        statuses[filename] = (value == 'true')
+        key = f'locked:{filename}'
+        value = redis_lock_client.hget(runid, key)
+        statuses[filename] = (value == 'true') if value is not None else False
 
     return statuses
