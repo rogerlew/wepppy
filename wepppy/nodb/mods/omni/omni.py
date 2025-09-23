@@ -127,6 +127,7 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
             d = json.load(f)
         
         d['py/state']['wd'] = omni_dir
+        d['py/state']['_parent_wd'] = wd
 
         with open(dst, 'w') as f:
             json.dump(d, f)
@@ -189,6 +190,7 @@ def _omni_clone(scenario_def: dict, wd: str):
                 
 
             d['py/state']['wd'] = omni_dir
+            d['py/state']['_parent_wd'] = wd
 
             with open(dst, 'w') as f:
                 json.dump(d, f)
@@ -491,7 +493,7 @@ class Omni(NoDbBase):
 
     @property
     def omni_dir(self):
-        return _join(self.wd, 'omni')
+        return _join(self.wd, '_pups/omni')
     
     def clean(self):
         shutil.rmtree(self.omni_dir)

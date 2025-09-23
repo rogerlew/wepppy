@@ -142,7 +142,7 @@ from wepppy.nodb.mods.treatments import TreatmentsMode, Treatments
 
 from wepppy.nodb.redis_prep import RedisPrep
 
-from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.weppcloud.utils.helpers import get_wd, authorize
 from wepppy.weppcloud.utils.archive import has_archive, restore_archive, archive_run
 
 try:
@@ -166,7 +166,7 @@ def pre_request(worker, req):
 def post_request(worker, req, environ, resp):
     busy.acquire()
 
-
+import logging
 
 # load app configuration based on deployment
 
@@ -1214,14 +1214,10 @@ def create_run_dir(current_user):
         runid = awesome_codename.generate_codename().replace(' ', '-').replace("'", '')
 
         email = getattr(current_user, 'email', '')
-        if email.startswith('rogerlew@'):
-            runid = 'rlew-' + runid
-        elif email.startswith('mdobre@'):
+        if email.startswith('mdobre@'):
             runid = 'mdobre-' + runid
         elif email.startswith('srivas42@'):
             runid = 'srivas42-' + runid
-        elif request.remote_addr == '127.0.0.1':
-            runid = 'devvm-' + runid
 
         wd = get_wd(runid)
         if _exists(wd):
@@ -1328,59 +1324,15 @@ def view_access_log(runid, config):
 @app.route('/runs/<string:runid>/<config>/rq-fork-console', strict_slashes=False)
 @app.route('/runs/<string:runid>/<config>/rq-fork-console/', strict_slashes=False)
 def rq_fork_console(runid, config):
+    authorize(runid, config, require_owner=True)
     undisturbify = ('false', 'true')[bool(request.args.get('undisturbify', False))]
-
-    # get working dir of original directory
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
-
-    should_abort = True
-
-    if current_user in owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if len(owners) == 0:
-        should_abort = False
-
-    else:
-        ron = Ron.getInstance(wd)
-        if ron.public:
-            should_abort = False
-
-    if should_abort:
-        abort(403)
-
     return render_template('controls/rq-fork-console.j2', runid=runid, config=config, undisturbify=undisturbify)
 
 
 @app.route('/runs/<string:runid>/<config>/rq-archive-dashboard', strict_slashes=False)
 @app.route('/runs/<string:runid>/<config>/rq-archive-dashboard/', strict_slashes=False)
 def rq_archive_dashboard(runid, config):
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
-
-    should_abort = True
-
-    if current_user in owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if len(owners) == 0:
-        should_abort = False
-
-    else:
-        ron = Ron.getInstance(wd)
-        if ron.public:
-            should_abort = False
-
-    if should_abort:
-        abort(403)
-
+    authorize(runid, config, require_owner=True)
     return render_template('controls/rq-archive-dashboard.j2', runid=runid, config=config)
 
 
@@ -1593,9 +1545,8 @@ def get_scenarios(runid, config):
 @app.route('/runs/<string:runid>/<config>/tasks/omni_migration')
 @app.route('/runs/<string:runid>/<config>/tasks/omni_migration/')
 def omni_migration(runid, config):
+    authorize(runid, config, require_owner=True)
     
-    assert config is not None
-
     wd = get_wd(runid)
     owners = get_run_owners(runid)
     try:
