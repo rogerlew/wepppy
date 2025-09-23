@@ -16,10 +16,10 @@ from os.path import split as _split
 import math
 
 from subprocess import Popen, PIPE, call
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, wait, FIRST_EXCEPTION
 
 import time
-
+import inspect
 import pickle
 from copy import deepcopy
 from glob import glob
@@ -682,7 +682,8 @@ class Wepp(NoDbBase):
     # hillslopes
     #
     def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None, omni=False):
-        self.logger.info('Prepping Hillslopes... ')
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(frost={frost}, baseflow={baseflow}, wepp_ui={wepp_ui}, pmet={pmet}, snow={snow}, omni={omni})')
 
         # get translator
         watershed = Watershed.getInstance(self.wd)
@@ -1427,7 +1428,8 @@ class Wepp(NoDbBase):
             self.logger.info('done')
 
     def _prep_soils(self, translator):
-        self.logger.info('    _prep_soils... ')
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
 
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
@@ -1442,16 +1444,15 @@ class Wepp(NoDbBase):
         kslast_map_fn = self.kslast_map
         kslast_map = RasterDatasetInterpolator(kslast_map_fn) if kslast_map_fn is not None else None
 
-        run_concurrent = 0
-        # concurrency doesn't seem to make this any faster on NAS
-        # should be revisited if running on a local drive
+        run_concurrent = 1
 
+        self.logger.info(f'  run_concurrent={run_concurrent}')
         if run_concurrent:
             def oncomplete(prep_soils_task):
                 topaz_id, elapsed_time = prep_soils_task.result()
-                self.logger.info('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
+                self.logger.info(f'  Completed soil prep for {topaz_id} in {elapsed_time}s\n')
 
-            with ThreadPoolExecutor(max_workers=8) as pool:
+            with ProcessPoolExecutor(max_workers=max(os.cpu_count(), 32)) as executor:
                 futures = []
                 for topaz_id, soil in soils.sub_iter():
                     wepp_id = translator.wepp(top=int(topaz_id))
@@ -1481,7 +1482,8 @@ class Wepp(NoDbBase):
                         _kslast, modify_kslast_pars, 
                         initial_sat, 
                         clip_soils, clip_soils_depth)
-                    futures.append(pool.submit(lambda p: prep_soil(p), task_args))
+                    self.logger.debug(f'  Submitting soil prep for {topaz_id} with args={task_args}')
+                    futures.append(executor.submit(prep_soil, task_args))
                     futures[-1].add_done_callback(oncomplete)
 
                 wait(futures, return_when=FIRST_EXCEPTION)
