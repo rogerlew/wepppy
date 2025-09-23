@@ -1492,7 +1492,7 @@ class Wepp(NoDbBase):
                         # This will wait a maximum of 5 seconds for THIS specific future
                         topaz_id, elapsed_time = future.result(timeout=5)
                         count += 1
-                        self.logger.info(f'  ({count}/{futures_n}) Completed soil prep for {topaz_id} in {elapsed_time}s\n')
+                        self.logger.info(f'  ({count}/{futures_n}) Completed soil prep for {topaz_id} in {elapsed_time}s')
                     except TimeoutError:
                         self.logger.error("  A soil prep task timed out after 5 seconds.")
                     except Exception as e:
@@ -1529,32 +1529,31 @@ class Wepp(NoDbBase):
                 topaz_id, elapsed_time = prep_soil(task_args)
                 self.logger.info('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
 
-        self.logger.info('done')
-
     def _prep_climates(self, translator):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
+
         climate = Climate.getInstance(self.wd)
         if climate.climate_mode == ClimateMode.SingleStormBatch:
             return self._prep_climates_ss_batch(translator)
 
-        self.logger.info('    _prep_climates... ')
-        watershed = Watershed.getInstance(self.wd)
-        cli_dir = self.cli_dir
-        runs_dir = self.runs_dir
-        fp_runs_dir = self.fp_runs_dir
+        with self.timed():
+            watershed = Watershed.getInstance(self.wd)
+            cli_dir = self.cli_dir
+            runs_dir = self.runs_dir
+            fp_runs_dir = self.fp_runs_dir
 
-        for topaz_id in watershed._subs_summary:
-            self.logger.info(f'    _prep_climates:{topaz_id}... ')
+            sub_n = watershed.sub_n
+            count = 0
+            for topaz_id in watershed._subs_summary:
+                wepp_id = translator.wepp(top=int(topaz_id))
+                dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
 
-            wepp_id = translator.wepp(top=int(topaz_id))
-            dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
-
-            cli_summary = climate.sub_summary(topaz_id)
-            src_fn = _join(cli_dir, cli_summary['cli_fn'])
-            _copyfile(src_fn, dst_fn) 
-
-            self.logger.info('done')
-
-        self.logger.info('done')
+                cli_summary = climate.sub_summary(topaz_id)
+                src_fn = _join(cli_dir, cli_summary['cli_fn'])
+                _copyfile(src_fn, dst_fn) 
+                count += 1
+                self.logger.info(f' ({count}/{sub_n}) topaz_id: {topaz_id} | {src_fn} -> {dst_fn}')
 
     def _prep_climates_ss_batch(self, translator):
         climate = Climate.getInstance(self.wd)
@@ -1671,7 +1670,9 @@ class Wepp(NoDbBase):
                     ))
                     futures[-1].add_done_callback(oncomplete)
 
-            wait(futures, return_when=FIRST_EXCEPTION)
+            done, _ = wait(futures, return_when=FIRST_EXCEPTION)
+            for fut in done:
+                fut.result()
 
     #
     # watershed
