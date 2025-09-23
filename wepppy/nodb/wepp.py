@@ -16,8 +16,10 @@ from os.path import split as _split
 import math
 
 from subprocess import Popen, PIPE, call
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, wait, FIRST_EXCEPTION
-
+from concurrent.futures import (
+    ThreadPoolExecutor, ProcessPoolExecutor, wait, FIRST_EXCEPTION,
+    TimeoutError
+)
 import time
 import inspect
 import pickle
@@ -1448,11 +1450,7 @@ class Wepp(NoDbBase):
 
         self.logger.info(f'  run_concurrent={run_concurrent}')
         if run_concurrent:
-            def oncomplete(prep_soils_task):
-                topaz_id, elapsed_time = prep_soils_task.result()
-                self.logger.info(f'  Completed soil prep for {topaz_id} in {elapsed_time}s\n')
-
-            with ProcessPoolExecutor(max_workers=max(os.cpu_count(), 32)) as executor:
+            with ProcessPoolExecutor(max_workers=max(os.cpu_count(), 20)) as executor:
                 futures = []
                 for topaz_id, soil in soils.sub_iter():
                     wepp_id = translator.wepp(top=int(topaz_id))
@@ -1478,15 +1476,27 @@ class Wepp(NoDbBase):
                         _kslast = kslast
 
                     task_args = (
-                        topaz_id, src_fn, dst_fn, 
-                        _kslast, modify_kslast_pars, 
-                        initial_sat, 
+                        topaz_id, src_fn, dst_fn,
+                        _kslast, modify_kslast_pars,
+                        initial_sat,
                         clip_soils, clip_soils_depth)
-                    self.logger.debug(f'  Submitting soil prep for {topaz_id} with args={task_args}')
-                    futures.append(executor.submit(prep_soil, task_args))
-                    futures[-1].add_done_callback(oncomplete)
+                    self.logger.info(f'  Submitting soil prep for {topaz_id} with args={task_args}')
+                    
+                    future = executor.submit(prep_soil, task_args)
+                    futures.append(future)
 
-                wait(futures, return_when=FIRST_EXCEPTION)
+                futures_n = len(futures)
+                count = 0
+                for future in futures:
+                    try:
+                        # This will wait a maximum of 5 seconds for THIS specific future
+                        topaz_id, elapsed_time = future.result(timeout=5)
+                        count += 1
+                        self.logger.info(f'  ({count}/{futures_n}) Completed soil prep for {topaz_id} in {elapsed_time}s\n')
+                    except TimeoutError:
+                        self.logger.error("  A soil prep task timed out after 5 seconds.")
+                    except Exception as e:
+                        self.logger.error(f"  A soil prep task failed with an error: {e}")
         else:
             for topaz_id, soil in soils.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
@@ -2039,40 +2049,43 @@ class Wepp(NoDbBase):
         wd = self.wd
         climate = Climate.getInstance(wd)
         wepp_bin = self.wepp_bin
-        self.logger.info(f'Running Watershed wepp_bin:{self.wepp_bin}... ')
+        self.logger.info(f'Running Watershed wepp_bin:{self.wepp_bin}')
+        self.logger.info(f'    climate_mode:{climate.climate_mode.name}')
+        self.logger.info(f'    output_dir:{self.output_dir}')
+        self.logger.info(f'    runs_dir:{self.runs_dir}')
 
         runs_dir = self.runs_dir
 
         if climate.climate_mode == ClimateMode.SingleStormBatch:
+            with self.timed('  Running watershed ss batch runs'):
+                for d in climate.ss_batch_storms:
+                    ss_batch_key = d['ss_batch_key']
+                    ss_batch_id = d['ss_batch_id']
+                    run_ss_batch_watershed(runs_dir, wepp_bin, ss_batch_id)
 
-            for d in climate.ss_batch_storms:
-                ss_batch_key = d['ss_batch_key']
-                ss_batch_id = d['ss_batch_id']
-                run_ss_batch_watershed(runs_dir, wepp_bin, ss_batch_id)
+                    self.logger.info('    moving .out files...')
+                    for fn in glob(_join(self.runs_dir, '*.out')):
+                        dst_path = _join(self.output_dir, ss_batch_key, _split(fn)[1])
+                        shutil.move(fn, dst_path)
+                    self.logger.info('done')
+
+        else:
+            with self.timed('  Running watershed run'):
+                assert run_watershed(runs_dir, wepp_bin, status_channel=self._status_channel)
 
                 self.logger.info('    moving .out files...')
                 for fn in glob(_join(self.runs_dir, '*.out')):
-                    dst_path = _join(self.output_dir, ss_batch_key, _split(fn)[1])
+                    dst_path = _join(self.output_dir, _split(fn)[1])
                     shutil.move(fn, dst_path)
-                self.logger.info('done')
-
-        else:
-            assert run_watershed(runs_dir, wepp_bin, status_channel=self._status_channel)
-
-            self.logger.info('    moving .out files...')
-            for fn in glob(_join(self.runs_dir, '*.out')):
-                dst_path = _join(self.output_dir, _split(fn)[1])
-                shutil.move(fn, dst_path)
-            self.logger.info('done')
-
-        self.logger.info('done')
 
         if not self.is_omni_contrasts_run:
+            self.logger.info('  Not omni contrasts run, running post processing... ')
+
             if self.prep_details_on_run_completion:
-                self.logger.info('    exporting prep details...')
-                export_channels_prep_details(wd)
-                export_hillslopes_prep_details(wd)
-                self.logger.info('done')
+                with self.timed('  Exporting prep details'):
+                    export_channels_prep_details(wd)
+                    export_hillslopes_prep_details(wd)
+                    self.logger.info('done')
 
             if not _exists(_join(wd, 'wepppost.nodb')):
                 WeppPost(wd, '0.cfg')
@@ -2080,43 +2093,36 @@ class Wepp(NoDbBase):
             climate = Climate.getInstance(wd)
 
             if not climate.is_single_storm:
-                self.logger.info(' running wepppost... ')
-                self._run_wepppost()
-                self.logger.info('done')
+                with self.timed('  running wepppost'):
+                    self._run_wepppost()
 
-                self.logger.info(' running totalwatsed2... ')
-                self._build_totalwatsed2()
-                self.logger.info('done')
+                with self.timed('  running totalwatsed2'):
+                    self._build_totalwatsed2()
 
-                self.logger.info(' running hillslope_watbal... ')
-                self._run_hillslope_watbal()
-                self.logger.info('done')
+                with self.timed('  running hillslope_watbal'):
+                    self._run_hillslope_watbal()
 
-                self.logger.info(' compressing pass_pw0.txt... ')
-                compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
-                self.logger.info('done')
+                with self.timed('  compressing pass_pw0.txt'):
+                    compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
 
-                self.logger.info(' compressing soil_pw0.txt... ')
-                compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
-                self.logger.info('done')
+                with self.timed('  compressing soil_pw0.txt'):
+                    compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
 
                 if self.legacy_arc_export_on_run_completion:
-                    self.logger.info(' running legacy arcexport... ')
-                    from wepppy.export import  legacy_arc_export
-                    legacy_arc_export(self.wd)
-                    self.logger.info('done')
+                    with self.timed('  running legacy_arc_export'):
+                        from wepppy.export import  legacy_arc_export
+                        legacy_arc_export(self.wd)
 
-
-            _ = self.loss_report # make the .parquet files for loss report
-
+            with self.timed('  generating loss report'):
+                _ = self.loss_report # make the .parquet files for loss report
 
             if self.arc_export_on_run_completion:
-                self.logger.info(' running gpkg_export... ')
-                from wepppy.export.gpkg_export import gpkg_export
-                gpkg_export(self.wd)
-                self.logger.info('done')
+                with self.timed('  running gpkg_export'):
+                    from wepppy.export.gpkg_export import gpkg_export
+                    gpkg_export(self.wd)
+                    self.logger.info('done')
 
-                self.make_loss_grid()
+                    self.make_loss_grid()
 
         self.logger.info('Watershed Run Complete')
 

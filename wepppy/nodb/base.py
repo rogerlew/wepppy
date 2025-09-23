@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-2025, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
@@ -6,7 +6,9 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-# standard library
+## LLM Directives: 
+# - Please do not change the code in this file without asking for permission
+
 import os
 
 from dotenv import load_dotenv
@@ -54,11 +56,13 @@ import redis
 
 redis_nodb_cache_client = None
 redis_status_client = None
+redis_log_level_client = None
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 REDIS_NODB_CACHE_DB = 13  # to check keys use: redis-cli -n 13 KEYS "*"    
 REDIS_STATUS_DB = 2       # to monitor db 2 in real-time use: redis-cli MONITOR | grep '\[2 '
 REDIS_LOCK_DB = 0  # this is the same db as RedisPrep
 REDIS_NODB_EXPIRY = 72*3600  # 72 hours
+REDIS_LOG_LEVEL_DB = 15
 
 try:
     redis_nodb_cache_pool = redis.ConnectionPool(
@@ -70,7 +74,6 @@ try:
 except Exception as e:
     logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
     redis_nodb_cache_client = None
-
 
 try:
     redis_status_pool = redis.ConnectionPool(
@@ -94,6 +97,74 @@ except Exception as e:
     logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
     redis_lock_client = None
 
+try:
+    redis_log_level_pool = redis.ConnectionPool(
+        host=REDIS_HOST, port=6379, db=REDIS_LOG_LEVEL_DB, 
+        decode_responses=True, max_connections=50
+    )
+    redis_log_level_client = redis.StrictRedis(connection_pool=redis_log_level_pool)
+    redis_log_level_client.ping()
+except Exception as e:
+    logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
+    redis_log_level_client = None
+
+class LogLevel(IntEnum):
+    DEBUG = logging.DEBUG
+    INFO = logging.INFO
+    WARNING = logging.WARNING
+    ERROR = logging.ERROR
+    CRITICAL = logging.CRITICAL
+
+    @staticmethod
+    def parse(x: str):
+        x = x.lower()
+        if x == 'debug':
+            return LogLevel.DEBUG
+        elif x == 'info':
+            return LogLevel.INFO
+        elif x == 'warning':
+            return LogLevel.WARNING
+        elif x == 'error':
+            return LogLevel.ERROR
+        elif x == 'critical':
+            return LogLevel.CRITICAL
+        return LogLevel.INFO
+    
+    def __str__(self):
+        return super().__str__().replace('LogLevel.', '').lower()
+
+
+def try_redis_get_log_level(runid, default=logging.INFO):
+    if redis_log_level_client is None:
+        return default
+    try:
+        level = redis_log_level_client.get(f'loglevel:{runid}')
+        if level is None:
+            return default
+        try:
+            return int(LogLevel.parse(level))
+        except ValueError:
+            logging.error(f'Invalid log level in Redis: {level}')
+            return default
+    except Exception as e:
+        logging.error(f'Error getting log level from Redis: {e}')
+        return default
+    
+
+def try_redis_set_log_level(runid, level: str):
+    if redis_log_level_client is None:
+        return
+
+    try:
+        level = LogLevel.parse(level)
+        redis_log_level_client.set(f'loglevel:{runid}', str(level))
+    except Exception as e:
+        logging.error(f'Error setting log level in Redis: {e}')
+
+    try:
+        logging.getLogger(f'wepppy.run.{runid}').setLevel(int(level))
+    except Exception as e:
+        logging.error(f'Error setting log level for logger: {e}')
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
@@ -145,10 +216,7 @@ class NoDbBase(object):
         """
         Absolute path to the .nodb file from the runid working directory.
         """
-        _rel_path = self._relpath_to_parent
-        if _rel_path is None:
-            return _join(self.wd, self.filename)
-        return _join(self.wd, _rel_path, self.filename)
+        return _join(self.wd, self.filename)
     
     @property
     def _rel_nodb(self):
@@ -156,7 +224,7 @@ class NoDbBase(object):
         Relative path to the .nodb file from the runid working directory.
 
         e.g. 'wepp.nodb', 'ron.nodb', 'landuse.nodb', etc.
-        or for omni runs: '_pups/omni/scenarios/undisturbed/wepp.nodb'
+        or for pup (child) runs: '_pups/omni/scenarios/undisturbed/wepp.nodb'
         """
         _rel_path = self._relpath_to_parent
         if _rel_path is None:
@@ -256,7 +324,7 @@ class NoDbBase(object):
             # File handler for run logs
             log_path = self._nodb.replace('.nodb', '.log')  # absoloute path to log file
             self._run_file_handler = FileHandler(log_path)
-            self._run_file_handler.setLevel(logging.INFO)
+            self._run_file_handler.setLevel(try_redis_get_log_level(self.runid, logging.INFO))
             self._run_file_handler.setFormatter(formatter)
             Path(log_path).touch(exist_ok=True)
 
@@ -268,7 +336,7 @@ class NoDbBase(object):
             # RunID exceptions handler
             exceptions_path = _join(self.wd, 'exceptions.log')  # absolute path to exceptions log
             self._exception_file_handler = FileHandler(exceptions_path)
-            self._exception_file_handler.setLevel(logging.ERROR)
+            self._exception_file_handler.setLevel(try_redis_get_log_level(self.runid, logging.ERROR))
             self._exception_file_handler.setFormatter(formatter)
             Path(exceptions_path).touch(exist_ok=True)
 
@@ -338,36 +406,25 @@ class NoDbBase(object):
     def getInstance(cls, wd='.', allow_nonexistent=False, ignore_lock=False):
         global redis_nodb_cache_client, REDIS_NODB_EXPIRY
 
-        wd = os.path.abspath(wd)     # -> '/wc1/runs/lo/looking-glass/_pups/omni/scenarios/undisturbed'
-        split_wd = wd.split(os.sep)  # -> ['/', 'wc1', 'runs', 'lo', 'looking-glass', '_pups', 'omni', 'scenarios', 'undisturbed']
+        wd = os.path.abspath(wd)
+        filepath = cls._get_nodb_path(wd)
 
         # if redis_nodb_cache_client is available try to load from cache
         if redis_nodb_cache_client is not None:
-            # determine whether this is a _pups run
-            if '_pups' in split_wd:
-                # find the runid from the path
-                runid = split_wd[split_wd.index('_pups') -1]                 # -> 'looking-glass'
-                rel_path = os.sep.join(split_wd[split_wd.index('_pups'):])   # -> '_pups/omni/scenarios/undisturbed'
-                cache_key = f'{rel_path}/{cls.filename}'                     # -> '_pups/omni/scenarios/undisturbed/wepp.nodb'
-            else:
-                runid = split_wd[-1]      # -> 'looking-glass'
-                cache_key = cls.filename  # -> 'wepp.nodb'
-
-            cached_data = redis_nodb_cache_client.hget(runid, cache_key)
+            cached_data = redis_nodb_cache_client.get(filepath)
             if cached_data is not None:
                 try:
                     db = cls._decode_jsonpickle(cached_data)
                     if isinstance(db, cls):
                         db = cls._post_instance_loaded(db)
                         db._init_logging()
+                        db.logger.debug(f'Loaded NoDb instance from redis://{REDIS_HOST}/{REDIS_NODB_CACHE_DB}{filepath}')
                         return db
                 except Exception as e:
-                    print(f'Error decoding cached data for {cache_key}: {e}')
-                    redis_nodb_cache_client.hdel(runid, cache_key)
+                    print(f'Error decoding cached data for {filepath}: {e}')
+                    redis_nodb_cache_client.delete(filepath)
 
         # fall back to loading from file
-        filepath = cls._get_nodb_path(wd)
-
         if not _exists(filepath):
             if allow_nonexistent:
                 return None
@@ -383,10 +440,10 @@ class NoDbBase(object):
         if redis_nodb_cache_client:
             try:
                 # Cache the newly loaded object for next time
-                redis_nodb_cache_client.hsetex(runid, cache_key, jsonpickle.encode(db), ex=REDIS_NODB_EXPIRY) 
+                redis_nodb_cache_client.set(filepath, jsonpickle.encode(db), ex=REDIS_NODB_EXPIRY)
             except Exception as e:
-                print(f"Warning: Could not update Redis cache for {cache_key}: {e}")
-                
+                print(f"Warning: Could not update Redis cache for {filepath}: {e}")
+
         # validate and return
         if not isinstance(db, cls):
             raise TypeError(f"Decoded object type {type(db)} does not match expected {cls}")
@@ -394,7 +451,7 @@ class NoDbBase(object):
         db = cls._post_instance_loaded(db)
 
         abs_wd = os.path.abspath(wd)
-        db_wd = getattr(db, 'wd', abs_wd)
+        db_wd = db.wd
 
         if _exists(_join(wd, 'READONLY')) or ignore_lock:
             db.wd = abs_wd
@@ -402,9 +459,11 @@ class NoDbBase(object):
             return db
 
         if abs_wd != os.path.abspath(db_wd):
-            if not db.islocked():
-                with db.locked():
-                    db.wd = wd
+            logging.error(f"Warning: working directory mismatch: {abs_wd} != {db_wd}")
+            db.wd = abs_wd
+#            if not db.islocked():
+#                with db.locked():
+#                    db.wd = wd
 
         db._init_logging()
         return db
@@ -414,7 +473,8 @@ class NoDbBase(object):
         from wepppy.weppcloud.utils.helpers import get_wd
 
         return cls.getInstance(
-            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
+            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock
+        )
 
     @contextmanager
     def locked(self, validate_on_success=True):
@@ -475,7 +535,7 @@ class NoDbBase(object):
 
         if redis_nodb_cache_client is not None:
             try:
-                redis_nodb_cache_client.hsetex(self.runid, self._rel_nodb, js, ex=REDIS_NODB_EXPIRY) 
+                redis_nodb_cache_client.set(self._nodb, js, ex=REDIS_NODB_EXPIRY) 
             except Exception as e:
                 print(f'Error caching NoDb instance to Redis: {e}')
 
@@ -734,20 +794,21 @@ class NoDbBase(object):
         if self.islocked():
             raise Exception('lock() called on an already locked nodb')
 
-        redis_lock_client.hsetex(self.runid, self._file_lock_key, 'true')
+        redis_lock_client.hset(self.runid, self._file_lock_key, 'true')
 
     def unlock(self, flag=None):
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
 
-        redis_lock_client.hsetex(self.runid, self._file_lock_key, 'false')
+        redis_lock_client.hset(self.runid, self._file_lock_key, 'false')
 
     @property
     def runid(self):
         wd = self.wd
-        if wd.endswith('/'):
-            wd = wd[:-1]
-        return _split(wd)[-1]
+        split_wd = wd.split(os.sep)
+        if '_pups' in split_wd:
+            return split_wd[split_wd.index('_pups') -1]
+        return split_wd[-1]
 
     @property
     def multi_ofe(self):
@@ -1087,7 +1148,7 @@ def clear_locks(runid):
         if v != 'true':
             continue
 
-        redis_lock_client.hsetex(runid, lock_key, 'false')
+        redis_lock_client.hset(runid, lock_key, 'false')
         cleared.append(lock_key)
     
     return cleared
