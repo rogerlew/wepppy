@@ -125,8 +125,8 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
 
         with open(dst, 'r') as f:
             d = json.load(f)
-
-        d['wd'] = omni_dir
+        
+        d['py/state']['wd'] = omni_dir
 
         with open(dst, 'w') as f:
             json.dump(d, f)
@@ -186,8 +186,9 @@ def _omni_clone(scenario_def: dict, wd: str):
 
             with open(dst, 'r') as f:
                 d = json.load(f)
+                
 
-            d['wd'] = omni_dir
+            d['py/state']['wd'] = omni_dir
 
             with open(dst, 'w') as f:
                 json.dump(d, f)
