@@ -1083,7 +1083,7 @@ class Omni(NoDbBase):
         combined['Sediment Yield (t)']        = combined['Sediment Yield (kg/ha)']        * combined['Hillslope Area (ha)'] / 1_000
 
         # Calculate NTU in g/L (combined['Sediment Yield (t)'] * 1_000_000) / (combined['Runoff (m^3)'] * 1_000)
-        combined['NTU (g/L)'] = (combined['Sediment Yield (t)'] * 1_000) / combined['Runoff (m^3)']
+        combined['NTU (g/L)'] = (combined['Sediment Yield (t)'] * 1_000) / (combined['Runoff (m^3)'] + combined['Baseflow (m^3)'] )
 
         out_path = _join(self.wd, 'omni', 'scenarios.hillslope_summaries.parquet')
         combined.to_parquet(out_path)
