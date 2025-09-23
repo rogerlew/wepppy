@@ -18,7 +18,7 @@ from flask_security import current_user
 
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # pip install cmarkgfm
 # https://github.com/sindresorhus/github-markdown-css for styling
-from wepppy.weppcloud.utils.helpers import get_wd, exception_factory
+from wepppy.weppcloud.utils.helpers import get_wd, exception_factory, authorize
 from wepppy.nodb import Ron
 from wepppy.nodb.base import _iter_nodb_subclasses
 
@@ -227,30 +227,6 @@ def _session_has_lock(runid, config, client_uuid):
         return False
     return current_uuid == client_uuid
 
-
-def _authorize(runid, config, require_owner=False):
-    from wepppy.weppcloud.app import get_run_owners
-
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
-    should_abort = True
-
-    if not require_owner and Ron.getInstance(wd).public:
-        should_abort = False
-
-    if current_user in owners:
-        should_abort = False
-
-    if current_user.has_role("Admin"):
-        should_abort = False
-
-    if not owners:
-        should_abort = False
-
-    if should_abort:
-        abort(403)
-
-
 def _can_edit(runid):
     from wepppy.weppcloud.app import get_run_owners
 
@@ -265,7 +241,7 @@ def _can_edit(runid):
 @readme_bp.route("/runs/<string:runid>/<config>/readme-editor")
 def readme_editor(runid, config):
     try:
-        _authorize(runid, config, require_owner=True)
+        authorize(runid, config, require_owner=True)
         context = _template_context(runid, config)
         ron = context.get("ron")
         if getattr(ron, "readonly", False):
@@ -287,7 +263,7 @@ def readme_editor(runid, config):
 @readme_bp.route("/runs/<string:runid>/<config>/readme/raw")
 def readme_raw(runid, config):
     try:
-        _authorize(runid, config, require_owner=True)
+        authorize(runid, config, require_owner=True)
         markdown = _load_markdown(runid, config)
         return jsonify({"markdown": markdown})
     except:
@@ -296,7 +272,7 @@ def readme_raw(runid, config):
 @readme_bp.route("/runs/<string:runid>/<config>/readme/save", methods=["POST"])
 def readme_save(runid, config):
     try:
-        _authorize(runid, config, require_owner=True)
+        authorize(runid, config, require_owner=True)
         data = request.get_json() or {}
         markdown = data.get("markdown", "")
         client_uuid = data.get("uuid")
@@ -334,7 +310,7 @@ def readme_save(runid, config):
 @readme_bp.route("/runs/<string:runid>/<config>/readme/preview", methods=["POST"])
 def readme_preview(runid, config):
     try:
-        _authorize(runid, config, require_owner=True)
+        authorize(runid, config, require_owner=True)
         data = request.get_json() or {}
         markdown = data.get("markdown", "")
         if not isinstance(markdown, str):
@@ -349,7 +325,7 @@ def readme_preview(runid, config):
 @readme_bp.route("/runs/<string:runid>/<config>/README")
 def readme_render(runid, config):
     try:
-        _authorize(runid, config)
+        authorize(runid, config)
         markdown = _load_markdown(runid, config)
         context = _template_context(runid, config)
         html = _render_markdown(markdown, context)

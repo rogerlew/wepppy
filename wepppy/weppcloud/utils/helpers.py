@@ -155,6 +155,33 @@ def htmltree(_dir='.', padding='', print_files=True, recurse=False):
     return ''.join(_tree(_dir, padding, print_files))
 
 
+
+def authorize(runid, config, require_owner=False):
+    from flask_login import current_user
+    from flask import abort
+    from wepppy.nodb.ron import Ron
+    from wepppy.weppcloud.app import get_run_owners
+
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    should_abort = True
+
+    if not require_owner and Ron.getInstance(wd).public:
+        should_abort = False
+
+    if current_user in owners:
+        should_abort = False
+
+    if current_user.has_role("Admin"):
+        should_abort = False
+
+    if not owners:
+        should_abort = False
+
+    if should_abort:
+        abort(403)
+
+
 def matplotlib_vis(path):
     import matplotlib.pyplot as plt
 
