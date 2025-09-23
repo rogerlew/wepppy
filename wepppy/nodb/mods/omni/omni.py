@@ -29,7 +29,7 @@ import utm
 
 # wepppy
 from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
-from wepppy.all_your_base import robust_rmtree
+
 from ...base import (
     NoDbBase,
     TriggerEvents
@@ -107,7 +107,7 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
     omni_dir = _join(wd, OMNI_REL_DIR, 'contrasts', contrast_id)
 
     if _exists(omni_dir):
-        srobust_rmtree(omni_dir)
+        shutil.rmtree(omni_dir)
 
     os.makedirs(omni_dir)
     os.makedirs(_join(omni_dir, 'soils'), exist_ok=True)
@@ -163,7 +163,7 @@ def _omni_clone(scenario_def: dict, wd: str):
     omni_dir = _join(wd, OMNI_REL_DIR, 'scenarios', _scenario_name)
 
     if _exists(omni_dir):
-        robust_rmtree(omni_dir)
+        shutil.rmtree(omni_dir)
 
     os.makedirs(omni_dir)
 
@@ -245,9 +245,9 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str):
     os.remove(_join(new_wd, 'landuse.nodb'))
     os.remove(_join(new_wd, 'soils.nodb'))
 
-    robust_rmtree(_join(new_wd, 'disturbed'))
-    robust_rmtree(_join(new_wd, 'landuse'))
-    robust_rmtree(_join(new_wd, 'soils'))
+    shutil.rmtree(_join(new_wd, 'disturbed'))
+    shutil.rmtree(_join(new_wd, 'landuse'))
+    shutil.rmtree(_join(new_wd, 'soils'))
 
     # copy the sibling scenario
     shutil.copyfile(_join(sibling_wd, 'disturbed.nodb'), _join(new_wd, 'disturbed.nodb'))
@@ -501,7 +501,7 @@ class Omni(NoDbBase):
         return _join(self.wd, OMNI_REL_DIR)
     
     def clean(self):
-        robust_rmtree(self.omni_dir)
+        shutil.rmtree(self.omni_dir)
         sleep(1)
         os.makedirs(self.omni_dir)
 
@@ -509,7 +509,7 @@ class Omni(NoDbBase):
         scenarios_dir = _join(self.omni_dir, 'scenarios')
 
         if _exists(scenarios_dir):
-            robust_rmtree(scenarios_dir)
+            shutil.rmtree(scenarios_dir)
             sleep(1)
 
         os.makedirs(scenarios_dir)
