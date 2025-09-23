@@ -24,6 +24,7 @@ from glob import glob
 from contextlib import contextmanager
 from pathlib import Path
 from typing import ClassVar
+from collections import defaultdict
 
 import json
 
@@ -57,6 +58,7 @@ REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 REDIS_NODB_CACHE_DB = 13  # to check keys use: redis-cli -n 13 KEYS "*"    
 REDIS_STATUS_DB = 2       # to monitor db 2 in real-time use: redis-cli MONITOR | grep '\[2 '
 REDIS_LOCK_DB = 0  # this is the same db as RedisPrep
+REDIS_NODB_EXPIRY = 72*3600  # 72 hours
 
 try:
     redis_nodb_cache_pool = redis.ConnectionPool(
@@ -124,15 +126,7 @@ class NoDbBase(object):
     DEBUG = 0
     _js_decode_replacements = ()
 
-    filename: ClassVar[str] = None
-
-    @property
-    def _nodb(self):
-        return _join(self.wd, self.filename)
-
-    @property
-    def _lock_key(self):
-        return f"{self.runid}:{self.filename}"
+    filename: ClassVar[str] = None # just the basename
 
     def __init__(self, wd, cfg_fn):
         assert _exists(wd)
@@ -141,26 +135,96 @@ class NoDbBase(object):
         self._load_mods()
 
         # noinspection PyUnresolvedReferences
-        if _exists(self._nodb):
+        if _exists(self._nodb):  # absolute path to .nodb file
             raise Exception('NoDb has already been initialized')
 
         self._init_logging()
+
+    @property
+    def _nodb(self):
+        """
+        Absolute path to the .nodb file from the runid working directory.
+        """
+        _rel_path = self._relpath_to_parent
+        if _rel_path is None:
+            return _join(self.wd, self.filename)
+        return _join(self.wd, _rel_path, self.filename)
+    
+    @property
+    def _rel_nodb(self):
+        """
+        Relative path to the .nodb file from the runid working directory.
+
+        e.g. 'wepp.nodb', 'ron.nodb', 'landuse.nodb', etc.
+        or for omni runs: '_pups/omni/scenarios/undisturbed/wepp.nodb'
+        """
+        _rel_path = self._relpath_to_parent
+        if _rel_path is None:
+            return self.filename
+        return _join(_rel_path, self.filename)
+
+    @property
+    def _file_lock_key(self):
+        return f'locked:{self._rel_nodb}'
+            
+    @property
+    def parent_wd(self):
+        return getattr(self, '_parent_wd', None)
+    
+    @parent_wd.setter
+    def parent_wd(self, value: str):
+        self._parent_wd = value
+
+    @property
+    def is_child_run(self):
+        if self.parent_wd is None:
+            return False
         
+        return self._relpath_to_parent.startswith('_pups/')
+    
+    @property
+    def _relpath_to_parent(self):
+        if self.parent_wd is None:
+            return None
+        
+        parent_wd = os.path.abspath(self.parent_wd)
+        wd = os.path.abspath(self.wd)
+
+        if wd.startswith(parent_wd):
+            relpath = os.path.relpath(wd, parent_wd)
+            return relpath
+        
+        return None
+        
+    @property
+    def _logger_base_name(self):
+        _rel_path = self._relpath_to_parent
+        if _rel_path is None:
+            return f'wepppy.run.{self.runid}'
+        _rel_path = _rel_path.split('/')
+        return f'wepppy.run.{self.runid}' + '.' + ','.join(_rel_path)
+    
     @property
     def class_name(self):
         return type(self).filename.removesuffix(".nodb")
 
+    @property
+    def _status_channel(self):
+        """
+        Redis channel name for status messages.
+        """
+        # this is a router
+        _rel_path = self._relpath_to_parent
+        if _rel_path is None:    
+            return f'{self.runid}:{self.class_name}'
+    
+        if _rel_path.startswith('_pups/omni/'):
+            return f'{self.runid}:omni'
+
     def _init_logging(self):
         # Initialize loggers
-        self.runid_logger = logging.getLogger(f'wepppy.run.{self.runid}')
-        self.logger = logging.getLogger(f'wepppy.run.{self.runid}.{self.class_name}')
-
-        # Clear existing handlers from logger
-        for handler in list(self.logger.handlers):
-            self.logger.removeHandler(handler)
-
-        self.logger.setLevel(logging.INFO)
-        self.logger.propagate = True
+        self.runid_logger = logging.getLogger(f'wepppy.run.{self.runid}')  # project logger
+        self.logger = logging.getLogger(f'{self._logger_base_name}.{self.class_name}')  # project component logger
 
         # Check if queue handler exists
         queue_handler = getattr(self.runid_logger, '_queue_handler', None)
@@ -176,12 +240,12 @@ class NoDbBase(object):
             self._queue_handler = QueueHandler(self._log_queue)
 
             # Clear existing handlers from runid_logger
-            for handler in list(self.runid_logger.handlers):
-                self.runid_logger.removeHandler(handler)
+            for handler in list(self.logger.handlers):
+                self.logger.removeHandler(handler)
 
-            self.runid_logger.setLevel(logging.WARNING)
-            self.runid_logger.propagate = False
-            self.runid_logger.addHandler(self._queue_handler)
+            self.logger.setLevel(logging.INFO)
+            self.logger.propagate = True  # allow to propagate to runid_logger
+            self.logger.addHandler(self._queue_handler)
 
             # Redis handler to proxy to web clients
             self._redis_handler = StatusMessengerHandler(
@@ -190,53 +254,55 @@ class NoDbBase(object):
             self._redis_handler.setLevel(logging.DEBUG)
 
             # File handler for run logs
-            log_path = _join(self.wd, self.filename.replace('.nodb', '.log'))
+            log_path = self._nodb.replace('.nodb', '.log')  # absoloute path to log file
             self._run_file_handler = FileHandler(log_path)
             self._run_file_handler.setLevel(logging.INFO)
             self._run_file_handler.setFormatter(formatter)
             Path(log_path).touch(exist_ok=True)
-
-            # File handler for exceptions
-            exceptions_path = _join(self.wd, 'exceptions.log')
-            self._exception_file_handler = FileHandler(exceptions_path)
-            self._exception_file_handler.setLevel(logging.ERROR)
-            self._exception_file_handler.setFormatter(formatter)
-            Path(exceptions_path).touch(exist_ok=True)
 
             # Console handler
             self._console_handler = StreamHandler()
             self._console_handler.setLevel(logging.ERROR)
             self._console_handler.setFormatter(formatter)
 
+            # RunID exceptions handler
+            exceptions_path = _join(self.wd, 'exceptions.log')  # absolute path to exceptions log
+            self._exception_file_handler = FileHandler(exceptions_path)
+            self._exception_file_handler.setLevel(logging.ERROR)
+            self._exception_file_handler.setFormatter(formatter)
+            Path(exceptions_path).touch(exist_ok=True)
+
             # Initialize queue listener with all handlers
             self._queue_listener = QueueListener(
                 self._log_queue,
                 self._redis_handler,
                 self._run_file_handler,
-                self._exception_file_handler,
                 self._console_handler
             )
-
             self._queue_listener.start()
             atexit.register(self._queue_listener.stop)
 
-            # Attach handlers to runid_logger for reuse
-            self.runid_logger._log_queue = self._log_queue
-            self.runid_logger._queue_handler = self._queue_handler
-            self.runid_logger._queue_listener = self._queue_listener
-            self.runid_logger._redis_handler = self._redis_handler
-            self.runid_logger._run_file_handler = self._run_file_handler
-            self.runid_logger._exception_file_handler = self._exception_file_handler
-            self.runid_logger._console_handler = self._console_handler
+            self.runid_logger.setLevel(logging.ERROR)
+            self.runid_logger.propagate = True  # allow propagation to root logger
+            self.runid_logger.addHandler(self._exception_file_handler)
+
+            # Attach handlers to component logger for reuse
+            self.logger._log_queue = self._log_queue
+            self.logger._queue_handler = self._queue_handler
+            self.logger._queue_listener = self._queue_listener
+            self.logger._redis_handler = self._redis_handler
+            self.logger._run_file_handler = self._run_file_handler
+            self.logger._exception_file_handler = self._exception_file_handler
+            self.logger._console_handler = self._console_handler
         else:
             # Reuse existing handlers
-            self._queue_handler = queue_handler
-            self._log_queue = self.runid_logger._log_queue
-            self._queue_listener = self.runid_logger._queue_listener
-            self._redis_handler = self.runid_logger._redis_handler
-            self._run_file_handler = self.runid_logger._run_file_handler
-            self._exception_file_handler = self.runid_logger._exception_file_handler
-            self._console_handler = self.runid_logger._console_handler
+            self._queue_handler = self.logger.queue_handler
+            self._log_queue = self.logger._log_queue
+            self._queue_listener = self.logger._queue_listener
+            self._redis_handler = self.logger._redis_handler
+            self._run_file_handler = self.logger._run_file_handler
+            self._exception_file_handler = self.logger._exception_file_handler
+            self._console_handler = self.logger._console_handler
 
     def __getstate__(self):
         state = self.__dict__.copy()
@@ -254,17 +320,6 @@ class NoDbBase(object):
             state.pop(attr, None)
         return state
 
-    @property
-    def _status_channel(self):
-        run_dir = os.path.abspath(self.runs_dir)
-        if '/omni/' in run_dir:
-            _parent_runid = run_dir.split('/omni/')[0].split('/')[-1]
-            __status_channel = f'{_parent_runid}:omni'
-        else:
-            __status_channel = f'{self.runid}:{self.class_name}'
-
-        return  __status_channel
-
     @contextmanager
     def timed(self, task_name: str, level=logging.INFO):
         """Context manager to log the start, end, and duration of a task."""
@@ -279,28 +334,36 @@ class NoDbBase(object):
             duration = end_time - start_time
             self.logger.log(level, f"{task_name}... done. ({duration:.2f}s)")
 
-    @property
-    def _redis_cache_key(self):
-        return f'{self.runid}:{self.filename}'
-
     @classmethod
     def getInstance(cls, wd='.', allow_nonexistent=False, ignore_lock=False):
-        global redis_nodb_cache_client
+        global redis_nodb_cache_client, REDIS_NODB_EXPIRY
+
+        wd = os.path.abspath(wd)     # -> '/wc1/runs/lo/looking-glass/_pups/omni/scenarios/undisturbed'
+        split_wd = wd.split(os.sep)  # -> ['/', 'wc1', 'runs', 'lo', 'looking-glass', '_pups', 'omni', 'scenarios', 'undisturbed']
 
         # if redis_nodb_cache_client is available try to load from cache
         if redis_nodb_cache_client is not None:
-            runid = _split(os.path.abspath(wd))[-1]
-            cache_key = f'{runid}:{cls.filename}'
-            cached_data = redis_nodb_cache_client.get(cache_key)
+            # determine whether this is a _pups run
+            if '_pups' in split_wd:
+                # find the runid from the path
+                runid = split_wd[split_wd.index('_pups') -1]                 # -> 'looking-glass'
+                rel_path = os.sep.join(split_wd[split_wd.index('_pups'):])   # -> '_pups/omni/scenarios/undisturbed'
+                cache_key = f'{rel_path}/{cls.filename}'                     # -> '_pups/omni/scenarios/undisturbed/wepp.nodb'
+            else:
+                runid = split_wd[-1]      # -> 'looking-glass'
+                cache_key = cls.filename  # -> 'wepp.nodb'
+
+            cached_data = redis_nodb_cache_client.hget(runid, cache_key)
             if cached_data is not None:
                 try:
                     db = cls._decode_jsonpickle(cached_data)
                     if isinstance(db, cls):
+                        db = cls._post_instance_loaded(db)
                         db._init_logging()
                         return db
                 except Exception as e:
                     print(f'Error decoding cached data for {cache_key}: {e}')
-                    redis_nodb_cache_client.delete(cache_key)
+                    redis_nodb_cache_client.hdel(runid, cache_key)
 
         # fall back to loading from file
         filepath = cls._get_nodb_path(wd)
@@ -320,7 +383,7 @@ class NoDbBase(object):
         if redis_nodb_cache_client:
             try:
                 # Cache the newly loaded object for next time
-                redis_nodb_cache_client.set(cache_key, jsonpickle.encode(db), ex=72*3600) 
+                redis_nodb_cache_client.hsetex(runid, cache_key, jsonpickle.encode(db), ex=REDIS_NODB_EXPIRY) 
             except Exception as e:
                 print(f"Warning: Could not update Redis cache for {cache_key}: {e}")
                 
@@ -366,6 +429,8 @@ class NoDbBase(object):
         On successful exit from the 'with' block, it calls dump_and_unlock().
         If an exception occurs, it calls unlock() and re-raises the exception.
         """
+        self.logger.info(f"Entering locked context manager: {self._file_lock_key}")
+
         if self.readonly:
             raise Exception('Cannot use locked context on a readonly project.')
 
@@ -395,7 +460,7 @@ class NoDbBase(object):
         return instance
 
     def dump(self):
-        global redis_nodb_cache_client
+        global redis_nodb_cache_client, REDIS_NODB_EXPIRY
 
         if not self.islocked():
             raise RuntimeError("cannot dump to unlocked db")
@@ -403,14 +468,14 @@ class NoDbBase(object):
         js = jsonpickle.encode(self)
 
         # Write-then-sync
-        with open(self._nodb, "w") as fp:
+        with open(self._nodb, "w") as fp:  # absolute path to .nodb file
             fp.write(js)
             fp.flush()                 # flush Python’s userspace buffer
             os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
 
         if redis_nodb_cache_client is not None:
             try:
-                redis_nodb_cache_client.set(self._redis_cache_key, js)
+                redis_nodb_cache_client.hsetex(self.runid, self._rel_nodb, js, ex=REDIS_NODB_EXPIRY) 
             except Exception as e:
                 print(f'Error caching NoDb instance to Redis: {e}')
 
@@ -425,7 +490,6 @@ class NoDbBase(object):
         if cls.filename is None:
             raise AttributeError(f"{cls.__name__} must define a class attribute 'filename'")
         return _join(wd, cls.filename)
-
 
     @classmethod
     def _preprocess_json_for_decode(cls, json_text):
@@ -655,7 +719,7 @@ class NoDbBase(object):
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
 
-        v = redis_lock_client.hget(self.runid, f'locked:{self.filename}')
+        v = redis_lock_client.hget(self.runid, self._file_lock_key)
         if v is None:
             return False
         return v == 'true'
@@ -670,13 +734,13 @@ class NoDbBase(object):
         if self.islocked():
             raise Exception('lock() called on an already locked nodb')
 
-        redis_lock_client.hset(self.runid, f'locked:{self.filename}', 'true')
+        redis_lock_client.hsetex(self.runid, self._file_lock_key, 'true')
 
     def unlock(self, flag=None):
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
 
-        redis_lock_client.hset(self.runid, f'locked:{self.filename}', 'false')
+        redis_lock_client.hsetex(self.runid, self._file_lock_key, 'false')
 
     @property
     def runid(self):
@@ -1004,6 +1068,7 @@ def iter_nodb_mods_subclasses():
                 if 'mods' in _module:
                     yield subcls.filename.removesuffix('.nodb'), subcls
 
+
 def clear_locks(runid):
     """
     Clear all locks for the given runid.
@@ -1012,40 +1077,37 @@ def clear_locks(runid):
     if redis_lock_client is None:
         raise RuntimeError('Redis lock client is unavailable')
 
-    subclasses = list(_iter_nodb_subclasses())
-    filenames = [getattr(cls, 'filename', None) for cls in subclasses]
-    
     cleared = []
-    for filename in filenames:
-        if not filename:
+    hashmap = redis_lock_client.hgetall(runid)
+
+    for lock_key, v in hashmap.items():
+        if not lock_key.startswith('locked:'):
             continue
 
-        lock_key = f'locked:{filename}'
-
-        v = redis_lock_client.hget(runid, lock_key)
-        if v is None:
+        if v != 'true':
             continue
-        if v == 'true':
-            redis_lock_client.hset(runid, lock_key, 'false')
 
+        redis_lock_client.hsetex(runid, lock_key, 'false')
         cleared.append(lock_key)
-
+    
     return cleared
 
 
-def lock_statuses(runid):
-    """Return a mapping of `.nodb` filenames to lock booleans for the run."""
+def lock_statuses(runid) -> defaultdict[str, bool]:
+    """
+    Clear all locks for the given runid.
+    Low-level function that interacts directly with Redis.
+    """
     if redis_lock_client is None:
         raise RuntimeError('Redis lock client is unavailable')
 
-    statuses = {}
-    for cls in _iter_nodb_subclasses():
-        filename = getattr(cls, 'filename', None)
-        if not filename:
-            continue
+    statuses = defaultdict(bool)
 
-        key = f'locked:{filename}'
-        value = redis_lock_client.hget(runid, key)
-        statuses[filename] = (value == 'true') if value is not None else False
+    # sync statuses from redis
+    hashmap = redis_lock_client.hgetall(runid)
+    for lock_key, v in hashmap.items():
+        if lock_key.startswith('locked:'):
+            filename = lock_key.split('locked:')[1]
+            statuses[filename] = (v == 'true')
 
     return statuses
