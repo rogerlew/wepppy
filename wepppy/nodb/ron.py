@@ -285,8 +285,9 @@ class RonNoDbLockedException(Exception):
 
 class Ron(NoDbBase):
     """
-    Manager that keeps track of project details
-    and coordinates access of NoDb instances.
+    Run Object Node
+
+    tracks high level project details and intializes other NoDb singletons
     """
     __name__ = 'Ron'
 
