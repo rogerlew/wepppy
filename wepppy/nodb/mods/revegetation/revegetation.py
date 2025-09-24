@@ -14,8 +14,6 @@ from os.path import split as _split
 
 from copy import deepcopy
 
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
-
 from glob import glob
 
 import shutil
