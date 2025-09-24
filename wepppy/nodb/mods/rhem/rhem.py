@@ -29,7 +29,7 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 
 from glob import glob
 
@@ -179,26 +179,43 @@ class Rhem(NoDbBase):
         watershed = Watershed.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
 
-        pool = ThreadPoolExecutor(NCPU)
-        futures = []
+        with ThreadPoolExecutor(NCPU) as pool:
+            futures = []
 
-        def oncomplete(rhemrun):
-            status, _id, elapsed_time = rhemrun.result()
-            assert status
-            self.logger.info('  {} completed run in {}s\n'.format(_id, elapsed_time))
+            def oncomplete(rhemrun):
+                status, _id, elapsed_time = rhemrun.result()
+                assert status
+                self.logger.info('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
-        sub_n = watershed.sub_n
-        for i, topaz_id in enumerate(watershed._subs_summary):
-            self.logger.info(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})\n')
-            self.logger.info(f'      runs_dir: {runs_dir}\n')
+            sub_n = watershed.sub_n
+            for i, topaz_id in enumerate(watershed._subs_summary):
+                self.logger.info(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})\n')
+                self.logger.info(f'      runs_dir: {runs_dir}\n')
 
-#            run_hillslope(topaz_id, runs_dir)
-#            self.logger.info(f'  {topaz_id} completed run\n')
+                futures.append(pool.submit(run_hillslope, topaz_id, runs_dir))
+                futures[-1].add_done_callback(oncomplete)
 
-            futures.append(pool.submit(run_hillslope, topaz_id, runs_dir))
-            futures[-1].add_done_callback(oncomplete)
+            futures_n = len(futures)
+            count = 0
+            pending = set(futures)
+            while pending:
+                done, pending = wait(pending, timeout=30, return_when=FIRST_COMPLETED)
 
-        wait(futures, return_when=FIRST_EXCEPTION)
+                if not done:
+                    # RHEM runs may take a while; log so we notice if they hang entirely.
+                    self.logger.warning('  RHEM hillslopes still running after 30 seconds; continuing to wait.')
+                    continue
+
+                for future in done:
+                    try:
+                        future.result()
+                        count += 1
+                        self.logger.info(f'  ({count}/{futures_n}) hillslopes completed)\
+                    except Exception as exc:
+                        for remaining in pending:
+                            remaining.cancel()
+                        self.logger.error(f'  RHEM hillslope failed with an error: {exc}')
+                        raise
 
         self.logger.info('Running RhemPost... ')
         rhempost = RhemPost.getInstance(self.wd)
