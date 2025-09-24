@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 from calendar import isleap
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
 import os
 from os.path import join as _join
 from os.path import exists as _exists
+import logging
 
 from metpy.calc import dewpoint
 from metpy.units import units
@@ -48,6 +49,8 @@ from wepppy.all_your_base.geo.gdallocationinfo import (
 )
 
 from wepppy.nodb.status_messenger import StatusMessenger
+
+_logger = logging.getLogger(__name__)
 
 from pprint import pprint
 
@@ -116,17 +119,34 @@ def interpolate_daily_timeseries(
                 futures.append(executor.submit(process_measure, year, measure, hillslope_locations))
 
         aggregated = defaultdict(lambda: defaultdict(dict))
-        for future in futures:
-            yearly_data = future.result(timeout=3600)
-            for topaz_id, d in yearly_data.items():
-                year = d['year']
-                measure = d['measure']
-                data = d['data']
+        pending = set(futures)
 
+        while pending:
+            done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
+
+            if not done:
                 if status_channel is not None:
-                    StatusMessenger.publish(status_channel, f'  collecting {topaz_id}: {measure} for {year}...')
+                    StatusMessenger.publish(status_channel, '  waiting on Daymet measure processing...')
+                _logger.warning('Daymet measure processing still running after 60 seconds; continuing to wait.')
+                continue
 
-                aggregated[topaz_id][measure][year] = data
+            for future in done:
+                try:
+                    yearly_data = future.result()
+                except Exception:
+                    for remaining in pending:
+                        remaining.cancel()
+                    raise
+
+                for topaz_id, d in yearly_data.items():
+                    year = d['year']
+                    measure = d['measure']
+                    data = d['data']
+
+                    if status_channel is not None:
+                        StatusMessenger.publish(status_channel, f'  collecting {topaz_id}: {measure} for {year}...')
+
+                    aggregated[topaz_id][measure][year] = data
 
 
     for topaz_id in hillslope_locations:
