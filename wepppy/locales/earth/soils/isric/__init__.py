@@ -2,7 +2,8 @@ from owslib.wms import WebMapService
 
 import os
 from os.path import join as _join
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
+import logging
 
 from datetime import datetime
 
@@ -21,6 +22,8 @@ import hashlib
 import base64
 
 from osgeo import gdal
+
+_logger = logging.getLogger(__name__)
 
 wrb_rat = {
  0: 'Acrisols',
@@ -166,8 +169,22 @@ def fetch_isric_soil_layers(wgs_bbox, soils_dir='./', status_channel=None):
     with ThreadPoolExecutor(max_workers=16) as executor:
         futures = [executor.submit(fetch_layer, *task) for task in tasks]
         futures.append(executor.submit(fetch_isric_wrb, wgs_bbox, soils_dir, status_channel))
-        for future in futures:
-            future.result()  # Wait for each task to complete
+
+        pending = set(futures)
+        while pending:
+            done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
+
+            if not done:
+                _logger.warning('ISRIC layer retrieval still running after 60 seconds; continuing to wait.')
+                continue
+
+            for future in done:
+                try:
+                    future.result()
+                except Exception:
+                    for remaining in pending:
+                        remaining.cancel()
+                    raise
 
 
 def fetch_isric_wrb(wgs_bbox, soils_dir='./', status_channel=None):
@@ -468,4 +485,3 @@ if __name__ == "__main__":
 
         print(station.par, station.longitude, station.latitude)
         _build_soil(station.longitude, station.latitude, soils_dir)
-
