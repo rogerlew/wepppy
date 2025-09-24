@@ -14,7 +14,7 @@ import base64
 
 import pandas as pd
 
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
 from enum import IntEnum
