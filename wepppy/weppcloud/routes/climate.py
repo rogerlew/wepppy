@@ -164,7 +164,7 @@ def view_closest_stations(runid, config):
                        '{desc} ({distance_to_query_location:0.1f} km | {years} years)</option>'
                        .format(**r))
 
-    return Response('n'.join(options), mimetype='text/html')
+    return Response('\n'.join(options), mimetype='text/html')
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/heuristic_stations/')
@@ -197,7 +197,7 @@ def view_heuristic_stations(runid, config):
                        '{distance_to_query_location:0.1f} km | {years} years)</option>'
                        .format(**r))
 
-    return Response('n'.join(options), mimetype='text/html')
+    return Response('\n'.join(options), mimetype='text/html')
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/par/')
@@ -228,7 +228,7 @@ def view_eu_heuristic_stations(runid, config):
                        '{desc} ({rank_based_on_query_location} | {years} years)</option>'
                        .format(**r))
 
-    return Response('n'.join(options), mimetype='text/html')
+    return Response('\n'.join(options), mimetype='text/html')
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/au_heuristic_stations/')
@@ -251,7 +251,7 @@ def view_au_heuristic_stations(runid, config):
                        '{desc} ({rank_based_on_query_location} | {years} years)</option>'
                        .format(**r))
 
-    return Response('n'.join(options), mimetype='text/html')
+    return Response('\n'.join(options), mimetype='text/html')
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/climate_monthlies')
