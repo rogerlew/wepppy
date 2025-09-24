@@ -19,7 +19,7 @@ TotalWatSed2 exports .parquet files.
 
 from abc import ABC, abstractmethod
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 import os
 from os.path import exists as _exists
 from os.path import join as _join
@@ -45,6 +45,7 @@ from datetime import datetime
 
 from wepppy.all_your_base import isint
 from wepppy.all_your_base.hydro import determine_wateryear
+import logging
 from wepppy.wepp.out import watershed_swe
 from wepppy.all_your_base import NCPU
 
@@ -55,6 +56,7 @@ NCPU = math.ceil(NCPU * 0.6)
 # Define a cache dictionary at module level
 _hill_wat_sed_cache = {}
 _cache_lock = threading.Lock()
+_logger = logging.getLogger(__name__)
 
 def _read_hill_wat_sed(pass_fn):
     # Check if result is in cache using thread-safe approach
@@ -321,7 +323,39 @@ class AbstractTotalWatSed2(ABC):
         assert len(pass_fns) > 0, 'No pass files found'
 
         with ThreadPoolExecutor(max_workers=NCPU) as executor:
-            results = list(executor.map(_read_hill_wat_sed, pass_fns))
+            futures = []
+            future_map = {}
+            results = [None] * len(pass_fns)
+
+            for idx, pass_fn in enumerate(pass_fns):
+                fut = executor.submit(_read_hill_wat_sed, pass_fn)
+                futures.append(fut)
+                future_map[fut] = idx
+
+            futures_n = len(futures)
+            count = 0
+            pending = set(futures)
+            while pending:
+                done, pending = wait(pending, timeout=15, return_when=FIRST_COMPLETED)
+
+                if not done:
+                    # If this trips frequently we likely need to tune the timeout based on project size.
+                    _logger.warning('TotalWatSed2 soil-pass processing still running after 15 seconds; continuing to wait.')
+                    continue
+
+                for fut in done:
+                    idx = future_map[fut]
+                    try:
+                        results[idx] = fut.result()
+                        count += 1
+                        _logger.info(f'  ({count}/{futures_n}) hillslopes processed)')
+                    except Exception:
+                        for remaining in pending:
+                            remaining.cancel()
+                        for other in done:
+                            if other is not fut:
+                                other.cancel()
+                        raise
 
         self.compile_data(results)
 
