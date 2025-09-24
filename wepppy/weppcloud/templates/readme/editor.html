@@ -94,7 +94,7 @@
     <div class="container-fluid mt-4">
       <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
         <div>
-          <h2 class="mb-1"><a href='{{ url_for("runs0", runid=runid, config=config) }}'>{{ runid }}</a> README.md Editor</h2>
+          <h2 class="mb-1"><a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}">{{ runid }}</a> README.md Editor</h2>
           <p class="text-muted mb-2">Changes are saved automatically (and with Ctrl+S).</p>
         </div>
         <div class="btn-group btn-group-toggle btn-group-lg" data-toggle="buttons" role="group" aria-label="README mode">

@@ -1,0 +1,376 @@
+"""Routes for watar blueprint extracted from app.py."""
+
+import wepppy
+
+from ast import literal_eval
+
+from ._common import *  # noqa: F401,F403
+
+from wepppy.all_your_base.dateutils import YearlessDate
+from wepppy.all_your_base import isint
+from wepppy.nodb import Ash, AshPost, Disturbed, Ron, Unitizer, Watershed
+from wepppy.nodb.climate import Climate
+from wepppy.nodb.mods.ash_transport import AshType
+from wepppy.nodb.wepp import Wepp
+from wepppy.wepp.out import Element, HillWat
+from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize
+
+
+watar_bp = Blueprint('watar', __name__)
+
+@watar_bp.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
+@watar_bp.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')
+def hillslope0_ash(runid, config, topaz_id):
+    assert config is not None
+
+    from wepppy.climates.cligen import ClimateFile
+
+    wd = get_wd(runid)
+
+    try:
+        owners = get_run_owners_lazy(runid)
+        ron = Ron.getInstance(wd)
+
+        should_abort = True
+        if current_user in owners:
+            should_abort = False
+
+        if not owners:
+            should_abort = False
+
+        if current_user.has_role('Admin'):
+            should_abort = False
+
+        if ron.public:
+            should_abort = False
+
+        #if should_abort:
+        #    abort(404)
+
+        fire_date = request.args.get('fire_date', None)
+        if fire_date is None:
+            fire_date = '8/4'
+        _fire_date = YearlessDate.from_string(fire_date)
+
+        ini_ash_depth = request.args.get('ini_ash_depth', None)
+        if ini_ash_depth is None:
+            ini_ash_depth = 5.0
+        ini_ash_depth = float(ini_ash_depth)
+
+        ash_type = request.args.get('ash_type', None)
+        if ash_type is None:
+            ash_type = 'black'
+
+        _ash_type = None
+        if 'black' in ash_type.lower():
+            _ash_type = AshType.BLACK
+        elif 'white' in ash_type.lower():
+            _ash_type = AshType.WHITE
+
+        ash_dir = _join(wd, '_ash')
+        if not _exists(ash_dir):
+            os.mkdir(ash_dir)
+
+        unitizer = Unitizer.getInstance(wd)
+        watershed = Watershed.getInstance(wd)
+        translator = watershed.translator_factory()
+        wepp_id = translator.wepp(top=topaz_id)
+        sub = watershed.sub_summary(topaz_id)
+        climate = Climate.getInstance(wd)
+        wepp = Wepp.getInstance(wd)
+        ash = Ash.getInstance(wd)
+    
+        cli_path = climate.cli_path
+        cli_df = ClimateFile(cli_path).as_dataframe()
+
+        element_fn = _join(wepp.output_dir, 'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
+        element = Element(element_fn)
+
+        hill_wat_fn = _join(wepp.output_dir, 'H{wepp_id}.wat.dat'.format(wepp_id=wepp_id))
+        hill_wat = HillWat(hill_wat_fn)
+
+        prefix = 'H{wepp_id}'.format(wepp_id=wepp_id)
+        recurrence = [100, 50, 20, 10, 2.5, 1]
+
+        from wepppy.nodb.mods.ash_transport.ash_multi_year_model import WhiteAshModel, BlackAshModel
+
+        if _ash_type == AshType.BLACK:
+            _, results, annuals = BlackAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
+                                                            ash_dir, prefix=prefix, recurrence=recurrence,
+                                                            ini_ash_depth=ini_ash_depth)
+        elif _ash_type == AshType.WHITE:
+            _, results, annuals = WhiteAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
+                                                            ash_dir, prefix=prefix, recurrence=recurrence,
+                                                            ini_ash_depth=ini_ash_depth)
+        else:
+            raise ValueError
+
+        results = json.loads(json.dumps(results))
+        annuals = json.loads(json.dumps(annuals))
+
+        #return jsonify(dict(results=results, recurrence_intervals=recurrence))
+
+        return render_template('reports/ash/ash_hillslope.htm', runid=runid, config=config,
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               sub=sub,
+                               ash_type=ash_type,
+                               ini_ash_depth=5.0,
+                               fire_date=fire_date,
+                               recurrence_intervals=recurrence,
+                               results=results,
+                               annuals=annuals,
+                               ron=ron,
+                               user=current_user)
+
+    except:
+        return exception_factory('Error loading ash hillslope results', runid=runid)
+
+
+@watar_bp.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport', methods=['POST'])
+@watar_bp.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport/', methods=['POST'])
+def task_set_ash_wind_transport(runid, config):
+
+    try:
+        state = request.json.get('run_wind_transport', None)
+    except Exception:
+        return exception_factory('Error parsing state', runid=runid)
+
+    if state is None:
+        return error_factory('state is None')
+
+    try:
+        wd = get_wd(runid)
+        ash = Ash.getInstance(wd)
+        ash.run_wind_transport = state
+    except Exception:
+        return exception_factory('Error setting state', runid=runid)
+
+    return success_factory()
+
+def _parse_rec_intervals(request, years):
+    rec_intervals = request.args.get('rec_intervals', None)
+    if rec_intervals is None:
+        rec_intervals = [2, 5, 10, 20, 25]
+        if years >= 50:
+            rec_intervals.append(50)
+        if years >= 100:
+            rec_intervals.append(100)
+        if years >= 200:
+            rec_intervals.append(200)
+        if years >= 500:
+            rec_intervals.append(500)
+        if years >= 1000:
+            rec_intervals.append(1000)
+        rec_intervals = rec_intervals[::-1]
+    else:
+        rec_intervals = literal_eval(rec_intervals)
+        assert all([isint(x) for x in rec_intervals])
+
+    return rec_intervals
+
+
+@watar_bp.route('/runs/<string:runid>/<config>/report/run_ash')
+@watar_bp.route('/runs/<string:runid>/<config>/report/run_ash/')
+def report_run_ash(runid, config):
+    try:
+        wd = get_wd(runid)
+        ash = Ash.getInstance(wd)
+
+        return render_template('reports/ash/run_summary.htm', runid=runid, config=config,
+                               ash=ash)
+
+    except Exception:
+        return exception_factory('Error', runid=runid)
+
+
+@watar_bp.route('/runs/<string:runid>/<config>/report/ash')
+@watar_bp.route('/runs/<string:runid>/<config>/report/ash/')
+def report_ash(runid, config):
+    try:
+        wd = get_wd(runid)
+
+        climate = Climate.getInstance(wd)
+        rec_intervals = _parse_rec_intervals(request, climate.years)
+
+        ron = Ron.getInstance(wd)
+        ash = Ash.getInstance(wd)
+        ashpost = AshPost.getInstance(wd)
+
+        fire_date = ash.fire_date
+        ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
+        ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
+        unitizer = Unitizer.getInstance(wd)
+
+        disturbed = None
+        try:
+            disturbed = Disturbed.getInstance(wd)
+        except:
+            pass
+
+
+        burn_class_summary = ash.burn_class_summary()
+
+        recurrence_intervals = ashpost.recurrence_intervals
+        return_periods = ashpost.return_periods
+        cum_return_periods = ashpost.cum_return_periods
+
+        #return jsonify(dict(return_periods=return_periods, cum_return_period=cum_return_periods))
+
+        return render_template('reports/ash/ash_watershed.htm', runid=runid, config=config,
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               fire_date=fire_date,
+                               burn_class_summary=burn_class_summary,
+                               ini_black_ash_depth_mm=ini_black_ash_depth_mm,
+                               ini_white_ash_depth_mm=ini_white_ash_depth_mm,
+                               recurrence_intervals=recurrence_intervals,
+                               return_periods=return_periods,
+                               cum_return_periods=cum_return_periods,
+                               ash=ash,
+                               ron=ron,
+                               user=current_user)
+
+    except Exception:
+        return exception_factory('Error', runid=runid)
+
+
+@watar_bp.route('/runs/<string:runid>/<config>/query/ash_out')
+@watar_bp.route('/runs/<string:runid>/<config>/query/ash_out/')
+def query_ash_out(runid, config):
+    try:
+        wd = get_wd(runid)
+        ashpost = AshPost.getInstance(wd)
+        ash_out = ashpost.ash_out
+
+        return jsonify(ash_out)
+
+    except Exception:
+        return exception_factory(runid=runid)
+
+
+@watar_bp.route('/runs/<string:runid>/<config>/report/ash_by_hillslope')
+@watar_bp.route('/runs/<string:runid>/<config>/report/ash_by_hillslope/')
+def report_ash_by_hillslope(runid, config):
+    try:
+        res = request.args.get('exclude_yr_indxs')
+        exclude_yr_indxs = []
+        for yr in res.split(','):
+            if isint(yr):
+                exclude_yr_indxs.append(int(yr))
+
+    except:
+        exclude_yr_indxs = None
+
+    class_fractions = request.args.get('class_fractions', False)
+    class_fractions = str(class_fractions).lower() == 'true'
+
+    fraction_under = request.args.get('fraction_under', None)
+    if fraction_under is not None:
+        try:
+            fraction_under = float(fraction_under)
+        except:
+            fraction_under = None
+
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+        ash = Ash.getInstance(wd)
+        ashpost = AshPost.getInstance(wd)
+
+        out_rpt = OutletSummary(loss)
+        hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
+        chn_rpt = ChannelSummary(loss)
+        avg_annual_years = loss.avg_annual_years
+        excluded_years = loss.excluded_years
+        translator = Watershed.getInstance(wd).translator_factory()
+        unitizer = Unitizer.getInstance(wd)
+
+        fire_date = ash.fire_date
+        ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
+        ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
+
+        burn_class_summary = ash.burn_class_summary()
+        ash_out = ashpost.ash_out
+
+        return render_template('reports/ash/ash_watershed_by_hillslope.htm', runid=runid, config=config,
+                               out_rpt=out_rpt,
+                               hill_rpt=hill_rpt,
+                               chn_rpt=chn_rpt,
+                               avg_annual_years=avg_annual_years,
+                               excluded_years=excluded_years,
+                               translator=translator,
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               fire_date=fire_date,
+                               burn_class_summary=burn_class_summary,
+                               ini_black_ash_depth_mm=ini_black_ash_depth_mm,
+                               ini_white_ash_depth_mm=ini_white_ash_depth_mm,
+                               ash_out=ash_out,
+                               ash=ash,
+                               ron=ron,
+                               user=current_user)
+
+    except Exception:
+        return exception_factory('Error', runid=runid)
+
+
+@watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])
+@watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])
+def report_contaminant(runid, config):
+
+    try:
+        wd = get_wd(runid)
+
+        climate = Climate.getInstance(wd)
+        ron = Ron.getInstance(wd)
+        ash = Ash.getInstance(wd)
+        ashpost = AshPost.getInstance(wd)
+
+        rec_intervals = _parse_rec_intervals(request, climate.years)
+        contaminants = request.args.get('contaminants', None)
+        contaminant_keys = sorted(ash.high_contaminant_concentrations.keys())
+
+        if contaminants is not None:
+            contaminants = contaminants.split(',')
+        else:
+            # defaults
+            contaminants = []
+            for c in ['Ca', 'Pb', 'P', 'Hg']:
+                if c in contaminant_keys:
+                    contaminants.append(c)
+        
+            # defaults not available
+            if len(contaminants) == 0:
+                contaminants = contaminant_keys
+
+        if request.method == 'POST':
+            ash.parse_cc_inputs(dict(request.form))
+            ash = Ash.getInstance(wd)
+
+        unitizer = Unitizer.getInstance(wd)
+
+        # if not ash.has_watershed_summaries:
+        #     ash.report()
+
+        recurrence_intervals = ashpost.recurrence_intervals
+        results = ashpost.burn_class_return_periods
+        return_periods = ashpost.return_periods
+
+        pw0_stats = ashpost.pw0_stats
+
+        return render_template('reports/ash/ash_contaminant.htm', runid=runid, config=config,
+                               rec_intervals=recurrence_intervals,
+                               rec_results=results,
+                               return_periods=return_periods,
+                               contaminants=contaminants,
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               pw0_stats=pw0_stats,
+                               ash=ash,
+                               ron=ron,
+                               user=current_user)
+
+    except Exception:
+        return exception_factory('Error', runid=runid)

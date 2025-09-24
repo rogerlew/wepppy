@@ -27,7 +27,7 @@
       const archivesUrl = {{ url_for('archive.rq_archive_list', runid=runid, config=config) | tojson }};
       const archiveApiUrl = {{ url_for('rq_api.api_archive', runid=runid, config=config) | tojson }};
       const restoreApiUrl = {{ url_for('rq_api.api_restore_archive', runid=runid, config=config) | tojson }};
-      const projectPath = {{ url_for('runs0', runid=runid, config=config) | tojson }};
+      const projectPath = {{ url_for('run_0.runs0', runid=runid, config=config) | tojson }};
       let currentJobId = null;
       let pendingRestoreName = null;
 
@@ -292,7 +292,7 @@
   </head>
   <body>
     <div class="container mt-4">
-      <h2 class="mb-1"><a href='{{ url_for("runs0", runid=runid, config=config) }}'>{{ runid }}</a> Project Archive Dashboard</h2>
+      <h2 class="mb-1"><a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}">{{ runid }}</a> Project Archive Dashboard</h2>
       <p>Project: <code id="project_label"></code></p>
       <button type="button" class="btn btn-primary" id="archive_button">Create Archive</button>
 

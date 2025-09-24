@@ -191,7 +191,7 @@ Undisturbify: ${_undisturbify}<br>
   </head>
   <body>
     <div class="container mt-4">
-      <h2 class="mb-1"><a href='{{ url_for("runs0", runid=runid, config=config) }}'>{{ runid }}</a> Forking Console</h2>
+      <h2 class="mb-1"><a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}">{{ runid }}</a> Forking Console</h2>
       
       <!-- Console output area -->
 
