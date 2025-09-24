@@ -35,91 +35,43 @@ from utils.helpers import get_wd, error_factory
 Browse Blueprint
 ================
 
-This Flask Blueprint provides a web-based file explorer for project directories, allowing users to browse, filter, 
-view, download, and compare files and directories associated with project runs.
+This module hosts the `browse` Flask blueprint that serves the web-based file explorer used in WEPP Cloud.  The
+blueprint is exposed via `weppcloud.routes.browse.__init__` and registered against the application elsewhere.
+
+Template Organization
+---------------------
+All rendering is handled by Jinja templates bundled with the blueprint under
+`wepppy/weppcloud/routes/browse/templates/browse/`:
+
+- `directory.j2` - top-level directory listing view with pagination, diff controls, and the keyboard command bar.
+- `not_found.j2` - 404-style response shown when a requested directory segment is missing.
+- `_path_input_script.j2` - shared script that wires up the inline path input field for directory and 404 pages.
+- `arc_file.j2` - minimal viewer for “.arc” outputs.
+- `data_table.j2` - table presentation for CSV/TSV/Parquet/Pickle content rendered via pandas.
+- `text_file.j2` - general text viewer (including the command bar) for other readable file types.
 
 Routes
 ------
-- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/`  
-- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>`  
-- `/runs/<string:runid>/<config>/browse/`  
-- `/runs/<string:runid>/<config>/browse/<path:subpath>`  
+- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/`
+- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>`
+- `/runs/<string:runid>/<config>/browse/`
+- `/runs/<string:runid>/<config>/browse/<path:subpath>`
 
-Functionality
+Key Behaviors
 -------------
-- **Directory Browsing**: Navigate project directories with pagination and wildcard filtering.
-- **File Interaction**: View text-based file contents in the browser or download files via query parameters or headers.
-- **File Type Support**: Render JSON, XML, CSV, Parquet, and Pickle files appropriately, with HTML tables for tabular data.
-- **Directory Comparison**: Compare the current directory with another project run's directory using the `diff` parameter.
-- **Security**: Prevent directory traversal and validate filter patterns to avoid shell injection.
+- **Directory Browsing** – `browse_response` delegates to `html_dir_list` to build directory listings with pagination
+  and optional shell-style filtering, then renders `directory.j2`.
+- **File Viewing** – Depending on the requested file type, responses are streamed directly, downloaded, or rendered via
+  `arc_file.j2`, `data_table.j2`, or `text_file.j2`.
+- **Diff Support** – When the `diff` query argument is present the blueprint attempts to locate the requested object in
+  the comparison run and surfaces diff links in directory listings.
+- **Security** – `_browse_tree_helper` prevents directory traversal, validates filter syntax, and ensures the
+  requested path stays inside the working directory returned by `get_wd`.
+- **Performance** – Directory counts and listings are gathered concurrently using `ThreadPoolExecutor` to keep large
+  listings responsive.
 
-Logical Flow
-------------
-1. **Route Handling**:
-   - Routes `wp_browse_tree` and `browse_tree` capture URL parameters (`runid`, `config`, optional `wepp`, and `subpath`).
-   - They determine the project's working directory (`wd`) using `get_wd(runid)` and delegate to `_browse_tree_helper`.
-
-2. **Path and Filter Processing**:
-   - `_browse_tree_helper` constructs the full path from `wd` and `subpath`.
-   - If the path is a file, it calls `browse_response` directly.
-   - If it’s a directory, it extracts any wildcard filter from the subpath (e.g., `*.txt`) or uses a default filter, then 
-     passes control to `browse_response`.
-
-3. **Security Validation**:
-   - `_browse_tree_helper` ensures the path stays within `wd` to prevent directory traversal (aborts with 403 if not).
-   - Validates the filter pattern with `_validate_filter_pattern` (aborts with 400 if invalid).
-
-4. **Response Generation**:
-   - For files, `browse_response`:
-     - Checks for `raw` or `download` parameters/headers to serve raw content or trigger downloads.
-     - Handles special file types (e.g., JSON, CSV) with appropriate rendering.
-     - Falls back to plain text or binary download for unreadable files.
-   - For directories, `browse_response`:
-     - Calls `html_dir_list` to generate an HTML listing with pagination, file details, and action links.
-     - Incorporates pagination controls and a diff comparison form.
-
-5. **Directory Listing**:
-   - `get_page_entries` uses `get_entries` and `get_total_items` concurrently via `ThreadPoolExecutor`:
-     - `get_entries` runs `ls -l` with ISO time style to fetch paginated entries, parsing output into file details.
-     - `get_total_items` counts total items with `ls | wc -l`.
-   - Returns entries and total count for the current page.
-
-6. **HTML Rendering**:
-   - `html_dir_list` constructs an HTML string with directory contents, including navigation links, file sizes, 
-     modification times, and action links (download, diff, etc.), respecting pagination and filters.
-
-7. **Final Response**:
-   - `browse_response` wraps the directory listing in a full HTML page with a diff comparison form and pagination, 
-     or serves file content with the correct MIME type.
-
-Key Functions
--------------
-- **_validate_filter_pattern(pattern)**:
-  Validates wildcard patterns (e.g., `*.txt`) using a regex, allowing safe characters and rejecting shell metacharacters.
-
-- **_browse_tree_helper(runid, subpath, wd, request, filter_pattern_default='')**:
-  Processes the request by parsing the path, enforcing security, and delegating to `browse_response`.
-
-- **get_entries(directory, filter_pattern, start, end, page_size)**:
-  Executes `ls -l` with pagination and filtering, parsing output into a list of entry tuples (name, is_dir, etc.).
-
-- **get_total_items(directory)**:
-  Counts total directory items using `ls | wc -l`.
-
-- **get_page_entries(directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern='')**:
-  Concurrently retrieves paginated entries and total count using `ThreadPoolExecutor`.
-
-- **html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, page=1, page_size=MAX_FILE_LIMIT, filter_pattern='')**:
-  Generates an HTML directory listing with file details, action links, and diff support.
-
-- **browse_response(path, runid, wd, request, filter_pattern='')**:
-  Handles file serving (raw, download, or rendered) or directory listing generation, including pagination and UI elements.
-
-Notes
------
-- Uses `MAX_FILE_LIMIT = 100` as the default page size for pagination.
-- Employs subprocess calls for efficiency, with concurrent execution for listing and counting.
-- Assumes `get_wd(runid)` (from `utils.helpers`) returns the project’s working directory.
+For maintenance purposes, adjust template markup within the dedicated `templates/browse/` files; Python logic in this
+module should remain focused on routing, filesystem queries, and response orchestration.
 """
 
 MAX_FILE_LIMIT = 100
