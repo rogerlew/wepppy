@@ -291,6 +291,7 @@ from routes.jsoncrack import jsoncrack_bp
 from routes.weppcloudr import weppcloudr_bp
 from routes.readme import readme_bp, ensure_readme
 from routes.command_bar import command_bar_bp
+from routes.archive import archive_bp
 from routes.rq.api.jobinfo import rq_jobinfo_bp
 from routes.rq.api.api import rq_api_bp
 from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
@@ -308,6 +309,7 @@ app.register_blueprint(rq_jobinfo_bp)
 app.register_blueprint(rq_job_dashboard_bp)
 app.register_blueprint(readme_bp)
 app.register_blueprint(command_bar_bp)
+app.register_blueprint(archive_bp)
 
 mail = Mail(app)
 
@@ -1342,50 +1344,9 @@ def view_access_log(runid, config):
 @app.route('/runs/<string:runid>/<config>/rq-fork-console', strict_slashes=False)
 @app.route('/runs/<string:runid>/<config>/rq-fork-console/', strict_slashes=False)
 def rq_fork_console(runid, config):
-    authorize(runid, config, require_owner=True)
+    authorize(runid, config)
     undisturbify = ('false', 'true')[bool(request.args.get('undisturbify', False))]
     return render_template('controls/rq-fork-console.j2', runid=runid, config=config, undisturbify=undisturbify)
-
-
-@app.route('/runs/<string:runid>/<config>/rq-archive-dashboard', strict_slashes=False)
-@app.route('/runs/<string:runid>/<config>/rq-archive-dashboard/', strict_slashes=False)
-def rq_archive_dashboard(runid, config):
-    authorize(runid, config, require_owner=True)
-    return render_template('controls/rq-archive-dashboard.j2', runid=runid, config=config)
-
-
-@app.route('/runs/<string:runid>/<config>/rq-archive-dashboard/archives', strict_slashes=False)
-def rq_archive_list(runid, config):
-    wd = get_wd(runid)
-    archives_dir = os.path.join(wd, 'archives')
-    os.makedirs(archives_dir, exist_ok=True)
-
-    entries = []
-    pattern = os.path.join(archives_dir, '*.zip')
-    for path in sorted(glob(pattern), reverse=True):
-        try:
-            stat = os.stat(path)
-        except FileNotFoundError:
-            continue
-
-        rel_name = os.path.basename(path)
-        entries.append({
-            'name': rel_name,
-            'size': stat.st_size,
-            'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
-            'download_url': url_for('download.download_tree', runid=runid, config=config, subpath=f'archives/{rel_name}')
-        })
-
-    prep = RedisPrep.getInstance(wd)
-    archive_job_id = prep.get_archive_job_id()
-
-    return jsonify({
-        'archives': entries,
-        'in_progress': archive_job_id is not None,
-        'job_id': archive_job_id,
-    })
-
-
 @app.route('/runs/<string:runid>/<config>/modify_disturbed')
 def modify_disturbed(runid, config):
     assert config is not None
@@ -1563,7 +1524,7 @@ def get_scenarios(runid, config):
 @app.route('/runs/<string:runid>/<config>/tasks/omni_migration')
 @app.route('/runs/<string:runid>/<config>/tasks/omni_migration/')
 def omni_migration(runid, config):
-    authorize(runid, config, require_owner=True)
+    authorize(runid, config)
     try:
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
@@ -1610,6 +1571,7 @@ def task_modify_disturbed(runid, config):
 
 @app.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/delete/', methods=['POST'])
+@login_required
 def delete_run(runid, config):
     owners = get_run_owners(runid)
 

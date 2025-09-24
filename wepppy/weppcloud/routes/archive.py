@@ -1,0 +1,52 @@
+"""Routes related to archived run artifacts."""
+
+import os
+from datetime import datetime
+from glob import glob
+
+from flask import Blueprint, jsonify, render_template, url_for
+
+from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.weppcloud.utils.helpers import authorize, get_wd
+
+
+archive_bp = Blueprint('archive', __name__)
+
+
+@archive_bp.route('/runs/<string:runid>/<config>/rq-archive-dashboard', strict_slashes=False)
+@archive_bp.route('/runs/<string:runid>/<config>/rq-archive-dashboard/', strict_slashes=False)
+def rq_archive_dashboard(runid, config):
+    authorize(runid, config)
+    return render_template('controls/rq-archive-dashboard.j2', runid=runid, config=config)
+
+
+@archive_bp.route('/runs/<string:runid>/<config>/rq-archive-dashboard/archives', strict_slashes=False)
+def rq_archive_list(runid, config):
+    wd = get_wd(runid)
+    archives_dir = os.path.join(wd, 'archives')
+    os.makedirs(archives_dir, exist_ok=True)
+
+    entries = []
+    pattern = os.path.join(archives_dir, '*.zip')
+    for path in sorted(glob(pattern), reverse=True):
+        try:
+            stat = os.stat(path)
+        except FileNotFoundError:
+            continue
+
+        rel_name = os.path.basename(path)
+        entries.append({
+            'name': rel_name,
+            'size': stat.st_size,
+            'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+            'download_url': url_for('download.download_tree', runid=runid, config=config, subpath=f'archives/{rel_name}')
+        })
+
+    prep = RedisPrep.getInstance(wd)
+    archive_job_id = prep.get_archive_job_id()
+
+    return jsonify({
+        'archives': entries,
+        'in_progress': archive_job_id is not None,
+        'job_id': archive_job_id,
+    })
