@@ -17,7 +17,7 @@ import shutil
 from enum import IntEnum
 from copy import deepcopy
 
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
 
 from collections import Counter
 
@@ -377,13 +377,33 @@ class Soils(NoDbBase):
                 domsoil_d = {}
                 soils = {}
                 valid_k_counts = Counter()
-                for future in futures:
-                    mukey, soil_summary, meta = future.result()
-                    topaz_id = meta['topaz_id']
-                    if mukey is not None:
-                        domsoil_d[str(topaz_id)] = mukey
-                        valid_k_counts[mukey] += watershed.hillslope_area(topaz_id)
-                        soils[mukey] = soil_summary
+
+                futures_n = len(futures)
+                count = 0
+                pending = set(futures)
+                while pending:
+                    done, pending = wait(pending, timeout=30, return_when=FIRST_COMPLETED)
+
+                    if not done:
+                        self.logger.warning('  ISRIC soil building still running after 30 seconds; continuing to wait.')
+                        continue
+
+                    for future in done:
+                        try:
+                            mukey, soil_summary, meta = future.result()
+                            count += 1
+                            self.logger.info(f'  {count}/{futures_n} ISRIC soil building completed, mukey={mukey}')
+                        except Exception as exc:
+                            self.logger.error(f'  ISRIC soil building failed with an error: {exc}')
+                            for remaining in pending:
+                                remaining.cancel()
+                            raise
+
+                        topaz_id = meta['topaz_id']
+                        if mukey is not None:
+                            domsoil_d[str(topaz_id)] = mukey
+                            valid_k_counts[mukey] += watershed.hillslope_area(topaz_id)
+                            soils[mukey] = soil_summary
 
             self.logger.info('done')
 
