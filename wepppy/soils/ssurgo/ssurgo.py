@@ -30,7 +30,7 @@ import sqlite3
 
 from rosetta import Rosetta2, Rosetta3
 
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
 
 from wepppy.all_your_base import try_parse, try_parse_float, isfloat, isint
 
@@ -1712,21 +1712,30 @@ class SurgoSoilCollection(object):
             
             total_tasks = len(futures)
             completed_tasks = 0
-            for fut in as_completed(futures):
-                completed_tasks += 1
-                mukey = futures[fut]
-                try:
-                    _mukey, ws, valid, logs = fut.result()
+            pending = set(futures.keys())
+            while pending:
+                done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
+
+                if not done:
                     if logger:
-                        logger.info(f"  ({completed_tasks}/{total_tasks}) completed mukey {mukey} -> {valid}")
-                    if valid and ws is not None:
-                        weppSoils[mukey] = ws
-                    else:
-                        invalidSoils[mukey] = ws
-                except Exception as e:
-                    invalidSoils[mukey] = None
-                    if logger:
-                        logger.exception(f"  Task for mukey {mukey} failed")
+                        logger.warning('  makeWeppSoils still processing mukeys after 60 seconds; continuing to wait.')
+                    continue
+
+                for fut in done:
+                    completed_tasks += 1
+                    mukey = futures[fut]
+                    try:
+                        _mukey, ws, valid, logs = fut.result()
+                        if logger:
+                            logger.info(f"  ({completed_tasks}/{total_tasks}) completed mukey {mukey} -> {valid}")
+                        if valid and ws is not None:
+                            weppSoils[mukey] = ws
+                        else:
+                            invalidSoils[mukey] = ws
+                    except Exception:
+                        invalidSoils[mukey] = None
+                        if logger:
+                            logger.exception(f"  Task for mukey {mukey} failed")
 
         self.weppSoils = weppSoils
         self.invalidSoils = invalidSoils
