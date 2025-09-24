@@ -5,21 +5,33 @@ let lastPreflightChecklist = null;
 let controller_lock_statuses = null;
 
 // Map .nodb files to the UI elements we surface lock icons for.
-// NOTE: if a new controller needs visual lock feedback, add the
-// appropriate (buttonId, lockImageId) pair here so updateLocks can drive it.
+// NOTE: if a new controller or PowerUser entry needs visual lock feedback,
+// add the appropriate (lockImageId, puLockImageId) pair here so updateLocks
+// can drive both the main controller button and the PowerUser resource icon.
 const LOCKABLE_FILES = Object.freeze({
-    "wepp.nodb": { buttonId: "btn_run_wepp", lockImageId: "run_wepp_lock" },
-    "topaz.nodb": { buttonId: "btn_build_channels_en", lockImageId: "build_channels_en_lock" },
-    "watershed.nodb": { buttonId: "btn_build_subcatchments", lockImageId: "build_subcatchments_lock" },
-    "landuse.nodb": { buttonId: "btn_build_landuse", lockImageId: "build_landuse_lock" },
-    "soils.nodb": { buttonId: "btn_build_soil", lockImageId: "build_soil_lock" },
-    "climate.nodb": { buttonId: "btn_build_climate", lockImageId: "build_climate_lock" },
-    "treatments.nodb": { buttonId: "btn_build_treatments", lockImageId: "build_treatments_lock" },
-    "wepppost.nodb": { buttonId: "btn_export_dss", lockImageId: "btn_export_dss_lock" },
-    "observed.nodb": { buttonId: "btn_run_observed", lockImageId: "run_observed_lock" },
-    "debris_flow.nodb": { buttonId: "btn_run_debris_flow", lockImageId: "run_debris_flow_lock" },
-    "ash.nodb": { buttonId: "btn_run_ash", lockImageId: "run_ash_lock" },
-    "ashpost.nodb": { buttonId: "btn_run_ash", lockImageId: "run_ash_lock" }
+    "ron.nodb": { lockImageId: null, puLockImageId: "pu_ron_lock" },
+    "topaz.nodb": { lockImageId: "build_channels_en_lock", puLockImageId: "pu_topaz_lock" },
+    "watershed.nodb": { lockImageId: "build_subcatchments_lock", puLockImageId: "pu_watershed_lock" },
+    "landuse.nodb": { lockImageId: "build_landuse_lock", puLockImageId: "pu_landuse_lock" },
+    "shrubland.nodb": { lockImageId: null, puLockImageId: "pu_shrubland_lock" },
+    "rangeland_cover.nodb": { lockImageId: null, puLockImageId: "pu_rangeland_cover_lock" },
+    "soils.nodb": { lockImageId: "build_soil_lock", puLockImageId: "pu_soils_lock" },
+    "climate.nodb": { lockImageId: "build_climate_lock", puLockImageId: "pu_climate_lock" },
+    "treatments.nodb": { lockImageId: "build_treatments_lock", puLockImageId: null },
+    "rhem.nodb": { lockImageId: null, puLockImageId: "pu_rhem_lock" },
+    "rhempost.nodb": { lockImageId: null, puLockImageId: "pu_rhempost_lock" },
+    "wepp.nodb": { lockImageId: "run_wepp_lock", puLockImageId: "pu_wepp_lock" },
+    "wepppost.nodb": { lockImageId: "btn_export_dss_lock", puLockImageId: "pu_wepppost_lock" },
+    "observed.nodb": { lockImageId: "run_observed_lock", puLockImageId: "pu_observed_lock" },
+    "unitizer.nodb": { lockImageId: null, puLockImageId: "pu_unitizer_lock" },
+    "baer.nodb": { lockImageId: null, puLockImageId: "pu_baer_lock" },
+    "disturbed.nodb": { lockImageId: null, puLockImageId: "pu_disturbed_lock" },
+    "rred.nodb": { lockImageId: null, puLockImageId: "pu_rred_lock" },
+    "lt.nodb": { lockImageId: null, puLockImageId: "pu_lt_lock" },
+    "ash.nodb": { lockImageId: "run_ash_lock", puLockImageId: "pu_ash_lock" },
+    "ashpost.nodb": { lockImageId: "run_ash_lock", puLockImageId: "pu_ashpost_lock" },
+    "debris_flow.nodb": { lockImageId: "run_debris_flow_lock", puLockImageId: "pu_debris_flow_lock" },
+    "omni.nodb": { lockImageId: null, puLockImageId: "pu_omni_lock" }
 });
 
 function initPreflight(runid) {
@@ -83,20 +95,22 @@ function updateLocks(lockStatuses) {
             return; // This .nodb file does not control a button directly.
         }
 
-        const { buttonId, lockImageId } = target;
-        const lockImage = document.getElementById(lockImageId);
-        const buttonExists = document.getElementById(buttonId) !== null;
+        const { lockImageId, puLockImageId } = target;
+        const controllerLock = lockImageId ? document.getElementById(lockImageId) : null;
+        const panelLock = puLockImageId ? document.getElementById(puLockImageId) : null;
 
-        // Some legacy views reuse button ids; skip gracefully if the elements
-        // are not on the current page to avoid raising exceptions.
-        if (!buttonExists || !lockImage) {
+        if (!controllerLock && !panelLock) {
             return;
         }
 
-        if (isLocked) {
-            lockImage.style.display = 'inline';
-        } else {
-            lockImage.style.display = 'none';
+        const displayValue = isLocked ? 'inline' : 'none';
+
+        if (controllerLock) {
+            controllerLock.style.display = displayValue;
+        }
+
+        if (panelLock) {
+            panelLock.style.display = displayValue;
         }
     });
 }

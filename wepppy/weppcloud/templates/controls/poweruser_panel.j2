@@ -38,6 +38,13 @@
     flex-wrap: wrap;
   }
 
+  #puModal .resource-lock-icon {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    display: none;
+  }
+
   #puModal .resource-buttons .btn {
     flex: 1 1 120px;
     border: 1px solid rgba(0, 0, 0, 0.125);
@@ -264,9 +271,11 @@
             {% endif %}
             <h5>Components</h5>
             <div>
+              <!-- Dev note: lock icons in this panel are toggled via preflight.js updateLocks -->
               <div class="resource-group">
                 <h6>Ron</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_ron_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Ron locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
                     href="browse/ron.nodb">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
@@ -276,29 +285,32 @@
               <div class="resource-group">
                 <h6>Topaz</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_topaz_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Topaz locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/topaz.nodb">nodb</a>
+                    href="browse/topaz.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/topaz.log">log</a>
+                    href="browse/topaz.log', runid=ron.runid">log</a>
                 </div>
               </div>
               <div class="resource-group">
                 <h6>Watershed</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_watershed_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Watershed locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/watershed.nodb">nodb</a>
+                    href="browse/watershed.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/watershed.log">log</a>
+                    href="browse/watershed.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% if 'rhem' not in ron.mods %}
               <div class="resource-group">
                 <h6>Landuse</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_landuse_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Landuse locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/landuse.nodb">nodb</a>
+                    href="browse/landuse.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/landuse.log">log</a>
+                    href="browse/landuse.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -307,10 +319,11 @@
               <div class="resource-group">
                 <h6>Shrubland</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_shrubland_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Shrubland locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/shrubland.nodb">nodb</a>
+                    href="browse/shrubland.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/shrubland.log">log</a>
+                    href="browse/shrubland.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -319,10 +332,11 @@
               <div class="resource-group">
                 <h6>Rangeland Cover</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_rangeland_cover_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Rangeland Cover locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/rangeland_cover.nodb">nodb</a>
+                    href="browse/rangeland_cover.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/rangeland_cover.log">log</a>
+                    href="browse/rangeland_cover.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -330,20 +344,22 @@
               <div class="resource-group">
                 <h6>Soils</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_soils_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Soils locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/soils.nodb">nodb</a>
+                    href="browse/soils.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/soils.log">log</a>
+                    href="browse/soils.log', runid=ron.runid">log</a>
                 </div>
               </div>
 
               <div class="resource-group">
                 <h6>Climate</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_climate_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Climate locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/climate.nodb">nodb</a>
+                    href="browse/climate.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/climate.log">log</a>
+                    href="browse/climate.log', runid=ron.runid">log</a>
                 </div>
               </div>
 
@@ -351,19 +367,21 @@
               <div class="resource-group">
                 <h6>RHEM</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_rhem_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="RHEM locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/rhem.nodb">nodb</a>
+                    href="browse/rhem.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/rhem.log">log</a>
+                    href="browse/rhem.log', runid=ron.runid">log</a>
                 </div>
               </div>
               <div class="resource-group">
                 <h6>RHEM Post</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_rhempost_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="RHEM Post locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/rhempost.nodb">nodb</a>
+                    href="browse/rhempost.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/rhempost.log">log</a>
+                    href="browse/rhempost.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -371,40 +389,44 @@
               <div class="resource-group">
                 <h6>WEPP</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_wepp_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="WEPP locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/wepp.nodb">nodb</a>
+                    href="browse/wepp.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/wepp.log">log</a>
+                    href="browse/wepp.log', runid=ron.runid">log</a>
                 </div>
               </div>
 
               <div class="resource-group">
                 <h6>WEPP Post</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_wepppost_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="WEPP Post locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/wepppost.nodb">nodb</a>
+                    href="browse/wepppost.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/wepppost.log">log</a>
+                    href="browse/wepppost.log', runid=ron.runid">log</a>
                 </div>
               </div>
 
               <div class="resource-group">
                 <h6>Observed</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_observed_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Observed locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/observed.nodb">nodb</a>
+                    href="browse/observed.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/observed.log">log</a>
+                    href="browse/observed.log', runid=ron.runid">log</a>
                 </div>
               </div>
 
               <div class="resource-group">
                 <h6>Unitizer</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_unitizer_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Unitizer locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/unitizer.nodb">nodb</a>
+                    href="browse/unitizer.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/unitizer.log">log</a>
+                    href="browse/unitizer.log', runid=ron.runid">log</a>
                 </div>
               </div>
 
@@ -412,10 +434,11 @@
               <div class="resource-group">
                 <h6>BAER</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_baer_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="BAER locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/baer.nodb">nodb</a>
+                    href="browse/baer.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/baer.log">log</a>
+                    href="browse/baer.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -424,10 +447,11 @@
               <div class="resource-group">
                 <h6>Disturbed</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_disturbed_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Disturbed locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/disturbed.nodb">nodb</a>
+                    href="browse/disturbed.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/disturbed.log">log</a>
+                    href="browse/disturbed.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -436,10 +460,11 @@
               <div class="resource-group">
                 <h6>RRED</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_rred_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="RRED locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/rred.nodb">nodb</a>
+                    href="browse/rred.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/rred.log">log</a>
+                    href="browse/rred.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -448,10 +473,11 @@
               <div class="resource-group">
                 <h6>LT</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_lt_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="LT locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/lt.nodb">nodb</a>
+                    href="browse/lt.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/lt.log">log</a>
+                    href="browse/lt.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -460,19 +486,21 @@
               <div class="resource-group">
                 <h6>Ash</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_ash_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Ash locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/ash.nodb">nodb</a>
+                    href="browse/ash.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/ash.log">log</a>
+                    href="browse/ash.log', runid=ron.runid">log</a>
                 </div>
               </div>
               <div class="resource-group">
                 <h6>Ash Post</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_ashpost_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Ash Post locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/ashpost.nodb">nodb</a>
+                    href="browse/ashpost.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/ashpost.log">log</a>
+                    href="browse/ashpost.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -481,10 +509,11 @@
               <div class="resource-group">
                 <h6>Debris Flow</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_debris_flow_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Debris Flow locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/debris_flow.nodb">nodb</a>
+                    href="browse/debris_flow.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/debris_flow.log">log</a>
+                    href="browse/debris_flow.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
@@ -493,10 +522,11 @@
               <div class="resource-group">
                 <h6>Omni</h6>
                 <div class="resource-buttons">
+                  <img class="resource-lock-icon" id="pu_omni_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Omni locked" />
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/omni.nodb">nodb</a>
+                    href="browse/omni.nodb', runid=ron.runid">nodb</a>
                   <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="browse/omni.log">log</a>
+                    href="browse/omni.log', runid=ron.runid">log</a>
                 </div>
               </div>
               {% endif %}
