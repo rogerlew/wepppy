@@ -3,11 +3,12 @@ import subprocess
 import re
 import math
 import json
+import logging
 
 import urllib
 from urllib.parse import urlencode
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 
 from os.path import join as _join
 from os.path import split as _split
@@ -115,6 +116,8 @@ Notes
 MAX_FILE_LIMIT = 100
 
 browse_bp = Blueprint('browse', __name__)
+
+_logger = logging.getLogger(__name__)
 
 
 
@@ -416,11 +419,27 @@ def get_entries(directory, filter_pattern, start, end, page_size):
     if dir_indices:
         with ThreadPoolExecutor(max_workers=10) as executor:
             futures = {executor.submit(get_total_items, dir_path): i for i, dir_path in dir_indices}
-            for future in futures:
-                index = futures[future]
-                total_items = future.result()
-                entry = entries[index]
-                entries[index] = (entry[0], entry[1], entry[2], f"{total_items} items", entry[4], entry[5])
+
+            pending = set(futures.keys())
+            while pending:
+                done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
+
+                if not done:
+                    # Directory counts should be quick; repeated warnings imply system load.
+                    _logger.warning('browse.get_entries() directory count still pending after 5 seconds; continuing to wait.')
+                    continue
+
+                for future in done:
+                    index = futures[future]
+                    try:
+                        total_items = future.result()
+                    except Exception:
+                        for remaining in pending:
+                            remaining.cancel()
+                        raise
+
+                    entry = entries[index]
+                    entries[index] = (entry[0], entry[1], entry[2], f"{total_items} items", entry[4], entry[5])
                 
     return entries
 
@@ -463,16 +482,30 @@ def get_page_entries(directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern
     end = page * page_size
     
     with ThreadPoolExecutor(max_workers=2) as executor:
-        # Submit both subprocess tasks concurrently
-        future_entries = executor.submit(get_entries, directory, filter_pattern, start, end, page_size)
+        futures = {
+            executor.submit(get_entries, directory, filter_pattern, start, end, page_size): 'entries',
+            executor.submit(get_total_items, directory, filter_pattern): 'total_items'
+        }
 
-        future_total = executor.submit(get_total_items, directory, filter_pattern)
-        
-        # Retrieve results (blocks until both are complete)
-        entries = future_entries.result()
-        total_items = future_total.result()
-    
-    return entries, total_items
+        results = {}
+        pending = set(futures.keys())
+        while pending:
+            done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
+
+            if not done:
+                _logger.warning('browse.get_page_entries() still waiting on subprocesses after 5 seconds; continuing to wait.')
+                continue
+
+            for future in done:
+                key = futures[future]
+                try:
+                    results[key] = future.result()
+                except Exception:
+                    for remaining in pending:
+                        remaining.cancel()
+                    raise
+
+    return results['entries'], results['total_items']
 
 
 def get_pad(x):
