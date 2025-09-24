@@ -1547,7 +1547,7 @@ class Cligen:
         _clinp = open(_clinp_path)
         _log = open(_join(cli_dir, "cligen_{}.log".format(cli_fname[:-4])), "w")
         p = subprocess.Popen(cmd, stdin=_clinp, stdout=_log, stderr=_log, cwd=cli_dir)
-        p.wait(timeout=50)
+        p.wait(timeout=5)
         _clinp.close()
         _log.close()
 
@@ -1618,7 +1618,7 @@ class Cligen:
         # run cligen
         _log = open(_join(cli_dir, "cligen_{}.log".format(_split(cli_fn)[-1][:-4])), "w")
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log, cwd=cli_dir)
-        p.wait(timeout=50)
+        p.wait(timeout=5)
         _log.close()
 
         if not _exists(_join(cli_dir, cli_fn)): 
@@ -1903,7 +1903,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
             # run cligen
             _clinp = open(_clinp_path)
             process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE)
-            process.wait(timeout=50)
+            process.wait(timeout=5)
             output = process.stdout.read()
             output += process.stderr.read()
             fp_log.write(str(output))
