@@ -6,6 +6,7 @@ from datetime import datetime
 from glob import glob
 
 from flask import Blueprint, jsonify, render_template, url_for
+from flask_security import current_user
 
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.weppcloud.utils.helpers import authorize, get_wd, exception_factory
@@ -18,7 +19,7 @@ archive_bp = Blueprint('archive', __name__)
 def rq_archive_dashboard(runid, config):
     try:
         authorize(runid, config)
-        return render_template('controls/rq-archive-dashboard.j2', runid=runid, config=config)
+        return render_template('controls/rq-archive-dashboard.j2', runid=runid, config=config, user=current_user)
     except Exception as e:
         return exception_factory(e)
 
