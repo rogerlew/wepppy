@@ -119,7 +119,7 @@ from wepppy.nodb import (
     Unitizer,
     Observed,
     RangelandCover, RangelandCoverMode,
-    Rhem, RhemPost,
+    Rhem,
     Baer,
     Disturbed,
     DebrisFlow,
@@ -142,7 +142,7 @@ from wepppy.nodb.mods.treatments import TreatmentsMode, Treatments
 
 from wepppy.nodb.redis_prep import RedisPrep
 
-from wepppy.weppcloud.utils.helpers import get_wd, authorize
+from wepppy.weppcloud.utils.helpers import get_wd, authorize, render_project_template
 from wepppy.weppcloud.utils.archive import has_archive, restore_archive, archive_run
 
 try:
@@ -292,6 +292,7 @@ from routes.weppcloudr import weppcloudr_bp
 from routes.readme import readme_bp, ensure_readme
 from routes.command_bar import command_bar_bp
 from routes.archive import archive_bp
+from routes.rhem import rhem_bp
 from routes.rq.api.jobinfo import rq_jobinfo_bp
 from routes.rq.api.api import rq_api_bp
 from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
@@ -310,6 +311,7 @@ app.register_blueprint(rq_job_dashboard_bp)
 app.register_blueprint(readme_bp)
 app.register_blueprint(command_bar_bp)
 app.register_blueprint(archive_bp)
+app.register_blueprint(rhem_bp)
 
 mail = Mail(app)
 
@@ -321,14 +323,6 @@ migrate = Migrate(app, db, directory='/workdir/wepppy/wepppy/weppcloud/migration
 @app.context_processor
 def inject_site_prefix():
     return dict(site_prefix=app.config['SITE_PREFIX'])
-
-def render_project_template(template_name, runid, config, **context):
-    context.setdefault('runid', runid)
-    context.setdefault('config', config)
-    try:
-        return render_template(template_name, **context)
-    except Exception:
-        return jsonify(context)
 
 # Define models
 roles_users = db.Table(
@@ -1321,6 +1315,7 @@ def create_legacy(config):
     return redirect(url)
 
 
+# admin blueprint
 @app.route('/runs/<string:runid>/<config>/access-log')
 @app.route('/runs/<string:runid>/<config>/access-log/')
 @login_required
@@ -1341,7 +1336,7 @@ def view_access_log(runid, config):
 
     return f'<!DOCTYPE html><html><pre>{contents}</pre></html>'
 
-
+# fork blueprint
 @app.route('/runs/<string:runid>/<config>/rq-fork-console', strict_slashes=False)
 @app.route('/runs/<string:runid>/<config>/rq-fork-console/', strict_slashes=False)
 def rq_fork_console(runid, config):
@@ -1349,6 +1344,7 @@ def rq_fork_console(runid, config):
     undisturbify = ('false', 'true')[bool(request.args.get('undisturbify', False))]
     return render_template('controls/rq-fork-console.j2', runid=runid, config=config, undisturbify=undisturbify)
 
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/modify_disturbed')
 def modify_disturbed(runid, config):
     authorize(runid, config)
@@ -1359,6 +1355,7 @@ def modify_disturbed(runid, config):
         return exception_factory('Error Clearing Locks', runid=runid)
 
 
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/reset_disturbed')
 def reset_disturbed(runid, config):
     authorize(runid, config)
@@ -1371,6 +1368,7 @@ def reset_disturbed(runid, config):
         return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
     
 
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup')
 def load_extended_land_soil_lookup(runid, config):
     authorize(runid, config)
@@ -1383,6 +1381,7 @@ def load_extended_land_soil_lookup(runid, config):
         return exception_factory('Error Building Extended Land Soil Lookup', runid=runid)
 
 
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs')
 @app.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs/')
 def has_sbs(runid, config):
@@ -1394,6 +1393,7 @@ def has_sbs(runid, config):
     except Exception:
         return exception_factory('Error Getting SBS Status', runid=runid)
 
+# omni blueprint
 @app.route('/runs/<string:runid>/<config>/api/omni/get_scenarios')
 def get_scenarios(runid, config):
     authorize(runid, config)
@@ -1405,7 +1405,7 @@ def get_scenarios(runid, config):
 
 
 
-
+# omni blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/omni_migration')
 def omni_migration(runid, config):
     authorize(runid, config)
@@ -1432,6 +1432,7 @@ def omni_migration(runid, config):
         return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
 
 
+# project blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/clear_locks')
 def clear_locks(runid, config):
     """
@@ -1448,7 +1449,7 @@ def clear_locks(runid, config):
 
 
 
-
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/modify_disturbed', methods=['POST'])
 def task_modify_disturbed(runid, config):
     authorize(runid, config)
@@ -1462,6 +1463,7 @@ def task_modify_disturbed(runid, config):
         return exception_factory('Error Modifying Disturbed', runid=runid)
 
 
+# project blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/delete/', methods=['POST'])
 @login_required
@@ -1519,7 +1521,7 @@ def log_access(wd, current_user, ip):
 
     
 
-
+# user blueprint
 @app.route('/runs/<string:runid>/')
 def runs0_nocfg(runid):
 
@@ -1698,8 +1700,7 @@ def service_worker():
     response.headers['Service-Worker-Allowed'] = '/'
     return response
 
-
-# https://wepp.cloud/weppcloud/runs/proletarian-respondent/baer/hillslope/21/ash/?fire_date=8.4&ash_type=white&ini_ash_depth=5.0
+# watar blueprint
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')
 def hillslope0_ash(runid, config, topaz_id):
@@ -1808,22 +1809,11 @@ def hillslope0_ash(runid, config, topaz_id):
     except:
         return exception_factory('Error loading ash hillslope results', runid=runid)
 
-# noinspection PyBroadException
+# project blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/adduser/', methods=['POST'])
 @login_required
 def task_adduser(runid, config):
-    owners = get_run_owners(runid)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if should_abort:
-        return error_factory('Authentication Error')
-
+    authorize()
     try:
         email = request.form.get('adduser-email')
         user = User.query.filter(func.lower(User.email) == email.lower()).first()
@@ -1845,55 +1835,35 @@ def task_adduser(runid, config):
 
         return success_factory()
     except:
-        return exception_factory()
+        return exception_factory(f'Error adding user: {user_id}', runid=runid)
 
-# noinspection PyBroadException
+# project blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/removeuser/', methods=['POST'])
 @login_required
 def task_removeuser(runid, config):
+    authorize()
+    try:
+        user_id = request.json.get('user_id')
+        user = User.query.filter(User.id == user_id).first()
+        run = Run.query.filter(Run.runid == runid).first()
 
-    owners = get_run_owners(runid)
+        assert user is not None, user
+        assert user in owners, user
+        assert run is not None, run
 
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
+        user_datastore.remove_run_to_user(user, run)
 
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if should_abort:
-        return error_factory('Authentication Error')
-
-    user_id = request.json.get('user_id')
-    user = User.query.filter(User.id == user_id).first()
-    run = Run.query.filter(Run.runid == runid).first()
-
-    assert user is not None, user
-    assert user in owners, user
-    assert run is not None, run
-
-    user_datastore.remove_run_to_user(user, run)
-
-    return success_factory()
+        return success_factory()
+    except:
+        return exception_factory(f'Error removing user: {user_id}', runid=runid)
 
 
-# noinspection PyBroadException
+# project blueprint
 @app.route('/runs/<string:runid>/<config>/report/users/')
 @login_required
 def report_users(runid, config):
-
+    authorize()
     owners = get_run_owners(runid)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if should_abort:
-        return error_factory('Authentication Error')
-
     return render_project_template('reports/users.htm', runid, config, owners=owners)
 
 
@@ -1994,6 +1964,7 @@ def resources_channels_geojson(runid, config):
         return exception_factory(runid=runid)
 
 
+# project blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/setname/', methods=['POST'])
 def task_setname(runid, config):
     wd = get_wd(runid)
@@ -2002,6 +1973,7 @@ def task_setname(runid, config):
     return success_factory()
 
 
+# project blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/setscenario/', methods=['POST'])
 def task_setscenario(runid, config):
     wd = get_wd(runid)
@@ -2010,6 +1982,7 @@ def task_setscenario(runid, config):
     return success_factory()
 
 
+# unitizer blueprint
 @app.route('/runs/<string:runid>/<config>/report/tasks/set_unit_preferences/', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_unit_preferences/', methods=['POST'])
 def task_set_unit_preferences(runid, config):
@@ -2021,7 +1994,7 @@ def task_set_unit_preferences(runid, config):
     except:
         return exception_factory('Error setting unit preferences', runid=runid)
 
-
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/query/delineation_pass')
 @app.route('/runs/<string:runid>/<config>/query/delineation_pass/')
 def query_topaz_pass(runid, config):
@@ -2045,6 +2018,7 @@ def query_topaz_pass(runid, config):
         return exception_factory(runid=runid)
 
 
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/query/extent')
 @app.route('/runs/<string:runid>/<config>/query/extent/')
 def query_extent(runid, config):
@@ -2053,6 +2027,7 @@ def query_extent(runid, config):
     return jsonify(Ron.getInstance(wd).extent)
 
 
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/report/channel')
 @app.route('/runs/<string:runid>/<config>/report/channel/')
 def report_channel(runid, config):
@@ -2062,6 +2037,7 @@ def report_channel(runid, config):
                            map=Ron.getInstance(wd).map)
 
 
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/query/outlet')
 @app.route('/runs/<string:runid>/<config>/query/outlet/')
 def query_outlet(runid, config):
@@ -2072,6 +2048,7 @@ def query_outlet(runid, config):
                         .as_dict())
 
 
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/report/outlet')
 @app.route('/runs/<string:runid>/<config>/report/outlet/')
 def report_outlet(runid, config):
@@ -2082,6 +2059,7 @@ def report_outlet(runid, config):
                            ron=Ron.getInstance(wd))
 
 
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/query/has_dem')
 @app.route('/runs/<string:runid>/<config>/query/has_dem/')
 def query_has_dem(runid, config):
@@ -2090,7 +2068,7 @@ def query_has_dem(runid, config):
 
 
 
-# noinspection PyBroadException
+# export blueprint
 @app.route('/runs/<string:runid>/<config>/export/ermit/')
 def export_ermit(runid, config):
     try:
@@ -2102,14 +2080,14 @@ def export_ermit(runid, config):
     except:
         return exception_factory('Error exporting ERMiT', runid=runid)
 
-# TODO move to RQ or disbale lazy build
+# export blueprint
 @app.route('/runs/<string:runid>/<config>/export/geopackage')
 def export_geopackage(runid, config):
     from wepppy.export import gpkg_export, archive_project, legacy_arc_export
 
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-
+    # TODO move to RQ or disable lazy build
     try:
         gpkg_fn = _join(ron.export_arc_dir, f'{runid}.gpkg')
         if not _exists(gpkg_fn):
@@ -2122,7 +2100,7 @@ def export_geopackage(runid, config):
         return exception_factory('Error running gpkg_export', runid=runid)
 
 
-# TODO move to RQ or disable lazy build
+# export blueprint
 @app.route('/runs/<string:runid>/<config>/export/geodatabase')
 def export_geodatabase(runid, config):
     from wepppy.export import gpkg_export, archive_project, legacy_arc_export
@@ -2130,6 +2108,7 @@ def export_geodatabase(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
+    # TODO move to RQ or disable lazy build
     try:
         gdb_fn = _join(ron.export_arc_dir, f'{runid}.gdb.zip')
         if not _exists(gdb_fn):
@@ -2142,6 +2121,7 @@ def export_geodatabase(runid, config):
         return exception_factory('Error running gpkg_export', runid=runid)
 
 
+# export blueprint
 @app.route('/runs/<string:runid>/<config>/export/prep_details')
 @app.route('/runs/<string:runid>/<config>/export/prep_details/')
 def export_prep_details(runid, config):
@@ -2163,16 +2143,7 @@ def export_prep_details(runid, config):
     else:
         return success_factory()
 
-
-# noinspection PyBroadException
-@app.route('/runs/<string:runid>/<config>/export/winwepp/')
-def export_winwepp(runid, config):
-    from wepppy.export import export_winwepp
-    wd = get_wd(runid)
-    export_winwepp_path = export_winwepp(wd)
-    return send_file(export_winwepp_path, as_attachment=True, download_name='{}_winwepp.zip'.format(runid))
-
-
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/query/watershed/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/watershed/subcatchments/')
 def query_watershed_summary_subcatchments(runid, config):
@@ -2180,13 +2151,14 @@ def query_watershed_summary_subcatchments(runid, config):
     return jsonify(Watershed.getInstance(wd).subs_summary)
 
 
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/query/watershed/channels')
 @app.route('/runs/<string:runid>/<config>/query/watershed/channels/')
 def query_watershed_summary_channels(runid, config):
     wd = get_wd(runid)
     return jsonify(Watershed.getInstance(wd).chns_summary)
 
-
+# omni blueprint
 @app.route('/runs/<string:runid>/<config>/report/omni_scenarios')
 @app.route('/runs/<string:runid>/<config>/report/omni_scenarios/')
 def query_omni_scenarios_report(runid, config):
@@ -2243,6 +2215,7 @@ def query_omni_scenarios_report(runid, config):
         return exception_factory(runid=runid)
 
 
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/report/watershed')
 @app.route('/runs/<string:runid>/<config>/report/watershed/')
 def query_watershed_summary(runid, config):
@@ -2255,6 +2228,7 @@ def query_watershed_summary(runid, config):
         return exception_factory(runid=runid)
 
 
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
 def task_abstract_watershed(runid, config):
     wd = get_wd(runid)
@@ -2271,7 +2245,7 @@ def task_abstract_watershed(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# watershed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/sub_intersection/', methods=['POST'])
 def sub_intersection(runid, config):
     try:
@@ -2290,6 +2264,7 @@ def sub_intersection(runid, config):
         return exception_factory(runid=runid)
 
 
+# rangeland_cover blueprint
 @app.route('/runs/<string:runid>/<config>/query/rangeland_cover/current_cover_summary/', methods=['POST'])
 def query_rangeland_cover_current(runid, config):
     wd = get_wd(runid)
@@ -2300,7 +2275,7 @@ def query_rangeland_cover_current(runid, config):
     return jsonify(RangelandCover.getInstance(wd).current_cover_summary(topaz_ids))
 
 
-# noinspection PyBroadException
+# rangeland_cover blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_rangeland_cover_mode/', methods=['POST'])
 def set_rangeland_cover_mode(runid, config):
 
@@ -2324,7 +2299,7 @@ def set_rangeland_cover_mode(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_landuse_mode/', methods=['POST'])
 def set_landuse_mode(runid, config):
 
@@ -2352,7 +2327,7 @@ def set_landuse_mode(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# treatments blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_treatments_mode/', methods=['POST'])
 def set_treatments_mode(runid, config):
 
@@ -2374,7 +2349,8 @@ def set_treatments_mode(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_landuse_db/', methods=['POST'])
 def set_landuse_db(runid, config):
 
@@ -2396,6 +2372,7 @@ def set_landuse_db(runid, config):
     return success_factory()
 
 
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/modify_landuse_coverage', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/modify_landuse_coverage/', methods=['POST'])
 def modify_landuse_coverage(runid, config):
@@ -2410,7 +2387,7 @@ def modify_landuse_coverage(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/modify_landuse_mapping/', methods=['POST'])
 def task_modify_landuse_mapping(runid, config):
     wd = get_wd(runid)
@@ -2424,6 +2401,7 @@ def task_modify_landuse_mapping(runid, config):
     return success_factory()
 
 
+# rangeland blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/modify_rangeland_cover/', methods=['POST'])
 def task_modify_rangeland_cover(runid, config):
     wd = get_wd(runid)
@@ -2446,6 +2424,7 @@ def task_modify_rangeland_cover(runid, config):
     return success_factory()
 
 
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/query/landuse')
 @app.route('/runs/<string:runid>/<config>/query/landuse/')
 def query_landuse(runid, config):
@@ -2453,6 +2432,7 @@ def query_landuse(runid, config):
     return jsonify(Landuse.getInstance(wd).domlc_d)
 
 
+# map blueprint
 @app.route('/runs/<string:runid>/<config>/resources/legends/slope_aspect')
 @app.route('/runs/<string:runid>/<config>/resources/legends/slope_aspect/')
 def resources_slope_aspect_legend(runid, config):
@@ -2461,6 +2441,7 @@ def resources_slope_aspect_legend(runid, config):
     return render_template('legends/slope_aspect.htm')
 
 
+# map blueprint
 @app.route('/runs/<string:runid>/<config>/resources/legends/landuse')
 @app.route('/runs/<string:runid>/<config>/resources/legends/landuse/')
 def resources_landuse_legend(runid, config):
@@ -2470,6 +2451,7 @@ def resources_landuse_legend(runid, config):
                            legend=Landuse.getInstance(wd).legend)
 
 
+# map blueprint
 @app.route('/runs/<string:runid>/<config>/resources/legends/soils')
 @app.route('/runs/<string:runid>/<config>/resources/legends/soils/')
 def resources_soil_legend(runid, config):
@@ -2479,6 +2461,7 @@ def resources_soil_legend(runid, config):
                            legend=Soils.getInstance(wd).legend)
 
 
+# map blueprint
 @app.route('/runs/<string:runid>/<config>/resources/legends/sbs')
 @app.route('/runs/<string:runid>/<config>/resources/legends/sbs/')
 def resources_sbs_legend(runid, config):
@@ -2493,6 +2476,7 @@ def resources_sbs_legend(runid, config):
                            legend=baer.legend)
 
 
+# geodata blueprint
 @app.route('/resources/usgs/gage_locations/')
 def resources_usgs_gage_locations():
     bbox = request.args.get('bbox')
@@ -2500,6 +2484,7 @@ def resources_usgs_gage_locations():
     return jsonify(crop_geojson(_join(_thisdir, 'static/resources/usgs/usgs_gage_locations.geojson'), bbox=bbox))
 
 
+# geodata blueprint
 @app.route('/resources/snotel/snotel_locations/')
 def resources_snotel_locations():
     bbox = request.args.get('bbox')
@@ -2507,6 +2492,7 @@ def resources_snotel_locations():
     return jsonify(crop_geojson(_join(_thisdir, 'static/resources/snotel/snotel_2024_anu.geojson'), bbox=bbox))
 
 
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/query/landuse/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/landuse/subcatchments/')
 def query_landuse_subcatchments(runid, config):
@@ -2514,6 +2500,7 @@ def query_landuse_subcatchments(runid, config):
     return jsonify(Landuse.getInstance(wd).subs_summary)
 
 
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/query/landuse/channels')
 @app.route('/runs/<string:runid>/<config>/query/landuse/channels/')
 def query_landuse_channels(runid, config):
@@ -2521,6 +2508,7 @@ def query_landuse_channels(runid, config):
     return jsonify(Landuse.getInstance(wd).chns_summary)
 
 
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/report/landuse')
 @app.route('/runs/<string:runid>/<config>/report/landuse/')
 def report_landuse(runid, config):
@@ -2540,6 +2528,7 @@ def report_landuse(runid, config):
     except Exception:
         return exception_factory('Reporting landuse failed', runid=runid)
 
+# rangeland blueprint
 @app.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments/')
 def query_rangeland_cover_subcatchments(runid, config):
@@ -2547,6 +2536,7 @@ def query_rangeland_cover_subcatchments(runid, config):
     return jsonify(RangelandCover.getInstance(wd).subs_summary)
 
 
+# rangeland blueprint
 @app.route('/runs/<string:runid>/<config>/report/rangeland_cover')
 @app.route('/runs/<string:runid>/<config>/report/rangeland_cover/')
 def report_rangeland_cover(runid, config):
@@ -2557,7 +2547,7 @@ def report_rangeland_cover(runid, config):
     return render_project_template('reports/rangeland_cover.htm', runid, config,
                            rangeland_cover=rangeland_cover)
 
-
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>')
 @app.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>/')
 def view_channel_def(runid, config, chn_key):
@@ -2572,6 +2562,7 @@ def view_channel_def(runid, config, chn_key):
     return jsonify(chn_d)
 
 
+# rangeland blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/build_rangeland_cover/', methods=['POST'])
 def task_build_rangeland_cover(runid, config):
     wd = get_wd(runid)
@@ -2597,6 +2588,7 @@ def task_build_rangeland_cover(runid, config):
     return success_factory()
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/view/management/<key>')
 @app.route('/runs/<string:runid>/<config>/view/management/<key>/')
 def view_management(runid, config, key):
@@ -2615,7 +2607,7 @@ def view_management(runid, config, key):
     except Exception:
         return exception_factory('Error retrieving management', runid=runid)
 
-# noinspection PyBroadException
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/modify_landuse/', methods=['POST'])
 def task_modify_landuse(runid, config):
     wd = get_wd(runid)
@@ -2638,7 +2630,7 @@ def task_modify_landuse(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# soils blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_soil_mode/', methods=['POST'])
 def set_soil_mode(runid, config):
 
@@ -2670,6 +2662,7 @@ def set_soil_mode(runid, config):
     return success_factory()
 
 
+# soils blueprint
 @app.route('/runs/<string:runid>/<config>/query/soils')
 @app.route('/runs/<string:runid>/<config>/query/soils/')
 def query_soils(runid, config):
@@ -2677,6 +2670,7 @@ def query_soils(runid, config):
     return jsonify(Soils.getInstance(wd).domsoil_d)
 
 
+# soils blueprint
 @app.route('/runs/<string:runid>/<config>/query/soils/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/soils/subcatchments/')
 def query_soils_subcatchments(runid, config):
@@ -2684,6 +2678,7 @@ def query_soils_subcatchments(runid, config):
     return jsonify(Soils.getInstance(wd).subs_summary)
 
 
+# soils blueprint
 @app.route('/runs/<string:runid>/<config>/query/soils/channels')
 @app.route('/runs/<string:runid>/<config>/query/soils/channels/')
 def query_soils_channels(runid, config):
@@ -2691,6 +2686,7 @@ def query_soils_channels(runid, config):
     return jsonify(Soils.getInstance(wd).chns_summary)
 
 
+# soils blueprint
 @app.route('/runs/<string:runid>/<config>/report/soils')
 @app.route('/runs/<string:runid>/<config>/report/soils/')
 def report_soils(runid, config):
@@ -2702,7 +2698,7 @@ def report_soils(runid, config):
         return exception_factory('Building Soil Failed', runid=runid)
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_climatestation_mode/', methods=['POST'])
 def set_climatestation_mode(runid, config):
 
@@ -2722,7 +2718,7 @@ def set_climatestation_mode(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_climatestation/', methods=['POST'])
 def set_climatestation(runid, config):
 
@@ -2742,7 +2738,7 @@ def set_climatestation(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/upload_cli/', methods=['POST'])
 def task_upload_cli(runid, config):
     wd = get_wd(runid)
@@ -2776,6 +2772,7 @@ def task_upload_cli(runid, config):
     return success_factory()
 
 
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/query/climatestation')
 @app.route('/runs/<string:runid>/<config>/query/climatestation/')
 def query_climatestation(runid, config):
@@ -2783,6 +2780,7 @@ def query_climatestation(runid, config):
     return jsonify(Climate.getInstance(wd).climatestation)
 
 
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/query/climate_has_observed')
 @app.route('/runs/<string:runid>/<config>/query/climate_has_observed/')
 def query_climate_has_observed(runid, config):
@@ -2790,6 +2788,7 @@ def query_climate_has_observed(runid, config):
     return jsonify(Climate.getInstance(wd).has_observed)
 
 
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/report/climate/')
 def report_climate(runid, config):
     wd = get_wd(runid)
@@ -2800,7 +2799,7 @@ def report_climate(runid, config):
                            climate=climate)
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_climate_mode/', methods=['POST'])
 def set_climate_mode(runid, config):
     try:
@@ -2819,7 +2818,7 @@ def set_climate_mode(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_climate_spatialmode/', methods=['POST'])
 def set_climate_spatialmode(runid, config):
     try:
@@ -2838,7 +2837,7 @@ def set_climate_spatialmode(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/view/closest_stations/')
 def view_closest_stations(runid, config):
     wd = get_wd(runid)
@@ -2865,7 +2864,7 @@ def view_closest_stations(runid, config):
     return Response('n'.join(options), mimetype='text/html')
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/view/heuristic_stations/')
 def view_heuristic_stations(runid, config):
     wd = get_wd(runid)
@@ -2899,7 +2898,7 @@ def view_heuristic_stations(runid, config):
     return Response('n'.join(options), mimetype='text/html')
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/view/par/')
 def view_station_par(runid, config):
     wd = get_wd(runid)
@@ -2908,7 +2907,7 @@ def view_station_par(runid, config):
     return Response(contents, content_type='text/plain;charset=utf-8')
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/view/eu_heuristic_stations/')
 def view_eu_heuristic_stations(runid, config):
     wd = get_wd(runid)
@@ -2931,7 +2930,7 @@ def view_eu_heuristic_stations(runid, config):
 
     return Response('n'.join(options), mimetype='text/html')
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/view/au_heuristic_stations/')
 def view_au_heuristic_stations(runid, config):
     wd = get_wd(runid)
@@ -2954,7 +2953,7 @@ def view_au_heuristic_stations(runid, config):
 
     return Response('n'.join(options), mimetype='text/html')
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/view/climate_monthlies')
 @app.route('/runs/<string:runid>/<config>/view/climate_monthlies/')
 def view_climate_monthlies(runid, config):
@@ -2975,7 +2974,7 @@ def view_climate_monthlies(runid, config):
                            station=station_meta.as_dict(include_monthlies=True))
 
 
-# noinspection PyBroadException
+# climate blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable/', methods=['POST'])
 def task_set_use_gridmet_wind_when_applicable(runid, config):
@@ -2999,7 +2998,7 @@ def task_set_use_gridmet_wind_when_applicable(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine/', methods=['POST'])
 def task_set_hourly_seepage(runid, config):
@@ -3045,7 +3044,7 @@ def task_set_hourly_seepage(runid, config):
 
     return success_factory()
 
-# noinspection PyBroadException
+# soils blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_soils_ksflag', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_soils_ksflag/', methods=['POST'])
 def task_set_soils_ksflag(runid, config):
@@ -3068,7 +3067,7 @@ def task_set_soils_ksflag(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# soils blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_disturbed_sol_ver', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_disturbed_sol_ver/', methods=['POST'])
 def task_set_disturbed_sol_ver(runid, config):
@@ -3091,7 +3090,7 @@ def task_set_disturbed_sol_ver(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
+# project blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_public', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_public/', methods=['POST'])
 @login_required
@@ -3115,7 +3114,7 @@ def task_set_public(runid, config):
     return success_factory()
 
 
-# projects
+# project blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_readonly', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_readonly/', methods=['POST'])
 def task_set_readonly(runid, config):
@@ -3147,55 +3146,6 @@ def task_set_readonly(runid, config):
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
-
-
-# noinspection PyBroadException
-#@app.route('/runs/<string:runid>/<config>/query/status/<nodb>', methods=['GET', 'POST'])
-#@app.route('/runs/<string:runid>/<config>/query/status/<nodb>/', methods=['GET', 'POST'])
-def get_wepp_run_status(runid, config, nodb):
-    wd = get_wd(runid)
-
-    if nodb == 'wepp':
-        wepp = Wepp.getInstance(wd)
-        try:
-            return success_factory(wepp.get_log_last())
-        except:
-            return exception_factory('Could not determine status', runid=runid)
-
-    elif nodb == 'climate':
-        climate = Climate.getInstance(wd)
-        try:
-            return success_factory(climate.get_log_last())
-        except:
-            return exception_factory('Could not determine status', runid=runid)
-
-    elif nodb == 'rhem':
-        rhem = Rhem.getInstance(wd)
-        try:
-            return success_factory(rhem.get_log_last())
-        except:
-            return exception_factory('Could not determine status', runid=runid)
-
-    elif nodb == 'rap_ts':
-        from wepppy.nodb.mods import RAP_TS
-        rap_ts = RAP_TS.getInstance(wd)
-        try:
-            return success_factory(rap_ts.get_log_last())
-        except:
-            return exception_factory('Could not determine status', runid=runid)
-
-    return error_factory('Unknown nodb')
-
-# rhem blueprint
-@app.route('/runs/<string:runid>/<config>/report/rhem/results')
-@app.route('/runs/<string:runid>/<config>/report/rhem/results/')
-def report_rhem_results(runid, config):
-    wd = get_wd(runid)
-
-    try:
-        return render_template('controls/rhem_reports.htm')
-    except:
-        return exception_factory('Error building reports template', runid=runid)
 
 
 # wepp blueprint
@@ -3352,7 +3302,7 @@ def resources_observed_data(runid, config, file):
     assert _exists(fn)
     return send_file(fn, mimetype='text/csv', download_name=file)
 
-
+# landuse blueprint
 @app.route('/runs/<string:runid>/<config>/query/landuse/cover/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/landuse/cover/subcatchments/')
 def query_landuse_cover_subcatchments(runid, config):
@@ -3385,39 +3335,6 @@ def report_wepp_run_summary(runid, config):
                            flowpaths_n=flowpaths_n,
                            subs_n=subs_n,
                            ron=ron)
-
-
-# rhem blueprint
-@app.route('/runs/<string:runid>/<config>/report/rhem/run_summary')
-@app.route('/runs/<string:runid>/<config>/report/rhem/run_summary/')
-def report_rhem_run_summary(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    rhempost = RhemPost.getInstance(wd)
-    subs_n = len(glob(_join(wd, 'rhem/output/*.sum')))
-
-    return render_project_template('reports/rhem_run_summary.htm', runid, config,
-                           subs_n=subs_n,
-                           rhempost=rhempost,
-                           ron=ron)
-
-
-# rhem blueprint
-@app.route('/runs/<string:runid>/<config>/report/rhem/summary')
-@app.route('/runs/<string:runid>/<config>/report/rhem/summary/')
-def report_rhem_avg_annuals(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    rhempost = RhemPost.getInstance(wd)
-    unitizer = Unitizer.getInstance(wd)
-
-    return render_project_template('reports/rhem/avg_annual_summary.htm', runid, config,
-                           rhempost=rhempost,
-                           ron=ron,
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           user=current_user)
-
 
 # wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/summary')
@@ -3773,57 +3690,6 @@ def report_wepp_sediment_delivery(runid, config):
     except Exception:
         return exception_factory("Error Handling Request: This may have occured if the run did not produce soil loss."
                                  "Check that the loss_pw0.txt contains a class fractions table.", runid=runid)
-
-
-# rhem blueprint
-@app.route('/runs/<string:runid>/<config>/report/rhem/return_periods')
-@app.route('/runs/<string:runid>/<config>/report/rhem/return_periods/')
-def report_rhem_return_periods(runid, config):
-
-    try:
-        extraneous = request.args.get('extraneous', None) == 'true'
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        rhempost = RhemPost.getInstance(wd)
-
-        unitizer = Unitizer.getInstance(wd)
-
-        return render_project_template('reports/rhem/return_periods.htm', runid, config,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               rhempost=rhempost,
-                               ron=ron,
-                               user=current_user)
-    except:
-        return exception_factory('Error running report_rhem_return_periods', runid=runid)
-
-
-# rhem blueprint
-@app.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments')
-@app.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments/')
-def query_rhem_sub_runoff(runid, config):
-    wd = get_wd(runid)
-    rhempost = RhemPost.getInstance(wd)
-    return jsonify(rhempost.query_sub_val('runoff'))
-
-
-# rhem blueprint
-@app.route('/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments')
-@app.route('/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments/')
-def query_rhem_sub_sed_yield(runid, config):
-    wd = get_wd(runid)
-    rhempost = RhemPost.getInstance(wd)
-    return jsonify(rhempost.query_sub_val('sed_yield'))
-
-
-# rhem blueprint
-@app.route('/runs/<string:runid>/<config>/query/rhem/soil_loss/subcatchments')
-@app.route('/runs/<string:runid>/<config>/query/rhem/soil_loss/subcatchments/')
-def query_rhem_sub_soil_loss(runid, config):
-    wd = get_wd(runid)
-    rhempost = RhemPost.getInstance(wd)
-    return jsonify(rhempost.query_sub_val('soil_loss'))
-
 
 # wepp blueprint
 @app.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments')
@@ -4537,25 +4403,28 @@ def report_contaminant(runid, config):
     except Exception:
         return exception_factory('Error', runid=runid)
 
-
+# combined_watershed_viewer blueprint
 @app.route('/combined_ws_viewer')
 @app.route('/combined_ws_viewer/')
 def combined_ws_viewer():
     return render_template('combined_ws_viewer.htm')
 
 
+# combined_watershed_viewer blueprint
 @app.route('/combined_ws_viewer2')
 @app.route('/combined_ws_viewer2/')
 def combined_ws_viewer2():
     return render_template('combined_ws_viewer2.j2')
 
 
+# combined_watershed_viewer blueprint
 @app.route('/bounds_ws_viewer')
 @app.route('/bounds_ws_viewer/')
 def bounds_ws_viewer():
     return render_template('bounds_ws_viewer.htm')
 
 
+# combined_watershed_viewer blueprint
 @app.route('/combined_ws_viewer/url_generator', methods=['GET', 'POST'])
 @app.route('/combined_ws_viewer/url_generator/', methods=['GET', 'POST'])
 def combined_ws_viewer_url_gen():
