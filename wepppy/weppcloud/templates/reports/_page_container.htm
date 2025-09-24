@@ -53,12 +53,6 @@
 
         project.unitChangeEvent();
 
-
-        // konami code!
-        Mousetrap.bind('up up down down left right left right b a', function() {
-            $('#btnPuModal').click();
-        });
-
     });
 
 </script>
@@ -69,7 +63,7 @@
 <div role="main" class="container-full">
 {% block report_content %}{% endblock %}
 {% include 'controls/unitizer_modal.htm'%}
-{% include 'controls/poweruser_panel.htm'%}
+{% include 'controls/poweruser_panel.j2'%}
 </div> <!--main container -->
 
     <!-- Placed at the end of the document so the pages load faster -->
@@ -79,7 +73,6 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/copytext.js') }}?20180904"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/mousetrap.js') }}"></script>
     <script src="/weppcloud/static/js/sorttable.js"></script>
 
   {% include 'controls/command-bar.htm'%}

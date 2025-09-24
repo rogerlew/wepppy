@@ -35,7 +35,7 @@
   {% include 'header.htm'%}
   {% include 'controls/command-bar.htm'%}
   <div>
-    {% include 'controls/poweruser_panel.htm'%}
+    {% include 'controls/poweruser_panel.j2'%}
     <div class="py-5">
 
       <div class="main-content container-fluid">
@@ -116,8 +116,6 @@
             <script type="text/javascript" src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
             <script type="text/javascript" src="{{ url_for('static', filename='js/plotty.js') }}"></script>
             <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-ajax.js') }}"></script>
-            <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff-vector-arrows.js') }}"></script> -->
-            <script type="text/javascript" src="{{ url_for('static', filename='js/mousetrap.js') }}"></script>
           </div>
         </div>
       </div>

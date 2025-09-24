@@ -202,6 +202,10 @@
                 event.preventDefault(); // Prevent any default browser action
                 window.scrollTo(0, document.body.scrollHeight);
                 break;
+            case 'T':
+                event.preventDefault(); // Prevent any default browser action
+                window.scrollTo(0, 0);
+                break;
             case 'U':
                 event.preventDefault();
                 // Scroll up by 90% of the window's height for context overlap
@@ -294,7 +298,7 @@
                 .map(([name, meta]) => `${name.padEnd(10)} - ${meta.description}`)
                 .join('\n');
             const setHelp = SET_HELP_LINES.map((line) => `  ${line}`).join('\n');
-            const keyboardShortcuts = 'Navigation shortcuts:\n   Shift+G go to bottom  |  Shift+U page up  |  Shift+H page down';
+            const keyboardShortcuts = 'Navigation shortcuts:\n   Shift+G go to bottom  |  Shift+T go to top  |  Shift+U page up  |  Shift+H page down';
             this.showResult(`Available Commands:\n${lines}\n\nSet command usage:\n${setHelp}\n\n${keyboardShortcuts}`);
         }
 
