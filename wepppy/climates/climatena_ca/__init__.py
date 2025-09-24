@@ -50,7 +50,7 @@ def query_monthlies(locations, model='na'):
         "mode": "M"
     }
 
-    response = requests.post(url, headers=headers, json=payload, timeout=1200)
+    response = requests.post(url, headers=headers, json=payload, timeout=300)
    
     # get filename from re
     print(f"responseheader: {response.headers}")
