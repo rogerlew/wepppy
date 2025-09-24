@@ -12,7 +12,7 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 
 from osgeo import gdal
 
@@ -138,7 +138,26 @@ class RAP_TS(NoDbBase):
                     future.add_done_callback(oncomplete)
                     futures.append(future)
 
-                wait(futures, return_when=FIRST_EXCEPTION)
+                futures_n = len(futures)
+                count = 0
+                pending = set(futures)
+                while pending:
+                    done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
+
+                    if not done:
+                        self.logger.warning('  RAP raster retrieval still running after 60 seconds; continuing to wait.')
+                        continue
+
+                    for future in done:
+                        try:
+                            future.result()
+                            count += 1
+                            self.logger.info(f'  ({count}/{futures_n}) rasters retrieved)')
+                        except Exception as exc:
+                            for remaining in pending:
+                                remaining.cancel()
+                            self.logger.error(f'  RAP raster retrieval failed with an error: {exc}')
+                            raise
 
             self._rap_mgr = rap_mgr
 
@@ -212,7 +231,26 @@ class RAP_TS(NoDbBase):
                         future.add_done_callback(oncomplete)
                         futures.append(future)
 
-                wait(futures, return_when=FIRST_EXCEPTION)
+                futures_n = len(futures)
+                count = 0
+                pending = set(futures)
+                while pending:
+                    done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
+
+                    if not done:
+                        self.logger.warning('  RAP analysis still running after 60 seconds; continuing to wait.')
+                        continue
+
+                    for future in done:
+                        try:
+                            future.result()
+                            count += 1
+                            self.logger.info(f'  ({count}/{futures_n}) analyses complete)')
+                        except Exception as exc:
+                            for remaining in pending:
+                                remaining.cancel()
+                            self.logger.error(f'  RAP analysis failed with an error: {exc}')
+                            raise
 
             self.data = data_ds
 
