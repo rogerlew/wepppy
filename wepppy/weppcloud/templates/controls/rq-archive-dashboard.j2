@@ -20,6 +20,9 @@
         border: 1px solid #ccc;
         border-radius: 4px;
       }
+      .archive-action-btn {
+        width: 80px;
+      }
     </style>
     <script type="text/javascript">
       const runid = {{ runid | tojson }};
@@ -28,6 +31,7 @@
       const archiveApiUrl = {{ url_for('rq_api.api_archive', runid=runid, config=config) | tojson }};
       const restoreApiUrl = {{ url_for('rq_api.api_restore_archive', runid=runid, config=config) | tojson }};
       const projectPath = {{ url_for('run_0.runs0', runid=runid, config=config) | tojson }};
+      const isUserAnonymous = {{ user.is_anonymous | tojson }};
       let currentJobId = null;
       let pendingRestoreName = null;
 
@@ -142,16 +146,21 @@
             link.textContent = 'Download';
             link.rel = 'nofollow';
             link.target = '_blank';
-            link.className = 'btn btn-sm btn-outline-secondary';
+            link.className = 'btn btn-sm btn-outline-secondary archive-action-btn';
             linkTd.appendChild(link);
             const restoreTd = document.createElement('td');
             const restoreBtn = document.createElement('button');
             restoreBtn.type = 'button';
-            restoreBtn.className = 'btn btn-sm btn-outline-secondary restore-button';
+            restoreBtn.className = 'btn btn-sm btn-outline-secondary restore-button archive-action-btn';
             restoreBtn.textContent = 'Restore';
             restoreBtn.addEventListener('click', () => openRestoreModal(item.name));
             if (currentJobId) {
               restoreBtn.disabled = true;
+            } else if (isUserAnonymous) {
+              restoreBtn.disabled = true;
+              restoreBtn.setAttribute('data-toggle', 'tooltip');
+              restoreBtn.setAttribute('data-placement', 'top');
+              restoreBtn.setAttribute('title', 'Restore is only available for Authorized logged in users');
             }
             restoreTd.appendChild(restoreBtn);
             tr.appendChild(nameTd);
@@ -171,6 +180,9 @@
           document.getElementById('archive_button').disabled = false;
           setRestoreButtonsDisabled(false);
         }
+        
+        // Initialize tooltips after table is populated
+        initializeTooltips();
       }
 
       function fetchArchives() {
@@ -275,8 +287,19 @@
 
       function setRestoreButtonsDisabled(disabled) {
         document.querySelectorAll('.restore-button').forEach((btn) => {
-          btn.disabled = disabled;
+          // If user is anonymous, button should always be disabled
+          if (isUserAnonymous) {
+            btn.disabled = true;
+          } else {
+            btn.disabled = disabled;
+          }
         });
+      }
+
+      function initializeTooltips() {
+        if (typeof $ !== 'undefined' && $.fn.tooltip) {
+          $('[data-toggle="tooltip"]').tooltip();
+        }
       }
 
       document.addEventListener('DOMContentLoaded', () => {
@@ -287,6 +310,9 @@
         wsClient.connect();
         document.getElementById('restore_confirm_button').addEventListener('click', confirmRestore);
         document.getElementById('restore_cancel_button').addEventListener('click', closeRestoreModal);
+        
+        // Initialize tooltips
+        initializeTooltips();
       });
     </script>
   </head>
