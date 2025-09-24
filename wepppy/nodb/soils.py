@@ -41,7 +41,7 @@ from wepppy.wepp.soils.soilsdb import load_db, get_soil
 # wepppy submodules
 from .base import (
     NoDbBase,
-    TriggerEvents
+    TriggerEvents, nodb_setter
 )
 
 from .ron import Ron
@@ -124,36 +124,27 @@ class Soils(NoDbBase):
         return getattr(self, '_clip_soils', False)
 
     @clip_soils.setter
+    @nodb_setter
     def clip_soils(self, value: bool):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
-
-        with self.locked():
-            self._clip_soils = value
+        self._clip_soils = value
 
     @property
     def clip_soils_depth(self):
         return getattr(self, '_clip_soils_depth', 1000)
 
     @clip_soils_depth.setter
+    @nodb_setter
     def clip_soils_depth(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
-
-        with self.locked():
-            self._clip_soils_depth = value
+        self._clip_soils_depth = value
 
     @property
     def initial_sat(self):
         return getattr(self, '_initial_sat', 0.75)
 
     @initial_sat.setter
+    @nodb_setter
     def initial_sat(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
-
-        with self.locked():
-            self._initial_sat = value
+        self._initial_sat = value
 
     @property
     def ksflag(self):
@@ -163,32 +154,25 @@ class Soils(NoDbBase):
         return self._ksflag
 
     @ksflag.setter
+    @nodb_setter
     def ksflag(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
-
         assert value in (True, False)
-
-        with self.locked():
-            self._ksflag = value
+        self._ksflag = value
 
     @property
     def mode(self):
         return self._mode
 
     @mode.setter
+    @nodb_setter
     def mode(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
-
-        with self.locked():
-            if isinstance(value, SoilsMode):
-                self._mode = value
-            elif isinstance(value, int):
-                self._mode = SoilsMode(value)
-            else:
-                raise ValueError('most be SoilsMode or int')
-            
+        if isinstance(value, SoilsMode):
+            self._mode = value
+        elif isinstance(value, int):
+            self._mode = SoilsMode(value)
+        else:
+            raise ValueError('most be SoilsMode or int')
+        
     @property
     def soils_map(self):
         return getattr(self, '_soils_map', None)
@@ -198,24 +182,18 @@ class Soils(NoDbBase):
         return self._single_selection
 
     @single_selection.setter
+    @nodb_setter
     def single_selection(self, mukey):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> value={mukey}')
-
-        with self.locked():
-            self._single_selection = mukey
+        self._single_selection = mukey
 
     @property
     def single_dbselection(self):
         return getattr(self, '_single_dbselection', None)
 
     @single_dbselection.setter
+    @nodb_setter
     def single_dbselection(self, sol):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> value={sol}')
-
-        with self.locked():
-            self._single_dbselection = sol
+        self._single_dbselection = sol
         
     @property
     def has_soils(self):
@@ -251,12 +229,9 @@ class Soils(NoDbBase):
         return getattr(self, '_ssurgo_db', self.config_get_str('soils', 'ssurgo_db')).replace('gNATSGO', 'gNATSGSO')
 
     @ssurgo_db.setter
+    @nodb_setter
     def ssurgo_db(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> value={value}')
-
-        with self.locked():
-            self._ssurgo_db = value
+        self._ssurgo_db = value
 
     def build_chile(self, initial_sat=None, ksflag=None):
         func_name = inspect.currentframe().f_code.co_name
