@@ -282,7 +282,7 @@ app.wsgi_app = ProxyFix(
 )
 
 from routes.download import download_bp
-from routes.browse import browse_bp
+from wepppy.weppcloud.routes.browse import browse_bp
 from routes.gdalinfo import gdalinfo_bp
 from routes.wepprepr import repr_bp
 from routes.diff import diff_bp
