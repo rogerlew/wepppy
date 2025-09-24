@@ -1141,6 +1141,8 @@ class Omni(NoDbBase):
 # [x] treat low and moderate severity conditions
 # [x] rerun https://wepp.cloud/weppcloud/runs/rlew-indecorous-vest/disturbed9002/
 # [x] run contrast scenarios
+# [ ] cameron peak in colorado **
+# [ ] Blackwood with contrasts ****
 
 
 # [ ] ability to run solution scenario for PATH with specified treatments across hillslopes
