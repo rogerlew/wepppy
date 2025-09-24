@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-2025, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
@@ -9,6 +9,7 @@
 # standard library
 import csv
 import os
+import inspect
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -22,7 +23,7 @@ from datetime import datetime, date
 from subprocess import Popen, PIPE
 
 from concurrent.futures import (
-    ThreadPoolExecutor, wait, FIRST_EXCEPTION, ProcessPoolExecutor, as_completed
+    ThreadPoolExecutor, wait, FIRST_COMPLETED, ProcessPoolExecutor
 )
 
 import json
@@ -33,8 +34,6 @@ from glob import glob
 import shutil
 
 from shutil import copyfile
-import multiprocessing
-
 import pandas as pd
 
 import rasterio
@@ -71,7 +70,7 @@ import pyproj
 from pyproj import Proj
 
 # wepppy submodules
-from .base import NoDbBase, TriggerEvents
+from .base import NoDbBase, TriggerEvents, nodb_setter
 from .watershed import Watershed, WatershedNotAbstractedError
 from .ron import Ron
 from .redis_prep import RedisPrep, TaskEnum
@@ -549,14 +548,6 @@ def build_future(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn
     climate.write(cli_path)
 
 
-
-def mod_func_wrapper_factory(mod_func):
-    def mod_func_wrapper(kwds):
-        mod_func(**kwds)
-
-    return mod_func_wrapper
-
-
 def get_monthlies(fn, lng, lat):
     cmd = ['gdallocationinfo', '-wgs84', '-valonly', fn, str(lng), str(lat)]
     p = Popen(cmd, stdout=PIPE)
@@ -748,38 +739,38 @@ class Climate(NoDbBase):
         return getattr(self, '_use_gridmet_wind_when_applicable', True)
     
     @use_gridmet_wind_when_applicable.setter
+    @nodb_setter
     def use_gridmet_wind_when_applicable(self, value: bool):
-        with self.locked():
-            self._use_gridmet_wind_when_applicable = value
+        self._use_gridmet_wind_when_applicable = value
 
     @property
     def precip_scale_reference(self):
         return getattr(self, '_precip_scale_reference', None)
     
     @precip_scale_reference.setter
+    @nodb_setter
     def precip_scale_reference(self, value):
         assert value is None or value in ['prism', 'daymet', 'gridmet']
-        with self.locked():
-            self._precip_scale_reference = value
+        self._precip_scale_reference = value
 
     @property
     def precip_monthly_scale_factors(self):
         return getattr(self, '_precip_monthly_scale_factors', [1 for i in range(12)])
     
     @precip_monthly_scale_factors.setter
+    @nodb_setter
     def precip_monthly_scale_factors(self, value):
         assert value is None or len(value) == 12
-        with self.locked():
-            self._precip_monthly_scale_factors = value
+        self._precip_monthly_scale_factors = value
 
     @property
     def precip_scale_factor(self):
         return getattr(self, '_precip_scale_factor', None)
 
     @precip_scale_factor.setter
+    @nodb_setter
     def precip_scale_factor(self, value):
-        with self.locked():
-            self._precip_scale_factor = value
+        self._precip_scale_factor = value
 
     @property
     def precip_scale_factor_map(self):
@@ -880,18 +871,18 @@ class Climate(NoDbBase):
 
 
     @ss_batch.setter
+    @nodb_setter
     def ss_batch(self, value):
-        with self.locked():
-            self._ss_batch = value
+        self._ss_batch = value
 
     @property
     def climate_daily_temp_ds(self):
         return getattr(self, '_climate_daily_temp_ds', 'null')
 
     @climate_daily_temp_ds.setter
+    @nodb_setter
     def climate_daily_temp_ds(self, value):
-        with self.locked():
-            self._climate_daily_temp_ds = value
+        self._climate_daily_temp_ds = value
 
     @property
     def daymet_version(self):
@@ -899,9 +890,9 @@ class Climate(NoDbBase):
 
 
     @daymet_version.setter
+    @nodb_setter
     def daymet_version(self, value):
-        with self.locked():
-            self._daymet_version = value
+        self._daymet_version = value
 
     #
     # climatestation_mode
@@ -916,14 +907,14 @@ class Climate(NoDbBase):
                is not ClimateStationMode.Undefined
 
     @climatestation_mode.setter
+    @nodb_setter
     def climatestation_mode(self, value):
-        with self.locked():
-            if isinstance(value, ClimateStationMode):
-                self._climatestation_mode = value
-            elif isinstance(value, int):
-                self._climatestation_mode = ClimateStationMode(value)
-            else:
-                raise ValueError('most be ClimateStationMode or int')
+        if isinstance(value, ClimateStationMode):
+            self._climatestation_mode = value
+        elif isinstance(value, int):
+            self._climatestation_mode = ClimateStationMode(value)
+        else:
+            raise ValueError('most be ClimateStationMode or int')
 
     # noinspection PyPep8Naming
     @property
@@ -970,9 +961,9 @@ class Climate(NoDbBase):
         return self._climatestation
 
     @climatestation.setter
+    @nodb_setter
     def climatestation(self, value):
-        with self.locked():
-            self._climatestation = value
+        self._climatestation = value
 
     @property
     def climatestation_meta(self):
@@ -1001,14 +992,14 @@ class Climate(NoDbBase):
         return self._climate_mode
 
     @climate_mode.setter
+    @nodb_setter
     def climate_mode(self, value):
-        with self.locked():
-            if isinstance(value, ClimateMode):
-                self._climate_mode = value
-            elif isint(value):
-                self._climate_mode = ClimateMode(int(value))
-            else:
-                self._climate_mode = ClimateMode.parse(value)
+        if isinstance(value, ClimateMode):
+            self._climate_mode = value
+        elif isint(value):
+            self._climate_mode = ClimateMode(int(value))
+        else:
+            self._climate_mode = ClimateMode.parse(value)
 
     @property
     def is_single_storm(self):
@@ -1016,7 +1007,6 @@ class Climate(NoDbBase):
     ClimateMode.SingleStorm,
     ClimateMode.SingleStormBatch,
     ClimateMode.UserDefinedSingleStorm)
-
 
 
     #
@@ -1030,14 +1020,14 @@ class Climate(NoDbBase):
         return self._precip_scaling_mode
 
     @precip_scaling_mode.setter
+    @nodb_setter
     def precip_scaling_mode(self, value):
-        with self.locked():
-            if isinstance(value, ClimatePrecipScalingMode):
-                self._precip_scaling_mode = value
-            elif isinstance(value, int):
-                self._precip_scaling_mode = ClimatePrecipScalingMode(value)
-            else:
-                self._precip_scaling_mode = ClimatePrecipScalingMode.parse(value)
+        if isinstance(value, ClimatePrecipScalingMode):
+            self._precip_scaling_mode = value
+        elif isinstance(value, int):
+            self._precip_scaling_mode = ClimatePrecipScalingMode(value)
+        else:
+            self._precip_scaling_mode = ClimatePrecipScalingMode.parse(value)
 
     #
     # precip_scaling_reference
@@ -1050,9 +1040,9 @@ class Climate(NoDbBase):
         return self._precip_scaling_reference
 
     @precip_scaling_reference.setter
+    @nodb_setter
     def precip_scaling_reference(self, value):
-        with self.locked():
-            self._precip_scaling_reference = value
+        self._precip_scaling_reference = value
 
     #
     # climate_spatial mode
@@ -1062,14 +1052,14 @@ class Climate(NoDbBase):
         return self._climate_spatialmode
 
     @climate_spatialmode.setter
+    @nodb_setter
     def climate_spatialmode(self, value):
-        with self.locked():
-            if isinstance(value, ClimateSpatialMode):
-                self._climate_spatialmode = value
-            elif isinstance(value, int):
-                self._climate_spatialmode = ClimateSpatialMode(value)
-            else:
-                self._climate_spatialmode = ClimateSpatialMode.parse(value)
+        if isinstance(value, ClimateSpatialMode):
+            self._climate_spatialmode = value
+        elif isinstance(value, int):
+            self._climate_spatialmode = ClimateSpatialMode(value)
+        else:
+            self._climate_spatialmode = ClimateSpatialMode.parse(value)
 
     #
     # station search
@@ -1167,18 +1157,18 @@ class Climate(NoDbBase):
         return self._orig_cli_fn
 
     @orig_cli_fn.setter
+    @nodb_setter
     def orig_cli(self, value):
-        with self.locked():
-            self._orig_cli_fn = value
+        self._orig_cli_fn = value
 
     @property
     def input_years(self):
         return self._input_years
 
     @input_years.setter
+    @nodb_setter
     def input_years(self, value):
-        with self.locked():
-            self._input_years = int(value)
+        self._input_years = int(value)
 
     @property
     def has_station(self):
@@ -1401,30 +1391,30 @@ class Climate(NoDbBase):
             self._ss_batch = ss_batch
 
     def build(self, verbose=False, attrs=None):
-        self.logger.info('Build Climates\n')
-        self.logger.info('  assert not self.islocked()\n')
+        self.logger.info('Build Climates')
+        self.logger.info('  assert not self.islocked()')
         assert not self.islocked()
 
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
-            self.logger.info('  watershed is not abstracted, raising error\n')
+            self.logger.info('  watershed is not abstracted, raising error')
             raise WatershedNotAbstractedError()
 
         if self.climatestation is None and self.orig_cli_fn is None:
-            self.logger.info('  no climate station selected, raising error\n')
+            self.logger.info('  no climate station selected, raising error')
             raise NoClimateStationSelectedError()
 
         cli_dir = self.cli_dir
         if _exists(cli_dir):
-            self.logger.info('  cli_dir exists, attempting to remove\n')
+            self.logger.info('  cli_dir exists, attempting to remove')
             try:
                 shutil.rmtree(cli_dir)
             except:
                 pass
 
         if not _exists(cli_dir):
-            self.logger.info('  cli_dir does not exist, creating\n')
+            self.logger.info('  cli_dir does not exist, creating')
             os.mkdir(cli_dir)
 
         with self.locked():
@@ -1434,10 +1424,10 @@ class Climate(NoDbBase):
             self.sub_par_fns = None
 
         climate_mode = self.climate_mode
-        self.logger.info(f'  climate_mode: {climate_mode}\n')
+        self.logger.info(f'  climate_mode: {climate_mode}')
 
         if climate_mode == ClimateMode.Undefined:
-            self.logger.info('  climate_mode is Undefined, raising error\n')
+            self.logger.info('  climate_mode is Undefined, raising error')
             raise ClimateModeIsUndefinedError()
         
         # precip scaling mode validation
@@ -1445,17 +1435,17 @@ class Climate(NoDbBase):
         precip_scaling_mode  = self.precip_scaling_mode
         self.logger.info(f'  precip_scaling_mode: {precip_scaling_mode}')
         if precip_scaling_mode == ClimatePrecipScalingMode.Scalar:
-            self.logger.info('  precip_scaling_mode is Scalar, validating\n')
+            self.logger.info('  precip_scaling_mode is Scalar, validating')
             if self.precip_scale_factor is None:
-                raise ValueError('precip_scale_factor is None\n')
-            
+                raise ValueError('precip_scale_factor is None')
+
         elif precip_scaling_mode == ClimatePrecipScalingMode.Spatial:
-            self.logger.info('  precip_scaling_mode is Spatial, validating\n')
+            self.logger.info('  precip_scaling_mode is Spatial, validating')
             if self.precip_scale_factor_map is None:
-                raise ValueError('precip_scale_factor_map is None\n')
-            
+                raise ValueError('precip_scale_factor_map is None')
+
         elif precip_scaling_mode == ClimatePrecipScalingMode.Monthlies:
-            self.logger.info('  precip_scaling_mode is Monthlies, validating\n')
+            self.logger.info('  precip_scaling_mode is Monthlies, validating')
             if self.precip_monthly_scale_factors is None:
                 raise ValueError('precip_monthly_scale_factors is None')
             
@@ -1467,7 +1457,7 @@ class Climate(NoDbBase):
                     raise ValueError('precip_monthly_scale_factors contains non-floats')
                 
         elif precip_scaling_mode == ClimatePrecipScalingMode.AnnualMonthlies:
-            self.logger.info('  precip_scaling_mode is AnnualMonthlies, validating\n')
+            self.logger.info('  precip_scaling_mode is AnnualMonthlies, validating')
             if self.precip_scaling_reference is None:
                 raise ValueError('precip_scaling_reference is None')
             
@@ -1475,146 +1465,146 @@ class Climate(NoDbBase):
                 raise ValueError('precip_scaling_reference is not prism, daymet, or gridmet')
             
             if self.precip_scaling_reference == 'prism':
-                self.logger.info('  precip_scaling_reference is prism\n')
+                self.logger.info('  precip_scaling_reference is prism')
                 if self.observed_start_year < 1981:
                     raise ValueError('prism only available 1981 to present')
-        
-        self.logger.info('  precip_scaling_mode validation passed\n')
+
+        self.logger.info('  precip_scaling_mode validation passed')
 
         if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
-            self.logger.info('  climate_spatialmode is MultipleInterpolated, validating climate_mode\n')
+            self.logger.info('  climate_spatialmode is MultipleInterpolated, validating climate_mode')
             # check climate mode is observedprism or gridmetprism
             if self.climate_mode not in [ClimateMode.ObservedPRISM, ClimateMode.GridMetPRISM]:
                 raise ValueError('climate_spatialmode is MultipleInterpolated but climate_mode is not ObservedPRISM or GridMetPRISM')
-            self.logger.info('  climate_mode validated for MultipleInterpolated\n')
+            self.logger.info('  climate_mode validated for MultipleInterpolated')
 
-        self.logger.info('  routing by climate_mode...\n')
+        self.logger.info('  routing by climate_mode')
         # vanilla Cligen
         if climate_mode == ClimateMode.Vanilla:
-            self.logger.info('  climate_mode is Vanilla\n')
+            self.logger.info('  climate_mode is Vanilla')
             self._build_climate_vanilla(verbose=verbose, attrs=attrs)
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.logger.info('  climate_spatialmode is Multiple, running _prism_revision\n')
+                self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
                 self._prism_revision(verbose=verbose)
 
         # observed
         elif climate_mode == ClimateMode.ObservedPRISM:
-            self.logger.info('  climate_mode is ObservedPRISM\n')
+            self.logger.info('  climate_mode is ObservedPRISM')
             if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
                 self.logger.info('  climate_spatialmode is MultipleInterpolated, running _build_climate_observed_daymet_multiple')
                 # the climate_mode naming is kind of shitty, this doesn't use prism at all
                 # but kind of stuck with it for backwards compatibility
                 self._build_climate_observed_daymet_multiple(verbose=verbose, attrs=attrs) 
             else:
-                self.logger.info('  running _build_climate_observed_daymet\n')
+                self.logger.info('  running _build_climate_observed_daymet')
                 self._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
                 if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                    self.logger.info('  climate_spatialmode is Multiple, running _prism_revision\n')
+                    self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
                     self._prism_revision(verbose=verbose)
 
         # future
         elif climate_mode == ClimateMode.Future:
-            self.logger.info('  climate_mode is Future\n')
+            self.logger.info('  climate_mode is Future')
             self._build_climate_future(verbose=verbose, attrs=attrs)
 
         # single storm
         elif climate_mode == ClimateMode.SingleStorm:
-            self.logger.info('  climate_mode is SingleStorm\n')
+            self.logger.info('  climate_mode is SingleStorm')
             self._build_climate_single_storm(verbose=verbose, attrs=attrs)
 
         # single storm batch
         elif climate_mode == ClimateMode.SingleStormBatch:
-            self.logger.info('  climate_mode is SingleStormBatch\n')
+            self.logger.info('  climate_mode is SingleStormBatch')
             self._build_climate_single_storm_batch(verbose=verbose, attrs=attrs)
 
         # PRISM
         elif climate_mode == ClimateMode.PRISM:
-            self.logger.info('  climate_mode is PRISM\n')
+            self.logger.info('  climate_mode is PRISM')
             self._build_climate_prism(verbose=verbose, attrs=attrs)
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.logger.info('  climate_spatialmode is Multiple, running _prism_revision\n')
+                self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
                 self._prism_revision(verbose=verbose)
 
         # NEXRAD
         elif climate_mode == ClimateMode.DepNexrad:
-            self.logger.info('  climate_mode is DepNexrad\n')
+            self.logger.info('  climate_mode is DepNexrad')
             self._build_climate_depnexrad(verbose=verbose, attrs=attrs)
 
         elif climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
-            self.logger.info('  climate_mode is ObservedDb or FutureDb\n')
+            self.logger.info('  climate_mode is ObservedDb or FutureDb')
             assert self.orig_cli_fn is not None
             self._post_defined_climate(verbose=verbose, attrs=attrs)
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.logger.info('  climate_spatialmode is Multiple, running _prism_revision\n')
+                self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
                 self._prism_revision(verbose=verbose)
 
         # EOBS
         elif climate_mode == ClimateMode.EOBS:
-            self.logger.info('  climate_mode is EOBS\n')
+            self.logger.info('  climate_mode is EOBS')
             self._build_climate_mod(mod_function=eobs_mod, verbose=verbose, attrs=attrs)
 
         elif climate_mode == ClimateMode.AGDC:
-            self.logger.info('  climate_mode is AGDC\n')
+            self.logger.info('  climate_mode is AGDC')
             self._build_climate_mod(mod_function=agdc_mod, verbose=verbose, attrs=attrs)
 
         elif climate_mode == ClimateMode.GridMetPRISM:
-            self.logger.info('  climate_mode is GridMetPRISM\n')
+            self.logger.info('  climate_mode is GridMetPRISM')
             if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
-                self.logger.info('  climate_spatialmode is MultipleInterpolated, running _build_climate_observed_gridmet_multiple\n')
+                self.logger.info('  climate_spatialmode is MultipleInterpolated, running _build_climate_observed_gridmet_multiple')
                 self._build_climate_observed_gridmet_multiple(verbose=verbose, attrs=attrs)
             else:
-                self.logger.info('  running _build_climate_observed_gridmet\n')
+                self.logger.info('  running _build_climate_observed_gridmet')
                 self._build_climate_observed_gridmet(verbose=verbose, attrs=attrs)
                 if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                    self.logger.info('  climate_spatialmode is Multiple, running _prism_revision\n')
+                    self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
                     self._prism_revision(verbose=verbose)
 
-        self.logger.info('  routing by precip_scaling_mode...\n')
+        self.logger.info('  routing by precip_scaling_mode...')
         if self.precip_scaling_mode == ClimatePrecipScalingMode.Scalar:
-            self.logger.info('  precip_scaling_mode is Scalar, running _scale_precip\n')
+            self.logger.info('  precip_scaling_mode is Scalar, running _scale_precip')
             assert self.precip_scale_factor is not None
             self._scale_precip(self.precip_scale_factor)
         
         elif self.precip_scaling_mode == ClimatePrecipScalingMode.Spatial:
-            self.logger.info('  precip_scaling_mode is Spatial, running _spatial_scale_precip\n')
+            self.logger.info('  precip_scaling_mode is Spatial, running _spatial_scale_precip')
             assert self.precip_scale_factor_map is not None
             self._spatial_scale_precip(self.precip_scale_factor_map)
         
         elif self.precip_scaling_mode == ClimatePrecipScalingMode.Monthlies:
-            self.logger.info('  precip_scaling_mode is Monthlies, running _scale_precip_monthlies\n')
+            self.logger.info('  precip_scaling_mode is Monthlies, running _scale_precip_monthlies')
             assert self.precip_monthly_scale_factors is not None
             self._scale_precip_monthlies(self.precip_monthly_scale_factors, pyo3_cli_p_scale_monthlies)
             
         elif self.precip_scaling_mode == ClimatePrecipScalingMode.AnnualMonthlies:
-            self.logger.info('  precip_scaling_mode is AnnualMonthlies\n')
+            self.logger.info('  precip_scaling_mode is AnnualMonthlies')
             assert self.precip_scaling_reference in ['prism', 'daymet', 'gridmet']
             
             ws_lng, ws_lat = watershed.centroid
             start_year, end_year = self.observed_start_year, self.observed_end_year
-            self.logger.info(f'    reference: {self.precip_scaling_reference}, years: {start_year}-{end_year}\n')
+            self.logger.info(f'    reference: {self.precip_scaling_reference}, years: {start_year}-{end_year}')
             
             og_annual_monthlies = pyo3_cli_calculate_annual_monthlies(_join(cli_dir, self.cli_fn))
             if self.precip_scaling_reference == 'prism':
-                self.logger.info('    getting prism reference data\n')
+                self.logger.info('    getting prism reference data')
                 reference_annual_monthlies = get_prism_p_annual_monthlies(ws_lng, ws_lat, start_year, end_year)
             elif self.precip_scaling_reference == 'daymet':
-                self.logger.info('    getting daymet reference data\n')
+                self.logger.info('    getting daymet reference data')
                 reference_annual_monthlies = get_daymet_p_annual_monthlies(ws_lng, ws_lat, start_year, end_year)
             elif self.precip_scaling_reference == 'gridmet':
-                self.logger.info('    getting gridmet reference data\n')
+                self.logger.info('    getting gridmet reference data')
                 reference_annual_monthlies = get_gridmet_p_annual_monthlies(ws_lng, ws_lat, start_year, end_year)
                 
             assert len(og_annual_monthlies) == len(reference_annual_monthlies), (len(og_annual_monthlies), len(reference_annual_monthlies))
             
             monthly_scale_factors = []
-            self.logger.info('    calculating monthly scale factors\n')
+            self.logger.info('    calculating monthly scale factors')
             for ref, og in zip(reference_annual_monthlies, og_annual_monthlies):
                 if og == 0:
                     monthly_scale_factors.append(1.0)
                 else:
                     monthly_scale_factors.append(ref / og)
 
-            self.logger.info('    writing reference_annual_monthlies.csv\n')
+            self.logger.info('    writing reference_annual_monthlies.csv')
             with open(_join(cli_dir, 'reference_annual_monthlies.csv'), 'w') as fp:
                 writer = csv.writer(fp)
                 # Write header 
@@ -1627,18 +1617,18 @@ class Climate(NoDbBase):
                         year += 1
                     writer.writerow([year, month, ref, scale])
 
-            self.logger.info('    running _scale_precip_monthlies with annual factors\n')
+            self.logger.info('    running _scale_precip_monthlies with annual factors')
             self._scale_precip_monthlies(monthly_scale_factors, pyo3_cli_p_scale_annual_monthlies)
 
         try:
-            self.logger.info('  timestamping build_climate task\n')
+            self.logger.info('  timestamping build_climate task')
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.build_climate)
         except FileNotFoundError:
-            self.logger.info('  RedisPrep not found, skipping timestamp\n')
+            self.logger.info('  RedisPrep not found, skipping timestamp')
             pass
 
-        self.logger.info('Climate Build Successful.\n')
+        self.logger.info('Climate Build Successful.')
         self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
         
     def _scale_precip(self, scale_factor):
@@ -1646,7 +1636,7 @@ class Climate(NoDbBase):
         scalar scaling of precipitation
         """
         with self.locked():
-            self.logger.info('  running _scale_precip... \n')
+            self.logger.info('  running _scale_precip... ')
 
             cli_dir = os.path.abspath(self.cli_dir)
             
@@ -1674,7 +1664,7 @@ class Climate(NoDbBase):
         """
         
         with self.locked():
-            self.logger.info('  running _scale_precip... \n')
+            self.logger.info('  running _scale_precip... ')
 
             cli_dir = os.path.abspath(self.cli_dir)
             
@@ -1697,7 +1687,7 @@ class Climate(NoDbBase):
                 self.sub_cli_fns = sub_cli_fns
 
     def _spatial_scale_precip(self, scale_factor_map):
-        self.logger.info(f'  running _spatial_scale_precip with {scale_factor_map} \n')
+        self.logger.info(f'  running _spatial_scale_precip with {scale_factor_map} ')
 
         with self.locked():
             cli_dir = os.path.abspath(self.cli_dir)
@@ -1710,11 +1700,11 @@ class Climate(NoDbBase):
             ws_lng, ws_lat = watershed.centroid
             scale_factor = rdi.get_location_info(ws_lng, ws_lat)
 
-            self.logger.info(f'    Scaling {self.cli_fn}\n')
-            self.logger.info(f'      RasterDatasetInterpolator({scale_factor_map}).({ws_lng}, {ws_lat}) -> {scale_factor} \n')
+            self.logger.info(f'    Scaling {self.cli_fn}')
+            self.logger.info(f'      RasterDatasetInterpolator({scale_factor_map}).({ws_lng}, {ws_lat}) -> {scale_factor} ')
             if scale_factor is not None:
                 if scale_factor > 0.1 and scale_factor < 10.0:
-                    self.logger.info(f'    pyo3_cli_p_scale() \n')
+                    self.logger.info(f'    pyo3_cli_p_scale() ')
                     pyo3_cli_p_scale(
                         _join(cli_dir, self.cli_fn), 
                         _join(cli_dir, f'scale_{self.cli_fn}' ),
@@ -1722,7 +1712,7 @@ class Climate(NoDbBase):
                     self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'scale_{self.cli_fn}'))
                     self.cli_fn = f'scale_{self.cli_fn}'
                 else:
-                    self.logger.info(f'    scale factor {scale_factor} out of range, skipping for {self.cli_fn}\n')
+                    self.logger.info(f'    scale factor {scale_factor} out of range, skipping for {self.cli_fn}')
         
 
             if self.sub_cli_fns is not None:
@@ -1731,17 +1721,17 @@ class Climate(NoDbBase):
                     lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
                     scale_factor = rdi.get_location_info(lng, lat)
 
-                    self.logger.info(f'    RasterDatasetInterpolator({scale_factor_map}).({lng}, {lat}) -> {scale_factor} \n')
+                    self.logger.info(f'    RasterDatasetInterpolator({scale_factor_map}).({lng}, {lat}) -> {scale_factor} ')
                     if scale_factor is not None:
-                        self.logger.info(f'    scaling {sub_cli_fn} ({lng}, {lat}) -> {scale_factor} \n')
+                        self.logger.info(f'    scaling {sub_cli_fn} ({lng}, {lat}) -> {scale_factor} ')
                         if scale_factor > 0.1 and scale_factor < 10.0:
-                            self.logger.info(f'    pyo3_cli_p_scale() \n')
+                            self.logger.info(f'    pyo3_cli_p_scale() ')
                             pyo3_cli_p_scale( 
                                 _join(cli_dir, sub_cli_fn), 
                                 _join(cli_dir, f'scale_{sub_cli_fn}' ),
                                 scale_factor)
                         else:
-                            self.logger.info(f'    scale factor {scale_factor} out of range, skipping for {sub_cli_fn}\n')
+                            self.logger.info(f'    scale factor {scale_factor} out of range, skipping for {sub_cli_fn}')
 
                     if _exists(_join(cli_dir, f'scale_{sub_cli_fn}')):
                         sub_cli_fns[topaz_id] = f'scale_{sub_cli_fn}'
@@ -1751,7 +1741,7 @@ class Climate(NoDbBase):
                 self.sub_cli_fns = sub_cli_fns
 
     def _build_climate_depnexrad(self, verbose=False, attrs=None):
-        self.logger.info('  running _build_climate_depnexrad... \n')
+        self.logger.info('  running _build_climate_depnexrad... ')
 
         with self.locked():
             self.set_attrs(attrs)
@@ -1828,10 +1818,9 @@ class Climate(NoDbBase):
 
             self._input_years = cli.input_years
             self.monthlies = cli.calc_monthlies()
-            self.logger.info('done')
 
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.logger.info('  building climates for hillslopes... \n')
+                self.logger.info('  building climates for hillslopes... ')
 
                 # build a climate for each subcatchment
                 sub_par_fns = {}
@@ -1857,15 +1846,11 @@ class Climate(NoDbBase):
                     sub_par_fns[topaz_id] = '.par'
                     sub_cli_fns[topaz_id] = cli_fn
 
-                    self.logger.info('done')
-
-                self.logger.info('done')
-
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
 
     def _build_climate_prism(self, verbose=False, attrs=None):
-        self.logger.info('  running _build_climate_prism... \n')
+        self.logger.info('  running _build_climate_prism... ')
 
         with self.locked():
             self.set_attrs(attrs)
@@ -1923,8 +1908,7 @@ class Climate(NoDbBase):
                 self.logger.info('    prism/ppt contains <0 values (cubic); reacquiring with bilinear...')
                 wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='bilinear', 
                                  v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
-                self.done()
-
+                
             # Always use bilinear for the working stack
             wmesque_retrieve('prism/ppt',  _map.extent, ppt_fn,  _map.cellsize, resample='bilinear', 
                              v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
@@ -1939,20 +1923,12 @@ class Climate(NoDbBase):
             ws_tmins = get_monthlies(tmin_fn, ws_lng, ws_lat)
             ws_tmaxs = get_monthlies(tmax_fn, ws_lng, ws_lat)
 
-            self.logger.info('  building climates for hillslopes... \n')
+            self.logger.info('  building climates for hillslopes... ')
 
             cli = ClimateFile(cli_path)
 
             sub_par_fns: dict[str, str] = {}
             sub_cli_fns: dict[str, str] = {}
-
-            def _proc_ok(res):
-                self.logger.info(f'_prism_revision() -> {res}')
-                self.logger.info('done')
-
-            def _proc_err(err):
-                self.logger.info(f'_prism_revision() -> {err}')
-                self.logger.info('done')
 
             with ThreadPoolExecutor(max_workers=NCPU) as executor:
                 future_map = {}
@@ -1979,17 +1955,28 @@ class Climate(NoDbBase):
 
                     sub_par_fns[topaz_id] = '.par'
                     sub_cli_fns[topaz_id] = new_cli_fn
-                    self.logger.info('done')
 
-                for fut in as_completed(future_map):
-                    try:
-                        res = fut.result()
-                        _proc_ok(res)
-                    except Exception as e:
-                        _proc_err(e)
-                        for f in future_map:
-                            f.cancel()  
-                        raise
+                futures_n = len(future_map)
+                count = 0
+                pending = set(future_map.keys())
+                while pending:
+                    done, pending = wait(pending, timeout=30, return_when=FIRST_COMPLETED)
+
+                    if not done:
+                        # Climate builds can be lengthy when running large batches; this warning surfaces potential stalls.
+                        self.logger.warning('  Climate build tasks still running after 30 seconds; continuing to wait.')
+                        continue
+
+                    for fut in done:
+                        try:
+                            res = fut.result()
+                            count += 1
+                            self.logger.info(f' ({count}/{futures_n}) _prism_revision() -> {res}')
+                        except Exception as e:
+                            self.logger.info(f'_prism_revision() -> {e}')
+                            for f in future_map:
+                                f.cancel()
+                            raise
 
             self.sub_par_fns = sub_par_fns
             self.sub_cli_fns = sub_cli_fns
@@ -2016,14 +2003,13 @@ class Climate(NoDbBase):
 
             self.cli_fn = cli_fn
             assert _exists(cli_path)
-            self.logger.info('done')
 
             self.sub_par_fns = None
             self.sub_cli_fns = None
 
-            self.logger.info('Calculating monthlies...')
-            cli = ClimateFile(_join(cli_dir, cli_fn))
-            self.monthlies = cli.calc_monthlies()
+            with self.timed('Calculating monthlies'):
+                cli = ClimateFile(_join(cli_dir, cli_fn))
+                self.monthlies = cli.calc_monthlies()
 
     def _build_climate_mod(self, mod_function, verbose=False, attrs=None):
         self.logger.info('  running _build_climate_mod{}... \n'.format(mod_function.__name__))
@@ -2049,8 +2035,8 @@ class Climate(NoDbBase):
             # build a climate for the channels.
             lng, lat = watershed.centroid
 
-            self.par_fn = '{}.par'.format(climatestation)
-            self.cli_fn = '{}.cli'.format(climatestation)
+            self.par_fn = f'{climatestation}.par'
+            self.cli_fn = f'{climatestation}.cli'
 
             monthlies = mod_function(par=climatestation,
                                      years=years, lng=lng, lat=lat, wd=cli_dir,
@@ -2058,39 +2044,52 @@ class Climate(NoDbBase):
             self.monthlies = monthlies
 
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.logger.info('  building climates for hillslopes... \n')
+                with self.timed('  building climates for hillslopes'):
+                    # build a climate for each subcatchment
+                    sub_par_fns = {}
+                    sub_cli_fns = {}
 
-                pool = multiprocessing.Pool(NCPU)
-                jobs = []
+                    with ProcessPoolExecutor(max_workers=NCPU) as executor:
+                        futures = {}
 
-                def callback(res):
-                    ppts = ['%.2f' % p  for p in  res['ppts']]
-                    self.logger.info('job completed.  ppts: {} '.format(', '.join(ppts)))
-                    self.logger.info('done')
+                        for topaz_id, (hill_lng, hill_lat) in watershed.centroid_hillslope_iter():
+                            self.logger.info('submitting climate build for {} to worker pool... '.format(topaz_id))
 
-                # build a climate for each subcatchment
-                sub_par_fns = {}
-                sub_cli_fns = {}
-                for topaz_id, (hill_lng, hill_lat) in watershed.centroid_hillslope_iter():
-                    self.logger.info('submitting climate build for {} to worker pool... '.format(topaz_id))
+                            hill_lng, hill_lat = watershed.hillslope_centroid_lnglat(topaz_id)
+                            suffix = f'_{topaz_id}'
 
-                    hill_lng, hill_lat = watershed.hillslope_centroid_lnglat(topaz_id)
-                    suffix = f'_{topaz_id}'
+                            kwds = dict(par=climatestation,
+                                        years=years, lng=hill_lng, lat=hill_lat, wd=cli_dir,
+                                        suffix=suffix, logger=None, nwds_method='')
 
-                    kwds = dict(par=climatestation,
-                                 years=years, lng=hill_lng, lat=hill_lat, wd=cli_dir,
-                                 suffix=suffix, logger=None, nwds_method='')
+                            sub_par_fns[topaz_id] = f'{climatestation}{suffix}.par'
+                            sub_cli_fns[topaz_id] = f'{climatestation}{suffix}.cli'
 
-                    sub_par_fns[topaz_id] = '{}{}.par'.format(climatestation, suffix)
-                    sub_cli_fns[topaz_id] = '{}{}.cli'.format(climatestation, suffix)
+                            future = executor.submit(mod_function, **kwds)
+                            futures[future] = topaz_id
 
-                    jobs.append(pool.apply_async(mod_function, kwds=kwds, callback=callback))
+                        futures_n = len(futures)
+                        count = 0
+                        pending = set(futures.keys())
+                        while pending:
+                            done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
 
-                    self.logger.info('done')
+                            if not done:
+                                self.logger.warning('  Climate build worker pool still running after 60 seconds; continuing to wait.')
+                                continue
 
-                [j.wait() for j in jobs]
-
-                self.logger.info('done')
+                            for future in done:
+                                topaz_id = futures[future]
+                                try:
+                                    res = future.result()
+                                    ppts = ['%.2f' % p for p in res['ppts']]
+                                    count += 1
+                                    self.logger.info(f'  ({count}/{futures_n})ppts: {ppts} ')
+                                except Exception as exc:
+                                    for remaining in pending:
+                                        remaining.cancel()
+                                    self.logger.error(f'  Climate build for topaz {topaz_id} failed with an error: {exc}')
+                                    raise
 
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
@@ -2273,16 +2272,23 @@ class Climate(NoDbBase):
                             executor.submit(
                                 retrieve_nc, measure, bbox, year, cli_dir, _id=f'{measure}_{year}'))
 
+                pending = set(futures)
                 try:
-                    for future in as_completed(futures):
-                        # This call raises an exception if the task failed.
-                        future.result()
-                except Exception as e:
+                    while pending:
+                        done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
+
+                        if not done:
+                            # Retrievals can be slow depending on network/IO; warn so slowdowns are visible.
+                            self.logger.warning('  GridMET retrieval still running after 60 seconds; continuing to wait.')
+                            continue
+
+                        for future in done:
+                            future.result()
+                except Exception:
                     # Cancel all pending futures.
                     for f in futures:
                         if not f.done():
                             f.cancel()
-                    # If using Python 3.9+, you can force cancellation of pending futures:
                     executor.shutdown(wait=False, cancel_futures=True)
                     raise
 
@@ -2321,7 +2327,7 @@ class Climate(NoDbBase):
                 futures = []
 
                 for topaz_id, loc in hillslope_locations.items():
-                    self.logger.info(f'  interpolating topaz_id {topaz_id}...\n')
+                    self.logger.info(f'  interpolating topaz_id {topaz_id}...')
                         
                     # this interpolates the 3d grid using rust pyo3 and builds prn to be used by cligen
                     futures.append(
@@ -2330,17 +2336,22 @@ class Climate(NoDbBase):
                                         longitudes, latitudes, raw_data, interpolation_spec, 
                                         self.cli_dir, start_year, end_year))
                     
+                pending = set(futures)
                 try:
-                    for future in as_completed(futures):
-                        # This call raises an exception if the task failed.
-                        topaz_id = future.result()
-                        self.logger.info(f'  interpolated {topaz_id} done.\n')
-                except Exception as e:
-                    # Cancel all pending futures.
+                    while pending:
+                        done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
+
+                        if not done:
+                            self.logger.warning('  GridMET interpolation still running after 60 seconds; continuing to wait.')
+                            continue
+
+                        for future in done:
+                            topaz_id = future.result()
+                            self.logger.info(f'  interpolated {topaz_id} done.')
+                except Exception:
                     for f in futures:
                         if not f.done():
                             f.cancel()
-                    # If using Python 3.9+, you can force cancellation of pending futures:
                     executor.shutdown(wait=False, cancel_futures=True)
                     raise
 
@@ -2354,7 +2365,7 @@ class Climate(NoDbBase):
                     _prn_fn = f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.prn'
                     _cli_fn = f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.cli'
                     
-                    self.logger.info(f'submitting climate build for {topaz_id} ...\n')
+                    self.logger.info(f'submitting climate build for {topaz_id} ...')
 
                     futures.append(
                         executor.submit(
@@ -2364,25 +2375,30 @@ class Climate(NoDbBase):
                     sub_par_fns[topaz_id] = _prn_fn
                     sub_cli_fns[topaz_id] = _cli_fn
 
-                topaz_id = 'ws'
-                prn_fn = f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.prn'
+                ws_topaz_id = 'ws'
+                prn_fn = f'gridmet_observed_{ws_topaz_id}_{start_year}-{end_year}.prn'
                 cli_fn = 'wepp.cli'
                 futures.append(
                     executor.submit(
                         build_observed_gridmet_interpolated, 
-                        cligen, topaz_id, ws_lng, ws_lat, start_year, end_year, cli_dir, cli_fn, prn_fn))
+                        cligen, ws_topaz_id, ws_lng, ws_lat, start_year, end_year, cli_dir, cli_fn, prn_fn))
 
+                pending = set(futures)
                 try:
-                    for future in as_completed(futures):
-                        # This call raises an exception if the task failed.
-                        topaz_id = future.result()
-                        self.logger.info(f'  climate for {topaz_id} done.\n')
-                except Exception as e:
-                    # Cancel all pending futures.
+                    while pending:
+                        done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
+
+                        if not done:
+                            self.logger.warning('  GridMET climate build still running after 60 seconds; continuing to wait.')
+                            continue
+
+                        for future in done:
+                            completed_topaz = future.result()
+                            self.logger.info(f'  climate for {completed_topaz} done.')
+                except Exception:
                     for f in futures:
                         if not f.done():
                             f.cancel()
-                    # If using Python 3.9+, you can force cancellation of pending futures:
                     executor.shutdown(wait=False, cancel_futures=True)
                     raise
                 
@@ -2424,23 +2440,22 @@ class Climate(NoDbBase):
 
             hillslope_locations = identify_pixel_coords(hillslope_locations, daymet_version=self.daymet_version)
 
-            self.logger.info('  interpolating daymet grids...\n')
-
-            # this retrieves concurrently
-            interpolate_daily_timeseries(hillslope_locations, 
-                                         self.observed_start_year, self.observed_end_year,
-                                         output_dir=cli_dir,
-                                         output_type='prn parquet',
-                                         status_channel=self._status_channel)
+            with self.timed('  interpolating daymet grids'):
+                # this retrieves concurrently
+                interpolate_daily_timeseries(hillslope_locations, 
+                                            self.observed_start_year, self.observed_end_year,
+                                            output_dir=cli_dir,
+                                            output_type='prn parquet',
+                                            logger=self.logger)
 
             wind_df = None
             wind_vs = None
             wind_dir = None
             if self.use_gridmet_wind_when_applicable:
-                self.logger.info('  fetching gridmet wind...\n')
-                wind_df = gridmet_retrieve_historical_wind(ws_lng, ws_lat, start_year, end_year)
-                wind_vs = wind_df['vs(m/s)']
-                wind_dir = wind_df['th(DegreesClockwisefromnorth)']
+                with self.timed('  retrieving gridmet wind'):
+                    wind_df = gridmet_retrieve_historical_wind(ws_lng, ws_lat, start_year, end_year)
+                    wind_vs = wind_df['vs(m/s)']
+                    wind_dir = wind_df['th(DegreesClockwisefromnorth)']
 
             sub_par_fns = {}
             sub_cli_fns = {}
@@ -2450,7 +2465,7 @@ class Climate(NoDbBase):
                     _prn_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.prn'
                     _cli_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.cli'
                     
-                    self.logger.info(f'submitting climate build for {topaz_id} ...\n')
+                    self.logger.info(f'submitting climate build for {topaz_id} ...')
 
                     futures.append(
                         executor.submit(
@@ -2461,26 +2476,31 @@ class Climate(NoDbBase):
                     sub_par_fns[topaz_id] = _prn_fn
                     sub_cli_fns[topaz_id] = _cli_fn
 
-                topaz_id = 'ws'
-                prn_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.prn'
+                ws_topaz_id = 'ws'
+                prn_fn = f'daymet_observed_{ws_topaz_id}_{start_year}-{end_year}.prn'
                 cli_fn = 'wepp.cli'
                 futures.append(
                     executor.submit(
                         build_observed_daymet_interpolated, 
-                        cligen, topaz_id, ws_lng, ws_lat, start_year, end_year, cli_dir, cli_fn, prn_fn, 
+                        cligen, ws_topaz_id, ws_lng, ws_lat, start_year, end_year, cli_dir, cli_fn, prn_fn, 
                         wind_vs=wind_vs, wind_dir=wind_dir))
 
+                pending = set(futures)
                 try:
-                    for future in as_completed(futures):
-                        # This call raises an exception if the task failed.
-                        topaz_id = future.result()
-                        self.logger.info(f'  climate for {topaz_id} done.\n')
-                except Exception as e:
-                    # Cancel all pending futures.
+                    while pending:
+                        done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
+
+                        if not done:
+                            self.logger.warning('  Daymet climate build still running after 60 seconds; continuing to wait.')
+                            continue
+
+                        for future in done:
+                            completed_topaz = future.result()
+                            self.logger.info(f'  climate for {completed_topaz} done.')
+                except Exception:
                     for f in futures:
                         if not f.done():
                             f.cancel()
-                    # If using Python 3.9+, you can force cancellation of pending futures:
                     executor.shutdown(wait=False, cancel_futures=True)
                     raise
 
