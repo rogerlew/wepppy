@@ -1,4 +1,22 @@
 // static/js/command-bar.js
+//
+// Command Bar quick reference for developers:
+// - Purpose: keyboard-driven command palette for project pages. Press ':' to open, then
+//   submit commands that are routed to `CommandBar.createCommands()`.
+// - Structure: each command has `description` + `action`. Actions either handle UI logic
+//   locally or defer to helpers (fetching endpoints, navigating, etc.). Stateful commands
+//   that should keep the palette open must be registered in `STAY_ACTIVE_COMMANDS`.
+// - Adding commands:
+//     1. Add a new key to the object returned by `createCommands()`.
+//     2. Implement the action handler. Use the `route*` helpers pattern when the command
+//        needs its own validation + network request logic.
+//     3. Update `SET_HELP_LINES` or other user-facing help text where appropriate.
+//     4. If network-backed, expose a matching Flask route inside
+//        `wepppy/weppcloud/routes/command_prompt.py` (or another blueprint) that returns
+//        `{ Success: bool, Content?: {...}, Error?: str }` so the UI can display results.
+// - Routes: network actions assume `projectBaseUrl = /runs/<runid>/<config>/`. Append a
+//   relative path (e.g., `command_prompt/loglevel`) to reach the corresponding backend
+//   endpoint registered via Flask blueprints.
 (() => {
     'use strict';
 
