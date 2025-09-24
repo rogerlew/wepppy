@@ -200,6 +200,39 @@ def nodb_setter(setter_func):
             
     return wrapper
 
+def nodb_setter(setter_func):
+    """
+    A decorator that logs the setter call and wraps the operation
+    in a 'locked' context.
+    """
+    @functools.wraps(setter_func)
+    def wrapper(self, value):
+        # setter_func.__name__ will correctly be 'input_years'
+        # thanks to @functools.wraps
+        func_name = setter_func.__name__
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+        
+        with self.locked():
+            # Call the original setter function to perform the assignment
+            return setter_func(self, value)
+            
+    return wrapper
+
+def nodb_timed(method_func):
+    """
+    A decorator that wraps a method call in the instance's `timed` 
+    context manager, using the method's name as the task name.
+    """
+    @functools.wraps(method_func)
+    def wrapper(self, *args, **kwargs):
+        # method_func.__name__ correctly gets the decorated function's name
+        func_name = method_func.__name__
+        
+        with self.timed(func_name):
+            # Call the original method and return its result
+            return method_func(self, *args, **kwargs)
+            
+    return wrapper
 
 class TriggerEvents(Enum):
     ON_INIT_FINISH = 1
