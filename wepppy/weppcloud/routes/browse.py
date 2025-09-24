@@ -871,42 +871,8 @@ crossorigin="anonymous">
 </style>
 </head>
 <body>
-
 <header><b>File:</b> {path}</header>
-
 <pre>{contents}</pre>
-
-<footer>
-  <b>Shortcuts:</b> Shift + G (End) | Shift + U (Page Up) | Shift + H (Page Down)
-</footer>
-
-<script>
-  document.addEventListener('keydown', function(event) {{
-    // We only care about events with the Shift key
-    if (!event.shiftKey) {{
-      return;
-    }}
-
-    // Use a switch statement for different key presses
-    switch (event.key.toUpperCase()) {{
-      case 'G':
-        event.preventDefault(); // Prevent any default browser action
-        window.scrollTo(0, document.body.scrollHeight);
-        break;
-      case 'U':
-        event.preventDefault();
-        // Scroll up by 90% of the window's height for context overlap
-        window.scrollBy(0, -window.innerHeight * 0.9);
-        break;
-      case 'H':
-        event.preventDefault();
-        // Scroll down by 90% of the window's height
-        window.scrollBy(0, window.innerHeight * 0.9);
-        break;
-    }}
-  }});
-</script>
-
 </body>
 </html>'''
     return Response(_content, mimetype='text/html')
