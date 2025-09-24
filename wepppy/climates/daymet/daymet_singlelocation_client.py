@@ -9,7 +9,8 @@
 import time
 import io
 from os.path import join as _join
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
+import logging
 
 import datetime
 import numpy as np
@@ -31,8 +32,6 @@ from metpy.units import units
 from wepppyo3.climate import interpolate_geospatial
 
 from wepppy.climates.cligen import df_to_prn
-
-from wepppy.nodb.status_messenger import StatusMessenger
 
 
 def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_years=True, gridmet_wind=False):
@@ -154,11 +153,10 @@ def interpolate_daily_timeseries(
     end_year=2020,
     output_dir='test',
     output_type='prn parquet',
-    status_channel=None):
+    logger=None):
 
     debug = 1
     gridmet_wind = False
-
 
     interpolation_spec = {
         'prcp(mm/day)': {
@@ -209,8 +207,8 @@ def interpolate_daily_timeseries(
     min_northing = np.min(northings_hills)
     max_northing = np.max(northings_hills)
 
-    if status_channel is not None:
-        StatusMessenger.publish(status_channel, f'  identified extent in lcc [{min_easting}, {min_northing}, {max_easting}, {max_northing}]\n')
+    if logger is not None:
+        logger.info(f'  identified extent in lcc [{min_easting}, {min_northing}, {max_easting}, {max_northing}]\n')
 
     ur_e = max_easting
     ur_n = max_northing
@@ -255,8 +253,8 @@ def interpolate_daily_timeseries(
     ncols = len(eastings)
     ndays = (datetime.date(end_year, 12, 31) - datetime.date(start_year, 1, 1)).days + 1
 
-    if status_channel is not None:
-        StatusMessenger.publish(status_channel, f'  acquiring daymet for grid with shape ({ncols}, {nrows}, {ndays}) and pixel origin ({px0}, {py0})\n')
+    if logger is not None:
+        logger.info(f'  acquiring daymet for grid with shape ({ncols}, {nrows}, {ndays}) and pixel origin ({px0}, {py0})\n')
 
     # think this should be a dictionary of np.array with shape, ncols, nrows, ndates
     # need to determine dates using start_year and end_year parameter
@@ -267,24 +265,43 @@ def interpolate_daily_timeseries(
         futures = []
 
         for (col, row), (lng, lat) in pixel_locations.items():
-            if status_channel is not None:
-                StatusMessenger.publish(status_channel, f'  fetching daymet timeseries for pixel coordinate ({col}, {row})...\n')
+            if logger is not None:
+                logger.info(f'  fetching daymet timeseries for pixel coordinate ({col}, {row})...\n')
             futures.append(
                 executor.submit(
                     _retrieve_historical_timeseries_wrapper, 
                     lng, lat, start_year, end_year, gridmet_wind=gridmet_wind, attrs=(col, row)))
-            
-        for future in as_completed(futures):
-            (col, row), df = future.result(timeout=3600)
 
-            if debug:
-                df.to_parquet(_join(output_dir, f'daymet_observed_{col},{row}_{start_year}-{end_year}.parquet'))
+        futures_n = len(futures)
+        count = 0
+        pending = set(futures)
+        while pending:
+            done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
 
-            for measure in raw_data.keys():
-                raw_data[measure][col - px0, row - py0, :] = df[measure].values
+            if not done:
+                if logger is not None:
+                    logger.info('  waiting on daymet pixel downloads...')
+                continue
 
-            if status_channel is not None:
-                StatusMessenger.publish(status_channel, f'  obtained data for pixel coordinate ({col}, {row}).\n')
+            for future in done:
+                try:
+                    (col, row), df = future.result()
+                    count += 1
+                    if logger is not None:
+                        logger.info(f'  ({count}/{futures_n}) fetched daymet timeseries for pixel coordinate ({col}, {row})')
+                except Exception:
+                    for remaining in pending:
+                        remaining.cancel()
+                    raise
+
+                if debug:
+                    df.to_parquet(_join(output_dir, f'daymet_observed_{col},{row}_{start_year}-{end_year}.parquet'))
+
+                for measure in raw_data.keys():
+                    raw_data[measure][col - px0, row - py0, :] = df[measure].values
+
+                if logger is not None:
+                    logger.info(f'  obtained data for pixel coordinate ({col}, {row}).\n')
 
 
     dates = pd.date_range(start=f'{start_year}-01-01', end=f'{end_year}-12-31')
@@ -294,21 +311,39 @@ def interpolate_daily_timeseries(
         futures = []
 
         for topaz_id, loc in hillslope_locations.items():
-            if status_channel is not None:
-                StatusMessenger.publish(status_channel, f'  interpolating topaz_id {topaz_id}...\n')
-                
+            if logger is not None:
+                logger.info(f'  interpolating topaz_id {topaz_id}...\n')
+
             # this interpolates the 3d grid using rust pyo3 and builds prn to be used by cligen
             futures.append(
                 executor.submit(interpolate_daily_timeseries_for_location, 
                                 topaz_id, loc, dates, 
                                 eastings, northings, raw_data, interpolation_spec, 
                                 output_dir, start_year, end_year))
+        futures_n = len(futures)
+        count = 0
+        pending = set(futures)
+        while pending:
+            done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
 
-        for future in as_completed(futures):
-            topaz_id = future.result(timeout=3600)
+            if not done:
+                if logger is not None:
+                    logger.warning('Daymet interpolation still running after 60 seconds; continuing to wait.')
+                continue
 
-            if status_channel is not None:
-                StatusMessenger.publish(status_channel, f'  interpolating topaz_id {topaz_id}... done.\n')
+            for future in done:
+                try:
+                    topaz_id = future.result()
+                    count += 1
+                    if logger is not None:
+                        logger.info(f'  ({count}/{futures_n}) interpolated topaz_id {topaz_id}')
+                except Exception:
+                    for remaining in pending:
+                        remaining.cancel()
+                    raise
+
+                if logger is not None:
+                    logger.info(f'  interpolating topaz_id {topaz_id}... done.\n')
 
 
 def interpolate_daily_timeseries_for_location(topaz_id, loc, dates, 

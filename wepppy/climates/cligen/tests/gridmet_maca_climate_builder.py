@@ -5,7 +5,7 @@ from datetime import datetime
 from os.path import join as _join
 from os.path import exists as _exists
 from subprocess import Popen, PIPE
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from datetime import datetime
 
 from cligen import ClimateFile, CligenStationsManager, df_to_prn, _bin_dir
@@ -282,5 +282,13 @@ if __name__ == '__main__':
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = [executor.submit(process_location, location, models, scenarios) for location in locations]
         
-        for future in as_completed(futures):
-            future.result()
+        pending = set(futures)
+        while pending:
+            done, pending = wait(pending, timeout=30, return_when=FIRST_COMPLETED)
+
+            if not done:
+                print('gridmet_maca_climate_builder still processing after 10 seconds; continuing to wait.')
+                continue
+
+            for future in done:
+                future.result()
