@@ -1,7 +1,7 @@
 <header>
   <!-- Fixed navbar -->
   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    {% set project_base = url_for('runs0', runid=runid, config=config) if runid is defined and config is defined else None %}
+    {% set project_base = url_for('run_0.runs0', runid=runid, config=config) if runid is defined and config is defined else None %}
     <a class="navbar-brand" href="{{ project_base or (site_prefix if site_prefix else '/') }}">WEPPcloud  {{ ('&mdash;' if ron.configname != '') | safe }} {{ ron.configname }} </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" 
       aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,7 +22,7 @@
           <img src="{{ url_for('static', filename='open-iconic/png/reload-2x-wh.png') }}" /></a>
       </li>
       <li class="nav-item">
-        <a href="{{ url_for('rq_fork_console', runid=runid, config=config) if project_base else 'rq-fork-console' }}" class="nav-link" target="_blank" data-toggle="tooltip" title="Fork Project" rel="nofollow">
+        <a href="{{ url_for('fork.rq_fork_console', runid=runid, config=config) if project_base else 'rq-fork-console' }}" class="nav-link" target="_blank" data-toggle="tooltip" title="Fork Project" rel="nofollow">
           <img src="{{ url_for('static', filename='open-iconic/png/fork-2x-wh.png') }}" /></a>
       </li>
       <li class="nav-item">

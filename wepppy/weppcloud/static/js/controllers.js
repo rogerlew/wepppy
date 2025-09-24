@@ -2090,7 +2090,7 @@ var ChannelDelineation = function () {
             var self = instance;
 
             $.get({
-                url: "report/channel/",
+                url: "report/channel",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

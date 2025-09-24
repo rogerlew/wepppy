@@ -7,7 +7,7 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 
-from flask import jsonify, make_response
+from flask import jsonify, make_response, render_template
 
 from datetime import datetime
 
@@ -181,14 +181,36 @@ def authorize(runid, config, require_owner=False):
     abort(403)
 
 
-def matplotlib_vis(path):
-    import matplotlib.pyplot as plt
+def get_run_owners_lazy(runid):
+    from wepppy.weppcloud.app import get_run_owners
+    return get_run_owners(runid)
 
-    data, transform, proj = read_raster(path)
 
-    plt.imshow(data)
-    img_bytes = BytesIO()
-    plt.savefig(img_bytes)
-    img_bytes.seek(0)
-    return send_file(img_bytes, mimetype='image/png')
+def get_user_models():
+    from wepppy.weppcloud.app import Run, User, user_datastore
+    return Run, User, user_datastore
 
+from functools import wraps
+
+def authorize_and_handle_with_exception_factory(func):
+    """
+    A decorator for Flask routes that handles authorization and
+    exceptions for a given runid.
+    
+    Expects 'runid' and 'config' to be arguments in the decorated route.
+    """
+    @wraps(func)
+    def wrapper(runid, config, *args, **kwargs):
+        try:
+            # Step 1: Authorize the request. This will abort on failure.
+            authorize(runid, config)
+            
+            # Step 2: Call the original route function if authorization passes.
+            return func(runid, config, *args, **kwargs)
+            
+        except Exception as e:
+            # Step 3: If any exception occurs, return the standard error page.
+            # You might want to log the exception `e` here.
+            return exception_factory(runid=runid)
+            
+    return wrapper
