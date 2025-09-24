@@ -505,7 +505,7 @@ var Disturbed = function () {
 
         that.reset_land_soil_lookup = function () {
             $.get({
-                url: "tasks/reset_disturbed/",
+                url: "tasks/reset_disturbed",
                 cache: false,
                 success: function success(response) {
                     if (response.Success == true) {
@@ -525,7 +525,7 @@ var Disturbed = function () {
 
         that.load_extended_land_soil_lookup = function () {
             $.get({
-                url: "tasks/load_extended_land_soil_lookup/",
+                url: "tasks/load_extended_land_soil_lookup",
                 cache: false,
                 success: function success(response) {
                     if (response.Success == true) {
@@ -725,14 +725,41 @@ var Project = function () {
             });
         };
 
+        that.clear_locks = function () {
 
-        that.set_public = function (state) {
-            $.post({
-                url: "tasks/set_public/",
+            $.get({
+                url: "tasks/clear_locks/",
+                cache: false,
+                success: function success(response) {
+                    if (response.Success == true) {
+                        alert("Locks have been cleared");
+                    } else {
+                        alert("Error clearing locks");
+                    }
+                },
+                error: function error(jqXHR) {
+                    console.log(jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    alert("Error clearing locks");
+                }
+            });
+        };
+
+        that.migrate_to_omni = function (state) {
+            $.get({
+                url: "tasks/omni_migration",
                 data: JSON.stringify({ public: state }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
+                    // TODO: inform user of successful migration and refresh page
+                    if (response.Success === true) {
+                        alert("Project has been migrated to Omni. Page will now refresh.");
+                        window.location.reload();
+                    } else {
+                        alert("Error migrating project to Omni");
+                    }
                 },
                 error: function error(jqXHR) {
                     console.log(jqXHR.responseJSON);

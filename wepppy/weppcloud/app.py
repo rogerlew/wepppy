@@ -1323,6 +1323,7 @@ def create_legacy(config):
 
 @app.route('/runs/<string:runid>/<config>/access-log')
 @app.route('/runs/<string:runid>/<config>/access-log/')
+@login_required
 def view_access_log(runid, config):
     if current_user.has_role('Admin'):
         should_abort = False
@@ -1347,33 +1348,10 @@ def rq_fork_console(runid, config):
     authorize(runid, config)
     undisturbify = ('false', 'true')[bool(request.args.get('undisturbify', False))]
     return render_template('controls/rq-fork-console.j2', runid=runid, config=config, undisturbify=undisturbify)
+
 @app.route('/runs/<string:runid>/<config>/modify_disturbed')
 def modify_disturbed(runid, config):
-    assert config is not None
-
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
-    try:
-        ron = Ron.getInstance(wd)
-    except FileNotFoundError:
-        abort(404)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if not owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if ron.public:
-        should_abort = False
-
-    if should_abort:
-        abort(404)
-
+    authorize(runid, config)
     try:
         return render_template('controls/edit_csv.htm', 
             csv_url='download/disturbed/disturbed_land_soil_lookup.csv')
@@ -1382,33 +1360,8 @@ def modify_disturbed(runid, config):
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/reset_disturbed')
-@app.route('/runs/<string:runid>/<config>/tasks/reset_disturbed/')
 def reset_disturbed(runid, config):
-    assert config is not None
-
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
-    try:
-        ron = Ron.getInstance(wd)
-    except FileNotFoundError:
-        abort(404)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if not owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if ron.public:
-        should_abort = False
-
-    if should_abort:
-        abort(404)
-
+    authorize(runid, config)
     try:
         disturbed = Disturbed.getInstance(wd)
         disturbed.reset_land_soil_lookup()
@@ -1419,33 +1372,8 @@ def reset_disturbed(runid, config):
     
 
 @app.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup')
-@app.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup/')
 def load_extended_land_soil_lookup(runid, config):
-    assert config is not None
-
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
-    try:
-        ron = Ron.getInstance(wd)
-    except FileNotFoundError:
-        abort(404)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if not owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if ron.public:
-        should_abort = False
-
-    if should_abort:
-        abort(404)
-
+    authorize(runid, config)
     try:
         disturbed = Disturbed.getInstance(wd)
         disturbed.build_extended_land_soil_lookup()
@@ -1458,71 +1386,27 @@ def load_extended_land_soil_lookup(runid, config):
 @app.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs')
 @app.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs/')
 def has_sbs(runid, config):
-    
-    assert config is not None
-
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
+    authorize(runid, config)
     try:
-        ron = Ron.getInstance(wd)
-    except FileNotFoundError:
-        abort(404)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if not owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if ron.public:
-        should_abort = False
-
-    if should_abort:
-        abort(404)
-
-    disturbed = Disturbed.getInstance(wd)
-    return jsonify(dict(has_sbs=disturbed.has_sbs))
+        wd = get_wd(runid)
+        disturbed = Disturbed.getInstance(wd)
+        return jsonify(dict(has_sbs=disturbed.has_sbs))
+    except Exception:
+        return exception_factory('Error Getting SBS Status', runid=runid)
 
 @app.route('/runs/<string:runid>/<config>/api/omni/get_scenarios')
 def get_scenarios(runid, config):
-    
-    assert config is not None
-
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
+    authorize(runid, config)
     try:
-        ron = Ron.getInstance(wd)
-    except FileNotFoundError:
-        abort(404)
+        wd = get_wd(runid)
+        return jsonify(Omni.getInstance(wd).scenarios)
+    except Exception:
+        return exception_factory('Error Getting Scenarios', runid=runid)
 
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
 
-    if not owners:
-        should_abort = False
 
-    if current_user.has_role('Admin'):
-        should_abort = False
 
-    if ron.public:
-        should_abort = False
-
-    if should_abort:
-        abort(404)
-
-    omni = Omni.getInstance(wd)
-    scenarios = omni.scenarios
-    
-    return jsonify(scenarios)
-
-    
 @app.route('/runs/<string:runid>/<config>/tasks/omni_migration')
-@app.route('/runs/<string:runid>/<config>/tasks/omni_migration/')
 def omni_migration(runid, config):
     authorize(runid, config)
     try:
@@ -1548,19 +1432,28 @@ def omni_migration(runid, config):
         return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
 
 
-@app.route('/runs/<string:runid>/<config>/tasks/preflight/', methods=['POST'])
-def task_preflight(runid, config):
+@app.route('/runs/<string:runid>/<config>/tasks/clear_locks')
+def clear_locks(runid, config):
+    """
+    Clear the nodb locks
+    """
+    authorize(runid, config)
     wd = get_wd(runid)
-    res = preflight_check(wd)
-    return jsonify(res)
+    try:
+        from wepppy.nodb import clear_locks
+        clear_locks(runid)
+        return success_factory()
+    except:
+        return exception_factory('Error Clearing Locks', runid=runid)
+
+
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/modify_disturbed', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/modify_disturbed/', methods=['POST'])
 def task_modify_disturbed(runid, config):
-    wd = get_wd(runid)
-
+    authorize(runid, config)
     try:
+        wd = get_wd(runid)
         data = json.loads(request.data.decode('utf-8'))
         lookup_fn = Disturbed.getInstance(wd).lookup_fn
         write_disturbed_land_soil_lookup(lookup_fn, data)
@@ -1573,20 +1466,7 @@ def task_modify_disturbed(runid, config):
 @app.route('/runs/<string:runid>/<config>/tasks/delete/', methods=['POST'])
 @login_required
 def delete_run(runid, config):
-    owners = get_run_owners(runid)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if should_abort:
-        return error_factory('authentication error')
-
-    # get working dir of original directory
-    wd = get_wd(runid)
+    authorize(runid, config)
 
     ron = Ron.getInstance(wd)
     if ron.readonly:
@@ -1604,23 +1484,6 @@ def delete_run(runid, config):
         return exception_factory('Error removing run from database', runid=runid)
 
     return success_factory()
-
-
-@app.route('/runs/<string:runid>/<config>/tasks/clear_locks')
-@app.route('/runs/<string:runid>/<config>/tasks/clear_locks/')
-def clear_locks(runid, config):
-    # get working dir of original directory
-    wd = get_wd(runid)
-
-    try:
-
-        from wepppy.nodb import clear_locks
-        clear_locks(runid)
-
-        return success_factory()
-
-    except:
-        return exception_factory('Error Clearing Locks', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')

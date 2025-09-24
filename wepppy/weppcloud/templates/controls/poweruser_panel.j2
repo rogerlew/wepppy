@@ -1,46 +1,6 @@
 <!-- Modal -->
 <div class="modal fade" id="puModal" role="dialog">
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script>
-    reset_land_soil_lookup = function () {
-      $.get({
-        url: "{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/reset_disturbed/",
-        cache: false,
-        success: function success(response) {
-          if (response.Success == true) {
-            alert("Land Soil Lookup has been reset");
-          } else {
-            alert("Error resetting Land Soil Lookup");
-          }
-        },
-        error: function error(jqXHR) {
-          console.log(jqXHR.responseJSON);
-        },
-        fail: function fail(error) {
-          alert("Error clearing locks");
-        }
-      });
-    };
-
-    clear_locks = function () {
-      $.get({
-        url: "{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/clear_locks/",
-        cache: false,
-        success: function success(response) {
-          if (response.Success == true) {
-            alert("Locks have been cleared");
-          } else {
-            alert("Error clearing locks");
-          }
-        },
-        error: function error(jqXHR) {
-          console.log(jqXHR.responseJSON);
-        },
-        fail: function fail(error) {
-          alert("Error clearing locks");
-        }
-      });
-    };
     // System Notifications
 
     // ---- constants ----
@@ -239,6 +199,7 @@
       <div class="modal-body">
         <div class="row">
           <div class="col-md-6">
+            {% if False %}
             <h5>System Notifications</h5>
             <div class="list-group" style="margin-bottom: 5px;">
               <div class="list-group-item">
@@ -249,7 +210,8 @@
                 </div>
               </div>
             </div>
-            <h5>NoDbs</h5>
+            {% endif %}
+            <h5>Components</h5>
             <div class="list-group">
               <a class="list-group-item list-group-item-action" target="_blank"
                 href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ron.nodb">nodb.ron</a>
@@ -313,10 +275,14 @@
               <a class="list-group-item list-group-item-action" target="_blank"
                 href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/debris_flow.nodb">nodb.debris_flow</a>
               {% endif %}
+              {% if 'omni' in ron.mods %}
+              <a class="list-group-item list-group-item-action" target="_blank"
+                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/omni.nodb">nodb.omni</a>
+              {% endif %}
             </div>
             <br>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action text-danger" onclick="clear_locks()" href="#">Clear
+              <a class="list-group-item list-group-item-action text-danger" onclick="Project.getInstance().clear_locks()" href="#">Clear
                 Locks</a>
             </div>
           </div>
@@ -379,8 +345,7 @@
             {% if 'omni' not in ron.mods %}
             <div class="list-group">
               <a class="list-group-item list-group-item-action"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/omni_migration"
-                target="_blank">Omni Migration</a>
+                onclick="Project.getInstance().migrate_to_omni()" href="#">Migrate Project to Omni</a>
             </div>
             {% endif %}
           </div>
