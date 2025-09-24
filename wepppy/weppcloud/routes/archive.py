@@ -1,4 +1,5 @@
 """Routes related to archived run artifacts."""
+# see notes/weppcloud-project-archiving.md for archive architecture
 
 import os
 from datetime import datetime
