@@ -11,6 +11,8 @@
 
 import os
 
+import functools
+import inspect
 from dotenv import load_dotenv
 from os.path import join as _join
 from os.path import split as _split
@@ -179,6 +181,24 @@ def get_configs():
 
 def get_legacy_configs():
     return [Path(fn).stem for fn in glob(_join(_config_dir, 'legacy', '*.toml'))]
+
+def nodb_setter(setter_func):
+    """
+    A decorator that logs the setter call and wraps the operation
+    in a 'locked' context.
+    """
+    @functools.wraps(setter_func)
+    def wrapper(self, value):
+        # setter_func.__name__ will correctly be 'input_years'
+        # thanks to @functools.wraps
+        func_name = setter_func.__name__
+        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
+        
+        with self.locked():
+            # Call the original setter function to perform the assignment
+            return setter_func(self, value)
+            
+    return wrapper
 
 
 class TriggerEvents(Enum):
