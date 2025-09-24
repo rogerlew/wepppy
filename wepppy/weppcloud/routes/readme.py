@@ -241,7 +241,7 @@ def _can_edit(runid):
 @readme_bp.route("/runs/<string:runid>/<config>/readme-editor")
 def readme_editor(runid, config):
     try:
-        authorize(runid, config, require_owner=True)
+        authorize(runid, config)
         context = _template_context(runid, config)
         ron = context.get("ron")
         if getattr(ron, "readonly", False):
@@ -263,7 +263,7 @@ def readme_editor(runid, config):
 @readme_bp.route("/runs/<string:runid>/<config>/readme/raw")
 def readme_raw(runid, config):
     try:
-        authorize(runid, config, require_owner=True)
+        authorize(runid, config)
         markdown = _load_markdown(runid, config)
         return jsonify({"markdown": markdown})
     except:
@@ -272,7 +272,7 @@ def readme_raw(runid, config):
 @readme_bp.route("/runs/<string:runid>/<config>/readme/save", methods=["POST"])
 def readme_save(runid, config):
     try:
-        authorize(runid, config, require_owner=True)
+        authorize(runid, config)
         data = request.get_json() or {}
         markdown = data.get("markdown", "")
         client_uuid = data.get("uuid")
@@ -310,7 +310,7 @@ def readme_save(runid, config):
 @readme_bp.route("/runs/<string:runid>/<config>/readme/preview", methods=["POST"])
 def readme_preview(runid, config):
     try:
-        authorize(runid, config, require_owner=True)
+        authorize(runid, config)
         data = request.get_json() or {}
         markdown = data.get("markdown", "")
         if not isinstance(markdown, str):
