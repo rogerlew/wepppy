@@ -1,24 +1,29 @@
-    <form  id="setloc_form" action="javascript:void(0);">
-      <div class="form-group row">
-        <h3 style="margin-left: 0.5em; padding-top: 80px;">Map</h3>
+<div class="col-md-11 px-1 controller-section">
+  <form id="setloc_form" action="javascript:void(0);">
+    <div class="form-group row">
+      <h3 style="margin-left: 0.5em;">Map</h3>
+    </div>
+    <div class="form-group row align-items-center">
+      <div class="col-sm-5">
+        <input id="input_centerloc" name="centerloc" class="form-control" type="text"
+          placeholder="Lon, Lat, [Zoom] | Topaz | Wepp" aria-label="Lon, Lat, [Zoom] | TopazID | WeppID">
       </div>
-      <div class="form-group row align-items-center">
-        <div class="col-sm-5">
-          <input id="input_centerloc" name="centerloc" class="form-control" type="text" placeholder="Lon, Lat, [Zoom] | Topaz | Wepp" aria-label="Lon, Lat, [Zoom] | TopazID | WeppID">
-        </div>
-        <div class="col-auto">
-          <button id="btn_setloc" name="setloc" class="btn btn-outline-success" type="button">Go</button>
-        </div>
-        <div class="col-auto">
-          <button id="btn_find_topaz_id" name="find_topaz_id" class="btn btn-outline-success" type="button">🔍 TopazID</button>
-        </div>
-        <div class="col-auto">
-          <button id="btn_find_wepp_id" name="find_wepp_id" class="btn btn-outline-success" type="button">🔍 WeppID</button>
-        </div>
+      <div class="col-auto">
+        <button id="btn_setloc" name="setloc" class="btn btn-outline-success" type="button">Go</button>
       </div>
-    </form>
+      <div class="col-auto">
+        <button id="btn_find_topaz_id" name="find_topaz_id" class="btn btn-outline-success" type="button">🔍
+          TopazID</button>
+      </div>
+      <div class="col-auto">
+        <button id="btn_find_wepp_id" name="find_wepp_id" class="btn btn-outline-success" type="button">🔍
+          WeppID</button>
+      </div>
+    </div>
+  </form>
+  <div class="controller-section__inner">
     <div class="row">
-      <div class="col-md-7 px-1">
+      <div class="col-md-7 col-lg-7 pr-lg-3 mb-3 mb-md-0">
         <div id="mapid"></div>
         <div class="row">
           <div class="col-xs-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -26,130 +31,134 @@
           <div class="col-xs-2"><span>&nbsp;</span><span id="mouseelev" class="text-muted"></span></div>
         </div>
       </div>
-      <div class="col-md-4 px-1">
-       <!-- Nav tabs -->
-       <ul class="nav nav-tabs" role="tablist">
-          <li class="nav-item">
-            <a class="nav-link active" data-toggle="tab" href="#sub_layer_selection" role="tab">
-              <img src="{{ url_for('static', filename='open-iconic/png/layers-2x.png') }}"/>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#drilldown" role="tab">
-              <img src="{{ url_for('static', filename='open-iconic/png/magnifying-glass-2x.png') }}"/>
-            </a>
-          </li>
-          {% if ron.enable_landuse_change %}
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#modify" role="tab">
-              <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}"/>
-            </a>
-          </li>
-          {% endif %}
-          {% if 'rangeland_cover' in ron.mods %}
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#modify_rangeland_cover" role="tab">
-              <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}"/>
-            </a>
-          </li>
-          {% endif %}
-          {% if false %}
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#spatialclimate" role="tab">
-            <img src="{{ url_for('static', filename='open-iconic/png/rain-2x.png') }}"/>
-            </a>
-          </li>
-          {% endif %}
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#results" role="tab">
-              <img src="{{ url_for('static', filename='open-iconic/png/pie-chart-2x.png') }}"/>
-            </a>
-          </li>
-        </ul>
+      <div class="col-md-5 col-lg-5 pl-lg-3">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#sub_layer_selection" role="tab">
+          <img src="{{ url_for('static', filename='open-iconic/png/layers-2x.png') }}" />
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#drilldown" role="tab">
+          <img src="{{ url_for('static', filename='open-iconic/png/magnifying-glass-2x.png') }}" />
+        </a>
+      </li>
+      {% if ron.enable_landuse_change %}
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#modify" role="tab">
+          <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}" />
+        </a>
+      </li>
+      {% endif %}
+      {% if 'rangeland_cover' in ron.mods %}
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#modify_rangeland_cover" role="tab">
+          <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}" />
+        </a>
+      </li>
+      {% endif %}
+      {% if false %}
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#spatialclimate" role="tab">
+          <img src="{{ url_for('static', filename='open-iconic/png/rain-2x.png') }}" />
+        </a>
+      </li>
+      {% endif %}
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#results" role="tab">
+          <img src="{{ url_for('static', filename='open-iconic/png/pie-chart-2x.png') }}" />
+        </a>
+      </li>
+    </ul>
 
-        <!-- Tab panes -->
-        <div class="tab-content">
-          <div class="tab-pane active" id="sub_layer_selection" role="tabpanel">
-            <h6>Subcatchment Colormapping</h6>
-            <div class="radio radio-primary">
-                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_default" value="default" checked>
-                <label for="sub_cmap_radio_default">
-                    Default
-                </label>
-            </div>
-            <div class="radio radio-primary">
-                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_slp_asp" value="slp_asp" disabled>
-                <label for="sub_cmap_radio_slp_asp">
-                    Slope/Aspect
-                </label>
-            </div>
-            <div class="radio radio-primary">
-                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_lc" value="dom_lc" disabled>
-                <label for="sub_cmap_radio_dom_lc">
-                    Dominant Landcover
-                </label>
-            </div>
-            {% if 'rangeland_cover' in ron.mods %}
-            <div class="radio radio-primary">
-                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_rangeland_cover" value="rangeland_cover" disabled>
-                <label for="sub_cmap_radio_rangeland_cover">
-                    Rangeland Cover
-                </label>
-            </div>
-            {% endif %}
-            {% if 'rap' in ron.mods %}
-            <div class="radio radio-primary">
-              <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_landuse_cover" value="landuse_cover" >
-              <label for="sub_cmap_radio_landuse_cover">
-                  Vegetation Cover (%)
-              </label>
-              <br/>
-              <span id="landuse_sub_cmap_canvas_cover_units"></span><br/>
-              <div style='width:240px;height:40px'>
-                  <canvas id="landuse_sub_cmap_canvas_cover" width=200 height=20
-                          style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-                  <div class="row">
-                      <div class="col-md-4"><span id="landuse_sub_cmap_canvas_cover_min"></span></div>
-                      <div class="col-md-4" style="text-align: center;"></div>
-                      <div class="col-md-4" style="text-align: right;">
-                          <span id="landuse_sub_cmap_canvas_cover_max">
-                          </span></div>
-                  </div>
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div class="tab-pane active" id="sub_layer_selection" role="tabpanel">
+        <h6>Subcatchment Colormapping</h6>
+        <div class="radio radio-primary">
+          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_default" value="default" checked>
+          <label for="sub_cmap_radio_default">
+            Default
+          </label>
+        </div>
+        <div class="radio radio-primary">
+          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_slp_asp" value="slp_asp" disabled>
+          <label for="sub_cmap_radio_slp_asp">
+            Slope/Aspect
+          </label>
+        </div>
+        <div class="radio radio-primary">
+          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_lc" value="dom_lc" disabled>
+          <label for="sub_cmap_radio_dom_lc">
+            Dominant Landcover
+          </label>
+        </div>
+        {% if 'rangeland_cover' in ron.mods %}
+        <div class="radio radio-primary">
+          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_rangeland_cover" value="rangeland_cover"
+            disabled>
+          <label for="sub_cmap_radio_rangeland_cover">
+            Rangeland Cover
+          </label>
+        </div>
+        {% endif %}
+        {% if 'rap' in ron.mods %}
+        <div class="radio radio-primary">
+          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_landuse_cover" value="landuse_cover">
+          <label for="sub_cmap_radio_landuse_cover">
+            Vegetation Cover (%)
+          </label>
+          <br />
+          <span id="landuse_sub_cmap_canvas_cover_units"></span><br />
+          <div style='width:240px;height:40px'>
+            <canvas id="landuse_sub_cmap_canvas_cover" width=200 height=20
+              style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
+            <div class="row">
+              <div class="col-md-4"><span id="landuse_sub_cmap_canvas_cover_min"></span></div>
+              <div class="col-md-4" style="text-align: center;"></div>
+              <div class="col-md-4" style="text-align: right;">
+                <span id="landuse_sub_cmap_canvas_cover_max">
+                </span>
               </div>
             </div>
-            {% endif %}
-            <div class="radio radio-primary">
-                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_soil" value="dom_soil" disabled>
-                <label for="sub_cmap_radio_dom_soil">
-                    Dominant Soil
-                </label>
-            </div><br/>
-            <div id="sbs_legend"></div>
-            <div id="sub_legend"></div>
-          </div>
-          <div class="tab-pane" id="drilldown" role="tabpanel">
-            <i>Select a channel or hillslope to view information</i>
-          </div>
-          <!-- div class="tab-pane" id="spatialclimate" role="tabpanel">
-            <h6>Spatial Climate</h6>
-          </div -->
-          {% if ron.enable_landuse_change %}
-          <div class="tab-pane" id="modify" role="tabpanel">
-              {% include 'controls/modify_landuse.htm' %}
-          </div>
-          {% endif %}
-          {% if 'rangeland_cover' in ron.mods %}
-          <div class="tab-pane" id="modify_rangeland_cover" role="tabpanel">
-              {% include 'controls/modify_rangeland_cover.htm' %}
-          </div>
-          {% endif %}
-          <div class="tab-pane" id="results" role="tabpanel">
-              {% if 'rhem' not in ron.mods %}
-                  {% include("controls/map/wepp_hillslope_visualizations.htm") %}
-              {% else %}
-                  {% include("controls/map/rhem_hillslope_visualizations.htm") %}
-              {% endif %}
           </div>
         </div>
+        {% endif %}
+        <div class="radio radio-primary">
+          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_soil" value="dom_soil" disabled>
+          <label for="sub_cmap_radio_dom_soil">
+            Dominant Soil
+          </label>
+        </div><br />
+        <div id="sbs_legend"></div>
+        <div id="sub_legend"></div>
+      </div>
+      <div class="tab-pane" id="drilldown" role="tabpanel">
+        <i>Select a channel or hillslope to view information</i>
+      </div>
+      <!-- div class="tab-pane" id="spatialclimate" role="tabpanel">
+            <h6>Spatial Climate</h6>
+          </div -->
+      {% if ron.enable_landuse_change %}
+      <div class="tab-pane" id="modify" role="tabpanel">
+        {% include 'controls/modify_landuse.htm' %}
+      </div>
+      {% endif %}
+      {% if 'rangeland_cover' in ron.mods %}
+      <div class="tab-pane" id="modify_rangeland_cover" role="tabpanel">
+        {% include 'controls/modify_rangeland_cover.htm' %}
+      </div>
+      {% endif %}
+      <div class="tab-pane" id="results" role="tabpanel">
+        {% if 'rhem' not in ron.mods %}
+        {% include("controls/map/wepp_hillslope_visualizations.htm") %}
+        {% else %}
+        {% include("controls/map/rhem_hillslope_visualizations.htm") %}
+        {% endif %}
       </div>
     </div>
+      </div>
+    </div>
+  </div>
+</div>
