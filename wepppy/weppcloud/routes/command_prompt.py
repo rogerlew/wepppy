@@ -1,3 +1,21 @@
+"""Backend endpoints for the command bar.
+
+The command bar is a run specific UI compoent with vim style command entry. It
+can be opened with the `:` key when the focus is not in a text input. It is a power user
+feature for various functions. It expedients tasks for advanced users. And provides a
+simple method of adding features without implementing a full UI. 
+
+Many of the commands can use existing endpoints, but some need new ones. This serves
+as a home for those endpoints that are command bar specific and don't belong elsewhere.
+The `static/js/command-bar.js` is the companion frontend code.
+
+Keep endpoints small and focused. Here are some guidelines:
+1. Validate payload + authorization, always call `authorize()`
+2. Delegate work to existing NoDB helpers or service objects (as needed)
+3. Return `{Success, Content?, Error?}` JSON for the command bar to display
+
+"""
+
 import logging
 
 from flask import Blueprint, jsonify, request
