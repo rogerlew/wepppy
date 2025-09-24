@@ -5249,63 +5249,6 @@ var Wepp = function () {
             });
         };
 
-        that.set_wepp_bin = function (wepp_bin) {
-            var self = instance;
-            var task_msg = "Setting wepp_bin (" + wepp_bin + ")";
-
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/set_wepp_bin/",
-                data: JSON.stringify({ wepp_bin: wepp_bin }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.set_flowpaths = function (state) {
-            var self = instance;
-            var task_msg = "Setting run_flowpaths (" + state + ")";
-
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/set_run_flowpaths/",
-                data: JSON.stringify({ run_flowpaths: state }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-        };
-
         that.run = function () {
             var self = instance;
             var task_msg = "Submitting wepp run";
