@@ -16,6 +16,7 @@ from queue import Queue
 from functools import wraps
 from subprocess import Popen, PIPE, call
 import zipfile
+from pathlib import Path
 from datetime import datetime
 
 import redis
@@ -761,6 +762,102 @@ def archive_rq(runid: str):
             except OSError:
                 pass
 
+        if prep is None:
+            try:
+                prep = RedisPrep.getInstanceFromRunID(runid)
+            except Exception:
+                prep = None
+
+        if prep is not None:
+            try:
+                prep.clear_archive_job_id()
+            except Exception:
+                pass
+
+
+def restore_archive_rq(runid: str, archive_name: str):
+    job = get_current_job()
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f'{runid}:archive'
+    StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, {archive_name})')
+
+    prep = None
+    try:
+        prep = RedisPrep.getInstanceFromRunID(runid)
+        wd = Path(get_wd(runid)).resolve()
+
+        archives_dir = wd / 'archives'
+        archive_path = (archives_dir / archive_name).resolve()
+
+        if not archive_path.exists() or not archive_path.is_file():
+            raise FileNotFoundError(f'Archive not found: {archive_name}')
+
+        # Ensure the archive resides inside the archives directory
+        if archives_dir not in archive_path.parents:
+            raise ValueError('Invalid archive path')
+
+        StatusMessenger.publish(status_channel, f'Preparing to restore from {archive_name}')
+
+        # Remove all existing contents except the archives directory itself.
+        for entry in sorted(wd.iterdir()):
+            if entry.name == 'archives':
+                continue
+
+            try:
+                if entry.is_dir() and not entry.is_symlink():
+                    StatusMessenger.publish(status_channel, f'Removing directory {entry.relative_to(wd)}')
+                    shutil.rmtree(entry)
+                else:
+                    StatusMessenger.publish(status_channel, f'Removing file {entry.relative_to(wd)}')
+                    entry.unlink()
+            except FileNotFoundError:
+                continue
+
+        with zipfile.ZipFile(archive_path, mode='r') as zf:
+            for member in zf.infolist():
+                arcname = member.filename
+                if not arcname:
+                    continue
+
+                # Normalize name to avoid traversal attempts
+                target_path = (wd / arcname).resolve()
+                if wd not in target_path.parents and target_path != wd:
+                    raise ValueError(f'Unsafe archive member path: {arcname}')
+
+                # Skip anything targeting the archives directory to avoid overwriting archives
+                try:
+                    relative_target = target_path.relative_to(wd)
+                except ValueError:
+                    raise ValueError(f'Unsafe archive member path: {arcname}')
+
+                if relative_target.parts and relative_target.parts[0] == 'archives':
+                    continue
+
+                if member.is_dir():
+                    target_path.mkdir(parents=True, exist_ok=True)
+                    StatusMessenger.publish(status_channel, f'Restored directory {relative_target}')
+                    continue
+
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                with zf.open(member, 'r') as src, open(target_path, 'wb') as dst:
+                    shutil.copyfileobj(src, dst)
+
+                perm = member.external_attr >> 16
+                if perm:
+                    try:
+                        os.chmod(target_path, perm)
+                    except OSError:
+                        pass
+
+                StatusMessenger.publish(status_channel, f'Restored file {relative_target}')
+
+        StatusMessenger.publish(status_channel, f'Restore complete: {archive_name}')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   archive RESTORE_COMPLETE')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+    finally:
         if prep is None:
             try:
                 prep = RedisPrep.getInstanceFromRunID(runid)

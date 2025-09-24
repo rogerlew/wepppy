@@ -8,6 +8,7 @@ from subprocess import check_output
 
 import awesome_codename
 
+from flask_login import login_required
 import pandas as pd
 
 from flask import abort, Blueprint, request, Response, jsonify, send_file
@@ -43,7 +44,8 @@ from wepppy.rq.project_rq import (
     run_rhem_rq,
     fetch_and_analyze_rap_ts_rq,
     fork_rq,
-    archive_rq
+    archive_rq,
+    restore_archive_rq
 )
 from wepppy.rq.wepp_rq import run_wepp_rq, post_dss_export_rq
 from wepppy.rq.omni_rq import run_omni_rq
@@ -1197,3 +1199,51 @@ def api_archive(runid, config):
         return jsonify({'Success': True, 'job_id': job.id})
     except Exception:
         return exception_factory('Error enqueueing archive job', runid=runid)
+
+
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/restore-archive', methods=['POST'])
+@login_required
+def api_restore_archive(runid, config):
+    try:
+        payload = request.get_json(silent=True) or {}
+        archive_name = payload.get('archive_name') or request.form.get('archive_name')
+        if not archive_name:
+            return exception_factory('Missing archive_name parameter', runid=runid)
+
+        wd = get_wd(runid)
+        if not _exists(wd):
+            return exception_factory(f'Project {runid} not found', runid=runid)
+
+        locked = [name for name, state in lock_statuses(runid).items() if name.endswith('.nodb') and state]
+        if locked:
+            return exception_factory('Cannot restore while files are locked: ' + ', '.join(locked), runid=runid)
+
+        archive_path = os.path.join(wd, 'archives', archive_name)
+        if not os.path.exists(archive_path):
+            return exception_factory(f'Archive {archive_name} not found', runid=runid)
+
+        prep = RedisPrep.getInstance(wd)
+        existing_job_id = prep.get_archive_job_id()
+        if existing_job_id:
+            try:
+                with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+                    job = Job.fetch(existing_job_id, connection=redis_conn)
+                    status = job.get_status(refresh=True)
+            except Exception:
+                status = None
+
+            if status in ('queued', 'started', 'deferred'):
+                return exception_factory('An archive job is already running for this project', runid=runid)
+            else:
+                prep.clear_archive_job_id()
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            queue = Queue(connection=redis_conn)
+            job = queue.enqueue_call(restore_archive_rq, (runid, archive_name), timeout=TIMEOUT)
+
+        prep.set_archive_job_id(job.id)
+        StatusMessenger.publish(f'{runid}:archive', f'rq:{job.id} ENQUEUED restore_archive_rq({runid}, {archive_name})')
+
+        return jsonify({'Success': True, 'job_id': job.id})
+    except Exception:
+        return exception_factory('Error enqueueing restore job', runid=runid)
