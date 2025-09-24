@@ -55,6 +55,8 @@ RQ_DB = 9
 TIMEOUT = 43_200
 DEFAULT_ZOOM = 12
 
+# This is WIP, the idea is to recreate projects from stubs. but all the branching in the NoDb files,
+# makes it kind of tedious to implement the stubs
 def new_project_rq(runid: str, project_def: dict):
     """
     assumes a runid has been assigned and an empty wd has been created.
@@ -470,6 +472,8 @@ def run_rhem_rq(runid: str):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+# Fork Functions
+
 def _finish_fork_rq(runid):
     try:
         job = get_current_job()
@@ -699,6 +703,8 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+# Archive Backend Functions
+# see notes/weppcloud-project-archiving.md for archive architecture
 
 def archive_rq(runid: str):
     job = get_current_job()
@@ -870,6 +876,7 @@ def restore_archive_rq(runid: str, archive_name: str):
             except Exception:
                 pass
 
+# RAP_TS Functions
 
 def fetch_and_analyze_rap_ts_rq(runid: str):
     try:
@@ -897,4 +904,3 @@ def fetch_and_analyze_rap_ts_rq(runid: str):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-# todo: observed
