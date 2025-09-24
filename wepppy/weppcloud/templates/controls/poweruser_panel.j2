@@ -1,4 +1,29 @@
 <!-- Modal -->
+<style>
+  /* Keep the PowerUser modal sizing/positioning self-contained */
+  #puModal .modal-dialog {
+    max-width: 1100px;
+    width: calc(100vw - 32px);
+    margin: 80px auto 32px;
+  }
+
+  #puModal .modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 144px);
+  }
+
+  #puModal .modal-body {
+    overflow-y: auto;
+  }
+
+  @media (max-width: 768px) {
+    #puModal .modal-dialog {
+      margin: 72px auto 24px;
+      width: calc(100vw - 24px);
+    }
+  }
+</style>
 <div class="modal fade" id="puModal" role="dialog">
   <script>
     // System Notifications
@@ -131,6 +156,11 @@
 
       const toggle = document.getElementById("notificationToggle");
       const toggleLabel = document.getElementById("notificationToggleLabel");
+
+      if (!toggle || !toggleLabel) {
+        console.warn("[wepppush] Notification toggle elements not present; skipping toggle wiring");
+        return;
+      }
 
       const subId = localStorage.getItem(SUB_ID_KEY);
       if (!subId || !RUN_ID) {
@@ -340,9 +370,9 @@
                 Documentation</a>
             </div>
             {% endif %}
+            {% if 'omni' not in ron.mods %}
             <br>
             <h5>Omni (Experimental)</h5>
-            {% if 'omni' not in ron.mods %}
             <div class="list-group">
               <a class="list-group-item list-group-item-action"
                 onclick="Project.getInstance().migrate_to_omni()" href="#">Migrate Project to Omni</a>

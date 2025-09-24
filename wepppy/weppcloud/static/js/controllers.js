@@ -6004,6 +6004,10 @@ var DssExport = function () {
         var that = controlBase();
 
         that.form = $("#dss_export_form");
+        that.container = that.form.closest(".controller-section");
+        if (!that.container.length) {
+            that.container = that.form;
+        }
         that.info = $("#dss_export_form #info");
         that.status = $("#dss_export_form  #status");
         that.stacktrace = $("#dss_export_form #stacktrace");
@@ -6013,12 +6017,12 @@ var DssExport = function () {
         that.command_btn_id = 'btn_export_dss';
 
         that.show = function () {
-            that.form.show();
+            that.container.show();
             $('a[href="#partitioned-dss-export-for-hec"]').parent().show()
         };
 
         that.hide = function () {
-            that.form.hide();
+            that.container.hide();
             $('a[href="#partitioned-dss-export-for-hec"]').parent().hide()
         };
 

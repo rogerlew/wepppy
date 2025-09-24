@@ -1,46 +1,50 @@
-<div class="form-group row">
-  <h3 style="margin-left: 0.5em; padding-top: 80px;">Export</h3>
-</div>
-<div>
-  {% if 'rhem' not in ron.mods %}
-  <h4>Daily Waterbalance Report</h4>
-  <p>
-    <a href="resources/wepp/totalwatsed2.csv">Download totalwatsed2.csv</a>
-    <br>
-    <i>totalwatsed2.csv is the replacement for totalwatsed.csv. It has been
-      optimize to reduce processing time and file size.</i>
-  </p>
-  {% endif %}
-      <h4>OGC GeoPackage - Open Standard</h4>
-      <p>
-        <a href="export/geopackage" rel="nofollow">OGC GeoPackage (ArcGIS Compatible) (.gpkg)</a><br />
-      </p>
-      <h4>Geodatabase - Proprietary Esri</h4>
-      <p>
-        <a href="export/geodatabase" rel="nofollow">Esri Geodatabase (.zip)</a><br />
-      </p>
-      <h4>Return Periods Report</h4>
-      <p>
-        <a href="download/export/return_periods.tsv" rel="nofollow">Spreadsheet Report (.tsv)</a> |
-        <a href="download/export/return_periods_extraneous.tsv" rel="nofollow">Spreadsheet Report with Extraneous Measures (.tsv)</a>
-      </p>
-      <h4>Watershed Preparation Details</h4>
-      <p>
-        <a href="export/prep_details/" rel="nofollow">CSV Zip Archive</a>
-      </p>
-      <h4>Zip Archive</h4>
-      <p>
-        <a href="rq-archive-dashboard" target="_blank" rel="nofollow">Open Archive Dashboard</a>
-      </p>
-      {% if 'rhem' not in ron.mods %}
-      <h4>ERMiT</h4>
-      <p>
-        <a href="export/ermit/" rel="nofollow">Hillslope Input CSV for ERMiT and
-          Disturbed WEPP</a>
-      </p>
-      <p>
-        <a href="https://forest.moscowfsl.wsu.edu/fswepp/batch/">
-          ERMiT and Disturbed WEPP batch processing spreadsheets</a>
-      </p>
-      {% endif %}
-    </div>
+{% extends 'controls/_content_base.htm' %}
+
+{% block content %}
+  <div class="form-group row">
+    <h3 style="margin-left: 0.5em;">Export</h3>
+  </div>
+  <div>
+    {% if 'rhem' not in ron.mods %}
+    <h4>Daily Waterbalance Report</h4>
+    <p>
+      <a href="resources/wepp/totalwatsed2.csv">Download totalwatsed2.csv</a>
+      <br>
+      <i>totalwatsed2.csv is the replacement for totalwatsed.csv. It has been
+        optimize to reduce processing time and file size.</i>
+    </p>
+    {% endif %}
+        <h4>OGC GeoPackage - Open Standard</h4>
+        <p>
+          <a href="export/geopackage" rel="nofollow">OGC GeoPackage (ArcGIS Compatible) (.gpkg)</a><br />
+        </p>
+        <h4>Geodatabase - Proprietary Esri</h4>
+        <p>
+          <a href="export/geodatabase" rel="nofollow">Esri Geodatabase (.zip)</a><br />
+        </p>
+        <h4>Return Periods Report</h4>
+        <p>
+          <a href="download/export/return_periods.tsv" rel="nofollow">Spreadsheet Report (.tsv)</a> |
+          <a href="download/export/return_periods_extraneous.tsv" rel="nofollow">Spreadsheet Report with Extraneous Measures (.tsv)</a>
+        </p>
+        <h4>Watershed Preparation Details</h4>
+        <p>
+          <a href="export/prep_details/" rel="nofollow">CSV Zip Archive</a>
+        </p>
+        <h4>Zip Archive</h4>
+        <p>
+          <a href="rq-archive-dashboard" target="_blank" rel="nofollow">Open Archive Dashboard</a>
+        </p>
+        {% if 'rhem' not in ron.mods %}
+        <h4>ERMiT</h4>
+        <p>
+          <a href="export/ermit/" rel="nofollow">Hillslope Input CSV for ERMiT and
+            Disturbed WEPP</a>
+        </p>
+        <p>
+          <a href="https://forest.moscowfsl.wsu.edu/fswepp/batch/">
+            ERMiT and Disturbed WEPP batch processing spreadsheets</a>
+        </p>
+        {% endif %}
+      </div>
+{% endblock content %}
