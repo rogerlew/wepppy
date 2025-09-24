@@ -21,7 +21,7 @@
     'use strict';
 
     const KEY_TRIGGER = ':';
-    const TIP_DEFAULT = "Tip: Press ':' to activate the command bar";
+    const TIP_DEFAULT = "Tip: Press ':' to activate the command bar. :help for commands.";
     const TIP_ACTIVE = 'Command mode - press Enter to run, Esc to cancel';
     const INSTANCE_DATA_KEY = '__commandBarInstance';
     const STAY_ACTIVE_COMMANDS = new Set(['help', 'status']);
