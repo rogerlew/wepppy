@@ -23,6 +23,27 @@
       width: calc(100vw - 24px);
     }
   }
+
+  #puModal .resource-group {
+    margin-bottom: 1.5rem;
+  }
+
+  #puModal .resource-group:last-child {
+    margin-bottom: 0;
+  }
+
+  #puModal .resource-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  #puModal .resource-buttons .btn {
+    flex: 1 1 120px;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+  }
 </style>
 <div class="modal fade" id="puModal" role="dialog">
   <script>
@@ -242,72 +263,242 @@
             </div>
             {% endif %}
             <h5>Components</h5>
-            <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ron.nodb">nodb.ron</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/topaz.nodb">nodb.topaz</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed.nodb">nodb.watershed</a>
+            <div>
+              <div class="resource-group">
+                <h6>Ron</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/ron.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/ron.log">log</a>
+                </div>
+              </div>
+              <div class="resource-group">
+                <h6>Topaz</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/topaz.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/topaz.log">log</a>
+                </div>
+              </div>
+              <div class="resource-group">
+                <h6>Watershed</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/watershed.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/watershed.log">log</a>
+                </div>
+              </div>
               {% if 'rhem' not in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse.nodb">nodb.landuse</a>
+              <div class="resource-group">
+                <h6>Landuse</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/landuse.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/landuse.log">log</a>
+                </div>
+              </div>
               {% endif %}
+
               {% if 'shrubland' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/shrubland.nodb">nodb.shrubland</a>
+              <div class="resource-group">
+                <h6>Shrubland</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/shrubland.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/shrubland.log">log</a>
+                </div>
+              </div>
               {% endif %}
+
               {% if 'rangeland_cover' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rangeland_cover.nodb">nodb.rangeland_cover</a>
+              <div class="resource-group">
+                <h6>Rangeland Cover</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/rangeland_cover.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/rangeland_cover.log">log</a>
+                </div>
+              </div>
               {% endif %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils.nodb">nodb.soils</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/climate.nodb">nodb.climate</a>
+
+              <div class="resource-group">
+                <h6>Soils</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/soils.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/soils.log">log</a>
+                </div>
+              </div>
+
+              <div class="resource-group">
+                <h6>Climate</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/climate.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/climate.log">log</a>
+                </div>
+              </div>
+
               {% if 'rhem' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem.nodb">nodb.rhem</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhempost.nodb">nodb.rhempost</a>
+              <div class="resource-group">
+                <h6>RHEM</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/rhem.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/rhem.log">log</a>
+                </div>
+              </div>
+              <div class="resource-group">
+                <h6>RHEM Post</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/rhempost.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/rhempost.log">log</a>
+                </div>
+              </div>
               {% endif %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp.nodb">nodb.wepp</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepppost.nodb">nodb.wepppost</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/observed.nodb">nodb.observed</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/unitizer.nodb">nodb.unitizer</a>
+
+              <div class="resource-group">
+                <h6>WEPP</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/wepp.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/wepp.log">log</a>
+                </div>
+              </div>
+
+              <div class="resource-group">
+                <h6>WEPP Post</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/wepppost.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/wepppost.log">log</a>
+                </div>
+              </div>
+
+              <div class="resource-group">
+                <h6>Observed</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/observed.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/observed.log">log</a>
+                </div>
+              </div>
+
+              <div class="resource-group">
+                <h6>Unitizer</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/unitizer.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/unitizer.log">log</a>
+                </div>
+              </div>
+
               {% if 'baer' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/baer.nodb">nodb.baer</a>
+              <div class="resource-group">
+                <h6>BAER</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/baer.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/baer.log">log</a>
+                </div>
+              </div>
               {% endif %}
+
               {% if 'disturbed' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/disturbed.nodb">nodb.disturbed</a>
+              <div class="resource-group">
+                <h6>Disturbed</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/disturbed.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/disturbed.log">log</a>
+                </div>
+              </div>
               {% endif %}
+
               {% if 'rred' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred.nodb">nodb.rred</a>
+              <div class="resource-group">
+                <h6>RRED</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/rred.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/rred.log">log</a>
+                </div>
+              </div>
               {% endif %}
+
               {% if 'lt' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/lt.nodb">nodb.lt</a>
+              <div class="resource-group">
+                <h6>LT</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/lt.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/lt.log">log</a>
+                </div>
+              </div>
               {% endif %}
+
               {% if 'ash' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ash.nodb">nodb.ash</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ashpost.nodb">nodb.ashpost</a>
+              <div class="resource-group">
+                <h6>Ash</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/ash.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/ash.log">log</a>
+                </div>
+              </div>
+              <div class="resource-group">
+                <h6>Ash Post</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/ashpost.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/ashpost.log">log</a>
+                </div>
+              </div>
               {% endif %}
+
               {% if 'debris_flow' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/debris_flow.nodb">nodb.debris_flow</a>
+              <div class="resource-group">
+                <h6>Debris Flow</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/debris_flow.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/debris_flow.log">log</a>
+                </div>
+              </div>
               {% endif %}
+
               {% if 'omni' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/omni.nodb">nodb.omni</a>
+              <div class="resource-group">
+                <h6>Omni</h6>
+                <div class="resource-buttons">
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/omni.nodb">nodb</a>
+                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                    href="browse/omni.log">log</a>
+                </div>
+              </div>
               {% endif %}
             </div>
             <br>
@@ -320,45 +511,45 @@
             <h5>Directory Views</h5>
             <div class="list-group">
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/">/</a>
+                href="">/</a>
               {% if 'rred' in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred/">rred/</a>
+                href="rred/">rred/</a>
               {% endif %}
               {% if 'rhem' not in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/runs/">wepp/runs/</a>
+                href="browse/wepp/runs/">wepp/runs/</a>
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/output/">wepp/output/</a>
+                href="wepp/output/">wepp/output/</a>
               {% else %}
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/runs/">rhem/runs/</a>
+                href="browse/rhem/runs/">rhem/runs/</a>
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/output/">rhem/output/</a>
+                href="browse/rhem/output/">rhem/output/</a>
               {% endif %}
               {% if 'ash' in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ash/">ash/</a>
+                href="browse/ash/">ash/</a>
               {% endif %}
             </div>
             <br>
             <h5>Data Tables</h5>
             <div class="list-group">
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/hillslopes.parquet/">Hillslope</a>
+                href="browse/watershed/hillslopes.parquet/">Hillslope</a>
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/channels.parquet">Channels</a>
+                href="browse/watershed/channels.parquet">Channels</a>
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse/landuse.parquet/">Landuse</a>
+                href="browse/landuse/landuse.parquet/">Landuse</a>
               <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils/soils.parquet/">Soils</a>
+                href="soils/soils.parquet/">Soils</a>
             </div>
             <br>
             {% if 'disturbed' in ron.mods %}
             <h5>Disturbed</h5>
             <div class="list-group">
               <a class="list-group-item list-group-item-action"
-                href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/modify_disturbed"
+                href="modify_disturbed"
                 target="_blank">Modify Disturbed Parameters</a>
               <a class="list-group-item list-group-item-action"
                 onclick="Disturbed.getInstance().reset_land_soil_lookup()" href="#">Reset Disturbed Parameters</a>

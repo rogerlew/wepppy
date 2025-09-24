@@ -1544,7 +1544,6 @@ class Wepp(NoDbBase):
                 futures_n = len(futures)
                 count = 0
                 pending = set(futures)
-
                 while pending:
                     done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
 
