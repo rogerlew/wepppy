@@ -191,6 +191,28 @@
                 event.preventDefault();
                 this.activate();
             }
+
+            if (!event.shiftKey) {
+                return;
+            }
+
+            // Use a switch statement for different key presses
+            switch (event.key.toUpperCase()) {
+            case 'G':
+                event.preventDefault(); // Prevent any default browser action
+                window.scrollTo(0, document.body.scrollHeight);
+                break;
+            case 'U':
+                event.preventDefault();
+                // Scroll up by 90% of the window's height for context overlap
+                window.scrollBy(0, -window.innerHeight * 0.9);
+                break;
+            case 'H':
+                event.preventDefault();
+                // Scroll down by 90% of the window's height
+                window.scrollBy(0, window.innerHeight * 0.9);
+                break;
+            }
         }
 
         handleInputKeyDown(event) {
