@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
+<title>{{ filename }} - {{ runid }}</title>
+<style>
+  body {
+    margin: 0;
+    font-family: monospace;
+    padding-top: 45px;
+    padding-bottom: 45px;
+  }
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #343a40;
+    color: #ecf0f1;
+    padding: 10px 10px;
+    box-sizing: border-box;
+    z-index: 1000;
+    font-size: 12px;
+  }
+  pre {
+    margin: 0 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+</style>
+</head>
+<body>
+<header><b>File:</b> {{ path }}</header>
+<pre>{{ contents }}</pre>
+</body>
+</html>

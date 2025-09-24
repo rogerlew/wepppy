@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
+<title>{{ runid }}</title>
+<script>
+function redirectToDiff() {
+    const runId = document.getElementById('runIdInput').value;
+    window.location.href = '?diff=' + encodeURIComponent(runId);
+}
+const runid = "{{ runid }}";
+const config = "{{ config }}";
+</script>
+<style>
+  input[type='text'] { font-family: monospace; }
+  a { text-decoration: none; }
+  span.even-row { background-color: #f6f6f6;  display: block; }
+  span.odd-row { background-color: #ffffff;  display: block; }
+  span.even-row:hover,
+  span.odd-row:hover {
+    background-color: #d0ebff;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<input type="text" value="{{ diff_runid|e }}" id="runIdInput" placeholder="runid">
+<button onclick="redirectToDiff()">Compare project</button>
+<pre id="file-tree">
+{{ showing_text|safe }}{{ pagination_html|safe }}
+{{ project_href|safe }}{{ breadcrumbs_html|safe }}
+{{ listing_html|safe }}
+{{ pagination_html|safe }}
+</pre>
+{% include 'browse/_path_input_script.j2' %}
+</body>
+</html>

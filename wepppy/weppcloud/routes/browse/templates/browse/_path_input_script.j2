@@ -1,0 +1,45 @@
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const pathInput = document.getElementById('pathInput');
+    if (!pathInput) return;
+
+    function handleNavigation(event) {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+
+        const path = pathInput.value.trim();
+        if (!path) return;
+
+        const currentUrl = new URL(window.location.href);
+        const searchParams = currentUrl.search;
+        let newUrl;
+
+        if (path.startsWith('/')) {
+            const baseUrl = `/weppcloud/runs/{{ runid }}/{{ config }}/browse`;
+            newUrl = baseUrl + path;
+        } else {
+            const baseHref =
+                currentUrl.origin +
+                currentUrl.pathname +
+                (currentUrl.pathname.endsWith('/') ? '' : '/');
+
+            const resolvedUrl = new URL(path, baseHref);
+            newUrl = resolvedUrl.pathname;
+        }
+
+        window.location.href = newUrl + searchParams;
+    }
+
+    pathInput.addEventListener('keydown', handleNavigation);
+    pathInput.disabled = false;
+    pathInput.readOnly = false;
+
+    requestAnimationFrame(() => {
+        pathInput.focus({ preventScroll: true });
+        const pos = pathInput.value.length;
+        try {
+            pathInput.setSelectionRange(pos, pos);
+        } catch (_) {}
+    });
+});
+</script>
