@@ -2976,33 +2976,6 @@ def view_climate_monthlies(runid, config):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/<config>/tasks/set_wepp_bin', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/set_wepp_bin/', methods=['POST'])
-def task_set_wepp_bin(runid, config):
-    try:
-        wepp_bin = request.json.get('wepp_bin', None)
-    except Exception:
-        return exception_factory('Error parsing routine', runid=runid)
-
-    if wepp_bin is None:
-        return error_factory('wepp_bin is None')
-
-    assert wepp_bin[:4] == 'wepp'
-    assert '.' not in wepp_bin
-    assert '/' not in wepp_bin
-    assert '\\' not in wepp_bin
-
-    try:
-        wd = get_wd(runid)
-        wepp = Wepp.getInstance(wd)
-        wepp.wepp_bin = wepp_bin
-    except Exception:
-        return exception_factory('Error setting wepp_bin', runid=runid)
-
-    return success_factory()
-
-
-# noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable/', methods=['POST'])
 def task_set_use_gridmet_wind_when_applicable(runid, config):
@@ -3119,43 +3092,11 @@ def task_set_disturbed_sol_ver(runid, config):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/<config>/tasks/set_run_flowpaths', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/set_run_flowpaths/', methods=['POST'])
-def task_set_run_flowpaths(runid, config):
-
-    try:
-        state = request.json.get('run_flowpaths', None)
-    except Exception:
-        return exception_factory('Error parsing state', runid=runid)
-
-    if state is None:
-        return error_factory('state is None')
-
-    try:
-        wd = get_wd(runid)
-        wepp = Wepp.getInstance(wd)
-        wepp.set_run_flowpaths(state)
-    except Exception:
-        return exception_factory('Error setting state', runid=runid)
-
-    return success_factory()
-
-# noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_public', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_public/', methods=['POST'])
+@login_required
 def task_set_public(runid, config):
-    owners = get_run_owners(runid)
-
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if should_abort:
-        return error_factory('authentication error')
-
+    authorize()
     try:
         state = request.json.get('public', None)
     except Exception:
@@ -3174,15 +3115,7 @@ def task_set_public(runid, config):
     return success_factory()
 
 
-# noinspection PyBroadException
-@app.route('/runs/<string:runid>/<config>/hasowners', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/hasowners/', methods=['POST'])
-def get_owners(runid, config):
-    owners = get_run_owners(runid)
-    return jsonify(len(owners) > 0)
-
-
-# noinspection PyBroadException
+# projects
 @app.route('/runs/<string:runid>/<config>/tasks/set_readonly', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_readonly/', methods=['POST'])
 def task_set_readonly(runid, config):
@@ -3253,7 +3186,7 @@ def get_wepp_run_status(runid, config, nodb):
 
     return error_factory('Unknown nodb')
 
-# noinspection PyBroadException
+# rhem blueprint
 @app.route('/runs/<string:runid>/<config>/report/rhem/results')
 @app.route('/runs/<string:runid>/<config>/report/rhem/results/')
 def report_rhem_results(runid, config):
@@ -3265,7 +3198,7 @@ def report_rhem_results(runid, config):
         return exception_factory('Error building reports template', runid=runid)
 
 
-# noinspection PyBroadException
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/results')
 @app.route('/runs/<string:runid>/<config>/report/wepp/results/')
 def report_wepp_results(runid, config):
@@ -3316,7 +3249,7 @@ def query_channels_summary(runid, config):
         return exception_factory('Error building summary', runid=runid)
 
 
-# noinspection PyBroadException
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/prep_details')
 @app.route('/runs/<string:runid>/<config>/report/wepp/prep_details/')
 def get_wepp_prep_details(runid, config):
@@ -3341,8 +3274,7 @@ def get_wepp_prep_details(runid, config):
         return exception_factory('Error building summary', runid=runid)
 
 
-# TODO refactor as RQ task?
-# noinspection PyBroadException
+# observed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/run_model_fit', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_model_fit/', methods=['POST'])
 def submit_task_run_model_fit(runid, config):
@@ -3355,7 +3287,7 @@ def submit_task_run_model_fit(runid, config):
         observed.parse_textdata(textdata)
     except Exception:
         return exception_factory('Error parsing text', runid=runid)
-
+    # TODO refactor as RQ task?
     try:
         observed.calc_model_fit()
     except Exception:
@@ -3363,7 +3295,7 @@ def submit_task_run_model_fit(runid, config):
 
     return success_factory()
 
-# noinspection PyBroadException
+# observed blueprint
 @app.route('/runs/<string:runid>/<config>/report/observed')
 @app.route('/runs/<string:runid>/<config>/report/observed/')
 def report_observed(runid, config):
@@ -3379,6 +3311,8 @@ def report_observed(runid, config):
                            unitizer_nodb=unitizer,
                            user=current_user)
 
+
+# observed blueprint
 @app.route('/runs/<string:runid>/<config>/plot/observed/<selected>/')
 @app.route('/runs/<string:runid>/<config>/plot/observed/<selected>/')
 def plot_observed(runid, config, selected):
@@ -3427,6 +3361,7 @@ def query_landuse_cover_subcatchments(runid, config):
     return jsonify(d)
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts')
 @app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts/')
 def query_wepp_phos_opts(runid, config):
@@ -3435,6 +3370,7 @@ def query_wepp_phos_opts(runid, config):
     return jsonify(phos_opts)
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/run_summary')
 @app.route('/runs/<string:runid>/<config>/report/wepp/run_summary/')
 def report_wepp_run_summary(runid, config):
@@ -3451,6 +3387,7 @@ def report_wepp_run_summary(runid, config):
                            ron=ron)
 
 
+# rhem blueprint
 @app.route('/runs/<string:runid>/<config>/report/rhem/run_summary')
 @app.route('/runs/<string:runid>/<config>/report/rhem/run_summary/')
 def report_rhem_run_summary(runid, config):
@@ -3465,6 +3402,7 @@ def report_rhem_run_summary(runid, config):
                            ron=ron)
 
 
+# rhem blueprint
 @app.route('/runs/<string:runid>/<config>/report/rhem/summary')
 @app.route('/runs/<string:runid>/<config>/report/rhem/summary/')
 def report_rhem_avg_annuals(runid, config):
@@ -3481,6 +3419,7 @@ def report_rhem_avg_annuals(runid, config):
                            user=current_user)
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/summary')
 @app.route('/runs/<string:runid>/<config>/report/wepp/summary/')
 def report_wepp_loss(runid, config):
@@ -3536,6 +3475,7 @@ def report_wepp_loss(runid, config):
         return exception_factory(runid=runid)
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal')
 @app.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal/')
 def report_wepp_yearly_watbal(runid, config):
@@ -3569,6 +3509,7 @@ def report_wepp_yearly_watbal(runid, config):
         return exception_factory(runid=runid)
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse')
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse/')
 def report_wepp_avg_annual_by_landuse(runid, config):
@@ -3591,6 +3532,7 @@ def report_wepp_avg_annual_by_landuse(runid, config):
         return exception_factory('Error running wepp_avg_annual_by_landuse', runid=runid)
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal')
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal/')
 def report_wepp_avg_annual_watbal(runid, config):
@@ -3615,6 +3557,7 @@ def report_wepp_avg_annual_watbal(runid, config):
         return exception_factory('Error running watbal', runid=runid)
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/resources/wepp/daily_streamflow.csv')
 def resources_wepp_streamflow(runid, config):
     try:
@@ -3644,6 +3587,7 @@ def resources_wepp_streamflow(runid, config):
     return send_file(fn, mimetype='text/csv', download_name='daily_streamflow.csv')
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed.csv')
 def resources_wepp_totalwatsed(runid, config):
     wd = get_wd(runid)
@@ -3663,6 +3607,7 @@ def resources_wepp_totalwatsed(runid, config):
     return send_file(fn, mimetype='text/csv', download_name='totalwatsed.csv')
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed2.csv')
 def resources_wepp_totalwatsed2(runid, config):
     wd = get_wd(runid)
@@ -3676,6 +3621,7 @@ def resources_wepp_totalwatsed2(runid, config):
 
     return send_file(fn, mimetype='text/csv', download_name='totalwatsed2.csv', as_attachment=True)
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow')
 @app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow/')
 def plot_wepp_streamflow(runid, config):
@@ -3707,28 +3653,8 @@ def plot_wepp_streamflow(runid, config):
         return exception_factory('Error running plot_wepp_streamflow', runid=runid)
 
 
-@app.route('/runs/<string:runid>/<config>/report/rhem/return_periods')
-@app.route('/runs/<string:runid>/<config>/report/rhem/return_periods/')
-def report_rhem_return_periods(runid, config):
 
-    try:
-        extraneous = request.args.get('extraneous', None) == 'true'
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        rhempost = RhemPost.getInstance(wd)
-
-        unitizer = Unitizer.getInstance(wd)
-
-        return render_project_template('reports/rhem/return_periods.htm', runid, config,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               rhempost=rhempost,
-                               ron=ron,
-                               user=current_user)
-    except:
-        return exception_factory('Error running report_rhem_return_periods', runid=runid)
-
-
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/return_periods')
 @app.route('/runs/<string:runid>/<config>/report/wepp/return_periods/')
 def report_wepp_return_periods(runid, config):
@@ -3800,6 +3726,7 @@ def report_wepp_return_periods(runid, config):
         return exception_factory('Error generating return periods report', runid=runid)
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/frq_flood')
 @app.route('/runs/<string:runid>/<config>/report/wepp/frq_flood/')
 def report_wepp_frq_flood(runid, config):
@@ -3823,6 +3750,7 @@ def report_wepp_frq_flood(runid, config):
 
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics')
 @app.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics/')
 def report_wepp_sediment_delivery(runid, config):
@@ -3847,6 +3775,30 @@ def report_wepp_sediment_delivery(runid, config):
                                  "Check that the loss_pw0.txt contains a class fractions table.", runid=runid)
 
 
+# rhem blueprint
+@app.route('/runs/<string:runid>/<config>/report/rhem/return_periods')
+@app.route('/runs/<string:runid>/<config>/report/rhem/return_periods/')
+def report_rhem_return_periods(runid, config):
+
+    try:
+        extraneous = request.args.get('extraneous', None) == 'true'
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        rhempost = RhemPost.getInstance(wd)
+
+        unitizer = Unitizer.getInstance(wd)
+
+        return render_project_template('reports/rhem/return_periods.htm', runid, config,
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               rhempost=rhempost,
+                               ron=ron,
+                               user=current_user)
+    except:
+        return exception_factory('Error running report_rhem_return_periods', runid=runid)
+
+
+# rhem blueprint
 @app.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments/')
 def query_rhem_sub_runoff(runid, config):
@@ -3855,6 +3807,7 @@ def query_rhem_sub_runoff(runid, config):
     return jsonify(rhempost.query_sub_val('runoff'))
 
 
+# rhem blueprint
 @app.route('/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments/')
 def query_rhem_sub_sed_yield(runid, config):
@@ -3863,6 +3816,7 @@ def query_rhem_sub_sed_yield(runid, config):
     return jsonify(rhempost.query_sub_val('sed_yield'))
 
 
+# rhem blueprint
 @app.route('/runs/<string:runid>/<config>/query/rhem/soil_loss/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/rhem/soil_loss/subcatchments/')
 def query_rhem_sub_soil_loss(runid, config):
@@ -3871,6 +3825,7 @@ def query_rhem_sub_soil_loss(runid, config):
     return jsonify(rhempost.query_sub_val('soil_loss'))
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments/')
 def query_wepp_sub_runoff(runid, config):
@@ -3880,6 +3835,7 @@ def query_wepp_sub_runoff(runid, config):
     return jsonify(wepp.query_sub_val('Runoff'))
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments/')
 def query_wepp_sub_subrunoff(runid, config):
@@ -3889,6 +3845,7 @@ def query_wepp_sub_subrunoff(runid, config):
     return jsonify(wepp.query_sub_val('Subrunoff'))
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments/')
 def query_wepp_sub_baseflow(runid, config):
@@ -3898,6 +3855,7 @@ def query_wepp_sub_baseflow(runid, config):
     return jsonify(wepp.query_sub_val('Baseflow'))
 
 
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments/')
 def query_wepp_sub_loss(runid, config):
@@ -3905,7 +3863,7 @@ def query_wepp_sub_loss(runid, config):
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Soil Loss Density'))
 
-
+# wepp blueprint
 @app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments/')
 def query_wepp_sub_phosphorus(runid, config):
@@ -4027,6 +3985,7 @@ def query_bound_coords(runid, config):
 #
 
 
+# unitizer blueprint
 @app.route('/runs/<string:runid>/<config>/unitizer')
 @app.route('/runs/<string:runid>/<config>/unitizer/')
 def unitizer_route(runid, config):
@@ -4044,7 +4003,8 @@ def unitizer_route(runid, config):
 
     except Exception:
         return exception_factory(runid=runid)
-
+    
+# unitizer blueprint
 @app.route('/runs/<string:runid>/<config>/unitizer_units')
 @app.route('/runs/<string:runid>/<config>/unitizer_units/')
 def unitizer_units_route(runid, config):
@@ -4064,11 +4024,10 @@ def unitizer_units_route(runid, config):
 
 
 #
-# BAER
+# Disturbed
 #
 
-
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/query/baer_wgs_map')
 @app.route('/runs/<string:runid>/<config>/query/baer_wgs_map/')
 def query_baer_wgs_bounds(runid, config):
@@ -4090,7 +4049,7 @@ def query_baer_wgs_bounds(runid, config):
         return exception_factory(runid=runid)
 
 
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/view/modify_burn_class')
 @app.route('/runs/<string:runid>/<config>/view/modify_burn_class/')
 def query_baer_class_map(runid, config):
@@ -4110,7 +4069,7 @@ def query_baer_class_map(runid, config):
         return exception_factory(runid=runid)
 
 
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/modify_burn_class', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/modify_burn_class/', methods=['POST'])
 def task_baer_class_map(runid, config):
@@ -4134,7 +4093,7 @@ def task_baer_class_map(runid, config):
         return exception_factory(runid=runid)
 
 
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/modify_color_map', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/modify_color_map/', methods=['POST'])
 def task_baer_modify_color_map(runid, config):
@@ -4158,7 +4117,7 @@ def task_baer_modify_color_map(runid, config):
     except Exception:
         return exception_factory(runid=runid)
 
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/resources/baer.png')
 def resources_baer_sbs(runid, config):
     try:
@@ -4176,7 +4135,7 @@ def resources_baer_sbs(runid, config):
     except Exception:
         return exception_factory(runid=runid)
 
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_firedate/', methods=['POST'])
 def set_firedate(runid, config):
     wd = get_wd(runid)
@@ -4189,7 +4148,7 @@ def set_firedate(runid, config):
         return exception_factory("failed to set firedate", runid=runid)
 
 
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/upload_sbs/', methods=['POST'])
 def task_upload_sbs(runid, config):
     wd = get_wd(runid)
@@ -4234,7 +4193,7 @@ def task_upload_sbs(runid, config):
     return success_factory(res)
 
 
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/upload_cover_transform/', methods=['POST'])
 def task_upload_cover_transform(runid, config):
     from wepppy.nodb.mods.revegetation import Revegetation
@@ -4268,7 +4227,7 @@ def task_upload_cover_transform(runid, config):
 
     return success_factory(res)
 
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/remove_sbs/', methods=['POST'])
 def task_remove_sbs(runid, config):
    
@@ -4289,7 +4248,7 @@ def task_remove_sbs(runid, config):
         return exception_factory(runid=runid)
 
 
-# noinspection PyBroadException
+# disturbed blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/build_uniform_sbs/<value>', methods=['POST'])
 def task_build_uniform_sbs(runid, config, value):
     try:
@@ -4308,7 +4267,25 @@ def task_build_uniform_sbs(runid, config, value):
     return success_factory()
 
 
-# noinspection PyBroadException
+# debris_flow blueprint
+@app.route('/runs/<string:runid>/<config>/report/debris_flow')
+@app.route('/runs/<string:runid>/<config>/report/debris_flow/')
+def report_debris_flow(runid, config):
+    wd = get_wd(runid)
+
+    ron = Ron.getInstance(wd)
+    debris_flow = DebrisFlow.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
+
+    return render_project_template('reports/debris_flow.htm', runid, config,
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
+                           debris_flow=debris_flow,
+                           ron=ron,
+                           user=current_user)
+
+
+# watar blueprint
 @app.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport/', methods=['POST'])
 def task_set_ash_wind_transport(runid, config):
@@ -4329,23 +4306,6 @@ def task_set_ash_wind_transport(runid, config):
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
-
-@app.route('/runs/<string:runid>/<config>/report/debris_flow')
-@app.route('/runs/<string:runid>/<config>/report/debris_flow/')
-def report_debris_flow(runid, config):
-    wd = get_wd(runid)
-
-    ron = Ron.getInstance(wd)
-    debris_flow = DebrisFlow.getInstance(wd)
-    unitizer = Unitizer.getInstance(wd)
-
-    return render_project_template('reports/debris_flow.htm', runid, config,
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           debris_flow=debris_flow,
-                           ron=ron,
-                           user=current_user)
-
 
 def _parse_rec_intervals(request, years):
     rec_intervals = request.args.get('rec_intervals', None)
@@ -4368,6 +4328,7 @@ def _parse_rec_intervals(request, years):
 
     return rec_intervals
 
+# watar blueprint
 @app.route('/runs/<string:runid>/<config>/report/run_ash')
 @app.route('/runs/<string:runid>/<config>/report/run_ash/')
 def report_run_ash(runid, config):
@@ -4382,6 +4343,7 @@ def report_run_ash(runid, config):
         return exception_factory('Error', runid=runid)
 
 
+# watar blueprint
 @app.route('/runs/<string:runid>/<config>/report/ash')
 @app.route('/runs/<string:runid>/<config>/report/ash/')
 def report_ash(runid, config):
@@ -4433,6 +4395,7 @@ def report_ash(runid, config):
         return exception_factory('Error', runid=runid)
 
 
+# watar blueprint
 @app.route('/runs/<string:runid>/<config>/query/ash_out')
 @app.route('/runs/<string:runid>/<config>/query/ash_out/')
 def query_ash_out(runid, config):
@@ -4447,6 +4410,7 @@ def query_ash_out(runid, config):
         return exception_factory(runid=runid)
 
 
+# watar blueprint
 @app.route('/runs/<string:runid>/<config>/report/ash_by_hillslope')
 @app.route('/runs/<string:runid>/<config>/report/ash_by_hillslope/')
 def report_ash_by_hillslope(runid, config):
@@ -4513,6 +4477,7 @@ def report_ash_by_hillslope(runid, config):
     except Exception:
         return exception_factory('Error', runid=runid)
 
+# watar blueprint
 @app.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])
 @app.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])
 def report_contaminant(runid, config):
@@ -4612,16 +4577,7 @@ def combined_ws_viewer_url_gen():
         return exception_factory('Error processing request')
 
 
-def get_project_name(wd):
-    ron = Ron.getInstance(wd)
-    return ron.name
-
-
-def get_config_stem(wd):
-    ron = Ron.getInstance(wd)
-    return ron.config_stem
-
-
+# admin blueprint
 @app.route('/dev/runid_query/')
 def runid_query():
     if current_user.has_role('Root') or \
@@ -4636,8 +4592,8 @@ def runid_query():
         wds = [wd for wd in wds if _exists(_join(wd, 'ron.nodb'))]
 
         if name is not None:
-            wds = [wd for wd in wds if name in get_project_name(wd)]
+            wds = [wd for wd in wds if name in Ron.getInstance(wd).name]
 
-        return jsonify([_join('weppcloud/runs', _split(wd)[-1], get_config_stem(wd)) for wd in wds])
+        return jsonify([_join('weppcloud/runs', _split(wd)[-1], Ron.getInstance(wd).config_stem) for wd in wds])
     else:
         return error_factory('not authorized')
