@@ -44,7 +44,7 @@ from flask import (
     stream_with_context, url_for, current_app
 )
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 
 from sqlalchemy import func
 
@@ -575,10 +575,26 @@ def runs():
                 })
                 for r in items
             ]
-            for f in as_completed(futures):
-                m = f.result()
-                if m:
-                    metas.append(m)
+
+            pending = set(futures)
+            while pending:
+                done, pending = wait(pending, timeout=10, return_when=FIRST_COMPLETED)
+
+                if not done:
+                    # If this fires frequently we may need to tune the 10s threshold; keep an eye on I/O latency in prod.
+                    current_app.logger.warning('runs() metadata build still pending after 10 seconds; continuing to wait.')
+                    continue
+
+                for future in done:
+                    try:
+                        m = future.result()
+                    except Exception:
+                        for remaining in pending:
+                            remaining.cancel()
+                        raise
+
+                    if m:
+                        metas.append(m)
 
         # metas roughly in DB order already
         return render_template(
