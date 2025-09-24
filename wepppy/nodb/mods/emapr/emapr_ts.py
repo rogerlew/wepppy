@@ -14,7 +14,7 @@ from os.path import exists as _exists
 from osgeo import gdal
 
 from ...ron import Ron
-from ...base import NoDbBase, TriggerEvents
+from ...base import NoDbBase, TriggerEvents, nodb_setter
 from ...watershed import Watershed
 
 from wepppy.landcover.emapr import (
@@ -54,18 +54,18 @@ class OSUeMapR_TS(NoDbBase):
         return self._emapr_end_year
 
     @emapr_end_year.setter
+    @nodb_setter
     def emapr_end_year(self, value: int):
-        with self.locked():
-            self._emapr_end_year = value
+        self._emapr_end_year = value
   
     @property
     def emapr_start_year(self):
         return self._emapr_start_year
 
     @emapr_start_year.setter
+    @nodb_setter
     def emapr_start_year(self, value: int):
-        with self.locked():
-            self._emapr_start_year = value
+        self._emapr_start_year = value
   
     @property
     def emapr_dir(self):
