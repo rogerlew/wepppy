@@ -24,12 +24,12 @@ from wepppy.nodb.base import LogLevel, try_redis_get_log_level, try_redis_set_lo
 from wepppy.weppcloud.utils.helpers import authorize
 
 
-command_prompt_bp = Blueprint('command_prompt', __name__)
+command_bar_bp = Blueprint('command_bar', __name__)
 
 _ALLOWED_LEVELS = {level.name.lower(): level for level in LogLevel}
 
 
-@command_prompt_bp.route('/runs/<string:runid>/<config>/command_prompt/loglevel', methods=['POST'])
+@command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/loglevel', methods=['POST'])
 def set_log_level(runid, config):
     authorize(runid, config, require_owner=True)
 

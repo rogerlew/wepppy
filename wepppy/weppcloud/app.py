@@ -290,7 +290,7 @@ from routes.pivottable import pivottable_bp
 from routes.jsoncrack import jsoncrack_bp
 from routes.weppcloudr import weppcloudr_bp
 from routes.readme import readme_bp, ensure_readme
-from routes.command_prompt import command_prompt_bp
+from routes.command_bar import command_bar_bp
 from routes.rq.api.jobinfo import rq_jobinfo_bp
 from routes.rq.api.api import rq_api_bp
 from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
@@ -307,7 +307,7 @@ app.register_blueprint(rq_api_bp)
 app.register_blueprint(rq_jobinfo_bp)
 app.register_blueprint(rq_job_dashboard_bp)
 app.register_blueprint(readme_bp)
-app.register_blueprint(command_prompt_bp)
+app.register_blueprint(command_bar_bp)
 
 mail = Mail(app)
 

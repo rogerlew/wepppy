@@ -12,10 +12,10 @@
 //        needs its own validation + network request logic.
 //     3. Update `SET_HELP_LINES` or other user-facing help text where appropriate.
 //     4. If network-backed, expose a matching Flask route inside
-//        `wepppy/weppcloud/routes/command_prompt.py` (or another blueprint) that returns
+//        `wepppy/weppcloud/routes/command_bar.py` (or another blueprint) that returns
 //        `{ Success: bool, Content?: {...}, Error?: str }` so the UI can display results.
 // - Routes: network actions assume `projectBaseUrl = /runs/<runid>/<config>/`. Append a
-//   relative path (e.g., `command_prompt/loglevel`) to reach the corresponding backend
+//   relative path (e.g., `command_bar/loglevel`) to reach the corresponding backend
 //   endpoint registered via Flask blueprints.
 (() => {
     'use strict';
@@ -487,7 +487,7 @@
                 return;
             }
 
-            const targetUrl = `${this.projectBaseUrl}command_prompt/loglevel`;
+            const targetUrl = `${this.projectBaseUrl}command_bar/loglevel`;
             return fetch(targetUrl, {
                 method: 'POST',
                 headers: {
