@@ -11,7 +11,8 @@
         "set units <si|english>    - Switch global unit preferences",
         "set name <project name>   - Update the project name",
         "set scenario <name>       - Update the project scenario",
-        "set outlet                - Use cursor location for outlet delineation"
+        "set outlet                - Use cursor location for outlet delineation",
+        "set loglevel <debug|info|warning|error|critical> - Update project log verbosity"
     ];
 
     class CommandBar {
@@ -347,6 +348,8 @@
                 case 'outlet':
                     this.routeSetOutlet(rest);
                     break;
+                case 'loglevel':
+                    return this.routeSetLogLevel(rest);
                 default:
                     this.showResult(`Error: Unknown set option "${subcommandRaw}"`);
             }
@@ -446,6 +449,56 @@
             } else {
                 this.showResult('Cursor selection for outlet is now deactivated.');
             }
+        }
+
+        routeSetLogLevel(args = []) {
+            if (args.length === 0) {
+                this.showResult('Usage: set loglevel <debug|info|warning|error|critical>');
+                return;
+            }
+
+            const level = (args[0] || '').toLowerCase();
+            const allowedLevels = new Set(['debug', 'info', 'warning', 'error', 'critical']);
+            if (!allowedLevels.has(level)) {
+                this.showResult('Error: Log level must be one of debug, info, warning, error, critical.');
+                return;
+            }
+
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: The loglevel command is only available on a project page.');
+                return;
+            }
+
+            const targetUrl = `${this.projectBaseUrl}command_prompt/loglevel`;
+            return fetch(targetUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ level })
+            }).then((response) => {
+                if (!response.ok) {
+                    return response.json().catch(() => ({})).then((data) => {
+                        const message = data.Error || `HTTP ${response.status}`;
+                        throw new Error(message);
+                    });
+                }
+                return response.json();
+            }).then((data) => {
+                if (!data || !data.Success) {
+                    throw new Error((data && data.Error) || 'Unknown error');
+                }
+
+                const content = data.Content || {};
+                const levelLabel = content.log_level || level;
+                const levelValue = content.log_level_value;
+                const formatted = levelValue !== undefined ? `${levelLabel} (${levelValue})` : levelLabel;
+                this.showResult(`Log level set to ${formatted}.`);
+            }).catch((error) => {
+                console.error('Error setting log level:', error);
+                this.showResult(`Error: Unable to set log level. ${error.message || error}`);
+            });
         }
 
         getProjectInstance() {
