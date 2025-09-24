@@ -31,7 +31,7 @@ _ALLOWED_LEVELS = {level.name.lower(): level for level in LogLevel}
 
 @command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/loglevel', methods=['POST'])
 def set_log_level(runid, config):
-    authorize(runid, config, require_owner=True)
+    authorize(runid, config)
 
     payload = request.get_json(silent=True) or {}
     level = payload.get('level')

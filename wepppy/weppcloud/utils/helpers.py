@@ -162,24 +162,23 @@ def authorize(runid, config, require_owner=False):
     from wepppy.nodb.ron import Ron
     from wepppy.weppcloud.app import get_run_owners
 
-    wd = get_wd(runid)
-    owners = get_run_owners(runid)
-    should_abort = True
-
-    if not require_owner and Ron.getInstance(wd).public:
-        should_abort = False
-
-    if current_user in owners:
-        should_abort = False
 
     if current_user.has_role("Admin"):
-        should_abort = False
+        return
+    
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
 
     if not owners:
-        should_abort = False
+        return  # No owners means public run
+    
+    if current_user in owners:
+        return
+    
+    if  Ron.ispublic(wd):
+        return
 
-    if should_abort:
-        abort(403)
+    abort(403)
 
 
 def matplotlib_vis(path):
