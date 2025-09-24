@@ -210,7 +210,7 @@ class Rhem(NoDbBase):
                     try:
                         future.result()
                         count += 1
-                        self.logger.info(f'  ({count}/{futures_n}) hillslopes completed)\
+                        self.logger.info(f'  ({count}/{futures_n}) hillslopes completed)')
                     except Exception as exc:
                         for remaining in pending:
                             remaining.cancel()
