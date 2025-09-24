@@ -24,7 +24,7 @@ from wepppy.climates.cligen import ClimateFile
 
 # wepppy submodules
 from wepppy.nodb.parameter_map import ParameterMap
-from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.base import NoDbBase, nodb_setter
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
 from wepppy.nodb.watershed import Watershed
 from wepppy.nodb.climate import Climate
@@ -383,9 +383,9 @@ class Ash(NoDbBase):
         return self._model
 
     @model.setter
+    @nodb_setter
     def model(self, value):
-        with self.locked():
-            self._model = value
+        self._model = value
             
     @property
     def reservoir_storage(self):
@@ -394,19 +394,19 @@ class Ash(NoDbBase):
         return self._reservoir_storage
 
     @reservoir_storage.setter
+    @nodb_setter
     def reservoir_storage(self, value):
         assert isfloat(value), value
-        with self.locked():
-            self._reservoir_storage = float(value)
+        self._reservoir_storage = float(value)
 
     @property
     def run_wind_transport(self):
         return getattr(self, '_run_wind_transport', False)
 
     @run_wind_transport.setter
+    @nodb_setter
     def run_wind_transport(self, value):
-        with self.locked():
-            self._run_wind_transport = bool(value)
+        self._run_wind_transport = bool(value)
 
     @property
     def ash_load_d(self):
@@ -426,9 +426,9 @@ class Ash(NoDbBase):
         return _join(self.ash_dir, fn)
         
     @ash_load_fn.setter
+    @nodb_setter
     def ash_load_fn(self, value):
-        with self.locked():
-            self._ash_load_fn = value
+        self._ash_load_fn = value
 
     @property
     def ash_type_map_fn(self):
@@ -439,9 +439,9 @@ class Ash(NoDbBase):
         return _join(self.ash_dir, fn)
 
     @ash_type_map_fn.setter
+    @nodb_setter
     def ash_type_map_fn(self, value):
-        with self.locked():
-            self._ash_type_map_fn = value
+        self._ash_type_map_fn = value
 
     @property
     @deprecated
@@ -454,9 +454,9 @@ class Ash(NoDbBase):
 
     @ash_bulk_density_fn.setter
     @deprecated
+    @nodb_setter
     def ash_bulk_density_fn(self, value):
-        with self.locked():
-            self._ash_bulk_density_fn = value
+        self._ash_bulk_density_fn = value
 
     @property
     def ash_spatial_mode(self):
@@ -466,10 +466,11 @@ class Ash(NoDbBase):
         return self._ash_spatial_mode
 
     @ash_spatial_mode.setter
+    @nodb_setter
     def ash_spatial_mode(self, value):
-        assert isinstance(self, AshSpatialMode), value
-        with self.locked():
-            self._ash_spatial_mode = value
+        if not isinstance(value, AshSpatialMode):
+            raise TypeError(f"Expected AshSpatialMode, got {type(value)}")
+        self._ash_spatial_mode = value
 
     @property
     def ash_depth_mode(self):
@@ -479,10 +480,10 @@ class Ash(NoDbBase):
         return self._ash_depth_mode
 
     @ash_depth_mode.setter
+    @nodb_setter
     def ash_depth_mode(self, value):
         assert isfloat(value), value
-        with self.locked():
-            self._ash_depth_mode = int(value)
+        self._ash_depth_mode = int(value)
 
     @property
     def reservoir_capacity_m3(self):
@@ -496,10 +497,10 @@ class Ash(NoDbBase):
         return self.reservoir_capacity_m3 * 35.3147
 
     @reservoir_capacity_m3.setter
+    @nodb_setter
     def reservoir_capacity_m3(self, value):
         assert isfloat(value), value
-        with self.locked():
-            self._reservoir_capacity_m3 = float(value)
+        self._reservoir_capacity_m3 = float(value)
 
     @property
     @deprecated

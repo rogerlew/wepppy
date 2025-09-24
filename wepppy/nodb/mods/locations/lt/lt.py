@@ -14,7 +14,7 @@ from os.path import exists as _exists
 from deprecated import deprecated
 
 
-from ....base import NoDbBase, TriggerEvents
+from ....base import NoDbBase, TriggerEvents, nodb_setter
 
 from ..location_mixin import LocationMixin
 
@@ -61,9 +61,9 @@ class LakeTahoe(NoDbBase, LocationMixin):
         return self._lc_lookup_fn
 
     @lc_lookup_fn.setter
+    @nodb_setter
     def lc_lookup_fn(self, value):
-        with self.locked():
-            self._lc_lookup_fn = value
+        self._lc_lookup_fn = value
 
     @property
     def default_wepp_type(self):
@@ -73,9 +73,9 @@ class LakeTahoe(NoDbBase, LocationMixin):
         return self._default_wepp_type
 
     @default_wepp_type.setter
+    @nodb_setter
     def default_wepp_type(self, value):
-        with self.locked():
-            self._default_wepp_type = value
+        self._default_wepp_type = value
 
     @property
     def data_dir(self):

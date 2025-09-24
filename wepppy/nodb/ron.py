@@ -32,7 +32,8 @@ from wepppy.locales.earth.opentopography import opentopo_retrieve
 # wepppy submodules
 from .base import (
     NoDbBase,
-    TriggerEvents
+    TriggerEvents,
+    nodb_setter,
 )
 
 from .redis_prep import TaskEnum
@@ -503,12 +504,9 @@ class Ron(NoDbBase):
         return self._name
 
     @name.setter
+    @nodb_setter
     def name(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._name = value
+        self._name = value
 
     #
     # scenario
@@ -518,12 +516,9 @@ class Ron(NoDbBase):
         return getattr(self, '_scenario', '')
 
     @scenario.setter
+    @nodb_setter
     def scenario(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._scenario = value
+        self._scenario = value
 
     @property
     def has_ash_results(self):
@@ -539,12 +534,9 @@ class Ron(NoDbBase):
         return getattr(self, '_dem_db', self.config_get_str('general', 'dem_db'))
 
     @dem_db.setter
+    @nodb_setter
     def dem_db(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._dem_db = value
+        self._dem_db = value
 
     @property
     def dem_map(self):
@@ -554,12 +546,9 @@ class Ron(NoDbBase):
         return self._dem_map
 
     @dem_map.setter
+    @nodb_setter
     def dem_map(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._dem_map = value
+        self._dem_map = value
 
     #
     # dem

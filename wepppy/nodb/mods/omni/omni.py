@@ -32,7 +32,8 @@ from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
 from ...base import (
     NoDbBase,
-    TriggerEvents
+    TriggerEvents,
+    nodb_setter,
 )
 
 OMNI_REL_DIR = '_pups/omni'
@@ -384,9 +385,9 @@ class Omni(NoDbBase):
         return self._scenarios
     
     @scenarios.setter
+    @nodb_setter
     def scenarios(self, value: set[OmniScenario]):
-        with self.locked():
-            self._scenarios = value
+        self._scenarios = value
 
     def parse_scenarios(self, parsed_inputs):
         """
@@ -481,19 +482,18 @@ class Omni(NoDbBase):
         return self._contrasts
     
     @contrasts.setter
+    @nodb_setter
     def contrasts(self, value):
-        with self.locked():
-            self._contrasts = value
+        self._contrasts = value
 
     @property
     def contrast_names(self):
         return self._contrast_names
 
     @contrast_names.setter
+    @nodb_setter
     def contrast_names(self, value):
-
-        with self.locked():
-            self._contrast_names = value
+        self._contrast_names = value
 
     @property
     def omni_dir(self):

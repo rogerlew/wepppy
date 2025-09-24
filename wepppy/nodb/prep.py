@@ -18,7 +18,7 @@ from deprecated import deprecated
 # non-standard
 
 # weppy submodules
-from .base import NoDbBase
+from .base import NoDbBase, nodb_setter
 
 @deprecated
 class PrepNoDbLockedException(Exception):
@@ -44,18 +44,18 @@ class Prep(NoDbBase):
         return getattr(self, '_sbs_required', False)
 
     @sbs_required.setter
+    @nodb_setter
     def sbs_required(self, v: bool):
-        with self.locked():
-            self._sbs_required = v
+        self._sbs_required = v
 
     @property
     def has_sbs(self):
         return getattr(self, '_has_sbs', False)
 
     @has_sbs.setter
+    @nodb_setter
     def has_sbs(self, v: bool):
-        with self.locked():
-            self._has_sbs = v
+        self._has_sbs = v
 
     def timestamp(self, key):
         now = int(time.time())

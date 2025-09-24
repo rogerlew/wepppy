@@ -16,7 +16,7 @@ from osgeo import gdal
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 from ...ron import Ron
-from ...base import NoDbBase, TriggerEvents
+from ...base import NoDbBase, TriggerEvents, nodb_setter
 from ...watershed import Watershed
 
 from wepppy.landcover.rap import (
@@ -136,9 +136,9 @@ class RAP(NoDbBase):
         return self._rap_year
 
     @rap_year.setter
+    @nodb_setter
     def rap_year(self, value: int):
-        with self.locked():
-            self._rap_year = value
+        self._rap_year = value
 
     @property
     def rap_dir(self):

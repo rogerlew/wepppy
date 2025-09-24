@@ -40,7 +40,7 @@ from ...watershed import Watershed
 from ...ron import Ron
 from ...topaz import Topaz
 from ...redis_prep import RedisPrep, TaskEnum
-from ...base import NoDbBase, TriggerEvents
+from ...base import NoDbBase, TriggerEvents, nodb_setter
 from ..baer.sbs_map import SoilBurnSeverityMap
 
 from wepppyo3.raster_characteristics import identify_mode_single_raster_key
@@ -181,36 +181,27 @@ class Disturbed(NoDbBase):
         return getattr(self, '_burn_shrubs', True)
     
     @burn_shrubs.setter
+    @nodb_setter
     def burn_shrubs(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._burn_shrubs = bool(value)
+        self._burn_shrubs = bool(value)
 
     @property
     def burn_grass(self):
         return getattr(self, '_burn_grass', False)
     
     @burn_grass.setter
+    @nodb_setter
     def burn_grass(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._burn_grass = bool(value)
+        self._burn_grass = bool(value)
 
     @property
     def fire_date(self):
         return getattr(self, "_fire_date", None)
 
     @fire_date.setter
+    @nodb_setter
     def fire_date(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._fire_date = value
+        self._fire_date = value
 
     @property
     def default_land_soil_lookup_fn(self):
@@ -274,12 +265,9 @@ class Disturbed(NoDbBase):
         return getattr(self, '_sol_ver', 7778.0)
 
     @sol_ver.setter
+    @nodb_setter
     def sol_ver(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._sol_ver = float(value)
+        self._sol_ver = float(value)
 
     @property
     def nodata_vals(self):
