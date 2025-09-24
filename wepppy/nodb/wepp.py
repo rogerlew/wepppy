@@ -17,8 +17,7 @@ import math
 
 from subprocess import Popen, PIPE, call
 from concurrent.futures import (
-    ThreadPoolExecutor, ProcessPoolExecutor, wait, FIRST_COMPLETED,
-    FIRST_EXCEPTION
+    ThreadPoolExecutor, ProcessPoolExecutor, wait, FIRST_COMPLETED
 )
 import time
 import inspect
@@ -102,7 +101,9 @@ from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, Sed
 from wepppy.wepp.stats.frq_flood import FrqFlood
 from .base import (
     NoDbBase,
-    TriggerEvents
+    TriggerEvents,
+    nodb_setter,
+    nodb_timed,
 )
 
 from .landuse import Landuse
@@ -461,9 +462,9 @@ class Wepp(NoDbBase):
         return getattr(self, '_dss_export_mode', self.config_get_int('wepp', 'dss_export_mode', 2))
     
     @dss_export_mode.setter
+    @nodb_setter
     def dss_export_mode(self, value: isint):
-        with self.locked():
-            self._dss_export_mode = value
+        self._dss_export_mode = value
 
     @property
     def dss_excluded_channel_orders(self) -> list:
@@ -471,18 +472,18 @@ class Wepp(NoDbBase):
                        self.config_get_list('wepp', 'dss_excluded_channel_orders'))
 
     @dss_excluded_channel_orders.setter
+    @nodb_setter
     def dss_excluded_channel_orders(self, value):
-        with self.locked():
-            self._dss_excluded_channel_orders = value
+        self._dss_excluded_channel_orders = value
 
     @property
     def dss_export_channel_ids(self) -> list:
         return getattr(self, '_dss_export_channel_ids', [])
 
     @dss_export_channel_ids.setter
+    @nodb_setter
     def dss_export_channel_ids(self, value):
-        with self.locked():
-            self._dss_export_channel_ids = value
+        self._dss_export_channel_ids = value
 
     @property
     def has_dss_zip(self):
@@ -493,9 +494,9 @@ class Wepp(NoDbBase):
         return getattr(self, "_multi_ofe", False)
 
     @multi_ofe.setter
+    @nodb_setter
     def multi_ofe(self, value):
-        with self.locked():
-            self._multi_ofe = value
+        self._multi_ofe = value
 
     @property
     def wepp_bin(self):
@@ -505,9 +506,9 @@ class Wepp(NoDbBase):
         return self._wepp_bin
 
     @wepp_bin.setter
+    @nodb_setter
     def wepp_bin(self, value):
-        with self.locked():
-            self._wepp_bin = value
+        self._wepp_bin = value
 
 
     @property
@@ -742,7 +743,6 @@ class Wepp(NoDbBase):
         if reveg:
             self._prep_revegetation()
 
-        self.logger.info('done')
 
     def _prep_revegetation(self):
         self.logger.info('    _prep_revegetation... ')
@@ -847,18 +847,18 @@ class Wepp(NoDbBase):
         return getattr(self, '_pmet_kcb_map', None)
 
     @pmet_kcb.setter
+    @nodb_setter
     def pmet_kcb(self, value):
-        with self.locked():
-            self._pmet_kcb = value
+        self._pmet_kcb = value
 
     @property
     def pmet_rawp(self):
         return getattr(self, '_pmet_rawp', self.config_get_float('wepp', 'pmet_rawp'))
 
     @pmet_rawp.setter
+    @nodb_setter
     def pmet_rawp(self, value):
-        with self.locked():
-            self._pmet_ramp = value
+        self._pmet_rawp = value
 
     def _prep_pmet(self, kcb=None, rawp=None):
 
@@ -1086,10 +1086,27 @@ class Wepp(NoDbBase):
             for fp_slps_fn in fp_slps_fns:
                 futures.append(pool.submit(extract_slps_fn, fp_slps_fn, self.fp_runs_dir))
 
-            wait(futures, return_when=FIRST_EXCEPTION)
+            futures_n = len(futures)
+            count = 0
+            pending = set(futures)
+            while pending:
+                done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
 
+                if not done:
+                    self.logger.error('  Flowpath slope extraction still running after 5 seconds.')
+                    continue
 
-        self.logger.info('  Creating flowpath run files... ')
+                for future in done:
+                    try:
+                        future.result()
+                        count += 1
+                        self.logger.info(f'  ({count}/{futures_n}) flowpath slopes prep complete')
+                    except Exception as exc:
+                        for remaining in pending:
+                            remaining.cancel()
+                        self.logger.error(f'  Flowpath slope extraction failed with an error: {exc}')
+                        raise
+            
 
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -1106,7 +1123,26 @@ class Wepp(NoDbBase):
                     self.logger.info(f'  Creating {fp_id}.run... ')
                     futures.append(pool.submit(make_flowpath_run, fp_id, wepp_id, sim_years, self.fp_runs_dir))
 
-            wait(futures, return_when=FIRST_EXCEPTION)
+            futures_n = len(futures)
+            count = 0
+            pending = set(futures)
+            while pending:
+                done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
+
+                if not done:
+                    self.logger.error('  Flowpath runfile creation still running after 5 seconds.')
+                    continue
+
+                for future in done:
+                    try:
+                        future.result()
+                        count += 1
+                        self.logger.info(f'  ({count}/{futures_n}) flowpath run files complete')
+                    except Exception as exc:
+                        for remaining in pending:
+                            remaining.cancel()
+                        self.logger.error(f'  Flowpath runfile creation failed with an error: {exc}')
+                        raise
 
         self.logger.info('  Running _run_flowpaths... ')
 
@@ -1119,32 +1155,52 @@ class Wepp(NoDbBase):
                     self.logger.info(f'  Running {fp_id}... ')
                     futures.append(pool.submit(run_flowpath, fp_id, wepp_id, self.runs_dir, self.fp_runs_dir, self.wepp_bin))
 
-            wait(futures, return_when=FIRST_EXCEPTION)
+            futures_n = len(futures)
+            count = 0
+            pending = set(futures)
+            while pending:
+                done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
 
-        loss_grid_path = _join(self.plot_dir, 'flowpaths_loss.tif')
+                if not done:
+                    # Flowpath simulations can legitimately run for a long time; warn rather than error.
+                    self.logger.warning('  Flowpath simulation still running after 60 seconds; continuing to wait.')
+                    continue
 
-        if _exists(loss_grid_path):
-            os.remove(loss_grid_path)
-            time.sleep(1)
+                for future in done:
+                    try:
+                        future.result()
+                        count += 1
+                        self.logger.info(f'  ({count}/{futures_n}) flowpaths ran')
+                    except Exception as exc:
+                        for remaining in pending:
+                            remaining.cancel()
+                        self.logger.error(f'  Flowpath simulation failed with an error: {exc}')
+                        raise
 
-        self.logger.info(f'  Creating flowpaths loss grid... ')
-        make_soil_loss_grid_fps(watershed.discha, self.fp_runs_dir, loss_grid_path)
- 
-        assert _exists(loss_grid_path)
+        with self.timed('  Generating flowpath loss grid'):
+            loss_grid_path = _join(self.plot_dir, 'flowpaths_loss.tif')
 
-        loss_grid_wgs = _join(self.plot_dir, 'flowpaths_loss.WGS.tif')
+            if _exists(loss_grid_path):
+                os.remove(loss_grid_path)
+                time.sleep(1)
 
-        if _exists(loss_grid_wgs):
-            os.remove(loss_grid_wgs)
-            time.sleep(1)
+            make_soil_loss_grid_fps(watershed.discha, self.fp_runs_dir, loss_grid_path)
+    
+            assert _exists(loss_grid_path)
 
-        cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
-               '-srcnodata', '-9999', '-dstnodata', '-9999',
-               '-r', 'near', loss_grid_path, loss_grid_wgs]
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        p.wait()
+            loss_grid_wgs = _join(self.plot_dir, 'flowpaths_loss.WGS.tif')
 
-        assert _exists(loss_grid_wgs)
+            if _exists(loss_grid_wgs):
+                os.remove(loss_grid_wgs)
+                time.sleep(1)
+
+            cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
+                '-srcnodata', '-9999', '-dstnodata', '-9999',
+                '-r', 'near', loss_grid_path, loss_grid_wgs]
+            p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            p.wait()
+
+            assert _exists(loss_grid_wgs)
 
         if clean_after_run:
             self.logger.info('  Cleaning up flowpath run files... ')
@@ -1450,6 +1506,7 @@ class Wepp(NoDbBase):
 
         self.logger.info(f'  run_concurrent={run_concurrent}')
         if run_concurrent:
+            self.logger.info(f'  Submitting soils for `prep_soil` to ProcessPoolExecutor')
             with ProcessPoolExecutor(max_workers=max(os.cpu_count(), 20)) as executor:
                 futures = []
                 for topaz_id, soil in soils.sub_iter():
@@ -1480,7 +1537,6 @@ class Wepp(NoDbBase):
                         _kslast, modify_kslast_pars,
                         initial_sat,
                         clip_soils, clip_soils_depth)
-                    self.logger.info(f'  Submitting soil prep for {topaz_id} with args={task_args}')
                     
                     future = executor.submit(prep_soil, task_args)
                     futures.append(future)
@@ -1535,31 +1591,32 @@ class Wepp(NoDbBase):
                 topaz_id, elapsed_time = prep_soil(task_args)
                 self.logger.info('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
 
+
+    @nodb_timed
     def _prep_climates(self, translator):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
 
         climate = Climate.getInstance(self.wd)
         if climate.climate_mode == ClimateMode.SingleStormBatch:
+            self.logger.info('    _prep_climates_ss_batch... ')
             return self._prep_climates_ss_batch(translator)
+        
+        watershed = Watershed.getInstance(self.wd)
+        cli_dir = self.cli_dir
+        runs_dir = self.runs_dir
 
-        with self.timed():
-            watershed = Watershed.getInstance(self.wd)
-            cli_dir = self.cli_dir
-            runs_dir = self.runs_dir
-            fp_runs_dir = self.fp_runs_dir
+        sub_n = watershed.sub_n
+        count = 0
+        for topaz_id in watershed._subs_summary:
+            wepp_id = translator.wepp(top=int(topaz_id))
+            dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
 
-            sub_n = watershed.sub_n
-            count = 0
-            for topaz_id in watershed._subs_summary:
-                wepp_id = translator.wepp(top=int(topaz_id))
-                dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
-
-                cli_summary = climate.sub_summary(topaz_id)
-                src_fn = _join(cli_dir, cli_summary['cli_fn'])
-                _copyfile(src_fn, dst_fn) 
-                count += 1
-                self.logger.info(f' ({count}/{sub_n}) topaz_id: {topaz_id} | {src_fn} -> {dst_fn}')
+            cli_summary = climate.sub_summary(topaz_id)
+            src_fn = _join(cli_dir, cli_summary['cli_fn'])
+            _copyfile(src_fn, dst_fn) 
+            count += 1
+            self.logger.info(f' ({count}/{sub_n}) topaz_id: {topaz_id} | {src_fn} -> {dst_fn}')
 
     def _prep_climates_ss_batch(self, translator):
         climate = Climate.getInstance(self.wd)
@@ -1583,13 +1640,9 @@ class Wepp(NoDbBase):
                 src_fn = _join(cli_dir, cli_fn)
                 _copyfile(src_fn, dst_fn)
 
-                self.logger.info('done')
-
             dst_fn = _join(runs_dir, f'pw0.{ss_batch_id}.cli')
             src_fn = _join(cli_dir, cli_fn)
             _copyfile(src_fn, dst_fn)
-
-        self.logger.info('done')
 
     def _make_hillslope_runs(self, translator, reveg=False, omni=False):
         self.logger.info('    Prepping _make_hillslope_runs... ')
@@ -1619,11 +1672,8 @@ class Wepp(NoDbBase):
                 wepp_id = translator.wepp(top=int(topaz_id))
                 make_hillslope_run(wepp_id, years, runs_dir, reveg=reveg, omni=omni)
 
-        self.logger.info('done')
-
-
     def run_hillslopes(self, omni=False):
-        self.logger.info('Running Hillslopes\n')
+        self.logger.info('Running Hillslopes')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
         climate = Climate.getInstance(self.wd)
@@ -1634,16 +1684,12 @@ class Wepp(NoDbBase):
         self.logger.info(f'    wepp_bin:{wepp_bin}')
         self.logger.info(f'    omni: {omni}')
 
-        def oncomplete(wepprun):
-            status, _id, elapsed_time = wepprun.result()
-            assert status
-            self.logger.info('  {} completed run in {}s\n'.format(_id, elapsed_time))
-
         sub_n = watershed.sub_n
 
         with ThreadPoolExecutor(NCPU) as pool:
             futures = []
             if climate.climate_mode == ClimateMode.SingleStormBatch:
+                self.logger.info(f'  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - SS batch')
                 for i, topaz_id in enumerate(watershed._subs_summary):
 
                     ss_n = len(climate.ss_batch_storms)
@@ -1651,7 +1697,6 @@ class Wepp(NoDbBase):
                         ss_batch_id = d['ss_batch_id']
                         ss_batch_key = d['ss_batch_key']
 
-                        self.logger.info(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id}  of {ss_n}).\n')
                         wepp_id = translator.wepp(top=int(topaz_id))
                         futures.append(pool.submit(
                             run_ss_batch_hillslope,
@@ -1664,8 +1709,8 @@ class Wepp(NoDbBase):
                         futures[-1].add_done_callback(oncomplete)
 
             else:
+                self.logger.info(f'  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - no SS batch')
                 for i, topaz_id in enumerate(watershed._subs_summary):
-                    self.logger.info(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
                     wepp_id = translator.wepp(top=int(topaz_id))
                     futures.append(pool.submit(
                         run_hillslope,
@@ -1674,11 +1719,28 @@ class Wepp(NoDbBase):
                         wepp_bin=wepp_bin,
                         omni=omni
                     ))
-                    futures[-1].add_done_callback(oncomplete)
 
-            done, _ = wait(futures, return_when=FIRST_EXCEPTION)
-            for fut in done:
-                fut.result()
+            futures_n = len(futures)
+            count = 0
+            pending = set(futures)
+            while pending:
+                done, pending = wait(pending, timeout=30, return_when=FIRST_COMPLETED)
+
+                if not done:
+                    # Hillslope runs can legitimately extend well beyond 30s; this warning is purely observational.
+                    self.logger.warning('  Hillslope simulations still running after 30 seconds; continuing to wait.')
+                    continue
+
+                for future in done:
+                    try:
+                        status, _id, elapsed_time = future.result()
+                        count += 1
+                        self.logger.info(f'  ({count}/{futures_n})  wepp hillslope {_id} completed in {elapsed_time}s with status={status}')
+                    except Exception as exc:
+                        for remaining in pending:
+                            remaining.cancel()
+                        self.logger.error(f'  Hillslope simulation failed with an error: {exc}')
+                        raise
 
     #
     # watershed
@@ -1700,7 +1762,7 @@ class Wepp(NoDbBase):
                 rdi = RasterDatasetInterpolator(crit_shear_map)
                 critical_shear = rdi.get_location_info(lng, lat, method='nearest')
                 self.logger.info(f'critical_shear from map {crit_shear_map} at {watershed.centroid} ={critical_shear}... ')
-                self.logger.info('done')
+
         if critical_shear is None:
             critical_shear = self.channel_critical_shear
 
@@ -1719,8 +1781,6 @@ class Wepp(NoDbBase):
 
         self._prep_watershed_managements(translator)
         self._make_watershed_run(translator)
-
-        self.logger.info('done')
 
         self.trigger(TriggerEvents.WEPP_PREP_WATERSHED_COMPLETE)
 
@@ -1744,8 +1804,6 @@ class Wepp(NoDbBase):
 
         with open(_join(runs_dir, 'pw0.str'), 'w') as fp:
             fp.write('\n'.join(s) + '\n')
-
-        self.logger.info('done')
 
     def _prep_channel_slopes(self):
         wat_dir = self.wat_dir
@@ -1795,7 +1853,6 @@ class Wepp(NoDbBase):
         if erodibility is not None or critical_shear is not None:
             self.logger.info('nodb.Wepp._prep_channel_chn::erodibility = {}, critical_shear = {} '
                      .format(erodibility, critical_shear))
-            self.logger.info('done')
 
         if erodibility is None:
             erodibility = self.channel_erodibility
@@ -1854,11 +1911,11 @@ class Wepp(NoDbBase):
         return None
 
     @dtchr_override.setter
+    @nodb_setter
     def dtchr_override(self, value: int):
         if value < 60:
             raise ValueError(f"Expected dtchr_override to be at least 60, got {value}")
-        with self.locked():
-            self._dtchr_override = value
+        self._dtchr_override = value
 
     @property
     def chn_topaz_ids_of_interest(self):
@@ -1869,12 +1926,12 @@ class Wepp(NoDbBase):
         return [24]
     
     @chn_topaz_ids_of_interest.setter
+    @nodb_setter
     def chn_topaz_ids_of_interest(self, value: list[int]):
         for topaz_id in value:
             if not str(topaz_id).endswith("4"):
                 raise ValueError(f"Expected topaz_id to end with '4', got {topaz_id}")
-        with self.locked():
-            self._chn_topaz_ids_of_interest = [int(v) for v in value]
+        self._chn_topaz_ids_of_interest = [int(v) for v in value]
 
     def _prep_channel_input(self):
         translator = Watershed.getInstance(self.wd).translator_factory()
@@ -1914,7 +1971,6 @@ class Wepp(NoDbBase):
         if erodibility is not None or critical_shear is not None:
             self.logger.info('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
                      .format(erodibility, critical_shear))
-            self.logger.info('done')
 
         if erodibility is None:
             erodibility = self.channel_erodibility
@@ -1947,7 +2003,6 @@ class Wepp(NoDbBase):
         if erodibility is not None or critical_shear is not None:
             self.logger.info('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
                      .format(erodibility, critical_shear))
-            self.logger.info('done')
 
         if erodibility is None:
             erodibility = self.channel_erodibility
@@ -1958,7 +2013,6 @@ class Wepp(NoDbBase):
         if avke is not None:
             self.logger.info('nodb.Wepp._prep_channel_soils::avke = {} '
                      .format(avke))
-            self.logger.info('done')
 
         if avke is None:
             avke = self.channel_2006_avke
@@ -2074,7 +2128,6 @@ class Wepp(NoDbBase):
                     for fn in glob(_join(self.runs_dir, '*.out')):
                         dst_path = _join(self.output_dir, ss_batch_key, _split(fn)[1])
                         shutil.move(fn, dst_path)
-                    self.logger.info('done')
 
         else:
             with self.timed('  Running watershed run'):
@@ -2092,7 +2145,6 @@ class Wepp(NoDbBase):
                 with self.timed('  Exporting prep details'):
                     export_channels_prep_details(wd)
                     export_hillslopes_prep_details(wd)
-                    self.logger.info('done')
 
             if not _exists(_join(wd, 'wepppost.nodb')):
                 WeppPost(wd, '0.cfg')
@@ -2127,7 +2179,6 @@ class Wepp(NoDbBase):
                 with self.timed('  running gpkg_export'):
                     from wepppy.export.gpkg_export import gpkg_export
                     gpkg_export(self.wd)
-                    self.logger.info('done')
 
                     self.make_loss_grid()
 
@@ -2160,29 +2211,25 @@ class Wepp(NoDbBase):
 
             send_discord_message(f':fireworks: [{link}](https://wepp.cloud/weppcloud/runs/{runid}/{config}/)')
 
+    @nodb_timed
     def _run_hillslope_watbal(self):
-        self.logger.info('Calculating Hillslope Water Balance...')
         HillslopeWatbal(self.wd)
-        self.logger.info('done')
 
+    @nodb_timed
     def _run_wepppost(self):
-        self.logger.info('Running WeppPost... ')
         wepppost = WeppPost.getInstance(self.wd)
         wepppost.run_post()
-        self.logger.info('done')
 
+    @nodb_timed
     def _build_totalwatsed2(self):
-        self.logger.info('Building totalwatsed2.parquet... ')
         totwatsed2 = TotalWatSed2(self.wd, rebuild=True)
         fn = _join(self.export_dir, 'totalwatsed2.csv')
         totwatsed2.export(fn)
-        self.logger.info('done')
 
+    @nodb_timed
     def _export_partitioned_totalwatsed2_dss(self):
-        self.logger.info('Exporting totalwatsed2.dss... ')
         from wepppy.wepp.out import totalwatsed_partitioned_dss_export
         totalwatsed_partitioned_dss_export(self.wd)
-        self.logger.info('done')
 
     def report_loss(self, exclude_yr_indxs=None):
         output_dir = self.output_dir
@@ -2442,6 +2489,6 @@ class Wepp(NoDbBase):
         return self._kslast_map
 
     @kslast.setter
+    @nodb_setter
     def kslast(self, value):
-        with self.locked():
-            self._kslast = value
+        self._kslast = value
