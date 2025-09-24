@@ -28,7 +28,7 @@ from wepppy.all_your_base import cmyk_to_rgb, RGBA
 from wepppy.landcover import LandcoverMap
 
 from ...watershed import Watershed
-from ...base import NoDbBase, TriggerEvents
+from ...base import NoDbBase, TriggerEvents, nodb_setter
 
 gdal.UseExceptions()
 
@@ -106,95 +106,95 @@ class RangelandCover(NoDbBase):
         return getattr(self, '_rap_year', self.config_get_int('rhem', 'rap_year'))
 
     @rap_year.setter
+    @nodb_setter
     def rap_year(self, value: int):
-        with self.locked():
-            self._rap_year = value
+        self._rap_year = value
 
     @property
     def mode(self):
         return self._mode
 
     @mode.setter
+    @nodb_setter
     def mode(self, value):
-        with self.locked():
-            if isinstance(value, RangelandCoverMode):
-                self._mode = value
-            elif isinstance(value, int):
-                self._mode = RangelandCoverMode(value)
-            else:
-                raise ValueError('most be RangelandCoverMode or int')
+        if isinstance(value, RangelandCoverMode):
+            self._mode = value
+        elif isinstance(value, int):
+            self._mode = RangelandCoverMode(value)
+        else:
+            raise ValueError('most be RangelandCoverMode or int')
             
     @property
     def bunchgrass_cover_default(self):
         return self._bunchgrass_cover_default
 
     @bunchgrass_cover_default.setter
+    @nodb_setter
     def bunchgrass_cover_default(self, value):
-        with self.locked():
-            self._bunchgrass_cover_default = value
+        self._bunchgrass_cover_default = value
 
     @property
     def forbs_cover_default(self):
         return self._forbs_cover_default
 
     @forbs_cover_default.setter
+    @nodb_setter
     def forbs_cover_default(self, value):
-        with self.locked():
-            self._forbs_cover_default = value
+        self._forbs_cover_default = value
             
     @property
     def sodgrass_cover_default(self):
         return self._sodgrass_cover_default
 
     @sodgrass_cover_default.setter
+    @nodb_setter
     def sodgrass_cover_default(self, value):
-        with self.locked():
-            self._sodgrass_cover_default = value
+        self._sodgrass_cover_default = value
 
     @property
     def shrub_cover_default(self):
         return self._shrub_cover_default
 
     @shrub_cover_default.setter
+    @nodb_setter
     def shrub_cover_default(self, value):
-        with self.locked():
-            self._shrub_cover_default = value
+        self._shrub_cover_default = value
             
     @property
     def basal_cover_default(self):
         return self._basal_cover_default
 
     @basal_cover_default.setter
+    @nodb_setter
     def basal_cover_default(self, value):
-        with self.locked():
-            self._basal_cover_default = value
+        self._basal_cover_default = value
             
     @property
     def rock_cover_default(self):
         return self._rock_cover_default
 
     @rock_cover_default.setter
+    @nodb_setter
     def rock_cover_default(self, value):
-        with self.locked():
-            self._rock_cover_default = value
+        self._rock_cover_default = value
 
     @property
     def litter_cover_default(self):
         return self._litter_cover_default
 
     @litter_cover_default.setter
+    @nodb_setter
     def litter_cover_default(self, value):
-        with self.locked():
-            self._litter_cover_default = value
+        self._litter_cover_default = value
 
     @property
     def cryptogams_cover_default(self):
         return self._cryptogams_cover_default
 
     @cryptogams_cover_default.setter
+    @nodb_setter
     def cryptogams_cover_default(self, value):
-        with self.locked():
-            self._cryptogams_cover_default = value
+        self._cryptogams_cover_default = value
 
     def set_default_covers(self, default_covers):
         with self.locked():

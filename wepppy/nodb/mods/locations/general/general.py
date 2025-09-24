@@ -15,7 +15,7 @@ from copy import deepcopy
 
 from deprecated import deprecated
 
-from ....base import NoDbBase, TriggerEvents
+from ....base import NoDbBase, TriggerEvents, nodb_setter
 from ....soils import Soils
 from ....watershed import Watershed
 
@@ -64,9 +64,9 @@ class GeneralMod(NoDbBase, LocationMixin):
         return self._lc_lookup_fn
 
     @lc_lookup_fn.setter
+    @nodb_setter
     def lc_lookup_fn(self, value):
-        with self.locked():
-            self._lc_lookup_fn = value
+        self._lc_lookup_fn = value
 
     @property
     def kslast(self):
@@ -76,9 +76,9 @@ class GeneralMod(NoDbBase, LocationMixin):
         return self._kslast
 
     @kslast.setter
+    @nodb_setter
     def kslast(self, value):
-        with self.locked():
-            self._kslast = value
+        self._kslast = value
 
     def modify_soils_kslast(self):
         wd = self.wd
@@ -127,9 +127,9 @@ class GeneralMod(NoDbBase, LocationMixin):
         return self._default_wepp_type
 
     @default_wepp_type.setter
+    @nodb_setter
     def default_wepp_type(self, value):
-        with self.locked():
-            self._default_wepp_type = value
+        self._default_wepp_type = value
 
     @property
     def data_dir(self):

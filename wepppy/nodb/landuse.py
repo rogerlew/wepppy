@@ -38,6 +38,7 @@ from wepppy.all_your_base.geo import read_raster
 from .base import (
     NoDbBase,
     TriggerEvents,
+    nodb_setter,
 )
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
@@ -158,9 +159,9 @@ class Landuse(NoDbBase):
         return _mapping
     
     @mapping.setter
+    @nodb_setter
     def mapping(self, value: str):
-        with self.locked():
-            self._mapping = value
+        self._mapping = value
 
     def get_mapping_dict(self) -> dict[str, dict]:
         """
@@ -176,14 +177,14 @@ class Landuse(NoDbBase):
         return self._mode
     
     @mode.setter
+    @nodb_setter
     def mode(self, value):
-        with self.locked():
-            if isinstance(value, LanduseMode):
-                self._mode = value
-            elif isinstance(value, int):
-                self._mode = LanduseMode(value)
-            else:
-                raise ValueError('most be LanduseMode or int')
+        if isinstance(value, LanduseMode):
+            self._mode = value
+        elif isinstance(value, int):
+            self._mode = LanduseMode(value)
+        else:
+            raise ValueError('most be LanduseMode or int')
 
     @property
     def single_selection(self):
@@ -193,11 +194,11 @@ class Landuse(NoDbBase):
         return self._single_selection
 
     @single_selection.setter
+    @nodb_setter
     def single_selection(self, landuse_single_selection):
-        with self.locked():
-            k = landuse_single_selection
-            self._single_selection = k
-            self._single_man = get_management_summary(k)
+        k = landuse_single_selection
+        self._single_selection = k
+        self._single_man = get_management_summary(k)
 
     @property
     def single_man(self):
@@ -214,10 +215,10 @@ class Landuse(NoDbBase):
         return getattr(self, '_mofe_buffer_selection', None)
 
     @mofe_buffer_selection.setter
+    @nodb_setter
     def mofe_buffer_selection(self, k):
-        with self.locked():
-            self._mofe_buffer_selection = str(k)
-            self._buffer_man = get_management_summary(k)
+        self._mofe_buffer_selection = str(k)
+        self._buffer_man = get_management_summary(k)
 
     @property
     def buffer_man(self):
@@ -282,18 +283,18 @@ class Landuse(NoDbBase):
         return getattr(self, '_fractionals', self.config_get_list('landuse', 'fractionals'))
 
     @fractionals.setter
+    @nodb_setter
     def fractionals(self, value):
-        with self.locked():
-            self._fractionals = value
+        self._fractionals = value
 
     @property
     def nlcd_db(self):
         return getattr(self, '_nlcd_db', self.config_get_str('landuse', 'nlcd_db'))
 
     @nlcd_db.setter
+    @nodb_setter
     def nlcd_db(self, value):
-        with self.locked():
-            self._nlcd_db = value
+        self._nlcd_db = value
 
     def _build_NLCD(self, retrieve_nlcd=True):
         global wepppyo3
@@ -975,9 +976,9 @@ class Landuse(NoDbBase):
         return getattr(self, '_hillslope_cancovs', None)
 
     @hillslope_cancovs.setter
+    @nodb_setter
     def hillslope_cancovs(self, value):
-        with self.locked():
-            self._hillslope_cancovs = value
+        self._hillslope_cancovs = value
 
     @property
     def hillslope_mofe_cancovs(self):

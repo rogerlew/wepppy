@@ -48,7 +48,7 @@ from wepppy.nodb.wepp import Wepp
 
 from wepppy.all_your_base import isfloat, NCPU
 
-from ...base import NoDbBase, TriggerEvents
+from ...base import NoDbBase, TriggerEvents, nodb_setter
 
 
 _thisdir = os.path.dirname(__file__)
@@ -101,9 +101,9 @@ class Revegetation(NoDbBase):
         return getattr(self, '_cover_transform_fn', '')
     
     @cover_transform_fn.setter
+    @nodb_setter
     def cover_transform_fn(self, value: str) -> str:
-        with self.locked():
-            self._cover_transform_fn = value
+        self._cover_transform_fn = value
 
     @property
     def revegetation_dir(self):

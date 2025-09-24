@@ -21,7 +21,7 @@ import numpy as np
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 from ...ron import Ron
-from ...base import NoDbBase, TriggerEvents
+from ...base import NoDbBase, TriggerEvents, nodb_setter
 from ...watershed import Watershed
 
 from wepppy.landcover.rap import (
@@ -86,18 +86,18 @@ class RAP_TS(NoDbBase):
         return self._rap_end_year
 
     @rap_end_year.setter
+    @nodb_setter
     def rap_end_year(self, value: int):
-        with self.locked():
-            self._rap_end_year = value
+        self._rap_end_year = value
 
     @property
     def rap_start_year(self):
         return self._rap_start_year
 
     @rap_start_year.setter
+    @nodb_setter
     def rap_start_year(self, value: int):
-        with self.locked():
-            self._rap_start_year = value
+        self._rap_start_year = value
 
     @property
     def rap_dir(self):

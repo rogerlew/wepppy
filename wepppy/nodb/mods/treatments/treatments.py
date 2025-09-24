@@ -30,7 +30,7 @@ from ...watershed import Watershed
 from ...ron import Ron
 from ...topaz import Topaz
 from ...redis_prep import RedisPrep, TaskEnum
-from ...base import NoDbBase, TriggerEvents
+from ...base import NoDbBase, TriggerEvents, nodb_setter
 from ..baer.sbs_map import SoilBurnSeverityMap
 from ..disturbed import Disturbed
 
@@ -75,14 +75,14 @@ class Treatments(NoDbBase):
         return self._mode
     
     @mode.setter
+    @nodb_setter
     def mode(self, value):
-        with self.locked():
-            if isinstance(value, TreatmentsMode):
-                self._mode = value
-            elif isinstance(value, int):
-                self._mode = TreatmentsMode(value)
-            else:
-                raise ValueError('most be TreatmentsMode or int')
+        if isinstance(value, TreatmentsMode):
+            self._mode = value
+        elif isinstance(value, int):
+            self._mode = TreatmentsMode(value)
+        else:
+            raise ValueError('most be TreatmentsMode or int')
             
     @property
     def treatments_dir(self):
@@ -106,6 +106,7 @@ class Treatments(NoDbBase):
         return self._treatments_domlc_d
     
     @treatments_domlc_d.setter
+    @nodb_setter
     def treatments_domlc_d(self, value: Dict[str, str]):
         """
         Set the treatments dictionary.
@@ -117,9 +118,8 @@ class Treatments(NoDbBase):
         for k, v in _domlc_d.items():
             if v not in valid_treatment_keys:
                 raise ValueError(f"Invalid treatment key: {k} not in {valid_treatment_keys}")
-            
-        with self.locked():
-            self._treatments_domlc_d = _domlc_d
+
+        self._treatments_domlc_d = _domlc_d
 
     def validate(self, fn):
         """

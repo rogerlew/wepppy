@@ -1158,7 +1158,7 @@ class Climate(NoDbBase):
 
     @orig_cli_fn.setter
     @nodb_setter
-    def orig_cli(self, value):
+    def orig_cli_fn(self, value):
         self._orig_cli_fn = value
 
     @property

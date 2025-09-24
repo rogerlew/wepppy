@@ -51,7 +51,7 @@ from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 from wepppy.all_your_base.geo import read_raster, haversine
 
 from .ron import Ron
-from .base import NoDbBase, TriggerEvents
+from .base import NoDbBase, TriggerEvents, nodb_setter
 from .topaz import Topaz
 from .redis_prep import RedisPrep, TaskEnum
 
@@ -219,14 +219,11 @@ class Watershed(NoDbBase):
         return self._set_extent_mode
     
     @set_extent_mode.setter
+    @nodb_setter
     def set_extent_mode(self, value: int):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-        
         _value = int(value)
-        with self.locked():
-            assert _value in [0, 1], f"Invalid set_extent_mode value: {_value}"
-            self._set_extent_mode = _value
+        assert _value in [0, 1], f"Invalid set_extent_mode value: {_value}"
+        self._set_extent_mode = _value
 
     @property
     def map_bounds_text(self):
@@ -235,14 +232,10 @@ class Watershed(NoDbBase):
         return self._map_bounds_text
     
     @map_bounds_text.setter
+    @nodb_setter
     def map_bounds_text(self, value: str):
         _value = str(value)
-
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {_value}')
-
-        with self.locked():
-            self._map_bounds_text = _value
+        self._map_bounds_text = _value
 
     @classmethod
     def _decode_jsonpickle(cls, json_text):
@@ -360,29 +353,23 @@ class Watershed(NoDbBase):
         return getattr(self, "_wbt_fill_or_breach", "fill")
 
     @wbt_fill_or_breach.setter
+    @nodb_setter
     def wbt_fill_or_breach(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
         assert value in [
             "fill",
             "breach",
             "breach_least_cost",
         ], f"Invalid wbt_fill_or_breach value: {value}"
-
-        with self.locked():
-            self._wbt_fill_or_breach = value
+        self._wbt_fill_or_breach = value
 
     @property
     def wbt_blc_dist(self) -> int:
         return getattr(self, "_wbt_blc_dist", 1000)
 
     @wbt_blc_dist.setter
+    @nodb_setter
     def wbt_blc_dist(self, value: int):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._wbt_blc_dist = value
+        self._wbt_blc_dist = value
 
     @property
     def max_points(self):
@@ -404,48 +391,36 @@ class Watershed(NoDbBase):
         return getattr(self, "_clip_hillslopes", False) and not self.multi_ofe
 
     @clip_hillslopes.setter
+    @nodb_setter
     def clip_hillslopes(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._clip_hillslopes = value
+        self._clip_hillslopes = value
 
     @property
     def clip_hillslope_length(self):
         return getattr(self, "_clip_hillslope_length", 300.0)
 
     @clip_hillslope_length.setter
+    @nodb_setter
     def clip_hillslope_length(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._clip_hillslope_length = value
+        self._clip_hillslope_length = value
 
     @property
     def bieger2015_widths(self):
         return getattr(self, "_bieger2015_widths", False)
 
     @bieger2015_widths.setter
+    @nodb_setter
     def bieger2015_widths(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._bieger2015_widths = value
+        self._bieger2015_widths = value
 
     @property
     def walk_flowpaths(self):
         return getattr(self, "_walk_flowpaths", True)
 
     @walk_flowpaths.setter
+    @nodb_setter
     def walk_flowpaths(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._walk_flowpaths = value
+        self._walk_flowpaths = value
 
     @property
     def delineation_backend_is_taudem(self):
@@ -703,14 +678,10 @@ class Watershed(NoDbBase):
         return Topaz.getInstance(self.wd).outlet
 
     @outlet.setter
+    @nodb_setter
     def outlet(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-        
         assert isinstance(value, Outlet) or value is None
-
-        with self.locked():
-            self._outlet = value
+        self._outlet = value
 
     @property
     def has_outlet(self):
@@ -813,18 +784,11 @@ class Watershed(NoDbBase):
         return self._wbt
 
     @wbt.setter
+    @nodb_setter
     def wbt(self, value):
-        assert isinstance(value, WhiteboxToolsTopazEmulator)
-
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-        
-        with self.locked():
-            if value is None:
-                self._wbt = None
-            else:
-                assert isinstance(value, WhiteboxToolsTopazEmulator)
-                self._wbt = value
+        if value is not None and not isinstance(value, WhiteboxToolsTopazEmulator):
+            raise TypeError("Expected WhiteboxToolsTopazEmulator or None for wbt")
+        self._wbt = value
 
     #
     # set outlet
@@ -1050,48 +1014,36 @@ class Watershed(NoDbBase):
         return getattr(self, "_mofe_target_length", 50)
 
     @mofe_target_length.setter
+    @nodb_setter
     def mofe_target_length(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._mofe_target_length = value
+        self._mofe_target_length = value
 
     @property
     def mofe_buffer(self):
         return getattr(self, "_mofe_buffer", False)
 
     @mofe_buffer.setter
+    @nodb_setter
     def mofe_buffer(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._mofe_buffer = bool(value)
+        self._mofe_buffer = bool(value)
 
     @property
     def mofe_max_ofes(self):
         return getattr(self, "_mofe_max_ofes", 19)
 
     @mofe_max_ofes.setter
+    @nodb_setter
     def mofe_max_ofes(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._mofe_max_ofes = value
+        self._mofe_max_ofes = value
 
     @property
     def mofe_buffer_length(self):
         return getattr(self, "_mofe_buffer_length", 15)
 
     @mofe_buffer_length.setter
+    @nodb_setter
     def mofe_buffer_length(self, value):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-
-        with self.locked():
-            self._mofe_buffer_length = value
+        self._mofe_buffer_length = value
 
     def _build_multiple_ofe(self):
         func_name = inspect.currentframe().f_code.co_name
