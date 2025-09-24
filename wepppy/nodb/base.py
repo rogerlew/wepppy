@@ -889,6 +889,10 @@ class NoDbBase(object):
 
             assert not self.readonly
 
+    @staticmethod
+    def ispublic(wd):
+        return _exists(_join(wd, 'PUBLIC'))
+
     @property
     def public(self):
         return _exists(_join(self.wd, 'PUBLIC'))

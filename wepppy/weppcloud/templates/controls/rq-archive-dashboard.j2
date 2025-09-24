@@ -24,7 +24,7 @@
     <script type="text/javascript">
       const runid = {{ runid | tojson }};
       const config = {{ config | tojson }};
-      const archivesUrl = {{ url_for('rq_archive_list', runid=runid, config=config) | tojson }};
+      const archivesUrl = {{ url_for('archive.rq_archive_list', runid=runid, config=config) | tojson }};
       const archiveApiUrl = {{ url_for('rq_api.api_archive', runid=runid, config=config) | tojson }};
       let currentJobId = null;
 
