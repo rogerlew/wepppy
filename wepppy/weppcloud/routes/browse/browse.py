@@ -5,7 +5,6 @@ import math
 import json
 import logging
 
-import urllib
 from urllib.parse import urlencode
 
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
@@ -15,10 +14,20 @@ from os.path import split as _split
 from os.path import exists as _exists
 from os.path import abspath, basename
 
-import pandas as pd
 import gzip
+import pandas as pd
 
-from flask import abort, Blueprint, request, Response, send_file, jsonify, redirect
+from flask import (
+    Blueprint,
+    Response,
+    abort,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    send_file,
+)
+from markupsafe import Markup
 
 from utils.helpers import get_wd, error_factory
 
@@ -115,71 +124,11 @@ Notes
 
 MAX_FILE_LIMIT = 100
 
-browse_bp = Blueprint('browse', __name__)
+browse_bp = Blueprint('browse', __name__, template_folder='templates')
 
 _logger = logging.getLogger(__name__)
 
 
-
-on_load_script = """<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const pathInput = document.getElementById('pathInput');
-    const rows = document.querySelectorAll('span.odd-row, span.even-row');
-    const prompt = document.getElementById('filter-prompt');
-
-    /**
-     * Handles navigation when the Enter key is pressed in the path input.
-     */
-    function handleNavigation(event) {
-        if (event.key !== 'Enter') return;
-        event.preventDefault();
-
-        const path = pathInput.value.trim();
-        if (!path) return;
-
-        const currentUrl = new URL(window.location.href);
-        const searchParams = currentUrl.search;
-
-        let newUrl;
-
-        if (path.startsWith('/')) {
-            // absolute from your browse root
-            const baseUrl = `/weppcloud/runs/${runid}/${config}/browse`;
-            newUrl = baseUrl + path; // e.g., "/.../browse/output"
-        } else {
-            // ensure the base ends with "/" so it's treated as a directory
-            const baseHref =
-                currentUrl.origin +
-                currentUrl.pathname +
-                (currentUrl.pathname.endsWith('/') ? '' : '/');
-
-            const resolvedUrl = new URL(path, baseHref);
-            newUrl = resolvedUrl.pathname;
-        }
-
-        window.location.href = newUrl + searchParams;
-    }
-    
-    // Attach event listeners
-    pathInput.addEventListener('keydown', handleNavigation);
-
-    const el = document.getElementById('pathInput');
-    if (!el) return;
-
-    // in case something made it inert
-    el.disabled = false;
-    el.readOnly = false;
-
-    // delay one frame so the URL bar/layout settles and other scripts attach
-    requestAnimationFrame(() => {
-        el.focus({ preventScroll: true });
-        // put caret at end
-        const pos = el.value.length;
-        try { el.setSelectionRange(pos, pos); } catch (_) {}
-    });
-});
-</script>
-"""
 
 def _validate_filter_pattern(pattern):
     """
@@ -245,42 +194,20 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     <p>The path '<b style="font-family: monospace;">{subpath}</b>' could not be found on the server.</p>
 </div>"""
     
-    project_href = f'<a href="/weppcloud/runs/{runid}/{config}">☁️</a> '
-    tree = f'<pre>{project_href}{breadcrumbs_html}{error_message}</pre>'
+    project_href = Markup(f'<a href="/weppcloud/runs/{runid}/{config}">☁️</a> ')
 
-    # Construct the full HTML page, reusing the template from the main browse response
-    html_content = f'''\
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
-<title>{runid} - Not Found</title>
-<script>
-// This script is needed for the diff and path input functionality
-function redirectToDiff() {{
-    var runId = document.getElementById('runIdInput').value;
-    window.location.href = '?diff=' + encodeURIComponent(runId);
-}}
-const runid = "{runid}";
-const config = "{config}";
-</script>
-<style>
-  input[type='text'] {{ font-family: monospace; }}
-  a {{ text-decoration: none; }}
-</style>
-</head>
-<body>
-    <input type="text" value="{diff_runid}" id="runIdInput" placeholder="runid">
-    <button onclick="redirectToDiff()">Compare project</button>
-    {tree}
-    {on_load_script}
-</body>
-</html>'''
-
-    return Response(html_content, status=404)
+    return (
+        render_template(
+            'browse/not_found.j2',
+            runid=runid,
+            config=config,
+            diff_runid=diff_runid,
+            breadcrumbs_html=Markup(breadcrumbs_html),
+            project_href=project_href,
+            error_message=Markup(error_message),
+        ),
+        404,
+    )
 
     
 def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_default=''):
@@ -686,45 +613,23 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
                         if total_items > 0 else '<p>No items to display</p>')
         
         # Combine UI elements
-        project_href = f'<a href="/weppcloud/runs/{runid}/{config}">☁️</a> '
-        tree = f'<pre id="file-tree">{showing_text}{pagination_html}\n{project_href}{breadcrumbs}\n{listing_html}\n{pagination_html}</pre>'
+        project_href = Markup(f'<a href="/weppcloud/runs/{runid}/{config}">☁️</a> ')
+        breadcrumbs_markup = Markup(breadcrumbs)
+        listing_markup = Markup(listing_html)
+        pagination_markup = Markup(pagination_html)
+        showing_markup = Markup(showing_text)
 
-        return Response(f'''\
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
-<title>{runid}</title>
-<script>
-function redirectToDiff() {{
-    var runId = document.getElementById('runIdInput').value;
-    window.location.href = '?diff=' + encodeURIComponent(runId);
-}}
-const runid = "{runid}";
-const config = "{config}";
-</script>
-<style>
-  input[type='text'] {{ font-family: monospace; }}
-  a {{ text-decoration: none; }}
-  span.even-row {{ background-color: #f6f6f6;  display: block; }}
-  span.odd-row {{ background-color: #ffffff;  display: block; }}
-  span.even-row:hover, 
-  span.odd-row:hover {{
-    background-color: #d0ebff;
-    cursor: pointer;
-  }}
-</style>
-</head>
-<body>
-    <input type="text" value="{diff_runid}" id="runIdInput" placeholder="runid">
-    <button onclick="redirectToDiff()">Compare project</button>
-    {tree}
-    {on_load_script}
-</body>
-</html>''')
+        return render_template(
+            'browse/directory.j2',
+            runid=runid,
+            config=config,
+            diff_runid=diff_runid,
+            project_href=project_href,
+            breadcrumbs_html=breadcrumbs_markup,
+            listing_html=listing_markup,
+            pagination_html=pagination_markup,
+            showing_text=showing_markup,
+        )
 
     else:
         if path_lower.endswith('.gz'):
@@ -760,18 +665,12 @@ const config = "{config}";
 
         if path_lower.endswith('.arc'):
             assert contents is not None
-            _content = f'''\
-<!DOCTYPE html>
-<html><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
-<title>{basename(path)} - {runid}</title>
-</head><body>
-<pre style="font-size:xx-small;">\n{contents}</pre>
-</body></html>'''
-            return Response(_content, mimetype='text/html')
+            return render_template(
+                'browse/arc_file.j2',
+                filename=basename(path),
+                runid=runid,
+                contents=contents,
+            )
 
         html = None
         if path_lower.endswith('.pkl'):
@@ -796,83 +695,25 @@ const config = "{config}";
             html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
 
         if html is not None:
-            _content = f'''\
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
-<title>{basename(path)} - {runid}</title>
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
-crossorigin="anonymous">
-<script src="/weppcloud/static/js/sorttable.js"></script>
-<style>.table-nonfluid {{width: auto !important;}}</style>
-</head>
-<body>
-<a href="?download">Download File</a><hr>{html}
-</body>
-</html>'''
+            table_markup = Markup(html)
+            return render_template(
+                'browse/data_table.j2',
+                filename=basename(path),
+                runid=runid,
+                table_html=table_markup,
+            )
 
-            return Response(_content, mimetype='text/html')
+        if contents is None:
+            with open(path) as fp:
+                try:
+                    contents = fp.read()
+                except UnicodeDecodeError:
+                    return send_file(path, as_attachment=True, download_name=_split(path)[-1])
 
-        with open(path) as fp:
-            try:
-                contents = fp.read()
-            except UnicodeDecodeError:
-                return send_file(path, as_attachment=True, download_name=_split(path)[-1])
-
-        _content = f'''\
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
-<title>{basename(path)} - {runid}</title>
-<style>
-  body {{
-    margin: 0;
-    font-family: monospace;
-    /* Add padding to prevent content from being hidden by fixed header/footer */
-    padding-top: 45px;
-    padding-bottom: 45px;
-  }}
-  header, footer {{
-    position: fixed;
-    left: 0;
-    width: 100%;
-    background-color: #343a40;
-    color: #ecf0f1;
-    padding: 10px 10px;
-    box-sizing: border-box; /* Ensures padding is included in the width */
-    z-index: 1000;
-    font-size: 12px;
-  }}
-  header {{
-    top: 0;
-  }}
-  footer {{
-    bottom: 0;
-    text-align: center;
-  }}
-  pre {{
-    margin: 0 10px; /* Add some horizontal margin for readability */
-    white-space: pre-wrap;       /* CSS3 */
-    white-space: -moz-pre-wrap;  /* Mozilla */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
-  }}
-</style>
-</head>
-<body>
-<header><b>File:</b> {path}</header>
-<pre>{contents}</pre>
-</body>
-</html>'''
-    return Response(_content, mimetype='text/html')
+        return render_template(
+            'browse/text_file.j2',
+            runid=runid,
+            path=path,
+            filename=basename(path),
+            contents=contents,
+        )
