@@ -1258,7 +1258,7 @@ function onReady() {
     function computeScrollOffset() {
         var header = document.querySelector('header .navbar');
         if (header) {
-            return header.getBoundingClientRect().height + 12;
+            return Math.ceil(header.getBoundingClientRect().height) + 12;
         }
         var cssOffset = parseInt(getComputedStyle(document.documentElement)
             .getPropertyValue('--project-header-offset'), 10);
@@ -1268,7 +1268,16 @@ function onReady() {
         return cssOffset + 12;
     }
 
-    $('#toc .nav li a').on('click', function (event) {
+    function scrollToSection(el) {
+        if (!el) {
+            return;
+        }
+        var offset = computeScrollOffset();
+        var targetY = window.pageYOffset + el.getBoundingClientRect().top - offset;
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+    }
+
+    $('#toc').on('click', 'a.nav-link', function (event) {
         var href = $(this).attr('href');
         if (!href || href.charAt(0) !== '#') {
             return;
@@ -1276,8 +1285,7 @@ function onReady() {
         var $target = $(href);
         if ($target.length) {
             event.preventDefault();
-            $target[0].scrollIntoView();
-            scrollBy(0, -computeScrollOffset());
+            scrollToSection($target[0]);
         }
     });
 
