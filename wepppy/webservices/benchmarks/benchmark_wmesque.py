@@ -86,15 +86,30 @@ def main(url: str, total_requests: int, concurrency: int):
         
         # Use ThreadPoolExecutor to run requests concurrently
         with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as executor:
-            # Prepare future tasks
             futures = [
                 executor.submit(run_request, url, temp_dir, i)
                 for i in range(total_requests)
             ]
-            
-            # Wait for all futures to complete and gather results
-            for future in concurrent.futures.as_completed(futures):
-                results.append(future.result())
+
+            pending = set(futures)
+            while pending:
+                done, pending = concurrent.futures.wait(
+                    pending,
+                    timeout=10,
+                    return_when=concurrent.futures.FIRST_COMPLETED,
+                )
+
+                if not done:
+                    logging.warning('Benchmark still waiting on requests after 10 seconds; continuing to wait.')
+                    continue
+
+                for future in done:
+                    try:
+                        results.append(future.result())
+                    except Exception:
+                        for remaining in pending:
+                            remaining.cancel()
+                        raise
 
         overall_end_time = time.monotonic()
 
