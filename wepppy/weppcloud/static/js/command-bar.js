@@ -294,7 +294,8 @@
                 .map(([name, meta]) => `${name.padEnd(10)} - ${meta.description}`)
                 .join('\n');
             const setHelp = SET_HELP_LINES.map((line) => `  ${line}`).join('\n');
-            this.showResult(`Available Commands:\n${lines}\n\nSet command usage:\n${setHelp}`);
+            const keyboardShortcuts = 'Navigation shortcuts:\n   Shift+G go to bottom  |  Shift+U page up  |  Shift+H page down';
+            this.showResult(`Available Commands:\n${lines}\n\nSet command usage:\n${setHelp}\n\n${keyboardShortcuts}`);
         }
 
         getProjectBaseUrl() {

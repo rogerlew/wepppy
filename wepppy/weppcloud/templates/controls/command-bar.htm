@@ -7,6 +7,8 @@
   left: 0;
   z-index: 1050;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -18,11 +20,15 @@
 .command-bar-result[hidden] {
   display: none;
 }
+.command-bar-input-wrapper {
+  width: 100%;
+}
 .command-bar-input-wrapper input {
   padding: 2px 6px;
   height: auto;
   font-family: monospace;
   font-size: x-small;
+  width: 100%;
 }
 .command-bar-result {
   padding: 4px 6px;
@@ -34,8 +40,8 @@
 .command-bar-result pre {
   color: #f8f9fa;
   margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
+  white-space: break-spaces;
+  overflow-wrap: break-word;
   font-family: monospace;
   font-size: x-small;
 }
