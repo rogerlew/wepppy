@@ -26,7 +26,10 @@
       const config = {{ config | tojson }};
       const archivesUrl = {{ url_for('archive.rq_archive_list', runid=runid, config=config) | tojson }};
       const archiveApiUrl = {{ url_for('rq_api.api_archive', runid=runid, config=config) | tojson }};
+      const restoreApiUrl = {{ url_for('rq_api.api_restore_archive', runid=runid, config=config) | tojson }};
+      const projectPath = {{ url_for('runs0', runid=runid, config=config) | tojson }};
       let currentJobId = null;
+      let pendingRestoreName = null;
 
       class WSClient {
         constructor(runid, channel) {
@@ -63,8 +66,12 @@
                   const parts = data.trim().split(/\s+/);
                   const eventName = parts[parts.length - 1];
                   const controller = parts[parts.length - 2];
-                  if (controller === this.channel && eventName === 'ARCHIVE_COMPLETE') {
-                    archiveFinished();
+                  if (controller === this.channel) {
+                    if (eventName === 'ARCHIVE_COMPLETE') {
+                      archiveFinished();
+                    } else if (eventName === 'RESTORE_COMPLETE') {
+                      restoreFinished();
+                    }
                   }
                 }
               }
@@ -135,11 +142,23 @@
             link.textContent = 'Download';
             link.rel = 'nofollow';
             link.target = '_blank';
+            link.className = 'btn btn-sm btn-outline-secondary';
             linkTd.appendChild(link);
+            const restoreTd = document.createElement('td');
+            const restoreBtn = document.createElement('button');
+            restoreBtn.type = 'button';
+            restoreBtn.className = 'btn btn-sm btn-outline-secondary restore-button';
+            restoreBtn.textContent = 'Restore';
+            restoreBtn.addEventListener('click', () => openRestoreModal(item.name));
+            if (currentJobId) {
+              restoreBtn.disabled = true;
+            }
+            restoreTd.appendChild(restoreBtn);
             tr.appendChild(nameTd);
             tr.appendChild(sizeTd);
             tr.appendChild(modTd);
             tr.appendChild(linkTd);
+            tr.appendChild(restoreTd);
             tbody.appendChild(tr);
           });
         }
@@ -147,8 +166,10 @@
         if (data && data.in_progress) {
           document.getElementById('archive_button').disabled = true;
           currentJobId = data.job_id || null;
+          setRestoreButtonsDisabled(true);
         } else if (!currentJobId) {
           document.getElementById('archive_button').disabled = false;
+          setRestoreButtonsDisabled(false);
         }
       }
 
@@ -176,6 +197,7 @@
 
       function startArchive() {
         document.getElementById('archive_button').disabled = true;
+        setRestoreButtonsDisabled(true);
         appendStatus('Submitting archive job...');
         fetch(archiveApiUrl, {
           method: 'POST',
@@ -191,7 +213,70 @@
           .catch((err) => {
             appendStatus(`ERROR: ${err.message || err}`);
             document.getElementById('archive_button').disabled = false;
+            setRestoreButtonsDisabled(false);
           });
+      }
+
+      function openRestoreModal(archiveName) {
+        pendingRestoreName = archiveName;
+        document.getElementById('restore_modal_archive_name').textContent = archiveName;
+        $('#restoreConfirmModal').modal('show');
+      }
+
+      function closeRestoreModal() {
+        $('#restoreConfirmModal').modal('hide');
+      }
+
+      function confirmRestore() {
+        if (!pendingRestoreName) {
+          closeRestoreModal();
+          return;
+        }
+        const archiveName = pendingRestoreName;
+        pendingRestoreName = null;
+        closeRestoreModal();
+        startRestore(archiveName);
+      }
+
+      function startRestore(archiveName) {
+        document.getElementById('archive_button').disabled = true;
+        setRestoreButtonsDisabled(true);
+        appendStatus(`Submitting restore job for ${archiveName}...`);
+        $('#bottom').empty();
+        fetch(restoreApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ archive_name: archiveName })
+        })
+          .then((response) => response.json())
+          .then((body) => {
+            if (!body.Success) {
+              throw new Error(body.Error || 'Restore submission failed');
+            }
+            currentJobId = body.job_id;
+            appendStatus(`Restore job submitted: ${currentJobId}`);
+          })
+          .catch((err) => {
+            appendStatus(`ERROR: ${err.message || err}`);
+            document.getElementById('archive_button').disabled = false;
+            setRestoreButtonsDisabled(false);
+          });
+      }
+
+      function restoreFinished() {
+        currentJobId = null;
+        document.getElementById('archive_button').disabled = false;
+        setRestoreButtonsDisabled(false);
+        fetchArchives();
+        $('#bottom').html(`<a href="${projectPath}">Load ${runid} Project</a>`);
+      }
+
+      function setRestoreButtonsDisabled(disabled) {
+        document.querySelectorAll('.restore-button').forEach((btn) => {
+          btn.disabled = disabled;
+        });
       }
 
       document.addEventListener('DOMContentLoaded', () => {
@@ -200,6 +285,8 @@
         fetchArchives();
         const wsClient = new WSClient(runid, 'archive');
         wsClient.connect();
+        document.getElementById('restore_confirm_button').addEventListener('click', confirmRestore);
+        document.getElementById('restore_cancel_button').addEventListener('click', closeRestoreModal);
       });
     </script>
   </head>
@@ -224,10 +311,33 @@
               <th>Size</th>
               <th>Created</th>
               <th>Download</th>
+              <th>Restore</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
+      </div>
+      <div id="bottom" class="mt-3"></div>
+    </div>
+
+    <div class="modal fade" id="restoreConfirmModal" tabindex="-1" role="dialog" aria-labelledby="restoreConfirmLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="restoreConfirmLabel">Restore Archive</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-2">Restoring <code id="restore_modal_archive_name"></code>.</p>
+            <p class="mb-0">Proceeding will delete all current project files (except <code>archives/</code>) and replace them with the contents of this archive. Do you want to continue?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="restore_cancel_button">Cancel</button>
+            <button type="button" class="btn btn-danger" id="restore_confirm_button">Proceed</button>
+          </div>
+        </div>
       </div>
     </div>
   </body>
