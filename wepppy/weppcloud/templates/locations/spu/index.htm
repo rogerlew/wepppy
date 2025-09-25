@@ -19,37 +19,6 @@ a.disabled {
       </style>
   </head>
   <body>
-  <header>
-      <!-- Fixed navbar -->
-      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <a class="navbar-brand" href="../">WEPPcloud/Seattle</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-          </li>
-          {% if user.is_anonymous %}
-          <li><a class="nav-link" href="../login">Login</a></li>
-          <li><a class="nav-link" href="../register">Register</a></li>
-          {% else %}
-          <li><a class="nav-link" href="../runs">My Runs</a></li>
-          <li><a class="nav-link" href="../profile">Profile</a></li>
-          <li><a class="nav-link" href="../logout">Logout</a></li>
-          {% if current_user.has_role('Root') %}
-          <li><a class="nav-link" href="../usermod">Usermod</a></li>
-          {% endif %}
-          {% endif %}
-        </ul>
-        <button class="btn btn-link" type="button" id="btnPuModal"
-                data-toggle="modal" data-target="#puModal"
-                title="up up down down left right left right b a">
-            <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}"/>
-        </button>
-        </div>
-      </nav>
-    </header>
     <div role="main" class="container">
     <div style="height: 60px;"></div>
     <div style="height: 2em;"></div>

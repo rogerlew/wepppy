@@ -1,136 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>WEPPcloud</title>
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-          integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
-    <link rel="icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
-    <style type="text/css">
-/* styles.css */
-.youtube-banner {
-    background-color: #fff; /* White background */
-    text-align: center; /* Centering text */
-    padding: 20px 0; /* Padding around the text */
-    margin: 20px -10px;
-    border: 1px solid #ccc; /* Light grey border */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
 
-.youtube-banner a {
-    text-decoration: none; /* No underline */
-    font-family: 'Arial', sans-serif; /* Modern, readable font */
-    font-size: 16px; /* Adequate font size */
-}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>WEPPcloud</title>
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+    integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
+  <link rel="icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
+  <style type="text/css">
+    /* styles.css */
+    .youtube-banner {
+      background-color: #fff;
+      /* White background */
+      text-align: center;
+      /* Centering text */
+      padding: 20px 0;
+      /* Padding around the text */
+      margin: 20px -10px;
+      border: 1px solid #ccc;
+      /* Light grey border */
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      /* Subtle shadow for depth */
+    }
 
-.youtube-banner a:hover {
-    text-decoration: underline; /* Underline on hover for better interactivity */
-}
+    .youtube-banner a {
+      text-decoration: none;
+      /* No underline */
+      font-family: 'Arial', sans-serif;
+      /* Modern, readable font */
+      font-size: 16px;
+      /* Adequate font size */
+    }
 
-.youtube-logo {
-    width: 24px; /* Appropriate size for the logo */
-    vertical-align: middle; /* Align with the text */
-    margin-right: 10px; /* Space between logo and text */
-}
-.youtube-link {
-    color: red;         /* Set the text color to black */
-    text-decoration: none; /* No underline */
-}
-.doc-link {
-    color: black;         /* Set the text color to black */
-    font-style: italic;   /* Make the font style italic */
-    text-decoration: none; /* Optionally remove underline from links */
-}
+    .youtube-banner a:hover {
+      text-decoration: underline;
+      /* Underline on hover for better interactivity */
+    }
 
+    .youtube-logo {
+      width: 24px;
+      /* Appropriate size for the logo */
+      vertical-align: middle;
+      /* Align with the text */
+      margin-right: 10px;
+      /* Space between logo and text */
+    }
 
-.context-menu {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 120px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  padding: 12px 16px;
-  z-index: 1;
-}
+    .youtube-link {
+      color: red;
+      /* Set the text color to black */
+      text-decoration: none;
+      /* No underline */
+    }
 
-.context-menu ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.context-menu li {
-  margin-bottom: 5px;
-}
-    </style>
+    .doc-link {
+      color: black;
+      /* Set the text color to black */
+      font-style: italic;
+      /* Make the font style italic */
+      text-decoration: none;
+      /* Optionally remove underline from links */
+    }
 
 
-<script>
-let selectedLink;
+    .context-menu {
+      display: none;
+      position: absolute;
+      background-color: #f9f9f9;
+      min-width: 120px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      padding: 12px 16px;
+      z-index: 1;
+    }
 
-function showContextMenu(event, link) {
-  event.preventDefault();
-  selectedLink = link;
-  var menu = document.getElementById("context-menu");
-  menu.style.display = "block";
-  menu.style.left = event.pageX + "px";
-  menu.style.top = event.pageY + "px";
-  document.addEventListener("click", hideContextMenu);
-}
+    .context-menu ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
 
-function hideContextMenu() {
-  var menu = document.getElementById("context-menu");
-  menu.style.display = "none";
-  document.removeEventListener("click", hideContextMenu);
-}
+    .context-menu li {
+      margin-bottom: 5px;
+    }
+  </style>
 
 
-function loadWithArgument(name, value) {
-  var url = new URL(selectedLink.href);
-  url.searchParams.append(name, value);
-  window.location.href = url.toString();
-}
+  <script>
+    let selectedLink;
 
-</script>
+    function showContextMenu(event, link) {
+      event.preventDefault();
+      selectedLink = link;
+      var menu = document.getElementById("context-menu");
+      menu.style.display = "block";
+      menu.style.left = event.pageX + "px";
+      menu.style.top = event.pageY + "px";
+      document.addEventListener("click", hideContextMenu);
+    }
 
-  </head>
-  <body>
-  <header>
-  <!-- Fixed navbar -->
-  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="{{ site_prefix }}">WEPPcloud</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item">
-      </li>
-      {% if user.is_anonymous %}
-      <li><a class="nav-link" href="login">Login</a></li>
-      <li><a class="nav-link" href="register">Register</a></li>
-      {% else %}
-      <li><a class="nav-link" href="runs">My Runs</a></li>
-      <li><a class="nav-link" href="profile">Profile</a></li>
-      <li><a class="nav-link" href="logout">Logout</a></li>
-      {% if current_user.has_role('Root') %}
-      <li><a class="nav-link" href="usermod">Usermod</a></li>
-      {% endif %}
-      {% endif %}
-    </ul>
-    <button class="btn btn-link" type="button" id="btnPuModal"
-            data-toggle="modal" data-target="#puModal"
-            title="up up down down left right left right b a">
-        <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}"/>
-    </button>
-    </div>
-  </nav>
-  </header>
+    function hideContextMenu() {
+      var menu = document.getElementById("context-menu");
+      menu.style.display = "none";
+      document.removeEventListener("click", hideContextMenu);
+    }
+
+
+    function loadWithArgument(name, value) {
+      var url = new URL(selectedLink.href);
+      url.searchParams.append(name, value);
+      window.location.href = url.toString();
+    }
+
+  </script>
+</head>
+<body>
+  {% include "user/navbar.html" %}
 
   <div id="context-menu" class="context-menu">
     <ul>
@@ -139,384 +128,441 @@ function loadWithArgument(name, value) {
     </ul>
   </div>
 
-
-    <div role="main" class="container">
-      <div style="height: 60px;"></div>
-        <!--h3>WEPPcloud will be down for scheduled maintenance on Sunday, July 14, 2024 starting at 7pm Pacific</h3 -->
-        <!-- The banner -->
-        <div class="youtube-banner">
-            <a href="https://www.youtube.com/@fswepp4700" target="_blank" class="youtube-link">
-                <img src="{{  url_for('static', filename='images/youtube.png') }}" alt="YouTube Logo" class="youtube-logo">
-                Check out our YouTube tutorials and learn more!
-            </a>
-            <br/>
-            <a href="https://doc.wepp.cloud" class="doc-link">Documentation and QuickStart Guide</a>
-        </div>
-      <div style="height: 2em;"></div>
-      <div class="jumbotron row">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/disturbed.png') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div id="pep" class="col-lg-8">
-          <h1>WEPPcloud-(Un)Disturbed for United States</h1>
-          <p>The WEPPcloud-Disturbed allows users to upload a burn severity map and predict erosion
-             based on fire severity. Optionally, the user can forgo uploading a burn severity map to model unburned
-             conditions. It uses SSURGO to create 9002 soils and NLCD to parameterize landuse for unburned
-             conditions. For fire and treatment conditions soils and managements are procedurally generated and
-             parameterized from the disturbed database based on soil texture and landuse. This allowing forests,
-             shrubs, and grass to be burned based on landuse. The parameterization is intended to provide meaningful
-             comparisons between unburned, burned, and treatment conditions. In the long-term disturbed is envisioned
-             to replace the WEPPcloud-PEP interface.<br>
-             This interface also incorporates the Wildfire Ash Transport And  Risk estimation tool (WATAR).
-          </p>
-          <div class="container">
-            <div class="row">
-              <div class="col-12">
-                <a class="btn btn-primary d-block mb-3" href="create/disturbed9002" title="disturbed9002" oncontextmenu="showContextMenu(event, this)" role="button" rel="nofollow">Start Disturbed Run (CONUS)</a>
-              </div>
-              <div class="col-12">
-                <a class="btn btn-primary d-block mb-3" href="create/disturbed-hi" title="disturbed-hi" oncontextmenu="showContextMenu(event, this)" role="button" rel="nofollow">Start Disturbed-Hawaii Run (Experimental)</a>
-              </div>
-              <div class="col-12">
-                <a class="btn btn-primary d-block mb-3" href="create/disturbed-ak" title="disturbed-ak" oncontextmenu="showContextMenu(event, this)" role="button" rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
-              </div>
-            </div>
-          </div>
-          <p>{{ runs_counter['disturbed_projects'] }} projects and {{ commafy(runs_counter['disturbed_hillruns']) }} hillslopes ({{ commafy(runs_counter['disturbed_ash_hillruns'])}} WATAR hillslopes) ran since January 1, 2024</p>
-        </div>
-      </div>
-      <div style="height: 2em;"></div>
-
-      <div style="height: 2em;"></div>
-      <div class="jumbotron row">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/revegetation.webp') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div id="pep" class="col-lg-8">
-          <h1>WEPPcloud-Revegetation for United States</h1>
-          <p>The WEPPcloud-Revegetation allows users to upload a burn severity map and use historic vegetative cover data
-             from <a href="https://rangelands.app/">RAP</a> to model post-fire hydrology and erosion. 
-             <br/>
-             The WEPPcloud-Revegetation allows users to upload a Soil Burn Severity map and use historical vegetative cover data from the 
-             Rangeland Analysis Platform (RAP) to model streamflow and soil erosion both before and after a fire. This interface also supports 
-             the modeling of stochastic wildfires and their subsequent recovery. Users can specify a cover transformation that describes the 
-             recovery of perennial, annual, shrub, and tree covers following the simulated fire.
-          </p>
-          <div class="container">
-            <div class="row">
-              <div class="col-12">
-                <a class="btn btn-primary d-block mb-3" href="create/reveg" title="reveg" role="button" rel="nofollow">Start Revegetation Run (CONUS)</a>
-              </div>
-              <div class="col-12">
-                <a class="btn btn-primary d-block mb-3" href="create/reveg-mofe" title="reveg-mofe" role="button" rel="nofollow">Start Multiple OFE Revegetation Run (CONUS)</a>
-              </div>
-              <div class="col-12">
-                <a class="btn btn-primary d-block mb-3" href="create/reveg-10m-mofe" title="reveg-10m-mofe" role="button" rel="nofollow">Start 10m Multiple OFE Revegetation Run (CONUS)</a>
-                <a class="btn btn-primary d-block mb-3" href="create/disturbed-ak" title="disturbed-ak" role="button" rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
-              </div>
-            </div>
-          </div>
-          <p>{{ runs_counter['reveg_projects'] }} projects and {{ commafy(runs_counter['reveg_hillruns']) }} hillslopes ran since January 1, 2024</p>
-        </div>
-      </div>
-      <div style="height: 2em;"></div>
-
-
-      <div style="height: 2em;"></div>
-      <div class="jumbotron row">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/europe.png') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div id="pep" class="col-lg-8">
-          <h1>WEPPcloud-EU</h1>
-          <p>WEPPcloud for Europe.</p>
-          <p>Managements are assigned based on ESDAC landuses. Soils are built from ESDAC and EU-SoilHydroGrids data.
-              U.S. climate stations are selected based on E-OBS monthly precip and temperatures.
-          </p>
-          <p>The PeP interfaces provide post fire erosion modeling and ash transport modeling. Parameterizes soils based
-             on burn severity and soil texture using Disturbed WEPP soil files. 
-             The PeP interface incorporates the Wildfire Ash Transport And  Risk estimation tool (WATAR).
-          </p>
-          <p>
-          This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 10100389.
-          </p>
-          <div class="container">
-            <div class="row">
-              <div class="col-12">
-                <a class="btn btn-primary d-block mb-3" href="create/eu-disturbed" title="eu-disturbed" role="button" rel="nofollow">Start EU WEPPcloud-Disturbed Run</a><br><br>
-              </div>
-            </div>
-          </div>
-          <p>{{ runs_counter['eu_projects'] }} EU projects and {{ commafy(runs_counter['eu_hillruns']) }} hillslopes ran since January 1, 2024</p>
-          <p>EU WATAR  hillslopes ran since January 1, 2023 {{ commafy(runs_counter['eu_ash_hillruns']) }}</p>
-        </div>
-      </div>
-
-      <div style="height: 2em;"></div>
-      <div class="jumbotron row">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/australia200.png') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div id="pep" class="col-lg-8">
-          <h1>WEPPcloud-AU</h1>
-          <p>WEPPcloud for Australia.</p>
-          <p>Managements are assigned based on  Land Use of Australia 2010-11. Soils are built from ASRIS soil data.
-              U.S. climate stations are selected based on AGDC monthly precip and temperatures.
-          </p>
-          <div class="container">
-            <div class="row">
-              <div class="col-12">
-                <a class="btn btn-primary d-block mb-3" href="create/au-disturbed" title="au-disturbed" role="button" rel="nofollow">Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)</a><br><br>
-              </div>
-            </div>
-          </div>
-          <p>{{ runs_counter['au_projects'] }} EU projects and {{ commafy(runs_counter['au_hillruns']) }} hillslopes ran since January 1, 2024</p>
-          <p>EU WATAR  hillslopes ran since January 1, 2023 {{ commafy(runs_counter['au_ash_hillruns']) }}</p>
-        </div>
-      </div>
-
-      <div style="height: 2em;"></div>
-      <div class="jumbotron row">
-        <div class="col-lg-3">
-      <div style="height: 53px;"></div>
-            <img src="{{  url_for('static', filename='images/interfaces/rhem.png') }}" height="44" width="150" style="width: 150px; height: 44px;" />
-        </div>
-        <div id="pep" class="col-lg-8">
-          <h1>WEPPcloud-RHEM</h1>
-          <p>Run the Rangeland Hydrology and Erosion Model (RHEM) over the US.</p>
-          <p>Where available foliar and ground covers are estimated from NLCD Shrubland 2016 data.
-          </p>
-          <p>SURGO/STATSGO is used to identify soil textures
-          </p>
-          <div class="container">
-            <div class="row">
-              <div class="col-12">
-                <a class="btn btn-primary d-block mb-3" href="create/rhem" title="rhem" role="button" rel="nofollow">Start RHEM Run (Experimental)</a><br><br>
-              </div>
-            </div>
-          </div>
-          <p>{{ runs_counter['rhem_projects'] }} RHEM projects and {{ commafy(runs_counter['rhem_hillruns']) }} RHEM hillslopes ran since January 1, 2024</p>
-        </div>
-      </div>
-
-      <div style="height: 2em;"></div>
-      <h1>Site Specific Resources</h1>
-      <div class="jumbotron row" style="padding: 2rem 2rem;">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/lt.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div class="col-lg-8">
-          <h3>Lake Tahoe</h3>
-          <p>The Lake Tahoe Project incorporates region specific soil, phosphorus, and estimated soil burn severity.
-          </p>
-          <p>
-            <a class="btn btn-primary" href="lt" role="button">View Results and Run WEPP</a>
-          </p>
-        </div>
-      </div>
-
-      <div class="jumbotron row" style="padding: 2rem 2rem;">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/widlfire_credit_NOAA_DanBorsum.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div class="col-lg-8">
-          <h3>Hazards and Disasters (Hazard SEES) - FireEarth Project</h3>
-          <p>Data portals related to the Hazard SEES - FireEarth Project
-          </p>
-          <p>
-            {% if current_user.has_role('PortlandGroup') %}
-            <a class="btn btn-primary" href="portland-municipal" role="button">Portland Municipal Watersheds</a>&nbsp;&nbsp;&nbsp;&nbsp;
-            {% endif %}
-
-            <a class="btn btn-primary" href="seattle-municipal" role="button">Seattle Municipal Watersheds</a>
-          </p>
-        </div>
-      </div>
-      <div style="height: 2em;"></div>
-
-
-      <h1>Legacy Interfaces</h1>
-      <div class="jumbotron row">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/0.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div class="col-lg-8">
-          <h3>WEPPcloud</h3>
-            <p>Run WEPP anywhere in the continental U.S.</p>
-            <p>
-             Legacy interface. From 2021 we recommend users to switch to WEPPcloud-US instead of WEPP-PEP. WEPP-PEP is 
-             limited to four general soils based on textures. WEPPcloud-Disturbed incorporates spatial variability in soils 
-             from SSURGO/STATSGO data bases. A full comparison between the two interfaces has not been made, however, 
-             WEPPcloud-US for undisturbed conditions has been successfully validated in multiple watersheds in Western US.
-             Elevation data is from the USGS National Elevation Set.
-             This interface uses TOPAZ for watershed delineation. The soils are built using SURGO/STATSGO. Landcover is
-             selected based on the USGS National Landcover dataset. Climates are generated from the CLIGEN database.
-          </p>
-          <p><b>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</b></p>
-          <p>
-            <a class="btn btn-primary btn-lg" href="create/0" role="button" rel="nofollow">Start WEPPcloud Run</a>
-            <a class="btn btn-primary" href="create/13" role="button" rel="nofollow">10m (Experimental)</a>
-            <p>{{ runs_counter['0_projects'] }} projects and {{ commafy(runs_counter['0_hillruns']) }} hillslopes ran since January 1, 2024</p>
-          </p>
-        </div>
-      </div>
-      <div style="height: 2em;"></div>
-      <div class="jumbotron row">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/baer.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div id="pep" class="col-lg-8">
-          <h3>WEPPcloud-PEP w/ WATAR</h3>
-          <p>The WEPPcloud Post-Fire Erosion Prediction (PEP) allows users to upload a burn severity map and predict erosion
-             based on fire severity. 
-             Legacy interface. From 2021 we recommend users to switch to WEPPcloud-US instead of WEPP-PEP. WEPP-PEP is 
-             limited to four general soils based on textures. WEPPcloud-Disturbed incorporates spatial variability in soils 
-             from SSURGO/STATSGO data bases. A full comparison between the two interfaces has not been made, however, 
-             WEPPcloud-US for undisturbed conditions has been successfully validated in multiple watersheds in Western US.
-             Soil textures are identified from SSURGO. Unburned conditions are assigned 2006.2
-             forest soils and managements based on soil texture. Burned areas are assigned burned soils and managements
-             based on soil texture.<br>
-             The PeP interface incorporates the Wildfire Ash Transport And  Risk estimation tool (WATAR).<br>
-              <a href="https://youtu.be/g8_ClR96tFU">View 15 May 2019 USDA Forest Service Webinar:
-                  <i>An Introduction to WEPPcloud-PEP</i></a>
-          </p>
-          <p><b>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</b></p>
-          <p>
-            <a class="btn btn-primary btn-lg" href="create/baer" role="button" rel="nofollow">Start WEPPcloud Run</a>
-            <p>{{ runs_counter['baer_projects'] }} projects and {{ commafy(runs_counter['baer_hillruns']) }} hillslopes ({{ commafy(runs_counter['baer_ash_hillruns'])}} WATAR hillslopes) ran since January 1, 2024</p>
-            <!--a class="btn btn-primary" href="create/baer-ssurgo" role="button">SURGO Modified Soils (Experimental)</a-->
-            <p><a href="{{  url_for('static', filename='resources/baer/Rattlesnake.tif') }}">Download Example 4 Class SBS Map (Rattlesnake Fire)</a></p>
-          </p>
-        </div>
-      </div>
-
-
-
-      <div>
-        <h3>WEPPcloud Utilities</h3>
-          <a href="combined_ws_viewer/url_generator/">Combined Watershed Viewer URL Generator</a>
-      </div>
-      <div style="height: 1em;"></div>
-      <div>
-        <h3>WEPPcloud Test Watersheds</h3>
-          <a href="joh/">Test Watersheds</a>
-      </div>
-      <div style="height: 1em;"></div>
-      <div>
-        <h3>Contact</h3>
-          <p>For technical assistance please contact Roger Lew at rogerlew@uidaho.edu</p> 
-          <p>For other requests please contact Mariana Dobre at mdobre@uidaho.edu or Roger Lew at rogerlew@uidaho.edu</p>
-      <div style="height: 1em;"></div>
-        <h3>Documentation</h3>
-          <p>WEPPcloud Documentation can be found at: <a href='https://doc.wepp.cloud'>https://doc.wepp.cloud</a></p>
-      </div>
-      <div style="height: 1em;"></div>
-
-      <h3>Sponsors:</h3>
-
-      <div style="height: 2em;"></div>
-      <a href="https://www.idahoecosystems.org/">
-          <img src="{{  url_for('static', filename='images/miles_short_logo.png') }}" height="40" style="margin: 10px;"
-           alt="NSF Idaho EPSCoR"/></a>
-      <div>This work was made possible by the NSF Idaho EPSCoR Program and by the 
-           National Science Foundation under award number IIA-1301792.</div>
-
-      <div style="height: 2em;"></div>
-      <a href="https://www.usda.gov/">
-          <img src="{{  url_for('static', filename='images/USDA_logo.png') }}" height="55" style="margin: 10px;"
-           alt="USDA AFRI"/></a>
-      <div>This work is supported by AFRI program [grant no2016-67020-25320/project 
-           accession no. 1009827] from the USDA National Institute of Food and Agriculture.</div>
-
-      <div style="height: 2em;"></div>
-      <a href="https://www.ukri.org/">
-          <img src="{{  url_for('static', filename='images/ukri-nerc-logo-600x160.png') }}" height="55" style="margin: 10px;"
-           alt="UK NERC"/></a>
-      <div>The Wildfire Ash Transport And Risk estimation tool (WATAR) was made possible 
-           with collaboration from Swansea University (Jonay Neris, Stefan Doerr) and 
-           the US Forest Service (Pete Robichaud, William Elliott), and funding provided 
-           by UK NERC Grant NE/R011125/1 and European Commission (H2020 FirEUrisk project 
-           no. 101003890)</div>
-
-      <div style="height: 2em;"></div>
-      <a href="https://www.nasa.gov/">
-          <img src="{{  url_for('static', filename='images/nasa_logo.svg') }}" height="55" style="margin: 10px;"
-           alt="NASA"/></a>
-      <div>The revegetation module in WEPPcloud was supported by NASA’s Western Water Application Office (WWAO)</div>
-
-      <div style="height: 3em;"></div>
-
-      <h3>Affiliations and Collaborators:</h3>
-
-      <div style="height: 2em;"></div>
-       <a href="https://www.uidaho.edu/">
-          <img src="{{  url_for('static', filename='images/ui-main-horizontal.jpg') }}" height="47" style="margin: 10px;"
-           alt="University of Idaho"/></a>
-      <div>Go Vandals! <a href="https://uidaho.edu/">Univeristy of Idaho</a><div>
-
-      <div style="height: 2em;"></div>
-      <a href="https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-2020_en/">
-          <img src="{{  url_for('static', filename='images/eu_logo.png') }}" height="55" style="margin: 10px;"
-           alt=""/></a>
-      <div>WEPPcloud EU has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 101003890
-          <a href="https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-2020_en/">https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-2020_en</a><div>
-
-      <div style="height: 2em;"></div>
-      <a href="https://www.swansea.ac.uk/">
-          <img src="{{  url_for('static', filename='images/Swansea_University_logo.png') }}" height="55" style="margin: 10px;"
-           alt="Swansea University"/></a>
-      <div><i>Gweddw Crefft Heb Ei Dawn</i> Technical Skill is Bereft Without Culture 
-          <a href="https://www.swansea.ac.uk/">Swansea Univeristy</a><div>
-
-      <div style="height: 2em;"></div>
-      <a href="https://www.fs.fed.us/">
-          <img src="{{  url_for('static', filename='images/usfslogo.png') }}" height="55" style="margin: 10px;"
-           alt="USDA FS Rocky Mountain Forest Station"/></a>
-      <div>Caring for the land and serving people 
-          <a href="https://www.fs.usda.gov/research/rmrs">Rocky Mountain Research Station</a><div>
-
-      <div style="height: 2em;"></div>
-      <a href="https://hpc.uidaho.edu/">
-          <img src="{{  url_for('static', filename='images/RCDS_Logo-horizontal.svg') }}" height="55" style="margin: 10px;"
-           alt="University of Idaho RCDS"/></a>
-      <div>WEPPcloud is proudly hosted by the 
-          <a href="https://hpc.uidaho.edu/">Univeristy of Idaho Research Computing + Data Services</a><div>
-
-      <div style="height: 2em;"></div>
-      <div>wepppy</div>
-      <div>Powered by wepppy <a href="https://github.com/rogerlew/wepppy">https://github.com/rogerlew/wepppy</a></div>
-      <div style="height: 2em;"></div>
-
-      <div>
-        <h3>Contributors:</h3>
-        <div>Roger Lew, Mariana Dobre, William Elliot, Pete Robichaud, Erin Brooks, Anurag Srivastava, Jim Frakenberger, Jonay Neris, Stefan Doerr, Cristina Santin, Mary E. Miller
-        </div>
-      </div>
-      <div style="height: 2em;"></div>
-      <div>
-        <h3>Attributions:</h3>
-        <div>Map baselayers provided by Google (Terrain, Satellite) and USGS (NLCD).
-        </div>
-      </div>
-      <div style="height: 2em;"></div>
-      <div>
-        <h3>Legal Disclaimer:</h3>
-          <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
-            INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-            DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-            SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-            SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-            WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-            THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
-      </div>
-
+  <div role="main" class="container">
+    <div style="height: 60px;"></div>
+    <!--h3>WEPPcloud will be down for scheduled maintenance on Sunday, July 14, 2024 starting at 7pm Pacific</h3 -->
+    <!-- The banner -->
+    <div class="youtube-banner">
+      <a href="https://www.youtube.com/@fswepp4700" target="_blank" class="youtube-link">
+        <img src="{{  url_for('static', filename='images/youtube.png') }}" alt="YouTube Logo" class="youtube-logo">
+        Check out our YouTube tutorials and learn more!
+      </a>
+      <br />
+      <a href="https://doc.wepp.cloud" class="doc-link">Documentation and QuickStart Guide</a>
     </div>
-    <!-- Bootstrap core JavaScript
+    <div style="height: 2em;"></div>
+    <div class="jumbotron row">
+      <div class="col-lg-3">
+        <img src="{{  url_for('static', filename='images/interfaces/disturbed.png') }}" height="200" width="200"
+          style="width: 200px; height: 200px;" />
+      </div>
+      <div id="pep" class="col-lg-8">
+        <h1>WEPPcloud-(Un)Disturbed for United States</h1>
+        <p>The WEPPcloud-Disturbed allows users to upload a burn severity map and predict erosion
+          based on fire severity. Optionally, the user can forgo uploading a burn severity map to model unburned
+          conditions. It uses SSURGO to create 9002 soils and NLCD to parameterize landuse for unburned
+          conditions. For fire and treatment conditions soils and managements are procedurally generated and
+          parameterized from the disturbed database based on soil texture and landuse. This allowing forests,
+          shrubs, and grass to be burned based on landuse. The parameterization is intended to provide meaningful
+          comparisons between unburned, burned, and treatment conditions. In the long-term disturbed is envisioned
+          to replace the WEPPcloud-PEP interface.<br>
+          This interface also incorporates the Wildfire Ash Transport And Risk estimation tool (WATAR).
+        </p>
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <a class="btn btn-primary d-block mb-3" href="create/disturbed9002" title="disturbed9002"
+                oncontextmenu="showContextMenu(event, this)" role="button" rel="nofollow">Start Disturbed Run
+                (CONUS)</a>
+            </div>
+            <div class="col-12">
+              <a class="btn btn-primary d-block mb-3" href="create/disturbed-hi" title="disturbed-hi"
+                oncontextmenu="showContextMenu(event, this)" role="button" rel="nofollow">Start Disturbed-Hawaii Run
+                (Experimental)</a>
+            </div>
+            <div class="col-12">
+              <a class="btn btn-primary d-block mb-3" href="create/disturbed-ak" title="disturbed-ak"
+                oncontextmenu="showContextMenu(event, this)" role="button" rel="nofollow">Start Disturbed-Alaska Run
+                (Experimental)</a>
+            </div>
+          </div>
+        </div>
+        <p>{{ runs_counter['disturbed_projects'] }} projects and {{ commafy(runs_counter['disturbed_hillruns']) }}
+          hillslopes ({{ commafy(runs_counter['disturbed_ash_hillruns'])}} WATAR hillslopes) ran since January 1, 2024
+        </p>
+      </div>
+    </div>
+    <div style="height: 2em;"></div>
+
+    <div style="height: 2em;"></div>
+    <div class="jumbotron row">
+      <div class="col-lg-3">
+        <img src="{{  url_for('static', filename='images/interfaces/revegetation.webp') }}" height="200" width="200"
+          style="width: 200px; height: 200px;" />
+      </div>
+      <div id="pep" class="col-lg-8">
+        <h1>WEPPcloud-Revegetation for United States</h1>
+        <p>The WEPPcloud-Revegetation allows users to upload a burn severity map and use historic vegetative cover data
+          from <a href="https://rangelands.app/">RAP</a> to model post-fire hydrology and erosion.
+          <br />
+          The WEPPcloud-Revegetation allows users to upload a Soil Burn Severity map and use historical vegetative cover
+          data from the
+          Rangeland Analysis Platform (RAP) to model streamflow and soil erosion both before and after a fire. This
+          interface also supports
+          the modeling of stochastic wildfires and their subsequent recovery. Users can specify a cover transformation
+          that describes the
+          recovery of perennial, annual, shrub, and tree covers following the simulated fire.
+        </p>
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <a class="btn btn-primary d-block mb-3" href="create/reveg" title="reveg" role="button"
+                rel="nofollow">Start Revegetation Run (CONUS)</a>
+            </div>
+            <div class="col-12">
+              <a class="btn btn-primary d-block mb-3" href="create/reveg-mofe" title="reveg-mofe" role="button"
+                rel="nofollow">Start Multiple OFE Revegetation Run (CONUS)</a>
+            </div>
+            <div class="col-12">
+              <a class="btn btn-primary d-block mb-3" href="create/reveg-10m-mofe" title="reveg-10m-mofe" role="button"
+                rel="nofollow">Start 10m Multiple OFE Revegetation Run (CONUS)</a>
+              <a class="btn btn-primary d-block mb-3" href="create/disturbed-ak" title="disturbed-ak" role="button"
+                rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
+            </div>
+          </div>
+        </div>
+        <p>{{ runs_counter['reveg_projects'] }} projects and {{ commafy(runs_counter['reveg_hillruns']) }} hillslopes
+          ran since January 1, 2024</p>
+      </div>
+    </div>
+    <div style="height: 2em;"></div>
+
+
+    <div style="height: 2em;"></div>
+    <div class="jumbotron row">
+      <div class="col-lg-3">
+        <img src="{{  url_for('static', filename='images/interfaces/europe.png') }}" height="200" width="200"
+          style="width: 200px; height: 200px;" />
+      </div>
+      <div id="pep" class="col-lg-8">
+        <h1>WEPPcloud-EU</h1>
+        <p>WEPPcloud for Europe.</p>
+        <p>Managements are assigned based on ESDAC landuses. Soils are built from ESDAC and EU-SoilHydroGrids data.
+          U.S. climate stations are selected based on E-OBS monthly precip and temperatures.
+        </p>
+        <p>The PeP interfaces provide post fire erosion modeling and ash transport modeling. Parameterizes soils based
+          on burn severity and soil texture using Disturbed WEPP soil files.
+          The PeP interface incorporates the Wildfire Ash Transport And Risk estimation tool (WATAR).
+        </p>
+        <p>
+          This project has received funding from the European Union's Horizon 2020 research and innovation programme
+          under grant agreement No 10100389.
+        </p>
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <a class="btn btn-primary d-block mb-3" href="create/eu-disturbed" title="eu-disturbed" role="button"
+                rel="nofollow">Start EU WEPPcloud-Disturbed Run</a><br><br>
+            </div>
+          </div>
+        </div>
+        <p>{{ runs_counter['eu_projects'] }} EU projects and {{ commafy(runs_counter['eu_hillruns']) }} hillslopes ran
+          since January 1, 2024</p>
+        <p>EU WATAR hillslopes ran since January 1, 2023 {{ commafy(runs_counter['eu_ash_hillruns']) }}</p>
+      </div>
+    </div>
+
+    <div style="height: 2em;"></div>
+    <div class="jumbotron row">
+      <div class="col-lg-3">
+        <img src="{{  url_for('static', filename='images/interfaces/australia200.png') }}" height="200" width="200"
+          style="width: 200px; height: 200px;" />
+      </div>
+      <div id="pep" class="col-lg-8">
+        <h1>WEPPcloud-AU</h1>
+        <p>WEPPcloud for Australia.</p>
+        <p>Managements are assigned based on Land Use of Australia 2010-11. Soils are built from ASRIS soil data.
+          U.S. climate stations are selected based on AGDC monthly precip and temperatures.
+        </p>
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <a class="btn btn-primary d-block mb-3" href="create/au-disturbed" title="au-disturbed" role="button"
+                rel="nofollow">Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)</a><br><br>
+            </div>
+          </div>
+        </div>
+        <p>{{ runs_counter['au_projects'] }} EU projects and {{ commafy(runs_counter['au_hillruns']) }} hillslopes ran
+          since January 1, 2024</p>
+        <p>EU WATAR hillslopes ran since January 1, 2023 {{ commafy(runs_counter['au_ash_hillruns']) }}</p>
+      </div>
+    </div>
+
+    <div style="height: 2em;"></div>
+    <div class="jumbotron row">
+      <div class="col-lg-3">
+        <div style="height: 53px;"></div>
+        <img src="{{  url_for('static', filename='images/interfaces/rhem.png') }}" height="44" width="150"
+          style="width: 150px; height: 44px;" />
+      </div>
+      <div id="pep" class="col-lg-8">
+        <h1>WEPPcloud-RHEM</h1>
+        <p>Run the Rangeland Hydrology and Erosion Model (RHEM) over the US.</p>
+        <p>Where available foliar and ground covers are estimated from NLCD Shrubland 2016 data.
+        </p>
+        <p>SURGO/STATSGO is used to identify soil textures
+        </p>
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <a class="btn btn-primary d-block mb-3" href="create/rhem" title="rhem" role="button" rel="nofollow">Start
+                RHEM Run (Experimental)</a><br><br>
+            </div>
+          </div>
+        </div>
+        <p>{{ runs_counter['rhem_projects'] }} RHEM projects and {{ commafy(runs_counter['rhem_hillruns']) }} RHEM
+          hillslopes ran since January 1, 2024</p>
+      </div>
+    </div>
+
+    <div style="height: 2em;"></div>
+    <h1>Site Specific Resources</h1>
+    <div class="jumbotron row" style="padding: 2rem 2rem;">
+      <div class="col-lg-3">
+        <img src="{{  url_for('static', filename='images/interfaces/lt.jpg') }}" height="200" width="200"
+          style="width: 200px; height: 200px;" />
+      </div>
+      <div class="col-lg-8">
+        <h3>Lake Tahoe</h3>
+        <p>The Lake Tahoe Project incorporates region specific soil, phosphorus, and estimated soil burn severity.
+        </p>
+        <p>
+          <a class="btn btn-primary" href="lt" role="button">View Results and Run WEPP</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="jumbotron row" style="padding: 2rem 2rem;">
+      <div class="col-lg-3">
+        <img src="{{  url_for('static', filename='images/interfaces/widlfire_credit_NOAA_DanBorsum.jpg') }}"
+          height="200" width="200" style="width: 200px; height: 200px;" />
+      </div>
+      <div class="col-lg-8">
+        <h3>Hazards and Disasters (Hazard SEES) - FireEarth Project</h3>
+        <p>Data portals related to the Hazard SEES - FireEarth Project
+        </p>
+        <p>
+          {% if current_user.has_role('PortlandGroup') %}
+          <a class="btn btn-primary" href="portland-municipal" role="button">Portland Municipal
+            Watersheds</a>&nbsp;&nbsp;&nbsp;&nbsp;
+          {% endif %}
+
+          <a class="btn btn-primary" href="seattle-municipal" role="button">Seattle Municipal Watersheds</a>
+        </p>
+      </div>
+    </div>
+    <div style="height: 2em;"></div>
+
+
+    <h1>Legacy Interfaces</h1>
+    <div class="jumbotron row">
+      <div class="col-lg-3">
+        <img src="{{  url_for('static', filename='images/interfaces/0.jpg') }}" height="200" width="200"
+          style="width: 200px; height: 200px;" />
+      </div>
+      <div class="col-lg-8">
+        <h3>WEPPcloud</h3>
+        <p>Run WEPP anywhere in the continental U.S.</p>
+        <p>
+          Legacy interface. From 2021 we recommend users to switch to WEPPcloud-US instead of WEPP-PEP. WEPP-PEP is
+          limited to four general soils based on textures. WEPPcloud-Disturbed incorporates spatial variability in soils
+          from SSURGO/STATSGO data bases. A full comparison between the two interfaces has not been made, however,
+          WEPPcloud-US for undisturbed conditions has been successfully validated in multiple watersheds in Western US.
+          Elevation data is from the USGS National Elevation Set.
+          This interface uses TOPAZ for watershed delineation. The soils are built using SURGO/STATSGO. Landcover is
+          selected based on the USGS National Landcover dataset. Climates are generated from the CLIGEN database.
+        </p>
+        <p><b>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</b>
+        </p>
+        <p>
+          <a class="btn btn-primary btn-lg" href="create/0" role="button" rel="nofollow">Start WEPPcloud Run</a>
+          <a class="btn btn-primary" href="create/13" role="button" rel="nofollow">10m (Experimental)</a>
+        <p>{{ runs_counter['0_projects'] }} projects and {{ commafy(runs_counter['0_hillruns']) }} hillslopes ran since
+          January 1, 2024</p>
+        </p>
+      </div>
+    </div>
+    <div style="height: 2em;"></div>
+    <div class="jumbotron row">
+      <div class="col-lg-3">
+        <img src="{{  url_for('static', filename='images/interfaces/baer.jpg') }}" height="200" width="200"
+          style="width: 200px; height: 200px;" />
+      </div>
+      <div id="pep" class="col-lg-8">
+        <h3>WEPPcloud-PEP w/ WATAR</h3>
+        <p>The WEPPcloud Post-Fire Erosion Prediction (PEP) allows users to upload a burn severity map and predict
+          erosion
+          based on fire severity.
+          Legacy interface. From 2021 we recommend users to switch to WEPPcloud-US instead of WEPP-PEP. WEPP-PEP is
+          limited to four general soils based on textures. WEPPcloud-Disturbed incorporates spatial variability in soils
+          from SSURGO/STATSGO data bases. A full comparison between the two interfaces has not been made, however,
+          WEPPcloud-US for undisturbed conditions has been successfully validated in multiple watersheds in Western US.
+          Soil textures are identified from SSURGO. Unburned conditions are assigned 2006.2
+          forest soils and managements based on soil texture. Burned areas are assigned burned soils and managements
+          based on soil texture.<br>
+          The PeP interface incorporates the Wildfire Ash Transport And Risk estimation tool (WATAR).<br>
+          <a href="https://youtu.be/g8_ClR96tFU">View 15 May 2019 USDA Forest Service Webinar:
+            <i>An Introduction to WEPPcloud-PEP</i></a>
+        </p>
+        <p><b>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</b>
+        </p>
+        <p>
+          <a class="btn btn-primary btn-lg" href="create/baer" role="button" rel="nofollow">Start WEPPcloud Run</a>
+        <p>{{ runs_counter['baer_projects'] }} projects and {{ commafy(runs_counter['baer_hillruns']) }} hillslopes ({{
+          commafy(runs_counter['baer_ash_hillruns'])}} WATAR hillslopes) ran since January 1, 2024</p>
+        <!--a class="btn btn-primary" href="create/baer-ssurgo" role="button">SURGO Modified Soils (Experimental)</a-->
+        <p><a href="{{  url_for('static', filename='resources/baer/Rattlesnake.tif') }}">Download Example 4 Class SBS
+            Map (Rattlesnake Fire)</a></p>
+        </p>
+      </div>
+    </div>
+
+
+
+    <div>
+      <h3>WEPPcloud Utilities</h3>
+      <a href="combined_ws_viewer/url_generator/">Combined Watershed Viewer URL Generator</a>
+    </div>
+    <div style="height: 1em;"></div>
+    <div>
+      <h3>WEPPcloud Test Watersheds</h3>
+      <a href="joh/">Test Watersheds</a>
+    </div>
+    <div style="height: 1em;"></div>
+    <div>
+      <h3>Contact</h3>
+      <p>For technical assistance please contact Roger Lew at rogerlew@uidaho.edu</p>
+      <p>For other requests please contact Mariana Dobre at mdobre@uidaho.edu or Roger Lew at rogerlew@uidaho.edu</p>
+      <div style="height: 1em;"></div>
+      <h3>Documentation</h3>
+      <p>WEPPcloud Documentation can be found at: <a href='https://doc.wepp.cloud'>https://doc.wepp.cloud</a></p>
+    </div>
+    <div style="height: 1em;"></div>
+
+    <h3>Sponsors:</h3>
+
+    <div style="height: 2em;"></div>
+    <a href="https://www.idahoecosystems.org/">
+      <img src="{{  url_for('static', filename='images/miles_short_logo.png') }}" height="40" style="margin: 10px;"
+        alt="NSF Idaho EPSCoR" /></a>
+    <div>This work was made possible by the NSF Idaho EPSCoR Program and by the
+      National Science Foundation under award number IIA-1301792.</div>
+
+    <div style="height: 2em;"></div>
+    <a href="https://www.usda.gov/">
+      <img src="{{  url_for('static', filename='images/USDA_logo.png') }}" height="55" style="margin: 10px;"
+        alt="USDA AFRI" /></a>
+    <div>This work is supported by AFRI program [grant no2016-67020-25320/project
+      accession no. 1009827] from the USDA National Institute of Food and Agriculture.</div>
+
+    <div style="height: 2em;"></div>
+    <a href="https://www.ukri.org/">
+      <img src="{{  url_for('static', filename='images/ukri-nerc-logo-600x160.png') }}" height="55"
+        style="margin: 10px;" alt="UK NERC" /></a>
+    <div>The Wildfire Ash Transport And Risk estimation tool (WATAR) was made possible
+      with collaboration from Swansea University (Jonay Neris, Stefan Doerr) and
+      the US Forest Service (Pete Robichaud, William Elliott), and funding provided
+      by UK NERC Grant NE/R011125/1 and European Commission (H2020 FirEUrisk project
+      no. 101003890)</div>
+
+    <div style="height: 2em;"></div>
+    <a href="https://www.nasa.gov/">
+      <img src="{{  url_for('static', filename='images/nasa_logo.svg') }}" height="55" style="margin: 10px;"
+        alt="NASA" /></a>
+    <div>The revegetation module in WEPPcloud was supported by NASA’s Western Water Application Office (WWAO)</div>
+
+    <div style="height: 3em;"></div>
+
+    <h3>Affiliations and Collaborators:</h3>
+
+    <div style="height: 2em;"></div>
+    <a href="https://www.uidaho.edu/">
+      <img src="{{  url_for('static', filename='images/ui-main-horizontal.jpg') }}" height="47" style="margin: 10px;"
+        alt="University of Idaho" /></a>
+    <div>Go Vandals! <a href="https://uidaho.edu/">Univeristy of Idaho</a>
+      <div>
+
+        <div style="height: 2em;"></div>
+        <a
+          href="https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-2020_en/">
+          <img src="{{  url_for('static', filename='images/eu_logo.png') }}" height="55" style="margin: 10px;"
+            alt="" /></a>
+        <div>WEPPcloud EU has received funding from the European Union's Horizon 2020 research and innovation programme
+          under grant agreement No 101003890
+          <a
+            href="https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-2020_en/">https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-2020_en</a>
+          <div>
+
+            <div style="height: 2em;"></div>
+            <a href="https://www.swansea.ac.uk/">
+              <img src="{{  url_for('static', filename='images/Swansea_University_logo.png') }}" height="55"
+                style="margin: 10px;" alt="Swansea University" /></a>
+            <div><i>Gweddw Crefft Heb Ei Dawn</i> Technical Skill is Bereft Without Culture
+              <a href="https://www.swansea.ac.uk/">Swansea Univeristy</a>
+              <div>
+
+                <div style="height: 2em;"></div>
+                <a href="https://www.fs.fed.us/">
+                  <img src="{{  url_for('static', filename='images/usfslogo.png') }}" height="55" style="margin: 10px;"
+                    alt="USDA FS Rocky Mountain Forest Station" /></a>
+                <div>Caring for the land and serving people
+                  <a href="https://www.fs.usda.gov/research/rmrs">Rocky Mountain Research Station</a>
+                  <div>
+
+                    <div style="height: 2em;"></div>
+                    <a href="https://hpc.uidaho.edu/">
+                      <img src="{{  url_for('static', filename='images/RCDS_Logo-horizontal.svg') }}" height="55"
+                        style="margin: 10px;" alt="University of Idaho RCDS" /></a>
+                    <div>WEPPcloud is proudly hosted by the
+                      <a href="https://hpc.uidaho.edu/">Univeristy of Idaho Research Computing + Data Services</a>
+                      <div>
+
+                        <div style="height: 2em;"></div>
+                        <div>wepppy</div>
+                        <div>Powered by wepppy <a
+                            href="https://github.com/rogerlew/wepppy">https://github.com/rogerlew/wepppy</a></div>
+                        <div style="height: 2em;"></div>
+
+                        <div>
+                          <h3>Contributors:</h3>
+                          <div>Roger Lew, Mariana Dobre, William Elliot, Pete Robichaud, Erin Brooks, Anurag Srivastava,
+                            Jim Frakenberger, Jonay Neris, Stefan Doerr, Cristina Santin, Mary E. Miller
+                          </div>
+                        </div>
+                        <div style="height: 2em;"></div>
+                        <div>
+                          <h3>Attributions:</h3>
+                          <div>Map baselayers provided by Google (Terrain, Satellite) and USGS (NLCD).
+                          </div>
+                        </div>
+                        <div style="height: 2em;"></div>
+                        <div>
+                          <h3>Legal Disclaimer:</h3>
+                          <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+                            OR IMPLIED WARRANTIES,
+                            INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+                            PARTICULAR PURPOSE ARE
+                            DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+                            INDIRECT, INCIDENTAL,
+                            SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+                            SUBSTITUTE GOODS OR
+                            SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+                            THEORY OF LIABILITY,
+                            WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+                            IN ANY WAY OUT OF THE USE OF
+                            THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+                        </div>
+
+                      </div>
+                      <!-- Bootstrap core JavaScript
     ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"
-     integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-  </body>
+                      <!-- Placed at the end of the document so the pages load faster -->
+                      <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+                        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+                        crossorigin="anonymous"></script>
+                      <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+                        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+                        crossorigin="anonymous"></script>
+</body>
+
 </html>
