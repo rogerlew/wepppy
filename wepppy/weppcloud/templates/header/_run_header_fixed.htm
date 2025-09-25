@@ -1,0 +1,86 @@
+{% extends "header/_layout_fixed.htm" %}
+{% block nav_content %}
+<!-- _run_header_fixed.htm -->
+<a class="navbar-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud
+  {{ ('&mdash;' if current_ron.config_stem != '') | safe }}
+  {{ current_ron.config_stem }} </a>
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+  aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+  <span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="navbarCollapse">
+  <form class="form-inline my-2 my-lg-0" id="setname_form" action="javascript:void(0);">
+    <input class="form-control mr-sm-1 disable-readonly" id="input_name" name="name" type="text" placeholder="Name"
+      value="{{ current_ron.name }}" aria-label="Name">
+  </form>
+  <form class="form-inline my-2 my-lg-0" id="setscenario_form" action="javascript:void(0);">
+    <input class="form-control mr-sm-1 disable-readonly" id="input_scenario" name="scenario" type="text"
+      placeholder="Scenario" value="{{ current_ron.scenario }}" aria-label="Scenario">
+  </form>
+  <ul class="navbar-nav mr-auto">
+    <li class="nav-item">
+      <a href="{{ url_for('run_0.runs0', runid=current_ron.runid, config=current_ron.config_stem) }}" class="nav-link"
+        data-toggle="tooltip" title="Reload Page" aria-label="Reload page">
+        <img src="{{ url_for('static', filename='open-iconic/png/reload-2x-wh.png') }}" /></a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
+        class="nav-link" target="_blank" data-toggle="tooltip" title="Fork Project" rel="nofollow"
+        aria-label="Fork project">
+        <img src="{{ url_for('static', filename='open-iconic/png/fork-2x-wh.png') }}" /></a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
+        class="nav-link" target="_blank" data-toggle="tooltip" title="Archive Project" rel="nofollow"
+        aria-label="Archive project">
+        <img src="{{ url_for('static', filename='open-iconic/png/cloud-download-2x-wh.png') }}" /></a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
+        class="nav-link" data-toggle="tooltip" title="Project README" rel="nofollow"
+        aria-label="Open project README">
+        <img src="{{ url_for('static', filename='open-iconic/png/book-2x-wh.png') }}" /></a>
+    </li>
+    <li class="nav-item">
+      <a href="#" class="nav-link" id="btnPuModal" data-toggle="modal" data-target="#puModal" title="Poweruser Panel"
+        rel="nofollow" aria-label="Open poweruser panel">
+        <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}" />
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="#" class="nav-link" id="btnUnitizerModal" data-toggle="modal" data-target="#unitizerModal"
+        aria-label="Open unitizer modal">
+        <img src="{{ url_for('static', filename='open-iconic/png/cog-2x-wh.png') }}" />
+      </a>
+    </li>
+    {% if user.has_role('Admin') %}
+    <li>
+      <a href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}"
+        class="nav-link" target="_blank" data-toggle="tooltip" title="Access Log"
+        aria-label="Open access log">
+        <img src="{{ url_for('static', filename='open-iconic/png/monitor-2x-wh.png') }}" /></a>
+    </li>
+    {% endif %}
+  </ul>
+  {% if user.is_authenticated %}
+  <ul class="navbar-nav navbar-right">
+    <li class="nav-item">
+      <div class="custom-control custom-checkbox">
+        <input id="checkbox_readonly" type="checkbox" class="form-check-input"
+          onchange="Project.getInstance().set_readonly(this.checked);" {% if current_ron.readonly %}checked{% endif %}>
+        <label class="form-check-label" for="checkbox_readonly"><span style="color: white;">Readonly</span></label>
+      </div>
+    </li>
+    <li class="nav-item">
+      <div class="custom-control custom-checkbox">
+        <input id="checkbox_public" type="checkbox" class="form-check-input"
+          onchange="Project.getInstance().set_public(this.checked);" {% if current_ron.public %}checked{% endif %}>
+        <label class="form-check-label" for="checkbox_public"><span style="color: white;">Public</span></label>
+      </div>
+    </li>
+  </ul>
+  {% endif %}
+  {% include "header/header.htm" %}
+</div>
+<!--/ _run_header_fixed.htm -->
+{% endblock %}

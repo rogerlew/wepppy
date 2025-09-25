@@ -1,46 +1,5 @@
 from flask import jsonify
-from wepppy.weppcloud.routes.browse import browse_bp
-from wepppy.weppcloud.routes.weppcloud_site import weppcloud_site_bp
-from wepppy.weppcloud.routes.admin import admin_bp
-from wepppy.weppcloud.routes.archive import archive_bp
-from wepppy.weppcloud.routes.climate import climate_bp
-from wepppy.weppcloud.routes.combined_watershed_viewer import combined_watershed_viewer_bp
-from wepppy.weppcloud.routes.command_bar import command_bar_bp
-from wepppy.weppcloud.routes.debris_flow import debris_flow_bp
-from wepppy.weppcloud.routes.disturbed import disturbed_bp
-from wepppy.weppcloud.routes.download import download_bp
-from wepppy.weppcloud.routes.export import export_bp
-from wepppy.weppcloud.routes.fork import fork_bp
-from wepppy.weppcloud.routes.wepprepr import repr_bp
-from wepppy.weppcloud.routes.diff import diff_bp
-from wepppy.weppcloud.routes.gdalinfo import gdalinfo_bp
-from wepppy.weppcloud.routes.geodata import geodata_bp
-from wepppy.weppcloud.routes.landuse import landuse_bp
-from wepppy.weppcloud.routes.map import map_bp
-from wepppy.weppcloud.routes.observed import observed_bp
-from wepppy.weppcloud.routes.omni import omni_bp
-from wepppy.weppcloud.routes.pivottable import pivottable_bp
-from wepppy.weppcloud.routes.project import project_bp
-from wepppy.weppcloud.routes.jsoncrack import jsoncrack_bp
-from wepppy.weppcloud.routes.rangeland import rangeland_bp
-from wepppy.weppcloud.routes.rangeland_cover import rangeland_cover_bp
-from wepppy.weppcloud.routes.readme import readme_bp
-from wepppy.weppcloud.routes.rhem import rhem_bp
-from wepppy.weppcloud.routes.soils import soils_bp
-from wepppy.weppcloud.routes.treatments import treatments_bp
-from wepppy.weppcloud.routes.unitizer import unitizer_bp
-from wepppy.weppcloud.routes.user import user_bp
-from wepppy.weppcloud.routes.watar import watar_bp
-from wepppy.weppcloud.routes.watershed import watershed_bp
-from wepppy.weppcloud.routes.wepp import wepp_bp
-from wepppy.weppcloud.routes.locations import locations_bp
-from wepppy.weppcloud.routes.weppcloudr import weppcloudr_bp
-from wepppy.weppcloud.routes.rq.api.jobinfo import rq_jobinfo_bp
-from wepppy.weppcloud.routes.rq.api.api import rq_api_bp
-from wepppy.weppcloud.routes.rq.job_dashboard.routes import rq_job_dashboard_bp
-from wepppy.weppcloud.routes.stats import stats_bp
-from wepppy.weppcloud.routes.run_0 import run_0_bp
-from wepppy.weppcloud.routes._security import security_logging_bp, security_ui_bp
+from wepppy.weppcloud.routes import *
 
 def register_blueprints(app):
 

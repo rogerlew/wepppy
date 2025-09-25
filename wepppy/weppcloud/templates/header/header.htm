@@ -1,0 +1,8 @@
+{% if current_ron %}
+    {# current_ron is RonViewModel instance from current_ron_processor #}
+    {% include 'header/_run_header_fixed.htm' %}
+{% elif current_user.is_authenticated %}
+    {% include 'header/_non_run_user_header_fixed.htm' %}
+{% else %}
+    {% include 'header/_global_header_fixed.htm' %}
+{% endif %}
