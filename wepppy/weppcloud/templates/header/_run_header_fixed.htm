@@ -1,9 +1,6 @@
 {% extends "header/_layout_fixed.htm" %}
 {% block nav_content %}
 <!-- _run_header_fixed.htm -->
-<a class="navbar-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud
-  {{ ('&mdash;' if current_ron.config_stem != '') | safe }}
-  {{ current_ron.config_stem }} </a>
 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
   aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
   <span class="navbar-toggler-icon"></span>
@@ -80,7 +77,6 @@
     </li>
   </ul>
   {% endif %}
-  {% include "header/header.htm" %}
 </div>
 <!--/ _run_header_fixed.htm -->
 {% endblock %}
