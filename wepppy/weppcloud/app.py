@@ -6,37 +6,23 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+import hashlib
+import json
+import logging
 import os
-import sys
-import csv
-import pathlib
-import io
-
-from datetime import datetime
-
-from ast import literal_eval
-from os.path import join as _join
-from os.path import exists as _exists
-from os.path import split as _split
-
-from collections import Counter
-
 import re
 import socket
-import hashlib
-import logging
-import json
-import shutil
-import traceback
+import sys
+from collections import Counter
+from datetime import datetime
 from glob import glob
-from subprocess import check_output, Popen, PIPE
+from os.path import exists as _exists
+from os.path import join as _join
+from os.path import split as _split
 
 import awesome_codename
 
-from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
-
-from deprecated import deprecated
 
 from flask import (
     Flask, jsonify, request, render_template,
@@ -59,13 +45,12 @@ from flask_security import (
 
 from wtforms.validators import DataRequired as Required
 from flask_mail import Mail
+from flask_session import Session
 from flask_migrate import Migrate
 
 from wtforms import StringField
 
 import wepppy
-
-import requests
 
 from wepppy.all_your_base import isfloat, isint
 from wepppy.all_your_base.geo import crop_geojson, read_raster
@@ -213,6 +198,7 @@ def setup_logging():
 
     # Ensure the error logger has no HealthFilter attached so stack traces remain visible.
     error_logger = logging.getLogger("gunicorn.error")
+    error_logger.setLevel(logging.DEBUG)
     if error_logger:
         for f in list(error_logger.filters):
             if isinstance(f, filter_type):
@@ -324,6 +310,7 @@ from routes.rq.api.api import rq_api_bp
 from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
 from routes.stats import stats_bp
 from routes.run_0 import run_0_bp
+from wepppy.weppcloud.routes._security import security_bp
 
 app.register_blueprint(admin_bp)
 app.register_blueprint(archive_bp)
@@ -365,8 +352,12 @@ app.register_blueprint(watershed_bp)
 app.register_blueprint(wepp_bp)
 app.register_blueprint(stats_bp)
 app.register_blueprint(run_0_bp)
+app.register_blueprint(security_bp)
+
+app.logger.setLevel(logging.DEBUG)
 
 mail = Mail(app)
+session_manager = Session(app)
 
 # Setup Flask-Security
 # Create database connection object
