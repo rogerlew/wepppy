@@ -2,6 +2,10 @@ import subprocess
 import os
 import shutil
 
+## This archive module is different form the archive blueprint. the archive blueprint is for user download of results
+## This archive module is for server side archiving of old runs to save space to the archive directory (wc/archive)
+
+
 
 def archive_run(runid, archive_dir='/wc/archive', wd=None):
     if wd is None:

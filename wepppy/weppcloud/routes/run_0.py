@@ -4,11 +4,13 @@ import wepppy
 import pathlib
 
 from datetime import datetime
+import awesome_codename
 
 from ._common import *  # noqa: F401,F403
 
 import wepppy
 from wepppy.all_your_base import isint
+from wepppy.nodb.base import get_configs
 from wepppy.nodb import Landuse, Ron, Unitizer, Watershed, Wepp, WeppPost, Soils, Topaz, Observed, RangelandCover, Rhem, Treatments
 from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.disturbed import Disturbed
@@ -18,7 +20,11 @@ from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
 from wepppy.wepp.out import DisturbedTotalWatSed2, Element, HillWat, TotalWatSed2
 from wepppy.wepp.stats import ChannelSummary, HillSummary, OutletSummary, TotalWatbal
-from wepppy.weppcloud.utils.helpers import get_wd, authorize, get_run_owners_lazy
+from wepppy.weppcloud.utils.helpers import (
+    get_wd, authorize, get_run_owners_lazy, 
+    authorize_and_handle_with_exception_factory,
+    handle_with_exception_factory
+)
 
 
 run_0_bp = Blueprint('run_0', __name__)
@@ -218,21 +224,22 @@ def runs0(runid, config):
         return exception_factory(runid=runid)
 
 
-@run_0.route('/create', strict_slashes=False)
+@run_0_bp.route('/create', strict_slashes=False)
+@handle_with_exception_factory
 def create_index():
     configs = get_configs()
     x = ['<tr><td><a href="{0}" rel="nofollow">{0}</a></td>'
-         '<td><a href="{0}?general:dem_db=ned1/2016" rel="nofollow">{0} ned1/2016</a></td>'
-         '<td><a href="{0}?watershed:delineation_backend=wbt" rel="nofollow">{0} WhiteBoxTools</a></td></tr>'
-         .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
+        '<td><a href="{0}?general:dem_db=ned1/2016" rel="nofollow">{0} ned1/2016</a></td>'
+        '<td><a href="{0}?watershed:delineation_backend=wbt" rel="nofollow">{0} WhiteBoxTools</a></td></tr>'
+        .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
     return '<!DOCTYPE html><html><body>'\
-           '<link rel="stylesheet" '\
-           'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
-           'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
-           '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(x))
-
+        '<link rel="stylesheet" '\
+        'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
+        'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
+        '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(x))
 
 def create_run_dir(current_user):
+    from wepppy.weppcloud.utils.archive import has_archive
     wd = None
     dir_created = False
     while not dir_created:
@@ -257,11 +264,11 @@ def create_run_dir(current_user):
     return runid, wd
 
 
-@run_0.route('/create/<config>')
-@run_0.route('/create/<config>/')
+@run_0_bp.route('/create/<config>')
+@run_0_bp.route('/create/<config>/')
 def create(config):
-
     try:
+        from wepppy.weppcloud.routes.readme import ensure_readme
         cfg = "%s.cfg" % config
 
         overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
@@ -281,16 +288,15 @@ def create(config):
         except Exception:
             return exception_factory('Could not create run')
 
-        url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config)
-
+        
         if not current_user.is_anonymous:
+            from wepppy.weppcloud.app import user_datastore
             try:
                 user_datastore.create_run(runid, config, current_user)
             except Exception:
                 return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
 
         ensure_readme(runid, config)
-
-        return redirect(url)
+        return redirect(url_for('run_0.runs0', runid=runid, config=config))
     except Exception:
-        return exception_factory()
+        return exception_factory('Could not create run')

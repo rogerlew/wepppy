@@ -9,7 +9,7 @@ import pandas as pd
 
 from flask import abort, Blueprint, request, Response, send_file, jsonify
 
-from utils.helpers import get_wd, htmltree
+from wepppy.weppcloud.utils.helpers import get_wd, htmltree
 
 
 download_bp = Blueprint('download', __name__)
