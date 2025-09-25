@@ -310,7 +310,7 @@ from routes.rq.api.api import rq_api_bp
 from routes.rq.job_dashboard.routes import rq_job_dashboard_bp
 from routes.stats import stats_bp
 from routes.run_0 import run_0_bp
-from wepppy.weppcloud.routes._security import security_bp
+from wepppy.weppcloud.routes._security import security_logging_bp, security_ui_bp
 
 app.register_blueprint(admin_bp)
 app.register_blueprint(archive_bp)
@@ -352,7 +352,8 @@ app.register_blueprint(watershed_bp)
 app.register_blueprint(wepp_bp)
 app.register_blueprint(stats_bp)
 app.register_blueprint(run_0_bp)
-app.register_blueprint(security_bp)
+app.register_blueprint(security_logging_bp)
+app.register_blueprint(security_ui_bp)
 
 app.logger.setLevel(logging.DEBUG)
 
@@ -644,7 +645,7 @@ def _get_last_modified(runid):
     return datetime.fromtimestamp(last)
 
 
-def _get_all_runs():
+def get_all_runs():
     return [run for run in Run.query.order_by(Run.date_created).all()]
 
 
@@ -669,7 +670,7 @@ def security_processor():
                 get_run_owner=_get_run_owner,
                 get_last_modified=_get_last_modified,
                 get_anonymous_runs=_get_anonymous_runs,
-                get_all_runs=_get_all_runs,
+                get_all_runs=get_all_runs,
                 w3w_center=_w3w_center,
                 get_all_users=_get_all_users)
 

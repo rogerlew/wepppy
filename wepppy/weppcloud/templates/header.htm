@@ -48,7 +48,7 @@
       </li>
       {% if user.has_role('Admin') %}
       <li>
-        <a href='{{ url_for('view_access_log', runid=runid, config=config) if project_base else 'access-log' }}' class="nav-link" target="_blank" data-toggle="tooltip" title="Access Log">
+        <a href='{{ url_for('admin.view_access_log', runid=runid, config=config) if project_base else 'access-log' }}' class="nav-link" target="_blank" data-toggle="tooltip" title="Access Log">
           <img src="{{ url_for('static', filename='open-iconic/png/monitor-2x-wh.png') }}" /></a>
       </li>
       {% endif %}
