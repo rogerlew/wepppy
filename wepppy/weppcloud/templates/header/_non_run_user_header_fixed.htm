@@ -1,0 +1,33 @@
+{% extends "header/_layout_fixed.htm" %}
+{% block nav_content %}
+<!-- _non_run_user_header_fixed.htm -->
+<ul class="navbar-nav navbar-right">
+  <li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('user.runs') }}">Runs</a>
+  </li>
+  {% if current_user.has_role('Admin') %}
+  <li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('admin.allruns') }}">All Runs</a>
+  </li>
+  {% endif %}
+  <li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('user.profile') }}">Profile</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('security.logout') }}">Logout</a>
+  </li>
+  {% if current_user.has_role('Root') %}
+  <li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('admin.usermod') }}">Usermod</a>
+  </li>
+  {% endif %}
+  {% if current_user.has_role('Root') or
+  current_user.has_role('Admin') or
+  current_user.has_role('Dev') %}
+  <li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('admin.runid_query') }}">Runid Query</a>
+  </li>
+  {% endif %}
+</ul>
+<!--/ _non_run_user_header_fixed.htm -->
+{% endblock %}

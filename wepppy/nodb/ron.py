@@ -781,3 +781,30 @@ class Ron(NoDbBase):
             soil=None,
             climate=None)
         
+
+def _try_str(x):
+    try:
+        return str(x)
+    except:
+        return ''
+
+def _try_bool(x):
+    try:
+        return bool(int(x))
+    except:
+        return False
+
+# for jinja views
+class RonViewModel(object):
+    def __init__(self, ron: Ron):
+        self.runid = _try_str(ron.runid)
+        self.name = _try_str(ron.name)
+        self.scenario = _try_str(ron.scenario)
+        self.config_stem = _try_str(ron.config_stem)
+        self.readonly = _try_bool(ron.readonly)
+        self.public = _try_bool(ron.public)
+
+    @classmethod
+    def getInstanceFromRunID(cls, runid):
+        ron = Ron.getInstanceFromRunID(runid)
+        return cls(ron)

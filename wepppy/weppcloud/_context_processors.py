@@ -106,7 +106,20 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
     def hasattr_processor():
         return dict(hasattr=lambda item, attr: hasattr(item, attr))
 
-
+    @app.context_processor
+    def current_ron_processor():
+        # get current runid from request path
+        from flask import request
+        from wepppy.nodb.ron import RonViewModel
+        runid = None
+        path_parts = request.path.split('/')
+        try:
+            _indx = path_parts.index('runs')
+            runid = path_parts[_indx + 1]
+            ron = RonViewModel.getInstanceFromRunID(runid)
+            return dict(current_ron=ron)
+        except:
+            return dict(current_ron=None)
 
     @app.context_processor
     def security_processor():
