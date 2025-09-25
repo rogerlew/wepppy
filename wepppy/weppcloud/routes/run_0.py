@@ -51,8 +51,6 @@ def runs0_nocfg(runid):
 
     return redirect(url_for('run_0.runs0', runid=runid, config=ron.config_stem))
 
-
-
 def _log_access(wd, current_user, ip):
     assert _exists(wd)
 
@@ -219,3 +217,80 @@ def runs0(runid, config):
     except:
         return exception_factory(runid=runid)
 
+
+@run_0.route('/create', strict_slashes=False)
+def create_index():
+    configs = get_configs()
+    x = ['<tr><td><a href="{0}" rel="nofollow">{0}</a></td>'
+         '<td><a href="{0}?general:dem_db=ned1/2016" rel="nofollow">{0} ned1/2016</a></td>'
+         '<td><a href="{0}?watershed:delineation_backend=wbt" rel="nofollow">{0} WhiteBoxTools</a></td></tr>'
+         .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
+    return '<!DOCTYPE html><html><body>'\
+           '<link rel="stylesheet" '\
+           'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
+           'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
+           '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(x))
+
+
+def create_run_dir(current_user):
+    wd = None
+    dir_created = False
+    while not dir_created:
+        runid = awesome_codename.generate_codename().replace(' ', '-').replace("'", '')
+
+        email = getattr(current_user, 'email', '')
+        if email.startswith('mdobre@'):
+            runid = 'mdobre-' + runid
+        elif email.startswith('srivas42@'):
+            runid = 'srivas42-' + runid
+
+        wd = get_wd(runid)
+        if _exists(wd):
+            continue
+
+        if has_archive(runid):
+            continue
+
+        os.makedirs(wd)
+        dir_created = True
+
+    return runid, wd
+
+
+@run_0.route('/create/<config>')
+@run_0.route('/create/<config>/')
+def create(config):
+
+    try:
+        cfg = "%s.cfg" % config
+
+        overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
+
+        if len(overrides) > 0:
+            cfg += '?%s' % overrides
+
+        try:
+            runid, wd = create_run_dir(current_user)
+        except PermissionError:
+            return exception_factory('Could not create run directory. NAS may be down.')
+        except Exception:
+            return exception_factory('Could not create run directory.')
+
+        try:
+            Ron(wd, cfg)
+        except Exception:
+            return exception_factory('Could not create run')
+
+        url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config)
+
+        if not current_user.is_anonymous:
+            try:
+                user_datastore.create_run(runid, config, current_user)
+            except Exception:
+                return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
+
+        ensure_readme(runid, config)
+
+        return redirect(url)
+    except Exception:
+        return exception_factory()
