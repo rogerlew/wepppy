@@ -7,7 +7,7 @@ from os.path import join as _join
 from os.path import split as _split
 
 from wepppy.nodb import Ron
-from wepppy.weppcloud.utils.helpers import error_factory, get_wd, authorize_and_handle_with_exception_factory
+from wepppy.weppcloud.utils.helpers import error_factory, get_wd, handle_with_exception_factory
 
 from ._common import *  # noqa: F401,F403
 
@@ -17,7 +17,7 @@ admin_bp = Blueprint('admin', __name__)
 @admin_bp.route('/runs/<string:runid>/<config>/access-log')
 @login_required
 @roles_required('Admin', 'Root')
-@authorize_and_handle_with_exception_factory
+@handle_with_exception_factory
 def view_access_log(runid, config):
     wd = get_wd(runid)
     access_fn = wd.replace(runid, f'.{runid}').rstrip('/')
@@ -32,7 +32,7 @@ def view_access_log(runid, config):
 
 @admin_bp.route('/dev/runid_query')
 @roles_required('Admin', 'Root')
-@authorize_and_handle_with_exception_factory
+@handle_with_exception_factory
 def runid_query():
     wc = request.args.get('wc', '')
     name = request.args.get('name', None)
@@ -49,7 +49,7 @@ def runid_query():
 
 @admin_bp.route('/usermod', strict_slashes=False)
 @roles_required('Admin', 'Root')
-@authorize_and_handle_with_exception_factory
+@handle_with_exception_factory
 def usermod():
     return render_template('user/usermod.html', user=current_user)
 
@@ -57,7 +57,7 @@ def usermod():
 @admin_bp.route('/allruns')
 @admin_bp.route('/allruns/')
 @roles_required('Admin')
-@authorize_and_handle_with_exception_factory
+@handle_with_exception_factory
 def allruns():
     from wepppy.weppcloud.app import get_all_runs, current_user
     user_runs = [run.meta for run in get_all_runs()]
@@ -70,7 +70,7 @@ def allruns():
 
 @admin_bp.route('/tasks/usermod/', methods=['POST'])
 @roles_required('Root')
-@authorize_and_handle_with_exception_factory
+@handle_with_exception_factory
 def task_usermod():
     from sqlalchemy import func
     from wepppy.weppcloud.app import db, user_datastore, User
