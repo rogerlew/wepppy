@@ -10,24 +10,24 @@ from sqlalchemy import func
 from wepppy.nodb import Ron
 from wepppy.nodb.watershed import Watershed
 
-from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize
+from wepppy.weppcloud.utils.helpers import (
+    get_wd, success_factory, error_factory, exception_factory,
+    get_run_owners_lazy, get_user_models, authorize, 
+    authorize_and_handle_with_exception_factory
+) 
 
 project_bp = Blueprint('project', __name__)
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/clear_locks')
+@authorize_and_handle_with_exception_factory
 def clear_locks(runid, config):
     """
     Clear the nodb locks
     """
-    authorize(runid, config)
-    wd = get_wd(runid)
-    try:
-        from wepppy.nodb import clear_locks
-        clear_locks(runid)
-        return success_factory()
-    except:
-        return exception_factory('Error Clearing Locks', runid=runid)
+    from wepppy.nodb import clear_locks
+    clear_locks(runid)
+    return success_factory()
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
@@ -57,25 +57,18 @@ def delete_run(runid, config):
 
 @project_bp.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')
 @project_bp.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json/')
+@authorize_and_handle_with_exception_factory
 def meta_subcatchmets_wgs(runid, config):
     from wepppy.export import arc_export
-
-    # get working dir of original directory
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
+    arc_export(wd)
 
-    try:
-        arc_export(wd)
-
-        if not request.args.get('no_retrieve', None) is not None:
-            sub_fn = _join(wd, ron.export_dir, 'arcmap', 'subcatchments.WGS.json')
-            return send_file(sub_fn)
-        else:
-            return success_factory()
-
-    except Exception:
-        return exception_factory('Error running arc_export', runid=runid)
-
+    if not request.args.get('no_retrieve', None) is not None:
+        sub_fn = _join(wd, ron.export_dir, 'arcmap', 'subcatchments.WGS.json')
+        return send_file(sub_fn)
+    else:
+        return success_factory()
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/adduser/', methods=['POST'])
@@ -142,78 +135,73 @@ def report_users(runid, config):
 
 # noinspection PyBroadException
 @project_bp.route('/runs/<string:runid>/<config>/resources/netful.json')
+@authorize_and_handle_with_exception_factory
 def resources_netful_geojson(runid, config):
-    try:
-        wd = get_wd(runid)
-        watershed = Watershed.getInstance(wd)
-        fn = watershed.netful_shp
-        return send_file(fn, mimetype='application/json')
-    except Exception:
-        return exception_factory(runid=runid)
+    wd = get_wd(runid)
+    watershed = Watershed.getInstance(wd)
+    fn = watershed.netful_shp
+    return send_file(fn, mimetype='application/json')
 
 
 # noinspection PyBroadException
 @project_bp.route('/runs/<string:runid>/<config>/resources/subcatchments.json')
+@authorize_and_handle_with_exception_factory
 def resources_subcatchments_geojson(runid, config):
-    try:
-        wd = get_wd(runid)
-        watershed = Watershed.getInstance(wd)
-        fn = watershed.subwta_shp
+    wd = get_wd(runid)
+    watershed = Watershed.getInstance(wd)
+    fn = watershed.subwta_shp
 
-        js = json.load(open(fn))
-        ron = Ron.getInstance(wd)
-        name = ron.name
+    js = json.load(open(fn))
+    ron = Ron.getInstance(wd)
+    name = ron.name
 
-        if name.strip() == '':
-            js['name'] = runid
-        else:
-            js['name'] = name
+    if name.strip() == '':
+        js['name'] = runid
+    else:
+        js['name'] = name
 
-        return jsonify(js)
-    except Exception:
-        return exception_factory(runid=runid)
+    return jsonify(js)
 
 @project_bp.route('/runs/<string:runid>/<config>/resources/bound.json')
+@authorize_and_handle_with_exception_factory
 def resources_bounds_geojson(runid, config, simplify=False):
-    try:
-        wd = get_wd(runid)
-        watershed = Watershed.getInstance(wd)
-        fn = watershed.bound_shp
+    wd = get_wd(runid)
+    watershed = Watershed.getInstance(wd)
+    fn = watershed.bound_shp
 
-        if 0:  #  disable simplify branch
-            fn2 = fn.split('.')
-            fn2.insert(-1, 'opt')
-            fn2 = '.'.join(fn2)
-            if _exists(fn2):
-                return send_file(fn2)
-            
-            cmd = ['ogr2ogr', fn2, fn, '-simplify', '0.002']
+    if 0:  #  disable simplify branch
+        fn2 = fn.split('.')
+        fn2.insert(-1, 'opt')
+        fn2 = '.'.join(fn2)
+        if _exists(fn2):
+            return send_file(fn2)
+        
+        cmd = ['ogr2ogr', fn2, fn, '-simplify', '0.002']
 
-            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            p.wait()
-        else:
-            fn2 = fn
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        p.wait()
+    else:
+        fn2 = fn
 
-        js = json.load(open(fn2))
-        ron = Ron.getInstance(wd)
-        name = ron.name
+    js = json.load(open(fn2))
+    ron = Ron.getInstance(wd)
+    name = ron.name
 
-        js['features'] = [js['features'][0]]
+    js['features'] = [js['features'][0]]
 
-        if name.strip() == '':
-            js['name'] = runid
-        else:
-            js['name'] = name
+    if name.strip() == '':
+        js['name'] = runid
+    else:
+        js['name'] = name
 
-        with open(fn2, 'w') as fp:
-            json.dump(js, fp)
+    with open(fn2, 'w') as fp:
+        json.dump(js, fp)
 
-        return jsonify(js)
-    except Exception:
-        return exception_factory(runid=runid)
+    return jsonify(js)
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/setname/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_setname(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -222,6 +210,7 @@ def task_setname(runid, config):
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/setscenario/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_setscenario(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -230,10 +219,8 @@ def task_setscenario(runid, config):
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/set_public', methods=['POST'])
-@project_bp.route('/runs/<string:runid>/<config>/tasks/set_public/', methods=['POST'])
-@login_required
+@authorize_and_handle_with_exception_factory
 def task_set_public(runid, config):
-    authorize()
     try:
         state = request.json.get('public', None)
     except Exception:
@@ -243,9 +230,7 @@ def task_set_public(runid, config):
         return error_factory('state is None')
 
     try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        ron.public = state
+        Ron.getInstanceFromRunID(runid).public = bool(state)
     except Exception:
         return exception_factory('Error setting state', runid=runid)
 
@@ -253,11 +238,8 @@ def task_set_public(runid, config):
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/set_readonly', methods=['POST'])
-@project_bp.route('/runs/<string:runid>/<config>/tasks/set_readonly/', methods=['POST'])
-@login_required
+@authorize_and_handle_with_exception_factory
 def task_set_readonly(runid, config):
-    authorize(runid, config)
-
     try:
         state = request.json.get('readonly', None)
     except Exception:
@@ -267,9 +249,7 @@ def task_set_readonly(runid, config):
         return error_factory('state is None')
 
     try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        ron.readonly = state
+        Ron.getInstanceFromRunID(runid).readonly = bool(state)
     except Exception:
         return exception_factory('Error setting state', runid=runid)
 
