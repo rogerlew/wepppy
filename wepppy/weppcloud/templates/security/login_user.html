@@ -1,17 +1,98 @@
-{% extends "security/_layout.html"%}
-{% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
-{% block title %}
-Login to WEPPcloud
-{% endblock %}
+{% set title = 'WEPPcloud Sign In' %}
+{% extends "security/base.html" %}
+{% from "security/_macros.html" import render_field_with_errors, render_field_errors, render_form_errors, prop_next %}
+
 {% block content %}
-  {% include "security/_messages.html" %}
-  <form action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
-    {{ login_user_form.hidden_tag() }}
-    {{ render_field_with_errors(login_user_form.email, class_="form-control") }}
-    {{ render_field_with_errors(login_user_form.password, class_="form-control") }}
-    {{ render_checkbox_with_errors(login_user_form.remember) }}
-    {{ render_field(login_user_form.next) }}
-    {{ render_field(login_user_form.submit, class_="btn btn-primary") }}
-  </form>
-<a href="{{ url_for_security('forgot_password') }}">Reset Password</a>
-{% endblock %}
+  <div class="wc-auth-shell">
+    <header class="wc-auth-header">
+      <h1>WEPPcloud</h1>
+      <p>Sign in with your WEPPcloud credentials to access tools and projects.</p>
+    </header>
+
+    {% include "security/_messages.html" %}
+
+    <form action="{{ url_for_security('login') }}{{ prop_next() }}" method="post" name="login_user_form" class="wc-auth-form">
+      {{ login_user_form.hidden_tag() }}
+      {{ render_form_errors(login_user_form) }}
+
+      {% if login_user_form.email and "email" in identity_attributes %}
+        {{ render_field_with_errors(login_user_form.email, placeholder='you@example.com', autocomplete='username') }}
+      {% endif %}
+
+      {% if login_user_form.username and "username" in identity_attributes %}
+        <div class="wc-auth-separator">or</div>
+        {{ render_field_with_errors(login_user_form.username, autocomplete='username') }}
+      {% endif %}
+
+      <div class="wc-auth-field" id="password-field">
+        <label for="{{ login_user_form.password.id }}">Password</label>
+        <div class="wc-auth-password">
+          {{ login_user_form.password(autocomplete='current-password') }}
+          <button type="button" class="wc-toggle" aria-controls="{{ login_user_form.password.id }}" aria-label="Show password">Show</button>
+        </div>
+        {{ render_field_errors(login_user_form.password) }}
+      </div>
+
+      {% if login_user_form.remember %}
+        <div class="wc-auth-remember">
+          {{ login_user_form.remember() }}
+          <label for="{{ login_user_form.remember.id }}">Remember me on this device</label>
+        </div>
+      {% endif %}
+
+      {{ render_field_errors(login_user_form.csrf_token) }}
+      <div class="wc-auth-actions">
+        {{ login_user_form.submit(class_='wc-auth-submit') }}
+      </div>
+    </form>
+
+    {% include "security/_menu.html" %}
+  </div>
+
+  <script>
+    (function () {
+      const toggle = document.querySelector('.wc-toggle');
+      const input = document.getElementById('{{ login_user_form.password.id }}');
+      if (!toggle || !input) {
+        return;
+      }
+      toggle.addEventListener('click', function () {
+        const showing = input.getAttribute('type') === 'text';
+        input.setAttribute('type', showing ? 'password' : 'text');
+        toggle.textContent = showing ? 'Show' : 'Hide';
+        toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+      });
+    }());
+  </script>
+
+  <style>
+    .wc-auth-shell { max-width: 420px; margin: 2rem auto; padding: 2rem; border-radius: 12px; background: #ffffff; box-shadow: 0 6px 24px rgba(34, 60, 80, 0.14); font-family: "Helvetica Neue", Arial, sans-serif; }
+    .wc-auth-header { text-align: center; margin-bottom: 1.5rem; }
+    .wc-auth-header h1 { margin: 0; font-size: 2rem; letter-spacing: 0.06rem; color: #154c79; }
+    .wc-auth-header p { margin: 0.66rem 0 0; color: #405263; font-size: 0.95rem; }
+    .wc-auth-form .fs-div { margin-bottom: 1rem; }
+    .wc-auth-form label { display: block; font-weight: 600; margin-bottom: 0.3rem; color: #1d2936; }
+    .wc-auth-form input[type="email"],
+    .wc-auth-form input[type="text"],
+    .wc-auth-form input[type="password"] { width: 100%; padding: 0.75rem 0.9rem; border: 1px solid #cad3de; border-radius: 8px; font-size: 1rem; }
+    .wc-auth-form input:focus { outline: none; border-color: #154c79; box-shadow: 0 0 0 3px rgba(21, 76, 121, 0.15); }
+    .wc-auth-password { display: flex; align-items: center; gap: 0.5rem; }
+    .wc-auth-password input { flex: 1; }
+    .wc-toggle { background: #eef4fb; border: 1px solid #cad3de; border-radius: 8px; padding: 0.55rem 0.85rem; cursor: pointer; font-size: 0.85rem; color: #154c79; transition: background 0.2s; }
+    .wc-toggle:hover { background: #dce8f5; }
+    .wc-auth-remember { display: flex; align-items: center; gap: 0.45rem; font-size: 0.9rem; color: #3f4a57; margin-bottom: 1rem; }
+    .wc-auth-actions { text-align: right; }
+    .wc-auth-submit { width: 100%; background: #1d74b7; color: #fff; border: none; padding: 0.8rem; font-size: 1rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+    .wc-auth-submit:hover { background: #155a8b; }
+    .wc-auth-separator { text-transform: uppercase; font-size: 0.75rem; font-weight: 600; text-align: center; color: #8592a3; letter-spacing: 0.1em; margin: -0.5rem 0 1rem; }
+    .fs-error-msg { color: #a52a2a; font-size: 0.85rem; margin-top: 0.4rem; }
+    .fs-messages { margin-bottom: 1rem; }
+    .fs-message { border-radius: 8px; padding: 0.8rem; margin-bottom: 0.75rem; font-size: 0.9rem; }
+    .fs-message.info { background: #eef4fb; color: #154c79; border: 1px solid #c0d4e6; }
+    .fs-message.error { background: #fdeaea; color: #782929; border: 1px solid #f3b4b4; }
+    .fs-menu { margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; text-align: center; }
+    .fs-menu a { color: #1d74b7; text-decoration: none; }
+    .fs-menu a:hover { text-decoration: underline; }
+    @media (max-width: 540px) { .wc-auth-shell { margin: 1.5rem; padding: 1.5rem; } }
+  </style>
+{% endblock content %}

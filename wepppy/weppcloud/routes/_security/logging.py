@@ -120,9 +120,13 @@ def _log_event(event_name: str, *, user=None, login_form=None, extra: Optional[D
         )
 
 
+LOGIN_ENDPOINTS = {'security.login', 'security_ui.login'}
+LOGOUT_ENDPOINTS = {'security.logout'}
+
+
 @security_bp.before_app_request
 def _log_login_request():
-    if request.endpoint == 'security.login' and request.method == 'POST':
+    if request.endpoint in LOGIN_ENDPOINTS and request.method == 'POST':
         sanitized_form = request.form.to_dict(flat=True)
         sanitized_form.pop('password', None)
         sanitized_form.pop('csrf_token', None)
@@ -139,7 +143,7 @@ def _log_login_request():
             session_snapshot,
             sanitized_form,
         )
-    elif request.endpoint == 'security.logout':
+    elif request.endpoint in LOGOUT_ENDPOINTS:
         session_snapshot = _session_snapshot()
         current_app.logger.info(
             "Security logout request method=%s ip=%s forwarded_for=%s ua=%s referrer=%s has_session_cookie=%s session=%s",
@@ -161,7 +165,7 @@ def _log_login_response(response):
     except Exception:
         endpoint = None
 
-    if endpoint == 'security.login':
+    if endpoint in LOGIN_ENDPOINTS:
         set_cookie_present = any(header[0].lower() == 'set-cookie' for header in response.headers.items())
         current_app.logger.info(
             "Security login response method=%s status=%s location=%s set_cookie=%s mimetype=%s",
@@ -171,7 +175,7 @@ def _log_login_response(response):
             set_cookie_present,
             response.mimetype,
         )
-    elif endpoint == 'security.logout':
+    elif endpoint in LOGOUT_ENDPOINTS:
         set_cookie_present = any(header[0].lower() == 'set-cookie' for header in response.headers.items())
         current_app.logger.info(
             "Security logout response method=%s status=%s location=%s set_cookie=%s mimetype=%s",

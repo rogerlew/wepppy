@@ -1,0 +1,33 @@
+{% set title = 'Signed out of WEPPcloud' %}
+{% extends "security/base.html" %}
+
+{% block content %}
+  <div class="wc-auth-shell">
+    <header class="wc-auth-header">
+      <h1>Goodbye for now</h1>
+      <p>You have signed out of WEPPcloud.</p>
+    </header>
+
+    {% include "security/_messages.html" %}
+
+    <div class="wc-auth-body">
+      <p>Your session is cleared on this device. Close the browser if you are on a shared computer, or sign back in to continue working.</p>
+    </div>
+
+    <div class="wc-auth-actions">
+      <a class="wc-auth-submit" href="{{ auth_login_url }}">Return to sign in</a>
+    </div>
+  </div>
+
+  <style>
+    .wc-auth-shell { max-width: 480px; margin: 2.5rem auto; padding: 2rem; border-radius: 12px; background: #ffffff; box-shadow: 0 6px 20px rgba(34, 60, 80, 0.14); font-family: "Helvetica Neue", Arial, sans-serif; }
+    .wc-auth-header { text-align: center; margin-bottom: 1.5rem; }
+    .wc-auth-header h1 { margin: 0; font-size: 2rem; color: #154c79; }
+    .wc-auth-header p { margin: 0.75rem 0 0; color: #405263; font-size: 0.98rem; }
+    .wc-auth-body { margin-bottom: 1.75rem; color: #3c4b5a; line-height: 1.6; font-size: 0.95rem; text-align: center; }
+    .wc-auth-actions { text-align: center; }
+    .wc-auth-submit { display: inline-block; background: #1d74b7; color: #fff; border-radius: 8px; padding: 0.8rem 1.6rem; font-weight: 600; text-decoration: none; }
+    .wc-auth-submit:hover { background: #155a8b; }
+    @media (max-width: 560px) { .wc-auth-shell { margin: 2rem 1.5rem; padding: 1.8rem; } }
+  </style>
+{% endblock content %}
