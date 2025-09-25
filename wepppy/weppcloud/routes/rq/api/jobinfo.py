@@ -38,8 +38,16 @@ rq_jobinfo_bp = Blueprint('rq_jobinfo', __name__)
 
 
 
+@rq_jobinfo_bp.route('/rq/api/jobstatus/<string:job_id>')
+def jobstatus_route(job_id):
+    try:
+        job_status = get_wepppy_rq_job_status(job_id)
+        return jsonify(job_status)
+    except Exception:
+        return exception_factory()
+
+
 @rq_jobinfo_bp.route('/rq/api/jobinfo/<string:job_id>')
-@rq_jobinfo_bp.route('/rq/jobinfo/<string:job_id>')
 def jobinfo_route(job_id):
     try:
         job_info = get_wepppy_rq_job_info(job_id)
@@ -49,20 +57,9 @@ def jobinfo_route(job_id):
 
 
 @rq_jobinfo_bp.route('/rq/api/canceljob/<string:job_id>')
-@rq_jobinfo_bp.route('/rq/canceljob/<string:job_id>')
 def canceljob_route(job_id):
     try:
         cancel_jobs(job_id)
         return success_factory()
-    except Exception:
-        return exception_factory()
-
-
-@rq_jobinfo_bp.route('/rq/api/jobstatus/<string:job_id>')
-@rq_jobinfo_bp.route('/rq/jobstatus/<string:job_id>')
-def jobstatus_route(job_id):
-    try:
-        job_status = get_wepppy_rq_job_status(job_id)
-        return jsonify(job_status)
     except Exception:
         return exception_factory()
