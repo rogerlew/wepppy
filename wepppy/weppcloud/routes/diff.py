@@ -11,7 +11,7 @@ import difflib
 
 from flask import abort, Blueprint, request, Response, jsonify
 
-from utils.helpers import get_wd, htmltree, error_factory
+from wepppy.weppcloud.utils.helpers import get_wd, htmltree, error_factory
 
 
 diff_bp = Blueprint('diff', __name__)

@@ -6,7 +6,7 @@ from os.path import split as _split
 from os.path import exists as _exists
 
 from flask import abort, Blueprint, request, jsonify
-from utils.helpers import get_wd, exception_factory, success_factory
+from wepppy.weppcloud.utils.helpers import get_wd, exception_factory, success_factory
 
 from wepppy.rq.job_info import get_wepppy_rq_job_info, get_wepppy_rq_job_status
 from wepppy.rq.cancel_job import cancel_jobs

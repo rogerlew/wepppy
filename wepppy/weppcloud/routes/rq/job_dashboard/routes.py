@@ -6,7 +6,7 @@ from os.path import split as _split
 from os.path import exists as _exists
 
 from flask import abort, Blueprint, request, render_template
-from utils.helpers import get_wd, exception_factory
+from wepppy.weppcloud.utils.helpers import get_wd, exception_factory
 
 rq_job_dashboard_bp = Blueprint('rq_job_dashboard', __name__, template_folder='templates')
 

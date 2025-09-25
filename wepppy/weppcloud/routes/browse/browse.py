@@ -29,7 +29,7 @@ from flask import (
 )
 from markupsafe import Markup
 
-from utils.helpers import get_wd, error_factory
+from wepppy.weppcloud.utils.helpers import get_wd, error_factory
 
 """
 Browse Blueprint

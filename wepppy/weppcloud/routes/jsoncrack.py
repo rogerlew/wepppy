@@ -10,7 +10,7 @@ import pandas as pd
 
 from flask import abort, Blueprint, request, Response, jsonify, current_app
 
-from utils.helpers import get_wd, htmltree, error_factory
+from wepppy.weppcloud.utils.helpers import get_wd, htmltree, error_factory
 _html = r"""
 <!DOCTYPE html>
 <html>

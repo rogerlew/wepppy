@@ -10,7 +10,7 @@ import pandas as pd
 
 from flask import abort, Blueprint, request, Response, jsonify
 
-from utils.helpers import get_wd, htmltree, error_factory
+from wepppy.weppcloud.utils.helpers import get_wd, htmltree, error_factory
 
 
 gdalinfo_bp = Blueprint('gdalinfo', __name__)

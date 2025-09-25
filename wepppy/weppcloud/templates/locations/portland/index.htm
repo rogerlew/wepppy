@@ -22,7 +22,7 @@ a.disabled {
   <header>
       <!-- Fixed navbar -->
       <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <a class="navbar-brand" href="../">WEPPcloud/Portland</a>
+        <a class="navbar-brand" href="{{ url_for('index') }}">WEPPcloud/Portland</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -31,14 +31,14 @@ a.disabled {
           <li class="nav-item">
           </li>
           {% if user.is_anonymous %}
-          <li><a class="nav-link" href="../login">Login</a></li>
-          <li><a class="nav-link" href="../register">Register</a></li>
+          <li><a class="nav-link" href="{{ url_for('security.login') }}">Login</a></li>
+          <li><a class="nav-link" href="{{ url_for('security.register') }}">Register</a></li>
           {% else %}
-          <li><a class="nav-link" href="../runs">My Runs</a></li>
-          <li><a class="nav-link" href="../profile">Profile</a></li>
-          <li><a class="nav-link" href="../logout">Logout</a></li>
+          <li><a class="nav-link" href="{{ url_for('user.runs') }}">My Runs</a></li>
+          <li><a class="nav-link" href="{{ url_for('user.profile') }}">Profile</a></li>
+          <li><a class="nav-link" href="{{ url_for('security.logout') }}">Logout</a></li>
           {% if current_user.has_role('Root') %}
-          <li><a class="nav-link" href="../usermod">Usermod</a></li>
+          <li><a class="nav-link" href="{{ url_for('admin.usermod') }}">Usermod</a></li>
           {% endif %}
           {% endif %}
         </ul>
@@ -104,23 +104,23 @@ a.disabled {
     <h4>Blazed Alder, Bull Run Near Multnomah, North Fork, South Fork, Little Sandy, Fir Creek, CedarCreek, Deer Creek, Cougar Creek, Bear Creek, Fivemile Creek, Camp Creek</h4>
     <div style="margin-left: 1.5em;">
         <h3>Tabled Results by Condition</h3>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202208_out_summary.csv">Aggregated Outlet Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202208_out_summary.csv') }}">Aggregated Outlet Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202208_hill_summary.csv">Aggregated Hillslopes Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202208_hill_summary.csv') }}">Aggregated Hillslopes Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202208_chn_summary.csv">Aggregated Channels Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202208_chn_summary.csv') }}">Aggregated Channels Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202208_sed_del_summary.csv">Aggregated Sediment Delivery Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202208_sed_del_summary.csv') }}">Aggregated Sediment Delivery Summary Results (.csv)</a>
     </div>
     <div style="margin-left: 1.5em;">
         <h3>ESRI Shapefiles by Condition</h3>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202208_shps.zip">Aggregated Shapefiles of Results (.zip)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202208_shps.zip') }}">Aggregated Shapefiles of Results (.zip)</a>
     </div>
     <div style="margin-left: 1.5em;">
         <h3>ERMiT Results</h3>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/ERMiT_results_interpretation_12_08_2022.pdf">12/2022 ERMiT Results Interpretation (.pdf)</a>
+        <a href="{{ url_for('locations.portland_results', file='ERMiT_results_interpretation_12_08_2022.pdf') }}">12/2022 ERMiT Results Interpretation (.pdf)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202208_ERMiT_results.zip">8/2020 ERMiT Results (.zip)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202208_ERMiT_results.zip') }}">8/2020 ERMiT Results (.zip)</a>
         <div style="height: 1em;"></div>
         <a href="https://cdeval.shinyapps.io/Viz-ERMiT/">Viz-ERMiT</a>
     </div>
@@ -129,34 +129,34 @@ a.disabled {
     <h4>Deer Creek, Cougar Creek, Bear Creek, Fivemile Creek, Camp Creek</h4>
     <div style="margin-left: 1.5em;">
         <h3>Tabled Results by Condition</h3>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202010_out_summary.csv">Aggregated Outlet Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202010_out_summary.csv') }}">Aggregated Outlet Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202010_hill_summary.csv">Aggregated Hillslopes Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202010_hill_summary.csv') }}">Aggregated Hillslopes Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202010_chn_summary.csv">Aggregated Channels Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202010_chn_summary.csv') }}">Aggregated Channels Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202010_sed_del_summary.csv">Aggregated Sediment Delivery Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202010_sed_del_summary.csv') }}">Aggregated Sediment Delivery Summary Results (.csv)</a>
     </div>
     <div style="margin-left: 1.5em;">
         <h3>ESRI Shapefiles by Condition</h3>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202010_shps.zip">Aggregated Shapefiles of Results (.zip)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202010_shps.zip') }}">Aggregated Shapefiles of Results (.zip)</a>
     </div>
 	
     <hr/>
     <h2>(Old) Summarized All Conditions 202009 Runs</h2>
     <div style="margin-left: 1.5em;">
         <h3>Tabled Results by Condition</h3>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202009_out_summary.csv">Aggregated Outlet Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202009_out_summary.csv') }}">Aggregated Outlet Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202009_hill_summary.csv">Aggregated Hillslopes Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202009_hill_summary.csv') }}">Aggregated Hillslopes Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202009_chn_summary.csv">Aggregated Channels Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202009_chn_summary.csv') }}">Aggregated Channels Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202009_sed_del_summary.csv">Aggregated Sediment Delivery Summary Results (.csv)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202009_sed_del_summary.csv') }}">Aggregated Sediment Delivery Summary Results (.csv)</a>
     </div>
     <div style="margin-left: 1.5em;">
         <h3>ESRI Shapefiles by Condition</h3>
-        <a href="{{ site_prefix }}/locations/portland-municipal/results/portland202009_shps.zip">Aggregated Shapefiles of Results (.zip)</a>
+        <a href="{{ url_for('locations.portland_results', file='portland202009_shps.zip') }}">Aggregated Shapefiles of Results (.zip)</a>
     </div>
     
     <hr/>
@@ -166,19 +166,19 @@ a.disabled {
         <h3>Current conditions and managements</h3>
         <div style="margin-left: 1.5em;">
             <h4>Delineate new watershed</h4>
-            <div><a href="/weppcloud/create/portland-wepp_bd16b69_snow " rel="nofollow">Run WEPP</a></div>
+            <div><a href="{{ url_for('run_0.create', config='portland-wepp_bd16b69_snow') }}" rel="nofollow">Run WEPP</a></div>
             <div style="height: 1em;"></div>
         </div>
         <h3>Simfire - Eagle</h3>
         <div style="margin-left: 1.5em;">
             <h4>Delineate new watershed</h4>
-            <div><a href="/weppcloud/create/portland-simfire-eagle-snow" rel="nofollow">Run WEPP</a></div>
+            <div><a href="{{ url_for('run_0.create', config='portland-simfire-eagle-snow') }}" rel="nofollow">Run WEPP</a></div>
             <div style="height: 1em;"></div>
         </div>
         <h3>Simfire - Norse</h3>
         <div style="margin-left: 1.5em;">
             <h4>Delineate new watershed</h4>
-            <div><a href="/weppcloud/create/portland-simfire-norse-snow" rel="nofollow">Run WEPP</a></div>
+            <div><a href="{{ url_for('run_0.create', config='portland-simfire-norse-snow') }}" rel="nofollow">Run WEPP</a></div>
             <div style="height: 1em;"></div>
         </div>
     </div>

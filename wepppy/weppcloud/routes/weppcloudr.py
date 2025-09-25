@@ -17,7 +17,7 @@ from os.path import abspath, basename
 from flask import abort, Blueprint, request
 from flask_security import current_user
 
-from utils.helpers import get_wd, exception_factory
+from wepppy.weppcloud.utils.helpers import get_wd, exception_factory
 
 from wepppy.nodb import Ron, Wepp, Watershed
 

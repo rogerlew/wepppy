@@ -2,6 +2,7 @@ import traceback
 
 import os
 import csv
+import inspect
 
 from os.path import join as _join
 from os.path import split as _split
@@ -213,4 +214,20 @@ def authorize_and_handle_with_exception_factory(func):
             # You might want to log the exception `e` here.
             return exception_factory(runid=runid)
             
+    return wrapper
+
+def handle_with_exception_factory(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        runid = kwargs.get('runid')
+        if runid is None:
+            try:
+                bound = inspect.signature(func).bind_partial(*args, **kwargs)
+                runid = bound.arguments.get('runid')
+            except Exception:
+                runid = None
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            return exception_factory(runid=runid)
     return wrapper
