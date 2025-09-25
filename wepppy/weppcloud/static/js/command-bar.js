@@ -30,6 +30,8 @@
         "set name <project name>   - Update the project name",
         "set scenario <name>       - Update the project scenario",
         "set outlet                - Use cursor location for outlet delineation",
+        "set readonly <true|false> - Toggle project readonly mode",
+        "set public <true|false>   - Toggle project public visibility",
         "set loglevel <debug|info|warning|error|critical> - Update project log verbosity"
     ];
 
@@ -395,6 +397,12 @@
                     break;
                 case 'loglevel':
                     return this.routeSetLogLevel(rest);
+                case 'readonly':
+                    this.routeSetReadonly(rest);
+                    break;
+                case 'public':
+                    this.routeSetPublic(rest);
+                    break;
                 default:
                     this.showResult(`Error: Unknown set option "${subcommandRaw}"`);
             }
@@ -438,18 +446,8 @@
                 return;
             }
 
-            const project = this.getProjectInstance();
-            if (!project) {
-                return;
-            }
-
-            if (typeof project.setName !== 'function') {
-                this.showResult('Error: Project.setName is not available.');
-                return;
-            }
-
             try {
-                project.setName(name);
+                Project.getInstance().setName(name);
             } catch (error) {
                 console.error('Error setting project name:', error);
                 this.showResult(`Error: Unable to set project name. ${error.message || error}`);
@@ -463,21 +461,51 @@
                 return;
             }
 
-            const project = this.getProjectInstance();
-            if (!project) {
+            try {
+                Project.getInstance().setScenario(scenario);
+            } catch (error) {
+                console.error('Error setting project scenario:', error);
+                this.showResult(`Error: Unable to set project scenario. ${error.message || error}`);
+            }
+        }
+
+        routeSetReadonly(args = []) {
+            if (args.length === 0) {
+                this.showResult('Usage: set readonly <true|false>');
                 return;
             }
 
-            if (typeof project.setScenario !== 'function') {
-                this.showResult('Error: Project.setScenario is not available.');
+            const desiredState = this.parseBooleanFlag(args[0]);
+            if (desiredState === null) {
+                this.showResult('Error: readonly state must be true or false.');
                 return;
             }
 
             try {
-                project.setScenario(scenario);
+                Project.getInstance().set_readonly(desiredState);
             } catch (error) {
-                console.error('Error setting project scenario:', error);
-                this.showResult(`Error: Unable to set project scenario. ${error.message || error}`);
+                console.error('Error setting readonly state:', error);
+                this.showResult(`Error: Unable to set readonly state. ${error.message || error}`);
+            }
+        }
+
+        routeSetPublic(args = []) {
+            if (args.length === 0) {
+                this.showResult('Usage: set public <true|false>');
+                return;
+            }
+
+            const desiredState = this.parseBooleanFlag(args[0]);
+            if (desiredState === null) {
+                this.showResult('Error: public state must be true or false.');
+                return;
+            }
+
+            try {
+                Project.getInstance().set_public(desiredState);
+            } catch (error) {
+                console.error('Error setting public state:', error);
+                this.showResult(`Error: Unable to set public state. ${error.message || error}`);
             }
         }
 
@@ -546,19 +574,15 @@
             });
         }
 
-        getProjectInstance() {
-            if (!window.Project || typeof window.Project.getInstance !== 'function') {
-                this.showResult('Error: Project instance is not available.');
-                return null;
+        parseBooleanFlag(value) {
+            const normalized = String(value || '').trim().toLowerCase();
+            if (['true', '1', 'yes', 'on', 'enable', 'enabled'].includes(normalized)) {
+                return true;
             }
-
-            try {
-                return window.Project.getInstance();
-            } catch (error) {
-                console.error('Error retrieving Project instance:', error);
-                this.showResult(`Error: Unable to access project. ${error.message || error}`);
-                return null;
+            if (['false', '0', 'no', 'off', 'disable', 'disabled'].includes(normalized)) {
+                return false;
             }
+            return null;
         }
 
         async fetchStatus() {

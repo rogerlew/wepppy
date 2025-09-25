@@ -769,23 +769,52 @@ var Project = function () {
             });
         };
 
-        that.set_readonly = function (state) {
+        that.set_readonly = function (state, options) {
             var self = instance;
+            options = options || {};
 
-            $.post({
-                url: "tasks/set_readonly/",
-                data: JSON.stringify({ readonly: state }),
+            var desiredState = !!state;
+            var previousState = $('#checkbox_readonly').is(':checked');
+
+            var request = $.post({
+                url: "tasks/set_readonly",
+                data: JSON.stringify({ readonly: desiredState }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
-                    self.set_readonly_controls(state);
+                    if (response.Success === true) {
+                        $('#checkbox_readonly').prop('checked', desiredState);
+                        self.set_readonly_controls(desiredState);
+                        if (options.notify !== false) {
+                            var message = desiredState
+                                ? 'READONLY set to True. Project controls disabled.'
+                                : 'READONLY set to False. Project controls enabled.';
+                            self._notifyCommandBar(message);
+                        }
+                    } else {
+                        $('#checkbox_readonly').prop('checked', previousState);
+                        self.pushResponseStacktrace(self, response);
+                        if (options.notify !== false) {
+                            self._notifyCommandBar('Error updating READONLY state.', { duration: null });
+                        }
+                    }
                 },
                 error: function error(jqXHR) {
+                    $('#checkbox_readonly').prop('checked', previousState);
                     console.log(jqXHR.responseJSON);
+                    if (options.notify !== false) {
+                        self._notifyCommandBar('Error updating READONLY state.', { duration: null });
+                    }
                 },
                 fail: function fail(error) {
+                    $('#checkbox_readonly').prop('checked', previousState);
+                    if (options.notify !== false) {
+                        self._notifyCommandBar('Error updating READONLY state.', { duration: null });
+                    }
                 }
             });
+
+            return request;
         };
 
         that.set_readonly_controls = function (readonly) {
@@ -812,6 +841,53 @@ var Project = function () {
 
                 Outlet.getInstance().setMode(0);
             }
+        };
+
+        that.set_public = function (state, options) {
+            var self = instance;
+            options = options || {};
+
+            var desiredState = !!state;
+            var previousState = $('#checkbox_public').is(':checked');
+
+            var request = $.post({
+                url: "tasks/set_public",
+                data: JSON.stringify({ public: desiredState }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        $('#checkbox_public').prop('checked', desiredState);
+                        if (options.notify !== false) {
+                            var message = desiredState
+                                ? 'PUBLIC set to True. Project is now publicly accessible.'
+                                : 'PUBLIC set to False. Project access limited to collaborators.';
+                            self._notifyCommandBar(message);
+                        }
+                    } else {
+                        $('#checkbox_public').prop('checked', previousState);
+                        self.pushResponseStacktrace(self, response);
+                        if (options.notify !== false) {
+                            self._notifyCommandBar('Error updating PUBLIC state.', { duration: null });
+                        }
+                    }
+                },
+                error: function error(jqXHR) {
+                    $('#checkbox_public').prop('checked', previousState);
+                    console.log(jqXHR.responseJSON);
+                    if (options.notify !== false) {
+                        self._notifyCommandBar('Error updating PUBLIC state.', { duration: null });
+                    }
+                },
+                fail: function fail(error) {
+                    $('#checkbox_public').prop('checked', previousState);
+                    if (options.notify !== false) {
+                        self._notifyCommandBar('Error updating PUBLIC state.', { duration: null });
+                    }
+                }
+            });
+
+            return request;
         };
 
         function replaceAll(str, find, replace) {
