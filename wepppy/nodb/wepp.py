@@ -14,6 +14,7 @@ from os.path import exists as _exists
 from os.path import split as _split
 
 import math
+import multiprocessing as mp
 
 from subprocess import Popen, PIPE, call
 from concurrent.futures import (
@@ -1512,7 +1513,28 @@ class Wepp(NoDbBase):
         self.logger.info(f'  run_concurrent={run_concurrent}')
         if run_concurrent:
             self.logger.info(f'  Submitting soils for `prep_soil` to ProcessPoolExecutor')
-            with ProcessPoolExecutor(max_workers=max(os.cpu_count(), 20)) as executor:
+
+            cpu_count = os.cpu_count() or 1
+            default_workers = max(cpu_count, 20)
+
+            def _create_executor():
+                ctx = None
+                try:
+                    ctx = mp.get_context('spawn')
+                except (AttributeError, ValueError):
+                    pass
+
+                if ctx is not None:
+                    try:
+                        return ProcessPoolExecutor(max_workers=default_workers, mp_context=ctx)
+                    except (OSError, PermissionError) as exc:
+                        self.logger.warning(
+                            '  Spawn start method unavailable for ProcessPoolExecutor (%s); using default context instead.',
+                            exc)
+
+                return ProcessPoolExecutor(max_workers=default_workers)
+
+            with _create_executor() as executor:
                 futures = []
                 for topaz_id, soil in soils.sub_iter():
                     wepp_id = translator.wepp(top=int(topaz_id))
@@ -1548,12 +1570,24 @@ class Wepp(NoDbBase):
 
                 futures_n = len(futures)
                 count = 0
-                pending = set(futures)
-                while pending:
-                    done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
+                pending_futures = set(futures)
+                last_progress_time = time.time()
+
+                while pending_futures:
+                    done, pending_futures = wait(pending_futures, timeout=5, return_when=FIRST_COMPLETED)
 
                     if not done:
-                        self.logger.error('  A soil prep task timed out after 5 seconds.')
+                        since_progress = time.time() - last_progress_time
+                        pending_count = len(pending_futures)
+
+                        if since_progress >= 60:
+                            self.logger.error(
+                                '  Soil prep tasks still pending after %.1fs; %s tasks waiting.',
+                                round(since_progress, 1), pending_count)
+                        else:
+                            self.logger.info(
+                                '  Waiting on soil prep tasks (pending=%s, %.1fs since last completion).',
+                                pending_count, round(since_progress, 1))
                         continue
 
                     for future in done:
@@ -1561,6 +1595,7 @@ class Wepp(NoDbBase):
                             topaz_id, elapsed_time = future.result()
                             count += 1
                             self.logger.info(f'  ({count}/{futures_n}) Completed soil prep for {topaz_id} in {elapsed_time}s')
+                            last_progress_time = time.time()
                         except Exception as e:
                             self.logger.error(f'  A soil prep task failed with an error: {e}')
         else:
