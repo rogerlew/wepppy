@@ -123,7 +123,7 @@ WSClient.prototype.connect = function () {
                 stacktrace.append(`<p>${data}</p>`);
 
                 var job_id = data.split(' ')[0].slice(3);
-                var job_url = `https://${window.location.host}/weppcloud/rq/jobinfo/${job_id}`;
+                var job_url = `https://${window.location.host}/weppcloud/rq/api/jobinfo/${job_id}`;
 
                 // need a short delay here to avoid race condition
                 setTimeout(function () {
@@ -707,7 +707,7 @@ var Project = function () {
         that.clear_locks = function () {
 
             $.get({
-                url: "tasks/clear_locks/",
+                url: "tasks/clear_locks",
                 cache: false,
                 success: function success(response) {
                     if (response.Success == true) {
@@ -728,7 +728,7 @@ var Project = function () {
         that.clear_locks = function () {
 
             $.get({
-                url: "tasks/clear_locks/",
+                url: "tasks/clear_locks",
                 cache: false,
                 success: function success(response) {
                     if (response.Success == true) {
