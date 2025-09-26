@@ -3,8 +3,12 @@
     "**/node_modules": true,
     "**/__pycache__": true,
     "**/wepppy/nodb/mods/locations/seattle/**": true,
+    "**/wepppy/weppcloud/static/js/controllers.js": true,
     "**/_scripts/**": true,
     "**/_scripts_hwd/**": true
+  },
+  "files.exclude": {
+    "**/wepppy/weppcloud/static/js/controllers.js": true
   },
   "python.analysis.exclude": [
     "**/_scripts",
