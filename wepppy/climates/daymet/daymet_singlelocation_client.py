@@ -9,7 +9,7 @@
 import time
 import io
 from os.path import join as _join
-from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
+from concurrent.futures import wait, FIRST_COMPLETED
 import logging
 
 import datetime
@@ -32,6 +32,7 @@ from metpy.units import units
 from wepppyo3.climate import interpolate_geospatial
 
 from wepppy.climates.cligen import df_to_prn
+from wepppy.nodb.base import createProcessPoolExecutor
 
 
 def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_years=True, gridmet_wind=False):
@@ -261,7 +262,7 @@ def interpolate_daily_timeseries(
     raw_data = {measure: np.zeros((ncols, nrows, ndays))
                 for measure in interpolation_spec.keys()}
     
-    with ProcessPoolExecutor(max_workers=12) as executor:
+    with createProcessPoolExecutor(max_workers=12, logger=logger) as executor:
         futures = []
 
         for (col, row), (lng, lat) in pixel_locations.items():
@@ -307,7 +308,7 @@ def interpolate_daily_timeseries(
     dates = pd.date_range(start=f'{start_year}-01-01', end=f'{end_year}-12-31')
 
 
-    with ProcessPoolExecutor(max_workers=28) as executor:
+    with createProcessPoolExecutor(max_workers=28, logger=logger) as executor:
         futures = []
 
         for topaz_id, loc in hillslope_locations.items():
