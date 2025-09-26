@@ -242,7 +242,7 @@ def create_run_dir(current_user):
 @run_0_bp.route('/create/<config>')
 @handle_with_exception_factory
 def create(config):
-    from wepppy.weppcloud.routes.readme import ensure_readme
+    from wepppy.weppcloud.routes.readme_md import ensure_readme
     cfg = "%s.cfg" % config
 
     overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])

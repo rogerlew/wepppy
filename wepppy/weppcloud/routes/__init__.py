@@ -24,7 +24,7 @@ from .project import project_bp
 from .jsoncrack import jsoncrack_bp
 from .rangeland import rangeland_bp
 from .rangeland_cover import rangeland_cover_bp
-from .readme import readme_bp
+from .readme_md import readme_bp
 from .rhem import rhem_bp
 from .soils import soils_bp
 from .treatments import treatments_bp
