@@ -39,6 +39,8 @@ import xarray as xr
 from wepppy.all_your_base.geo.locationinfo import  RasterDatasetInterpolator
 from wepppy.all_your_base.geo.geo_transformer import GeoTransformer
 
+from wepppy.weppcloud.utils.helpers import exception_factory
+
 from glob import glob
 
 from osgeo import ogr, osr, gdal
@@ -166,16 +168,6 @@ def merge_nc(fn_list, dst):
     p.wait()
 
     assert _exists(dst), ' '.join(cmd) + ' '.join(cmd2)
-
-
-def exception_factory(msg='Error Handling Request',
-                      stacktrace=None):
-    if stacktrace is None:
-        stacktrace = traceback.format_exc()
-
-    return jsonify({'Success': False,
-                    'Error': msg,
-                    'StackTrace': stacktrace})
 
 
 def safe_float_parse(x):
