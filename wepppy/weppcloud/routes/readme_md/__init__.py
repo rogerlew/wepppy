@@ -1,3 +1,4 @@
-from .readme_md import readme_bp
+from .readme_md import readme_bp, ensure_readme
 
-__all__ = ["readme_bp"]
+__all__ = ["readme_bp", 
+           "ensure_readme"]
