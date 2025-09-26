@@ -27,7 +27,7 @@ def _template_loader(fn):
     return _template
 
 
-def par_template_loader():
+def _par_template_loader():
     return _template_loader("par.template")
 
 
@@ -218,7 +218,7 @@ def make_parameter_file(scn_name,
 
     # Write to soil log file
     with open(fn, 'w') as fp:
-        fp.write(par_template_loader().format(
+        fp.write(_par_template_loader().format(
             scn_name=scn_name,
             now=datetime.now,
             model_version=model_version,
