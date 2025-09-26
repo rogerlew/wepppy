@@ -1,5 +1,6 @@
 import traceback
 
+import json
 import os
 import csv
 import inspect
@@ -81,30 +82,66 @@ def error_factory(msg='Error Handling Request'):
                     'Error': msg})
 
 
+def _ensure_text(value):
+    """Return a safe text representation for logging/JSON payloads."""
+    try:
+        return str(value)
+    except Exception:  # pragma: no cover - extremely defensive
+        return repr(value)
+
+
+def _format_error_message(msg):
+    if isinstance(msg, BaseException):
+        detail = _ensure_text(msg)
+        if detail and detail != msg.__class__.__name__:
+            return f'{msg.__class__.__name__}: {detail}'
+        return msg.__class__.__name__
+    return _ensure_text(msg)
+
+
 def exception_factory(msg='Error Handling Request',
                       stacktrace=None,
                       runid=None):
     if stacktrace is None:
         stacktrace = traceback.format_exc()
 
+    message = _format_error_message(msg)
+    stacktrace_text = stacktrace if isinstance(stacktrace, str) else _ensure_text(stacktrace)
+    stacktrace_lines = stacktrace_text.splitlines() if isinstance(stacktrace_text, str) else [_ensure_text(stacktrace_text)]
+
     if runid is not None:
         wd = get_wd(runid)
         if _exists(wd):
-            with open(_join(wd, 'exceptions.log'), 'a') as fp:
-                fp.write(f'[{datetime.now()}]\n')
-                fp.write(stacktrace)
-                fp.write('\n\n')
+            try:
+                with open(_join(wd, 'exceptions.log'), 'a') as fp:
+                    fp.write(f'[{datetime.now()}]\n')
+                    fp.write(stacktrace_text)
+                    fp.write('\n\n')
+            except OSError as log_error:
+                print(f'Error writing run exception log: {log_error}')
 
-    with open('/var/log/exceptions.log', 'a') as fp:
-        fp.write(f'[{datetime.now()}] ')
-        if runid is not None:
-            fp.write(f'{runid}\n')
-        fp.write(stacktrace)
-        fp.write('\n\n')
+    try:
+        with open('/var/log/exceptions.log', 'a') as fp:
+            fp.write(f'[{datetime.now()}] ')
+            if runid is not None:
+                fp.write(f'{runid}\n')
+            fp.write(stacktrace_text)
+            fp.write('\n\n')
+    except OSError as log_error:
+        print(f'Error writing global exception log: {log_error}')
 
-    return make_response(jsonify({'Success': False,
-                         'Error': msg,
-                         'StackTrace': stacktrace.split('\n')}), 500)
+    payload = {
+        'Success': False,
+        'Error': message,
+        'StackTrace': stacktrace_lines,
+    }
+
+    try:
+        return make_response(jsonify(payload), 500)
+    except TypeError:
+        fallback = make_response(json.dumps(payload), 500)
+        fallback.mimetype = 'application/json'
+        return fallback
 
 
 def success_factory(kwds=None):
