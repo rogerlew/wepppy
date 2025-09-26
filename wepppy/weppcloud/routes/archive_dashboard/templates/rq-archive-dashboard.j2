@@ -30,10 +30,12 @@
       const archivesUrl = {{ url_for('archive.rq_archive_list', runid=runid, config=config) | tojson }};
       const archiveApiUrl = {{ url_for('rq_api.api_archive', runid=runid, config=config) | tojson }};
       const restoreApiUrl = {{ url_for('rq_api.api_restore_archive', runid=runid, config=config) | tojson }};
+      const deleteApiUrl = {{ url_for('rq_api.api_delete_archive', runid=runid, config=config) | tojson }};
       const projectPath = {{ url_for('run_0.runs0', runid=runid, config=config) | tojson }};
       const isUserAnonymous = {{ user.is_anonymous | tojson }};
       let currentJobId = null;
       let pendingRestoreName = null;
+      let pendingDeleteName = null;
 
       class WSClient {
         constructor(runid, channel) {
@@ -134,12 +136,19 @@
           emptyMsg.style.display = 'none';
           data.archives.forEach((item) => {
             const tr = document.createElement('tr');
+
             const nameTd = document.createElement('td');
             nameTd.textContent = item.name;
+
+            const commentTd = document.createElement('td');
+            commentTd.textContent = item.comment || '';
+
             const sizeTd = document.createElement('td');
             sizeTd.textContent = formatBytes(item.size || 0);
+
             const modTd = document.createElement('td');
             modTd.textContent = item.modified || '';
+
             const linkTd = document.createElement('td');
             const link = document.createElement('a');
             link.href = item.download_url;
@@ -148,6 +157,7 @@
             link.target = '_blank';
             link.className = 'btn btn-sm btn-outline-secondary archive-action-btn';
             linkTd.appendChild(link);
+
             const restoreTd = document.createElement('td');
             const restoreBtn = document.createElement('button');
             restoreBtn.type = 'button';
@@ -163,11 +173,30 @@
               restoreBtn.setAttribute('title', 'Restore is only available for Authorized logged in users');
             }
             restoreTd.appendChild(restoreBtn);
+
+            const deleteTd = document.createElement('td');
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'btn btn-sm btn-outline-danger delete-button archive-action-btn';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.addEventListener('click', () => openDeleteModal(item.name));
+            if (currentJobId) {
+              deleteBtn.disabled = true;
+            } else if (isUserAnonymous) {
+              deleteBtn.disabled = true;
+              deleteBtn.setAttribute('data-toggle', 'tooltip');
+              deleteBtn.setAttribute('data-placement', 'top');
+              deleteBtn.setAttribute('title', 'Delete is only available for Authorized logged in users');
+            }
+            deleteTd.appendChild(deleteBtn);
+
             tr.appendChild(nameTd);
+            tr.appendChild(commentTd);
             tr.appendChild(sizeTd);
             tr.appendChild(modTd);
             tr.appendChild(linkTd);
             tr.appendChild(restoreTd);
+            tr.appendChild(deleteTd);
             tbody.appendChild(tr);
           });
         }
@@ -176,9 +205,11 @@
           document.getElementById('archive_button').disabled = true;
           currentJobId = data.job_id || null;
           setRestoreButtonsDisabled(true);
+          setDeleteButtonsDisabled(true);
         } else if (!currentJobId) {
           document.getElementById('archive_button').disabled = false;
           setRestoreButtonsDisabled(false);
+          setDeleteButtonsDisabled(false);
         }
         
         // Initialize tooltips after table is populated
@@ -204,15 +235,35 @@
       function archiveFinished() {
         currentJobId = null;
         document.getElementById('archive_button').disabled = false;
+        setRestoreButtonsDisabled(false);
+        setDeleteButtonsDisabled(false);
+        const commentInput = document.getElementById('archive_comment');
+        if (commentInput) {
+          commentInput.value = '';
+        }
         fetchArchives();
       }
 
       function startArchive() {
         document.getElementById('archive_button').disabled = true;
         setRestoreButtonsDisabled(true);
+        setDeleteButtonsDisabled(true);
+        const commentInput = document.getElementById('archive_comment');
+        let comment = '';
+        if (commentInput) {
+          comment = (commentInput.value || '').trim();
+          if (comment.length > 40) {
+            comment = comment.slice(0, 40);
+            commentInput.value = comment;
+          }
+        }
         appendStatus('Submitting archive job...');
         fetch(archiveApiUrl, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ comment })
         })
           .then((response) => response.json())
           .then((body) => {
@@ -226,6 +277,7 @@
             appendStatus(`ERROR: ${err.message || err}`);
             document.getElementById('archive_button').disabled = false;
             setRestoreButtonsDisabled(false);
+            setDeleteButtonsDisabled(false);
           });
       }
 
@@ -253,6 +305,7 @@
       function startRestore(archiveName) {
         document.getElementById('archive_button').disabled = true;
         setRestoreButtonsDisabled(true);
+        setDeleteButtonsDisabled(true);
         appendStatus(`Submitting restore job for ${archiveName}...`);
         $('#bottom').empty();
         fetch(restoreApiUrl, {
@@ -274,6 +327,7 @@
             appendStatus(`ERROR: ${err.message || err}`);
             document.getElementById('archive_button').disabled = false;
             setRestoreButtonsDisabled(false);
+            setDeleteButtonsDisabled(false);
           });
       }
 
@@ -281,6 +335,7 @@
         currentJobId = null;
         document.getElementById('archive_button').disabled = false;
         setRestoreButtonsDisabled(false);
+        setDeleteButtonsDisabled(false);
         fetchArchives();
         $('#bottom').html(`<a href="${projectPath}">Load ${runid} Project</a>`);
       }
@@ -294,6 +349,65 @@
             btn.disabled = disabled;
           }
         });
+      }
+
+      function setDeleteButtonsDisabled(disabled) {
+        document.querySelectorAll('.delete-button').forEach((btn) => {
+          if (isUserAnonymous) {
+            btn.disabled = true;
+          } else {
+            btn.disabled = disabled;
+          }
+        });
+      }
+
+      function openDeleteModal(archiveName) {
+        pendingDeleteName = archiveName;
+        document.getElementById('delete_modal_archive_name').textContent = archiveName;
+        $('#deleteConfirmModal').modal('show');
+      }
+
+      function closeDeleteModal() {
+        $('#deleteConfirmModal').modal('hide');
+      }
+
+      function confirmDelete() {
+        if (!pendingDeleteName) {
+          closeDeleteModal();
+          return;
+        }
+        const archiveName = pendingDeleteName;
+        pendingDeleteName = null;
+        closeDeleteModal();
+        startDelete(archiveName);
+      }
+
+      function startDelete(archiveName) {
+        setDeleteButtonsDisabled(true);
+        appendStatus(`Deleting archive ${archiveName}...`);
+        fetch(deleteApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ archive_name: archiveName })
+        })
+          .then((response) => response.json())
+          .then((body) => {
+            if (!body.Success) {
+              throw new Error(body.Error || 'Delete failed');
+            }
+            fetchArchives();
+          })
+          .catch((err) => {
+            appendStatus(`ERROR: ${err.message || err}`);
+          })
+          .finally(() => {
+            if (!currentJobId) {
+              setRestoreButtonsDisabled(false);
+              setDeleteButtonsDisabled(false);
+            }
+          });
       }
 
       function initializeTooltips() {
@@ -310,6 +424,8 @@
         wsClient.connect();
         document.getElementById('restore_confirm_button').addEventListener('click', confirmRestore);
         document.getElementById('restore_cancel_button').addEventListener('click', closeRestoreModal);
+        document.getElementById('delete_confirm_button').addEventListener('click', confirmDelete);
+        document.getElementById('delete_cancel_button').addEventListener('click', closeDeleteModal);
         
         // Initialize tooltips
         initializeTooltips();
@@ -320,6 +436,10 @@
     <div class="container mt-4">
       <h2 class="mb-1"><a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}">{{ runid }}</a> Project Archive Dashboard</h2>
       <p>Project: <code id="project_label"></code></p>
+      <div class="form-group col-md-6 px-0">
+        <label for="archive_comment">Archive Comment (optional, 40 characters max)</label>
+        <input type="text" class="form-control" id="archive_comment" maxlength="40" placeholder="Optional note stored with the archive">
+      </div>
       <button type="button" class="btn btn-primary" id="archive_button">Create Archive</button>
 
       <div class="mt-4">
@@ -334,10 +454,12 @@
           <thead>
             <tr>
               <th>Name</th>
+              <th>Comment</th>
               <th>Size</th>
               <th>Created</th>
               <th>Download</th>
               <th>Restore</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -362,6 +484,27 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="restore_cancel_button">Cancel</button>
             <button type="button" class="btn btn-danger" id="restore_confirm_button">Proceed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteConfirmLabel">Delete Archive</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-2">Deleting <code id="delete_modal_archive_name"></code>.</p>
+            <p class="mb-0">This permanently removes the archive file. This action cannot be undone. Do you want to continue?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="delete_cancel_button">Cancel</button>
+            <button type="button" class="btn btn-danger" id="delete_confirm_button">Delete</button>
           </div>
         </div>
       </div>
