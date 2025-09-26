@@ -13,6 +13,8 @@ import os
 
 import functools
 import inspect
+import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor
 from dotenv import load_dotenv
 from os.path import join as _join
 from os.path import split as _split
@@ -167,6 +169,48 @@ def try_redis_set_log_level(runid, level: str):
         logging.getLogger(f'wepppy.run.{runid}').setLevel(int(level))
     except Exception as e:
         logging.error(f'Error setting log level for logger: {e}')
+
+
+def createProcessPoolExecutor(max_workers, logger=None, prefer_spawn=True):
+    """Create a `ProcessPoolExecutor`, preferring the spawn context when requested.
+
+    Falls back to the default context when spawn is unavailable, restricted,
+    or explicitly disabled (for example, when pickling non-spawn-safe objects).
+
+    Args:
+        max_workers (int): Required worker count for the pool.
+        logger: Optional logger used for warning messages.
+        prefer_spawn (bool): If True (default), attempt to use the spawn start
+            method before falling back to the platform default.
+
+    Returns:
+        ProcessPoolExecutor: Configured executor instance.
+    """
+    if max_workers is None:
+        raise ValueError('max_workers is required')
+
+    log = logger or logging.getLogger(__name__)
+
+    if prefer_spawn:
+        ctx = None
+        try:
+            ctx = mp.get_context('spawn')
+        except (AttributeError, ValueError, RuntimeError):
+            ctx = None
+
+        if ctx is not None:
+            try:
+                return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx)
+            except (OSError, PermissionError) as exc:
+                log.warning(
+                    'Spawn start method unavailable for ProcessPoolExecutor (%s); using default context instead.',
+                    exc)
+            except Exception as exc:  # pragma: no cover - unexpected spawn errors
+                log.warning(
+                    'Spawn start method failed for ProcessPoolExecutor (%s); using default context instead.',
+                    exc)
+
+    return ProcessPoolExecutor(max_workers=max_workers)
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')

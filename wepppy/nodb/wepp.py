@@ -14,11 +14,10 @@ from os.path import exists as _exists
 from os.path import split as _split
 
 import math
-import multiprocessing as mp
 
 from subprocess import Popen, PIPE, call
 from concurrent.futures import (
-    ThreadPoolExecutor, ProcessPoolExecutor, wait, FIRST_COMPLETED
+    ThreadPoolExecutor, wait, FIRST_COMPLETED
 )
 import time
 import inspect
@@ -105,6 +104,7 @@ from .base import (
     TriggerEvents,
     nodb_setter,
     nodb_timed,
+    createProcessPoolExecutor,
 )
 
 from .landuse import Landuse
@@ -763,11 +763,11 @@ class Wepp(NoDbBase):
         assert max(years) == rap_ts.rap_end_year, 'RAP_TS end year does not match climate'
 
         rap_ts.prep_cover(self.runs_dir)
-        self.logger.info('done')
+        )
 
         self._prep_firedate()
 
-        self.logger.info('done')
+        )
 
     def _prep_firedate(self):
 
@@ -781,7 +781,7 @@ class Wepp(NoDbBase):
                 assert isint(da), da
                 assert isint(yr), yr
                 fp.write(firedate)
-        self.logger.info('done')
+        )
 
     @property
     def sol_versions(self):
@@ -872,7 +872,7 @@ class Wepp(NoDbBase):
             self.logger.info(f'nodb.Wepp._prep_pmet::kwargs routine')
             pmetpara_prep(self.runs_dir, kcb=kcb, rawp=rawp)
             assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
-            self.logger.info('done')
+            )
             return
 
         pmet_kcb_map = self.pmet_kcb_map
@@ -896,14 +896,14 @@ class Wepp(NoDbBase):
                 self.logger.info(f'nodb.Wepp._prep_pmet::kcb_map routine')
                 pmetpara_prep(self.runs_dir, kcb=kcb, rawp=self.pmet_rawp)
                 assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
-                self.logger.info('done')
+                )
                 return
 
         if 'disturbed' not in self.mods:
             self.logger.info(f'nodb.Wepp._prep_pmet::defaults routine')
             pmetpara_prep(self.runs_dir, kcb=self.pmet_kcb, rawp=self.pmet_rawp)
             assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
-            self.logger.info('done')
+            )
             return
 
         self.logger.info(f'nodb.Wepp._prep_pmet::disturbed routine')
@@ -911,7 +911,7 @@ class Wepp(NoDbBase):
         disturbed = Disturbed.getInstance(self.wd)
         disturbed.pmetpara_prep()
         assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
-        self.logger.info('done')
+        )
 
 
     def _remove_pmet(self):
@@ -942,28 +942,28 @@ class Wepp(NoDbBase):
             if p_surf_runoff > 0.0:
                 self.logger.info('wepp:_prep_phosphorus setting surf_runoff to {} from map'.format(p_surf_runoff))
                 phos_opts.surf_runoff = float(p_surf_runoff)
-                self.logger.info('done')
+                )
 
         if p_lateral_flow_map is not None:
             p_lateral_flow = RasterDatasetInterpolator(p_lateral_flow_map).get_location_info(lng, lat, method='nearest')
             if p_lateral_flow > 0.0:
                 self.logger.info('wepp:_prep_phosphorus setting lateral_flow to {} from map'.format(p_lateral_flow))
                 phos_opts.lateral_flow = float(p_lateral_flow)
-                self.logger.info('done')
+                )
 
         if p_baseflow_map is not None:
             p_baseflow = RasterDatasetInterpolator(p_baseflow_map).get_location_info(lng, lat, method='nearest')
             if p_baseflow > 0.0:
                 self.logger.info('wepp:_prep_phosphorus setting baseflow to {} from map'.format(p_baseflow))
                 phos_opts.baseflow = float(p_baseflow)
-                self.logger.info('done')
+                )
 
         if  p_sediment_map is not None:
             p_sediment = RasterDatasetInterpolator(p_sediment_map).get_location_info(lng, lat, method='nearest')
             if p_sediment > 0.0:
                 self.logger.info('wepp:_prep_phosphorus setting sediment to {} from map'.format(p_sediment))
                 phos_opts.sediment = float(p_sediment)
-                self.logger.info('done')
+                )
 
         # save the phosphorus parameters to the .nodb
         with self.locked():
@@ -1014,28 +1014,28 @@ class Wepp(NoDbBase):
             if gwstorage >= 0.0:
                 self.logger.info('wepp:_prep_baseflow setting gwstorage to {} from map'.format(gwstorage))
                 baseflow_opts.gwstorage = float(gwstorage)
-                self.logger.info('done')
+                )
 
         if bfcoeff_map is not None:
             bfcoeff = RasterDatasetInterpolator(bfcoeff_map).get_location_info(lng, lat, method='nearest')
             if bfcoeff >= 0.0:
                 self.logger.info('wepp:_prep_baseflow setting bfcoeff to {} from map'.format(bfcoeff))
                 baseflow_opts.bfcoeff = float(bfcoeff)
-                self.logger.info('done')
+                )
 
         if dscoeff_map is not None:
             dscoeff = RasterDatasetInterpolator(dscoeff_map).get_location_info(lng, lat, method='nearest')
             if dscoeff >= 0.0:
                 self.logger.info('wepp:_prep_baseflow setting dscoeff to {} from map'.format(dscoeff))
                 baseflow_opts.dscoeff = float(dscoeff)
-                self.logger.info('done')
+                )
 
         if bfthreshold_map is not None:
             bfthreshold = RasterDatasetInterpolator(bfthreshold_map).get_location_info(lng, lat, method='nearest')
             if bfthreshold >= 0.0:
                 self.logger.info('wepp:_prep_baseflow setting bfthreshold to {} from map'.format(bfthreshold))
                 baseflow_opts.bfthreshold = float(bfthreshold)
-                self.logger.info('done')
+                )
 
         # save the baseflow parameters to the .nodb
         with self.locked():
@@ -1216,7 +1216,7 @@ class Wepp(NoDbBase):
             os.makedirs(self.fp_runs_dir)
             os.makedirs(self.fp_output_dir)
 
-        self.logger.info('done')
+        )
 
     def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
         self.logger.info('    Prepping _prep_slopes_peridot... ')
@@ -1234,7 +1234,7 @@ class Wepp(NoDbBase):
             else:
                 _copyfile(src_fn, dst_fn)
 
-        self.logger.info('done')
+        )
 
     def _prep_slopes(self, translator, clip_hillslopes, clip_hillslope_length):
         self.logger.info('    Prepping _prep_slopes... ')
@@ -1257,7 +1257,7 @@ class Wepp(NoDbBase):
             else:
                 _copyfile(src_fn, dst_fn)
 
-        self.logger.info('done')
+        )
 
     def _prep_multi_ofe(self, translator):
         from wepppy.topo.watershed_abstraction import HillSummary as WatHillSummary
@@ -1410,7 +1410,7 @@ class Wepp(NoDbBase):
                 shutil.copyfile(build_d[meoization_key], dst_fn)
 
                 self.logger.info(f"     copying build_d['{meoization_key}'] -> {dst_fn}")
-                self.logger.info('done')
+                )
 
             else:
                 management = man_summary.get_management()
@@ -1477,7 +1477,7 @@ class Wepp(NoDbBase):
                 build_d[meoization_key] = dst_fn
                 self.logger.info(f'     meoization_key: {meoization_key} -> {dst_fn}')
 
-                self.logger.info('done')
+                )
 
         if 'emapr_ts' in self.mods:
             self.logger.info('    _prep_managements:emapr_ts.analyze... ')
@@ -1489,7 +1489,7 @@ class Wepp(NoDbBase):
             emapr_ts.acquire_rasters(start_year=climate.observed_start_year,
                                      end_year=climate.observed_end_year)
             emapr_ts.analyze()
-            self.logger.info('done')
+            )
 
     def _prep_soils(self, translator):
         func_name = inspect.currentframe().f_code.co_name
@@ -1517,24 +1517,7 @@ class Wepp(NoDbBase):
             cpu_count = os.cpu_count() or 1
             default_workers = max(cpu_count, 20)
 
-            def _create_executor():
-                ctx = None
-                try:
-                    ctx = mp.get_context('spawn')
-                except (AttributeError, ValueError):
-                    pass
-
-                if ctx is not None:
-                    try:
-                        return ProcessPoolExecutor(max_workers=default_workers, mp_context=ctx)
-                    except (OSError, PermissionError) as exc:
-                        self.logger.warning(
-                            '  Spawn start method unavailable for ProcessPoolExecutor (%s); using default context instead.',
-                            exc)
-
-                return ProcessPoolExecutor(max_workers=default_workers)
-
-            with _create_executor() as executor:
+            with createProcessPoolExecutor(max_workers=default_workers, logger=self.logger) as executor:
                 futures = []
                 for topaz_id, soil in soils.sub_iter():
                     wepp_id = translator.wepp(top=int(topaz_id))

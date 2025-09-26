@@ -110,7 +110,7 @@ class RAP_TS(NoDbBase):
             retries = rap_mgr.retrieve([year])
             if retries > 0:
                 self.logger.info(f'  retries: {retries}\n')
-            self.logger.info('done')
+            )
             return year
 
         def oncomplete(future):
@@ -211,7 +211,7 @@ class RAP_TS(NoDbBase):
                         key_fn=watershed.subwta, parameter_fn=rap_ds_fn, band_indx=band)
 
                 data_ds[band][year] = result
-                self.logger.info('done')
+                )
                 return year, band
 
             def oncomplete(future):
@@ -255,7 +255,7 @@ class RAP_TS(NoDbBase):
             self.data = data_ds
 
         self.logger.info('analysis complete...')
-        self.logger.info('done')
+        )
 
         try:
             prep = RedisPrep.getInstance(self.wd)

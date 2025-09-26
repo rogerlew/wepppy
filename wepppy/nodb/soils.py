@@ -17,7 +17,7 @@ import shutil
 from enum import IntEnum
 from copy import deepcopy
 
-from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
+from concurrent.futures import wait, FIRST_COMPLETED
 
 from collections import Counter
 
@@ -41,7 +41,8 @@ from wepppy.wepp.soils.soilsdb import load_db, get_soil
 # wepppy submodules
 from .base import (
     NoDbBase,
-    TriggerEvents, nodb_setter
+    TriggerEvents, nodb_setter,
+    createProcessPoolExecutor,
 )
 
 from .ron import Ron
@@ -340,7 +341,7 @@ class Soils(NoDbBase):
             # Prepare arguments for multiprocessing
 
             # Execute in parallel
-            with ProcessPoolExecutor(max_workers=max(os.cpu_count(), 16)) as executor:
+            with createProcessPoolExecutor(max_workers=max(os.cpu_count(), 16), logger=self.logger, prefer_spawn=False) as executor:
                 futures = []
                 for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
                     futures.append(
@@ -380,7 +381,7 @@ class Soils(NoDbBase):
                             valid_k_counts[mukey] += watershed.hillslope_area(topaz_id)
                             soils[mukey] = soil_summary
 
-            self.logger.info('done')
+            )
 
             # now assign hillslopes with invalid mukeys the most common valid mukey
             most_common_k = valid_k_counts.most_common()[0][0]

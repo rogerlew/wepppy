@@ -442,7 +442,6 @@ class Landuse(NoDbBase):
                 # rhem has rap but no disturbed class
                 disturbed_class = getattr(man_summary, 'disturbed_class', None)
                 self.logger.info(f'topaz_id: {topaz_id}\t dom:{dom}\t disturbed_class: {disturbed_class}')
-                self.logger.info('done')
 
                 if disturbed_class is None or disturbed_class == '':
                     continue
@@ -610,7 +609,6 @@ class Landuse(NoDbBase):
                     meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
         
         self.logger.info(f'domlc_d = {domlc_d}')
-        self.logger.info('done')
 
         if 'rap' in self.mods:
             self.logger.info(f'acquiring rap')
@@ -703,7 +701,7 @@ class Landuse(NoDbBase):
                 mofe_synth.stack = stack
                 merged = mofe_synth.write(mofe_lc_fn)
 
-            self.logger.info('done')
+            )
 
         with self.locked():
             if cancov_d:

@@ -14,7 +14,6 @@ import base64
 
 import pandas as pd
 
-from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
 from enum import IntEnum
@@ -837,11 +836,11 @@ class Omni(NoDbBase):
 
             self.logger.info(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
             self._build_scenario(scenario_def)
-            self.logger.info('done')
+            )
 
         self.logger.info('  Omni::run_omni_scenarios: compiling hillslope summaries\n')
         self.compile_hillslope_summaries()
-        self.logger.info('done')
+        )
 
     def _build_scenario(
             self,
@@ -867,10 +866,6 @@ class Omni(NoDbBase):
         # assert we know how to handle the scenario
         assert isinstance(scenario, OmniScenario)
         new_wd = _omni_clone(scenario_def, wd)
-
-        if _exists(new_wd):
-            self.logger.info(f'  Omni::_build_scenario: removing existing {new_wd}\n')
-            shutil.rmtree(new_wd)
 
         self.logger.info(f'  Omni::_build_scenario: new_wd:{new_wd}\n')
 
@@ -1025,6 +1020,11 @@ class Omni(NoDbBase):
         cli_relpath = os.path.relpath(self.runs_dir, wepp.runs_dir)  # self is Omni instance in parent. _pups do not have Omni
         slp_relpath = os.path.relpath(self.runs_dir, wepp.runs_dir)
         sol_relpath = ''
+
+        if not cli_relpath.endswith('/'):
+            cli_relpath += '/'
+        if not slp_relpath.endswith('/'):
+            slp_relpath += '/'
 
         wepp.prep_hillslopes(man_relpath=man_relpath,
                              cli_relpath=cli_relpath,
