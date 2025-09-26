@@ -31,7 +31,7 @@ _thisdir = os.path.dirname(__file__)
 _template_dir = _join(_thisdir, "templates")
 
 
-def ww2_prw_template_loader():
+def _ww2_prw_template_loader():
     fn = _join(_template_dir, "ww2.prw.template")
     with open(fn) as fp:
         return fp.read()
@@ -57,7 +57,7 @@ def export_winwepp(wd):
     soils = wepppy.nodb.Soils.getInstance(wd)
     translator = watershed.translator_factory()   
     
-    template = Template(ww2_prw_template_loader())
+    template = Template(_ww2_prw_template_loader())
     ww2 = template.render(ron=ron,
                           watershed=watershed,
                           climate=climate,
