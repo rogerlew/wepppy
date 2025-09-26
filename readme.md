@@ -8,7 +8,7 @@ wepppy is the core library behind WEPPcloud, automating Water Erosion Prediction
 
 At the heart of the system is a "NoDb" philosophy: instead of a monolithic database, run state is serialized to disk, memoized in Redis, and surfaced through microservices so every component can inspect, replay, or recover long-lived scenarios with minimal coupling.
 
-## Why Engineers Like It
+## Nerdy Highlights
 - Redis-backed NoDb singletons hydrate run state on demand, cache hot JSON payloads, and enforce distributed locks without an RDBMS.
 - A queue-driven logging pipeline streams structured status updates from background workers to the browser in milliseconds.
 - Heavy geospatial math is offloaded to Rust crates (`wepppyo3`, `peridot`, WhiteboxTools bindings) so Python orchestrates while SIMD cores do the heavy lifting.
