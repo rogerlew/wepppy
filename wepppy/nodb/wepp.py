@@ -684,9 +684,10 @@ class Wepp(NoDbBase):
     #
     # hillslopes
     #
-    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None, omni=False):
+    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None,
+                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
         func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name}(frost={frost}, baseflow={baseflow}, wepp_ui={wepp_ui}, pmet={pmet}, snow={snow}, omni={omni})')
+        self.logger.info(f'{self.class_name}.{func_name}(frost={frost}, baseflow={baseflow}, wepp_ui={wepp_ui}, pmet={pmet}, snow={snow}, man_relpath={man_relpath}, cli_relpath={cli_relpath}, slp_relpath={slp_relpath}, sol_relpath={sol_relpath})')
 
         # get translator
         watershed = Watershed.getInstance(self.wd)
@@ -699,17 +700,21 @@ class Wepp(NoDbBase):
                 reveg = True
 
         if self.multi_ofe:
-            self._prep_multi_ofe(translator, omni=omni)
+            self._prep_multi_ofe(translator)
         else:
-            if not omni:
+            if slp_relpath == '':
                 self._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
             self._prep_managements(translator)
             self._prep_soils(translator)
 
-        if not omni:
+        if cli_relpath == '':
             self._prep_climates(translator)
 
-        self._make_hillslope_runs(translator, reveg=reveg, omni=omni)
+        self._make_hillslope_runs(translator, reveg=reveg,
+                                  man_relpath=man_relpath, 
+                                  cli_relpath=cli_relpath, 
+                                  slp_relpath=slp_relpath, 
+                                  sol_relpath=sol_relpath)
 
         if (frost is None and self.run_frost) or frost:
             self._prep_frost()
@@ -1253,7 +1258,7 @@ class Wepp(NoDbBase):
 
         self.logger.info('done')
 
-    def _prep_multi_ofe(self, translator, omni=False):
+    def _prep_multi_ofe(self, translator):
         from wepppy.topo.watershed_abstraction import HillSummary as WatHillSummary
 
         self.logger.info('    Prepping _prep_multi_ofe... ')
@@ -1643,7 +1648,8 @@ class Wepp(NoDbBase):
             src_fn = _join(cli_dir, cli_fn)
             _copyfile(src_fn, dst_fn)
 
-    def _make_hillslope_runs(self, translator, reveg=False, omni=False):
+    def _make_hillslope_runs(self, translator, reveg=False,
+                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
         self.logger.info('    Prepping _make_hillslope_runs... ')
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
@@ -1655,7 +1661,11 @@ class Wepp(NoDbBase):
             for topaz_id in watershed._subs_summary:
                 wepp_id = translator.wepp(top=int(topaz_id))
 
-                make_ss_hillslope_run(wepp_id, runs_dir, omni=omni)
+                make_ss_hillslope_run(wepp_id, runs_dir,
+                                      man_relpath=man_relpath,
+                                      cli_relpath=cli_relpath,
+                                      slp_relpath=slp_relpath,
+                                      sol_relpath=sol_relpath)
 
         elif climate.climate_mode == ClimateMode.SingleStormBatch:
             for topaz_id in watershed._subs_summary:
@@ -1664,14 +1674,28 @@ class Wepp(NoDbBase):
                 for d in climate.ss_batch_storms:
                     ss_batch_id = d['ss_batch_id']
                     ss_batch_key = d['ss_batch_key']
-                    make_ss_batch_hillslope_run(wepp_id, runs_dir, ss_batch_id=ss_batch_id, ss_batch_key=ss_batch_key, omni=omni)
-
+                    make_ss_batch_hillslope_run(wepp_id, 
+                                                runs_dir, 
+                                                ss_batch_id=ss_batch_id, 
+                                                ss_batch_key=ss_batch_key,
+                                                man_relpath=man_relpath,
+                                                cli_relpath=cli_relpath,
+                                                slp_relpath=slp_relpath,
+                                                sol_relpath=sol_relpath)
         else:
             for topaz_id in watershed._subs_summary:
                 wepp_id = translator.wepp(top=int(topaz_id))
-                make_hillslope_run(wepp_id, years, runs_dir, reveg=reveg, omni=omni)
+                make_hillslope_run(wepp_id, 
+                                   years, 
+                                   runs_dir, 
+                                   reveg=reveg,
+                                   man_relpath=man_relpath,
+                                   cli_relpath=cli_relpath,
+                                   slp_relpath=slp_relpath,
+                                   sol_relpath=sol_relpath)
 
-    def run_hillslopes(self, omni=False):
+    def run_hillslopes(self,
+                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
         self.logger.info('Running Hillslopes')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -1681,7 +1705,6 @@ class Wepp(NoDbBase):
         wepp_bin = self.wepp_bin
 
         self.logger.info(f'    wepp_bin:{wepp_bin}')
-        self.logger.info(f'    omni: {omni}')
 
         sub_n = watershed.sub_n
 
@@ -1703,9 +1726,11 @@ class Wepp(NoDbBase):
                             runs_dir=runs_dir,
                             wepp_bin=wepp_bin,
                             ss_batch_id=ss_batch_id,
-                            omni=omni
+                            man_relpath=man_relpath,
+                            cli_relpath=cli_relpath,
+                            slp_relpath=slp_relpath,
+                            sol_relpath=sol_relpath
                         ))
-                        futures[-1].add_done_callback(oncomplete)
 
             else:
                 self.logger.info(f'  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - no SS batch')
@@ -1716,7 +1741,10 @@ class Wepp(NoDbBase):
                         wepp_id=wepp_id,
                         runs_dir=runs_dir,
                         wepp_bin=wepp_bin,
-                        omni=omni
+                        man_relpath=man_relpath,
+                        cli_relpath=cli_relpath,
+                        slp_relpath=slp_relpath,
+                        sol_relpath=sol_relpath
                     ))
 
             futures_n = len(futures)
