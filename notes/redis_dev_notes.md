@@ -37,8 +37,10 @@ Redis underpins WEPPcloud's run orchestration, caching, and collaborative toolin
 | 0  | Run-scoped state, timestamps, and file-lock flags (`RedisPrep`) | `wepppy.nodb.redis_prep`, `wepppy.nodb.base`, RQ tasks | `microservices/preflight`, `wepppy` services, CLI utilities | Hash per run ID storing `attrs:*`, `timestamps:*`, `rq:*`, `archive:*`, and `locked:*`. Requires Redis keyspace notifications (`notify-keyspace-events` should include `Kh`) for live preflight updates. |
 | 2  | Real-time status streaming via Pub/Sub | `StatusMessenger`, long-running RQ jobs, climate/soil builders | `microservices/status`, web clients subscribed over WebSockets | Channels follow `<runid>:<channel>` (examples: `:wepp`, `:archive`, `:omni`). No persistence—messages disappear if no subscriber is listening. |
 | 9  | RQ queues and job metadata | `wepppy.weppcloud.routes.rq.api`, worker callbacks, `wepppy.rq.*` helpers | RQ workers, dashboards, jobinfo APIs, admin scripts | Holds queue lists (`rq:m4`) plus job hashes (`rq:job:<id>`). Make sure `RQ_DB` stays consistent across web, workers, and CLI tooling. |
+| 11 | Server-side Flask sessions (`Flask-Session`) | WEPPcloud web app | WEPPcloud web app | Keys prefixed `session:` with 12-hour TTL. Configurable via `SESSION_REDIS_URL`, `SESSION_REDIS_DB`, or the shared `REDIS_*` settings. |
 | 13 | NoDb JSON cache to accelerate repeated object loads | `wepppy.nodb.base` when saving or rebuilding | Same modules when calling `NoDbBase.getInstance` | Values are JSONPickle payloads keyed `<runid>:<filename>`, TTL 72h. Fails open: if the cache is missing or corrupt we fall back to disk. |
-| 14 | README editor session coordination and distributed locks | `wepppy.weppcloud.routes.readme` blueprint | README editor SPA, admin pages | Keys such as `readme:lock:<runid>:<config>` and `readme:client:<runid>:<config>:<uuid>` carry TTLs to clean up abandoned sessions.
+| 14 | README editor session coordination and distributed locks | `wepppy.weppcloud.routes.readme_md` blueprint | README editor SPA, admin pages | Keys such as `readme:lock:<runid>:<config>` and `readme:client:<runid>:<config>:<uuid>` carry TTLs to clean up abandoned sessions. |
+| 15 | Per-run log level configuration | Command bar endpoints, debugging utilities | NoDb logger initialization, file handlers | Keys formatted as `loglevel:<runid>` store string values (debug, info, warning, error, critical) that control logging verbosity for specific runs. No TTL—levels persist until explicitly changed.
 
 Most synchronous modules read the host from `REDIS_HOST` (default `localhost`). The async microservices rely on `REDIS_URL` (default `redis://localhost`). When in doubt, prefer these helpers so deployments can override endpoints without touching code.
 
@@ -70,7 +72,7 @@ prep.timestamp(TaskEnum.run_wepp)
 prep.set_rq_job_id("run_wepp", job.id)
 ```
 
-- `wepppy.nodb.base.NoDbBase`: wraps JSON-backed project components with Redis-powered locks (`locked:<filename>`), caching (DB 13), and log fan-out via `StatusMessengerHandler`.
+- `wepppy.nodb.base.NoDbBase`: wraps JSON-backed project components with Redis-powered locks (`locked:<filename>`), caching (DB 13), and log fan-out via `StatusMessengerHandler`. Logger initialization automatically respects per-run log levels from DB 15.
 
 ```python
 with nodb_instance.locked():
@@ -93,7 +95,9 @@ StatusMessenger.publish(f"{runid}:wepp", f"rq:{job.id} STARTED run_wepp_rq({runi
 
 - `wepppy.weppcloud.routes.rq.api`: the Flask API surface that enqueues RQ work, checks queue health, and reads `RedisPrep` to guard against duplicate submissions.
 
-- `wepppy.weppcloud.routes.readme`: collaborative README editor that uses DB 14 to enforce a soft lock, track active client sessions, and invalidate stale writers.
+- `wepppy.weppcloud.routes.readme_md`: collaborative README editor that uses DB 14 to enforce a soft lock, track active client sessions, and invalidate stale writers.
+
+- `wepppy.weppcloud.routes.command_bar.command_bar`: provides power-user endpoints including log level control that stores configuration in DB 15 and validates levels against the `LogLevel` enum.
 
 ## `wepppy` redis patterns
 
@@ -120,6 +124,29 @@ if cached:
 ```
 
 When saving, `dump()` writes to disk first and then mirrors the JSON into Redis so a crash during persistence never leaves us with cache-only state.
+
+### per-run log level configuration
+
+Dynamic log level control per run ID uses DB 15 with keys formatted as `loglevel:<runid>`. The `LogLevel` enum maps string values (debug, info, warning, error, critical) to Python logging constants. This enables granular debugging without affecting other concurrent runs.
+
+```python
+from wepppy.nodb.base import LogLevel, try_redis_set_log_level, try_redis_get_log_level
+
+# Set log level for a specific run
+try_redis_set_log_level(runid, "debug")
+
+# Retrieve current log level (defaults to INFO if not set)
+current_level = try_redis_get_log_level(runid, logging.INFO)
+```
+
+The NoDb logger initialization automatically respects these Redis-stored levels when creating file handlers. The pattern gracefully degrades—if Redis is unavailable, it falls back to the provided default level.
+
+```python
+self._run_file_handler.setLevel(try_redis_get_log_level(self.runid, logging.INFO))
+self._exception_file_handler.setLevel(try_redis_get_log_level(self.runid, logging.ERROR))
+```
+
+The command bar provides a web interface for changing log levels via the `/runs/<runid>/<config>/command_bar/loglevel` POST endpoint. Valid levels are validated against the enum before storage.
 
 ### status messenger to microservices.status
 
@@ -150,6 +177,8 @@ pipe.execute()
 - Inspect RQ queue depth: `redis-cli -n 9 LLEN rq:m4` and fetch job metadata with `redis-cli -n 9 HGETALL rq:job:<id>`.
 - Validate NoDb cache entries: `redis-cli -n 13 TTL <runid>:wepp.nodb` and `redis-cli -n 13 GET <runid>:wepp.nodb` (large output; pipe through `jq` for readability).
 - Check README editor locks: `redis-cli -n 14 GET readme:lock:<runid>:<config>` and `redis-cli -n 14 HGETALL readme:client:<runid>:<config>:*`.
+- Inspect run-specific log levels: `redis-cli -n 15 GET loglevel:<runid>` and set them manually with `redis-cli -n 15 SET loglevel:<runid> debug`.
+- List all configured log levels: `redis-cli -n 15 KEYS 'loglevel:*'` (use `SCAN` in production to avoid blocking).
 - Publish test events without the app stack: `redis-cli -n 2 PUBLISH <runid>:wepp 'ping from cli'` or `redis-cli -n 0 HSET <runid> timestamps:run_wepp $(date +%s)`.
 
 When exploring production data prefer `SCAN` over `KEYS` to avoid blocking the server, and remember that Pub/Sub traffic is ephemeral—attach a subscriber before triggering work if you need to capture the full log stream.

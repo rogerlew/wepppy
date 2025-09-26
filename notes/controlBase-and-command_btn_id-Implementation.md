@@ -1,7 +1,7 @@
 # controlBase and command_btn_id Implementation
 
 **Date:** September 24, 2025  
-**Author:** GitHub Copilot (Claude 3.5 Sonnet)  
+**Author:** GitHub Copilot (Claude 4 Sonnet)  
 **Source:** `/workdir/wepppy/wepppy/weppcloud/static/js/controllers.js`
 
 ## Overview
