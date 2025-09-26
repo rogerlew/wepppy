@@ -8,7 +8,6 @@ from os.path import split as _split
 from os.path import exists as _exists
 import inspect
 import time
-import shutil
 import queue
 import stat
 import threading
@@ -18,6 +17,7 @@ from subprocess import Popen, PIPE, call
 import zipfile
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 
 import redis
 from rq import Queue, get_current_job
@@ -705,8 +705,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
 
 # Archive Backend Functions
 # see notes/weppcloud-project-archiving.md for archive architecture
-
-def archive_rq(runid: str):
+def archive_rq(runid: str, comment: Optional[str] = None):
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
     status_channel = f'{runid}:archive'
@@ -732,6 +731,8 @@ def archive_rq(runid: str):
 
         StatusMessenger.publish(status_channel, f'Creating archive {archive_name}')
 
+        comment_bytes = (comment or '').encode('utf-8')
+
         with zipfile.ZipFile(archive_path_tmp, mode='w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
             for root, dirs, files in os.walk(wd):
                 rel_root = os.path.relpath(root, wd)
@@ -753,6 +754,9 @@ def archive_rq(runid: str):
 
                     StatusMessenger.publish(status_channel, f'Adding {arcname}')
                     zf.write(abs_path, arcname)
+
+            if comment_bytes:
+                zf.comment = comment_bytes
 
         os.replace(archive_path_tmp, archive_path)
         StatusMessenger.publish(status_channel, f'Archive ready: {archive_name}')
@@ -903,4 +907,3 @@ def fetch_and_analyze_rap_ts_rq(runid: str):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
-
