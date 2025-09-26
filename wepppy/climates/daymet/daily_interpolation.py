@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from calendar import isleap
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
+from concurrent.futures import wait, FIRST_COMPLETED
 import os
 from os.path import join as _join
 from os.path import exists as _exists
@@ -49,6 +49,7 @@ from wepppy.all_your_base.geo.gdallocationinfo import (
 )
 
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.nodb.base import createProcessPoolExecutor
 
 _logger = logging.getLogger(__name__)
 
@@ -109,7 +110,7 @@ def interpolate_daily_timeseries(
     # 30 workers 74 seconds
     # 36 workers 79 seconds
     # 56 workers 131 seconds
-    with ProcessPoolExecutor(max_workers=28) as executor:
+    with createProcessPoolExecutor(max_workers=28, logger=_logger) as executor:
         futures = []
 
         for measure in measures:
