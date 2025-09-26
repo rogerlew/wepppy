@@ -808,8 +808,6 @@ class Omni(NoDbBase):
     def run_omni_scenarios(self):
         self.logger.info('Omni::run_omni_scenarios\n')
 
-        self.clean_scenarios()
-
         if not self.scenarios:
             self.logger.info('  Omni::run_omni_scenarios: No scenarios to run\n')
             raise Exception('No scenarios to run')
@@ -869,6 +867,10 @@ class Omni(NoDbBase):
         # assert we know how to handle the scenario
         assert isinstance(scenario, OmniScenario)
         new_wd = _omni_clone(scenario_def, wd)
+
+        if _exists(new_wd):
+            self.logger.info(f'  Omni::_build_scenario: removing existing {new_wd}\n')
+            shutil.rmtree(new_wd)
 
         self.logger.info(f'  Omni::_build_scenario: new_wd:{new_wd}\n')
 
@@ -1010,8 +1012,28 @@ class Omni(NoDbBase):
 
         wepp = Wepp.getInstance(new_wd)
 
-        wepp.prep_hillslopes(omni=True)
-        wepp.run_hillslopes(omni=True)
+        # use the climate and slope from the parent project's wepp/run directory
+                
+        # these specify path's relative to the wepp.runs_dir
+        # e.g.
+        # > runs_dir = '/wc1/runs/lo/looking-glass/_pups/omni/scenarios/undisturbed/wepp/runs'
+        # > base_runs_dir = '/wc1/runs/lo/looking-glass/wepp/runs'
+        # > os.path.relpath(base_runs_dir, runs_dir)
+        # '../../../../../../wepp/runs'
+
+        man_relpath = ''
+        cli_relpath = os.path.relpath(self.runs_dir, wepp.runs_dir)  # self is Omni instance in parent. _pups do not have Omni
+        slp_relpath = os.path.relpath(self.runs_dir, wepp.runs_dir)
+        sol_relpath = ''
+
+        wepp.prep_hillslopes(man_relpath=man_relpath,
+                             cli_relpath=cli_relpath,
+                             slp_relpath=slp_relpath,
+                             sol_relpath=sol_relpath)
+        wepp.run_hillslopes(man_relpath=man_relpath,
+                             cli_relpath=cli_relpath,
+                             slp_relpath=slp_relpath,
+                             sol_relpath=sol_relpath)
 
         wepp.prep_watershed()
         wepp.run_watershed()
