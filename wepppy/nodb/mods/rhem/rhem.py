@@ -91,7 +91,7 @@ class Rhem(NoDbBase):
     def prep_hillslopes(self):
         self.logger.info('Ceaning runs and output dir... ')
         self.clean()
-        self.logger.info('done')
+        )
 
         self.logger.info('Prepping Hillslopes... ')
 
@@ -149,7 +149,7 @@ class Rhem(NoDbBase):
             run_fn = _join(runs_dir, 'hill_{}.run'.format(topaz_id))
             make_hillslope_run(run_fn, par_fn, stm_fn, _join(out_dir, 'hill_{}.sum'.format(topaz_id)), scn_name)
 
-        self.logger.info('done')
+        )
 
     def clean(self):
         runs_dir = self.runs_dir
@@ -223,7 +223,7 @@ class Rhem(NoDbBase):
 
         arc_export(self.wd)
 
-        self.logger.info('done')
+        )
 
     def report_loss(self):
         output_dir = self.output_dir

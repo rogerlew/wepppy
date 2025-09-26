@@ -4,11 +4,12 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 from time import sleep
-import multiprocessing
 from subprocess import Popen, PIPE
 from enum import IntEnum
 from collections import namedtuple
 from deprecated import deprecated
+
+from concurrent.futures import as_completed
 
 # wepppy
 from wepppy.landcover import LandcoverMap
@@ -24,7 +25,7 @@ from wepppy.climates.cligen import ClimateFile
 
 # wepppy submodules
 from wepppy.nodb.parameter_map import ParameterMap
-from wepppy.nodb.base import NoDbBase, nodb_setter
+from wepppy.nodb.base import NoDbBase, nodb_setter, createProcessPoolExecutor
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
 from wepppy.nodb.watershed import Watershed
 from wepppy.nodb.climate import Climate
@@ -72,7 +73,7 @@ def run_ash_model(kwds):
 
     del kwds['logger']
     out_fn = ash_model.run_model(**kwds)
-    logger.info(f'  finished ash model for {prefix}\n')
+    logger.info(f'  finished ash model for {prefix}')
 
     return out_fn
 
@@ -515,10 +516,14 @@ class Ash(NoDbBase):
     def ash_type_map_cropped_fn(self):
         return _join(self.ash_dir, 'ash_type_map_cropped.tif')
 
-    def run_ash(self, fire_date='8/4', ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0,
+    def run_ash(self, 
+                fire_date='8/4', 
+                ini_white_ash_depth_mm=3.0, 
+                ini_black_ash_depth_mm=5.0,
                 slope=None):
         run_wind_transport=self.run_wind_transport
 
+        self.logger.info("=" * 100)
         with self.locked():
             self.logger.info(f"Ash::run_ash(fire_date='{fire_date}', ini_white_ash_depth_mm={ini_white_ash_depth_mm}, ini_black_ash_depth_mm={ini_black_ash_depth_mm}\n")
             self.fire_date = fire_date = YearlessDate.from_string(fire_date)
@@ -577,13 +582,13 @@ class Ash(NoDbBase):
 
             translator = watershed.translator_factory()
 
-            self.logger.info('done')
+            )
 
-            self.logger.info('  Running Hillslopes\n')
+            self.logger.info('  Running Hillslopes')
             meta = {}
             args = []
             for topaz_id in watershed._subs_summary:
-                self.logger.info(f'    Running Hillslope {topaz_id}\n')
+                self.logger.info(f'    Running Hillslope {topaz_id}')
 
                 meta[topaz_id] = {}
                 wepp_id = translator.wepp(top=topaz_id)
@@ -595,16 +600,16 @@ class Ash(NoDbBase):
                 if burn_class == 255:
                     burn_class = 0
 
-                self.logger.info(f'      burn_class: {burn_class}\n')
+                self.logger.info(f'      burn_class: {burn_class}')
 
                 if ash_type_d is None:
-                    self.logger.info('      ash_type_d is None. Assigning ash type from burn_class\n')
+                    self.logger.info('      ash_type_d is None. Assigning ash type from burn_class')
                     ash_type = (None, AshType.BLACK, AshType.BLACK, AshType.WHITE)[burn_class]
                 else:
-                    self.logger.info(f'      ash_type_d: {ash_type_d[topaz_id]}\n')
+                    self.logger.info(f'      ash_type_d: {ash_type_d[topaz_id]}')
                     ash_type = (None, AshType.BLACK, AshType.WHITE)[int(ash_type_d[topaz_id])]
 
-                self.logger.info(f'      ash_type: {ash_type}\n')
+                self.logger.info(f'      ash_type: {ash_type}')
 
 
                 meta[topaz_id]['ash_type'] = ash_type
@@ -633,7 +638,7 @@ class Ash(NoDbBase):
                 assert field_black_ash_bulkdensity > 0.0, field_black_ash_bulkdensity
 
                 if load_d is None:
-                    self.logger.info('      load_d is None. Using initial ash depth\n')
+                    self.logger.info('      load_d is None. Using initial ash depth')
                     white_ash_depth = ini_white_ash_depth_mm
                     black_ash_depth = ini_black_ash_depth_mm
                     
@@ -641,15 +646,15 @@ class Ash(NoDbBase):
                     black_ash_load = ini_black_ash_depth_mm * field_black_ash_bulkdensity * 10
 
                 else:
-                    self.logger.info(f'      load_d: {load_d[topaz_id]} tonne/ha\n')
+                    self.logger.info(f'      load_d: {load_d[topaz_id]} tonne/ha')
                     _load_kg_m2 = load_d[topaz_id] * 0.1
 
                     white_ash_depth = _load_kg_m2 / field_white_ash_bulkdensity  # in g/cm3
                     black_ash_depth = _load_kg_m2 / field_black_ash_bulkdensity  # in g/cm3
 
-                    self.logger.info('      setting ash depth based on load_d and field bulk densities\n')
-                    self.logger.info(f'        white_ash_depth: {white_ash_depth}\n')
-                    self.logger.info(f'        black_ash_depth: {black_ash_depth}\n')
+                    self.logger.info('      setting ash depth based on load_d and field bulk densities')
+                    self.logger.info(f'        white_ash_depth: {white_ash_depth}')
+                    self.logger.info(f'        black_ash_depth: {black_ash_depth}')
 
                     white_ash_load = black_ash_load = load_d[topaz_id]
 
@@ -683,11 +688,11 @@ class Ash(NoDbBase):
                 meta[topaz_id]['ini_ash_load'] = ini_ash_load
                 meta[topaz_id]['ash_bulkdensity'] = ash_bulkdensity
 
-                self.logger.info(f'      ash parameters\n')
-                self.logger.info(f'        ini_ash_depth: {ini_ash_depth}\n')
-                self.logger.info(f'        field_ash_bulkdensity: {field_ash_bulkdensity}\n')
-                self.logger.info(f'        ini_ash_load: {ini_ash_load}\n')
-                self.logger.info(f'        ash_bulkdensity: {ash_bulkdensity}\n')
+                self.logger.info(f'      ash parameters')
+                self.logger.info(f'        ini_ash_depth: {ini_ash_depth}')
+                self.logger.info(f'        field_ash_bulkdensity: {field_ash_bulkdensity}')
+                self.logger.info(f'        ini_ash_load: {ini_ash_load}')
+                self.logger.info(f'        ash_bulkdensity: {ash_bulkdensity}')
 
                 kwds = dict(ash_type=ash_type,
                             ini_ash_load=ini_ash_load,
@@ -708,18 +713,27 @@ class Ash(NoDbBase):
 
                 args.append(kwds)
 
-            if MULTIPROCESSING:
-                # Use a 'with' statement to create the pool and automatically close and join it
-                with multiprocessing.Pool(NCPU) as pool:
-                    # Use 'pool.map()' to apply the function to the arguments and wait for all the jobs to finish
-                    pool.map(run_ash_model, args)
+            if MULTIPROCESSING and args:
+                max_workers = max(1, min(NCPU, len(args)))
+                with createProcessPoolExecutor(max_workers=max_workers, logger=self.logger) as executor:
+                    futures = [executor.submit(run_ash_model, kwds) for kwds in args]
+                    total = len(futures)
 
-
+                    for index, future in enumerate(as_completed(futures), start=1):
+                        try:
+                            future.result()
+                            self.logger.info(f'  ({index}/{total}) ash model task completed')
+                        except Exception as exc:
+                            self.logger.error(f'  Ash model task failed: {exc}')
+                            for pending_future in futures:
+                                if pending_future is not future and not pending_future.done():
+                                    pending_future.cancel()
+                            raise
             else:
                 for kwds in args:
                     self.logger.info(f"  running {kwds['prefix']}\n")
                     run_ash_model(kwds)
-                    self.logger.info('done')
+                    )
 
             self._ash_load_d = load_d
             self._ash_type_d = ash_type_d

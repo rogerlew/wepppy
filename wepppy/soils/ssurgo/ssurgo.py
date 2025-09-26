@@ -30,7 +30,9 @@ import sqlite3
 
 from rosetta import Rosetta2, Rosetta3
 
-from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
+from concurrent.futures import wait, FIRST_COMPLETED
+
+from wepppy.nodb.base import createProcessPoolExecutor
 
 from wepppy.all_your_base import try_parse, try_parse_float, isfloat, isint
 
@@ -1701,7 +1703,7 @@ class SurgoSoilCollection(object):
 
         # 2. Use ProcessPoolExecutor. Workers get the pre-loaded worker_view object.
         # No database access happens inside the pool.
-        with ProcessPoolExecutor(max_workers=max_workers) as pool:
+        with createProcessPoolExecutor(max_workers=max_workers, logger=logger, prefer_spawn=False) as pool:
             futures = {
                 pool.submit(
                     _build_soil_for_process,
