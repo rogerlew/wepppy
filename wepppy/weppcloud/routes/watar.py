@@ -13,7 +13,7 @@ from wepppy.nodb.climate import Climate
 from wepppy.nodb.mods.ash_transport import AshType
 from wepppy.nodb.wepp import Wepp
 from wepppy.wepp.out import Element, HillWat
-from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize
+from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize, parse_rec_intervals
 
 
 watar_bp = Blueprint('watar', __name__)
@@ -148,28 +148,6 @@ def task_set_ash_wind_transport(runid, config):
 
     return success_factory()
 
-def _parse_rec_intervals(request, years):
-    rec_intervals = request.args.get('rec_intervals', None)
-    if rec_intervals is None:
-        rec_intervals = [2, 5, 10, 20, 25]
-        if years >= 50:
-            rec_intervals.append(50)
-        if years >= 100:
-            rec_intervals.append(100)
-        if years >= 200:
-            rec_intervals.append(200)
-        if years >= 500:
-            rec_intervals.append(500)
-        if years >= 1000:
-            rec_intervals.append(1000)
-        rec_intervals = rec_intervals[::-1]
-    else:
-        rec_intervals = literal_eval(rec_intervals)
-        assert all([isint(x) for x in rec_intervals])
-
-    return rec_intervals
-
-
 @watar_bp.route('/runs/<string:runid>/<config>/report/run_ash')
 @watar_bp.route('/runs/<string:runid>/<config>/report/run_ash/')
 def report_run_ash(runid, config):
@@ -191,7 +169,7 @@ def report_ash(runid, config):
         wd = get_wd(runid)
 
         climate = Climate.getInstance(wd)
-        rec_intervals = _parse_rec_intervals(request, climate.years)
+        rec_intervals = parse_rec_intervals(request, climate.years)
 
         ron = Ron.getInstance(wd)
         ash = Ash.getInstance(wd)
@@ -328,7 +306,7 @@ def report_contaminant(runid, config):
         ash = Ash.getInstance(wd)
         ashpost = AshPost.getInstance(wd)
 
-        rec_intervals = _parse_rec_intervals(request, climate.years)
+        rec_intervals = parse_rec_intervals(request, climate.years)
         contaminants = request.args.get('contaminants', None)
         contaminant_keys = sorted(ash.high_contaminant_concentrations.keys())
 
