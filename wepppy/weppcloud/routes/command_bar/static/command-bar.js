@@ -228,6 +228,7 @@
             } else if (event.key === 'Escape') {
                 event.preventDefault();
                 this.deactivate();
+                this.hideResult();
             }
         }
 
