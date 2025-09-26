@@ -1,10 +1,12 @@
 /* ----------------------------------------------------------------------------
  * Controllers (controllers.js)
+ * NOTE: Generated via build_controllers_js.py from
+ *       wepppy/weppcloud/controllers_js/templates/*.js
+ * Build date: 2025-09-26T18:49:56Z
  * ----------------------------------------------------------------------------
  */
 "use strict";
 // globals for JSLint: $, L, polylabel, setTimeout, console
-
 function coordRound(v) {
     var w = Math.floor(v);
     var d = v - w;
@@ -43,6 +45,7 @@ function pass() {
     return { r, g, b, a: alpha };
 };
 
+
 function linearToLog(value, minLog, maxLog, maxLinear) {
     if (isNaN(value)) return minLog;
     value = Math.max(0, Math.min(value, maxLinear));
@@ -61,6 +64,7 @@ function lockButton(buttonId, lockImageId) {
     lockImage.style.display = 'inline';
 }
 
+
 function unlockButton(buttonId, lockImageId) {
     const button = document.getElementById(buttonId);
     const lockImage = document.getElementById(lockImageId);
@@ -70,6 +74,80 @@ function unlockButton(buttonId, lockImageId) {
     lockImage.style.display = 'none';
 }
 
+
+const updateRangeMaxLabel_mm = function (r, labelMax) {
+    const in_units = 'mm';
+    const mmValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
+    const inValue = (r * 0.0393701).toFixed(1); // Convert mm to inches
+
+    const currentUnits = $("input[name='unitizer_xs-distance_radio']:checked").val(); // mm or in
+
+    const mmClass = currentUnits === 'mm' ? '' : 'invisible';
+    const inClass = currentUnits === 'in' ? '' : 'invisible';
+
+    labelMax.html(
+        `<div class="unitizer-wrapper"><div class="unitizer units-mm ${mmClass}">${mmValue} mm</div><div class="unitizer units-in ${inClass}">${inValue} in</div></div>`
+    );
+};
+
+
+const updateRangeMaxLabel_kgha = function (r, labelMax) {
+    const in_units = 'kg/ha';
+    const kgHaValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
+    const lbAcValue = (r * 0.892857).toFixed(1); // Convert kg/ha to lb/ac
+
+    const currentUnits = $("input[name='unitizer_xs-surface-density_radio']:checked").val(); // kg/ha or lb/acre
+
+    const kgHaClass = currentUnits === 'kg_ha-_3' ? '' : 'invisible';
+    const lbAcClass = currentUnits === 'lb_acre-_3' ? '' : 'invisible';
+
+    labelMax.html(
+        `<div class="unitizer-wrapper"><div class="unitizer units-kg-ha ${kgHaClass}">${kgHaValue} kg/ha</div><div class="unitizer units-lb-ac ${lbAcClass}">${lbAcValue} lb/ac</div></div>`
+    );
+};
+
+
+const updateRangeMaxLabel_tonneha = function (r, labelMax) {
+    const in_units = 'tonne/ha';
+    const tonneHaValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
+    const tonAcValue = (r * 0.44609).toFixed(1); // Convert tonne/ha to ton/ac
+
+    const currentUnits = $("input[name='unitizer_surface-density_radio']:checked").val(); // tonne/ha or ton/acre
+
+    const tonneHaClass = currentUnits === 'tonne_ha-_3' ? '' : 'invisible';
+    const tonAcClass = currentUnits === 'ton_acre-_3' ? '' : 'invisible';
+
+    labelMax.html(
+        `<div class="unitizer-wrapper"><div class="unitizer units-kg-ha ${tonneHaClass}">${tonneHaValue} tonne/ha</div><div class="unitizer units-lb-ac ${tonAcClass}">${tonAcValue} ton/ac</div></div>`
+    );
+};
+
+
+function parseBboxText(text) {
+    // Keep digits, signs, decimal, scientific notation, commas and spaces
+    const toks = text
+        .replace(/[^\d\s,.\-+eE]/g, '')
+        .split(/[\s,]+/)
+        .filter(Boolean)
+        .map(Number);
+
+    if (toks.length !== 4 || toks.some(Number.isNaN)) {
+        throw new Error("Extent must have exactly 4 numeric values: minLon, minLat, maxLon, maxLat.");
+    }
+
+    let [x1, y1, x2, y2] = toks;
+    // Normalize (user might give two corners in any order)
+    const minLon = Math.min(x1, x2);
+    const minLat = Math.min(y1, y2);
+    const maxLon = Math.max(x1, x2);
+    const maxLat = Math.max(y1, y2);
+
+    // Basic sanity check
+    if (minLon >= maxLon || minLat >= maxLat) {
+        throw new Error("Invalid extent: ensure minLon < maxLon and minLat < maxLat.");
+    }
+    return [minLon, minLat, maxLon, maxLat];
+}
 /* ----------------------------------------------------------------------------
  * WebSocketManager
  * ----------------------------------------------------------------------------
@@ -175,7 +253,6 @@ WSClient.prototype.disconnect = function () {
         this.ws = null;
     }
 };
-
 
 /* ----------------------------------------------------------------------------
  * Control Base
@@ -491,90 +568,6 @@ function controlBase() {
 
     };
 }
-
-
-/* ----------------------------------------------------------------------------
- * Disturbed
- * ----------------------------------------------------------------------------
- */
-var Disturbed = function () {
-    var instance;
-
-    function createInstance() {
-        var that = controlBase();
-
-        that.reset_land_soil_lookup = function () {
-            $.get({
-                url: "tasks/reset_disturbed",
-                cache: false,
-                success: function success(response) {
-                    if (response.Success == true) {
-                        alert("Land Soil Lookup has been reset");
-                    } else {
-                        alert("Error resetting Land Soil Lookup");
-                    }
-                },
-                error: function error(jqXHR) {
-                    console.log(jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    alert("Error resetting Land Soil Lookup");
-                }
-            });
-        };
-
-        that.load_extended_land_soil_lookup = function () {
-            $.get({
-                url: "tasks/load_extended_land_soil_lookup",
-                cache: false,
-                success: function success(response) {
-                    if (response.Success == true) {
-                        alert("Land Soil Lookup has been extended");
-                    } else {
-                        alert("Error extending Land Soil Lookup");
-                    }
-                },
-                error: function error(jqXHR) {
-                    console.log(jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    alert("Error  extending Land Soil Lookup");
-                }
-            });
-        };
-
-        that.has_sbs = function () {
-            var result;
-            $.ajax({
-                url: "api/disturbed/has_sbs/",
-                async: false,  // Makes the request synchronous
-                dataType: 'json',  // Ensures response is parsed as JSON
-                success: function (response) {
-                    result = response.has_sbs;
-                },
-                error: function (jqXHR) {
-                    console.log(jqXHR.responseJSON);
-                    result = false;  // Returns false if the request fails
-                }
-            });
-            return result;
-        };
-
-        return that;
-    }
-
-    return {
-        getInstance: function getInstance() {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
-        }
-    };
-}();
-
-
-
 /* ----------------------------------------------------------------------------
  * Project
  * ----------------------------------------------------------------------------
@@ -958,221 +951,6 @@ var Project = function () {
         }
     };
 }();
-
-const updateRangeMaxLabel_mm = function (r, labelMax) {
-    const in_units = 'mm';
-    const mmValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
-    const inValue = (r * 0.0393701).toFixed(1); // Convert mm to inches
-
-    const currentUnits = $("input[name='unitizer_xs-distance_radio']:checked").val(); // mm or in
-
-    const mmClass = currentUnits === 'mm' ? '' : 'invisible';
-    const inClass = currentUnits === 'in' ? '' : 'invisible';
-
-    labelMax.html(
-        `<div class="unitizer-wrapper"><div class="unitizer units-mm ${mmClass}">${mmValue} mm</div><div class="unitizer units-in ${inClass}">${inValue} in</div></div>`
-    );
-};
-
-
-const updateRangeMaxLabel_kgha = function (r, labelMax) {
-    const in_units = 'kg/ha';
-    const kgHaValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
-    const lbAcValue = (r * 0.892857).toFixed(1); // Convert kg/ha to lb/ac
-
-    const currentUnits = $("input[name='unitizer_xs-surface-density_radio']:checked").val(); // kg/ha or lb/acre
-
-    const kgHaClass = currentUnits === 'kg_ha-_3' ? '' : 'invisible';
-    const lbAcClass = currentUnits === 'lb_acre-_3' ? '' : 'invisible';
-
-    labelMax.html(
-        `<div class="unitizer-wrapper"><div class="unitizer units-kg-ha ${kgHaClass}">${kgHaValue} kg/ha</div><div class="unitizer units-lb-ac ${lbAcClass}">${lbAcValue} lb/ac</div></div>`
-    );
-};
-
-
-const updateRangeMaxLabel_tonneha = function (r, labelMax) {
-    const in_units = 'tonne/ha';
-    const tonneHaValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
-    const tonAcValue = (r * 0.44609).toFixed(1); // Convert tonne/ha to ton/ac
-
-    const currentUnits = $("input[name='unitizer_surface-density_radio']:checked").val(); // tonne/ha or ton/acre
-
-    const tonneHaClass = currentUnits === 'tonne_ha-_3' ? '' : 'invisible';
-    const tonAcClass = currentUnits === 'ton_acre-_3' ? '' : 'invisible';
-
-    labelMax.html(
-        `<div class="unitizer-wrapper"><div class="unitizer units-kg-ha ${tonneHaClass}">${tonneHaValue} tonne/ha</div><div class="unitizer units-lb-ac ${tonAcClass}">${tonAcValue} ton/ac</div></div>`
-    );
-};
-
-/* ----------------------------------------------------------------------------
- * RAP_TS
- * ----------------------------------------------------------------------------
- */
-var RAP_TS = function () {
-    var instance;
-
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#rap_ts_form");
-        that.info = $("#rap_ts_form #info");
-        that.status = $("#rap_ts_form  #status");
-        that.stacktrace = $("#rap_ts_form #stacktrace");
-        that.ws_client = new WSClient('rap_ts_form', 'rap_ts');
-        that.rq_job_id = null;
-        that.rq_job = $("#rap_ts_form #rq_job");
-        that.command_btn_id = 'btn_build_rap_ts';
-
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.acquire = function () {
-            var self = instance;
-            var task_msg = "Acquiring RAP TS maps";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-            self.ws_client.connect();
-
-            $.post({
-                url: "rq/api/acquire_rap_ts",
-                cache: false,
-                success: function success(response) {
-                    self.status.html(`fetch_and_analyze_rap_ts_rq job submitted: ${response.job_id}`);
-                    self.set_rq_job_id(self, response.job_id);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance;
-            self.status.html("RAP Timeseries fetched and analyzed")
-        };
-
-        return that;
-    }
-
-    return {
-        getInstance: function getInstance() {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
-        }
-    };
-}();
-
-/* ----------------------------------------------------------------------------
- * Team
- * ----------------------------------------------------------------------------
- */
-var Team = function () {
-    var instance;
-
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#team_form");
-        that.info = $("#team_form #info");
-        that.status = $("#team_form  #status");
-        that.stacktrace = $("#team_form #stacktrace");
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.adduser_click = function () {
-            var self = instance;
-            var email = $('#adduser-email').val()
-            self.adduser(email)
-        };
-
-        that.adduser = function (email) {
-            var self = instance;
-            var data = { "adduser-email": email };
-
-            $.post({
-                url: "tasks/adduser/",
-                data: data,
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.form.trigger("TEAM_ADDUSER_TASK_COMPLETED");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    console.log(error);
-                }
-            });
-        };
-
-        that.removeuser = function (user_id) {
-            var self = instance;
-            $.post({
-                url: "tasks/removeuser/",
-                data: JSON.stringify({ user_id: user_id }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.form.trigger("TEAM_REMOVEUSER_TASK_COMPLETED");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    console.log(error);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance;
-
-            $.get({
-                url: "report/users/",
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        return that;
-    }
-
-    return {
-        getInstance: function getInstance() {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
-        }
-    };
-}();
-
 /* ----------------------------------------------------------------------------
  * Map
  * ----------------------------------------------------------------------------
@@ -1442,7 +1220,85 @@ var Map = function () {
         }
     };
 }();
+/* ----------------------------------------------------------------------------
+ * Disturbed
+ * ----------------------------------------------------------------------------
+ */
+var Disturbed = function () {
+    var instance;
 
+    function createInstance() {
+        var that = controlBase();
+
+        that.reset_land_soil_lookup = function () {
+            $.get({
+                url: "tasks/reset_disturbed",
+                cache: false,
+                success: function success(response) {
+                    if (response.Success == true) {
+                        alert("Land Soil Lookup has been reset");
+                    } else {
+                        alert("Error resetting Land Soil Lookup");
+                    }
+                },
+                error: function error(jqXHR) {
+                    console.log(jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    alert("Error resetting Land Soil Lookup");
+                }
+            });
+        };
+
+        that.load_extended_land_soil_lookup = function () {
+            $.get({
+                url: "tasks/load_extended_land_soil_lookup",
+                cache: false,
+                success: function success(response) {
+                    if (response.Success == true) {
+                        alert("Land Soil Lookup has been extended");
+                    } else {
+                        alert("Error extending Land Soil Lookup");
+                    }
+                },
+                error: function error(jqXHR) {
+                    console.log(jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    alert("Error  extending Land Soil Lookup");
+                }
+            });
+        };
+
+        that.has_sbs = function () {
+            var result;
+            $.ajax({
+                url: "api/disturbed/has_sbs/",
+                async: false,  // Makes the request synchronous
+                dataType: 'json',  // Ensures response is parsed as JSON
+                success: function (response) {
+                    result = response.has_sbs;
+                },
+                error: function (jqXHR) {
+                    console.log(jqXHR.responseJSON);
+                    result = false;  // Returns false if the request fails
+                }
+            });
+            return result;
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
 /* ----------------------------------------------------------------------------
  * Baer
  * ----------------------------------------------------------------------------
@@ -1802,33 +1658,6 @@ var Baer = function () {
         }
     };
 }();
-
-function parseBboxText(text) {
-    // Keep digits, signs, decimal, scientific notation, commas and spaces
-    const toks = text
-        .replace(/[^\d\s,.\-+eE]/g, '')
-        .split(/[\s,]+/)
-        .filter(Boolean)
-        .map(Number);
-
-    if (toks.length !== 4 || toks.some(Number.isNaN)) {
-        throw new Error("Extent must have exactly 4 numeric values: minLon, minLat, maxLon, maxLat.");
-    }
-
-    let [x1, y1, x2, y2] = toks;
-    // Normalize (user might give two corners in any order)
-    const minLon = Math.min(x1, x2);
-    const minLat = Math.min(y1, y2);
-    const maxLon = Math.max(x1, x2);
-    const maxLat = Math.max(y1, y2);
-
-    // Basic sanity check
-    if (minLon >= maxLon || minLat >= maxLat) {
-        throw new Error("Invalid extent: ensure minLon < maxLon and minLat < maxLat.");
-    }
-    return [minLon, minLat, maxLon, maxLat];
-}
-
 /* ----------------------------------------------------------------------------
  * Channel Delineation
  * ----------------------------------------------------------------------------
@@ -2192,9 +2021,8 @@ var ChannelDelineation = function () {
         }
     };
 }();
-
 /* ----------------------------------------------------------------------------
- * Set Outlet
+ * Outlet
  * ----------------------------------------------------------------------------
  */
 var Outlet = function () {
@@ -2390,7 +2218,6 @@ function render_legend(cmap, canvasID) {
     });
     plot.render();
 }
-
 /* ----------------------------------------------------------------------------
  * Subcatchment Delineation
  * ----------------------------------------------------------------------------
@@ -3165,135 +2992,6 @@ var SubcatchmentDelineation = function () {
         }
     };
 }();
-
-/* ----------------------------------------------------------------------------
- * Rangeland Cover
- * ----------------------------------------------------------------------------
- */
-
-var RangelandCover = function () {
-    var instance;
-
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#rangeland_cover_form");
-        that.info = $("#rangeland_cover_form #info");
-        that.status = $("#rangeland_cover_form  #status");
-        that.stacktrace = $("#rangeland_cover_form #stacktrace");
-        that.ws_client = new WSClient('rangeland_cover_form', 'rangeland_cover');
-        that.rq_job_id = null;
-        that.rq_job = $("#rangeland_cover_form #rq_job");
-
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.build = function () {
-            var self = instance;
-
-            var task_msg = "Building rangeland_cover";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/build_rangeland_cover/",
-                data: self.form.serialize(),
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.form.trigger("RANGELAND_COVER_BUILD_TASK_COMPLETED");
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance;
-            $.get({
-                url: "report/rangeland_cover/",
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.setMode = function (mode) {
-            var self = instance;
-            // mode is an optional parameter
-            // if it isn't provided then we get the checked value
-            if (mode === undefined) {
-                mode = $("input[name='rangeland_cover_mode']:checked").val();
-            }
-            mode = parseInt(mode, 10);
-            var rangeland_rap_year = $("#rangeland_cover_form #rap_year").val();
-
-            var task_msg = "Setting Mode to " + mode + " (" + rangeland_rap_year + ")";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            // sync rangeland_cover with nodb
-            $.post({
-                url: "tasks/set_rangeland_cover_mode/",
-                data: { "mode": mode, "rap_year": rangeland_rap_year },
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-            self.showHideControls(mode);
-        };
-
-        that.showHideControls = function (mode) {
-            if (mode == 2) {
-                $("#rangeland_cover_form #rangeland_cover_rap_year_div").show();
-            } else {
-                $("#rangeland_cover_form #rangeland_cover_rap_year_div").hide();
-            }
-        };
-
-        return that;
-    }
-
-    return {
-        getInstance: function getInstance() {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
-        }
-    };
-}();
-
-
 /* ----------------------------------------------------------------------------
  * Landuse
  * ----------------------------------------------------------------------------
@@ -3560,528 +3258,6 @@ var Landuse = function () {
         }
     };
 }();
-
-/* ----------------------------------------------------------------------------
- * Treatments
- * ----------------------------------------------------------------------------
- */
-var Treatments = function () {
-    var instance;
-
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#treatments_form");
-        that.info = $("#treatments_form #info");
-        that.status = $("#treatments_form  #status");
-        that.stacktrace = $("#treatments_form #stacktrace");
-        that.ws_client = new WSClient('treatments_form', 'treatments');
-        that.rq_job_id = null;
-        that.rq_job = $("#treatments_form #rq_job");
-        that.command_btn_id = 'btn_build_treatments';
-
-
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.build = function () {
-            var self = instance;
-            var task_msg = "Building treatments";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-            self.ws_client.connect();
-
-            var formData = new FormData($('#treatments_form')[0]);
-
-            $.post({
-                url: "rq/api/build_treatments",
-                data: formData,
-                contentType: false,
-                cache: false,
-                processData: false,
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(`build_treatments job submitted: ${response.job_id}`);
-                        self.set_rq_job_id(self, response.job_id);
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance;
-            $.get({
-                url: "report/treatments/",
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.restore = function (treatments_mode, treatments_single_selection) {
-            console.log("restore treatments mode: " + treatments_mode);
-            var self = instance;
-            $("#treatments_mode" + treatments_mode).prop("checked", true);
-
-            $('#treatments_single_selection').val('{{ treatments.single_selection }}').prop('selected', true);
-
-            self.showHideControls(treatments_mode);
-        };
-
-        that.setMode = function (mode) {
-            var self = instance;
-            // mode is an optional parameter
-            // if it isn't provided then we get the checked value
-            if (mode === undefined) {
-                mode = $("input[name='treatments_mode']:checked").val();
-            }
-            mode = parseInt(mode, 10);
-            var treatments_single_selection = $("#treatments_single_selection").val();
-
-            var task_msg = "Setting Mode to " + mode + " (" + treatments_single_selection + ")";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            // sync treatments with nodb
-            $.post({
-                url: "tasks/set_treatments_mode/",
-                data: { "mode": mode, "treatments_single_selection": treatments_single_selection },
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-            self.showHideControls(mode);
-        };
-
-        that.showHideControls = function (mode) {
-            // show the appropriate controls
-            if (mode === -1) {
-                // undefined
-                $("#treatments_mode1_controls").hide();
-                $("#treatments_mode4_controls").hide();
-            } else if (mode === 1) {
-                // selection
-                $("#treatments_mode1_controls").show();
-                $("#treatments_mode4_controls").hide();
-            } else if (mode === 4) {
-                // map
-                $("#treatments_mode1_controls").hide();
-                $("#treatments_mode4_controls").show();
-            } else {
-                throw "ValueError: unknown mode";
-            }
-        };
-
-        return that;
-    }
-
-    return {
-        getInstance: function getInstance() {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
-        }
-    };
-}();
-
-/* ----------------------------------------------------------------------------
- * RangelandCover
- * ----------------------------------------------------------------------------
- */
-var RangelandCoverModify = function () {
-    var instance;
-
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#modify_rangeland_cover_form");
-        that.status = $("#modify_rangeland_cover_form  #status");
-        that.stacktrace = $("#modify_rangeland_cover_form #stacktrace");
-        //that.ws_client = new WSClient('modify_rangeland_cover_form', 'modify_rangeland_cover');
-        that.rq_job_id = null;
-        that.rq_job = $("#modify_rangeland_cover_form #rq_job");
-
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.checkbox = $('#checkbox_modify_rangeland_cover');
-        that.checkbox_box_select = $('#checkbox_box_select_modify_rangeland_cover');
-        that.textarea = $('#textarea_modify_rangeland_cover');
-
-        that.input_bunchgrass = $('#input_bunchgrass_cover');
-        that.input_forbs = $('#input_forbs_cover');
-        that.input_sodgrass = $('#input_sodgrass_cover');
-        that.input_shrub = $('#input_shrub_cover');
-
-        that.input_basal = $('#input_basal_cover');
-        that.input_rock = $('#input_rock_cover');
-        that.input_litter = $('#input_litter_cover');
-        that.input_cryptogams = $('#input_cryptogams_cover');
-
-        that.data = null; // Leaflet geoJSON layer
-        that.polys = null; // Leaflet geoJSON layer
-        that.selected = null;
-
-        that.style = {
-            color: "white",
-            opacity: 1,
-            weight: 1,
-            fillColor: "#FFEDA0",
-            fillOpacity: 0.0
-        };
-
-        that.selectedstyle = {
-            color: "red",
-            opacity: 1,
-            weight: 2,
-            fillOpacity: 0.0
-        };
-
-        that.mouseoverstyle = {
-            weight: 2,
-            color: '#666',
-            dashArray: '',
-            fillOpacity: 0.0
-        };
-
-        that.ll0 = null;
-        that.selectionRect = null;
-
-        that.boxSelectionModeMouseDown = function (evt) {
-            var self = instance;
-            self.ll0 = evt.latlng;
-        };
-
-        that.boxSelectionModeMouseMove = function (evt) {
-            var self = instance;
-            var map = Map.getInstance();
-
-            if (self.ll0 === null) {
-                if (self.selectedRect !== null) {
-                    map.removeLayer(that.selectionRect);
-                    self.selectionRect = null;
-                }
-                return;
-            }
-
-            var bounds = L.latLngBounds(self.ll0, evt.latlng);
-
-            if (self.selectionRect === null) {
-                self.selectionRect = L.rectangle(bounds, { color: 'blue', weight: 1 }).addTo(map);
-            } else {
-                self.selectionRect.setLatLngs([bounds.getSouthWest(), bounds.getSouthEast(),
-                bounds.getNorthEast(), bounds.getNorthWest()]);
-                self.selectionRect.redraw();
-            }
-
-        };
-
-        that.find_layer_id = function (topaz_id) {
-            var self = instance;
-
-            for (var id in self.glLayer._layers) {
-                var topaz_id2 = self.glLayer._layers[id].feature.properties.TopazID;
-
-                if (topaz_id === topaz_id2) {
-                    return id;
-                }
-            }
-            return undefined;
-        };
-
-        that.loadCovers = function () {
-            var self = instance;
-            var topaz_ids = instance.textarea.val().split(',');
-
-            $.post({
-                url: "query/rangeland_cover/current_cover_summary/",
-                data: JSON.stringify({ topaz_ids: topaz_ids }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(covers) {
-
-                    that.input_bunchgrass.val(covers['bunchgrass']);
-                    that.input_forbs.val(covers['forbs']);
-                    that.input_sodgrass.val(covers['sodgrass']);
-                    that.input_shrub.val(covers['shrub']);
-                    that.input_basal.val(covers['basal']);
-                    that.input_rock.val(covers['rock']);
-                    that.input_litter.val(covers['litter']);
-                    that.input_cryptogams.val(covers['cryptogams']);
-
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    console.log(error);
-                }
-            });
-        };
-
-        that.boxSelectionModeMouseUp = function (evt) {
-            var self = instance;
-
-            var map = Map.getInstance();
-
-            var llend = evt.latlng;
-
-            if (self.ll0.lat === llend.lat && self.ll0.lng === llend.lng) {
-                that.ll0 = null;
-                map.removeLayer(that.selectionRect);
-                that.selectionRect = null;
-                return;
-            }
-
-            var bounds = L.latLngBounds(self.ll0, llend);
-
-            var sw = bounds.getSouthWest();
-            var ne = bounds.getNorthEast();
-            var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
-
-
-            $.post({
-                url: "tasks/sub_intersection/",
-                data: JSON.stringify({ extent: extent }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(topaz_ids) {
-
-                    for (var i = 0; i < topaz_ids.length; i++) {
-                        var topaz_id = topaz_ids[i];
-                        var id = self.find_layer_id(topaz_id);
-
-                        if (id == undefined) {
-                            continue;
-                        }
-
-                        var layer = self.glLayer._layers[id];
-
-                        if (self.selected.has(topaz_id)) {
-                            self.selected.delete(topaz_id);
-                            layer.setStyle(self.style);
-                        } else {
-                            self.selected.add(topaz_id);
-                            layer.setStyle(self.selectedstyle);
-                        }
-                    }
-
-                    that.textarea.val(Array.from(self.selected).join());
-                    that.loadCovers();
-
-                    map.removeLayer(that.selectionRect);
-                    that.selectionRect = null;
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    console.log(error);
-                }
-            }).always(function () {
-                that.ll0 = null;
-            });
-        };
-
-        that.toggle = function () {
-            var self = instance;
-
-            if (self.checkbox.prop("checked") === true) {
-                if (self.glLayer == null) {
-                    self.showModifyMap();
-                }
-                if (self.selected == null) {
-                    self.selected = new Set();
-                }
-            } else {
-                if (self.checkbox_box_select.prop("checked") === false) {
-                    self.selected = new Set();
-                    self.hideModifyMap();
-                }
-            }
-        };
-
-        that.showModifyMap = function () {
-            var self = instance;
-
-            var map = Map.getInstance();
-            map.boxZoom.disable();
-
-            map.on('mousedown', self.boxSelectionModeMouseDown);
-            map.on('mousemove', self.boxSelectionModeMouseMove);
-            map.on('mouseup', self.boxSelectionModeMouseUp);
-
-            self.data = null;
-            $.get({
-                url: "resources/subcatchments.json",
-                cache: false,
-                success: self.onShowSuccess,
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.hideModifyMap = function () {
-            var self = instance;
-            var map = Map.getInstance();
-
-            map.boxZoom.enable();
-            map.off('mousedown', self.boxSelectionModeMouseDown);
-            map.off('mousemove', self.boxSelectionModeMouseMove);
-            map.off('mouseup', self.boxSelectionModeMouseUp);
-            map.removeLayer(self.glLayer);
-
-            self.data = null;
-            self.glLayer = null;
-            self.ll0 = null;
-        };
-
-        that.onShowSuccess = function (response) {
-            var self = instance;
-            var map = Map.getInstance();
-            self.data = response;
-            self.glLayer = L.geoJSON(self.data.features, {
-                style: self.style,
-                onEachFeature: self.onEachFeature
-            });
-            self.glLayer.addTo(map);
-        };
-
-        that.onEachFeature = function (feature, layer) {
-            var self = instance;
-            var map = Map.getInstance();
-
-            layer.on({
-                mouseover: function mouseover(e) {
-                    var layer = e.target;
-
-                    layer.setStyle(self.mouseoverstyle);
-
-                    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-                        layer.bringToFront();
-                    }
-                },
-                mouseout: function mouseout(e) {
-                    var topaz_id = e.target.feature.properties.TopazID;
-                    if (self.selected.has(topaz_id)) {
-                        layer.setStyle(self.selectedstyle);
-                    } else {
-                        layer.setStyle(self.style);
-                    }
-                },
-                click: function click(e) {
-                    var layer = e.target;
-                    var topaz_id = e.target.feature.properties.TopazID;
-
-                    if (self.selected.has(topaz_id)) {
-                        self.selected.delete(topaz_id);
-                        layer.setStyle(self.style);
-                    } else {
-                        self.selected.add(topaz_id);
-                        layer.setStyle(self.selectedstyle);
-                    }
-
-                    that.textarea.val(Array.from(self.selected).join());
-                    that.loadCovers();
-                }
-            });
-        };
-
-        that.modify = function () {
-            var self = instance;
-            var task_msg = "Modifying rangeland_cover";
-            self.status.html(task_msg + "...");
-            self.hideStacktrace();
-
-            var topaz_ids = self.textarea.val().split(',');
-            $.post({
-                url: "tasks/modify_rangeland_cover/",
-                data: JSON.stringify({
-                    topaz_ids: topaz_ids,
-                    covers: {
-                        bunchgrass: self.input_bunchgrass.val(),
-                        forbs: self.input_forbs.val(),
-                        sodgrass: self.input_sodgrass.val(),
-                        shrub: self.input_shrub.val(),
-                        basal: self.input_basal.val(),
-                        rock: self.input_rock.val(),
-                        litter: self.input_litter.val(),
-                        cryptogams: self.input_cryptogams.val()
-                    }
-                }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.textarea.val("");
-                        self.loadCovers();
-                        self.checkbox.prop("checked", false);
-                        self.hideModifyMap();
-                        self.status.html(task_msg + "... Success");
-
-                        self.form.trigger("RANGELAND_COVER_MODIFY_TASK_COMPLETED");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        return that;
-    }
-
-    return {
-        getInstance: function getInstance() {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
-        }
-    };
-}();
-
 var LanduseModify = function () {
     var instance;
 
@@ -4386,7 +3562,6 @@ var LanduseModify = function () {
         }
     };
 }();
-
 /* ----------------------------------------------------------------------------
  * Soil
  * ----------------------------------------------------------------------------
@@ -4595,7 +3770,6 @@ var Soil = function () {
         }
     };
 }();
-
 /* ----------------------------------------------------------------------------
  * Climate
  * ----------------------------------------------------------------------------
@@ -5217,10 +4391,6 @@ var Climate = function () {
                 }
             });
         };
-
-
-
-
         return that;
     }
 
@@ -5233,7 +4403,6 @@ var Climate = function () {
         }
     };
 }();
-
 /* ----------------------------------------------------------------------------
  * Wepp
  * ----------------------------------------------------------------------------
@@ -5409,8 +4578,77 @@ var Wepp = function () {
         }
     };
 }();
+/* ----------------------------------------------------------------------------
+ * DebrisFlow
+ * ----------------------------------------------------------------------------
+ */
+var DebrisFlow = function () {
+    var instance;
 
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#debris_flow_form");
+        that.info = $("#debris_flow_form #info");
+        that.status = $("#debris_flow_form  #status");
+        that.stacktrace = $("#debris_flow_form #stacktrace");
+        that.ws_client = new WSClient('debris_flow_form', 'debris_flow');
+        that.rq_job_id = null;
+        that.rq_job = $("#debris_flow_form #rq_job");
+        that.command_btn_id = 'btn_run_debris_flow';
 
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.run_model = function () {
+            var self = instance;
+
+            var task_msg = "Running debris_flow model fit";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+            self.ws_client.connect();
+
+            $.post({
+                url: "rq/api/run_debris_flow",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(`run_debris_flow_rq job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.report = function () {
+            var self = instance;
+            self.info.html("<a href='report/debris_flow/' target='_blank'>View Debris Flow Model Results</a>");
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
 /* ----------------------------------------------------------------------------
  * Observed
  * ----------------------------------------------------------------------------
@@ -5515,82 +4753,6 @@ var Observed = function () {
         }
     };
 }();
-
-
-/* ----------------------------------------------------------------------------
- * DebrisFlow
- * ----------------------------------------------------------------------------
- */
-var DebrisFlow = function () {
-    var instance;
-
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#debris_flow_form");
-        that.info = $("#debris_flow_form #info");
-        that.status = $("#debris_flow_form  #status");
-        that.stacktrace = $("#debris_flow_form #stacktrace");
-        that.ws_client = new WSClient('debris_flow_form', 'debris_flow');
-        that.rq_job_id = null;
-        that.rq_job = $("#debris_flow_form #rq_job");
-        that.command_btn_id = 'btn_run_debris_flow';
-
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.run_model = function () {
-            var self = instance;
-
-            var task_msg = "Running debris_flow model fit";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-            self.ws_client.connect();
-
-            $.post({
-                url: "rq/api/run_debris_flow",
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(`run_debris_flow_rq job submitted: ${response.job_id}`);
-                        self.set_rq_job_id(self, response.job_id);
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance;
-            self.info.html("<a href='report/debris_flow/' target='_blank'>View Debris Flow Model Results</a>");
-        };
-
-        return that;
-    }
-
-    return {
-        getInstance: function getInstance() {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
-        }
-    };
-}();
-
-
-
 /* ----------------------------------------------------------------------------
  * Ash
  * ----------------------------------------------------------------------------
@@ -5748,8 +4910,816 @@ var Ash = function () {
         }
     };
 }();
+/* ----------------------------------------------------------------------------
+ * RAP_TS
+ * ----------------------------------------------------------------------------
+ */
+var RAP_TS = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#rap_ts_form");
+        that.info = $("#rap_ts_form #info");
+        that.status = $("#rap_ts_form  #status");
+        that.stacktrace = $("#rap_ts_form #stacktrace");
+        that.ws_client = new WSClient('rap_ts_form', 'rap_ts');
+        that.rq_job_id = null;
+        that.rq_job = $("#rap_ts_form #rq_job");
+        that.command_btn_id = 'btn_build_rap_ts';
+
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.acquire = function () {
+            var self = instance;
+            var task_msg = "Acquiring RAP TS maps";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+            self.ws_client.connect();
+
+            $.post({
+                url: "rq/api/acquire_rap_ts",
+                cache: false,
+                success: function success(response) {
+                    self.status.html(`fetch_and_analyze_rap_ts_rq job submitted: ${response.job_id}`);
+                    self.set_rq_job_id(self, response.job_id);
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.report = function () {
+            var self = instance;
+            self.status.html("RAP Timeseries fetched and analyzed")
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+/* ----------------------------------------------------------------------------
+ * Rangeland Cover
+ * ----------------------------------------------------------------------------
+ */
+
+var RangelandCover = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#rangeland_cover_form");
+        that.info = $("#rangeland_cover_form #info");
+        that.status = $("#rangeland_cover_form  #status");
+        that.stacktrace = $("#rangeland_cover_form #stacktrace");
+        that.ws_client = new WSClient('rangeland_cover_form', 'rangeland_cover');
+        that.rq_job_id = null;
+        that.rq_job = $("#rangeland_cover_form #rq_job");
+
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.build = function () {
+            var self = instance;
+
+            var task_msg = "Building rangeland_cover";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "tasks/build_rangeland_cover/",
+                data: self.form.serialize(),
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.form.trigger("RANGELAND_COVER_BUILD_TASK_COMPLETED");
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.report = function () {
+            var self = instance;
+            $.get({
+                url: "report/rangeland_cover/",
+                cache: false,
+                success: function success(response) {
+                    self.info.html(response);
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.setMode = function (mode) {
+            var self = instance;
+            // mode is an optional parameter
+            // if it isn't provided then we get the checked value
+            if (mode === undefined) {
+                mode = $("input[name='rangeland_cover_mode']:checked").val();
+            }
+            mode = parseInt(mode, 10);
+            var rangeland_rap_year = $("#rangeland_cover_form #rap_year").val();
+
+            var task_msg = "Setting Mode to " + mode + " (" + rangeland_rap_year + ")";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            // sync rangeland_cover with nodb
+            $.post({
+                url: "tasks/set_rangeland_cover_mode/",
+                data: { "mode": mode, "rap_year": rangeland_rap_year },
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+            self.showHideControls(mode);
+        };
+
+        that.showHideControls = function (mode) {
+            if (mode == 2) {
+                $("#rangeland_cover_form #rangeland_cover_rap_year_div").show();
+            } else {
+                $("#rangeland_cover_form #rangeland_cover_rap_year_div").hide();
+            }
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+/* ----------------------------------------------------------------------------
+ * RangelandCover
+ * ----------------------------------------------------------------------------
+ */
+var RangelandCoverModify = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#modify_rangeland_cover_form");
+        that.status = $("#modify_rangeland_cover_form  #status");
+        that.stacktrace = $("#modify_rangeland_cover_form #stacktrace");
+        //that.ws_client = new WSClient('modify_rangeland_cover_form', 'modify_rangeland_cover');
+        that.rq_job_id = null;
+        that.rq_job = $("#modify_rangeland_cover_form #rq_job");
+
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.checkbox = $('#checkbox_modify_rangeland_cover');
+        that.checkbox_box_select = $('#checkbox_box_select_modify_rangeland_cover');
+        that.textarea = $('#textarea_modify_rangeland_cover');
+
+        that.input_bunchgrass = $('#input_bunchgrass_cover');
+        that.input_forbs = $('#input_forbs_cover');
+        that.input_sodgrass = $('#input_sodgrass_cover');
+        that.input_shrub = $('#input_shrub_cover');
+
+        that.input_basal = $('#input_basal_cover');
+        that.input_rock = $('#input_rock_cover');
+        that.input_litter = $('#input_litter_cover');
+        that.input_cryptogams = $('#input_cryptogams_cover');
+
+        that.data = null; // Leaflet geoJSON layer
+        that.polys = null; // Leaflet geoJSON layer
+        that.selected = null;
+
+        that.style = {
+            color: "white",
+            opacity: 1,
+            weight: 1,
+            fillColor: "#FFEDA0",
+            fillOpacity: 0.0
+        };
+
+        that.selectedstyle = {
+            color: "red",
+            opacity: 1,
+            weight: 2,
+            fillOpacity: 0.0
+        };
+
+        that.mouseoverstyle = {
+            weight: 2,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.0
+        };
+
+        that.ll0 = null;
+        that.selectionRect = null;
+
+        that.boxSelectionModeMouseDown = function (evt) {
+            var self = instance;
+            self.ll0 = evt.latlng;
+        };
+
+        that.boxSelectionModeMouseMove = function (evt) {
+            var self = instance;
+            var map = Map.getInstance();
+
+            if (self.ll0 === null) {
+                if (self.selectedRect !== null) {
+                    map.removeLayer(that.selectionRect);
+                    self.selectionRect = null;
+                }
+                return;
+            }
+
+            var bounds = L.latLngBounds(self.ll0, evt.latlng);
+
+            if (self.selectionRect === null) {
+                self.selectionRect = L.rectangle(bounds, { color: 'blue', weight: 1 }).addTo(map);
+            } else {
+                self.selectionRect.setLatLngs([bounds.getSouthWest(), bounds.getSouthEast(),
+                bounds.getNorthEast(), bounds.getNorthWest()]);
+                self.selectionRect.redraw();
+            }
+
+        };
+
+        that.find_layer_id = function (topaz_id) {
+            var self = instance;
+
+            for (var id in self.glLayer._layers) {
+                var topaz_id2 = self.glLayer._layers[id].feature.properties.TopazID;
+
+                if (topaz_id === topaz_id2) {
+                    return id;
+                }
+            }
+            return undefined;
+        };
+
+        that.loadCovers = function () {
+            var self = instance;
+            var topaz_ids = instance.textarea.val().split(',');
+
+            $.post({
+                url: "query/rangeland_cover/current_cover_summary/",
+                data: JSON.stringify({ topaz_ids: topaz_ids }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(covers) {
+
+                    that.input_bunchgrass.val(covers['bunchgrass']);
+                    that.input_forbs.val(covers['forbs']);
+                    that.input_sodgrass.val(covers['sodgrass']);
+                    that.input_shrub.val(covers['shrub']);
+                    that.input_basal.val(covers['basal']);
+                    that.input_rock.val(covers['rock']);
+                    that.input_litter.val(covers['litter']);
+                    that.input_cryptogams.val(covers['cryptogams']);
+
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    console.log(error);
+                }
+            });
+        };
+
+        that.boxSelectionModeMouseUp = function (evt) {
+            var self = instance;
+
+            var map = Map.getInstance();
+
+            var llend = evt.latlng;
+
+            if (self.ll0.lat === llend.lat && self.ll0.lng === llend.lng) {
+                that.ll0 = null;
+                map.removeLayer(that.selectionRect);
+                that.selectionRect = null;
+                return;
+            }
+
+            var bounds = L.latLngBounds(self.ll0, llend);
+
+            var sw = bounds.getSouthWest();
+            var ne = bounds.getNorthEast();
+            var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
 
 
+            $.post({
+                url: "tasks/sub_intersection/",
+                data: JSON.stringify({ extent: extent }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(topaz_ids) {
+
+                    for (var i = 0; i < topaz_ids.length; i++) {
+                        var topaz_id = topaz_ids[i];
+                        var id = self.find_layer_id(topaz_id);
+
+                        if (id == undefined) {
+                            continue;
+                        }
+
+                        var layer = self.glLayer._layers[id];
+
+                        if (self.selected.has(topaz_id)) {
+                            self.selected.delete(topaz_id);
+                            layer.setStyle(self.style);
+                        } else {
+                            self.selected.add(topaz_id);
+                            layer.setStyle(self.selectedstyle);
+                        }
+                    }
+
+                    that.textarea.val(Array.from(self.selected).join());
+                    that.loadCovers();
+
+                    map.removeLayer(that.selectionRect);
+                    that.selectionRect = null;
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    console.log(error);
+                }
+            }).always(function () {
+                that.ll0 = null;
+            });
+        };
+
+        that.toggle = function () {
+            var self = instance;
+
+            if (self.checkbox.prop("checked") === true) {
+                if (self.glLayer == null) {
+                    self.showModifyMap();
+                }
+                if (self.selected == null) {
+                    self.selected = new Set();
+                }
+            } else {
+                if (self.checkbox_box_select.prop("checked") === false) {
+                    self.selected = new Set();
+                    self.hideModifyMap();
+                }
+            }
+        };
+
+        that.showModifyMap = function () {
+            var self = instance;
+
+            var map = Map.getInstance();
+            map.boxZoom.disable();
+
+            map.on('mousedown', self.boxSelectionModeMouseDown);
+            map.on('mousemove', self.boxSelectionModeMouseMove);
+            map.on('mouseup', self.boxSelectionModeMouseUp);
+
+            self.data = null;
+            $.get({
+                url: "resources/subcatchments.json",
+                cache: false,
+                success: self.onShowSuccess,
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.hideModifyMap = function () {
+            var self = instance;
+            var map = Map.getInstance();
+
+            map.boxZoom.enable();
+            map.off('mousedown', self.boxSelectionModeMouseDown);
+            map.off('mousemove', self.boxSelectionModeMouseMove);
+            map.off('mouseup', self.boxSelectionModeMouseUp);
+            map.removeLayer(self.glLayer);
+
+            self.data = null;
+            self.glLayer = null;
+            self.ll0 = null;
+        };
+
+        that.onShowSuccess = function (response) {
+            var self = instance;
+            var map = Map.getInstance();
+            self.data = response;
+            self.glLayer = L.geoJSON(self.data.features, {
+                style: self.style,
+                onEachFeature: self.onEachFeature
+            });
+            self.glLayer.addTo(map);
+        };
+
+        that.onEachFeature = function (feature, layer) {
+            var self = instance;
+            var map = Map.getInstance();
+
+            layer.on({
+                mouseover: function mouseover(e) {
+                    var layer = e.target;
+
+                    layer.setStyle(self.mouseoverstyle);
+
+                    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                        layer.bringToFront();
+                    }
+                },
+                mouseout: function mouseout(e) {
+                    var topaz_id = e.target.feature.properties.TopazID;
+                    if (self.selected.has(topaz_id)) {
+                        layer.setStyle(self.selectedstyle);
+                    } else {
+                        layer.setStyle(self.style);
+                    }
+                },
+                click: function click(e) {
+                    var layer = e.target;
+                    var topaz_id = e.target.feature.properties.TopazID;
+
+                    if (self.selected.has(topaz_id)) {
+                        self.selected.delete(topaz_id);
+                        layer.setStyle(self.style);
+                    } else {
+                        self.selected.add(topaz_id);
+                        layer.setStyle(self.selectedstyle);
+                    }
+
+                    that.textarea.val(Array.from(self.selected).join());
+                    that.loadCovers();
+                }
+            });
+        };
+
+        that.modify = function () {
+            var self = instance;
+            var task_msg = "Modifying rangeland_cover";
+            self.status.html(task_msg + "...");
+            self.hideStacktrace();
+
+            var topaz_ids = self.textarea.val().split(',');
+            $.post({
+                url: "tasks/modify_rangeland_cover/",
+                data: JSON.stringify({
+                    topaz_ids: topaz_ids,
+                    covers: {
+                        bunchgrass: self.input_bunchgrass.val(),
+                        forbs: self.input_forbs.val(),
+                        sodgrass: self.input_sodgrass.val(),
+                        shrub: self.input_shrub.val(),
+                        basal: self.input_basal.val(),
+                        rock: self.input_rock.val(),
+                        litter: self.input_litter.val(),
+                        cryptogams: self.input_cryptogams.val()
+                    }
+                }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.textarea.val("");
+                        self.loadCovers();
+                        self.checkbox.prop("checked", false);
+                        self.hideModifyMap();
+                        self.status.html(task_msg + "... Success");
+
+                        self.form.trigger("RANGELAND_COVER_MODIFY_TASK_COMPLETED");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+/* ----------------------------------------------------------------------------
+ * Treatments
+ * ----------------------------------------------------------------------------
+ */
+var Treatments = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#treatments_form");
+        that.info = $("#treatments_form #info");
+        that.status = $("#treatments_form  #status");
+        that.stacktrace = $("#treatments_form #stacktrace");
+        that.ws_client = new WSClient('treatments_form', 'treatments');
+        that.rq_job_id = null;
+        that.rq_job = $("#treatments_form #rq_job");
+        that.command_btn_id = 'btn_build_treatments';
+
+
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.build = function () {
+            var self = instance;
+            var task_msg = "Building treatments";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+            self.ws_client.connect();
+
+            var formData = new FormData($('#treatments_form')[0]);
+
+            $.post({
+                url: "rq/api/build_treatments",
+                data: formData,
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(`build_treatments job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.report = function () {
+            var self = instance;
+            $.get({
+                url: "report/treatments/",
+                cache: false,
+                success: function success(response) {
+                    self.info.html(response);
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.restore = function (treatments_mode, treatments_single_selection) {
+            console.log("restore treatments mode: " + treatments_mode);
+            var self = instance;
+            $("#treatments_mode" + treatments_mode).prop("checked", true);
+
+            $('#treatments_single_selection').val('{{ treatments.single_selection }}').prop('selected', true);
+
+            self.showHideControls(treatments_mode);
+        };
+
+        that.setMode = function (mode) {
+            var self = instance;
+            // mode is an optional parameter
+            // if it isn't provided then we get the checked value
+            if (mode === undefined) {
+                mode = $("input[name='treatments_mode']:checked").val();
+            }
+            mode = parseInt(mode, 10);
+            var treatments_single_selection = $("#treatments_single_selection").val();
+
+            var task_msg = "Setting Mode to " + mode + " (" + treatments_single_selection + ")";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            // sync treatments with nodb
+            $.post({
+                url: "tasks/set_treatments_mode/",
+                data: { "mode": mode, "treatments_single_selection": treatments_single_selection },
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+            self.showHideControls(mode);
+        };
+
+        that.showHideControls = function (mode) {
+            // show the appropriate controls
+            if (mode === -1) {
+                // undefined
+                $("#treatments_mode1_controls").hide();
+                $("#treatments_mode4_controls").hide();
+            } else if (mode === 1) {
+                // selection
+                $("#treatments_mode1_controls").show();
+                $("#treatments_mode4_controls").hide();
+            } else if (mode === 4) {
+                // map
+                $("#treatments_mode1_controls").hide();
+                $("#treatments_mode4_controls").show();
+            } else {
+                throw "ValueError: unknown mode";
+            }
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+/* ----------------------------------------------------------------------------
+ * Team
+ * ----------------------------------------------------------------------------
+ */
+var Team = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#team_form");
+        that.info = $("#team_form #info");
+        that.status = $("#team_form  #status");
+        that.stacktrace = $("#team_form #stacktrace");
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.adduser_click = function () {
+            var self = instance;
+            var email = $('#adduser-email').val()
+            self.adduser(email)
+        };
+
+        that.adduser = function (email) {
+            var self = instance;
+            var data = { "adduser-email": email };
+
+            $.post({
+                url: "tasks/adduser/",
+                data: data,
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.form.trigger("TEAM_ADDUSER_TASK_COMPLETED");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    console.log(error);
+                }
+            });
+        };
+
+        that.removeuser = function (user_id) {
+            var self = instance;
+            $.post({
+                url: "tasks/removeuser/",
+                data: JSON.stringify({ user_id: user_id }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.form.trigger("TEAM_REMOVEUSER_TASK_COMPLETED");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    console.log(error);
+                }
+            });
+        };
+
+        that.report = function () {
+            var self = instance;
+
+            $.get({
+                url: "report/users/",
+                cache: false,
+                success: function success(response) {
+                    self.info.html(response);
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
 /* ----------------------------------------------------------------------------
  * Rhem
  * ----------------------------------------------------------------------------
@@ -5855,8 +5825,6 @@ var Rhem = function () {
         }
     };
 }();
-
-
 /* ----------------------------------------------------------------------------
  * Omni
  * ----------------------------------------------------------------------------
@@ -6010,8 +5978,6 @@ var Omni = function () {
         }
     };
 }();
-
-
 /* ----------------------------------------------------------------------------
  * DSS Export
  * ----------------------------------------------------------------------------
