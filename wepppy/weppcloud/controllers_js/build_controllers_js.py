@@ -1,4 +1,7 @@
-"""Compose controllers.js from controllers_js templates."""
+"""Compose controllers.js from controllers_js templates.
+
+See notes/controllers_js.md for architecture details.
+"""
 
 from __future__ import annotations
 

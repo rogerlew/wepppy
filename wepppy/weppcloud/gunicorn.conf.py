@@ -1,4 +1,7 @@
-"""Gunicorn settings for weppcloud."""
+"""Gunicorn settings for weppcloud.
+
+Bundle orchestration is documented in notes/controllers_js.md.
+"""
 
 import subprocess
 import sys
