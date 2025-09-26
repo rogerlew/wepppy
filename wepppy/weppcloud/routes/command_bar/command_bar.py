@@ -7,7 +7,7 @@ simple method of adding features without implementing a full UI.
 
 Many of the commands can use existing endpoints, but some need new ones. This serves
 as a home for those endpoints that are command bar specific and don't belong elsewhere.
-The `static/js/command-bar.js` is the companion frontend code.
+The `command_bar/static/command-bar.js` file holds the companion frontend code.
 
 Keep endpoints small and focused. Here are some guidelines:
 1. Validate payload + authorization, always call `authorize()`
@@ -24,7 +24,13 @@ from wepppy.nodb.base import LogLevel, try_redis_get_log_level, try_redis_set_lo
 from wepppy.weppcloud.utils.helpers import authorize
 
 
-command_bar_bp = Blueprint('command_bar', __name__)
+command_bar_bp = Blueprint(
+    'command_bar',
+    __name__,
+    template_folder='templates',
+    static_folder='static',
+    static_url_path='/command_bar/static'
+)
 
 _ALLOWED_LEVELS = {level.name.lower(): level for level in LogLevel}
 

@@ -1,6 +1,5 @@
 import os
 from datetime import datetime, timezone
-from os.path import join as _join
 from pathlib import Path
 import uuid
 
@@ -43,12 +42,12 @@ except Exception as e:
     redis_readme_client = None
 
 
-readme_bp = Blueprint("readme", __name__)
+readme_bp = Blueprint('readme', __name__, template_folder='templates')
 
-_thisdir = os.path.dirname(os.path.abspath(__file__))
+_BASE_DIR = Path(__file__).resolve().parent
 
 README_FILENAME = "README.md"
-DEFAULT_TEMPLATE = _join(_thisdir, "../templates/readme/default.md.j2")
+DEFAULT_TEMPLATE = _BASE_DIR / "templates" / "readme" / "default.md.j2"
 
 
 def _readme_path(wd):
@@ -97,8 +96,7 @@ def ensure_readme(runid, config):
         return path
 
 #    context = _template_context(runid, config)
-    with open(DEFAULT_TEMPLATE, "r", encoding="utf-8") as f:
-        template_source = f.read()
+    template_source = DEFAULT_TEMPLATE.read_text(encoding="utf-8")
     markdown = template_source.replace('{runid}', runid).replace('{config}', config)
     Path(path).write_text(markdown, encoding="utf-8")
     return path
@@ -251,7 +249,7 @@ def readme_editor(runid, config):
         client_uuid = uuid.uuid4().hex
         _record_editor_session(runid, config, client_uuid, ron)
         return render_template(
-            "readme/editor.html",
+            "readme/editor.j2",
             initial_markdown=markdown,
             initial_html=html,
             editor_client_uuid=client_uuid,
@@ -330,7 +328,7 @@ def readme_render(runid, config):
         context = _template_context(runid, config)
         html = _render_markdown(markdown, context)
         return render_template(
-            "readme/view.html",
+            "readme/view.j2",
             readme_html=html,
             generated=datetime.now(),
             can_edit=_can_edit(runid),

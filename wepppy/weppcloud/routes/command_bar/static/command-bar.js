@@ -1,4 +1,4 @@
-// static/js/command-bar.js
+// wepppy/weppcloud/routes/command_bar/static/js/command-bar.js
 //
 // Command Bar quick reference for developers:
 // - Purpose: keyboard-driven command palette for project pages. Press ':' to open, then
@@ -12,7 +12,7 @@
 //        needs its own validation + network request logic.
 //     3. Update `SET_HELP_LINES` or other user-facing help text where appropriate.
 //     4. If network-backed, expose a matching Flask route inside
-//        `wepppy/weppcloud/routes/command_bar.py` (or another blueprint) that returns
+//        `wepppy/weppcloud/routes/command_bar/command_bar.py` (or another blueprint) that returns
 //        `{ Success: bool, Content?: {...}, Error?: str }` so the UI can display results.
 // - Routes: network actions assume `projectBaseUrl = /runs/<runid>/<config>/`. Append a
 //   relative path (e.g., `command_bar/loglevel`) to reach the corresponding backend
