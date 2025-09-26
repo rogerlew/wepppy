@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-2025, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
