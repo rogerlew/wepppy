@@ -836,11 +836,9 @@ class Omni(NoDbBase):
 
             self.logger.info(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
             self._build_scenario(scenario_def)
-            )
 
         self.logger.info('  Omni::run_omni_scenarios: compiling hillslope summaries\n')
         self.compile_hillslope_summaries()
-        )
 
     def _build_scenario(
             self,

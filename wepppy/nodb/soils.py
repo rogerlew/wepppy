@@ -381,7 +381,6 @@ class Soils(NoDbBase):
                             valid_k_counts[mukey] += watershed.hillslope_area(topaz_id)
                             soils[mukey] = soil_summary
 
-            )
 
             # now assign hillslopes with invalid mukeys the most common valid mukey
             most_common_k = valid_k_counts.most_common()[0][0]
