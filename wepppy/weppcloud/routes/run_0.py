@@ -46,6 +46,7 @@ def service_worker():
 
 # Redirect to the correct to the full run path
 @run_0_bp.route('/runs/<string:runid>/')
+@handle_with_exception_factory
 def runs0_nocfg(runid):
 
     wd = get_wd(runid)
@@ -67,6 +68,7 @@ def _log_access(wd, current_user, ip):
         fp.write('{},{},{}\n'.format(email, ip, datetime.now()))
 
 @run_0_bp.route('/runs/<string:runid>/<config>/')
+@authorize_and_handle_with_exception_factory
 def runs0(runid, config):
     global VAPID_PUBLIC_KEY
     from wepppy.nodb.mods.revegetation import Revegetation
@@ -74,155 +76,128 @@ def runs0(runid, config):
     from wepppy.wepp import management
     from wepp_runner.wepp_runner import linux_wepp_bin_opts
     from wepppy.wepp.management.managements import landuse_management_mapping_options
-
     from wepppy.weppcloud.app import db, Run
 
     assert config is not None
 
     wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
 
-    owners = get_run_owners_lazy(runid)
-    try:
-        ron = Ron.getInstance(wd)
-    except FileNotFoundError:
-        abort(404)
-
-    # check config
+    # check config from url matches config from Ron
     if config != ron.config_stem:
         return redirect(url_for('run_0.runs0', runid=runid, config=ron.config_stem))
 
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
+    landuse = Landuse.getInstance(wd)
+    soils = Soils.getInstance(wd)
+    climate = Climate.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+    watershed = Watershed.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
+    site_prefix = current_app.config['SITE_PREFIX']
 
-    if not owners:
-        should_abort = False
-
-    if current_user.has_role('Admin'):
-        should_abort = False
-
-    if ron.public:
-        should_abort = False
-
-    if should_abort:
-        abort(404)
+    if watershed.delineation_backend_is_topaz:
+        topaz = Topaz.getInstance(wd)
+    else:
+        topaz = None
 
     try:
-
-        landuse = Landuse.getInstance(wd)
-        soils = Soils.getInstance(wd)
-        climate = Climate.getInstance(wd)
-        wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
-        unitizer = Unitizer.getInstance(wd)
-        site_prefix = current_app.config['SITE_PREFIX']
-
-        if watershed.delineation_backend_is_topaz:
-            topaz = Topaz.getInstance(wd)
-        else:
-            topaz = None
-
-        try:
-            observed = Observed.getInstance(wd)
-        except:
-            observed = Observed(wd, "%s.cfg" % config)
-
-        try:
-            rangeland_cover = RangelandCover.getInstance(wd)
-        except:
-            rangeland_cover = None
-
-        try:
-            rhem = Rhem.getInstance(wd)
-        except:
-            rhem = None
-
-        try:
-            disturbed = Disturbed.getInstance(wd)
-        except:
-            disturbed = None
-
-        try:
-            ash = Ash.getInstance(wd)
-        except:
-            ash = None
-
-        try:
-            skid_trails = wepppy.nodb.mods.SkidTrails.getInstance(wd)
-        except:
-            skid_trails = None
-
-        try:
-            reveg = Revegetation.getInstance(wd)
-        except:
-            reveg = None
-
-        try:
-            omni = Omni.getInstance(wd)
-        except:
-            omni = None
-
-        try:
-            treatments = Treatments.getInstance(wd)
-        except:
-            treatments = None
-
-        try:
-            redis_prep = RedisPrep.getInstance(wd)
-        except:
-            redis_prep = None
-
-        if redis_prep is not None:
-            rq_job_ids = redis_prep.get_rq_job_ids()
-        else:
-            rq_job_ids = {}
-
-        landuseoptions = landuse.landuseoptions
-        soildboptions = soilsdb.load_db()
-
-        critical_shear_options = management.load_channel_d50_cs()
-
-
-        _log_access(wd, current_user, request.remote_addr)
-        timestamp = datetime.now()
-        Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
-        db.session.commit()
-
-        return render_template('0.html',
-                               user=current_user,
-                               site_prefix=site_prefix,
-                               topaz=topaz,
-                               soils=soils,
-                               ron=ron,
-                               landuse=landuse,
-                               climate=climate,
-                               wepp=wepp,
-                               wepp_bin_opts=linux_wepp_bin_opts,
-                               rhem=rhem,
-                               disturbed=disturbed,
-                               ash=ash,
-                               skid_trails=skid_trails,
-                               reveg=reveg,
-                               watershed=watershed,
-                               unitizer_nodb=unitizer,
-                               observed=observed,
-                               rangeland_cover=rangeland_cover,
-                               omni=omni,
-                               OmniScenario=OmniScenario,
-                               treatments=treatments,
-                               rq_job_ids=rq_job_ids,
-                               landuseoptions=landuseoptions,
-                               landuse_management_mapping_options=landuse_management_mapping_options,
-                               soildboptions=soildboptions,
-                               critical_shear_options=critical_shear_options,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               run_id=runid,
-                               runid=runid,
-                               config=config,
-                               VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
+        observed = Observed.getInstance(wd)
     except:
-        return exception_factory(runid=runid)
+        observed = Observed(wd, "%s.cfg" % config)
 
+    try:
+        rangeland_cover = RangelandCover.getInstance(wd)
+    except:
+        rangeland_cover = None
+
+    try:
+        rhem = Rhem.getInstance(wd)
+    except:
+        rhem = None
+
+    try:
+        disturbed = Disturbed.getInstance(wd)
+    except:
+        disturbed = None
+
+    try:
+        ash = Ash.getInstance(wd)
+    except:
+        ash = None
+
+    try:
+        skid_trails = wepppy.nodb.mods.SkidTrails.getInstance(wd)
+    except:
+        skid_trails = None
+
+    try:
+        reveg = Revegetation.getInstance(wd)
+    except:
+        reveg = None
+
+    try:
+        omni = Omni.getInstance(wd)
+    except:
+        omni = None
+
+    try:
+        treatments = Treatments.getInstance(wd)
+    except:
+        treatments = None
+
+    try:
+        redis_prep = RedisPrep.getInstance(wd)
+    except:
+        redis_prep = None
+
+    if redis_prep is not None:
+        rq_job_ids = redis_prep.get_rq_job_ids()
+    else:
+        rq_job_ids = {}
+
+    landuseoptions = landuse.landuseoptions
+    soildboptions = soilsdb.load_db()
+
+    critical_shear_options = management.load_channel_d50_cs()
+
+
+    _log_access(wd, current_user, request.remote_addr)
+    timestamp = datetime.now()
+    Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
+    db.session.commit()
+
+    return render_template('0.html',
+                            user=current_user,
+                            site_prefix=site_prefix,
+                            topaz=topaz,
+                            soils=soils,
+                            ron=ron,
+                            landuse=landuse,
+                            climate=climate,
+                            wepp=wepp,
+                            wepp_bin_opts=linux_wepp_bin_opts,
+                            rhem=rhem,
+                            disturbed=disturbed,
+                            ash=ash,
+                            skid_trails=skid_trails,
+                            reveg=reveg,
+                            watershed=watershed,
+                            unitizer_nodb=unitizer,
+                            observed=observed,
+                            rangeland_cover=rangeland_cover,
+                            omni=omni,
+                            OmniScenario=OmniScenario,
+                            treatments=treatments,
+                            rq_job_ids=rq_job_ids,
+                            landuseoptions=landuseoptions,
+                            landuse_management_mapping_options=landuse_management_mapping_options,
+                            soildboptions=soildboptions,
+                            critical_shear_options=critical_shear_options,
+                            precisions=wepppy.nodb.unitizer.precisions,
+                            run_id=runid,
+                            runid=runid,
+                            config=config,
+                            VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
 
 @run_0_bp.route('/create', strict_slashes=False)
 @handle_with_exception_factory
@@ -265,38 +240,35 @@ def create_run_dir(current_user):
 
 
 @run_0_bp.route('/create/<config>')
-@run_0_bp.route('/create/<config>/')
+@handle_with_exception_factory
 def create(config):
+    from wepppy.weppcloud.routes.readme import ensure_readme
+    cfg = "%s.cfg" % config
+
+    overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
+
+    if len(overrides) > 0:
+        cfg += '?%s' % overrides
+
     try:
-        from wepppy.weppcloud.routes.readme import ensure_readme
-        cfg = "%s.cfg" % config
+        runid, wd = create_run_dir(current_user)
+    except PermissionError:
+        return exception_factory('Could not create run directory. NAS may be down.')
+    except Exception:
+        return exception_factory('Could not create run directory.')
 
-        overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
-
-        if len(overrides) > 0:
-            cfg += '?%s' % overrides
-
-        try:
-            runid, wd = create_run_dir(current_user)
-        except PermissionError:
-            return exception_factory('Could not create run directory. NAS may be down.')
-        except Exception:
-            return exception_factory('Could not create run directory.')
-
-        try:
-            Ron(wd, cfg)
-        except Exception:
-            return exception_factory('Could not create run')
-
-        
-        if not current_user.is_anonymous:
-            from wepppy.weppcloud.app import user_datastore
-            try:
-                user_datastore.create_run(runid, config, current_user)
-            except Exception:
-                return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
-
-        ensure_readme(runid, config)
-        return redirect(url_for('run_0.runs0', runid=runid, config=config))
+    try:
+        Ron(wd, cfg)
     except Exception:
         return exception_factory('Could not create run')
+
+    
+    if not current_user.is_anonymous:
+        from wepppy.weppcloud.app import user_datastore
+        try:
+            user_datastore.create_run(runid, config, current_user)
+        except Exception:
+            return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
+
+    ensure_readme(runid, config)
+    return redirect(url_for('run_0.runs0', runid=runid, config=config))
