@@ -701,8 +701,6 @@ class Landuse(NoDbBase):
                 mofe_synth.stack = stack
                 merged = mofe_synth.write(mofe_lc_fn)
 
-            )
-
         with self.locked():
             if cancov_d:
                 self._hillslope_mofe_cancovs = cancov_d

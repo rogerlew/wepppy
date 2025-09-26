@@ -582,7 +582,6 @@ class Ash(NoDbBase):
 
             translator = watershed.translator_factory()
 
-            )
 
             self.logger.info('  Running Hillslopes')
             meta = {}
@@ -733,7 +732,6 @@ class Ash(NoDbBase):
                 for kwds in args:
                     self.logger.info(f"  running {kwds['prefix']}\n")
                     run_ash_model(kwds)
-                    )
 
             self._ash_load_d = load_d
             self._ash_type_d = ash_type_d
