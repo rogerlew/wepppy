@@ -11,12 +11,13 @@ from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
 from wepppy.wepp.out import DisturbedTotalWatSed2, Element, HillWat, TotalWatSed2
 from wepppy.wepp.stats import ChannelSummary, HillSummary, OutletSummary, TotalWatbal
-
+from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
 
 wepp_bp = Blueprint('wepp', __name__)
 
 @wepp_bp.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>')
 @wepp_bp.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>/')
+@authorize_and_handle_with_exception_factory
 def view_channel_def(runid, config, chn_key):
     wd = get_wd(runid)
     assert wd is not None
@@ -31,25 +32,23 @@ def view_channel_def(runid, config, chn_key):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/view/management/<key>')
 @wepp_bp.route('/runs/<string:runid>/<config>/view/management/<key>/')
+@authorize_and_handle_with_exception_factory
 def view_management(runid, config, key):
     wd = get_wd(runid)
     assert wd is not None
 
-    try:
-        landuse = Landuse.getInstance(wd)
-        man = landuse.managements[str(key)].get_management()
-        contents = repr(man)
+    landuse = Landuse.getInstance(wd)
+    man = landuse.managements[str(key)].get_management()
+    contents = repr(man)
 
-        r = Response(response=contents, status=200, mimetype="text/plain")
-        r.headers["Content-Type"] = "text/plain; charset=utf-8"
-        return r
-
-    except Exception:
-        return exception_factory('Error retrieving management', runid=runid)
+    r = Response(response=contents, status=200, mimetype="text/plain")
+    r.headers["Content-Type"] = "text/plain; charset=utf-8"
+    return r
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine', methods=['POST'])
 @wepp_bp.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_set_hourly_seepage(runid, config):
 
     try:
@@ -96,6 +95,7 @@ def task_set_hourly_seepage(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/results')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/results/')
+@authorize_and_handle_with_exception_factory
 def report_wepp_results(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
@@ -114,9 +114,10 @@ def report_wepp_results(runid, config):
         return exception_factory('Error building reports template', runid=runid)
 
 
-# noinspection PyBroadException
+
 @wepp_bp.route('/runs/<string:runid>/<config>/query/subcatchments_summary')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/subcatchments_summary/')
+@authorize_and_handle_with_exception_factory
 def query_subcatchments_summary(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -129,9 +130,10 @@ def query_subcatchments_summary(runid, config):
         return exception_factory('Error building summary', runid=runid)
 
 
-# noinspection PyBroadException
+
 @wepp_bp.route('/runs/<string:runid>/<config>/query/channels_summary')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/channels_summary/')
+@authorize_and_handle_with_exception_factory
 def query_channels_summary(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -146,30 +148,28 @@ def query_channels_summary(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/prep_details')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/prep_details/')
+@authorize_and_handle_with_exception_factory
 def get_wepp_prep_details(runid, config):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
 
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
+    subcatchments_summary = ron.subs_summary(abbreviated=True)
+    channels_summary = ron.chns_summary(abbreviated=True)
 
-        subcatchments_summary = ron.subs_summary(abbreviated=True)
-        channels_summary = ron.chns_summary(abbreviated=True)
+    unitizer = Unitizer.getInstance(wd)
 
-        unitizer = Unitizer.getInstance(wd)
-
-        return render_template('reports/wepp/prep_details.htm', runid=runid, config=config,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               subcatchments_summary=subcatchments_summary,
-                               channels_summary=channels_summary,
-                               user=current_user,
-                               ron=ron)
-    except:
-        return exception_factory('Error building summary', runid=runid)
+    return render_template('reports/wepp/prep_details.htm', runid=runid, config=config,
+                            unitizer_nodb=unitizer,
+                            precisions=wepppy.nodb.unitizer.precisions,
+                            subcatchments_summary=subcatchments_summary,
+                            channels_summary=channels_summary,
+                            user=current_user,
+                            ron=ron)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts/')
+@authorize_and_handle_with_exception_factory
 def query_wepp_phos_opts(runid, config):
     wd = get_wd(runid)
     phos_opts = Wepp.getInstance(wd).phosphorus_opts.asdict()
@@ -178,6 +178,7 @@ def query_wepp_phos_opts(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/run_summary')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/run_summary/')
+@authorize_and_handle_with_exception_factory
 def report_wepp_run_summary(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -194,6 +195,7 @@ def report_wepp_run_summary(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/summary')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/summary/')
+@authorize_and_handle_with_exception_factory
 def report_wepp_loss(runid, config):
     extraneous = request.args.get('extraneous', None) == 'true'
 
@@ -207,48 +209,46 @@ def report_wepp_loss(runid, config):
     except:
         exclude_yr_indxs = None
 
-    try:
-        class_fractions = request.args.get('class_fractions', False)
-        class_fractions = str(class_fractions).lower() == 'true'
+    class_fractions = request.args.get('class_fractions', False)
+    class_fractions = str(class_fractions).lower() == 'true'
 
-        fraction_under = request.args.get('fraction_under', None)
-        if fraction_under is not None:
-            try:
-                fraction_under = float(fraction_under)
-            except:
-                fraction_under = None
+    fraction_under = request.args.get('fraction_under', None)
+    if fraction_under is not None:
+        try:
+            fraction_under = float(fraction_under)
+        except:
+            fraction_under = None
 
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
-        is_singlestorm = loss.is_singlestorm
-        out_rpt = OutletSummary(loss)
-        hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
-        chn_rpt = ChannelSummary(loss)
-        avg_annual_years = loss.avg_annual_years
-        excluded_years = loss.excluded_years
-        translator = Watershed.getInstance(wd).translator_factory()
-        unitizer = Unitizer.getInstance(wd)
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+    is_singlestorm = loss.is_singlestorm
+    out_rpt = OutletSummary(loss)
+    hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
+    chn_rpt = ChannelSummary(loss)
+    avg_annual_years = loss.avg_annual_years
+    excluded_years = loss.excluded_years
+    translator = Watershed.getInstance(wd).translator_factory()
+    unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/summary.htm', runid=runid, config=config,
-                               extraneous=extraneous,
-                               out_rpt=out_rpt,
-                               hill_rpt=hill_rpt,
-                               chn_rpt=chn_rpt,
-                               avg_annual_years=avg_annual_years,
-                               excluded_years=excluded_years,
-                               translator=translator,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               ron=ron,
-                               is_singlestorm=is_singlestorm,
-                               user=current_user)
-    except:
-        return exception_factory(runid=runid)
+    return render_template('reports/wepp/summary.htm', runid=runid, config=config,
+                        extraneous=extraneous,
+                        out_rpt=out_rpt,
+                        hill_rpt=hill_rpt,
+                        chn_rpt=chn_rpt,
+                        avg_annual_years=avg_annual_years,
+                        excluded_years=excluded_years,
+                        translator=translator,
+                        unitizer_nodb=unitizer,
+                        precisions=wepppy.nodb.unitizer.precisions,
+                        ron=ron,
+                        is_singlestorm=is_singlestorm,
+                        user=current_user)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal/')
+@authorize_and_handle_with_exception_factory
 def report_wepp_yearly_watbal(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
@@ -260,73 +260,65 @@ def report_wepp_yearly_watbal(runid, config):
     except:
         exclude_yr_indxs = [0, 1]
 
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
 
-        totwatsed = TotalWatSed2(wd)
-        totwatbal = TotalWatbal(totwatsed,
-                                exclude_yr_indxs=exclude_yr_indxs)
+    totwatsed = TotalWatSed2(wd)
+    totwatbal = TotalWatbal(totwatsed,
+                            exclude_yr_indxs=exclude_yr_indxs)
 
-        unitizer = Unitizer.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/yearly_watbal.htm', runid=runid, config=config,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               rpt=totwatbal,
-                               ron=ron,
-                               user=current_user)
-    except:
-        return exception_factory(runid=runid)
+    return render_template('reports/wepp/yearly_watbal.htm', runid=runid, config=config,
+                            unitizer_nodb=unitizer,
+                            precisions=wepppy.nodb.unitizer.precisions,
+                            rpt=totwatbal,
+                            ron=ron,
+                            user=current_user)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse/')
+@authorize_and_handle_with_exception_factory
 def report_wepp_avg_annual_by_landuse(runid, config):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
 
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+    dwat = DisturbedTotalWatSed2(wd, wepp.baseflow_opts, wepp.phosphorus_opts)
+    unitizer = Unitizer.getInstance(wd)
 
-        wepp = Wepp.getInstance(wd)
-        dwat = DisturbedTotalWatSed2(wd, wepp.baseflow_opts, wepp.phosphorus_opts)
-        unitizer = Unitizer.getInstance(wd)
-
-        return render_template('reports/wepp/avg_annuals_by_landuse.htm', runid=runid, config=config,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               report=dwat.annual_averages_report,
-                               ron=ron,
-                               user=current_user)
-    except:
-        return exception_factory('Error running wepp_avg_annual_by_landuse', runid=runid)
+    return render_template('reports/wepp/avg_annuals_by_landuse.htm', runid=runid, config=config,
+                        unitizer_nodb=unitizer,
+                        precisions=wepppy.nodb.unitizer.precisions,
+                        report=dwat.annual_averages_report,
+                        ron=ron,
+                        user=current_user)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal/')
+@authorize_and_handle_with_exception_factory
 def report_wepp_avg_annual_watbal(runid, config):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+    hill_rpt = wepp.report_hill_watbal()
+    # chn_rpt = wepp.report_chn_watbal()
 
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        wepp = Wepp.getInstance(wd)
-        hill_rpt = wepp.report_hill_watbal()
-        # chn_rpt = wepp.report_chn_watbal()
+    unitizer = Unitizer.getInstance(wd)
 
-        unitizer = Unitizer.getInstance(wd)
-
-        return render_template('reports/wepp/avg_annual_watbal.htm', runid=runid, config=config,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               hill_rpt=hill_rpt,
-                               # chn_rpt=chn_rpt,
-                               ron=ron,
-                               user=current_user)
-    except:
-        return exception_factory('Error running watbal', runid=runid)
+    return render_template('reports/wepp/avg_annual_watbal.htm', runid=runid, config=config,
+                            unitizer_nodb=unitizer,
+                            precisions=wepppy.nodb.unitizer.precisions,
+                            hill_rpt=hill_rpt,
+                            # chn_rpt=chn_rpt,
+                            ron=ron,
+                            user=current_user)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp/daily_streamflow.csv')
+@authorize_and_handle_with_exception_factory
 def resources_wepp_streamflow(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
@@ -356,6 +348,7 @@ def resources_wepp_streamflow(runid, config):
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed.csv')
+@authorize_and_handle_with_exception_factory
 def resources_wepp_totalwatsed(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -375,6 +368,7 @@ def resources_wepp_totalwatsed(runid, config):
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed2.csv')
+@authorize_and_handle_with_exception_factory
 def resources_wepp_totalwatsed2(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -390,6 +384,7 @@ def resources_wepp_totalwatsed2(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/plot/wepp/streamflow')
 @wepp_bp.route('/runs/<string:runid>/<config>/plot/wepp/streamflow/')
+@authorize_and_handle_with_exception_factory
 def plot_wepp_streamflow(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
@@ -397,30 +392,23 @@ def plot_wepp_streamflow(runid, config):
         for yr in res.split(','):
             if isint(yr):
                 exclude_yr_indxs.append(int(yr))
-
     except:
         exclude_yr_indxs = [0, 1]
 
-
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-
-        unitizer = Unitizer.getInstance(wd)
-
-        # stack basefow, lateral flow, runoff
-        return render_template('reports/wepp/daily_streamflow_graph.htm', runid=runid, config=config,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
-                               ron=ron,
-                               user=current_user)
-    except:
-        return exception_factory('Error running plot_wepp_streamflow', runid=runid)
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
+    return render_template('reports/wepp/daily_streamflow_graph.htm', runid=runid, config=config,
+                            unitizer_nodb=unitizer,
+                            precisions=wepppy.nodb.unitizer.precisions,
+                            exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
+                            ron=ron,
+                            user=current_user)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/return_periods')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/return_periods/')
+@authorize_and_handle_with_exception_factory
 def report_wepp_return_periods(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
@@ -440,104 +428,95 @@ def report_wepp_return_periods(runid, config):
     except:
         exclude_months = None
 
-    try:
-        # get method and gringorten_correction
-        # method default is cta gringorten_correction default is False
-        method = request.args.get('method', 'cta')
-        if method not in ['cta', 'am']:
-            return error_factory('method must be either cta or am')
-        
-        gringorten_correction = request.args.get('gringorten_correction', 'false').lower() == 'true'
+    # get method and gringorten_correction
+    # method default is cta gringorten_correction default is False
+    method = request.args.get('method', 'cta')
+    if method not in ['cta', 'am']:
+        return error_factory('method must be either cta or am')
+    
+    gringorten_correction = request.args.get('gringorten_correction', 'false').lower() == 'true'
 
-        extraneous = request.args.get('extraneous', None) == 'true'
+    extraneous = request.args.get('extraneous', None) == 'true'
 
-        chn_topaz_id_of_interest = request.args.get('chn_topaz_id_of_interest', None)
-        if chn_topaz_id_of_interest is not None:
-            chn_topaz_id_of_interest = int(chn_topaz_id_of_interest)
+    chn_topaz_id_of_interest = request.args.get('chn_topaz_id_of_interest', None)
+    if chn_topaz_id_of_interest is not None:
+        chn_topaz_id_of_interest = int(chn_topaz_id_of_interest)
 
-        wd = get_wd(runid)
+    wd = get_wd(runid)
 
-        climate = Climate.getInstance(wd)
-        rec_intervals = _parse_rec_intervals(request, climate.years)
+    climate = Climate.getInstance(wd)
+    rec_intervals = parse_rec_intervals(request, climate.years)
 
-        ron = Ron.getInstance(wd)
-        wepp = Wepp.getInstance(wd)
-        report = wepp.report_return_periods(
-            rec_intervals=rec_intervals, 
-            exclude_yr_indxs=exclude_yr_indxs,
-            method=method, 
-            gringorten_correction=gringorten_correction, 
-            exclude_months=exclude_months,
-            chn_topaz_id_of_interest=chn_topaz_id_of_interest
-        )
+    ron = Ron.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+    report = wepp.report_return_periods(
+        rec_intervals=rec_intervals, 
+        exclude_yr_indxs=exclude_yr_indxs,
+        method=method, 
+        gringorten_correction=gringorten_correction, 
+        exclude_months=exclude_months,
+        chn_topaz_id_of_interest=chn_topaz_id_of_interest
+    )
 
-        translator = Watershed.getInstance(wd).translator_factory()
+    translator = Watershed.getInstance(wd).translator_factory()
+    unitizer = Unitizer.getInstance(wd)
 
-        unitizer = Unitizer.getInstance(wd)
-
-        return render_template('reports/wepp/return_periods.htm', runid=runid, config=config,
-                               extraneous=extraneous,
-                               chn_topaz_id_of_interest=chn_topaz_id_of_interest,
-                               chn_topaz_id_options=wepp.chn_topaz_ids_of_interest,
-                               gringorten_correction=gringorten_correction,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               report=report,
-                               translator=translator,
-                               ron=ron,
-                               user=current_user)
-    except:
-        return exception_factory('Error generating return periods report', runid=runid)
+    return render_template('reports/wepp/return_periods.htm', runid=runid, config=config,
+                            extraneous=extraneous,
+                            chn_topaz_id_of_interest=chn_topaz_id_of_interest,
+                            chn_topaz_id_options=wepp.chn_topaz_ids_of_interest,
+                            gringorten_correction=gringorten_correction,
+                            unitizer_nodb=unitizer,
+                            precisions=wepppy.nodb.unitizer.precisions,
+                            report=report,
+                            translator=translator,
+                            ron=ron,
+                            user=current_user)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/frq_flood')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/frq_flood/')
+@authorize_and_handle_with_exception_factory
 def report_wepp_frq_flood(runid, config):
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        report = Wepp.getInstance(wd).report_frq_flood()
-        translator = Watershed.getInstance(wd).translator_factory()
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    report = Wepp.getInstance(wd).report_frq_flood()
+    translator = Watershed.getInstance(wd).translator_factory()
 
-        unitizer = Unitizer.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/frq_flood.htm', runid=runid, config=config,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               report=report,
-                               translator=translator,
-                               ron=ron,
-                               user=current_user)
-    except:
-        return exception_factory('Error running report_wepp_frq_flood', runid=runid)
+    return render_template('reports/wepp/frq_flood.htm', runid=runid, config=config,
+                            unitizer_nodb=unitizer,
+                            precisions=wepppy.nodb.unitizer.precisions,
+                            report=report,
+                            translator=translator,
+                            ron=ron,
+                            user=current_user)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics/')
+@authorize_and_handle_with_exception_factory
 def report_wepp_sediment_delivery(runid, config):
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        sed_del = Wepp.getInstance(wd).report_sediment_delivery()
-        translator = Watershed.getInstance(wd).translator_factory()
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    sed_del = Wepp.getInstance(wd).report_sediment_delivery()
+    translator = Watershed.getInstance(wd).translator_factory()
 
-        unitizer = Unitizer.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/sediment_characteristics.htm', runid=runid, config=config,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               sed_del=sed_del,
-                               translator=translator,
-                               ron=ron,
-                               user=current_user)
-
-    except Exception:
-        return exception_factory("Error Handling Request: This may have occured if the run did not produce soil loss."
-                                 "Check that the loss_pw0.txt contains a class fractions table.", runid=runid)
+    return render_template('reports/wepp/sediment_characteristics.htm', runid=runid, config=config,
+                            unitizer_nodb=unitizer,
+                            precisions=wepppy.nodb.unitizer.precisions,
+                            sed_del=sed_del,
+                            translator=translator,
+                            ron=ron,
+                            user=current_user)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments/')
+@authorize_and_handle_with_exception_factory
 def query_wepp_sub_runoff(runid, config):
     # blackwood http://wepp.cloud/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
@@ -547,6 +526,7 @@ def query_wepp_sub_runoff(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments/')
+@authorize_and_handle_with_exception_factory
 def query_wepp_sub_subrunoff(runid, config):
     # blackwood http://wepp.cloud/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
@@ -556,6 +536,7 @@ def query_wepp_sub_subrunoff(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments/')
+@authorize_and_handle_with_exception_factory
 def query_wepp_sub_baseflow(runid, config):
     # blackwood http://wepp.cloud/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
@@ -565,6 +546,7 @@ def query_wepp_sub_baseflow(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments/')
+@authorize_and_handle_with_exception_factory
 def query_wepp_sub_loss(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
@@ -573,6 +555,7 @@ def query_wepp_sub_loss(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments/')
+@authorize_and_handle_with_exception_factory
 def query_wepp_sub_phosphorus(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
@@ -581,6 +564,7 @@ def query_wepp_sub_phosphorus(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/chn_summary/<topaz_id>')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/chn_summary/<topaz_id>/')
+@authorize_and_handle_with_exception_factory
 def query_ron_chn_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -589,6 +573,7 @@ def query_ron_chn_summary(runid, config, topaz_id):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>/')
+@authorize_and_handle_with_exception_factory
 def query_ron_sub_summary(runid, config, topaz_id):
     try:
         wd = get_wd(runid)
@@ -600,6 +585,7 @@ def query_ron_sub_summary(runid, config, topaz_id):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>/')
+@authorize_and_handle_with_exception_factory
 def report_ron_chn_summary(runid, config, topaz_id):
     try:
         wd = get_wd(runid)
@@ -610,8 +596,10 @@ def report_ron_chn_summary(runid, config, topaz_id):
     except Exception:
         return exception_factory(runid=runid)
 
+
 @wepp_bp.route('/runs/<string:runid>/<config>/query/topaz_wepp_map')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/topaz_wepp_map/')
+@authorize_and_handle_with_exception_factory
 def query_topaz_wepp_map(runid, config):
     wd = get_wd(runid)
     translator = Watershed.getInstance(wd).translator_factory()
@@ -623,6 +611,7 @@ def query_topaz_wepp_map(runid, config):
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>/')
+@authorize_and_handle_with_exception_factory
 def report_ron_sub_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -631,8 +620,8 @@ def report_ron_sub_summary(runid, config, topaz_id):
                            d=ron.sub_summary(topaz_id))
 
 
-# noinspection PyBroadException
 @wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp_loss.tif')
+@authorize_and_handle_with_exception_factory
 def resources_wepp_loss(runid, config):
     try:
         wd = get_wd(runid)
@@ -648,8 +637,8 @@ def resources_wepp_loss(runid, config):
         return exception_factory(runid=runid)
 
 
-# noinspection PyBroadException
 @wepp_bp.route('/runs/<string:runid>/<config>/resources/flowpaths_loss.tif')
+@authorize_and_handle_with_exception_factory
 def resources_flowpaths_loss(runid, config):
     try:
         wd = get_wd(runid)
@@ -665,9 +654,9 @@ def resources_flowpaths_loss(runid, config):
         return exception_factory(runid=runid)
 
 
-# noinspection PyBroadException
 @wepp_bp.route('/runs/<string:runid>/<config>/query/bound_coords')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/bound_coords/')
+@authorize_and_handle_with_exception_factory
 def query_bound_coords(runid, config):
     try:
         wd = get_wd(runid)
@@ -686,7 +675,3 @@ def query_bound_coords(runid, config):
 
     except Exception:
         return exception_factory(runid=runid)
-
-#
-# Unitizer
-#
