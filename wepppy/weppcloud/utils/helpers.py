@@ -8,7 +8,10 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 
+from functools import wraps
+
 from flask import jsonify, make_response, render_template
+from werkzeug.exceptions import HTTPException
 
 from datetime import datetime
 
@@ -191,8 +194,6 @@ def get_user_models():
     from wepppy.weppcloud.app import Run, User, user_datastore
     return Run, User, user_datastore
 
-from functools import wraps
-
 def authorize_and_handle_with_exception_factory(func):
     """
     A decorator for Flask routes that handles authorization and
@@ -203,22 +204,27 @@ def authorize_and_handle_with_exception_factory(func):
     @wraps(func)
     def wrapper(runid, config, *args, **kwargs):
         try:
-            # Step 1: Authorize the request. This will abort on failure.
+            # Authorize request before executing the route; aborts raise HTTPException.
             authorize(runid, config)
             
-            # Step 2: Call the original route function if authorization passes.
+            # Execute the wrapped route once authorization succeeds.
             return func(runid, config, *args, **kwargs)
             
+        except HTTPException:
+            # Preserve Flask/Werkzeug HTTP errors such as abort(403).
+            raise
         except Exception as e:
-            # Step 3: If any exception occurs, return the standard error page.
-            # You might want to log the exception `e` here.
+            # For unexpected errors, return the standard exception payload.
             return exception_factory(runid=runid)
             
     return wrapper
 
 def handle_with_exception_factory(func):
+    """Wrap a route/helper to send our standard error payload for unexpected failures."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
+        # Prefer an explicit runid kwarg; otherwise inspect the signature to find one.
         runid = kwargs.get('runid')
         if runid is None:
             try:
@@ -226,8 +232,38 @@ def handle_with_exception_factory(func):
                 runid = bound.arguments.get('runid')
             except Exception:
                 runid = None
+
         try:
+            # Call the wrapped function and bubble up successful responses.
             return func(*args, **kwargs)
+
+        except HTTPException:
+            # Preserve deliberate HTTP errors such as abort(404) / abort(403).
+            raise
         except Exception:
+            # Anything else becomes our standard error response, optionally tagged with runid.
             return exception_factory(runid=runid)
+
     return wrapper
+
+
+def parse_rec_intervals(request, years):
+    rec_intervals = request.args.get('rec_intervals', None)
+    if rec_intervals is None:
+        rec_intervals = [2, 5, 10, 20, 25]
+        if years >= 50:
+            rec_intervals.append(50)
+        if years >= 100:
+            rec_intervals.append(100)
+        if years >= 200:
+            rec_intervals.append(200)
+        if years >= 500:
+            rec_intervals.append(500)
+        if years >= 1000:
+            rec_intervals.append(1000)
+        rec_intervals = rec_intervals[::-1]
+    else:
+        rec_intervals = literal_eval(rec_intervals)
+        assert all([isint(x) for x in rec_intervals])
+
+    return rec_intervals
