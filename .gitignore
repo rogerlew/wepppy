@@ -16,3 +16,4 @@ wepppy/taudem/tests/*/*
 wepppy/locales/global/soils/isric/test
 wepppy/climates/cligen/_scripts/*.db
 wepppy/climates/daymet/test/*
+wepppy/wepppy/weppcloud/static/js/controllers.js
