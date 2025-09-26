@@ -57,7 +57,7 @@
 
   function fetchJobStatus() {
     $.ajax({
-      url: `{{site_prefix}}/rq/jobinfo/${jobId}`,
+      url: `{{site_prefix}}/rq/api/jobinfo/${jobId}`,
       method: 'GET',
       success: function(data) {
         jobCount = 0;
