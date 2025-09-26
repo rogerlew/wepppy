@@ -2,7 +2,7 @@
 from .browse import browse_bp
 from .weppcloud_site import weppcloud_site_bp
 from .admin import admin_bp
-from .archive import archive_bp
+from .archive_dashboard import archive_bp
 from .climate import climate_bp
 from .combined_watershed_viewer import combined_watershed_viewer_bp
 from .command_bar import command_bar_bp
@@ -10,7 +10,7 @@ from .debris_flow import debris_flow_bp
 from .disturbed import disturbed_bp
 from .download import download_bp
 from .export import export_bp
-from .fork import fork_bp
+from .fork_console import fork_bp
 from .wepprepr import repr_bp
 from .diff import diff_bp
 from .gdalinfo import gdalinfo_bp

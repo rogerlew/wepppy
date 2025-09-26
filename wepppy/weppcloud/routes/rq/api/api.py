@@ -1166,6 +1166,18 @@ def api_fork(runid, config):
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/archive', methods=['POST'])
 def api_archive(runid, config):
     try:
+        payload = request.get_json(silent=True) or {}
+        comment = payload.get('comment')
+        if comment is None:
+            comment = request.form.get('comment')
+
+        if comment is not None:
+            comment = comment.strip()
+            if len(comment) > 40:
+                comment = comment[:40]
+        else:
+            comment = ''
+
         wd = get_wd(runid)
         if not _exists(wd):
             return exception_factory(f'Project {runid} not found', runid=runid)
@@ -1191,7 +1203,7 @@ def api_archive(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             queue = Queue(connection=redis_conn)
-            job = queue.enqueue_call(archive_rq, (runid,), timeout=TIMEOUT)
+            job = queue.enqueue_call(archive_rq, (runid, comment), timeout=TIMEOUT)
 
         prep.set_archive_job_id(job.id)
         StatusMessenger.publish(f'{runid}:archive', f'rq:{job.id} ENQUEUED archive_rq({runid})')
@@ -1247,3 +1259,47 @@ def api_restore_archive(runid, config):
         return jsonify({'Success': True, 'job_id': job.id})
     except Exception:
         return exception_factory('Error enqueueing restore job', runid=runid)
+
+
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/delete-archive', methods=['POST'])
+@login_required
+def api_delete_archive(runid, config):
+    try:
+        payload = request.get_json(silent=True) or {}
+        archive_name = payload.get('archive_name') or request.form.get('archive_name')
+        if not archive_name:
+            return exception_factory('Missing archive_name parameter', runid=runid)
+
+        wd = get_wd(runid)
+        if not _exists(wd):
+            return exception_factory(f'Project {runid} not found', runid=runid)
+
+        locked = [name for name, state in lock_statuses(runid).items() if name.endswith('.nodb') and state]
+        if locked:
+            return exception_factory('Cannot delete while files are locked: ' + ', '.join(locked), runid=runid)
+
+        archive_path = os.path.join(wd, 'archives', archive_name)
+        if not os.path.exists(archive_path):
+            return exception_factory(f'Archive {archive_name} not found', runid=runid)
+
+        prep = RedisPrep.getInstance(wd)
+        existing_job_id = prep.get_archive_job_id()
+        if existing_job_id:
+            try:
+                with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+                    job = Job.fetch(existing_job_id, connection=redis_conn)
+                    status = job.get_status(refresh=True)
+            except Exception:
+                status = None
+
+            if status in ('queued', 'started', 'deferred'):
+                return exception_factory('An archive job is already running for this project', runid=runid)
+            else:
+                prep.clear_archive_job_id()
+
+        os.remove(archive_path)
+        StatusMessenger.publish(f'{runid}:archive', f'Archive deleted: {archive_name}')
+
+        return jsonify({'Success': True})
+    except Exception:
+        return exception_factory('Error deleting archive', runid=runid)

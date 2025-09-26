@@ -2,6 +2,7 @@
 # see notes/weppcloud-project-archiving.md for archive architecture
 
 import os
+import zipfile
 from datetime import datetime
 from glob import glob
 
@@ -12,14 +13,14 @@ from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.weppcloud.utils.helpers import authorize, get_wd, exception_factory
 
 
-archive_bp = Blueprint('archive', __name__)
+archive_bp = Blueprint('archive', __name__, template_folder='templates')
 
 
 @archive_bp.route('/runs/<string:runid>/<string:config>/rq-archive-dashboard', strict_slashes=False)
 def rq_archive_dashboard(runid, config):
     try:
         authorize(runid, config)
-        return render_template('controls/rq-archive-dashboard.j2', runid=runid, config=config, user=current_user)
+        return render_template('rq-archive-dashboard.j2', runid=runid, config=config, user=current_user)
     except Exception as e:
         return exception_factory(e)
 
@@ -41,10 +42,20 @@ def rq_archive_list(runid, config):
                 continue
 
             rel_name = os.path.basename(path)
+            comment = ''
+            try:
+                with zipfile.ZipFile(path) as zf:
+                    raw_comment = zf.comment or b''
+                    comment = raw_comment.decode('utf-8', errors='replace').strip()
+            except (zipfile.BadZipFile, OSError):
+                comment = ''
+
+            modified_str = datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
             entries.append({
                 'name': rel_name,
+                'comment': comment,
                 'size': stat.st_size,
-                'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                'modified': modified_str,
                 'download_url': url_for('download.download_tree', runid=runid, config=config, subpath=f'archives/{rel_name}')
             })
 
