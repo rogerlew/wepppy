@@ -109,7 +109,7 @@
                     action: () => this.navigateToSelector('a[href^="#soil-burn-severity-optional"]')
                 },
                 set: {
-                    description: 'Update project settings (see help for usage)',
+                    description: '',
                     action: (args) => this.handleSetCommand(args)
                 },
                 channels: {
@@ -306,6 +306,7 @@
 
         showHelp() {
             const lines = Object.entries(this.commands)
+                .filter(([, meta]) => !(meta && meta.description === ''))
                 .map(([name, meta]) => {
                     const description = meta && meta.description ? ` - ${meta.description}` : '';
                     return `${name.padEnd(10)}${description}`;
@@ -354,8 +355,16 @@
                 this.showResult('Error: The browse command is only available on a project page.');
                 return;
             }
+            
+            let url = window.location.href;
+            let baseUrl = this.projectBaseUrl;
+            if (typeof pup_relpath === 'string' && pup_relpath && url.indexOf('pup=') !== -1) {
+                const normalizedRelPath = pup_relpath.endsWith('/') ? pup_relpath : `${pup_relpath}/`;
+                baseUrl += `browse/_pups/${normalizedRelPath}`;
+            } else {
+                baseUrl += 'browse/';
+            }
 
-            const baseUrl = this.projectBaseUrl + 'browse/';
             const resource = Array.isArray(args) ? args.join(' ').trim() : '';
 
             if (!resource) {
