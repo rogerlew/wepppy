@@ -24,7 +24,7 @@
 </head>
 <body>
   <div class="container-fluid">
-    <h2 class="mb-1"><a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}">{{ runid }}</a> RQ Job Dashboard</h2>
+    <h2 class="mb-1"><a href="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}">{{ runid }}</a> RQ Job Dashboard</h2>
     <dl>
     <dt>Job ID</dt>
     <dd>{{ job_id }}</dd>
@@ -284,4 +284,3 @@
   </script>
 </body>
 </html>
-

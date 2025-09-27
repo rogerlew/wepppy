@@ -24,7 +24,9 @@ def report_rhem_results(runid, config):
     authorize(runid, config)
 
     try:
-        return render_template('controls/rhem_reports.htm')
+        return render_template('controls/rhem_reports.htm',
+                               runid=runid,
+                               config=config)
     except Exception:
         return exception_factory('Error building reports template', runid=runid)
 

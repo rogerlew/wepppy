@@ -27,7 +27,7 @@
     <dt>Dominant Soil</dt>
     <dd>{% if d.soil is not none %}
         {{ d.soil.desc }}
-        (<a href="browse/soils/{{ d.soil.fname }}" target="_blank">{{ d.soil.mukey }}</a>)
+        (<a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/' ~ d.soil.fname) }}" target="_blank">{{ d.soil.mukey }}</a>)
         {% endif %}
     </dd>
     {% if d.meta.hill_type == "Channel"%}

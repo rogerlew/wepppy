@@ -52,7 +52,7 @@
       <td>{{ unitizer(d.watershed.area * 0.0001, "ha") | safe }}</td>
       <td>{{ d.watershed.slope_scalar|round(3) }}</td>
       <td>{{ d.watershed.aspect|round(0) }}</td>
-      <td><a href="../../../browse/watershed/{{ d.watershed.fname }}" target="_blank">{{ d.watershed.fname }}</a></td>
+      <td><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='watershed/' ~ d.watershed.fname) }}" target="_blank">{{ d.watershed.fname }}</a></td>
       {% if d.landuse.desc is not defined %}
       <td>&mdash;</td>
       <td>&mdash;</td>
@@ -63,12 +63,12 @@
       {% if d.soil.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.soil.desc }} (<a href="../../../browse/soils/{{ d.soil.fname }}" target="_blank">{{ d.soil.mukey }}</a>)</td>
+      <td>{{ d.soil.desc }} (<a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/' ~ d.soil.fname) }}" target="_blank">{{ d.soil.mukey }}</a>)</td>
       {% endif %}
       {% if d.climate.cli_fn is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td><a href="../../../browse/climate/{{ d.climate.cli_fn }}" target="_blank">{{ d.climate.cli_fn }}</a></td>
+      <td><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/' ~ d.climate.cli_fn) }}" target="_blank">{{ d.climate.cli_fn }}</a></td>
       {% endif %}
 
       {% if d.watershed.fp_longest is not defined %}
@@ -138,7 +138,7 @@
       <td>{{ unitizer(d.watershed.area * 0.0001, "ha") | safe }}</td>
       <td>{{ d.watershed.slope_scalar|round(3) }}</td>
       <td>{{ d.watershed.aspect|round(0) }}</td>
-      <td><a href="../../../browse/watershed/channels/{{ d.watershed.fname }}" target="_blank">{{ d.watershed.fname }}</a></td>
+      <td><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='watershed/channels/' ~ d.watershed.fname) }}" target="_blank">{{ d.watershed.fname }}</a></td>
       {% if d.watershed.channel_type is not defined %}
       <td>&mdash;</td>
       {% else %}

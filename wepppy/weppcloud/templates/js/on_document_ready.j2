@@ -4,6 +4,7 @@
     var site_prefix = "{{ site_prefix }}";
     var runid = "{{ ron.runid }}";
     var config = "{{ ron.config_stem }}";
+    var pup_relpath = {{ pup_relpath | tojson }};
     var ispoweruser = {{ current_user.has_role('PowerUser') | tojson }};
     var WEPP_channel_critical_shear = null;
 
@@ -86,6 +87,27 @@ function onReady() {
     var disturbed = Disturbed.getInstance();
     var omni = Omni.getInstance();
     var dss_export = DssExport.getInstance();
+
+    if (pup_relpath) {
+        $.ajaxPrefilter(function (options) {
+            if (!options.url) {
+                return;
+            }
+
+            var url = options.url;
+
+            if (/^https?:\/\//i.test(url) || url.startsWith('//')) {
+                return;
+            }
+
+            if (url.indexOf('pup=') !== -1) {
+                return;
+            }
+
+            var separator = url.indexOf('?') !== -1 ? '&' : '?';
+            options.url = url + separator + 'pup=' + encodeURIComponent(pup_relpath);
+        });
+    }
 
     // ---------------------------------------------------------------------------
     // Find and Flash by ID

@@ -93,12 +93,12 @@
     <div class="container-fluid mt-4">
       <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
         <div>
-          <h2 class="mb-1"><a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}">{{ runid }}</a> README.md Editor</h2>
+          <h2 class="mb-1"><a href="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}">{{ runid }}</a> README.md Editor</h2>
           <p class="text-muted mb-2">Changes are saved automatically (and with Ctrl+S).</p>
         </div>
         <div class="btn-group btn-group-toggle btn-group-lg" data-toggle="buttons" role="group" aria-label="README mode">
           <label class="btn btn-secondary btn-lg">
-            <input type="radio" name="readme-mode" autocomplete="off" onclick="window.location.href='{{ url_for('readme.readme_render', runid=runid, config=config) }}'"> View
+            <input type="radio" name="readme-mode" autocomplete="off" onclick="window.location.href='{{ url_for_run('readme.readme_render', runid=runid, config=config) }}'"> View
           </label>
           <label class="btn btn-secondary btn-lg active">
             <input type="radio" name="readme-mode" autocomplete="off" checked> Edit
@@ -136,9 +136,9 @@
         const initialRonScenario = {{ (ron.scenario or '') | tojson }};
         const editor = document.getElementById('readme-editor');
         const previewEl = document.getElementById('readme-preview');
-        const saveUrl = {{ url_for('readme.readme_save', runid=runid, config=config) | tojson }};
-        const previewUrl = {{ url_for('readme.readme_preview', runid=runid, config=config) | tojson }};
-        const rawUrl = {{ url_for('readme.readme_raw', runid=runid, config=config) | tojson }};
+        const saveUrl = {{ url_for_run('readme.readme_save', runid=runid, config=config) | tojson }};
+        const previewUrl = {{ url_for_run('readme.readme_preview', runid=runid, config=config) | tojson }};
+        const rawUrl = {{ url_for_run('readme.readme_raw', runid=runid, config=config) | tojson }};
         const lockOverlay = document.getElementById('readme-lock-overlay');
         const reloadButton = document.getElementById('readme-lock-reload');
         let saveTimer = null;

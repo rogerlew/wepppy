@@ -37,6 +37,7 @@ from wepppy.weppcloud.utils.helpers import (
     exception_factory,
     get_wd,
     success_factory,
+    url_for_run,
 )
 
 __all__ = [
@@ -64,6 +65,7 @@ __all__ = [
     'stream_with_context',
     'success_factory',
     'url_for',
+    'url_for_run',
     'secure_filename',
     '_exists',
     '_join',

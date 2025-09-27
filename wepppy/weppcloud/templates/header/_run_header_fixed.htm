@@ -16,24 +16,24 @@
   </form>
   <ul class="navbar-nav mr-auto">
     <li class="nav-item">
-      <a href="{{ url_for('run_0.runs0', runid=current_ron.runid, config=current_ron.config_stem) }}" class="nav-link"
+      <a href="{{ url_for_run('run_0.runs0', runid=current_ron.runid, config=current_ron.config_stem) }}" class="nav-link"
         data-toggle="tooltip" title="Reload Page" aria-label="Reload page">
         <img src="{{ url_for('static', filename='open-iconic/png/reload-2x-wh.png') }}" /></a>
     </li>
     <li class="nav-item">
-      <a href="{{ url_for('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
+      <a href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
         class="nav-link" target="_blank" data-toggle="tooltip" title="Fork Project" rel="nofollow"
         aria-label="Fork project">
         <img src="{{ url_for('static', filename='open-iconic/png/fork-2x-wh.png') }}" /></a>
     </li>
     <li class="nav-item">
-      <a href="{{ url_for('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
+      <a href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
         class="nav-link" target="_blank" data-toggle="tooltip" title="Archive Project" rel="nofollow"
         aria-label="Archive project">
         <img src="{{ url_for('static', filename='open-iconic/png/cloud-download-2x-wh.png') }}" /></a>
     </li>
     <li class="nav-item">
-      <a href="{{ url_for('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
+      <a href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
         class="nav-link" data-toggle="tooltip" title="Project README" rel="nofollow"
         aria-label="Open project README">
         <img src="{{ url_for('static', filename='open-iconic/png/book-2x-wh.png') }}" /></a>

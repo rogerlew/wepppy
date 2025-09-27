@@ -6,9 +6,9 @@
   </div>
   <div>
       <h4>RHEM Results</h4>
-      <p><a href="report/rhem/summary/" target="_blank">Average Annuals by Hillslope</a></p>
-      <p><a href="report/rhem/return_periods/" target="_blank">Return Periods Report</a></p>
-      <p><a href="browse/rhem/runs/status.log/" target="_blank">Run Log</a></p>
+      <p><a href="{{ url_for_run('rhem.report_rhem_avg_annuals', runid=runid, config=config) }}" target="_blank">Average Annuals by Hillslope</a></p>
+      <p><a href="{{ url_for_run('rhem.report_rhem_return_periods', runid=runid, config=config) }}" target="_blank">Return Periods Report</a></p>
+      <p><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='rhem/runs/status.log') }}" target="_blank">Run Log</a></p>
   </div>
   <hr/>
 {% endblock content %}

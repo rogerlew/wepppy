@@ -11,7 +11,7 @@ from os.path import exists as _exists
 
 from functools import wraps
 
-from flask import g, jsonify, make_response, render_template
+from flask import current_app, g, jsonify, make_response, render_template, url_for
 from werkzeug.exceptions import HTTPException
 
 from datetime import datetime
@@ -95,6 +95,25 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
     return path
     
+
+def url_for_run(endpoint: str, **values) -> str:
+    """Generate a URL and propagate the active pup context if present."""
+
+    if 'pup' not in values:
+        pup_relpath = getattr(g, 'pup_relpath', None)
+        if pup_relpath:
+            values['pup'] = pup_relpath
+
+    url = url_for(endpoint, **values)
+
+    site_prefix = current_app.config.get('SITE_PREFIX', '') if current_app else ''
+    if site_prefix and url.startswith('/') and not url.startswith(site_prefix + '/'):
+        if site_prefix.endswith('/'):
+            return site_prefix.rstrip('/') + url
+        return site_prefix + url
+
+    return url
+
 
 def error_factory(msg='Error Handling Request'):
     return jsonify({'Success': False,
