@@ -11,7 +11,6 @@ from .disturbed import disturbed_bp
 from .download import download_bp
 from .export import export_bp
 from .fork_console import fork_bp
-from .wepprepr import repr_bp
 from .diff import diff_bp
 from .gdalinfo import gdalinfo_bp
 from .geodata import geodata_bp
@@ -56,7 +55,6 @@ __all__ = [
     'download_bp',
     'export_bp',
     'fork_bp',
-    'repr_bp',
     'diff_bp',
     'gdalinfo_bp',
     'geodata_bp',

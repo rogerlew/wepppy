@@ -815,6 +815,76 @@
         }
     }
 
+    function attachUsersumHover(root, commandBar) {
+        if (!root || !commandBar) {
+            return;
+        }
+        if (root.__usersumHoverAttached) {
+            return;
+        }
+        root.__usersumHoverAttached = true;
+
+        root.addEventListener('mouseover', (event) => {
+            const target = event.target.closest('[data-usersum]');
+            if (!target) {
+                return;
+            }
+
+            const parameterName = target.dataset.usersum;
+            if (!parameterName) {
+                return;
+            }
+
+            const cachedPreview = target.dataset.usersumPreview;
+            if (cachedPreview) {
+                commandBar.showResult(cachedPreview);
+                return;
+            }
+
+            if (target.dataset.usersumPending === '1') {
+                return;
+            }
+
+            target.dataset.usersumPending = '1';
+
+            const params = new URLSearchParams({ name: parameterName });
+            const targetUrl = `/usersum/api/parameter?${params.toString()}`;
+
+            fetch(targetUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then((response) => {
+                if (!response.ok) {
+                    return response.json().catch(() => ({})).then((data) => {
+                        const message = data.error || data.Error || `HTTP ${response.status}`;
+                        throw new Error(message);
+                    });
+                }
+                return response.json();
+            }).then((data) => {
+                if (!data || !data.success) {
+                    throw new Error((data && (data.error || data.Error)) || 'Unknown error');
+                }
+
+                const lines = Array.isArray(data.lines) ? data.lines : [];
+                const preview = lines.length > 0 ? lines[0] : `No description available for ${parameterName}`;
+                target.dataset.usersumPreview = preview;
+                commandBar.showResult(preview);
+            }).catch((error) => {
+                console.error('Usersum hover lookup failed:', error);
+                const message = `Error: ${error.message || error}`;
+                target.dataset.usersumPreview = message;
+                commandBar.showResult(message);
+            }).finally(() => {
+                delete target.dataset.usersumPending;
+            });
+        }, { passive: true });
+    }
+
+
     function initializeCommandBar(root = document) {
         const container = root.querySelector('[data-command-bar]');
         if (!container) {
@@ -828,6 +898,7 @@
         const commandBar = new CommandBar(container);
         commandBar.init();
         container[INSTANCE_DATA_KEY] = commandBar;
+        attachUsersumHover(root, commandBar);
         return commandBar;
     }
 
