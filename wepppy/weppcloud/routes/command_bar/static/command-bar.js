@@ -45,6 +45,7 @@
 
             this.active = false;
             this.projectBaseUrl = this.getProjectBaseUrl();
+            this.getCommandHandlers = this.createGetCommandHandlers();
             this.commands = this.createCommands();
 
             this.handleDocumentKeyDown = this.handleDocumentKeyDown.bind(this);
@@ -90,11 +91,29 @@
                 window.requestAnimationFrame(applyFocus);
             }
         }
+
+        createGetCommandHandlers() {
+            return {
+                loadavg: {
+                    description: 'Show server load averages (1, 5, 15 minute windows)',
+                    handler: (args) => this.routeGetLoadAvg(args)
+                }
+            };
+        }
+
         createCommands() {
             return {
                 help: {
                     description: 'Show available commands',
                     action: () => this.showHelp()
+                },
+                get: {
+                    description: 'Run GET utility commands (e.g., loadavg)',
+                    action: (args) => this.handleGetCommand(args)
+                },
+                usersum: {
+                    description: '',
+                    action: (args) => this.routeUsersum(args)
                 },
                 map: {
                     description: 'Navigate to Map',
@@ -256,6 +275,10 @@
                 return;
             }
 
+            if (fullCommand.startsWith(KEY_TRIGGER)) {
+                fullCommand = fullCommand.slice(1).trim();
+            }
+            
             const [commandName, ...rawArgs] = fullCommand.split(/\s+/);
             const command = this.commands[commandName.toLowerCase()];
 
@@ -298,11 +321,34 @@
 
         showHelp() {
             const lines = Object.entries(this.commands)
-                .map(([name, meta]) => `${name.padEnd(10)} - ${meta.description}`)
+                .map(([name, meta]) => {
+                    const description = meta && meta.description ? ` - ${meta.description}` : '';
+                    return `${name.padEnd(10)}${description}`;
+                })
                 .join('\n');
             const setHelp = SET_HELP_LINES.map((line) => `  ${line}`).join('\n');
             const keyboardShortcuts = 'Navigation shortcuts:\n   Shift+G go to bottom  |  Shift+T go to top  |  Shift+U page up  |  Shift+H page down';
-            this.showResult(`Available Commands:\n${lines}\n\nSet command usage:\n${setHelp}\n\n${keyboardShortcuts}`);
+            const getHelpLines = this.buildGetCommandHelpLines();
+            const usersumUsage = [
+                'usersum command usage:',
+                '  usersum <parameter> - concise description',
+                '  usersum <parameter> -e or --extended - include extended details',
+                '  usersum -k <keyword> - keyword search across parameters'
+            ].join('\n');
+
+            const sections = [
+                `Available Commands:\n${lines}`,
+                `Set command usage:\n${setHelp}`,
+                usersumUsage
+            ];
+
+            if (getHelpLines.length) {
+                sections.push(`Get command usage:\n${getHelpLines.join('\n')}`);
+            }
+
+            sections.push(keyboardShortcuts);
+
+            this.showResult(sections.join('\n\n'));
         }
 
         getProjectBaseUrl() {
@@ -374,6 +420,51 @@
             this.showResult('Error: Could not find the specified section on this page.');
         }
 
+        handleGetCommand(args = []) {
+            if (!Array.isArray(args) || args.length === 0) {
+                const helpLines = this.buildGetCommandHelpLines();
+                if (helpLines.length === 0) {
+                    this.showResult('No get commands are available yet.');
+                    return;
+                }
+
+                const messageParts = [
+                    'Usage:',
+                    '  get <command>',
+                    '',
+                    'Available get commands:',
+                    ...helpLines
+                ];
+                this.showResult(messageParts.join('\n'));
+                return;
+            }
+
+            const [subcommandRaw, ...rest] = args;
+            const subcommand = (subcommandRaw || '').toLowerCase();
+            const handlerEntry = this.getCommandHandlers[subcommand];
+
+            if (!handlerEntry) {
+                const helpLines = this.buildGetCommandHelpLines();
+                const details = helpLines.length ? `\nAvailable get commands:\n${helpLines.join('\n')}` : '';
+                this.showResult(`Error: Unknown get command "${subcommand}".${details}`);
+                return;
+            }
+
+            return handlerEntry.handler(rest);
+        }
+
+        buildGetCommandHelpLines() {
+            return Object.entries(this.getCommandHandlers).map(([name, meta]) => {
+                const description = (meta && meta.description) || '';
+                const label = `get ${name}`;
+                if (!description) {
+                    return `  ${label}`;
+                }
+                const padded = label.padEnd(18);
+                return `  ${padded}- ${description}`;
+            });
+        }
+
         handleSetCommand(args = []) {
             if (!Array.isArray(args) || args.length === 0) {
                 this.showResult('Usage:\n' + SET_HELP_LINES.join('\n'));
@@ -407,6 +498,124 @@
                 default:
                     this.showResult(`Error: Unknown set option "${subcommandRaw}"`);
             }
+        }
+
+        routeGetLoadAvg(args = []) {
+            if (Array.isArray(args) && args.length > 0) {
+                this.showResult('Usage: get loadavg');
+                return;
+            }
+
+            const jsonUrl = '/getloadavg';
+
+            return fetch(jsonUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} fetching ${jsonUrl}`);
+                }
+                return response.json();
+            }).then((jsonData) => {
+                const values = Array.isArray(jsonData) ? jsonData : [];
+                const joined = values.map((value) => String(value)).join(' ');
+                const messageLines = [
+                    'Load average (1m, 5m, 15m):',
+                    `  ${joined || '(no data)'}`
+                ];
+                this.showResult(messageLines.join('\n'));
+            }).catch((error) => {
+                console.error('Error fetching load average:', error);
+                this.showResult(`Error: Unable to fetch load average. ${error.message || error}`);
+            });
+        }
+
+        routeUsersum(args = []) {
+            if (!Array.isArray(args)) {
+                this.showResult('Usage: usersum <parameter> [-e|--extended]\n       usersum -k <keyword>');
+                return;
+            }
+
+            const normalizedArgs = args
+                .map((value) => String(value || '').trim())
+                .filter((value) => value.length > 0);
+
+            if (normalizedArgs.length === 0) {
+                this.showResult('Usage: usersum <parameter> [-e|--extended]\n       usersum -k <keyword>');
+                return;
+            }
+
+            const firstArg = normalizedArgs[0].toLowerCase();
+
+            if (firstArg === '-k' || firstArg === '--apropos') {
+                const keyword = normalizedArgs.slice(1).join(' ').trim();
+                if (!keyword) {
+                    this.showResult('Usage: usersum -k <keyword>');
+                    return;
+                }
+
+                const params = new URLSearchParams({ q: keyword });
+                const targetUrl = `/usersum/api/keyword?${params.toString()}`;
+                return this.fetchUsersumData(targetUrl);
+            }
+
+            const parameterName = normalizedArgs[0];
+            let includeExtended = false;
+            const unknownFlags = [];
+
+            for (let i = 1; i < normalizedArgs.length; i += 1) {
+                const flag = normalizedArgs[i].toLowerCase();
+                if (flag === '-e' || flag === '--extended') {
+                    includeExtended = true;
+                } else {
+                    unknownFlags.push(normalizedArgs[i]);
+                }
+            }
+
+            if (unknownFlags.length > 0) {
+                this.showResult(`Error: Unknown usersum option "${unknownFlags[0]}"`);
+                return;
+            }
+
+            const params = new URLSearchParams({ name: parameterName });
+            if (includeExtended) {
+                params.set('extended', '1');
+            }
+
+            const targetUrl = `/usersum/api/parameter?${params.toString()}`;
+            return this.fetchUsersumData(targetUrl);
+        }
+
+        fetchUsersumData(targetUrl) {
+            return fetch(targetUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then((response) => {
+                if (!response.ok) {
+                    return response.json().catch(() => ({})).then((data) => {
+                        const message = data.error || data.Error || `HTTP ${response.status}`;
+                        throw new Error(message);
+                    });
+                }
+                return response.json();
+            }).then((data) => {
+                if (!data || !data.success) {
+                    throw new Error((data && (data.error || data.Error)) || 'Unknown error');
+                }
+
+                const lines = Array.isArray(data.lines) ? data.lines : [];
+                const message = lines.join('\n').trim();
+                this.showResult(message || 'No usersum data available.');
+            }).catch((error) => {
+                console.error('Usersum command failed:', error);
+                this.showResult(`Error: ${error.message || error}`);
+            });
         }
 
         routeSetUnits(args = []) {

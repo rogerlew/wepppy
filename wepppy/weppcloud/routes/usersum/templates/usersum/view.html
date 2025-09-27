@@ -1,0 +1,6 @@
+{% extends "usersum/layout.html" %}
+{% block body %}
+<p><a href="{{ url_for('usersum.usersum_index') }}">&larr; Back to usersum index</a></p>
+<h1>{{ title }}</h1>
+{{ content_html|safe }}
+{% endblock %}

@@ -2,7 +2,7 @@ from collections import Counter
 import json
 from flask_security import current_user
 from ._common import *  # noqa: F401,F403
-from wepppy.weppcloud.utils.helpers import exception_factory
+from wepppy.weppcloud.utils.helpers import exception_factory, handle_with_exception_factory
 
 weppcloud_site_bp = Blueprint('weppcloud_site', __name__)
 
@@ -20,3 +20,8 @@ def index():
         return render_template('index.htm', user=current_user, runs_counter=runs_counter)
     except Exception:
         return exception_factory()
+
+@weppcloud_site_bp.route('/about/', strict_slashes=False)
+@handle_with_exception_factory
+def about():
+    return render_template('about.htm', user=current_user)
