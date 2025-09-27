@@ -98,6 +98,14 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
 def url_for_run(endpoint: str, **values) -> str:
     """Generate a URL and propagate the active pup context if present."""
+    pup_relpath = getattr(g, 'pup_relpath', None)
+
+    # serve pup browse routes through the parent. it makes it less confusing to the
+    if endpoint.startswith('browse') and pup_relpath:
+        runid = values.get('runid')
+        config = values.get('config')
+        subpath = _join('_pups', pup_relpath, values.get('subpath'))
+        return url_for(endpoint, runid=runid, config=config, subpath=subpath)
 
     if 'pup' not in values:
         pup_relpath = getattr(g, 'pup_relpath', None)

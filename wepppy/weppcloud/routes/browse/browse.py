@@ -1,3 +1,47 @@
+
+"""
+Browse Blueprint
+================
+
+This module hosts the `browse` Flask blueprint that serves the web-based file explorer used in WEPP Cloud.  The
+blueprint is exposed via `weppcloud.routes.browse.__init__` and registered against the application elsewhere.
+
+Template Organization
+---------------------
+All rendering is handled by Jinja templates bundled with the blueprint under
+`wepppy/weppcloud/routes/browse/templates/browse/`:
+
+- `directory.j2` - top-level directory listing view with pagination, diff controls, and the keyboard command bar.
+- `not_found.j2` - 404-style response shown when a requested directory segment is missing.
+- `_path_input_script.j2` - shared script that wires up the inline path input field for directory and 404 pages.
+- `arc_file.j2` - minimal viewer for “.arc” outputs.
+- `data_table.j2` - table presentation for CSV/TSV/Parquet/Pickle content rendered via pandas.
+- `text_file.j2` - general text viewer (including the command bar) for other readable file types.
+
+Routes
+------
+- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/`
+- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>`
+- `/runs/<string:runid>/<config>/browse/`
+- `/runs/<string:runid>/<config>/browse/<path:subpath>`
+
+Key Behaviors
+-------------
+- **Directory Browsing** - `browse_response` delegates to `html_dir_list` to build directory listings with pagination
+  and optional shell-style filtering, then renders `directory.j2`.
+- **File Viewing** - Depending on the requested file type, responses are streamed directly, downloaded, or rendered via
+  `arc_file.j2`, `data_table.j2`, or `text_file.j2`.
+- **Diff Support** - When the `diff` query argument is present the blueprint attempts to locate the requested object in
+  the comparison run and surfaces diff links in directory listings.
+- **Security** - `_browse_tree_helper` prevents directory traversal, validates filter syntax, and ensures the
+  requested path stays inside the working directory returned by `get_wd`.
+- **Performance** - Directory counts and listings are gathered concurrently using `ThreadPoolExecutor` to keep large
+  listings responsive.
+
+For maintenance purposes, adjust template markup within the dedicated `templates/browse/` files; Python logic in this
+module should remain focused on routing, filesystem queries, and response orchestration.
+"""
+
 import os
 import subprocess
 import re
@@ -35,54 +79,27 @@ from functools import lru_cache
 
 from wepppy.weppcloud.routes.usersum.usersum import _load_parameter_catalog
 
-"""
-Browse Blueprint
-================
-
-This module hosts the `browse` Flask blueprint that serves the web-based file explorer used in WEPP Cloud.  The
-blueprint is exposed via `weppcloud.routes.browse.__init__` and registered against the application elsewhere.
-
-Template Organization
----------------------
-All rendering is handled by Jinja templates bundled with the blueprint under
-`wepppy/weppcloud/routes/browse/templates/browse/`:
-
-- `directory.j2` - top-level directory listing view with pagination, diff controls, and the keyboard command bar.
-- `not_found.j2` - 404-style response shown when a requested directory segment is missing.
-- `_path_input_script.j2` - shared script that wires up the inline path input field for directory and 404 pages.
-- `arc_file.j2` - minimal viewer for “.arc” outputs.
-- `data_table.j2` - table presentation for CSV/TSV/Parquet/Pickle content rendered via pandas.
-- `text_file.j2` - general text viewer (including the command bar) for other readable file types.
-
-Routes
-------
-- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/`
-- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>`
-- `/runs/<string:runid>/<config>/browse/`
-- `/runs/<string:runid>/<config>/browse/<path:subpath>`
-
-Key Behaviors
--------------
-- **Directory Browsing** – `browse_response` delegates to `html_dir_list` to build directory listings with pagination
-  and optional shell-style filtering, then renders `directory.j2`.
-- **File Viewing** – Depending on the requested file type, responses are streamed directly, downloaded, or rendered via
-  `arc_file.j2`, `data_table.j2`, or `text_file.j2`.
-- **Diff Support** – When the `diff` query argument is present the blueprint attempts to locate the requested object in
-  the comparison run and surfaces diff links in directory listings.
-- **Security** – `_browse_tree_helper` prevents directory traversal, validates filter syntax, and ensures the
-  requested path stays inside the working directory returned by `get_wd`.
-- **Performance** – Directory counts and listings are gathered concurrently using `ThreadPoolExecutor` to keep large
-  listings responsive.
-
-For maintenance purposes, adjust template markup within the dedicated `templates/browse/` files; Python logic in this
-module should remain focused on routing, filesystem queries, and response orchestration.
-"""
-
 MAX_FILE_LIMIT = 100
+
 
 browse_bp = Blueprint('browse', __name__, template_folder='templates')
 
 _logger = logging.getLogger(__name__)
+
+
+
+@browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/', defaults={'subpath': ''}, strict_slashes=False)
+@browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>', strict_slashes=False)
+def wp_browse_tree(runid, config, wepp, subpath):
+    wd = os.path.abspath(get_wd(runid))
+    return _browse_tree_helper(runid, subpath, wd, request, config)
+
+
+@browse_bp.route('/runs/<string:runid>/<config>/browse/', defaults={'subpath': ''}, strict_slashes=False)
+@browse_bp.route('/runs/<string:runid>/<config>/browse/<path:subpath>', strict_slashes=False)
+def browse_tree(runid, config, subpath):
+    wd = os.path.abspath(get_wd(runid))
+    return _browse_tree_helper(runid, subpath, wd, request, config)
 
 
 @lru_cache(maxsize=1)
@@ -257,19 +274,6 @@ def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_defa
             abort(400, f"Invalid filter pattern: {filter_pattern}")
             
         return browse_response(dir_path, runid, wd, request, config, filter_pattern=filter_pattern)
-
-
-@browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/', defaults={'subpath': ''}, strict_slashes=False)
-@browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>', strict_slashes=False)
-def wp_browse_tree(runid, config, wepp, subpath):
-    wd = os.path.abspath(get_wd(runid))  # Assume get_wd retrieves the working directory
-    return _browse_tree_helper(runid, subpath, wd, request, config)
-
-@browse_bp.route('/runs/<string:runid>/<config>/browse/', defaults={'subpath': ''}, strict_slashes=False)
-@browse_bp.route('/runs/<string:runid>/<config>/browse/<path:subpath>', strict_slashes=False)
-def browse_tree(runid, config, subpath):
-    wd = os.path.abspath(get_wd(runid))  # Assume get_wd retrieves the working directory
-    return _browse_tree_helper(runid, subpath, wd, request, config)
 
 
 def get_entries(directory, filter_pattern, start, end, page_size):
