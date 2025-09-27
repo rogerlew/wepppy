@@ -25,5 +25,5 @@
     {% endfor %}
     </tbody>
  </table>
- <a href="browse/rap/rap_readme.txt">RAP Attribution</a>
+ <a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='rap/rap_readme.txt') }}">RAP Attribution</a>
 {% endif %}

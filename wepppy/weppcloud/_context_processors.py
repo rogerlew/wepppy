@@ -8,7 +8,7 @@ from typing import Optional, Type
 
 from wepppy.nodb.ron import Ron
 from wepppy.nodb.unitizer import Unitizer
-from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.weppcloud.utils.helpers import get_wd, url_for_run
 from wepppy.all_your_base import isfloat
 
 
@@ -128,4 +128,10 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
                     get_run_owner=_get_run_owner,
                     get_last_modified=_get_last_modified,
                     get_all_runs=get_all_runs,
-                    get_all_users=_get_all_users)
+                    get_all_users=_get_all_users,
+                    url_for_run=url_for_run)
+
+    @app.context_processor
+    def pup_context_processor():
+        from flask import g
+        return dict(pup_relpath=getattr(g, 'pup_relpath', None))

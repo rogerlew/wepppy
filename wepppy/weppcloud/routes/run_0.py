@@ -74,7 +74,7 @@ def runs0_nocfg(runid):
     if pup_relpath:
         target_args['pup'] = pup_relpath
 
-    return redirect(url_for('run_0.runs0', **target_args))
+    return redirect(url_for_run('run_0.runs0', **target_args))
 
 def _log_access(wd, current_user, ip):
     assert _exists(wd)
@@ -108,7 +108,7 @@ def runs0(runid, config):
         target_args = {'runid': runid, 'config': ron.config_stem}
         if ctx.pup_relpath:
             target_args['pup'] = ctx.pup_relpath
-        return redirect(url_for('run_0.runs0', **target_args))
+        return redirect(url_for_run('run_0.runs0', **target_args))
 
     if ctx.pup_root and not ron.readonly:
         try:
@@ -272,4 +272,4 @@ def create(config):
             return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
 
     ensure_readme(runid, config)
-    return redirect(url_for('run_0.runs0', runid=runid, config=config))
+    return redirect(url_for_run('run_0.runs0', runid=runid, config=config))

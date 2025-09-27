@@ -5,7 +5,7 @@
     <h4 data-toc-skip>Watershed Preparation Report</h4>
   </div>
   <div>
-    <p><a href="report/wepp/prep_details/" target="_blank">Watershed Preparation Details</a></p>
+    <p><a href="{{ url_for_run('wepp.get_wepp_prep_details', runid=runid, config=config) }}" target="_blank">Watershed Preparation Details</a></p>
     <p><a href="export/prep_details/">Download as CSV Zip Archive</a></p>
   </div>
 {% endblock content %}

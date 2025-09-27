@@ -11,13 +11,12 @@ from flask import (
     render_template_string,
     render_template,
     redirect,
-    url_for,
 )
 from flask_security import current_user
 
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # pip install cmarkgfm
 # https://github.com/sindresorhus/github-markdown-css for styling
-from wepppy.weppcloud.utils.helpers import exception_factory, authorize
+from wepppy.weppcloud.utils.helpers import exception_factory, authorize, url_for_run
 from wepppy.nodb import Ron
 from wepppy.nodb.base import _iter_nodb_subclasses
 
@@ -251,7 +250,7 @@ def readme_editor(runid, config):
             target_args = {"runid": runid, "config": config}
             if ctx.pup_relpath:
                 target_args["pup"] = ctx.pup_relpath
-            return redirect(url_for("readme.readme_render", **target_args))
+            return redirect(url_for_run("readme.readme_render", **target_args))
         markdown = _load_markdown(ctx)
         html = _render_markdown(markdown, context)
         client_uuid = uuid.uuid4().hex

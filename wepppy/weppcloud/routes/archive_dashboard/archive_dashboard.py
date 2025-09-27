@@ -6,11 +6,11 @@ import zipfile
 from datetime import datetime
 from glob import glob
 
-from flask import Blueprint, jsonify, render_template, url_for
+from flask import Blueprint, jsonify, render_template
 from flask_security import current_user
 
 from wepppy.nodb.redis_prep import RedisPrep
-from wepppy.weppcloud.utils.helpers import authorize, exception_factory
+from wepppy.weppcloud.utils.helpers import authorize, exception_factory, url_for_run
 
 from .._run_context import load_run_context
 
@@ -60,12 +60,11 @@ def rq_archive_list(runid, config):
                 'comment': comment,
                 'size': stat.st_size,
                 'modified': modified_str,
-                'download_url': url_for(
+                'download_url': url_for_run(
                     'download.download_tree',
                     runid=runid,
                     config=config,
                     subpath=f'archives/{rel_name}',
-                    **({'pup': ctx.pup_relpath} if ctx.pup_relpath else {})
                 )
             })
 

@@ -105,6 +105,6 @@
 {% include("reports/ash/_ash_annual_table.htm") %}
 
 <h3>Download Output Files</h3>
-<p><a href='../../browse/ash/' target='_blank'>Browse Ash Transport Output Directory</a></p>
+<p><a href='{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='ash/') }}' target='_blank'>Browse Ash Transport Output Directory</a></p>
 
 {% endblock %}

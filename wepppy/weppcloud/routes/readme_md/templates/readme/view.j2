@@ -40,7 +40,7 @@
               <input type="radio" name="readme-mode" autocomplete="off" checked> View
             </label>
             <label class="btn btn-secondary btn-lg">
-              <input type="radio" name="readme-mode" autocomplete="off" onclick="window.location.href='{{ url_for('readme.readme_editor', runid=runid, config=config) }}'"> Edit
+              <input type="radio" name="readme-mode" autocomplete="off" onclick="window.location.href='{{ url_for_run('readme.readme_editor', runid=runid, config=config) }}'"> Edit
             </label>
           </div>
           {% endif %}

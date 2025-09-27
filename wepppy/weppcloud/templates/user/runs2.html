@@ -81,7 +81,7 @@ function delete_runs() {
           <td>{{ meta.w3w }}</td>
           <td>
               <a class="btn btn-primary" 
-                 href="{{ url_for('run_0.runs0', runid=meta.runid, config=meta.config) }}"
+                 href="{{ url_for_run('run_0.runs0', runid=meta.runid, config=meta.config) }}"
                  role="button" target="_blank">Open</a>
           </td>
           <td>{{ meta.date_created }}</td>
