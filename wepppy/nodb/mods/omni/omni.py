@@ -156,6 +156,8 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
     wepp.run_watershed()
     wepp.report_loss()
 
+    return omni_dir
+
 
 def _omni_clone(scenario_def: dict, wd: str):
     global OMNI_REL_DIR
@@ -774,7 +776,8 @@ class Omni(NoDbBase):
                 continue
 
             self.logger.info(f'  Omni::run_omni_contrasts: Running contrast {contrast_id} of {total_contrasts}: {contrast_name}\n')
-            _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
+            omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
+            self._post_omni_run(omni_wd, contrast_name)
 
             dependency_tree[contrast_name] = {
                 'signature': signature,
@@ -792,7 +795,8 @@ class Omni(NoDbBase):
         self.logger.info(f'Omni::run_omni_contrast {contrast_id}')
         contrast_name = self.contrast_names[contrast_id - 1]
         _contrasts = self.contrasts[contrast_id - 1]
-        _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
+        omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
+        self._post_omni_run(omni_wd, contrast_name)
 
     def contrasts_report(self):
         global OMNI_REL_DIR
@@ -922,12 +926,22 @@ class Omni(NoDbBase):
         if not isinstance(scenario, OmniScenario):
             raise TypeError('scenario must be an instance of OmniScenario')
 
-        self._build_scenario(scenario_def, self.wd, self.base_scenario)
+        omni_dir = self._build_scenario(scenario_def, self.wd, self.base_scenario)
 
         if scenario not in self.scenarios:
             self.scenarios = self.scenarios + [scenario_def]
             
+        self._post_omni_run(omni_dir, scenario_name)
+
         self.logger.info(f'  Omni::run_scenario({scenario}): {scenario} completed\n')
+
+    def _post_omni_run(self, omni_wd: str, scenario_name: str):
+        from wepppy.nodb.ron import Ron
+        ron = Ron.getInstance(omni_wd)
+        with ron.locked():
+            ron._mods = [mod for mod in ron._mods if mod != 'omni']
+            ron._name = scenario_name
+            ron.readonly = True
 
     @property
     def ran_scenarios(self) -> List[str]:
@@ -1103,6 +1117,7 @@ class Omni(NoDbBase):
             
         wd = self.wd
         base_scenario = self.base_scenario
+        scenario_name = _scenario_name_from_scenario_definition(scenario_def)
 
         scenario = OmniScenario.parse(scenario_def.get('type'))
         _scenario = str(scenario)
@@ -1241,8 +1256,7 @@ class Omni(NoDbBase):
             soils.build()
             
             treatments = Treatments.getInstance(new_wd)
-            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            treatment_key = treatments.treatments_lookup[_scenario_name]
+            treatment_key = treatments.treatments_lookup[scenario_name]
 
             treatments_domlc_d = {}
             for topaz_id, dom in landuse.domlc_d.items():
@@ -1289,6 +1303,8 @@ class Omni(NoDbBase):
 
         wepp.prep_watershed()
         wepp.run_watershed()
+
+        return new_wd, scenario_name
 
     @property
     def has_ran_scenarios(self):
