@@ -21,7 +21,6 @@ from .admin import admin_bp
 from .archive_dashboard import archive_bp
 from .combined_watershed_viewer import combined_watershed_viewer_bp
 from .command_bar import command_bar_bp
-from .download import download_bp
 from .export import export_bp
 from .fork_console import fork_bp
 from .diff import diff_bp
@@ -53,7 +52,6 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     debris_flow_bp,
     diff_bp,
     disturbed_bp,
-    download_bp,
     export_bp,
     gdalinfo_bp,
     geodata_bp,
@@ -96,7 +94,6 @@ __all__ = [
     'command_bar_bp',
     'debris_flow_bp',
     'disturbed_bp',
-    'download_bp',
     'export_bp',
     'fork_bp',
     'diff_bp',
