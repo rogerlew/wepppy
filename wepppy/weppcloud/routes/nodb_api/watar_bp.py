@@ -4,7 +4,7 @@ import wepppy
 
 from ast import literal_eval
 
-from ._common import *  # noqa: F401,F403
+from .._common import *  # noqa: F401,F403
 
 from wepppy.all_your_base.dateutils import YearlessDate
 from wepppy.all_your_base import isint

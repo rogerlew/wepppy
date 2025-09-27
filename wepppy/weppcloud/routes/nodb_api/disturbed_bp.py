@@ -1,6 +1,6 @@
 """Routes for disturbed blueprint extracted from app.py."""
 
-from ._common import *  # noqa: F401,F403
+from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb import Baer, Disturbed, Ron
 from wepppy.nodb.mods.disturbed import write_disturbed_land_soil_lookup

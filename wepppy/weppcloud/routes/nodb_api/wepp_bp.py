@@ -2,7 +2,7 @@
 
 import wepppy
 
-from ._common import *  # noqa: F401,F403
+from .._common import *  # noqa: F401,F403
 
 from wepppy.all_your_base import isint
 from wepppy.nodb import Landuse, Ron, Unitizer, Watershed, Wepp, WeppPost

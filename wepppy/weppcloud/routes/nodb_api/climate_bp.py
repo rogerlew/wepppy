@@ -1,6 +1,6 @@
 """Routes for climate blueprint extracted from app.py."""
 
-from ._common import *  # noqa: F401,F403
+from .._common import *  # noqa: F401,F403
 
 from wepppy.climates.cligen import StationMeta
 from wepppy.nodb import Ron
