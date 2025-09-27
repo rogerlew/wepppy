@@ -21,6 +21,20 @@ def get_scenarios(runid, config):
         return exception_factory('Error Getting Scenarios', runid=runid)
 
 
+@omni_bp.route('/runs/<string:runid>/<config>/api/omni/get_scenario_run_state')
+def get_scenario_run_state(runid, config):
+    authorize(runid, config)
+    try:
+        wd = get_wd(runid)
+        omni = Omni.getInstance(wd)
+        return jsonify({
+            'run_state': omni.scenario_run_state,
+            'dependency_tree': omni.scenario_dependency_tree
+        })
+    except Exception:
+        return exception_factory('Error Getting Scenario Run State', runid=runid)
+
+
 @omni_bp.route('/runs/<string:runid>/<config>/tasks/omni_migration')
 def omni_migration(runid, config):
     authorize(runid, config)
