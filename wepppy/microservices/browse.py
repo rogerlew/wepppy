@@ -1,14 +1,14 @@
 
 """
-Browse Blueprint
-================
+Browse Microservice
+===================
 
-This module hosts the `browse` Flask blueprint that serves the web-based file explorer used in WEPP Cloud.  The
-blueprint is exposed via `weppcloud.routes.browse.__init__` and registered against the application elsewhere.
+This module houses the Starlette microservice that powers the web-based file explorer used in WEPP Cloud.  The service
+retains the original browse blueprint behaviour with minimal changes so the underlying view logic remains untouched.
 
 Template Organization
 ---------------------
-All rendering is handled by Jinja templates bundled with the blueprint under
+All rendering is handled by Jinja templates bundled with the original blueprint under
 `wepppy/weppcloud/routes/browse/templates/browse/`:
 
 - `directory.j2` - top-level directory listing view with pagination, diff controls, and the keyboard command bar.
@@ -20,19 +20,17 @@ All rendering is handled by Jinja templates bundled with the blueprint under
 
 Routes
 ------
-- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/`
-- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>`
-- `/runs/<string:runid>/<config>/browse/`
-- `/runs/<string:runid>/<config>/browse/<path:subpath>`
+- `/runs/{runid}/{config}/browse/`
+- `/runs/{runid}/{config}/browse/{subpath:path}`
 
-Key Behaviors
--------------
+Key Behaviours
+--------------
 - **Directory Browsing** - `browse_response` delegates to `html_dir_list` to build directory listings with pagination
   and optional shell-style filtering, then renders `directory.j2`.
 - **File Viewing** - Depending on the requested file type, responses are streamed directly, downloaded, or rendered via
   `arc_file.j2`, `data_table.j2`, or `text_file.j2`.
-- **Diff Support** - When the `diff` query argument is present the blueprint attempts to locate the requested object in
-  the comparison run and surfaces diff links in directory listings.
+- **Diff Support** - When the `diff` query argument is present the microservice attempts to locate the requested object
+  in the comparison run and surfaces diff links in directory listings.
 - **Security** - `_browse_tree_helper` prevents directory traversal, validates filter syntax, and ensures the
   requested path stays inside the working directory returned by `get_wd`.
 - **Performance** - Directory counts and listings are gathered concurrently using `ThreadPoolExecutor` to keep large
@@ -60,46 +58,193 @@ from os.path import exists as _exists
 from os.path import abspath, basename
 
 import gzip
-import pandas as pd
-
-from flask import (
-    Blueprint,
-    Response,
-    abort,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    send_file,
-)
-from markupsafe import Markup
-
-from wepppy.weppcloud.utils.helpers import get_wd, error_factory
 from functools import lru_cache
+from pathlib import Path
 
+import pandas as pd
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from markupsafe import Markup
+from starlette.applications import Starlette
+from starlette.exceptions import HTTPException
+from starlette.requests import Request as StarletteRequest
+from starlette.responses import (
+    FileResponse,
+    HTMLResponse,
+    JSONResponse,
+    PlainTextResponse,
+    RedirectResponse,
+    Response as StarletteResponse,
+)
+from starlette.routing import Route
+
+from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.routes.usersum.usersum import _load_parameter_catalog
+
+
+class QueryParamsAdapter:
+    """Minimal shim to mimic Flask's request.args mapping."""
+
+    def __init__(self, query_params):
+        self._query_params = query_params
+
+    def get(self, key, default=None, type=None):
+        value = self._query_params.get(key, default)
+        if value is default:
+            return default
+        if type is None:
+            return value
+        try:
+            return type(value)
+        except (TypeError, ValueError):
+            return default
+
+    def items(self):
+        return self._query_params.items()
+
+    def __iter__(self):
+        return iter(self._query_params)
+
+    def __contains__(self, item):
+        return item in self._query_params
+
+    def __getitem__(self, item):
+        return self._query_params[item]
+
+
+class FlaskRequestAdapter:
+    """Wrap Starlette's Request to expose the minimal Flask attributes used here."""
+
+    def __init__(self, request: StarletteRequest):
+        self._request = request
+        self.args = QueryParamsAdapter(request.query_params)
+        self.headers = request.headers
+        self.base_url = str(request.base_url)
+        self.path = request.url.path
+
+    def __getattr__(self, item):
+        return getattr(self._request, item)
+
+
+BASE_DIR = Path(__file__).resolve().parent
+WEPP_CLOUD_DIR = (BASE_DIR.parent / 'weppcloud').resolve()
+BROWSE_TEMPLATES_DIR = (WEPP_CLOUD_DIR / 'routes' / 'browse' / 'templates').resolve()
+COMMAND_BAR_TEMPLATES_DIR = (WEPP_CLOUD_DIR / 'routes' / 'command_bar' / 'templates').resolve()
+SITE_TEMPLATES_DIR = (WEPP_CLOUD_DIR / 'templates').resolve()
+
+templates_env = Environment(
+    loader=FileSystemLoader([
+        str(BROWSE_TEMPLATES_DIR),
+        str(COMMAND_BAR_TEMPLATES_DIR),
+        str(SITE_TEMPLATES_DIR),
+    ]),
+    autoescape=select_autoescape(['html', 'j2', 'xml'])
+)
+
+
+def _normalize_prefix(prefix: str | None) -> str:
+    if not prefix:
+        return ''
+    trimmed = prefix.strip()
+    if not trimmed or trimmed == '/':
+        return ''
+    return '/' + trimmed.strip('/')
+
+
+SITE_PREFIX = _normalize_prefix(os.getenv('SITE_PREFIX', '/weppcloud'))
+
+
+def _prefix_path(path: str) -> str:
+    if not SITE_PREFIX:
+        return path
+    return SITE_PREFIX + path if path.startswith('/') else SITE_PREFIX + '/' + path
+
+
+def url_for(endpoint: str, **values) -> str:
+    if endpoint == 'command_bar.static':
+        filename = values.get('filename', '')
+        return _prefix_path(f'/command_bar/static/{filename}')
+    if endpoint == 'static':
+        filename = values.get('filename', '')
+        return _prefix_path(f'/static/{filename}')
+    suffix = endpoint.replace('.', '/')
+    return _prefix_path(f'/{suffix}')
+
+
+templates_env.globals['url_for'] = url_for
+templates_env.globals['site_prefix'] = SITE_PREFIX
+
+
+def render_template(template_name, **context):
+    context.setdefault('site_prefix', SITE_PREFIX)
+    template = templates_env.get_template(template_name)
+    return template.render(**context)
+
+
+def jsonify(payload):
+    return JSONResponse(payload)
+
+
+def abort(status_code, detail=None):
+    raise HTTPException(status_code=status_code, detail=detail)
+
+
+def redirect(location, code=302):
+    return RedirectResponse(location, status_code=code)
+
+
+class Response(StarletteResponse):
+    def __init__(self, response=None, status=200, mimetype=None):
+        super().__init__(content=response if response is not None else b'', status_code=status, media_type=mimetype)
+
+
+def send_file(path, as_attachment=False, download_name=None):
+    if as_attachment:
+        filename = download_name or os.path.basename(path)
+        return FileResponse(path, filename=filename)
+
+    response = FileResponse(path)
+    if download_name:
+        response.headers['Content-Disposition'] = f'inline; filename="{download_name}"'
+    return response
+
+
+def ensure_response(value):
+    if isinstance(value, StarletteResponse):
+        return value
+
+    if isinstance(value, tuple) and len(value) == 2:
+        body, status_code = value
+        if isinstance(body, StarletteResponse):
+            body.status_code = status_code
+            return body
+        return HTMLResponse(body, status_code=status_code)
+
+    if isinstance(value, (str, Markup)):
+        return HTMLResponse(str(value))
+
+    if value is None:
+        return StarletteResponse(status_code=204)
+
+    return value
 
 MAX_FILE_LIMIT = 100
 
 
-browse_bp = Blueprint('browse', __name__, template_folder='templates')
-
 _logger = logging.getLogger(__name__)
 
 
+class _HealthLogFilter(logging.Filter):
+    def filter(self, record):
+        try:
+            message = record.getMessage()
+        except Exception:
+            message = str(record.msg)
+        return '/health' not in message
 
-@browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/', defaults={'subpath': ''}, strict_slashes=False)
-@browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>', strict_slashes=False)
-def wp_browse_tree(runid, config, wepp, subpath):
-    wd = os.path.abspath(get_wd(runid))
-    return _browse_tree_helper(runid, subpath, wd, request, config)
 
-
-@browse_bp.route('/runs/<string:runid>/<config>/browse/', defaults={'subpath': ''}, strict_slashes=False)
-@browse_bp.route('/runs/<string:runid>/<config>/browse/<path:subpath>', strict_slashes=False)
-def browse_tree(runid, config, subpath):
-    wd = os.path.abspath(get_wd(runid))
-    return _browse_tree_helper(runid, subpath, wd, request, config)
+_health_log_filter = _HealthLogFilter()
+for _log_name in ('uvicorn.access', 'gunicorn.access'):
+    logging.getLogger(_log_name).addFilter(_health_log_filter)
 
 
 @lru_cache(maxsize=1)
@@ -475,42 +620,42 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
         _tree_char = '├└'[i == len(page_entries) - 1]
         
         if is_dir:
-            file_link = '/weppcloud' + _join(request_path, _file)
+            file_link = _join(request_path, _file)
             item_count = entry[3]
             sym_target = entry[5]
             item_pad = get_pad(8 - len(item_count.split()[0]))
             end_pad = ' ' * 32
             s.append(_padding + f'{_tree_char} <a href="{file_link}/{diff_arg}"><b>{_file}{ts_pad}</b></a>{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}  \n')
         else:
-            file_link = '/weppcloud' + _join(request_path, _file)
+            file_link = _join(request_path, _file)
             is_symlink = entry[4]
             sym_target = entry[5]
             file_size = entry[3]
             item_pad = get_pad(8 - len(file_size.split()[0]))
             dl_pad = get_pad(6 - len(file_size.split()[1]))
-            dl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/download/')
+            dl_url = _join(request_path, _file).replace('/browse/', '/download/')
             dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
             file_lower = _file.lower()
             gl_link = '          '
             if file_lower.endswith(('.arc', '.tif', '.img', '.nc')):
-                gl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/gdalinfo/')
+                gl_url = _join(request_path, _file).replace('/browse/', '/gdalinfo/')
                 gl_link = f'  <a href="{gl_url}">gdalinfo</a>'
             if file_lower.endswith('.parquet'):
-                gl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/download/') + '?as_csv=1'
+                gl_url = _join(request_path, _file).replace('/browse/', '/download/') + '?as_csv=1'
                 gl_link = f'  <a href="{gl_url}">.csv</a>'
             repr_link = '           '
             if file_lower.endswith('.man') or  file_lower.endswith('.sol'):
-                repr_url = '/weppcloud' + _join(request_path, _file) + '?repr=1'
+                repr_url = _join(request_path, _file) + '?repr=1'
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
             elif file_lower.endswith('.parquet') or file_lower.endswith('.csv') or file_lower.endswith('.tsv'):
-                repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/pivottable/')
+                repr_url = _join(request_path, _file).replace('/browse/', '/pivottable/')
                 repr_link = f'  <a href="{repr_url}">pivot</a>    '
 
             diff_link = '    '
             if diff_wd and not file_lower.endswith(('.tif', '.parquet', '.gz', '.img')):
                 diff_path = _join(diff_wd, os.path.relpath(path, wd))
                 if _exists(diff_path):
-                    diff_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
+                    diff_url = _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
                     diff_link = f'  <a href="{diff_url}">diff</a>'
             s.append(_padding + f'{_tree_char} <a href="{file_link}">{_file}{ts_pad}</a>{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
         
@@ -537,7 +682,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
         diff_arg = f'?diff={diff_runid}'
     
     if not _exists(path):
-        return error_factory('path does not exist')
+        return jsonify({'Success': False, 'Error': 'path does not exist'})
     
     path_lower = path.lower()
 
@@ -741,3 +886,66 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
             contents=contents,
             contents_html=contents_html,
         )
+
+
+def _handle_browse_request(request: StarletteRequest, runid: str, config: str, subpath: str):
+    wd = os.path.abspath(get_wd(runid))
+    flask_request = FlaskRequestAdapter(request)
+    result = _browse_tree_helper(runid, subpath or '', wd, flask_request, config)
+    return ensure_response(result)
+
+
+def browse_root(request: StarletteRequest):
+    runid = request.path_params['runid']
+    config = request.path_params['config']
+    return _handle_browse_request(request, runid, config, '')
+
+
+def browse_subpath(request: StarletteRequest):
+    runid = request.path_params['runid']
+    config = request.path_params['config']
+    subpath = request.path_params.get('subpath', '')
+    return _handle_browse_request(request, runid, config, subpath)
+
+
+def health(_: StarletteRequest):
+    return PlainTextResponse('OK')
+
+
+def create_app():
+    routes = [
+        Route(
+            '/health',
+            health,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/runs/{runid}/{config}/browse/',
+            browse_root,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/runs/{runid}/{config}/browse',
+            browse_root,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/runs/{runid}/{config}/browse/{subpath:path}',
+            browse_subpath,
+            methods=['GET']
+        ),
+    ]
+
+    return Starlette(routes=routes)
+
+
+app = create_app()
+
+__all__ = ['create_app', 'app']
+
+
+if __name__ == '__main__':
+    import uvicorn
+
+    port = int(os.getenv('PORT', '9009'))
+    uvicorn.run(app, host=os.getenv('HOST', '0.0.0.0'), port=port)
