@@ -16,44 +16,29 @@ from starlette.routing import Route
 from wepppy.weppcloud.routes._run_context import RunContext
 from wepppy.weppcloud.utils.helpers import get_wd
 
-
-async def gdalinfo_tree(request: Request) -> JSONResponse:
+async def gdalinfo_with_subpath(request: Request) -> JSONResponse:
     runid = request.path_params['runid']
     config = request.path_params['config']
     subpath = request.path_params['subpath']
-    return await _gdalinfo_tree(runid, config, subpath, request)
 
-
-async def _gdalinfo_tree(runid: str, config: str, subpath: str, request: Request) -> JSONResponse:
     ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
     target_path = os.path.abspath(os.path.join(wd, subpath))
 
     if not target_path.startswith(wd):
         raise HTTPException(status_code=403)
-
     if not os.path.exists(target_path) or os.path.isdir(target_path):
         raise HTTPException(status_code=404)
 
-    return await _gdalinfo_response(target_path)
-
-
-async def _gdalinfo_response(path: str) -> JSONResponse:
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail='path does not exist')
-
-    command = f'gdalinfo -json {path}'
-    returncode, stdout, stderr = await _run_shell_command(command, os.path.dirname(path) or None)
+    command = f'gdalinfo -json {target_path}'
+    returncode, stdout, stderr = await _run_shell_command(command, os.path.dirname(target_path) or None)
     if returncode != 0:
         raise HTTPException(status_code=500, detail=f'gdalinfo failed: {stderr.strip()}')
 
     try:
-        jsobj = json.loads(stdout)
+        return JSONResponse(json.loads(stdout))
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=500, detail=f'gdalinfo returned invalid JSON: {exc}')
-
-    return JSONResponse(jsobj)
-
 
 async def _run_shell_command(command: str, cwd: Optional[str]) -> tuple[int, str, str]:
     process = await asyncio.create_subprocess_shell(
@@ -89,7 +74,7 @@ def create_routes(prefix_path: Callable[[str], str]) -> list[Route]:
     return [
         Route(
             prefix_path('/runs/{runid}/{config}/gdalinfo/{subpath:path}'),
-            gdalinfo_tree,
+            gdalinfo_with_subpath,
             methods=['GET']
         )
     ]
