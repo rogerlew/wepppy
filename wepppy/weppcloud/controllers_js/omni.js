@@ -57,9 +57,6 @@ var Omni = function () {
             self.ws_client.connect();
 
             const data = self.serializeScenarios();
-            for (let [key, value] of data.entries()) {
-                console.log(`${key}: ${value instanceof File ? value.name : value}`);
-            }
 
             $.post({
                 url: "rq/api/run_omni",
