@@ -10,6 +10,8 @@ function WSClient(formId, channel) {
     this.wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/status/" + runid + ":" + channel;
     this.ws = null;
     this.shouldReconnect = true;
+    this.spinnerFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+    this.spinnerIndex = 0;
     //    this.connect();
 }
 
@@ -37,6 +39,7 @@ WSClient.prototype.connect = function () {
             this.disconnect();
         } else if (payload.type === "status") {
             var data = payload.data;
+            this.advanceSpinner();
             var lines = data.split('\n');
             if (lines.length > 1) {
                 data = lines[0] + '...';
@@ -73,6 +76,9 @@ WSClient.prototype.connect = function () {
 
                 if (controller == this.channel) {
                     $("#" + this.formId).trigger(event);
+                    if (typeof event === 'string' && event.toUpperCase().includes('COMPLETE')) {
+                        this.resetSpinner();
+                    }
                 }
 
             }
@@ -104,3 +110,25 @@ WSClient.prototype.disconnect = function () {
     }
 };
 
+WSClient.prototype.advanceSpinner = function () {
+    if (!Array.isArray(this.spinnerFrames) || this.spinnerFrames.length === 0) {
+        return;
+    }
+
+    var $braille = $("#" + this.formId + " #braille");
+    if ($braille.length === 0) {
+        return;
+    }
+
+    var frame = this.spinnerFrames[this.spinnerIndex];
+    $braille.text(frame);
+    this.spinnerIndex = (this.spinnerIndex + 1) % this.spinnerFrames.length;
+};
+
+WSClient.prototype.resetSpinner = function () {
+    this.spinnerIndex = 0;
+    var $braille = $("#" + this.formId + " #braille");
+    if ($braille.length) {
+        $braille.text("");
+    }
+};

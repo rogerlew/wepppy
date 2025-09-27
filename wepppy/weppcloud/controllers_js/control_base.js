@@ -146,6 +146,9 @@ function controlBase() {
                     self.render_job_status(self);
                     self.update_command_button_state(self);
                     self.manage_ws_client(self, null);
+                    if (self.ws_client && typeof self.ws_client.resetSpinner === 'function') {
+                        self.ws_client.resetSpinner();
+                    }
                 } else if (!self._job_status_fetch_inflight) {
                     self.fetch_job_status(self);
                 }
@@ -155,6 +158,10 @@ function controlBase() {
             self.rq_job_id = normalizedJobId;
             self.rq_job_status = null;
             self._job_status_error = null;
+
+            if (self.ws_client && typeof self.ws_client.resetSpinner === 'function') {
+                self.ws_client.resetSpinner();
+            }
 
             self.stop_job_status_polling(self);
             self.render_job_status(self);
@@ -195,9 +202,17 @@ function controlBase() {
 
             self.render_job_status(self);
             self.update_command_button_state(self);
-            self.manage_ws_client(self, data && data.status ? data.status : null);
 
-            if (self.should_continue_polling(self, data && data.status)) {
+            const currentStatus = data && data.status ? data.status : null;
+            self.manage_ws_client(self, currentStatus);
+
+            if (currentStatus && typeof currentStatus === 'string' && currentStatus.toLowerCase() === 'started') {
+                if (self.ws_client && typeof self.ws_client.advanceSpinner === 'function') {
+                    self.ws_client.advanceSpinner();
+                }
+            }
+
+            if (self.should_continue_polling(self, currentStatus)) {
                 self.schedule_job_status_poll(self);
             } else {
                 self.stop_job_status_polling(self);
