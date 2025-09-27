@@ -11,7 +11,7 @@ from os.path import exists as _exists
 
 from functools import wraps
 
-from flask import jsonify, make_response, render_template
+from flask import g, jsonify, make_response, render_template
 from werkzeug.exceptions import HTTPException
 
 from datetime import datetime
@@ -37,19 +37,35 @@ if REDIS_HOST is not None:
         redis_wd_cache_client = None
     
 
-def get_wd(runid: str) -> str:
+def get_wd(runid: str, *, prefer_active: bool = True) -> str:
     """
     Gets the working directory path for a given run ID, using a Redis cache
     to speed up lookups.
     """
     global redis_wd_cache_client
 
+    context_override = None
+    if prefer_active:
+        try:
+            ctx = getattr(g, 'run_context', None)
+        except RuntimeError:
+            ctx = None
+
+        if ctx is not None and getattr(ctx, 'runid', None) == runid:
+            pup_root = getattr(ctx, 'pup_root', None)
+            if pup_root is not None:
+                return str(pup_root)
+
+            run_root = getattr(ctx, 'run_root', None)
+            if run_root is not None:
+                context_override = str(run_root)
+
     # 1. Attempt to fetch the working directory from the cache
     if redis_wd_cache_client:
         try:
             cached_wd = redis_wd_cache_client.get(runid)
             if cached_wd:
-                return cached_wd
+                return context_override or cached_wd
         except redis.exceptions.ConnectionError as e:
             print(f"Warning: Redis connection error during GET. Falling back to filesystem. Error: {e}")
 
@@ -64,6 +80,9 @@ def get_wd(runid: str) -> str:
             path = _join('/wc1/runs', prefix, runid)
         else:
             path = _join('/geodata/wc1/runs', prefix, runid)
+
+    if context_override:
+        path = context_override
 
     # 3. Store the determined path in the cache for future requests
     if redis_wd_cache_client:

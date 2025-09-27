@@ -13,6 +13,8 @@ from flask import abort, Blueprint, request, Response, jsonify
 
 from wepppy.weppcloud.utils.helpers import get_wd, htmltree, error_factory
 
+from ._run_context import load_run_context
+
 
 diff_bp = Blueprint('diff', __name__)
 
@@ -24,7 +26,8 @@ def wp_diff_tree(runid, config, wepp, subpath):
 
 @diff_bp.route('/runs/<string:runid>/<config>/diff/<path:subpath>', strict_slashes=False)
 def diff_tree(runid, config, subpath):
-    wd = os.path.abspath(get_wd(runid))
+    ctx = load_run_context(runid, config)
+    wd = os.path.abspath(str(ctx.active_root))
     dir_path = os.path.abspath(os.path.join(wd, subpath))
 
     diff_runid = request.args.get('diff', None)
@@ -59,4 +62,3 @@ def diff_response(path, diff_path, runid, diff_runid):
     html_diff = diff.make_file(left, right, runid, diff_runid)
     html_diff = html_diff.replace('Courier; border:medium;', 'monospace;')
     return Response(html_diff)
-

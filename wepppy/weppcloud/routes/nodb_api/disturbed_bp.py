@@ -22,7 +22,8 @@ def modify_disturbed(runid, config):
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/reset_disturbed')
 def reset_disturbed(runid, config):
     authorize(runid, config)
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     try:
         disturbed = Disturbed.getInstance(wd)
         disturbed.reset_land_soil_lookup()
@@ -35,7 +36,8 @@ def reset_disturbed(runid, config):
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup')
 def load_extended_land_soil_lookup(runid, config):
     authorize(runid, config)
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     try:
         disturbed = Disturbed.getInstance(wd)
         disturbed.build_extended_land_soil_lookup()
@@ -50,7 +52,8 @@ def load_extended_land_soil_lookup(runid, config):
 def has_sbs(runid, config):
     authorize(runid, config)
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         disturbed = Disturbed.getInstance(wd)
         return jsonify(dict(has_sbs=disturbed.has_sbs))
     except Exception:
@@ -61,7 +64,8 @@ def has_sbs(runid, config):
 def task_modify_disturbed(runid, config):
     authorize(runid, config)
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         data = json.loads(request.data.decode('utf-8'))
         lookup_fn = Disturbed.getInstance(wd).lookup_fn
         write_disturbed_land_soil_lookup(lookup_fn, data)
@@ -74,7 +78,8 @@ def task_modify_disturbed(runid, config):
 @disturbed_bp.route('/runs/<string:runid>/<config>/query/baer_wgs_map/')
 def query_baer_wgs_bounds(runid, config):
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         ron = Ron.getInstance(wd)
         if 'baer' in ron.mods:
             baer = Baer.getInstance(wd)
@@ -95,7 +100,8 @@ def query_baer_wgs_bounds(runid, config):
 @disturbed_bp.route('/runs/<string:runid>/<config>/view/modify_burn_class/')
 def query_baer_class_map(runid, config):
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         ron = Ron.getInstance(wd)
         if 'baer' in ron.mods:
             baer = Baer.getInstance(wd)
@@ -114,7 +120,8 @@ def query_baer_class_map(runid, config):
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/modify_burn_class/', methods=['POST'])
 def task_baer_class_map(runid, config):
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         ron = Ron.getInstance(wd)
         if 'baer' in ron.mods:
             baer = Baer.getInstance(wd)
@@ -137,7 +144,8 @@ def task_baer_class_map(runid, config):
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/modify_color_map/', methods=['POST'])
 def task_baer_modify_color_map(runid, config):
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         ron = Ron.getInstance(wd)
         if 'baer' in ron.mods:
             baer = Baer.getInstance(wd)
@@ -160,7 +168,8 @@ def task_baer_modify_color_map(runid, config):
 @disturbed_bp.route('/runs/<string:runid>/<config>/resources/baer.png')
 def resources_baer_sbs(runid, config):
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         ron = Ron.getInstance(wd)
         if 'baer' in ron.mods:
             baer = Baer.getInstance(wd)
@@ -177,7 +186,8 @@ def resources_baer_sbs(runid, config):
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/set_firedate/', methods=['POST'])
 def set_firedate(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     disturbed = Disturbed.getInstance(wd)
     try:
         fire_date = request.json.get('fire_date', None)
@@ -189,7 +199,8 @@ def set_firedate(runid, config):
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/upload_sbs/', methods=['POST'])
 def task_upload_sbs(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
 
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
@@ -235,7 +246,8 @@ def task_upload_sbs(runid, config):
 def task_upload_cover_transform(runid, config):
     from wepppy.nodb.mods.revegetation import Revegetation
 
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
 
     reveg = Revegetation.getInstance(wd)
 
@@ -269,7 +281,8 @@ def task_upload_cover_transform(runid, config):
 def task_remove_sbs(runid, config):
    
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
 
         ron = Ron.getInstance(wd)
         if 'baer' in ron.mods:
@@ -288,7 +301,8 @@ def task_remove_sbs(runid, config):
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/build_uniform_sbs/<value>', methods=['POST'])
 def task_build_uniform_sbs(runid, config, value):
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
 
         disturbed = Disturbed.getInstance(wd)
         sbs_fn = disturbed.build_uniform_sbs(int(value))

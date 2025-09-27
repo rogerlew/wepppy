@@ -16,6 +16,7 @@ from flask import (
     Blueprint,
     abort,
     current_app,
+    g,
     jsonify,
     make_response,
     redirect,
@@ -43,6 +44,7 @@ __all__ = [
     'abort',
     'authorize',
     'current_app',
+    'g',
     'current_user',
     'error_factory',
     'exception_factory',
@@ -71,3 +73,11 @@ __all__ = [
     'os',
     'shutil',
 ]
+
+from ._run_context import RunContext, load_run_context, register_run_context_preprocessor
+
+__all__.extend([
+    'RunContext',
+    'load_run_context',
+    'register_run_context_preprocessor',
+])

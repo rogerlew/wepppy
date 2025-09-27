@@ -98,4 +98,3 @@ def task_usermod():
 
     db.session.commit()
     return success_factory()
-

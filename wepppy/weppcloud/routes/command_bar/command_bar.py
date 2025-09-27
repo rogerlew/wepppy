@@ -23,6 +23,8 @@ from flask import Blueprint, jsonify, request
 from wepppy.nodb.base import LogLevel, try_redis_get_log_level, try_redis_set_log_level
 from wepppy.weppcloud.utils.helpers import authorize
 
+from .._run_context import load_run_context
+
 
 command_bar_bp = Blueprint(
     'command_bar',
@@ -38,6 +40,7 @@ _ALLOWED_LEVELS = {level.name.lower(): level for level in LogLevel}
 @command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/loglevel', methods=['POST'])
 def set_log_level(runid, config):
     authorize(runid, config)
+    load_run_context(runid, config)
 
     payload = request.get_json(silent=True) or {}
     level = payload.get('level')

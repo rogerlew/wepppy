@@ -1,5 +1,6 @@
 import os
 from io import BytesIO
+from urllib.parse import urlencode
 
 from os.path import join as _join
 from os.path import split as _split
@@ -9,15 +10,20 @@ import pandas as pd
 
 from flask import abort, Blueprint, request, Response, send_file, jsonify
 
-from wepppy.weppcloud.utils.helpers import get_wd, htmltree
+from wepppy.weppcloud.utils.helpers import htmltree
+
+from ._run_context import load_run_context
 
 
 download_bp = Blueprint('download', __name__)
 
 @download_bp.route('/runs/<string:runid>/<config>/aria2c.spec')
 def aria2c_spec(runid, config):
-    wd = os.path.abspath(get_wd(runid))
+    ctx = load_run_context(runid, config)
+    wd = os.path.abspath(str(ctx.active_root))
     base_url = f"https://wepp.cloud/weppcloud/runs/{runid}/{config}/download"
+    if ctx.pup_relpath:
+        base_url = f"{base_url}?{urlencode({'pup': ctx.pup_relpath})}"
 
     file_list = []
 
@@ -38,7 +44,8 @@ def download_tree(runid, config, subpath):
     """
     Recursive list the file structure of the working directory.
     """
-    wd = os.path.abspath(get_wd(runid))
+    ctx = load_run_context(runid, config)
+    wd = os.path.abspath(str(ctx.active_root))
     dir_path = os.path.abspath(os.path.join(wd, subpath))
 
     if not dir_path.startswith(wd):
@@ -90,8 +97,9 @@ def download_response_dir(path, show_up=False, args=None, headers=None):
 
     up = ''
     if show_up:
-        up = '<a href="../">Up</a>\n'
+        pup = args.get('pup') if args else None
+        query = f'?{urlencode({"pup": pup})}' if pup else ''
+        up = f'<a href="../{query}">Up</a>\n'
     c = '<pre>\n{}{}</pre>'.format(up, htmltree(path))
 
     return Response(c, mimetype='text/html')
-

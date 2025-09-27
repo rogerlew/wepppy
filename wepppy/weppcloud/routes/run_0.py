@@ -48,15 +48,33 @@ def service_worker():
 @run_0_bp.route('/runs/<string:runid>/')
 @handle_with_exception_factory
 def runs0_nocfg(runid):
+    run_root = pathlib.Path(get_wd(runid)).resolve()
+    pup_relpath = request.args.get('pup')
+    active_root = run_root
 
-    wd = get_wd(runid)
-    owners = get_run_owners_lazy(runid)
+    if pup_relpath:
+        pups_root = (run_root / '_pups').resolve()
+        candidate = (pups_root / pup_relpath).resolve()
+        try:
+            candidate.relative_to(pups_root)
+        except ValueError:
+            abort(404)
+
+        if not candidate.is_dir():
+            abort(404)
+
+        active_root = candidate
+
     try:
-        ron = Ron.getInstance(wd)
+        ron = Ron.getInstance(str(active_root))
     except FileNotFoundError:
         abort(404)
 
-    return redirect(url_for('run_0.runs0', runid=runid, config=ron.config_stem))
+    target_args = {'runid': runid, 'config': ron.config_stem}
+    if pup_relpath:
+        target_args['pup'] = pup_relpath
+
+    return redirect(url_for('run_0.runs0', **target_args))
 
 def _log_access(wd, current_user, ip):
     assert _exists(wd)
@@ -80,13 +98,34 @@ def runs0(runid, config):
 
     assert config is not None
 
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    base_wd = str(ctx.run_root)
     ron = Ron.getInstance(wd)
 
     # check config from url matches config from Ron
     if config != ron.config_stem:
-        return redirect(url_for('run_0.runs0', runid=runid, config=ron.config_stem))
+        target_args = {'runid': runid, 'config': ron.config_stem}
+        if ctx.pup_relpath:
+            target_args['pup'] = ctx.pup_relpath
+        return redirect(url_for('run_0.runs0', **target_args))
 
+    if ctx.pup_root and not ron.readonly:
+        try:
+            ron.readonly = True
+        except Exception as exc:
+            current_app.logger.warning('Failed to mark pup project as readonly: %s', exc)
+
+    # return jsonify({'wd': wd, 'base_wd': base_wd, 'runid': runid, 'config': config, 'pup_relpath': ctx.pup_relpath})
+    # https://wc.bearhive.duckdns.org/runs/considerable-imperative/disturbed9002/?pup=omni/scenarios/undisturbed
+    # {
+    # "base_wd": "/wc1/runs/co/considerable-imperative",
+    # "config": "disturbed9002",
+    # "pup_relpath": "omni/scenarios/undisturbed",
+    # "runid": "considerable-imperative",
+    # "wd": "/wc1/runs/co/considerable-imperative/_pups/omni/scenarios/undisturbed"
+    # }
+    
     landuse = Landuse.getInstance(wd)
     soils = Soils.getInstance(wd)
     climate = Climate.getInstance(wd)
@@ -122,7 +161,7 @@ def runs0(runid, config):
     critical_shear_options = management.load_channel_d50_cs()
 
 
-    _log_access(wd, current_user, request.remote_addr)
+    _log_access(base_wd, current_user, request.remote_addr)
     timestamp = datetime.now()
     Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
     db.session.commit()
@@ -158,6 +197,7 @@ def runs0(runid, config):
                             run_id=runid,
                             runid=runid,
                             config=config,
+                            pup_relpath=ctx.pup_relpath,
                             VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
 
 @run_0_bp.route('/create', strict_slashes=False)

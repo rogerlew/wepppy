@@ -73,7 +73,8 @@ def upload_sbs():
 @huc_fire_bp.route('/runs/<string:runid>/<config>/resources/huc.json')
 def huc(runid, config):
 
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     disturbed = Disturbed.getInstance(wd)
     ((ymin, xmin), (ymax, xmax)) = disturbed.bounds
 
