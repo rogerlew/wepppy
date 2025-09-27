@@ -4,6 +4,7 @@ import re
 import math
 import json
 import logging
+import html
 
 from urllib.parse import urlencode
 
@@ -30,6 +31,9 @@ from flask import (
 from markupsafe import Markup
 
 from wepppy.weppcloud.utils.helpers import get_wd, error_factory
+from functools import lru_cache
+
+from wepppy.weppcloud.routes.usersum.usersum import _load_parameter_catalog
 
 """
 Browse Blueprint
@@ -80,6 +84,58 @@ browse_bp = Blueprint('browse', __name__, template_folder='templates')
 
 _logger = logging.getLogger(__name__)
 
+
+@lru_cache(maxsize=1)
+def _usersum_parameter_names():
+    try:
+        by_name, _ = _load_parameter_catalog()
+    except Exception:
+        _logger.exception('Unable to load usersum parameter catalog')
+        return tuple()
+    return tuple(sorted(by_name.keys(), key=len, reverse=True))
+
+
+@lru_cache(maxsize=1)
+def _usersum_pattern():
+    names = _usersum_parameter_names()
+    if not names:
+        return None
+    return re.compile(r'\b(' + '|'.join(re.escape(name) for name in names) + r')\b')
+
+
+def _wrap_usersum_spans(text):
+    if text is None:
+        return Markup('')
+
+    pattern = _usersum_pattern()
+    escaped = html.escape(text)
+    if not pattern:
+        return Markup(escaped)
+
+    def replacer(match):
+        name = match.group(0)
+        return f'<span data-usersum="{name}">{name}</span>'
+
+    highlighted = pattern.sub(replacer, escaped)
+    return Markup(highlighted)
+
+
+def _generate_repr_content(path):
+    path_lower = path.lower()
+    try:
+        if path_lower.endswith('.man'):
+            from wepppy.wepp.management import read_management
+            management_obj = read_management(path)
+            return repr(management_obj)
+        if path_lower.endswith('.sol'):
+            from wepppy.wepp.soils.utils import WeppSoilUtil
+            soil = WeppSoilUtil(path)
+            return repr(soil)
+    except Exception:
+        _logger.exception('Failed to generate repr content for %s', path)
+        return None
+
+    return None
 
 
 def _validate_filter_pattern(pattern):
@@ -440,7 +496,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
                 gl_link = f'  <a href="{gl_url}">.csv</a>'
             repr_link = '           '
             if file_lower.endswith('.man') or  file_lower.endswith('.sol'):
-                repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/repr/')
+                repr_url = '/weppcloud' + _join(request_path, _file) + '?repr=1'
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
             elif file_lower.endswith('.parquet') or file_lower.endswith('.csv') or file_lower.endswith('.tsv'):
                 repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/pivottable/')
@@ -584,16 +640,25 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
         )
 
     else:
-        if path_lower.endswith('.gz'):
-            with gzip.open(path, 'rt') as fp:
-                contents = fp.read()
-            path_lower = path_lower[:-3]
-        else:
-            with open(path) as fp:
-                try:
+        repr_mode = args.get('repr') is not None
+        contents = None
+
+        if repr_mode:
+            contents = _generate_repr_content(path)
+            if contents is None:
+                abort(404)
+
+        if contents is None:
+            if path_lower.endswith('.gz'):
+                with gzip.open(path, 'rt') as fp:
                     contents = fp.read()
-                except UnicodeDecodeError:
-                    contents = None
+                path_lower = path_lower[:-3]
+            else:
+                with open(path) as fp:
+                    try:
+                        contents = fp.read()
+                    except UnicodeDecodeError:
+                        contents = None
 
         if 'raw' in args or 'Raw' in headers:
             if contents is not None:
@@ -662,10 +727,13 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
                 except UnicodeDecodeError:
                     return send_file(path, as_attachment=True, download_name=_split(path)[-1])
 
+        contents_html = _wrap_usersum_spans(contents)
+
         return render_template(
             'browse/text_file.j2',
             runid=runid,
             path=path,
             filename=basename(path),
             contents=contents,
+            contents_html=contents_html,
         )

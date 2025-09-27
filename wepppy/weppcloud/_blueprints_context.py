@@ -34,7 +34,6 @@ def register_blueprints(app):
     app.register_blueprint(export_bp)
     app.register_blueprint(gdalinfo_bp)
     app.register_blueprint(geodata_bp)
-    app.register_blueprint(repr_bp)
     app.register_blueprint(diff_bp)
     app.register_blueprint(fork_bp)
     app.register_blueprint(observed_bp)
