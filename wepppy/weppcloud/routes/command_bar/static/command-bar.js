@@ -1,22 +1,7 @@
 // wepppy/weppcloud/routes/command_bar/static/js/command-bar.js
 //
-// Command Bar quick reference for developers:
-// - Purpose: keyboard-driven command palette for project pages. Press ':' to open, then
-//   submit commands that are routed to `CommandBar.createCommands()`.
-// - Structure: each command has `description` + `action`. Actions either handle UI logic
-//   locally or defer to helpers (fetching endpoints, navigating, etc.). Stateful commands
-//   that should keep the palette open must be registered in `STAY_ACTIVE_COMMANDS`.
-// - Adding commands:
-//     1. Add a new key to the object returned by `createCommands()`.
-//     2. Implement the action handler. Use the `route*` helpers pattern when the command
-//        needs its own validation + network request logic.
-//     3. Update `SET_HELP_LINES` or other user-facing help text where appropriate.
-//     4. If network-backed, expose a matching Flask route inside
-//        `wepppy/weppcloud/routes/command_bar/command_bar.py` (or another blueprint) that returns
-//        `{ Success: bool, Content?: {...}, Error?: str }` so the UI can display results.
-// - Routes: network actions assume `projectBaseUrl = /runs/<runid>/<config>/`. Append a
-//   relative path (e.g., `command_bar/loglevel`) to reach the corresponding backend
-//   endpoint registered via Flask blueprints.
+// Developer notes live in `dev-notes/command-bar.md`. See that document for quick-start
+// guidance on registering commands, server routes, and hover previews.
 (() => {
     'use strict';
 
@@ -815,6 +800,10 @@
         }
     }
 
+    // Attach a single hover listener that turns any element with `data-usersum="<param>"`
+    // into a lightweight preview trigger. The span markup is added by the browse blueprint
+    // (and can be reused elsewhere). We cache the preview text on the element so repeated
+    // hovers do not spam `/usersum/api/parameter`.
     function attachUsersumHover(root, commandBar) {
         if (!root || !commandBar) {
             return;

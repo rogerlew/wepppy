@@ -13,6 +13,7 @@ usersum_bp = Blueprint('usersum', __name__, template_folder='templates')
 _BASE_DIR = Path(__file__).resolve().parent
 _DB_DIR = _BASE_DIR / 'db'
 _SPEC_DIR = _BASE_DIR / 'input-file-specifications'
+_DEV_NOTES_DIR = _BASE_DIR / 'dev-notes'
 _WEPPCLOUD_DIR = _BASE_DIR / 'weppcloud'
 
 _PARAM_HEADER_RE = re.compile(r'^#### `([^`]+)` —\s*(.+)$')
@@ -45,17 +46,21 @@ def _list_markdown(directory: Path, category: str) -> List[Dict[str, str]]:
 def usersum_index():
     sections = []
 
-    wc_items = _list_markdown(_WEPPCLOUD_DIR, 'db')
-    if wc_items:
-        sections.append({'title': 'WEPPcloud Documentation', 'entries': wc_items})
-
     db_items = _list_markdown(_DB_DIR, 'db')
     if db_items:
         sections.append({'title': 'Parameter Databases', 'entries': db_items})
 
+    dev_items = _list_markdown(_DEV_NOTES_DIR, 'dev-notes')
+    if dev_items:
+        sections.append({'title': 'Developer Notes', 'entries': dev_items})
+
     spec_items = _list_markdown(_SPEC_DIR, 'input-file-specifications')
     if spec_items:
         sections.append({'title': 'Input File Specifications', 'entries': spec_items})
+
+    wc_items = _list_markdown(_WEPPCLOUD_DIR, 'weppcloud')
+    if wc_items:
+        sections.append({'title': 'WEPPcloud Guides', 'entries': wc_items})
 
     return render_template('usersum/index.html', title='Usersum Reference', sections=sections)
 
@@ -63,7 +68,9 @@ def usersum_index():
 def _resolve_markdown_path(category: str, filename: str) -> Path:
     allowed = {
         'db': _DB_DIR,
+        'dev-notes': _DEV_NOTES_DIR,
         'input-file-specifications': _SPEC_DIR,
+        'weppcloud': _WEPPCLOUD_DIR,
     }
     root = allowed.get(category)
     if root is None:
