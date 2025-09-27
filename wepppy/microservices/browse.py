@@ -33,15 +33,14 @@ Key Behaviours
   in the comparison run and surfaces diff links in directory listings.
 - **Security** - `_browse_tree_helper` prevents directory traversal, validates filter syntax, and ensures the
   requested path stays inside the working directory returned by `get_wd`.
-- **Performance** - Directory counts and listings are gathered concurrently using `ThreadPoolExecutor` to keep large
-  listings responsive.
+- **Performance** - Directory counts and listings run concurrently via asyncio tasks to keep large listings responsive.
 
 For maintenance purposes, adjust template markup within the dedicated `templates/browse/` files; Python logic in this
 module should remain focused on routing, filesystem queries, and response orchestration.
 """
 
+import asyncio
 import os
-import subprocess
 import re
 import math
 import json
@@ -49,8 +48,6 @@ import logging
 import html
 
 from urllib.parse import urlencode
-
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 
 from os.path import join as _join
 from os.path import split as _split
@@ -159,6 +156,8 @@ def _prefix_path(path: str) -> str:
     return SITE_PREFIX + path if path.startswith('/') else SITE_PREFIX + '/' + path
 
 
+# NOTE: Simplified url_for shim mimics Flask asset lookup.
+# Extend this mapping or integrate with Starlette routing before using additional blueprint templates.
 def url_for(endpoint: str, **values) -> str:
     if endpoint == 'command_bar.static':
         filename = values.get('filename', '')
@@ -178,6 +177,48 @@ def render_template(template_name, **context):
     context.setdefault('site_prefix', SITE_PREFIX)
     template = templates_env.get_template(template_name)
     return template.render(**context)
+
+
+async def _run_shell_command(command: str, cwd: str) -> tuple[int, str, str]:
+    process = await asyncio.create_subprocess_shell(
+        command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+        cwd=cwd,
+    )
+    stdout, stderr = await process.communicate()
+    stdout_text = stdout.decode('utf-8', errors='replace')
+    stderr_text = stderr.decode('utf-8', errors='replace')
+    if process.returncode != 0 and stderr_text:
+        _logger.debug('Command failed (%s): %s', cwd, stderr_text.strip())
+    return process.returncode, stdout_text, stderr_text
+
+
+def _read_gzip_text(path: str) -> str:
+    with gzip.open(path, 'rt') as fp:
+        return fp.read()
+
+
+def _read_text_file(path: str) -> str:
+    with open(path) as fp:
+        return fp.read()
+
+
+async def _async_read_gzip(path: str) -> str:
+    return await asyncio.to_thread(_read_gzip_text, path)
+
+
+async def _async_read_text(path: str) -> str:
+    return await asyncio.to_thread(_read_text_file, path)
+
+
+async def _async_df_to_html(df: pd.DataFrame) -> str:
+    return await asyncio.to_thread(
+        df.to_html,
+        classes=['sortable table table-nonfluid'],
+        border=0,
+        justify='left'
+    )
 
 
 def jsonify(payload):
@@ -327,7 +368,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     diff_arg = f'?diff={diff_runid}' if diff_runid else ''
 
     # Build breadcrumbs up to the point of failure
-    base_browse_url = f'/weppcloud/runs/{runid}/{config}/browse/'
+    base_browse_url = _prefix_path(f'/runs/{runid}/{config}/browse/')
     breadcrumbs = [f'<a href="{base_browse_url}{diff_arg}"><b>{runid}</b></a>']
     
     # Clean the subpath for display and split into components
@@ -364,7 +405,8 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     <p>The path '<b style="font-family: monospace;">{subpath}</b>' could not be found on the server.</p>
 </div>"""
     
-    project_href = Markup(f'<a href="/weppcloud/runs/{runid}/{config}">☁️</a> ')
+    home_href = _prefix_path(f'/runs/{runid}/{config}')
+    project_href = Markup(f'<a href="{home_href}">☁️</a> ')
 
     return (
         render_template(
@@ -380,7 +422,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     )
 
     
-def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_default=''):
+async def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_default=''):
     """
     Helper function to handle common browse tree logic.
     Returns the response for a file or directory browse request.
@@ -389,7 +431,7 @@ def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_defa
     
     if os.path.isfile(full_path):
         # If subpath points to a file, serve it
-        return browse_response(full_path, runid, wd, request, config)
+        return await browse_response(full_path, runid, wd, request, config)
     else:
         # Parse subpath for directory and filter
         if subpath.endswith('/'):
@@ -418,15 +460,12 @@ def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_defa
         if not _validate_filter_pattern(filter_pattern):
             abort(400, f"Invalid filter pattern: {filter_pattern}")
             
-        return browse_response(dir_path, runid, wd, request, config, filter_pattern=filter_pattern)
+        return await browse_response(dir_path, runid, wd, request, config, filter_pattern=filter_pattern)
 
 
-def get_entries(directory, filter_pattern, start, end, page_size):
-    """
-    Retrieve paginated directory entries using ls -l with ISO time style.
-    """
- 
-    # Construct the ls command with --time-style=long-iso
+async def get_entries(directory, filter_pattern, start, end, page_size):
+    """Retrieve paginated directory entries using ls -l with ISO time style."""
+
     if filter_pattern:
         cmd = (
             f"ls -l --time-style=long-iso --group-directories-first {filter_pattern} "
@@ -437,40 +476,28 @@ def get_entries(directory, filter_pattern, start, end, page_size):
             f"ls -l --time-style=long-iso --group-directories-first "
             f"| sed '/^total /d' | sed -n '{start},{end}p'"
         )
-    
-    # Execute the command
-    result = subprocess.run(
-        cmd,
-        shell=True,
-        capture_output=True,
-        text=True,
-        check=False,
-        cwd=directory
-    )
-    
-    # Handle command failure
-    if result.returncode != 0:
-        # This can happen if the directory is empty and the filter matches nothing, which is not an error.
-        # Or if ls fails for another reason. Returning [] is safe.
+
+    returncode, stdout, _ = await _run_shell_command(cmd, directory)
+    if returncode != 0:
         return []
-    
+
     entries = []
     dir_indices = []
     index = 0
-    for line in result.stdout.splitlines():
+    for line in stdout.splitlines():
         if line == '':
             break
-        
+
         parts = line.split(maxsplit=7)
         if len(parts) < 8:
             continue
-        
+
         flag = parts[0]
         is_dir = flag.startswith('d')
         is_symlink = flag.startswith('l')
-        
+
         modified_time = f"{parts[5]} {parts[6]}"
-        
+
         file_field = parts[7]
         if is_symlink and " -> " in file_field:
             name, _, sym_target = file_field.partition(" -> ")
@@ -479,7 +506,7 @@ def get_entries(directory, filter_pattern, start, end, page_size):
         else:
             name = file_field
             sym_target = ""
-        
+
         if is_dir:
             hr_size = ""
             dir_indices.append((index, _join(directory, name)))
@@ -496,100 +523,76 @@ def get_entries(directory, filter_pattern, start, end, page_size):
                 p = math.pow(1024, i)
                 s = round(size_bytes / p, 2)
                 hr_size = f"{s} {size_name[i]}"
-        
+
         entries.append((name, is_dir, modified_time, hr_size, is_symlink, sym_target))
         index += 1
-    
+
     if dir_indices:
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = {executor.submit(get_total_items, dir_path): i for i, dir_path in dir_indices}
+        loop = asyncio.get_running_loop()
+        start_time = loop.time()
+        totals = await asyncio.gather(
+            *[get_total_items(dir_path) for _, dir_path in dir_indices],
+            return_exceptions=True,
+        )
+        elapsed = loop.time() - start_time
+        if elapsed > 5:
+            _logger.warning(
+                'browse.get_entries() directory count took %.1f seconds; consider investigating system load.',
+                elapsed,
+            )
 
-            pending = set(futures.keys())
-            while pending:
-                done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
+        for (entry_index, _), total_items in zip(dir_indices, totals):
+            if isinstance(total_items, Exception):
+                raise total_items
+            entry = entries[entry_index]
+            entries[entry_index] = (
+                entry[0],
+                entry[1],
+                entry[2],
+                f"{total_items} items",
+                entry[4],
+                entry[5],
+            )
 
-                if not done:
-                    # Directory counts should be quick; repeated warnings imply system load.
-                    _logger.warning('browse.get_entries() directory count still pending after 5 seconds; continuing to wait.')
-                    continue
-
-                for future in done:
-                    index = futures[future]
-                    try:
-                        total_items = future.result()
-                    except Exception:
-                        for remaining in pending:
-                            remaining.cancel()
-                        raise
-
-                    entry = entries[index]
-                    entries[index] = (entry[0], entry[1], entry[2], f"{total_items} items", entry[4], entry[5])
-                
     return entries
 
 
-def get_total_items(directory, filter_pattern=''):
-    """
-    Count total items in the directory, respecting the filter_pattern.
-    """
+async def get_total_items(directory, filter_pattern=''):
+    """Count total items in the directory, respecting the filter_pattern."""
 
-    if filter_pattern == '':
-        total_cmd = "ls | wc -l"
-    else:
-        total_cmd = f"ls {filter_pattern} | wc -l"
-    
-    total_result = subprocess.run(
-        total_cmd,
-        shell=True,
-        capture_output=True,
-        text=True,
-        cwd=directory
-    )
-
-    return int(total_result.stdout.strip()) if total_result.returncode == 0 else 0
+    total_cmd = "ls | wc -l" if filter_pattern == '' else f"ls {filter_pattern} | wc -l"
+    returncode, stdout, _ = await _run_shell_command(total_cmd, directory)
+    if returncode != 0:
+        return 0
+    try:
+        return int(stdout.strip())
+    except (TypeError, ValueError):
+        return 0
 
 
-def get_page_entries(directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern=''):
-    """
-    List directory contents with pagination and optional filtering, using concurrent subprocess calls.
-    
-    Args:
-        directory (str): Directory path to list.
-        page (int): Page number (1-based).
-        page_size (int): Number of entries per page.
-        filter_pattern (str): Sanitized shell glob pattern (e.g., '*.txt').
-    
-    Returns:
-        tuple: (list of entries, total item count)
-    """
+async def get_page_entries(directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern=''):
+    """List directory contents with pagination and optional filtering."""
+
     start = (page - 1) * page_size + 1
     end = page * page_size
-    
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        futures = {
-            executor.submit(get_entries, directory, filter_pattern, start, end, page_size): 'entries',
-            executor.submit(get_total_items, directory, filter_pattern): 'total_items'
-        }
 
-        results = {}
-        pending = set(futures.keys())
-        while pending:
-            done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
+    entries_task = asyncio.create_task(
+        get_entries(directory, filter_pattern, start, end, page_size)
+    )
+    total_task = asyncio.create_task(
+        get_total_items(directory, filter_pattern)
+    )
 
-            if not done:
-                _logger.warning('browse.get_page_entries() still waiting on subprocesses after 5 seconds; continuing to wait.')
-                continue
-
-            for future in done:
-                key = futures[future]
-                try:
-                    results[key] = future.result()
-                except Exception:
-                    for remaining in pending:
-                        remaining.cancel()
-                    raise
-
-    return results['entries'], results['total_items']
+    loop = asyncio.get_running_loop()
+    start_time = loop.time()
+    entries, total_items = await asyncio.gather(entries_task, total_task)
+    elapsed = loop.time() - start_time
+    if elapsed > 5:
+        _logger.warning(
+            'browse.get_page_entries() completed after %.1f seconds; large directories may impact responsiveness.',
+            elapsed,
+        )
+    return entries, total_items
 
 
 def get_pad(x):
@@ -597,11 +600,11 @@ def get_pad(x):
     return x * ' '
 
 
-def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, page=1, page_size=MAX_FILE_LIMIT, filter_pattern=''):
+async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, page=1, page_size=MAX_FILE_LIMIT, filter_pattern=''):
     _padding = ' '
     s = []
     
-    page_entries, total_items = get_page_entries(_dir, page, page_size, filter_pattern)
+    page_entries, total_items = await get_page_entries(_dir, page, page_size, filter_pattern)
     
     # Adjust column width based on current page entries
     n = max(36, max(len(entry[0]) for entry in page_entries) + 2) if page_entries else 36
@@ -667,7 +670,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
     return ''.join(s), total_items
 
 
-def browse_response(path, runid, wd, request, config, filter_pattern=''):
+async def browse_response(path, runid, wd, request, config, filter_pattern=''):
     args = request.args
     headers = request.headers
     
@@ -691,7 +694,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
     if os.path.isdir(path):
         # build bread crumb links
-        _url = f'/weppcloud/runs/{runid}/{config}/browse/'
+        _url = _prefix_path(f'/runs/{runid}/{config}/browse/')
         breadcrumbs = [f'<a href="{_url}{diff_arg}"><b>{runid}</b></a>']
 
         if rel_path != '.':
@@ -700,7 +703,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
             _rel_path = ''
             for part in parts[:-1]:
                 _rel_path = _join(_rel_path, part)
-                _url = f'/weppcloud/runs/{runid}/{config}/browse/{_rel_path}/'
+                _url = _prefix_path(f'/runs/{runid}/{config}/browse/{_rel_path}/')
                 breadcrumbs.append(f'<a href="{_url}{diff_arg}"><b>{part}</b></a>')
             breadcrumbs.append(f'<b>{parts[-1]}</b>')
 
@@ -711,7 +714,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
         page = request.args.get('page', 1, type=int)
         
         # Generate directory listing and get total items
-        listing_html, total_items = html_dir_list(
+        listing_html, total_items = await html_dir_list(
             path, runid, wd, request.path, diff_runid, diff_wd, diff_arg,
             page=page, page_size=MAX_FILE_LIMIT, filter_pattern=filter_pattern
         )
@@ -770,7 +773,8 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
                         if total_items > 0 else '<p>No items to display</p>')
         
         # Combine UI elements
-        project_href = Markup(f'<a href="/weppcloud/runs/{runid}/{config}">☁️</a> ')
+        home_href = _prefix_path(f'/runs/{runid}/{config}')
+        project_href = Markup(f'<a href="{home_href}">☁️</a> ')
         breadcrumbs_markup = Markup(breadcrumbs)
         listing_markup = Markup(listing_html)
         pagination_markup = Markup(pagination_html)
@@ -799,15 +803,13 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
         if contents is None:
             if path_lower.endswith('.gz'):
-                with gzip.open(path, 'rt') as fp:
-                    contents = fp.read()
+                contents = await _async_read_gzip(path)
                 path_lower = path_lower[:-3]
             else:
-                with open(path) as fp:
-                    try:
-                        contents = fp.read()
-                    except UnicodeDecodeError:
-                        contents = None
+                try:
+                    contents = await _async_read_text(path)
+                except UnicodeDecodeError:
+                    contents = None
 
         if 'raw' in args or 'Raw' in headers:
             if contents is not None:
@@ -840,25 +842,25 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
         html = None
         if path_lower.endswith('.pkl'):
-            df = pd.read_pickle(path)
-            html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
+            df = await asyncio.to_thread(pd.read_pickle, path)
+            html = await _async_df_to_html(df)
 
         if path_lower.endswith('.parquet'):
-            df = pd.read_parquet(path)
-            html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
+            df = await asyncio.to_thread(pd.read_parquet, path)
+            html = await _async_df_to_html(df)
 
         if path_lower.endswith('.csv'):
             skiprows = 0
             if 'totalwatsed2' in path_lower:
                 skiprows = 1
-            df = pd.read_csv(path, skiprows=skiprows)
-            html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
+            df = await asyncio.to_thread(pd.read_csv, path, skiprows=skiprows)
+            html = await _async_df_to_html(df)
             #html = csv_to_html(path)
 
         if path_lower.endswith('.tsv'):
             skiprows = 0
-            df = pd.read_table(path, sep='\t', skiprows=skiprows)
-            html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
+            df = await asyncio.to_thread(pd.read_table, path, sep='\t', skiprows=skiprows)
+            html = await _async_df_to_html(df)
 
         if html is not None:
             table_markup = Markup(html)
@@ -870,11 +872,10 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
             )
 
         if contents is None:
-            with open(path) as fp:
-                try:
-                    contents = fp.read()
-                except UnicodeDecodeError:
-                    return send_file(path, as_attachment=True, download_name=_split(path)[-1])
+            try:
+                contents = await _async_read_text(path)
+            except UnicodeDecodeError:
+                return send_file(path, as_attachment=True, download_name=_split(path)[-1])
 
         contents_html = _wrap_usersum_spans(contents)
 
@@ -888,24 +889,24 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
         )
 
 
-def _handle_browse_request(request: StarletteRequest, runid: str, config: str, subpath: str):
+async def _handle_browse_request(request: StarletteRequest, runid: str, config: str, subpath: str):
     wd = os.path.abspath(get_wd(runid))
     flask_request = FlaskRequestAdapter(request)
-    result = _browse_tree_helper(runid, subpath or '', wd, flask_request, config)
+    result = await _browse_tree_helper(runid, subpath or '', wd, flask_request, config)
     return ensure_response(result)
 
 
-def browse_root(request: StarletteRequest):
+async def browse_root(request: StarletteRequest):
     runid = request.path_params['runid']
     config = request.path_params['config']
-    return _handle_browse_request(request, runid, config, '')
+    return await _handle_browse_request(request, runid, config, '')
 
 
-def browse_subpath(request: StarletteRequest):
+async def browse_subpath(request: StarletteRequest):
     runid = request.path_params['runid']
     config = request.path_params['config']
     subpath = request.path_params.get('subpath', '')
-    return _handle_browse_request(request, runid, config, subpath)
+    return await _handle_browse_request(request, runid, config, subpath)
 
 
 def health(_: StarletteRequest):
