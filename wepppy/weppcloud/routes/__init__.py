@@ -16,7 +16,6 @@ from .nodb_api.watar_bp import watar_bp
 from .nodb_api.watershed_bp import watershed_bp
 from .nodb_api.wepp_bp import wepp_bp
 
-from .browse import browse_bp
 from .weppcloud_site import weppcloud_site_bp
 from .admin import admin_bp
 from .archive_dashboard import archive_bp
@@ -89,7 +88,6 @@ for _bp in _RUN_CONTEXT_BLUEPRINTS:
 
 
 __all__ = [
-    'browse_bp',
     'weppcloud_site_bp', 
     'admin_bp',
     'archive_bp',
