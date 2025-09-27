@@ -17,14 +17,6 @@ from wepppy.weppcloud.routes._run_context import RunContext
 from wepppy.weppcloud.utils.helpers import get_wd
 
 
-async def gdalinfo_report(request: Request) -> JSONResponse:
-    runid = request.path_params['runid']
-    config = request.path_params['config']
-    wepp = request.path_params.get('wepp')  # unused, preserved for compatibility
-    subpath = request.path_params['subpath']
-    return await _gdalinfo_tree(runid, config, subpath, request)
-
-
 async def gdalinfo_tree(request: Request) -> JSONResponse:
     runid = request.path_params['runid']
     config = request.path_params['config']
@@ -33,8 +25,7 @@ async def gdalinfo_tree(request: Request) -> JSONResponse:
 
 
 async def _gdalinfo_tree(runid: str, config: str, subpath: str, request: Request) -> JSONResponse:
-    pup_relpath = request.query_params.get('pup')
-    ctx = await asyncio.to_thread(_resolve_run_context, runid, config, pup_relpath)
+    ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
     target_path = os.path.abspath(os.path.join(wd, subpath))
 
@@ -79,36 +70,18 @@ async def _run_shell_command(command: str, cwd: Optional[str]) -> tuple[int, str
     )
 
 
-def _resolve_run_context(runid: str, config: str, pup_relpath: str | None) -> RunContext:
+def _resolve_run_context(runid: str, config: str) -> RunContext:
     run_root = Path(get_wd(runid, prefer_active=False)).resolve()
     if not run_root.is_dir():
         raise HTTPException(status_code=404, detail=f"Run '{runid}' not found")
-
-    sanitized = (pup_relpath or '').strip()
-    pup_root: Path | None = None
-    active_root = run_root
-
-    if sanitized:
-        pups_root = (run_root / '_pups').resolve()
-        if not pups_root.is_dir():
-            raise HTTPException(status_code=404, detail='Unknown pup project')
-        candidate = (pups_root / sanitized).resolve()
-        try:
-            candidate.relative_to(pups_root)
-        except ValueError:
-            raise HTTPException(status_code=404, detail='Unknown pup project')
-        if not candidate.is_dir():
-            raise HTTPException(status_code=404, detail='Unknown pup project')
-        pup_root = candidate
-        active_root = candidate
 
     return RunContext(
         runid=runid,
         config=config,
         run_root=run_root,
-        active_root=active_root,
-        pup_root=pup_root,
-        pup_relpath=sanitized or None,
+        active_root=run_root,
+        pup_root=None,
+        pup_relpath=None,
     )
 
 
@@ -118,10 +91,5 @@ def create_routes(prefix_path: Callable[[str], str]) -> list[Route]:
             prefix_path('/runs/{runid}/{config}/gdalinfo/{subpath:path}'),
             gdalinfo_tree,
             methods=['GET']
-        ),
-        Route(
-            prefix_path('/runs/{runid}/{config}/report/{wepp}/gdalinfo/{subpath:path}'),
-            gdalinfo_report,
-            methods=['GET']
-        ),
+        )
     ]
