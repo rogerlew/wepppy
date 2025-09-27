@@ -564,6 +564,13 @@ class NoDbBase(object):
 
         db._init_logging()
         return db
+    
+    @classmethod
+    def tryGetInstance(cls, wd='.', allow_nonexistent=True, ignore_lock=False):
+        try:
+            return cls.getInstance(wd, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
+        except FileNotFoundError:
+            return None
 
     @classmethod
     def getInstanceFromRunID(cls, runid, allow_nonexistent=False, ignore_lock=False):

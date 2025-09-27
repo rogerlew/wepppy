@@ -150,7 +150,7 @@ class RunStatistics(object):
                 db.dump_and_unlock()
 
         return db
-
+    
 
 if __name__ == "__main__":
     rs = RunStatistics.getInstance('/geodata/weppcloud_runs/')

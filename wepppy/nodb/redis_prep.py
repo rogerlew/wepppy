@@ -59,6 +59,13 @@ class RedisPrep:
         return instance
 
     @staticmethod
+    def tryGetInstance(wd='.', allow_nonexistent=True, ignore_lock=False):
+        try:
+            return RedisPrep.getInstance(wd, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
+        except FileNotFoundError:
+            return None
+        
+    @staticmethod
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
         from wepppy.weppcloud.utils.helpers import get_wd
         return RedisPrep.getInstance(

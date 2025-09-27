@@ -277,11 +277,7 @@ class RAP_TS(NoDbBase):
         if disturbed is not None:
             fire_date = disturbed.fire_date
 
-        try:
-            reveg = Revegetation.getInstance(wd)
-        except:
-            reveg = None
-
+        reveg = Revegetation.tryGetInstance(wd)
         cover_transform = None
         if reveg is not None:
             cover_transform = reveg.cover_transform
