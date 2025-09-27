@@ -10,7 +10,9 @@ from flask import Blueprint, jsonify, render_template, url_for
 from flask_security import current_user
 
 from wepppy.nodb.redis_prep import RedisPrep
-from wepppy.weppcloud.utils.helpers import authorize, get_wd, exception_factory
+from wepppy.weppcloud.utils.helpers import authorize, exception_factory
+
+from .._run_context import load_run_context
 
 
 archive_bp = Blueprint('archive', __name__, template_folder='templates')
@@ -20,6 +22,7 @@ archive_bp = Blueprint('archive', __name__, template_folder='templates')
 def rq_archive_dashboard(runid, config):
     try:
         authorize(runid, config)
+        load_run_context(runid, config)
         return render_template('rq-archive-dashboard.j2', runid=runid, config=config, user=current_user)
     except Exception as e:
         return exception_factory(e)
@@ -29,7 +32,8 @@ def rq_archive_dashboard(runid, config):
 def rq_archive_list(runid, config):
     authorize(runid, config)
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         archives_dir = os.path.join(wd, 'archives')
         os.makedirs(archives_dir, exist_ok=True)
 
@@ -56,7 +60,13 @@ def rq_archive_list(runid, config):
                 'comment': comment,
                 'size': stat.st_size,
                 'modified': modified_str,
-                'download_url': url_for('download.download_tree', runid=runid, config=config, subpath=f'archives/{rel_name}')
+                'download_url': url_for(
+                    'download.download_tree',
+                    runid=runid,
+                    config=config,
+                    subpath=f'archives/{rel_name}',
+                    **({'pup': ctx.pup_relpath} if ctx.pup_relpath else {})
+                )
             })
 
         prep = RedisPrep.getInstance(wd)

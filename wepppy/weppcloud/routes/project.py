@@ -11,7 +11,7 @@ from wepppy.nodb import Ron
 from wepppy.nodb.watershed import Watershed
 
 from wepppy.weppcloud.utils.helpers import (
-    get_wd, success_factory, error_factory, exception_factory,
+    success_factory, error_factory, exception_factory,
     get_run_owners_lazy, get_user_models, authorize, 
     authorize_and_handle_with_exception_factory
 ) 
@@ -25,6 +25,7 @@ def clear_locks(runid, config):
     """
     Clear the nodb locks
     """
+    load_run_context(runid, config)
     from wepppy.nodb import clear_locks
     clear_locks(runid)
     return success_factory()
@@ -35,7 +36,8 @@ def clear_locks(runid, config):
 @login_required
 def delete_run(runid, config):
     authorize(runid, config)
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
     if ron.readonly:
         return error_factory('cannot delete readonly project')
@@ -60,7 +62,8 @@ def delete_run(runid, config):
 @authorize_and_handle_with_exception_factory
 def meta_subcatchmets_wgs(runid, config):
     from wepppy.export import arc_export
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
     arc_export(wd)
 
@@ -75,6 +78,7 @@ def meta_subcatchmets_wgs(runid, config):
 @login_required
 def task_adduser(runid, config):
     authorize(runid, config)
+    load_run_context(runid, config)
     owners = get_run_owners_lazy(runid)
     try:
         Run, User, user_datastore = get_user_models()
@@ -106,6 +110,7 @@ def task_adduser(runid, config):
 @login_required
 def task_removeuser(runid, config):
     authorize(runid, config)
+    load_run_context(runid, config)
     owners = get_run_owners_lazy(runid)
     try:
         Run, User, user_datastore = get_user_models()
@@ -129,6 +134,7 @@ def task_removeuser(runid, config):
 @login_required
 def report_users(runid, config):
     authorize(runid, config)
+    load_run_context(runid, config)
     owners = get_run_owners_lazy(runid)
     return render_template('reports/users.htm', runid=runid, config=config, owners=owners)
 
@@ -137,7 +143,8 @@ def report_users(runid, config):
 @project_bp.route('/runs/<string:runid>/<config>/resources/netful.json')
 @authorize_and_handle_with_exception_factory
 def resources_netful_geojson(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     watershed = Watershed.getInstance(wd)
     fn = watershed.netful_shp
     return send_file(fn, mimetype='application/json')
@@ -147,7 +154,8 @@ def resources_netful_geojson(runid, config):
 @project_bp.route('/runs/<string:runid>/<config>/resources/subcatchments.json')
 @authorize_and_handle_with_exception_factory
 def resources_subcatchments_geojson(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     watershed = Watershed.getInstance(wd)
     fn = watershed.subwta_shp
 
@@ -165,7 +173,8 @@ def resources_subcatchments_geojson(runid, config):
 @project_bp.route('/runs/<string:runid>/<config>/resources/bound.json')
 @authorize_and_handle_with_exception_factory
 def resources_bounds_geojson(runid, config, simplify=False):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     watershed = Watershed.getInstance(wd)
     fn = watershed.bound_shp
 
@@ -203,8 +212,8 @@ def resources_bounds_geojson(runid, config, simplify=False):
 @project_bp.route('/runs/<string:runid>/<config>/tasks/setname/', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_setname(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
+    ctx = load_run_context(runid, config)
+    ron = Ron.getInstance(str(ctx.active_root))
     ron.name = request.form.get('name', 'Untitled')
     return success_factory()
 
@@ -212,8 +221,8 @@ def task_setname(runid, config):
 @project_bp.route('/runs/<string:runid>/<config>/tasks/setscenario/', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_setscenario(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
+    ctx = load_run_context(runid, config)
+    ron = Ron.getInstance(str(ctx.active_root))
     ron.scenario = request.form.get('scenario', '')
     return success_factory()
 
@@ -230,7 +239,8 @@ def task_set_public(runid, config):
         return error_factory('state is None')
 
     try:
-        Ron.getInstanceFromRunID(runid).public = bool(state)
+        ctx = load_run_context(runid, config)
+        Ron.getInstance(str(ctx.active_root)).public = bool(state)
     except Exception:
         return exception_factory('Error setting state', runid=runid)
 
@@ -249,7 +259,8 @@ def task_set_readonly(runid, config):
         return error_factory('state is None')
 
     try:
-        Ron.getInstanceFromRunID(runid).readonly = bool(state)
+        ctx = load_run_context(runid, config)
+        Ron.getInstance(str(ctx.active_root)).readonly = bool(state)
     except Exception:
         return exception_factory('Error setting state', runid=runid)
 

@@ -2,7 +2,7 @@
  * Controllers (controllers.js)
  * NOTE: Generated via build_controllers_js.py from
  *       wepppy/weppcloud/controllers_js/templates/*.js
- * Build date: 2025-09-27T06:49:45Z
+ * Build date: 2025-09-27T13:54:40Z
  * See developer notes: wepppy/weppcloud/routes/usersum/dev-notes/controllers_js.md
  * ----------------------------------------------------------------------------
  */
@@ -5931,9 +5931,6 @@ var Omni = function () {
             self.ws_client.connect();
 
             const data = self.serializeScenarios();
-            for (let [key, value] of data.entries()) {
-                console.log(`${key}: ${value instanceof File ? value.name : value}`);
-            }
 
             $.post({
                 url: "rq/api/run_omni",

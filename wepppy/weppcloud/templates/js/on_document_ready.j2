@@ -1087,7 +1087,7 @@ function onReady() {
     });
 
 
-    {% if 'omni' in ron.mods %}
+    {% if 'omni' in ron.mods and omni %}
 
     omni.form.on("OMNI_SCENARIO_RUN_TASK_COMPLETED", function () {
         omni.ws_client.disconnect();

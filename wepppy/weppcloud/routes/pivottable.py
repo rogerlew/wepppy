@@ -10,7 +10,9 @@ import pandas as pd
 
 from flask import abort, Blueprint, request, Response, jsonify, current_app
 
-from wepppy.weppcloud.utils.helpers import get_wd, htmltree, error_factory
+from wepppy.weppcloud.utils.helpers import error_factory
+
+from ._run_context import load_run_context
 
 _html = r"""
 <!DOCTYPE html>
@@ -173,7 +175,8 @@ def pivottable_tree(runid, config, subpath):
     """
     Serve a pivot UI for a specific file under a run working directory.
     """
-    wd = os.path.abspath(get_wd(runid))
+    ctx = load_run_context(runid, config)
+    wd = os.path.abspath(str(ctx.active_root))
     dir_path = os.path.abspath(os.path.join(wd, subpath))
 
     # jail within run wd

@@ -9,7 +9,8 @@ rangeland_cover_bp = Blueprint('rangeland_cover', __name__)
 
 @rangeland_cover_bp.route('/runs/<string:runid>/<config>/query/rangeland_cover/current_cover_summary/', methods=['POST'])
 def query_rangeland_cover_current(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
 
     topaz_ids = request.json.get('topaz_ids', None)
     topaz_ids = [x for x in topaz_ids if x != '']
@@ -28,7 +29,8 @@ def set_rangeland_cover_mode(runid, config):
     except Exception:
         exception_factory('mode and rap_year must be provided', runid=runid)
 
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     rangeland_cover = RangelandCover.getInstance(wd)
 
     try:

@@ -9,7 +9,8 @@ rangeland_bp = Blueprint('rangeland', __name__)
 
 @rangeland_bp.route('/runs/<string:runid>/<config>/tasks/modify_rangeland_cover/', methods=['POST'])
 def task_modify_rangeland_cover(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
 
     topaz_ids = request.json.get('topaz_ids', None)
     covers = request.json.get('covers', None)
@@ -32,14 +33,16 @@ def task_modify_rangeland_cover(runid, config):
 @rangeland_bp.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments')
 @rangeland_bp.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments/')
 def query_rangeland_cover_subcatchments(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     return jsonify(RangelandCover.getInstance(wd).subs_summary)
 
 
 @rangeland_bp.route('/runs/<string:runid>/<config>/report/rangeland_cover')
 @rangeland_bp.route('/runs/<string:runid>/<config>/report/rangeland_cover/')
 def report_rangeland_cover(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
     rangeland_cover = RangelandCover.getInstance(wd)
 
@@ -49,7 +52,8 @@ def report_rangeland_cover(runid, config):
 
 @rangeland_bp.route('/runs/<string:runid>/<config>/tasks/build_rangeland_cover/', methods=['POST'])
 def task_build_rangeland_cover(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     rangeland_cover = RangelandCover.getInstance(wd)
 
     rap_year = request.form.get('rap_year')

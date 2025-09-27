@@ -12,7 +12,8 @@ watershed_bp = Blueprint('watershed', __name__)
 @watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass/')
 @authorize_and_handle_with_exception_factory
 def query_topaz_pass(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     watershed = Watershed.getInstance(wd)
     has_channels = watershed.has_channels
     has_subcatchments = watershed.has_subcatchments
@@ -32,7 +33,8 @@ def query_topaz_pass(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/resources/channels.json')
 @authorize_and_handle_with_exception_factory
 def resources_channels_geojson(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     watershed = Watershed.getInstance(wd)
     fn = watershed.channels_shp
 
@@ -51,14 +53,16 @@ def resources_channels_geojson(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/query/extent/')
 @authorize_and_handle_with_exception_factory
 def query_extent(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     return jsonify(Ron.getInstance(wd).extent)
 
 
 @watershed_bp.route('/runs/<string:runid>/<config>/report/channel')
 @authorize_and_handle_with_exception_factory
 def report_channel(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     return render_template('reports/channel.htm', 
                            runid=runid, config=config,
                            map=Ron.getInstance(wd).map)
@@ -68,7 +72,8 @@ def report_channel(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/query/outlet/')
 @authorize_and_handle_with_exception_factory
 def query_outlet(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     return jsonify(Watershed.getInstance(wd)
                         .outlet
                         .as_dict())
@@ -78,7 +83,8 @@ def query_outlet(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/report/outlet/')
 @authorize_and_handle_with_exception_factory
 def report_outlet(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     return render_template('reports/outlet.htm', runid=runid, config=config,
                            outlet=Watershed.getInstance(wd).outlet,
                            ron=Ron.getInstance(wd))
@@ -88,7 +94,8 @@ def report_outlet(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/query/has_dem/')
 @authorize_and_handle_with_exception_factory
 def query_has_dem(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     return jsonify(Ron.getInstance(wd).has_dem)
 
 
@@ -96,7 +103,8 @@ def query_has_dem(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/subcatchments/')
 @authorize_and_handle_with_exception_factory
 def query_watershed_summary_subcatchments(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     return jsonify(Watershed.getInstance(wd).subs_summary)
 
 
@@ -104,7 +112,8 @@ def query_watershed_summary_subcatchments(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/channels/')
 @authorize_and_handle_with_exception_factory
 def query_watershed_summary_channels(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     return jsonify(Watershed.getInstance(wd).chns_summary)
 
 
@@ -112,7 +121,8 @@ def query_watershed_summary_channels(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/report/watershed/')
 @authorize_and_handle_with_exception_factory
 def query_watershed_summary(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     return render_template('reports/subcatchments.htm', runid=runid, config=config,
                             user=current_user,
                             watershed=Watershed.getInstance(wd))
@@ -120,7 +130,8 @@ def query_watershed_summary(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
 @authorize_and_handle_with_exception_factory
 def task_abstract_watershed(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     watershed = Watershed.getInstance(wd)
     watershed.abstract_watershed()
     return success_factory()
@@ -129,7 +140,8 @@ def task_abstract_watershed(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/tasks/sub_intersection/', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def sub_intersection(runid, config):
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     extent = request.json.get('extent', None)
     ron = Ron.getInstance(wd)
     _map = ron.map

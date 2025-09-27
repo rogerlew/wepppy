@@ -9,6 +9,8 @@ from urllib.parse import urlencode
 
 from concurrent.futures import ThreadPoolExecutor
 
+from typing import Optional
+
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
@@ -20,6 +22,8 @@ from flask_security import current_user
 from wepppy.weppcloud.utils.helpers import get_wd, exception_factory
 
 from wepppy.nodb import Ron, Wepp, Watershed
+
+from ._run_context import RunContext, load_run_context
 
 VIZ_RSCRIPT_DIR = '/workdir/viz-weppcloud/scripts/R/'
 VIZ_RMARKDOWN_DIR = '/workdir/viz-weppcloud/scripts/Rmd'
@@ -35,7 +39,8 @@ def viz_r(runid, config, r_format, routine):
 
     assert config is not None
 
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     owners = get_run_owners(runid)
     try:
         ron = Ron.getInstance(wd)
@@ -107,7 +112,8 @@ def weppcloudr(runid, config, routine):
 
     assert config is not None
 
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     owners = get_run_owners(runid)
     try:
         ron = Ron.getInstance(wd)
@@ -132,12 +138,14 @@ def weppcloudr(runid, config, routine):
 
     user = request.args.get('user', None)
     
-    return weppcloudr_runner(runid, config, routine, user)
+    return weppcloudr_runner(runid, config, routine, user, ctx=ctx)
 
 
-def weppcloudr_runner(runid, config, routine, user):
+def weppcloudr_runner(runid, config, routine, user, ctx: Optional[RunContext] = None):
     from wepppy.weppcloud.app import get_file_sha1
-    wd = get_wd(runid)
+    if ctx is None:
+        ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
 
     viz_export_dir = _join(wd, 'export/WEPPcloudR')
     if not _exists(viz_export_dir):
@@ -196,14 +204,15 @@ def weppcloudr_runner(runid, config, routine, user):
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details')
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details/')
 def deval_details(runid, config):
+    ctx = load_run_context(runid, config)
     try:
-        wd = get_wd(runid)
+        wd = str(ctx.active_root)
         from wepppy.export import arc_export
         arc_export(wd)
     except:
         return exception_factory('Error running script', runid=runid)
 
-    return weppcloudr_runner(runid, config, routine='new_report.Rmd', user='chinmay')
+    return weppcloudr_runner(runid, config, routine='new_report.Rmd', user='chinmay', ctx=ctx)
 
 
 @weppcloudr_bp.route('/WEPPcloudR/proxy/<routine>', methods=['GET', 'POST'])

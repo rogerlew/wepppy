@@ -17,9 +17,11 @@ from flask_security import current_user
 
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # pip install cmarkgfm
 # https://github.com/sindresorhus/github-markdown-css for styling
-from wepppy.weppcloud.utils.helpers import get_wd, exception_factory, authorize
+from wepppy.weppcloud.utils.helpers import exception_factory, authorize
 from wepppy.nodb import Ron
 from wepppy.nodb.base import _iter_nodb_subclasses
+
+from .._run_context import RunContext, load_run_context
 
 
 import redis
@@ -71,33 +73,35 @@ def _collect_nodb_context(wd):
     return context
 
 
-def _template_context(runid, config):
+def _template_context(ctx: RunContext):
     from wepppy.weppcloud.app import Run  # local import to avoid circular
 
-    wd = get_wd(runid)
+    wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
-    run_rec = Run.query.filter_by(runid=runid).first()
+    run_rec = Run.query.filter_by(runid=ctx.runid).first()
     context = {
         "user": current_user,
-        "runid": runid,
-        "config": config,
+        "runid": ctx.runid,
+        "config": ctx.config,
         "ron": ron,
         "run_record": run_rec,
         "created": run_rec.date_created if run_rec else None,
-        "nodb": _collect_nodb_context(wd),
     }
+    if ctx.pup_relpath:
+        context["pup_relpath"] = ctx.pup_relpath
+    context["nodb"] = _collect_nodb_context(wd)
     return context
 
 
-def ensure_readme(runid, config):
-    wd = get_wd(runid)
+def ensure_readme(ctx: RunContext):
+    wd = str(ctx.active_root)
     path = _readme_path(wd)
     if os.path.exists(path):
         return path
 
 #    context = _template_context(runid, config)
     template_source = DEFAULT_TEMPLATE.read_text(encoding="utf-8")
-    markdown = template_source.replace('{runid}', runid).replace('{config}', config)
+    markdown = template_source.replace('{runid}', ctx.runid).replace('{config}', ctx.config)
     Path(path).write_text(markdown, encoding="utf-8")
     return path
 
@@ -107,13 +111,13 @@ def _render_markdown(markdown_source, context):
     return markdown_to_html(rendered_markdown)
 
 
-def _load_markdown(runid, config):
-    path = ensure_readme(runid, config)
+def _load_markdown(ctx: RunContext):
+    path = ensure_readme(ctx)
     return Path(path).read_text(encoding="utf-8")
 
 
-def _write_markdown(runid, config, markdown_text):
-    path = _readme_path(get_wd(runid))
+def _write_markdown(ctx: RunContext, markdown_text: str):
+    path = _readme_path(str(ctx.active_root))
     Path(path).write_text(markdown_text, encoding="utf-8")
 
 
@@ -240,11 +244,15 @@ def _can_edit(runid):
 def readme_editor(runid, config):
     try:
         authorize(runid, config)
-        context = _template_context(runid, config)
+        ctx = load_run_context(runid, config)
+        context = _template_context(ctx)
         ron = context.get("ron")
         if getattr(ron, "readonly", False):
-            return redirect(url_for("readme.readme_render", runid=runid, config=config))
-        markdown = _load_markdown(runid, config)
+            target_args = {"runid": runid, "config": config}
+            if ctx.pup_relpath:
+                target_args["pup"] = ctx.pup_relpath
+            return redirect(url_for("readme.readme_render", **target_args))
+        markdown = _load_markdown(ctx)
         html = _render_markdown(markdown, context)
         client_uuid = uuid.uuid4().hex
         _record_editor_session(runid, config, client_uuid, ron)
@@ -262,7 +270,8 @@ def readme_editor(runid, config):
 def readme_raw(runid, config):
     try:
         authorize(runid, config)
-        markdown = _load_markdown(runid, config)
+        ctx = load_run_context(runid, config)
+        markdown = _load_markdown(ctx)
         return jsonify({"markdown": markdown})
     except:
         return exception_factory("Could not load README raw")
@@ -271,6 +280,7 @@ def readme_raw(runid, config):
 def readme_save(runid, config):
     try:
         authorize(runid, config)
+        ctx = load_run_context(runid, config)
         data = request.get_json() or {}
         markdown = data.get("markdown", "")
         client_uuid = data.get("uuid")
@@ -283,8 +293,8 @@ def readme_save(runid, config):
                 reason = "missing_uuid"
             _invalidate_editor_session(runid, config, client_uuid)
             return jsonify({"Success": False, "invalidated": True, "reason": reason})
-        _write_markdown(runid, config, markdown)
-        ron = Ron.getInstance(get_wd(runid))
+        _write_markdown(ctx, markdown)
+        ron = Ron.getInstance(str(ctx.active_root))
         previous_state = _get_editor_state(runid, config, client_uuid) if client_uuid else {}
         previous_name = (previous_state.get("ron_name") or "") if previous_state else ""
         previous_scenario = (previous_state.get("ron_scenario") or "") if previous_state else ""
@@ -309,11 +319,12 @@ def readme_save(runid, config):
 def readme_preview(runid, config):
     try:
         authorize(runid, config)
+        ctx = load_run_context(runid, config)
         data = request.get_json() or {}
         markdown = data.get("markdown", "")
         if not isinstance(markdown, str):
             abort(400)
-        context = _template_context(runid, config)
+        context = _template_context(ctx)
         html = _render_markdown(markdown, context)
         return jsonify({"html": html})
     except:
@@ -324,8 +335,9 @@ def readme_preview(runid, config):
 def readme_render(runid, config):
     try:
         authorize(runid, config)
-        markdown = _load_markdown(runid, config)
-        context = _template_context(runid, config)
+        ctx = load_run_context(runid, config)
+        markdown = _load_markdown(ctx)
+        context = _template_context(ctx)
         html = _render_markdown(markdown, context)
         return render_template(
             "readme/view.j2",

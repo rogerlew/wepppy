@@ -12,7 +12,8 @@ export_bp = Blueprint('export', __name__)
 def export_ermit(runid, config):
     try:
         from wepppy.export import create_ermit_input
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         fn = create_ermit_input(wd)
         name = _split(fn)[-1]
         return send_file(fn, as_attachment=True, download_name=name)
@@ -24,7 +25,8 @@ def export_ermit(runid, config):
 def export_geopackage(runid, config):
     from wepppy.export import gpkg_export, archive_project, legacy_arc_export
 
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
     # TODO move to RQ or disable lazy build
     try:
@@ -43,7 +45,8 @@ def export_geopackage(runid, config):
 def export_geodatabase(runid, config):
     from wepppy.export import gpkg_export, archive_project, legacy_arc_export
 
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
 
     # TODO move to RQ or disable lazy build
@@ -63,7 +66,8 @@ def export_geodatabase(runid, config):
 @export_bp.route('/runs/<string:runid>/<config>/export/prep_details/')
 def export_prep_details(runid, config):
     # get working dir of original directory
-    wd = get_wd(runid)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
 
     from wepppy.export import archive_project
     from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details

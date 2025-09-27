@@ -10,7 +10,9 @@ import pandas as pd
 
 from flask import abort, Blueprint, request, Response, jsonify
 
-from wepppy.weppcloud.utils.helpers import get_wd, htmltree, error_factory
+from wepppy.weppcloud.utils.helpers import error_factory
+
+from ._run_context import load_run_context
 
 
 gdalinfo_bp = Blueprint('gdalinfo', __name__)
@@ -26,7 +28,8 @@ def gdalinfo_tree(runid, config, subpath):
     """
     Recursive list the file structure of the working directory.
     """
-    wd = os.path.abspath(get_wd(runid))
+    ctx = load_run_context(runid, config)
+    wd = os.path.abspath(str(ctx.active_root))
     dir_path = os.path.abspath(os.path.join(wd, subpath))
 
     if not dir_path.startswith(wd):
@@ -48,4 +51,3 @@ def gdalinfo_response(path):
     contents = check_output('gdalinfo -json ' + path, shell=True)
     jsobj = json.loads(contents)
     return jsonify(jsobj)
-

@@ -11,7 +11,8 @@ unitizer_bp = Blueprint('unitizer', __name__)
 @unitizer_bp.route('/runs/<string:runid>/<config>/tasks/set_unit_preferences/', methods=['POST'])
 def task_set_unit_preferences(runid, config):
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         unitizer = Unitizer.getInstance(wd)
         res = unitizer.set_preferences(request.form)
         return success_factory(res)
@@ -24,7 +25,8 @@ def task_set_unit_preferences(runid, config):
 def unitizer_route(runid, config):
 
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         unitizer = Unitizer.getInstance(wd)
 
         value = request.args.get('value')
@@ -43,7 +45,8 @@ def unitizer_route(runid, config):
 def unitizer_units_route(runid, config):
 
     try:
-        wd = get_wd(runid)
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
         unitizer = Unitizer.getInstance(wd)
 
         in_units = request.args.get('in_units')
