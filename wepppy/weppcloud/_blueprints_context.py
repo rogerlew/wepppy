@@ -8,7 +8,6 @@ def register_blueprints(app):
         return jsonify('OK')
 
     app.register_blueprint(rq_api_bp)
-    app.register_blueprint(download_bp)
     app.register_blueprint(rq_jobinfo_bp)
     app.register_blueprint(security_logging_bp)
     app.register_blueprint(security_ui_bp)
