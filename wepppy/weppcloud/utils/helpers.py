@@ -97,15 +97,47 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
     
 
 def url_for_run(endpoint: str, **values) -> str:
-    """Generate a URL and propagate the active pup context if present."""
-    pup_relpath = getattr(g, 'pup_relpath', None)
+    """Generate a URL for run-scoped routes, including microservices."""
 
-    # serve pup browse routes through the parent. it makes it less confusing to the
-    if endpoint.startswith('browse') and pup_relpath:
-        runid = values.get('runid')
-        config = values.get('config')
-        subpath = _join('_pups', pup_relpath, values.get('subpath'))
-        return url_for(endpoint, runid=runid, config=config, subpath=subpath)
+    site_prefix = current_app.config.get('SITE_PREFIX', '') if current_app else ''
+
+    def _apply_site_prefix(path: str) -> str:
+        if path.startswith(('http://', 'https://')):
+            return path
+        if not path.startswith('/'):
+            path = '/' + path
+        if site_prefix:
+            prefix = site_prefix.rstrip('/')
+            if prefix and not path.startswith(prefix + '/'):
+                return prefix + path
+        return path
+
+    def _require(keys):
+        missing = [k for k in keys if not values.get(k)]
+        if missing:
+            raise ValueError(f'Missing values for {endpoint}: {", ".join(missing)}')
+
+    if endpoint == 'browse.browse_tree':
+        _require(['runid', 'config'])
+        subpath = (values.get('subpath') or '').lstrip('/')
+        path = f"/runs/{values['runid']}/{values['config']}/browse/"
+        if subpath:
+            path += subpath
+        return _apply_site_prefix(path)
+    if endpoint == 'download.download_with_subpath':
+        _require(['runid', 'config'])
+        subpath = (values.get('subpath') or '').lstrip('/')
+        path = f"/runs/{values['runid']}/{values['config']}/download/"
+        if subpath:
+            path += subpath
+        return _apply_site_prefix(path)
+    if endpoint == 'gdalinfo.gdalinfo_with_subpath':
+        _require(['runid', 'config', 'subpath'])
+        subpath = values['subpath'].lstrip('/')
+        return _apply_site_prefix(f"/runs/{values['runid']}/{values['config']}/gdalinfo/{subpath}")
+    if endpoint == 'download.aria2c_spec':
+        _require(['runid', 'config'])
+        return _apply_site_prefix(f"/runs/{values['runid']}/{values['config']}/aria2c.spec")
 
     if 'pup' not in values:
         pup_relpath = getattr(g, 'pup_relpath', None)
@@ -113,14 +145,7 @@ def url_for_run(endpoint: str, **values) -> str:
             values['pup'] = pup_relpath
 
     url = url_for(endpoint, **values)
-
-    site_prefix = current_app.config.get('SITE_PREFIX', '') if current_app else ''
-    if site_prefix and url.startswith('/') and not url.startswith(site_prefix + '/'):
-        if site_prefix.endswith('/'):
-            return site_prefix.rstrip('/') + url
-        return site_prefix + url
-
-    return url
+    return _apply_site_prefix(url)
 
 
 def error_factory(msg='Error Handling Request'):

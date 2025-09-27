@@ -34,10 +34,6 @@ async def aria2c_spec(request: Request) -> PlainTextResponse:
 
 async def download_with_subpath(request: Request) -> Response:
     subpath = request.path_params.get('subpath', '')
-    return await _download_tree(request, subpath)
-
-
-async def _download_tree(request: Request, subpath: str) -> Response:
     runid = request.path_params['runid']
     config = request.path_params['config']
 

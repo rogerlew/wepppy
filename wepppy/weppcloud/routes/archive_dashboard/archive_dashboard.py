@@ -61,7 +61,7 @@ def rq_archive_list(runid, config):
                 'size': stat.st_size,
                 'modified': modified_str,
                 'download_url': url_for_run(
-                    'download.download_tree',
+                    'download.download_with_subpath',
                     runid=runid,
                     config=config,
                     subpath=f'archives/{rel_name}',
