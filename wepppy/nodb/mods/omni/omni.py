@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 import os
+import hashlib
+import time
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -287,6 +289,20 @@ def _scenario_name_from_scenario_definition(scenario_def) -> str:
         return str(_scenario)
 
 
+def _hash_file_sha1(path: Optional[str]) -> Optional[str]:
+    if not path or not _exists(path):
+        return None
+
+    h = hashlib.sha1()
+    try:
+        with open(path, 'rb') as fp:
+            for chunk in iter(lambda: fp.read(8192), b''):
+                h.update(chunk)
+    except (OSError, IOError):
+        return None
+    return h.hexdigest()
+
+
 class OmniNoDbLockedException(Exception):
     pass
 
@@ -379,6 +395,10 @@ class Omni(NoDbBase):
             self._contrast_select_topaz_ids = None
             self._mulching_base_scenario = None
 
+            self._scenario_dependency_tree = {}
+            self._contrast_dependency_tree = {}
+            self._scenario_run_state = []
+
     @property
     def scenarios(self):
         return self._scenarios
@@ -387,6 +407,24 @@ class Omni(NoDbBase):
     @nodb_setter
     def scenarios(self, value: set[OmniScenario]):
         self._scenarios = value
+
+    @property
+    def scenario_dependency_tree(self) -> Dict[str, Dict[str, Any]]:
+        return getattr(self, '_scenario_dependency_tree', {}) or {}
+
+    @scenario_dependency_tree.setter
+    @nodb_setter
+    def scenario_dependency_tree(self, value: Dict[str, Dict[str, Any]]):
+        self._scenario_dependency_tree = value
+
+    @property
+    def scenario_run_state(self) -> List[Dict[str, Any]]:
+        return getattr(self, '_scenario_run_state', []) or []
+
+    @scenario_run_state.setter
+    @nodb_setter
+    def scenario_run_state(self, value: List[Dict[str, Any]]):
+        self._scenario_run_state = value
 
     def parse_scenarios(self, parsed_inputs):
         """
@@ -493,6 +531,15 @@ class Omni(NoDbBase):
     @nodb_setter
     def contrast_names(self, value):
         self._contrast_names = value
+
+    @property
+    def contrast_dependency_tree(self) -> Dict[str, Dict[str, Any]]:
+        return getattr(self, '_contrast_dependency_tree', {}) or {}
+
+    @contrast_dependency_tree.setter
+    @nodb_setter
+    def contrast_dependency_tree(self, value: Dict[str, Dict[str, Any]]):
+        self._contrast_dependency_tree = value
 
     @property
     def omni_dir(self):
@@ -699,9 +746,47 @@ class Omni(NoDbBase):
 
         self.logger.info('Omni::run_omni_contrasts')
 
+        if not self.contrasts or not self.contrast_names:
+            self.logger.info('  Omni::run_omni_contrasts: No contrasts to run\n')
+            return
+
+        dependency_tree = dict(self.contrast_dependency_tree)
+        active_contrasts = set()
+
+        total_contrasts = len(self.contrasts)
+
         for contrast_id, (contrast_name, _contrasts) in enumerate(zip(self.contrast_names, self.contrasts), start=1):
-            print(f'Running contrast {contrast_id} of {len(self.contrasts)}: {contrast_name}')
+            active_contrasts.add(contrast_name)
+            dependencies = self._contrast_dependencies(contrast_name)
+            signature = self._contrast_signature(contrast_name, _contrasts)
+
+            prev_entry = dependency_tree.get(contrast_name)
+            dep_match = False
+            if prev_entry and prev_entry.get('dependencies'):
+                prev_deps = prev_entry['dependencies']
+                dep_match = (
+                    set(prev_deps.keys()) == set(dependencies.keys()) and
+                    all(prev_deps[key].get('sha1') == dependencies[key].get('sha1') for key in dependencies)
+                )
+
+            if prev_entry and prev_entry.get('signature') == signature and dep_match:
+                self.logger.info(f'  Omni::run_omni_contrasts: {contrast_name} up-to-date, skipping\n')
+                continue
+
+            self.logger.info(f'  Omni::run_omni_contrasts: Running contrast {contrast_id} of {total_contrasts}: {contrast_name}\n')
             _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
+
+            dependency_tree[contrast_name] = {
+                'signature': signature,
+                'dependencies': dependencies,
+                'timestamp': time.time()
+            }
+
+        stale = set(dependency_tree.keys()) - active_contrasts
+        for contrast_name in stale:
+            dependency_tree.pop(contrast_name, None)
+
+        self.contrast_dependency_tree = dependency_tree
 
     def run_omni_contrast(self, contrast_id: int):
         self.logger.info(f'Omni::run_omni_contrast {contrast_id}')
@@ -773,6 +858,62 @@ class Omni(NoDbBase):
 
         return combined
     
+    def _normalize_scenario_key(self, name: Optional[Any]) -> str:
+        if isinstance(name, OmniScenario):
+            name = str(name)
+        if name in (None, 'None'):
+            return str(self.base_scenario)
+        return str(name)
+
+    def _loss_pw0_path_for_scenario(self, scenario_name: Optional[Any]) -> str:
+        global OMNI_REL_DIR
+        scenario_key = self._normalize_scenario_key(scenario_name)
+
+        base_path = _join(self.wd, 'wepp', 'output', 'loss_pw0.txt')
+        scenario_path = _join(self.wd, OMNI_REL_DIR, 'scenarios', scenario_key, 'wepp', 'output', 'loss_pw0.txt')
+
+        if scenario_key == str(self.base_scenario) and not _exists(scenario_path):
+            return base_path
+
+        return scenario_path if _exists(scenario_path) else (base_path if scenario_key == str(self.base_scenario) else scenario_path)
+
+    def _scenario_signature(self, scenario_def: dict) -> str:
+        sanitized: Dict[str, Any] = {}
+        for key, value in scenario_def.items():
+            if key == 'type' and isinstance(value, OmniScenario):
+                sanitized[key] = str(value)
+            else:
+                sanitized[key] = value
+        return json.dumps(sanitized, sort_keys=True, default=str)
+
+    def _scenario_dependency_target(self, scenario: OmniScenario, scenario_def: dict) -> Optional[str]:
+        if scenario == OmniScenario.Mulch:
+            return scenario_def.get('base_scenario')
+        return str(self.base_scenario)
+
+    def _contrast_dependencies(self, contrast_name: str) -> Dict[str, Dict[str, Optional[str]]]:
+        control_part, target_part = contrast_name.split('__to__')
+        control_scenario_raw = control_part.split(',')[0]
+        control_key = self._normalize_scenario_key(control_scenario_raw)
+        target_key = self._normalize_scenario_key(target_part)
+
+        scenarios = {control_key, target_key}
+        dependencies: Dict[str, Dict[str, Optional[str]]] = {}
+        for scenario_name in scenarios:
+            loss_path = self._loss_pw0_path_for_scenario(scenario_name)
+            dependencies[scenario_name] = {
+                'loss_path': loss_path,
+                'sha1': _hash_file_sha1(loss_path)
+            }
+        return dependencies
+
+    def _contrast_signature(self, contrast_name: str, contrast_payload: dict) -> str:
+        payload_serializable = {
+            'name': contrast_name,
+            'items': sorted((str(k), str(v)) for k, v in contrast_payload.items())
+        }
+        return hashlib.sha1(json.dumps(payload_serializable, sort_keys=True).encode('utf-8')).hexdigest()
+
     def run_omni_scenario(self, scenario_def: dict):
         scenario = scenario_def.get('type')
 
@@ -811,33 +952,144 @@ class Omni(NoDbBase):
             self.logger.info('  Omni::run_omni_scenarios: No scenarios to run\n')
             raise Exception('No scenarios to run')
 
+        dependency_tree = dict(self.scenario_dependency_tree)
+        run_states: List[Dict[str, Any]] = []
+        active_scenarios = set()
+        processed_scenarios = set()
+
+        def dependency_info(scenario_enum: OmniScenario, scenario_def: dict):
+            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            active_scenarios.add(scenario_name)
+            dependency_target = self._scenario_dependency_target(scenario_enum, scenario_def)
+            dependency_path = self._loss_pw0_path_for_scenario(dependency_target)
+            dependency_hash = _hash_file_sha1(dependency_path)
+            signature = self._scenario_signature(scenario_def)
+            prev_entry = dependency_tree.get(scenario_name)
+            up_to_date = (
+                prev_entry is not None and
+                prev_entry.get('dependency_sha1') == dependency_hash and
+                prev_entry.get('signature') == signature
+            )
+            return scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date
+
         # pass 1 scenarios: dependent on base_scenario
-        ran_scenarios = []
         for scenario_def in self.scenarios:
-            scenario = OmniScenario.parse(scenario_def.get('type'))
-            if scenario in [OmniScenario.Mulch]:
+            scenario_enum = OmniScenario.parse(scenario_def.get('type'))
+            if scenario_enum == OmniScenario.Mulch:
                 continue
 
-            if  self.base_scenario != OmniScenario.Undisturbed and \
-                scenario in [OmniScenario.Thinning, OmniScenario.PrescribedFire]:
-                # skip undisturbed if the base scenario is sbs_map
+            if self.base_scenario != OmniScenario.Undisturbed and \
+               scenario_enum in [OmniScenario.Thinning, OmniScenario.PrescribedFire]:
+                # defer thinning/prescribed fire until after dependent scenarios build
                 continue
 
-            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            self.logger.info(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
+            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date = dependency_info(scenario_enum, scenario_def)
+            processed_scenarios.add(scenario_name)
+
+            target_key = self._normalize_scenario_key(dependency_target)
+
+            if up_to_date:
+                self.logger.info(f'  Omni::run_omni_scenarios: {scenario_name} dependency unchanged, skipping\n')
+                ts = time.time()
+                dependency_tree[scenario_name] = {
+                    'dependency_target': target_key,
+                    'dependency_path': dependency_path,
+                    'dependency_sha1': dependency_hash,
+                    'signature': signature,
+                    'timestamp': ts
+                }
+                run_states.append({
+                    'scenario': scenario_name,
+                    'status': 'skipped',
+                    'reason': 'dependency_unchanged',
+                    'dependency_target': target_key,
+                    'dependency_path': dependency_path,
+                    'dependency_sha1': dependency_hash,
+                    'timestamp': ts
+                })
+                continue
+
+            self.logger.info(f'  Omni::run_omni_scenarios: {scenario_name}\n')
             self._build_scenario(scenario_def)
-            ran_scenarios.append(_scenario_name)
+            updated_hash = _hash_file_sha1(dependency_path)
+            ts = time.time()
+            dependency_tree[scenario_name] = {
+                'dependency_target': target_key,
+                'dependency_path': dependency_path,
+                'dependency_sha1': updated_hash,
+                'signature': signature,
+                'timestamp': ts
+            }
+            run_states.append({
+                'scenario': scenario_name,
+                'status': 'executed',
+                'reason': 'dependency_changed',
+                'dependency_target': target_key,
+                'dependency_path': dependency_path,
+                'dependency_sha1': updated_hash,
+                'timestamp': ts
+            })
 
         # pass 2 scenarios: dependent on pass 1
         for scenario_def in self.scenarios:
-            self.logger.info(f'  Omni::run_omni_scenarios: djskd {scenario_def}\n')
-            
-            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            if _scenario_name in ran_scenarios:
+            scenario_enum = OmniScenario.parse(scenario_def.get('type'))
+            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            if scenario_name in processed_scenarios:
                 continue
 
-            self.logger.info(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
+            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date = dependency_info(scenario_enum, scenario_def)
+            processed_scenarios.add(scenario_name)
+
+            target_key = self._normalize_scenario_key(dependency_target)
+
+            if up_to_date:
+                self.logger.info(f'  Omni::run_omni_scenarios: {scenario_name} dependency unchanged, skipping\n')
+                ts = time.time()
+                dependency_tree[scenario_name] = {
+                    'dependency_target': target_key,
+                    'dependency_path': dependency_path,
+                    'dependency_sha1': dependency_hash,
+                    'signature': signature,
+                    'timestamp': ts
+                }
+                run_states.append({
+                    'scenario': scenario_name,
+                    'status': 'skipped',
+                    'reason': 'dependency_unchanged',
+                    'dependency_target': target_key,
+                    'dependency_path': dependency_path,
+                    'dependency_sha1': dependency_hash,
+                    'timestamp': ts
+                })
+                continue
+
+            self.logger.info(f'  Omni::run_omni_scenarios: {scenario_name}\n')
             self._build_scenario(scenario_def)
+            updated_hash = _hash_file_sha1(dependency_path)
+            ts = time.time()
+            dependency_tree[scenario_name] = {
+                'dependency_target': target_key,
+                'dependency_path': dependency_path,
+                'dependency_sha1': updated_hash,
+                'signature': signature,
+                'timestamp': ts
+            }
+            run_states.append({
+                'scenario': scenario_name,
+                'status': 'executed',
+                'reason': 'dependency_changed',
+                'dependency_target': target_key,
+                'dependency_path': dependency_path,
+                'dependency_sha1': updated_hash,
+                'timestamp': ts
+            })
+
+        stale = set(dependency_tree.keys()) - active_scenarios
+        for scenario_name in stale:
+            dependency_tree.pop(scenario_name, None)
+
+        self.scenario_dependency_tree = dependency_tree
+        self.scenario_run_state = run_states
 
         self.logger.info('  Omni::run_omni_scenarios: compiling hillslope summaries\n')
         self.compile_hillslope_summaries()
