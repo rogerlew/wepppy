@@ -2,7 +2,7 @@
  * Controllers (controllers.js)
  * NOTE: Generated via build_controllers_js.py from
  *       wepppy/weppcloud/controllers_js/templates/*.js
- * Build date: 2025-09-27T06:44:27Z
+ * Build date: 2025-09-27T06:49:45Z
  * See developer notes: wepppy/weppcloud/routes/usersum/dev-notes/controllers_js.md
  * ----------------------------------------------------------------------------
  */
@@ -191,9 +191,6 @@ WSClient.prototype.connect = function () {
         } else if (payload.type === "status") {
             var data = payload.data;
             this.advanceSpinner();
-            if (typeof window.emitPrecip === 'function') {
-                window.emitPrecip();
-            }
             var lines = data.split('\n');
             if (lines.length > 1) {
                 data = lines[0] + '...';
@@ -5893,15 +5890,6 @@ var Omni = function () {
         that.rq_job = $("#omni_form #rq_job");
         that.command_btn_id = 'btn_run_omni';
 
-        function escapeHtml(value) {
-            if (value === null || value === undefined) {
-                return '';
-            }
-            const div = document.createElement('div');
-            div.textContent = value;
-            return div.innerHTML;
-        }
-
         that.serializeScenarios = function () {
             const formData = new FormData();
             const scenarioItems = document.querySelectorAll('#omni_form #scenario-container .scenario-item');
@@ -5932,49 +5920,6 @@ var Omni = function () {
             return formData;
         };
 
-        that.render_run_state = function (payload) {
-            const container = document.getElementById('scenario-run-state');
-            if (!container) {
-                return;
-            }
-
-            const runState = (payload && Array.isArray(payload.run_state)) ? payload.run_state : [];
-
-            if (runState.length === 0) {
-                container.innerHTML = '<span class="text-muted">No recent scenario runs.</span>';
-                return;
-            }
-
-            const entries = runState.map((entry) => {
-                const statusExecuted = entry.status === 'executed';
-                const statusLabel = statusExecuted ? 'Ran' : 'Skipped';
-                const cssClass = statusExecuted ? 'text-success' : 'text-secondary';
-                const reason = entry.reason === 'dependency_unchanged' ? 'dependency unchanged' : 'dependency changed';
-                const dependency = entry.dependency_target ? ` · depends on ${escapeHtml(entry.dependency_target)}` : '';
-                const timestamp = entry.timestamp ? new Date(entry.timestamp * 1000).toLocaleString() : '';
-                const when = timestamp ? ` · ${escapeHtml(timestamp)}` : '';
-                return `<div class="${cssClass}"><strong>${escapeHtml(entry.scenario)}</strong> — ${statusLabel}${dependency}${when}<span class="text-muted small"> (${escapeHtml(reason)})</span></div>`;
-            }).join('');
-
-            container.innerHTML = entries;
-        };
-
-        that.fetch_run_state = function () {
-            fetch("api/omni/get_scenario_run_state")
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Failed to fetch scenario run state");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    that.render_run_state(data);
-                })
-                .catch(err => {
-                    console.error("Error fetching scenario run state:", err);
-                });
-        };
-
 
         that.run_omni_scenarios = function () {
             var self = instance;
@@ -5984,11 +5929,6 @@ var Omni = function () {
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
             self.ws_client.connect();
-
-            const stateContainer = document.getElementById('scenario-run-state');
-            if (stateContainer) {
-                stateContainer.innerHTML = '<span class="text-info">Running scenarios...</span>';
-            }
 
             const data = self.serializeScenarios();
             for (let [key, value] of data.entries()) {
@@ -6045,9 +5985,6 @@ var Omni = function () {
                 })
                 .catch(err => {
                     console.error("Error loading scenarios:", err);
-                })
-                .then(() => {
-                    that.fetch_run_state();
                 });
         };
 
@@ -6066,7 +6003,6 @@ var Omni = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
-                    self.fetch_run_state();
                 },
                 error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -6076,8 +6012,6 @@ var Omni = function () {
                 }
             });
         };
-
-        that.render_run_state({ run_state: [] });
         return that;
     }
 

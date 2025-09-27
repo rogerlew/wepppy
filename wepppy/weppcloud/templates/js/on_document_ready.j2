@@ -1092,7 +1092,6 @@ function onReady() {
     omni.form.on("OMNI_SCENARIO_RUN_TASK_COMPLETED", function () {
         omni.ws_client.disconnect();
         omni.report_scenarios();
-        omni.fetch_run_state();
     });
 
     omni.load_scenarios_from_backend();
