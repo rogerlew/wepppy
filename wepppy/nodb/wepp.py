@@ -1332,6 +1332,7 @@ class Wepp(NoDbBase):
 
     def _prep_managements(self, translator):
         self.logger.info('    _prep_managements... ')
+        from wepppy.nodb.mods import RAP_TS
 
         wd = self.wd
 
@@ -1341,18 +1342,13 @@ class Wepp(NoDbBase):
         climate = Climate.getInstance(wd)
         watershed = Watershed.getInstance(wd)
         soils = Soils.getInstance(wd)
-        try:
-            disturbed = Disturbed.getInstance(wd)
+        disturbed = Disturbed.tryGetInstance(wd)
+        if disturbed is not None:
             _land_soil_replacements_d = disturbed.land_soil_replacements_d
-        except:
-            disturbed = None
+        else:
             _land_soil_replacements_d = None
 
-        try:
-            from wepppy.nodb.mods import RAP_TS
-            rap_ts = RAP_TS.getInstance(wd)
-        except:
-            rap_ts = None
+        rap_ts = RAP_TS.tryGetInstance(wd)
 
         years = climate.input_years
         year0 = climate.year0
