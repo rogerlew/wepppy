@@ -275,7 +275,7 @@ var Climate = function () {
             var self = instance;
             var project = Project.getInstance();
             $.get({
-                url: "report/climate/",
+                url: url_for_run("report/climate/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

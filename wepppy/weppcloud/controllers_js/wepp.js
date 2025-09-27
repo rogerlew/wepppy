@@ -130,7 +130,7 @@ var Wepp = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "report/wepp/results/",
+                url: url_for_run("report/wepp/results/"),
                 cache: false,
                 success: function success(response) {
                     $('#wepp-results').html(response);
@@ -144,7 +144,7 @@ var Wepp = function () {
             });
 
             $.get({
-                url: "report/wepp/run_summary/",
+                url: url_for_run("report/wepp/run_summary/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

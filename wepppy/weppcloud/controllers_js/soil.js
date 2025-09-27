@@ -53,7 +53,7 @@ var Soil = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "report/soils/",
+                url: url_for_run("report/soils/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

@@ -70,7 +70,7 @@ var Outlet = function () {
             });
 
             $.get({
-                url: "report/outlet/",
+                url: url_for_run("report/outlet/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

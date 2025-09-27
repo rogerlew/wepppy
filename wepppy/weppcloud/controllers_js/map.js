@@ -203,13 +203,13 @@ var Map = function () {
 
         that.chnQuery = function (topazID) {
             var self = instance;
-            var query_url = "report/chn_summary/" + topazID + "/";
+            var query_url = url_for_run("report/chn_summary/" + topazID + "/");
             self.hillQuery(query_url);
         };
 
         that.subQuery = function (topazID) {
             var self = instance;
-            var query_url = "report/sub_summary/" + topazID + "/";
+            var query_url = url_for_run("report/sub_summary/" + topazID + "/");
             self.hillQuery(query_url);
         };
 

@@ -59,7 +59,7 @@ var Treatments = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "report/treatments/",
+                url: url_for_run("report/treatments/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

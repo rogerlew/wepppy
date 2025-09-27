@@ -53,7 +53,7 @@ var RangelandCover = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "report/rangeland_cover/",
+                url: url_for_run("report/rangeland_cover/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

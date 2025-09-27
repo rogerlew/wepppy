@@ -72,7 +72,7 @@ var Team = function () {
             var self = instance;
 
             $.get({
-                url: "report/users/",
+                url: url_for_run("report/users/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

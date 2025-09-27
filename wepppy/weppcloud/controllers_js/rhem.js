@@ -60,7 +60,7 @@ var Rhem = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "report/rhem/results/",
+                url: url_for_run("report/rhem/results/"),
                 cache: false,
                 success: function success(response) {
                     $('#rhem-results').html(response);
@@ -74,7 +74,7 @@ var Rhem = function () {
             });
 
             $.get({
-                url: "report/rhem/run_summary/",
+                url: url_for_run("report/rhem/run_summary/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

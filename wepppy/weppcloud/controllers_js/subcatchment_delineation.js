@@ -744,7 +744,7 @@ var SubcatchmentDelineation = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "report/watershed/",
+                url: url_for_run("report/watershed/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

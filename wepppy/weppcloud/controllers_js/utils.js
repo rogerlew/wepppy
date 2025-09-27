@@ -5,6 +5,15 @@ function coordRound(v) {
     return w + d;
 }
 
+// utility function to be used by ControlBase subclasses to build URLs for pup runs.
+// not to be used elsewhere.
+function url_for_run(url) {
+    if (typeof pup_relpath === 'string' && pup_relpath && url.indexOf('pup=') === -1) {
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 'pup=' + encodeURIComponent(pup_relpath);
+    }
+    return url;
+}
+
 function pass() {
     return undefined;
 
