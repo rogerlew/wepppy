@@ -2,7 +2,8 @@
  * Controllers (controllers.js)
  * NOTE: Generated via build_controllers_js.py from
  *       wepppy/weppcloud/controllers_js/templates/*.js
- * Build date: 2025-09-26T18:49:56Z
+ * Build date: 2025-09-27T00:41:48Z
+ * See developer notes: notes/controllers_js.md
  * ----------------------------------------------------------------------------
  */
 "use strict";

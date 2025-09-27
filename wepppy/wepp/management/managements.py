@@ -20,6 +20,8 @@ one installation to another, and having multiple dbs with the same condition
 entries can cause ambiguity. The rotations break if the condition cannot be found
 in the db.
 
+`plant-file.spec.md` provides the text from the WEPP 2024 user manual
+detailed description of the management/plant files.
 """
 
 from glob import glob
@@ -2528,4 +2530,3 @@ def get_plant_loop_names(runs_dir):
         plant_loops.add(man.plants[0].name)
 
     return list(plant_loops)
-

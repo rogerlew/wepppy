@@ -48,5 +48,6 @@ def register_blueprints(app):
     app.register_blueprint(locations_bp)
     app.register_blueprint(rq_job_dashboard_bp)
     app.register_blueprint(readme_bp)
+    app.register_blueprint(usersum_bp)
     app.register_blueprint(stats_bp)
     app.register_blueprint(combined_watershed_viewer_bp)

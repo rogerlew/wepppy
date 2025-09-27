@@ -25,6 +25,7 @@ from .jsoncrack import jsoncrack_bp
 from .rangeland import rangeland_bp
 from .rangeland_cover import rangeland_cover_bp
 from .readme_md import readme_bp
+from .usersum import usersum_bp
 from .rhem import rhem_bp
 from .soils import soils_bp
 from .treatments import treatments_bp
@@ -69,6 +70,7 @@ __all__ = [
     'rangeland_bp',
     'rangeland_cover_bp',
     'readme_bp',
+    'usersum_bp',
     'rhem_bp',
     'soils_bp',
     'treatments_bp',

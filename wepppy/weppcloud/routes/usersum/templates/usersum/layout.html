@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title or 'Usersum' }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown-light.css" integrity="sha512-CxC9MO8FBaaq8vl9yaXHjgWd7uXqx3pWMSBP3daioTTI0gpXijlypuMV67NoE1bPYMzj7ZSNNS0o+jFFdFodgA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+      .markdown-body {
+        box-sizing: border-box;
+        min-width: 200px;
+        width: 100%;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 45px;
+      }
+
+      @media (max-width: 767.98px) {
+        .markdown-body {
+          padding: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <article class="markdown-body">
+      {% block body %}{% endblock %}
+    </article>
+  </body>
+</html>

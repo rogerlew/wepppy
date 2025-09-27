@@ -57,7 +57,7 @@ def repr_response(path):
             return r
 
         except Exception:
-            return exception_factory('Error retrieving management', runid=runid)
+            return exception_factory('Error retrieving management')
 
     if path_lower.endswith('.sol'):
         from wepppy.wepp.soils.utils import WeppSoilUtil
@@ -69,7 +69,7 @@ def repr_response(path):
             r.headers["Content-Type"] = "text/plain; charset=utf-8"
             return r
         except Exception:
-            return exception_factory('Error retrieving soil', runid=runid)
+            return exception_factory('Error retrieving soil')
 
     abort(404)
 
