@@ -44,11 +44,8 @@ def legacy_arc_export(wd, verbose=False):
     map = ron.map
 
     ash_out = None
-    try:
-        ash = Ash.getInstance(wd)
-        ash_post = AshPost.getInstance(wd)
-    except FileNotFoundError:
-        ash = ash_post = ash_out = None
+    ash = Ash.tryGetInstance(wd)
+    ash_post = AshPost.tryGetInstance(wd)
 
     if ash_post is not None:
         try:
@@ -367,11 +364,8 @@ def arc_export(wd, verbose=False):
     map = ron.map
 
     ash_out = None
-    try:
-        ash = Ash.getInstance(wd)
-        ash_post = AshPost.getInstance(wd)
-    except FileNotFoundError:
-        ash = ash_post = ash_out = None
+    ash = Ash.tryGetInstance(wd)
+    ash_post = AshPost.tryGetInstance(wd)
 
     if ash_post is not None:
         try:
@@ -379,10 +373,7 @@ def arc_export(wd, verbose=False):
         except:
             ash_out = None
 
-    try:
-        rhempost = RhemPost.getInstance(wd)
-    except:
-        rhempost = None
+    rhempost = RhemPost.tryGetInstance(wd)
 
     name = ron.name
     export_dir = ron.export_arc_dir

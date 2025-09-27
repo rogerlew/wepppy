@@ -704,7 +704,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         raise
 
 # Archive Backend Functions
-# see notes/weppcloud-project-archiving.md for archive architecture
+# see wepppy/weppcloud/routes/usersum/dev-notes/weppcloud-project-archiving.md for archive architecture
 def archive_rq(runid: str, comment: Optional[str] = None):
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name

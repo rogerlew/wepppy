@@ -44,6 +44,9 @@ WSClient.prototype.connect = function () {
             if (lines.length > 1) {
                 data = lines[0] + '...';
             }
+            if (data.length > 100) {
+                data = data.substring(0, 100) + '...';
+            }
 
             if (data.includes("EXCEPTION")) {
                 var stacktrace = $("#" + this.formId + " #stacktrace");

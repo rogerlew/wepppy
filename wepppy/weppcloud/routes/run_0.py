@@ -100,56 +100,17 @@ def runs0(runid, config):
     else:
         topaz = None
 
-    try:
-        observed = Observed.getInstance(wd)
-    except:
-        observed = Observed(wd, "%s.cfg" % config)
-
-    try:
-        rangeland_cover = RangelandCover.getInstance(wd)
-    except:
-        rangeland_cover = None
-
-    try:
-        rhem = Rhem.getInstance(wd)
-    except:
-        rhem = None
-
-    try:
-        disturbed = Disturbed.getInstance(wd)
-    except:
-        disturbed = None
-
-    try:
-        ash = Ash.getInstance(wd)
-    except:
-        ash = None
-
-    try:
-        skid_trails = wepppy.nodb.mods.SkidTrails.getInstance(wd)
-    except:
-        skid_trails = None
-
-    try:
-        reveg = Revegetation.getInstance(wd)
-    except:
-        reveg = None
-
-    try:
-        omni = Omni.getInstance(wd)
-    except:
-        omni = None
-
-    try:
-        treatments = Treatments.getInstance(wd)
-    except:
-        treatments = None
-
-    try:
-        redis_prep = RedisPrep.getInstance(wd)
-    except:
-        redis_prep = None
-
+    observed = Observed.tryGetInstance(wd)
+    rangeland_cover = RangelandCover.tryGetInstance(wd)
+    rhem = Rhem.tryGetInstance(wd)
+    disturbed = Disturbed.tryGetInstance(wd)
+    ash = Ash.tryGetInstance(wd)
+    skid_trails = wepppy.nodb.mods.SkidTrails.tryGetInstance(wd)
+    reveg = Revegetation.tryGetInstance(wd)
+    omni = Omni.tryGetInstance(wd)
+    treatments = Treatments.tryGetInstance(wd)
+    redis_prep = RedisPrep.tryGetInstance(wd)
+    
     if redis_prep is not None:
         rq_job_ids = redis_prep.get_rq_job_ids()
     else:

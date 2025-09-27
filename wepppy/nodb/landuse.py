@@ -539,12 +539,10 @@ class Landuse(NoDbBase):
         wd = self.wd
 
         watershed = Watershed.getInstance(wd)
-
-        try:
-            disturbed = Disturbed.getInstance(wd)
+        disturbed = Disturbed.tryGetInstance(wd)
+        if disturbed is not None:
             _land_soil_replacements_d = disturbed.land_soil_replacements_d
-        except:
-            disturbed = None
+        else:
             _land_soil_replacements_d = None
 
         if wepppyo3 is None:

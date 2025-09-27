@@ -50,12 +50,10 @@ if __name__ == "__main__":
         channels_summary = {_d['meta']['topaz_id']: _d for _d in ron.chns_summary()}
 
         ash_out = None
-        try:
-            ash = Ash.getInstance(wd)
-            ash_post = AshPost.getInstance(wd)
-        except FileNotFoundError:
-            ash = ash_post = ash_out = None
 
+        ash = Ash.tryGetInstance(wd)
+        ash_post = AshPost.tryGetInstance(wd)
+        
         if ash_post is not None:
             try:
                 ash_out = ash_post.ash_out
