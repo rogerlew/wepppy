@@ -54,7 +54,7 @@ var DebrisFlow = function () {
 
         that.report = function () {
             var self = instance;
-            self.info.html("<a href='report/debris_flow/' target='_blank'>View Debris Flow Model Results</a>");
+            self.info.html(`<a href='${url_for_run("report/debris_flow/")}' target='_blank'>View Debris Flow Model Results</a>`);
         };
 
         return that;

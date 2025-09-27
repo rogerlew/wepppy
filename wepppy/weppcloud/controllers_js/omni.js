@@ -122,7 +122,7 @@ var Omni = function () {
             var self = instance;
 
             $.get({
-                url: "report/omni_scenarios/",
+                url: url_for_run("report/omni_scenarios/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

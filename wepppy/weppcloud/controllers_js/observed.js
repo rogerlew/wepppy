@@ -87,7 +87,7 @@ var Observed = function () {
 
         that.report = function () {
             var self = instance;
-            self.info.html("<a href='report/observed/' target='_blank'>View Model Fit Results</a>");
+            self.info.html(`<a href='${url_for_run("report/observed/")}' target='_blank'>View Model Fit Results</a>`);
         };
 
         return that;

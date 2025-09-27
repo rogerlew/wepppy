@@ -335,7 +335,7 @@ var ChannelDelineation = function () {
             var self = instance;
 
             $.get({
-                url: "report/channel",
+                url: url_for_run("report/channel"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

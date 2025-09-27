@@ -107,7 +107,7 @@ var Landuse = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "report/landuse/",
+                url: url_for_run("report/landuse/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

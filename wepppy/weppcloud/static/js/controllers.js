@@ -2,7 +2,7 @@
  * Controllers (controllers.js)
  * NOTE: Generated via build_controllers_js.py from
  *       wepppy/weppcloud/controllers_js/templates/*.js
- * Build date: 2025-09-27T15:30:42Z
+ * Build date: 2025-09-27T16:48:05Z
  * See developer notes: wepppy/weppcloud/routes/usersum/dev-notes/controllers_js.md
  * ----------------------------------------------------------------------------
  */
@@ -13,6 +13,15 @@ function coordRound(v) {
     var d = v - w;
     d = Math.round(d * 10000) / 10000;
     return w + d;
+}
+
+// utility function to be used by ControlBase subclasses to build URLs for pup runs.
+// not to be used elsewhere.
+function url_for_run(url) {
+    if (typeof pup_relpath === 'string' && pup_relpath && url.indexOf('pup=') === -1) {
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 'pup=' + encodeURIComponent(pup_relpath);
+    }
+    return url;
 }
 
 function pass() {
@@ -1203,13 +1212,13 @@ var Map = function () {
 
         that.chnQuery = function (topazID) {
             var self = instance;
-            var query_url = "report/chn_summary/" + topazID + "/";
+            var query_url = url_for_run("report/chn_summary/" + topazID + "/");
             self.hillQuery(query_url);
         };
 
         that.subQuery = function (topazID) {
             var self = instance;
-            var query_url = "report/sub_summary/" + topazID + "/";
+            var query_url = url_for_run("report/sub_summary/" + topazID + "/");
             self.hillQuery(query_url);
         };
 
@@ -2042,7 +2051,7 @@ var ChannelDelineation = function () {
             var self = instance;
 
             $.get({
-                url: "report/channel",
+                url: url_for_run("report/channel"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -2140,7 +2149,7 @@ var Outlet = function () {
             });
 
             $.get({
-                url: "report/outlet/",
+                url: url_for_run("report/outlet/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -3011,7 +3020,7 @@ var SubcatchmentDelineation = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "report/watershed/",
+                url: url_for_run("report/watershed/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -3148,7 +3157,7 @@ var Landuse = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "report/landuse/",
+                url: url_for_run("report/landuse/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -3664,7 +3673,7 @@ var Soil = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "report/soils/",
+                url: url_for_run("report/soils/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -4094,7 +4103,7 @@ var Climate = function () {
             var self = instance;
             var project = Project.getInstance();
             $.get({
-                url: "report/climate/",
+                url: url_for_run("report/climate/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -4582,7 +4591,7 @@ var Wepp = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "report/wepp/results/",
+                url: url_for_run("report/wepp/results/"),
                 cache: false,
                 success: function success(response) {
                     $('#wepp-results').html(response);
@@ -4596,7 +4605,7 @@ var Wepp = function () {
             });
 
             $.get({
-                url: "report/wepp/run_summary/",
+                url: url_for_run("report/wepp/run_summary/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -4681,7 +4690,7 @@ var DebrisFlow = function () {
 
         that.report = function () {
             var self = instance;
-            self.info.html("<a href='report/debris_flow/' target='_blank'>View Debris Flow Model Results</a>");
+            self.info.html(`<a href='${url_for_run("report/debris_flow/")}' target='_blank'>View Debris Flow Model Results</a>`);
         };
 
         return that;
@@ -4785,7 +4794,7 @@ var Observed = function () {
 
         that.report = function () {
             var self = instance;
-            self.info.html("<a href='report/observed/' target='_blank'>View Model Fit Results</a>");
+            self.info.html(`<a href='${url_for_run("report/observed/")}' target='_blank'>View Model Fit Results</a>`);
         };
 
         return that;
@@ -4928,7 +4937,7 @@ var Ash = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "report/run_ash/",
+                url: url_for_run("report/run_ash/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -5077,7 +5086,7 @@ var RangelandCover = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "report/rangeland_cover/",
+                url: url_for_run("report/rangeland_cover/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -5575,7 +5584,7 @@ var Treatments = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "report/treatments/",
+                url: url_for_run("report/treatments/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -5741,7 +5750,7 @@ var Team = function () {
             var self = instance;
 
             $.get({
-                url: "report/users/",
+                url: url_for_run("report/users/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -5829,7 +5838,7 @@ var Rhem = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "report/rhem/results/",
+                url: url_for_run("report/rhem/results/"),
                 cache: false,
                 success: function success(response) {
                     $('#rhem-results').html(response);
@@ -5843,7 +5852,7 @@ var Rhem = function () {
             });
 
             $.get({
-                url: "report/rhem/run_summary/",
+                url: url_for_run("report/rhem/run_summary/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -5996,7 +6005,7 @@ var Omni = function () {
             var self = instance;
 
             $.get({
-                url: "report/omni_scenarios/",
+                url: url_for_run("report/omni_scenarios/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);

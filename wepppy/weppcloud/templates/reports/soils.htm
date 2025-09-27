@@ -1,20 +1,23 @@
- <table class="table">
-    <thead>
-      <tr>
-        <th>Mukey</th>
-        <th>Description</th>
-        <th>Coverage %</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in report %}
-      {% if row.pct_coverage > 0.0 or row.pct_coverage == -1 %}
-      <tr>
-        <td><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/' ~ row.fname) }}"  target="_blank">{{ row.mukey }}</a></td>
-        <td>{{ row.desc }}</td>
-        <td class="text-right">{{ '%0.1f' % row.pct_coverage }}</td>
-      </tr>
-      {% endif %}
-      {% endfor %}
-    </tbody>
-  </table>
+<!-- wepppy/weppcloud/templates/reports/soils.htm -->
+<table class="table">
+  <thead>
+    <tr>
+      <th>Mukey</th>
+      <th>Description</th>
+      <th>Coverage %</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in report %}
+    {% if row.pct_coverage > 0.0 or row.pct_coverage == -1 %}
+    <tr>
+      <td><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/' ~ row.fname) }}"
+          target="_blank">{{ row.mukey }}</a></td>
+      <td>{{ row.desc }}</td>
+      <td class="text-right">{{ '%0.1f' % row.pct_coverage }}</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+<!-- End wepppy/weppcloud/templates/reports/soils.htm -->

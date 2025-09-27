@@ -126,7 +126,7 @@ var Ash = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "report/run_ash/",
+                url: url_for_run("report/run_ash/"),
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
