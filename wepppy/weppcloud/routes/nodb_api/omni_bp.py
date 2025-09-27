@@ -1,6 +1,6 @@
 """Routes for omni blueprint extracted from app.py."""
 
-from ._common import *  # noqa: F401,F403
+from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb import Ron
 from wepppy.nodb.mods.omni import Omni

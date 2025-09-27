@@ -811,6 +811,7 @@ class Omni(NoDbBase):
             self.logger.info('  Omni::run_omni_scenarios: No scenarios to run\n')
             raise Exception('No scenarios to run')
 
+        # pass 1 scenarios: dependent on base_scenario
         ran_scenarios = []
         for scenario_def in self.scenarios:
             scenario = OmniScenario.parse(scenario_def.get('type'))
@@ -827,6 +828,7 @@ class Omni(NoDbBase):
             self._build_scenario(scenario_def)
             ran_scenarios.append(_scenario_name)
 
+        # pass 2 scenarios: dependent on pass 1
         for scenario_def in self.scenarios:
             self.logger.info(f'  Omni::run_omni_scenarios: djskd {scenario_def}\n')
             

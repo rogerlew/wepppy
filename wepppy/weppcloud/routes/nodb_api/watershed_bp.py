@@ -1,6 +1,6 @@
 """Routes for watershed blueprint extracted from app.py."""
 
-from ._common import *  # noqa: F401,F403
+from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb import Ron, Watershed
 from wepppy.topo.watershed_abstraction import ChannelRoutingError
