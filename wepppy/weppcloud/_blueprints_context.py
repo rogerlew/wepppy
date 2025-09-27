@@ -30,7 +30,6 @@ def register_blueprints(app):
     app.register_blueprint(debris_flow_bp)
     app.register_blueprint(disturbed_bp)
     app.register_blueprint(export_bp)
-    app.register_blueprint(gdalinfo_bp)
     app.register_blueprint(geodata_bp)
     app.register_blueprint(diff_bp)
     app.register_blueprint(fork_bp)

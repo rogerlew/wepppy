@@ -74,6 +74,7 @@ from starlette.responses import (
 )
 from starlette.routing import Route
 from wepppy.microservices._download import create_routes as create_download_routes
+from wepppy.microservices._gdalinfo import create_routes as create_gdalinfo_routes
 
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.routes.usersum.usersum import _load_parameter_catalog
@@ -939,6 +940,7 @@ def create_app():
     ]
 
     routes.extend(create_download_routes(_prefix_path))
+    routes.extend(create_gdalinfo_routes(_prefix_path))
 
     return Starlette(routes=routes)
 
