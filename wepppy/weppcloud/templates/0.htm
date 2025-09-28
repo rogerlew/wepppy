@@ -28,13 +28,13 @@
   <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
   <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
   <script src="{{ url_for('static', filename='js/preflight.js') }}"></script>
-  {% include 'js/on_document_ready.j2'%}
+  {% include 'js/on_document_ready.js.j2'%}
 </head>
 
 <body>
   {% include 'header/header.htm'%}
   {% include 'command-bar.htm'%}
-  {% include 'controls/poweruser_panel.j2'%}
+  {% include 'controls/poweruser_panel.htm'%}
 
   <style>
     :root {

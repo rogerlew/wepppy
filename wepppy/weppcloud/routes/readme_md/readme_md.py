@@ -48,7 +48,7 @@ readme_bp = Blueprint('readme', __name__, template_folder='templates')
 _BASE_DIR = Path(__file__).resolve().parent
 
 README_FILENAME = "README.md"
-DEFAULT_TEMPLATE = _BASE_DIR / "templates" / "readme" / "default.md.j2"
+DEFAULT_TEMPLATE = _BASE_DIR / "templates" / "default.md.j2"
 
 
 def _readme_path(wd):
@@ -256,7 +256,7 @@ def readme_editor(runid, config):
         client_uuid = uuid.uuid4().hex
         _record_editor_session(runid, config, client_uuid, ron)
         return render_template(
-            "readme/editor.j2",
+            "readme_editor.htm",
             initial_markdown=markdown,
             initial_html=html,
             editor_client_uuid=client_uuid,
@@ -339,7 +339,7 @@ def readme_render(runid, config):
         context = _template_context(ctx)
         html = _render_markdown(markdown, context)
         return render_template(
-            "readme/view.j2",
+            "readme_view.htm",
             readme_html=html,
             generated=datetime.now(),
             can_edit=_can_edit(runid),

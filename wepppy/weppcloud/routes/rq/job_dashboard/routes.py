@@ -17,5 +17,5 @@ def job_dashboard_route(job_id):
         job_id = f'{job_id[:8]}-{job_id[8:12]}-{job_id[12:16]}-{job_id[16:20]}-{job_id[20:]}'
         
     # Assuming you have a function to get job details
-    return render_template('dashboard.html', job_id=job_id)
+    return render_template('dashboard.htm', job_id=job_id)
 
