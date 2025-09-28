@@ -75,6 +75,99 @@ var SubcatchmentDelineation = function () {
             baseTriggerEvent(eventName, payload);
         };
 
+        function bindRadioGroup(name, handler) {
+            var selector = "input[name='" + name + "']";
+            var $radios = $(selector);
+            if ($radios.length === 0) {
+                return;
+            }
+            $radios.off('change.subcatchment');
+            $radios.on('change.subcatchment', handler);
+        }
+
+        function bindSlider(selector, handler) {
+            var $slider = $(selector);
+            if ($slider.length === 0) {
+                return;
+            }
+            $slider.off('input.subcatchment');
+            $slider.on('input.subcatchment', handler);
+        }
+
+        function renderLegendIfPresent(palette, canvasId) {
+            if (typeof render_legend !== 'function') {
+                return;
+            }
+            if (!document.getElementById(canvasId)) {
+                return;
+            }
+            render_legend(palette, canvasId);
+        }
+
+        that.initializeColorMapControls = function () {
+            bindRadioGroup('sub_cmap_radio', function () {
+                var value = $("input[name='sub_cmap_radio']:checked").val();
+                if (value) {
+                    that.setColorMap(value);
+                }
+            });
+
+            bindRadioGroup('wepp_sub_cmap_radio', function () {
+                var value = $("input[name='wepp_sub_cmap_radio']:checked").val();
+                if (value) {
+                    that.setColorMap(value);
+                }
+            });
+
+            bindRadioGroup('rhem_sub_cmap_radio', function () {
+                var value = $("input[name='rhem_sub_cmap_radio']:checked").val();
+                if (value) {
+                    that.setColorMap(value);
+                }
+            });
+
+            bindSlider('#wepp_sub_cmap_range_phosphorus', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#wepp_sub_cmap_range_runoff', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#wepp_sub_cmap_range_loss', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#wepp_grd_cmap_range_loss', function () {
+                that.updateGriddedLoss();
+            });
+
+            bindSlider('#rhem_sub_cmap_range_runoff', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#rhem_sub_cmap_range_sed_yield', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#rhem_sub_cmap_range_soil_loss', function () {
+                that.updateGlLayerStyle();
+            });
+
+            bindSlider('#ash_sub_cmap_range_load', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#ash_sub_cmap_range_transport', function () {
+                that.updateGlLayerStyle();
+            });
+
+            renderLegendIfPresent('viridis', 'landuse_sub_cmap_canvas_cover');
+            renderLegendIfPresent('viridis', 'wepp_sub_cmap_canvas_phosphorus');
+            renderLegendIfPresent('winter', 'wepp_sub_cmap_canvas_runoff');
+            renderLegendIfPresent('jet2', 'wepp_sub_cmap_canvas_loss');
+            renderLegendIfPresent('jet2', 'wepp_grd_cmap_canvas_loss');
+            renderLegendIfPresent('winter', 'rhem_sub_cmap_canvas_runoff');
+            renderLegendIfPresent('viridis', 'rhem_sub_cmap_canvas_sed_yield');
+            renderLegendIfPresent('jet2', 'rhem_sub_cmap_canvas_soil_loss');
+            renderLegendIfPresent('jet2', 'ash_sub_cmap_canvas_load');
+            renderLegendIfPresent('jet2', 'ash_sub_cmap_canvas_transport');
+        };
+
         that.enableColorMap = function (cmap_name) {
             if (cmap_name === "dom_lc") {
                 $("#sub_cmap_radio_dom_lc").prop("disabled", false);
