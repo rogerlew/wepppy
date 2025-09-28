@@ -7,6 +7,51 @@ var Climate = function () {
 
     function createInstance() {
         var that = controlBase();
+        const SECTION_IDS = [
+            '#climate_spatialmode_controls',
+            '#input_years_container',
+            '#climate_mode0_controls',
+            '#climate_mode5_controls',
+            '#observed_years_container',
+            '#future_years_container',
+            '#climate_mode4_controls',
+            '#climate_mode6_controls',
+            '#climate_mode7_controls',
+            '#climate_mode8_controls',
+            '#climate_mode10_controls',
+            '#climate_mode13_controls',
+            '#climate_mode14_controls'
+        ];
+
+        const MODE_CONFIG = {
+            '-1': { show: [], allowSpatialMode2: false, showBuildButton: false },
+            0: { show: ['#input_years_container', '#climate_mode0_controls'], allowSpatialMode2: false, showBuildButton: true },
+            2: { show: ['#climate_spatialmode_controls', '#observed_years_container'], allowSpatialMode2: true, showBuildButton: true },
+            3: { show: ['#climate_spatialmode_controls', '#future_years_container'], allowSpatialMode2: false, showBuildButton: true },
+            4: { show: ['#climate_mode4_controls'], allowSpatialMode2: false, showBuildButton: true },
+            5: { show: ['#climate_spatialmode_controls', '#input_years_container', '#climate_mode5_controls'], allowSpatialMode2: false, showBuildButton: true },
+            6: { show: ['#climate_spatialmode_controls', '#climate_mode6_controls'], allowSpatialMode2: false, showBuildButton: true },
+            7: { show: ['#climate_spatialmode_controls', '#climate_mode7_controls'], allowSpatialMode2: false, showBuildButton: true },
+            8: { show: ['#climate_spatialmode_controls', '#input_years_container', '#climate_mode8_controls'], allowSpatialMode2: false, showBuildButton: true },
+            9: { show: ['#climate_spatialmode_controls', '#observed_years_container'], allowSpatialMode2: true, showBuildButton: true },
+            10: { show: ['#climate_spatialmode_controls', '#input_years_container', '#climate_mode10_controls'], allowSpatialMode2: false, showBuildButton: true },
+            11: { show: ['#climate_spatialmode_controls', '#observed_years_container'], allowSpatialMode2: true, showBuildButton: true },
+            13: { show: ['#climate_spatialmode_controls', '#observed_years_container', '#climate_mode13_controls'], allowSpatialMode2: false, showBuildButton: true },
+            14: { show: ['#climate_mode14_controls'], allowSpatialMode2: false, showBuildButton: true }
+        };
+
+        const PRECIP_SECTIONS = [
+            '#climate_precipscaling_mode1_controls',
+            '#climate_precipscaling_mode2_controls',
+            '#climate_precipscaling_mode3_controls',
+            '#climate_precipscaling_mode4_controls'
+        ];
+
+        function parseMode(value, fallback) {
+            var parsed = parseInt(value, 10);
+            return Number.isNaN(parsed) ? fallback : parsed;
+        }
+
         that.form = $("#climate_form");
         that.info = $("#climate_form #info");
         that.status = $("#climate_form  #status");
@@ -41,7 +86,7 @@ var Climate = function () {
 
         that.setBuildMode = function (mode) {
             var self = instance;
-            self.mode = parseInt(mode, 10);
+            self.mode = parseMode(mode, 0);
             if (self.mode === 0) {
                 $("#climate_cligen").show();
                 $("#climate_userdefined").hide();
@@ -55,13 +100,12 @@ var Climate = function () {
 
         that.setStationMode = function (mode) {
             var self = instance;
-            // mode is an optional parameter
-            // if it isn't provided then we get the checked value
             if (mode === undefined) {
                 mode = $("input[name='climatestation_mode']:checked").val();
             }
 
-            var task_msg = "Setting Station Mode to " + mode;
+            var parsedMode = parseMode(mode, -1);
+            var task_msg = "Setting Station Mode to " + parsedMode;
 
             self.info.text("");
             self.stacktrace.text("");
@@ -69,7 +113,7 @@ var Climate = function () {
             // sync climate with nodb
             $.post({
                 url: "tasks/set_climatestation_mode/",
-                data: { "mode": mode },
+                data: { "mode": parsedMode },
                 success: function success(response) {
                     if (response.Success === true) {
                         self.triggerEvent('CLIMATE_SETSTATIONMODE_TASK_COMPLETED');
@@ -125,7 +169,7 @@ var Climate = function () {
             if (mode === undefined) {
                 return;
             }
-            mode = parseInt(mode, 10);
+            mode = parseMode(mode, -1);
 
             var task_msg = "Fetching Stations " + mode;
 
@@ -209,10 +253,12 @@ var Climate = function () {
             }
         };
 
-        that.setStation = function () {
+        that.setStation = function (station) {
             var self = instance;
 
-            var station = $("#climate_station_selection").val();
+            if (station === undefined) {
+                station = $("#climate_station_selection").val();
+            }
 
             var task_msg = "Setting station " + station;
 
@@ -309,12 +355,10 @@ var Climate = function () {
 
         that.setMode = function (mode) {
             var self = instance;
-            // mode is an optional parameter
-            // if it isn't provided then we get the checked value
             if (mode === undefined) {
                 mode = $("input[name='climate_mode']:checked").val();
             }
-            mode = parseInt(mode, 10);
+            mode = parseMode(mode, -1);
             var climate_single_selection = $("#climate_single_selection").val();
 
             var task_msg = "Setting Mode to " + mode + " (" + climate_single_selection + ")";
@@ -346,245 +390,72 @@ var Climate = function () {
         };
 
         that.showHideControls = function (mode) {
-            if (mode === undefined) {
-                mode = -1;
-            }
-            // show the appropriate controls
-            if (mode === -1) {
-                // none selected
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").hide();
-                $("#input_years_container").hide();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").hide();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
+            var parsedMode = parseMode(mode, -1);
+            var config = MODE_CONFIG.hasOwnProperty(parsedMode) ? MODE_CONFIG[parsedMode] : MODE_CONFIG['-1'];
+            var showSet = new Set(config.show || []);
+
+            SECTION_IDS.forEach(function (selector) {
+                if (showSet.has(selector)) {
+                    $(selector).show();
+                } else {
+                    $(selector).hide();
+                }
+            });
+
+            $("#climate_spatialmode2").prop('disabled', config.allowSpatialMode2 !== true);
+            if (config.showBuildButton === true) {
+                $("#btn_build_climate_container").show();
+            } else {
                 $("#btn_build_climate_container").hide();
-            } else if (mode === 0) {
-                // vanilla
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").hide();
-                $("#input_years_container").show();
-                $("#climate_mode0_controls").show();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").hide();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if ((mode === 2) || (mode === 11)) {
-                // observed daymet or gridmet
-                $("#climate_spatialmode2").prop("disabled", false);
-                $("#climate_spatialmode_controls").show();
-                $("#input_years_container").hide();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").show();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 3) {
-                // future
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").show();
-                $("#input_years_container").hide();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").hide();
-                $("#future_years_container").show();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 4) {
-                // single storm
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").hide();
-                $("#input_years_container").hide();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").hide();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").show();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 14) {
-                // single storm
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").hide();
-                $("#input_years_container").hide();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").hide();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").show();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 5) {
-                // prism
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").show();
-                $("#input_years_container").show();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").show();
-                $("#observed_years_container").hide();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 6) {
-                // observed database
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").show();
-                $("#input_years_container").hide();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").hide();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").show();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 7) {
-                // future database
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").show();
-                $("#input_years_container").hide();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").hide();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").show();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 8) {
-                // EOBS (EU)
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").show();
-                $("#input_years_container").show();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").hide();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").show();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 9) {
-                // observed PRISM
-                $("#climate_spatialmode2").prop("disabled", false);
-                $("#climate_spatialmode_controls").show();
-                $("#input_years_container").hide();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").show();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 10) {
-                // AGDC (AU)
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").show();
-                $("#input_years_container").show();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").hide();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").show();
-                $("#climate_mode13_controls").hide();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
-            } else if (mode === 13) {
-                // NEXRAD
-                $("#climate_spatialmode2").prop("disabled", true);
-                $("#climate_spatialmode_controls").show();
-                $("#input_years_container").hide();
-                $("#climate_mode0_controls").hide();
-                $("#climate_mode5_controls").hide();
-                $("#observed_years_container").show();
-                $("#future_years_container").hide();
-                $("#climate_mode4_controls").hide();
-                $("#climate_mode6_controls").hide();
-                $("#climate_mode7_controls").hide();
-                $("#climate_mode8_controls").hide();
-                $("#climate_mode10_controls").hide();
-                $("#climate_mode13_controls").show();
-                $("#climate_mode14_controls").hide();
-                $("#btn_build_climate_container").show();
             }
-            //              else {
-            //                throw "ValueError: unknown mode";
-            //            }
+        };
+
+        that.updatePrecipScalingControls = function (mode) {
+            var parsedMode = parseMode(mode, 0);
+            var targetId = '#climate_precipscaling_mode' + parsedMode + '_controls';
+            PRECIP_SECTIONS.forEach(function (selector) {
+                if (selector === targetId) {
+                    $(selector).show();
+                } else {
+                    $(selector).hide();
+                }
+            });
+        };
+
+        that.handleBuildModeChange = function (mode) {
+            that.setBuildMode(mode);
+        };
+
+        that.handleModeChange = function (mode) {
+            that.setMode(mode);
+        };
+
+        that.handleSpatialModeChange = function (mode) {
+            that.setSpatialMode(mode);
+        };
+
+        that.handleStationModeChange = function (mode) {
+            that.setStationMode(mode);
+        };
+
+        that.handleStationSelectionChange = function (station) {
+            that.setStation(station);
+        };
+
+        that.handlePrecipScalingModeChange = function (mode) {
+            if (mode === undefined) {
+                mode = $('input[name="precip_scaling_mode"]:checked').val();
+            }
+            that.updatePrecipScalingControls(mode);
         };
 
         that.setSpatialMode = function (mode) {
             var self = instance;
-            // mode is an optional parameter
-            // if it isn't provided then we get the checked value
             if (mode === undefined) {
                 mode = $("input[name='climate_spatialmode']:checked").val();
             }
-            var task_msg = "Setting SpatialMode to " + mode;
+            var parsedMode = parseMode(mode, 0);
+            var task_msg = "Setting SpatialMode to " + parsedMode;
 
             self.info.text("");
             self.stacktrace.text("");
@@ -592,7 +463,7 @@ var Climate = function () {
             // sync climate with nodb
             $.post({
                 url: "tasks/set_climate_spatialmode/",
-                data: { "spatialmode": mode },
+                data: { "spatialmode": parsedMode },
                 success: function success(response) {
                     if (response.Success === true) {
                     } else {
@@ -610,7 +481,7 @@ var Climate = function () {
 
         that.set_use_gridmet_wind_when_applicable = function (state) {
             var self = instance;
-            var task_msg = "Setting " + routine + " (" + state + ")";
+            var task_msg = "Setting use_gridmet_wind_when_applicable (" + state + ")";
 
             self.status.html(task_msg + "...");
             self.stacktrace.text("");

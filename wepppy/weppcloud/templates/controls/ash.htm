@@ -103,19 +103,22 @@
     <div class="col-sm-3">
         <label class="radio-inline">
             <input type="radio" value="1" class="disable-readonly" id="ash_depth_mode" name="ash_depth_mode" {{
-                ('', 'checked' )[ash.ash_depth_mode==1] }}>
+                ('', 'checked' )[ash.ash_depth_mode==1] }}
+                onchange="Ash.getInstance().handleDepthModeChange(this.value)">
             Specify Depth</label>
     </div>
     <div class="col-sm-3">
         <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="ash_depth_mode" name="ash_depth_mode" {{
-                ('', 'checked' )[ash.ash_depth_mode==0] }}>
+                ('', 'checked' )[ash.ash_depth_mode==0] }}
+                onchange="Ash.getInstance().handleDepthModeChange(this.value)">
             Specify Load</label>
     </div>
     <div class="col-sm-3">
         <label class="radio-inline">
             <input type="radio" value="2" class="disable-readonly" id="ash_depth_mode" name="ash_depth_mode" {{
-                ('', 'checked' )[ash.ash_depth_mode==2] }}>
+                ('', 'checked' )[ash.ash_depth_mode==2] }}
+                onchange="Ash.getInstance().handleDepthModeChange(this.value)">
             Upload Maps</label>
     </div>
 </div>
@@ -442,7 +445,7 @@
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
         <button id="btn_run_ash" class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-            onclick="Ash.getInstance().run_model();"
+            onclick="Ash.getInstance().run();"
             type="button">
             <img id="run_ash_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
             Run Model

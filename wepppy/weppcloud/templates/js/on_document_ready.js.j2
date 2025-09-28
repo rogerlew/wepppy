@@ -382,53 +382,12 @@ function onReady() {
      * ======================
      */
 
-    //
-    // Bindings
-    //
-    // Bind radio to the set outlet mode on change
-    $("[name='climate_build_mode']").change(function () {
-        var mode = parseInt($("input[name='climate_build_mode']:checked").val(), 10);
-        climate.setBuildMode(mode);
-    });
-
-    $("[name='climate_mode']").change(function () {
-        climate.setMode();
-    });
-
-    $("[name='climate_spatialmode']").change(function () {
-        climate.setSpatialMode();
-    });
-
-    $("[name='climatestation_mode']").change(function () {
-        climate.setStationMode();
-    });
-
-    $("#climate_station_selection").on("change", function () {
-        climate.setStation();
-    });
-
-    function togglePrecipScalingControls() {
-        var mode = $('input[name="precip_scaling_mode"]:checked').val();
-        // Hide all control divs first
-        $('#climate_precipscaling_mode1_controls, #climate_precipscaling_mode2_controls, #climate_precipscaling_mode3_controls, #climate_precipscaling_mode4_controls').hide();
-
-        // Show the relevant control div if mode is not "No Scaling"
-        if (mode === "1") {
-            $('#climate_precipscaling_mode1_controls').show();
-        } else if (mode === "2") {
-            $('#climate_precipscaling_mode2_controls').show();
-        } else if (mode === "3") {
-            $('#climate_precipscaling_mode3_controls').show();
-        } else if (mode === "4") {
-            $('#climate_precipscaling_mode4_controls').show();
-        }
+    var buildMode = $("input[name='climate_build_mode']:checked").val();
+    if (buildMode !== undefined) {
+        climate.handleBuildModeChange(buildMode);
     }
 
-    // Bind change event to radio buttons
-    $('input[name="precip_scaling_mode"]').on('change', togglePrecipScalingControls);
-
-    // Initialize on page load
-    togglePrecipScalingControls();
+    climate.handlePrecipScalingModeChange();
 
     //
     // Initial Configuration
@@ -455,25 +414,6 @@ function onReady() {
 
     climate.setBuildMode(parseInt($("input[name='climate_build_mode']:checked").val(), 10));
 
-
-    //
-    // Single Storm Unitization
-    //
-    /*
-    * Wepp Initialization
-    * ======================
-    */
-
-    //
-    // Bindings
-    //
-    $("[name='wepp_mode']").change(function () {
-        wepp.setMode();
-    });
-
-    $("#wepp_single_selection").on("change", function () {
-        wepp.setMode();
-    });
 
     {% if 'omni' in ron.mods and omni %}
 
@@ -522,10 +462,6 @@ function onReady() {
 
     {% if 'ash' in ron.mods %}
     ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
-
-    $("[name='ash_depth_mode']").change(function () {
-        ash.setAshDepthMode();
-    });
 
     // show report if ash model has run
     if ({{ ron.has_ash_results | tojson }} ) {
