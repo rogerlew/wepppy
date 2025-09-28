@@ -233,57 +233,6 @@ function onReady() {
     //
     // Bindings
     //
-    // Event handler for #btn_build_channels
-    $('#btn_build_channels').on('click', function (event) {
-        // Prevent the default behavior of the button
-        event.preventDefault();
-
-        // Get the values of the input fields and convert them to integers
-        var mclValue = parseFloat($('#input_mcl').val());
-        var csaValue = parseFloat($('#input_csa').val());
-
-        // Check the values
-        if (mclValue > 100 || csaValue > 10) {
-            // If the values are not in the desired range, show a confirmation dialog
-            var result = confirm("Model has been validated with MCL less than 100 m and CSA less than 10 ha. Are you sure you want to continue?");
-
-            // If user clicked "Cancel" in the confirmation dialog
-            if (!result) {
-                // Stop here and don't call the build function
-                return;
-            }
-        }
-
-        // If everything is fine, or user confirmed, then call channel_ctrl.build
-        channel_ctrl.build();
-    });
-
-
-    // Event handler for #btn_build_channels
-    $('#btn_build_channels_en').on('click', function (event) {
-        // Prevent the default behavior of the button
-        event.preventDefault();
-
-        // Get the values of the input fields and convert them to integers
-        var mclValue = parseFloat($('#input_mcl_en').val());
-        var csaValue = parseFloat($('#input_csa_en').val());
-
-        // Check the values
-        if (mclValue > 330 || csaValue > 25) {
-            // If the values are not in the desired range, show a confirmation dialog
-            var result = confirm("Model has been validated with MCL less than 330 ft and CSA less than 25 acres. Are you sure you want to continue?");
-
-            // If user clicked "Cancel" in the confirmation dialog
-            if (!result) {
-                // Stop here and don't call the build function
-                return;
-            }
-        }
-
-        // If everything is fine, or user confirmed, then call channel_ctrl.build
-        channel_ctrl.build();
-    });
-
     // load the hidden inputs on channel form
     channel_ctrl.onMapChange();
 
@@ -348,104 +297,7 @@ function onReady() {
     //
     // Bindings
     //
-    // Bind radio to change subcatchment appearance
-    // radios live in the map.htm template
-    $("[name='sub_cmap_radio']").change(function () {
-        sub_ctrl.setColorMap($("input[name='sub_cmap_radio']:checked").val());
-    });
-
-    {% if 'rap' in ron.mods %}
-    // Bind radio to change subcatchment appearance
-    // radios live in the map.htm template
-    $("[name='sub_cmap_radio']").change(function () {
-        sub_ctrl.setColorMap("landuse_cover");
-    });
-    {% endif %}
-
-    {% if 'rhem' not in ron.mods %}
-    // Bind radio to change subcatchment appearance
-    // radios live in the map.htm template
-    $("[name='wepp_sub_cmap_radio']").change(function () {
-        sub_ctrl.setColorMap($("input[name='wepp_sub_cmap_radio']:checked").val());
-    });
-    {% else %}
-    // Bind radio to change subcatchment appearance
-    // radios live in the map.htm template
-    $("[name='rhem_sub_cmap_radio']").change(function () {
-        sub_ctrl.setColorMap($("input[name='rhem_sub_cmap_radio']:checked").val());
-    });
-    {% endif %}
-
-    {% if 'rap' in ron.mods %}
-    // Cover
-    render_legend("viridis", "landuse_sub_cmap_canvas_cover");
-    {% endif %}
-
-    //
-    // Hillslopes Visualizations
-    {% if 'rhem' not in ron.mods %}
-    // Phosphorus
-    render_legend("viridis", "wepp_sub_cmap_canvas_phosphorus");
-    $('#wepp_sub_cmap_range_phosphorus').on('input', function () {
-        sub_ctrl.updateGlLayerStyle();
-    });
-
-    // Runoff
-    render_legend("winter", "wepp_sub_cmap_canvas_runoff");
-    $('#wepp_sub_cmap_range_runoff').on('input', function () {
-        sub_ctrl.updateGlLayerStyle();
-    });
-
-    // Loss
-    render_legend("jet2", "wepp_sub_cmap_canvas_loss");
-    $('#wepp_sub_cmap_range_loss').on('input', function () {
-        sub_ctrl.updateGlLayerStyle();
-    });
-
-
-    //
-    // Gridded
-
-    // Soil Deposition / Loss
-    render_legend("jet2", "wepp_grd_cmap_canvas_loss");
-    $('#wepp_grd_cmap_range_loss').on('input', function () {
-        sub_ctrl.updateGriddedLoss();
-    });
-    {% else %}
-
-    // Runoff
-    render_legend("winter", "rhem_sub_cmap_canvas_runoff");
-    $('#rhem_sub_cmap_range_runoff').on('input', function () {
-        sub_ctrl.updateGlLayerStyle();
-    });
-
-    // Yield
-    render_legend("viridis", "rhem_sub_cmap_canvas_sed_yield");
-    $('#rhem_sub_cmap_range_sed_yield').on('input', function () {
-        sub_ctrl.updateGlLayerStyle();
-    });
-
-    // Loss
-    render_legend("jet2", "rhem_sub_cmap_canvas_soil_loss");
-    $('#rhem_sub_cmap_range_soil_loss').on('input', function () {
-        sub_ctrl.updateGlLayerStyle();
-    });
-    {% endif %}
-
-    {% if 'ash' in ron.mods %}
-    // Ash Load
-    render_legend("jet2", "ash_sub_cmap_canvas_load");
-    $('#ash_sub_cmap_range_load').on('input', function () {
-        sub_ctrl.updateGlLayerStyle();
-    });
-
-    // Ash Transport
-    render_legend("jet2", "ash_sub_cmap_canvas_transport");
-    $('#ash_sub_cmap_range_transport').on('input', function () {
-        sub_ctrl.updateGlLayerStyle();
-    });
-    {% endif %}
-
+    sub_ctrl.initializeColorMapControls();
 
     // load subcatchments
     sub_ctrl.set_rq_job_id(sub_ctrl, {{ rq_job_ids.get("build_subcatchments_and_abstract_watershed_rq") | tojson }});
@@ -774,28 +626,6 @@ function onReady() {
     map.on("click", function (ev) {
         outlet.setClickHandler(ev);
         // add additional events here
-    });
-
-    map.on("zoom", function (ev) {
-        map.onMapChange();
-        channel_ctrl.onMapChange();
-        // add additional events here
-    });
-
-    map.on("move", function (ev) {
-        map.onMapChange();
-        channel_ctrl.onMapChange();
-        // add additional events here
-    });
-
-    map.on("moveend", function (ev) {
-        map.loadUSGSGageLocations();
-        map.loadSnotelLocations();
-    });
-
-    map.on("zoomend", function (ev) {
-        map.loadUSGSGageLocations();
-        map.loadSnotelLocations();
     });
 
     landuse.restore({{ landuse.mode | int }}, {{ landuse.single_selection | int }});

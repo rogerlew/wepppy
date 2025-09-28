@@ -159,7 +159,8 @@
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
         <button id="btn_build_channels_en"
-            class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
+            class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+            onclick="return ChannelDelineation.getInstance().build()">
             <img id="build_channels_en_lock" style="display:none;"
                 src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
             Build Channels

@@ -2,7 +2,7 @@
  * Controllers (controllers.js)
  * NOTE: Generated via build_controllers_js.py from
  *       wepppy/weppcloud/controllers_js/templates/*.js
- * Build date: 2025-09-27T17:52:25Z
+ * Build date: 2025-09-28T22:41:54Z
  * See developer notes: wepppy/weppcloud/routes/usersum/dev-notes/controllers_js.md
  * ----------------------------------------------------------------------------
  */
@@ -183,11 +183,12 @@ WSClient.prototype.connect = function () {
     this.shouldReconnect = true;
     this.ws = new WebSocket(this.wsUrl);
     this.ws.onopen = () => {
-        $("#preflight_status").html("Connected");
+        this.pushCommandBarResult(`Connecting to ${this.channel}...`);
         if (this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({ "type": "init" }));
+            this.pushCommandBarResult(`Connected to ${this.channel}`);
         } else {
-            console.error("WebSocket is not in OPEN state: ", this.ws.readyState);
+            this.pushCommandBarResult(`WebSocket is not in OPEN state: ${this.ws.readyState}`);
         }
     };
 
@@ -203,9 +204,6 @@ WSClient.prototype.connect = function () {
             var lines = data.split('\n');
             if (lines.length > 1) {
                 data = lines[0] + '...';
-            }
-            if (data.length > 100) {
-                data = data.substring(0, 100) + '...';
             }
 
             if (data.includes("EXCEPTION")) {
@@ -229,23 +227,41 @@ WSClient.prototype.connect = function () {
                 }, 500);
             }
 
-            if (data.includes("TRIGGER")) {
-                // need to parse the trigger command and execute it
-                // second to last argument is the controller
-                // last argument is the event
-                var trigger = data.split(' ');
-                var controller = trigger[trigger.length - 2];
-                var event = trigger[trigger.length - 1];
+            if (data.includes("COMMAND_BAR_RESULT")) {
+                const marker = 'COMMAND_BAR_RESULT';
+                const markerIndex = data.indexOf(marker);
+                let commandMessage = data;
+                if (markerIndex !== -1) {
+                    commandMessage = data.substring(markerIndex + marker.length).trim();
+                }
+                $("#" + this.formId + " #status").html(commandMessage);
+                this.pushCommandBarResult(commandMessage);
+            }
 
-                if (controller == this.channel) {
-                    $("#" + this.formId).trigger(event);
+            if (data.includes("TRIGGER")) {
+                const tokens = data.trim().split(/\s+/);
+                const event = tokens.length > 0 ? tokens[tokens.length - 1] : null;
+                const controller = tokens.length > 1 ? tokens[tokens.length - 2] : null;
+
+                if (controller && controller === this.channel) {
+                    if (this._parentControl && typeof this._parentControl.triggerEvent === 'function') {
+                        try {
+                            this._parentControl.triggerEvent(event, { tokens: tokens, raw: data });
+                        } catch (err) {
+                            console.warn('WSClient triggerEvent error:', err);
+                        }
+                    } else if (this._parentControl && this._parentControl.form && typeof this._parentControl.form.trigger === 'function') {
+                        this._parentControl.form.trigger(event);
+                    }
+
                     if (typeof event === 'string' && event.toUpperCase().includes('COMPLETE')) {
                         this.resetSpinner();
                     }
                 }
-
-            }
-            else {
+            } else {
+                if (data.length > 120) {
+                    data = data.substring(0, 120) + '...';
+                }
                 $("#" + this.formId + " #status").html(data);
             }
         }
@@ -294,6 +310,25 @@ WSClient.prototype.resetSpinner = function () {
     if ($braille.length) {
         $braille.text("");
     }
+};
+
+WSClient.prototype.pushCommandBarResult = function (message) {
+    if (typeof window.initializeCommandBar !== 'function') {
+        return;
+    }
+
+    try {
+        var commandBar = window.initializeCommandBar();
+        if (commandBar && typeof commandBar.showResult === 'function') {
+            commandBar.showResult(message);
+        }
+    } catch (error) {
+        console.warn('Unable to update command bar result:', error);
+    }
+};
+
+WSClient.prototype.attachControl = function (control) {
+    this._parentControl = control || null;
 };
 /* ----------------------------------------------------------------------------
  * Control Base
@@ -620,6 +655,21 @@ function controlBase() {
                     self.ws_client.connect();
                 }
             }
+        },
+
+        triggerEvent: function triggerEvent(eventName, payload) {
+            if (!eventName) {
+                return;
+            }
+
+            var form = this.form;
+            if (form && typeof form.trigger === 'function') {
+                if (payload === undefined) {
+                    form.trigger(eventName);
+                } else {
+                    form.trigger(eventName, payload);
+                }
+            }
         }
 
     };
@@ -634,8 +684,12 @@ var Project = function () {
     function createInstance() {
         var that = controlBase();
 
-        that._currentName = $("#input_name").val() || '';
-        that._currentScenario = $("#input_scenario").val() || '';
+        that._nameInput = $("#input_name");
+        that._scenarioInput = $("#input_scenario");
+        that._currentName = that._nameInput.val() || '';
+        that._currentScenario = that._scenarioInput.val() || '';
+        that._nameDebounceTimer = null;
+        that._scenarioDebounceTimer = null;
         that._notifyTimer = null;
 
         that._notifyCommandBar = function (message, options) {
@@ -681,7 +735,7 @@ var Project = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         that._currentName = trimmed;
-                        $("#input_name").val(trimmed);
+                        that._nameInput.val(trimmed);
                         try {
                             document.title = document.title.split(" - ")[0] + ' - ' + (trimmed || 'Untitled');
                         } catch (err) { }
@@ -710,6 +764,22 @@ var Project = function () {
             return request;
         };
 
+        that.setNameFromInput = function (options) {
+            var value = that._nameInput.val();
+            var wait = (options && options.debounceMs) || 800;
+
+            clearTimeout(that._nameDebounceTimer);
+            that._nameDebounceTimer = setTimeout(function () {
+                that.setName(value, options);
+            }, wait);
+        };
+
+        that.commitNameFromInput = function (options) {
+            var value = that._nameInput.val();
+            clearTimeout(that._nameDebounceTimer);
+            that.setName(value, options);
+        };
+
         that.setScenario = function (scenario, options) {
             options = options || {};
             var trimmed = (scenario || '').trim();
@@ -724,7 +794,7 @@ var Project = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         that._currentScenario = trimmed;
-                        $("#input_scenario").val(trimmed);
+                        that._scenarioInput.val(trimmed);
                         try {
                             document.title = document.title.split(" - ")[0] + ' - ' + trimmed;
                         } catch (err) { }
@@ -751,6 +821,34 @@ var Project = function () {
             });
 
             return request;
+        };
+
+        that.setScenarioFromInput = function (options) {
+            var value = that._scenarioInput.val();
+            var wait = (options && options.debounceMs) || 800;
+
+            clearTimeout(that._scenarioDebounceTimer);
+            that._scenarioDebounceTimer = setTimeout(function () {
+                that.setScenario(value, options);
+            }, wait);
+        };
+
+        that.commitScenarioFromInput = function (options) {
+            var value = that._scenarioInput.val();
+            clearTimeout(that._scenarioDebounceTimer);
+            that.setScenario(value, options);
+        };
+
+        that.handleGlobalUnitPreference = function (pref) {
+            var numericPref = Number(pref);
+            if (typeof window.setGlobalUnitizerPreference === 'function') {
+                window.setGlobalUnitizerPreference(numericPref);
+            }
+            that.unitChangeEvent();
+        };
+
+        that.handleUnitPreferenceChange = function () {
+            that.unitChangeEvent();
         };
 
         that.clear_locks = function () {
@@ -1043,6 +1141,7 @@ var Map = function () {
         that.sbs_legend = $("#sbs_legend");
 
         that.fetchTimer;
+        that.centerInput = $("#input_centerloc");
         that.fetchElevation = function (ev) {
             var self = instance;
 
@@ -1086,6 +1185,101 @@ var Map = function () {
             self.mouseelev.fadeOut(2000);
             that.isFetchingElevation = false;
         });
+
+        function sanitizeLocationInput(value) {
+            if (!value) {
+                return [];
+            }
+            var sanitized = String(value).replace(/[a-zA-Z{}\[\]\\|\/<>;:]/g, '');
+            return sanitized.split(/[\s,]+/).filter(function (item) {
+                return item !== '';
+            });
+        }
+
+        that.goToEnteredLocation = function () {
+            var parts = sanitizeLocationInput(that.centerInput.val());
+            if (parts.length < 2) {
+                return;
+            }
+
+            var lon = parseFloat(parts[0]);
+            var lat = parseFloat(parts[1]);
+
+            if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
+                console.warn('Invalid location values', parts);
+                return;
+            }
+
+            var zoom = that.getZoom();
+            if (parts.length >= 3) {
+                var parsedZoom = parseInt(parts[2], 10);
+                if (Number.isFinite(parsedZoom)) {
+                    zoom = parsedZoom;
+                }
+            }
+
+            that.flyTo([lat, lon], zoom);
+        };
+
+        that.handleCenterInputKey = function (event) {
+            if (!event) {
+                return;
+            }
+            var key = event.key || event.keyCode;
+            if (key === 'Enter' || key === 13) {
+                event.preventDefault();
+                that.goToEnteredLocation();
+            }
+        };
+
+        that.findById = function (idType) {
+            if (!window.WEPP_FIND_AND_FLASH) {
+                console.warn('WEPP_FIND_AND_FLASH helper not available');
+                return;
+            }
+
+            var value = (that.centerInput.val() || '').trim();
+            if (!value) {
+                return;
+            }
+
+            var subCtrl = SubcatchmentDelineation.getInstance();
+            var channelCtrl = ChannelDelineation.getInstance();
+
+            window.WEPP_FIND_AND_FLASH.findAndFlashById({
+                idType: idType,
+                value: value,
+                map: that,
+                layers: [
+                    { ctrl: subCtrl, type: window.WEPP_FIND_AND_FLASH.FEATURE_TYPE.SUBCATCHMENT },
+                    { ctrl: channelCtrl, type: window.WEPP_FIND_AND_FLASH.FEATURE_TYPE.CHANNEL }
+                ],
+                onFlash: function (result) {
+                    var topazId = value;
+
+                    if (idType !== window.WEPP_FIND_AND_FLASH.ID_TYPE.TOPAZ) {
+                        var hit = result.hits && result.hits[0];
+                        if (hit && hit.properties && hit.properties.TopazID !== undefined && hit.properties.TopazID !== null) {
+                            topazId = hit.properties.TopazID;
+                        }
+                    }
+
+                    if (result.featureType === window.WEPP_FIND_AND_FLASH.FEATURE_TYPE.SUBCATCHMENT) {
+                        that.subQuery(topazId);
+                    } else if (result.featureType === window.WEPP_FIND_AND_FLASH.FEATURE_TYPE.CHANNEL) {
+                        that.chnQuery(topazId);
+                    }
+                }
+            });
+        };
+
+        that.findByTopazId = function () {
+            that.findById(window.WEPP_FIND_AND_FLASH.ID_TYPE.TOPAZ);
+        };
+
+        that.findByWeppId = function () {
+            that.findById(window.WEPP_FIND_AND_FLASH.ID_TYPE.WEPP);
+        };
 
         // define the base layer and add it to the map
         // does not require an API key
@@ -1171,6 +1365,29 @@ var Map = function () {
         that.ctrls = L.control.layers(that.baseMaps, that.overlayMaps);
         that.ctrls.addTo(that);
 
+        function handleViewportChange() {
+            that.onMapChange();
+
+            if (typeof ChannelDelineation !== 'undefined' && ChannelDelineation !== null) {
+                try {
+                    ChannelDelineation.getInstance().onMapChange();
+                } catch (err) {
+                    console.warn('ChannelDelineation.onMapChange failed', err);
+                }
+            }
+        }
+
+        that.on('zoom', handleViewportChange);
+        that.on('move', handleViewportChange);
+
+        function handleViewportSettled() {
+            that.loadUSGSGageLocations();
+            that.loadSnotelLocations();
+        }
+
+        that.on('moveend', handleViewportSettled);
+        that.on('zoomend', handleViewportSettled);
+
         that.onMapChange = function () {
             var self = instance;
 
@@ -1178,7 +1395,7 @@ var Map = function () {
             var zoom = self.getZoom();
             var lng = coordRound(center.lng);
             var lat = coordRound(center.lat);
-            var map_w = $('#mapid').width()
+            var map_w = Math.round($('#mapid').width());
             $("#mapstatus").text("Center: " + lng +
                 ", " + lat +
                 " | Zoom: " + zoom +
@@ -1369,6 +1586,7 @@ var Baer = function () {
         that.status = $("#sbs_upload_form  #status");
         that.stacktrace = $("#sbs_upload_form #stacktrace");
         that.ws_client = new WSClient('sbs_upload_form', 'sbs_upload');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#sbs_upload_form #rq_job");
 
@@ -1767,9 +1985,21 @@ var ChannelDelineation = function () {
         that.status = $("#build_channels_form  #status");
         that.stacktrace = $("#build_channels_form #stacktrace");
         that.ws_client = new WSClient('build_channels_form', 'channel_delineation');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#build_channels_form #rq_job");
-        that.command_btn_id = 'btn_build_channels_en';
+        that.command_btn_id = ['btn_build_channels', 'btn_build_channels_en'];
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'BUILD_CHANNELS_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.show();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -2091,9 +2321,23 @@ var Outlet = function () {
         that.status = $("#set_outlet_form  #status");
         that.stacktrace = $("#set_outlet_form #stacktrace");
         that.ws_client = new WSClient('set_outlet_form', 'outlet');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#set_outlet_form #rq_job");
         that.command_btn_id = ['btn_set_outlet_cursor', 'btn_set_outlet_entry'];
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'SET_OUTLET_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                if (that.popup && typeof that.popup.remove === 'function') {
+                    that.popup.remove();
+                }
+                that.show();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -2288,6 +2532,7 @@ var SubcatchmentDelineation = function () {
         that.status = $("#build_subcatchments_form  #status");
         that.stacktrace = $("#build_subcatchments_form #stacktrace");
         that.ws_client = new WSClient('build_subcatchments_form', 'subcatchment_delineation');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#build_subcatchments_form #rq_job");
         that.command_btn_id = 'btn_build_subcatchments';
@@ -2335,6 +2580,113 @@ var SubcatchmentDelineation = function () {
         // various query-result dicts filled by cmap*() functions
         that.dataCover = null;
 
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'BUILD_SUBCATCHMENTS_TASK_COMPLETED') {
+                that.show();
+                ChannelDelineation.getInstance().show();
+            } else if (eventName === 'WATERSHED_ABSTRACTION_TASK_COMPLETED') {
+                that.report();
+                that.ws_client.disconnect();
+                that.enableColorMap("slp_asp");
+                Wepp.getInstance().updatePhosphorus();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
+
+        function bindRadioGroup(name, handler) {
+            var selector = "input[name='" + name + "']";
+            var $radios = $(selector);
+            if ($radios.length === 0) {
+                return;
+            }
+            $radios.off('change.subcatchment');
+            $radios.on('change.subcatchment', handler);
+        }
+
+        function bindSlider(selector, handler) {
+            var $slider = $(selector);
+            if ($slider.length === 0) {
+                return;
+            }
+            $slider.off('input.subcatchment');
+            $slider.on('input.subcatchment', handler);
+        }
+
+        function renderLegendIfPresent(palette, canvasId) {
+            if (typeof render_legend !== 'function') {
+                return;
+            }
+            if (!document.getElementById(canvasId)) {
+                return;
+            }
+            render_legend(palette, canvasId);
+        }
+
+        that.initializeColorMapControls = function () {
+            bindRadioGroup('sub_cmap_radio', function () {
+                var value = $("input[name='sub_cmap_radio']:checked").val();
+                if (value) {
+                    that.setColorMap(value);
+                }
+            });
+
+            bindRadioGroup('wepp_sub_cmap_radio', function () {
+                var value = $("input[name='wepp_sub_cmap_radio']:checked").val();
+                if (value) {
+                    that.setColorMap(value);
+                }
+            });
+
+            bindRadioGroup('rhem_sub_cmap_radio', function () {
+                var value = $("input[name='rhem_sub_cmap_radio']:checked").val();
+                if (value) {
+                    that.setColorMap(value);
+                }
+            });
+
+            bindSlider('#wepp_sub_cmap_range_phosphorus', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#wepp_sub_cmap_range_runoff', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#wepp_sub_cmap_range_loss', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#wepp_grd_cmap_range_loss', function () {
+                that.updateGriddedLoss();
+            });
+
+            bindSlider('#rhem_sub_cmap_range_runoff', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#rhem_sub_cmap_range_sed_yield', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#rhem_sub_cmap_range_soil_loss', function () {
+                that.updateGlLayerStyle();
+            });
+
+            bindSlider('#ash_sub_cmap_range_load', function () {
+                that.updateGlLayerStyle();
+            });
+            bindSlider('#ash_sub_cmap_range_transport', function () {
+                that.updateGlLayerStyle();
+            });
+
+            renderLegendIfPresent('viridis', 'landuse_sub_cmap_canvas_cover');
+            renderLegendIfPresent('viridis', 'wepp_sub_cmap_canvas_phosphorus');
+            renderLegendIfPresent('winter', 'wepp_sub_cmap_canvas_runoff');
+            renderLegendIfPresent('jet2', 'wepp_sub_cmap_canvas_loss');
+            renderLegendIfPresent('jet2', 'wepp_grd_cmap_canvas_loss');
+            renderLegendIfPresent('winter', 'rhem_sub_cmap_canvas_runoff');
+            renderLegendIfPresent('viridis', 'rhem_sub_cmap_canvas_sed_yield');
+            renderLegendIfPresent('jet2', 'rhem_sub_cmap_canvas_soil_loss');
+            renderLegendIfPresent('jet2', 'ash_sub_cmap_canvas_load');
+            renderLegendIfPresent('jet2', 'ash_sub_cmap_canvas_transport');
+        };
 
         that.enableColorMap = function (cmap_name) {
             if (cmap_name === "dom_lc") {
@@ -3062,9 +3414,21 @@ var Landuse = function () {
         that.status = $("#landuse_form  #status");
         that.stacktrace = $("#landuse_form #stacktrace");
         that.ws_client = new WSClient('landuse_form', 'landuse');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#landuse_form #rq_job");
         that.command_btn_id = 'btn_build_landuse';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'LANDUSE_BUILD_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+                SubcatchmentDelineation.getInstance().enableColorMap('dom_lc');
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
 
         that.hideStacktrace = function () {
@@ -3330,6 +3694,19 @@ var LanduseModify = function () {
             self.stacktrace.hide();
         };
 
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'LANDCOVER_MODIFY_TASK_COMPLETED') {
+                var subCtrl = SubcatchmentDelineation.getInstance();
+                if (subCtrl.getCmapMode && subCtrl.getCmapMode() === 'dom_lc') {
+                    subCtrl.setColorMap('dom_lc');
+                }
+                Landuse.getInstance().report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
+
         that.checkbox = $('#checkbox_modify_landuse');
         that.textarea = $('#textarea_modify_landuse');
         that.selection = $('#selection_modify_landuse');
@@ -3592,7 +3969,7 @@ var LanduseModify = function () {
                         self.hideModifyMap();
                         self.status.html(task_msg + "... Success");
 
-                        self.form.trigger("LANDCOVER_MODIFY_TASK_COMPLETED");
+                        self.triggerEvent('LANDCOVER_MODIFY_TASK_COMPLETED');
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -3632,9 +4009,21 @@ var Soil = function () {
         that.status = $("#soil_form  #status");
         that.stacktrace = $("#soil_form #stacktrace");
         that.ws_client = new WSClient('soil_form', 'soils');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#soil_form #rq_job");
         that.command_btn_id = 'btn_build_soil';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'SOILS_BUILD_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+                SubcatchmentDelineation.getInstance().enableColorMap('dom_soil');
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -3840,9 +4229,25 @@ var Climate = function () {
         that.status = $("#climate_form  #status");
         that.stacktrace = $("#climate_form #stacktrace");
         that.ws_client = new WSClient('climate_form', 'climate');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#climate_form #rq_job");
         that.command_btn_id = 'btn_build_climate';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'CLIMATE_SETSTATIONMODE_TASK_COMPLETED') {
+                that.refreshStationSelection();
+                that.viewStationMonthlies();
+            } else if (eventName === 'CLIMATE_SETSTATION_TASK_COMPLETED') {
+                that.viewStationMonthlies();
+            } else if (eventName === 'CLIMATE_BUILD_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -3884,7 +4289,7 @@ var Climate = function () {
                 data: { "mode": mode },
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("CLIMATE_SETSTATIONMODE_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATIONMODE_TASK_COMPLETED');
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -3916,7 +4321,7 @@ var Climate = function () {
                 processData: false,
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("CLIMATE_BUILD_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_BUILD_TASK_COMPLETED');
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -3952,7 +4357,7 @@ var Climate = function () {
                     data: { "mode": mode },
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     },
                     error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -3969,7 +4374,7 @@ var Climate = function () {
                     cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     },
                     error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -3986,7 +4391,7 @@ var Climate = function () {
                     cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     },
                     error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -4003,7 +4408,7 @@ var Climate = function () {
                     cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     },
                     error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -4036,7 +4441,7 @@ var Climate = function () {
                 data: { "station": station },
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -4473,9 +4878,21 @@ var Wepp = function () {
         that.status = $("#wepp_form  #status");
         that.stacktrace = $("#wepp_form #stacktrace");
         that.ws_client = new WSClient('wepp_form', 'wepp');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#wepp_form #rq_job");
         that.command_btn_id = 'btn_run_wepp';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'WEPP_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+                Observed.getInstance().onWeppRunCompleted();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -4648,9 +5065,20 @@ var DebrisFlow = function () {
         that.status = $("#debris_flow_form  #status");
         that.stacktrace = $("#debris_flow_form #stacktrace");
         that.ws_client = new WSClient('debris_flow_form', 'debris_flow');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#debris_flow_form #rq_job");
         that.command_btn_id = 'btn_run_debris_flow';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'DEBRIS_FLOW_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -4720,6 +5148,7 @@ var Observed = function () {
         that.status = $("#observed_form  #status");
         that.stacktrace = $("#observed_form #stacktrace");
         that.ws_client = new WSClient('observed_form', 'observed');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#observed_form #rq_job");
 
@@ -4823,9 +5252,20 @@ var Ash = function () {
         that.status = $("#ash_form  #status");
         that.stacktrace = $("#ash_form #stacktrace");
         that.ws_client = new WSClient('ash_form', 'ash');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#ash_form #rq_job");
         that.command_btn_id = 'btn_run_ash';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'ASH_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -4980,9 +5420,20 @@ var RAP_TS = function () {
         that.status = $("#rap_ts_form  #status");
         that.stacktrace = $("#rap_ts_form #stacktrace");
         that.ws_client = new WSClient('rap_ts_form', 'rap_ts');
+       that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#rap_ts_form #rq_job");
         that.command_btn_id = 'btn_build_rap_ts';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'RAP_TS_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -5046,8 +5497,19 @@ var RangelandCover = function () {
         that.status = $("#rangeland_cover_form  #status");
         that.stacktrace = $("#rangeland_cover_form #stacktrace");
         that.ws_client = new WSClient('rangeland_cover_form', 'rangeland_cover');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#rangeland_cover_form #rq_job");
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'RANGELAND_COVER_BUILD_TASK_COMPLETED') {
+                SubcatchmentDelineation.getInstance().enableColorMap("rangeland_cover");
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -5068,7 +5530,7 @@ var RangelandCover = function () {
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("RANGELAND_COVER_BUILD_TASK_COMPLETED");
+                        self.triggerEvent('RANGELAND_COVER_BUILD_TASK_COMPLETED');
                         self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
@@ -5172,6 +5634,22 @@ var RangelandCoverModify = function () {
         //that.ws_client = new WSClient('modify_rangeland_cover_form', 'modify_rangeland_cover');
         that.rq_job_id = null;
         that.rq_job = $("#modify_rangeland_cover_form #rq_job");
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'RANGELAND_COVER_MODIFY_TASK_COMPLETED') {
+                var subCtrl = SubcatchmentDelineation.getInstance();
+                if (subCtrl.getCmapMode && subCtrl.getCmapMode() === 'rangeland_cover') {
+                    subCtrl.setColorMap('rangeland_cover');
+                }
+                RangelandCover.getInstance().report();
+                if (typeof subCtrl.cmapRangelandCover === 'function') {
+                    subCtrl.cmapRangelandCover();
+                }
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -5497,7 +5975,7 @@ var RangelandCoverModify = function () {
                         self.hideModifyMap();
                         self.status.html(task_msg + "... Success");
 
-                        self.form.trigger("RANGELAND_COVER_MODIFY_TASK_COMPLETED");
+                        self.triggerEvent('RANGELAND_COVER_MODIFY_TASK_COMPLETED');
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -5537,6 +6015,7 @@ var Treatments = function () {
         that.status = $("#treatments_form  #status");
         that.stacktrace = $("#treatments_form #stacktrace");
         that.ws_client = new WSClient('treatments_form', 'treatments');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#treatments_form #rq_job");
         that.command_btn_id = 'btn_build_treatments';
@@ -5790,9 +6269,20 @@ var Rhem = function () {
         that.status = $("#rhem_form  #status");
         that.stacktrace = $("#rhem_form #stacktrace");
         that.ws_client = new WSClient('rhem_form', 'rhem');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#rhem_form #rq_job");
         that.command_btn_id = 'btn_run_rhem';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'RHEM_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -5895,9 +6385,20 @@ var Omni = function () {
         that.status = $("#omni_form  #status");
         that.stacktrace = $("#omni_form #stacktrace");
         that.ws_client = new WSClient('omni_form', 'omni');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#omni_form #rq_job");
         that.command_btn_id = 'btn_run_omni';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'OMNI_SCENARIO_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report_scenarios();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.serializeScenarios = function () {
             const formData = new FormData();
@@ -6049,9 +6550,30 @@ var DssExport = function () {
         that.status = $("#dss_export_form  #status");
         that.stacktrace = $("#dss_export_form #stacktrace");
         that.ws_client = new WSClient('dss_export_form', 'dss_export');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#dss_export_form #rq_job");
         that.command_btn_id = 'btn_export_dss';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'DSS_EXPORT_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+
+                if (typeof Omni !== 'undefined') {
+                    var omni = Omni.getInstance();
+                    if (omni && omni.ws_client && typeof omni.ws_client.disconnect === 'function') {
+                        omni.ws_client.disconnect();
+                    }
+                    if (omni && typeof omni.report_scenarios === 'function') {
+                        omni.report_scenarios();
+                    }
+                }
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.show = function () {
             that.container.show();
@@ -6096,8 +6618,6 @@ var DssExport = function () {
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
             self.ws_client.connect();
-
-            console.log(self.form.serialize());
 
             $.post({
                 url: "rq/api/post_dss_export_rq",

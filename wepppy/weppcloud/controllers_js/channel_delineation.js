@@ -54,7 +54,7 @@ var ChannelDelineation = function () {
         that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#build_channels_form #rq_job");
-        that.command_btn_id = 'btn_build_channels_en';
+        that.command_btn_id = ['btn_build_channels', 'btn_build_channels_en'];
 
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {

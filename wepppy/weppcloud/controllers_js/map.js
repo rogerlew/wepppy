@@ -258,6 +258,29 @@ var Map = function () {
         that.ctrls = L.control.layers(that.baseMaps, that.overlayMaps);
         that.ctrls.addTo(that);
 
+        function handleViewportChange() {
+            that.onMapChange();
+
+            if (typeof ChannelDelineation !== 'undefined' && ChannelDelineation !== null) {
+                try {
+                    ChannelDelineation.getInstance().onMapChange();
+                } catch (err) {
+                    console.warn('ChannelDelineation.onMapChange failed', err);
+                }
+            }
+        }
+
+        that.on('zoom', handleViewportChange);
+        that.on('move', handleViewportChange);
+
+        function handleViewportSettled() {
+            that.loadUSGSGageLocations();
+            that.loadSnotelLocations();
+        }
+
+        that.on('moveend', handleViewportSettled);
+        that.on('zoomend', handleViewportSettled);
+
         that.onMapChange = function () {
             var self = instance;
 
@@ -265,7 +288,7 @@ var Map = function () {
             var zoom = self.getZoom();
             var lng = coordRound(center.lng);
             var lat = coordRound(center.lat);
-            var map_w = $('#mapid').width()
+            var map_w = Math.round($('#mapid').width());
             $("#mapstatus").text("Center: " + lng +
                 ", " + lat +
                 " | Zoom: " + zoom +
