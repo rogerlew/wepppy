@@ -4,10 +4,11 @@ After=network.target
 
 [Service]
 User=www-data
-Group=www-data
+Group=webgroup
 WorkingDirectory=/workdir
 Environment="LD_LIBRARY_PATH=/workdir/miniconda3/envs/wepppy310-env/lib"
 Environment="PATH=/workdir/miniconda3/envs/wepppy310-env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+LimitNOFILE=5000000
 ExecStart=/workdir/miniconda3/envs/wepppy310-env/bin/rq worker-pool -n 32 -u "redis://129.101.202.237:6379/9?socket_timeout=10&health_check_interval=30" --worker-class 'wepppy.rq.WepppyRqWorker' default
 Restart=always
 RestartSec=5s
