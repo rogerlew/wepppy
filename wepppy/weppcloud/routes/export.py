@@ -5,6 +5,10 @@ from ._common import *  # noqa: F401,F403
 from wepppy.nodb import Ron
 
 
+# These routes have lazy generation of geopackages and geodatabases,
+# but the gpkg and geodatabase should be built already
+# so the building should be infrequent and not a risk to degrading the user experience
+
 export_bp = Blueprint('export', __name__)
 
 
@@ -28,7 +32,6 @@ def export_geopackage(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
-    # TODO move to RQ or disable lazy build
     try:
         gpkg_fn = _join(ron.export_arc_dir, f'{runid}.gpkg')
         if not _exists(gpkg_fn):
