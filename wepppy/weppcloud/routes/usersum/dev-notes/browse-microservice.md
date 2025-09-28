@@ -50,6 +50,28 @@ All routes honour the site prefix automatically (default `/weppcloud`). If the s
 - **Logging**
   - `/health` polling is filtered from gunicorn/uvicorn access logs.
 
+## Manifest-backed directory listings
+- `manifest.db` is created when a project flips to readonly; it lives at the run root and is built by `create_manifest` in `browse.py` using the same traversal logic as on-demand browsing.
+- SQLite stays in WAL mode with `synchronous=NORMAL` for fast reads. The `entries` table stores `dir_path`, `name`, `entry_type` (file, directory, symlink), `size_bytes`, `mtime_ns`, `child_count`, and `symlink_target`. `entry_type` sorts with raw byte ordering so listings match `ls`.
+- Directory rows carry a `child_count` so pagination never shells out. Symlink rows capture `symlink_is_dir` so the UI can label folder links correctly and suppress download buttons for directory links.
+- `browse_response` tags responses that came from the manifest so breadcrumbs can show a subtle badge (for example “manifest cached”).
+- Queries fall back to on-demand scans whenever the manifest is missing, unreadable, or a pattern cannot be expressed with SQLite `GLOB` semantics.
+
+### Creation workflow
+- `project_rq.set_run_readonly_rq(runid, readonly)` performs the toggle: it updates the `READONLY` sentinel, removes any stale manifest, and rebuilds `manifest.db` for non-child runs.
+- The worker publishes start/complete/error messages through `StatusMessenger` so `Project._notifyCommandBar` can report progress without changing the browser contract.
+- The project blueprint queues `set_run_readonly_rq`; the worker flips the `READONLY` sentinel and handles manifest creation/removal before reporting back to the UI.
+- Clearing readonly removes `manifest.db` (if present) after the sentinel file disappears.
+
+### Browse integration
+- `get_page_entries` checks for `manifest.db` first and serves listings directly from SQLite. Only when the manifest is absent does it shell out to `ls`/`wc`.
+- Directory rows use the stored `child_count` and symlink metadata so nested counts are instantaneous and links render correctly.
+- Symlink directories inherit the folder styling and omit download links; file symlinks still show download buttons and targets (`name -> dest`).
+- Breadcrumbs and JSON payloads surface a `using_manifest` flag for observability and to aid debugging.
+
+### Known limitations
+- The manifest only refreshes when readonly changes; manual edits to a readonly tree are not detected until a rebuild runs.
+
 ## Operating the service
 - Systemd unit: `wepppy/microservices/_service_files/gunicorn-browse.service` (binds to 0.0.0.0:9009 with uvicorn workers).
 - Health check: `GET /health` returns `OK` — HAProxy uses this for backend status.

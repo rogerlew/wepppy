@@ -163,6 +163,84 @@ def new_project_rq(runid: str, project_def: dict):
         raise
 
 
+def set_run_readonly_rq(runid: str, readonly: bool):
+    from wepppy.microservices.browse import create_manifest, remove_manifest, MANIFEST_FILENAME
+
+    job = get_current_job()
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f'{runid}:wepp'
+    StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, readonly={readonly})')
+
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    previous_state = ron.readonly
+    prep = RedisPrep.tryGetInstance(wd)
+
+    if prep is not None:
+        try:
+            prep.set_rq_job_id('set_readonly', job.id)
+            prep.remove_timestamp(TaskEnum.set_readonly)
+        except Exception:
+            pass
+
+    try:
+        if readonly:
+            if not previous_state:
+                ron.readonly = True
+
+            if ron.is_child_run:
+                StatusMessenger.publish(
+                    status_channel,
+                    f'rq:{job.id} COMMAND_BAR_RESULT {MANIFEST_FILENAME} skipped (child run)'
+                )
+            else:
+                StatusMessenger.publish(
+                    status_channel,
+                    f'rq:{job.id} STATUS {MANIFEST_FILENAME} creation started'
+                )
+                with ron.timed('Create manifest'):
+                    create_manifest(wd)
+                    if not _exists(_join(wd, MANIFEST_FILENAME)):
+                        raise RuntimeError(f'{MANIFEST_FILENAME} was not created')
+                StatusMessenger.publish(
+                    status_channel,
+                    f'rq:{job.id} COMMAND_BAR_RESULT {MANIFEST_FILENAME} creation finished'
+                )
+        else:
+            if previous_state:
+                ron.readonly = False
+
+            remove_manifest(wd)
+            if _exists(_join(wd, MANIFEST_FILENAME)):
+                raise RuntimeError(f'Unable to remove {MANIFEST_FILENAME}')
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job.id} COMMAND_BAR_RESULT {MANIFEST_FILENAME} removed'
+            )
+
+        if prep is not None:
+            try:
+                prep.timestamp(TaskEnum.set_readonly)
+            except Exception:
+                pass
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, readonly={readonly})')
+    except Exception:
+        try:
+            if ron.readonly != previous_state:
+                ron.readonly = previous_state
+        except Exception:
+            pass
+
+        failure_suffix = 'creation failed' if readonly else 'removal failed'
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} COMMAND_BAR_RESULT {MANIFEST_FILENAME} {failure_suffix}'
+        )
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, readonly={readonly})')
+        raise
+
+
 def init_sbs_map_rq(runid: str, sbs_map: str):
     try:
         job = get_current_job()
