@@ -3,7 +3,8 @@
     <h6>Modify Rangeland Cover</h6>
     <div class="form-check">
         <label class="form-check-label">
-            <input id="checkbox_modify_rangeland_cover" type="checkbox" class="form-check-input">
+            <input id="checkbox_modify_rangeland_cover" type="checkbox" class="form-check-input"
+                   onchange="RangelandCoverModify.getInstance().toggle()">
             Click subcatchments to select/deselect.<br/>Hold shift and click and drag for box selection.
         </label>
     </div>

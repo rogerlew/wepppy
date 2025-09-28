@@ -32,6 +32,18 @@ var RangelandCover = function () {
             self.stacktrace.hide();
         };
 
+        that.handleModeChange = function (mode) {
+            if (mode === undefined) {
+                that.setMode();
+                return;
+            }
+            that.setMode(parseInt(mode, 10));
+        };
+
+        that.handleRapYearChange = function () {
+            that.setMode();
+        };
+
         that.build = function () {
             var self = instance;
 

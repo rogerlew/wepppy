@@ -6,19 +6,22 @@
         <div class="col-sm-12">
             <label class="radio-inline">
                 <input type="radio" class="disable-readonly" value="0" id="rangeland_cover_mode0" name="rangeland_cover_mode"
-                {% if rangeland_cover.mode == 0 %}checked{% endif %}> Determine Per Hillslope (USGS NLCD Shrubland 2016)</label>
+                {% if rangeland_cover.mode == 0 %}checked{% endif %}
+                onchange="RangelandCover.getInstance().handleModeChange(this.value)"> Determine Per Hillslope (USGS NLCD Shrubland 2016)</label>
         </div>
         {% if 'rap' in rangeland_cover.mods %}
         <div class="col-sm-12">
             <label class="radio-inline">
                 <input type="radio" class="disable-readonly" value="2" id="rangeland_cover_mode2" name="rangeland_cover_mode"
-                {% if rangeland_cover.mode == 2 %}checked{% endif %}> Determine Per Hillslope (RAP)</label>
+                {% if rangeland_cover.mode == 2 %}checked{% endif %}
+                onchange="RangelandCover.getInstance().handleModeChange(this.value)"> Determine Per Hillslope (RAP)</label>
         </div>
         {% endif %}
         <div class="col-sm-12">
             <label class="radio-inline">
                 <input type="radio" class="disable-readonly" value="1" id="rangeland_cover_mode1" name="rangeland_cover_mode"
-                {% if rangeland_cover.mode == 1 %}checked{% endif %}> Single Cover for Watershed</label>
+                {% if rangeland_cover.mode == 1 %}checked{% endif %}
+                onchange="RangelandCover.getInstance().handleModeChange(this.value)"> Single Cover for Watershed</label>
         </div>
     </div>
 
@@ -28,7 +31,8 @@
         </div>
         <div class="col-sm-4">
             <input id="rap_year" name="rap_year" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{{ rangeland_cover.rap_year }}" aria-label="RAP Year">
+            value="{{ rangeland_cover.rap_year }}" aria-label="RAP Year"
+            onchange="RangelandCover.getInstance().handleRapYearChange()">
         </div>
     </div>
 
@@ -124,7 +128,8 @@
     </div>
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
-            <button id="btn_build_rangeland_cover" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Build Rangeland Cover</button>
+            <button id="btn_build_rangeland_cover" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+              onclick="RangelandCover.getInstance().build()">Build Rangeland Cover</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_build_rangeland_cover"></small>

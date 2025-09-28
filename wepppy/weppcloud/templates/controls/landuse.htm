@@ -5,25 +5,25 @@
 <div class="form-group row">
   <div class="col-sm-3">
     <label class="radio-inline"><input type="radio" class="disable-readonly" value="0" id="landuse_mode0"
-        name="landuse_mode"> Determine Per Hillslope</label>
+        name="landuse_mode" onchange="Landuse.getInstance().handleModeChange(this.value)"> Determine Per Hillslope</label>
   </div>
   <div class="col-sm-3">
     <label class="radio-inline"><input type="radio" class="disable-readonly" value="1" id="landuse_mode1"
-        name="landuse_mode"> Single Landuse for Watershed</label>
+        name="landuse_mode" onchange="Landuse.getInstance().handleModeChange(this.value)"> Single Landuse for Watershed</label>
   </div>
   <div class="col-sm-3">
     <label class="radio-inline"><input type="radio" class="disable-readonly" value="4" id="landuse_mode4"
-        name="landuse_mode"> Upload Landcover Map</label>
+        name="landuse_mode" onchange="Landuse.getInstance().handleModeChange(this.value)"> Upload Landcover Map</label>
   </div>
   {% if 'rred' in ron.mods %}
   <div class="d-none">
     <div class="d-none">
       <label class="radio-inline"><input type="radio" class="disable-readonly" value="2" id="landuse_mode2"
-          name="landuse_mode"> RRED Unburned</label>
+          name="landuse_mode" onchange="Landuse.getInstance().handleModeChange(this.value)"> RRED Unburned</label>
     </div>
     <div class="d-none">
       <label class="radio-inline"><input type="radio" class="disable-readonly" value="3" id="landuse_mode3"
-          name="landuse_mode"> RRED Burned</label>
+          name="landuse_mode" onchange="Landuse.getInstance().handleModeChange(this.value)"> RRED Burned</label>
     </div>
   </div>
   {% endif %}
@@ -360,7 +360,8 @@
 <div id="landuse_mode1_controls" class="form-group row hide-readonly">
   <div class="col-sm-5">
     <label for="landuse_single_selection">Select landuse:</label>
-    <select class="form-control disable-readonly" id="landuse_single_selection">
+    <select class="form-control disable-readonly" id="landuse_single_selection"
+      onchange="Landuse.getInstance().handleSingleSelectionChange()">
       {% for opt in landuseoptions %}
       <option value="{{ opt['Key'] }}">{{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
       {% endfor %}

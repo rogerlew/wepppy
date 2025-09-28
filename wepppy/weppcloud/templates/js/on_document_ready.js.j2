@@ -322,19 +322,7 @@ function onReady() {
     var rangeland_cover_modify = RangelandCoverModify.getInstance();
     rangeland_cover_modify.hideStacktrace();
 
-    //
-    // Bindings
-    //
-    $("[name='rangeland_cover_mode']").change(function () {
-        rangeland_cover.setMode();
-    });
-    $("[name='rangeland_cover_mode']").trigger("change");
-
-    $("#rangeland_cover_single_selection").on("change", function () {
-        rangeland_cover.setMode();
-    });
-
-    $("#btn_build_rangeland_cover").click(rangeland_cover.build);
+    rangeland_cover.setMode();
 
     if ({{ rangeland_cover.has_covers | tojson }}) {
         rangeland_cover.report();
@@ -346,31 +334,12 @@ function onReady() {
      * ======================
      */
 
-    //
-    // Bindings
-    //
-    $("#checkbox_modify_rangeland_cover").on("change", function () {
-        rangeland_cover_modify.toggle();
-    });
-
-
     {% endif %}
 
     /*
      * Landuse Initialization
      * ======================
      */
-
-    //
-    // Bindings
-    //
-    $("[name='landuse_mode']").change(function () {
-        landuse.setMode();
-    });
-
-    $("#landuse_single_selection").on("change", function () {
-        landuse.setMode();
-    });
 
     //
     // Initial Configuration
@@ -387,33 +356,10 @@ function onReady() {
      * ======================
      */
 
-    //
-    // Bindings
-    //
-    $("#checkbox_modify_landuse").on("change", function () {
-        lc_modify.toggle();
-    });
-
-
     /*
      * Soil Initialization
      * ======================
      */
-
-    //
-    // Bindings
-    //
-    $("[name='soil_mode']").change(function () {
-        soil.setMode();
-    });
-
-    $("#soil_single_selection").on("input", function () {
-        soil.setMode();
-    });
-
-    $("#soil_single_dbselection").on("change", function () {
-        soil.setMode();
-    });
 
     //
     // Initial Configuration
