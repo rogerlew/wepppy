@@ -243,7 +243,7 @@ def create_run_dir(current_user):
 @run_0_bp.route('/create/<config>')
 @handle_with_exception_factory
 def create(config):
-    from wepppy.weppcloud.routes.readme_md import ensure_readme
+    from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
     cfg = "%s.cfg" % config
 
     overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
@@ -263,13 +263,10 @@ def create(config):
     except Exception:
         return exception_factory('Could not create run')
 
-    
     if not current_user.is_anonymous:
         from wepppy.weppcloud.app import user_datastore
-        try:
-            user_datastore.create_run(runid, config, current_user)
-        except Exception:
-            return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
+        user_datastore.create_run(runid, config, current_user)
 
-    ensure_readme(runid, config)
+    ensure_readme_on_create(runid, config)
+
     return redirect(url_for_run('run_0.runs0', runid=runid, config=config))
