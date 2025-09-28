@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diff: {{ subpath }}</title>
+  <style>
+    :root {
+      --diff-font-family: "Fira Mono", "Menlo", "Consolas", "Courier New", monospace;
+      --diff-font-size: 13px;
+      --diff-header-height: 72px;
+      --diff-background: #f5f7fb;
+      --diff-border-color: #d8dee9;
+      --diff-muted: #6b7280;
+      --diff-left-color: #2563eb;
+      --diff-right-color: #10b981;
+      --diff-line-number-width: 64px;
+      --diff-row-height: 22px;
+      --diff-left-column-min: 320px;
+      --diff-right-column-min: 320px;
+      --diff-token-insert-bg: rgba(16, 185, 129, 0.18);
+      --diff-token-delete-bg: rgba(239, 68, 68, 0.18);
+      --diff-line-insert-bg: rgba(16, 185, 129, 0.14);
+      --diff-line-delete-bg: rgba(239, 68, 68, 0.14);
+      --diff-line-replace-bg: rgba(245, 158, 11, 0.16);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      background: var(--diff-background);
+      color: #111827;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .diff-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid var(--diff-border-color);
+      padding: 12px 20px;
+      box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06);
+    }
+
+    .diff-header__primary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .diff-header__side {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .diff-header__side--left .diff-header__label {
+      color: var(--diff-left-color);
+    }
+
+    .diff-header__side--right .diff-header__label {
+      color: var(--diff-right-color);
+    }
+
+    .diff-header__label {
+      font-size: 0.85em;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .diff-header__value {
+      font-feature-settings: "tnum";
+      font-family: var(--diff-font-family);
+    }
+
+    .diff-header__file {
+      flex: 1 1 auto;
+      min-width: 180px;
+      font-size: 0.9rem;
+      color: var(--diff-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .diff-header__status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--diff-muted);
+      margin-top: 8px;
+    }
+
+    .diff-header__status strong {
+      color: #111827;
+    }
+
+    main {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 20px 20px;
+    }
+
+    .diff-root {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      background: #ffffff;
+      border: 1px solid var(--diff-border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .diff-toolbar {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--diff-border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.92), rgba(255, 255, 255, 0.92));
+    }
+
+    .diff-toolbar__metrics {
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--diff-muted);
+    }
+
+    .diff-toolbar__metrics span strong {
+      color: #111827;
+      font-feature-settings: "tnum";
+    }
+
+    .diff-toolbar__hint {
+      font-size: 0.8rem;
+      color: var(--diff-muted);
+    }
+
+    .diff-viewport {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      background: #ffffff;
+      font-family: var(--diff-font-family);
+      font-size: var(--diff-font-size);
+      line-height: var(--diff-row-height);
+    }
+
+    .diff-viewport--loading::after {
+      content: "Loading diff…";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.82);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.95rem;
+      color: var(--diff-muted);
+      backdrop-filter: blur(2px);
+      z-index: 10;
+    }
+
+    .diff-error {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(248, 113, 113, 0.14);
+      color: #991b1b;
+      font-size: 0.95rem;
+      z-index: 25;
+      text-align: center;
+    }
+
+    .diff-error--visible {
+      display: flex;
+    }
+
+    .diff-layer {
+      position: relative;
+      min-width: 100%;
+    }
+
+    .diff-spacer {
+      height: 0;
+      visibility: hidden;
+    }
+
+    .diff-visible-rows {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: max-content;
+    }
+
+    .diff-row {
+      display: grid;
+      grid-template-columns: var(--diff-line-number-width) minmax(var(--diff-left-column-min), max-content) var(--diff-line-number-width) minmax(var(--diff-right-column-min), max-content);
+      column-gap: 12px;
+      border-bottom: 1px solid #edf2f7;
+      padding: 0 16px 0 20px;
+      min-height: var(--diff-row-height);
+      align-items: stretch;
+    }
+
+    .diff-row:last-child {
+      border-bottom: none;
+    }
+
+    .diff-line-number {
+      text-align: right;
+      color: var(--diff-muted);
+      padding-top: 2px;
+      font-size: 0.8rem;
+      font-feature-settings: "tnum";
+    }
+
+    .diff-line-content {
+      white-space: pre;
+      overflow: visible;
+      padding: 2px 0;
+    }
+
+    .diff-row--insert {
+      background: var(--diff-line-insert-bg);
+    }
+
+    .diff-row--delete {
+      background: var(--diff-line-delete-bg);
+    }
+
+    .diff-row--replace {
+      background: var(--diff-line-replace-bg);
+    }
+
+    .diff-token-insert {
+      background: var(--diff-token-insert-bg);
+      border-radius: 3px;
+    }
+
+    .diff-token-delete {
+      background: var(--diff-token-delete-bg);
+      border-radius: 3px;
+    }
+
+    .diff-stats__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: rgba(59, 130, 246, 0.12);
+      color: #1d4ed8;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+    }
+
+    .diff-status--match {
+      color: #047857;
+    }
+
+    .diff-status--different {
+      color: #b45309;
+    }
+
+  </style>
+  <script>
+    window.DiffViewerBootstrap = {
+      leftLabel: {{ runid | tojson }},
+      rightLabel: {{ diff_runid | tojson }},
+      config: {{ config | tojson }},
+      fileSubpath: {{ subpath | tojson }},
+      leftDownloadUrl: {{ left_download_url | tojson }},
+      rightDownloadUrl: {{ right_download_url | tojson }}
+    };
+  </script>
+  <script defer src="{{ url_for('static', filename='js/diff_viewer.js') }}"></script>
+</head>
+<body>
+  <header class="diff-header">
+    <div class="diff-header__primary">
+      <div class="diff-header__side diff-header__side--left">
+        <span class="diff-header__label">Left Run</span>
+        <span class="diff-header__value" data-role="left-run">{{ runid }}</span>
+      </div>
+      <div class="diff-header__side diff-header__side--right">
+        <span class="diff-header__label">Right Run</span>
+        <span class="diff-header__value" data-role="right-run">{{ diff_runid }}</span>
+      </div>
+      <div class="diff-header__file" title="{{ subpath }}">{{ subpath }}</div>
+    </div>
+    <div class="diff-header__status">
+      <span class="diff-stats__badge">Config {{ config }}</span>
+      <span>Status:</span>
+      <strong id="diff-status" class="diff-status--loading">Loading…</strong>
+    </div>
+  </header>
+  <main>
+    <div class="diff-root">
+      <div class="diff-toolbar">
+        <div class="diff-toolbar__metrics" id="diff-metrics">
+          <span>Left <strong data-role="left-lines">0</strong></span>
+          <span>Right <strong data-role="right-lines">0</strong></span>
+          <span><strong data-role="changes-count">0</strong> changed rows</span>
+        </div>
+        <div class="diff-toolbar__hint">Scroll to explore · Horizontal scroll keeps both panes in sync</div>
+      </div>
+      <div class="diff-viewport diff-viewport--loading" id="diff-viewport">
+        <div class="diff-error" id="diff-error"></div>
+        <div class="diff-layer">
+          <div class="diff-spacer" id="diff-spacer"></div>
+          <div class="diff-visible-rows" id="diff-visible-rows"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
