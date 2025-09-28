@@ -17,9 +17,30 @@ var DssExport = function () {
         that.status = $("#dss_export_form  #status");
         that.stacktrace = $("#dss_export_form #stacktrace");
         that.ws_client = new WSClient('dss_export_form', 'dss_export');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#dss_export_form #rq_job");
         that.command_btn_id = 'btn_export_dss';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'DSS_EXPORT_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+
+                if (typeof Omni !== 'undefined') {
+                    var omni = Omni.getInstance();
+                    if (omni && omni.ws_client && typeof omni.ws_client.disconnect === 'function') {
+                        omni.ws_client.disconnect();
+                    }
+                    if (omni && typeof omni.report_scenarios === 'function') {
+                        omni.report_scenarios();
+                    }
+                }
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.show = function () {
             that.container.show();
@@ -64,8 +85,6 @@ var DssExport = function () {
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
             self.ws_client.connect();
-
-            console.log(self.form.serialize());
 
             $.post({
                 url: "rq/api/post_dss_export_rq",

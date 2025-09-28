@@ -14,6 +14,19 @@ var LanduseModify = function () {
             self.stacktrace.hide();
         };
 
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'LANDCOVER_MODIFY_TASK_COMPLETED') {
+                var subCtrl = SubcatchmentDelineation.getInstance();
+                if (subCtrl.getCmapMode && subCtrl.getCmapMode() === 'dom_lc') {
+                    subCtrl.setColorMap('dom_lc');
+                }
+                Landuse.getInstance().report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
+
         that.checkbox = $('#checkbox_modify_landuse');
         that.textarea = $('#textarea_modify_landuse');
         that.selection = $('#selection_modify_landuse');
@@ -276,7 +289,7 @@ var LanduseModify = function () {
                         self.hideModifyMap();
                         self.status.html(task_msg + "... Success");
 
-                        self.form.trigger("LANDCOVER_MODIFY_TASK_COMPLETED");
+                        self.triggerEvent('LANDCOVER_MODIFY_TASK_COMPLETED');
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }

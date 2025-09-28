@@ -12,9 +12,20 @@ var Ash = function () {
         that.status = $("#ash_form  #status");
         that.stacktrace = $("#ash_form #stacktrace");
         that.ws_client = new WSClient('ash_form', 'ash');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#ash_form #rq_job");
         that.command_btn_id = 'btn_run_ash';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'ASH_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;

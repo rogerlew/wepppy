@@ -323,6 +323,21 @@ function controlBase() {
                     self.ws_client.connect();
                 }
             }
+        },
+
+        triggerEvent: function triggerEvent(eventName, payload) {
+            if (!eventName) {
+                return;
+            }
+
+            var form = this.form;
+            if (form && typeof form.trigger === 'function') {
+                if (payload === undefined) {
+                    form.trigger(eventName);
+                } else {
+                    form.trigger(eventName, payload);
+                }
+            }
         }
 
     };

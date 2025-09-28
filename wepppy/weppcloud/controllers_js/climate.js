@@ -12,9 +12,25 @@ var Climate = function () {
         that.status = $("#climate_form  #status");
         that.stacktrace = $("#climate_form #stacktrace");
         that.ws_client = new WSClient('climate_form', 'climate');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#climate_form #rq_job");
         that.command_btn_id = 'btn_build_climate';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'CLIMATE_SETSTATIONMODE_TASK_COMPLETED') {
+                that.refreshStationSelection();
+                that.viewStationMonthlies();
+            } else if (eventName === 'CLIMATE_SETSTATION_TASK_COMPLETED') {
+                that.viewStationMonthlies();
+            } else if (eventName === 'CLIMATE_BUILD_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -56,7 +72,7 @@ var Climate = function () {
                 data: { "mode": mode },
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("CLIMATE_SETSTATIONMODE_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATIONMODE_TASK_COMPLETED');
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -88,7 +104,7 @@ var Climate = function () {
                 processData: false,
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("CLIMATE_BUILD_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_BUILD_TASK_COMPLETED');
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -124,7 +140,7 @@ var Climate = function () {
                     data: { "mode": mode },
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     },
                     error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -141,7 +157,7 @@ var Climate = function () {
                     cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     },
                     error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -158,7 +174,7 @@ var Climate = function () {
                     cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     },
                     error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -175,7 +191,7 @@ var Climate = function () {
                     cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     },
                     error: function error(jqXHR) {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -208,7 +224,7 @@ var Climate = function () {
                 data: { "station": station },
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                        self.triggerEvent('CLIMATE_SETSTATION_TASK_COMPLETED');
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }

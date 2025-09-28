@@ -12,9 +12,21 @@ var Landuse = function () {
         that.status = $("#landuse_form  #status");
         that.stacktrace = $("#landuse_form #stacktrace");
         that.ws_client = new WSClient('landuse_form', 'landuse');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#landuse_form #rq_job");
         that.command_btn_id = 'btn_build_landuse';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'LANDUSE_BUILD_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+                SubcatchmentDelineation.getInstance().enableColorMap('dom_lc');
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
 
         that.hideStacktrace = function () {

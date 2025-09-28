@@ -12,9 +12,20 @@ var Rhem = function () {
         that.status = $("#rhem_form  #status");
         that.stacktrace = $("#rhem_form #stacktrace");
         that.ws_client = new WSClient('rhem_form', 'rhem');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#rhem_form #rq_job");
         that.command_btn_id = 'btn_run_rhem';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'RHEM_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;

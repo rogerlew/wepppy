@@ -12,9 +12,21 @@ var Soil = function () {
         that.status = $("#soil_form  #status");
         that.stacktrace = $("#soil_form #stacktrace");
         that.ws_client = new WSClient('soil_form', 'soils');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#soil_form #rq_job");
         that.command_btn_id = 'btn_build_soil';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'SOILS_BUILD_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+                SubcatchmentDelineation.getInstance().enableColorMap('dom_soil');
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;

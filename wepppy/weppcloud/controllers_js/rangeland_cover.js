@@ -13,8 +13,19 @@ var RangelandCover = function () {
         that.status = $("#rangeland_cover_form  #status");
         that.stacktrace = $("#rangeland_cover_form #stacktrace");
         that.ws_client = new WSClient('rangeland_cover_form', 'rangeland_cover');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#rangeland_cover_form #rq_job");
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'RANGELAND_COVER_BUILD_TASK_COMPLETED') {
+                SubcatchmentDelineation.getInstance().enableColorMap("rangeland_cover");
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;
@@ -35,7 +46,7 @@ var RangelandCover = function () {
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("RANGELAND_COVER_BUILD_TASK_COMPLETED");
+                        self.triggerEvent('RANGELAND_COVER_BUILD_TASK_COMPLETED');
                         self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);

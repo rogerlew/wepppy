@@ -12,9 +12,20 @@ var Omni = function () {
         that.status = $("#omni_form  #status");
         that.stacktrace = $("#omni_form #stacktrace");
         that.ws_client = new WSClient('omni_form', 'omni');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#omni_form #rq_job");
         that.command_btn_id = 'btn_run_omni';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'OMNI_SCENARIO_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report_scenarios();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.serializeScenarios = function () {
             const formData = new FormData();
