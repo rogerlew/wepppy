@@ -12,9 +12,20 @@ var DebrisFlow = function () {
         that.status = $("#debris_flow_form  #status");
         that.stacktrace = $("#debris_flow_form #stacktrace");
         that.ws_client = new WSClient('debris_flow_form', 'debris_flow');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#debris_flow_form #rq_job");
         that.command_btn_id = 'btn_run_debris_flow';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'DEBRIS_FLOW_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;

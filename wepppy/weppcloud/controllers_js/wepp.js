@@ -12,9 +12,21 @@ var Wepp = function () {
         that.status = $("#wepp_form  #status");
         that.stacktrace = $("#wepp_form #stacktrace");
         that.ws_client = new WSClient('wepp_form', 'wepp');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#wepp_form #rq_job");
         that.command_btn_id = 'btn_run_wepp';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'WEPP_RUN_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+                Observed.getInstance().onWeppRunCompleted();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;

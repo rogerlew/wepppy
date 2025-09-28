@@ -12,9 +12,23 @@ var Outlet = function () {
         that.status = $("#set_outlet_form  #status");
         that.stacktrace = $("#set_outlet_form #stacktrace");
         that.ws_client = new WSClient('set_outlet_form', 'outlet');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#set_outlet_form #rq_job");
         that.command_btn_id = ['btn_set_outlet_cursor', 'btn_set_outlet_entry'];
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'SET_OUTLET_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                if (that.popup && typeof that.popup.remove === 'function') {
+                    that.popup.remove();
+                }
+                that.show();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;

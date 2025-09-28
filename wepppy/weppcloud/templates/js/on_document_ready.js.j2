@@ -574,16 +574,6 @@ function onReady() {
         channel_ctrl.build();
     });
 
-    //
-    // Channel Event Handling
-    //
-
-    channel_ctrl.form.on("BUILD_CHANNELS_TASK_COMPLETED", function () {
-        channel_ctrl.ws_client.disconnect();
-        channel_ctrl.show();
-        channel_ctrl.report();
-    });
-
     // load the hidden inputs on channel form
     channel_ctrl.onMapChange();
 
@@ -633,15 +623,9 @@ function onReady() {
     //
     outlet.set_rq_job_id(outlet, {{ rq_job_ids.get("set_outlet_rq") | tojson }});
 
-    outlet.form.on("SET_OUTLET_TASK_COMPLETED", function () {
-        outlet.ws_client.disconnect();
-        outlet.popup.remove();
-        outlet.show();
-    });
-
     // Load outlet from server
     if ({{ watershed.has_outlet | tojson }}) {
-        outlet.form.trigger("SET_OUTLET_TASK_COMPLETED");
+        outlet.triggerEvent('SET_OUTLET_TASK_COMPLETED');
     }
 
     outlet.setMode(parseInt($("input[name='set_outlet_mode']:checked").val(), 10));
@@ -699,25 +683,6 @@ function onReady() {
         sub_ctrl.setColorMap($("input[name='rhem_sub_cmap_radio']:checked").val());
     });
     {% endif %}
-
-    //
-    // Subcatchment Event Bindings
-    //
-    sub_ctrl.form.on("BUILD_SUBCATCHMENTS_TASK_COMPLETED", function () {
-        sub_ctrl.show();
-        channel_ctrl.show();
-    });
-
-    sub_ctrl.form.on("WATERSHED_ABSTRACTION_TASK_COMPLETED", function () {
-        console.log("WATERSHED_ABSTRACTION_TASK_COMPLETED event received.");
-        sub_ctrl.ws_client.disconnect();
-        sub_ctrl.report();
-        sub_ctrl.enableColorMap("slp_asp");
-        wepp.updatePhosphorus();
-    });
-
-
-
 
     {% if 'rap' in ron.mods %}
     // Cover
@@ -827,15 +792,6 @@ function onReady() {
 
     $("#btn_build_rangeland_cover").click(rangeland_cover.build);
 
-    //
-    // Rangeland Cover Event Bindings
-    //
-    rangeland_cover.form.on("RANGELAND_COVER_BUILD_TASK_COMPLETED", function () {
-        sub_ctrl.enableColorMap("rangeland_cover");
-        rangeland_cover.report();
-    });
-
-
     if ({{ rangeland_cover.has_covers | tojson }}) {
         rangeland_cover.report();
         sub_ctrl.enableColorMap("rangeland_cover");
@@ -851,15 +807,6 @@ function onReady() {
     //
     $("#checkbox_modify_rangeland_cover").on("change", function () {
         rangeland_cover_modify.toggle();
-    });
-
-
-    rangeland_cover_modify.form.on("RANGELAND_COVER_MODIFY_TASK_COMPLETED", function () {
-        if (sub_ctrl.getCmapMode() === "rangeland_cover") {
-            sub_ctrl.setColorMap("rangeland_cover");
-        }
-        rangeland_cover.report();
-        sub_ctrl.cmapRangelandCover();
     });
 
 
@@ -882,22 +829,13 @@ function onReady() {
     });
 
     //
-    // Landuse Event Bindings
-    //
-    landuse.form.on("LANDUSE_BUILD_TASK_COMPLETED", function () {
-        landuse.ws_client.disconnect();
-        landuse.report();
-        sub_ctrl.enableColorMap("dom_lc");
-    });
-
-    //
     // Initial Configuration
     //
     landuse.set_rq_job_id(landuse, {{ rq_job_ids.get("build_landuse_rq") | tojson }});
 
     // load landuse
     if ({{ landuse.has_landuse | tojson }} ) {
-        landuse.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
+        landuse.triggerEvent('LANDUSE_BUILD_TASK_COMPLETED');
     }
 
     /*
@@ -912,13 +850,6 @@ function onReady() {
         lc_modify.toggle();
     });
 
-
-    lc_modify.form.on("LANDCOVER_MODIFY_TASK_COMPLETED", function () {
-        if (sub_ctrl.getCmapMode() === "dom_lc") {
-            sub_ctrl.setColorMap("dom_lc");
-        }
-        landuse.report();
-    });
 
     /*
      * Soil Initialization
@@ -941,15 +872,6 @@ function onReady() {
     });
 
     //
-    // Subcatchment Event Bindings
-    //
-    soil.form.on("SOILS_BUILD_TASK_COMPLETED", function () {
-        soil.ws_client.disconnect();
-        soil.report();
-        sub_ctrl.enableColorMap("dom_soil");
-    });
-
-    //
     // Initial Configuration
     //
     soil.set_rq_job_id(soil, {{ rq_job_ids.get("build_soils_rq") | tojson }});
@@ -962,7 +884,7 @@ function onReady() {
     }
     // load soil
     if ({{ soils.has_soils | tojson }} ) {
-        soil.form.trigger("SOILS_BUILD_TASK_COMPLETED");
+        soil.triggerEvent('SOILS_BUILD_TASK_COMPLETED');
     }
 
     /*
@@ -1017,23 +939,6 @@ function onReady() {
 
     // Initialize on page load
     togglePrecipScalingControls();
-
-    //
-    // Climate Event Bindings
-    //
-    climate.form.on("CLIMATE_SETSTATIONMODE_TASK_COMPLETED", function () {
-        climate.refreshStationSelection();
-        climate.viewStationMonthlies();
-    });
-
-    climate.form.on("CLIMATE_SETSTATION_TASK_COMPLETED", function () {
-        climate.viewStationMonthlies();
-    });
-
-    climate.form.on("CLIMATE_BUILD_TASK_COMPLETED", function () {
-        climate.ws_client.disconnect();
-        climate.report();
-    });
 
     //
     // Initial Configuration
@@ -1103,19 +1008,7 @@ function onReady() {
         wepp.setMode();
     });
 
-    wepp.form.on("WEPP_RUN_TASK_COMPLETED", function () {
-        wepp.ws_client.disconnect();
-        wepp.report();
-        observed.onWeppRunCompleted();
-    });
-
-
     {% if 'omni' in ron.mods and omni %}
-
-    omni.form.on("OMNI_SCENARIO_RUN_TASK_COMPLETED", function () {
-        omni.ws_client.disconnect();
-        omni.report_scenarios();
-    });
 
     omni.load_scenarios_from_backend();
 
@@ -1124,17 +1017,6 @@ function onReady() {
     }
 
     {% endif %}
-
-    dss_export.form.on("DSS_EXPORT_TASK_COMPLETED", function () {
-        omni.ws_client.disconnect();
-        omni.report_scenarios();
-    });
-
-
-    dss_export.form.on("DSS_EXPORT_TASK_COMPLETED", function () {
-        dss_export.ws_client.disconnect();
-        dss_export.report();
-    });
 
     {% if 'rhem' in ron.mods %}
     /*
@@ -1149,11 +1031,6 @@ function onReady() {
     // Bindings
     //
     rhem.set_rq_job_id(rhem, {{ rq_job_ids.get("run_rhem_rq") | tojson }});
-
-    rhem.form.on("RHEM_RUN_TASK_COMPLETED", function () {
-        rhem.ws_client.disconnect();
-        rhem.report();
-    });
 
     if ({{ rhem.has_run | tojson }} ) {
         rhem.report();
@@ -1190,23 +1067,11 @@ function onReady() {
 
     ash.setAshDepthMode({{ ash.ash_depth_mode }});
 
-    ash.form.on("ASH_RUN_TASK_COMPLETED", function () {
-        ash.ws_client.disconnect();
-        ash.report();
-    });
     {% endif %}
 
-    rap_ts.form.on("RAP_TS_TASK_COMPLETED", function () {
-        rap_ts.ws_client.disconnect();
-        rap_ts.report();
-    });
     rap_ts.set_rq_job_id(rap_ts, {{ rq_job_ids.get("fetch_and_analyze_rap_ts_rq") | tojson }});
 
 
-    debris_flow.form.on("DEBRIS_FLOW_RUN_TASK_COMPLETED", function () {
-        debris_flow.ws_client.disconnect();
-        debris_flow.report();
-    });
     debris_flow.set_rq_job_id(debris_flow, {{ rq_job_ids.get("run_debris_flow_rq") | tojson }});
 
     project.set_readonly_controls({{ ron.readonly | tojson }})

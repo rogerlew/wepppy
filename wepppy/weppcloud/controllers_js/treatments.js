@@ -12,6 +12,7 @@ var Treatments = function () {
         that.status = $("#treatments_form  #status");
         that.stacktrace = $("#treatments_form #stacktrace");
         that.ws_client = new WSClient('treatments_form', 'treatments');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#treatments_form #rq_job");
         that.command_btn_id = 'btn_build_treatments';

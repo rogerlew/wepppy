@@ -12,9 +12,20 @@ var RAP_TS = function () {
         that.status = $("#rap_ts_form  #status");
         that.stacktrace = $("#rap_ts_form #stacktrace");
         that.ws_client = new WSClient('rap_ts_form', 'rap_ts');
+       that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#rap_ts_form #rq_job");
         that.command_btn_id = 'btn_build_rap_ts';
+
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'RAP_TS_TASK_COMPLETED') {
+                that.ws_client.disconnect();
+                that.report();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.hideStacktrace = function () {
             var self = instance;

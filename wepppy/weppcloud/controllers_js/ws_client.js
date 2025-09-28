@@ -45,9 +45,6 @@ WSClient.prototype.connect = function () {
             if (lines.length > 1) {
                 data = lines[0] + '...';
             }
-            if (data.length > 100) {
-                data = data.substring(0, 100) + '...';
-            }
 
             if (data.includes("EXCEPTION")) {
                 var stacktrace = $("#" + this.formId + " #stacktrace");
@@ -80,24 +77,31 @@ WSClient.prototype.connect = function () {
                 $("#" + this.formId + " #status").html(commandMessage);
                 this.pushCommandBarResult(commandMessage);
             }
-            
-            if (data.includes("TRIGGER")) {
-                // need to parse the trigger command and execute it
-                // second to last argument is the controller
-                // last argument is the event
-                var trigger = data.split(' ');
-                var controller = trigger[trigger.length - 2];
-                var event = trigger[trigger.length - 1];
 
-                if (controller == this.channel) {
-                    $("#" + this.formId).trigger(event);
+            if (data.includes("TRIGGER")) {
+                const tokens = data.trim().split(/\s+/);
+                const event = tokens.length > 0 ? tokens[tokens.length - 1] : null;
+                const controller = tokens.length > 1 ? tokens[tokens.length - 2] : null;
+
+                if (controller && controller === this.channel) {
+                    if (this._parentControl && typeof this._parentControl.triggerEvent === 'function') {
+                        try {
+                            this._parentControl.triggerEvent(event, { tokens: tokens, raw: data });
+                        } catch (err) {
+                            console.warn('WSClient triggerEvent error:', err);
+                        }
+                    } else if (this._parentControl && this._parentControl.form && typeof this._parentControl.form.trigger === 'function') {
+                        this._parentControl.form.trigger(event);
+                    }
+
                     if (typeof event === 'string' && event.toUpperCase().includes('COMPLETE')) {
                         this.resetSpinner();
                     }
                 }
-
-            }
-            else {
+            } else {
+                if (data.length > 120) {
+                    data = data.substring(0, 120) + '...';
+                }
                 $("#" + this.formId + " #status").html(data);
             }
         }
@@ -161,4 +165,8 @@ WSClient.prototype.pushCommandBarResult = function (message) {
     } catch (error) {
         console.warn('Unable to update command bar result:', error);
     }
+};
+
+WSClient.prototype.attachControl = function (control) {
+    this._parentControl = control || null;
 };

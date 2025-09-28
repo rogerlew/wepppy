@@ -12,6 +12,7 @@ var Baer = function () {
         that.status = $("#sbs_upload_form  #status");
         that.stacktrace = $("#sbs_upload_form #stacktrace");
         that.ws_client = new WSClient('sbs_upload_form', 'sbs_upload');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#sbs_upload_form #rq_job");
 

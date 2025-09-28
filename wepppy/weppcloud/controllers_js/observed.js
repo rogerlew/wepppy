@@ -13,6 +13,7 @@ var Observed = function () {
         that.status = $("#observed_form  #status");
         that.stacktrace = $("#observed_form #stacktrace");
         that.ws_client = new WSClient('observed_form', 'observed');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#observed_form #rq_job");
 

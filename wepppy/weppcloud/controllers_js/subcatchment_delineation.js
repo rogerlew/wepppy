@@ -12,6 +12,7 @@ var SubcatchmentDelineation = function () {
         that.status = $("#build_subcatchments_form  #status");
         that.stacktrace = $("#build_subcatchments_form #stacktrace");
         that.ws_client = new WSClient('build_subcatchments_form', 'subcatchment_delineation');
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#build_subcatchments_form #rq_job");
         that.command_btn_id = 'btn_build_subcatchments';
@@ -59,6 +60,20 @@ var SubcatchmentDelineation = function () {
         // various query-result dicts filled by cmap*() functions
         that.dataCover = null;
 
+        const baseTriggerEvent = that.triggerEvent.bind(that);
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'BUILD_SUBCATCHMENTS_TASK_COMPLETED') {
+                that.show();
+                ChannelDelineation.getInstance().show();
+            } else if (eventName === 'WATERSHED_ABSTRACTION_TASK_COMPLETED') {
+                that.report();
+                that.ws_client.disconnect();
+                that.enableColorMap("slp_asp");
+                Wepp.getInstance().updatePhosphorus();
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
 
         that.enableColorMap = function (cmap_name) {
             if (cmap_name === "dom_lc") {
