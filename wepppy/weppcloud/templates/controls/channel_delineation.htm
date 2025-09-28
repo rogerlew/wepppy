@@ -38,7 +38,8 @@
             </div>
             <div class="col-sm-3">
                 <input id="input_mcl" name="mcl" class="form-control mr-sm-3 disable-readonly" type="text"
-                    value="{{ watershed.mcl | round | int }}" aria-label="Lon, Lat">
+                    value="{{ watershed.mcl | round | int }}" aria-label="Lon, Lat"
+                    data-convert-target="#input_mcl_en" data-convert-func="m_to_ft" data-convert-decimals="2">
             </div>
         </div>
         <div class="form-group row">
@@ -51,7 +52,8 @@
             </div>
             <div class="col-sm-3">
                 <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text"
-                    value="{{ watershed.csa | round | int }}" aria-label="Lon, Lat">
+                    value="{{ watershed.csa | round | int }}" aria-label="Lon, Lat"
+                    data-convert-target="#input_csa_en" data-convert-func="ha_to_ac" data-convert-decimals="2">
             </div>
         </div>
         {% else %}
@@ -84,7 +86,8 @@
             </div>
             <div class="col-sm-3">
                 <input id="input_mcl_en" name="mcl_en" class="form-control mr-sm-3 disable-readonly" type="text"
-                    value="{{ (watershed.mcl * 3.28084) | round | int }}" aria-label="Lon, Lat">
+                    value="{{ (watershed.mcl * 3.28084) | round | int }}" aria-label="Lon, Lat"
+                    data-convert-target="#input_mcl" data-convert-func="ft_to_m" data-convert-decimals="2">
             </div>
         </div>
         <div class="form-group row">
@@ -97,7 +100,8 @@
             </div>
             <div class="col-sm-3">
                 <input id="input_csa_en" name="csa_en" class="form-control mr-sm-3 disable-readonly" type="text"
-                    value="{{ (watershed.csa * 2.47105) | round | int }}" aria-label="Lon, Lat">
+                    value="{{ (watershed.csa * 2.47105) | round | int }}" aria-label="Lon, Lat"
+                    data-convert-target="#input_csa" data-convert-func="ac_to_ha" data-convert-decimals="2">
             </div>
         </div>
         {% else %}

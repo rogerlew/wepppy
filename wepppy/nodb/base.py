@@ -323,7 +323,7 @@ class NoDbBase(object):
         e.g. 'wepp.nodb', 'ron.nodb', 'landuse.nodb', etc.
         or for pup (child) runs: '_pups/omni/scenarios/undisturbed/wepp.nodb'
         """
-        _rel_path = self._relpath_to_parent
+        _rel_path = self.pup_relpath
         if _rel_path is None:
             return self.filename
         return _join(_rel_path, self.filename)
@@ -345,10 +345,10 @@ class NoDbBase(object):
         if self.parent_wd is None:
             return False
         
-        return self._relpath_to_parent.startswith('_pups/')
-    
+        return self.pup_relpath.startswith('_pups/')
+
     @property
-    def _relpath_to_parent(self):
+    def pup_relpath(self):  # relative path to the parent or None
         if self.parent_wd is None:
             return None
         
@@ -360,10 +360,11 @@ class NoDbBase(object):
             return relpath
         
         return None
+    
         
     @property
     def _logger_base_name(self):
-        _rel_path = self._relpath_to_parent
+        _rel_path = self.pup_relpath
         if _rel_path is None:
             return f'wepppy.run.{self.runid}'
         _rel_path = _rel_path.split('/')
@@ -379,7 +380,7 @@ class NoDbBase(object):
         Redis channel name for status messages.
         """
         # this is a router
-        _rel_path = self._relpath_to_parent
+        _rel_path = self.pup_relpath
         if _rel_path is None:    
             return f'{self.runid}:{self.class_name}'
     

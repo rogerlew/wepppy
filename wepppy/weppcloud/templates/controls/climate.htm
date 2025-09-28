@@ -297,7 +297,8 @@
                         <input id="ss_design_storm_amount_mm"
                         name="ss_design_storm_amount_mm" class="form-control mr-sm-3 disable-readonly" type="text"
                         value="{{ climate.ss_design_storm_amount_inches * 25.4 }}" placeholder=""
-                        aria-label="Design Storm Amount in mm">
+                        aria-label="Design Storm Amount in mm"
+                        data-convert-target="#ss_design_storm_amount_inches" data-convert-func="mm_to_in" data-convert-decimals="2">
                     </div>
                 </div>
             </div>
@@ -310,7 +311,8 @@
                         <input id="ss_design_storm_amount_inches"
                         name="ss_design_storm_amount_inches" class="form-control mr-sm-3 disable-readonly" type="text"
                         value="{{ climate.ss_design_storm_amount_inches }}" placeholder=""
-                        aria-label="Design Storm Amount in inches">
+                        aria-label="Design Storm Amount in inches"
+                        data-convert-target="#ss_design_storm_amount_mm" data-convert-func="in_to_mm" data-convert-decimals="2">
                     </div>
                 </div>
             </div>
@@ -350,7 +352,8 @@
                         <input id="ss_max_intensity_mm_per_hour"
                         name="ss_max_intensity_mm_per_hour" class="form-control mr-sm-3 disable-readonly" type="text"
                         value="{{ climate.ss_max_intensity_inches_per_hour * 25.4 }}" placeholder=""
-                        aria-label="Max intensity mm per hour">
+                        aria-label="Max intensity mm per hour"
+                        data-convert-target="#ss_max_intensity_inches_per_hour" data-convert-func="mm_to_in" data-convert-decimals="2">
                     </div>
                 </div>
             </div>
@@ -363,7 +366,8 @@
                         <input id="ss_max_intensity_inches_per_hour"
                         name="ss_max_intensity_inches_per_hour" class="form-control mr-sm-3 disable-readonly" type="text"
                         value="{{ climate.ss_max_intensity_inches_per_hour }}" placeholder=""
-                        aria-label="Max intensity inches per hour">
+                        aria-label="Max intensity inches per hour"
+                        data-convert-target="#ss_max_intensity_mm_per_hour" data-convert-func="in_to_mm" data-convert-decimals="2">
                     </div>
                 </div>
             </div>
