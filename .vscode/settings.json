@@ -14,5 +14,8 @@
     "**/_scripts",
     "**/_scripts_hwd",
     "**/__pycache__"
-  ]
+  ],
+  "files.associations": {
+    "*.htm": "jinja-html"
+  }
 }

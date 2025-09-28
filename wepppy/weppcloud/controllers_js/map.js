@@ -34,6 +34,7 @@ var Map = function () {
         that.sbs_legend = $("#sbs_legend");
 
         that.fetchTimer;
+        that.centerInput = $("#input_centerloc");
         that.fetchElevation = function (ev) {
             var self = instance;
 
@@ -77,6 +78,101 @@ var Map = function () {
             self.mouseelev.fadeOut(2000);
             that.isFetchingElevation = false;
         });
+
+        function sanitizeLocationInput(value) {
+            if (!value) {
+                return [];
+            }
+            var sanitized = String(value).replace(/[a-zA-Z{}\[\]\\|\/<>;:]/g, '');
+            return sanitized.split(/[\s,]+/).filter(function (item) {
+                return item !== '';
+            });
+        }
+
+        that.goToEnteredLocation = function () {
+            var parts = sanitizeLocationInput(that.centerInput.val());
+            if (parts.length < 2) {
+                return;
+            }
+
+            var lon = parseFloat(parts[0]);
+            var lat = parseFloat(parts[1]);
+
+            if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
+                console.warn('Invalid location values', parts);
+                return;
+            }
+
+            var zoom = that.getZoom();
+            if (parts.length >= 3) {
+                var parsedZoom = parseInt(parts[2], 10);
+                if (Number.isFinite(parsedZoom)) {
+                    zoom = parsedZoom;
+                }
+            }
+
+            that.flyTo([lat, lon], zoom);
+        };
+
+        that.handleCenterInputKey = function (event) {
+            if (!event) {
+                return;
+            }
+            var key = event.key || event.keyCode;
+            if (key === 'Enter' || key === 13) {
+                event.preventDefault();
+                that.goToEnteredLocation();
+            }
+        };
+
+        that.findById = function (idType) {
+            if (!window.WEPP_FIND_AND_FLASH) {
+                console.warn('WEPP_FIND_AND_FLASH helper not available');
+                return;
+            }
+
+            var value = (that.centerInput.val() || '').trim();
+            if (!value) {
+                return;
+            }
+
+            var subCtrl = SubcatchmentDelineation.getInstance();
+            var channelCtrl = ChannelDelineation.getInstance();
+
+            window.WEPP_FIND_AND_FLASH.findAndFlashById({
+                idType: idType,
+                value: value,
+                map: that,
+                layers: [
+                    { ctrl: subCtrl, type: window.WEPP_FIND_AND_FLASH.FEATURE_TYPE.SUBCATCHMENT },
+                    { ctrl: channelCtrl, type: window.WEPP_FIND_AND_FLASH.FEATURE_TYPE.CHANNEL }
+                ],
+                onFlash: function (result) {
+                    var topazId = value;
+
+                    if (idType !== window.WEPP_FIND_AND_FLASH.ID_TYPE.TOPAZ) {
+                        var hit = result.hits && result.hits[0];
+                        if (hit && hit.properties && hit.properties.TopazID !== undefined && hit.properties.TopazID !== null) {
+                            topazId = hit.properties.TopazID;
+                        }
+                    }
+
+                    if (result.featureType === window.WEPP_FIND_AND_FLASH.FEATURE_TYPE.SUBCATCHMENT) {
+                        that.subQuery(topazId);
+                    } else if (result.featureType === window.WEPP_FIND_AND_FLASH.FEATURE_TYPE.CHANNEL) {
+                        that.chnQuery(topazId);
+                    }
+                }
+            });
+        };
+
+        that.findByTopazId = function () {
+            that.findById(window.WEPP_FIND_AND_FLASH.ID_TYPE.TOPAZ);
+        };
+
+        that.findByWeppId = function () {
+            that.findById(window.WEPP_FIND_AND_FLASH.ID_TYPE.WEPP);
+        };
 
         // define the base layer and add it to the map
         // does not require an API key

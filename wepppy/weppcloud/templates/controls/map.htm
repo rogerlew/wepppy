@@ -6,17 +6,21 @@
     <div class="form-group row align-items-center">
       <div class="col-sm-5">
         <input id="input_centerloc" name="centerloc" class="form-control" type="text"
-          placeholder="Lon, Lat, [Zoom] | Topaz | Wepp" aria-label="Lon, Lat, [Zoom] | TopazID | WeppID">
+          placeholder="Lon, Lat, [Zoom] | Topaz | Wepp" aria-label="Lon, Lat, [Zoom] | TopazID | WeppID"
+          onkeydown="Map.getInstance().handleCenterInputKey(event)">
       </div>
       <div class="col-auto">
-        <button id="btn_setloc" name="setloc" class="btn btn-outline-success" type="button">Go</button>
+        <button id="btn_setloc" name="setloc" class="btn btn-outline-success" type="button"
+          onclick="Map.getInstance().goToEnteredLocation()">Go</button>
       </div>
       <div class="col-auto">
-        <button id="btn_find_topaz_id" name="find_topaz_id" class="btn btn-outline-success" type="button">🔍
+        <button id="btn_find_topaz_id" name="find_topaz_id" class="btn btn-outline-success" type="button"
+          onclick="Map.getInstance().findByTopazId()">🔍
           TopazID</button>
       </div>
       <div class="col-auto">
-        <button id="btn_find_wepp_id" name="find_wepp_id" class="btn btn-outline-success" type="button">🔍
+        <button id="btn_find_wepp_id" name="find_wepp_id" class="btn btn-outline-success" type="button"
+          onclick="Map.getInstance().findByWeppId()">🔍
           WeppID</button>
       </div>
     </div>
