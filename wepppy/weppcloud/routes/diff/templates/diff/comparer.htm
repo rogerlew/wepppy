@@ -7,17 +7,20 @@
   <style>
     :root {
       --diff-font-family: "Fira Mono", "Menlo", "Consolas", "Courier New", monospace;
-      --diff-font-size: 13px;
+      --diff-font-size: 14px;
       --diff-header-height: 72px;
+      --diff-toolbar-height: 56px;
       --diff-background: #f5f7fb;
       --diff-border-color: #d8dee9;
       --diff-muted: #6b7280;
       --diff-left-color: #2563eb;
       --diff-right-color: #10b981;
       --diff-line-number-width: 64px;
-      --diff-row-height: 22px;
-      --diff-left-column-min: 320px;
-      --diff-right-column-min: 320px;
+      --diff-row-height: 20px;
+      --diff-pane-gap: 48px;
+      --diff-left-pane-width: 340px;
+      --diff-right-pane-width: 340px;
+      --diff-total-row-width: calc(var(--diff-line-number-width) * 2 + var(--diff-left-pane-width) + var(--diff-right-pane-width) + var(--diff-pane-gap));
       --diff-token-insert-bg: rgba(16, 185, 129, 0.18);
       --diff-token-delete-bg: rgba(239, 68, 68, 0.18);
       --diff-line-insert-bg: rgba(16, 185, 129, 0.14);
@@ -101,6 +104,7 @@
       font-size: 0.9rem;
       color: var(--diff-muted);
       margin-top: 8px;
+      flex-wrap: wrap;
     }
 
     .diff-header__status strong {
@@ -128,13 +132,17 @@
     }
 
     .diff-toolbar {
-      padding: 10px 16px;
+      position: sticky;
+      top: var(--diff-header-height);
+      z-index: 15;
+      padding: 8px 16px;
       border-bottom: 1px solid var(--diff-border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
       background: linear-gradient(180deg, rgba(248, 250, 252, 0.92), rgba(255, 255, 255, 0.92));
+      flex-wrap: wrap;
     }
 
     .diff-toolbar__metrics {
@@ -142,6 +150,7 @@
       gap: 16px;
       font-size: 0.85rem;
       color: var(--diff-muted);
+      flex-wrap: wrap;
     }
 
     .diff-toolbar__metrics span strong {
@@ -149,20 +158,61 @@
       font-feature-settings: "tnum";
     }
 
+    .diff-toolbar__controls {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 0.82rem;
+      color: var(--diff-muted);
+      flex-wrap: wrap;
+    }
+
+    .diff-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .diff-toggle input[type="checkbox"] {
+      margin: 0;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--diff-left-color);
+      cursor: pointer;
+    }
+
+    .diff-toggle__text {
+      font-size: 0.82rem;
+    }
+
+    .diff-toggle input[type="checkbox"]:disabled {
+      cursor: not-allowed;
+      accent-color: var(--diff-muted);
+    }
+
+    .diff-toggle input[type="checkbox"]:disabled + .diff-toggle__text {
+      opacity: 0.55;
+    }
+
     .diff-toolbar__hint {
       font-size: 0.8rem;
       color: var(--diff-muted);
+      white-space: nowrap;
     }
 
     .diff-viewport {
       position: relative;
       flex: 1 1 auto;
       min-height: 0;
-      overflow: auto;
+      overflow-y: auto;
+      overflow-x: hidden;
       background: #ffffff;
       font-family: var(--diff-font-family);
       font-size: var(--diff-font-size);
       line-height: var(--diff-row-height);
+      scroll-padding-top: calc(var(--diff-header-height) + var(--diff-toolbar-height) + 8px);
     }
 
     .diff-viewport--loading::after {
@@ -200,6 +250,9 @@
     .diff-layer {
       position: relative;
       min-width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      padding-top: calc(var(--diff-toolbar-height) + 8px);
     }
 
     .diff-spacer {
@@ -207,39 +260,89 @@
       visibility: hidden;
     }
 
+    .diff-horizontal {
+      position: absolute;
+      top: calc(var(--diff-toolbar-height) + 8px);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0;
+      transform: translateX(0);
+    }
+
     .diff-visible-rows {
       position: absolute;
       top: 0;
       left: 0;
-      width: max-content;
+      right: 0;
+      width: max(100%, var(--diff-total-row-width));
+      margin: 0 auto;
     }
 
     .diff-row {
       display: grid;
-      grid-template-columns: var(--diff-line-number-width) minmax(var(--diff-left-column-min), max-content) var(--diff-line-number-width) minmax(var(--diff-right-column-min), max-content);
-      column-gap: 12px;
-      border-bottom: 1px solid #edf2f7;
-      padding: 0 16px 0 20px;
-      min-height: var(--diff-row-height);
+      grid-template-columns: var(--diff-line-number-width) var(--diff-left-pane-width) var(--diff-pane-gap) var(--diff-line-number-width) var(--diff-right-pane-width);
       align-items: stretch;
-    }
-
-    .diff-row:last-child {
-      border-bottom: none;
+      min-height: var(--diff-row-height);
+      padding: 0;
+      line-height: var(--diff-row-height);
+      transition: background 120ms ease;
     }
 
     .diff-line-number {
+      position: sticky;
+      top: calc(var(--diff-header-height) + var(--diff-toolbar-height));
+      z-index: 3;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      width: var(--diff-line-number-width);
+      min-width: var(--diff-line-number-width);
       text-align: right;
       color: var(--diff-muted);
-      padding-top: 2px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-feature-settings: "tnum";
+      padding: 0 10px;
+      background: rgba(255, 255, 255, 0.94);
+    }
+
+    .diff-line-number[data-side="left"] {
+      grid-column: 1 / span 1;
+      left: 0;
+      border-radius: 0 6px 6px 0;
+      padding-left: 4px;
+      padding-right: 8px;
+    }
+
+    .diff-line-number[data-side="right"] {
+      grid-column: 4 / span 1;
+      left: auto;
+      right: 0;
+      border-radius: 6px 0 0 6px;
+      padding-left: 8px;
+      padding-right: 4px;
     }
 
     .diff-line-content {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .diff-line-content[data-side="left"] {
+      grid-column: 2 / span 1;
+    }
+
+    .diff-line-content[data-side="right"] {
+      grid-column: 5 / span 1;
+    }
+
+    .diff-line-content-inner {
+      display: block;
+      padding: 0 12px;
       white-space: pre;
-      overflow: visible;
-      padding: 2px 0;
+      min-width: max-content;
     }
 
     .diff-row--insert {
@@ -252,6 +355,10 @@
 
     .diff-row--replace {
       background: var(--diff-line-replace-bg);
+    }
+
+    .diff-row:hover {
+      background-color: rgba(148, 163, 184, 0.12);
     }
 
     .diff-token-insert {
@@ -325,14 +432,23 @@
           <span>Left <strong data-role="left-lines">0</strong></span>
           <span>Right <strong data-role="right-lines">0</strong></span>
           <span><strong data-role="changes-count">0</strong> changed rows</span>
+          <span>Showing <strong data-role="displayed-rows">0</strong></span>
         </div>
-        <div class="diff-toolbar__hint">Scroll to explore · Horizontal scroll keeps both panes in sync</div>
+        <div class="diff-toolbar__controls">
+          <label class="diff-toggle">
+          <input type="checkbox" id="diff-toggle-differences">
+          <span class="diff-toggle__text">Show differences only</span>
+          </label>
+          <span class="diff-toolbar__hint">Scroll keeps panes synced</span>
+        </div>
       </div>
       <div class="diff-viewport diff-viewport--loading" id="diff-viewport">
         <div class="diff-error" id="diff-error"></div>
         <div class="diff-layer">
           <div class="diff-spacer" id="diff-spacer"></div>
-          <div class="diff-visible-rows" id="diff-visible-rows"></div>
+          <div class="diff-horizontal" id="diff-horizontal">
+            <div class="diff-visible-rows" id="diff-visible-rows"></div>
+          </div>
         </div>
       </div>
     </div>
