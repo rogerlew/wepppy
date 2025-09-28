@@ -421,7 +421,7 @@
       rightDownloadUrl: {{ right_download_url | tojson }}
     };
   </script>
-  <script defer src="{{ url_for('static', filename='js/diff_viewer.js') }}"></script>
+  <script defer src="{{ url_for('diff.static', filename='diff_viewer.js') }}"></script>
 </head>
 <body>
   <header class="diff-header">

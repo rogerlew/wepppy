@@ -16,7 +16,9 @@ from .._run_context import load_run_context
 
 
 diff_bp = Blueprint('diff', __name__,
-    template_folder='templates')
+    template_folder='templates',
+    static_folder='static',
+    static_url_path='/diff/static')
 
 @diff_bp.route('/runs/<string:runid>/<config>/diff/<path:subpath>', strict_slashes=False)
 def diff_comparer(runid, config, subpath):
@@ -57,7 +59,7 @@ def diff_comparer(runid, config, subpath):
                 )
 
     # render template with client side diff. client will fetch the files from diff
-    return render_template('diff/comparer.htm',
+    return render_template('comparer.htm',
                             runid=runid,  # left
                             config=config,
                             diff_runid=diff_runid,  # right
