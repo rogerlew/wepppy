@@ -16,7 +16,7 @@ from flask_security import current_user
 
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # pip install cmarkgfm
 # https://github.com/sindresorhus/github-markdown-css for styling
-from wepppy.weppcloud.utils.helpers import exception_factory, authorize, url_for_run
+from wepppy.weppcloud.utils.helpers import exception_factory, authorize, get_wd, url_for_run
 from wepppy.nodb import Ron
 from wepppy.nodb.base import _iter_nodb_subclasses
 
@@ -92,17 +92,25 @@ def _template_context(ctx: RunContext):
     return context
 
 
-def ensure_readme(ctx: RunContext):
-    wd = str(ctx.active_root)
+def _ensure_readme(wd, runid, config):
     path = _readme_path(wd)
     if os.path.exists(path):
         return path
 
-#    context = _template_context(runid, config)
     template_source = DEFAULT_TEMPLATE.read_text(encoding="utf-8")
-    markdown = template_source.replace('{runid}', ctx.runid).replace('{config}', ctx.config)
+    markdown = template_source.replace('{runid}', runid).replace('{config}', config)
     Path(path).write_text(markdown, encoding="utf-8")
     return path
+
+
+def ensure_readme_on_create(runid, config):
+    wd = get_wd(runid)
+    return _ensure_readme(wd, runid, config)
+
+
+def ensure_readme(ctx: RunContext):
+    wd = str(ctx.active_root)
+    return _ensure_readme(wd, ctx.runid, ctx.config)
 
 
 def _render_markdown(markdown_source, context):
