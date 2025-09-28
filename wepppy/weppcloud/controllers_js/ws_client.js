@@ -23,11 +23,12 @@ WSClient.prototype.connect = function () {
     this.shouldReconnect = true;
     this.ws = new WebSocket(this.wsUrl);
     this.ws.onopen = () => {
-        $("#preflight_status").html("Connected");
+        this.pushCommandBarResult(`Connecting to ${this.channel}...`);
         if (this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({ "type": "init" }));
+            this.pushCommandBarResult(`Connected to ${this.channel}`);
         } else {
-            console.error("WebSocket is not in OPEN state: ", this.ws.readyState);
+            this.pushCommandBarResult(`WebSocket is not in OPEN state: ${this.ws.readyState}`);
         }
     };
 
@@ -69,6 +70,17 @@ WSClient.prototype.connect = function () {
                 }, 500);
             }
 
+            if (data.includes("COMMAND_BAR_RESULT")) {
+                const marker = 'COMMAND_BAR_RESULT';
+                const markerIndex = data.indexOf(marker);
+                let commandMessage = data;
+                if (markerIndex !== -1) {
+                    commandMessage = data.substring(markerIndex + marker.length).trim();
+                }
+                $("#" + this.formId + " #status").html(commandMessage);
+                this.pushCommandBarResult(commandMessage);
+            }
+            
             if (data.includes("TRIGGER")) {
                 // need to parse the trigger command and execute it
                 // second to last argument is the controller
@@ -133,5 +145,20 @@ WSClient.prototype.resetSpinner = function () {
     var $braille = $("#" + this.formId + " #braille");
     if ($braille.length) {
         $braille.text("");
+    }
+};
+
+WSClient.prototype.pushCommandBarResult = function (message) {
+    if (typeof window.initializeCommandBar !== 'function') {
+        return;
+    }
+
+    try {
+        var commandBar = window.initializeCommandBar();
+        if (commandBar && typeof commandBar.showResult === 'function') {
+            commandBar.showResult(message);
+        }
+    } catch (error) {
+        console.warn('Unable to update command bar result:', error);
     }
 };

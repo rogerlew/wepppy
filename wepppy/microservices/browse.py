@@ -46,6 +46,7 @@ import math
 import json
 import logging
 import html
+import sqlite3
 
 from urllib.parse import urlencode
 
@@ -57,6 +58,7 @@ from os.path import abspath, basename
 import gzip
 from functools import lru_cache
 from pathlib import Path
+from datetime import datetime
 
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -156,6 +158,60 @@ def _prefix_path(path: str) -> str:
     if not SITE_PREFIX:
         return path
     return SITE_PREFIX + path if path.startswith('/') else SITE_PREFIX + '/' + path
+
+
+MANIFEST_FILENAME = 'manifest.db'
+MANIFEST_SCHEMA_VERSION = 1
+
+
+def _manifest_path(wd: str) -> str:
+    return os.path.join(wd, MANIFEST_FILENAME)
+
+
+def _normalize_rel_path(rel_path: str) -> str:
+    if not rel_path or rel_path == '.':
+        return '.'
+    rel_path = rel_path.replace('\\', '/')
+    if rel_path.startswith('./'):
+        rel_path = rel_path[2:]
+    return rel_path.strip('/') or '.'
+
+
+def _rel_join(parent: str, child: str) -> str:
+    parent = _normalize_rel_path(parent)
+    child = child.strip('/')
+    if not child:
+        return parent
+    if parent in ('.', ''):
+        return child
+    return f'{parent}/{child}'
+
+
+def _rel_parent(rel_path: str) -> tuple[str, str]:
+    rel_path = _normalize_rel_path(rel_path)
+    if rel_path in ('.', ''):
+        return '.', ''
+    head, _, tail = rel_path.rpartition('/')
+    if not head:
+        head = '.'
+    return head, tail
+
+
+def _format_mtime_ns(ns: int) -> str:
+    try:
+        dt = datetime.fromtimestamp(ns / 1_000_000_000)
+    except (OSError, OverflowError, ValueError):
+        dt = datetime.fromtimestamp(0)
+    return dt.strftime('%Y-%m-%d %H:%M')
+
+
+def _format_human_size(size_bytes: int) -> str:
+    if size_bytes <= 0:
+        return '0 B'
+    size_units = ('B', 'KB', 'MB', 'GB', 'TB')
+    unit_index = min(int(math.log(size_bytes, 1024)), len(size_units) - 1)
+    scaled = round(size_bytes / (1024 ** unit_index), 2)
+    return f'{scaled} {size_units[unit_index]}'
 
 
 # NOTE: Simplified url_for shim mimics Flask asset lookup.
@@ -274,6 +330,242 @@ MAX_FILE_LIMIT = 100
 
 
 _logger = logging.getLogger(__name__)
+
+
+def remove_manifest(wd: str) -> None:
+    path = _manifest_path(wd)
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        return
+    except OSError:
+        _logger.warning('Unable to remove manifest file at %s', path, exc_info=True)
+
+
+def create_manifest(wd: str) -> str:
+    wd = os.path.abspath(wd)
+    if not os.path.isdir(wd):
+        raise FileNotFoundError(f'{wd} is not a directory')
+
+    manifest_path = _manifest_path(wd)
+    tmp_path = manifest_path + '.tmp'
+
+    try:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+    except OSError:
+        _logger.warning('Could not remove stale manifest temp file %s', tmp_path, exc_info=True)
+
+    conn = sqlite3.connect(tmp_path)
+    try:
+        conn.execute('PRAGMA journal_mode=WAL;')
+        conn.execute('PRAGMA synchronous=NORMAL;')
+        conn.execute('PRAGMA temp_store=MEMORY;')
+        conn.execute(
+            '''CREATE TABLE IF NOT EXISTS entries (
+                   dir_path TEXT NOT NULL,
+                   name TEXT NOT NULL,
+                   is_dir INTEGER NOT NULL,
+                   is_symlink INTEGER NOT NULL,
+                   symlink_is_dir INTEGER NOT NULL,
+                   size_bytes INTEGER NOT NULL,
+                   mtime_ns INTEGER NOT NULL,
+                   child_count INTEGER,
+                   symlink_target TEXT,
+                   sort_rank INTEGER NOT NULL,
+                   PRIMARY KEY (dir_path, name)
+               )'''
+        )
+        conn.execute(
+            'CREATE INDEX IF NOT EXISTS entries_dir_sort ON entries(dir_path, sort_rank DESC, name)'
+        )
+        conn.execute(
+            '''CREATE TABLE IF NOT EXISTS meta (
+                   key TEXT PRIMARY KEY,
+                   value TEXT
+               )'''
+        )
+
+        stack = [(wd, '.')]
+
+        while stack:
+            abs_dir, rel_dir = stack.pop()
+            try:
+                with os.scandir(abs_dir) as it:
+                    dir_entries = [entry for entry in it if entry.name not in ('.', '..')]
+            except OSError:
+                dir_entries = []
+
+            rel_dir_norm = _normalize_rel_path(rel_dir)
+            if rel_dir_norm != '.':
+                parent_dir, dir_name = _rel_parent(rel_dir_norm)
+                conn.execute(
+                    'UPDATE entries SET child_count = ? WHERE dir_path = ? AND name = ?',
+                    (len(dir_entries), parent_dir, dir_name),
+                )
+            else:
+                conn.execute(
+                    'INSERT OR REPLACE INTO meta(key, value) VALUES (?, ?)',
+                    ('root_child_count', str(len(dir_entries))),
+                )
+
+            batch = []
+            for entry in dir_entries:
+                name = entry.name
+                entry_path = entry.path
+                try:
+                    stat_result = entry.stat(follow_symlinks=False)
+                except OSError:
+                    stat_result = None
+
+                size_bytes = stat_result.st_size if stat_result else 0
+                if stat_result is not None:
+                    mtime_ns = getattr(stat_result, 'st_mtime_ns', None)
+                    if mtime_ns is None:
+                        mtime_ns = int(stat_result.st_mtime * 1_000_000_000)
+                else:
+                    mtime_ns = 0
+
+                is_dir = 1 if entry.is_dir(follow_symlinks=False) else 0
+                is_symlink = 1 if entry.is_symlink() else 0
+                symlink_target = ''
+                symlink_is_dir = 0
+                if is_symlink:
+                    try:
+                        symlink_target = os.readlink(entry_path)
+                    except OSError:
+                        symlink_target = ''
+                    symlink_is_dir = 1 if os.path.isdir(entry_path) else 0
+
+                sort_rank = 2 if is_dir else 0
+                batch.append(
+                    (
+                        rel_dir_norm,
+                        name,
+                        is_dir,
+                        is_symlink,
+                        symlink_is_dir,
+                        size_bytes,
+                        mtime_ns,
+                        None,
+                        symlink_target,
+                        sort_rank,
+                    )
+                )
+
+                if is_dir:
+                    stack.append((entry_path, _rel_join(rel_dir_norm, name)))
+
+            if batch:
+                conn.executemany(
+                    '''INSERT OR REPLACE INTO entries(
+                           dir_path, name, is_dir, is_symlink, symlink_is_dir,
+                           size_bytes, mtime_ns, child_count, symlink_target, sort_rank
+                       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    batch,
+                )
+
+        generated_at = datetime.utcnow().isoformat()
+        conn.execute(
+            'INSERT OR REPLACE INTO meta(key, value) VALUES (?, ?)',
+            ('schema_version', str(MANIFEST_SCHEMA_VERSION)),
+        )
+        conn.execute(
+            'INSERT OR REPLACE INTO meta(key, value) VALUES (?, ?)',
+            ('generated_at', generated_at),
+        )
+        conn.commit()
+    except Exception:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        raise
+    finally:
+        conn.close()
+
+    os.replace(tmp_path, manifest_path)
+    return manifest_path
+
+
+def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str, page: int, page_size: int):
+    manifest_path = _manifest_path(root_wd)
+    if not os.path.exists(manifest_path):
+        return None
+
+    try:
+        rel_dir = os.path.relpath(directory, root_wd)
+    except ValueError:
+        return None
+
+    rel_dir = _normalize_rel_path(rel_dir)
+    if rel_dir.startswith('..'):
+        return None
+
+    conn = sqlite3.connect(manifest_path)
+    conn.row_factory = sqlite3.Row
+    try:
+        if rel_dir != '.':
+            parent_dir, entry_name = _rel_parent(rel_dir)
+            parent_row = conn.execute(
+                'SELECT is_dir, symlink_is_dir FROM entries WHERE dir_path = ? AND name = ?',
+                (parent_dir, entry_name),
+            ).fetchone()
+            if parent_row is None:
+                return None
+            if int(parent_row['is_dir']) != 1:
+                return None
+
+        where_clause = 'dir_path = ?'
+        params = [rel_dir]
+        if filter_pattern:
+            where_clause += ' AND name GLOB ?'
+            params.append(filter_pattern)
+
+        total_items = conn.execute(
+            f'SELECT COUNT(*) AS total FROM entries WHERE {where_clause}',
+            params,
+        ).fetchone()['total']
+
+        offset = max(0, (page - 1) * page_size)
+        rows = conn.execute(
+            f'''SELECT name, is_dir, is_symlink, symlink_is_dir, size_bytes, mtime_ns,
+                       child_count, symlink_target, sort_rank
+                FROM entries
+                WHERE {where_clause}
+                ORDER BY sort_rank DESC, name
+                LIMIT ? OFFSET ?''',
+            params + [page_size, offset],
+        ).fetchall()
+    finally:
+        conn.close()
+
+    entries = []
+    for row in rows:
+        name = row['name']
+        is_dir = bool(row['is_dir'])
+        is_symlink = bool(row['is_symlink'])
+        symlink_is_dir = bool(row['symlink_is_dir'])
+
+        mtime_display = _format_mtime_ns(int(row['mtime_ns']))
+        if is_dir:
+            child_count = row['child_count'] if row['child_count'] is not None else 0
+            hr_value = f'{child_count} items'
+        else:
+            hr_value = _format_human_size(int(row['size_bytes']))
+
+        sym_target = ''
+        if is_symlink:
+            target = row['symlink_target'] or ''
+            if symlink_is_dir and target and not target.endswith('/'):
+                target = f'{target}/'
+            sym_target = f'->{target}' if target else '->'
+
+        entries.append(
+            (name, is_dir, mtime_display, hr_value, is_symlink, sym_target, symlink_is_dir)
+        )
+
+    return entries, total_items
 
 
 class _HealthLogFilter(logging.Filter):
@@ -497,6 +789,7 @@ async def get_entries(directory, filter_pattern, start, end, page_size):
         flag = parts[0]
         is_dir = flag.startswith('d')
         is_symlink = flag.startswith('l')
+        symlink_is_dir = False
 
         modified_time = f"{parts[5]} {parts[6]}"
 
@@ -509,9 +802,18 @@ async def get_entries(directory, filter_pattern, start, end, page_size):
             name = file_field
             sym_target = ""
 
+        entry_path = _join(directory, name)
+        if is_symlink:
+            try:
+                symlink_is_dir = os.path.isdir(entry_path)
+            except OSError:
+                symlink_is_dir = False
+            if symlink_is_dir and sym_target.startswith('->') and not sym_target.endswith('/'):
+                sym_target = sym_target + '/'
+
         if is_dir:
             hr_size = ""
-            dir_indices.append((index, _join(directory, name)))
+            dir_indices.append((index, entry_path))
         else:
             try:
                 size_bytes = int(parts[4])
@@ -526,7 +828,7 @@ async def get_entries(directory, filter_pattern, start, end, page_size):
                 s = round(size_bytes / p, 2)
                 hr_size = f"{s} {size_name[i]}"
 
-        entries.append((name, is_dir, modified_time, hr_size, is_symlink, sym_target))
+        entries.append((name, is_dir, modified_time, hr_size, is_symlink, sym_target, symlink_is_dir))
         index += 1
 
     if dir_indices:
@@ -554,6 +856,7 @@ async def get_entries(directory, filter_pattern, start, end, page_size):
                 f"{total_items} items",
                 entry[4],
                 entry[5],
+                entry[6],
             )
 
     return entries
@@ -572,8 +875,20 @@ async def get_total_items(directory, filter_pattern=''):
         return 0
 
 
-async def get_page_entries(directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern=''):
+async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern=''):
     """List directory contents with pagination and optional filtering."""
+
+    manifest_result = await asyncio.to_thread(
+        _manifest_get_page_entries,
+        wd,
+        directory,
+        filter_pattern,
+        page,
+        page_size,
+    )
+    if manifest_result is not None:
+        entries, total_items = manifest_result
+        return entries, total_items, True
 
     start = (page - 1) * page_size + 1
     end = page * page_size
@@ -594,7 +909,7 @@ async def get_page_entries(directory, page=1, page_size=MAX_FILE_LIMIT, filter_p
             'browse.get_page_entries() completed after %.1f seconds; large directories may impact responsiveness.',
             elapsed,
         )
-    return entries, total_items
+    return entries, total_items, False
 
 
 def get_pad(x):
@@ -606,7 +921,7 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff
     _padding = ' '
     s = []
     
-    page_entries, total_items = await get_page_entries(_dir, page, page_size, filter_pattern)
+    page_entries, total_items, using_manifest = await get_page_entries(wd, _dir, page, page_size, filter_pattern)
     
     # Adjust column width based on current page entries
     n = max(36, max(len(entry[0]) for entry in page_entries) + 2) if page_entries else 36
@@ -637,9 +952,14 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff
             sym_target = entry[5]
             file_size = entry[3]
             item_pad = get_pad(8 - len(file_size.split()[0]))
-            dl_pad = get_pad(6 - len(file_size.split()[1]))
-            dl_url = _join(request_path, _file).replace('/browse/', '/download/')
-            dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
+            size_tokens = file_size.split()
+            unit = size_tokens[1] if len(size_tokens) > 1 else ''
+            dl_pad = get_pad(6 - len(unit))
+            dl_link = '          '
+            symlink_is_dir = entry[6] if len(entry) > 6 else False
+            if not symlink_is_dir:
+                dl_url = _join(request_path, _file).replace('/browse/', '/download/')
+                dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
             file_lower = _file.lower()
             gl_link = '          '
             if file_lower.endswith(('.arc', '.tif', '.img', '.nc')):
@@ -669,7 +989,7 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff
         else:
             s[-1] = f'<span class="odd-row">{s[-1]}</span>'
     
-    return ''.join(s), total_items
+    return ''.join(s), total_items, using_manifest
 
 
 async def browse_response(path, runid, wd, request, config, filter_pattern=''):
@@ -716,7 +1036,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         page = request.args.get('page', 1, type=int)
         
         # Generate directory listing and get total items
-        listing_html, total_items = await html_dir_list(
+        listing_html, total_items, using_manifest = await html_dir_list(
             path, runid, wd, request.path, diff_runid, diff_wd, diff_arg,
             page=page, page_size=MAX_FILE_LIMIT, filter_pattern=filter_pattern
         )
@@ -771,8 +1091,11 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         start = (page - 1) * MAX_FILE_LIMIT
         showing_start = start + 1 if total_items > 0 else 0
         showing_end = min(start + MAX_FILE_LIMIT, total_items)
-        showing_text = (f'<p>Showing items {showing_start} to {showing_end} of {total_items}</p>'
-                        if total_items > 0 else '<p>No items to display</p>')
+        manifest_note = ' (manifest cached)' if using_manifest else ''
+        if total_items > 0:
+            showing_text = f'<p>Showing items {showing_start} to {showing_end} of {total_items}{manifest_note}</p>'
+        else:
+            showing_text = f'<p>No items to display{manifest_note}</p>'
         
         # Combine UI elements
         home_href = _prefix_path(f'/runs/{runid}/{config}')
@@ -792,6 +1115,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
             listing_html=listing_markup,
             pagination_html=pagination_markup,
             showing_text=showing_markup,
+            using_manifest=using_manifest,
         )
 
     else:
@@ -947,7 +1271,7 @@ def create_app():
 
 app = create_app()
 
-__all__ = ['create_app', 'app']
+__all__ = ['create_app', 'app', 'create_manifest', 'remove_manifest', 'MANIFEST_FILENAME']
 
 
 if __name__ == '__main__':

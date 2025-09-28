@@ -2,6 +2,8 @@
 
 from datetime import datetime
 from subprocess import PIPE, Popen
+import redis
+from rq import Queue
 
 from ._common import *  # noqa: F401,F403
 
@@ -15,6 +17,7 @@ from wepppy.weppcloud.utils.helpers import (
     get_run_owners_lazy, get_user_models, authorize, 
     authorize_and_handle_with_exception_factory
 ) 
+
 
 project_bp = Blueprint('project', __name__)
 
@@ -250,6 +253,13 @@ def task_set_public(runid, config):
 @project_bp.route('/runs/<string:runid>/<config>/tasks/set_readonly', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_set_readonly(runid, config):
+    from wepppy.rq.project_rq import (
+        set_run_readonly_rq,
+        REDIS_HOST,
+        RQ_DB,
+        TIMEOUT,
+    )
+
     try:
         state = request.json.get('readonly', None)
     except Exception:
@@ -259,9 +269,13 @@ def task_set_readonly(runid, config):
         return error_factory('state is None')
 
     try:
-        ctx = load_run_context(runid, config)
-        Ron.getInstance(str(ctx.active_root)).readonly = bool(state)
-    except Exception:
-        return exception_factory('Error setting state', runid=runid)
+        load_run_context(runid, config)
+        desired_state = bool(state)
 
-    return success_factory()
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            queue = Queue(connection=redis_conn)
+            job = queue.enqueue_call(set_run_readonly_rq, (runid, desired_state), timeout=TIMEOUT)
+    except Exception:
+        return exception_factory('Error queuing readonly task', runid=runid)
+
+    return jsonify({'Success': True, 'job_id': job.id})

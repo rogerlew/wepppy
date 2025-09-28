@@ -151,6 +151,7 @@ The command bar provides a web interface for changing log levels via the `/runs/
 ### status messenger to microservices.status
 
 `StatusMessenger.publish` pushes plain strings onto `<runid>:<channel>` in DB 2. The `microservices/status` Tornado app subscribes to requested channels, forwards payloads as `{"type": "status", "data": ..}` JSON frames, and maintains heartbeat ping/pong to drop dead sockets. Channel naming consistency (`wepp`, `archive`, `omni`, `fork`, etc.) keeps the front-end selectors simple.
+Jobs that want to surface command-bar notifications can embed the `COMMAND_BAR_RESULT` keyword in their payload. The WebSocket client peels off the message body and calls `commandBar.showResult(...)`, so long-running tasks (for example `set_run_readonly_rq`) can report `manifest.db creation finished`. Keep the leading `rq:<jobid>` prefix so troubleshooting still maps back to Redis job metadata.
 
 ### RedisPrep and NoDb file locking to microservices.preflight
 

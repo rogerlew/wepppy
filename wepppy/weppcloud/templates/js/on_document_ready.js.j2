@@ -709,6 +709,7 @@ function onReady() {
     });
 
     sub_ctrl.form.on("WATERSHED_ABSTRACTION_TASK_COMPLETED", function () {
+        console.log("WATERSHED_ABSTRACTION_TASK_COMPLETED event received.");
         sub_ctrl.ws_client.disconnect();
         sub_ctrl.report();
         sub_ctrl.enableColorMap("slp_asp");

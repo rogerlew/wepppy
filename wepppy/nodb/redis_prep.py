@@ -37,6 +37,7 @@ class TaskEnum(Enum):
     init_sbs_map = 'init_sbs_map'
     run_omni = 'run_omni'
     dss_export = 'dss_export'
+    set_readonly = 'set_readonly'
 
     def __str__(self):
         return self.value.replace('TaskEnum.', '')

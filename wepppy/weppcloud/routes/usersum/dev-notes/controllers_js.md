@@ -20,6 +20,7 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
   - Polling for job status and stopping when work reaches a terminal state.
 - `WSClient` (in `ws_client.js`) is the companion that listens for WebSocket broadcasts. Messages are passed through NoDbBase subclass loggers through redis and status microservice. Controllers assign `that.ws_client = new WSClient(formId, channel)` and `controlBase.manage_ws_client` will connect whenever a job is running so live status text, trigger events, and exception information stream into the panel.
 - Together, these two components are the contract for any control that launches asynchronous work: provide the DOM IDs, call `set_rq_job_id`, and the infrastructure handles the rest.
+- The Project controller applies the same contract when readonly toggles queue `set_run_readonly_rq`; the worker sends `COMMAND_BAR_RESULT` frames so `_notifyCommandBar` (via `WSClient`) can surface messages such as `manifest.db creation finished` without extra wiring.
 
 ## Views and DOM Contract
 - The HTML that controllers operate on lives under `wepppy/weppcloud/templates/controls/`. Each control has its own template (`wepp.htm`, `landuse.htm`, etc.) and they all extend the markup defined in `_base.htm`.
