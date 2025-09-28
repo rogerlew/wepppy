@@ -11,12 +11,12 @@ Template Organization
 All rendering is handled by Jinja templates bundled with the original blueprint under
 `wepppy/weppcloud/routes/browse/templates/browse/`:
 
-- `directory.j2` - top-level directory listing view with pagination, diff controls, and the keyboard command bar.
-- `not_found.j2` - 404-style response shown when a requested directory segment is missing.
-- `_path_input_script.j2` - shared script that wires up the inline path input field for directory and 404 pages.
-- `arc_file.j2` - minimal viewer for “.arc” outputs.
-- `data_table.j2` - table presentation for CSV/TSV/Parquet/Pickle content rendered via pandas.
-- `text_file.j2` - general text viewer (including the command bar) for other readable file types.
+- `directory.htm` - top-level directory listing view with pagination, diff controls, and the keyboard command bar.
+- `not_found.htm` - 404-style response shown when a requested directory segment is missing.
+- `_path_input_script.htm` - shared script that wires up the inline path input field for directory and 404 pages.
+- `arc_file.htm` - minimal viewer for “.arc” outputs.
+- `data_table.htm` - table presentation for CSV/TSV/Parquet/Pickle content rendered via pandas.
+- `text_file.htm` - general text viewer (including the command bar) for other readable file types.
 
 Routes
 ------
@@ -26,9 +26,9 @@ Routes
 Key Behaviours
 --------------
 - **Directory Browsing** - `browse_response` delegates to `html_dir_list` to build directory listings with pagination
-  and optional shell-style filtering, then renders `directory.j2`.
+  and optional shell-style filtering, then renders `directory.htm`.
 - **File Viewing** - Depending on the requested file type, responses are streamed directly, downloaded, or rendered via
-  `arc_file.j2`, `data_table.j2`, or `text_file.j2`.
+  `arc_file.htm`, `data_table.htm`, or `text_file.htm`.
 - **Diff Support** - When the `diff` query argument is present the microservice attempts to locate the requested object
   in the comparison run and surfaces diff links in directory listings.
 - **Security** - `_browse_tree_helper` prevents directory traversal, validates filter syntax, and ensures the
@@ -412,7 +412,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
 
     return (
         render_template(
-            'browse/not_found.j2',
+            'browse/not_found.htm',
             runid=runid,
             config=config,
             diff_runid=diff_runid,
@@ -783,7 +783,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         showing_markup = Markup(showing_text)
 
         return render_template(
-            'browse/directory.j2',
+            'browse/directory.htm',
             runid=runid,
             config=config,
             diff_runid=diff_runid,
@@ -836,7 +836,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         if path_lower.endswith('.arc'):
             assert contents is not None
             return render_template(
-                'browse/arc_file.j2',
+                'browse/arc_file.htm',
                 filename=basename(path),
                 runid=runid,
                 contents=contents,
@@ -867,7 +867,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         if html is not None:
             table_markup = Markup(html)
             return render_template(
-                'browse/data_table.j2',
+                'browse/data_table.htm',
                 filename=basename(path),
                 runid=runid,
                 table_html=table_markup,
@@ -882,7 +882,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         contents_html = _wrap_usersum_spans(contents)
 
         return render_template(
-            'browse/text_file.j2',
+            'browse/text_file.htm',
             runid=runid,
             path=path,
             filename=basename(path),

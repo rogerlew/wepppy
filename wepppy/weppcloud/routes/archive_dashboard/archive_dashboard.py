@@ -23,7 +23,7 @@ def rq_archive_dashboard(runid, config):
     try:
         authorize(runid, config)
         load_run_context(runid, config)
-        return render_template('rq-archive-dashboard.j2', runid=runid, config=config, user=current_user)
+        return render_template('rq-archive-dashboard.htm', runid=runid, config=config, user=current_user)
     except Exception as e:
         return exception_factory(e)
 

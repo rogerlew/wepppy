@@ -15,7 +15,7 @@ def combined_ws_viewer():
 @combined_watershed_viewer_bp.route('/combined_ws_viewer2')
 @combined_watershed_viewer_bp.route('/combined_ws_viewer2/')
 def combined_ws_viewer2():
-    return render_template('combined_ws_viewer2.j2')
+    return render_template('combined_ws_viewer2.htm')
 
 
 @combined_watershed_viewer_bp.route('/bounds_ws_viewer')

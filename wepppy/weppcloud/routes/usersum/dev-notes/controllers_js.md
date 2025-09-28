@@ -24,7 +24,7 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
 ## Views and DOM Contract
 - The HTML that controllers operate on lives under `wepppy/weppcloud/templates/controls/`. Each control has its own template (`wepp.htm`, `landuse.htm`, etc.) and they all extend the markup defined in `_base.htm`.
 - `_base.htm` defines the canonical form structure: `#status`, `#info`, `#rq_job`, `#stacktrace`, `#preflight_status`, and other fields that the JS expects. As long as new controls keep those IDs, `controlBase` can update the UI without per-controller duplication.
-- Higher-level pages (for example `templates/controls/poweruser_panel.j2`) compose multiple control templates, which in turn rely on the singleton controllers to bind behavior once the bundle loads.
+- Higher-level pages (for example `templates/controls/poweruser_panel.htm`) compose multiple control templates, which in turn rely on the singleton controllers to bind behavior once the bundle loads.
 
 ## Build Script and Gunicorn Integration
 - `wepppy/weppcloud/controllers_js/build_controllers_js.py` is the entry point for producing the bundle. It configures Jinja to treat the controller files as literal text (so existing `{{ }}` tokens meant for client-side templating survive), renders `controllers.js.j2`, and writes the output to `static/js/controllers.js`.

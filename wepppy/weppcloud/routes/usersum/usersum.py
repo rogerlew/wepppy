@@ -62,7 +62,7 @@ def usersum_index():
     if wc_items:
         sections.append({'title': 'WEPPcloud Guides', 'entries': wc_items})
 
-    return render_template('usersum/index.html', title='Usersum Reference', sections=sections)
+    return render_template('usersum/index.htm', title='Usersum Reference', sections=sections)
 
 
 def _resolve_markdown_path(category: str, filename: str) -> Path:
@@ -89,7 +89,7 @@ def view_markdown(category: str, filename: str):
     content_html = markdown_to_html(markdown_source)
     display_name = _friendly_display_name(path.name)
     return render_template(
-        'usersum/view.html',
+        'usersum/view.htm',
         title=display_name,
         content_html=content_html
     )

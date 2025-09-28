@@ -166,7 +166,7 @@ def runs0(runid, config):
     Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
     db.session.commit()
 
-    return render_template('0.html',
+    return render_template('0.htm',
                             user=current_user,
                             site_prefix=site_prefix,
                             topaz=topaz,

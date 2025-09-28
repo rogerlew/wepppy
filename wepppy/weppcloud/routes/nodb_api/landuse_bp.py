@@ -115,7 +115,7 @@ def report_landuse(runid, config):
         landuse = Landuse.getInstance(wd)
         landuseoptions = landuse.landuseoptions
 
-        return render_template('reports/landuse.j2', runid=runid, config=config,
+        return render_template('reports/landuse.htm', runid=runid, config=config,
                                landuse=landuse,
                                landuseoptions=landuseoptions,
                                report=landuse.report)
