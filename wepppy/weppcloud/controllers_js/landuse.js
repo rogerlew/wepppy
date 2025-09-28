@@ -143,6 +143,18 @@ var Landuse = function () {
             self.showHideControls(landuse_mode);
         };
 
+        that.handleModeChange = function (mode) {
+            if (mode === undefined) {
+                that.setMode();
+                return;
+            }
+            that.setMode(parseInt(mode, 10));
+        };
+
+        that.handleSingleSelectionChange = function () {
+            that.setMode();
+        };
+
         that.setMode = function (mode) {
             var self = instance;
             // mode is an optional parameter

@@ -5,25 +5,30 @@
     <div class="form-group row">
         <div class="col-sm-12">
             <label class="radio-inline">
-            <input type="radio" value="0" class="disable-readonly" id="soil_mode0" name="soil_mode"> Determine Per Hillslope</label>
+            <input type="radio" value="0" class="disable-readonly" id="soil_mode0" name="soil_mode"
+              onchange="Soil.getInstance().handleModeChange(this.value)"> Determine Per Hillslope</label>
         </div>
         <div class="col-sm-12">
             <label class="radio-inline">
-            <input type="radio" value="1" class="disable-readonly" id="soil_mode1" name="soil_mode"> Single Soil for Watershed (MUKEY)</label>
+            <input type="radio" value="1" class="disable-readonly" id="soil_mode1" name="soil_mode"
+              onchange="Soil.getInstance().handleModeChange(this.value)"> Single Soil for Watershed (MUKEY)</label>
         </div>
         <div class="col-sm-12">
             <label class="radio-inline">
-            <input type="radio" value="2" class="disable-readonly" id="soil_mode2" name="soil_mode"> Single Soil for Watershed (Database)</label>
+            <input type="radio" value="2" class="disable-readonly" id="soil_mode2" name="soil_mode"
+              onchange="Soil.getInstance().handleModeChange(this.value)"> Single Soil for Watershed (Database)</label>
         </div>
         {% if 'rred' in ron.mods %}
             <div class="d-none">
                 <div class="d-none">
                     <label class="radio-inline">
-                    <input type="radio" value="3" class="disable-readonly" id="soil_mode3" name="soil_mode"> RRED Unburned</label>
+                    <input type="radio" value="3" class="disable-readonly" id="soil_mode3" name="soil_mode"
+                      onchange="Soil.getInstance().handleModeChange(this.value)"> RRED Unburned</label>
                 </div>
                 <div class="d-none">
                     <label class="radio-inline">
-                    <input type="radio" value="4" class="disable-readonly" id="soil_mode4" name="soil_mode"> RRED Burned</label>
+                    <input type="radio" value="4" class="disable-readonly" id="soil_mode4" name="soil_mode"
+                      onchange="Soil.getInstance().handleModeChange(this.value)"> RRED Burned</label>
                 </div>
             </div>
         {% endif %}
@@ -37,13 +42,15 @@
     <div id="soil_mode1_controls" class="form-group row">
         <div class="col-sm-5">
             <label for="soil_single_selection">Mukey for single soil:</label>
-            <input type="text" class="form-control disable-readonly" id="soil_single_selection" value="{{ soils.single_selection }}"/>
+            <input type="text" class="form-control disable-readonly" id="soil_single_selection" value="{{ soils.single_selection }}"
+              oninput="Soil.getInstance().handleSingleSelectionInput()"/>
         </div>
     </div>
     <div id="soil_mode2_controls" class="form-group row">
         <div class="col-sm-5">
             <label for="soil_single_dbselection">Select soil:</label>
-            <select class="form-control disable-readonly" id="soil_single_dbselection">
+            <select class="form-control disable-readonly" id="soil_single_dbselection"
+              onchange="Soil.getInstance().handleDbSelectionChange()">
                 {% for opt in soildboptions %}
                 <option value="{{ opt }}">{{ opt }}</option>
                 {% endfor %}
