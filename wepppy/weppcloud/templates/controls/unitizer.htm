@@ -3,12 +3,14 @@
     <dd>
         <label class="radio">
         <input type="radio" value="0" name="uni_main_selector"
-                {{ 'checked' if unitizer_nodb.is_english == False }}> SI</label>
+                {{ 'checked' if unitizer_nodb.is_english == False }}
+                onchange="Project.getInstance().handleGlobalUnitPreference(this.value)"> SI</label>
     </dd>
     <dd>
         <label class="radio">
         <input type="radio" value="1" name="uni_main_selector"
-               {{ 'checked' if unitizer_nodb.is_english == True }}> English</label>
+               {{ 'checked' if unitizer_nodb.is_english == True }}
+               onchange="Project.getInstance().handleGlobalUnitPreference(this.value)"> English</label>
     </dd>
 </dl>
 
@@ -22,7 +24,8 @@
                     {% for units in precisions[unitclass] %}
                     <label class="radio">
                     <input type="radio" value="{{ cls_units(units) }}" name="unitizer_{{unitclass}}_radio"
-                    {{ 'checked' if unitizer_nodb.preferences[unitclass] == units }}>&nbsp;{{ str_units(units) | safe }}&nbsp;&nbsp;</label>
+                    {{ 'checked' if unitizer_nodb.preferences[unitclass] == units }}
+                    onchange="Project.getInstance().handleUnitPreferenceChange()">&nbsp;{{ str_units(units) | safe }}&nbsp;&nbsp;</label>
                     {% endfor %}
                 </dd>
                 {% endfor %}

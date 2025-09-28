@@ -9,11 +9,15 @@
 <div class="collapse navbar-collapse" id="navbarCollapse">
   <form class="form-inline my-2 my-lg-0" id="setname_form" action="javascript:void(0);">
     <input class="form-control mr-sm-1 disable-readonly" id="input_name" name="name" type="text" placeholder="Name"
-      value="{{ current_ron.name }}" aria-label="Name">
+      value="{{ current_ron.name }}" aria-label="Name"
+      oninput="Project.getInstance().setNameFromInput()"
+      onblur="Project.getInstance().commitNameFromInput()">
   </form>
   <form class="form-inline my-2 my-lg-0" id="setscenario_form" action="javascript:void(0);">
     <input class="form-control mr-sm-1 disable-readonly" id="input_scenario" name="scenario" type="text"
-      placeholder="Scenario" value="{{ current_ron.scenario }}" aria-label="Scenario">
+      placeholder="Scenario" value="{{ current_ron.scenario }}" aria-label="Scenario"
+      oninput="Project.getInstance().setScenarioFromInput()"
+      onblur="Project.getInstance().commitScenarioFromInput()">
   </form>
   <ul class="navbar-nav mr-auto">
     <li class="nav-item">

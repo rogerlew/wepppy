@@ -8,8 +8,12 @@ var Project = function () {
     function createInstance() {
         var that = controlBase();
 
-        that._currentName = $("#input_name").val() || '';
-        that._currentScenario = $("#input_scenario").val() || '';
+        that._nameInput = $("#input_name");
+        that._scenarioInput = $("#input_scenario");
+        that._currentName = that._nameInput.val() || '';
+        that._currentScenario = that._scenarioInput.val() || '';
+        that._nameDebounceTimer = null;
+        that._scenarioDebounceTimer = null;
         that._notifyTimer = null;
 
         that._notifyCommandBar = function (message, options) {
@@ -55,7 +59,7 @@ var Project = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         that._currentName = trimmed;
-                        $("#input_name").val(trimmed);
+                        that._nameInput.val(trimmed);
                         try {
                             document.title = document.title.split(" - ")[0] + ' - ' + (trimmed || 'Untitled');
                         } catch (err) { }
@@ -84,6 +88,22 @@ var Project = function () {
             return request;
         };
 
+        that.setNameFromInput = function (options) {
+            var value = that._nameInput.val();
+            var wait = (options && options.debounceMs) || 800;
+
+            clearTimeout(that._nameDebounceTimer);
+            that._nameDebounceTimer = setTimeout(function () {
+                that.setName(value, options);
+            }, wait);
+        };
+
+        that.commitNameFromInput = function (options) {
+            var value = that._nameInput.val();
+            clearTimeout(that._nameDebounceTimer);
+            that.setName(value, options);
+        };
+
         that.setScenario = function (scenario, options) {
             options = options || {};
             var trimmed = (scenario || '').trim();
@@ -98,7 +118,7 @@ var Project = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         that._currentScenario = trimmed;
-                        $("#input_scenario").val(trimmed);
+                        that._scenarioInput.val(trimmed);
                         try {
                             document.title = document.title.split(" - ")[0] + ' - ' + trimmed;
                         } catch (err) { }
@@ -125,6 +145,34 @@ var Project = function () {
             });
 
             return request;
+        };
+
+        that.setScenarioFromInput = function (options) {
+            var value = that._scenarioInput.val();
+            var wait = (options && options.debounceMs) || 800;
+
+            clearTimeout(that._scenarioDebounceTimer);
+            that._scenarioDebounceTimer = setTimeout(function () {
+                that.setScenario(value, options);
+            }, wait);
+        };
+
+        that.commitScenarioFromInput = function (options) {
+            var value = that._scenarioInput.val();
+            clearTimeout(that._scenarioDebounceTimer);
+            that.setScenario(value, options);
+        };
+
+        that.handleGlobalUnitPreference = function (pref) {
+            var numericPref = Number(pref);
+            if (typeof window.setGlobalUnitizerPreference === 'function') {
+                window.setGlobalUnitizerPreference(numericPref);
+            }
+            that.unitChangeEvent();
+        };
+
+        that.handleUnitPreferenceChange = function () {
+            that.unitChangeEvent();
         };
 
         that.clear_locks = function () {
