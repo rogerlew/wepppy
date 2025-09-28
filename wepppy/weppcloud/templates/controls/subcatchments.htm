@@ -20,7 +20,8 @@
                     <input id="input_pkcsa" name="pkcsa"
                         class="form-control mr-sm-3 disable-readonly"
                         type="text" value="{{ watershed.pkcsa }}"
-                        aria-label="pkcsa">
+                        aria-label="pkcsa"
+                        data-convert-target="#input_pkcsa_en" data-convert-func="ha_to_ac" data-convert-decimals="2">
                 </div>
             </div>
         </div>
@@ -34,8 +35,9 @@
                     <input id="input_pkcsa_en" name="pkcsa_en"
                         class="form-control mr-sm-3 disable-readonly"
                         type="text"
-                        value="{% if isfloat(watershed.pkcsa) %}{{ watershed.pkcsa * 3.28084 }}{% else %}{{ watershed.pkcsa }}{% endif %}"
-                        aria-label="pkcsa" t>
+                        value="{% if isfloat(watershed.pkcsa) %}{{ watershed.pkcsa * 2.47105 }}{% else %}{{ watershed.pkcsa }}{% endif %}"
+                        aria-label="pkcsa"
+                        data-convert-target="#input_pkcsa" data-convert-func="ac_to_ha" data-convert-decimals="2">
                 </div>
             </div>
         </div>

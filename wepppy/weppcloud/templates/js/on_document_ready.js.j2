@@ -4,7 +4,6 @@
     var site_prefix = "{{ site_prefix }}";
     var runid = "{{ ron.runid }}";
     var config = "{{ ron.config_stem }}";
-    var pup_relpath = {{ pup_relpath | tojson }};
     var ispoweruser = {{ current_user.has_role('PowerUser') | tojson }};
     var WEPP_channel_critical_shear = null;
 
@@ -88,26 +87,8 @@ function onReady() {
     var omni = Omni.getInstance();
     var dss_export = DssExport.getInstance();
 
-    if (pup_relpath) {
-        $.ajaxPrefilter(function (options) {
-            if (!options.url) {
-                return;
-            }
+    initUnitConverters(document);
 
-            var url = options.url;
-
-            if (/^https?:\/\//i.test(url) || url.startsWith('//')) {
-                return;
-            }
-
-            if (url.indexOf('pup=') !== -1) {
-                return;
-            }
-
-            var separator = url.indexOf('?') !== -1 ? '&' : '?';
-            options.url = url + separator + 'pup=' + encodeURIComponent(pup_relpath);
-        });
-    }
 
     // ---------------------------------------------------------------------------
     // Find and Flash by ID
@@ -249,28 +230,6 @@ function onReady() {
     wepp.hideStacktrace();
     dss_export.hideStacktrace();
 
-
-    // kick off websocket clients if the nodb is locked. Likely building or running is in progress
-
-    if ({{ (watershed.islocked()) | tojson }} ) {
-        sub_ctrl.ws_client.connect();
-    }
-
-    if ({{ (landuse.islocked()) | tojson }}) {
-        landuse.ws_client.connect();
-    }
-
-    if ({{ (soils.islocked()) | tojson }}) {
-        soil.ws_client.connect();
-    }
-
-    if ({{ (climate.islocked()) | tojson }}) {
-        climate.ws_client.connect();
-    }
-
-    if ({{ (wepp.islocked()) | tojson }}) {
-        wepp.ws_client.connect();
-    }
 
     try {
         observed.hideStacktrace();
@@ -502,27 +461,6 @@ function onReady() {
     //
     // Bindings
     //
-    var input_mcl = $("#input_mcl");
-    var input_mcl_en = $("#input_mcl_en");
-    var input_csa = $("#input_csa");
-    var input_csa_en = $("#input_csa_en");
-
-    input_mcl.on("input", function () {
-        input_mcl_en.val(parseFloat(input_mcl.val()) * 3.28084);
-    });
-
-    input_mcl_en.on("input", function () {
-        input_mcl.val(parseFloat(input_mcl_en.val()) / 3.28084);
-    });
-
-    input_csa.on("input", function () {
-        input_csa_en.val(parseFloat(input_csa.val()) * 2.47105);
-    });
-
-    input_csa_en.on("input", function () {
-        input_csa.val(parseFloat(input_csa_en.val()) / 2.47105);
-    });
-
     // Event handler for #btn_build_channels
     $('#btn_build_channels').on('click', function (event) {
         // Prevent the default behavior of the button
@@ -638,24 +576,6 @@ function onReady() {
     //
     // Bindings
     //
-    var input_pkcsa = $("#input_pkcsa");
-    var input_pkcsa_en = $("#input_pkcsa_en");
-
-    input_pkcsa.on("input", function () {
-        var v = input_pkcsa.val();
-        if (v !== 'auto') {
-            input_pkcsa_en.val(parseFloat(v) * 2.47105);
-        }
-    });
-
-    input_pkcsa_en.on("input", function () {
-        console.log('on input_pkcsa_en change.');
-        var v = input_pkcsa_en.val();
-        if (v !== 'auto') {
-            input_pkcsa.val(parseFloat(v) / 2.47105);
-        }
-    });
-
     // Bind radio to change subcatchment appearance
     // radios live in the map.htm template
     $("[name='sub_cmap_radio']").change(function () {
@@ -969,29 +889,6 @@ function onReady() {
     //
     // Single Storm Unitization
     //
-    var ss_design_storm_amount_mm = $("#ss_design_storm_amount_mm");
-    var ss_design_storm_amount_inches = $("#ss_design_storm_amount_inches");
-
-    ss_design_storm_amount_mm.on("input", function () {
-        ss_design_storm_amount_inches.val(parseFloat(ss_design_storm_amount_mm.val()) / 25.4);
-    });
-
-    ss_design_storm_amount_inches.on("input", function () {
-        ss_design_storm_amount_mm.val(parseFloat(ss_design_storm_amount_inches.val()) * 25.4);
-    });
-
-
-    var ss_max_intensity_mm_per_hour = $("#ss_max_intensity_mm_per_hour");
-    var ss_max_intensity_inches_per_hour = $("#ss_max_intensity_inches_per_hour");
-
-    ss_max_intensity_mm_per_hour.on("input", function () {
-        ss_max_intensity_inches_per_hour.val(parseFloat(ss_max_intensity_mm_per_hour.val()) / 25.4);
-    });
-
-    ss_max_intensity_inches_per_hour.on("input", function () {
-        ss_max_intensity_mm_per_hour.val(parseFloat(ss_max_intensity_inches_per_hour.val()) * 25.4);
-    });
-
     /*
     * Wepp Initialization
     * ======================

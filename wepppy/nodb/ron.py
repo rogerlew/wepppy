@@ -803,6 +803,7 @@ class RonViewModel(object):
         self.config_stem = _try_str(ron.config_stem)
         self.readonly = _try_bool(ron.readonly)
         self.public = _try_bool(ron.public)
+        self.pup_relpath = ron.pup_relpath
 
     @classmethod
     def getInstanceFromRunID(cls, runid):
