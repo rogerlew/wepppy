@@ -7,6 +7,17 @@ var Ash = function () {
 
     function createInstance() {
         var that = controlBase();
+        const DEPTH_MODE_SECTIONS = {
+            0: '#ash_depth_mode0_controls',
+            1: '#ash_depth_mode1_controls',
+            2: '#ash_depth_mode2_controls'
+        };
+
+        function parseDepthMode(value, fallback) {
+            var parsed = parseInt(value, 10);
+            return Number.isNaN(parsed) ? fallback : parsed;
+        }
+
         that.form = $("#ash_form");
         that.info = $("#ash_form #info");
         that.status = $("#ash_form  #status");
@@ -32,7 +43,7 @@ var Ash = function () {
             self.stacktrace.hide();
         };
 
-        that.run_model = function () {
+        that.run = function () {
             var self = instance;
 
             var task_msg = "Running ash model";
@@ -74,9 +85,13 @@ var Ash = function () {
                 mode = $("input[name='ash_depth_mode']:checked").val();
             }
 
-            self.ash_depth_mode = parseInt(mode, 10);
+            self.ash_depth_mode = parseDepthMode(mode, 0);
             self.showHideControls();
-        }
+        };
+
+        that.handleDepthModeChange = function (mode) {
+            that.setAshDepthMode(mode);
+        };
 
         that.set_wind_transport = function (state) {
             var self = instance;
@@ -109,23 +124,18 @@ var Ash = function () {
 
         that.showHideControls = function () {
             var self = instance;
+            var active = DEPTH_MODE_SECTIONS.hasOwnProperty(self.ash_depth_mode)
+                ? DEPTH_MODE_SECTIONS[self.ash_depth_mode]
+                : DEPTH_MODE_SECTIONS[0];
 
-            if (self.ash_depth_mode === 1) {
-                $("#ash_depth_mode0_controls").hide();
-                $("#ash_depth_mode1_controls").show();
-                $("#ash_depth_mode2_controls").hide();
-            }
-            else if (self.ash_depth_mode === 2) {
-                $("#ash_depth_mode0_controls").hide();
-                $("#ash_depth_mode1_controls").hide();
-                $("#ash_depth_mode2_controls").show();
-            }
-            else {
-                $("#ash_depth_mode0_controls").show();
-                $("#ash_depth_mode1_controls").hide();
-                $("#ash_depth_mode2_controls").hide();
-            }
-        }
+            Object.values(DEPTH_MODE_SECTIONS).forEach(function (selector) {
+                if (selector === active) {
+                    $(selector).show();
+                } else {
+                    $(selector).hide();
+                }
+            });
+        };
 
         that.report = function () {
             var self = instance;

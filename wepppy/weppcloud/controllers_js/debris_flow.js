@@ -32,7 +32,7 @@ var DebrisFlow = function () {
             self.stacktrace.hide();
         };
 
-        that.run_model = function () {
+        that.run = function () {
             var self = instance;
 
             var task_msg = "Running debris_flow model fit";
