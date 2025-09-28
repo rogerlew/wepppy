@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=www-data
-Group=www-data
+Group=webgroup
 WorkingDirectory=/workdir
 Environment="LD_LIBRARY_PATH=/workdir/miniconda3/envs/wepppy310-env/lib"
 Environment="PATH=/workdir/miniconda3/envs/wepppy310-env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
