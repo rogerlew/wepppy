@@ -76,7 +76,6 @@ from wepppy.all_your_base import (
     isfloat,
     isnan,
     isinf,
-    NCPU,
     IS_WINDOWS,
     NumpyEncoder
 )
@@ -686,7 +685,8 @@ class Wepp(NoDbBase):
     # hillslopes
     #
     def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None,
-                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
+                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
+                  max_workers=None):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(frost={frost}, baseflow={baseflow}, wepp_ui={wepp_ui}, pmet={pmet}, snow={snow}, man_relpath={man_relpath}, cli_relpath={cli_relpath}, slp_relpath={slp_relpath}, sol_relpath={sol_relpath})')
 
@@ -706,7 +706,7 @@ class Wepp(NoDbBase):
             if slp_relpath == '':
                 self._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
             self._prep_managements(translator)
-            self._prep_soils(translator)
+            self._prep_soils(translator, max_workers=max_workers)
 
         if cli_relpath == '':
             self._prep_climates(translator)
@@ -1409,7 +1409,6 @@ class Wepp(NoDbBase):
                     if (texid, disturbed_class) not in _land_soil_replacements_d:
                         self.logger.info(f'     _prep_managements: {texid}:{disturbed_class} not in replacements_d')
 
-
                     if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
                         rdmax = None
                         xmxlai = None
@@ -1460,9 +1459,18 @@ class Wepp(NoDbBase):
                                      end_year=climate.observed_end_year)
             emapr_ts.analyze()
 
-    def _prep_soils(self, translator):
+    def _prep_soils(self, translator, max_workers=None):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
+    
+        cpu_count = os.cpu_count() or 1
+        if max_workers is None:
+            max_workers = cpu_count
+
+        if max_workers < 1:
+            max_workers = 1
+        if max_workers > max(cpu_count, 20):
+            max_workers = max(cpu_count, 20)
 
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
@@ -1483,10 +1491,8 @@ class Wepp(NoDbBase):
         if run_concurrent:
             self.logger.info(f'  Submitting soils for `prep_soil` to ProcessPoolExecutor')
 
-            cpu_count = os.cpu_count() or 1
-            default_workers = max(cpu_count, 20)
 
-            with createProcessPoolExecutor(max_workers=default_workers, logger=self.logger) as executor:
+            with createProcessPoolExecutor(max_workers=max_workers, logger=self.logger) as executor:
                 futures = []
                 for topaz_id, soil in soils.sub_iter():
                     wepp_id = translator.wepp(top=int(topaz_id))
@@ -1682,7 +1688,19 @@ class Wepp(NoDbBase):
                                    sol_relpath=sol_relpath)
 
     def run_hillslopes(self,
-                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
+                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
+                  max_workers=None):
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}()')
+
+        cpu_count = os.cpu_count() or 1
+        if max_workers is None:
+            max_workers = cpu_count
+        if max_workers < 1:
+            max_workers = 1
+        if max_workers > max(cpu_count, 16):
+            max_workers = max(cpu_count, 16)
+
         self.logger.info('Running Hillslopes')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -1695,11 +1713,12 @@ class Wepp(NoDbBase):
 
         sub_n = watershed.sub_n
 
-        with ThreadPoolExecutor(NCPU) as pool:
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
             futures = []
             if climate.climate_mode == ClimateMode.SingleStormBatch:
                 self.logger.info(f'  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - SS batch')
                 for i, topaz_id in enumerate(watershed._subs_summary):
+                    self.logger.info(f'  submitting {topaz_id} to executor')
 
                     ss_n = len(climate.ss_batch_storms)
                     for d in climate.ss_batch_storms:
@@ -1722,6 +1741,7 @@ class Wepp(NoDbBase):
             else:
                 self.logger.info(f'  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - no SS batch')
                 for i, topaz_id in enumerate(watershed._subs_summary):
+                    self.logger.info(f'  submitting {topaz_id} to executor')
                     wepp_id = translator.wepp(top=int(topaz_id))
                     futures.append(pool.submit(
                         run_hillslope,

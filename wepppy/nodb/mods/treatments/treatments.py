@@ -2,6 +2,7 @@ from typing import Dict, List, Tuple
 import os
 import ast
 import csv
+import inspect
 import shutil
 from collections import Counter
 from datetime import datetime
@@ -230,7 +231,8 @@ class Treatments(NoDbBase):
 
         landuse = Landuse.getInstance(self.wd)
         mapping = landuse.get_mapping_dict()
-
+        self.logger.info(f'self.wd: {self.wd}')
+        self.logger.info(f'Applying treatments to {len(treatments_domlc_d)} hillslopes')
         disturbed = Disturbed.getInstance(self.wd)
 
         with landuse.locked():
@@ -260,6 +262,8 @@ class Treatments(NoDbBase):
         """
         Apply the treatment to the hillslope.
         """
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(topaz_id={topaz_id}, treatment={treatment}, man_summary={man_summary.as_dict()}, disturbed_class={disturbed_class})')
 
         if not landuse_instance.islocked():
             raise RuntimeError("Treatments.nodb is not locked!")

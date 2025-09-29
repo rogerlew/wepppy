@@ -32,6 +32,7 @@ from wepppy.nodb import (
     Soils, SoilsMode, Ash, DebrisFlow,
     Rhem, RAP_TS
 )
+from wepppy.nodb.base import clear_nodb_file_cache
 
 from wepppy.topo.topaz import (
     WatershedBoundaryTouchesEdgeError,
@@ -938,6 +939,16 @@ def restore_archive_rq(runid: str, archive_name: str):
                         pass
 
                 StatusMessenger.publish(status_channel, f'Restored file {relative_target}')
+
+        try:
+            cleared_entries = clear_nodb_file_cache(runid)
+        except Exception as exc:
+            StatusMessenger.publish(status_channel, f'Warning: failed to clear NoDb cache after restore ({exc})')
+        else:
+            StatusMessenger.publish(
+                status_channel,
+                f'Cleared NoDb cache entries after restore ({len(cleared_entries)})'
+            )
 
         StatusMessenger.publish(status_channel, f'Restore complete: {archive_name}')
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')

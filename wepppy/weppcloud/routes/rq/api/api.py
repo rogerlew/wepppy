@@ -48,7 +48,7 @@ from wepppy.rq.project_rq import (
     restore_archive_rq
 )
 from wepppy.rq.wepp_rq import run_wepp_rq, post_dss_export_rq
-from wepppy.rq.omni_rq import run_omni_rq
+from wepppy.rq.omni_rq import run_omni_scenarios_rq
 from wepppy.rq.land_and_soil_rq import land_and_soil_rq
 
 from wepppy.topo.watershed_abstraction import (
@@ -858,7 +858,7 @@ def api_run_omni(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_omni_rq, (runid,), timeout=TIMEOUT)
+            job = q.enqueue_call(run_omni_scenarios_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_omni_rq', job.id)
     except Exception:
         return exception_factory()
@@ -928,7 +928,7 @@ def run_omni_contrasts(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_omni_rq, (runid,), timeout=TIMEOUT)
+            job = q.enqueue_call(run_omni_scenarios_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_omni_rq', job.id)
     except Exception:
         return exception_factory()

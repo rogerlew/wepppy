@@ -52,6 +52,11 @@ import atexit
 from logging import FileHandler, StreamHandler
 from wepppy.nodb.status_messenger import StatusMessengerHandler
 
+
+class NoDbAlreadyLockedError(Exception):
+    """Raised when attempting to lock a NoDb instance that is already locked."""
+    pass
+
 from .redis_prep import RedisPrep
 from wepppy.all_your_base import isfloat, isint, isbool
 
@@ -895,7 +900,7 @@ class NoDbBase(object):
             raise RuntimeError('Redis lock client is unavailable')
         
         if self.islocked():
-            raise Exception('lock() called on an already locked nodb')
+            raise NoDbAlreadyLockedError('lock() called on an already locked nodb')
 
         redis_lock_client.hset(self.runid, self._file_lock_key, 'true')
 

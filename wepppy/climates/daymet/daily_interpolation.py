@@ -93,7 +93,8 @@ def interpolate_daily_timeseries(
     end_year=2020,
     output_dir='test',
     output_type='prn parquet',
-    status_channel=None):
+    status_channel=None,
+    max_workers=28):
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -110,7 +111,7 @@ def interpolate_daily_timeseries(
     # 30 workers 74 seconds
     # 36 workers 79 seconds
     # 56 workers 131 seconds
-    with createProcessPoolExecutor(max_workers=28, logger=_logger) as executor:
+    with createProcessPoolExecutor(max_workers=max_workers, logger=_logger) as executor:
         futures = []
 
         for measure in measures:
