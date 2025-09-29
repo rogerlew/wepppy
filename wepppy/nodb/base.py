@@ -1279,3 +1279,45 @@ def lock_statuses(runid) -> defaultdict[str, bool]:
             statuses[filename] = (v == 'true')
 
     return statuses
+
+
+def clear_nodb_file_cache(runid):
+    """Clear Redis cache entries for all `.nodb` files under a run directory."""
+    if redis_nodb_cache_client is None:
+        raise RuntimeError('Redis NoDb cache client is unavailable')
+
+    from wepppy.weppcloud.utils.helpers import get_wd
+
+    wd = Path(get_wd(runid)).resolve()
+    if not wd.exists():
+        raise FileNotFoundError(f'Working directory not found for runid {runid}: {wd}')
+
+    nodb_paths: set[Path] = set()
+
+    # Top-level `.nodb` files (e.g., wepp.nodb, soils.nodb)
+    nodb_paths.update(wd.glob('*.nodb'))
+
+    # Immediate subdirectories (excluding `_pups`, handled below)
+    for child in wd.glob('*/*.nodb'):
+        if '_pups' in child.parts:
+            continue
+        nodb_paths.add(child)
+
+    # Recursive search within `_pups` hierarchy, tracking relative paths
+    pups_dir = wd / '_pups'
+    if pups_dir.is_dir():
+        nodb_paths.update(pups_dir.rglob('*.nodb'))
+
+    cleared = []
+    for nodb_path in sorted(nodb_paths):
+        cache_key = str(nodb_path)
+        try:
+            removed = redis_nodb_cache_client.delete(cache_key)
+        except redis.exceptions.RedisError as exc:
+            logging.error(f'Error clearing NoDb cache for {cache_key}: {exc}')
+            continue
+
+        if removed:
+            cleared.append(nodb_path.relative_to(wd))
+
+    return cleared
