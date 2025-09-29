@@ -17,12 +17,22 @@ const config = "{{ config }}";
 <style>
   input[type='text'] { font-family: monospace; }
   a { text-decoration: none; }
-  span.even-row { background-color: #f6f6f6;  display: block; }
-  span.odd-row { background-color: #ffffff;  display: block; }
+  span.even-row {
+    background-color: #f6f6f6;
+    display: block;
+  }
+  span.odd-row {
+    background-color: #ffffff;
+    display: block;
+  }
   span.even-row:hover,
   span.odd-row:hover {
     background-color: #d0ebff;
     cursor: pointer;
+  }
+  .breadcrumb-separator {
+    cursor: pointer;
+    user-select: none;
   }
 </style>
 </head>
@@ -35,6 +45,75 @@ const config = "{{ config }}";
 {{ listing_html|safe }}
 {{ pagination_html|safe }}
 </pre>
+<script>
+(function() {
+  function fallbackCopy(text) {
+    if (!text) {
+      return;
+    }
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    const selection = document.getSelection();
+    const selectedRange = selection && selection.rangeCount ? selection.getRangeAt(0) : null;
+    textarea.select();
+    try {
+      document.execCommand('copy');
+    } catch (err) {
+      console.error('Copy failed', err);
+    }
+    document.body.removeChild(textarea);
+    if (selectedRange && selection) {
+      selection.removeAllRanges();
+      selection.addRange(selectedRange);
+    }
+  }
+
+  async function copyPath(text, target) {
+    if (!text) {
+      return;
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        fallbackCopy(text);
+        return;
+      }
+    } catch (err) {
+      console.error('Clipboard API failed, using fallback.', err);
+      fallbackCopy(text);
+      return;
+    }
+    target.setAttribute('data-copied', 'true');
+    window.setTimeout(() => target.removeAttribute('data-copied'), 1200);
+  }
+
+  document.addEventListener('click', (event) => {
+    const separator = event.target.closest('.breadcrumb-separator');
+    if (!separator) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    copyPath(separator.getAttribute('data-copy-path'), separator);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+    if (!event.target.classList.contains('breadcrumb-separator')) {
+      return;
+    }
+    event.preventDefault();
+    copyPath(event.target.getAttribute('data-copy-path'), event.target);
+  });
+})();
+</script>
 {% include 'browse/_path_input_script.htm' %}
 </body>
 </html>
