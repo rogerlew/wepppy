@@ -1701,7 +1701,7 @@ class Wepp(NoDbBase):
         if max_workers > max(cpu_count, 16):
             max_workers = max(cpu_count, 16)
 
-        self.logger.info('Running Hillslopes')
+        self.logger.info(f'Running Hillslopes with max_workers={max_workers}')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
         climate = Climate.getInstance(self.wd)
