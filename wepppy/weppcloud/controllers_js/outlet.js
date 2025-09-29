@@ -7,6 +7,16 @@ var Outlet = function () {
 
     function createInstance() {
         var that = controlBase();
+        const MODE_SECTIONS = {
+            0: $("#set_outlet_mode0_controls"),
+            1: $("#set_outlet_mode1_controls")
+        };
+
+        function parseMode(value, fallback) {
+            var parsed = parseInt(value, 10);
+            return Number.isNaN(parsed) ? fallback : parsed;
+        }
+
         that.form = $("#set_outlet_form");
         that.info = $("#set_outlet_form #info");
         that.status = $("#set_outlet_form  #status");
@@ -99,6 +109,9 @@ var Outlet = function () {
         };
 
         // Cursor Selection Control
+        that.cursorButton = $("#btn_set_outlet_cursor");
+        that.cursorHint = $("#hint_set_outlet_cursor");
+        that.entryInput = $("#input_set_outlet_entry");
         that.popup = L.popup();
         that.cursorSelectionOn = false;
 
@@ -151,29 +164,75 @@ var Outlet = function () {
             self.cursorSelectionOn = state;
 
             if (state) {
-                $("#btn_set_outlet_cursor").text("Cancel");
+                if (self.cursorButton && self.cursorButton.length) {
+                    self.cursorButton.text("Cancel");
+                }
                 $(".leaflet-container").css("cursor", "crosshair");
-                $("#hint_set_outlet_cursor").text("Click on the map to define outlet.");
+                if (self.cursorHint && self.cursorHint.length) {
+                    self.cursorHint.text("Click on the map to define outlet.");
+                }
             } else {
-                $("#btn_set_outlet_cursor").text("Use Cursor");
+                if (self.cursorButton && self.cursorButton.length) {
+                    self.cursorButton.text("Use Cursor");
+                }
                 $(".leaflet-container").css("cursor", "");
-                $("#hint_set_outlet_cursor").text("");
+                if (self.cursorHint && self.cursorHint.length) {
+                    self.cursorHint.text("");
+                }
             }
         };
 
         that.setMode = function (mode) {
             var self = instance;
-            self.mode = parseInt(mode, 10);
-            if (self.mode === 0) {
-                // Enter lng, lat
-                $("#set_outlet_mode0_controls").show();
-                $("#set_outlet_mode1_controls").hide();
-            } else {
-                // user cursor
-                $("#set_outlet_mode0_controls").hide();
-                $("#set_outlet_mode1_controls").show();
+            self.mode = parseMode(mode, 0);
+
+            Object.keys(MODE_SECTIONS).forEach(function (key) {
+                var section = MODE_SECTIONS[key];
+                if (!section || section.length === 0) {
+                    return;
+                }
+                if (Number(key) === self.mode) {
+                    section.show();
+                } else {
+                    section.hide();
+                }
+            });
+
+            if (self.mode !== 0) {
                 self.setCursorSelection(false);
             }
+        };
+
+        that.handleModeChange = function (mode) {
+            that.setMode(mode);
+        };
+
+        that.handleCursorToggle = function () {
+            var self = instance;
+            self.setCursorSelection(!self.cursorSelectionOn);
+        };
+
+        that.handleEntrySubmit = function () {
+            var self = instance;
+            var raw = self.entryInput && self.entryInput.length ? self.entryInput.val() : '';
+            var parts = String(raw || '').split(',');
+
+            if (parts.length < 2) {
+                self.status.html('<span class="text-danger">Enter coordinates as "lon, lat".</span>');
+                return false;
+            }
+
+            var lng = parseFloat(parts[0]);
+            var lat = parseFloat(parts[1]);
+
+            if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+                self.status.html('<span class="text-danger">Invalid coordinates.</span>');
+                return false;
+            }
+
+            var ev = { latlng: L.latLng(lat, lng) };
+            self.set_outlet(ev);
+            return true;
         };
 
         return that;
