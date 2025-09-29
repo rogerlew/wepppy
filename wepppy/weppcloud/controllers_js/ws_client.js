@@ -36,7 +36,7 @@ WSClient.prototype.connect = function () {
         var payload = JSON.parse(event.data);
         if (payload.type === "ping") {
             this.ws.send(JSON.stringify({ "type": "pong" }));
-        } else if (payload.type === "hangup") {
+        } else if (payload.type === "hangup") { // intended for server in distress signaling
             this.disconnect();
         } else if (payload.type === "status") {
             var data = payload.data;
