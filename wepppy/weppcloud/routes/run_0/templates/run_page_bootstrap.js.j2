@@ -1,0 +1,419 @@
+<!-- wepppy/weppcloud/templates/js/run_page_bootstrap.js.j2 -->
+<script>
+"use strict";
+
+var site_prefix = "{{ site_prefix }}";
+var runid = "{{ ron.runid }}";
+var config = "{{ ron.config_stem }}";
+var ispoweruser = {{ current_user.has_role('PowerUser') | tojson }};
+var WEPP_channel_critical_shear = null;
+
+var error = null;
+
+var cellsize = {{ ron.cellsize }};
+var readonly = {{ ron.readonly | tojson }};
+
+function window_resize() {
+    var _map = $('#mapid');
+    var w = _map.parent().width();
+    _map.css('min-height', w);
+    _map.css('height', w);
+    _map.css('width', w);
+
+    Map.getInstance().invalidateSize();
+};
+
+function onReady() {
+    console.log("Document ready");
+
+    var project = Project.getInstance();
+    var team = Team.getInstance();
+    var map = Map.getInstance();
+    var channel_ctrl = ChannelDelineation.getInstance();
+    var outlet = Outlet.getInstance();
+    var sub_ctrl = SubcatchmentDelineation.getInstance();
+    var landuse = Landuse.getInstance();
+    var lc_modify = LanduseModify.getInstance();
+    var soil = Soil.getInstance();
+    var climate = Climate.getInstance();
+    var wepp = Wepp.getInstance();
+    var observed = Observed.getInstance();
+    var debris_flow = DebrisFlow.getInstance();
+    var ash = Ash.getInstance();
+    var rap_ts = RAP_TS.getInstance();
+    var disturbed = Disturbed.getInstance();
+    var omni = Omni.getInstance();
+    var dss_export = DssExport.getInstance();
+
+    initUnitConverters(document);
+    
+    /*
+     * Map
+     * ==================
+     */
+    map.setView({{ ron.center0 }}, {{ ron.zoom0 }});
+
+    // call map.onMapChange to update mapStatus
+    map.onMapChange();
+
+    if ({{ (ron.boundary != None) | tojson }}) {
+        map.addGeoJsonOverlay({
+            url: "{{ site_prefix }}/{{ ron.boundary }}",
+            layerName: 'Watershed Boundary',
+            style: {
+                color: "#FF0000",
+                opacity: 1,
+                weight: 2,
+                fillColor: "#FFFFFF",
+                fillOpacity: 0.0
+            }
+        });
+    }
+
+
+    {% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
+    /*
+     * Baer mod
+     * ======================
+     */
+
+    var baer = Baer.getInstance();
+
+    baer.form.on("SBS_UPLOAD_TASK_COMPLETE", function () {
+        setTimeout(baer.show_sbs, 100);
+        setTimeout(baer.load_modify_class, 100);
+    });
+
+    baer.form.on("SBS_REMOVE_TASK_COMPLETE", function () {
+    });
+
+    baer.form.on("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {
+        setTimeout(baer.show_sbs, 100);
+        setTimeout(baer.load_modify_class, 100);
+    });
+
+    if ({{ ron.has_sbs | tojson }})
+    {
+        baer.show_sbs();
+        baer.load_modify_class();
+    }
+
+    $("#sbs_mode0").click();
+    {% endif %}
+
+    /*
+     * Channel
+     * ======================
+     */
+
+    // load the hidden inputs on channel form
+    channel_ctrl.onMapChange();
+
+    channel_ctrl.set_rq_job_id(channel_ctrl, {{ rq_job_ids.get("fetch_dem_and_build_channels_rq") | tojson }});
+
+    channel_ctrl.zoom_min = 11;
+    if ({{ watershed.has_channels | tojson }}) {
+        channel_ctrl.report();
+    }
+    if ({{ watershed.has_channels | tojson }} && !({{ watershed.has_subcatchments | tojson }})) {
+        channel_ctrl.show();
+    }
+
+    /*
+     * Outlet
+     * =====================
+     */
+    outlet.set_rq_job_id(outlet, {{ rq_job_ids.get("set_outlet_rq") | tojson }});
+
+    // Load outlet from server
+    if ({{ watershed.has_outlet | tojson }}) {
+        outlet.triggerEvent('SET_OUTLET_TASK_COMPLETED');
+    }
+
+    var initialOutletMode = $("input[name='set_outlet_mode']:checked").val();
+    if (initialOutletMode !== undefined) {
+        outlet.handleModeChange(initialOutletMode);
+    }
+
+    map.on("click", function (ev) {
+        outlet.setClickHandler(ev);
+    });
+
+    /*
+     * Subcatchment
+     * ===========================
+     */
+    sub_ctrl.initializeColorMapControls();
+    sub_ctrl.set_rq_job_id(sub_ctrl, {{ rq_job_ids.get("build_subcatchments_and_abstract_watershed_rq") | tojson }});
+
+    if ({{ watershed.has_subcatchments | tojson }}) {
+        sub_ctrl.show();
+        sub_ctrl.report();
+        channel_ctrl.show();
+        sub_ctrl.enableColorMap("slp_asp");
+    }
+
+    {% if 'rangeland_cover' in ron.mods %}
+    /*
+     * Rangeland Cover
+     * ===============================
+     */
+    var rangeland_cover = RangelandCover.getInstance();
+    var rangeland_cover_modify = RangelandCoverModify.getInstance();
+    rangeland_cover.setMode();
+
+    if ({{ rangeland_cover.has_covers | tojson }}) {
+        rangeland_cover.report();
+        sub_ctrl.enableColorMap("rangeland_cover");
+    }
+    {% endif %}
+
+    /*
+     * Landuse
+     * ======================
+     */
+
+    landuse.set_rq_job_id(landuse, {{ rq_job_ids.get("build_landuse_rq") | tojson }});
+
+    // load landuse
+    if ({{ landuse.has_landuse | tojson }} ) {
+        landuse.triggerEvent('LANDUSE_BUILD_TASK_COMPLETED');
+    }
+
+    landuse.restore({{ landuse.mode | int }}, {{ landuse.single_selection | int }});
+
+    /*
+     * Soil
+     * ======================
+     */
+
+    soil.set_rq_job_id(soil, {{ rq_job_ids.get("build_soils_rq") | tojson }});
+    soil.restore({{ soils.mode | int }});
+
+    if ({{ (soils.single_dbselection != none) | tojson }})
+    {
+        $('#soil_single_dbselection').val('{{ soils.single_dbselection }}').prop('selected', true);
+    }
+    // load soil
+    if ({{ soils.has_soils | tojson }} ) {
+        soil.triggerEvent('SOILS_BUILD_TASK_COMPLETED');
+    }
+
+    /*
+     * Climate
+     * ======================
+     */
+
+    var buildMode = $("input[name='climate_build_mode']:checked").val();
+    if (buildMode !== undefined) {
+        climate.handleBuildModeChange(buildMode);
+    }
+    climate.handlePrecipScalingModeChange();
+    climate.set_rq_job_id(climate, {{ rq_job_ids.get("build_climate_rq") | tojson }});
+
+    observed.hideControl();
+    climate.showHideControls({{ climate.climate_mode | int }});
+
+    // load climate
+    if ({{ climate.has_station | tojson }} ) {
+        climate.refreshStationSelection();
+        climate.viewStationMonthlies();
+    }
+
+    if ({{ climate.has_climate | tojson }} ) {
+        climate.report();
+    }
+
+    if ({{ climate.has_observed | tojson }} ||
+        {{ observed.results is not none | tojson }}) {
+        observed.showControl();
+    }
+
+    climate.setBuildMode(parseInt($("input[name='climate_build_mode']:checked").val(), 10));
+
+    /*
+    * Wepp
+    * ======================
+    */
+
+    $("[name='wepp_mode']").change(function () {
+        wepp.setMode();
+    });
+
+    $("#wepp_single_selection").on("change", function () {
+        wepp.setMode();
+    });
+
+    wepp.set_rq_job_id(wepp, {{ rq_job_ids.get("run_wepp_rq") | tojson }});
+
+    // show report if wepp has run
+    if ({{ wepp.has_run | tojson }} ) {
+        wepp.report();
+    }
+
+    {% if 'omni' in ron.mods and omni %}
+    /*
+    * Omni
+    * ======================
+    */
+    omni.load_scenarios_from_backend();
+
+    if ({{ omni.has_ran_scenarios | tojson }}) {
+        omni.report_scenarios()
+    }
+
+    {% endif %}
+
+    {% if 'rhem' in ron.mods %}
+    /*
+    * Rhem
+    * ======================
+    */
+    var rhem = Rhem.getInstance();
+    rhem.set_rq_job_id(rhem, {{ rq_job_ids.get("run_rhem_rq") | tojson }});
+    if ({{ rhem.has_run | tojson }} ) {
+        rhem.report();
+    }
+    {% endif %}
+
+    /*
+    * Observed
+    * ====================
+    if ({{ observed.has_results | tojson }} ) {
+        observed.report();
+    }
+
+    {% if 'ash' in ron.mods %}
+    /*
+    * Ash
+    * ====================
+    ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
+
+    $("[name='ash_depth_mode']").change(function () {
+        ash.setAshDepthMode();
+    });
+
+    // show report if ash model has run
+    if ({{ ron.has_ash_results | tojson }} ) {
+        ash.report();
+    }
+    ash.setAshDepthMode({{ ash.ash_depth_mode }});
+    {% endif %}
+
+    /*
+    * Ash
+    * ====================
+    rap_ts.set_rq_job_id(rap_ts, {{ rq_job_ids.get("fetch_and_analyze_rap_ts_rq") | tojson }});
+
+    /*
+    * DebrisFlow
+    * ====================
+    debris_flow.set_rq_job_id(debris_flow, {{ rq_job_ids.get("run_debris_flow_rq") | tojson }});
+
+    /*
+    * Project
+    * ====================
+    project.set_readonly_controls({{ ron.readonly | tojson }})
+
+    /*
+     * Team
+     * ======================
+     */
+    team.form.on("TEAM_ADDUSER_TASK_COMPLETED", function () {
+        team.report();
+    });
+
+    team.form.on("TEAM_REMOVEUSER_TASK_COMPLETED", function () {
+        team.report();
+    });
+
+    // show report if wepp has run
+    if ({{ user.is_authenticated | tojson }} ) {
+        team.report();
+    }
+
+    /*
+     * DSS Export
+     * =================
+     */
+    dss_export.setMode({{ wepp.dss_export_mode | int }});
+
+    if ({{ wepp.has_dss_zip | tojson }} ) {
+        dss_export.report();
+    }
+
+    /*
+     * Table of Contents
+     * =================
+     */
+    $(function () {
+        var navSelector = "#toc";
+        var $myNav = $(navSelector);
+        Toc.init($myNav);
+    });
+
+    function computeScrollOffset() {
+        var header = document.querySelector('header .navbar');
+        if (header) {
+            return Math.ceil(header.getBoundingClientRect().height) + 12;
+        }
+        var cssOffset = parseInt(getComputedStyle(document.documentElement)
+            .getPropertyValue('--project-header-offset'), 10);
+        if (Number.isNaN(cssOffset)) {
+            cssOffset = 72;
+        }
+        return cssOffset + 12;
+    }
+
+    function scrollToSection(el) {
+        if (!el) {
+            return;
+        }
+        var offset = computeScrollOffset();
+        var targetY = window.pageYOffset + el.getBoundingClientRect().top - offset;
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+    }
+
+    $('#toc').on('click', 'a.nav-link', function (event) {
+        var href = $(this).attr('href');
+        if (!href || href.charAt(0) !== '#') {
+            return;
+        }
+        var $target = $(href);
+        if ($target.length) {
+            event.preventDefault();
+            scrollToSection($target[0]);
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', onReady);
+
+window.addEventListener('load', function () {
+    window.addEventListener('resize', window_resize);
+    setTimeout(function () {
+        window_resize();
+    }, 100);
+
+    initPreflight("{{run_id}}");
+
+    {% if 'dss_export' not in ron.mods %}
+    // Ensure this runs after all other initialization
+    setTimeout(function () {
+        // Check if DssExport instance exists before trying to hide it
+        var dssExport = DssExport.getInstance();
+        if (dssExport && typeof dssExport.hide === 'function') {
+            dssExport.hide();
+            console.log("DssExport component hidden");
+        }
+    }, 300);
+    {% endif %}
+
+    // get the preferred units and set the unitizer preference
+    var pref = $("input[name='uni_main_selector']:checked").val();
+    pref = parseInt(pref, 10);
+    setGlobalUnitizerPreference(pref);
+    Project.getInstance().unitChangeEvent();
+
+});
+</script>
+<!-- End wepppy/weppcloud/templates/js/run_page_bootstrap.js.j2 -->

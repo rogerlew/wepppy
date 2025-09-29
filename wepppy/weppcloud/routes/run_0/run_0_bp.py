@@ -6,7 +6,7 @@ import pathlib
 from datetime import datetime
 import awesome_codename
 
-from ._common import *  # noqa: F401,F403
+from .._common import *  # noqa: F401,F403
 
 import wepppy
 from wepppy.all_your_base import isint
@@ -27,7 +27,8 @@ from wepppy.weppcloud.utils.helpers import (
 )
 
 
-run_0_bp = Blueprint('run_0', __name__)
+run_0_bp = Blueprint('run_0', __name__,
+                     template_folder='templates')
 
 VAPID_PUBLIC_KEY = ''
 _VAPID_PATH = pathlib.Path('/workdir/weppcloud2/microservices/wepppush/vapid.json')
