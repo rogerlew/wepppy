@@ -14,11 +14,14 @@ var cellsize = {{ ron.cellsize }};
 var readonly = {{ ron.readonly | tojson }};
 
 function window_resize() {
-    var _map = $('#mapid');
-    var w = _map.parent().width();
-    _map.css('min-height', w);
-    _map.css('height', w);
-    _map.css('width', w);
+    var mapElement = document.getElementById('mapid');
+    if (!mapElement || !mapElement.parentElement) {
+        return;
+    }
+    var width = mapElement.parentElement.clientWidth;
+    mapElement.style.minHeight = width + 'px';
+    mapElement.style.height = width + 'px';
+    mapElement.style.width = width + 'px';
 
     Map.getInstance().invalidateSize();
 };
@@ -97,8 +100,7 @@ function onReady() {
         baer.show_sbs();
         baer.load_modify_class();
     }
-
-    $("#sbs_mode0").click();
+    baer.showHideControls(0);
     {% endif %}
 
     /*
@@ -130,7 +132,8 @@ function onReady() {
         outlet.triggerEvent('SET_OUTLET_TASK_COMPLETED');
     }
 
-    var initialOutletMode = $("input[name='set_outlet_mode']:checked").val();
+    var initialOutletModeElement = document.querySelector("input[name='set_outlet_mode']:checked");
+    var initialOutletMode = initialOutletModeElement ? initialOutletModeElement.value : undefined;
     if (initialOutletMode !== undefined) {
         outlet.handleModeChange(initialOutletMode);
     }
@@ -192,7 +195,10 @@ function onReady() {
 
     if ({{ (soils.single_dbselection != none) | tojson }})
     {
-        $('#soil_single_dbselection').val('{{ soils.single_dbselection }}').prop('selected', true);
+        var soilSingleDbSelection = document.getElementById('soil_single_dbselection');
+        if (soilSingleDbSelection) {
+            soilSingleDbSelection.value = '{{ soils.single_dbselection }}';
+        }
     }
     // load soil
     if ({{ soils.has_soils | tojson }} ) {
@@ -204,7 +210,8 @@ function onReady() {
      * ======================
      */
 
-    var buildMode = $("input[name='climate_build_mode']:checked").val();
+    var buildModeElement = document.querySelector("input[name='climate_build_mode']:checked");
+    var buildMode = buildModeElement ? buildModeElement.value : undefined;
     if (buildMode !== undefined) {
         climate.handleBuildModeChange(buildMode);
     }
@@ -229,20 +236,29 @@ function onReady() {
         observed.showControl();
     }
 
-    climate.setBuildMode(parseInt($("input[name='climate_build_mode']:checked").val(), 10));
+    var selectedClimateBuildMode = document.querySelector("input[name='climate_build_mode']:checked");
+    if (selectedClimateBuildMode) {
+        climate.setBuildMode(parseInt(selectedClimateBuildMode.value, 10));
+    }
 
     /*
     * Wepp
     * ======================
     */
 
-    $("[name='wepp_mode']").change(function () {
-        wepp.setMode();
+    var weppModeInputs = document.querySelectorAll("[name='wepp_mode']");
+    Array.prototype.forEach.call(weppModeInputs, function (input) {
+        input.addEventListener('change', function () {
+            wepp.setMode();
+        });
     });
 
-    $("#wepp_single_selection").on("change", function () {
-        wepp.setMode();
-    });
+    var weppSingleSelection = document.getElementById('wepp_single_selection');
+    if (weppSingleSelection) {
+        weppSingleSelection.addEventListener('change', function () {
+            wepp.setMode();
+        });
+    }
 
     wepp.set_rq_job_id(wepp, {{ rq_job_ids.get("run_wepp_rq") | tojson }});
 
@@ -289,8 +305,11 @@ function onReady() {
     * ====================
     ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
 
-    $("[name='ash_depth_mode']").change(function () {
-        ash.setAshDepthMode();
+    var ashDepthModeInputs = document.querySelectorAll("[name='ash_depth_mode']");
+    Array.prototype.forEach.call(ashDepthModeInputs, function (input) {
+        input.addEventListener('change', function () {
+            ash.setAshDepthMode();
+        });
     });
 
     // show report if ash model has run
@@ -374,17 +393,33 @@ function onReady() {
         window.scrollTo({ top: targetY, behavior: 'smooth' });
     }
 
-    $('#toc').on('click', 'a.nav-link', function (event) {
-        var href = $(this).attr('href');
-        if (!href || href.charAt(0) !== '#') {
-            return;
-        }
-        var $target = $(href);
-        if ($target.length) {
-            event.preventDefault();
-            scrollToSection($target[0]);
-        }
-    });
+    var tocElement = document.getElementById('toc');
+    if (tocElement) {
+        tocElement.addEventListener('click', function (event) {
+            var link = event.target;
+            while (link && link !== tocElement) {
+                if (link.tagName === 'A') {
+                    var hasNavLinkClass = link.classList ? link.classList.contains('nav-link') : (' ' + link.className + ' ').indexOf(' nav-link ') !== -1;
+                    if (hasNavLinkClass) {
+                        break;
+                    }
+                }
+                link = link.parentElement;
+            }
+            if (!link || link === tocElement) {
+                return;
+            }
+            var href = link.getAttribute('href');
+            if (!href || href.charAt(0) !== '#') {
+                return;
+            }
+            var targetElement = document.querySelector(href);
+            if (targetElement) {
+                event.preventDefault();
+                scrollToSection(targetElement);
+            }
+        });
+    }
 }
 document.addEventListener('DOMContentLoaded', onReady);
 
@@ -409,7 +444,8 @@ window.addEventListener('load', function () {
     {% endif %}
 
     // get the preferred units and set the unitizer preference
-    var pref = $("input[name='uni_main_selector']:checked").val();
+    var unitPreferenceElement = document.querySelector("input[name='uni_main_selector']:checked");
+    var pref = unitPreferenceElement ? unitPreferenceElement.value : undefined;
     pref = parseInt(pref, 10);
     setGlobalUnitizerPreference(pref);
     Project.getInstance().unitChangeEvent();
