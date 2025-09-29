@@ -4,9 +4,11 @@ from .disturbed_bp import disturbed_bp
 from .landuse_bp import landuse_bp
 from .observed_bp import observed_bp
 from .omni_bp import omni_bp
+from .project_bp import project_bp
 from .rangeland_bp import rangeland_bp
 from .rangeland_cover_bp import rangeland_cover_bp
 from .rhem_bp import rhem_bp
+from .soils_bp import soils_bp
 from .treatments_bp import treatments_bp
 from .unitizer_bp import unitizer_bp
 from .watar_bp import watar_bp
@@ -20,9 +22,11 @@ __all__ = [
     'landuse_bp',
     'observed_bp',
     'omni_bp',
+    'project_bp',
     'rangeland_bp',
     'rangeland_cover_bp',
     'rhem_bp',
+    'soils_bp',
     'treatments_bp',
     'unitizer_bp',
     'watar_bp',

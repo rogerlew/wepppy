@@ -5,7 +5,7 @@ from subprocess import PIPE, Popen
 import redis
 from rq import Queue
 
-from ._common import *  # noqa: F401,F403
+from .._common import *  # noqa: F401,F403
 
 from sqlalchemy import func
 

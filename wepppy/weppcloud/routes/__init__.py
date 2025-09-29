@@ -7,9 +7,11 @@ from .nodb_api.disturbed_bp import disturbed_bp
 from .nodb_api.landuse_bp import landuse_bp
 from .nodb_api.observed_bp import observed_bp
 from .nodb_api.omni_bp import omni_bp
+from .nodb_api.project_bp import project_bp
 from .nodb_api.rangeland_bp import rangeland_bp
 from .nodb_api.rangeland_cover_bp import rangeland_cover_bp
 from .nodb_api.rhem_bp import rhem_bp
+from .nodb_api.soils_bp import soils_bp
 from .nodb_api.treatments_bp import treatments_bp
 from .nodb_api.unitizer_bp import unitizer_bp
 from .nodb_api.watar_bp import watar_bp
@@ -28,11 +30,9 @@ from .geodata import geodata_bp
 from .huc_fire import huc_fire_bp
 from .map import map_bp
 from .pivottable import pivottable_bp
-from .project import project_bp
 from .jsoncrack import jsoncrack_bp
 from .readme_md import readme_bp
 from .usersum import usersum_bp
-from .soils import soils_bp
 from .user import user_bp
 from .locations import locations_bp
 from .weppcloudr import weppcloudr_bp
