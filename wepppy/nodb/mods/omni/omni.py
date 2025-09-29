@@ -613,7 +613,7 @@ class Omni(NoDbBase):
             A list of topaz_ids to use for the contrast. If None, all topaz_ids are selected.
         """
 
-        self.logger.info('Omni::build_contrasts')
+        self.logger.info('build_contrasts')
 
         control_scenario = _scenario_name_from_scenario_definition(control_scenario_def)
         contrast_scenario = _scenario_name_from_scenario_definition(contrast_scenario_def)
@@ -746,10 +746,10 @@ class Omni(NoDbBase):
     def run_omni_contrasts(self):
         global OMNI_REL_DIR
 
-        self.logger.info('Omni::run_omni_contrasts')
+        self.logger.info('run_omni_contrasts')
 
         if not self.contrasts or not self.contrast_names:
-            self.logger.info('  Omni::run_omni_contrasts: No contrasts to run\n')
+            self.logger.info('  run_omni_contrasts: No contrasts to run')
             return
 
         dependency_tree = dict(self.contrast_dependency_tree)
@@ -772,10 +772,10 @@ class Omni(NoDbBase):
                 )
 
             if prev_entry and prev_entry.get('signature') == signature and dep_match:
-                self.logger.info(f'  Omni::run_omni_contrasts: {contrast_name} up-to-date, skipping\n')
+                self.logger.info(f'  run_omni_contrasts: {contrast_name} up-to-date, skipping')
                 continue
 
-            self.logger.info(f'  Omni::run_omni_contrasts: Running contrast {contrast_id} of {total_contrasts}: {contrast_name}\n')
+            self.logger.info(f'  run_omni_contrasts: Running contrast {contrast_id} of {total_contrasts}: {contrast_name}')
             omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
             self._post_omni_run(omni_wd, contrast_name)
 
@@ -792,7 +792,7 @@ class Omni(NoDbBase):
         self.contrast_dependency_tree = dependency_tree
 
     def run_omni_contrast(self, contrast_id: int):
-        self.logger.info(f'Omni::run_omni_contrast {contrast_id}')
+        self.logger.info(f'run_omni_contrast {contrast_id}')
         contrast_name = self.contrast_names[contrast_id - 1]
         _contrasts = self.contrasts[contrast_id - 1]
         omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
@@ -921,19 +921,19 @@ class Omni(NoDbBase):
     def run_omni_scenario(self, scenario_def: dict):
         scenario = scenario_def.get('type')
 
-        self.logger.info(f'Omni::run_scenario({scenario})\n')
+        self.logger.info(f'run_scenario({scenario})')
 
         if not isinstance(scenario, OmniScenario):
             raise TypeError('scenario must be an instance of OmniScenario')
 
-        omni_dir = self._build_scenario(scenario_def, self.wd, self.base_scenario)
+        omni_dir, scenario_name = self._build_scenario(scenario_def)
 
         if scenario not in self.scenarios:
             self.scenarios = self.scenarios + [scenario_def]
             
         self._post_omni_run(omni_dir, scenario_name)
 
-        self.logger.info(f'  Omni::run_scenario({scenario}): {scenario} completed\n')
+        self.logger.info(f'  run_scenario({scenario}): {scenario} completed')
 
     def _post_omni_run(self, omni_wd: str, scenario_name: str):
         from wepppy.nodb.ron import Ron
@@ -960,10 +960,10 @@ class Omni(NoDbBase):
         return ran_scenarios
     
     def run_omni_scenarios(self):
-        self.logger.info('Omni::run_omni_scenarios\n')
+        self.logger.info('run_omni_scenarios')
 
         if not self.scenarios:
-            self.logger.info('  Omni::run_omni_scenarios: No scenarios to run\n')
+            self.logger.info('  run_omni_scenarios: No scenarios to run')
             raise Exception('No scenarios to run')
 
         dependency_tree = dict(self.scenario_dependency_tree)
@@ -1003,7 +1003,7 @@ class Omni(NoDbBase):
             target_key = self._normalize_scenario_key(dependency_target)
 
             if up_to_date:
-                self.logger.info(f'  Omni::run_omni_scenarios: {scenario_name} dependency unchanged, skipping\n')
+                self.logger.info(f'  run_omni_scenarios: {scenario_name} dependency unchanged, skipping')
                 ts = time.time()
                 dependency_tree[scenario_name] = {
                     'dependency_target': target_key,
@@ -1023,8 +1023,10 @@ class Omni(NoDbBase):
                 })
                 continue
 
-            self.logger.info(f'  Omni::run_omni_scenarios: {scenario_name}\n')
-            self._build_scenario(scenario_def)
+            self.logger.info(f'  run_omni_scenarios: {scenario_name}')
+            omni_dir, scenario_name = self._build_scenario(scenario_def)
+            self._post_omni_run(omni_dir, scenario_name)
+
             updated_hash = _hash_file_sha1(dependency_path)
             ts = time.time()
             dependency_tree[scenario_name] = {
@@ -1057,7 +1059,7 @@ class Omni(NoDbBase):
             target_key = self._normalize_scenario_key(dependency_target)
 
             if up_to_date:
-                self.logger.info(f'  Omni::run_omni_scenarios: {scenario_name} dependency unchanged, skipping\n')
+                self.logger.info(f'  run_omni_scenarios: {scenario_name} dependency unchanged, skipping')
                 ts = time.time()
                 dependency_tree[scenario_name] = {
                     'dependency_target': target_key,
@@ -1077,8 +1079,10 @@ class Omni(NoDbBase):
                 })
                 continue
 
-            self.logger.info(f'  Omni::run_omni_scenarios: {scenario_name}\n')
-            self._build_scenario(scenario_def)
+            self.logger.info(f'  run_omni_scenarios: {scenario_name}')
+            omni_dir, scenario_name = self._build_scenario(scenario_def)
+            self._post_omni_run(omni_dir, scenario_name)
+            
             updated_hash = _hash_file_sha1(dependency_path)
             ts = time.time()
             dependency_tree[scenario_name] = {
@@ -1105,7 +1109,7 @@ class Omni(NoDbBase):
         self.scenario_dependency_tree = dependency_tree
         self.scenario_run_state = run_states
 
-        self.logger.info('  Omni::run_omni_scenarios: compiling hillslope summaries\n')
+        self.logger.info('  run_omni_scenarios: compiling hillslope summaries')
         self.compile_hillslope_summaries()
 
     def _build_scenario(
@@ -1126,21 +1130,21 @@ class Omni(NoDbBase):
         if scenario in [OmniScenario.PrescribedFire, OmniScenario.Thinning]:  # prescribed fire and thining has to be applied to undisturbed
             if base_scenario != OmniScenario.Undisturbed:  # if the base scenario is SBSmap, we need to clone it from the undisturbed sibling
                 omni_base_scenario_name = 'undisturbed'
+                self.logger.info(f'  {scenario_name}: omni_base_scenario_name:{omni_base_scenario_name}')
 
         # change to working dir of parent weppcloud project
         os.chdir(wd)
         
         # assert we know how to handle the scenario
         assert isinstance(scenario, OmniScenario)
-        new_wd = _omni_clone(scenario_def, wd)
-
-        self.logger.info(f'  Omni::_build_scenario: new_wd:{new_wd}\n')
+        with self.timed(f'  {scenario_name}: _omni_clone({scenario_def}, {wd})'):
+            new_wd = _omni_clone(scenario_def, wd)
 
         if omni_base_scenario_name is not None:
             if not omni_base_scenario_name == str(base_scenario):  # base scenario is either sbs_map or undisturbed
                 # e.g. scenario is mulch and omni_base_scenario is uniform_low, uniform_moderate, uniform_high, or sbs_map
-                self.logger.info(f'  Omni::_build_scenario: _omni_clone_sibling:{omni_base_scenario_name}\n')
-                _omni_clone_sibling(new_wd, omni_base_scenario_name)
+                with self.timed(f'  {scenario_name}: _omni_clone_sibling({new_wd}, {omni_base_scenario_name})'):
+                    _omni_clone_sibling(new_wd, omni_base_scenario_name)
                 
         # get disturbed and landuse instances
         disturbed = Disturbed.getInstance(new_wd)
@@ -1152,8 +1156,6 @@ class Omni(NoDbBase):
             scenario == OmniScenario.UniformModerate or \
             scenario == OmniScenario.UniformHigh:
 
-            self.logger.info(f'  Omni::_build_scenario: uniform burn severity\n')
-
             # identify burn class
             sbs = None
             if scenario == OmniScenario.UniformLow:
@@ -1163,113 +1165,131 @@ class Omni(NoDbBase):
             elif scenario == OmniScenario.UniformHigh:
                 sbs = 3
 
-            sbs_fn = disturbed.build_uniform_sbs(int(sbs))
-            disturbed.validate(sbs_fn)
-            landuse.build()
-            soils.build()
+            self.logger.info(f' {scenario_name}: scenario == uniform burn severity -> {sbs}')
+
+            with self.timed(f'  {scenario_name}: build uniform sbs {sbs}'):
+                sbs_fn = disturbed.build_uniform_sbs(int(sbs))
+            with self.timed(f'  {scenario_name}: validate sbs {sbs_fn}'):
+                disturbed.validate(sbs_fn)
+            with self.timed(f'  {scenario_name}: build landuse and soils'):
+                landuse.build()
+            with self.timed(f'  {scenario_name}: build soils'):
+                soils.build()
 
         elif scenario == OmniScenario.Undisturbed:
-            self.logger.info(f'  Omni::_build_scenario: undisturbed\n')
+            self.logger.info(f' {scenario_name}: scenario == undisturbed')
 
             if not Disturbed.getInstance(wd).has_sbs:
                 raise Exception('Undisturbed scenario requires a base scenario with sbs')
-            disturbed.remove_sbs()
-            landuse.build()
-            soils.build()
+
+            with self.timed(f'  {scenario_name}: remove sbs'):
+                disturbed.remove_sbs()
+            with self.timed(f'  {scenario_name}: build landuse'):
+                landuse.build()
+            with self.timed(f'  {scenario_name}: build soils'):
+                soils.build()
 
         elif scenario == OmniScenario.SBSmap:
-            self.logger.info(f'  Omni::_build_scenario: sbs\n')
+            self.logger.info(f' {scenario_name}: scenario == sbs')
 
             sbs_file_path = scenario_def.get('sbs_file_path')
             if not _exists(sbs_file_path):
                 raise FileNotFoundError(f"'{sbs_file_path}' not found!")
             
-            # move from _limbo to new_wd/disturbed and validate
-            sbs_fn = _split(sbs_file_path)[-1]
-            new_sbs_file_path = _join(disturbed.disturbed_dir, sbs_fn)
-            shutil.copyfile(sbs_file_path, new_sbs_file_path)
-            os.remove(sbs_file_path)
+            with self.timed(f'  {scenario_name}: copy sbs to disturbed dir from _limbo'):
+                sbs_fn = _split(sbs_file_path)[-1]
+                new_sbs_file_path = _join(disturbed.disturbed_dir, sbs_fn)
+                shutil.copyfile(sbs_file_path, new_sbs_file_path)
+                os.remove(sbs_file_path)
 
-            disturbed.validate(sbs_fn)
-            landuse.build()
-            soils.build()
+            with self.timed(f'  {scenario_name}: validate sbs {sbs_fn}'):
+                disturbed.validate(sbs_fn)
+            with self.timed(f'  {scenario_name}: build landuse and soils'):
+                landuse.build()
+            with self.timed(f'  {scenario_name}: build soils'):
+                soils.build()
 
         elif scenario == OmniScenario.Mulch:
-            self.logger.info(f'  Omni::_build_scenario: mulch\n')
+            self.logger.info(f'  {scenario_name}: scenario == mulch')
 
             assert omni_base_scenario_name is not None, \
                 'Mulching scenario requires a base scenario'
 
-            soils.build()
+            with self.timed(f'  {scenario_name}: build soils'):
+                soils.build()
 
-            treatments = Treatments.getInstance(new_wd)
+            with self.timed(f'  {scenario_name}: applying treatments'):
+                treatments = Treatments.getInstance(new_wd)
+                ground_cover_increase = scenario_def.get('ground_cover_increase')
+                treatment_key = treatments.treatments_lookup[f'mulch_{ground_cover_increase}'.replace('%', '')]
 
-            ground_cover_increase = scenario_def.get('ground_cover_increase')
-            treatment_key = treatments.treatments_lookup[f'mulch_{ground_cover_increase}'.replace('%', '')]
+                treatments_domlc_d = {}
+                for topaz_id, dom in landuse.domlc_d.items():
+                    if str(topaz_id).endswith('4'):
+                        continue
 
-            treatments_domlc_d = {}
-            for topaz_id, dom in landuse.domlc_d.items():
-                if str(topaz_id).endswith('4'):
-                    continue
+                    # treat burned forest, shrub, and grass with mulching by increasing cover
+                    man_summary = landuse.managements[dom]
+                    disturbed_class = getattr(man_summary, 'disturbed_class', '')
+                    if isinstance(disturbed_class, str) and 'fire' in disturbed_class:
+                        treatments_domlc_d[topaz_id] = treatment_key
 
-                # treat burned forest, shrub, and grass with mulching by increasing cover
-                man_summary = landuse.managements[dom]
-                disturbed_class = getattr(man_summary, 'disturbed_class', '')
-                if isinstance(disturbed_class, str) and 'fire' in disturbed_class:
-                    treatments_domlc_d[topaz_id] = treatment_key
-
-            treatments.treatments_domlc_d = treatments_domlc_d
-            treatments.build_treatments()
+                treatments.treatments_domlc_d = treatments_domlc_d
+                treatments.build_treatments()
             
         elif scenario == OmniScenario.PrescribedFire:
-            self.logger.info(f'  Omni::_build_scenario: prescribed fire\n')
+            self.logger.info(f'  {scenario_name}: scenario == prescribed fire')
 
             # should have cloned undisturbed
             if disturbed.has_sbs:
                 raise Exception('Cloned omni scenario should be undisturbed')
 
-            soils.build()
+            with self.timed(f'  {scenario_name}: build soils'):
+                soils.build()
             
-            treatments = Treatments.getInstance(new_wd)
-            treatment_key = treatments.treatments_lookup[str(scenario)]
+            with self.timed(f'  {scenario_name}: applying treatments'):
+                treatments = Treatments.getInstance(new_wd)
+                treatment_key = treatments.treatments_lookup[str(scenario)]
 
-            treatments_domlc_d = {}
-            for topaz_id, dom in landuse.domlc_d.items():
-                if str(topaz_id).endswith('4'):
-                    continue
+                treatments_domlc_d = {}
+                for topaz_id, dom in landuse.domlc_d.items():
+                    if str(topaz_id).endswith('4'):
+                        continue
 
-                man_summary = landuse.managements[dom]
-                disturbed_class = getattr(man_summary, 'disturbed_class', '')
-                if 'forest' in disturbed_class and 'young' not in disturbed_class:
-                    treatments_domlc_d[topaz_id] = treatment_key
+                    man_summary = landuse.managements[dom]
+                    disturbed_class = getattr(man_summary, 'disturbed_class', '')
+                    if 'forest' in disturbed_class and 'young' not in disturbed_class:
+                        treatments_domlc_d[topaz_id] = treatment_key
 
-            treatments.treatments_domlc_d = treatments_domlc_d
-            treatments.build_treatments()
+                treatments.treatments_domlc_d = treatments_domlc_d
+                treatments.build_treatments()
 
         elif scenario == OmniScenario.Thinning:
-            self.logger.info(f'  Omni::_build_scenario: thinning\n')
+            self.logger.info(f'  {scenario_name}: scenario == thinning')
 
             # should have cloned undisturbed
             if disturbed.has_sbs:
                 raise Exception('Cloned omni scenario should be undisturbed')
 
-            soils.build()
+            with self.timed(f'  {scenario_name}: build soils'):
+                soils.build()
             
-            treatments = Treatments.getInstance(new_wd)
-            treatment_key = treatments.treatments_lookup[scenario_name]
+            with self.timed(f'  {scenario_name}: applying treatments'):
+                treatments = Treatments.getInstance(new_wd)
+                treatment_key = treatments.treatments_lookup[scenario_name]
 
-            treatments_domlc_d = {}
-            for topaz_id, dom in landuse.domlc_d.items():
-                if str(topaz_id).endswith('4'):
-                    continue
-                    
-                man_summary = landuse.managements[dom]
-                disturbed_class = getattr(man_summary, 'disturbed_class', '')
-                if 'forest' in disturbed_class and 'young' not in disturbed_class:
-                    treatments_domlc_d[topaz_id] = treatment_key
+                treatments_domlc_d = {}
+                for topaz_id, dom in landuse.domlc_d.items():
+                    if str(topaz_id).endswith('4'):
+                        continue
+                        
+                    man_summary = landuse.managements[dom]
+                    disturbed_class = getattr(man_summary, 'disturbed_class', '')
+                    if 'forest' in disturbed_class and 'young' not in disturbed_class:
+                        treatments_domlc_d[topaz_id] = treatment_key
 
-            treatments.treatments_domlc_d = treatments_domlc_d
-            treatments.build_treatments()
+                treatments.treatments_domlc_d = treatments_domlc_d
+                treatments.build_treatments()
 
         wepp = Wepp.getInstance(new_wd)
 
@@ -1292,17 +1312,22 @@ class Omni(NoDbBase):
         if not slp_relpath.endswith('/'):
             slp_relpath += '/'
 
-        wepp.prep_hillslopes(man_relpath=man_relpath,
-                             cli_relpath=cli_relpath,
-                             slp_relpath=slp_relpath,
-                             sol_relpath=sol_relpath)
-        wepp.run_hillslopes(man_relpath=man_relpath,
-                             cli_relpath=cli_relpath,
-                             slp_relpath=slp_relpath,
-                             sol_relpath=sol_relpath)
+        with self.timed(f'  {scenario_name}: prep hillslopes'):
+            wepp.prep_hillslopes(man_relpath=man_relpath,
+                                cli_relpath=cli_relpath,
+                                slp_relpath=slp_relpath,
+                                sol_relpath=sol_relpath)
+        with self.timed(f'  {scenario_name}: run hillslopes'):
+            wepp.run_hillslopes(man_relpath=man_relpath,
+                                cli_relpath=cli_relpath,
+                                slp_relpath=slp_relpath,
+                                sol_relpath=sol_relpath)
 
-        wepp.prep_watershed()
-        wepp.run_watershed()
+        with self.timed(f'  {scenario_name}: prep watershed'):
+            wepp.prep_watershed()
+
+        with self.timed(f'  {scenario_name}: run watershed'):
+            wepp.run_watershed()
 
         return new_wd, scenario_name
 
