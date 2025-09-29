@@ -46,6 +46,7 @@ import math
 import json
 import logging
 import html
+from html import escape as html_escape
 import sqlite3
 
 from urllib.parse import urlencode
@@ -1015,22 +1016,45 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
     breadcrumbs = ''
 
     if os.path.isdir(path):
-        # build bread crumb links
-        _url = _prefix_path(f'/runs/{runid}/{config}/browse/')
-        breadcrumbs = [f'<a href="{_url}{diff_arg}"><b>{runid}</b></a>']
+        # build breadcrumb links and clickable separators that expose absolute paths
+        root_url = _prefix_path(f'/runs/{runid}/{config}/browse/')
+        breadcrumb_items = [(f'<a href="{root_url}{diff_arg}"><b>{runid}</b></a>', os.path.abspath(wd))]
 
         if rel_path != '.':
             parts = rel_path.split('/')
 
             _rel_path = ''
-            for part in parts[:-1]:
+            for idx, part in enumerate(parts):
                 _rel_path = _join(_rel_path, part)
-                _url = _prefix_path(f'/runs/{runid}/{config}/browse/{_rel_path}/')
-                breadcrumbs.append(f'<a href="{_url}{diff_arg}"><b>{part}</b></a>')
-            breadcrumbs.append(f'<b>{parts[-1]}</b>')
+                abs_part_path = os.path.abspath(os.path.join(wd, _rel_path))
+                is_last = idx == len(parts) - 1
+                if is_last:
+                    breadcrumb_html = f'<b>{part}</b>'
+                else:
+                    part_url = _prefix_path(f'/runs/{runid}/{config}/browse/{_rel_path}/')
+                    breadcrumb_html = f'<a href="{part_url}{diff_arg}"><b>{part}</b></a>'
+                breadcrumb_items.append((breadcrumb_html, abs_part_path))
 
-        breadcrumbs.append(f'<input type="text" id="pathInput" value="{filter_pattern}" placeholder="../output/p1.*" size="50">')
-        breadcrumbs = ' ❯ '.join(breadcrumbs)
+        breadcrumb_segments: list[str] = []
+        previous_abs_path = None
+        for idx, (crumb_html, abs_path_str) in enumerate(breadcrumb_items):
+            if idx and previous_abs_path is not None:
+                escaped_abs_path = html_escape(previous_abs_path, quote=True)
+                breadcrumb_segments.append(
+                    f' <span class="breadcrumb-separator" data-copy-path="{escaped_abs_path}" title="Copy absolute path" role="button" tabindex="0">❯</span> '
+                )
+            breadcrumb_segments.append(crumb_html)
+            previous_abs_path = abs_path_str
+
+        current_abs_path = previous_abs_path or os.path.abspath(path)
+        breadcrumb_segments.append(
+            f' <span class="breadcrumb-separator" data-copy-path="{html_escape(current_abs_path, quote=True)}" title="Copy absolute path" role="button" tabindex="0">❯</span> '
+        )
+
+        breadcrumb_segments.append(
+            f'<input type="text" id="pathInput" value="{filter_pattern}" placeholder="../output/p1.*" size="50">'
+        )
+        breadcrumbs = ''.join(breadcrumb_segments)
 
         # Get page and filter from query parameters
         page = request.args.get('page', 1, type=int)
