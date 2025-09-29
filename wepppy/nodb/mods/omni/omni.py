@@ -4,6 +4,7 @@ from typing import List, Optional, Dict, Any
 import os
 import hashlib
 import time
+import logging
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -35,9 +36,43 @@ from ...base import (
     NoDbBase,
     TriggerEvents,
     nodb_setter,
+    clear_locks,
+    clear_nodb_file_cache,
 )
 
 OMNI_REL_DIR = '_pups/omni'
+
+LOGGER = logging.getLogger(__name__)
+
+
+def _clear_nodb_cache_and_locks(runid: str, pup_relpath: Optional[str] = None) -> None:
+    """Best-effort clearing of cached NoDb entries and locks for a run scope."""
+    try:
+        cleared_entries = clear_nodb_file_cache(runid, pup_relpath=pup_relpath)
+        if cleared_entries:
+            LOGGER.debug(
+                'Cleared %d NoDb cache entries for run %s (scope=%s)',
+                len(cleared_entries),
+                runid,
+                pup_relpath or 'root'
+            )
+    except RuntimeError as exc:
+        if 'Redis NoDb cache client is unavailable' in str(exc):
+            LOGGER.debug('Redis NoDb cache unavailable while clearing cache for %s (scope=%s)', runid, pup_relpath)
+        else:
+            LOGGER.warning('Failed to clear NoDb cache for %s (scope=%s): %s', runid, pup_relpath, exc)
+    except Exception as exc:
+        LOGGER.warning('Failed to clear NoDb cache for %s (scope=%s): %s', runid, pup_relpath, exc)
+
+    try:
+        clear_locks(runid, pup_relpath=pup_relpath)
+    except RuntimeError as exc:
+        if 'Redis lock client is unavailable' in str(exc):
+            LOGGER.debug('Redis lock client unavailable while clearing locks for %s', runid)
+        else:
+            LOGGER.warning('Failed to clear NoDb locks for %s: %s', runid, exc)
+    except Exception as exc:
+        LOGGER.warning('Failed to clear NoDb locks for %s: %s', runid, exc)
 
 class OmniScenario(IntEnum):
     UniformLow = 1
@@ -102,36 +137,38 @@ class OmniScenario(IntEnum):
         return False
     
 
-def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557997'):
+def _run_contrast(contrast_id, contrast_name, contrasts, wd, runid, wepp_bin='wepp_a557997'):
     from wepppy.nodb import Landuse, Soils, Wepp
     global OMNI_REL_DIR
 
-    omni_dir = _join(wd, OMNI_REL_DIR, 'contrasts', contrast_id)
+    new_wd = _join(wd, OMNI_REL_DIR, 'contrasts', contrast_id)
+    pup_relpath = os.path.relpath(new_wd, wd)
 
-    if _exists(omni_dir):
-        shutil.rmtree(omni_dir)
+    if _exists(new_wd):
+        shutil.rmtree(new_wd)
+        _clear_nodb_cache_and_locks(runid, pup_relpath)
 
-    os.makedirs(omni_dir)
-    os.makedirs(_join(omni_dir, 'soils'), exist_ok=True)
-    os.makedirs(_join(omni_dir, 'landuse'), exist_ok=True)
+    os.makedirs(new_wd)
+    os.makedirs(_join(new_wd, 'soils'), exist_ok=True)
+    os.makedirs(_join(new_wd, 'landuse'), exist_ok=True)
 
     for fn in os.listdir(wd):
         if fn in ['climate', 'watershed', 'climate.nodb', 'watershed.nodb', 'landuse.nodb', 'soils.nodb']:
             src = _join(wd, fn)
-            dst = _join(omni_dir, fn)
+            dst = _join(new_wd, fn)
             if not _exists(dst):
                 os.symlink(src, dst)
 
     for nodb_fn in ['wepp.nodb']:
         src = _join(wd, nodb_fn)
-        dst = _join(omni_dir, nodb_fn)
+        dst = _join(new_wd, nodb_fn)
         if not _exists(dst):
             shutil.copy(src, dst)
 
         with open(dst, 'r') as f:
             d = json.load(f)
         
-        d['py/state']['wd'] = omni_dir
+        d['py/state']['wd'] = new_wd
         d['py/state']['_parent_wd'] = wd
 
         with open(dst, 'w') as fp:
@@ -139,13 +176,13 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
             fp.flush()                 # flush Python’s userspace buffer
             os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
 
-    wepp = Wepp.getInstance(omni_dir)
+    wepp = Wepp.getInstance(new_wd)
     wepp.wepp_bin = wepp_bin
     wepp.clean()  # this creates the directories in the {omni_dir}/wepp
 
     # symlink the other wepp watershed input files
     og_runs_dir = _join(wd, 'wepp', 'runs/')
-    omni_runs_dir = _join(omni_dir, 'wepp', 'runs/')
+    omni_runs_dir = _join(new_wd, 'wepp', 'runs/')
     for fn in os.listdir(og_runs_dir):
         _fn = _split(fn)[-1]
         if _fn.startswith('pw0') or _fn.endswith('.txt') or _fn.endswith('.inp'):
@@ -158,18 +195,22 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
     wepp.run_watershed()
     wepp.report_loss()
 
-    return omni_dir
+    return new_wd
 
 
-def _omni_clone(scenario_def: dict, wd: str):
+def _omni_clone(scenario_def: dict, wd: str, runid):
     global OMNI_REL_DIR
     
     scenario = scenario_def.get('type')
     _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
     new_wd = _join(wd, OMNI_REL_DIR, 'scenarios', _scenario_name)
+    pup_relpath = os.path.relpath(new_wd, wd)
 
     if _exists(new_wd):
         shutil.rmtree(new_wd)
+        # clear cached NoDb payloads and locks for the previous scenario clone
+        _clear_nodb_cache_and_locks(runid, pup_relpath)
+
 
     os.makedirs(new_wd)
 
@@ -241,7 +282,7 @@ def _omni_clone(scenario_def: dict, wd: str):
     return new_wd
 
 
-def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str):
+def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid:str, parent_wd: str):
     """
     after _omni_clone copies watershed, climates, wepp from the base_scenario (parent)
 
@@ -252,11 +293,16 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str):
     sibling_wd = _join(new_wd, '..', omni_clone_sibling_name)
     if not _exists(sibling_wd):
         raise FileNotFoundError(f"'{sibling_wd}' not found!")
-    
+
+    pup_relpath = os.path.relpath(new_wd, parent_wd)
+
     # replace disturbed, landuse, and soils
     os.remove(_join(new_wd, 'disturbed.nodb'))
     os.remove(_join(new_wd, 'landuse.nodb'))
     os.remove(_join(new_wd, 'soils.nodb'))
+
+    # clear cached NoDb payloads and locks after removing the existing nodb files
+    _clear_nodb_cache_and_locks(runid, pup_relpath)
 
     shutil.rmtree(_join(new_wd, 'disturbed'))
     shutil.rmtree(_join(new_wd, 'landuse'))
@@ -574,20 +620,6 @@ class Omni(NoDbBase):
         global OMNI_REL_DIR
         return _join(self.wd, OMNI_REL_DIR)
     
-    def clean(self):
-        shutil.rmtree(self.omni_dir)
-        sleep(1)
-        os.makedirs(self.omni_dir)
-
-    def clean_scenarios(self):
-        scenarios_dir = _join(self.omni_dir, 'scenarios')
-
-        if _exists(scenarios_dir):
-            shutil.rmtree(scenarios_dir)
-            sleep(1)
-
-        os.makedirs(scenarios_dir)
-
     def get_objective_parameter_from_gpkg(self, objective_parameter, scenario=None):
         if scenario is None:
             gpkg_fn = glob(_join(self.wd, 'export/arcmap/*.gpkg'))[0]
@@ -802,13 +834,12 @@ class Omni(NoDbBase):
                 continue
 
             self.logger.info(f'  run_omni_contrasts: Running contrast {contrast_id} of {total_contrasts}: {contrast_name}')
-            omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
+            omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
             self._post_omni_run(omni_wd, contrast_name)
 
             dependency_tree[contrast_name] = {
                 'signature': signature,
                 'dependencies': dependencies,
-                'timestamp': time.time()
             }
             self.contrast_dependency_tree = dependency_tree
 
@@ -823,7 +854,7 @@ class Omni(NoDbBase):
         self.logger.info(f'run_omni_contrast {contrast_id}')
         contrast_name = self.contrast_names[contrast_id - 1]
         _contrasts = self.contrasts[contrast_id - 1]
-        omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
+        omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
         self._post_omni_run(omni_wd, contrast_name)
 
     def contrasts_report(self):
@@ -1186,14 +1217,14 @@ class Omni(NoDbBase):
         
         # assert we know how to handle the scenario
         assert isinstance(scenario, OmniScenario)
-        with self.timed(f'  {scenario_name}: _omni_clone({scenario_def}, {wd})'):
-            new_wd = _omni_clone(scenario_def, wd)
+        with self.timed(f'  {scenario_name}: _omni_clone({scenario_def}, {wd}, {self.runid})'):
+            new_wd = _omni_clone(scenario_def, wd, self.runid)
 
         if omni_base_scenario_name is not None:
             if not omni_base_scenario_name == str(base_scenario):  # base scenario is either sbs_map or undisturbed
                 # e.g. scenario is mulch and omni_base_scenario is uniform_low, uniform_moderate, uniform_high, or sbs_map
-                with self.timed(f'  {scenario_name}: _omni_clone_sibling({new_wd}, {omni_base_scenario_name})'):
-                    _omni_clone_sibling(new_wd, omni_base_scenario_name)
+                with self.timed(f'  {scenario_name}: _omni_clone_sibling({new_wd}, {omni_base_scenario_name}, {self.runid}, {self.wd})'):
+                    _omni_clone_sibling(new_wd, omni_base_scenario_name, self.runid, self.wd)
                 
         # get disturbed and landuse instances
         disturbed = Disturbed.getInstance(new_wd)

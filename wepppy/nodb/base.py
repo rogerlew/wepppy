@@ -1242,9 +1242,11 @@ def iter_nodb_mods_subclasses():
                     yield subcls.filename.removesuffix('.nodb'), subcls
 
 
-def clear_locks(runid):
+def clear_locks(runid, pup_relpath=None):
     """
-    Clear all locks for the given runid.
+    Clear locks for the given runid.
+    If ``pup_relpath`` is provided, only locks whose relative paths fall under that
+    subtree are cleared.
     Low-level function that interacts directly with Redis.
     """
     if redis_lock_client is None:
@@ -1253,12 +1255,25 @@ def clear_locks(runid):
     cleared = []
     hashmap = redis_lock_client.hgetall(runid)
 
+    scope = None
+    if pup_relpath:
+        scope = pup_relpath.rstrip(os.sep)
+        if scope == '.':
+            scope = None
+
     for lock_key, v in hashmap.items():
         if not lock_key.startswith('locked:'):
             continue
 
         if v != 'true':
             continue
+
+        rel_path = lock_key.split('locked:', 1)[1]
+        if scope is not None:
+            if rel_path == scope or rel_path.startswith(scope + os.sep):
+                pass
+            else:
+                continue
 
         redis_lock_client.hset(runid, lock_key, 'false')
         cleared.append(lock_key)
@@ -1286,8 +1301,8 @@ def lock_statuses(runid) -> defaultdict[str, bool]:
     return statuses
 
 
-def clear_nodb_file_cache(runid):
-    """Clear Redis cache entries for all `.nodb` files under a run directory."""
+def clear_nodb_file_cache(runid, pup_relpath=None) -> list[Path]:
+    """Clear Redis cache entries for `.nodb` files under a run (optionally scoped)."""
     if redis_nodb_cache_client is None:
         raise RuntimeError('Redis NoDb cache client is unavailable')
 
@@ -1297,21 +1312,84 @@ def clear_nodb_file_cache(runid):
     if not wd.exists():
         raise FileNotFoundError(f'Working directory not found for runid {runid}: {wd}')
 
+    def _validate_relpath(relpath: str) -> Path:
+        candidate = Path(relpath)
+        if candidate.is_absolute():
+            raise ValueError(f"pup_relpath must be relative to the run root: {relpath}")
+        if any(part == '..' for part in candidate.parts):
+            raise ValueError(f"pup_relpath cannot traverse outside the run root: {relpath}")
+        target = (wd / candidate).resolve()
+        if target != wd and wd not in target.parents:
+            raise ValueError(f"pup_relpath resolves outside the run root: {relpath}")
+        return target
+
+    def _gather_filesystem_nodbs(root: Path) -> set[Path]:
+        paths: set[Path] = set()
+        if root.is_file() and root.suffix == '.nodb':
+            paths.add(root)
+            return paths
+
+        if not root.exists():
+            return paths
+
+        if root.is_dir():
+            for path in root.rglob('*.nodb'):
+                paths.add(path)
+
+        return paths
+
+    def _gather_cached_paths(prefix_root: Path) -> set[Path]:
+        paths: set[Path] = set()
+        prefix = str(prefix_root)
+        raw_keys: set[str] = set()
+
+        # include keys that match the directory prefix as well as a direct file
+        patterns = [prefix, f"{prefix}{os.sep}*"]
+        for pattern in patterns:
+            try:
+                for key in redis_nodb_cache_client.scan_iter(match=f"{pattern}"):
+                    if isinstance(key, bytes):
+                        key = key.decode('utf-8')
+                    raw_keys.add(key)
+            except redis.exceptions.RedisError as exc:
+                logging.error(f'Error scanning NoDb cache keys with pattern {pattern}: {exc}')
+                return paths
+
+        for key in raw_keys:
+            path = Path(key)
+            # only keep entries that remain within the run root
+            try:
+                path.relative_to(wd)
+            except ValueError:
+                continue
+            if path.suffix == '.nodb':
+                paths.add(path)
+
+        return paths
+
     nodb_paths: set[Path] = set()
 
-    # Top-level `.nodb` files (e.g., wepp.nodb, soils.nodb)
-    nodb_paths.update(wd.glob('*.nodb'))
+    if pup_relpath:
+        scoped_root = _validate_relpath(pup_relpath)
+        nodb_paths.update(_gather_filesystem_nodbs(scoped_root))
+        nodb_paths.update(_gather_cached_paths(scoped_root))
+    else:
+        # Top-level `.nodb` files (e.g., wepp.nodb, soils.nodb)
+        nodb_paths.update(wd.glob('*.nodb'))
 
-    # Immediate subdirectories (excluding `_pups`, handled below)
-    for child in wd.glob('*/*.nodb'):
-        if '_pups' in child.parts:
-            continue
-        nodb_paths.add(child)
+        # Immediate subdirectories (excluding `_pups`, handled below)
+        for child in wd.glob('*/*.nodb'):
+            if '_pups' in child.parts:
+                continue
+            nodb_paths.add(child.resolve())
 
-    # Recursive search within `_pups` hierarchy, tracking relative paths
-    pups_dir = wd / '_pups'
-    if pups_dir.is_dir():
-        nodb_paths.update(pups_dir.rglob('*.nodb'))
+        # Recursive search within `_pups` hierarchy, tracking relative paths
+        pups_dir = wd / '_pups'
+        if pups_dir.is_dir():
+            nodb_paths.update(path.resolve() for path in pups_dir.rglob('*.nodb'))
+
+        # Also include any cached entries that might remain for deleted nodb files
+        nodb_paths.update(_gather_cached_paths(wd))
 
     cleared = []
     for nodb_path in sorted(nodb_paths):
@@ -1323,6 +1401,9 @@ def clear_nodb_file_cache(runid):
             continue
 
         if removed:
-            cleared.append(nodb_path.relative_to(wd))
+            try:
+                cleared.append(nodb_path.relative_to(wd))
+            except ValueError:
+                cleared.append(nodb_path)
 
     return cleared
