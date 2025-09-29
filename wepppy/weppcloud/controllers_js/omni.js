@@ -20,8 +20,10 @@ var Omni = function () {
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
             if (eventName === 'OMNI_SCENARIO_RUN_TASK_COMPLETED') {
-                that.ws_client.disconnect();
                 that.report_scenarios();
+            }
+            else if (eventName === 'END_BROADCAST') {
+                that.ws_client.disconnect();
             }
 
             baseTriggerEvent(eventName, payload);

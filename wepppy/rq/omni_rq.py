@@ -164,6 +164,8 @@ def run_omni_scenario_rq(
             status_channel,
             f'rq:{job.id} COMPLETED {func_name}({runid}) -> ({status}, {elapsed:.3f})',
         )
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
         return status, elapsed
 
     except Exception:
@@ -192,6 +194,7 @@ def run_omni_scenarios_rq(runid: str):
 
             StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni END BROADCAST')
             return None
 
         if not omni.scenarios:
@@ -444,7 +447,7 @@ def _finalize_omni_scenarios_rq(runid: str):
                 pass
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni END BROADCAST')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
