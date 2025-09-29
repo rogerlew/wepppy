@@ -5,6 +5,7 @@ The command bar provides a keyboard-driven palette for common actions on project
 ## Quick Reference
 - **Purpose** – Surfacing navigation and utility commands without touching the mouse. `CommandBar.createCommands()` registers the top-level verbs, while `createGetCommandHandlers()` manages the `get` subcommands.
 - **Structure** – Every entry supplies a `description` (shown in `:help`) and an `action`. Actions can manipulate the UI directly or call helpers (e.g., `routeGetLoadAvg`). Long-running commands that should keep the palette open must be listed in `STAY_ACTIVE_COMMANDS`.
+- **History** – The palette keeps an in-memory command history per page load. While command mode is active, press `ArrowUp`/`ArrowDown` to cycle through previous entries without retyping.
 - **Adding Commands**
   1. Add a new key to the object returned by `createCommands()` (or `createGetCommandHandlers()` for `get` subcommands).
   2. Implement the handler. When network calls are required, follow the existing `route*` helper pattern for clarity and reuse.

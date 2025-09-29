@@ -33,6 +33,9 @@
             this.inputEl = container.querySelector('[data-command-input]');
 
             this.active = false;
+            this.commandHistory = [];
+            this.historyIndex = 0;
+            this.historySnapshot = '';
             this.projectBaseUrl = this.getProjectBaseUrl();
             this.getCommandHandlers = this.createGetCommandHandlers();
             this.commands = this.createCommands();
@@ -236,11 +239,26 @@
         handleInputKeyDown(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                this.executeCommand(this.inputEl.value.trim());
+                const enteredCommand = this.inputEl.value.trim();
+                if (enteredCommand) {
+                    this.rememberCommand(enteredCommand);
+                }
+                this.executeCommand(enteredCommand);
+                this.resetHistoryNavigation();
             } else if (event.key === 'Escape') {
                 event.preventDefault();
                 this.deactivate();
                 this.hideResult();
+            } else if (event.key === 'ArrowUp') {
+                if (this.commandHistory.length > 0) {
+                    event.preventDefault();
+                    this.navigateHistory(-1);
+                }
+            } else if (event.key === 'ArrowDown') {
+                if (this.commandHistory.length > 0) {
+                    event.preventDefault();
+                    this.navigateHistory(1);
+                }
             }
         }
 
@@ -250,6 +268,7 @@
             this.tipEl.textContent = TIP_ACTIVE;
             this.inputEl.value = '';
             this.focusInput();
+            this.resetHistoryNavigation();
         }
 
         deactivate() {
@@ -260,6 +279,7 @@
             if (document.activeElement === this.inputEl) {
                 this.inputEl.blur();
             }
+            this.resetHistoryNavigation();
         }
 
         executeCommand(fullCommand) {
@@ -310,6 +330,48 @@
         hideResult() {
             this.resultEl.hidden = true;
             this.resultEl.textContent = '';
+        }
+
+        rememberCommand(commandText) {
+            if (!commandText) {
+                return;
+            }
+
+            this.commandHistory.push(commandText);
+            this.resetHistoryNavigation();
+        }
+
+        navigateHistory(direction) {
+            if (!this.inputEl) {
+                return;
+            }
+
+            if (this.historyIndex === this.commandHistory.length) {
+                this.historySnapshot = this.inputEl.value;
+            }
+
+            const nextIndex = this.historyIndex + direction;
+
+            if (nextIndex < 0) {
+                this.historyIndex = 0;
+            } else if (nextIndex > this.commandHistory.length) {
+                this.historyIndex = this.commandHistory.length;
+            } else {
+                this.historyIndex = nextIndex;
+            }
+
+            if (this.historyIndex === this.commandHistory.length) {
+                this.inputEl.value = this.historySnapshot;
+            } else {
+                this.inputEl.value = this.commandHistory[this.historyIndex] || '';
+            }
+
+            this.focusInput(true);
+        }
+
+        resetHistoryNavigation() {
+            this.historyIndex = this.commandHistory.length;
+            this.historySnapshot = '';
         }
 
         showHelp() {
