@@ -274,6 +274,8 @@ function onReady() {
     */
     omni.load_scenarios_from_backend();
 
+    omni.set_rq_job_id(omni, {{ rq_job_ids.get("run_omni_rq") | tojson }});
+
     if ({{ omni.has_ran_scenarios | tojson }}) {
         omni.report_scenarios()
     }
