@@ -594,8 +594,6 @@ class NoDbBase(object):
         On successful exit from the 'with' block, it calls dump_and_unlock().
         If an exception occurs, it calls unlock() and re-raises the exception.
         """
-        self.logger.info(f"Entering locked context manager: {self._file_lock_key}")
-
         if self.readonly:
             raise Exception('Cannot use locked context on a readonly project.')
 
