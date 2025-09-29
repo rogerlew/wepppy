@@ -101,6 +101,35 @@ var Wepp = function () {
             });
         };
 
+        that.handleCoverTransformUpload = function (input) {
+            if (!input || !input.files || input.files.length === 0) {
+                return false;
+            }
+
+            var file = input.files[0];
+            var formData = new FormData();
+            formData.append('input_upload_cover_transform', file);
+
+            $.post({
+                url: "tasks/upload_cover_transform/",
+                data: formData,
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function success() {
+                    console.log('upload cover transform successful');
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            return true;
+        };
+
         that.run = function () {
             var self = instance;
             var task_msg = "Submitting wepp run";
