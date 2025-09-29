@@ -164,23 +164,23 @@ def _omni_clone(scenario_def: dict, wd: str):
     
     scenario = scenario_def.get('type')
     _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-    omni_dir = _join(wd, OMNI_REL_DIR, 'scenarios', _scenario_name)
+    new_wd = _join(wd, OMNI_REL_DIR, 'scenarios', _scenario_name)
 
-    if _exists(omni_dir):
-        shutil.rmtree(omni_dir)
+    if _exists(new_wd):
+        shutil.rmtree(new_wd)
 
-    os.makedirs(omni_dir)
+    os.makedirs(new_wd)
 
     for fn in os.listdir(wd):
         if fn in ['climate', 'dem', 'watershed', 'climate.nodb', 'dem.nodb', 'watershed.nodb']:
             src = _join(wd, fn)
-            dst = _join(omni_dir, fn)
+            dst = _join(new_wd, fn)
             if not _exists(dst):
                 os.symlink(src, dst)
 
         elif fn in ['disturbed', 'soils']:
             src = _join(wd, fn)
-            dst = _join(omni_dir, fn)
+            dst = _join(new_wd, fn)
             if not _exists(dst):
                 shutil.copytree(src, dst)
 
@@ -189,7 +189,7 @@ def _omni_clone(scenario_def: dict, wd: str):
                 continue
 
             src = _join(wd, fn)
-            dst = _join(omni_dir, fn)
+            dst = _join(new_wd, fn)
             if not _exists(dst):
                 shutil.copy(src, dst)
 
@@ -197,7 +197,7 @@ def _omni_clone(scenario_def: dict, wd: str):
                 d = json.load(f)
                 
 
-            d['py/state']['wd'] = omni_dir
+            d['py/state']['wd'] = new_wd
             d['py/state']['_parent_wd'] = wd
 
             with open(dst, 'w') as f:
@@ -209,7 +209,7 @@ def _omni_clone(scenario_def: dict, wd: str):
 
         src = _join(wd, fn)
         if os.path.isdir(src):
-            dst = _join(omni_dir, fn)
+            dst = _join(new_wd, fn)
 
             if not _exists(dst):
                 try:
@@ -229,7 +229,12 @@ def _omni_clone(scenario_def: dict, wd: str):
             if not _exists(dst):
                 os.makedirs(dst, exist_ok=True)
 
-    return omni_dir
+
+    # remove READONLY file flag if present
+    if _exists(_join(new_wd, 'READONLY')):
+        os.remove(_join(new_wd, 'READONLY'))
+
+    return new_wd
 
 
 def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str):
@@ -262,6 +267,10 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str):
     shutil.copytree(_join(sibling_wd, 'disturbed'), _join(new_wd, 'disturbed'))
     shutil.copytree(_join(sibling_wd, 'landuse'), _join(new_wd, 'landuse'))
     shutil.copytree(_join(sibling_wd, 'soils'), _join(new_wd, 'soils'))
+
+    # remove READONLY file flag if present
+    if _exists(_join(new_wd, 'READONLY')):
+        os.remove(_join(new_wd, 'READONLY'))
 
 
 def _scenario_name_from_scenario_definition(scenario_def) -> str:
