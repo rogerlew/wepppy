@@ -784,10 +784,12 @@ class Omni(NoDbBase):
                 'dependencies': dependencies,
                 'timestamp': time.time()
             }
+            self.contrast_dependency_tree = dependency_tree
 
         stale = set(dependency_tree.keys()) - active_contrasts
         for contrast_name in stale:
             dependency_tree.pop(contrast_name, None)
+        self.contrast_dependency_tree = dependency_tree
 
         self.contrast_dependency_tree = dependency_tree
 
@@ -967,7 +969,10 @@ class Omni(NoDbBase):
             raise Exception('No scenarios to run')
 
         dependency_tree = dict(self.scenario_dependency_tree)
+
         run_states: List[Dict[str, Any]] = []
+        self.scenario_run_state = run_states
+
         active_scenarios = set()
         processed_scenarios = set()
 
@@ -997,7 +1002,8 @@ class Omni(NoDbBase):
                 # defer thinning/prescribed fire until after dependent scenarios build
                 continue
 
-            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date = dependency_info(scenario_enum, scenario_def)
+            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date = \
+                dependency_info(scenario_enum, scenario_def)
             processed_scenarios.add(scenario_name)
 
             target_key = self._normalize_scenario_key(dependency_target)
@@ -1012,6 +1018,7 @@ class Omni(NoDbBase):
                     'signature': signature,
                     'timestamp': ts
                 }
+                self.scenario_dependency_tree = dependency_tree
                 run_states.append({
                     'scenario': scenario_name,
                     'status': 'skipped',
@@ -1021,6 +1028,7 @@ class Omni(NoDbBase):
                     'dependency_sha1': dependency_hash,
                     'timestamp': ts
                 })
+                self.scenario_run_state = run_states
                 continue
 
             self.logger.info(f'  run_omni_scenarios: {scenario_name}')
@@ -1036,6 +1044,7 @@ class Omni(NoDbBase):
                 'signature': signature,
                 'timestamp': ts
             }
+            self.scenario_dependency_tree = dependency_tree
             run_states.append({
                 'scenario': scenario_name,
                 'status': 'executed',
@@ -1045,6 +1054,7 @@ class Omni(NoDbBase):
                 'dependency_sha1': updated_hash,
                 'timestamp': ts
             })
+            self.scenario_run_state = run_states
 
         # pass 2 scenarios: dependent on pass 1
         for scenario_def in self.scenarios:
@@ -1068,6 +1078,7 @@ class Omni(NoDbBase):
                     'signature': signature,
                     'timestamp': ts
                 }
+                self.scenario_dependency_tree = dependency_tree
                 run_states.append({
                     'scenario': scenario_name,
                     'status': 'skipped',
@@ -1077,6 +1088,7 @@ class Omni(NoDbBase):
                     'dependency_sha1': dependency_hash,
                     'timestamp': ts
                 })
+                self.scenario_run_state = run_states
                 continue
 
             self.logger.info(f'  run_omni_scenarios: {scenario_name}')
@@ -1092,6 +1104,7 @@ class Omni(NoDbBase):
                 'signature': signature,
                 'timestamp': ts
             }
+            self.scenario_dependency_tree = dependency_tree
             run_states.append({
                 'scenario': scenario_name,
                 'status': 'executed',
@@ -1101,13 +1114,12 @@ class Omni(NoDbBase):
                 'dependency_sha1': updated_hash,
                 'timestamp': ts
             })
+            self.scenario_run_state = run_states
 
         stale = set(dependency_tree.keys()) - active_scenarios
         for scenario_name in stale:
             dependency_tree.pop(scenario_name, None)
-
         self.scenario_dependency_tree = dependency_tree
-        self.scenario_run_state = run_states
 
         self.logger.info('  run_omni_scenarios: compiling hillslope summaries')
         self.compile_hillslope_summaries()
@@ -1215,9 +1227,6 @@ class Omni(NoDbBase):
             assert omni_base_scenario_name is not None, \
                 'Mulching scenario requires a base scenario'
 
-            with self.timed(f'  {scenario_name}: build soils'):
-                soils.build()
-
             with self.timed(f'  {scenario_name}: applying treatments'):
                 treatments = Treatments.getInstance(new_wd)
                 ground_cover_increase = scenario_def.get('ground_cover_increase')
@@ -1237,6 +1246,9 @@ class Omni(NoDbBase):
                 treatments.treatments_domlc_d = treatments_domlc_d
                 treatments.build_treatments()
             
+            with self.timed(f'  {scenario_name}: build soils'):
+                soils.build()
+
         elif scenario == OmniScenario.PrescribedFire:
             self.logger.info(f'  {scenario_name}: scenario == prescribed fire')
 
