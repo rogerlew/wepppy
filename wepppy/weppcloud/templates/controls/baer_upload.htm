@@ -2,105 +2,121 @@
 {% block form_id %}sbs_upload_form{% endblock %}
 {% block form_title %}Soil Burn Severity {% if 'disturbed' in ron.mods %}(Optional){% endif %}{% endblock %}
 {% block inputs %}
-    <!-- if the form_title changes need to update on_document_ready.js to get the fire/tree icon to work -->
-    <div class="form-group row">
-        <div class="col-sm-12">
-            <label class="radio-inline">
-            <input type="radio" value="0" class="disable-readonly" id="sbs_mode0" name="sbs_mode" onclick="Baer.getInstance().showHideControls(0)"> Upload SBS Map</label>
-        </div>
-        <div class="col-sm-12">
-            <label class="radio-inline">
-            <input type="radio" value="1" class="disable-readonly" id="sbs_mode1" name="sbs_mode" onclick="Baer.getInstance().showHideControls(1)"> Specify Uniform SBS (Must Delineate Channels First)</label>
+<!-- if the form_title changes need to update on_document_ready.js to get the fire/tree icon to work -->
+<div class="form-group row">
+    <div class="col-sm-12">
+        <label class="radio-inline">
+            <input type="radio" value="0" class="disable-readonly" id="sbs_mode0" name="sbs_mode"
+                onclick="Baer.getInstance().showHideControls(0)"> Upload SBS Map</label>
+    </div>
+    <div class="col-sm-12">
+        <label class="radio-inline">
+            <input type="radio" value="1" class="disable-readonly" id="sbs_mode1" name="sbs_mode"
+                onclick="Baer.getInstance().showHideControls(1)"> Specify Uniform SBS (Must Delineate Channels
+            First)</label>
+    </div>
+</div>
+
+<div id="sbs_mode0_controls">
+    <p>
+        Upload a raster SBS map (.img or .tif).
+        The map can be a thematic SBS map or a 256 dNBR map.<br The datatype should be uint8 (Byte) or Short Integer.
+            Preferably in UTM. Maps with color tables will use colors to assign severities.</p>
+
+    <div class="form-group row hide-readonly">
+        <div class="col-md-6">
+            <input id="input_upload_sbs" name="input_upload_sbs" type="file" class="file" accept=".tif,.img">
         </div>
     </div>
-
-    <div id="sbs_mode0_controls">
-        <p>
-            Upload a raster SBS map (.img or .tif). 
-            The map can be a thematic SBS map or a 256 dNBR map.<br 
-            The datatype should be uint8 (Byte) or Short Integer. 
-            Preferably in UTM. 
-            Maps with color tables will use colors to assign severities.</p>
-        <div class="form-group row hide-readonly">
-            <div class="col-md-6">
-                <input id="input_upload_sbs" name="input_upload_sbs" type="file" class="file" accept=".tif,.img">
-            </div>
-        </div>
-        <div class="form-group row hide-readonly">
-            <div class="col-sm-4">
-                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().upload_sbs()">Upload SBS</button>
-            </div>
-            <div class="col-sm-5">
-                <small id="hint_upload_sbs"></small>
-            </div>
-        </div>
-        {% if 'disturbed' in ron.mods %}
-
-        <div class="form-group row hide-readonly">
-            <div class="col-sm-4">
-                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"onclick="Baer.getInstance().remove_sbs()">Remove SBS</button>
-            </div>
-            <div class="col-sm-5">
-                <small id="hint_remove_sbs"></small>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
-    <div id="sbs_mode1_controls">
-        <div class="form-group row hide-readonly">
-            <div class="col-sm-4">
-                <button  class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().build_uniform_sbs(1)">Use Uniform Low SBS</button>
-            </div>
-            <div class="col-sm-5">
-                <small id="hint_low_sbs"></small>
-            </div>
-        </div>
-
-        <div class="form-group row hide-readonly">
-            <div class="col-sm-4">
-                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().build_uniform_sbs(2)">Use Uniform Moderate SBS</button>
-            </div>
-            <div class="col-sm-5">
-                <small id="hint_moderate_sbs"></small>
-            </div>
-        </div>
-
-        <div class="form-group row hide-readonly">
-            <div class="col-sm-4">
-                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().build_uniform_sbs(3)">Use Uniform High SBS</button>
-            </div>
-            <div class="col-sm-5">
-                <small id="hint_high_sbs"></small>
-            </div>
-        </div>
-
-        <div class="form-group row hide-readonly">
-            <div class="col-sm-4">
-                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().remove_sbs()">Remove SBS</button>
-            </div>
-            <div class="col-sm-5">
-                <small id="hint_remove_sbs"></small>
-            </div>
-        </div>
-
-    </div>
-
-
-    {% if 'rap_ts' in climate.mods %}
-    <h5>Fire Date</h5>
-    <div class="form-group row" id="firedate_container">
-        <div class="col-sm-3">
-            <label for="firedate">Fire Date (mo da yr): [Used for revegetation modeling with 9005 soils]</label>
-        </div>
-        <div class="col-sm-2">
-            <input id="firedate" name="firedate" class="form-control mr-sm-3" type="text"
-            value="{{ disturbed.fire_date }}" aria-label="firedate mo da yr">
-        </div>
-        <div class="col-sm-2">
-            <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().set_firedate($('#firedate').val())">Set Fire Date</button>
-
+    {% if 'disturbed' in ron.mods and disturbed.has_map %}
+    <div class="form-group row hide-readonly">
+        <div class="col-md-6">
+            <strong>Current SBS map:</strong>
+            <span class="text-monospace">{{ disturbed.disturbed_fn }}</span>
         </div>
     </div>
     {% endif %}
+    <div class="form-group row hide-readonly">
+        <div class="col-sm-4">
+            <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+                onclick="Baer.getInstance().upload_sbs()">Upload SBS</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_upload_sbs"></small>
+        </div>
+    </div>
+    {% if 'disturbed' in ron.mods %}
+    <div class="form-group row hide-readonly">
+        <div class="col-sm-4">
+            <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+                onclick="Baer.getInstance().remove_sbs()">Remove SBS</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_remove_sbs"></small>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div id="sbs_mode1_controls">
+    <div class="form-group row hide-readonly">
+        <div class="col-sm-4">
+            <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+                onclick="Baer.getInstance().build_uniform_sbs(1)">Use Uniform Low SBS</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_low_sbs"></small>
+        </div>
+    </div>
+
+    <div class="form-group row hide-readonly">
+        <div class="col-sm-4">
+            <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+                onclick="Baer.getInstance().build_uniform_sbs(2)">Use Uniform Moderate SBS</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_moderate_sbs"></small>
+        </div>
+    </div>
+
+    <div class="form-group row hide-readonly">
+        <div class="col-sm-4">
+            <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+                onclick="Baer.getInstance().build_uniform_sbs(3)">Use Uniform High SBS</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_high_sbs"></small>
+        </div>
+    </div>
+
+    <div class="form-group row hide-readonly">
+        <div class="col-sm-4">
+            <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+                onclick="Baer.getInstance().remove_sbs()">Remove SBS</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_remove_sbs"></small>
+        </div>
+    </div>
+
+</div>
+
+
+{% if 'rap_ts' in climate.mods %}
+<h5>Fire Date</h5>
+<div class="form-group row" id="firedate_container">
+    <div class="col-sm-3">
+        <label for="firedate">Fire Date (mo da yr): [Used for revegetation modeling with 9005 soils]</label>
+    </div>
+    <div class="col-sm-2">
+        <input id="firedate" name="firedate" class="form-control mr-sm-3" type="text" value="{{ disturbed.fire_date }}"
+            aria-label="firedate mo da yr">
+    </div>
+    <div class="col-sm-2">
+        <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+            onclick="Baer.getInstance().set_firedate($('#firedate').val())">Set Fire Date</button>
+
+    </div>
+</div>
+{% endif %}
 {% endblock %}
