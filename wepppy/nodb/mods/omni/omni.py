@@ -134,8 +134,10 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
         d['py/state']['wd'] = omni_dir
         d['py/state']['_parent_wd'] = wd
 
-        with open(dst, 'w') as f:
-            json.dump(d, f)
+        with open(dst, 'w') as fp:
+            json.dump(d, fp)
+            fp.flush()                 # flush Python’s userspace buffer
+            os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
 
     wepp = Wepp.getInstance(omni_dir)
     wepp.wepp_bin = wepp_bin
@@ -200,8 +202,10 @@ def _omni_clone(scenario_def: dict, wd: str):
             d['py/state']['wd'] = new_wd
             d['py/state']['_parent_wd'] = wd
 
-            with open(dst, 'w') as f:
-                json.dump(d, f)
+            with open(dst, 'w') as fp:
+                json.dump(d, fp)
+                fp.flush()                 # flush Python’s userspace buffer
+                os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
     
     for fn in os.listdir(wd):
         if fn == '_pups':
@@ -267,6 +271,19 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str):
     shutil.copytree(_join(sibling_wd, 'disturbed'), _join(new_wd, 'disturbed'))
     shutil.copytree(_join(sibling_wd, 'landuse'), _join(new_wd, 'landuse'))
     shutil.copytree(_join(sibling_wd, 'soils'), _join(new_wd, 'soils'))
+
+    # set wd to new_wd for the nodb files that are copied
+    for fn in ['disturbed.nodb', 'landuse.nodb', 'soils.nodb']:
+        dst = _join(new_wd, fn)
+        with open(dst, 'r') as f:
+            d = json.load(f)
+            
+        d['py/state']['wd'] = new_wd
+
+        with open(dst, 'w') as fp:
+            json.dump(d, fp)
+            fp.flush()                 # flush Python’s userspace buffer
+            os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
 
     # remove READONLY file flag if present
     if _exists(_join(new_wd, 'READONLY')):
