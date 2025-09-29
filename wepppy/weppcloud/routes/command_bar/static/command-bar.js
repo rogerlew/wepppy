@@ -19,6 +19,10 @@
         "set public <true|false>   - Toggle project public visibility",
         "set loglevel <debug|info|warning|error|critical> - Update project log verbosity"
     ];
+    const CLEAR_HELP_LINES = [
+        'clear locks         - Clear NoDb locks',
+        'clear nodb_cache    - Clear Redis NoDb cache entries'
+    ];
 
     class CommandBar {
         constructor(container) {
@@ -169,8 +173,8 @@
                     action: (args) => this.navigateToProjectBrowse(args)
                 },
                 clear: {
-                    description: 'Clear the NoDb locks',
-                    action: () => this.clearLocks()
+                    description: 'Clear run resources (locks, cache)',
+                    action: (args) => this.handleClearCommand(args)
                 }
             };
         }
@@ -317,6 +321,7 @@
                 })
                 .join('\n');
             const setHelp = SET_HELP_LINES.map((line) => `  ${line}`).join('\n');
+            const clearHelp = CLEAR_HELP_LINES.map((line) => `  ${line}`).join('\n');
             const keyboardShortcuts = 'Navigation shortcuts:\n   Shift+G go to bottom  |  Shift+T go to top  |  Shift+U page up  |  Shift+H page down';
             const getHelpLines = this.buildGetCommandHelpLines();
             const usersumUsage = [
@@ -328,6 +333,7 @@
 
             const sections = [
                 `Available Commands:\n${lines}`,
+                `Clear command usage:\n${clearHelp}`,
                 `Set command usage:\n${setHelp}`,
                 usersumUsage
             ];
@@ -388,20 +394,106 @@
         }
 
 
+        handleClearCommand(args = []) {
+            const normalizedArgs = Array.isArray(args)
+                ? args.map((value) => String(value || '').trim()).filter((value) => value.length > 0)
+                : [];
+            if (normalizedArgs.length > 1) {
+                this.showResult([
+                    'Error: Too many arguments for clear command.',
+                    'Expected one of:',
+                    ...CLEAR_HELP_LINES.map((line) => `  ${line}`)
+                ].join('\n'));
+                return;
+            }
+            const target = (normalizedArgs[0] || 'locks').toLowerCase();
+
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: The clear command is only available on a project page.');
+                return;
+            }
+
+            switch (target) {
+            case '':
+            case 'lock':
+            case 'locks':
+                return this.clearLocks();
+            case 'cache':
+            case 'nodb_cache':
+            case 'nodb-cache':
+                return this.clearNodbCache();
+            default:
+                this.showResult([
+                    'Available clear commands:',
+                    ...CLEAR_HELP_LINES.map((line) => `  ${line}`)
+                ].join('\n'));
+            }
+        }
+
+
         clearLocks() {
             if (!this.projectBaseUrl) {
-                this.showResult('Error: The browse command is only available on a project page.');
+                this.showResult('Error: The clear command is only available on a project page.');
                 return;
             }
             const targetUrl = this.projectBaseUrl + 'tasks/clear_locks';
 
-            fetch(targetUrl, { method: 'GET', cache: 'no-store' })
-                .then((response) => {
-                    if (response.ok) {
-                        this.showResult('Success: Cleared NoDb locks.');
-                    } else {
-                        this.showResult(`Error: Could not clear locks. HTTP ${response.status}`);
+            return fetch(targetUrl, { method: 'GET', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+                .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
+                .then(({ response, data }) => {
+                    if (!response.ok) {
+                        const message = (data && (data.Error || data.error)) || `Could not clear locks. HTTP ${response.status}`;
+                        throw new Error(message);
                     }
+
+                    if (data && data.Success === false) {
+                        const message = (data && (data.Error || data.error)) || 'Unable to clear locks.';
+                        throw new Error(message);
+                    }
+
+                    this.showResult('Success: Cleared NoDb locks.');
+                })
+                .catch((error) => {
+                    console.error('Error clearing locks:', error);
+                    this.showResult(`Error: ${error.message || error}`);
+                });
+        }
+
+
+        clearNodbCache() {
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: The clear command is only available on a project page.');
+                return;
+            }
+            const targetUrl = this.projectBaseUrl + 'tasks/clear_nodb_cache';
+
+            return fetch(targetUrl, { method: 'GET', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+                .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
+                .then(({ response, data }) => {
+                    if (!response.ok) {
+                        const message = (data && (data.Error || data.error)) || `Could not clear NoDb cache. HTTP ${response.status}`;
+                        throw new Error(message);
+                    }
+
+                    if (data && data.Success === false) {
+                        const message = (data && (data.Error || data.error)) || 'Unable to clear NoDb cache.';
+                        throw new Error(message);
+                    }
+
+                    const clearedEntries = (data && data.Content && Array.isArray(data.Content.cleared_entries))
+                        ? data.Content.cleared_entries
+                        : [];
+
+                    if (clearedEntries.length === 0) {
+                        this.showResult('Success: No cached NoDb entries were present.');
+                    } else {
+                        const details = clearedEntries.map((entry) => `  ${entry}`).join('\n');
+                        this.showResult(`Success: Cleared NoDb cache entries:\n${details}`);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error clearing NoDb cache:', error);
+                    this.showResult(`Error: ${error.message || error}`);
                 });
         }
 

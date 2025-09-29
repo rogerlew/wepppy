@@ -10,6 +10,7 @@ from .._common import *  # noqa: F401,F403
 from sqlalchemy import func
 
 from wepppy.nodb import Ron
+from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.watershed import Watershed
 
 from wepppy.weppcloud.utils.helpers import (
@@ -32,6 +33,21 @@ def clear_locks(runid, config):
     from wepppy.nodb import clear_locks
     clear_locks(runid)
     return success_factory()
+
+
+@project_bp.route('/runs/<string:runid>/<config>/tasks/clear_nodb_cache')
+@authorize_and_handle_with_exception_factory
+def clear_nodb_cache(runid, config):
+    """Clear cached NoDb payloads for the active run."""
+    load_run_context(runid, config)
+    try:
+        cleared = clear_nodb_file_cache(runid)
+    except FileNotFoundError as exc:
+        return error_factory(str(exc)), 404
+    except RuntimeError as exc:
+        return error_factory(str(exc)), 503
+    cleared_entries = [str(path) for path in cleared]
+    return success_factory({'cleared_entries': cleared_entries})
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
