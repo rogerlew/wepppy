@@ -307,11 +307,16 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def build_isric(self, initial_sat=None, ksflag=None):
+    def build_isric(self, initial_sat=None, ksflag=None,
+                    max_workers=16):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
-
         from wepppy.locales.earth.soils.isric import ISRICSoilData
+
+        if max_workers < 1:
+            max_workers = 1
+        if max_workers > 16:
+            max_workers = 16
 
         wd = self.wd
         watershed = Watershed.getInstance(wd)
@@ -341,7 +346,7 @@ class Soils(NoDbBase):
             # Prepare arguments for multiprocessing
 
             # Execute in parallel
-            with createProcessPoolExecutor(max_workers=max(os.cpu_count(), 16), logger=self.logger, prefer_spawn=False) as executor:
+            with createProcessPoolExecutor(max_workers=max_workers, logger=self.logger, prefer_spawn=False) as executor:
                 futures = []
                 for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
                     futures.append(
@@ -608,7 +613,7 @@ class Soils(NoDbBase):
         with self.locked():
             self._soils = soils
 
-    def build(self, initial_sat=None, ksflag=None):
+    def build(self, initial_sat=None, ksflag=None, max_workers=None):
         self.logger.info(f'='*100)
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
@@ -647,7 +652,7 @@ class Soils(NoDbBase):
                 self._build_by_identify(build_asris_soils)
             else:
                 self.logger.info('    Using SSURGO/STATSGO database')
-                self._build_gridded(initial_sat=initial_sat, ksflag=ksflag)
+                self._build_gridded(initial_sat=initial_sat, ksflag=ksflag, max_workers=max_workers)
         elif self.mode == SoilsMode.Single:
             self.logger.info('  Single Soil Mode')
             self._build_single(initial_sat=initial_sat, ksflag=ksflag)
@@ -926,9 +931,9 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def _build_gridded(self, initial_sat=None, ksflag=None):
+    def _build_gridded(self, initial_sat=None, ksflag=None, max_workers=None):
         func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
+        self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag}, max_workers={max_workers})')
 
         global wepppyo3
 
@@ -955,7 +960,8 @@ class Soils(NoDbBase):
                 self.logger.info(f"    ssurgo mukeys: {mukeys}")
 
                 surgo_c = SurgoSoilCollection(mukeys)
-                surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag, logger=self.logger)
+                surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag, logger=self.logger,
+                                      max_workers=max_workers)
 
                 soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
                 soils = {str(k): v for k, v in soils.items()}

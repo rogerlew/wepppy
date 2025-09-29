@@ -946,23 +946,6 @@ class Omni(NoDbBase):
         }
         return hashlib.sha1(json.dumps(payload_serializable, sort_keys=True).encode('utf-8')).hexdigest()
 
-    def run_omni_scenario(self, scenario_def: dict):
-        scenario = scenario_def.get('type')
-
-        self.logger.info(f'run_scenario({scenario})')
-
-        if not isinstance(scenario, OmniScenario):
-            raise TypeError('scenario must be an instance of OmniScenario')
-
-        omni_dir, scenario_name = self._build_scenario(scenario_def)
-
-        if scenario not in self.scenarios:
-            self.scenarios = self.scenarios + [scenario_def]
-            
-        self._post_omni_run(omni_dir, scenario_name)
-
-        self.logger.info(f'  run_scenario({scenario}): {scenario} completed')
-
     def _post_omni_run(self, omni_wd: str, scenario_name: str):
         from wepppy.nodb.ron import Ron
         ron = Ron.getInstance(omni_wd)
@@ -987,7 +970,37 @@ class Omni(NoDbBase):
                 
         return ran_scenarios
     
+    @property
+    def use_rq_job_pool_concurrency(self) -> bool:
+        return getattr(self, '_use_rq_job_pool_concurrency', True)
+    
+    @use_rq_job_pool_concurrency.setter
+    @nodb_setter
+    def use_rq_job_pool_concurrency(self, value: bool):
+        self._use_rq_job_pool_concurrency = value
+
+    @property
+    def rq_job_pool_max_worker_per_scenario_task(self) -> int:
+        cpu_count = os.cpu_count() or 1
+        if not self.scenarios:
+            return cpu_count
+        
+        if self.use_rq_job_pool_concurrency:
+            return max(cpu_count // len(self.scenarios), 1)
+
+        return cpu_count
+
+
     def run_omni_scenarios(self):
+        """
+        Runs all the scenarios in two passes to ensure dependencies are met.
+        has dependency checking and skips scenarios that are up-to-date.
+        1st pass: runs scenarios thar are only dependent on base_scenario (Undisturbed, SBSmap, Uniform*)
+        2nd pass: runs scenarios dependent on 1st pass scenarios (Thinning, Mulching)
+
+        Intended as a development hook for testing scenario running without the additional
+        complexties of having rq as seperate jobs.
+        """
         self.logger.info('run_omni_scenarios')
 
         if not self.scenarios:
@@ -1058,7 +1071,7 @@ class Omni(NoDbBase):
                 continue
 
             self.logger.info(f'  run_omni_scenarios: {scenario_name}')
-            omni_dir, scenario_name = self._build_scenario(scenario_def)
+            omni_dir, scenario_name = self.run_omni_scenario(scenario_def)
             self._post_omni_run(omni_dir, scenario_name)
 
             updated_hash = _hash_file_sha1(dependency_path)
@@ -1118,7 +1131,7 @@ class Omni(NoDbBase):
                 continue
 
             self.logger.info(f'  run_omni_scenarios: {scenario_name}')
-            omni_dir, scenario_name = self._build_scenario(scenario_def)
+            omni_dir, scenario_name = self.run_omni_scenario(scenario_def)
             self._post_omni_run(omni_dir, scenario_name)
             
             updated_hash = _hash_file_sha1(dependency_path)
@@ -1150,9 +1163,7 @@ class Omni(NoDbBase):
         self.logger.info('  run_omni_scenarios: compiling hillslope summaries')
         self.compile_hillslope_summaries()
 
-    def _build_scenario(
-            self,
-            scenario_def: dict):
+    def run_omni_scenario(self, scenario_def: dict):
         from wepppy.nodb import Landuse, Soils, Wepp
         from wepppy.nodb.mods import Disturbed
         from wepppy.nodb.mods import Treatments
@@ -1212,7 +1223,7 @@ class Omni(NoDbBase):
             with self.timed(f'  {scenario_name}: build landuse and soils'):
                 landuse.build()
             with self.timed(f'  {scenario_name}: build soils'):
-                soils.build()
+                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
 
         elif scenario == OmniScenario.Undisturbed:
             self.logger.info(f' {scenario_name}: scenario == undisturbed')
@@ -1225,7 +1236,7 @@ class Omni(NoDbBase):
             with self.timed(f'  {scenario_name}: build landuse'):
                 landuse.build()
             with self.timed(f'  {scenario_name}: build soils'):
-                soils.build()
+                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
 
         elif scenario == OmniScenario.SBSmap:
             self.logger.info(f' {scenario_name}: scenario == sbs')
@@ -1245,7 +1256,7 @@ class Omni(NoDbBase):
             with self.timed(f'  {scenario_name}: build landuse and soils'):
                 landuse.build()
             with self.timed(f'  {scenario_name}: build soils'):
-                soils.build()
+                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
 
         elif scenario == OmniScenario.Mulch:
             self.logger.info(f'  {scenario_name}: scenario == mulch')
@@ -1273,7 +1284,7 @@ class Omni(NoDbBase):
                 treatments.build_treatments()
             
             with self.timed(f'  {scenario_name}: build soils'):
-                soils.build()
+                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
 
         elif scenario == OmniScenario.PrescribedFire:
             self.logger.info(f'  {scenario_name}: scenario == prescribed fire')
@@ -1283,7 +1294,7 @@ class Omni(NoDbBase):
                 raise Exception('Cloned omni scenario should be undisturbed')
 
             with self.timed(f'  {scenario_name}: build soils'):
-                soils.build()
+                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
             
             with self.timed(f'  {scenario_name}: applying treatments'):
                 treatments = Treatments.getInstance(new_wd)
@@ -1310,7 +1321,7 @@ class Omni(NoDbBase):
                 raise Exception('Cloned omni scenario should be undisturbed')
 
             with self.timed(f'  {scenario_name}: build soils'):
-                soils.build()
+                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
             
             with self.timed(f'  {scenario_name}: applying treatments'):
                 treatments = Treatments.getInstance(new_wd)
@@ -1354,12 +1365,14 @@ class Omni(NoDbBase):
             wepp.prep_hillslopes(man_relpath=man_relpath,
                                 cli_relpath=cli_relpath,
                                 slp_relpath=slp_relpath,
-                                sol_relpath=sol_relpath)
+                                sol_relpath=sol_relpath,
+                                max_workers=self.rq_job_pool_max_worker_per_scenario_task)
         with self.timed(f'  {scenario_name}: run hillslopes'):
             wepp.run_hillslopes(man_relpath=man_relpath,
                                 cli_relpath=cli_relpath,
                                 slp_relpath=slp_relpath,
-                                sol_relpath=sol_relpath)
+                                sol_relpath=sol_relpath,
+                                max_workers=self.rq_job_pool_max_worker_per_scenario_task)
 
         with self.timed(f'  {scenario_name}: prep watershed'):
             wepp.prep_watershed()

@@ -154,7 +154,13 @@ def interpolate_daily_timeseries(
     end_year=2020,
     output_dir='test',
     output_type='prn parquet',
-    logger=None):
+    logger=None,
+    max_workers=12):
+
+    if max_workers < 1:
+        max_workers = 1
+    if max_workers > 20:
+        max_workers = 20
 
     debug = 1
     gridmet_wind = False
@@ -262,7 +268,7 @@ def interpolate_daily_timeseries(
     raw_data = {measure: np.zeros((ncols, nrows, ndays))
                 for measure in interpolation_spec.keys()}
     
-    with createProcessPoolExecutor(max_workers=12, logger=logger) as executor:
+    with createProcessPoolExecutor(max_workers=max_workers, logger=logger) as executor:
         futures = []
 
         for (col, row), (lng, lat) in pixel_locations.items():

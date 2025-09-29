@@ -1677,6 +1677,16 @@ class SurgoSoilCollection(object):
         - Exceptions propagate to the caller; failed mukeys go to invalidSoils with value=None.
         - Defaults to using the available CPU cores when max_workers is not provided.
         """
+
+        cpu_count = os.cpu_count() or 1
+        if max_workers is None:
+            max_workers = cpu_count
+            
+        if max_workers < 1:
+            max_workers = 1
+        if max_workers > max(cpu_count, 20):
+            max_workers = max(cpu_count, 20)
+
         if logger:
             logger.info("Starting makeWeppSoils...")
 
@@ -1695,7 +1705,6 @@ class SurgoSoilCollection(object):
             ])
 
         ksflag = int(ksflag)
-        max_workers = max(1, int(max_workers or os.cpu_count() or 1))
 
         weppSoils = {}
         invalidSoils = {}
