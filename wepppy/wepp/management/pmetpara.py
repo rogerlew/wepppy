@@ -31,6 +31,8 @@ def pmetpara_prep(runs_dir, kcb, rawp):
 
             fp.write(f'{plant},{kcb},{rawp},{i+1},{description}\n')
 
+        fp.flush()                 # flush Python’s userspace buffer
+        os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
 
 if __name__ == "__main__":
     runs_dir = r'C:\Users\roger\Downloads\lt_obs_Blackwood_BC1_10336660_CurCond.2020.cl532.observed.ki5krcs.no_pmet.wepp_ui\wepp\runs'
