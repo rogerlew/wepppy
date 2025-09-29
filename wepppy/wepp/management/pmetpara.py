@@ -2,6 +2,7 @@ import csv
 import os
 from os.path import join as _join
 from os.path import split as _split
+from os.path import exists as _exists
 from glob import glob
 
 from .managements import get_plant_loop_names
@@ -34,6 +35,9 @@ def pmetpara_prep(runs_dir, kcb, rawp):
         fp.flush()                 # flush Python’s userspace buffer
         os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
 
-if __name__ == "__main__":
-    runs_dir = r'C:\Users\roger\Downloads\lt_obs_Blackwood_BC1_10336660_CurCond.2020.cl532.observed.ki5krcs.no_pmet.wepp_ui\wepp\runs'
-    pmetpara_prep(runs_dir, kcb=0.95, rawp=0.8)
+    # validate file exists
+    if not _exists(_join(runs_dir, 'pmetpara.txt')):
+        raise FileNotFoundError(
+            f'Error: pmetpara.txt not found in {runs_dir}'
+        )
+
