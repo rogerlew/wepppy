@@ -20,7 +20,12 @@ import logging
 
 from flask import Blueprint, jsonify, request
 
-from wepppy.nodb.base import LogLevel, try_redis_get_log_level, try_redis_set_log_level
+from wepppy.nodb.base import (
+    LogLevel,
+    lock_statuses,
+    try_redis_get_log_level,
+    try_redis_set_log_level,
+)
 from wepppy.weppcloud.utils.helpers import authorize
 
 from .._run_context import load_run_context
@@ -70,5 +75,33 @@ def set_log_level(runid, config):
         'Content': {
             'log_level': effective_label,
             'log_level_value': effective_value
+        }
+    })
+
+
+@command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/locks', methods=['GET'])
+def get_lock_statuses(runid, config):
+    authorize(runid, config)
+    load_run_context(runid, config)
+
+    try:
+        statuses = lock_statuses(runid)
+    except RuntimeError as exc:
+        logging.error('Lock status unavailable for %s: %s', runid, exc)
+        return jsonify({'Success': False, 'Error': 'Lock service unavailable. Please try again later.'}), 503
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logging.exception('Unexpected error retrieving lock statuses for %s', runid)
+        return jsonify({'Success': False, 'Error': 'Unexpected error retrieving lock statuses.'}), 500
+
+    locked_files = sorted([
+        str(filename)
+        for filename, is_locked in statuses.items()
+        if is_locked
+    ])
+
+    return jsonify({
+        'Success': True,
+        'Content': {
+            'locked_files': locked_files
         }
     })

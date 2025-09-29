@@ -82,6 +82,10 @@
                 loadavg: {
                     description: 'Show server load averages (1, 5, 15 minute windows)',
                     handler: (args) => this.routeGetLoadAvg(args)
+                },
+                locks: {
+                    description: 'Show active NoDb file locks for this run',
+                    handler: (args) => this.routeGetLocks(args)
                 }
             };
         }
@@ -524,6 +528,56 @@
             }).catch((error) => {
                 console.error('Error fetching load average:', error);
                 this.showResult(`Error: Unable to fetch load average. ${error.message || error}`);
+            });
+        }
+
+        routeGetLocks(args = []) {
+            if (Array.isArray(args) && args.length > 0) {
+                this.showResult('Usage: get locks');
+                return;
+            }
+
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: This command is only available on a project page.');
+                return;
+            }
+
+            const targetUrl = `${this.projectBaseUrl}command_bar/locks`;
+
+            return fetch(targetUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} fetching ${targetUrl}`);
+                }
+                return response.json();
+            }).then((data) => {
+                if (!data || data.Success !== true) {
+                    const message = (data && (data.Error || data.error)) || 'Unexpected response while fetching lock statuses.';
+                    throw new Error(message);
+                }
+
+                const lockedFiles = Array.isArray(data.Content && data.Content.locked_files)
+                    ? data.Content.locked_files
+                    : [];
+
+                if (lockedFiles.length === 0) {
+                    this.showResult('No locked files.');
+                    return;
+                }
+
+                const messageLines = [
+                    'Locked files:',
+                    ...lockedFiles.map((filename) => `  ${filename}`)
+                ];
+                this.showResult(messageLines.join('\n'));
+            }).catch((error) => {
+                console.error('Error fetching lock statuses:', error);
+                this.showResult(`Error: Unable to fetch lock statuses. ${error.message || error}`);
             });
         }
 
