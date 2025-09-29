@@ -258,6 +258,35 @@ var Map = function () {
         that.ctrls = L.control.layers(that.baseMaps, that.overlayMaps);
         that.ctrls.addTo(that);
 
+        that.addGeoJsonOverlay = function (options) {
+            options = options || {};
+            var url = options.url;
+            if (!url) {
+                console.warn('addGeoJsonOverlay called without a url');
+                return null;
+            }
+
+            var layerName = options.layerName || 'Overlay';
+            var style = options.style || null;
+
+            $.get({
+                url: url,
+                cache: false,
+                success: function success(response) {
+                    var overlay = L.geoJSON(response, {
+                        style: style
+                    });
+                    overlay.addTo(that);
+                    that.ctrls.addOverlay(overlay, layerName);
+                },
+                error: function error(jqXHR) {
+                    console.warn('Failed to load overlay', layerName, jqXHR);
+                }
+            });
+
+            return that;
+        };
+
         function handleViewportChange() {
             that.onMapChange();
 
