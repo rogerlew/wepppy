@@ -33,6 +33,7 @@ from .pivottable import pivottable_bp
 from .jsoncrack import jsoncrack_bp
 from .readme_md import readme_bp
 from .usersum import usersum_bp
+from .batch_runner import batch_runner_bp
 from .user import user_bp
 from .locations import locations_bp
 from .weppcloudr import weppcloudr_bp
@@ -107,6 +108,7 @@ __all__ = [
     'rangeland_cover_bp',
     'readme_bp',
     'usersum_bp',
+    'batch_runner_bp',
     'rhem_bp',
     'soils_bp',
     'treatments_bp',

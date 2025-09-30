@@ -1,4 +1,5 @@
 
+import os
 import socket
 
 def config_app(app, logger=None):
@@ -27,3 +28,13 @@ def config_app(app, logger=None):
     logger.info(f"Configuring app")
     
     _config_app(app)
+
+    # Batch runner feature flag defaults
+    flag_raw = os.getenv('BATCH_RUNNER_ENABLED')
+    if flag_raw is None:
+        app.config.setdefault('BATCH_RUNNER_ENABLED', True)
+    else:
+        app.config['BATCH_RUNNER_ENABLED'] = flag_raw.strip().lower() in {'1', 'true', 'yes', 'on'}
+
+    if 'BATCH_RUNNER_ROOT' not in app.config:
+        app.config['BATCH_RUNNER_ROOT'] = os.getenv('BATCH_RUNNER_ROOT', '/wc1/batch')

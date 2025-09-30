@@ -1,0 +1,85 @@
+"""NoDb scaffolding for the Batch Runner feature (Phase 0).
+
+Provides a minimal manifest container so subsequent phases can persist
+batch metadata using the existing NoDb infrastructure without yet
+implementing orchestration logic.
+"""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional
+
+from .base import NoDbBase
+
+
+@dataclass
+class BatchRunnerManifest:
+    """Lightweight manifest for batch runner state."""
+
+    version: int = 1
+    batch_name: Optional[str] = None
+    config: Optional[str] = None
+    created_at: Optional[str] = None
+    created_by: Optional[str] = None
+    runid_template: Optional[str] = None
+    selected_tasks: List[str] = field(default_factory=list)
+    force_rebuild: bool = False
+    runs: Dict[str, Any] = field(default_factory=dict)
+    history: List[Dict[str, Any]] = field(default_factory=list)
+    resources: Dict[str, Any] = field(default_factory=dict)
+    control_hashes: Dict[str, str] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a JSON-serialisable representation."""
+        return asdict(self)
+
+
+class BatchRunner(NoDbBase):
+    """NoDb stub for the batch runner controller."""
+
+    __name__ = "BatchRunner"
+    filename = "batch_runner.nodb"
+
+    def __init__(self, wd: str, cfg_fn: Optional[str] = None):
+        super().__init__(wd, cfg_fn)
+        with self.locked():
+            if not hasattr(self, "_manifest") or self._manifest is None:
+                self._manifest = BatchRunnerManifest()
+
+    @property
+    def manifest(self) -> BatchRunnerManifest:
+        """Return the in-memory manifest object."""
+        return self._manifest
+
+    def manifest_dict(self) -> Dict[str, Any]:
+        """Return the manifest as a primitive dictionary."""
+        return self._manifest.to_dict()
+
+    def reset_manifest(self) -> BatchRunnerManifest:
+        """Reset the manifest back to default values."""
+        with self.locked():
+            self._manifest = BatchRunnerManifest()
+            return self._manifest
+
+    def update_manifest(self, **updates: Any) -> BatchRunnerManifest:
+        """Apply shallow updates to the manifest (Phase 0 placeholder)."""
+        if not updates:
+            return self._manifest
+
+        with self.locked():
+            for key, value in updates.items():
+                if hasattr(self._manifest, key):
+                    setattr(self._manifest, key, value)
+                else:
+                    self._manifest.metadata[key] = value
+            return self._manifest
+
+    @classmethod
+    def default_manifest(cls) -> BatchRunnerManifest:
+        """Convenience helper for creating a detached default manifest."""
+        return BatchRunnerManifest()
+
+
+__all__ = ["BatchRunner", "BatchRunnerManifest"]

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title or 'WEPPcloud Batch Runner' }}</title>
+    <link rel="stylesheet" href="{{ site_prefix }}/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand navbar-light bg-light mb-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ site_prefix or '/' }}">WEPPcloud</a>
+            <span class="navbar-text">Batch Runner Preview</span>
+        </div>
+    </nav>
+    <main class="container" id="batch-runner-page">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ site_prefix }}/static/js/jquery-3.1.1.min.js"></script>
+    <script src="{{ site_prefix }}/static/js/controllers.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

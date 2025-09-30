@@ -1,0 +1,52 @@
+{% extends "layout.j2" %}
+
+{% block content %}
+<section class="mb-4">
+    <h1 class="h3">Batch: {{ batch_name }}</h1>
+    <p class="text-muted">Phase 0 preview – manifest editing and orchestration will arrive in later phases.</p>
+</section>
+
+{% if not feature_enabled %}
+<div class="alert alert-warning" role="alert">
+    Batch Runner is currently disabled. State is shown read-only for verification purposes.
+</div>
+{% endif %}
+
+<section id="batch-runner-root" class="card">
+    <div class="card-body">
+        <h2 class="h5">Manifest Overview</h2>
+        <p>This view confirms that routing, manifest scaffolding, and client bootstrap data are wired correctly.</p>
+        <dl class="row">
+            <dt class="col-sm-3">Feature Enabled</dt>
+            <dd class="col-sm-9"><span data-role="enabled-flag">{{ feature_enabled }}</span></dd>
+            <dt class="col-sm-3">Manifest Version</dt>
+            <dd class="col-sm-9"><span data-role="manifest-version">{{ manifest_payload.get('version') }}</span></dd>
+            <dt class="col-sm-3">Created By</dt>
+            <dd class="col-sm-9"><span data-role="created-by">{{ manifest_payload.get('created_by') or '—' }}</span></dd>
+        </dl>
+        <details class="mt-3">
+            <summary>Full Manifest</summary>
+            <pre class="bg-light p-3" data-role="manifest-json">{{ manifest_payload | tojson(indent=2) }}</pre>
+        </details>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.batchRunnerBootstrap = {
+        enabled: {{ feature_enabled | tojson }},
+        batchName: {{ batch_name | tojson }},
+        manifest: {{ manifest_payload | tojson }}
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof window.BatchRunner === 'undefined' || typeof window.BatchRunner.getInstance !== 'function') {
+            console.warn('BatchRunner control is not yet available.');
+            return;
+        }
+        var control = window.BatchRunner.getInstance();
+        control.init(window.batchRunnerBootstrap);
+    });
+</script>
+{% endblock %}
