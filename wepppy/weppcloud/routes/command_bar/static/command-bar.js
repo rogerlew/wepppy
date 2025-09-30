@@ -17,7 +17,8 @@
         "set outlet                - Use cursor location for outlet delineation",
         "set readonly <true|false> - Toggle project readonly mode",
         "set public <true|false>   - Toggle project public visibility",
-        "set loglevel <debug|info|warning|error|critical> - Update project log verbosity"
+        "set loglevel <debug|info|warning|error|critical> - Update project log verbosity",
+        "set channel_critical_shear <value> - Add a custom channel critical shear option"
     ];
     const CLEAR_HELP_LINES = [
         'clear locks         - Clear NoDb locks',
@@ -647,9 +648,49 @@
                 case 'public':
                     this.routeSetPublic(rest);
                     break;
+                case 'channel_critical_shear':
+                    this.handleSetChannelCriticalShear(rest);
+                    break;
                 default:
                     this.showResult(`Error: Unknown set option "${subcommandRaw}"`);
             }
+        }
+
+        handleSetChannelCriticalShear(args = []) {
+            if (!Array.isArray(args) || args.length === 0) {
+                this.showResult('Usage: set channel_critical_shear <value>');
+                return;
+            }
+
+            const rawValue = args.join(' ').trim();
+            if (!rawValue) {
+                this.showResult('Usage: set channel_critical_shear <value>');
+                return;
+            }
+
+            const numericValue = Number(rawValue);
+            if (!Number.isFinite(numericValue)) {
+                this.showResult(`Error: channel_critical_shear requires a numeric value, received "${rawValue}".`);
+                return;
+            }
+
+            const globalWepp = (typeof window !== 'undefined' && window.Wepp)
+                ? window.Wepp
+                : (typeof Wepp !== 'undefined' ? Wepp : undefined);
+
+            if (!globalWepp || typeof globalWepp.getInstance !== 'function') {
+                this.showResult('Error: WEPP module is not available on this page.');
+                return;
+            }
+
+            const weppInstance = globalWepp.getInstance();
+            if (!weppInstance || typeof weppInstance.addChannelCriticalShear !== 'function') {
+                this.showResult('Error: Unable to update channel critical shear at this time.');
+                return;
+            }
+
+            weppInstance.addChannelCriticalShear(rawValue);
+            this.showResult(`Channel critical shear set to ${rawValue}.`);
         }
 
         routeGetLoadAvg(args = []) {
