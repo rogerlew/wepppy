@@ -47,3 +47,4 @@ def register_blueprints(app):
     app.register_blueprint(usersum_bp)
     app.register_blueprint(stats_bp)
     app.register_blueprint(combined_watershed_viewer_bp)
+    app.register_blueprint(batch_runner_bp)

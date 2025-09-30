@@ -11,6 +11,7 @@ from wepppy.weppcloud.utils.helpers import error_factory, get_wd, handle_with_ex
 
 from ._common import *  # noqa: F401,F403
 
+# Blueprint for administrative tasks and support
 
 admin_bp = Blueprint('admin', __name__)
 
