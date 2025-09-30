@@ -227,7 +227,7 @@ def run_omni_scenarios_rq(runid: str):
             target_key = omni._normalize_scenario_key(dependency_target)
             return scenario_name, target_key, dependency_path, dependency_hash, signature_value, up_to_date
 
-        # pass 1 scenarios: dependent on base scenario
+        # stage 1 scenarios: dependent on base scenario
         for scenario_def in omni.scenarios:
             scenario_payload = _scenario_payload_for_job(scenario_def)
             scenario_enum = scenario_payload['type']
@@ -284,7 +284,7 @@ def run_omni_scenarios_rq(runid: str):
                 }
             )
 
-        # pass 2 scenarios: dependent on pass 1 results
+        # stage 2 scenarios: dependent on stage 1 results
         for scenario_def in omni.scenarios:
             scenario_payload = _scenario_payload_for_job(scenario_def)
             scenario_enum = scenario_payload['type']
