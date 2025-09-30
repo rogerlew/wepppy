@@ -57,47 +57,27 @@ class OmniLockTimeout(Exception):
     pass
 
 
-@contextmanager
-def _locked_with_retry(omni: Omni, timeout: float = 30.0, poll_interval: float = 0.5):
-    """Acquire the Omni lock, retrying until timeout elapses."""
-    deadline = time.time() + timeout
-    while True:
-        try:
-            omni.lock()
-            break
-        except NoDbAlreadyLockedError as exc:
-            if time.time() >= deadline:
-                raise OmniLockTimeout(
-                    f"Timed out waiting for Omni lock after {timeout}s"
-                ) from exc
-            time.sleep(poll_interval)
-        except Exception:
-            raise
-
-    try:
-        yield
-    except Exception:
-        omni.unlock()
-        raise
-    else:
-        omni.dump_and_unlock()
-
-
 def _update_dependency_state(
     omni: Omni,
     scenario_name: str,
     dependency_entry: Dict[str, Any],
     run_state_entry: Dict[str, Any],
 ) -> None:
-    """Persist dependency metadata and run state for a scenario within one lock."""
-    with _locked_with_retry(omni):
-        dependency_tree = dict(getattr(omni, '_scenario_dependency_tree', {}) or {})
-        dependency_tree[scenario_name] = dependency_entry
-        omni._scenario_dependency_tree = dependency_tree
+    
+    max_tries = 5
+    for attempt in range(max_tries):
+        try:
+            omni = Omni.getInstance(omni.wd)
+            with omni.locked():
+                omni.scenario_dependency_tree[scenario_name] = dependency_entry
+                omni.scenario_run_state.append(run_state_entry)
 
-        run_states = list(getattr(omni, '_scenario_run_state', []) or [])
-        run_states.append(run_state_entry)
-        omni._scenario_run_state = run_states
+        except OmniLockTimeout:
+            if attempt + 1 == max_tries:
+                raise OmniLockTimeout('max retries exceeded')
+            time.sleep(1.0)
+        else:
+            break
 
 
 def run_omni_scenario_rq(
@@ -210,6 +190,7 @@ def run_omni_scenarios_rq(runid: str):
 
         stage1_tasks: List[Dict[str, Any]] = []
         stage2_tasks: List[Dict[str, Any]] = []
+        scenarios_ran_count = 0
 
         def dependency_info(scenario_enum: OmniScenario, scenario_def: Dict[str, Any]):
             scenario_name = _scenario_name_from_scenario_definition(scenario_def)
@@ -283,6 +264,7 @@ def run_omni_scenarios_rq(runid: str):
                     'signature': signature_value,
                 }
             )
+            scenarios_ran_count += 1
 
         # stage 2 scenarios: dependent on stage 1 results
         for scenario_def in omni.scenarios:
@@ -335,6 +317,11 @@ def run_omni_scenarios_rq(runid: str):
                     'signature': signature_value,
                 }
             )
+            scenarios_ran_count += 1
+
+        if scenarios_ran_count == 0:
+            omni.logger.info('  run_omni_scenarios: All scenarios up to date, nothing to run')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
 
         stale = set(dependency_tree.keys()) - active_scenarios
         for scenario_name in stale:
