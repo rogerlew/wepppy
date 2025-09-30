@@ -44,6 +44,32 @@ Omni persists lightweight bookkeeping alongside the scenarios in `omni.nodb` so 
 Dependency resolution is scenario aware: mulching scenarios hash the chosen base scenario’s `loss_pw0.txt`, while all other scenarios hash the parent project (undisturbed or SBS map).  Any change to that file’s contents or to the scenario definition (signature) forces a rebuild.
 
 
+### Developer notes: cloning internals and gotchas
+
+Omni builds every scenario workspace by cloning the parent project with `_omni_clone()` and, when necessary, overlaying a sibling scenario via `_omni_clone_sibling()`.  A few details matter if you are extending these helpers:
+
+- **Workspace creation.** `_omni_clone()` creates `<parent>/_pups/omni/scenarios/<scenario>` and symlinks shared inputs (`climate/`, `dem/`, `watershed/`, their `.nodb` counterparts, etc.).  Per-scenario state (`disturbed/`, `landuse/`, `soils/`) is copied so each scenario can mutate it without touching the parent.
+- **Writable copies.** Some production runs stamp a `READONLY` file into the project root; the clone explicitly removes it so downstream code can dump `.nodb` files.  Forgetting that step leaves the child project read-only and all subsequent `with locked()` calls explode.
+- **Relinking `.nodb` metadata.** When `.nodb` files are copied, `_omni_clone()` rewrites their JSON payloads to update the `wd` and `_parent_wd` attributes.  Without that rewrite the nodb singletons continue to point at the parent run directory and every subsequent path lookup goes rogue.
+- **Clearing caches and locks.** Both `_omni_clone()` and `_omni_clone_sibling()` call `_clear_nodb_cache_and_locks(runid, pup_relpath)` after swapping files.  This flushes the Redis-backed nodb cache and per-run locks so new workers do not load stale payloads or hang on inherited locks.
+- **Sibling overlays.** `_omni_clone_sibling()` is used for scenarios that depend on another scenario’s disturbed/landuse/soils state (e.g., mulching built on `uniform_low`).  It replaces the cloned directories with copies from the sibling, dumps fresh `.nodb` files, and again clears caches before returning.
+
+When creating your own clone routine, keep those steps in mind: ensure the workspace is writable, update the embedded `wd`, and always clear caches before handing the tree to the next stage of the pipeline.
+
+
+### Running scenarios concurrently – lessons learned
+
+Omni can run scenarios inside a single process (`run_omni_scenarios`) or scatter them across RQ workers (`run_omni_scenarios_rq`).  The latter provides throughput, but introduces a few pain points:
+
+- **Stale singleton state.** Every worker loads its own `Omni` singleton at queue time.  If you mutate `_scenario_dependency_tree` or `_scenario_run_state`, reload the latest `omni.nodb` inside the lock before writing back, otherwise the last writer clobbers previous updates.
+- **Process pools and Rosetta.** Soil preparation is CPU heavy.  We wrap it in a `ProcessPoolExecutor` with retry logic: try spawn first, retry with fork if the pool crashes, then fall back to sequential execution.  This avoids deadlocks when the spawn bootstrap explodes and keeps large projects from failing silently.
+- **Lock contention.** Scenario jobs call `_locked_with_retry()`, which retries for 30 seconds before giving up.  Long-running tasks (soil prep, watershed runs) can exhaust that window.  If you add new critical sections make sure they release quickly or bump the timeout.
+- **Resource cleanup.** Always clear nodb caches and locks when cloning or replacing scenario directories; otherwise a rescheduled job can pick up stale `.nodb` payloads that still point to deleted files and the run will fail mid-stream.
+- **Logging fan-out.** Each pup writes its own `wepp.log`, `landuse.log`, etc.  If you spin up many workers at once, watch disk quotas and rotate logs if necessary.  The logging system falls back to console on errors, so a full disk manifests as missing run output and no dependency updates.
+
+Running concurrently pays off with large watersheds, but the bookkeeping is fragile.  Treat nodb state as shared memory: reload before writing, clear caches when swapping files, and prefer idempotent tasks so a retry won’t corrupt downstream state.
+
+
 #### 4. Objective parameter analysis to idenfity contrast hillslopes
 
 Omni uses the gpkg exports to find hillslopes with high sediment, runoff, lateral flow, ...
