@@ -19,6 +19,7 @@ from subprocess import Popen, PIPE, call
 from concurrent.futures import (
     ThreadPoolExecutor, wait, FIRST_COMPLETED
 )
+from concurrent.futures.process import BrokenProcessPool
 import time
 import inspect
 import pickle
@@ -335,9 +336,10 @@ class TCROpts(object):
 
 def prep_soil(args):
     t0 = time.time()
+    # str,    str,    str,    float,  bool,               float,       bool,       float
     topaz_id, src_fn, dst_fn, kslast, modify_kslast_pars, initial_sat, clip_soils, clip_soils_depth = args
 
-    soilu = WeppSoilUtil(src_fn)
+    soilu = WeppSoilUtil(src_fn)  # internally uses rosetta
     soilu.modify_initial_sat(initial_sat)
 
     if kslast is not None:
@@ -1472,6 +1474,8 @@ class Wepp(NoDbBase):
         if max_workers > max(cpu_count, 20):
             max_workers = max(cpu_count, 20)
 
+        self.logger.info(f'  Using max_workers={max_workers} for soil prep')
+
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
         watershed = Watershed.getInstance(self.wd)
@@ -1485,108 +1489,148 @@ class Wepp(NoDbBase):
         kslast_map_fn = self.kslast_map
         kslast_map = RasterDatasetInterpolator(kslast_map_fn) if kslast_map_fn is not None else None
 
+        task_args_list = []
+        for topaz_id, soil in soils.sub_iter():
+            wepp_id = translator.wepp(top=int(topaz_id))
+            src_fn = _join(soils_dir, soil.fname)
+            dst_fn = _join(runs_dir, f'p{wepp_id}.sol')
+
+            _kslast = None
+            modify_kslast_pars = None
+
+            if kslast_map is not None:
+                lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
+                try:
+                    _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
+                    modify_kslast_pars = dict(map_fn=kslast_map, lng=lng, lat=lat, kslast=_kslast)
+                except RDIOutOfBoundsException:
+                    _kslast = None
+
+                if not isfloat(_kslast):
+                    _kslast = kslast if kslast is not None else None
+                elif _kslast <= 0.0:
+                    _kslast = kslast if kslast is not None else None
+            elif kslast is not None:
+                _kslast = kslast
+
+            task_args_list.append(
+                (
+                    topaz_id,
+                    src_fn,
+                    dst_fn,
+                    _kslast,
+                    modify_kslast_pars,
+                    initial_sat,
+                    clip_soils,
+                    clip_soils_depth,
+                )
+            )
+
+        if not task_args_list:
+            self.logger.info('  No soils require preparation.')
+            return
+
         run_concurrent = 1
+
+        def _run_soil_prep_pool(prefer_spawn: bool):
+            try:
+                with createProcessPoolExecutor(
+                    max_workers=max_workers,
+                    logger=self.logger,
+                    prefer_spawn=prefer_spawn,
+                ) as executor:
+                    futures = [executor.submit(prep_soil, args) for args in task_args_list]
+
+                    futures_n = len(futures)
+                    count = 0
+                    pending_futures = set(futures)
+                    last_progress_time = time.time()
+
+                    while pending_futures:
+                        done, pending_futures = wait(pending_futures, timeout=5, return_when=FIRST_COMPLETED)
+
+                        if not done:
+                            since_progress = time.time() - last_progress_time
+                            pending_count = len(pending_futures)
+
+                            if since_progress >= 60:
+                                self.logger.error(
+                                    '  Soil prep tasks still pending after %.1fs; %s tasks waiting.',
+                                    round(since_progress, 1), pending_count,
+                                )
+                            else:
+                                self.logger.info(
+                                    '  Waiting on soil prep tasks (pending=%s, %.1fs since last completion).',
+                                    pending_count,
+                                    round(since_progress, 1),
+                                )
+                            continue
+
+                        for future in done:
+                            try:
+                                topaz_id, elapsed_time = future.result()
+                                count += 1
+                                self.logger.info(
+                                    f'  ({count}/{futures_n}) Completed soil prep for {topaz_id} in {elapsed_time}s'
+                                )
+                                last_progress_time = time.time()
+                            except BrokenProcessPool as exc:
+                                self.logger.error(
+                                    '  Soil prep process pool terminated unexpectedly: %s', exc
+                                )
+                                for pending_future in pending_futures:
+                                    pending_future.cancel()
+                                return False, exc
+                            except Exception as exc:
+                                self.logger.error(
+                                    f'  A soil prep task failed with an error: {exc}'
+                                )
+                                for pending_future in pending_futures:
+                                    pending_future.cancel()
+                                return False, exc
+
+                    return True, None
+            except BrokenProcessPool as exc:
+                self.logger.error(
+                    '  Failed to initialize soil prep process pool: %s', exc
+                )
+                return False, exc
+            except Exception as exc:
+                self.logger.error(
+                    '  Unexpected error during soil prep pool execution: %s', exc
+                )
+                return False, exc
+
+        def _run_soil_prep_sequential():
+            total = len(task_args_list)
+            self.logger.warning('  Running soil prep sequentially')
+            for idx, task_args in enumerate(task_args_list, start=1):
+                topaz_id, elapsed_time = prep_soil(task_args)
+                self.logger.info(
+                    f'  ({idx}/{total}) Completed soil prep for {topaz_id} in {elapsed_time}s [sequential]'
+                )
 
         self.logger.info(f'  run_concurrent={run_concurrent}')
         if run_concurrent:
-            self.logger.info(f'  Submitting soils for `prep_soil` to ProcessPoolExecutor')
+            self.logger.info('  Submitting soils for `prep_soil` to ProcessPoolExecutor')
+            success, failure_exc = _run_soil_prep_pool(prefer_spawn=True)
 
+            if not success and isinstance(failure_exc, BrokenProcessPool):
+                self.logger.warning(
+                    '  Retrying soil prep with fork-based executor after spawn failure'
+                )
+                success, failure_exc = _run_soil_prep_pool(prefer_spawn=False)
 
-            with createProcessPoolExecutor(max_workers=max_workers, logger=self.logger) as executor:
-                futures = []
-                for topaz_id, soil in soils.sub_iter():
-                    wepp_id = translator.wepp(top=int(topaz_id))
-                    src_fn = _join(soils_dir, soil.fname)
-                    dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
-
-                    _kslast = None
-                    modify_kslast_pars = None
-
-                    if kslast_map is not None:
-                        lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
-                        try:
-                            _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
-                            modify_kslast_pars = dict(map_fn=kslast_map, lng=lng, lat=lat, kslast=_kslast)
-                        except RDIOutOfBoundsException:
-                            _kslast = None
-
-                        if not isfloat(_kslast):
-                            _kslast = kslast if kslast is not None else None
-                        elif _kslast <= 0.0:
-                            _kslast = kslast if kslast is not None else None
-                    elif kslast is not None:
-                        _kslast = kslast
-
-                    task_args = (
-                        topaz_id, src_fn, dst_fn,
-                        _kslast, modify_kslast_pars,
-                        initial_sat,
-                        clip_soils, clip_soils_depth)
-                    
-                    future = executor.submit(prep_soil, task_args)
-                    futures.append(future)
-
-                futures_n = len(futures)
-                count = 0
-                pending_futures = set(futures)
-                last_progress_time = time.time()
-
-                while pending_futures:
-                    done, pending_futures = wait(pending_futures, timeout=5, return_when=FIRST_COMPLETED)
-
-                    if not done:
-                        since_progress = time.time() - last_progress_time
-                        pending_count = len(pending_futures)
-
-                        if since_progress >= 60:
-                            self.logger.error(
-                                '  Soil prep tasks still pending after %.1fs; %s tasks waiting.',
-                                round(since_progress, 1), pending_count)
-                        else:
-                            self.logger.info(
-                                '  Waiting on soil prep tasks (pending=%s, %.1fs since last completion).',
-                                pending_count, round(since_progress, 1))
-                        continue
-
-                    for future in done:
-                        try:
-                            topaz_id, elapsed_time = future.result()
-                            count += 1
-                            self.logger.info(f'  ({count}/{futures_n}) Completed soil prep for {topaz_id} in {elapsed_time}s')
-                            last_progress_time = time.time()
-                        except Exception as e:
-                            self.logger.error(f'  A soil prep task failed with an error: {e}')
+            if not success:
+                if isinstance(failure_exc, BrokenProcessPool):
+                    self.logger.warning(
+                        '  Falling back to sequential soil prep after process pool failures'
+                    )
+                    _run_soil_prep_sequential()
+                else:
+                    raise failure_exc
         else:
-            for topaz_id, soil in soils.sub_iter():
-                wepp_id = translator.wepp(top=int(topaz_id))
-                src_fn = _join(soils_dir, soil.fname)
-                dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
-
-                _kslast = None
-                modify_kslast_pars = None
-
-                if kslast_map is not None:
-                    lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
-                    try:
-                        _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
-                        modify_kslast_pars = dict(map_fn=kslast_map, lng=lng, lat=lat, kslast=_kslast)
-                    except RDIOutOfBoundsException:
-                        _kslast = None
-
-                    if not isfloat(_kslast):
-                        _kslast = kslast if kslast is not None else None
-                    elif _kslast <= 0.0:
-                        _kslast = kslast if kslast is not None else None
-                elif kslast is not None:
-                    _kslast = kslast
-
-                task_args = (
-                    topaz_id, src_fn, dst_fn, 
-                    _kslast, modify_kslast_pars, 
-                    initial_sat, 
-                        clip_soils, clip_soils_depth)
-                topaz_id, elapsed_time = prep_soil(task_args)
-                self.logger.info('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
+            _run_soil_prep_sequential()
 
 
     @nodb_timed
