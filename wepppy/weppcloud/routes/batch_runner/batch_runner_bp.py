@@ -103,8 +103,9 @@ def _create_batch_project(
     base_config: str,    # config means no .cfg extension
     created_by: Optional[str],
     batch_config: str = "default_batch",  # config means no .cfg extension
+    batch_root: Optional[Path] = None,
 ) -> Dict[str, object]:
-    batch_root = get_batch_root_dir()
+    batch_root = batch_root or get_batch_root_dir()
     base_config_cfg = f"{base_config}.cfg"
     config_file = Path(get_config_dir()) / base_config_cfg
     if not config_file.exists():
