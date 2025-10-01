@@ -100,19 +100,10 @@ class BatchRunner(NoDbBase):
         """
         from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
 
-        filepath = os.path.abspath(watershed_collection.filepath)
-        if not os.path.exists(filepath):
-            raise FileNotFoundError(f"GeoJSON file not found: {filepath}")
-        
-        if not os.path.commonpath([self.resources_dir, filepath]) == self.resources_dir:
-            raise ValueError("GeoJSON file must be located in the resources directory.")
-
-        # Validate GeoJSON by attempting to load it
-        watershed_collection = WatershedCollection(filepath)
         analysis_results = watershed_collection.analysis_results   # lazy runs analysis
 
         if analysis_results["feature_count"] == 0:
-            os.remove(filepath)
+            os.remove(watershed_collection.geojson_filepath)
             raise ValueError("GeoJSON contains no features.")
         
         # Update state

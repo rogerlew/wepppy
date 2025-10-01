@@ -250,15 +250,13 @@ def _batch_runner_disabled_response():
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/upload-geojson", methods=["POST"])
 @roles_required("Admin")
+@handle_with_exception_factory
 def upload_geojson(batch_name: str):
     if not _batch_runner_feature_enabled():
         return jsonify(_batch_runner_disabled_response()), 403
 
-    try:
-        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
-    except FileNotFoundError as exc:
-        return jsonify({"success": False, "error": str(exc)}), 404
-
+    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+    
     storage = request.files.get("geojson_file") or request.files.get("file")
     if storage is None:
         return jsonify({"success": False, "error": "No file part named 'geojson_file'."}), 400
@@ -280,11 +278,7 @@ def upload_geojson(batch_name: str):
     resources_dir.mkdir(parents=True, exist_ok=True)
     dest_path = resources_dir / safe_name
     replaced = dest_path.exists()
-
-    try:
-        safe_name.save(dest_path)
-    except Exception:
-        return jsonify({"success": False, "error": str(exc)}), 400
+    storage.save(dest_path)
 
     # initial validation for security
     try:
