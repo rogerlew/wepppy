@@ -14,6 +14,7 @@ from flask_security import current_user
 from .._common import Blueprint, roles_required
 from wepppy.nodb.base import get_configs, get_config_dir
 from wepppy.nodb.batch_runner import BatchRunner
+from wepppy.weppcloud.utils.helpers import get_batch_root_dir
 
 batch_runner_bp = Blueprint(
     "batch_runner",
@@ -27,21 +28,12 @@ def _batch_runner_feature_enabled() -> bool:
     return bool(flag)
 
 
-def _batch_root() -> Path:
-    root = current_app.config.get("BATCH_RUNNER_ROOT")
-    if root:
-        return Path(root)
-    # Default placeholder mirrors production layout but remains configurable.
-    return Path("/wc1/batch")
-
-
-
 def _serialize_manifest(manifest) -> Dict[str, object]:
     return asdict(manifest)
 
 
 def _existing_batches() -> Sequence[str]:
-    root = _batch_root()
+    root = get_batch_root_dir()
     if not root.exists():
         return ()
     return tuple(sorted(p.name for p in root.iterdir() if p.is_dir()))
@@ -51,7 +43,7 @@ def _load_manifest(batch_name: Optional[str]) -> Dict[str, object]:
     if not batch_name:
         return _serialize_manifest(BatchRunner.default_manifest())
 
-    batch_dir = _batch_root() / batch_name
+    batch_dir = get_batch_root_dir() / batch_name
     try:
         runner = BatchRunner.getInstance(str(batch_dir))
     except FileNotFoundError:
@@ -75,7 +67,7 @@ def _build_context(batch_name: Optional[str] = None) -> Dict[str, object]:
         "manifest_payload": manifest_payload,
         "page_title": "WEPPcloud Batch Runner",
         "site_prefix": current_app.config.get("SITE_PREFIX", ""),
-        "batch_root": str(_batch_root()),
+        "batch_root": str(get_batch_root_dir()),
         "available_configs": get_configs(),
         "existing_batches": _existing_batches(),
     }
@@ -83,7 +75,6 @@ def _build_context(batch_name: Optional[str] = None) -> Dict[str, object]:
 
 
 _BATCH_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$")
-
 
 def _validate_batch_name(raw_name: str) -> str:
     name = (raw_name or "").strip()
@@ -113,7 +104,7 @@ def _create_batch_project(
     created_by: Optional[str],
     batch_config: str = "default_batch",  # config means no .cfg extension
 ) -> Dict[str, object]:
-    batch_root = _batch_root()
+    batch_root = get_batch_root_dir()
     base_config_cfg = f"{base_config}.cfg"
     config_file = Path(get_config_dir()) / base_config_cfg
     if not config_file.exists():
@@ -125,10 +116,6 @@ def _create_batch_project(
     if batch_wd.exists():
         raise FileExistsError(f"Batch '{batch_name}' already exists.")
 
-    subdirs = [batch_wd, batch_wd / "resources", batch_wd / "logs"]
-    for directory in subdirs:
-        directory.mkdir(parents=True, exist_ok=False)
-
     # create batch_dir
     batch_wd.mkdir(parents=True, exist_ok=False)
     runner = BatchRunner(
@@ -136,9 +123,7 @@ def _create_batch_project(
         f"batch/{batch_config}.cfg", 
         base_config_cfg)
 
-    subdirs = [batch_wd / "resources", batch_wd / "logs"]
-    for directory in subdirs:
-        directory.mkdir(parents=True, exist_ok=False)
+    (batch_wd / "resources").mkdir(parents=True, exist_ok=False)
 
     timestamp = datetime.now(timezone.utc).isoformat()
     history_entry = {
