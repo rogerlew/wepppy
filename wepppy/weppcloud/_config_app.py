@@ -36,9 +36,6 @@ def config_app(app, logger=None):
     else:
         app.config['BATCH_RUNNER_ENABLED'] = flag_raw.strip().lower() in {'1', 'true', 'yes', 'on'}
 
-    if 'BATCH_RUNNER_ROOT' not in app.config:
-        app.config['BATCH_RUNNER_ROOT'] = os.getenv('BATCH_RUNNER_ROOT', '/wc1/batch')
-
     if 'BATCH_GEOJSON_MAX_MB' not in app.config:
         raw_limit = os.getenv('BATCH_GEOJSON_MAX_MB')
         try:

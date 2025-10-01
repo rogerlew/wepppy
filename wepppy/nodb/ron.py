@@ -362,7 +362,7 @@ class Ron(NoDbBase):
             wepppy.nodb.Unitizer(wd, cfg_fn, run_group=run_group, group_name=group_name)
             wepppy.nodb.WeppPost(wd, cfg_fn, run_group=run_group, group_name=group_name)
             wepppy.nodb.Observed(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            prep = wepppy.nodb.RedisPrep(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            prep = wepppy.nodb.RedisPrep(wd, cfg_fn)
             prep.timestamp(TaskEnum.project_init)
 
             # Initialize mods
