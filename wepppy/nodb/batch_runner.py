@@ -8,6 +8,8 @@ implementing orchestration logic.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+import os
+import shutil
 from typing import Any, Dict, List, Optional
 
 from .base import NoDbBase
@@ -42,11 +44,32 @@ class BatchRunner(NoDbBase):
     __name__ = "BatchRunner"
     filename = "batch_runner.nodb"
 
-    def __init__(self, wd: str, cfg_fn: Optional[str] = None):
-        super().__init__(wd, cfg_fn)
+    def __init__(self, wd: str, 
+                 batch_config: str,
+                 base_config: str):
+        super().__init__(wd, batch_config)
         with self.locked():
             if not hasattr(self, "_manifest") or self._manifest is None:
                 self._manifest = BatchRunnerManifest()
+            self._base_config = base_config
+        self._init_base_project()
+
+    def _init_base_project(self) -> None:
+        from wepppy.nodb.ron import Ron
+        if os.path.exists(self._base_wd):
+            shutil.rmtree(self._base_wd)
+        os.makedirs(self._base_wd)
+        Ron(self._base_wd, self.base_config)
+
+    @property
+    def _base_wd(self) -> str:
+        """Return the base working directory."""
+        return os.path.join(self.wd, "_base")
+
+    @property
+    def base_config(self) -> str:
+        """Return the base config for create _base"""
+        return self._base_config
 
     @property
     def manifest(self) -> BatchRunnerManifest:

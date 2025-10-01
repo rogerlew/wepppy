@@ -3,25 +3,90 @@
 {% block content %}
 <section class="mb-4">
     <h1 class="h3">Create Batch Runs</h1>
-    <p class="text-muted">Phase 0 scaffolding – final workflows will land in later phases.</p>
+    <p class="text-muted">Phase 1 scaffolding - populate a batch workspace and continue setup on the manage page.</p>
 </section>
 
 {% if not feature_enabled %}
 <div class="alert alert-warning" role="alert">
     Batch Runner is currently disabled. Set <code>BATCH_RUNNER_ENABLED=1</code> in the deployment configuration
-    to enable the feature once the implementation is complete.
+    to enable the feature once implementation is complete.
 </div>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+{% if errors %}
+<div class="alert alert-danger" role="alert">
+    <ul class="mb-0">
+        {% for message in errors %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<section class="card mb-4">
+    <div class="card-body">
+        <h2 class="h5">Batch Details</h2>
+        <p>Provide a unique batch name and select the configuration blueprint for the `_base` project.</p>
+        <form method="post" novalidate>
+            <div class="mb-3">
+                <label class="form-label" for="batch_name">Batch Name</label>
+                <input type="text" class="form-control" id="batch_name" name="batch_name" placeholder="e.g. forest_fires_2025"
+                       value="{{ form_state.batch_name }}" {% if not feature_enabled %}disabled{% endif %}>
+                <div class="form-text">3+ characters, letters/numbers/underscores/hyphens only.</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="base_config">Configuration for `_base` project</label>
+                <select class="form-select" id="base_config" name="base_config" {% if not feature_enabled or not available_configs %}disabled{% endif %}>
+                    {% if available_configs %}
+                        {% for cfg in available_configs %}
+                            <option value="{{ cfg }}" {% if cfg == form_state.config %}selected{% endif %}>{{ cfg }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="" selected disabled>No batch configurations available</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" {% if not feature_enabled or not available_configs %}disabled{% endif %}>Create Batch</button>
+        </form>
+    </div>
+</section>
+
+{% if existing_batches %}
+<section class="card mb-4">
+    <div class="card-body">
+        <h2 class="h5">Existing Batches</h2>
+        <p class="text-muted">Select a batch to continue setup.</p>
+        <ul class="list-group">
+            {% for name in existing_batches %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ name }}</span>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('batch_runner.view_batch', batch_name=name) }}">Manage</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
 {% endif %}
 
 <section id="batch-runner-root" class="card">
     <div class="card-body">
         <h2 class="h5">Status</h2>
-        <p class="mb-3">This page hosts the forthcoming Batch Runner control. For now it simply confirms wiring and feature-flag behaviour.</p>
+        <p class="mb-3">Bootstrap payload mirrors the manage page to verify manifest wiring before control integration.</p>
         <dl class="row">
             <dt class="col-sm-3">Feature Enabled</dt>
             <dd class="col-sm-9"><span data-role="enabled-flag">{{ feature_enabled }}</span></dd>
             <dt class="col-sm-3">Batch Name</dt>
-            <dd class="col-sm-9"><span data-role="batch-name">{{ batch_name or '—' }}</span></dd>
+            <dd class="col-sm-9"><span data-role="batch-name">{{ batch_name or form_state.batch_name or '—' }}</span></dd>
         </dl>
         <details class="mt-3">
             <summary>Bootstrap Manifest</summary>
@@ -32,20 +97,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    window.batchRunnerBootstrap = {
-        enabled: {{ feature_enabled | tojson }},
-        batchName: {{ batch_name | tojson }},
-        manifest: {{ manifest_payload | tojson }}
-    };
-
-    document.addEventListener('DOMContentLoaded', function () {
-        if (typeof window.BatchRunner === 'undefined' || typeof window.BatchRunner.getInstance !== 'function') {
-            console.warn('BatchRunner control is not yet available.');
-            return;
-        }
-        var control = window.BatchRunner.getInstance();
-        control.init(window.batchRunnerBootstrap);
-    });
-</script>
+{% include "create_page_bootstrap.js.j2" %}
 {% endblock %}
