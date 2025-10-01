@@ -447,8 +447,8 @@ class Omni(NoDbBase):
 
     filename = 'omni.nodb'
 
-    def __init__(self, wd, cfg_fn='0.cfg'):
-        super(Omni, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn='0.cfg', run_group=None, group_name=None):
+        super(Omni, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             if not _exists(self.omni_dir):

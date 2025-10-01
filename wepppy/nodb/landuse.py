@@ -88,8 +88,8 @@ class Landuse(NoDbBase):
 
     filename = 'landuse.nodb'
     
-    def __init__(self, wd, cfg_fn):
-        super(Landuse, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(Landuse, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             self._mode = LanduseMode.Gridded

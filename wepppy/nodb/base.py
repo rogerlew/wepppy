@@ -303,8 +303,15 @@ class NoDbBase(object):
 
     filename: ClassVar[str] = None # just the basename
 
-    def __init__(self, wd, cfg_fn):
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
         assert _exists(wd)
+
+        if run_group is not None:
+            self._run_group = run_group
+
+        if group_name is not None:
+            self._group_name = group_name
+
         self.wd = wd
         self._config = cfg_fn
         self._load_mods()
@@ -913,12 +920,36 @@ class NoDbBase(object):
         redis_lock_client.hset(self.runid, self._file_lock_key, 'false')
 
     @property
+    def run_group(self):  # e.g. batch
+        return getattr(self, '_run_group', None)
+    
+    @run_group.setter
+    @nodb_setter
+    def run_group(self, value: str):
+        self._run_group = value
+
+    @property
+    def group_name(self):  # e.g. my_batch_01
+        return getattr(self, '_group_name', None)
+    
+    @group_name.setter
+    @nodb_setter
+    def group_name(self, value: str):
+        self._group_name = value
+
+    @property
     def runid(self):
+        group_prefix = ''
+        if self.run_group is not None:
+            if self.group_name is None:
+                raise ValueError('run_group is set but group_name is None')
+            group_prefix = f'{self.run_group};;{self.group_name};;'
+
         wd = self.wd
         split_wd = wd.split(os.sep)
         if '_pups' in split_wd:
-            return split_wd[split_wd.index('_pups') -1]
-        return split_wd[-1]
+            return group_prefix + split_wd[split_wd.index('_pups') -1]
+        return group_prefix + split_wd[-1]
 
     @property
     def multi_ofe(self):

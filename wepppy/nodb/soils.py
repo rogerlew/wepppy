@@ -92,8 +92,8 @@ class Soils(NoDbBase):
 
     filename = 'soils.nodb'
     
-    def __init__(self, wd, cfg_fn):
-        super(Soils, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(Soils, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             self._mode = SoilsMode.Gridded

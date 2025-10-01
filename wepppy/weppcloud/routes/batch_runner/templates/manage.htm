@@ -98,11 +98,9 @@
     </style>
 
     <div class="project-layout">
-        <aside class="project-layout__toc">
-            {% include 'batch_runner.htm' %}
-        </aside>
-
         <main class="project-layout__content">
+            {% include 'batch_runner.htm' %}
+            
             {% include 'controls/map.htm'%}
             {% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
             {% if 'lt' not in ron.mods %}

@@ -56,8 +56,8 @@ class Rhem(NoDbBase):
 
     filename = 'rhem.nodb'
 
-    def __init__(self, wd, cfg_fn):
-        super(Rhem, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(Rhem, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             rhem_dir = self.rhem_dir

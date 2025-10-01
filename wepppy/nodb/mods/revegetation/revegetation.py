@@ -65,8 +65,8 @@ class Revegetation(NoDbBase):
 
     filename = 'revegetation.nodb'  
 
-    def __init__(self, wd, cfg_fn):
-        super(Revegetation, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(Revegetation, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             self.clean()

@@ -43,7 +43,8 @@ def _validate_pup_root(run_root: Path, pup_relpath: str) -> Path:
 
 
 def load_run_context(runid: str, config: str) -> RunContext:
-    """Resolve the working directories for the given run route.
+    """
+    Resolve the working directories for the given run route.
 
     Stores the ``RunContext`` on ``flask.g`` so downstream helpers can reuse it.
     """

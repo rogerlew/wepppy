@@ -295,9 +295,9 @@ class Unitizer(NoDbBase):
 
     filename = 'unitizer.nodb'
     
-    def __init__(self, wd, cfg_fn):
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
         global precisions
-        super(Unitizer, self).__init__(wd, cfg_fn)
+        super(Unitizer, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
         is_english = self.config_get_bool('unitizer', 'is_english')
 
         with self.locked():

@@ -77,20 +77,12 @@ def query_baer_wgs_bounds(runid, config):
                                 imgurl='resources/baer.png'))
 
 
-@disturbed_bp.route('/batch/<string:batch_name>/<config>/view/modify_burn_class')
-@handle_with_exception_factory
-def batch_query_baer_class_map(batch_name, config):
-    wd = get_batch_base_wd(batch_name)
-    return _query_baer_class_map(wd)
-
 @disturbed_bp.route('/runs/<string:runid>/<config>/view/modify_burn_class')
 @authorize_and_handle_with_exception_factory
 def query_baer_class_map(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    return _query_baer_class_map(wd)
-
-def _query_baer_class_map(wd):
+    
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
         baer = Baer.getInstance(wd)
@@ -103,19 +95,12 @@ def _query_baer_class_map(wd):
     return render_template('mods/baer/classify.htm', baer=baer)
 
 
-@disturbed_bp.route('/batch/<string:batch_name>/<config>/tasks/modify_burn_class', methods=['POST'])
-@handle_with_exception_factory
-def batch_task_baer_class_map(batch_name, config):
-    wd = get_batch_base_wd(batch_name)
-    return _task_baer_class_map(wd)
-
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/modify_burn_class', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_baer_class_map(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
 
-def _task_baer_class_map(wd):
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
         baer = Baer.getInstance(wd)
@@ -132,19 +117,11 @@ def _task_baer_class_map(wd):
     return success_factory()
 
 
-@disturbed_bp.route('/batch/<string:batch_name>/<config>/tasks/modify_color_map', methods=['POST'])
-@handle_with_exception_factory
-def batch_task_baer_modify_color_map(batch_name, config):
-    wd = get_batch_base_wd(batch_name)
-    return _task_baer_modify_color_map(wd)
-
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/modify_color_map', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_baer_modify_color_map(runid, config):
     ctx = load_run_context(runid, config)
-    wd = str(ctx.active_root)
-
-def _task_baer_modify_color_map(wd):
+    w
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
         baer = Baer.getInstance(wd)
@@ -193,19 +170,11 @@ def set_firedate(runid, config):
         return exception_factory("failed to set firedate", runid=runid)
 
 
-@disturbed_bp.route('/batch/<string:batch_name>/<config>/tasks/upload_sbs/', methods=['POST'])
-def batch_task_upload_sbs_batch(batch_name, config):
-    wd = get_batch_base_wd(batch_name)
-    return _task_upload_sbs(f'{batch_name}-_base', wd)
-
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/upload_sbs/', methods=['POST'])
 def task_upload_sbs(runid, config):
+    from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    return _task_upload_sbs(runid, wd)
-
-def _task_upload_sbs(runid, wd):
-    from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
 
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
@@ -224,21 +193,12 @@ def _task_upload_sbs(runid, wd):
     return success_factory(res)
 
 
-@disturbed_bp.route('/batch/<string:batch_name>/<config>/tasks/upload_cover_transform', methods=['POST'])
-@handle_with_exception_factory
-def batch_task_upload_cover_transform(batch_name, config):
-    wd = get_batch_base_wd(batch_name)
-    _task_upload_cover_transform(wd)
-
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/upload_cover_transform', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_upload_cover_transform(runid, config):
+    from wepppy.nodb.mods.revegetation import Revegetation
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    _task_upload_cover_transform(wd)
-
-def _task_upload_cover_transform(wd):
-    from wepppy.nodb.mods.revegetation import Revegetation
     reveg = Revegetation.getInstance(wd)
     file = request.files['input_upload_cover_transform']
     filename = secure_filename(file.filename)
@@ -247,20 +207,11 @@ def _task_upload_cover_transform(wd):
     return success_factory(res)
 
 
-@disturbed_bp.route('/runs/<string:batch_name>/<config>/tasks/remove_sbs', methods=['POST'])
-@handle_with_exception_factory
-def batch_task_remove_sbs(batch_name, config):
-    wd = get_batch_base_wd(batch_name)
-    return _task_remove_sbs(wd)
-
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/remove_sbs', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_remove_sbs(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    return _task_remove_sbs(wd)
-
-def _task_remove_sbs(wd):
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
         baer = Baer.getInstance(wd)
@@ -271,20 +222,11 @@ def _task_remove_sbs(wd):
     return success_factory()
 
 
-@disturbed_bp.route('/batch/<string:batch_name>/<config>/tasks/build_uniform_sbs/<value>', methods=['POST'])
-@authorize_and_handle_with_exception_factory
-def batch_task_build_uniform_sbs(batch_name, config, value):
-    wd = get_batch_base_wd(batch_name)
-    return _task_build_uniform_sbs(wd, value)
-
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/build_uniform_sbs/<value>', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_build_uniform_sbs(runid, config, value):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    return _task_build_uniform_sbs(wd, value)
-
-def _task_build_uniform_sbs(wd, value):
     disturbed = Disturbed.getInstance(wd)
     sbs_fn = disturbed.build_uniform_sbs(int(value))
     res = disturbed.validate(sbs_fn)

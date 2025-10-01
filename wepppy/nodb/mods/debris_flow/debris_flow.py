@@ -56,8 +56,8 @@ class DebrisFlow(NoDbBase):
 
     filename = 'debris_flow.nodb'
 
-    def __init__(self, wd, cfg_fn):
-        super(DebrisFlow, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(DebrisFlow, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             # config = self.config
