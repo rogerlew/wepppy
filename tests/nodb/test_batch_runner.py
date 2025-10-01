@@ -17,12 +17,14 @@ def test_manifest_defaults_are_sane():
     assert manifest.selected_tasks == []
     assert manifest.runs == {}
     assert manifest.history == []
+    assert manifest.base_config is None
+    assert manifest.batch_config is None
 
 
 def test_batch_runner_initialises_manifest(tmp_path: Path):
     wd = tmp_path / "batch" / "example"
     wd.mkdir(parents=True)
-    
+
     wd = str(wd)
     BatchRunner(wd, "batch/default_batch.cfg", "disturbed9002_wbt.cfg")
     runner = BatchRunner.getInstance(wd)
@@ -31,6 +33,9 @@ def test_batch_runner_initialises_manifest(tmp_path: Path):
     manifest = runner.manifest
     assert manifest.batch_name is None
     assert manifest.version == 1
+    assert manifest.base_config == "disturbed9002_wbt"
+    assert manifest.batch_config == "default_batch"
+    assert manifest.config == "disturbed9002_wbt"
 
     # Updates should set known attributes and tuck unknowns into metadata
     runner.update_manifest(batch_name="demo", foo="bar")
@@ -41,6 +46,8 @@ def test_batch_runner_initialises_manifest(tmp_path: Path):
     runner.reset_manifest()
     assert runner.manifest.batch_name is None
     assert runner.manifest.metadata == {}
+    assert runner.manifest.base_config == "disturbed9002_wbt"
+    assert runner.manifest.batch_config == "default_batch"
 
 
 def test_validate_batch_name_rules():
@@ -78,6 +85,8 @@ def test_initialize_batch_project_scaffolds_directories(tmp_path: Path):
     manifest = result["manifest"]
     assert manifest["batch_name"] == "demo_batch"
     assert manifest["base_config"].endswith("disturbed9002_wbt")
+    assert manifest["config"] == "disturbed9002_wbt"
+    assert manifest["batch_config"] == "default_batch"
     assert manifest["created_by"] == "tester@example.com"
     assert manifest["history"][0]["event"] == "created"
 

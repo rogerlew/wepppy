@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 import os
 import shutil
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .base import NoDbBase
@@ -22,6 +23,8 @@ class BatchRunnerManifest:
     version: int = 1
     batch_name: Optional[str] = None
     config: Optional[str] = None
+    batch_config: Optional[str] = None
+    base_config: Optional[str] = None
     created_at: Optional[str] = None
     created_by: Optional[str] = None
     runid_template: Optional[str] = None
@@ -44,7 +47,7 @@ class BatchRunner(NoDbBase):
     __name__ = "BatchRunner"
     filename = "batch_runner.nodb"
 
-    def __init__(self, wd: str, 
+    def __init__(self, wd: str,
                  batch_config: str,
                  base_config: str):
         super().__init__(wd, batch_config)
@@ -52,6 +55,7 @@ class BatchRunner(NoDbBase):
             if not hasattr(self, "_manifest") or self._manifest is None:
                 self._manifest = BatchRunnerManifest()
             self._base_config = base_config
+            self._manifest = self._apply_config_defaults(self._manifest)
 
         self._init_base_project()
 
@@ -100,7 +104,7 @@ class BatchRunner(NoDbBase):
     def reset_manifest(self) -> BatchRunnerManifest:
         """Reset the manifest back to default values."""
         with self.locked():
-            self._manifest = BatchRunnerManifest()
+            self._manifest = self._apply_config_defaults(BatchRunnerManifest())
             return self._manifest
 
     def update_manifest(self, **updates: Any) -> BatchRunnerManifest:
@@ -120,6 +124,36 @@ class BatchRunner(NoDbBase):
     def default_manifest(cls) -> BatchRunnerManifest:
         """Convenience helper for creating a detached default manifest."""
         return BatchRunnerManifest()
+
+    @classmethod
+    def _post_instance_loaded(cls, instance: "BatchRunner") -> "BatchRunner":
+        """Backfill config identifiers when decoding persisted manifests."""
+        instance._manifest = instance._apply_config_defaults(instance._manifest)
+        return instance
+
+    @staticmethod
+    def _normalize_config_name(config: str) -> Optional[str]:
+        """Return a stemmed config name, keeping None intact."""
+        if not config:
+            return None
+        stem = Path(config).stem
+        return stem
+
+    def _apply_config_defaults(self, manifest: BatchRunnerManifest) -> BatchRunnerManifest:
+        """Ensure manifest carries canonical configuration identifiers."""
+        base_config_name = self._normalize_config_name(self._base_config)
+        batch_config_name = self._normalize_config_name(getattr(self, "_config", None))
+
+        if manifest.base_config is None:
+            manifest.base_config = base_config_name
+
+        if manifest.config is None:
+            manifest.config = base_config_name
+
+        if manifest.batch_config is None:
+            manifest.batch_config = batch_config_name
+
+        return manifest
 
 
 __all__ = ["BatchRunner", "BatchRunnerManifest"]
