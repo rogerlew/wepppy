@@ -24,7 +24,7 @@ def test_batch_runner_initialises_manifest(tmp_path: Path):
     wd.mkdir(parents=True)
     
     wd = str(wd)
-    BatchRunner(wd, "batch/default_batch.cfg")
+    BatchRunner(wd, "batch/default_batch.cfg", "disturbed9002_wbt.cfg")
     runner = BatchRunner.getInstance(wd)
 
     # Manifest should be created with default values
@@ -58,63 +58,59 @@ def test_validate_batch_name_rules():
 
 def test_initialize_batch_project_scaffolds_directories(tmp_path: Path):
     batch_root = tmp_path / "batch"
-    config_root = Path(__file__).resolve().parents[2] / "wepppy" / "nodb" / "configs" / "batch"
 
     result = _create_batch_project(
-        "demo_batch",
-        "default_batch.cfg",
+        batch_name="demo_batch",
+        base_config="disturbed9002_wbt",
         created_by="tester@example.com",
+        batch_config="default_batch",
         batch_root=batch_root,
-        config_root=config_root,
     )
 
     batch_dir = batch_root / "demo_batch"
     assert batch_dir.exists()
     assert (batch_dir / "_base").is_dir()
     assert (batch_dir / "resources").is_dir()
-    assert (batch_dir / "logs").is_dir()
 
     manifest_path = batch_dir / "batch_runner.nodb"
     assert manifest_path.exists()
 
     manifest = result["manifest"]
     assert manifest["batch_name"] == "demo_batch"
-    assert manifest["config"].endswith("default_batch.cfg")
+    assert manifest["base_config"].endswith("disturbed9002_wbt")
     assert manifest["created_by"] == "tester@example.com"
     assert manifest["history"][0]["event"] == "created"
 
 
 def test_initialize_batch_project_duplicate(tmp_path: Path):
     batch_root = tmp_path / "batch"
-    config_root = Path(__file__).resolve().parents[2] / "wepppy" / "nodb" / "configs" / "batch"
 
     _create_batch_project(
-        "duplicate",
-        "default_batch.cfg",
-        created_by=None,
+        batch_name="duplicate",
+        base_config="disturbed9002_wbt",
+        created_by="tester@example.com",
+        batch_config="default_batch",
         batch_root=batch_root,
-        config_root=config_root,
     )
 
     with pytest.raises(FileExistsError):
         _create_batch_project(
-            "duplicate",
-            "default_batch.cfg",
-            created_by=None,
+            batch_name="duplicate",
+            base_config="disturbed9002_wbt",
+            created_by="tester@example.com",
+            batch_config="default_batch",
             batch_root=batch_root,
-            config_root=config_root,
         )
 
 
 def test_initialize_batch_project_missing_config(tmp_path: Path):
     batch_root = tmp_path / "batch"
-    config_root = Path(__file__).resolve().parents[2] / "wepppy" / "nodb" / "configs" / "batch"
 
     with pytest.raises(FileNotFoundError):
         _create_batch_project(
-            "demo_missing_config",
-            "not_real.cfg",
-            created_by=None,
+            batch_name="missing_config",
+            base_config="not_real_config",
+            created_by="tester@example.com",
+            batch_config="default_batch",
             batch_root=batch_root,
-            config_root=config_root,
         )
