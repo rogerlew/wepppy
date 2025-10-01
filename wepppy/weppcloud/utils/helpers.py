@@ -70,17 +70,24 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
         except redis.exceptions.ConnectionError as e:
             print(f"Warning: Redis connection error during GET. Falling back to filesystem. Error: {e}")
 
-    # 2. If not in cache or Redis is down, determine path from the filesystem
-    # Check the primary, non-prefixed location first
-    path = _join('/geodata/weppcloud_runs', runid)
 
-    # If not found, fall back to the prefixed, partitioned locations
-    if not _exists(path):
-        prefix = runid[:2]
-        if _hostname.startswith('forest'):
-            path = _join('/wc1/runs', prefix, runid)
+    if ';;' in runid:
+        _group, _name, _runid = runid.split(';;')
+        if _group == 'batch':
+            path = get_batch_run_wd(_name, _runid)
         else:
-            path = _join('/geodata/wc1/runs', prefix, runid)
+            raise ValueError(f'Unknown group prefix: {_group}')
+    else:
+        # Check the primary, non-prefixed location first
+        path = _join('/geodata/weppcloud_runs', runid)
+
+        # If not found, fall back to the prefixed, partitioned locations
+        if not _exists(path):
+            prefix = runid[:2]
+            if _hostname.startswith('forest'):
+                path = _join('/wc1/runs', prefix, runid)
+            else:
+                path = _join('/geodata/wc1/runs', prefix, runid)
 
     if context_override:
         path = context_override
@@ -100,8 +107,10 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 def get_batch_wd(batch_name: str) -> str:
     return _join(get_batch_root_dir(), batch_name)
 
+
 def get_batch_base_wd(batch_name: str) -> str:
     return _join(get_batch_root_dir(), batch_name, '_base')
+
 
 def get_batch_root_dir() -> Path:
     root = current_app.config.get("BATCH_RUNNER_ROOT")
@@ -109,6 +118,15 @@ def get_batch_root_dir() -> Path:
         return Path(root)
     # Default placeholder mirrors production layout but remains configurable.
     return "/wc1/batch"
+
+
+def get_batch_run_wd(batch_name: str, runid: str) -> str:
+    batch_wd = get_batch_wd(batch_name)
+
+    if runid == '_base':
+        return _join(batch_wd, '_base')
+    else:
+        return _join(batch_wd, 'runs', runid)
 
 
 def url_for_run(endpoint: str, **values) -> str:

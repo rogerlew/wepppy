@@ -299,13 +299,13 @@ class Ron(NoDbBase):
                    '_boundary')
 
     filename = 'ron.nodb'
-    
-    def __init__(self, wd, cfg_fn='0.cfg'):
+
+    def __init__(self, wd, cfg_fn='0.cfg', run_group=None, group_name=None):
         import wepppy
         from wepppy.nodb.base import iter_nodb_mods_subclasses
         from wepppy.nodb.watershed import DelineationBackend
 
-        super(Ron, self).__init__(wd, cfg_fn)
+        super(Ron, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             self._configname = self.config_get_str('general', 'name')
@@ -351,18 +351,18 @@ class Ron(NoDbBase):
 
             # gotcha: need to import the nodb submodules
             # through wepppy to avoid circular references
-            watershed = wepppy.nodb.Watershed(wd, cfg_fn)
+            watershed = wepppy.nodb.Watershed(wd, cfg_fn, run_group=run_group, group_name=group_name)
             if watershed.delineation_backend == DelineationBackend.TOPAZ:
-                wepppy.nodb.Topaz(wd, cfg_fn)
+                wepppy.nodb.Topaz(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
-            wepppy.nodb.Landuse(wd, cfg_fn)
-            wepppy.nodb.Soils(wd, cfg_fn)
-            wepppy.nodb.Climate(wd, cfg_fn)
-            wepppy.nodb.Wepp(wd, cfg_fn)
-            wepppy.nodb.Unitizer(wd, cfg_fn)
-            wepppy.nodb.WeppPost(wd, cfg_fn)
-            wepppy.nodb.Observed(wd, cfg_fn)
-            prep = wepppy.nodb.RedisPrep(wd, cfg_fn)
+            wepppy.nodb.Landuse(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            wepppy.nodb.Soils(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            wepppy.nodb.Climate(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            wepppy.nodb.Wepp(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            wepppy.nodb.Unitizer(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            wepppy.nodb.WeppPost(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            wepppy.nodb.Observed(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            prep = wepppy.nodb.RedisPrep(wd, cfg_fn, run_group=run_group, group_name=group_name)
             prep.timestamp(TaskEnum.project_init)
 
             # Initialize mods
@@ -371,7 +371,7 @@ class Ron(NoDbBase):
             for mod in self.mods:
                 if mod not in mods_registry:
                     raise Exception(f'unknown mod {mod}')
-                mod_instance = mods_registry[mod](wd, cfg_fn)
+                mod_instance = mods_registry[mod](wd, cfg_fn, run_group=run_group, group_name=group_name)
 
                 if mod in ['baer', 'disturbed']:
                     if mod == 'baer':

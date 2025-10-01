@@ -379,8 +379,8 @@ class Wepp(NoDbBase):
 
     filename = 'wepp.nodb'
     
-    def __init__(self, wd, cfg_fn):
-        super(Wepp, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(Wepp, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             wepp_dir = self.wepp_dir

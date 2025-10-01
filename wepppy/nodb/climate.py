@@ -625,8 +625,8 @@ class Climate(NoDbBase):
 
     filename = 'climate.nodb'
     
-    def __init__(self, wd, cfg_fn):
-        super(Climate, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(Climate, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             self._input_years = 100
@@ -1073,9 +1073,9 @@ class Climate(NoDbBase):
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
             station_manager = CligenStationsManager(version=self.cligen_db)
-            results = station_manager\
-                .get_closest_stations((lng, lat), num_stations)
+            results = station_manager.get_closest_stations((lng, lat), num_stations)
             self._closest_stations = results
+            self._climatestation_mode = ClimateStationMode.Closest
 
             self._climatestation = results[0].id
             return self.closest_stations
@@ -1402,8 +1402,8 @@ class Climate(NoDbBase):
             raise WatershedNotAbstractedError()
 
         if self.climatestation is None and self.orig_cli_fn is None:
-            self.logger.info('  no climate station selected, raising error')
-            raise NoClimateStationSelectedError()
+            self.logger.info('  no climate station selected, assigning closest station')
+            self.find_closest_stations()
 
         cli_dir = self.cli_dir
         if _exists(cli_dir):

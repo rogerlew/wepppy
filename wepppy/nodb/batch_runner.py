@@ -27,8 +27,8 @@ class BatchRunner(NoDbBase):
     __name__ = "BatchRunner"
     filename = "batch_runner.nodb"
 
-    def __init__(self, wd: str, batch_config: str, base_config: str):
-        super().__init__(wd, batch_config)
+    def __init__(self, wd: str, batch_config: str, base_config: str, run_group: str | None = None, group_name: str | None = None):
+        super().__init__(wd, batch_config, run_group=run_group, group_name=group_name)
         with self.locked():
             self._base_config = base_config
             self._geojson_state = None
@@ -87,7 +87,8 @@ class BatchRunner(NoDbBase):
         if os.path.exists(self._base_wd):
             shutil.rmtree(self._base_wd)
         os.makedirs(self._base_wd)
-        Ron(self._base_wd, self._base_config)
+        Ron(self._base_wd, self._base_config, run_group='batch', batch_name=self.batch_name)
+
 
     # ------------------------------------------------------------------
     # Watershed GeoJSON

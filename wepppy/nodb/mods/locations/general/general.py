@@ -36,8 +36,8 @@ class GeneralMod(NoDbBase, LocationMixin):
     __name__ = 'General'
     filename = 'general.nodb'
 
-    def __init__(self, wd, cfg_fn):
-        super(GeneralMod, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(GeneralMod, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             self._lc_lookup_fn = self.config_get_path('nodb', 'lc_lookup_fn', 'landSoilLookup.csv')

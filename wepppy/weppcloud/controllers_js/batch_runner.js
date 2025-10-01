@@ -70,10 +70,17 @@ var BatchRunner = (function () {
         that._bindEvents = function () {
             var self = this;
             if (this.uploadForm.length) {
-                this.uploadForm.on('submit', function (evt) {
-                    evt.preventDefault();
-                    self._handleUpload();
-                });
+                if (this.uploadForm.is('form')) {
+                    this.uploadForm.on('submit', function (evt) {
+                        evt.preventDefault();
+                        self._handleUpload();
+                    });
+                } else if (this.uploadButton.length) {
+                    this.uploadButton.on('click', function (evt) {
+                        evt.preventDefault();
+                        self._handleUpload();
+                    });
+                }
             }
             if (this.validateButton.length) {
                 this.validateButton.on('click', function (evt) {

@@ -118,8 +118,8 @@ class Shrubland(NoDbBase):
 
     filename = 'shrubland.nodb'
 
-    def __init__(self, wd, cfg_fn):
-        super(Shrubland, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(Shrubland, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             os.mkdir(self.shrubland_dir)

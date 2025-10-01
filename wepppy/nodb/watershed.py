@@ -126,8 +126,8 @@ class Watershed(NoDbBase):
 
     filename = 'watershed.nodb'
     
-    def __init__(self, wd, cfg_fn):
-        super(Watershed, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(Watershed, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             self._subs_summary = None  # deprecated watershed/hillslopes.csv

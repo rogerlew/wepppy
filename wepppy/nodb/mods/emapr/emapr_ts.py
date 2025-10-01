@@ -39,8 +39,8 @@ class OSUeMapR_TS(NoDbBase):
     __name__ = 'OSUeMapR_TS'
     filename = 'emapr_ts.nodb'
 
-    def __init__(self, wd, cfg_fn):
-        super(OSUeMapR_TS, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(OSUeMapR_TS, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             os.mkdir(self.emapr_dir)

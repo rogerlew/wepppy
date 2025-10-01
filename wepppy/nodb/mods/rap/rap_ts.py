@@ -56,8 +56,8 @@ class RAP_TS(NoDbBase):
 
     filename = 'rap_ts.nodb'
     
-    def __init__(self, wd, cfg_fn):
-        super(RAP_TS, self).__init__(wd, cfg_fn)
+    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        super(RAP_TS, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             os.mkdir(self.rap_dir)
