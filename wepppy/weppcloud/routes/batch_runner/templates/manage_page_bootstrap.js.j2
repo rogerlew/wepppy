@@ -1,0 +1,23 @@
+<!-- wepppy/weppcloud/routes/batch_runner/templates/manage_page_bootstrap.js.j2 -->
+<script>
+"use strict";
+
+window.batchRunnerBootstrap = {
+    enabled: {{ feature_enabled | tojson }},
+    batchName: {{ batch_name | tojson }},
+    manifest: {{ manifest_payload | tojson }}
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof window.BatchRunner === 'undefined' || typeof window.BatchRunner.getInstance !== 'function') {
+        console.warn('BatchRunner control is not yet available.');
+        return;
+    }
+    var control = window.BatchRunner.getInstance();
+    if (typeof control.initManage === 'function') {
+        control.initManage(window.batchRunnerBootstrap);
+    } else if (typeof control.init === 'function') {
+        control.init(window.batchRunnerBootstrap);
+    }
+});
+</script>

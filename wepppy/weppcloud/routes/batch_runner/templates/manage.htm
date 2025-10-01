@@ -2,8 +2,8 @@
 
 {% block content %}
 <section class="mb-4">
-    <h1 class="h3">Batch: {{ batch_name }}</h1>
-    <p class="text-muted">Phase 0 preview – manifest editing and orchestration will arrive in later phases.</p>
+    <h1 class="h3">Manage Batch Run</h1>
+    <p class="text-muted">Phase 0 scaffolding - full manifest controls will land in upcoming phases.</p>
 </section>
 
 {% if not feature_enabled %}
@@ -14,18 +14,18 @@
 
 <section id="batch-runner-root" class="card">
     <div class="card-body">
-        <h2 class="h5">Manifest Overview</h2>
-        <p>This view confirms that routing, manifest scaffolding, and client bootstrap data are wired correctly.</p>
+        <h2 class="h5">Status</h2>
+        <p class="mb-3">This view mirrors the creation page wiring and confirms that feature flags and manifest data are flowing correctly.</p>
         <dl class="row">
             <dt class="col-sm-3">Feature Enabled</dt>
             <dd class="col-sm-9"><span data-role="enabled-flag">{{ feature_enabled }}</span></dd>
+            <dt class="col-sm-3">Batch Name</dt>
+            <dd class="col-sm-9"><span data-role="batch-name">{{ batch_name or '—' }}</span></dd>
             <dt class="col-sm-3">Manifest Version</dt>
             <dd class="col-sm-9"><span data-role="manifest-version">{{ manifest_payload.get('version') }}</span></dd>
-            <dt class="col-sm-3">Created By</dt>
-            <dd class="col-sm-9"><span data-role="created-by">{{ manifest_payload.get('created_by') or '—' }}</span></dd>
         </dl>
         <details class="mt-3">
-            <summary>Full Manifest</summary>
+            <summary>Bootstrap Manifest</summary>
             <pre class="bg-light p-3" data-role="manifest-json">{{ manifest_payload | tojson(indent=2) }}</pre>
         </details>
     </div>
@@ -33,20 +33,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    window.batchRunnerBootstrap = {
-        enabled: {{ feature_enabled | tojson }},
-        batchName: {{ batch_name | tojson }},
-        manifest: {{ manifest_payload | tojson }}
-    };
-
-    document.addEventListener('DOMContentLoaded', function () {
-        if (typeof window.BatchRunner === 'undefined' || typeof window.BatchRunner.getInstance !== 'function') {
-            console.warn('BatchRunner control is not yet available.');
-            return;
-        }
-        var control = window.BatchRunner.getInstance();
-        control.init(window.batchRunnerBootstrap);
-    });
-</script>
+{% include "manage_page_bootstrap.js.j2" %}
 {% endblock %}

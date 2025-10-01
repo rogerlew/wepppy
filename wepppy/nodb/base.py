@@ -221,6 +221,8 @@ _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
 _default_config = _join(_config_dir, '_defaults.toml')
 
+def get_config_dir():
+    return _config_dir
 
 class CaseSensitiveRawConfigParser(RawConfigParser):
     def optionxform(self, s): return s
