@@ -1,110 +1,299 @@
-{% extends "layout.j2" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block content %}
-<section class="mb-4">
-    <h1 class="h3">Manage Batch Run</h1>
-    <p class="text-muted">Phase 2 resource intake: upload GeoJSON, validate run-id templates, and monitor manifest state.</p>
-</section>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content>
+    <meta name="author" content>
+    <title>Batch Runner</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet-src.js" crossorigin></script>
+    <script src="{{ url_for('static', filename='js/glify-browser.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/leaflet-glify-layer.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.js"></script>
 
-{% if not feature_enabled %}
-<div class="alert alert-warning" role="alert">
-    Batch Runner is currently disabled. State is shown read-only for verification purposes.
-</div>
-{% endif %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}?20180731">
+    <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static', filename='css/bootstrap-toc-weppcloud.css') }}?20220706">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.css" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
+    <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+</head>
 
-<section class="card mb-4" id="batch-runner-resource-card">
-    <div class="card-body">
-        <h2 class="h5 mb-3">Resource Intake</h2>
-        <p class="text-muted">Upload the watershed GeoJSON driving batch expansion. Maximum size {{ geojson_limit_mb }}&nbsp;MB.</p>
-        <form data-role="upload-form" class="row gy-2 gx-3 align-items-end" enctype="multipart/form-data">
-            <div class="col-sm-8">
-                <label class="form-label" for="batch-runner-geojson">GeoJSON file</label>
-                <input type="file" class="form-control" id="batch-runner-geojson" name="geojson_file" accept=".geojson,.json" data-role="geojson-input" {% if not feature_enabled %}disabled{% endif %}>
+<body>
+    <style>
+        :root {
+            --project-header-offset: 72px;
+        }
+
+        body {
+            background: #f8f9fa;
+        }
+
+        .project-layout {
+            display: flex;
+            align-items: flex-start;
+            background: #f8f9fa;
+            margin-top: var(--project-header-offset);
+            min-height: calc(100vh - var(--project-header-offset));
+        }
+
+        .project-layout__toc {
+            position: fixed;
+            top: var(--project-header-offset);
+            left: 0;
+            width: 320px;
+            max-height: calc(100vh - var(--project-header-offset));
+            overflow-y: auto;
+            padding: 16px 20px 24px;
+            z-index: 1010;
+            box-sizing: border-box;
+        }
+
+        .project-layout__content {
+            flex: 1;
+            margin-left: 320px;
+            padding: 24px 32px 48px;
+            min-height: calc(100vh - var(--project-header-offset));
+            box-sizing: border-box;
+        }
+
+        .controller-section {
+            margin: 2em 0;
+            padding: 1.5em 0;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 6px;
+        }
+
+        .controller-section form {
+            margin: 0;
+            padding: 0 2.5em;
+        }
+
+        .controller-section__inner {
+            padding: 0 2.5em;
+        }
+
+        .controller-section input[type="radio"],
+        .controller-section input[type="checkbox"] {
+            vertical-align: middle;
+            margin-top: -0.1em;
+            margin-right: 0.4em;
+        }
+
+        @media (max-width: 992px) {
+            .project-layout {
+                flex-direction: column;
+                margin-top: var(--project-header-offset);
+            }
+
+            .project-layout__toc {
+                position: static;
+                width: 100%;
+                max-height: none;
+                padding: 16px 16px 24px;
+                margin-top: 0;
+            }
+
+            .project-layout__content {
+                margin-left: 0;
+                padding: 24px 16px 48px;
+            }
+        }
+    </style>
+
+    <div class="project-layout">
+        <section class="mb-4">
+            <h1 class="h3">Manage Batch Run</h1>
+            <p class="text-muted">Phase 2 resource intake: upload GeoJSON, validate run-id templates, and monitor
+                manifest state.</p>
+        </section>
+
+        {% if not feature_enabled %}
+        <div class="alert alert-warning" role="alert">
+            Batch Runner is currently disabled. State is shown read-only for verification purposes.
+        </div>
+        {% endif %}
+
+        <section class="card mb-4" id="batch-runner-resource-card">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Resource Intake</h2>
+                <p class="text-muted">Upload the watershed GeoJSON driving batch expansion. Maximum size {{
+                    geojson_limit_mb }}&nbsp;MB.</p>
+                <form data-role="upload-form" class="row gy-2 gx-3 align-items-end" enctype="multipart/form-data">
+                    <div class="col-sm-8">
+                        <label class="form-label" for="batch-runner-geojson">GeoJSON file</label>
+                        <input type="file" class="form-control" id="batch-runner-geojson" name="geojson_file"
+                            accept=".geojson,.json" data-role="geojson-input" {% if not feature_enabled %}disabled{%
+                            endif %}>
+                    </div>
+                    <div class="col-sm-4 text-sm-end">
+                        <button type="submit" class="btn btn-primary mt-3 mt-sm-0" data-role="upload-button" {% if not
+                            feature_enabled %}disabled{% endif %}>Upload GeoJSON</button>
+                    </div>
+                </form>
+                <div class="small mt-3" data-role="upload-status"></div>
+
+                <div class="mt-3" data-role="resource-empty">
+                    <div class="alert alert-info mb-0" role="alert">
+                        No GeoJSON resource uploaded yet. Upload a FeatureCollection to enable template validation.
+                    </div>
+                </div>
+
+                <div class="mt-3" data-role="resource-details" hidden>
+                    <h3 class="h6">Current Resource</h3>
+                    <dl class="row small" data-role="resource-meta"></dl>
+                </div>
             </div>
-            <div class="col-sm-4 text-sm-end">
-                <button type="submit" class="btn btn-primary mt-3 mt-sm-0" data-role="upload-button" {% if not feature_enabled %}disabled{% endif %}>Upload GeoJSON</button>
+        </section>
+
+        <section class="card mb-4" id="batch-runner-template-card">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Run ID Template</h2>
+                <p class="text-muted">Expressions inside braces are evaluated with <code>properties</code>,
+                    <code>feature</code>, <code>index</code> (0-based), <code>one_based_index</code>, and helpers such
+                    as <code>slug()</code>, <code>lower()</code>, <code>upper()</code>, <code>title()</code>,
+                    <code>replace()</code>, and <code>zfill()</code>. Use double braces to emit literals.</p>
+                <div class="mb-3">
+                    <label class="form-label" for="batch-runner-template-input">Template</label>
+                    <textarea class="form-control" id="batch-runner-template-input" rows="3" data-role="template-input"
+                        placeholder="e.g. {slug(properties['HucName'])}-{zfill(one_based_index, 3)}" {% if not
+                        feature_enabled %}disabled{% endif %}></textarea>
+                    <div class="form-text">Validate to preview run IDs and catch duplicate or missing values before
+                        orchestration.</div>
+                </div>
+                <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+                    <button class="btn btn-outline-primary" type="button" data-role="validate-button" {% if not
+                        feature_enabled %}disabled{% endif %}>Validate Template</button>
+                    <div class="small" data-role="template-status"></div>
+                </div>
+
+                <div class="mb-3" data-role="validation-summary" hidden>
+                    <h3 class="h6">Validation Summary</h3>
+                    <ul class="list-unstyled small mb-0" data-role="validation-summary-list"></ul>
+                </div>
+
+                <div class="mb-3" data-role="validation-issues" hidden>
+                    <h3 class="h6">Issues</h3>
+                    <div class="alert alert-warning" data-role="validation-issues-list"></div>
+                </div>
+
+                <div data-role="validation-preview" hidden>
+                    <h3 class="h6">Preview</h3>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Feature ID</th>
+                                    <th scope="col">Run ID</th>
+                                    <th scope="col">Error</th>
+                                </tr>
+                            </thead>
+                            <tbody data-role="preview-body"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </form>
-        <div class="small mt-3" data-role="upload-status"></div>
+        </section>
 
-        <div class="mt-3" data-role="resource-empty">
-            <div class="alert alert-info mb-0" role="alert">
-                No GeoJSON resource uploaded yet. Upload a FeatureCollection to enable template validation.
+        <section id="batch-runner-root" class="card">
+            <div class="card-body">
+                <h2 class="h5">Status</h2>
+                <p class="mb-3">This view mirrors the creation page wiring and confirms that feature flags and manifest
+                    data are flowing correctly.</p>
+                <dl class="row">
+                    <dt class="col-sm-3">Feature Enabled</dt>
+                    <dd class="col-sm-9"><span data-role="enabled-flag">{{ feature_enabled }}</span></dd>
+                    <dt class="col-sm-3">Batch Name</dt>
+                    <dd class="col-sm-9"><span data-role="batch-name">{{ batch_name or '—' }}</span></dd>
+                </dl>
             </div>
-        </div>
+        </section>
 
-        <div class="mt-3" data-role="resource-details" hidden>
-            <h3 class="h6">Current Resource</h3>
-            <dl class="row small" data-role="resource-meta"></dl>
-        </div>
-    </div>
-</section>
+        <main class="project-layout__content">
+            {% include 'controls/map.htm'%}
+            {% if 'baer' in _base_ron.mods or 'disturbed' in _base_ron.mods %}
+            {% if 'lt' not in _base_ron.mods %}
+            {% include 'controls/baer_upload.htm'%}
+            {% endif %}
+            {% endif %}
+            {% if 'salvage' in _base_ron.mods %}
+            {% include 'controls/road_upload.htm'%}
+            {% endif %}
+            {% include 'controls/channel_delineation.htm'%}
+            {% include 'controls/set_outlet.htm'%}
+            {% include 'controls/subcatchments.htm'%}
+            {% if 'rangeland_cover' in _base_ron.mods %}
+            {% include 'controls/rangeland_cover.htm'%}
+            {% endif %}
+            {% include 'controls/landuse.htm'%}
 
-<section class="card mb-4" id="batch-runner-template-card">
-    <div class="card-body">
-        <h2 class="h5 mb-3">Run ID Template</h2>
-        <p class="text-muted">Expressions inside braces are evaluated with <code>properties</code>, <code>feature</code>, <code>index</code> (0-based), <code>one_based_index</code>, and helpers such as <code>slug()</code>, <code>lower()</code>, <code>upper()</code>, <code>title()</code>, <code>replace()</code>, and <code>zfill()</code>. Use double braces to emit literals.</p>
-        <div class="mb-3">
-            <label class="form-label" for="batch-runner-template-input">Template</label>
-            <textarea class="form-control" id="batch-runner-template-input" rows="3" data-role="template-input" placeholder="e.g. {slug(properties['HucName'])}-{zfill(one_based_index, 3)}" {% if not feature_enabled %}disabled{% endif %}></textarea>
-            <div class="form-text">Validate to preview run IDs and catch duplicate or missing values before orchestration.</div>
-        </div>
-        <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
-            <button class="btn btn-outline-primary" type="button" data-role="validate-button" {% if not feature_enabled %}disabled{% endif %}>Validate Template</button>
-            <div class="small" data-role="template-status"></div>
-        </div>
+            {% include 'controls/soil.htm'%}
+            {% include 'controls/climate.htm'%}
+            {% if 'rap_ts' in _base_ron.mods %}
+            {% include 'controls/rap_ts.htm'%}
+            {% endif %}
 
-        <div class="mb-3" data-role="validation-summary" hidden>
-            <h3 class="h6">Validation Summary</h3>
-            <ul class="list-unstyled small mb-0" data-role="validation-summary-list"></ul>
-        </div>
+            {% if 'rhem' not in _base_ron.mods %}
+            {% include 'controls/prep.htm'%}
+            {% include 'controls/wepp.htm'%}
+            <div id="wepp-results"></div>
 
-        <div class="mb-3" data-role="validation-issues" hidden>
-            <h3 class="h6">Issues</h3>
-            <div class="alert alert-warning" data-role="validation-issues-list"></div>
-        </div>
 
-        <div data-role="validation-preview" hidden>
-            <h3 class="h6">Preview</h3>
-            <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Feature ID</th>
-                            <th scope="col">Run ID</th>
-                            <th scope="col">Error</th>
-                        </tr>
-                    </thead>
-                    <tbody data-role="preview-body"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+            {% else %}
+            {% include 'controls/rhem.htm'%}
+            <div id="rhem-results"></div>
+            {% endif %}
 
-<section id="batch-runner-root" class="card">
-    <div class="card-body">
-        <h2 class="h5">Status</h2>
-        <p class="mb-3">This view mirrors the creation page wiring and confirms that feature flags and manifest data are flowing correctly.</p>
-        <dl class="row">
-            <dt class="col-sm-3">Feature Enabled</dt>
-            <dd class="col-sm-9"><span data-role="enabled-flag">{{ feature_enabled }}</span></dd>
-            <dt class="col-sm-3">Batch Name</dt>
-            <dd class="col-sm-9"><span data-role="batch-name">{{ batch_name or '—' }}</span></dd>
-            <dt class="col-sm-3">Manifest Version</dt>
-            <dd class="col-sm-9"><span data-role="manifest-version">{{ state_payload.get('state_version') }}</span></dd>
-            <dt class="col-sm-3">Created By</dt>
-            <dd class="col-sm-9"><span data-role="created-by">{{ state_payload.get('created_by') or '—' }}</span></dd>
-        </dl>
-        <details class="mt-3">
-            <summary>Bootstrap Manifest</summary>
-            <pre class="bg-light p-3" data-role="manifest-json">{{ state_payload | tojson(indent=2) }}</pre>
-        </details>
-    </div>
-</section>
-{% endblock %}
+            {% if climate.has_observed and 'rhem' not in _base_ron.mods %}
+            {% include 'controls/observed.htm'%}
+            {% endif %}
 
-{% block scripts %}
-{% include "manage_page_bootstrap.js.j2" %}
-{% endblock %}
+            {% if 'debris_flow' in _base_ron.mods and user.has_role('PowerUser') %}
+            {% include 'controls/debris_flow.htm'%}
+            {% endif %}
+
+            {% if 'ash' in _base_ron.mods %}
+            {% include 'controls/ash.htm'%}
+            {% endif %}
+
+            {% include 'controls/dss_export.htm'%}
+
+            {% if 'omni' in _base_ron.mods %}
+            {% include 'controls/omni/omni_scenarios.htm'%}
+            {% include 'controls/omni/omni_contrasts_definition.htm'%}
+            {% endif %}
+
+            {% include 'controls/export.htm'%}
+            {% if user.is_authenticated %}
+            {% include 'controls/team.htm'%}
+            {% endif %}
+
+
+
+
+            {% include 'controls/unitizer_modal.htm'%}
+            <!-- Placed at the end of the document so the pages load faster -->
+            <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/colormap.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/plotty.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-ajax.js') }}"></script>
+        </main>
+        {% include "manage_page_bootstrap.js.j2" %}
+</body>
+
+</html>
