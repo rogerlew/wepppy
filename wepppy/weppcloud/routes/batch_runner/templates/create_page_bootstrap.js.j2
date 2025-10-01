@@ -5,7 +5,7 @@
 window.batchRunnerBootstrap = {
     enabled: {{ feature_enabled | tojson }},
     batchName: {{ (batch_name or form_state.batch_name) | tojson }},
-    manifest: {{ manifest_payload | tojson }}
+    state: {{ state_payload | tojson }}
 };
 
 document.addEventListener('DOMContentLoaded', function () {

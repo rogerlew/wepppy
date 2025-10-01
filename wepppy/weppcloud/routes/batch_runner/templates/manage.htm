@@ -93,13 +93,13 @@
             <dt class="col-sm-3">Batch Name</dt>
             <dd class="col-sm-9"><span data-role="batch-name">{{ batch_name or '—' }}</span></dd>
             <dt class="col-sm-3">Manifest Version</dt>
-            <dd class="col-sm-9"><span data-role="manifest-version">{{ manifest_payload.get('version') }}</span></dd>
+            <dd class="col-sm-9"><span data-role="manifest-version">{{ state_payload.get('state_version') }}</span></dd>
             <dt class="col-sm-3">Created By</dt>
-            <dd class="col-sm-9"><span data-role="created-by">{{ manifest_payload.get('created_by') or '—' }}</span></dd>
+            <dd class="col-sm-9"><span data-role="created-by">{{ state_payload.get('created_by') or '—' }}</span></dd>
         </dl>
         <details class="mt-3">
             <summary>Bootstrap Manifest</summary>
-            <pre class="bg-light p-3" data-role="manifest-json">{{ manifest_payload | tojson(indent=2) }}</pre>
+            <pre class="bg-light p-3" data-role="manifest-json">{{ state_payload | tojson(indent=2) }}</pre>
         </details>
     </div>
 </section>

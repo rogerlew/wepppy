@@ -1,76 +1,134 @@
-"""NoDb scaffolding for the Batch Runner feature (Phase 0).
-
-Provides a minimal manifest container so subsequent phases can persist
-batch metadata using the existing NoDb infrastructure without yet
-implementing orchestration logic.
-"""
+"""NoDb scaffolding for the Batch Runner feature."""
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 import hashlib
 import json
 import os
-import shutil
 import re
+from copy import deepcopy
 from pathlib import Path
+import shutil
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from .base import NoDbBase
 
 
-@dataclass
-class BatchRunnerManifest:
-    """Lightweight manifest for batch runner state."""
-
-    version: int = 2
-    batch_name: Optional[str] = None
-    config: Optional[str] = None
-    batch_config: Optional[str] = None
-    base_config: Optional[str] = None
-    created_at: Optional[str] = None
-    created_by: Optional[str] = None
-    runid_template: Optional[str] = None
-    selected_tasks: List[str] = field(default_factory=list)
-    force_rebuild: bool = False
-    runs: Dict[str, Any] = field(default_factory=dict)
-    history: List[Dict[str, Any]] = field(default_factory=list)
-    resources: Dict[str, Any] = field(default_factory=dict)
-    control_hashes: Dict[str, str] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Return a JSON-serialisable representation."""
-        return asdict(self)
-
-
 class BatchRunner(NoDbBase):
-    """NoDb stub for the batch runner controller."""
+    """NoDb controller for batch runner state."""
 
     __name__ = "BatchRunner"
     filename = "batch_runner.nodb"
+
     RESOURCE_WATERSHED = "watershed_geojson"
 
-    def __init__(self, wd: str,
-                 batch_config: str,
-                 base_config: str):
+    _DEFAULT_STATE = {
+        "batch_name": None,
+        "batch_config": None,
+        "config": None,
+        "base_config": None,
+        "created_at": None,
+        "created_by": None,
+        "runid_template": None,
+        "selected_tasks": [],
+        "force_rebuild": False,
+        "runs": {},
+        "history": [],
+        "resources": {},
+        "control_hashes": {},
+        "metadata": {},
+        "template_validation": None,
+        "state_version": 2,
+    }
+
+    def __init__(self, wd: str, batch_config: str, base_config: str):
         super().__init__(wd, batch_config)
         with self.locked():
-            if not hasattr(self, "_manifest") or self._manifest is None:
-                self._manifest = BatchRunnerManifest()
             self._base_config = base_config
-            self._manifest = self._apply_defaults(self._manifest)
+            self._ensure_defaults()
 
         self._init_base_project()
 
         os.makedirs(self.batch_runs_dir, exist_ok=True)
         os.makedirs(self.resources_dir, exist_ok=True)
 
-    #
-    # resource + template handling
-    #
+    # ------------------------------------------------------------------
+    # core helpers
+    # ------------------------------------------------------------------
+    def _ensure_defaults(self) -> None:
+        for key, value in self._DEFAULT_STATE.items():
+            if not hasattr(self, key):
+                setattr(self, key, deepcopy(value))
+        # base_config stored separately for runtime use, but expose alias
+        if self.base_config is None:
+            self.base_config = self._normalize_config_name(self._base_config)
+        if self.config is None:
+            self.config = self.base_config
+        if self.batch_config is None:
+            self.batch_config = self._normalize_config_name(getattr(self, "_config", None))
 
+    # ------------------------------------------------------------------
+    # properties
+    # ------------------------------------------------------------------
+    @property
+    def _base_wd(self) -> str:
+        return os.path.join(self.wd, "_base")
+
+    @property
+    def base_config(self) -> Optional[str]:
+        return getattr(self, "_base_config_name", None)
+
+    @base_config.setter
+    def base_config(self, value: Optional[str]) -> None:
+        self._base_config_name = value
+
+    @property
+    def batch_runs_dir(self) -> str:
+        return os.path.join(self.wd, "runs")
+
+    @property
+    def resources_dir(self) -> str:
+        return os.path.join(self.wd, "resources")
+
+    # ------------------------------------------------------------------
+    # lifecycle helpers
+    # ------------------------------------------------------------------
+    def _init_base_project(self) -> None:
+        from wepppy.nodb.ron import Ron
+
+        if os.path.exists(self._base_wd):
+            shutil.rmtree(self._base_wd)
+        os.makedirs(self._base_wd)
+        Ron(self._base_wd, self._base_config)
+
+    def reset_state(self) -> None:
+        with self.locked():
+            for key in self._DEFAULT_STATE:
+                setattr(self, key, deepcopy(self._DEFAULT_STATE[key]))
+            self._ensure_defaults()
+
+    def update_state(self, **updates: Any) -> None:
+        if not updates:
+            return
+        with self.locked():
+            self._ensure_defaults()
+            for key, value in updates.items():
+                if key in self._DEFAULT_STATE:
+                    setattr(self, key, value)
+                else:
+                    self.metadata[key] = value
+
+    def add_history(self, entry: Dict[str, Any]) -> None:
+        if not isinstance(entry, dict):
+            raise TypeError("history entry must be a mapping")
+        with self.locked():
+            self._ensure_defaults()
+            self.history.append(deepcopy(entry))
+
+    # ------------------------------------------------------------------
+    # resource registration & template validation
+    # ------------------------------------------------------------------
     def register_resource(
         self,
         resource_id: str,
@@ -79,7 +137,6 @@ class BatchRunner(NoDbBase):
         user: Optional[str] = None,
         replaced: bool = False,
     ) -> Dict[str, Any]:
-        """Persist resource metadata and append a history entry."""
         if not resource_id:
             raise ValueError("resource_id is required")
         if not isinstance(payload, dict):
@@ -88,10 +145,11 @@ class BatchRunner(NoDbBase):
         timestamp = datetime.now(timezone.utc).isoformat()
 
         with self.locked():
-            manifest = self._manifest
-            manifest = self._apply_defaults(manifest)
+            self._ensure_defaults()
 
-            existing = manifest.resources.get(resource_id)
+            resources = self.resources
+            existing = resources.get(resource_id)
+
             payload_copy = dict(payload)
             payload_copy.setdefault("resource_id", resource_id)
             payload_copy.setdefault("uploaded_at", timestamp)
@@ -99,7 +157,7 @@ class BatchRunner(NoDbBase):
                 payload_copy.setdefault("uploaded_by", user)
             payload_copy["replaced"] = bool(replaced or existing is not None)
 
-            manifest.resources[resource_id] = payload_copy
+            resources[resource_id] = payload_copy
 
             history_event = {
                 "event": "resource_uploaded",
@@ -111,18 +169,18 @@ class BatchRunner(NoDbBase):
                 history_event["user"] = user
             if "filename" in payload_copy:
                 history_event["filename"] = payload_copy["filename"]
-            manifest.history.append(history_event)
+            self.history.append(history_event)
 
-            validation_state = manifest.metadata.get("template_validation")
-            if validation_state:
-                if validation_state.get("resource_id") == resource_id and (
+            validation_state = self.template_validation
+            if validation_state and validation_state.get("resource_id") == resource_id:
+                if (
                     payload_copy.get("checksum")
                     and validation_state.get("resource_checksum")
                     and validation_state["resource_checksum"] != payload_copy.get("checksum")
                 ):
                     validation_state["status"] = "stale"
                     validation_state["stale_since"] = timestamp
-                elif validation_state.get("resource_id") == resource_id:
+                else:
                     validation_state["status"] = "stale"
                     validation_state["stale_since"] = timestamp
 
@@ -139,25 +197,21 @@ class BatchRunner(NoDbBase):
         *,
         user: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Persist template validation metadata."""
         if not isinstance(payload, dict):
             raise TypeError("payload must be a mapping")
 
         timestamp = datetime.now(timezone.utc).isoformat()
 
         with self.locked():
-            manifest = self._manifest
-            manifest = self._apply_defaults(manifest)
+            self._ensure_defaults()
 
             payload_copy = dict(payload)
             payload_copy.setdefault("validated_at", timestamp)
             if user:
                 payload_copy.setdefault("validated_by", user)
             payload_copy.setdefault("status", "ok")
-            payload_copy.setdefault("stale", False)
-            payload_copy.pop("stale", None)  # prefer status flag only
 
-            manifest.metadata["template_validation"] = payload_copy
+            self.template_validation = payload_copy
 
             history_event = {
                 "event": "template_validated",
@@ -167,7 +221,7 @@ class BatchRunner(NoDbBase):
             }
             if user:
                 history_event["user"] = user
-            manifest.history.append(history_event)
+            self.history.append(history_event)
 
             self.logger.info(
                 "Recorded template validation (status=%s)",
@@ -175,113 +229,25 @@ class BatchRunner(NoDbBase):
             )
             return payload_copy
 
-    #
-    # manifest properties and methods, managed primarily by codex
-    #
-
-    def _init_base_project(self) -> None:
-        from wepppy.nodb.ron import Ron
-        if os.path.exists(self._base_wd):
-            shutil.rmtree(self._base_wd)
-        os.makedirs(self._base_wd)
-        Ron(self._base_wd, self.base_config)
-
-    @property
-    def _base_wd(self) -> str:
-        """Return the base working directory."""
-        return os.path.join(self.wd, "_base")
-
-    @property
-    def base_config(self) -> str:
-        """Return the base config for create _base"""
-        return self._base_config
-
-    @property
-    def batch_runs_dir(self) -> str:
-        """Return the directory where batch runs are stored."""
-        return os.path.join(self.wd, "runs")
-    
-    @property
-    def resources_dir(self) -> str:
-        """Return the directory where resources are stored."""
-        return os.path.join(self.wd, "resources")
-
-    #
-    # manifest properties and methods, managed primarily by codex
-    #
-    @property
-    def manifest(self) -> BatchRunnerManifest:
-        """Return the in-memory manifest object."""
-        return self._manifest
-
-    def manifest_dict(self) -> Dict[str, Any]:
-        """Return the manifest as a primitive dictionary."""
-        return self._manifest.to_dict()
-
-    def reset_manifest(self) -> BatchRunnerManifest:
-        """Reset the manifest back to default values."""
-        with self.locked():
-            self._manifest = self._apply_defaults(BatchRunnerManifest())
-            return self._manifest
-
-    def update_manifest(self, **updates: Any) -> BatchRunnerManifest:
-        """Apply shallow updates to the manifest (Phase 0 placeholder)."""
-        if not updates:
-            return self._manifest
-
-        with self.locked():
-            for key, value in updates.items():
-                if hasattr(self._manifest, key):
-                    setattr(self._manifest, key, value)
-                else:
-                    self._manifest.metadata[key] = value
-            return self._manifest
+    # ------------------------------------------------------------------
+    # serialisation helpers
+    # ------------------------------------------------------------------
+    def state_dict(self) -> Dict[str, Any]:
+        self._ensure_defaults()
+        return {
+            key: deepcopy(getattr(self, key))
+            for key in self._DEFAULT_STATE
+        }
 
     @classmethod
-    def default_manifest(cls) -> BatchRunnerManifest:
-        """Convenience helper for creating a detached default manifest."""
-        return BatchRunnerManifest()
+    def default_state(cls) -> Dict[str, Any]:
+        return {key: deepcopy(value) for key, value in cls._DEFAULT_STATE.items()}
 
-    @classmethod
-    def _post_instance_loaded(cls, instance: "BatchRunner") -> "BatchRunner":
-        """Backfill config identifiers when decoding persisted manifests."""
-        instance._manifest = instance._apply_defaults(instance._manifest)
-        return instance
-
-    @staticmethod
-    def _normalize_config_name(config: str) -> Optional[str]:
-        """Return a stemmed config name, keeping None intact."""
-        if not config:
-            return None
-        stem = Path(config).stem
-        return stem
-
-    def _apply_defaults(self, manifest: BatchRunnerManifest) -> BatchRunnerManifest:
-        """Ensure manifest carries canonical configuration identifiers and versioning."""
-        base_config_name = self._normalize_config_name(self._base_config)
-        batch_config_name = self._normalize_config_name(getattr(self, "_config", None))
-
-        if manifest.base_config is None:
-            manifest.base_config = base_config_name
-
-        if manifest.config is None:
-            manifest.config = base_config_name
-
-        if manifest.batch_config is None:
-            manifest.batch_config = batch_config_name
-
-        if not manifest.version or manifest.version < 2:
-            manifest.version = 2
-
-        return manifest
-
-    #
-    # static helpers for resource analysis & templating
-    #
-
+    # ------------------------------------------------------------------
+    # static helpers (geojson analysis & templating)
+    # ------------------------------------------------------------------
     @staticmethod
     def compute_file_checksum(path: Path, chunk_size: int = 1024 * 1024) -> Tuple[int, str]:
-        """Return file size and sha256 checksum."""
         hasher = hashlib.sha256()
         size = 0
         with open(path, "rb") as handle:
@@ -295,13 +261,11 @@ class BatchRunner(NoDbBase):
 
     @classmethod
     def analyse_geojson(cls, path: Path) -> Dict[str, Any]:
-        """Compute metadata for a GeoJSON FeatureCollection."""
         with open(path, "r", encoding="utf-8") as handle:
             data = json.load(handle)
 
         if not isinstance(data, dict):
             raise ValueError("GeoJSON payload must be an object")
-
         if data.get("type") != "FeatureCollection":
             raise ValueError("GeoJSON must be a FeatureCollection")
 
@@ -359,7 +323,6 @@ class BatchRunner(NoDbBase):
                     yield from BatchRunner._iter_coordinates(child)
             elif len(node) >= 2 and all(isinstance(val, (int, float)) for val in node[:2]):
                 yield float(node[0]), float(node[1])
-        # other types ignored
 
     @staticmethod
     def _extract_epsg(payload: Dict[str, Any]) -> Tuple[Optional[str], str]:
@@ -372,7 +335,6 @@ class BatchRunner(NoDbBase):
                 match = re.search(r"EPSG[:/](\d+)", name, flags=re.IGNORECASE)
                 if match:
                     return f"EPSG:{match.group(1)}", "declared"
-
         return "EPSG:4326", "default"
 
     @staticmethod
@@ -428,7 +390,6 @@ class BatchRunner(NoDbBase):
         *,
         allowed_functions: Optional[Dict[str, Any]] = None,
     ) -> str:
-        """Render a template by evaluating expressions between braces."""
         if allowed_functions is None:
             allowed_functions = {}
 
@@ -460,7 +421,6 @@ class BatchRunner(NoDbBase):
                 while i < length and template[i] not in ('{', '}'):
                     i += 1
                 chunks.append(template[start:i])
-                continue
         return ''.join(chunks)
 
     @staticmethod
@@ -482,7 +442,7 @@ class BatchRunner(NoDbBase):
     def _render_expression(expr: str, context: Dict[str, Any], allowed_functions: Dict[str, Any]) -> str:
         expression, format_spec = BatchRunner._split_format(expr)
         value = BatchRunner._safe_eval(expression, context, allowed_functions)
-        if format_spec is not None and format_spec != "":
+        if format_spec:
             return format(value, format_spec)
         return str(value)
 
@@ -545,9 +505,7 @@ class BatchRunner(NoDbBase):
             )
 
             allowed_unary = (ast.UAdd, ast.USub, ast.Not)
-
             allowed_bool = (ast.And, ast.Or)
-
             allowed_cmp = (
                 ast.Eq,
                 ast.NotEq,
@@ -567,11 +525,11 @@ class BatchRunner(NoDbBase):
                             raise ValueError(f"Function '{func.id}' is not permitted in templates")
                     else:
                         raise ValueError("Only named function calls are permitted in templates")
-                    for keyword in node.keywords:
-                        if keyword.arg not in (None, "sep", "join", "fillchar"):
-                            continue
                     for arg in node.args:
                         self.visit(arg)
+                    for keyword in node.keywords:
+                        if keyword.arg:
+                            self.visit(keyword.value)
                     return
 
                 if not isinstance(node, self.allowed_nodes):
@@ -591,9 +549,8 @@ class BatchRunner(NoDbBase):
                         if not isinstance(op, self.allowed_cmp):
                             raise ValueError("Comparison operator not permitted in template expression")
 
-                if isinstance(node, ast.Name):
-                    if node.id not in allowed_names:
-                        raise ValueError(f"Unknown name '{node.id}' in template expression")
+                if isinstance(node, ast.Name) and node.id not in allowed_names:
+                    raise ValueError(f"Unknown name '{node.id}' in template expression")
 
                 for child in ast.iter_child_nodes(node):
                     self.visit(child)
@@ -606,8 +563,6 @@ class BatchRunner(NoDbBase):
 
     @staticmethod
     def default_template_functions() -> Dict[str, Any]:
-        """Helper functions available to template expressions."""
-
         def slug(value: Any, *, separator: str = "-") -> str:
             text = str(value or "")
             text = text.strip()
@@ -677,7 +632,7 @@ class BatchRunner(NoDbBase):
                 rendered = str(rendered).strip()
                 if not rendered:
                     raise ValueError("Template produced an empty run id")
-            except Exception as exc:  # noqa: BLE001 - surface template errors
+            except Exception as exc:  # noqa: BLE001
                 message = str(exc)
                 errors.append({
                     "index": index,
@@ -738,5 +693,11 @@ class BatchRunner(NoDbBase):
             "validation_hash": validation_hash,
         }
 
+    @staticmethod
+    def _normalize_config_name(config: Optional[str]) -> Optional[str]:
+        if not config:
+            return None
+        return Path(config).stem
 
-__all__ = ["BatchRunner", "BatchRunnerManifest"]
+
+__all__ = ["BatchRunner"]

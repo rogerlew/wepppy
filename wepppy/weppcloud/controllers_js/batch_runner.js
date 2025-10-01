@@ -21,10 +21,10 @@ var BatchRunner = (function () {
             this.state = {
                 enabled: Boolean(bootstrap.enabled),
                 batchName: bootstrap.batchName || '',
-                manifest: bootstrap.manifest || {},
+                snapshot: bootstrap.state || {},
                 geojsonLimitMb: bootstrap.geojsonLimitMb,
             };
-            this.state.validation = this._extractValidation(this.state.manifest);
+            this.state.validation = this._extractValidation(this.state.snapshot);
             this.sitePrefix = bootstrap.sitePrefix || '';
             this.baseUrl = this._buildBaseUrl();
 
@@ -83,9 +83,9 @@ var BatchRunner = (function () {
             }
         };
 
-        that._extractValidation = function (manifest) {
-            manifest = manifest || {};
-            var metadata = manifest.metadata || {};
+        that._extractValidation = function (snapshot) {
+            snapshot = snapshot || {};
+            var metadata = snapshot.metadata || {};
             return metadata.template_validation || null;
         };
 
@@ -95,7 +95,7 @@ var BatchRunner = (function () {
                 prefix = prefix.slice(0, -1);
             }
             if (this.state.batchName) {
-                return prefix + '/batch/' + encodeURIComponent(this.state.batchName);
+                return prefix + '/batch/_/' + encodeURIComponent(this.state.batchName);
             }
             var pathname = window.location.pathname || '';
             return pathname.replace(/\/$/, '');
@@ -113,12 +113,12 @@ var BatchRunner = (function () {
         };
 
         that._renderCoreStatus = function () {
-            var manifest = this.state.manifest || {};
+            var snapshot = this.state.snapshot || {};
             this.container.find('[data-role="enabled-flag"]').text(this.state.enabled ? 'True' : 'False');
             this.container.find('[data-role="batch-name"]').text(this.state.batchName || '—');
-            this.container.find('[data-role="manifest-version"]').text(manifest.version || '—');
-            this.container.find('[data-role="created-by"]').text(manifest.created_by || '—');
-            this.container.find('[data-role="manifest-json"]').text(JSON.stringify(manifest, null, 2));
+            this.container.find('[data-role="manifest-version"]').text(snapshot.state_version || '—');
+            this.container.find('[data-role="created-by"]').text(snapshot.created_by || '—');
+            this.container.find('[data-role="manifest-json"]').text(JSON.stringify(snapshot, null, 2));
         };
 
         that.render = function render() {
@@ -127,8 +127,8 @@ var BatchRunner = (function () {
         };
 
         that._renderResource = function () {
-            var manifest = this.state.manifest || {};
-            var resources = manifest.resources || {};
+            var snapshot = this.state.snapshot || {};
+            var resources = snapshot.resources || {};
             var resource = resources.watershed_geojson;
 
             if (!this.resourceCard.length) {
@@ -180,12 +180,12 @@ var BatchRunner = (function () {
                 return;
             }
 
-            var manifest = this.state.manifest || {};
-            var resources = manifest.resources || {};
+            var snapshot = this.state.snapshot || {};
+            var resources = snapshot.resources || {};
             var resource = resources.watershed_geojson;
 
             if (!this.templateInitialised) {
-                var tpl = manifest.runid_template || '';
+                var tpl = snapshot.runid_template || '';
                 if (tpl && !this.templateInput.is(':focus')) {
                     this.templateInput.val(tpl);
                 }
@@ -200,7 +200,7 @@ var BatchRunner = (function () {
                 return;
             }
 
-            var validation = this.state.validation || this._extractValidation(manifest);
+            var validation = this.state.validation || this._extractValidation(snapshot);
             this.state.validation = validation;
 
             if (!validation) {
@@ -306,16 +306,16 @@ var BatchRunner = (function () {
                         throw payload.error || 'Upload failed.';
                     }
 
-                    var manifest = self.state.manifest;
-                    manifest.resources = manifest.resources || {};
-                    manifest.resources.watershed_geojson = payload.resource;
-                    manifest.metadata = manifest.metadata || {};
+                    var snapshot = self.state.snapshot;
+                    snapshot.resources = snapshot.resources || {};
+                    snapshot.resources.watershed_geojson = payload.resource;
+                    snapshot.metadata = snapshot.metadata || {};
                     if (payload.template_validation) {
-                        manifest.metadata.template_validation = payload.template_validation;
+                        snapshot.metadata.template_validation = payload.template_validation;
                         self.state.validation = payload.template_validation;
-                    } else if (manifest.metadata.template_validation) {
-                        manifest.metadata.template_validation.status = 'stale';
-                        self.state.validation = manifest.metadata.template_validation;
+                    } else if (snapshot.metadata.template_validation) {
+                        snapshot.metadata.template_validation.status = 'stale';
+                        self.state.validation = snapshot.metadata.template_validation;
                     }
 
                     self._setUploadStatus(payload.message || 'Upload complete.', 'text-success');
@@ -364,10 +364,10 @@ var BatchRunner = (function () {
                     }
 
                     self.state.validation = payload.validation;
-                    var manifest = self.state.manifest;
-                    manifest.metadata = manifest.metadata || {};
-                    manifest.metadata.template_validation = payload.stored;
-                    manifest.runid_template = template;
+                    var snapshot = self.state.snapshot;
+                    snapshot.metadata = snapshot.metadata || {};
+                    snapshot.metadata.template_validation = payload.stored;
+                    snapshot.runid_template = template;
                     self.templateInitialised = false;
                     self.render();
                 })
