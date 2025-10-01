@@ -9,6 +9,7 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 
+from pathlib import Path
 from functools import wraps
 
 from flask import current_app, g, jsonify, make_response, render_template, url_for
@@ -94,7 +95,19 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
             print(f"Warning: Redis connection error during SET. Error: {e}")
 
     return path
+
     
+def get_batch_wd(batch_name: str) -> str:
+    return str(get_batch_root_dir() / batch_name)
+
+
+def get_batch_root_dir() -> Path:
+    root = current_app.config.get("BATCH_RUNNER_ROOT")
+    if root:
+        return Path(root)
+    # Default placeholder mirrors production layout but remains configurable.
+    return Path("/wc1/batch")
+
 
 def url_for_run(endpoint: str, **values) -> str:
     """Generate a URL for run-scoped routes, including microservices."""
