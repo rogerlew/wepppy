@@ -4,14 +4,18 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from datetime import datetime, timezone
+import hashlib
+import os
+import json
 import re
 from pathlib import Path
+import tempfile
 from typing import Dict, Optional, Sequence
 
-from flask import current_app, flash, redirect, render_template, request, url_for
+from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_security import current_user
 
-from .._common import Blueprint, roles_required
+from .._common import Blueprint, roles_required, secure_filename
 from wepppy.nodb.base import get_configs, get_config_dir
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.weppcloud.utils.helpers import get_batch_root_dir
@@ -70,6 +74,7 @@ def _build_context(batch_name: Optional[str] = None) -> Dict[str, object]:
         "batch_root": str(get_batch_root_dir()),
         "available_configs": get_configs(),
         "existing_batches": _existing_batches(),
+        "geojson_limit_mb": current_app.config.get("BATCH_GEOJSON_MAX_MB", 10),
     }
     return context
 
@@ -205,3 +210,223 @@ def view_batch(batch_name: str):
     """Render the placeholder batch detail page for Batch Runner (Phase 0)."""
     context = _build_context(batch_name=batch_name)
     return render_template("manage.htm", **context)
+
+
+def _batch_runner_disabled_response():
+    return {
+        "success": False,
+        "error": "Batch Runner is currently disabled.",
+    }
+
+
+def _current_user_email() -> Optional[str]:
+    try:
+        if current_user and not current_user.is_anonymous:
+            return getattr(current_user, "email", None)
+    except Exception:  # pragma: no cover - defensive
+        return None
+    return None
+
+
+def _load_runner(batch_name: str) -> BatchRunner:
+    batch_dir = get_batch_root_dir() / batch_name
+    if not batch_dir.exists():
+        raise FileNotFoundError(f"Batch '{batch_name}' does not exist")
+    return BatchRunner.getInstance(str(batch_dir))
+
+
+def _load_geojson_features(resource_path: Path) -> Sequence[Dict[str, object]]:
+    with open(resource_path, "r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+    if not isinstance(payload, dict) or payload.get("type") != "FeatureCollection":
+        raise ValueError("GeoJSON resource must be a FeatureCollection")
+    features = payload.get("features", [])
+    if not isinstance(features, list) or not features:
+        raise ValueError("GeoJSON resource contains no features")
+    return features
+
+
+def _max_geojson_size_bytes() -> Optional[int]:
+    max_mb = current_app.config.get("BATCH_GEOJSON_MAX_MB", 10)
+    try:
+        max_mb = int(max_mb)
+    except (TypeError, ValueError):
+        return None
+    if max_mb <= 0:
+        return None
+    return max_mb * 1024 * 1024
+
+
+@batch_runner_bp.route("/batch/<string:batch_name>/upload-geojson", methods=["POST"])
+@roles_required("Admin")
+def upload_geojson(batch_name: str):
+    if not _batch_runner_feature_enabled():
+        return _json_response(_batch_runner_disabled_response(), 403)
+
+    try:
+        runner = _load_runner(batch_name)
+    except FileNotFoundError as exc:
+        return _json_response({"success": False, "error": str(exc)}, 404)
+
+    storage = request.files.get("geojson_file") or request.files.get("file")
+    if storage is None:
+        return _json_response({"success": False, "error": "No file part named 'geojson_file'."}, 400)
+
+    filename = storage.filename or ""
+    if not filename:
+        return _json_response({"success": False, "error": "Filename is required."}, 400)
+
+    safe_name = secure_filename(filename)
+    if not safe_name:
+        return _json_response({"success": False, "error": "Filename contains no safe characters."}, 400)
+
+    lower_name = safe_name.lower()
+    if not lower_name.endswith((".geojson", ".json")):
+        return _json_response({"success": False, "error": "Only .geojson or .json files are supported."}, 400)
+
+    max_bytes = _max_geojson_size_bytes()
+    resources_dir = Path(runner.resources_dir)
+    resources_dir.mkdir(parents=True, exist_ok=True)
+    dest_path = resources_dir / safe_name
+    replacing = dest_path.exists()
+
+    storage.stream.seek(0)
+    temp_fd, temp_path_str = tempfile.mkstemp(dir=resources_dir, prefix="upload_", suffix=".tmp")
+    temp_path = Path(temp_path_str)
+    size = 0
+    hasher = hashlib.sha256()
+
+    try:
+        with os.fdopen(temp_fd, "wb") as handle:  # type: ignore[arg-type]
+            while True:
+                chunk = storage.stream.read(1024 * 1024)
+                if not chunk:
+                    break
+                size += len(chunk)
+                if max_bytes and size > max_bytes:
+                    raise ValueError(
+                        f"GeoJSON exceeds maximum size of {max_bytes // (1024 * 1024)} MB"
+                    )
+                handle.write(chunk)
+                hasher.update(chunk)
+
+        analysis = BatchRunner.analyse_geojson(temp_path)
+    except ValueError as exc:
+        temp_path.unlink(missing_ok=True)
+        return _json_response({"success": False, "error": str(exc)}, 400)
+    except Exception as exc:  # pragma: no cover - unexpected errors
+        temp_path.unlink(missing_ok=True)
+        current_app.logger.exception("Failed to ingest GeoJSON upload")
+        return _json_response({"success": False, "error": "Failed to process GeoJSON upload."}, 500)
+
+    os.replace(temp_path, dest_path)
+
+    relative_path = os.path.relpath(dest_path, runner.wd)
+    checksum = hasher.hexdigest()
+    metadata = {
+        "resource_type": "geojson",
+        "filename": safe_name,
+        "original_filename": filename,
+        "relative_path": relative_path,
+        "content_type": storage.mimetype,
+        "size_bytes": size,
+        "checksum": checksum,
+    }
+    metadata.update(analysis)
+
+    stored = runner.register_resource(
+        BatchRunner.RESOURCE_WATERSHED,
+        metadata,
+        user=_current_user_email(),
+        replaced=replacing,
+    )
+
+    message = "GeoJSON uploaded successfully."
+    if stored.get("replaced"):
+        message = "GeoJSON replaced successfully."
+
+    response_payload = {
+        "success": True,
+        "resource": stored,
+        "message": message,
+    }
+
+    validation_state = runner.manifest.metadata.get("template_validation")
+    if validation_state:
+        response_payload["template_validation"] = validation_state
+
+    return _json_response(response_payload, 200)
+
+
+@batch_runner_bp.route("/batch/<string:batch_name>/validate-template", methods=["POST"])
+@roles_required("Admin")
+def validate_template(batch_name: str):
+    if not _batch_runner_feature_enabled():
+        return _json_response(_batch_runner_disabled_response(), 403)
+
+    try:
+        runner = _load_runner(batch_name)
+    except FileNotFoundError as exc:
+        return _json_response({"success": False, "error": str(exc)}, 404)
+    payload = request.get_json(silent=True) or {}
+    template = payload.get("template")
+    if not template:
+        return _json_response({"success": False, "error": "Template is required."}, 400)
+
+    manifest = runner.manifest_dict()
+    resource = manifest.get("resources", {}).get(BatchRunner.RESOURCE_WATERSHED)
+    if not resource:
+        return _json_response({"success": False, "error": "Upload a GeoJSON resource before validating."}, 400)
+
+    relative_path = resource.get("relative_path")
+    if not relative_path:
+        return _json_response({"success": False, "error": "Resource metadata is incomplete."}, 400)
+
+    resource_path = Path(runner.wd) / relative_path
+    if not resource_path.exists():
+        return _json_response({"success": False, "error": "Stored GeoJSON resource is missing."}, 400)
+
+    try:
+        features = _load_geojson_features(resource_path)
+    except ValueError as exc:
+        return _json_response({"success": False, "error": str(exc)}, 400)
+
+    validation = BatchRunner.validate_template(
+        template,
+        list(features),
+        resource_checksum=resource.get("checksum"),
+    )
+
+    status = "ok" if validation["summary"]["is_valid"] else "invalid"
+
+    persisted = {
+        "template": template,
+        "template_hash": validation["template_hash"],
+        "resource_id": BatchRunner.RESOURCE_WATERSHED,
+        "resource_checksum": resource.get("checksum"),
+        "summary": validation["summary"],
+        "duplicates": validation["duplicates"][:50],
+        "errors": validation["errors"][:50],
+        "preview": validation["preview"],
+        "validation_hash": validation["validation_hash"],
+        "status": status,
+    }
+
+    stored_validation = runner.record_template_validation(
+        persisted,
+        user=_current_user_email(),
+    )
+    runner.update_manifest(runid_template=template)
+
+    response_payload = {
+        "success": status == "ok",
+        "status": status,
+        "validation": validation,
+        "stored": stored_validation,
+    }
+
+    return _json_response(response_payload, 200)
+
+
+def _json_response(payload: Dict[str, object], status_code: int) -> tuple:
+    return jsonify(payload), status_code
