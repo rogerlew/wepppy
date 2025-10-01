@@ -8,7 +8,7 @@ import os
 import json
 import re
 from copy import deepcopy
-from typing import Dict, Optional, Sequence, Union
+from typing import Any, Dict, Optional, Sequence, Union
 
 from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_security import current_user
@@ -32,6 +32,8 @@ def _batch_runner_feature_enabled() -> bool:
 
 
 _BATCH_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$")
+_GEOJSON_MAX_BYTES = 10 * 1024 * 1024
+_GEOJSON_MAX_MB = int(_GEOJSON_MAX_BYTES // (1024 * 1024))
 
 def _validate_batch_name(raw_name: str) -> str:
     name = (raw_name or "").strip()
@@ -56,6 +58,34 @@ def _validate_config(config_name: str, available: Sequence[str]) -> str:
 
 
 BatchRoot = Union[str, os.PathLike[str]]
+
+
+def _serialize_geojson_state(state: Dict[str, Any]) -> Dict[str, Any]:
+    resource = deepcopy(state)
+    resource.pop("_geojson_filepath", None)
+    return resource
+
+
+def _build_batch_runner_snapshot(batch_runner: BatchRunner) -> Dict[str, Any]:
+    snapshot: Dict[str, Any] = {
+        "state_version": 1,
+        "batch_name": batch_runner.batch_name,
+        "base_config": batch_runner.base_config,
+        "resources": {},
+        "metadata": {},
+        "runid_template": None,
+    }
+
+    geojson_state = batch_runner.geojson_state
+    if geojson_state:
+        snapshot.setdefault("resources", {})["watershed_geojson"] = _serialize_geojson_state(geojson_state)
+
+    template_state = batch_runner.runid_template_state
+    if template_state:
+        snapshot.setdefault("metadata", {})["template_validation"] = deepcopy(template_state)
+        snapshot["runid_template"] = template_state.get("template")
+
+    return snapshot
 
 
 def _create_batch_project(
@@ -97,9 +127,9 @@ def create_batch_project():
     feature_enabled = _batch_runner_feature_enabled()
     if not feature_enabled:
         flash("Batch Runner is currently disabled.", "warning")
-        return render_template("create.htm", feature_enabled=False)
+        return render_template("create.htm", feature_enabled=False, geojson_limit_mb=_GEOJSON_MAX_MB)
    
-    context = {'feature_enabled': True}
+    context = {'feature_enabled': True, 'geojson_limit_mb': _GEOJSON_MAX_MB}
 
     available_configs = get_configs()
     context['available_configs'] = available_configs
@@ -142,6 +172,8 @@ def create_batch_project():
 @roles_required("Admin")
 def view_batch(batch_name: str):
     """Render the placeholder batch detail page for Batch Runner (Phase 0)."""
+    global _GEOJSON_MAX_MB
+
     feature_enabled = _batch_runner_feature_enabled()
     if not feature_enabled:
         return jsonify(_batch_runner_disabled_response()), 403
@@ -206,11 +238,13 @@ def view_batch(batch_name: str):
     soildboptions = soilsdb.load_db()
 
     critical_shear_options = management.load_channel_d50_cs()
+    batch_runner_state = _build_batch_runner_snapshot(batch_runner)
 
 
     return render_template("manage.htm", 
                             feature_enabled=feature_enabled,
                             batch_name=batch_name,
+                            batch_runner_state=batch_runner_state,
                             user=current_user,
                             site_prefix=site_prefix,
                             topaz=topaz,
@@ -238,6 +272,7 @@ def view_batch(batch_name: str):
                             soildboptions=soildboptions,
                             critical_shear_options=critical_shear_options,
                             precisions=wepppy.nodb.unitizer.precisions,
+                            geojson_limit_mb=_GEOJSON_MAX_MB,
                             run_id=runid,
                             runid=runid,
                             config=config,
@@ -275,7 +310,6 @@ def upload_geojson(batch_name: str):
     if not lower_name.endswith((".geojson", ".json")):
         return jsonify({"success": False, "error": "Only .geojson or .json files are supported."}), 400
 
-    max_bytes = 10 * 1024 * 1024  # 10 MB
     resources_dir = batch_runner.resources_dir
     os.makedirs(resources_dir, exist_ok=True)
     dest_path = os.path.join(resources_dir, safe_name)
@@ -298,9 +332,9 @@ def upload_geojson(batch_name: str):
         _safe_unlink(dest_path)
         return jsonify({"success": False, "error": "GeoJSON contains no features."}), 400
 
-    if os.path.getsize(dest_path) > max_bytes:
+    if os.path.getsize(dest_path) > _GEOJSON_MAX_BYTES:
         _safe_unlink(dest_path)
-        return jsonify({"success": False, "error": "GeoJSON file exceeds maximum size of 10 MB."}), 400
+        return jsonify({"success": False, "error": f"GeoJSON file exceeds maximum size of {_GEOJSON_MAX_MB} MB."}), 400
 
     relative_path = os.path.relpath(dest_path, batch_runner.wd)
     metadata = {
@@ -312,6 +346,11 @@ def upload_geojson(batch_name: str):
         "replaced": replaced
     }
 
+    metadata["uploaded_at"] = datetime.now(timezone.utc).isoformat()
+    uploader = getattr(current_user, "email", None) or getattr(current_user, "username", None) or getattr(current_user, "id", None)
+    if uploader:
+        metadata["uploaded_by"] = str(uploader)
+
     watershed_collection.update_analysis_results(metadata)
 
     # let BatchRunner verify it meets the requirements
@@ -321,14 +360,17 @@ def upload_geojson(batch_name: str):
         response_payload = {"success": False, "error": str(exc)}
         return jsonify(response_payload), 400
 
+    snapshot = _build_batch_runner_snapshot(batch_runner)
+    resource_payload = snapshot.get("resources", {}).get("watershed_geojson")
+    template_state = snapshot.get("metadata", {}).get("template_validation")
+
     response_payload = {
         "success": True,
-        "resource_metadata": metadata,
+        "resource": resource_payload,
+        "template_validation": template_state,
+        "snapshot": snapshot,
         "message": "GeoJSON uploaded successfully."
     }
-
-    if watershed_collection.analysis_results:
-        response_payload["template_validation"] = deepcopy(watershed_collection.analysis_results)
 
     return jsonify(response_payload), 200
 
@@ -376,10 +418,14 @@ def validate_template(batch_name: str):
     }
 
     batch_runner.runid_template_state = runid_template_state
+    snapshot = _build_batch_runner_snapshot(batch_runner)
+    stored_state = snapshot.get("metadata", {}).get("template_validation")
     response_payload = {
         "success": status == "ok",
         "status": status,
-        "validation": validation
+        "validation": validation,
+        "stored": stored_state,
+        "snapshot": snapshot,
     }
 
     return jsonify(response_payload), 200

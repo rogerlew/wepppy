@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ClimateNA API Test</title>
+    <!-- Include jQuery from a CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        #clmOut {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>ClimateNA API Test</h1>
+    <div>Results will appear below:</div>
+    <div id="clmOut"></div>
+
+    <script>
+        // ClimateNA example code
+        var latlon = [
+            {lat: 48.98, lon: -115.02, el: 1000, prd: "Normal_1961_1990.nrm", varYSM: "Y"},
+            {lat: 50.25, lon: -120, el: 100, prd: "Normal_1961_1990.nrm", varYSM: "Y"}
+        ];
+
+        $.ajax({
+            url: 'https://api6.climatebc.ca/api/clmApi6/',
+            method: "POST",
+            data: { '': latlon }
+        }).done(function (result) {
+            $.each(result, function (i, field) {
+                $("#clmOut").append(JSON.stringify(result));
+            });
+        }).fail(function (xhr) {
+            alert(xhr.responseText);
+            alert("fail");
+        });
+    </script>
+</body>
+</html>

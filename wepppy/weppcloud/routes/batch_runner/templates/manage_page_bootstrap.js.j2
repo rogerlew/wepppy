@@ -6,6 +6,8 @@ window.batchRunnerBootstrap = {
     enabled: {{ feature_enabled | tojson }},
     batchName: {{ batch_name | tojson }},
     sitePrefix: {{ site_prefix | tojson }},
+    geojsonLimitMb: {{ geojson_limit_mb | default(10, true) | tojson }},
+    state: {{ batch_runner_state | default({}, true) | tojson }},
 };
 
 document.addEventListener('DOMContentLoaded', function () {

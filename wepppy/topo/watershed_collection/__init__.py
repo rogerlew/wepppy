@@ -1,1 +1,1 @@
-from .watershed_collection import WatershedCollection
+from .watershed_collection import WatershedCollection, WatershedFeature

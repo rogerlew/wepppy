@@ -5,6 +5,104 @@ from pathlib import Path
 from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable
 
 
+class WatershedFeature(object):
+    """
+    Represents a single watershed feature from a GeoJSON file.
+    """
+    def __init__(self, feature: Dict[str, Any], runid: str, *, index: int):
+        self.feature = feature
+        self.id = feature.get("id")
+        self.properties = feature.get("properties") or {}
+        self.geometry = feature.get("geometry") or {}
+        self.type = self.geometry.get("type")
+        self.coordinates = self.geometry.get("coordinates")
+        self.runid = runid
+        self.index = index
+        if not self.is_valid():
+            raise ValueError("Invalid GeoJSON feature structure")
+        
+        self.bbox = self._calculate_bbox()
+
+    def is_valid(self) -> bool:
+        if not isinstance(self.feature, dict):
+            return False
+        if not isinstance(self.properties, dict):
+            return False
+        if not isinstance(self.geometry, dict):
+            return False
+        if not isinstance(self.type, str) or not self.type:
+            return False
+        if self.coordinates is None:
+            return False
+        return True
+    
+    def get_padded_bbox(self, padding: float) -> List[float]:
+        if padding < 0:
+            raise ValueError("Padding must be non-negative")
+        min_x, min_y, max_x, max_y = self.bbox
+        return [
+            min_x - padding,
+            min_y - padding,
+            max_x + padding,
+            max_y + padding,
+        ]
+    
+    def build_raster_mask(self, template_filepath, dst_filepath):
+        """build a raster mask for this watershed feature.
+        The raster mask will have the same dimensions and geotransform as the template raster."""
+        import geopandas as gpd
+        import rasterio
+        from rasterio.features import rasterize
+
+        geom = {
+            "type": "Feature",
+            "geometry": self.geometry,
+            "properties": {},
+        }
+        gdf = gpd.GeoDataFrame([geom], crs="EPSG:4326")
+
+        with rasterio.open(template_filepath) as src:
+            meta = src.meta.copy()
+            meta.update({
+                "count": 1,
+                "dtype": "uint8",
+                "nodata": 0,
+            })
+
+            shapes = ((geom, 1) for geom in gdf.geometry)
+
+            with rasterio.open(dst_filepath, "w", **meta) as dst:
+                mask = rasterize(
+                    shapes,
+                    out_shape=(src.height, src.width),
+                    transform=src.transform,
+                    fill=0,
+                    dtype="uint8",
+                )
+                dst.write(mask, 1)
+
+    def _calculate_bbox(self) -> List[float]:
+        min_x: Optional[float] = None
+        min_y: Optional[float] = None
+        max_x: Optional[float] = None
+        max_y: Optional[float] = None
+
+        coords = self.coordinates
+        for x, y in WatershedCollection._iter_coordinates(coords):
+            if min_x is None or x < min_x:
+                min_x = x
+            if min_y is None or y < min_y:
+                min_y = y
+            if max_x is None or x > max_x:
+                max_x = x
+            if max_y is None or y > max_y:
+                max_y = y
+
+        if None in (min_x, min_y, max_x, max_y):
+            raise ValueError("Unable to determine bounding box from GeoJSON geometry")
+        return [float(min_x), float(min_y), float(max_x), float(max_y)]
+
+
 class WatershedCollection(object):
     """
     Represents a collection of watersheds defined in a GeoJSON file.
@@ -12,6 +110,12 @@ class WatershedCollection(object):
     def __init__(self, geojson_filepath: str):
         self._geojson_filepath = geojson_filepath
         self._analysis_results = None
+        self._runid_template: Optional[str] = None
+        self._runid_template_hash: Optional[str] = None
+        self._runid_validation_hash: Optional[str] = None
+        self._runid_resource_checksum: Optional[str] = None
+        self._cached_runids: Optional[List[Optional[str]]] = None
+        self._allowed_template_functions_cache: Optional[Dict[str, Any]] = None
         self._load_geojson()
 
     def _load_geojson(self) -> None:
@@ -24,6 +128,46 @@ class WatershedCollection(object):
             raise ValueError("GeoJSON resource contains no features")
         self.geojson_features = features
         self.data = payload
+
+    def __iter__(self) -> Iterable[WatershedFeature]:
+        template = self.runid_template
+        features = self.geojson_features
+        allowed_functions = self._get_allowed_template_functions() if template else None
+
+        for index, feature in enumerate(features):
+            context = self.template_feature_context(index)
+            rendered = self.evaluate_template(template, context, allowed_functions=allowed_functions)
+            runid = str(rendered).strip() or None
+            if runid is None:
+                raise ValueError(f"Feature at index {index} produced an empty run id")
+            yield WatershedFeature(feature, runid=runid, index=index)
+
+    @property
+    def runid_template(self) -> Optional[str]:
+        return self._runid_template
+
+    @runid_template.setter
+    def runid_template(self, value: Optional[str]) -> None:
+        template = (value or '').strip() if value is not None else ''
+        if template != (self._runid_template or ''):
+            self._cached_runids = None
+            self._runid_template_hash = None
+            self._runid_validation_hash = None
+            self._runid_resource_checksum = None
+        self._runid_template = template or None
+        self._allowed_template_functions_cache = None
+        if self._runid_template is None:
+            self._cached_runids = None
+            self._runid_template_hash = None
+            self._runid_validation_hash = None
+            self._runid_resource_checksum = None
+
+    def _get_allowed_template_functions(self) -> Dict[str, Any]:
+        cache = self._allowed_template_functions_cache
+        if cache is None:
+            cache = self.default_template_functions()
+            self._allowed_template_functions_cache = cache
+        return cache
 
     @property
     def geojson_filepath(self) -> str:
@@ -483,6 +627,12 @@ class WatershedCollection(object):
         if resource_checksum:
             validation_key_material += f"|{resource_checksum}"
         validation_hash = hashlib.sha256(validation_key_material.encode("utf-8")).hexdigest()
+
+        self.runid_template = template
+        self._cached_runids = [row.get("run_id") for row in rows]
+        self._runid_template_hash = template_hash
+        self._runid_validation_hash = validation_hash
+        self._runid_resource_checksum = resource_checksum
 
         return {
             "template": template,

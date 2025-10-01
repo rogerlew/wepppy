@@ -31,6 +31,7 @@ from wepppy.nodb import (
 
 from wepppy.nodb.mods.omni import Omni, OmniNoDbLockedException, OmniScenario
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.batch_runner import BatchRunner
 
 from wepppy.rq.project_rq import (
     fetch_dem_and_build_channels_rq,
@@ -50,6 +51,7 @@ from wepppy.rq.project_rq import (
 from wepppy.rq.wepp_rq import run_wepp_rq, post_dss_export_rq
 from wepppy.rq.omni_rq import run_omni_scenarios_rq
 from wepppy.rq.land_and_soil_rq import land_and_soil_rq
+from wepppy.rq.batch_rq import run_batch_rq
 
 from wepppy.topo.watershed_abstraction import (
     ChannelRoutingError,
@@ -77,6 +79,8 @@ from wepppy.all_your_base import isint, isfloat
 from wepppy.weppcloud.utils.archive import has_archive
 
 from wepppy.nodb.status_messenger import StatusMessenger
+
+from ..._common import roles_required
 
 import inspect
 import time
@@ -150,6 +154,59 @@ def hello_world(runid, config):
     time.sleep(2)
 
     return jsonify({'Success': True, 'job_id': job.id, 'exc_info': job.exc_info, 'is_failed': job.is_failed})
+
+
+@rq_api_bp.route('/batch/_/<string:batch_name>/rq/api/run-batch', methods=['POST'])
+@roles_required('Admin')
+def api_run_batch(batch_name: str):
+
+    try:
+        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+    except FileNotFoundError as exc:
+        return jsonify({'success': False, 'error': str(exc)}), 404
+
+    try:
+        watershed_collection = batch_runner.get_watershed_collection()
+    except ValueError as exc:
+        return jsonify({'success': False, 'error': str(exc)}), 400
+
+    template_state = batch_runner.runid_template_state or {}
+    template = template_state.get('template')
+    summary = template_state.get('summary') or {}
+
+    if not template:
+        return jsonify({'success': False, 'error': 'Validate the run ID template before running this batch.'}), 400
+
+    if template_state.get('status') != 'ok' or not summary.get('is_valid', False):
+        return jsonify({'success': False, 'error': 'Resolve template validation issues before running this batch.'}), 400
+
+    resource_checksum = template_state.get('resource_checksum')
+    if resource_checksum and resource_checksum != watershed_collection.checksum:
+        return jsonify({'success': False, 'error': 'The validated template is stale; re-validate after updating the GeoJSON.'}), 409
+
+    try:
+        watershed_collection.runid_template = template
+        first_feature = next(iter(watershed_collection))
+        if first_feature is None:
+            raise StopIteration
+    except StopIteration:
+        return jsonify({'success': False, 'error': 'Watershed GeoJSON contains no features.'}), 400
+    except Exception as exc:
+        return jsonify({'success': False, 'error': f'Unable to compute run IDs: {exc}'}), 400
+
+    try:
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(run_batch_rq, (batch_name,), timeout=TIMEOUT)
+    except Exception:
+        return exception_factory('Failed to enqueue batch run', runid=batch_name)
+
+    payload = {
+        'success': True,
+        'job_id': job.id,
+        'message': 'Batch run submitted.',
+    }
+    return jsonify(payload), 200
 
 
 def _parse_map_change(form):

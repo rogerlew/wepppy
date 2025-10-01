@@ -15,6 +15,7 @@ var BatchRunner = (function () {
         that.sitePrefix = '';
         that.baseUrl = '';
         that.templateInitialised = false;
+        that.command_btn_id = 'btn_run_batch';
 
         that.init = function init(bootstrap) {
             bootstrap = bootstrap || {};
@@ -55,6 +56,13 @@ var BatchRunner = (function () {
             this.resourceEmpty = this.resourceCard.find('[data-role="resource-empty"]');
             this.resourceDetails = this.resourceCard.find('[data-role="resource-details"]');
             this.resourceMeta = this.resourceCard.find('[data-role="resource-meta"]');
+            this.resourceSchema = this.resourceCard.find('[data-role="resource-schema"]');
+            this.resourceSchemaBody = this.resourceCard.find('[data-role="resource-schema-body"]');
+            this.resourceSamples = this.resourceCard.find('[data-role="resource-samples"]');
+            this.resourceSamplesBody = this.resourceCard.find('[data-role="resource-samples-body"]');
+            this.runBatchButton = $('#btn_run_batch');
+            this.runBatchHint = $('#hint_run_batch');
+            this.runBatchLock = $('#run_batch_lock');
 
             this.templateInput = this.templateCard.find('[data-role="template-input"]');
             this.validateButton = this.templateCard.find('[data-role="validate-button"]');
@@ -75,14 +83,14 @@ var BatchRunner = (function () {
                         evt.preventDefault();
                         self._handleUpload();
                     });
-                } else if (this.uploadButton.length) {
+                } else if (this.uploadButton.length && !this.uploadButton.attr('onclick')) {
                     this.uploadButton.on('click', function (evt) {
                         evt.preventDefault();
                         self._handleUpload();
                     });
                 }
             }
-            if (this.validateButton.length) {
+            if (this.validateButton.length && !this.validateButton.attr('onclick')) {
                 this.validateButton.on('click', function (evt) {
                     evt.preventDefault();
                     self._handleValidate();
@@ -131,23 +139,99 @@ var BatchRunner = (function () {
         that.render = function render() {
             this._renderResource();
             this._renderValidation();
+            this._renderRunControls();
+        };
+
+        that._setRunBatchMessage = function (message, cssClass) {
+            if (!this.runBatchHint || !this.runBatchHint.length) {
+                return;
+            }
+            this.runBatchHint.removeClass('text-danger text-success text-warning text-muted text-info');
+            if (cssClass) {
+                this.runBatchHint.addClass(cssClass);
+            }
+            this.runBatchHint.text(message || '');
+        };
+
+        that._renderRunControls = function (options) {
+            options = options || {};
+            var preserveMessage = options.preserveMessage === true;
+
+            if (!this.runBatchButton || !this.runBatchButton.length) {
+                return;
+            }
+
+            var jobLocked = this.should_disable_command_button(this);
+            this.update_command_button_state(this);
+
+            if (this.runBatchLock && this.runBatchLock.length) {
+                if (jobLocked) {
+                    this.runBatchLock.show();
+                } else {
+                    this.runBatchLock.hide();
+                }
+            }
+
+            if (jobLocked) {
+                this.runBatchButton.prop('disabled', true);
+                this._setRunBatchMessage('Batch run in progress…', 'text-muted');
+                return;
+            }
+
+            var enabled = Boolean(this.state.enabled);
+            var snapshot = this.state.snapshot || {};
+            var resources = snapshot.resources || {};
+            var resource = resources.watershed_geojson;
+            var templateState = this.state.validation || (snapshot.metadata && snapshot.metadata.template_validation) || null;
+            var templateStatus = templateState && (templateState.status || 'ok');
+            var summary = templateState && templateState.summary;
+            var templateIsValid = Boolean(templateState && summary && summary.is_valid && templateStatus === 'ok');
+
+            var allowRun = enabled && Boolean(resource) && templateIsValid;
+            var message = '';
+            var cssClass = 'text-muted';
+
+            if (!enabled) {
+                message = 'Batch runner is disabled.';
+                cssClass = 'text-warning';
+            } else if (!resource) {
+                message = 'Upload a watershed GeoJSON before running.';
+            } else if (!templateIsValid) {
+                message = 'Validate and resolve template issues before running.';
+                cssClass = 'text-warning';
+            } else {
+                message = 'Ready to run batch.';
+            }
+
+            this.runBatchButton.prop('disabled', !allowRun);
+
+            if (!preserveMessage || !allowRun) {
+                this._setRunBatchMessage(message, cssClass);
+            }
         };
 
         that._renderResource = function () {
             var snapshot = this.state.snapshot || {};
             var resources = snapshot.resources || {};
             var resource = resources.watershed_geojson;
+            var self = this;
+            console.debug('[BatchRunner] _renderResource snapshot', snapshot);
+            console.debug('[BatchRunner] _renderResource resource present?', Boolean(resource), resource);
 
             if (!this.resourceCard.length) {
                 return;
             }
 
             if (!resource) {
+                console.debug('[BatchRunner] No watershed resource on render; showing empty state.');
                 this._setHidden(this.resourceEmpty, false);
                 this._setHidden(this.resourceDetails, true);
+                this._setHidden(this.resourceSchema, true);
+                this._setHidden(this.resourceSamples, true);
                 return;
             }
 
+            console.debug('[BatchRunner] Watershed resource detected; updating details card.');
             this._setHidden(this.resourceEmpty, true);
             this._setHidden(this.resourceDetails, false);
 
@@ -159,6 +243,9 @@ var BatchRunner = (function () {
             metaHtml.push(this._renderMetaRow('Size', this._formatBytes(resource.size_bytes)));
             metaHtml.push(this._renderMetaRow('Checksum', resource.checksum || '—'));
             metaHtml.push(this._renderMetaRow('Feature Count', resource.feature_count != null ? resource.feature_count : '—'));
+            if (Array.isArray(resource.properties)) {
+                metaHtml.push(this._renderMetaRow('Property Count', resource.properties.length));
+            }
             if (resource.bbox) {
                 metaHtml.push(this._renderMetaRow('Bounding Box', this._formatBBox(resource.bbox)));
             }
@@ -180,6 +267,40 @@ var BatchRunner = (function () {
             }
 
             this.resourceMeta.html(metaHtml.join(''));
+
+            var schema = resource.attribute_schema || {};
+            var schemaKeys = Object.keys(schema || {});
+            if (schemaKeys.length) {
+                schemaKeys.sort();
+                var schemaRows = schemaKeys.map(function (name) {
+                    return '<tr><td>' + self._escapeHtml(name) + '</td><td>' + self._escapeHtml(schema[name]) + '</td></tr>';
+                });
+                this.resourceSchemaBody.html(schemaRows.join(''));
+                this._setHidden(this.resourceSchema, false);
+            } else {
+                this.resourceSchemaBody.empty();
+                this._setHidden(this.resourceSchema, true);
+            }
+
+            var samples = Array.isArray(resource.sample_properties) ? resource.sample_properties : [];
+            if (samples.length) {
+                var sampleRows = samples.map(function (sample) {
+                    var props = sample.properties || {};
+                    var propsJson;
+                    try {
+                        propsJson = JSON.stringify(props, null, 2);
+                    } catch (err) {
+                        propsJson = String(props);
+                    }
+                    return '<tr><td>' + self._escapeHtml(sample.index != null ? sample.index : '—') + '</td>' +
+                        '<td><pre class="mb-0 small">' + self._escapeHtml(propsJson) + '</pre></td></tr>';
+                });
+                this.resourceSamplesBody.html(sampleRows.join(''));
+                this._setHidden(this.resourceSamples, false);
+            } else {
+                this.resourceSamplesBody.empty();
+                this._setHidden(this.resourceSamples, true);
+            }
         };
 
         that._renderValidation = function () {
@@ -190,6 +311,8 @@ var BatchRunner = (function () {
             var snapshot = this.state.snapshot || {};
             var resources = snapshot.resources || {};
             var resource = resources.watershed_geojson;
+            var manifest = snapshot || {};
+            var storedValidation = this._extractValidation(manifest);
 
             if (!this.templateInitialised) {
                 var tpl = snapshot.runid_template || '';
@@ -207,11 +330,11 @@ var BatchRunner = (function () {
                 return;
             }
 
-            var validation = this.state.validation || this._extractValidation(snapshot);
+            var validation = this.state.validation || storedValidation;
             this.state.validation = validation;
 
             if (!validation) {
-                if (manifest.metadata && manifest.metadata.template_validation && manifest.metadata.template_validation.status === 'stale') {
+                if (storedValidation && storedValidation.status === 'stale') {
                     this.templateStatus.text('Previous validation is stale. Re-run validation after reviewing the new GeoJSON.');
                 } else {
                     this.templateStatus.text('No validation recorded. Provide a template and validate.');
@@ -228,6 +351,7 @@ var BatchRunner = (function () {
             summaryItems.push('<li>Valid run IDs: ' + (summary.valid_run_ids != null ? summary.valid_run_ids : '—') + '</li>');
             summaryItems.push('<li>Unique run IDs: ' + (summary.unique_run_ids != null ? summary.unique_run_ids : '—') + '</li>');
             summaryItems.push('<li>Duplicate run IDs: ' + (summary.duplicate_run_ids != null ? summary.duplicate_run_ids : '—') + '</li>');
+            summaryItems.push('<li>Errors: ' + (summary.errors != null ? summary.errors : '—') + '</li>');
 
             var statusText = summary.is_valid ? 'Template is valid.' : 'Template has issues. Review details below.';
             if (validation.status === 'stale') {
@@ -313,20 +437,72 @@ var BatchRunner = (function () {
                         throw payload.error || 'Upload failed.';
                     }
 
-                    var snapshot = self.state.snapshot;
-                    snapshot.resources = snapshot.resources || {};
-                    snapshot.resources.watershed_geojson = payload.resource;
-                    snapshot.metadata = snapshot.metadata || {};
-                    if (payload.template_validation) {
-                        snapshot.metadata.template_validation = payload.template_validation;
-                        self.state.validation = payload.template_validation;
-                    } else if (snapshot.metadata.template_validation) {
-                        snapshot.metadata.template_validation.status = 'stale';
-                        self.state.validation = snapshot.metadata.template_validation;
+                    if (payload.snapshot) {
+                        console.debug('[BatchRunner] Upload response snapshot', payload.snapshot);
+                        self.state.snapshot = payload.snapshot || {};
+                        self.state.validation = self._extractValidation(self.state.snapshot);
+                    } else {
+                        console.debug('[BatchRunner] Upload response metadata', payload);
+                        var snapshot = self.state.snapshot || {};
+                        snapshot.resources = snapshot.resources || {};
+                        var resource = payload.resource;
+                        if (!resource && payload.resource_metadata) {
+                            resource = Object.assign({}, payload.resource_metadata);
+                            var analysis = payload.template_validation || {};
+                            if (analysis && typeof analysis === 'object') {
+                                if (analysis.feature_count != null) {
+                                    resource.feature_count = analysis.feature_count;
+                                }
+                                if (analysis.bbox) {
+                                    resource.bbox = analysis.bbox;
+                                }
+                                if (analysis.epsg) {
+                                    resource.epsg = analysis.epsg;
+                                }
+                                if (analysis.epsg_source) {
+                                    resource.epsg_source = analysis.epsg_source;
+                                }
+                                if (analysis.checksum) {
+                                    resource.checksum = analysis.checksum;
+                                }
+                                if (analysis.size_bytes != null) {
+                                    resource.size_bytes = analysis.size_bytes;
+                                }
+                                if (analysis.attribute_schema) {
+                                    resource.attribute_schema = analysis.attribute_schema;
+                                }
+                                if (Array.isArray(analysis.properties)) {
+                                    resource.properties = analysis.properties;
+                                }
+                                if (Array.isArray(analysis.sample_properties)) {
+                                    resource.sample_properties = analysis.sample_properties;
+                                }
+                            }
+                        }
+                        if (resource) {
+                            console.debug('[BatchRunner] Merging resource into snapshot', resource);
+                            snapshot.resources.watershed_geojson = resource;
+                        } else {
+                            console.debug('[BatchRunner] No resource derived from payload.');
+                        }
+                        snapshot.metadata = snapshot.metadata || {};
+                        if (payload.template_validation && payload.template_validation.summary) {
+                            snapshot.metadata.template_validation = payload.template_validation;
+                            self.state.validation = payload.template_validation;
+                        } else if (snapshot.metadata.template_validation) {
+                            snapshot.metadata.template_validation.status = 'stale';
+                            self.state.validation = snapshot.metadata.template_validation;
+                        } else {
+                            self.state.validation = null;
+                        }
+                        self.state.snapshot = snapshot;
                     }
 
+                    console.debug('[BatchRunner] Post-upload snapshot state', self.state.snapshot);
                     self._setUploadStatus(payload.message || 'Upload complete.', 'text-success');
                     fileInput.value = '';
+                    self.templateInitialised = false;
+                    self._applyResourceVisibility();
                     self.render();
                 })
                 .catch(function (error) {
@@ -371,10 +547,15 @@ var BatchRunner = (function () {
                     }
 
                     self.state.validation = payload.validation;
-                    var snapshot = self.state.snapshot;
-                    snapshot.metadata = snapshot.metadata || {};
-                    snapshot.metadata.template_validation = payload.stored;
-                    snapshot.runid_template = template;
+                    if (payload.snapshot) {
+                        self.state.snapshot = payload.snapshot || {};
+                    } else {
+                        var snapshot = self.state.snapshot || {};
+                        snapshot.metadata = snapshot.metadata || {};
+                        snapshot.metadata.template_validation = payload.stored;
+                        snapshot.runid_template = template;
+                        self.state.snapshot = snapshot;
+                    }
                     self.templateInitialised = false;
                     self.render();
                 })
@@ -405,30 +586,121 @@ var BatchRunner = (function () {
             }
         };
 
+        that._setRunBatchBusy = function (busy, message, cssClass) {
+            if (this.runBatchButton && this.runBatchButton.length && busy) {
+                this.runBatchButton.prop('disabled', true);
+            }
+
+            if (this.runBatchLock && this.runBatchLock.length) {
+                if (busy) {
+                    this.runBatchLock.show();
+                } else if (!this.should_disable_command_button(this)) {
+                    this.runBatchLock.hide();
+                }
+            }
+
+            if (message != null) {
+                this._setRunBatchMessage(message, cssClass || 'text-muted');
+            }
+
+            if (!busy) {
+                this._renderRunControls({ preserveMessage: true });
+            }
+        };
+
+        that.uploadGeojson = function (evt) {
+            if (!this.state.enabled) {
+                this._setUploadStatus('Batch runner is disabled.', 'text-warning');
+                return false;
+            }
+
+            if (evt) {
+                evt.preventDefault();
+                if (typeof evt.stopImmediatePropagation === 'function') {
+                    evt.stopImmediatePropagation();
+                }
+            }
+
+            this._handleUpload();
+            return false;
+        };
+
+        that.validateTemplate = function (evt) {
+            if (!this.state.enabled) {
+                this.templateStatus.text('Batch runner is disabled.');
+                return false;
+            }
+
+            if (evt) {
+                evt.preventDefault();
+                if (typeof evt.stopImmediatePropagation === 'function') {
+                    evt.stopImmediatePropagation();
+                }
+            }
+
+            this._handleValidate();
+            return false;
+        };
+
         that._setUploadStatus = function (message, cssClass) {
             if (!this.uploadStatus.length) {
                 return;
             }
-            this.uploadStatus.removeClass('text-danger text-success text-muted');
+            this.uploadStatus.removeClass('text-danger text-success text-muted text-warning');
             if (cssClass) {
                 this.uploadStatus.addClass(cssClass);
             }
             this.uploadStatus.text(message || '');
         };
 
+        that._applyResourceVisibility = function () {
+            if (!this.resourceCard || !this.resourceCard.length) {
+                return;
+            }
+            var snapshot = this.state.snapshot || {};
+            var resources = snapshot.resources || {};
+            var resource = resources.watershed_geojson;
+            console.debug('[BatchRunner] _applyResourceVisibility resource present?', Boolean(resource), resource);
+            if (resource) {
+                this.resourceEmpty.hide();
+                this.resourceDetails.show();
+            }
+        };
+
+        that._escapeHtml = function (value) {
+            return $('<span/>').text(value != null ? value : '').html();
+        };
+
         that._renderMetaRow = function (label, value) {
-            return '<dt class="col-sm-4">' + $('<span/>').text(label).html() + '</dt>' +
-                '<dd class="col-sm-8">' + $('<span/>').text(value != null ? value : '—').html() + '</dd>';
+            return '<dt class="col-sm-4">' + this._escapeHtml(label) + '</dt>' +
+                '<dd class="col-sm-8">' + this._escapeHtml(value != null ? value : '—') + '</dd>';
         };
 
         that._setHidden = function (element, hidden) {
             if (!element || !element.length) {
                 return;
             }
+            var domNode = element[0];
             if (hidden) {
                 element.attr('hidden', 'hidden');
+                element.prop('hidden', true);
+                element.addClass('d-none');
+                if (typeof element.hide === 'function') {
+                    element.hide();
+                }
+                if (domNode && domNode.style) {
+                    domNode.style.setProperty('display', 'none', 'important');
+                }
             } else {
                 element.removeAttr('hidden');
+                element.prop('hidden', false);
+                element.removeClass('d-none');
+                if (domNode && domNode.style) {
+                    domNode.style.removeProperty('display');
+                }
+                if (typeof element.show === 'function') {
+                    element.show();
+                }
             }
         };
 
@@ -465,6 +737,60 @@ var BatchRunner = (function () {
                 // ignore
             }
             return timestamp || '—';
+        };
+
+        that.runBatch = function () {
+            if (!this.state.enabled) {
+                this._setRunBatchMessage('Batch runner is disabled.', 'text-warning');
+                return;
+            }
+
+            if (this.should_disable_command_button(this)) {
+                return;
+            }
+
+            var self = this;
+            self._setRunBatchBusy(true, 'Submitting batch run…', 'text-muted');
+
+            fetch(this._apiUrl('rq/api/run-batch'), {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        data._httpStatus = response.status;
+                        return data;
+                    });
+                })
+                .then(function (payload) {
+                    if (!payload.success) {
+                        throw payload.error || 'Failed to submit batch run.';
+                    }
+
+                    if (payload.job_id) {
+                        self.set_rq_job_id(self, payload.job_id);
+                    } else {
+                        self.update_command_button_state(self);
+                    }
+
+                    var successMessage = payload.message || 'Batch run submitted.';
+                    self._setRunBatchMessage(successMessage, 'text-success');
+                })
+                .catch(function (error) {
+                    var message;
+                    if (typeof error === 'string') {
+                        message = error;
+                    } else if (error && typeof error === 'object') {
+                        message = error.error || error.message;
+                    }
+                    self._setRunBatchMessage(message || 'Failed to submit batch run.', 'text-danger');
+                })
+                .finally(function () {
+                    self._setRunBatchBusy(false);
+                });
         };
 
         return that;

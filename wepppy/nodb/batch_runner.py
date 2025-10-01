@@ -20,6 +20,18 @@ from wepppy.weppcloud.utils.helpers import get_batch_root_dir
 
 from .base import NoDbBase, TriggerEvents, nodb_setter
 
+from enum import Enum
+
+class RunDirectiveEnum(str, Enum):
+    FETCH_DEM = "fetch_dem"
+    BUILD_CHANNELS = "build_channels"
+    FIND_OUTLET = "find_outlet"
+    BUILD_SUBCATCHMENTS = "build_subcatchments"
+    ABSTRACT_WATERSHED = "abstract_watershed"
+    BUILD_LANDUSE = "build_landuse"
+    BUILD_SOILS = "build_soils"
+    ACQUIRE_RAP = "acquire_rap"
+
 
 class BatchRunner(NoDbBase):
     """NoDb controller for batch runner state."""
@@ -34,11 +46,18 @@ class BatchRunner(NoDbBase):
             self._geojson_state = None
             self._runid_template_state = None
             self._base_wd = os.path.join(self.wd, "_base")
+            self._run_directives = {}
+            for rd in RunDirectiveEnum:
+                self._run_directives[rd.value] = True
 
         self._init_base_project()
 
         os.makedirs(self.batch_runs_dir, exist_ok=True)
         os.makedirs(self.resources_dir, exist_ok=True)
+
+    @property
+    def run_directives(self) -> Dict[str, bool]:
+        return self._run_directives
 
     @property
     def batch_name(self) -> str:
@@ -119,12 +138,25 @@ class BatchRunner(NoDbBase):
         # Update state
         with self.locked():
             self._geojson_state = analysis_results
+            if self._runid_template_state:
+                stale_state = deepcopy(self._runid_template_state)
+                stale_state["status"] = "stale"
+                summary = stale_state.get("summary") or {}
+                summary["is_valid"] = False
+                stale_state["summary"] = summary
+                self._runid_template_state = stale_state
 
     def get_watershed_collection(self) -> WatershedCollection:
         """Get the registered watershed collection, if any."""
         if not self._geojson_state:
             raise ValueError("No GeoJSON registered.")    
         return WatershedCollection.load_from_analysis_results(self._geojson_state)
+
+    @property
+    def geojson_state(self) -> Optional[Dict[str, Any]]:
+        if not self._geojson_state:
+            return None
+        return deepcopy(self._geojson_state)
     
     @property
     def runid_template_state(self) -> Optional[Dict[str, Any]]:
@@ -135,4 +167,4 @@ class BatchRunner(NoDbBase):
     def runid_template_state(self, value: Optional[Dict[str, Any]]) -> None:
         self._runid_template_state = value
 
-__all__ = ["BatchRunner"]
+__all__ = ["BatchRunner", "RunDirectiveEnum"]
