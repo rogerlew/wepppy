@@ -1,0 +1,51 @@
+{
+  "type": "FeatureCollection",
+  "name": "batch_runner_sample",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "A",
+      "properties": {
+        "HucName": "Blue Creek",
+        "Region": "NW",
+        "NumericId": 101
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-116.91234, 46.7321]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "B",
+      "properties": {
+        "HucName": "Cedar Grove",
+        "Region": "NW",
+        "NumericId": 102
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-116.8356, 46.7519]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "C",
+      "properties": {
+        "HucName": "Juniper Basin",
+        "Region": "SW",
+        "NumericId": 103
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-116.7021, 46.8013]
+      }
+    }
+  ]
+}

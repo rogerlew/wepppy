@@ -100,6 +100,8 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 def get_batch_wd(batch_name: str) -> str:
     return str(get_batch_root_dir() / batch_name)
 
+def get_batch_base_wd(batch_name: str) -> str:
+    return str(get_batch_root_dir() / batch_name / '_base')
 
 def get_batch_root_dir() -> Path:
     root = current_app.config.get("BATCH_RUNNER_ROOT")

@@ -116,11 +116,11 @@ def create_batch_project():
         try:
             base_config = _validate_config(base_config_input, available_configs)
             batch_name = _validate_batch_name(batch_name_input)
-            runner = _create_batch_project(
+            batch_runner = _create_batch_project(
                 batch_name=batch_name,
                 base_config=base_config
             )
-            return redirect(url_for("batch_runner.view_batch", batch_name=runner.batch_name))   
+            return redirect(url_for("batch_runner.view_batch", batch_name=batch_runner.batch_name))   
         except (ValueError, FileExistsError, FileNotFoundError) as err:
             errors.append(str(err))
         except Exception as err:  # pragma: no cover - defensive path
@@ -140,7 +140,8 @@ def create_batch_project():
 @roles_required("Admin")
 def view_batch(batch_name: str):
     """Render the placeholder batch detail page for Batch Runner (Phase 0)."""
-    if not _batch_runner_feature_enabled():
+    feature_enabled = _batch_runner_feature_enabled()
+    if not feature_enabled:
         return jsonify(_batch_runner_disabled_response()), 403
     
     runner = BatchRunner.getInstanceFromBatchName(batch_name)
@@ -149,7 +150,7 @@ def view_batch(batch_name: str):
     # for now get nodb singletons like in run_0_bp.runs0 from base_wd
     # we will setup a proper common context loader in the future
 
-    from wepppy.nodb.ron import Ron, Landuse, Soils, Climate, Wepp, Watershed, Unitizer
+    from wepppy.nodb import Ron, Landuse, Soils, Climate, Wepp, Watershed, Unitizer
     from wepppy.nodb.topaz import Topaz
     from wepppy.nodb.observed import Observed
     from wepppy.nodb.mods.rangeland_cover import RangelandCover
@@ -206,6 +207,8 @@ def view_batch(batch_name: str):
 
 
     return render_template("manage.htm", 
+                            feature_enabled=feature_enabled,
+                            batch_name=batch_name,
                             user=current_user,
                             site_prefix=site_prefix,
                             topaz=topaz,

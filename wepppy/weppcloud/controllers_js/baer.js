@@ -103,7 +103,7 @@ var Baer = function () {
             var map = Map.getInstance();
 
             $.post({
-                url: "tasks/remove_sbs/",
+                url: "tasks/remove_sbs",
                 contentType: false,
                 cache: false,
                 processData: false,
@@ -168,7 +168,7 @@ var Baer = function () {
             var self = instance;
 
             $.get({
-                url: "view/modify_burn_class/",
+                url: "view/modify_burn_class",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -199,7 +199,7 @@ var Baer = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "tasks/modify_burn_class/",
+                url: "tasks/modify_burn_class",
                 data: JSON.stringify({ classes: data, nodata_vals: nodata_vals }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -241,7 +241,7 @@ var Baer = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "tasks/modify_color_map/",
+                url: "tasks/modify_color_map",
                 data: JSON.stringify({ color_map: data }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",

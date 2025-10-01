@@ -111,7 +111,7 @@ var Wepp = function () {
             formData.append('input_upload_cover_transform', file);
 
             $.post({
-                url: "tasks/upload_cover_transform/",
+                url: "tasks/upload_cover_transform",
                 data: formData,
                 contentType: false,
                 cache: false,
