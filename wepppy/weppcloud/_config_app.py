@@ -38,3 +38,10 @@ def config_app(app, logger=None):
 
     if 'BATCH_RUNNER_ROOT' not in app.config:
         app.config['BATCH_RUNNER_ROOT'] = os.getenv('BATCH_RUNNER_ROOT', '/wc1/batch')
+
+    if 'BATCH_GEOJSON_MAX_MB' not in app.config:
+        raw_limit = os.getenv('BATCH_GEOJSON_MAX_MB')
+        try:
+            app.config['BATCH_GEOJSON_MAX_MB'] = int(raw_limit) if raw_limit else 10
+        except (TypeError, ValueError):
+            app.config['BATCH_GEOJSON_MAX_MB'] = 10

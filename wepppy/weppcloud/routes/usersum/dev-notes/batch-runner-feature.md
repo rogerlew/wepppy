@@ -38,6 +38,7 @@ A developer and administrator tool to orchestrate large numbers of watersheds th
 - `/batch/<name>/` loads persisted manifests through `BatchRunner.getInstance`, exposing the same bootstrap payload that future controls will consume.
 - Base project creation reuses the existing `NoDbBase` pipeline; `nodb/configs/batch/default_batch.cfg` is a placeholder that keeps config semantics aligned with the standard run flow until batch-specific knobs arrive, which ideally is never.
 - Directory layout now includes `_base/` and `resources/`, giving Phase 2 a concrete landing zone for GeoJSON intake and manifest enrichment.
+- Phase 2 resource intake is now live: GeoJSON uploads land in `resources/`, metadata (feature count, bbox, checksum, EPSG) persists under `resources['watershed_geojson']`, manifest version advances to `2`, and template validation snapshots (summary, duplicates, sample rows) are cached under `metadata['template_validation']` with stale detection on resource replacement.
 
 ## Manifest Design (codex)
 - **Dataclass wrapper.** `BatchRunnerManifest` is the authoritative schema for what lands in `batch_runner.nodb`. `BatchRunner.manifest_dict()` feeds templates/JS, while the dataclass keeps field names explicit for mutation helpers.
@@ -55,6 +56,7 @@ A developer and administrator tool to orchestrate large numbers of watersheds th
   - `control_hashes`: fingerprints of `_base` controllers to detect configuration drift.
   - `metadata`: scratchpad for prototype data; `BatchRunner.update_manifest` continues to route unknown keys here so experiments stay isolated.
 - **Lifecycle.** `BatchRunner.__init__` creates a default manifest, backfills config identifiers, and persists it via standard NoDb locking/dump semantics. `BatchRunner.update_manifest(**updates)` routes known keys onto the dataclass and tucks unrecognised keys into `metadata`, keeping mutation safe even as we iterate.
+  Resource uploads flow through `BatchRunner.register_resource`, which stamps history entries and marks cached template results as stale; `record_template_validation` stores validation snapshots and history while updating `runid_template`.
 - **Access patterns.** Routes call `BatchRunner.getInstance(batch_wd)` to load the manifest; UI bootstrap receives the serialised dict. Future phases should expose focused helpers (`register_resource`, `record_validation`, `enqueue_runs`) rather than ad-hoc `update_manifest` calls so we centralise schema changes and validation logic.
 
 ## Filesystem
@@ -202,6 +204,37 @@ WhiteBoxTools wrapper
   - Manifest files can be created/read with default content and version headers.
   - The Batch Runner control renders in the UI behind the feature flag with a clear “coming soon” message.
   - Dedicated `batch` queue configuration is merged and workers can be launched without processing jobs.
+
+### Phase 2 Implementation Plan
+- **GeoJSON intake service**
+  - Add `POST /batch/<name>/upload-geojson` endpoint that writes uploads into `<batch>/resources/` with conflict-aware naming and size limits. Assume if user uploads a file with the same name they are intending on replacing the file. Provide feedback this has occurred.
+  - Validate file extension and MIME, reject multi-feature collections without `FeatureCollection` semantics, and stream to disk to avoid loading entire payloads into memory.
+  - In `BatchRunner` compute checksum, feature count, bounding boxes, EPSG code, and attribute schema; persist in `manifest.resources["watershed_geojson"]` along with upload timestamp and user.
+  - Guard writes with `BatchRunner.locked()` to keep manifest updates atomic and respect NoDb locking.
+- **Template validation pipeline**
+  - Implement `POST /batch/<name>/validate-template` that accepts a template string and optional filters, loads the stored GeoJSON, and evaluates run ids for each feature.
+  - Surface duplicates, missing attributes, or invalid expressions; return proposed run ids, validation errors, and summary stats.
+  - Cache the latest validation payload in `manifest.metadata["template_validation"]` with hashes of template + resource so the UI can detect when results are stale.
+- **Manifest helpers**
+  - Extend `BatchRunner` with typed methods (`register_resource`, `record_template_validation`) that wrap `update_manifest` and enforce schema updates in one place.
+  - Store resource metadata under `resources[resource_id]` and append a history entry (`event="resource_uploaded"` or `"template_validated"`).
+  - Introduce manifest version `2` once resource metadata lands; add migration hook in `_post_instance_loaded` to backfill missing keys on older manifests.
+- **Frontend integration**
+  - Build Dropzone-style uploader on `/batch/<name>/` showing progress, checksum, projection, and feature counts using the new API responses.
+  - Add template editor with preview table (first N run ids) and error list; disable `Run Batch` when validation fails or results are stale.
+  - Persist UI state in the bootstrap payload so refreshes do not lose the latest validation snapshot.
+- **Validation + test coverage**
+  - Write unit tests for new endpoints covering happy path, invalid files, oversized uploads, CRS mismatch, and stale template detection.
+  - Add fixture GeoJSON samples (small square, invalid CRS, duplicate ids) under `tests/data/batch_runner/` for deterministic checks.
+  - Provide integration test that simulates upload + template validation, asserting manifest fields (`resources`, `history`, `metadata`).
+- **Operational guardrails**
+  - Enforce per-file size limit via config (`BATCH_GEOJSON_MAX_MB`) and log drop reasons for future tuning. set default BATCH_GEOJSON_MAX_MB to 10 MB
+  - Emit structured logs/events through BatchRunner.logger (see `base._init_logging`) when resources change to aid auditing; consider webhook to Ops channel when large uploads occur.
+  - Document cleanup command to remove orphaned resources if manifest entries are pruned.
+- **Exit Criteria**
+  - Admin can upload GeoJSON, see validation details, and rerun validations after editing templates without manual filesystem access.
+  - Manifest tracks resource metadata, template results, and history entries for both actions.
+  - Test suite covers success and failure modes for upload + validation flows with no regressions in Phase 1 scaffolding.
 
 ## Open Questions (Resolved)
 - **Omni reuse:** Omni must execute per run after WEPP completes; no shared outputs.
