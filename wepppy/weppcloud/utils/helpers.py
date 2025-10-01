@@ -113,10 +113,6 @@ def get_batch_base_wd(batch_name: str) -> str:
 
 
 def get_batch_root_dir() -> Path:
-    root = current_app.config.get("BATCH_RUNNER_ROOT")
-    if root:
-        return Path(root)
-    # Default placeholder mirrors production layout but remains configurable.
     return "/wc1/batch"
 
 
