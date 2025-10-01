@@ -6,9 +6,12 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import os
+from os.path import exists as _exists
+from os.path import join as _join
+from os.path import split as _split
+
 import re
 from copy import deepcopy
-from pathlib import Path
 import shutil
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -45,11 +48,12 @@ class BatchRunner(NoDbBase):
         raise NotImplementedError("BatchRunner does not support getInstanceFromRunID")
 
     @classmethod
-    def getInstanceFromBatchName(cls, batch_name: str) -> Optional[BatchRunner]:
-        batch_wd = get_batch_root_dir() / batch_name
-        if not batch_wd.exists():
-            return None
-        return cls.getInstance(str(batch_wd))
+    def getInstanceFromBatchName(cls, batch_name: str) -> BatchRunner:
+        batch_root_dir = get_batch_root_dir()
+        batch_wd = _join(batch_root_dir, batch_name)
+        if not _exists(batch_wd):
+            raise FileNotFoundError(f"Batch '{batch_name}' does not exist. wd: {batch_wd}")
+        return cls.getInstance(batch_wd)
 
     # ------------------------------------------------------------------
     # properties

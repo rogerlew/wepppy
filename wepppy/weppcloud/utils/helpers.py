@@ -98,17 +98,17 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
     
 def get_batch_wd(batch_name: str) -> str:
-    return str(get_batch_root_dir() / batch_name)
+    return _join(get_batch_root_dir(), batch_name)
 
 def get_batch_base_wd(batch_name: str) -> str:
-    return str(get_batch_root_dir() / batch_name / '_base')
+    return _join(get_batch_root_dir(), batch_name, '_base')
 
 def get_batch_root_dir() -> Path:
     root = current_app.config.get("BATCH_RUNNER_ROOT")
     if root:
         return Path(root)
     # Default placeholder mirrors production layout but remains configurable.
-    return Path("/wc1/batch")
+    return "/wc1/batch"
 
 
 def url_for_run(endpoint: str, **values) -> str:

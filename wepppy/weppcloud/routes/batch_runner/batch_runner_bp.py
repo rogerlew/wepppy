@@ -7,10 +7,8 @@ import hashlib
 import os
 import json
 import re
-from pathlib import Path
-import tempfile
 from copy import deepcopy
-from typing import Dict, Optional, Sequence
+from typing import Dict, Optional, Sequence, Union
 
 from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_security import current_user
@@ -57,29 +55,33 @@ def _validate_config(config_name: str, available: Sequence[str]) -> str:
     return config_name
 
 
+BatchRoot = Union[str, os.PathLike[str]]
+
+
 def _create_batch_project(
     batch_name: str,
     base_config: str,    # config means no .cfg extension
     batch_config: str = "default_batch",  # config means no .cfg extension
-    batch_root: Optional[Path] = None,
-) -> Dict[str, object]:
+    batch_root: Optional[BatchRoot] = None,
+) -> BatchRunner:
     batch_root = batch_root or get_batch_root_dir()
+    batch_root_path = os.fspath(batch_root)
     base_config_cfg = f"{base_config}.cfg"
-    config_file = Path(get_config_dir()) / base_config_cfg
-    if not config_file.exists():
+    config_file = os.path.join(get_config_dir(), base_config_cfg)
+    if not os.path.exists(config_file):
         raise FileNotFoundError(f"Configuration '{config_file}' does not exist.")
 
-    batch_root.mkdir(parents=True, exist_ok=True)
+    os.makedirs(batch_root_path, exist_ok=True)
 
-    batch_wd = batch_root / batch_name
-    if batch_wd.exists():
+    batch_wd = os.path.join(batch_root_path, batch_name)
+    if os.path.exists(batch_wd):
         raise FileExistsError(f"Batch '{batch_name}' already exists.")
 
     # create batch_wd
-    batch_wd.mkdir(parents=True, exist_ok=False)
+    os.makedirs(batch_wd)
 
     runner = BatchRunner(
-        str(batch_wd),
+        batch_wd,
         f"batch/{batch_config}.cfg",
         base_config_cfg,
     )
@@ -144,8 +146,8 @@ def view_batch(batch_name: str):
     if not feature_enabled:
         return jsonify(_batch_runner_disabled_response()), 403
     
-    runner = BatchRunner.getInstanceFromBatchName(batch_name)
-    wd = runner.base_wd
+    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+    wd = batch_runner.base_wd
     
     # for now get nodb singletons like in run_0_bp.runs0 from base_wd
     # we will setup a proper common context loader in the future
@@ -274,10 +276,10 @@ def upload_geojson(batch_name: str):
         return jsonify({"success": False, "error": "Only .geojson or .json files are supported."}), 400
 
     max_bytes = 10 * 1024 * 1024  # 10 MB
-    resources_dir = Path(batch_runner.resources_dir)
-    resources_dir.mkdir(parents=True, exist_ok=True)
-    dest_path = resources_dir / safe_name
-    replaced = dest_path.exists()
+    resources_dir = batch_runner.resources_dir
+    os.makedirs(resources_dir, exist_ok=True)
+    dest_path = os.path.join(resources_dir, safe_name)
+    replaced = os.path.exists(dest_path)
     storage.save(dest_path)
 
     # initial validation for security
@@ -285,19 +287,19 @@ def upload_geojson(batch_name: str):
         watershed_collection = WatershedCollection(dest_path)
         analysis_results = watershed_collection.analysis_results  # lazy runs analysis
     except ValueError as exc:
-        dest_path.unlink(missing_ok=True)
+        _safe_unlink(dest_path)
         return jsonify({"success": False, "error": str(exc)}), 400
     except Exception as exc:  # pragma: no cover - unexpected errors
-        dest_path.unlink(missing_ok=True)
+        _safe_unlink(dest_path)
         current_app.logger.exception("Failed to ingest GeoJSON upload")
         return jsonify({"success": False, "error": "Failed to process GeoJSON upload."}), 500
 
     if analysis_results.get("feature_count", 0) == 0:
-        dest_path.unlink(missing_ok=True)
+        _safe_unlink(dest_path)
         return jsonify({"success": False, "error": "GeoJSON contains no features."}), 400
 
-    if dest_path.stat().st_size > max_bytes:
-        dest_path.unlink(missing_ok=True)
+    if os.path.getsize(dest_path) > max_bytes:
+        _safe_unlink(dest_path)
         return jsonify({"success": False, "error": "GeoJSON file exceeds maximum size of 10 MB."}), 400
 
     relative_path = os.path.relpath(dest_path, batch_runner.wd)
@@ -325,10 +327,17 @@ def upload_geojson(batch_name: str):
         "message": "GeoJSON uploaded successfully."
     }
 
-    if watershed_collection.template_validation:
-        response_payload["template_validation"] = deepcopy(watershed_collection.template_validation)
+    if watershed_collection.analysis_results:
+        response_payload["template_validation"] = deepcopy(watershed_collection.analysis_results)
 
     return jsonify(response_payload), 200
+
+
+def _safe_unlink(path: Union[str, os.PathLike[str]]) -> None:
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
 
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/validate-template", methods=["POST"])
@@ -374,4 +383,3 @@ def validate_template(batch_name: str):
     }
 
     return jsonify(response_payload), 200
-
