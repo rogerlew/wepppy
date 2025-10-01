@@ -19,13 +19,13 @@ A developer and administrator tool to orchestrate large numbers of watersheds th
 - Replacing `run_0` flows; the `_base` project continues to use the standard controls UI.
 
 ## Personas
-- **Batch Admin:** Limited number of power users with credentials that unlock `/batch/create/` and `/batch/<name>/` routes.
+- **Batch Admin:** Limited number of power users with credentials that unlock `/batch/create/` and `/batch/_/<name>/` routes.
 - **Ops Engineer:** Reviews logs, manages rq workers, and can SSH into the batch directories when escalated support is required.
 
 ## Workflow
 1. Batch admin opens `Create Batch Runs`, selects a stored config, and provides a `batch_name`.
-2. Backend scaffolds `/wc1/batch/<batch_name>/` with `_base/`, `resources/`, and `logs/`, then creates a `batch_runner.nodb` manifest.
-3. User is redirected to `/batch/<batch_name>/`, which boots the `_base` project controls alongside the Batch Runner control.
+2. Backend scaffolds `/wc1/batch/<batch_name>/` with `_base/`, `resources/`, and `logs/`, then persists a `batch_runner.nodb` state file.
+3. User is redirected to `/batch/_/<batch_name>/`, which boots the `_base` project controls alongside the Batch Runner control.
 4. Admin prepares the `_base` project (Omni scenarios, climate options, etc.) through the standard controls; run buttons remain hidden except on SBS Upload where file operations must stay available.
 5. Admin uploads a `.geojson` into `resources/`; backend stores a canonical relative path in `BatchRunner.nodb` and validates geometry plus feature attributes.
 6. Admin defines a template for `runid` generation and runs validation; system emits proposed run ids, uniqueness report, and rejected features.
@@ -34,33 +34,27 @@ A developer and administrator tool to orchestrate large numbers of watersheds th
 9. Worker pool processes runs; progress feeds back into `BatchRunner` state so the UI can stream status updates, show partial success, and allow re-drives.
 
 ## Current Status
-- Phase 1 scaffolding is implemented and gated by the Admin feature flag. `/batch/create/` provisions the batch workspace, instantiates the `_base/` project via the selected configuration, and writes `batch_runner.nodb` with creator/timestamp history.
-- `/batch/<name>/` loads persisted manifests through `BatchRunner.getInstance`, exposing the same bootstrap payload that future controls will consume.
+- Phase 1 scaffolding is implemented and gated by the Admin feature flag. `/batch/create/` provisions the batch workspace, instantiates the `_base/` project via the selected configuration, and persists creation metadata directly on the `BatchRunner` NoDb singleton.
+- `/batch/_/<name>/` loads the NoDb instance through `BatchRunner.getInstance`, exposing a state snapshot that downstream controls consume.
 - Base project creation reuses the existing `NoDbBase` pipeline; `nodb/configs/batch/default_batch.cfg` is a placeholder that keeps config semantics aligned with the standard run flow until batch-specific knobs arrive, which ideally is never.
-- Directory layout now includes `_base/` and `resources/`, giving Phase 2 a concrete landing zone for GeoJSON intake and manifest enrichment.
-- Phase 2 resource intake is now live: GeoJSON uploads land in `resources/`, metadata (feature count, bbox, checksum, EPSG) persists under `resources['watershed_geojson']`, manifest version advances to `2`, and template validation snapshots (summary, duplicates, sample rows) are cached under `metadata['template_validation']` with stale detection on resource replacement.
+- Directory layout now includes `_base/` and `resources/`, giving Phase 2 a concrete landing zone for GeoJSON intake and state enrichment.
+- Phase 2 resource intake is now live: GeoJSON uploads land in `resources/`, metadata (feature count, bbox, checksum, EPSG) persists under `resources['watershed_geojson']`, `state_version` advances to `2`, and template validation snapshots (summary, duplicates, sample rows) live on `BatchRunner.template_validation` with stale detection when resources change.
 
-## Manifest Design (codex)
-- **Dataclass wrapper.** `BatchRunnerManifest` is the authoritative schema for what lands in `batch_runner.nodb`. `BatchRunner.manifest_dict()` feeds templates/JS, while the dataclass keeps field names explicit for mutation helpers.
+## State Design (codex)
+- **NoDb attributes.** `BatchRunner` persists state as first-class attributes (`batch_name`, `resources`, `template_validation`, etc.), so callers leverage the standard NoDb property paradigm instead of an intermediate manifest object.
 - **Core fields.**
-  - `version`: schema migrations.
-  - `batch_name` / `base_config` / `batch_config`: identifiers for the workspace, `_base` seed, and manifest batch config (immutable after creation).
-  - `config`: mirrors `base_config` to keep the existing bootstrap payload stable while controls migrate.
-  - `created_at` / `created_by`: ISO8601 timestamp and user string stamped during Phase 1 setup.
+  - `state_version`: schema migrations for persisted attributes.
+  - `batch_name` / `base_config` / `batch_config`: identifiers for the workspace and selected configuration (immutable after creation).
+  - `config`: mirrors `base_config` to keep bootstrap payloads consistent while controls migrate.
+  - `created_at` / `created_by`: ISO8601 timestamp and user string stamped during setup.
   - `runid_template`: formatting string for Phase 2 run-id expansion.
-  - `selected_tasks`: ordered list of task ids chosen for orchestration.
-  - `force_rebuild`: boolean forcing re-enqueue of completed tasks.
-  - `runs`: map of `runid → { tasks {name: status, job_id}, last_update, attempts, errors }`; deliberately flexible for later enrichment.
-  - `history`: chronological audit trail (e.g., `created`, `validate`, `submit`, `retry`) capturing user/timestamp/reason.
-  - `resources`: descriptors for uploaded artifacts (relative paths, checksums, validation summaries).
-  - `control_hashes`: fingerprints of `_base` controllers to detect configuration drift.
-  - `metadata`: scratchpad for prototype data; `BatchRunner.update_manifest` continues to route unknown keys here so experiments stay isolated.
-- **Lifecycle.** `BatchRunner.__init__` creates a default manifest, backfills config identifiers, and persists it via standard NoDb locking/dump semantics. `BatchRunner.update_manifest(**updates)` routes known keys onto the dataclass and tucks unrecognised keys into `metadata`, keeping mutation safe even as we iterate.
-  Resource uploads flow through `BatchRunner.register_resource`, which stamps history entries and marks cached template results as stale; `record_template_validation` stores validation snapshots and history while updating `runid_template`.
-- **Access patterns.** Routes call `BatchRunner.getInstance(batch_wd)` to load the manifest; UI bootstrap receives the serialised dict. Future phases should expose focused helpers (`register_resource`, `record_validation`, `enqueue_runs`) rather than ad-hoc `update_manifest` calls so we centralise schema changes and validation logic.
+  - `selected_tasks`, `force_rebuild`, `runs`, `history`, `resources`, and `control_hashes`: shared bookkeeping for orchestration.
+  - `metadata`: scratchpad for prototype data; `update_state` continues to route unknown keys here so experiments stay isolated.
+- **Lifecycle.** `BatchRunner.__init__` seeds default attributes and persists via standard NoDb locking/dump semantics. `update_state(**updates)` applies structured changes, while helpers such as `register_resource`, `record_template_validation`, and `add_history` encapsulate common mutations.
+- **Access patterns.** Routes call `BatchRunner.getInstance(batch_wd)` and serialize via `state_dict()`. Future phases should add targeted helpers (`register_resource`, `record_validation`, `enqueue_runs`) rather than ad-hoc mutations so schema changes remain centralised.
 
 ## Filesystem
-- `/wc1/batch/<batch_name>/batch_runner.nodb` — persisted manifest with metadata, selected tasks, and run ledger.
+- `/wc1/batch/<batch_name>/batch_runner.nodb` — persisted BatchRunner NoDb state with metadata, selected tasks, and run ledger.
 - `/wc1/batch/<batch_name>/_base/` — canonical project built with normal controls; holds NoDb singletons (`ron.nodb`, `climate.nodb`, etc.).
 - `/wc1/batch/<batch_name>/<runid>/` — per-watershed directory cloned from `_base` before each run.
 - `/wc1/batch/<batch_name>/resources/` — staging area for geojson plus ancillary uploads referenced by tasks.
@@ -128,10 +122,10 @@ WhiteBoxTools wrapper
 ### `batch_runner_bp`
 - `GET /batch/create/` — guarded view displaying the create form and listing existing batches.
 - `POST /batch/create/` — validates input, scaffolds directories, initializes `_base`, redirects to batch page.
-- `GET /batch/<name>/` — renders Batch Runner page with `_base` forms and initial state payload.
-- `POST /batch/<name>/upload-geojson` — handles file upload, checksum storage, and structural validation.
-- `POST /batch/<name>/validate-template` — evaluates template across features, returns run id list and errors.
-- `POST /batch/<name>/run` — snapshots `_base`, updates manifest, enqueues jobs, responds with parent job id.
+- `GET /batch/_/<name>/` — renders Batch Runner page with `_base` forms and initial state payload.
+- `POST /batch/_/<name>/upload-geojson` — handles file upload, checksum storage, and structural validation.
+- `POST /batch/_/<name>/validate-template` — evaluates template across features, returns run id list and errors.
+- `POST /batch/_/<name>/run` — snapshots `_base`, updates BatchRunner state, enqueues jobs, responds with parent job id.
 
 ### RQ Worker Pool
 - Deploy dedicated queue `batch` with 2–3 workers initially, configurable via environment variable.
@@ -140,7 +134,7 @@ WhiteBoxTools wrapper
 
 ## Orchestration
 - Snapshot `_base` to a temp directory; copy into run directories to avoid partial states if cloning fails mid-copy.
-- Precompute run manifest before enqueueing any job to catch validation issues early; include outlet coordinates and DEM provenance so downstream tasks remain deterministic.
+- Precompute per-run state before enqueueing any job to catch validation issues early; include outlet coordinates and DEM provenance so downstream tasks remain deterministic.
 - For each run id:
   1. Create working directory and inject sanitized `_base` NoDb files (`wd`, caches, locks cleared).
   2. Derive hydrologic context: compute extent from GeoJSON, download DEM, run WhiteBox outlet tool, and persist outlet via `Watershed.determine_outlet()`.
@@ -160,7 +154,7 @@ WhiteBoxTools wrapper
 
 ## Mitigations
 - Implement shared utilities for slugging names, computing checksums, locking, and CRS normalization to stay consistent with Omni.
-- Ship manifest versioning so schema changes (e.g., new tasks) can be migrated without breaking older batches.
+- Ship `state_version` migrations so schema changes (e.g., new tasks) can be migrated without breaking older batches.
 - Add hydrologic preprocessing safeguards: CRS detection, buffered extents, DEM size limits, and retries with coarser tiles when fine resolution fails.
 - Extend the WhiteBoxTools fork with the outlet-detection helper; wrap it with structured error reporting and unit tests that compare to known outlets.
 - Create integration tests that simulate end-to-end batch creation, run id generation, preprocessing, and job enqueueing using mocked rq workers and DEM fetch stubs.
@@ -169,26 +163,26 @@ WhiteBoxTools wrapper
 
 ## Phases
 1. **Phase 0 – Foundations:** Define data structures, add authorization hooks (limit to Admin), scaffold BatchRunner(NoDbBase)/Control skeletons, and stand up a dedicated `batch` rq queue with workers.
-2. **Phase 1 – Batch Scaffolding:** Implement `/batch/create/`, directory creation, `_base` bootstrap, manifest persistence, and SBS upload support in `_base` context.
+2. **Phase 1 – Batch Scaffolding:** Implement `/batch/create/`, directory creation, `_base` bootstrap, state persistence, and SBS upload support in `_base` context.
 3. **Phase 2 – Resource Intake:** Deliver geojson upload pipeline, template validation service, and UI feedback loop for run id previews.
 4. **Phase 3 – Hydrologic Preprocessing:** Build extent derivation, DEM acquisition, WhiteBox outlet detection, and `Watershed.determine_outlet()` integration; persist outputs per run.
-5. **Phase 4 – Job Orchestration:** Wire task checklist, run manifest generation, directory cloning, and rq job submission with dependency graphs plus run filters.
+5. **Phase 4 – Job Orchestration:** Wire task checklist, run state generation, directory cloning, and rq job submission with dependency graphs plus run filters.
 6. **Phase 5 – Progress UI & Recovery:** Implement status dashboard, websocket updates, retry/force rebuild logic, log surfacing, and admin notifications.
 7. **Phase 6 – Hardening:** Load testing, integration tests, observability (metrics, alerts), documentation, and production-readiness polish.
 
 ### Phase 0 Implementation Plan
 - **Access Control & Feature Flagging**
   - Create a `batch_runner_bp` blueprint under `batch_runner/` with a dedicated templates folder to keep the feature isolated.
-  - Extend the existing admin-only decorators to cover `/batch/create/` and `/batch/<name>/`; add unit tests that ensure non-admin users receive `403` responses.
+  - Extend the existing admin-only decorators to cover `/batch/create/` and `/batch/_/<name>/`; add unit tests that ensure non-admin users receive `403` responses.
   - Introduce a `BATCH_RUNNER_ENABLED` configuration toggle and surface graceful fallback messaging in templates when disabled.
   - Document the access requirements in the ops/security notes so credentials can be provisioned ahead of launch.
 - **Manifest Schema Baseline**
-  - Draft a `BatchRunnerState` dataclass (or equivalent structured dict) containing manifest fields listed in the State section, including placeholders for per-control hashes and hydrologic metadata.
-  - Implement load/save helpers in a shared module that create versioned manifests with sensible defaults; write smoke tests confirming round-trip serialization.
+  - Define the `BatchRunner` state shape (fields listed below) including placeholders for per-control hashes and hydrologic metadata.
+  - Implement load/save helpers in a shared module that create versioned state snapshots with sensible defaults; write smoke tests confirming round-trip serialization.
   - Identify reusable checksum/slug utilities (likely from Omni) and refactor them into a shared helper to avoid duplication.
 - **NoDb & Control Scaffolds**
-  - Create `BatchRunner(NoDbBase)` with stubbed getters/setters returning the default manifest and emitting TODO logs for unimplemented mutators.
-  - Add `BatchRunner(ControlBase)` that exposes the manifest via `get_state()` and accepts no-op POST handlers for the Phase 0 endpoints.
+  - Create `BatchRunner(NoDbBase)` with stubbed getters/setters returning the default state and emitting TODO logs for unimplemented mutators.
+  - Add `BatchRunner(ControlBase)` that exposes the NoDb state via `get_state()` and accepts no-op POST handlers for the Phase 0 endpoints.
   - Register the blueprint so it renders placeholder templates and wires the control into server-side bootstrap data.
 - **Frontend Skeleton**
   - Add `controllers_js/batch_runner.js` as a singleton that renders a “coming soon” panel, consumes feature flag state, and subscribes to websocket channels without emitting events yet.
@@ -197,7 +191,7 @@ WhiteBoxTools wrapper
   - Reserve a `batch` queue in `wepp_rq` with configuration sourced from environment variables; ensure the queue is ignored when the feature flag is off.
   - Create an ops note/systemd template for launching dedicated batch workers; verify workers idle safely with no jobs.
 - **Testing & Tooling**
-  - Add minimal pytest coverage for manifest helpers, auth enforcement, and feature flag toggling.
+  - Add minimal pytest coverage for state helpers, auth enforcement, and feature flag toggling.
   - Seed an integration test scaffold (skipped initially) outlining the end-to-end batch lifecycle to keep CI wiring ready.
 - **Exit Criteria**
   - Admin-only routes exist and return placeholder responses; non-admins are blocked.
@@ -207,34 +201,69 @@ WhiteBoxTools wrapper
 
 ### Phase 2 Implementation Plan
 - **GeoJSON intake service**
-  - Add `POST /batch/<name>/upload-geojson` endpoint that writes uploads into `<batch>/resources/` with conflict-aware naming and size limits. Assume if user uploads a file with the same name they are intending on replacing the file. Provide feedback this has occurred.
+  - Add `POST /batch/_/<name>/upload-geojson` endpoint that writes uploads into `<batch>/resources/` with conflict-aware naming and size limits. Assume if user uploads a file with the same name they are intending on replacing the file. Provide feedback this has occurred.
   - Validate file extension and MIME, reject multi-feature collections without `FeatureCollection` semantics, and stream to disk to avoid loading entire payloads into memory.
-  - In `BatchRunner` compute checksum, feature count, bounding boxes, EPSG code, and attribute schema; persist in `manifest.resources["watershed_geojson"]` along with upload timestamp and user.
-  - Guard writes with `BatchRunner.locked()` to keep manifest updates atomic and respect NoDb locking.
+  - In `BatchRunner` compute checksum, feature count, bounding boxes, EPSG code, and attribute schema; persist in `resources['watershed_geojson']` along with upload timestamp and user.
+  - Guard writes with `BatchRunner.locked()` to keep updates atomic and respect NoDb locking.
 - **Template validation pipeline**
-  - Implement `POST /batch/<name>/validate-template` that accepts a template string and optional filters, loads the stored GeoJSON, and evaluates run ids for each feature.
+  - Implement `POST /batch/_/<name>/validate-template` that accepts a template string and optional filters, loads the stored GeoJSON, and evaluates run ids for each feature.
   - Surface duplicates, missing attributes, or invalid expressions; return proposed run ids, validation errors, and summary stats.
-  - Cache the latest validation payload in `manifest.metadata["template_validation"]` with hashes of template + resource so the UI can detect when results are stale.
-- **Manifest helpers**
-  - Extend `BatchRunner` with typed methods (`register_resource`, `record_template_validation`) that wrap `update_manifest` and enforce schema updates in one place.
+  - Cache the latest validation payload on `template_validation` with hashes of template + resource so the UI can detect when results are stale.
+- **State helpers**
+  - Extend `BatchRunner` with typed methods (`register_resource`, `record_template_validation`) that wrap `update_state` and enforce schema updates in one place.
   - Store resource metadata under `resources[resource_id]` and append a history entry (`event="resource_uploaded"` or `"template_validated"`).
-  - Introduce manifest version `2` once resource metadata lands; add migration hook in `_post_instance_loaded` to backfill missing keys on older manifests.
+  - Introduce `state_version` once resource metadata lands; add migration hook to backfill missing keys on older states.
 - **Frontend integration**
-  - Build Dropzone-style uploader on `/batch/<name>/` showing progress, checksum, projection, and feature counts using the new API responses.
+- Build Dropzone-style uploader on `/batch/_/<name>/` showing progress, checksum, projection, and feature counts using the new API responses.
   - Add template editor with preview table (first N run ids) and error list; disable `Run Batch` when validation fails or results are stale.
   - Persist UI state in the bootstrap payload so refreshes do not lose the latest validation snapshot.
 - **Validation + test coverage**
   - Write unit tests for new endpoints covering happy path, invalid files, oversized uploads, CRS mismatch, and stale template detection.
   - Add fixture GeoJSON samples (small square, invalid CRS, duplicate ids) under `tests/data/batch_runner/` for deterministic checks.
-  - Provide integration test that simulates upload + template validation, asserting manifest fields (`resources`, `history`, `metadata`).
+  - Provide integration test that simulates upload + template validation, asserting persisted fields (`resources`, `history`, `metadata`).
 - **Operational guardrails**
   - Enforce per-file size limit via config (`BATCH_GEOJSON_MAX_MB`) and log drop reasons for future tuning. set default BATCH_GEOJSON_MAX_MB to 10 MB
   - Emit structured logs/events through BatchRunner.logger (see `base._init_logging`) when resources change to aid auditing; consider webhook to Ops channel when large uploads occur.
-  - Document cleanup command to remove orphaned resources if manifest entries are pruned.
+  - Document cleanup command to remove orphaned resources if state entries are pruned.
 - **Exit Criteria**
   - Admin can upload GeoJSON, see validation details, and rerun validations after editing templates without manual filesystem access.
-  - Manifest tracks resource metadata, template results, and history entries for both actions.
+  - BatchRunner state tracks resource metadata, template results, and history entries for both actions.
   - Test suite covers success and failure modes for upload + validation flows with no regressions in Phase 1 scaffolding.
+
+### Phase 3 Implementation Plan – Hydrologic Preprocessing
+- **Resource preparation & state schema**
+  - Introduce state entries for `preprocessing` (per-run inputs), `resources.dem` / `resources.hydrology` meta, and `control_hashes` entries for topo-sensitive controllers.
+  - Add migration hook that backfills new keys on version `< 3`; bump `state_version` accordingly.
+  - Define `BatchRunner.preprocess_context` describing DEM sources, buffers, reprojection hints, and WhiteBox settings.
+- **Extent derivation pipeline**
+  - Implement helper to project each GeoJSON feature to a target CRS (e.g., EPSG:5070), buffer by configurable margin, and compute bounding boxes for DEM requests.
+  - Persist derived extents + target CRS per run in the BatchRunner state to avoid recomputation.
+- **DEM acquisition & caching**
+  - Integrate existing DEM fetch utilities (e.g., `wepppy.topo.dem_downloader`) with rate limiting and disk caching under `resources/dem/`.
+  - Store metadata (source, resolution, checksum, storage path) in state; reuse across runs when extents overlap.
+  - Add retry/ backoff logic for remote fetch failures; mark runs with degraded status when DEM cannot be acquired.
+- **WhiteBox outlet detection & watershed abstraction**
+  - Wire WhiteBoxTools helper (from Phase 2 mitigations) to derive pour points for each buffered extent; capture logs/errors.
+  - Update stored state per run with outlet coordinates, tool status, and summary artifacts (e.g., GeoJSON pour point).
+  - Generate watershed masks and store references for downstream controls.
+- **Integration with `Watershed.determine_outlet()`**
+  - Expose preprocessing outputs to existing watershed control; ensure outlets land in the NoDb state when runs materialize.
+  - Record control hash/digest to detect drift between `_base` and preprocessing output.
+- **Error handling & observability**
+  - Track per-run preprocessing status (`pending`/`complete`/`failed`) in the BatchRunner history log.
+  - Emit structured logs/metrics (duration, tile count, retries) via `BatchRunner.logger` and, if available, existing monitoring hooks.
+  - Surface partial failures in UI with actionable messages (e.g., missing DEM coverage) so admins can adjust buffers or fall back.
+- **Frontend updates**
+  - Extend manage view with preprocessing progress indicators and buttons to rerun preprocessing for select runs.
+  - Display derived extents/outlets preview (static map or data table) for quick verification before orchestration.
+- **Testing strategy**
+  - Unit tests for extent derivation, DEM metadata persistence, WhiteBox invocation (use stubs/mocks for external binaries).
+  - Integration test that simulates end-to-end preprocessing for a small GeoJSON, verifying state fields and cached resources.
+  - Add regression test ensuring migrating older states (<v3) preserves existing metadata and adds defaults.
+- **Exit Criteria**
+  - Each feature in the uploaded GeoJSON produces buffered extents, DEM artifacts, and outlet metadata stored in the BatchRunner state.
+  - Failures surface in UI + state snapshot with clear remediation paths; rerun workflow supports retrying individual runs.
+  - Automated tests cover extent calculations, state migrations, DEM caching, and error paths.
 
 ## Open Questions (Resolved)
 - **Omni reuse:** Omni must execute per run after WEPP completes; no shared outputs.
@@ -260,7 +289,7 @@ A developer and administrator tool to run batches of watersheds with the same co
    - creates a base project with the config in /wc1/batch/<project_name>/_base
      - we end up with the NoDb singletons in _base (ron.nodb, climate.nodb, etc.) and the directories
      - Omni should always be added to the project.
-4. User is redirected to the "WEPPcloud Batch Runner" page `/batch/<project_name>/`
+4. User is redirected to the "WEPPcloud Batch Runner" page `/batch/_/<project_name>/`
 5. On the WEPPcloud Batch Runner
    - The user has a new Batch Runner Control where they
      - Upload a .geojson file to the resources directory  (`/wc1/batch/<project_name>/resources`

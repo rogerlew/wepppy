@@ -58,17 +58,17 @@ def client(app):
     return app.test_client()
 
 
-def _read_manifest(app: Flask):
+def _read_state(app: Flask):
     with app.app_context():
         root = Path(app.config["BATCH_RUNNER_ROOT"])
         runner = BatchRunner.getInstance(str(root / "demo"))
-        return runner.manifest_dict()
+        return runner.state_dict()
 
 
 def test_upload_geojson_success(client, app):
     with (DATA_DIR / "simple.geojson").open("rb") as handle:
         response = client.post(
-            "/batch/demo/upload-geojson",
+            "/batch/_/demo/upload-geojson",
             data={"geojson_file": (handle, "sample.geojson")},
             content_type="multipart/form-data",
         )
@@ -78,8 +78,8 @@ def test_upload_geojson_success(client, app):
     assert payload["success"] is True
     assert payload["resource"]["feature_count"] == 3
 
-    manifest = _read_manifest(app)
-    resource = manifest["resources"][BatchRunner.RESOURCE_WATERSHED]
+    state = _read_state(app)
+    resource = state["resources"][BatchRunner.RESOURCE_WATERSHED]
     assert resource["filename"] == "sample.geojson"
     assert resource["feature_count"] == 3
 
@@ -87,7 +87,7 @@ def test_upload_geojson_success(client, app):
 def test_upload_geojson_rejects_invalid_geojson(client):
     with (DATA_DIR / "invalid.geojson").open("rb") as handle:
         response = client.post(
-            "/batch/demo/upload-geojson",
+            "/batch/_/demo/upload-geojson",
             data={"geojson_file": (handle, "invalid.geojson")},
             content_type="multipart/form-data",
         )
@@ -104,7 +104,7 @@ def test_upload_geojson_respects_size_limit(client, monkeypatch):
     content = json.dumps({"type": "FeatureCollection", "features": [{}]}).encode("utf-8")
 
     response = client.post(
-        "/batch/demo/upload-geojson",
+        "/batch/_/demo/upload-geojson",
         data={"geojson_file": (io.BytesIO(content), "oversize.geojson")},
         content_type="multipart/form-data",
     )
@@ -116,7 +116,7 @@ def test_upload_geojson_respects_size_limit(client, monkeypatch):
 
 def test_validate_template_requires_resource(client, app):
     response = client.post(
-        "/batch/demo/validate-template",
+        "/batch/_/demo/validate-template",
         json={"template": "{slug(properties['HucName'])}"},
     )
 
@@ -129,13 +129,13 @@ def test_validate_template_requires_resource(client, app):
 def test_validate_template_reports_duplicates(client, app):
     with (DATA_DIR / "simple.geojson").open("rb") as handle:
         client.post(
-            "/batch/demo/upload-geojson",
+            "/batch/_/demo/upload-geojson",
             data={"geojson_file": (handle, "sample.geojson")},
             content_type="multipart/form-data",
         )
 
     response = client.post(
-        "/batch/demo/validate-template",
+        "/batch/_/demo/validate-template",
         json={"template": "{'constant'}"},
     )
 
@@ -149,13 +149,13 @@ def test_validate_template_reports_duplicates(client, app):
 def test_validate_template_success_path(client, app):
     with (DATA_DIR / "simple.geojson").open("rb") as handle:
         client.post(
-            "/batch/demo/upload-geojson",
+            "/batch/_/demo/upload-geojson",
             data={"geojson_file": (handle, "sample.geojson")},
             content_type="multipart/form-data",
         )
 
     response = client.post(
-        "/batch/demo/validate-template",
+        "/batch/_/demo/validate-template",
         json={"template": "{slug(properties['HucName'])}-{zfill(one_based_index, 3)}"},
     )
 
@@ -163,5 +163,5 @@ def test_validate_template_success_path(client, app):
     payload = response.get_json()
     assert payload["validation"]["summary"]["is_valid"] is True
     assert payload["stored"]["status"] == "ok"
-    manifest = _read_manifest(app)
-    assert manifest["runid_template"] == "{slug(properties['HucName'])}-{zfill(one_based_index, 3)}"
+    state = _read_state(app)
+    assert state["runid_template"] == "{slug(properties['HucName'])}-{zfill(one_based_index, 3)}"

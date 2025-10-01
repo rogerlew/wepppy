@@ -5,24 +5,24 @@ from pathlib import Path
 
 import pytest
 
-from wepppy.nodb.batch_runner import BatchRunner, BatchRunnerManifest
+from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.weppcloud.routes.batch_runner.batch_runner_bp import (
     _create_batch_project,
     _validate_batch_name,
 )
 
 
-def test_manifest_defaults_are_sane():
-    manifest = BatchRunnerManifest()
-    assert manifest.version == 2
-    assert manifest.selected_tasks == []
-    assert manifest.runs == {}
-    assert manifest.history == []
-    assert manifest.base_config is None
-    assert manifest.batch_config is None
+def test_state_defaults_are_sane():
+    state = BatchRunner.default_state()
+    assert state["state_version"] == 2
+    assert state["selected_tasks"] == []
+    assert state["runs"] == {}
+    assert state["history"] == []
+    assert state["base_config"] is None
+    assert state["batch_config"] is None
 
 
-def test_batch_runner_initialises_manifest(tmp_path: Path):
+def test_batch_runner_initialises_state(tmp_path: Path):
     wd = tmp_path / "batch" / "example"
     wd.mkdir(parents=True)
 
@@ -30,25 +30,24 @@ def test_batch_runner_initialises_manifest(tmp_path: Path):
     BatchRunner(wd, "batch/default_batch.cfg", "disturbed9002_wbt.cfg")
     runner = BatchRunner.getInstance(wd)
 
-    # Manifest should be created with default values
-    manifest = runner.manifest
-    assert manifest.batch_name is None
-    assert manifest.version == 2
-    assert manifest.base_config == "disturbed9002_wbt"
-    assert manifest.batch_config == "default_batch"
-    assert manifest.config == "disturbed9002_wbt"
+    state = runner.state_dict()
+    assert state["batch_name"] is None
+    assert state["state_version"] == 2
+    assert state["base_config"] == "disturbed9002_wbt"
+    assert state["batch_config"] == "default_batch"
+    assert state["config"] == "disturbed9002_wbt"
 
-    # Updates should set known attributes and tuck unknowns into metadata
-    runner.update_manifest(batch_name="demo", foo="bar")
-    assert runner.manifest.batch_name == "demo"
-    assert runner.manifest.metadata.get("foo") == "bar"
+    runner.update_state(batch_name="demo", foo="bar")
+    updated = runner.state_dict()
+    assert updated["batch_name"] == "demo"
+    assert updated["metadata"].get("foo") == "bar"
 
-    # Reset brings us back to defaults
-    runner.reset_manifest()
-    assert runner.manifest.batch_name is None
-    assert runner.manifest.metadata == {}
-    assert runner.manifest.base_config == "disturbed9002_wbt"
-    assert runner.manifest.batch_config == "default_batch"
+    runner.reset_state()
+    reset = runner.state_dict()
+    assert reset["batch_name"] is None
+    assert reset["metadata"] == {}
+    assert reset["base_config"] == "disturbed9002_wbt"
+    assert reset["batch_config"] == "default_batch"
 
 
 def test_validate_batch_name_rules():
@@ -83,13 +82,13 @@ def test_initialize_batch_project_scaffolds_directories(tmp_path: Path):
     manifest_path = batch_dir / "batch_runner.nodb"
     assert manifest_path.exists()
 
-    manifest = result["manifest"]
-    assert manifest["batch_name"] == "demo_batch"
-    assert manifest["base_config"].endswith("disturbed9002_wbt")
-    assert manifest["config"] == "disturbed9002_wbt"
-    assert manifest["batch_config"] == "default_batch"
-    assert manifest["created_by"] == "tester@example.com"
-    assert manifest["history"][0]["event"] == "created"
+    state = result["state"]
+    assert state["batch_name"] == "demo_batch"
+    assert state["base_config"] == "disturbed9002_wbt"
+    assert state["config"] == "disturbed9002_wbt"
+    assert state["batch_config"] == "default_batch"
+    assert state["created_by"] == "tester@example.com"
+    assert state["history"][0]["event"] == "created"
 
 
 def test_initialize_batch_project_duplicate(tmp_path: Path):
@@ -204,6 +203,6 @@ def test_register_resource_marks_validation_stale(tmp_path: Path, monkeypatch):
     )
 
     assert stored["resource_id"] == BatchRunner.RESOURCE_WATERSHED
-    assert runner.manifest.resources[BatchRunner.RESOURCE_WATERSHED]["checksum"] == "new"
-    validation_state = runner.manifest.metadata["template_validation"]
+    assert runner.resources[BatchRunner.RESOURCE_WATERSHED]["checksum"] == "new"
+    validation_state = runner.template_validation
     assert validation_state["status"] == "stale"

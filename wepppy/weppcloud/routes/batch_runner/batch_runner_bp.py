@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
 from datetime import datetime, timezone
 import hashlib
 import os
@@ -10,6 +9,7 @@ import json
 import re
 from pathlib import Path
 import tempfile
+from copy import deepcopy
 from typing import Dict, Optional, Sequence
 
 from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
@@ -32,10 +32,6 @@ def _batch_runner_feature_enabled() -> bool:
     return bool(flag)
 
 
-def _serialize_manifest(manifest) -> Dict[str, object]:
-    return asdict(manifest)
-
-
 def _existing_batches() -> Sequence[str]:
     root = get_batch_root_dir()
     if not root.exists():
@@ -43,32 +39,32 @@ def _existing_batches() -> Sequence[str]:
     return tuple(sorted(p.name for p in root.iterdir() if p.is_dir()))
 
 
-def _load_manifest(batch_name: Optional[str]) -> Dict[str, object]:
+def _load_state(batch_name: Optional[str]) -> Dict[str, object]:
     if not batch_name:
-        return _serialize_manifest(BatchRunner.default_manifest())
+        return BatchRunner.default_state()
 
     batch_dir = get_batch_root_dir() / batch_name
     try:
         runner = BatchRunner.getInstance(str(batch_dir))
     except FileNotFoundError:
-        return _serialize_manifest(BatchRunner.default_manifest())
+        return BatchRunner.default_state()
     except Exception as exc:  # pragma: no cover - defensive logging path
         current_app.logger.warning(
-            "Unable to load batch runner manifest for %s: %s", batch_name, exc
+            "Unable to load batch runner state for %s: %s", batch_name, exc
         )
-        return _serialize_manifest(BatchRunner.default_manifest())
-    return runner.manifest_dict()
+        return BatchRunner.default_state()
+    return runner.state_dict()
 
 
 def _build_context(batch_name: Optional[str] = None) -> Dict[str, object]:
     enabled = _batch_runner_feature_enabled()
-    manifest_payload = _load_manifest(batch_name)
+    state_payload = _load_state(batch_name)
 
 
     context = {
         "feature_enabled": enabled,
         "batch_name": batch_name,
-        "manifest_payload": manifest_payload,
+        "state_payload": state_payload,
         "page_title": "WEPPcloud Batch Runner",
         "site_prefix": current_app.config.get("SITE_PREFIX", ""),
         "batch_root": str(get_batch_root_dir()),
@@ -125,11 +121,11 @@ def _create_batch_project(
     # create batch_dir
     batch_wd.mkdir(parents=True, exist_ok=False)
 
-    # BatchRunner is responsible for scaffolding _base and resources
     runner = BatchRunner(
-        str(batch_wd), 
-        f"batch/{batch_config}.cfg", 
-        base_config_cfg)
+        str(batch_wd),
+        f"batch/{batch_config}.cfg",
+        base_config_cfg,
+    )
 
     timestamp = datetime.now(timezone.utc).isoformat()
     history_entry = {
@@ -139,19 +135,19 @@ def _create_batch_project(
     if created_by:
         history_entry["user"] = created_by
 
-    runner.update_manifest(
+    runner.update_state(
         batch_name=batch_name,
         batch_config=batch_config,
         config=base_config,
         base_config=base_config,
         created_at=timestamp,
         created_by=created_by,
-        history=[history_entry],
     )
+    runner.add_history(history_entry)
 
     return {
         "path": batch_wd,
-        "manifest": runner.manifest_dict(),
+        "state": runner.state_dict(),
     }
 
 
@@ -194,8 +190,8 @@ def create_batch_project():
             context["errors"] = errors
             return render_template("create.htm", **context)
 
-        manifest = result["manifest"]
-        created_name = manifest.get("batch_name") or batch_name_input.strip()
+        state = result["state"]
+        created_name = state.get("batch_name") or batch_name_input.strip()
         flash(f"Batch '{created_name}' created successfully.", "success")
         return redirect(url_for("batch_runner.view_batch", batch_name=created_name))
 
@@ -204,7 +200,7 @@ def create_batch_project():
     return render_template("create.htm", **context)
 
 
-@batch_runner_bp.route("/batch/<string:batch_name>/", methods=["GET"])
+@batch_runner_bp.route("/batch/_/<string:batch_name>/", methods=["GET"])
 @roles_required("Admin")
 def view_batch(batch_name: str):
     """Render the placeholder batch detail page for Batch Runner (Phase 0)."""
@@ -257,7 +253,7 @@ def _max_geojson_size_bytes() -> Optional[int]:
     return max_mb * 1024 * 1024
 
 
-@batch_runner_bp.route("/batch/<string:batch_name>/upload-geojson", methods=["POST"])
+@batch_runner_bp.route("/batch/_/<string:batch_name>/upload-geojson", methods=["POST"])
 @roles_required("Admin")
 def upload_geojson(batch_name: str):
     if not _batch_runner_feature_enabled():
@@ -351,14 +347,13 @@ def upload_geojson(batch_name: str):
         "message": message,
     }
 
-    validation_state = runner.manifest.metadata.get("template_validation")
-    if validation_state:
-        response_payload["template_validation"] = validation_state
+    if runner.template_validation:
+        response_payload["template_validation"] = deepcopy(runner.template_validation)
 
     return _json_response(response_payload, 200)
 
 
-@batch_runner_bp.route("/batch/<string:batch_name>/validate-template", methods=["POST"])
+@batch_runner_bp.route("/batch/_/<string:batch_name>/validate-template", methods=["POST"])
 @roles_required("Admin")
 def validate_template(batch_name: str):
     if not _batch_runner_feature_enabled():
@@ -373,8 +368,8 @@ def validate_template(batch_name: str):
     if not template:
         return _json_response({"success": False, "error": "Template is required."}, 400)
 
-    manifest = runner.manifest_dict()
-    resource = manifest.get("resources", {}).get(BatchRunner.RESOURCE_WATERSHED)
+    state = runner.state_dict()
+    resource = state.get("resources", {}).get(BatchRunner.RESOURCE_WATERSHED)
     if not resource:
         return _json_response({"success": False, "error": "Upload a GeoJSON resource before validating."}, 400)
 
@@ -416,7 +411,7 @@ def validate_template(batch_name: str):
         persisted,
         user=_current_user_email(),
     )
-    runner.update_manifest(runid_template=template)
+    runner.update_state(runid_template=template)
 
     response_payload = {
         "success": status == "ok",

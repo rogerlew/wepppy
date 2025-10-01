@@ -5,7 +5,7 @@
 window.batchRunnerBootstrap = {
     enabled: {{ feature_enabled | tojson }},
     batchName: {{ batch_name | tojson }},
-    manifest: {{ manifest_payload | tojson }},
+    state: {{ state_payload | tojson }},
     sitePrefix: {{ site_prefix | tojson }},
     geojsonLimitMb: {{ geojson_limit_mb | tojson }}
 };

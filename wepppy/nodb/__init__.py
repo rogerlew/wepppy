@@ -58,7 +58,4 @@ from .unitizer import (
     UnitizerNoDbLockedException
 )
 
-from .batch_runner import (
-    BatchRunner,
-    BatchRunnerManifest,
-)
+from .batch_runner import BatchRunner
