@@ -52,7 +52,11 @@ class BatchRunner(NoDbBase):
             if not hasattr(self, "_manifest") or self._manifest is None:
                 self._manifest = BatchRunnerManifest()
             self._base_config = base_config
+
         self._init_base_project()
+
+        os.makedirs(self.batch_runs_dir, exist_ok=True)
+        os.makedirs(self.resources_dir, exist_ok=True)
 
     def _init_base_project(self) -> None:
         from wepppy.nodb.ron import Ron
@@ -71,6 +75,19 @@ class BatchRunner(NoDbBase):
         """Return the base config for create _base"""
         return self._base_config
 
+    @property
+    def batch_runs_dir(self) -> str:
+        """Return the directory where batch runs are stored."""
+        return os.path.join(self.wd, "runs")
+    
+    @property
+    def resources_dir(self) -> str:
+        """Return the directory where resources are stored."""
+        return os.path.join(self.wd, "resources")
+
+    #
+    # manifest properties and methods, managed primarily by codex
+    #
     @property
     def manifest(self) -> BatchRunnerManifest:
         """Return the in-memory manifest object."""
