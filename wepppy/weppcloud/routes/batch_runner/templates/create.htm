@@ -78,3 +78,39 @@
 {% block scripts %}
 {% include "create_page_bootstrap.js.j2" %}
 {% endblock %}
+
+{% block extra_css %}
+<style>
+    .batch-runner-create {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+
+    .batch-runner-create .card {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: none;
+    }
+
+    .batch-runner-create .form-text {
+        color: #6c757d;
+    }
+
+    .batch-runner-create dl {
+        margin-bottom: 0;
+    }
+
+    .batch-runner-create dt {
+        font-weight: 500;
+    }
+
+    .batch-runner-create dd {
+        margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .batch-runner-create {
+            padding: 0 1rem;
+        }
+    }
+</style>
+{% endblock %}

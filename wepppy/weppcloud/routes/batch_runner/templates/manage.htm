@@ -26,9 +26,14 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
     <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/input-unit-converters.js') }}"></script>
+    {% include 'run_page_bootstrap.js.j2'%}
 </head>
 
 <body>
+  {% include 'header/header.htm'%}
+  {% include 'command-bar.htm'%}
+  {% include 'controls/poweruser_panel.htm'%}
     <style>
         :root {
             --project-header-offset: 72px;
@@ -98,6 +103,8 @@
     </style>
 
     <div class="project-layout">
+    <nav id="toc" class="project-layout__toc"></nav>
+
         <main class="project-layout__content">
             {% include 'batch_runner.htm' %}
             
@@ -158,8 +165,6 @@
             {% if user.is_authenticated %}
             {% include 'controls/team.htm'%}
             {% endif %}
-
-
 
 
             {% include 'controls/unitizer_modal.htm'%}

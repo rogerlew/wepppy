@@ -44,6 +44,7 @@ from wepppy.topo.peridot.flowpath import (
     PeridotHillslope,
     PeridotChannel,
 )
+from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.topo.watershed_abstraction import SlopeFile
 from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummary, identify_edge_hillslopes
 from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
@@ -778,6 +779,23 @@ class Watershed(NoDbBase):
 
         prep = RedisPrep.getInstance(self.wd)
         prep.timestamp(TaskEnum.build_channels)
+
+    @property
+    def target_watershed_path(self):
+        return _join(self.wd, 'dem', "target_watershed.tif")
+
+    def find_outlet(self, watershed_feature: WatershedFeature):
+        assert self.delineation_backend_is_wbt, "find_outlet only works with WBT delineation backend"
+
+        # build raster mask from watershed feature
+        watershed_feature.build_raster_mask(
+            template_filepath=self.dem_fn, dst_filepath=self.target_watershed_path)
+    
+        self.wbt._wbt_runner.find_outlet(
+            d8_pntr=self.wbt.d8_pntr,
+            streams=self.wbt.streams,
+            output=self.wbt.outlet_geojson
+        )
 
     @property
     def wbt(self):

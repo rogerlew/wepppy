@@ -6,6 +6,7 @@ from os.path import join as _join
 from os.path import split as _split
 
 from datetime import datetime
+import warnings
 
 import awesome_codename
 
@@ -15,7 +16,7 @@ from wepppy.nodb.mods import RangelandCover
 from wepppy.weppcloud.app import get_wd
 from wepppy.weppcloud.utils.archive import has_archive
 
-
+# old attempt at a batch processor
 class BatchProcessor(object):
     def __init__(self, verbose=True):
         self.verbose = verbose
