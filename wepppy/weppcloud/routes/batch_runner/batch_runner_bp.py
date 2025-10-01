@@ -118,12 +118,12 @@ def _create_batch_project(
 
     # create batch_dir
     batch_wd.mkdir(parents=True, exist_ok=False)
+
+    # BatchRunner is responsible for scaffolding _base and resources
     runner = BatchRunner(
         str(batch_wd), 
         f"batch/{batch_config}.cfg", 
         base_config_cfg)
-
-    (batch_wd / "resources").mkdir(parents=True, exist_ok=False)
 
     timestamp = datetime.now(timezone.utc).isoformat()
     history_entry = {
