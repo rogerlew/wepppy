@@ -137,6 +137,7 @@ def _create_batch_project(
     runner.update_manifest(
         batch_name=batch_name,
         batch_config=batch_config,
+        config=base_config,
         base_config=base_config,
         created_at=timestamp,
         created_by=created_by,
@@ -193,7 +194,8 @@ def create_batch_project():
         flash(f"Batch '{created_name}' created successfully.", "success")
         return redirect(url_for("batch_runner.view_batch", batch_name=created_name))
 
-    context.setdefault("form_state", {"batch_name": "", "config": context["available_configs"][0] if context["available_configs"] else ""})
+    default_config = context["available_configs"][0] if context["available_configs"] else ""
+    context.setdefault("form_state", {"batch_name": "", "base_config": default_config})
     return render_template("create.htm", **context)
 
 

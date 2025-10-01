@@ -43,7 +43,8 @@ A developer and administrator tool to orchestrate large numbers of watersheds th
 - **Dataclass wrapper.** `BatchRunnerManifest` is the authoritative schema for what lands in `batch_runner.nodb`. `BatchRunner.manifest_dict()` feeds templates/JS, while the dataclass keeps field names explicit for mutation helpers.
 - **Core fields.**
   - `version`: schema migrations.
-  - `batch_name` / `config`: identifiers for the workspace and `_base` configuration (immutable after creation).
+  - `batch_name` / `base_config` / `batch_config`: identifiers for the workspace, `_base` seed, and manifest batch config (immutable after creation).
+  - `config`: mirrors `base_config` to keep the existing bootstrap payload stable while controls migrate.
   - `created_at` / `created_by`: ISO8601 timestamp and user string stamped during Phase 1 setup.
   - `runid_template`: formatting string for Phase 2 run-id expansion.
   - `selected_tasks`: ordered list of task ids chosen for orchestration.
@@ -52,8 +53,8 @@ A developer and administrator tool to orchestrate large numbers of watersheds th
   - `history`: chronological audit trail (e.g., `created`, `validate`, `submit`, `retry`) capturing user/timestamp/reason.
   - `resources`: descriptors for uploaded artifacts (relative paths, checksums, validation summaries).
   - `control_hashes`: fingerprints of `_base` controllers to detect configuration drift.
-  - `metadata`: scratchpad for prototype data; production logic should graduate fields out of this bag.
-- **Lifecycle.** `BatchRunner.__init__` creates a default manifest, seeds it with creation metadata, and persists it via standard NoDb locking/dump semantics. `BatchRunner.update_manifest(**updates)` routes known keys onto the dataclass and tucks unrecognised keys into `metadata`, keeping mutation safe even as we iterate.
+  - `metadata`: scratchpad for prototype data; `BatchRunner.update_manifest` continues to route unknown keys here so experiments stay isolated.
+- **Lifecycle.** `BatchRunner.__init__` creates a default manifest, backfills config identifiers, and persists it via standard NoDb locking/dump semantics. `BatchRunner.update_manifest(**updates)` routes known keys onto the dataclass and tucks unrecognised keys into `metadata`, keeping mutation safe even as we iterate.
 - **Access patterns.** Routes call `BatchRunner.getInstance(batch_wd)` to load the manifest; UI bootstrap receives the serialised dict. Future phases should expose focused helpers (`register_resource`, `record_validation`, `enqueue_runs`) rather than ad-hoc `update_manifest` calls so we centralise schema changes and validation logic.
 
 ## Filesystem

@@ -48,7 +48,7 @@
                 <select class="form-select" id="base_config" name="base_config" {% if not feature_enabled or not available_configs %}disabled{% endif %}>
                     {% if available_configs %}
                         {% for cfg in available_configs %}
-                            <option value="{{ cfg }}" {% if cfg == form_state.config %}selected{% endif %}>{{ cfg }}</option>
+                            <option value="{{ cfg }}" {% if cfg == form_state.base_config %}selected{% endif %}>{{ cfg }}</option>
                         {% endfor %}
                     {% else %}
                         <option value="" selected disabled>No batch configurations available</option>
