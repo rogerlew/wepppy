@@ -17,7 +17,7 @@ from wepppy.topo.watershed_collection.watershed_collection import WatershedColle
 
 from .._common import Blueprint, roles_required, secure_filename
 from wepppy.nodb.base import get_configs, get_config_dir
-from wepppy.nodb.batch_runner import BatchRunner
+from wepppy.nodb.batch_runner import BatchRunner, RunDirectiveEnum
 from wepppy.weppcloud.utils.helpers import exception_factory, get_batch_root_dir, handle_with_exception_factory
 
 batch_runner_bp = Blueprint(
@@ -75,6 +75,17 @@ def _build_batch_runner_snapshot(batch_runner: BatchRunner) -> Dict[str, Any]:
         "metadata": {},
         "runid_template": None,
     }
+
+    run_directives_state = []
+    for directive in RunDirectiveEnum:
+        label = directive.name.replace('_', ' ').title()
+        label = label.replace('Wepp', 'WEPP').replace('Omni', 'OMNI').replace('Rap', 'RAP')
+        run_directives_state.append({
+            "slug": directive.value,
+            "label": label,
+            "enabled": bool(batch_runner.run_directives.get(directive.value, False)),
+        })
+    snapshot["run_directives"] = run_directives_state
 
     geojson_state = batch_runner.geojson_state
     if geojson_state:
@@ -277,6 +288,47 @@ def view_batch(batch_name: str):
                             runid=runid,
                             config=config,
                             pup_relpath=None)
+
+
+@batch_runner_bp.route('/batch/_/<string:batch_name>/run-directives', methods=['POST'])
+@roles_required('Admin')
+@handle_with_exception_factory
+def update_run_directives(batch_name: str):
+    if not _batch_runner_feature_enabled():
+        return jsonify(_batch_runner_disabled_response()), 403
+
+    try:
+        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+    except FileNotFoundError as exc:
+        return jsonify({'success': False, 'error': str(exc)}), 404
+
+    payload = request.get_json(silent=True) or {}
+    raw_directives = payload.get('run_directives')
+    if raw_directives is None:
+        return jsonify({'success': False, 'error': 'run_directives payload is required.'}), 400
+
+    if isinstance(raw_directives, dict):
+        parsed = raw_directives
+    elif isinstance(raw_directives, list):
+        parsed = {}
+        for item in raw_directives:
+            if not isinstance(item, dict):
+                continue
+            slug = item.get('slug') or item.get('key')
+            if not slug:
+                continue
+            parsed[slug] = item.get('enabled', item.get('value'))
+    else:
+        return jsonify({'success': False, 'error': 'run_directives must be a list or object.'}), 400
+
+    batch_runner.update_run_directives(parsed)
+    snapshot = _build_batch_runner_snapshot(batch_runner)
+
+    return jsonify({
+        'success': True,
+        'run_directives': snapshot.get('run_directives', []),
+        'snapshot': snapshot,
+    })
 
 
 def _batch_runner_disabled_response():

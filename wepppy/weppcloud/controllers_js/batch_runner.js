@@ -18,6 +18,10 @@ var BatchRunner = (function () {
         that.command_btn_id = 'btn_run_batch';
         that.ws_client = null;
         that._jobInfoAbortController = null;
+        that._jobInfoTrackedIds = new Set();
+        that._jobInfoLastPayload = null;
+        that._runDirectivesSaving = false;
+        that._runDirectivesStatus = { message: '', css: 'text-muted' };
 
         that.init = function init(bootstrap) {
             bootstrap = bootstrap || {};
@@ -27,6 +31,7 @@ var BatchRunner = (function () {
                 snapshot: bootstrap.state || {},
                 geojsonLimitMb: bootstrap.geojsonLimitMb,
             };
+            this._bootstrapTrackedJobIds(bootstrap);
             this.state.validation = this._extractValidation(this.state.snapshot);
             this.sitePrefix = bootstrap.sitePrefix || '';
             this.baseUrl = this._buildBaseUrl();
@@ -82,6 +87,8 @@ var BatchRunner = (function () {
             this.runBatchButton = $('#btn_run_batch');
             this.runBatchHint = $('#hint_run_batch');
             this.runBatchLock = $('#run_batch_lock');
+            this.runDirectiveList = this.container.find('[data-role="run-directive-list"]');
+            this.runDirectiveStatus = this.container.find('[data-role="run-directive-status"]');
 
             this.templateInput = this.templateCard.find('[data-role="template-input"]');
             this.validateButton = this.templateCard.find('[data-role="validate-button"]');
@@ -113,6 +120,11 @@ var BatchRunner = (function () {
                 this.validateButton.on('click', function (evt) {
                     evt.preventDefault();
                     self._handleValidate();
+                });
+            }
+            if (this.runDirectiveList && this.runDirectiveList.length) {
+                this.runDirectiveList.on('change', 'input[data-slug]', function (evt) {
+                    self._handleRunDirectiveToggle(evt);
                 });
             }
         };
@@ -158,6 +170,7 @@ var BatchRunner = (function () {
         that.render = function render() {
             this._renderResource();
             this._renderValidation();
+            this._renderRunDirectives();
             this._renderRunControls();
         };
 
@@ -229,6 +242,173 @@ var BatchRunner = (function () {
             }
         };
 
+        that._syncRunDirectiveDisabledState = function () {
+            if (!this.runDirectiveList || !this.runDirectiveList.length) {
+                return;
+            }
+            var shouldDisable = this._runDirectivesSaving || !this.state.enabled;
+            this.runDirectiveList.find('input[data-slug]').prop('disabled', shouldDisable);
+        };
+
+        that._setRunDirectivesStatus = function (message, cssClass) {
+            this._runDirectivesStatus = {
+                message: message || '',
+                css: cssClass || '',
+            };
+            if (!this.runDirectiveStatus || !this.runDirectiveStatus.length) {
+                return;
+            }
+            this.runDirectiveStatus.removeClass('text-danger text-success text-muted text-warning');
+            if (cssClass) {
+                this.runDirectiveStatus.addClass(cssClass);
+            }
+            this.runDirectiveStatus.text(message || '');
+        };
+
+        that._applyStoredRunDirectiveStatus = function () {
+            if (!this.runDirectiveStatus || !this.runDirectiveStatus.length) {
+                return;
+            }
+            var status = this._runDirectivesStatus || {};
+            this.runDirectiveStatus.removeClass('text-danger text-success text-muted text-warning');
+            if (status.css) {
+                this.runDirectiveStatus.addClass(status.css);
+            }
+            this.runDirectiveStatus.text(status.message || '');
+        };
+
+        that._renderRunDirectives = function () {
+            if (!this.runDirectiveList || !this.runDirectiveList.length) {
+                return;
+            }
+
+            var snapshot = this.state.snapshot || {};
+            var directives = snapshot.run_directives || [];
+            var self = this;
+
+            if (!Array.isArray(directives) || directives.length === 0) {
+                this.runDirectiveList.html('<div class="text-muted small">No batch tasks configured.</div>');
+                this._setRunDirectivesStatus('No batch tasks configured.', 'text-muted');
+                return;
+            }
+
+            var html = directives.map(function (directive, index) {
+                if (!directive || typeof directive !== 'object') {
+                    return '';
+                }
+                var slug = directive.slug || ('directive-' + index);
+                var label = directive.label || slug;
+                var controlId = 'batch-runner-directive-' + slug;
+                var checked = directive.enabled ? ' checked' : '';
+                var disabled = (!self.state.enabled || self._runDirectivesSaving) ? ' disabled' : '';
+                return '<div class="custom-control custom-checkbox mb-1">' +
+                    '<input type="checkbox" class="custom-control-input" id="' + controlId + '" data-slug="' + slug + '"' + checked + disabled + '>' +
+                    '<label class="custom-control-label" for="' + controlId + '">' + self._escapeHtml(label) + '</label>' +
+                    '</div>';
+            }).join('');
+
+            this.runDirectiveList.html(html);
+            this._syncRunDirectiveDisabledState();
+            if (!this._runDirectivesStatus || !this._runDirectivesStatus.message) {
+                if (!this.state.enabled) {
+                    this._setRunDirectivesStatus('Batch runner is disabled; tasks cannot be edited.', 'text-muted');
+                } else {
+                    this._applyStoredRunDirectiveStatus();
+                }
+            } else {
+                this._applyStoredRunDirectiveStatus();
+            }
+        };
+
+        that._setRunDirectivesBusy = function (busy) {
+            this._runDirectivesSaving = busy === true;
+            this._syncRunDirectiveDisabledState();
+        };
+
+        that._collectRunDirectiveValues = function () {
+            var result = {};
+            if (!this.runDirectiveList || !this.runDirectiveList.length) {
+                return result;
+            }
+            this.runDirectiveList.find('input[data-slug]').each(function () {
+                var $input = $(this);
+                var slug = $input.data('slug');
+                if (!slug) {
+                    return;
+                }
+                result[String(slug)] = $input.is(':checked');
+            });
+            return result;
+        };
+
+        that._submitRunDirectives = function (values) {
+            if (!values) {
+                return;
+            }
+            var self = this;
+            this._setRunDirectivesBusy(true);
+            this._setRunDirectivesStatus('Saving batch task selection…', 'text-muted');
+
+            fetch(this._apiUrl('run-directives'), {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ run_directives: values })
+            })
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        data._httpStatus = response.status;
+                        return data;
+                    });
+                })
+                .then(function (payload) {
+                    if (!payload || payload.success !== true) {
+                        throw (payload && (payload.error || payload.message)) || 'Failed to update batch tasks.';
+                    }
+
+                    if (payload.snapshot) {
+                        self.state.snapshot = payload.snapshot;
+                    } else if (Array.isArray(payload.run_directives)) {
+                        var snapshot = self.state.snapshot || {};
+                        snapshot.run_directives = payload.run_directives;
+                        self.state.snapshot = snapshot;
+                    }
+
+                    self._setRunDirectivesStatus('Batch tasks updated.', 'text-success');
+                    self._renderRunDirectives();
+                })
+                .catch(function (error) {
+                    var message = typeof error === 'string' ? error : (error && error.error) || 'Failed to update batch tasks.';
+                    self._setRunDirectivesStatus(message, 'text-danger');
+                    self._renderRunDirectives();
+                })
+                .finally(function () {
+                    self._setRunDirectivesBusy(false);
+                });
+        };
+
+        that._handleRunDirectiveToggle = function (evt) {
+            if (this._runDirectivesSaving) {
+                if (evt && typeof evt.preventDefault === 'function') {
+                    evt.preventDefault();
+                }
+                return;
+            }
+
+            if (!this.state.enabled) {
+                if (evt && typeof evt.preventDefault === 'function') {
+                    evt.preventDefault();
+                }
+                this._renderRunDirectives();
+                return;
+            }
+
+            var values = this._collectRunDirectiveValues();
+            this._submitRunDirectives(values);
+        };
+
         that._collectJobNodes = function (jobInfo, acc) {
             if (!jobInfo) {
                 return;
@@ -245,19 +425,205 @@ var BatchRunner = (function () {
             });
         };
 
-        that._renderJobInfo = function (jobInfo) {
+        that._registerTrackedJobId = function (jobId) {
+            if (jobId === undefined || jobId === null) {
+                return false;
+            }
+            var normalized = String(jobId).trim();
+            if (!normalized) {
+                return false;
+            }
+            if (!this._jobInfoTrackedIds.has(normalized)) {
+                this._jobInfoTrackedIds.add(normalized);
+                return true;
+            }
+            return false;
+        };
+
+        that._registerTrackedJobIds = function (collection) {
+            var self = this;
+            if (!collection) {
+                return;
+            }
+            if (Array.isArray(collection)) {
+                collection.forEach(function (value) {
+                    self._registerTrackedJobId(value);
+                });
+                return;
+            }
+            if (typeof collection === 'object') {
+                Object.keys(collection).forEach(function (key) {
+                    self._registerTrackedJobId(collection[key]);
+                });
+                return;
+            }
+            self._registerTrackedJobId(collection);
+        };
+
+        that._bootstrapTrackedJobIds = function (bootstrap) {
+            if (!bootstrap || typeof bootstrap !== 'object') {
+                return;
+            }
+
+            if (Array.isArray(bootstrap.jobIds)) {
+                this._registerTrackedJobIds(bootstrap.jobIds);
+            }
+
+            if (bootstrap.rqJobIds && typeof bootstrap.rqJobIds === 'object') {
+                this._registerTrackedJobIds(bootstrap.rqJobIds);
+            }
+
+            var snapshot = bootstrap.state || {};
+            var metadata = snapshot && typeof snapshot === 'object' ? (snapshot.metadata || {}) : {};
+
+            this._registerTrackedJobIds(snapshot.job_ids);
+            this._registerTrackedJobIds(metadata.job_ids);
+            this._registerTrackedJobIds(metadata.rq_job_ids);
+            this._registerTrackedJobIds(metadata.tracked_job_ids);
+        };
+
+        that._resolveJobInfoRequestIds = function () {
+            var ids = new Set();
+
+            if (this.rq_job_id) {
+                ids.add(String(this.rq_job_id).trim());
+            }
+
+            if (this._jobInfoTrackedIds && this._jobInfoTrackedIds.size) {
+                this._jobInfoTrackedIds.forEach(function (value) {
+                    if (value) {
+                        ids.add(String(value).trim());
+                    }
+                });
+            }
+
+            var snapshot = (this.state && this.state.snapshot) || {};
+            var metadata = snapshot && typeof snapshot === 'object' ? (snapshot.metadata || {}) : {};
+
+            [snapshot.job_ids, metadata.job_ids, metadata.rq_job_ids, metadata.tracked_job_ids].forEach(function (collection) {
+                if (!collection) {
+                    return;
+                }
+                var items;
+                if (Array.isArray(collection)) {
+                    items = collection;
+                } else if (typeof collection === 'object') {
+                    items = Object.values(collection);
+                } else {
+                    items = [collection];
+                }
+                items.forEach(function (item) {
+                    if (item === undefined || item === null) {
+                        return;
+                    }
+                    var normalized = String(item).trim();
+                    if (normalized) {
+                        ids.add(normalized);
+                    }
+                });
+            });
+
+            return Array.from(ids).filter(function (value) {
+                return typeof value === 'string' && value.length > 0;
+            });
+        };
+
+        that._normalizeJobInfoPayload = function (payload) {
+            if (!payload) {
+                return [];
+            }
+
+            if (Array.isArray(payload)) {
+                return payload.filter(function (item) {
+                    return item && typeof item === 'object';
+                });
+            }
+
+            if (payload.jobs && typeof payload.jobs === 'object') {
+                return Object.keys(payload.jobs).map(function (key) {
+                    return payload.jobs[key];
+                }).filter(function (item) {
+                    return item && typeof item === 'object';
+                });
+            }
+
+            if (payload.job && typeof payload.job === 'object') {
+                return [payload.job];
+            }
+
+            if (payload && typeof payload === 'object' && (payload.id || payload.status || payload.children)) {
+                return [payload];
+            }
+
+            return [];
+        };
+
+        that._registerJobInfoTrees = function (jobInfos) {
+            var self = this;
+            if (!Array.isArray(jobInfos) || jobInfos.length === 0) {
+                return;
+            }
+            jobInfos.forEach(function (info) {
+                if (!info || typeof info !== 'object') {
+                    return;
+                }
+                var nodes = [];
+                self._collectJobNodes(info, nodes);
+                nodes.forEach(function (node) {
+                    if (node && node.id) {
+                        self._registerTrackedJobId(node.id);
+                    }
+                });
+            });
+        };
+
+        that._dedupeJobNodes = function (nodes) {
+            if (!Array.isArray(nodes)) {
+                return [];
+            }
+            var deduped = [];
+            var seen = new Set();
+
+            nodes.forEach(function (node) {
+                if (!node) {
+                    return;
+                }
+                var key = node.id ? String(node.id) : (node.runid ? 'runid:' + node.runid : null);
+                if (key && seen.has(key)) {
+                    return;
+                }
+                if (key) {
+                    seen.add(key);
+                }
+                deduped.push(node);
+            });
+
+            return deduped;
+        };
+
+        that._renderJobInfo = function (payload) {
             if (!this.infoPanel || !this.infoPanel.length) {
                 return;
             }
 
-            if (!jobInfo || jobInfo.status === 'not_found') {
+            this._jobInfoLastPayload = payload;
+
+            var jobInfos = this._normalizeJobInfoPayload(payload);
+            if (!jobInfos.length) {
                 this.infoPanel.html('<span class="text-muted">Job information unavailable.</span>');
                 return;
             }
 
+            this._registerJobInfoTrees(jobInfos);
+
+            var that = this;
             var nodes = [];
-            this._collectJobNodes(jobInfo, nodes);
-            var watershedNodes = nodes.filter(function (node) {
+            jobInfos.forEach(function (info) {
+                that._collectJobNodes(info, nodes);
+            });
+            var dedupedNodes = this._dedupeJobNodes(nodes);
+
+            var watershedNodes = dedupedNodes.filter(function (node) {
                 return node && node.runid;
             });
 
@@ -273,8 +639,41 @@ var BatchRunner = (function () {
             });
 
             var parts = [];
+
+            if (jobInfos.length === 1) {
+                var rootInfo = jobInfos[0] || {};
+                parts.push('<div><strong>Batch status:</strong> ' + this._escapeHtml(rootInfo.status || 'unknown') + '</div>');
+                if (rootInfo.id) {
+                    parts.push('<div class="small text-muted">Job ID: <code>' + this._escapeHtml(rootInfo.id) + '</code></div>');
+                }
+            } else {
+                parts.push('<div><strong>Tracked jobs:</strong></div>');
+                var maxJobsToShow = 6;
+                var jobBadges = jobInfos.slice(0, maxJobsToShow).map(function (info) {
+                    var safeStatus = that._escapeHtml((info && info.status) || 'unknown');
+                    var safeId = that._escapeHtml((info && info.id) || '—');
+                    return '<span class="badge badge-light text-dark border mr-1 mb-1">' + safeStatus + ' · <code>' + safeId + '</code></span>';
+                });
+                if (jobInfos.length > maxJobsToShow) {
+                    jobBadges.push('<span class="text-muted">…</span>');
+                }
+                parts.push('<div class="mt-1">' + jobBadges.join(' ') + '</div>');
+            }
+
+            var allNotFound = jobInfos.every(function (info) {
+                return info && info.status === 'not_found';
+            });
+
+            if (allNotFound) {
+                parts.push('<div class="small text-muted">Requested job IDs were not found in the queue.</div>');
+                this.infoPanel.html(parts.join(''));
+                return;
+            }
+
             if (totalWatersheds > 0) {
                 parts.push('<div class="small text-muted">Watersheds: ' + completedWatersheds + '/' + totalWatersheds + ' finished</div>');
+            } else {
+                parts.push('<div class="small text-muted">Watershed tasks have not started yet.</div>');
             }
 
             if (activeWatersheds.length) {
@@ -305,11 +704,16 @@ var BatchRunner = (function () {
                 return;
             }
 
-            var jobId = this.rq_job_id;
-            if (!jobId) {
+            var jobIds = this._resolveJobInfoRequestIds();
+            if (!jobIds.length) {
                 this.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
                 return;
             }
+
+            var self = this;
+            jobIds.forEach(function (jobId) {
+                self._registerTrackedJobId(jobId);
+            });
 
             if (typeof AbortController !== 'undefined') {
                 if (this._jobInfoAbortController) {
@@ -319,9 +723,14 @@ var BatchRunner = (function () {
             }
 
             var controller = this._jobInfoAbortController;
-            fetch('/weppcloud/rq/api/jobinfo/' + encodeURIComponent(jobId), {
+            fetch('/weppcloud/rq/api/jobinfo', {
+                method: 'POST',
                 signal: controller ? controller.signal : undefined,
-                credentials: 'same-origin'
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ job_ids: jobIds })
             })
                 .then(function (response) {
                     if (!response.ok) {
@@ -330,9 +739,15 @@ var BatchRunner = (function () {
                     return response.json();
                 })
                 .then(function (payload) {
-                    that._renderJobInfo(payload);
-                    if (controller && controller === that._jobInfoAbortController) {
-                        that._jobInfoAbortController = null;
+                    if (payload && Array.isArray(payload.job_ids)) {
+                        self._registerTrackedJobIds(payload.job_ids);
+                    } else if (payload && payload.jobs && typeof payload.jobs === 'object') {
+                        self._registerTrackedJobIds(Object.keys(payload.jobs));
+                    }
+
+                    self._renderJobInfo(payload);
+                    if (controller && controller === self._jobInfoAbortController) {
+                        self._jobInfoAbortController = null;
                     }
                 })
                 .catch(function (error) {
@@ -340,11 +755,11 @@ var BatchRunner = (function () {
                         return;
                     }
                     console.warn('Unable to refresh batch job info:', error);
-                    if (that.infoPanel && that.infoPanel.length) {
-                        that.infoPanel.html('<span class="text-muted">Unable to refresh batch job details.</span>');
+                    if (self.infoPanel && self.infoPanel.length) {
+                        self.infoPanel.html('<span class="text-muted">Unable to refresh batch job details.</span>');
                     }
-                    if (controller && controller === that._jobInfoAbortController) {
-                        that._jobInfoAbortController = null;
+                    if (controller && controller === self._jobInfoAbortController) {
+                        self._jobInfoAbortController = null;
                     }
                 });
         };
@@ -752,6 +1167,9 @@ var BatchRunner = (function () {
             baseSetRqJobId.call(this, self, job_id);
             if (self === that) {
                 if (job_id) {
+                    that._registerTrackedJobId(job_id);
+                }
+                if (job_id) {
                     that.refreshJobInfo();
                 } else if (that.infoPanel && that.infoPanel.length) {
                     that.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
@@ -909,6 +1327,19 @@ var BatchRunner = (function () {
             }
 
             var self = this;
+            if (self._jobInfoAbortController && typeof self._jobInfoAbortController.abort === 'function') {
+                try {
+                    self._jobInfoAbortController.abort();
+                } catch (abortError) {
+                    console.warn('Failed to abort in-flight job info request before submitting batch:', abortError);
+                }
+                self._jobInfoAbortController = null;
+            }
+            if (self._jobInfoTrackedIds && typeof self._jobInfoTrackedIds.clear === 'function') {
+                self._jobInfoTrackedIds.clear();
+            }
+            self._jobInfoLastPayload = null;
+
             self._setRunBatchBusy(true, 'Submitting batch run…', 'text-muted');
 
             if (self.ws_client && typeof self.ws_client.connect === 'function') {

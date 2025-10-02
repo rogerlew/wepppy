@@ -1,4 +1,6 @@
 import os
+from typing import Sequence
+
 from rq import Queue, Worker
 from rq.job import Job
 from rq.utils import get_version, utcnow
@@ -59,6 +61,60 @@ def get_wepppy_rq_job_info(job_id: str) -> dict:
             return {"id": job_id, "status": "not_found"}
 
         return recursive_get_job_details(job, redis_conn, now)
+
+
+def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> dict[str, dict]:
+    """Fetch job information for multiple job IDs in a single Redis session."""
+
+    if not job_ids:
+        return {}
+
+    normalized_ids: list[str] = []
+    seen_ids: set[str] = set()
+    for raw in job_ids:
+        if raw is None:
+            continue
+        job_id = str(raw).strip()
+        if not job_id or job_id in seen_ids:
+            continue
+        seen_ids.add(job_id)
+        normalized_ids.append(job_id)
+
+    if not normalized_ids:
+        return {}
+
+    now = utcnow()
+    results: dict[str, dict] = {}
+
+    with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        for job_id in normalized_ids:
+            try:
+                job = Job.fetch(job_id, connection=redis_conn)
+            except NoSuchJobError:
+                results[job_id] = {"id": job_id, "status": "not_found"}
+                continue
+            except Exception as exc:  # pragma: no cover - defensive guard
+                results[job_id] = {
+                    "id": job_id,
+                    "status": "error",
+                    "error": str(exc),
+                }
+                continue
+
+            if not job:
+                results[job_id] = {"id": job_id, "status": "not_found"}
+                continue
+
+            try:
+                results[job_id] = recursive_get_job_details(job, redis_conn, now)
+            except Exception as exc:  # pragma: no cover - defensive guard
+                results[job_id] = {
+                    "id": job_id,
+                    "status": "error",
+                    "error": str(exc),
+                }
+
+    return results
 
 
 def _flatten_job_tree(job_info: dict) -> tuple[list, list]:

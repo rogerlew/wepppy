@@ -13,7 +13,7 @@ from os.path import split as _split
 import re
 from copy import deepcopy
 import shutil
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping
 
 from wepppy.topo.watershed_collection import WatershedCollection
 from wepppy.weppcloud.utils.helpers import get_batch_root_dir
@@ -31,7 +31,11 @@ class RunDirectiveEnum(str, Enum):
     BUILD_LANDUSE = "build_landuse"
     BUILD_SOILS = "build_soils"
     ACQUIRE_RAP = "acquire_rap"
-
+    BUILD_CLIMATE = "build_climate"
+    RUN_WEPP_HILLSLOPES = "run_wepp_hillslopes"
+    RUN_WEPP_WATERSHED = "run_wepp_watershed"
+    RUN_OMNI_SCENARIOS = "run_omni_scenarios"
+    RUN_OMNI_CONTRASTS = "run_omni_contrasts"
 
 class BatchRunner(NoDbBase):
     """NoDb controller for batch runner state."""
@@ -58,6 +62,23 @@ class BatchRunner(NoDbBase):
     @property
     def run_directives(self) -> Dict[str, bool]:
         return self._run_directives
+
+    def update_run_directives(self, directives: Mapping[str, Any]) -> Dict[str, bool]:
+        if directives is None:
+            directives = {}
+
+        normalized: Dict[str, bool] = {}
+        for directive in RunDirectiveEnum:
+            key = directive.value
+            if isinstance(directives, Mapping) and key in directives:
+                normalized[key] = bool(directives[key])
+            else:
+                normalized[key] = bool(self._run_directives.get(key, True))
+
+        with self.locked():
+            self._run_directives.update(normalized)
+
+        return deepcopy(self._run_directives)
 
     @property
     def batch_name(self) -> str:
