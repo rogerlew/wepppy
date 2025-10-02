@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from glob import glob
 import hashlib
 import json
 import os
@@ -15,11 +16,12 @@ from copy import deepcopy
 import shutil
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar
 
-from wepppy.topo.watershed_collection import WatershedCollection
-from wepppy.weppcloud.utils.helpers import get_batch_root_dir
+from wepppy.topo.watershed_collection import WatershedCollection, WatershedFeature
+from wepppy.weppcloud.utils.helpers import get_batch_root_dir, get_wd
 
-from .base import NoDbBase, TriggerEvents, nodb_setter
-from .redis_prep import TaskEnum
+from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, clear_locks
+from .redis_prep import RedisPrep, TaskEnum
+
 
 class BatchRunner(NoDbBase):
     """NoDb controller for batch runner state."""
@@ -42,14 +44,6 @@ class BatchRunner(NoDbBase):
         TaskEnum.run_omni_scenarios,
         TaskEnum.run_omni_contrasts,
     )
-    DEFAULT_DIRECTIVE_KEYS: ClassVar[Tuple[str, ...]] = tuple(task.value for task in DEFAULT_TASKS)
-    LEGACY_DIRECTIVE_SLUGS: ClassVar[Dict[str, str]] = {
-        'acquire_rap': TaskEnum.fetch_rap_ts.value,
-        'run_wepp': TaskEnum.run_wepp_watershed.value,
-    }
-    LABEL_OVERRIDES: ClassVar[Dict[str, str]] = {
-        TaskEnum.fetch_rap_ts.value: 'Build RAP TS',
-    }
 
     def __init__(self, wd: str, batch_config: str, base_config: str):
         super().__init__(wd, batch_config)
@@ -58,8 +52,7 @@ class BatchRunner(NoDbBase):
             self._geojson_state = None
             self._runid_template_state = None
             self._base_wd = os.path.join(self.wd, "_base")
-            self._run_directives = {}
-            self._ensure_run_directives_initialized(default=True)
+            self._run_directives = deepcopy(BatchRunner.DEFAULT_TASKS)
 
         self._init_base_project()
 
@@ -68,11 +61,9 @@ class BatchRunner(NoDbBase):
 
     @property
     def run_directives(self) -> Dict[str, bool]:
-        self._ensure_run_directives_initialized()
-        return deepcopy(self._run_directives)
+        return self._run_directives
 
     def is_task_enabled(self, task: TaskEnum) -> bool:
-        self._ensure_run_directives_initialized()
         return bool(self._run_directives.get(task.value, True))
 
     def update_run_directives(self, directives: Mapping[str, Any]) -> Dict[str, bool]:
@@ -93,42 +84,111 @@ class BatchRunner(NoDbBase):
         return deepcopy(self._run_directives)
 
     @classmethod
-    def _normalize_directive_key(cls, key: Any) -> Optional[str]:
-        if key is None:
-            return None
-        slug = str(key)
-        if slug in cls.LEGACY_DIRECTIVE_SLUGS:
-            return cls.LEGACY_DIRECTIVE_SLUGS[slug]
-        if slug in cls.DEFAULT_DIRECTIVE_KEYS:
-            return slug
-        return None
-
-    def _ensure_run_directives_initialized(self, default: bool = True) -> None:
-        if not isinstance(getattr(self, '_run_directives', None), dict):
-            self._run_directives = {}
-
-        for key in self.DEFAULT_DIRECTIVE_KEYS:
-            self._run_directives.setdefault(key, bool(default))
-
-    def _migrate_run_directives(self) -> None:
-        directives = getattr(self, '_run_directives', None)
-        if not isinstance(directives, dict):
-            directives = {}
-
-        migrated: Dict[str, bool] = {}
-        for key, value in directives.items():
-            normalized_key = self._normalize_directive_key(key)
-            if normalized_key is None:
-                continue
-            migrated[normalized_key] = bool(value)
-
-        self._run_directives = migrated
-        self._ensure_run_directives_initialized()
-
-    @classmethod
     def _post_instance_loaded(cls, instance):
         instance._migrate_run_directives()
         return instance
+
+    def run_batch_project(
+        self,
+        watershed_feature: WatershedFeature,
+    ) -> Tuple[str, ...]:
+        runid = f'batch;;{self.batch_name};;{watershed_feature.runid}'
+        runid_wd = get_wd(runid)
+
+        base_wd = self.base_wd
+        if os.path.exists(runid_wd):
+            shutil.rmtree(runid_wd)
+        shutil.copytree(base_wd, runid_wd)
+
+        for nodb_fn in glob(_join(runid_wd, '*.nodb')):
+            with open(nodb_fn, 'r') as fp:
+                state = json.load(fp)
+            state.setdefault('py/state', {})['wd'] = runid_wd
+            with open(nodb_fn, 'w') as fp:
+                json.dump(state, fp)
+                fp.flush()
+                os.fsync(fp.fileno())
+
+        clear_nodb_file_cache(runid)
+        try:
+            locks_cleared = clear_locks(runid)
+        except RuntimeError:
+            locks_cleared = None
+
+        prep = RedisPrep.getInstance(runid_wd)
+
+        from wepppy.nodb.ron import Ron
+        from wepppy.nodb.watershed import Watershed
+        from wepppy.nodb.landuse import Landuse
+        from wepppy.nodb.soils import Soils
+        from wepppy.nodb.climate import Climate
+        from wepppy.nodb.wepp import Wepp
+        from wepppy.nodb.mods.rap.rap_ts import RAP_TS
+
+        ron = Ron.getInstance(runid_wd)
+        watershed = Watershed.getInstance(runid_wd)
+        landuse = Landuse.getInstance(runid_wd)
+        soils = Soils.getInstance(runid_wd)
+        climate = Climate.getInstance(runid_wd)
+        wepp = Wepp.getInstance(runid_wd)
+
+        if self.is_task_enabled(TaskEnum.fetch_dem) and prep[str(TaskEnum.fetch_dem)] is None:
+            pad = 0.02
+            bbox = watershed_feature.get_padded_bbox(pad=pad)
+            map_center = ((bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0)
+            ron.set_map(bbox, center=map_center, zoom=11)
+            ron.fetch_dem()
+            prep.timestamp(TaskEnum.fetch_dem)
+
+        if self.is_task_enabled(TaskEnum.build_channels) and prep[str(TaskEnum.build_channels)] is None:
+            watershed.build_channels()
+
+        if self.is_task_enabled(TaskEnum.find_outlet) and prep[str(TaskEnum.find_outlet)] is None:
+            watershed.find_outlet(watershed_feature)
+
+        if self.is_task_enabled(TaskEnum.build_subcatchments) and prep[str(TaskEnum.build_subcatchments)] is None:
+            watershed.build_subcatchments()
+            prep.timestamp(TaskEnum.build_subcatchments)
+
+        if self.is_task_enabled(TaskEnum.abstract_watershed) and prep[str(TaskEnum.abstract_watershed)] is None:
+            watershed.abstract_watershed()
+
+        if self.is_task_enabled(TaskEnum.build_landuse) and prep[str(TaskEnum.build_landuse)] is None:
+            landuse.build()
+
+        if self.is_task_enabled(TaskEnum.build_soils) and prep[str(TaskEnum.build_soils)] is None:
+            soils.build()
+
+        if self.is_task_enabled(TaskEnum.build_climate) and prep[str(TaskEnum.build_climate)] is None:
+            climate.build()
+
+        rap_ts = RAP_TS.tryGetInstance(runid_wd)
+        if rap_ts and self.is_task_enabled(TaskEnum.fetch_rap_ts) and prep[str(TaskEnum.fetch_rap_ts)] is None:
+            rap_ts.acquire_rasters(
+                start_year=climate.observed_start_year,
+                end_year=climate.observed_end_year,
+            )
+            rap_ts.analyze()
+
+        run_hillslopes = self.is_task_enabled(TaskEnum.run_wepp_hillslopes) and prep[str(TaskEnum.run_wepp_hillslopes)] is None
+        run_watershed = self.is_task_enabled(TaskEnum.run_wepp_watershed) and prep[str(TaskEnum.run_wepp_watershed)] is None
+
+        if run_hillslopes:
+            wepp.clean()
+
+        if run_hillslopes or run_watershed:
+            wepp._check_and_set_baseflow_map()
+            wepp._check_and_set_phosphorus_map()
+
+        if run_hillslopes:
+            wepp.prep_hillslopes()
+            wepp.run_hillslopes()
+
+        if run_watershed:
+            wepp.prep_watershed()
+            wepp.run_watershed()
+
+        return tuple(locks_cleared) if locks_cleared else ()
 
     @property
     def batch_name(self) -> str:

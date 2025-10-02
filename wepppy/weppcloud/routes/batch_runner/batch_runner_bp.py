@@ -79,9 +79,7 @@ def _build_batch_runner_snapshot(batch_runner: BatchRunner) -> Dict[str, Any]:
     run_directives_state = []
     directives_map = batch_runner.run_directives
     for task in BatchRunner.DEFAULT_TASKS:
-        label = task.name.replace('_', ' ').title()
-        label = label.replace('Wepp', 'WEPP').replace('Omni', 'OMNI').replace('Rap', 'RAP')
-        label = BatchRunner.LABEL_OVERRIDES.get(task.value, label)
+        label = task.label()
         run_directives_state.append({
             "slug": task.value,
             "label": label,

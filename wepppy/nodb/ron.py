@@ -566,6 +566,8 @@ class Ron(NoDbBase):
 
         assert _exists(self.dem_fn)
 
+        RedisPrep.getInstance(self.wd).timestamp(TaskEnum.fetch_dem)
+
     @property
     def has_dem(self):
         return _exists(self.dem_fn)
