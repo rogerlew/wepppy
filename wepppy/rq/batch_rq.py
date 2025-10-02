@@ -17,7 +17,7 @@ from rq import Queue, get_current_job
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from wepppy.nodb.base import NoDbAlreadyLockedError, clear_nodb_file_cache
+from wepppy.nodb.base import NoDbAlreadyLockedError, clear_nodb_file_cache, clear_locks
 from wepppy.nodb.batch_runner import BatchRunner, RunDirectiveEnum
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
@@ -150,8 +150,14 @@ def run_batch_watershed_rq(
                 json.dump(d, fp)
                 fp.flush()                 # flush Python’s userspace buffer
                 os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
-
+        
         clear_nodb_file_cache(runid)
+        try:
+            cleared = clear_locks(runid)
+            if cleared:
+                StatusMessenger.publish(status_channel, f'rq:{job.id} INFO cleared stale locks {cleared}')
+        except RuntimeError:
+            pass
 
         if batch_runner.run_directives[RunDirectiveEnum.FETCH_DEM]:
             pad = 0.02  # degrees
@@ -185,7 +191,12 @@ def run_batch_watershed_rq(
             soils = Soils.getInstance(runid_wd)
             soils.build()
 
-            
+        if batch_runner.run_directives[RunDirectiveEnum.BUILD_CLIMATE]:
+            from wepppy.nodb.climate import Climate
+            climate = Climate.getInstance(runid_wd)
+            climate.build()
+
+
 
         elapsed = time.time() - start_ts
         status = True
