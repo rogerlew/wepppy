@@ -13,35 +13,43 @@ from os.path import split as _split
 import re
 from copy import deepcopy
 import shutil
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar
 
 from wepppy.topo.watershed_collection import WatershedCollection
 from wepppy.weppcloud.utils.helpers import get_batch_root_dir
 
 from .base import NoDbBase, TriggerEvents, nodb_setter
-
-from enum import Enum
-
-class RunDirectiveEnum(str, Enum):
-    FETCH_DEM = "fetch_dem"
-    BUILD_CHANNELS = "build_channels"
-    FIND_OUTLET = "find_outlet"
-    BUILD_SUBCATCHMENTS = "build_subcatchments"
-    ABSTRACT_WATERSHED = "abstract_watershed"
-    BUILD_LANDUSE = "build_landuse"
-    BUILD_SOILS = "build_soils"
-    ACQUIRE_RAP = "acquire_rap"
-    BUILD_CLIMATE = "build_climate"
-    RUN_WEPP_HILLSLOPES = "run_wepp_hillslopes"
-    RUN_WEPP_WATERSHED = "run_wepp_watershed"
-    RUN_OMNI_SCENARIOS = "run_omni_scenarios"
-    RUN_OMNI_CONTRASTS = "run_omni_contrasts"
+from .redis_prep import TaskEnum
 
 class BatchRunner(NoDbBase):
     """NoDb controller for batch runner state."""
 
     __name__ = "BatchRunner"
     filename = "batch_runner.nodb"
+
+    DEFAULT_TASKS: ClassVar[Tuple[TaskEnum, ...]] = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_channels,
+        TaskEnum.find_outlet,
+        TaskEnum.build_subcatchments,
+        TaskEnum.abstract_watershed,
+        TaskEnum.build_landuse,
+        TaskEnum.build_soils,
+        TaskEnum.fetch_rap_ts,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+        TaskEnum.run_omni_scenarios,
+        TaskEnum.run_omni_contrasts,
+    )
+    DEFAULT_DIRECTIVE_KEYS: ClassVar[Tuple[str, ...]] = tuple(task.value for task in DEFAULT_TASKS)
+    LEGACY_DIRECTIVE_SLUGS: ClassVar[Dict[str, str]] = {
+        'acquire_rap': TaskEnum.fetch_rap_ts.value,
+        'run_wepp': TaskEnum.run_wepp_watershed.value,
+    }
+    LABEL_OVERRIDES: ClassVar[Dict[str, str]] = {
+        TaskEnum.fetch_rap_ts.value: 'Build RAP TS',
+    }
 
     def __init__(self, wd: str, batch_config: str, base_config: str):
         super().__init__(wd, batch_config)
@@ -51,8 +59,7 @@ class BatchRunner(NoDbBase):
             self._runid_template_state = None
             self._base_wd = os.path.join(self.wd, "_base")
             self._run_directives = {}
-            for rd in RunDirectiveEnum:
-                self._run_directives[rd.value] = True
+            self._ensure_run_directives_initialized(default=True)
 
         self._init_base_project()
 
@@ -61,24 +68,67 @@ class BatchRunner(NoDbBase):
 
     @property
     def run_directives(self) -> Dict[str, bool]:
-        return self._run_directives
+        self._ensure_run_directives_initialized()
+        return deepcopy(self._run_directives)
+
+    def is_task_enabled(self, task: TaskEnum) -> bool:
+        self._ensure_run_directives_initialized()
+        return bool(self._run_directives.get(task.value, True))
 
     def update_run_directives(self, directives: Mapping[str, Any]) -> Dict[str, bool]:
-        if directives is None:
-            directives = {}
-
         normalized: Dict[str, bool] = {}
-        for directive in RunDirectiveEnum:
-            key = directive.value
-            if isinstance(directives, Mapping) and key in directives:
-                normalized[key] = bool(directives[key])
-            else:
-                normalized[key] = bool(self._run_directives.get(key, True))
+        if isinstance(directives, Mapping):
+            for raw_key, value in directives.items():
+                key = self._normalize_directive_key(raw_key)
+                if key is None:
+                    continue
+                normalized[key] = bool(value)
 
         with self.locked():
-            self._run_directives.update(normalized)
+            self._ensure_run_directives_initialized()
+            for key in self.DEFAULT_DIRECTIVE_KEYS:
+                if key in normalized:
+                    self._run_directives[key] = normalized[key]
 
         return deepcopy(self._run_directives)
+
+    @classmethod
+    def _normalize_directive_key(cls, key: Any) -> Optional[str]:
+        if key is None:
+            return None
+        slug = str(key)
+        if slug in cls.LEGACY_DIRECTIVE_SLUGS:
+            return cls.LEGACY_DIRECTIVE_SLUGS[slug]
+        if slug in cls.DEFAULT_DIRECTIVE_KEYS:
+            return slug
+        return None
+
+    def _ensure_run_directives_initialized(self, default: bool = True) -> None:
+        if not isinstance(getattr(self, '_run_directives', None), dict):
+            self._run_directives = {}
+
+        for key in self.DEFAULT_DIRECTIVE_KEYS:
+            self._run_directives.setdefault(key, bool(default))
+
+    def _migrate_run_directives(self) -> None:
+        directives = getattr(self, '_run_directives', None)
+        if not isinstance(directives, dict):
+            directives = {}
+
+        migrated: Dict[str, bool] = {}
+        for key, value in directives.items():
+            normalized_key = self._normalize_directive_key(key)
+            if normalized_key is None:
+                continue
+            migrated[normalized_key] = bool(value)
+
+        self._run_directives = migrated
+        self._ensure_run_directives_initialized()
+
+    @classmethod
+    def _post_instance_loaded(cls, instance):
+        instance._migrate_run_directives()
+        return instance
 
     @property
     def batch_name(self) -> str:
@@ -188,4 +238,4 @@ class BatchRunner(NoDbBase):
     def runid_template_state(self, value: Optional[Dict[str, Any]]) -> None:
         self._runid_template_state = value
 
-__all__ = ["BatchRunner", "RunDirectiveEnum"]
+__all__ = ["BatchRunner"]

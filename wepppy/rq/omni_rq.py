@@ -168,7 +168,7 @@ def run_omni_scenarios_rq(runid: str):
 
             try:
                 prep = RedisPrep.getInstance(wd)
-                prep.timestamp(TaskEnum.run_omni)
+                prep.timestamp(TaskEnum.run_omni_scenarios)
             except FileNotFoundError:
                 pass
 
@@ -421,7 +421,7 @@ def _finalize_omni_scenarios_rq(runid: str):
 
         try:
             prep = RedisPrep.getInstance(wd)
-            prep.timestamp(TaskEnum.run_omni)
+            prep.timestamp(TaskEnum.run_omni_scenarios)
         except FileNotFoundError:
             pass
 

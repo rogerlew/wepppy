@@ -109,7 +109,7 @@ print(f"Run {ron.name} in scenario {ron.scenario}")
 from wepppy.nodb import RedisPrep, TaskEnum
 
 prep = RedisPrep.getInstance(wd)
-prep.timestamp(TaskEnum.run_wepp)
+prep.timestamp(TaskEnum.run_wepp_watershed)
 print(prep.get_rq_job_ids())
 ```
 

@@ -17,7 +17,7 @@ from wepppy.topo.watershed_collection.watershed_collection import WatershedColle
 
 from .._common import Blueprint, roles_required, secure_filename
 from wepppy.nodb.base import get_configs, get_config_dir
-from wepppy.nodb.batch_runner import BatchRunner, RunDirectiveEnum
+from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.weppcloud.utils.helpers import exception_factory, get_batch_root_dir, handle_with_exception_factory
 
 batch_runner_bp = Blueprint(
@@ -77,13 +77,15 @@ def _build_batch_runner_snapshot(batch_runner: BatchRunner) -> Dict[str, Any]:
     }
 
     run_directives_state = []
-    for directive in RunDirectiveEnum:
-        label = directive.name.replace('_', ' ').title()
+    directives_map = batch_runner.run_directives
+    for task in BatchRunner.DEFAULT_TASKS:
+        label = task.name.replace('_', ' ').title()
         label = label.replace('Wepp', 'WEPP').replace('Omni', 'OMNI').replace('Rap', 'RAP')
+        label = BatchRunner.LABEL_OVERRIDES.get(task.value, label)
         run_directives_state.append({
-            "slug": directive.value,
+            "slug": task.value,
             "label": label,
-            "enabled": bool(batch_runner.run_directives.get(directive.value, False)),
+            "enabled": bool(directives_map.get(task.value, False)),
         })
     snapshot["run_directives"] = run_directives_state
 

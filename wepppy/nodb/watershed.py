@@ -801,6 +801,12 @@ class Watershed(NoDbBase):
         outlet = self.wbt.set_outlet_from_geojson(logger=self.logger)
         self.outlet = outlet
 
+        try:
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.find_outlet)
+        except FileNotFoundError:
+            pass
+
     @property
     def wbt(self):
         return self._wbt

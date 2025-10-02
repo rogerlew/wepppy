@@ -7,6 +7,13 @@ def _safe_gt(a, b):
     return a > b
 
 
+def _max_ts(*values):
+    values = [v for v in values if v is not None]
+    if not values:
+        return None
+    return max(values)
+
+
 def preflight_check(wd):
     try:
         from wepppy.nodb.prep import Prep
@@ -28,7 +35,8 @@ def preflight_check(wd):
             d['sbs_map'] = None  # unburned
 
     d['channels'] = prep['build_channels'] is not None
-    d['outlet'] = _safe_gt(prep['set_outlet'], prep['build_channels'])
+    outlet_ts = _max_ts(prep['set_outlet'], prep['find_outlet'])
+    d['outlet'] = _safe_gt(outlet_ts, prep['build_channels'])
     d['subcatchments'] = _safe_gt(prep['abstract_watershed'], prep['build_channels'])
 
     if prep['landuse_map'] is None:
@@ -62,24 +70,27 @@ def preflight_check(wd):
 
     d['climate'] = _safe_gt(prep['build_climate'], prep['abstract_watershed'])
 
-    d['wepp'] = _safe_gt(prep['run_wepp'], prep['build_landuse']) and \
-                _safe_gt(prep['run_wepp'], prep['build_soils']) and \
-                _safe_gt(prep['run_wepp'], prep['build_climate'])
+    run_wepp_ts = prep['run_wepp_watershed']
+    if run_wepp_ts is None:
+        run_wepp_ts = prep['run_wepp']
+
+    d['wepp'] = _safe_gt(run_wepp_ts, prep['build_landuse']) and \
+                _safe_gt(run_wepp_ts, prep['build_soils']) and \
+                _safe_gt(run_wepp_ts, prep['build_climate'])
 
     d['observed'] = _safe_gt(prep['run_observed'], prep['build_landuse']) and \
                     _safe_gt(prep['run_observed'], prep['build_soils']) and \
                     _safe_gt(prep['run_observed'], prep['build_climate']) and \
-                    _safe_gt(prep['run_observed'], prep['run_wepp'])
+                    _safe_gt(prep['run_observed'], run_wepp_ts)
 
     d['debris'] = _safe_gt(prep['run_debris'], prep['build_landuse']) and \
                   _safe_gt(prep['run_debris'], prep['build_soils']) and \
                   _safe_gt(prep['run_debris'], prep['build_climate']) and \
-                  _safe_gt(prep['run_debris'], prep['run_wepp'])
+                  _safe_gt(prep['run_debris'], run_wepp_ts)
 
     d['watar'] = _safe_gt(prep['run_watar'], prep['build_landuse']) and \
                  _safe_gt(prep['run_watar'], prep['build_soils']) and \
                  _safe_gt(prep['run_watar'], prep['build_climate']) and \
-                 _safe_gt(prep['run_watar'], prep['run_wepp'])
+                 _safe_gt(prep['run_watar'], run_wepp_ts)
 
     return d
-
