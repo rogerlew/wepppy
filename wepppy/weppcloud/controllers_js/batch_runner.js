@@ -16,6 +16,8 @@ var BatchRunner = (function () {
         that.baseUrl = '';
         that.templateInitialised = false;
         that.command_btn_id = 'btn_run_batch';
+        that.ws_client = null;
+        that._jobInfoAbortController = null;
 
         that.init = function init(bootstrap) {
             bootstrap = bootstrap || {};
@@ -28,6 +30,21 @@ var BatchRunner = (function () {
             this.state.validation = this._extractValidation(this.state.snapshot);
             this.sitePrefix = bootstrap.sitePrefix || '';
             this.baseUrl = this._buildBaseUrl();
+
+            this.form = $('#batch_runner_form');
+            this.statusDisplay = $('#batch_runner_form #status');
+            this.stacktrace = $('#batch_runner_form #stacktrace');
+            this.infoPanel = $('#batch_runner_form #info');
+            this.rq_job = $('#batch_runner_form #rq_job');
+
+            if (!this.ws_client) {
+                this.ws_client = new WSClient('batch_runner_form', 'batch');
+                this.ws_client.attachControl(this);
+            }
+
+            if (this.ws_client && this.state.batchName) {
+                this.ws_client.wsUrl = `wss://${window.location.host}/weppcloud-microservices/status/${encodeURIComponent(this.state.batchName)}:batch`;
+            }
 
             this.container = $("#batch-runner-root");
             this.resourceCard = $("#batch-runner-resource-card");
@@ -42,6 +59,8 @@ var BatchRunner = (function () {
             this._bindEvents();
             this._renderCoreStatus();
             this.render();
+            this.refreshJobInfo();
+            this.render_job_status(this);
             return this;
         };
 
@@ -208,6 +227,131 @@ var BatchRunner = (function () {
             if (!preserveMessage || !allowRun) {
                 this._setRunBatchMessage(message, cssClass);
             }
+        };
+
+        that._collectJobNodes = function (jobInfo, acc) {
+            if (!jobInfo) {
+                return;
+            }
+            acc.push(jobInfo);
+            var children = jobInfo.children || {};
+            Object.keys(children).forEach(function (orderKey) {
+                var bucket = children[orderKey] || [];
+                bucket.forEach(function (child) {
+                    if (child) {
+                        that._collectJobNodes(child, acc);
+                    }
+                });
+            });
+        };
+
+        that._renderJobInfo = function (jobInfo) {
+            if (!this.infoPanel || !this.infoPanel.length) {
+                return;
+            }
+
+            if (!jobInfo || jobInfo.status === 'not_found') {
+                this.infoPanel.html('<span class="text-muted">Job information unavailable.</span>');
+                return;
+            }
+
+            var nodes = [];
+            this._collectJobNodes(jobInfo, nodes);
+            var watershedNodes = nodes.filter(function (node) {
+                return node && node.runid;
+            });
+
+            var totalWatersheds = watershedNodes.length;
+            var completedWatersheds = watershedNodes.filter(function (node) {
+                return node.status === 'finished';
+            }).length;
+            var failedWatersheds = watershedNodes.filter(function (node) {
+                return node.status === 'failed' || node.status === 'stopped' || node.status === 'canceled';
+            });
+            var activeWatersheds = watershedNodes.filter(function (node) {
+                return node.status && node.status !== 'finished' && node.status !== 'failed' && node.status !== 'stopped' && node.status !== 'canceled';
+            });
+
+            var parts = [];
+            parts.push('<div><strong>Batch status:</strong> ' + this._escapeHtml(jobInfo.status || 'unknown') + '</div>');
+            if (jobInfo.id) {
+                parts.push('<div class="small text-muted">Job ID: <code>' + this._escapeHtml(jobInfo.id) + '</code></div>');
+            }
+
+            if (totalWatersheds > 0) {
+                parts.push('<div class="small text-muted">Watersheds: ' + completedWatersheds + '/' + totalWatersheds + ' finished</div>');
+            }
+
+            if (activeWatersheds.length) {
+                var activeList = activeWatersheds.slice(0, 6).map(function (node) {
+                    return '<span class="badge badge-info text-dark mr-1 mb-1">' + that._escapeHtml(node.runid) + ' · ' + that._escapeHtml(node.status || 'pending') + '</span>';
+                });
+                if (activeWatersheds.length > activeList.length) {
+                    activeList.push('<span class="text-muted">…</span>');
+                }
+                parts.push('<div class="mt-2"><strong>Active</strong><div>' + activeList.join(' ') + '</div></div>');
+            }
+
+            if (failedWatersheds.length) {
+                var failedList = failedWatersheds.slice(0, 6).map(function (node) {
+                    return '<span class="badge badge-danger text-light mr-1 mb-1">' + that._escapeHtml(node.runid) + '</span>';
+                });
+                if (failedWatersheds.length > failedList.length) {
+                    failedList.push('<span class="text-muted">…</span>');
+                }
+                parts.push('<div class="mt-2"><strong class="text-danger">Failures</strong><div>' + failedList.join(' ') + '</div></div>');
+            }
+
+            this.infoPanel.html(parts.join(''));
+        };
+
+        that.refreshJobInfo = function () {
+            if (!this.infoPanel || !this.infoPanel.length) {
+                return;
+            }
+
+            var jobId = this.rq_job_id;
+            if (!jobId) {
+                this.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
+                return;
+            }
+
+            if (typeof AbortController !== 'undefined') {
+                if (this._jobInfoAbortController) {
+                    this._jobInfoAbortController.abort();
+                }
+                this._jobInfoAbortController = new AbortController();
+            }
+
+            var controller = this._jobInfoAbortController;
+            fetch('/weppcloud/rq/api/jobinfo/' + encodeURIComponent(jobId), {
+                signal: controller ? controller.signal : undefined,
+                credentials: 'same-origin'
+            })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch job info');
+                    }
+                    return response.json();
+                })
+                .then(function (payload) {
+                    that._renderJobInfo(payload);
+                    if (controller && controller === that._jobInfoAbortController) {
+                        that._jobInfoAbortController = null;
+                    }
+                })
+                .catch(function (error) {
+                    if (error && error.name === 'AbortError') {
+                        return;
+                    }
+                    console.warn('Unable to refresh batch job info:', error);
+                    if (that.infoPanel && that.infoPanel.length) {
+                        that.infoPanel.html('<span class="text-muted">Unable to refresh batch job details.</span>');
+                    }
+                    if (controller && controller === that._jobInfoAbortController) {
+                        that._jobInfoAbortController = null;
+                    }
+                });
         };
 
         that._renderResource = function () {
@@ -608,6 +752,26 @@ var BatchRunner = (function () {
             }
         };
 
+        var baseSetRqJobId = that.set_rq_job_id;
+        that.set_rq_job_id = function (self, job_id) {
+            baseSetRqJobId.call(this, self, job_id);
+            if (self === that) {
+                if (job_id) {
+                    that.refreshJobInfo();
+                } else if (that.infoPanel && that.infoPanel.length) {
+                    that.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
+                }
+            }
+        };
+
+        var baseHandleJobStatusResponse = that.handle_job_status_response;
+        that.handle_job_status_response = function (self, data) {
+            baseHandleJobStatusResponse.call(this, self, data);
+            if (self === that) {
+                that.refreshJobInfo();
+            }
+        };
+
         that.uploadGeojson = function (evt) {
             if (!this.state.enabled) {
                 this._setUploadStatus('Batch runner is disabled.', 'text-warning');
@@ -752,6 +916,14 @@ var BatchRunner = (function () {
             var self = this;
             self._setRunBatchBusy(true, 'Submitting batch run…', 'text-muted');
 
+            if (self.ws_client && typeof self.ws_client.connect === 'function') {
+                self.ws_client.connect();
+            }
+
+            if (self.infoPanel && self.infoPanel.length) {
+                self.infoPanel.html('<span class="text-muted">Submitting batch job…</span>');
+            }
+
             fetch(this._apiUrl('rq/api/run-batch'), {
                 method: 'POST',
                 credentials: 'same-origin',
@@ -787,10 +959,33 @@ var BatchRunner = (function () {
                         message = error.error || error.message;
                     }
                     self._setRunBatchMessage(message || 'Failed to submit batch run.', 'text-danger');
+                    if (self.infoPanel && self.infoPanel.length) {
+                        self.infoPanel.html('<span class="text-danger">' + self._escapeHtml(message || 'Failed to submit batch run.') + '</span>');
+                    }
+                    if (self.ws_client && typeof self.ws_client.disconnect === 'function') {
+                        self.ws_client.disconnect();
+                    }
                 })
                 .finally(function () {
                     self._setRunBatchBusy(false);
                 });
+        };
+
+        var baseTriggerEvent = that.triggerEvent;
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'BATCH_RUN_COMPLETED' || eventName === 'END_BROADCAST') {
+                if (this.ws_client && typeof this.ws_client.disconnect === 'function') {
+                    this.ws_client.disconnect();
+                }
+                if (this.ws_client && typeof this.ws_client.resetSpinner === 'function') {
+                    this.ws_client.resetSpinner();
+                }
+                this.refreshJobInfo();
+            } else if (eventName === 'BATCH_WATERSHED_TASK_COMPLETED') {
+                this.refreshJobInfo();
+            }
+
+            baseTriggerEvent.call(this, eventName, payload);
         };
 
         return that;

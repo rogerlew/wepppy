@@ -36,12 +36,16 @@ RQ_DB = 9
 TIMEOUT = 43_200
 
 def run_batch_rq(batch_name: str):
-    job = get_current_job()
-    job_id = job.id if job is not None else 'N/A'
-    func_name = inspect.currentframe().f_code.co_name
-    status_channel = f'{batch_name}:batch'
-
     try:
+        job = get_current_job()
+        job_id = job.id if job is not None else 'N/A'
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{batch_name}:batch'
+
+        if job is not None:
+            job.meta['runid'] = batch_name
+            job.save()
+
         StatusMessenger.publish(status_channel, f'rq:{job_id} STARTED {func_name}({batch_name})')
 
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
@@ -77,6 +81,8 @@ def run_batch_rq(batch_name: str):
                     args=[batch_name, wf],
                     timeout=TIMEOUT,
                 )
+                child_job.meta['runid'] = runid
+                child_job.save()
                 if job is not None:
                     job.meta[f'jobs:0,runid:{runid}'] = child_job.id
                     job.save()
@@ -88,6 +94,8 @@ def run_batch_rq(batch_name: str):
                 timeout=TIMEOUT,
                 depends_on=watershed_jobs if watershed_jobs else None,
             )
+            final_job.meta['runid'] = batch_name
+            final_job.save()
             if job is not None:
                 job.meta['jobs:1,func:_final_batch_complete_rq'] = final_job.id
                 job.save()
@@ -104,13 +112,14 @@ def run_batch_watershed_rq(
     batch_name: str,
     watershed_feature: WatershedFeature,
 ):
-    from wepppy.nodb.ron import Ron
-    from wepppy.nodb.watershed import Watershed
-    from whitebox_tools import WhiteboxTools
-
     try:
+        from wepppy.nodb.ron import Ron
+        from wepppy.nodb.watershed import Watershed
+        from whitebox_tools import WhiteboxTools
+
         job = get_current_job()
-        runid = watershed_feature.runid
+        _runid = watershed_feature.runid
+        runid = f'batch;;{batch_name};;{_runid}'
         runid_wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{batch_name}:batch'
@@ -148,7 +157,7 @@ def run_batch_watershed_rq(
             bbox = watershed_feature.get_padded_bbox(pad=pad)
             ron = Ron.getInstance(runid_wd)
             map_center = ((bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0)
-            ron.set_map(bbox, map_center=map_center, zoom=11)
+            ron.set_map(bbox, center=map_center, zoom=11)
             ron.fetch_dem()
             
         if batch_runner.run_directives[RunDirectiveEnum.BUILD_CHANNELS]:
@@ -191,6 +200,7 @@ def _final_batch_complete_rq(batch_name: str):
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({batch_name})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER batch BATCH_RUN_COMPLETED')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER batch END_BROADCAST')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni END_BROADCAST')
 
     except Exception:

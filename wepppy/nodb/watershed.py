@@ -792,8 +792,9 @@ class Watershed(NoDbBase):
             template_filepath=self.dem_fn, dst_filepath=self.target_watershed_path)
     
         self.wbt._wbt_runner.find_outlet(
-            d8_pntr=self.wbt.d8_pntr,
-            streams=self.wbt.streams,
+            d8_pntr=self.wbt.flovec,
+            streams=self.wbt.netful,
+            watershed=self.target_watershed_path,
             output=self.wbt.outlet_geojson
         )
 
