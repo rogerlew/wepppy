@@ -115,7 +115,8 @@ def run_batch_watershed_rq(
     try:
         from wepppy.nodb.ron import Ron
         from wepppy.nodb.watershed import Watershed
-        from whitebox_tools import WhiteboxTools
+        from wepppy.nodb.landuse import Landuse
+        from wepppy.nodb.soils import Soils
 
         job = get_current_job()
         _runid = watershed_feature.runid
@@ -167,6 +168,24 @@ def run_batch_watershed_rq(
         if batch_runner.run_directives[RunDirectiveEnum.FIND_OUTLET]:
             watershed = Watershed.getInstance(runid_wd)
             watershed.find_outlet(watershed_feature)
+
+        if batch_runner.run_directives[RunDirectiveEnum.BUILD_SUBCATCHMENTS]:
+            watershed = Watershed.getInstance(runid_wd)
+            watershed.build_subcatchments()
+
+        if batch_runner.run_directives[RunDirectiveEnum.ABSTRACT_WATERSHED]:
+            watershed = Watershed.getInstance(runid_wd)
+            watershed.abstract_watershed()
+
+        if batch_runner.run_directives[RunDirectiveEnum.BUILD_LANDUSE]:
+            landuse = Landuse.getInstance(runid_wd)
+            landuse.build()
+
+        if batch_runner.run_directives[RunDirectiveEnum.BUILD_SOILS]:
+            soils = Soils.getInstance(runid_wd)
+            soils.build()
+
+            
 
         elapsed = time.time() - start_ts
         status = True
