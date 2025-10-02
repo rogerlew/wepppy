@@ -36,7 +36,7 @@ NoDb subclass logger
 - `NoDbBase.getInstance(wd)` guarantees a singleton per working directory. Instances are serialized to disk and mirrored into Redis DB 13 for 72 hours so hot runs rebuild instantly.
 - Locking is implemented via Redis hashes in DB 0 (`locked:*.nodb`) to prevent concurrent writers during multi-process jobs. Context managers like `with watershed.locked()` guard critical sections.
 - Log verbosity goes through Redis DB 15. Operators can dial runs to DEBUG without touching config files, and every handler respects the remote setting on init.
-- `RedisPrep` time-stamps milestones (`timestamps:run_wepp`, `timestamps:abstract_watershed`) and stores RQ job IDs, giving microservices/preflight enough context to render readiness checklists.
+- `RedisPrep` time-stamps milestones (`timestamps:run_wepp_watershed`, `timestamps:abstract_watershed`) and stores RQ job IDs, giving microservices/preflight enough context to render readiness checklists.
 
 ## Rust-Powered Geospatial Acceleration
 - [`wepppyo3`](https://github.com/wepp-in-the-woods/wepppyo3) exposes Rust bindings for climate interpolation, raster mode lookups, and soil loss grids. Python falls back gracefully when the crate is absent, but production boxes pin the wheel for SIMD speedups.

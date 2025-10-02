@@ -44,6 +44,33 @@ class TaskEnum(Enum):
 
     def __str__(self):
         return self.value.replace('TaskEnum.', '')
+    
+    def label(self):
+        return {
+            TaskEnum.project_init: 'Initialize Project',
+            TaskEnum.set_outlet: 'Set Outlet',
+            TaskEnum.abstract_watershed: 'Abstract Watershed',
+            TaskEnum.build_channels: 'Build Channels',
+            TaskEnum.find_outlet: 'Find Outlet',
+            TaskEnum.build_subcatchments: 'Build Subcatchments',
+            TaskEnum.build_landuse: 'Build Landuse',
+            TaskEnum.build_soils: 'Build Soils',
+            TaskEnum.build_climate: 'Build Climate',
+            TaskEnum.fetch_rap_ts: 'Build RAP TS',
+            TaskEnum.run_wepp_hillslopes: 'Run WEPP Hillslopes',
+            TaskEnum.run_wepp_watershed: 'Run WEPP Watershed',
+            TaskEnum.run_observed: 'Run Observed',
+            TaskEnum.run_debris: 'Run Debris',
+            TaskEnum.run_watar: 'Run WATAR',
+            TaskEnum.run_rhem: 'Run RHEM',
+            TaskEnum.fetch_dem: 'Fetch DEM',
+            TaskEnum.landuse_map: 'Landuse Map',
+            TaskEnum.init_sbs_map: 'Initialize SBS Map',
+            TaskEnum.run_omni_scenarios: 'Run OMNI Scenarios',
+            TaskEnum.run_omni_contrasts: 'Run OMNI Contrasts',
+            TaskEnum.dss_export: 'Export DSS',
+            TaskEnum.set_readonly: 'Set Readonly',
+        }.get(self.value, self.value)
 
 
 class RedisPrep:
