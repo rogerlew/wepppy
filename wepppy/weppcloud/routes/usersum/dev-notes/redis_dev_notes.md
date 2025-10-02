@@ -68,7 +68,7 @@ status_conn = aioredis.from_url(redis_url, db=2, decode_responses=True)
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 prep = RedisPrep.getInstance(wd)
-prep.timestamp(TaskEnum.run_wepp)
+prep.timestamp(TaskEnum.run_wepp_watershed)
 prep.set_rq_job_id("run_wepp", job.id)
 ```
 
@@ -172,7 +172,7 @@ pipe.execute()
 ## Useful debugging commands with `redis-cli`
 
 - Inspect a run hash on DB 0: `redis-cli -n 0 HGETALL <runid>`.
-- Check a specific timestamp or lock flag: `redis-cli -n 0 HGET <runid> timestamps:run_wepp` and `redis-cli -n 0 HGET <runid> locked:wepp.nodb`.
+- Check a specific timestamp or lock flag: `redis-cli -n 0 HGET <runid> timestamps:run_wepp_watershed` and `redis-cli -n 0 HGET <runid> locked:wepp.nodb`.
 - Verify keyspace notifications: `redis-cli CONFIG GET notify-keyspace-events` (expect `Kh` or superset) and watch live events with `redis-cli -n 0 PSUBSCRIBE '__keyspace@0__:*'`.
 - Tail status traffic: `redis-cli -n 2 SUBSCRIBE <runid>:wepp` (or whatever channel you expect) to make sure `StatusMessenger` is publishing.
 - Inspect RQ queue depth: `redis-cli -n 9 LLEN rq:m4` and fetch job metadata with `redis-cli -n 9 HGETALL rq:job:<id>`.
@@ -180,6 +180,6 @@ pipe.execute()
 - Check README editor locks: `redis-cli -n 14 GET readme:lock:<runid>:<config>` and `redis-cli -n 14 HGETALL readme:client:<runid>:<config>:*`.
 - Inspect run-specific log levels: `redis-cli -n 15 GET loglevel:<runid>` and set them manually with `redis-cli -n 15 SET loglevel:<runid> debug`.
 - List all configured log levels: `redis-cli -n 15 KEYS 'loglevel:*'` (use `SCAN` in production to avoid blocking).
-- Publish test events without the app stack: `redis-cli -n 2 PUBLISH <runid>:wepp 'ping from cli'` or `redis-cli -n 0 HSET <runid> timestamps:run_wepp $(date +%s)`.
+- Publish test events without the app stack: `redis-cli -n 2 PUBLISH <runid>:wepp 'ping from cli'` or `redis-cli -n 0 HSET <runid> timestamps:run_wepp_watershed $(date +%s)`.
 
 When exploring production data prefer `SCAN` over `KEYS` to avoid blocking the server, and remember that Pub/Sub traffic is ephemeral—attach a subscriber before triggering work if you need to capture the full log stream.

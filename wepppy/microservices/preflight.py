@@ -52,6 +52,22 @@ def _safe_gt(a, b):
     a, b = _try_int(a), _try_int(b)
     return a is not None and b is not None and a > b
 
+
+def _first_timestamp(prep: dict, *keys: str):
+    for key in keys:
+        value = prep.get(key)
+        if value is not None:
+            return value
+    return None
+
+
+def _max_timestamp(prep: dict, *keys: str):
+    candidates = [_try_int(prep.get(key)) for key in keys]
+    candidates = [value for value in candidates if value is not None]
+    if not candidates:
+        return None
+    return max(candidates)
+
 def lock_statuses(prep: dict) -> dict:
     d = {}
     for k, v in prep.items():
@@ -78,29 +94,32 @@ def preflight(prep: dict) -> dict:
 
     d['sbs_map'] = prep.get('attrs:has_sbs', 'false') == 'true'
     d['channels'] = 'timestamps:build_channels' in prep
-    d['outlet'] = _safe_gt(prep.get('timestamps:set_outlet'), prep.get('timestamps:build_channels'))
-    d['subcatchments'] = _safe_gt(prep.get('timestamps:abstract_watershed'), prep.get('timestamps:build_channels'))
+    build_channels_ts = prep.get('timestamps:build_channels')
+    outlet_ts = _max_timestamp(prep, 'timestamps:set_outlet', 'timestamps:find_outlet')
+    d['outlet'] = _safe_gt(outlet_ts, build_channels_ts)
+    d['subcatchments'] = _safe_gt(prep.get('timestamps:abstract_watershed'), build_channels_ts)
     d['landuse'] = _safe_gt(prep.get('timestamps:build_landuse'), prep.get('timestamps:abstract_watershed'))
     d['soils'] = _safe_gt(prep.get('timestamps:build_soils'), prep.get('timestamps:abstract_watershed')) and \
                  _safe_gt(prep.get('timestamps:build_soils'), prep.get('timestamps:build_landuse'))
     d['climate'] = _safe_gt(prep.get('timestamps:build_climate'), prep.get('timestamps:abstract_watershed'))
     d['rap_ts'] = _safe_gt(prep.get('timestamps:build_rap_ts'), prep.get('timestamps:build_climate'))
-    d['wepp'] = _safe_gt(prep.get('timestamps:run_wepp'), prep.get('timestamps:build_landuse')) and \
-                _safe_gt(prep.get('timestamps:run_wepp'), prep.get('timestamps:build_soils')) and \
-                _safe_gt(prep.get('timestamps:run_wepp'), prep.get('timestamps:build_climate'))
+    run_wepp_ts = _first_timestamp(prep, 'timestamps:run_wepp_watershed', 'timestamps:run_wepp')
+    d['wepp'] = _safe_gt(run_wepp_ts, prep.get('timestamps:build_landuse')) and \
+                _safe_gt(run_wepp_ts, prep.get('timestamps:build_soils')) and \
+                _safe_gt(run_wepp_ts, prep.get('timestamps:build_climate'))
     d['observed'] = _safe_gt(prep.get('timestamps:run_observed'), prep.get('timestamps:build_landuse')) and \
                     _safe_gt(prep.get('timestamps:run_observed'), prep.get('timestamps:build_soils')) and \
                     _safe_gt(prep.get('timestamps:run_observed'), prep.get('timestamps:build_climate')) and \
-                    _safe_gt(prep.get('timestamps:run_observed'), prep.get('timestamps:run_wepp'))
+                    _safe_gt(prep.get('timestamps:run_observed'), run_wepp_ts)
     d['debris'] = _safe_gt(prep.get('timestamps:run_debris'), prep.get('timestamps:build_landuse')) and \
                   _safe_gt(prep.get('timestamps:run_debris'), prep.get('timestamps:build_soils')) and \
                   _safe_gt(prep.get('timestamps:run_debris'), prep.get('timestamps:build_climate')) and \
-                  _safe_gt(prep.get('timestamps:run_debris'), prep.get('timestamps:run_wepp'))
+                  _safe_gt(prep.get('timestamps:run_debris'), run_wepp_ts)
     d['watar'] = _safe_gt(prep.get('timestamps:run_watar'), prep.get('timestamps:build_landuse')) and \
                  _safe_gt(prep.get('timestamps:run_watar'), prep.get('timestamps:build_soils')) and \
                  _safe_gt(prep.get('timestamps:run_watar'), prep.get('timestamps:build_climate')) and \
-                 _safe_gt(prep.get('timestamps:run_watar'), prep.get('timestamps:run_wepp'))
-    d['dss_export'] = _safe_gt(prep.get('timestamps:dss_export'), prep.get('timestamps:run_wepp'))
+                 _safe_gt(prep.get('timestamps:run_watar'), run_wepp_ts)
+    d['dss_export'] = _safe_gt(prep.get('timestamps:dss_export'), run_wepp_ts)
 
     return d
 

@@ -18,7 +18,7 @@ from rq import Queue, get_current_job
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from wepppy.nodb.base import NoDbAlreadyLockedError, clear_nodb_file_cache, clear_locks
-from wepppy.nodb.batch_runner import BatchRunner, RunDirectiveEnum
+from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.topo.watershed_collection import  WatershedFeature
@@ -117,6 +117,8 @@ def run_batch_watershed_rq(
         from wepppy.nodb.watershed import Watershed
         from wepppy.nodb.landuse import Landuse
         from wepppy.nodb.soils import Soils
+        from wepppy.nodb.mods.rap.rap_ts import RAP_TS
+        from wepppy.nodb.wepp import Wepp
 
         job = get_current_job()
         _runid = watershed_feature.runid
@@ -128,6 +130,8 @@ def run_batch_watershed_rq(
         start_ts = time.time()
 
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+
+        # begin refactor for BatchRunner.run_watershed(watershed_feature)
         base_wd = batch_runner.base_wd
 
         assert runid.startswith('batch'), f"runid must start with 'batch', got: {runid}"
@@ -159,7 +163,7 @@ def run_batch_watershed_rq(
         except RuntimeError:
             pass
 
-        if batch_runner.run_directives[RunDirectiveEnum.FETCH_DEM]:
+        if batch_runner.is_task_enabled(TaskEnum.fetch_dem):
             pad = 0.02  # degrees
             bbox = watershed_feature.get_padded_bbox(pad=pad)
             ron = Ron.getInstance(runid_wd)
@@ -167,35 +171,55 @@ def run_batch_watershed_rq(
             ron.set_map(bbox, center=map_center, zoom=11)
             ron.fetch_dem()
             
-        if batch_runner.run_directives[RunDirectiveEnum.BUILD_CHANNELS]:
+        if batch_runner.is_task_enabled(TaskEnum.build_channels):
             watershed = Watershed.getInstance(runid_wd)
             watershed.build_channels()
 
-        if batch_runner.run_directives[RunDirectiveEnum.FIND_OUTLET]:
+        if batch_runner.is_task_enabled(TaskEnum.find_outlet):
             watershed = Watershed.getInstance(runid_wd)
             watershed.find_outlet(watershed_feature)
 
-        if batch_runner.run_directives[RunDirectiveEnum.BUILD_SUBCATCHMENTS]:
+        if batch_runner.is_task_enabled(TaskEnum.build_subcatchments):
             watershed = Watershed.getInstance(runid_wd)
             watershed.build_subcatchments()
 
-        if batch_runner.run_directives[RunDirectiveEnum.ABSTRACT_WATERSHED]:
+        if batch_runner.is_task_enabled(TaskEnum.abstract_watershed):
             watershed = Watershed.getInstance(runid_wd)
             watershed.abstract_watershed()
 
-        if batch_runner.run_directives[RunDirectiveEnum.BUILD_LANDUSE]:
+        if batch_runner.is_task_enabled(TaskEnum.build_landuse):
             landuse = Landuse.getInstance(runid_wd)
             landuse.build()
 
-        if batch_runner.run_directives[RunDirectiveEnum.BUILD_SOILS]:
+        if batch_runner.is_task_enabled(TaskEnum.build_soils):
             soils = Soils.getInstance(runid_wd)
             soils.build()
 
-        if batch_runner.run_directives[RunDirectiveEnum.BUILD_CLIMATE]:
+        if batch_runner.is_task_enabled(TaskEnum.build_climate):
             from wepppy.nodb.climate import Climate
             climate = Climate.getInstance(runid_wd)
             climate.build()
 
+        rap_ts = RAP_TS.tryGetInstance(runid_wd)
+        if rap_ts and batch_runner.is_task_enabled(TaskEnum.fetch_rap_ts):
+            rap_ts.acquire_rasters(start_year=climate.observed_start_year,
+                                end_year=climate.observed_end_year)
+            rap_ts.analyze()
+
+        # make sure wepp tasks follow wepp_rq routing, but don't
+        # branch to separate jobs
+        if batch_runner.is_task_enabled(TaskEnum.run_wepp_hillslopes):
+            wepp = Wepp.getInstance(runid_wd)
+            wepp.prep_hillslopes()
+            wepp.run_hillslopes()
+
+        if batch_runner.is_task_enabled(TaskEnum.run_wepp_watershed):
+            wepp = Wepp.getInstance(runid_wd)
+            wepp.prep_watershed()
+            wepp.run_watershed()
+
+        # if wepp was ran do the post wepp tasks that are performed in wepp_rq
+        # end refactor
 
 
         elapsed = time.time() - start_ts

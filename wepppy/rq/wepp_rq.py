@@ -777,7 +777,7 @@ def _log_complete_rq(runid):
 
         try:
             prep = RedisPrep.getInstance(wd)
-            prep.timestamp(TaskEnum.run_wepp)
+            prep.timestamp(TaskEnum.run_wepp_watershed)
         except FileNotFoundError:
             pass
 

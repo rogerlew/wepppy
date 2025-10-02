@@ -1820,6 +1820,12 @@ class Wepp(NoDbBase):
                         self.logger.error(f'  Hillslope simulation failed with an error: {exc}')
                         raise
 
+        try:
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.run_wepp_hillslopes)
+        except FileNotFoundError:
+            pass
+
     #
     # watershed
     #
@@ -2264,7 +2270,7 @@ class Wepp(NoDbBase):
 
         try:
             prep = RedisPrep.getInstance(self.wd)
-            prep.timestamp(TaskEnum.run_wepp)
+            prep.timestamp(TaskEnum.run_wepp_watershed)
         except FileNotFoundError:
             pass
 

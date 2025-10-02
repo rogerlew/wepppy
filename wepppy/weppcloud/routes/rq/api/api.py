@@ -704,7 +704,8 @@ def api_post_dss_export_rq(runid, config):
     
     try:
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.run_wepp)
+        prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
+        prep.remove_timestamp(TaskEnum.run_wepp_watershed)
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
@@ -828,7 +829,8 @@ def api_run_wepp(runid, config):
 
     try:
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.run_wepp)
+        prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
+        prep.remove_timestamp(TaskEnum.run_wepp_watershed)
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
@@ -911,7 +913,7 @@ def api_run_omni(runid, config):
 
     try:
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.run_omni)
+        prep.remove_timestamp(TaskEnum.run_omni_scenarios)
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
@@ -981,7 +983,7 @@ def run_omni_contrasts(runid, config):
 
     try:
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.run_omni)
+        prep.remove_timestamp(TaskEnum.run_omni_scenarios)
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
