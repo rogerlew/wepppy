@@ -52,12 +52,18 @@ class WepppyRqWorker(Worker):
 
         wd = None
         if runid is not None:
-            wd = get_wd(runid)
+            try:
+                wd = get_wd(runid)
+            except Exception:
+                wd = None
 
         file_handler = None
-        if wd:
-            file_handler = logging.FileHandler(_join(wd, 'rq.log'))
-            self.log.addHandler(file_handler)
+        if wd and os.path.isdir(wd):
+            try:
+                file_handler = logging.FileHandler(_join(wd, 'rq.log'))
+                self.log.addHandler(file_handler)
+            except OSError:
+                file_handler = None
 
         try:
             print(f"Starting job {job.id}")
@@ -108,4 +114,3 @@ if __name__ == '__main__':
 
     for p in workers:
         p.join()
-
