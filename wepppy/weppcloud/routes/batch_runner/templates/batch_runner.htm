@@ -3,7 +3,7 @@
 {% block form_title %}Manage Batch Run{% endblock %}
 {% block inputs %}
 <div id="batch-runner-root" class="batch-runner-panel">
-<p class="text-muted small mb-3">Upload GeoJSON resources, validate run-id templates, and monitor manifest state.</p>
+<p class="text-muted small mb-3">Upload GeoJSON resources, validate run-id templates, and monitor batch progress.</p>
 
 {% if not feature_enabled %}
 <div class="alert alert-warning" role="alert">
@@ -74,7 +74,7 @@
     <h2 class="h6">Run ID Template</h2>
     <p class="text-muted small mb-2">Expressions inside braces are evaluated with <code>properties</code>, <code>feature</code>, <code>index</code> (0-based),
         <code>one_based_index</code>, and a handful of helper functions. Use double braces to emit literals.</p>
-    <ul class="text-muted small mb-3 ps-3">
+    <ul class="text-muted small mb-3 pl-3">
         <li><code>slug(value)</code> – lowercase ASCII with spaces/punctuation replaced by dashes.</li>
         <li><code>lower(value)</code> / <code>upper(value)</code> – force to all lower- or upper-case.</li>
         <li><code>title(value)</code> – title-case words (first letter capitalized).</li>
@@ -122,7 +122,7 @@
     </div>
 </section>
 
-<div class="form-group row hide-readonly" id="btn_build_climate_container">
+<div class="form-group row hide-readonly" id="batch_runner_run_container">
     <div class="col-sm-4">
         <button 
             onclick="BatchRunner.getInstance().runBatch();"

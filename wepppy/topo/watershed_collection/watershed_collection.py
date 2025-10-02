@@ -36,32 +36,46 @@ class WatershedFeature(object):
             return False
         return True
     
-    def get_padded_bbox(self, padding: float) -> List[float]:
-        if padding < 0:
+    def get_padded_bbox(self, pad: float) -> List[float]:
+        if pad < 0:
             raise ValueError("Padding must be non-negative")
         min_x, min_y, max_x, max_y = self.bbox
         return [
-            min_x - padding,
-            min_y - padding,
-            max_x + padding,
-            max_y + padding,
+            min_x - pad,
+            min_y - pad,
+            max_x + pad,
+            max_y + pad,
         ]
     
     def build_raster_mask(self, template_filepath, dst_filepath):
-        """build a raster mask for this watershed feature.
-        The raster mask will have the same dimensions and geotransform as the template raster."""
+        """
+        Build a raster mask for this watershed feature.
+        The raster mask will have the same dimensions and geotransform as the template raster.
+        This method is robust to different projections by reprojecting the feature's geometry
+        to match the template raster's CRS.
+        """
         import geopandas as gpd
         import rasterio
         from rasterio.features import rasterize
 
+        # 1. Create a GeoDataFrame from the feature's geometry, assuming its
+        #    source CRS is WGS84 (EPSG:4326), a common standard for GeoJSON.
         geom = {
             "type": "Feature",
             "geometry": self.geometry,
             "properties": {},
         }
-        gdf = gpd.GeoDataFrame([geom], crs="EPSG:4326")
+        gdf = gpd.GeoDataFrame.from_features([geom], crs="EPSG:4326")
 
+        # 2. Open the template raster to get its CRS and other metadata.
         with rasterio.open(template_filepath) as src:
+            target_crs = src.crs
+
+            # 3. Reproject the GeoDataFrame to match the template raster's CRS.
+            #    This is the crucial step for ensuring alignment.
+            gdf_reprojected = gdf.to_crs(target_crs)
+
+            # Update metadata for the output mask file.
             meta = src.meta.copy()
             meta.update({
                 "count": 1,
@@ -69,11 +83,12 @@ class WatershedFeature(object):
                 "nodata": 0,
             })
 
-            shapes = ((geom, 1) for geom in gdf.geometry)
+            # 4. Use the geometries from the *reprojected* GeoDataFrame for rasterization.
+            shapes = ((g, 1) for g in gdf_reprojected.geometry)
 
             with rasterio.open(dst_filepath, "w", **meta) as dst:
                 mask = rasterize(
-                    shapes,
+                    shapes=shapes,
                     out_shape=(src.height, src.width),
                     transform=src.transform,
                     fill=0,

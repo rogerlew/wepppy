@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 WebSocket-to-Redis proxy using Tornado and redis-py 6.x (async).
-Listens on :9002 and forwards Pub/Sub traffic {run_id}:{channel} → WebSocket.
+Listens on :9002 and forwards Pub/Sub traffic {runid}:{channel} → WebSocket.
 
 • Uses redis.asyncio (aioredis is now folded into redis-py)
 • Health-checks idle sockets
@@ -71,7 +71,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             return
 
         try:
-            self.run_id, self.channel = arg.split(":")
+            self.runid, self.channel = arg.split(":")
         except ValueError:
             self.close()                              # bad path
             return
@@ -81,8 +81,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.stop_event = asyncio.Event()
 
         self.pubsub = shared_redis.pubsub()
-        await self.pubsub.subscribe(f"{self.run_id}:{self.channel}")
-        logging.info("WS subscribed to %s:%s", self.run_id, self.channel)
+        await self.pubsub.subscribe(f"{self.runid}:{self.channel}")
+        logging.info("WS subscribed to %s:%s", self.runid, self.channel)
 
         asyncio.create_task(self._proxy_loop())
 
@@ -105,7 +105,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         global shared_redis
         shared_redis = new_redis()
         self.pubsub = shared_redis.pubsub()
-        await self.pubsub.subscribe(f"{self.run_id}:{self.channel}")
+        await self.pubsub.subscribe(f"{self.runid}:{self.channel}")
 
     # ────────── WS plumbing ──────────
     async def on_message(self, msg):
@@ -118,7 +118,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         WebSocketHandler.clients.discard(self)
         if hasattr(self, "pubsub"):
-            asyncio.create_task(self.pubsub.unsubscribe(f"{self.run_id}:{self.channel}"))
+            asyncio.create_task(self.pubsub.unsubscribe(f"{self.runid}:{self.channel}"))
             asyncio.create_task(self.pubsub.aclose())
         self.stop_event.set()
 
@@ -128,7 +128,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             try:
                 self.write_message('{"type":"ping"}')
             except Exception:
-                logging.info("Ping failed; closing %s", self.run_id)
+                logging.info("Ping failed; closing %s", self.runid)
                 self.close()
                 
     @classmethod
