@@ -273,11 +273,6 @@ var BatchRunner = (function () {
             });
 
             var parts = [];
-            parts.push('<div><strong>Batch status:</strong> ' + this._escapeHtml(jobInfo.status || 'unknown') + '</div>');
-            if (jobInfo.id) {
-                parts.push('<div class="small text-muted">Job ID: <code>' + this._escapeHtml(jobInfo.id) + '</code></div>');
-            }
-
             if (totalWatersheds > 0) {
                 parts.push('<div class="small text-muted">Watersheds: ' + completedWatersheds + '/' + totalWatersheds + ' finished</div>');
             }
