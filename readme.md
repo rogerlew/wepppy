@@ -51,6 +51,7 @@ NoDb subclass logger
 
 ## DevOps Notes
 - Redis is mission control. DB 0 tracks run metadata, DB 2 streams status, DB 9 powers RQ, DB 11 stores Flask sessions, DB 13 caches NoDb JSON, DB 14 manages README editor locks, DB 15 holds log levels. See `wepppy/weppcloud/routes/usersum/dev-notes/redis_dev_notes.md` for ops drills.
+- Coding conventions live in `wepppy/weppcloud/routes/usersum/dev-notes/style-guide.md`; skim it before touching batch runners, NoDb modules, or microservices.
 - The microservices are lightweight Tornado apps (`microservices/preflight.py`, `microservices/status.py`) that boot via systemd or the dev scripts under `_scripts/`. They require Redis keyspace notifications (`notify-keyspace-events Kh`) for preflight streaming.
 - Workers scale horizontally. `wepppy/rq/*.py` modules provide CLI entry points, while `wepppy/weppcloud/routes/rq/api` exposes REST endpoints for job orchestration, cancellation, and status polling.
 - Structured logging is collected per run in the working directory (`<runid>/_logs/`). The queue handler replicates to console, file, and Redis so you get local artifacts plus live dashboards.
