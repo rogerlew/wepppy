@@ -798,6 +798,9 @@ class Watershed(NoDbBase):
             output=self.wbt.outlet_geojson
         )
 
+        outlet = self.wbt.set_outlet_from_geojson(logger=self.logger)
+        self.outlet = outlet
+
     @property
     def wbt(self):
         return self._wbt
