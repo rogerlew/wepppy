@@ -623,6 +623,82 @@ class WhiteboxToolsTopazEmulator:
 
         return self._outlet
 
+    def set_outlet_from_geojson(self, geojson_path=None, logger=None):
+        """Populate ``self._outlet`` based on a GeoJSON file produced by ``find_outlet``.
+
+        Parameters
+        ----------
+        geojson_path : str, optional
+            Path to the GeoJSON file. Defaults to :attr:`outlet_geojson`.
+        logger : logging.Logger, optional
+            Logger used to record debug information.
+        """
+
+        from wepppy.nodb.watershed import Outlet
+
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(geojson_path={geojson_path})"
+            )
+
+        path = geojson_path or self.outlet_geojson
+
+        if not _exists(path):
+            raise FileNotFoundError(f"Outlet GeoJSON not found: {path}")
+
+        with open(path) as fp:
+            data = json.load(fp)
+
+        features = data.get("features") or []
+        if not features:
+            raise ValueError(f"Outlet GeoJSON contains no features: {path}")
+
+        feature = features[0]
+        geometry = feature.get("geometry") or {}
+        coords = geometry.get("coordinates") or []
+        if len(coords) < 2:
+            raise ValueError(f"Outlet GeoJSON feature missing coordinates: {path}")
+
+        easting, northing = coords[:2]
+
+        properties = feature.get("properties") or {}
+        col = properties.get("column")
+        row = properties.get("row")
+
+        if col is None or row is None:
+            # column / row are 0-based indices in the GeoJSON
+            # Fall back to computing them from the transform if missing.
+            gt = self.transform
+            det = gt[1] * gt[5] - gt[2] * gt[4]
+            if det == 0:
+                raise ValueError("Cannot derive pixel coordinates from GeoTransform")
+
+            # Inverse affine transform.
+            col = (gt[5] * (easting - gt[0]) - gt[2] * (northing - gt[3])) / det
+            row = (gt[1] * (northing - gt[3]) - gt[4] * (easting - gt[0])) / det
+
+        col = int(round(col))
+        row = int(round(row))
+
+        lat, lng = utm.to_latlon(
+            easting=easting,
+            northing=northing,
+            zone_number=self.utm_zone,
+            northern=self.hemisphere == "N",
+        )
+        lng, lat = float(lng), float(lat)
+
+        outlet = Outlet(
+            requested_loc=(lng, lat),
+            actual_loc=(lng, lat),
+            distance_from_requested=0.0,
+            pixel_coords=(col, row),
+        )
+
+        self._outlet = outlet
+        return outlet
+
     def find_closest_channel2(self, lng, lat, pixelcoords=False, logger=None):
         """
         Find the closest channel given a lng and lat or pixel coords (pixelcoords=True).
