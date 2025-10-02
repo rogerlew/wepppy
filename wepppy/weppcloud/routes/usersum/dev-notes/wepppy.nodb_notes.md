@@ -1,5 +1,7 @@
 # wepppy NoDb Singletons
 
+> Looking for coding ground rules? Start with `style-guide.md` in this folder for clarity and ergonomics expectations before diving into the NoDb specifics.
+
 WEPPcloud keeps long-lived project state in a constellation of "NoDb" singleton objects instead of a relational database. Each singleton wraps a JSON (JSONPickle) file under the project's working directory and exposes a Pythonic surface for reading and mutating model inputs. Redis provides coarse-grained locking and caching so these objects can be quickly deserialized and shared across workers and RQ tasks without stomping on one another. This document outlines what the NoDb layer is, how it behaves, and how to extend it safely.
 
 ## What are they?
