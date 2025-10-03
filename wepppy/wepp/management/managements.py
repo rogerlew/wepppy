@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-2025, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
@@ -255,11 +255,12 @@ class PlantLoopCropland(ScenarioBase):
 
         line = lines.pop(0).split()
         assert len(line) in [3, 4], line
+        has_rcc = len(line) == 4
         self.tmpmin = float(line.pop(0))
         self.xmxlai = float(line.pop(0))
         self.yld = float(line.pop(0))
-        if len(line) == 4:
-            self.rcc = float(line.pop(0)) # release cover crop for 2017.1 mans
+        if has_rcc:
+            self.rcc = float(line.pop(0)) # release cover crop for 2016.3+
         else:
             self.rcc = ''
 
@@ -399,18 +400,25 @@ class OpLoopCropland(ScenarioBase):
         line = lines.pop(0).split()
         self.pcode = int(line.pop(0))
 
-        if self.root.datver == '98.4':
-            assert self.pcode in [1, 2, 3, 4, 10, 11, 12, 13], self.pcode
+        if getattr(self.root, 'datver_value', 0.0) >= 2016.3:
+            valid_pcodes = [1, 2, 3, 4, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        elif self.root.datver == '98.4':
+            valid_pcodes = [1, 2, 3, 4, 10, 11, 12, 13]
         else:
-            assert self.pcode in [1, 2, 3, 4], self.pcode
+            valid_pcodes = [1, 2, 3, 4]
+
+        assert self.pcode in valid_pcodes, self.pcode
 
         self.cltpos = ''
         if self.pcode == 3:
             self.cltpos = int(line.pop(0))
             assert self.cltpos in [1, 2]
 
+        assert len(line) == 0
+
         line = lines.pop(0).split()
-        assert len(line) == 7, line
+        assert len(line) in [7, 9], line
+        has_resurf = len(line) == 9
         self.rho = float(line.pop(0))
         self.rint = float(line.pop(0))
         self.rmfo1 = float(line.pop(0))
@@ -419,28 +427,98 @@ class OpLoopCropland(ScenarioBase):
         self.surdis = float(line.pop(0))
         self.tdmean = float(line.pop(0))
 
-        if self.pcode > 5:
-            line = lines.pop(0).split()
+        if has_resurf:
+            self.resurf1 = float(line.pop(0))
+            self.resurnf1 = float(line.pop(0))
+        else:
+            self.resurf1 = ''
+            self.resurnf1 = ''
 
-            if self.pcode in [11, 13]:
-                self.frmove = float(line.pop(0))
-
-            if self.pcode in [10, 12]:
-                self.iresad = int(line.pop(0))
-                self.amtres = int(line.pop(0))
-
-    def __str__(self):
-        s = """\
-{0.mfo1:0.5f} {0.mfo2:0.5f} {0.numof}
-{0.pcode} {0.cltpos}
-{0.rho:0.5f} {0.rint:0.5f} {0.rmfo1:0.5f} {0.rmfo2:0.5f} {0.rro:0.5f} {0.surdis:0.5f} {0.tdmean:0.5f}
-""".format(self)
-
-        if self.pcode in [11, 13]:
-            s += """{0.frmove:0.5f}\n""".format(self)
+        self.frmove = ''
+        self.iresad = ''
+        self.amtres = ''
+        self.fbma1 = ''
+        self.fbrnol = ''
+        self.frfmov1 = ''
+        self.frsmov1 = ''
 
         if self.pcode in [10, 12]:
-            s += """{0.iresad} {0.amtres}\n""".format(self)
+            line = lines.pop(0).split()
+            assert len(line) >= 1, line
+            self.iresad = int(line.pop(0))
+            if len(line) >= 1:
+                self.amtres = float(line.pop(0))
+                assert len(line) == 0, line
+            else:
+                line = lines.pop(0).split()
+                assert len(line) == 1, line
+                self.amtres = float(line.pop(0))
+
+        elif self.pcode in [11, 13, 14]:
+            line = lines.pop(0).split()
+            assert len(line) >= 1, line
+            self.frmove = float(line.pop(0))
+            assert len(line) == 0, line
+
+        elif self.pcode == 15:
+            line = lines.pop(0).split()
+            assert len(line) >= 1, line
+            self.fbma1 = float(line.pop(0))
+            if len(line) >= 1:
+                self.fbrnol = float(line.pop(0))
+                assert len(line) == 0, line
+            else:
+                line = lines.pop(0).split()
+                assert len(line) == 1, line
+                self.fbrnol = float(line.pop(0))
+
+        elif self.pcode in [18, 19]:
+            line = lines.pop(0).split()
+            assert len(line) >= 1, line
+            self.frfmov1 = float(line.pop(0))
+            if len(line) >= 1:
+                self.frsmov1 = float(line.pop(0))
+                assert len(line) == 0, line
+            else:
+                line = lines.pop(0).split()
+                assert len(line) == 1, line
+                self.frsmov1 = float(line.pop(0))
+
+    def __str__(self):
+        op_line = f"{self.pcode}"
+        if self.cltpos != '':
+            op_line = f"{op_line} {self.cltpos}"
+
+        effect_line = (
+            f"{self.rho:0.5f} {self.rint:0.5f} {self.rmfo1:0.5f} {self.rmfo2:0.5f} "
+            f"{self.rro:0.5f} {self.surdis:0.5f} {self.tdmean:0.5f}"
+        )
+        if self.resurf1 != '':
+            effect_line = f"{effect_line} {self.resurf1:0.5f} {self.resurnf1:0.5f}"
+
+        s = (
+            f"{self.mfo1:0.5f} {self.mfo2:0.5f} {self.numof}\n"
+            f"{op_line}\n"
+            f"{effect_line}\n"
+        )
+
+        if self.pcode in [11, 13, 14] and self.frmove != '':
+            s += f"{self.frmove:0.5f}\n"
+
+        if self.pcode in [10, 12] and self.iresad != '':
+            s += f"{self.iresad}\n"
+            if self.amtres != '':
+                s += f"{self.amtres:0.5f}\n"
+
+        if self.pcode == 15 and self.fbma1 != '':
+            s += f"{self.fbma1:0.5f}\n"
+            if self.fbrnol != '':
+                s += f"{self.fbrnol:0.5f}\n"
+
+        if self.pcode in [18, 19] and self.frfmov1 != '':
+            s += f"{self.frfmov1:0.5f}\n"
+            if self.frsmov1 != '':
+                s += f"{self.frsmov1:0.5f}\n"
 
         return s
 
@@ -452,11 +530,26 @@ pcode:{0.pcode} cltpos:{0.cltpos}
 rho:{0.rho:0.5f} rint:{0.rint:0.5f} rmfo1:{0.rmfo1:0.5f} rmfo2:{0.rmfo2:0.5f} rro:{0.rro:0.5f} surdis:{0.surdis:0.5f} tdmean:{0.tdmean:0.5f}
 """.format(self)
 
-        if self.pcode in [11, 13]:
+        if self.resurf1 != '':
+            s += """resurf1:{0.resurf1:0.5f} resurnf1:{0.resurnf1:0.5f}\n""".format(self)
+
+        if self.pcode in [11, 13, 14] and self.frmove != '':
             s += """frmove:{0.frmove:0.5f}\n""".format(self)
 
-        if self.pcode in [10, 12]:
-            s += """iresad:{0.iresad} amtres:{0.amtres}\n""".format(self)
+        if self.pcode in [10, 12] and self.iresad != '':
+            s += f"iresad:{self.iresad}\n"
+            if self.amtres != '':
+                s += f"amtres:{self.amtres:0.5f}\n"
+
+        if self.pcode == 15 and self.fbma1 != '':
+            s += """fbma1:{0.fbma1:0.5f}\n""".format(self)
+            if self.fbrnol != '':
+                s += """fbrnol:{0.fbrnol:0.5f}\n""".format(self)
+
+        if self.pcode in [18, 19] and self.frfmov1 != '':
+            s += """frfmov1:{0.frfmov1:0.5f}\n""".format(self)
+            if self.frsmov1 != '':
+                s += """frsmov1:{0.frsmov1:0.5f}\n""".format(self)
 
         return s
 
@@ -529,13 +622,13 @@ class IniLoopCropland(ScenarioBase):
 
         line = lines.pop(0).split()
         assert len(line) in (2, 4), line
+        has_understory = len(line) == 4
         self.sumrtm = float(line.pop(0))
         self.sumsrm = float(line.pop(0))
 
-
-        if len(line) == 4:
-            self.usinrco = float(line.pop(0)) # resurface 2017.1
-            self.usrilco = float(line.pop(0)) # resurface for non-fragile 2017.1
+        if has_understory:
+            self.usinrco = float(line.pop(0)) # resurface 2016.3+
+            self.usrilco = float(line.pop(0)) # resurface for non-fragile 2016.3+
         else:
             self.usinrco = '' # 0 defaults
             self.usrilco = '' # 0 defaults
@@ -695,22 +788,32 @@ class ContourLoopCropland(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 4, line
+        assert len(line) in [4, 5], line
+        has_permanent = len(line) == 5
         self.cntslp = float(line.pop(0))
         self.rdghgt = float(line.pop(0))
         self.rowlen = float(line.pop(0))
         self.rowspc = float(line.pop(0))
+        if has_permanent:
+            self.contours_perm = int(line.pop(0))
+        else:
+            self.contours_perm = ''
 
     def __str__(self):
-        return """\
-{0.cntslp:0.5f} {0.rdghgt:0.5f} {0.rowlen:0.5f} {0.rowspc:0.5f}
-""".format(self)
+        s = f"{self.cntslp:0.5f} {self.rdghgt:0.5f} {self.rowlen:0.5f} {self.rowspc:0.5f}"
+        if self.contours_perm != '':
+            s = f"{s} {self.contours_perm}"
+        return f"{s}\n"
 
     def __repr__(self):
-        return """\
-<ContourLoopCropland>
-cntslp:{0.cntslp:0.5f} rdghgt:{0.rdghgt:0.5f} rowlen:{0.rowlen:0.5f} rowspc:{0.rowspc:0.5f}
-""".format(self)
+        s = (
+            f"<ContourLoopCropland>\n"
+            f"cntslp:{self.cntslp:0.5f} rdghgt:{self.rdghgt:0.5f} "
+            f"rowlen:{self.rowlen:0.5f} rowspc:{self.rowspc:0.5f}"
+        )
+        if self.contours_perm != '':
+            s = f"{s} contours_perm:{self.contours_perm}"
+        return f"{s}\n"
 
 
 class DrainLoopCropland(ScenarioBase):
@@ -1915,6 +2018,13 @@ class Management(object):
 
         self._parse()
 
+    def dump_to_json(self, fn):
+        import jsonpickle
+
+        json_str = jsonpickle.encode(self, indent=2)
+        with open(fn, 'w') as fp:
+            fp.write(json_str)
+
     @staticmethod
     def load(key, man_fn, man_dir, desc, color=None):
         
@@ -1953,6 +2063,10 @@ class Management(object):
         del desc_indxs
 
         self.datver = lines.pop(0)
+        try:
+            self.datver_value = float(self.datver)
+        except ValueError:
+            self.datver_value = 0.0
         self.nofe = int(lines.pop(0))
         self.sim_years = int(lines.pop(0))
 
