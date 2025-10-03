@@ -348,6 +348,7 @@ def _safe_unlink(path: Union[str, os.PathLike[str]]) -> None:
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/validate-template", methods=["POST"])
 @roles_required("Admin")
+@handle_with_exception_factory
 def validate_template(batch_name: str):
     if not _batch_runner_feature_enabled():
         return jsonify(_batch_runner_disabled_response()), 403
