@@ -21,7 +21,7 @@ Resources stored in weppcloud `ag_fields` directory
 - database of crop management files saved in `ag_fields\plant_files`
 - table with `crop_id` keys and `management_file` values
 
-## Running fields
+## Running fields as sub-fields
 
 1. Generate WEPPcloud watershed containing the field boundaries with whitebox-tools delineation backend
    - Make sure climate observed `start_year` and `end_year` match the `rotation_schedule.tsv`
@@ -34,13 +34,14 @@ Resources stored in weppcloud `ag_fields` directory
    - 5.1 Build multi-year management files
    - 5.2 use soil, climate from sub_fields `topaz` hillslope
    - 5.3 run hillslope in `wepp\ag_fields\runs` and generate outputs in `wepp\ag_fields\output`
+6. Compile spatio-temporal outputs
 
-## Running fields in watershed as OFEs
+## Watershed model - Running subfields as OFEs
 1. Calculate area of sub fields
    - if the area of the sub field is less than 1/8 the subcatchment's area disregard
    - determine if the sub field area is closest to 1/4, 1/3, 1/2, of 1/1 of the subcatchment
    - use the inverse to determine how many OFEs (1/4 -> 4, 1/3 -> 3, 1/2 -> 2, 1/1 -> 1)
-   - use the distance to channel map to detemine which OFE the sub field should be assigned to
+   - use the distance to channel map to detemine which OFE the sub field should be assigned to (e.g. bottom 1/2, middle 1/3, ...)
 2. Hillslope prep fro sub-fields
    - MOFE slope file
    - MOFE soil file
