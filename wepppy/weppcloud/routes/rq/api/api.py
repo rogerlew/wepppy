@@ -166,35 +166,6 @@ def api_run_batch(batch_name: str):
         return jsonify({'success': False, 'error': str(exc)}), 404
 
     try:
-        watershed_collection = batch_runner.get_watershed_collection()
-    except ValueError as exc:
-        return jsonify({'success': False, 'error': str(exc)}), 400
-
-    template_state = batch_runner.runid_template_state or {}
-    template = template_state.get('template')
-    summary = template_state.get('summary') or {}
-
-    if not template:
-        return jsonify({'success': False, 'error': 'Validate the run ID template before running this batch.'}), 400
-
-    if template_state.get('status') != 'ok' or not summary.get('is_valid', False):
-        return jsonify({'success': False, 'error': 'Resolve template validation issues before running this batch.'}), 400
-
-    resource_checksum = template_state.get('resource_checksum')
-    if resource_checksum and resource_checksum != watershed_collection.checksum:
-        return jsonify({'success': False, 'error': 'The validated template is stale; re-validate after updating the GeoJSON.'}), 409
-
-    try:
-        watershed_collection.runid_template = template
-        first_feature = next(iter(watershed_collection))
-        if first_feature is None:
-            raise StopIteration
-    except StopIteration:
-        return jsonify({'success': False, 'error': 'Watershed GeoJSON contains no features.'}), 400
-    except Exception as exc:
-        return jsonify({'success': False, 'error': f'Unable to compute run IDs: {exc}'}), 400
-
-    try:
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(run_batch_rq, (batch_name,), timeout=TIMEOUT)
