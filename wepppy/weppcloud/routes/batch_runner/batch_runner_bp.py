@@ -16,7 +16,9 @@ from flask_security import current_user
 from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
 
 from .._common import Blueprint, roles_required, secure_filename
+from wepppy.nodb import unitizer as unitizer_module
 from wepppy.nodb.base import get_configs, get_config_dir
+from wepppy.nodb.ron import RonViewModel
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.weppcloud.utils.helpers import exception_factory, get_batch_root_dir, handle_with_exception_factory
 
@@ -83,7 +85,7 @@ def _build_batch_runner_snapshot(batch_runner: BatchRunner) -> Dict[str, Any]:
         run_directives_state.append({
             "slug": task.value,
             "label": label,
-            "enabled": bool(directives_map.get(task.value, False)),
+            "enabled": directives_map[task]
         })
     snapshot["run_directives"] = run_directives_state
 
@@ -181,6 +183,7 @@ def create_batch_project():
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/", methods=["GET"])
 @roles_required("Admin")
+@handle_with_exception_factory
 def view_batch(batch_name: str):
     """Render the placeholder batch detail page for Batch Runner (Phase 0)."""
     global _GEOJSON_MAX_MB
@@ -190,104 +193,29 @@ def view_batch(batch_name: str):
         return jsonify(_batch_runner_disabled_response()), 403
     
     batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
-    wd = batch_runner.base_wd
-    
-    # for now get nodb singletons like in run_0_bp.runs0 from base_wd
-    # we will setup a proper common context loader in the future
-
-    from wepppy.nodb import Ron, Landuse, Soils, Climate, Wepp, Watershed, Unitizer
-    from wepppy.nodb.topaz import Topaz
-    from wepppy.nodb.observed import Observed
-    from wepppy.nodb.mods.rangeland_cover import RangelandCover
-    from wepppy.nodb.mods.rhem import Rhem
-    from wepppy.nodb.mods.disturbed import Disturbed
-    from wepppy.nodb.mods.ash_transport import Ash
-    import wepppy.nodb.mods
-    from wepppy.nodb.mods.revegetation import Revegetation
-    from wepppy.nodb.mods.omni import Omni, OmniScenario
-    from wepppy.nodb.mods.treatments import Treatments
-    from wepppy.nodb.redis_prep import RedisPrep
-    from wepppy.wepp.soils import soilsdb
-    from wepppy.wepp import management
-    from wepp_runner.wepp_runner import linux_wepp_bin_opts
-    from wepppy.wepp.management.managements import landuse_management_mapping_options
-    
-    ron = Ron.getInstance(wd)
-
-    runid = '_base'
-    config = ron.config_stem
-    landuse = Landuse.getInstance(wd)
-    soils = Soils.getInstance(wd)
-    climate = Climate.getInstance(wd)
-    wepp = Wepp.getInstance(wd)
-    watershed = Watershed.getInstance(wd)
-    unitizer = Unitizer.getInstance(wd)
-    site_prefix = current_app.config['SITE_PREFIX']
-
-    if watershed.delineation_backend_is_topaz:
-        topaz = Topaz.getInstance(wd)
-    else:
-        topaz = None
-
-    observed = Observed.tryGetInstance(wd)
-    rangeland_cover = RangelandCover.tryGetInstance(wd)
-    rhem = Rhem.tryGetInstance(wd)
-    disturbed = Disturbed.tryGetInstance(wd)
-    ash = Ash.tryGetInstance(wd)
-    skid_trails = wepppy.nodb.mods.SkidTrails.tryGetInstance(wd)
-    reveg = Revegetation.tryGetInstance(wd)
-    omni = Omni.tryGetInstance(wd)
-    treatments = Treatments.tryGetInstance(wd)
-    redis_prep = RedisPrep.tryGetInstance(wd)
-    
-    if redis_prep is not None:
-        rq_job_ids = redis_prep.get_rq_job_ids()
-    else:
-        rq_job_ids = {}
-
-    landuseoptions = landuse.landuseoptions
-    soildboptions = soilsdb.load_db()
-
-    critical_shear_options = management.load_channel_d50_cs()
+    base_runid = f"batch;;{batch_name};;_base"
+    base_config = batch_runner.base_config
     batch_runner_state = _build_batch_runner_snapshot(batch_runner)
+    ron = RonViewModel.getInstanceFromRunID(base_runid)
 
+    context: Dict[str, Any] = {
+        "feature_enabled": feature_enabled,
+        "batch_name": batch_name,
+        "base_config": base_config,
+        "ron": ron,
+        "batch_runner_state": batch_runner_state,
+        "user": current_user,
+        "precisions": unitizer_module.precisions,
+        "geojson_limit_mb": _GEOJSON_MAX_MB,
+        "run_id": base_runid,
+        "runid": base_runid,
+        "batch_base_runid": base_runid,
+        "pup_relpath": None,
+    }
 
-    return render_template("manage.htm", 
-                            feature_enabled=feature_enabled,
-                            batch_name=batch_name,
-                            batch_runner_state=batch_runner_state,
-                            user=current_user,
-                            site_prefix=site_prefix,
-                            topaz=topaz,
-                            soils=soils,
-                            ron=ron,
-                            landuse=landuse,
-                            climate=climate,
-                            wepp=wepp,
-                            wepp_bin_opts=linux_wepp_bin_opts,
-                            rhem=rhem,
-                            disturbed=disturbed,
-                            ash=ash,
-                            skid_trails=skid_trails,
-                            reveg=reveg,
-                            watershed=watershed,
-                            unitizer_nodb=unitizer,
-                            observed=observed,
-                            rangeland_cover=rangeland_cover,
-                            omni=omni,
-                            OmniScenario=OmniScenario,
-                            treatments=treatments,
-                            rq_job_ids=rq_job_ids,
-                            landuseoptions=landuseoptions,
-                            landuse_management_mapping_options=landuse_management_mapping_options,
-                            soildboptions=soildboptions,
-                            critical_shear_options=critical_shear_options,
-                            precisions=wepppy.nodb.unitizer.precisions,
-                            geojson_limit_mb=_GEOJSON_MAX_MB,
-                            run_id=runid,
-                            runid=runid,
-                            config=config,
-                            pup_relpath=None)
+    context.setdefault("site_prefix", current_app.config.get("SITE_PREFIX", ""))
+
+    return render_template("manage.htm", **context)
 
 
 @batch_runner_bp.route('/batch/_/<string:batch_name>/run-directives', methods=['POST'])
@@ -296,32 +224,16 @@ def view_batch(batch_name: str):
 def update_run_directives(batch_name: str):
     if not _batch_runner_feature_enabled():
         return jsonify(_batch_runner_disabled_response()), 403
-
-    try:
-        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
-    except FileNotFoundError as exc:
-        return jsonify({'success': False, 'error': str(exc)}), 404
+    
+    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
 
     payload = request.get_json(silent=True) or {}
     raw_directives = payload.get('run_directives')
     if raw_directives is None:
         return jsonify({'success': False, 'error': 'run_directives payload is required.'}), 400
 
-    if isinstance(raw_directives, dict):
-        parsed = raw_directives
-    elif isinstance(raw_directives, list):
-        parsed = {}
-        for item in raw_directives:
-            if not isinstance(item, dict):
-                continue
-            slug = item.get('slug') or item.get('key')
-            if not slug:
-                continue
-            parsed[slug] = item.get('enabled', item.get('value'))
-    else:
-        return jsonify({'success': False, 'error': 'run_directives must be a list or object.'}), 400
+    batch_runner.update_run_directives(raw_directives)
 
-    batch_runner.update_run_directives(parsed)
     snapshot = _build_batch_runner_snapshot(batch_runner)
 
     return jsonify({

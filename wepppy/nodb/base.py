@@ -316,6 +316,13 @@ class NoDbBase(object):
         self._config = cfg_fn
         self._load_mods()
 
+        commit_hash_fn = _join(os.path.dirname(__file__), 'commit_hash')
+        if _exists(commit_hash_fn):
+            with open(commit_hash_fn) as fp:
+                self.commit_hash = fp.read().strip()
+        else:
+            self.commit_hash = 'unknown'
+        
         # noinspection PyUnresolvedReferences
         if _exists(self._nodb):  # absolute path to .nodb file
             raise Exception('NoDb has already been initialized')

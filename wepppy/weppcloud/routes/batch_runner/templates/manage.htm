@@ -1,185 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content>
-    <meta name="author" content>
     <title>Batch Runner</title>
-    <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
-        crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet-src.js" crossorigin></script>
-    <script src="{{ url_for('static', filename='js/glify-browser.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/leaflet-glify-layer.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.js"></script>
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+          integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}?20180731">
-    <link rel="stylesheet" type="text/css"
-        href="{{ url_for('static', filename='css/bootstrap-toc-weppcloud.css') }}?20220706">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.css" />
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
-    <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/input-unit-converters.js') }}"></script>
-    {% include 'run_page_bootstrap.js.j2'%}
-</head>
-
-<body>
-  {% include 'header/header.htm'%}
-  {% include 'command-bar.htm'%}
-  {% include 'controls/poweruser_panel.htm'%}
     <style>
-        :root {
-            --project-header-offset: 72px;
-        }
-
         body {
-            background: #f8f9fa;
+            background-color: #f8f9fa;
         }
 
-        .project-layout {
-            display: flex;
-            align-items: flex-start;
-            background: #f8f9fa;
-            margin-top: var(--project-header-offset);
-            min-height: calc(100vh - var(--project-header-offset));
+        #batch-runner-page {
+            padding-top: 5rem;
+            padding-bottom: 4rem;
         }
 
-        .project-layout__toc {
-            position: fixed;
-            top: var(--project-header-offset);
-            left: 0;
-            width: 340px;
-            max-height: calc(100vh - var(--project-header-offset));
-            overflow-y: auto;
-            padding: 24px 24px 48px;
-            z-index: 1010;
-            box-sizing: border-box;
+        #batch-runner-page .controller-section {
+            background: #ffffff;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.08);
         }
 
-        .project-layout__content {
-            flex: 1;
-            margin-left: 340px;
-            padding: 24px 32px 48px;
-            min-height: calc(100vh - var(--project-header-offset));
-            box-sizing: border-box;
+        #batch-runner-page .controller-section > form h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
-        .batch-runner-panel {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .batch-runner-panel .card {
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: none;
-        }
-
-        @media (max-width: 992px) {
-            .project-layout {
-                flex-direction: column;
-                margin-top: var(--project-header-offset);
+        @media (max-width: 768px) {
+            #batch-runner-page {
+                padding-top: 4.5rem;
+                padding-bottom: 3rem;
             }
 
-            .project-layout__toc {
-                position: static;
-                width: 100%;
-                max-height: none;
-                padding: 16px 16px 24px;
-                margin-top: 0;
-            }
-
-            .project-layout__content {
-                margin-left: 0;
-                padding: 24px 16px 48px;
+            #batch-runner-page .controller-section {
+                padding: 1.5rem;
             }
         }
     </style>
+</head>
+<body>
+    {% include 'header/header.htm' %}
+    {% include 'command-bar.htm' %}
 
-    <div class="project-layout">
-    <nav id="toc" class="project-layout__toc"></nav>
-
-        <main class="project-layout__content">
+    <main class="container" id="batch-runner-page">
+        <div class="row justify-content-center">
             {% include 'batch_runner.htm' %}
-            
-            {% include 'controls/map.htm'%}
-            {% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
-            {% if 'lt' not in ron.mods %}
-            {% include 'controls/baer_upload.htm'%}
-            {% endif %}
-            {% endif %}
-            {% if 'salvage' in ron.mods %}
-            {% include 'controls/road_upload.htm'%}
-            {% endif %}
-            {% include 'controls/channel_delineation.htm'%}
-            {% include 'controls/set_outlet.htm'%}
-            {% include 'controls/subcatchments.htm'%}
-            {% if 'rangeland_cover' in ron.mods %}
-            {% include 'controls/rangeland_cover.htm'%}
-            {% endif %}
-            {% include 'controls/landuse.htm'%}
+        </div>
+    </main>
 
-            {% include 'controls/soil.htm'%}
-            {% include 'controls/climate.htm'%}
-            {% if 'rap_ts' in ron.mods %}
-            {% include 'controls/rap_ts.htm'%}
-            {% endif %}
-
-            {% if 'rhem' not in ron.mods %}
-            {% include 'controls/prep.htm'%}
-            {% include 'controls/wepp.htm'%}
-            <div id="wepp-results"></div>
-
-
-            {% else %}
-            {% include 'controls/rhem.htm'%}
-            <div id="rhem-results"></div>
-            {% endif %}
-
-            {% if climate.has_observed and 'rhem' not in ron.mods %}
-            {% include 'controls/observed.htm'%}
-            {% endif %}
-
-            {% if 'debris_flow' in ron.mods and user.has_role('PowerUser') %}
-            {% include 'controls/debris_flow.htm'%}
-            {% endif %}
-
-            {% if 'ash' in ron.mods %}
-            {% include 'controls/ash.htm'%}
-            {% endif %}
-
-            {% include 'controls/dss_export.htm'%}
-
-            {% if 'omni' in ron.mods %}
-            {% include 'controls/omni/omni_scenarios.htm'%}
-            {% include 'controls/omni/omni_contrasts_definition.htm'%}
-            {% endif %}
-
-            {% include 'controls/export.htm'%}
-            {% if user.is_authenticated %}
-            {% include 'controls/team.htm'%}
-            {% endif %}
-
-
-            {% include 'controls/unitizer_modal.htm'%}
-            <!-- Placed at the end of the document so the pages load faster -->
-            <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
-            <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
-            <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
-            <script type="text/javascript" src="{{ url_for('static', filename='js/colormap.js') }}"></script>
-            <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
-            <script type="text/javascript" src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
-            <script type="text/javascript" src="{{ url_for('static', filename='js/plotty.js') }}"></script>
-            <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-ajax.js') }}"></script>
-        </main>
-    </div>
-    {% include "manage_page_bootstrap.js.j2" %}
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+            crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+    {% include 'manage_page_bootstrap.js.j2' %}
 </body>
-
 </html>

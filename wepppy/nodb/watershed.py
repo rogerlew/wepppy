@@ -203,16 +203,6 @@ class Watershed(NoDbBase):
             )
             self._mofe_max_ofes = self.config_get_int("watershed", "mofe_max_ofes", 19)
 
-    def __getstate__(self):
-        state = super().__getstate__()
-
-        for field in TRANSIENT_FIELDS:
-            state.pop(field, None)
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-
     @property
     def set_extent_mode(self):
         if not hasattr(self, "_set_extent_mode"):
@@ -891,6 +881,12 @@ class Watershed(NoDbBase):
                 if pkcsa is not None:
                     self._pkcsa = pkcsa
             self._taudem_build_subcatchments()
+
+        try:
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.build_subcatchments)
+        except FileNotFoundError:
+            pass
 
     def identify_edge_hillslopes(self):
         """
