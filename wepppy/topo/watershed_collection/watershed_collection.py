@@ -249,14 +249,14 @@ class WatershedCollection(object):
 
         resource_checksum = template_state.get('resource_checksum')
         if resource_checksum and resource_checksum != instance.checksum:
-            raise ValueError('Watershed GeoJSON has changed since template validation; re-validate before running.')
-
-        if template_state['summary']['is_valid'] is False:
-            raise ValueError('Run ID template validation is not in an OK state.')
+            instance._runid_template_is_valid = False
+        else:
+            try:
+                instance._runid_template_is_valid = template_state['summary']['is_valid']
+            except (KeyError, TypeError):
+                instance._runid_template_is_valid = False
         
         instance.runid_template = template
-        instance._runid_template_is_valid = True
-
         return instance
 
     @property
