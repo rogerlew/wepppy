@@ -72,7 +72,35 @@ class TaskEnum(Enum):
             TaskEnum.run_omni_contrasts: 'Run OMNI Contrasts',
             TaskEnum.dss_export: 'Export DSS',
             TaskEnum.set_readonly: 'Set Readonly',
-        }.get(self.value, self.value)
+        }.get(self, self.value)
+    
+    def emoji(self):
+        return {
+            TaskEnum.if_exists_rmtree: '🗑️',
+            TaskEnum.project_init: '🚀',
+            TaskEnum.set_outlet: '📍',
+            TaskEnum.abstract_watershed: '💎',
+            TaskEnum.build_channels: '🌊',
+            TaskEnum.find_outlet: '📍',
+            TaskEnum.build_subcatchments: '🧩',
+            TaskEnum.build_landuse: '🌲',
+            TaskEnum.build_soils: '🪱',
+            TaskEnum.build_climate: '☁️',
+            TaskEnum.fetch_rap_ts: '🗺️',
+            TaskEnum.run_wepp_hillslopes: '💧',
+            TaskEnum.run_wepp_watershed: '🏃',
+            TaskEnum.run_observed: '📊',
+            TaskEnum.run_debris: '🪨',
+            TaskEnum.run_watar: '🌋',
+            TaskEnum.run_rhem: '🌵',
+            TaskEnum.fetch_dem: '🌍',
+            TaskEnum.landuse_map: '🗺️',
+            TaskEnum.init_sbs_map: '🔥',
+            TaskEnum.run_omni_scenarios: '🪓',
+            TaskEnum.run_omni_contrasts: '⚖️',
+            TaskEnum.dss_export: '📤',
+            TaskEnum.set_readonly: '🔒',
+        }.get(self, self.value)
 
     def __getstate__(self):
         return self.value

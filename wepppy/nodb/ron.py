@@ -456,9 +456,18 @@ class Ron(NoDbBase):
         return self._cellsize
 
     @property
-    def boundary(self):
+    def boundary(self):  # url to a geojson file
         return self._boundary
+    
+    @property
+    def boundary_color(self):
+        return getattr(self, '_boundary_color', '#FF0000')
 
+    @property
+    def boundary_name(self):
+        return getattr(self, '_boundary_name', 'boundary')
+
+    
     @property
     def map(self):
         return self._map
