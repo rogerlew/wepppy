@@ -43,22 +43,12 @@ def run_batch_rq(batch_name: str):
 
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
         watershed_collection = batch_runner.get_watershed_collection()
-
-        template_state = batch_runner.runid_template_state or {}
-        template = template_state.get('template')
-        summary = template_state.get('summary') or {}
-
-        if not template:
+        if not watershed_collection.runid_template:
             raise ValueError('Batch run requires a validated run ID template.')
 
-        if template_state.get('status') != 'ok' or not summary.get('is_valid', False):
+        if not watershed_collection.runid_template_is_valid:
             raise ValueError('Run ID template validation is not in an OK state.')
 
-        resource_checksum = template_state.get('resource_checksum')
-        if resource_checksum and resource_checksum != watershed_collection.checksum:
-            raise ValueError('Watershed GeoJSON has changed since template validation; re-validate before running.')
-
-        watershed_collection.runid_template = template
         watershed_features = list(watershed_collection)
         if not watershed_features:
             raise ValueError('No watershed features available to enqueue.')
