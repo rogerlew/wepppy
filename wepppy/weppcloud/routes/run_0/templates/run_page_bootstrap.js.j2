@@ -62,15 +62,15 @@ function onReady() {
     if ({{ (ron.boundary != None) | tojson }}) {
         map.addGeoJsonOverlay({
             url: "{{ site_prefix }}/{{ ron.boundary }}",
-            layerName: 'Watershed Boundary',
+            layerName: '{{ ron.boundary_name }}',
             style: {
-                color: "#FF0000",
+                color: "{{ ron.boundary_color }}",
                 opacity: 1,
-                weight: 2,
-                fillColor: "#FFFFFF",
+                weight: 1,
                 fillOpacity: 0.0
             }
         });
+
     }
 
 
