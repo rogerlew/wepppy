@@ -74,10 +74,7 @@ class BatchRunner(NoDbBase):
 
     def __getstate__(self):
         """
-        Prepares the instance's state for serialization (saving to .nodb).
-        
-        This method intercepts the state, converts the TaskEnum keys in 
-        _run_directives to simple strings, and returns the modified state.
+        serialize _run_directives keys to strings to make deserialization easier
         """
 
         state = super().__getstate__()
@@ -94,6 +91,9 @@ class BatchRunner(NoDbBase):
 
     @classmethod
     def _post_instance_loaded(cls, instance):
+        """
+        deserialize _run_directives keys from strings to TaskEnum
+        """
         instance = super()._post_instance_loaded(instance)
         if instance._run_directives:
             instance._run_directives = {
@@ -101,6 +101,9 @@ class BatchRunner(NoDbBase):
             }
         return instance
 
+    # ------------------------------------------------------------------
+    # run directives
+    # ------------------------------------------------------------------
     @property
     def run_directives(self) -> Dict[TaskEnum, bool]:
         return self._run_directives
@@ -133,8 +136,10 @@ class BatchRunner(NoDbBase):
 
         return deepcopy(self._run_directives)
 
-
-    def _get_logger(self, _runid):
+    # ------------------------------------------------------------------
+    # project runner
+    # ------------------------------------------------------------------
+    def _get_run_logger(self, _runid):
         log_path = os.path.join(self.logs_dir, f"batch_runner_{_runid}.log")
         logger = logging.getLogger(f"batch.{self.batch_name}.{_runid}")
         logger.setLevel(logging.DEBUG)
@@ -157,7 +162,7 @@ class BatchRunner(NoDbBase):
         runid_wd = get_wd(runid)
 
         # setup file logger for this run
-        logger = self._get_logger(watershed_feature.runid)
+        logger = self._get_run_logger(watershed_feature.runid)
         logger.info(f"Starting batch run for runid: {runid}")
         if job_id:
             logger.info(f"RQ jobid: {job_id}")
@@ -351,7 +356,6 @@ class BatchRunner(NoDbBase):
 
         Ron(self._base_wd, self._base_config, run_group='batch', group_name=self.batch_name)
 
-
     # ------------------------------------------------------------------
     # Watershed GeoJSON
     # ------------------------------------------------------------------
@@ -388,7 +392,9 @@ class BatchRunner(NoDbBase):
         """Get the registered watershed collection, if any."""
         if not self._geojson_state:
             raise ValueError("No GeoJSON registered.")    
-        return WatershedCollection.load_from_analysis_results(self._geojson_state)
+        
+        return WatershedCollection.load_from_analysis_results(
+            self._geojson_state, self._runid_template_state)
 
     @property
     def geojson_state(self) -> Optional[Dict[str, Any]]:
@@ -404,5 +410,27 @@ class BatchRunner(NoDbBase):
     @nodb_setter
     def runid_template_state(self, value: Optional[Dict[str, Any]]) -> None:
         self._runid_template_state = value
+
+    # ------------------------------------------------------------------
+    # Report
+    # ------------------------------------------------------------------
+    def generate_runstate_report(self) -> Dict[str, Any]:
+        watershed_collection = self.get_watershed_collection()
+
+        report = {}
+        for wf in watershed_collection:
+            _runid = wf.runid
+            run_states = {str(task): None for task in BatchRunner.DEFAULT_TASKS}
+            run_wd = _join(self.wd, "runs", _runid)
+            if _exists(run_wd):
+                prep = RedisPrep.getInstance(run_wd)
+                for task in BatchRunner.DEFAULT_TASKS:
+                    run_states[str(task)] = prep[task]
+                
+            report[_runid] = {
+                "runid": _runid,
+                "run_state": run_states,
+            }
+        return report
 
 __all__ = ["BatchRunner"]
