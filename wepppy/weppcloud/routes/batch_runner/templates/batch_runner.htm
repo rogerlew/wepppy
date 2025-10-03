@@ -5,6 +5,21 @@
 <div id="batch-runner-root" class="batch-runner-panel">
 <p class="text-muted small mb-3">Upload GeoJSON resources, validate run-id templates, and monitor batch progress.</p>
 
+{% set base_runid = 'batch;;' ~ batch_name ~ ';;_base' %}
+<section class="card card-body mb-4" id="batch-runner-base-card">
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-md-between">
+        <div class="mb-3 mb-md-0">
+            <h2 class="h6 mb-2">Base Project</h2>
+            <p class="text-muted small mb-2">Open the shared `_base` project to adjust configuration defaults applied to every batch run.</p>
+            <div class="small text-muted">Run ID: <code>{{ base_runid }}</code></div>
+        </div>
+        <a class="btn btn-outline-primary" role="button"
+           href="{{ url_for('run_0.runs0', runid=base_runid, config=base_config) }}">
+            Configure Base Project
+        </a>
+    </div>
+</section>
+
 {% if not feature_enabled %}
 <div class="alert alert-warning" role="alert">
     Batch Runner is currently disabled. State is shown read-only for verification purposes.

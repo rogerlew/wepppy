@@ -7,6 +7,7 @@ from glob import glob
 import hashlib
 import json
 import os
+import logging
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
@@ -19,6 +20,15 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar
 from wepppy.topo.watershed_collection import WatershedCollection, WatershedFeature
 from wepppy.weppcloud.utils.helpers import get_batch_root_dir, get_wd
 
+from wepppy.nodb.ron import Ron
+from wepppy.nodb.watershed import Watershed
+from wepppy.nodb.landuse import Landuse
+from wepppy.nodb.soils import Soils
+from wepppy.nodb.climate import Climate
+from wepppy.nodb.wepp import Wepp
+from wepppy.nodb.mods.rap.rap_ts import RAP_TS
+
+
 from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, clear_locks
 from .redis_prep import RedisPrep, TaskEnum
 
@@ -30,6 +40,7 @@ class BatchRunner(NoDbBase):
     filename = "batch_runner.nodb"
 
     DEFAULT_TASKS: ClassVar[Tuple[TaskEnum, ...]] = (
+        TaskEnum.if_exists_rmtree,
         TaskEnum.fetch_dem,
         TaskEnum.build_channels,
         TaskEnum.find_outlet,
@@ -37,8 +48,8 @@ class BatchRunner(NoDbBase):
         TaskEnum.abstract_watershed,
         TaskEnum.build_landuse,
         TaskEnum.build_soils,
-        TaskEnum.fetch_rap_ts,
         TaskEnum.build_climate,
+        TaskEnum.fetch_rap_ts,
         TaskEnum.run_wepp_hillslopes,
         TaskEnum.run_wepp_watershed,
         TaskEnum.run_omni_scenarios,
@@ -52,79 +63,149 @@ class BatchRunner(NoDbBase):
             self._geojson_state = None
             self._runid_template_state = None
             self._base_wd = os.path.join(self.wd, "_base")
-            self._run_directives = deepcopy(BatchRunner.DEFAULT_TASKS)
+            self._run_directives = {task: True for task in self.DEFAULT_TASKS}
+            self._run_directives[TaskEnum.if_exists_rmtree] = False
 
         self._init_base_project()
 
         os.makedirs(self.batch_runs_dir, exist_ok=True)
         os.makedirs(self.resources_dir, exist_ok=True)
+        os.makedirs(self.logs_dir, exist_ok=True)
 
-    @property
-    def run_directives(self) -> Dict[str, bool]:
-        return self._run_directives
+    def __getstate__(self):
+        """
+        Prepares the instance's state for serialization (saving to .nodb).
+        
+        This method intercepts the state, converts the TaskEnum keys in 
+        _run_directives to simple strings, and returns the modified state.
+        """
 
-    def is_task_enabled(self, task: TaskEnum) -> bool:
-        return bool(self._run_directives.get(task.value, True))
+        state = super().__getstate__()
+        directives = state.get('_run_directives')
 
-    def update_run_directives(self, directives: Mapping[str, Any]) -> Dict[str, bool]:
-        normalized: Dict[str, bool] = {}
-        if isinstance(directives, Mapping):
-            for raw_key, value in directives.items():
-                key = self._normalize_directive_key(raw_key)
-                if key is None:
-                    continue
-                normalized[key] = bool(value)
-
-        with self.locked():
-            self._ensure_run_directives_initialized()
-            for key in self.DEFAULT_DIRECTIVE_KEYS:
-                if key in normalized:
-                    self._run_directives[key] = normalized[key]
-
-        return deepcopy(self._run_directives)
+        if directives:
+            storable_directives = {
+                (k.value if isinstance(k, TaskEnum) else str(k)): v
+                for k, v in directives.items()
+            }
+            state['_run_directives'] = storable_directives
+            
+        return state
 
     @classmethod
     def _post_instance_loaded(cls, instance):
-        instance._migrate_run_directives()
+        instance = super()._post_instance_loaded(instance)
+        if instance._run_directives:
+            instance._run_directives = {
+                TaskEnum(k): v for k, v in instance._run_directives.items()
+            }
         return instance
+
+    @property
+    def run_directives(self) -> Dict[TaskEnum, bool]:
+        return self._run_directives
+
+    def is_task_enabled(self, task: TaskEnum) -> bool:
+        return bool(self._run_directives.get(task, True))
+
+    def update_run_directives(self, directives: Mapping[str, Any]) -> Dict[str, bool]:
+        
+        if not isinstance(directives, Mapping):
+            self.logger.warning(f"Invalid directives type: {type(directives)}")
+            
+        with self.locked():
+            for raw_key, value in directives.items():
+                try:
+                    task = TaskEnum(raw_key)
+                except ValueError:
+                    self.logger.warning(f"Unrecognized task directive key: {raw_key}: {value}")
+                    continue
+
+                try:
+                    value = bool(value)
+                except ValueError:
+                    self.logger.warning(f"Invalid task directive value: {raw_key}: {value}")
+                    continue
+
+                if task in self._run_directives:
+                    self._run_directives[task] = bool(value)
+                    self.logger.info(f"Updated task directive: {task} = {value}")
+
+        return deepcopy(self._run_directives)
+
+
+    def _get_logger(self, _runid):
+        log_path = os.path.join(self.logs_dir, f"batch_runner_{_runid}.log")
+        logger = logging.getLogger(f"batch.{self.batch_name}.{_runid}")
+        logger.setLevel(logging.DEBUG)
+        if logger.hasHandlers():
+            logger.handlers.clear()
+        handler = logging.FileHandler(log_path, mode='a')
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.info(f"Logger initialized for runid: {_runid}")
+        return logger
 
     def run_batch_project(
         self,
         watershed_feature: WatershedFeature,
+        job_id: Optional[str] = None,
     ) -> Tuple[str, ...]:
         runid = f'batch;;{self.batch_name};;{watershed_feature.runid}'
         runid_wd = get_wd(runid)
 
+        # setup file logger for this run
+        logger = self._get_logger(watershed_feature.runid)
+        logger.info(f"Starting batch run for runid: {runid}")
+        if job_id:
+            logger.info(f"RQ jobid: {job_id}")
+
         base_wd = self.base_wd
-        if os.path.exists(runid_wd):
+        logger.info(f'base_wd: {base_wd}')
+        init_required = False
+        if os.path.exists(runid_wd) and self.is_task_enabled(TaskEnum.fetch_dem):
+            logger.info(f'removing existing runid_wd: {runid_wd}')
             shutil.rmtree(runid_wd)
-        shutil.copytree(base_wd, runid_wd)
+            init_required = True
 
-        for nodb_fn in glob(_join(runid_wd, '*.nodb')):
-            with open(nodb_fn, 'r') as fp:
-                state = json.load(fp)
-            state.setdefault('py/state', {})['wd'] = runid_wd
-            with open(nodb_fn, 'w') as fp:
-                json.dump(state, fp)
-                fp.flush()
-                os.fsync(fp.fileno())
+        if not os.path.exists(runid_wd):
+            init_required = True
+        
+        logger.info(f'init_required: {init_required}')
+        prep = None
+        if init_required:
+            logger.info(f'copying base project to runid_wd: {runid_wd}')
+            shutil.copytree(base_wd, runid_wd)
 
-        clear_nodb_file_cache(runid)
-        try:
-            locks_cleared = clear_locks(runid)
-        except RuntimeError:
-            locks_cleared = None
-
+            logger
+            for nodb_fn in glob(_join(runid_wd, '*.nodb')):
+                with open(nodb_fn, 'r') as fp:
+                    state = json.load(fp)
+                state.setdefault('py/state', {})['wd'] = runid_wd
+                with open(nodb_fn, 'w') as fp:
+                    json.dump(state, fp)
+                    fp.flush()
+                    os.fsync(fp.fileno())
+            clear_nodb_file_cache(runid)
+            logger.info('cleared NoDb file cache')
+            try:
+                locks_cleared = clear_locks(runid)
+                logger.info(f'cleared NoDb locks: {locks_cleared}')
+            except RuntimeError:
+                locks_cleared = None
+         
+        logger.info('getting RedisPrep instance')
         prep = RedisPrep.getInstance(runid_wd)
+        logger.info(prep.timestamps_report())
 
-        from wepppy.nodb.ron import Ron
-        from wepppy.nodb.watershed import Watershed
-        from wepppy.nodb.landuse import Landuse
-        from wepppy.nodb.soils import Soils
-        from wepppy.nodb.climate import Climate
-        from wepppy.nodb.wepp import Wepp
-        from wepppy.nodb.mods.rap.rap_ts import RAP_TS
+        if init_required:
+            logger.info(f'init_required: {init_required} removing all RedisPrep timestamps')
+            prep.remove_all_timestamp()
+            logger.info(prep.timestamps_report())
 
+        logger.info('getting NoDb instances')
         ron = Ron.getInstance(runid_wd)
         watershed = Watershed.getInstance(runid_wd)
         landuse = Landuse.getInstance(runid_wd)
@@ -133,60 +214,82 @@ class BatchRunner(NoDbBase):
         wepp = Wepp.getInstance(runid_wd)
 
         if self.is_task_enabled(TaskEnum.fetch_dem) and prep[str(TaskEnum.fetch_dem)] is None:
+            logger.info('fetching DEM')
             pad = 0.02
             bbox = watershed_feature.get_padded_bbox(pad=pad)
             map_center = ((bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0)
             ron.set_map(bbox, center=map_center, zoom=11)
             ron.fetch_dem()
-            prep.timestamp(TaskEnum.fetch_dem)
 
         if self.is_task_enabled(TaskEnum.build_channels) and prep[str(TaskEnum.build_channels)] is None:
+            logger.info(f'building channels')
             watershed.build_channels()
 
         if self.is_task_enabled(TaskEnum.find_outlet) and prep[str(TaskEnum.find_outlet)] is None:
+            logger.info(f'finding outlet')
             watershed.find_outlet(watershed_feature)
 
         if self.is_task_enabled(TaskEnum.build_subcatchments) and prep[str(TaskEnum.build_subcatchments)] is None:
+            logger.info(f'building subcatchments')
             watershed.build_subcatchments()
-            prep.timestamp(TaskEnum.build_subcatchments)
 
         if self.is_task_enabled(TaskEnum.abstract_watershed) and prep[str(TaskEnum.abstract_watershed)] is None:
+            logger.info(f'abstracting watershed')
             watershed.abstract_watershed()
 
         if self.is_task_enabled(TaskEnum.build_landuse) and prep[str(TaskEnum.build_landuse)] is None:
+            logger.info(f'building landuse')
             landuse.build()
 
         if self.is_task_enabled(TaskEnum.build_soils) and prep[str(TaskEnum.build_soils)] is None:
+            logger.info(f'building soils')
             soils.build()
 
         if self.is_task_enabled(TaskEnum.build_climate) and prep[str(TaskEnum.build_climate)] is None:
+            logger.info(f'building climate')
             climate.build()
 
         rap_ts = RAP_TS.tryGetInstance(runid_wd)
-        if rap_ts and self.is_task_enabled(TaskEnum.fetch_rap_ts) and prep[str(TaskEnum.fetch_rap_ts)] is None:
+        logger.info(f'rap_ts: {rap_ts}')
+        if rap_ts and self.is_task_enabled(TaskEnum.fetch_rap_ts) \
+            and prep[str(TaskEnum.fetch_rap_ts)] is None:
+            logger.info(f'fetching RAP TS')
             rap_ts.acquire_rasters(
                 start_year=climate.observed_start_year,
                 end_year=climate.observed_end_year,
             )
+            logger.info(f'analyzing RAP TS')
             rap_ts.analyze()
 
-        run_hillslopes = self.is_task_enabled(TaskEnum.run_wepp_hillslopes) and prep[str(TaskEnum.run_wepp_hillslopes)] is None
-        run_watershed = self.is_task_enabled(TaskEnum.run_wepp_watershed) and prep[str(TaskEnum.run_wepp_watershed)] is None
+        run_hillslopes = self.is_task_enabled(TaskEnum.run_wepp_hillslopes) \
+            and prep[str(TaskEnum.run_wepp_hillslopes)] is None
+        run_watershed = self.is_task_enabled(TaskEnum.run_wepp_watershed) \
+            and prep[str(TaskEnum.run_wepp_watershed)] is None
+
+        logger.info(f'run_hillslopes: {run_hillslopes}')
+        logger.info(f'run_watershed: {run_watershed}')
 
         if run_hillslopes:
+            logger.info('calling wepp.clean()')
             wepp.clean()
 
         if run_hillslopes or run_watershed:
+            logger.info('calling wepp._check_and_set_baseflow_map()')
             wepp._check_and_set_baseflow_map()
+            logger.info('calling wepp._check_and_set_phosphorus_map()')
             wepp._check_and_set_phosphorus_map()
 
         if run_hillslopes:
+            logger.info('calling wepp.prep_hillslopes()')
             wepp.prep_hillslopes()
+            logger.info('calling wepp.run_hillslopes()')
             wepp.run_hillslopes()
 
         if run_watershed:
+            logger.info('calling wepp.prep_watershed()')
             wepp.prep_watershed()
-            wepp.run_watershed()
+            logger.info('calling wepp.run_watershed()')
+            wepp.run_watershed()  # also triggers post wepp processing
 
         return tuple(locks_cleared) if locks_cleared else ()
 
@@ -228,6 +331,10 @@ class BatchRunner(NoDbBase):
     @property
     def resources_dir(self) -> str:
         return os.path.join(self.wd, "resources")
+    
+    @property
+    def logs_dir(self) -> str:
+        return os.path.join(self.wd, "logs")
 
     # ------------------------------------------------------------------
     # lifecycle helpers

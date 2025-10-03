@@ -22,6 +22,14 @@ var BatchRunner = (function () {
         that._jobInfoLastPayload = null;
         that._runDirectivesSaving = false;
         that._runDirectivesStatus = { message: '', css: 'text-muted' };
+        that._jobInfoPollIntervalMs = 3000;
+        that._jobInfoRefreshTimer = null;
+        that._jobInfoFetchInFlight = false;
+        that._jobInfoRefreshPending = false;
+        that._jobInfoLastFetchStartedAt = 0;
+        that._jobInfoForceNextFetch = false;
+        that._jobInfoCompletedIds = new Set();
+        that._jobInfoTerminalStatuses = new Set(['finished', 'failed', 'stopped', 'canceled', 'not_found', 'complete', 'completed', 'success', 'error']);
 
         that.init = function init(bootstrap) {
             bootstrap = bootstrap || {};
@@ -433,8 +441,26 @@ var BatchRunner = (function () {
             if (!normalized) {
                 return false;
             }
+            if (this._jobInfoCompletedIds && this._jobInfoCompletedIds.has(normalized)) {
+                return false;
+            }
             if (!this._jobInfoTrackedIds.has(normalized)) {
                 this._jobInfoTrackedIds.add(normalized);
+                return true;
+            }
+            return false;
+        };
+
+        that._unregisterTrackedJobId = function (jobId) {
+            if (jobId === undefined || jobId === null) {
+                return false;
+            }
+            var normalized = String(jobId).trim();
+            if (!normalized) {
+                return false;
+            }
+            if (this._jobInfoTrackedIds.has(normalized)) {
+                this._jobInfoTrackedIds.delete(normalized);
                 return true;
             }
             return false;
@@ -484,15 +510,23 @@ var BatchRunner = (function () {
 
         that._resolveJobInfoRequestIds = function () {
             var ids = new Set();
+            var self = this;
+            var completedIds = this._jobInfoCompletedIds || new Set();
 
             if (this.rq_job_id) {
-                ids.add(String(this.rq_job_id).trim());
+                var rootId = String(this.rq_job_id).trim();
+                if (rootId && !completedIds.has(rootId)) {
+                    ids.add(rootId);
+                }
             }
 
             if (this._jobInfoTrackedIds && this._jobInfoTrackedIds.size) {
                 this._jobInfoTrackedIds.forEach(function (value) {
                     if (value) {
-                        ids.add(String(value).trim());
+                        var normalizedTracked = String(value).trim();
+                        if (normalizedTracked && !completedIds.has(normalizedTracked)) {
+                            ids.add(normalizedTracked);
+                        }
                     }
                 });
             }
@@ -517,7 +551,7 @@ var BatchRunner = (function () {
                         return;
                     }
                     var normalized = String(item).trim();
-                    if (normalized) {
+                    if (normalized && !completedIds.has(normalized)) {
                         ids.add(normalized);
                     }
                 });
@@ -601,6 +635,35 @@ var BatchRunner = (function () {
             return deduped;
         };
 
+        that._pruneCompletedJobIds = function (nodes) {
+            if (!Array.isArray(nodes) || nodes.length === 0) {
+                return;
+            }
+
+            var self = this;
+            nodes.forEach(function (node) {
+                if (!node || !node.id) {
+                    return;
+                }
+                var status = node.status;
+                if (!status || typeof status !== 'string') {
+                    return;
+                }
+                var normalizedStatus = status.toLowerCase();
+                if (!self._jobInfoTerminalStatuses.has(normalizedStatus)) {
+                    return;
+                }
+                var normalizedId = String(node.id).trim();
+                if (!normalizedId) {
+                    return;
+                }
+                if (self._jobInfoCompletedIds) {
+                    self._jobInfoCompletedIds.add(normalizedId);
+                }
+                self._unregisterTrackedJobId(normalizedId);
+            });
+        };
+
         that._renderJobInfo = function (payload) {
             if (!this.infoPanel || !this.infoPanel.length) {
                 return;
@@ -622,6 +685,7 @@ var BatchRunner = (function () {
                 that._collectJobNodes(info, nodes);
             });
             var dedupedNodes = this._dedupeJobNodes(nodes);
+            this._pruneCompletedJobIds(dedupedNodes);
 
             var watershedNodes = dedupedNodes.filter(function (node) {
                 return node && node.runid;
@@ -699,14 +763,58 @@ var BatchRunner = (function () {
             this.infoPanel.html(parts.join(''));
         };
 
-        that.refreshJobInfo = function () {
+        that._cancelJobInfoTimer = function () {
+            if (this._jobInfoRefreshTimer) {
+                clearTimeout(this._jobInfoRefreshTimer);
+                this._jobInfoRefreshTimer = null;
+            }
+        };
+
+        that._ensureJobInfoFetchScheduled = function () {
+            if (this._jobInfoFetchInFlight) {
+                return;
+            }
+
+            var now = Date.now();
+            var interval = this._jobInfoPollIntervalMs || 0;
+            var lastStarted = this._jobInfoLastFetchStartedAt || 0;
+            var elapsed = now - lastStarted;
+            var forceNext = this._jobInfoForceNextFetch === true;
+
+            if (!forceNext && interval > 0 && elapsed < interval) {
+                if (this._jobInfoRefreshTimer) {
+                    return;
+                }
+                var self = this;
+                this._jobInfoRefreshTimer = setTimeout(function () {
+                    self._jobInfoRefreshTimer = null;
+                    self._performJobInfoFetch();
+                }, interval - elapsed);
+                return;
+            }
+
+            this._jobInfoForceNextFetch = false;
+            this._performJobInfoFetch();
+        };
+
+        that._performJobInfoFetch = function () {
             if (!this.infoPanel || !this.infoPanel.length) {
                 return;
             }
 
+            if (this._jobInfoFetchInFlight) {
+                return;
+            }
+
+            this._cancelJobInfoTimer();
+            this._jobInfoForceNextFetch = false;
+
             var jobIds = this._resolveJobInfoRequestIds();
             if (!jobIds.length) {
-                this.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
+                this._jobInfoRefreshPending = false;
+                if (!this._jobInfoLastPayload) {
+                    this.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
+                }
                 return;
             }
 
@@ -714,6 +822,10 @@ var BatchRunner = (function () {
             jobIds.forEach(function (jobId) {
                 self._registerTrackedJobId(jobId);
             });
+
+            this._jobInfoRefreshPending = false;
+            this._jobInfoFetchInFlight = true;
+            this._jobInfoLastFetchStartedAt = Date.now();
 
             if (typeof AbortController !== 'undefined') {
                 if (this._jobInfoAbortController) {
@@ -746,9 +858,6 @@ var BatchRunner = (function () {
                     }
 
                     self._renderJobInfo(payload);
-                    if (controller && controller === self._jobInfoAbortController) {
-                        self._jobInfoAbortController = null;
-                    }
                 })
                 .catch(function (error) {
                     if (error && error.name === 'AbortError') {
@@ -758,10 +867,36 @@ var BatchRunner = (function () {
                     if (self.infoPanel && self.infoPanel.length) {
                         self.infoPanel.html('<span class="text-muted">Unable to refresh batch job details.</span>');
                     }
+                })
+                .finally(function () {
                     if (controller && controller === self._jobInfoAbortController) {
                         self._jobInfoAbortController = null;
                     }
+                    self._jobInfoFetchInFlight = false;
+                    if (self._jobInfoRefreshPending) {
+                        self._ensureJobInfoFetchScheduled();
+                    }
                 });
+        };
+
+        that.refreshJobInfo = function (options) {
+            options = options || {};
+            if (!this.infoPanel || !this.infoPanel.length) {
+                return;
+            }
+
+            if (options.force === true) {
+                this._jobInfoForceNextFetch = true;
+                this._jobInfoRefreshPending = true;
+                this._cancelJobInfoTimer();
+                if (!this._jobInfoFetchInFlight) {
+                    this._performJobInfoFetch();
+                }
+                return;
+            }
+
+            this._jobInfoRefreshPending = true;
+            this._ensureJobInfoFetchScheduled();
         };
 
         that._renderResource = function () {
@@ -1167,10 +1302,14 @@ var BatchRunner = (function () {
             baseSetRqJobId.call(this, self, job_id);
             if (self === that) {
                 if (job_id) {
-                    that._registerTrackedJobId(job_id);
+                    var normalizedJobId = String(job_id).trim();
+                    if (that._jobInfoCompletedIds) {
+                        that._jobInfoCompletedIds.delete(normalizedJobId);
+                    }
+                    that._registerTrackedJobId(normalizedJobId);
                 }
                 if (job_id) {
-                    that.refreshJobInfo();
+                    that.refreshJobInfo({ force: true });
                 } else if (that.infoPanel && that.infoPanel.length) {
                     that.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
                 }
@@ -1335,11 +1474,21 @@ var BatchRunner = (function () {
                 }
                 self._jobInfoAbortController = null;
             }
+            if (typeof self._cancelJobInfoTimer === 'function') {
+                self._cancelJobInfoTimer();
+            }
+            self._jobInfoFetchInFlight = false;
+            self._jobInfoRefreshPending = false;
+            self._jobInfoForceNextFetch = false;
+            self._jobInfoLastFetchStartedAt = 0;
             if (self._jobInfoTrackedIds && typeof self._jobInfoTrackedIds.clear === 'function') {
                 self._jobInfoTrackedIds.clear();
             }
+            if (self._jobInfoCompletedIds && typeof self._jobInfoCompletedIds.clear === 'function') {
+                self._jobInfoCompletedIds.clear();
+            }
             self._jobInfoLastPayload = null;
-
+            
             self._setRunBatchBusy(true, 'Submitting batch run…', 'text-muted');
 
             if (self.ws_client && typeof self.ws_client.connect === 'function') {
@@ -1406,7 +1555,7 @@ var BatchRunner = (function () {
                 if (this.ws_client && typeof this.ws_client.resetSpinner === 'function') {
                     this.ws_client.resetSpinner();
                 }
-                this.refreshJobInfo();
+                this.refreshJobInfo({ force: true });
             } else if (eventName === 'BATCH_WATERSHED_TASK_COMPLETED') {
                 this.refreshJobInfo();
             }

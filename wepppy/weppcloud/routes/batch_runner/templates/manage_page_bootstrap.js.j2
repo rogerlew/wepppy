@@ -2,6 +2,22 @@
 <script>
 "use strict";
 
+var site_prefix = {{ site_prefix | tojson }};
+var runid = {{ runid | tojson }};
+var config = {{ base_config | tojson }};
+var ispoweruser = {{ user.has_role('PowerUser') | tojson }};
+var WEPP_channel_critical_shear = null;
+var error = null;
+var cellsize = {{ ron.cellsize | default(0, true) | tojson }};
+var readonly = {{ ron.readonly | tojson }};
+var pup_relpath = {{ pup_relpath | tojson }};
+
+window.site_prefix = site_prefix;
+window.runid = runid;
+window.config = config;
+window.ispoweruser = ispoweruser;
+window.pup_relpath = pup_relpath;
+
 window.batchRunnerBootstrap = {
     enabled: {{ feature_enabled | tojson }},
     batchName: {{ batch_name | tojson }},

@@ -301,9 +301,25 @@ def fetch_dem_and_build_channels(runid, config):
         if error is not None:
             return jsonify(error)
 
-        extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text = args
-
+        (extent, center, zoom,
+          mcl, csa, 
+          wbt_fill_or_breach, wbt_blc_dist, 
+          set_extent_mode, map_bounds_text) = args
         wd = get_wd(runid)
+
+        watershed = Watershed.getInstance(wd)
+        if watershed.run_group == 'batch':
+            with watershed.locked():
+                watershed._mcl = mcl
+                watershed._csa = csa
+                if watershed.delineation_backend_is_wbt:
+                    if wbt_fill_or_breach is not None:
+                        watershed._wbt_fill_or_breach = wbt_fill_or_breach
+                    if wbt_blc_dist is not None:
+                        watershed._wbt_blc_dist = wbt_blc_dist
+    
+            return success_factory('Set watershed inputs for batch processing')
+
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.fetch_dem)
         prep.remove_timestamp(TaskEnum.build_channels)
@@ -420,6 +436,9 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
         if bieger2015_widths is not None:
             watershed.bieger2015_widths = bieger2015_widths
 
+        if watershed.run_group == 'batch':
+            return success_factory('Set watershed inputs for batch processing')
+        
         try:    
             prep = RedisPrep.getInstance(wd)
             prep.remove_timestamp(TaskEnum.abstract_watershed)
@@ -515,6 +534,9 @@ def api_build_landuse(runid, config):
             if not _exists(landuse.lc_fn):
                 return error_factory('Failed creating landuse file')
 
+        if landuse.run_group == 'batch':
+            return success_factory('Set landuse inputs for batch processing')
+
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_landuse)
 
@@ -598,7 +620,6 @@ def api_build_treatments(runid, config):
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_soils', methods=['POST'])
 def api_build_soils(runid, config):
-
     try:
         wd = get_wd(runid)
         prep = RedisPrep.getInstance(wd)
@@ -612,6 +633,9 @@ def api_build_soils(runid, config):
             disturbed = Disturbed.getInstance(wd)
             disturbed.sol_ver = float(request.form.get('sol_ver'))
 
+        if soils.run_group == 'batch':
+            return success_factory('Set soils inputs for batch processing')
+    
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(build_soils_rq, (runid,), timeout=TIMEOUT)
@@ -635,6 +659,9 @@ def api_build_climate(runid, config):
         climate.parse_inputs(request.form)
     except Exception:
         return exception_factory('Error parsing climate inputs', runid=runid)
+
+    if climate.run_group == 'batch':
+        return success_factory('Set climate inputs for batch processing')
 
     try:
         prep = RedisPrep.getInstance(wd)

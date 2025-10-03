@@ -122,7 +122,7 @@ def run_batch_watershed_rq(
         start_ts = time.time()
 
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
-        locks_cleared = batch_runner.run_batch_project(watershed_feature)
+        locks_cleared = batch_runner.run_batch_project(watershed_feature, job_id=job.id)
         if locks_cleared:
             StatusMessenger.publish(
                 status_channel,

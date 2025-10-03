@@ -283,8 +283,6 @@ def fetch_dem_rq(runid: str, extent, center, zoom):
         
         ron.fetch_dem()
         
-        prep = RedisPrep.getInstance(wd)
-        prep.timestamp(TaskEnum.fetch_dem)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -376,9 +374,6 @@ def build_subcatchments_rq(runid: str):
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         time.sleep(1)
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation BUILD_SUBCATCHMENTS_TASK_COMPLETED')
-
-        prep = RedisPrep.getInstance(wd)
-        prep.timestamp(TaskEnum.build_subcatchments)
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise

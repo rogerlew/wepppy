@@ -18,6 +18,7 @@ REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 
 
 class TaskEnum(Enum):
+    if_exists_rmtree = 'rmtree'
     project_init = 'project_init'
     set_outlet = 'set_outlet'
     abstract_watershed = 'abstract_watershed'
@@ -47,6 +48,7 @@ class TaskEnum(Enum):
     
     def label(self):
         return {
+            TaskEnum.if_exists_rmtree: 'Remove existing files',
             TaskEnum.project_init: 'Initialize Project',
             TaskEnum.set_outlet: 'Set Outlet',
             TaskEnum.abstract_watershed: 'Abstract Watershed',
@@ -72,6 +74,8 @@ class TaskEnum(Enum):
             TaskEnum.set_readonly: 'Set Readonly',
         }.get(self.value, self.value)
 
+    def __getstate__(self):
+        return self.value
 
 class RedisPrep:
     def __init__(self, wd, cfg_fn=None):
@@ -82,6 +86,13 @@ class RedisPrep:
         self.run_id = run_id
         if not _exists(self.dump_filepath):
             self._set_bool_config('loaded', True)
+
+    def __getstate__(self):
+        return {
+            'wd': self.wd,
+            'cfg_fn': self.cfg_fn,
+            'run_id': self.run_id,
+        }
 
     @staticmethod
     def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
@@ -110,6 +121,9 @@ class RedisPrep:
         all_fields_and_values = self.redis.hgetall(self.run_id)
         filtered_fields_and_values = {k: v for k, v in all_fields_and_values.items() if not k.startswith('locked:')}
 
+        if not _exists(self.wd):
+            return
+        
         with open(self.dump_filepath, 'w') as dump_file:
             json.dump(filtered_fields_and_values, dump_file)
 
@@ -153,8 +167,20 @@ class RedisPrep:
         now = int(time.time())
         self.__setitem__(str(key), now)
 
+    def timestamps_report(self):
+        s = [f'RedisPrep Timestamps ({self.run_id}):']
+        for key in TaskEnum:
+            timestamp = self.redis.hget(self.run_id, f'timestamps:{key}')
+            s.append(f'  {key}: {timestamp}')
+        return '\n'.join(s)
+
     def remove_timestamp(self, key: TaskEnum):
         self.redis.hdel(self.run_id, f'timestamps:{key}')
+        self.dump()
+
+    def remove_all_timestamp(self):
+        for task in TaskEnum:
+            self.redis.hdel(self.run_id, f'timestamps:{task}')
         self.dump()
 
     def __setitem__(self, key, value: int):

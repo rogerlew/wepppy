@@ -24,6 +24,7 @@ import what3words
 # wepppy
 import requests
 
+from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import haversine, read_raster, utm_srid
 
@@ -566,7 +567,12 @@ class Ron(NoDbBase):
 
         assert _exists(self.dem_fn)
 
-        RedisPrep.getInstance(self.wd).timestamp(TaskEnum.fetch_dem)
+        try:
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.fetch_dem)
+        except FileNotFoundError:
+            pass
+
 
     @property
     def has_dem(self):
