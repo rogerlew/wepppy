@@ -230,15 +230,33 @@ class WatershedCollection(object):
         self._analysis_results.update(metadata)
         return self._analysis_results
 
+    @property
+    def runid_template_is_valid(self) -> bool:
+        return getattr(self, '_runid_template_is_valid', False)
+
     @classmethod
-    def load_from_analysis_results(cls, analysis: Dict[str, Any]) -> None:
+    def load_from_analysis_results(cls, analysis_state: Dict[str, Any], runid_template_state) -> None:
         """Load analysis results from a previously saved dictionary."""
-        geojson_filepath = analysis.get("_geojson_filepath")
+        geojson_filepath = analysis_state.get("_geojson_filepath")
         if not geojson_filepath or not isinstance(geojson_filepath, str):
             raise ValueError("Invalid analysis results: missing or invalid '_geojson_filepath'")
 
         instance = WatershedCollection(geojson_filepath)
-        instance._analysis_results = analysis
+        instance._analysis_results = analysis_state
+
+        template_state = runid_template_state or {}
+        template = template_state.get('template')
+
+        resource_checksum = template_state.get('resource_checksum')
+        if resource_checksum and resource_checksum != instance.checksum:
+            raise ValueError('Watershed GeoJSON has changed since template validation; re-validate before running.')
+
+        if template_state['summary']['is_valid'] is False:
+            raise ValueError('Run ID template validation is not in an OK state.')
+        
+        instance.runid_template = template
+        instance._runid_template_is_valid = True
+
         return instance
 
     @property
@@ -627,13 +645,15 @@ class WatershedCollection(object):
             if len(indexes) > 1
         ]
 
+        is_valid = not errors and not duplicate_entries
+        self._runid_template_is_valid = is_valid
         summary = {
             "total_features": len(features),
             "errors": len(errors),
             "duplicate_run_ids": len(duplicate_entries),
             "unique_run_ids": len(duplicates),
             "valid_run_ids": len(features) - len(errors),
-            "is_valid": not errors and not duplicate_entries,
+            "is_valid": is_valid,
         }
 
         preview = rows[: preview_limit]
