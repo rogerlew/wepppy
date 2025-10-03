@@ -2,6 +2,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from copy import deepcopy
 from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable
 
 
@@ -22,6 +23,31 @@ class WatershedFeature(object):
             raise ValueError("Invalid GeoJSON feature structure")
         
         self.bbox = self._calculate_bbox()
+
+    def save_geojson(self, filepath: str) -> None:
+        """Save this feature as a standalone GeoJSON file."""
+        features = deepcopy(self.feature)
+        features['properties']['runid'] = self.runid
+        features['properties']['index'] = self.index
+        
+        geojson_object = {
+            "type": "FeatureCollection",
+            "crs": {
+                "type": "name",
+                "properties": {
+                    "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+                }
+            },
+            "features": [features]
+        }
+
+        # Write the dictionary to the specified file path.
+        # Using 'indent=2' makes the output file human-readable.
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(geojson_object, f, indent=2)
+        except IOError as e:
+            print(f"Error: Could not write to file {filepath}. Reason: {e}")
 
     def is_valid(self) -> bool:
         if not isinstance(self.feature, dict):

@@ -201,7 +201,20 @@ class BatchRunner(NoDbBase):
                 logger.info(f'cleared NoDb locks: {locks_cleared}')
             except RuntimeError:
                 pass
-         
+
+            try:
+                watershed_feature.save_geojson(_join(runid_wd, 'dem','target_watershed.geojson'))
+                if _exists(_join(runid_wd, 'dem','target_watershed.geojson')):
+                    logger.info('saved watershed GeoJSON to dem/target_watershed.geojson')
+                    ron = Ron.getInstance(runid_wd)
+                    with ron.locked():
+                        ron._boundary = f'/weppcloud/runs/batch;;{self.batch_name};;{watershed_feature.runid}/browse/dem/target_watershed.geojson'
+                        ron._boundary_color = 'blue'
+                        ron._boundary_name = 'target_watershed'
+
+            except Exception as e:
+                logger.error(f"Failed to save GeoJSON: {e}")
+
         logger.info('getting RedisPrep instance')
         prep = RedisPrep.getInstance(runid_wd)
         logger.info(prep.timestamps_report())
@@ -435,30 +448,34 @@ class BatchRunner(NoDbBase):
         return report
 
     def generate_runstate_cli_report(self) -> Dict[str, Any]:
+        from wcwidth import wcswidth
         watershed_collection = self.get_watershed_collection()
 
         s = []
-        
         for wf in watershed_collection:
             _runid = wf.runid
-            run_states = {str(task): None for task in BatchRunner.DEFAULT_TASKS}
+            run_states = {task.value: None for task in BatchRunner.DEFAULT_TASKS}
             run_wd = _join(self.wd, "runs", _runid)
             if _exists(run_wd):
                 prep = RedisPrep.getInstance(run_wd)
                 for task in BatchRunner.DEFAULT_TASKS:
-                    run_states[str(task)] = prep[task]
+                    run_states[task.value] = prep[task]
                 
             _checked_states = ''.join(
-                '✅' if v is not None else '❌' for v in run_states.values())
+                TaskEnum(k).emoji() if v is not None else ' ' for k, v in run_states.items())
             s.append(f'{_runid:10} {_checked_states}')
 
         # arrange in columns
         n_cols = 6
-        col_width = max(len(line) for line in s) + 4
+
+        # 2. Use wcswidth instead of len to get the true visual width
+        col_width = max(wcswidth(line) for line in s) + 4 
+
         rows = [s[i:i+n_cols] for i in range(0, len(s), n_cols)]
         formatted_rows = []
         for row in rows:
-            formatted_row = ''.join(f'{item:<{col_width}}' for item in row)
+            # 3. Use a helper function for padding since f-string padding is based on len()
+            formatted_row = ''.join(f"{item}{' ' * (col_width - wcswidth(item))}" for item in row)
             formatted_rows.append(formatted_row)
         cli_report = '\n'.join(formatted_rows)
 
