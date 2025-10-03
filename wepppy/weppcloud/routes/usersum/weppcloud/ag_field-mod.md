@@ -19,6 +19,7 @@ Resources stored in weppcloud `ag_fields` directory
 ### Crop managements (`ag_fields\crop_kv_lookup.tsv`)
 
 - database of crop management files saved in `ag_fields\plant_files`
+  - no spaces in filenames (`rename 's/ /-/g' *`)
 - table with `crop_id` keys and `management_file` values
 
 ## Running fields as sub-fields

@@ -25,6 +25,22 @@ Some management file conventions:
 2.  WEPP expects the following to be on lines by themselves: text information (such as scenario names and comments), looping parameters (such as `nini`, `ntill`, etc.), option flags (such as `lanuse`, `imngmt`, etc.), dates, and scenario indexes.
 3.  Anything on a line after the `#` character is a comment. Comments may not follow text information that is read by the model.
 
+## wepppy Management parser and 2016.3+ downgrade conversion
+
+`wepppy/wepp/management/managements.py` implements the high-level parser for WEPP plant/management files. The parser mirrors the manual by reading each section in canonical order—plants, operations, initial conditions, surface effects, contours, drains, yearly scenarios, and the management loop. Each scenario is represented by loop classes that hold both metadata and typed parameter blocks, allowing downstream code to manipulate scenarios without string parsing while enforcing the specification (option bounds, expected line lengths, and required values).
+
+### 2016.3/2017.1 awareness
+
+Recent updates teach the parser about parameters introduced in the 2016.3/2017.1 formats, including release canopy cover (`rcc`), residue resurfacing fractions (`resurf1`/`resurnf1`), understory cover fractions in initial conditions, and the optional permanent-contour flag. These values are ingested into the in-memory management objects so newer management libraries preserve the richer behaviour during simulations.
+
+### Downgrading managements to 98.4
+
+`convert_to_98_4_format` constructs a sanitized copy of a parsed management and exports it using the 98.4 layout. Two downgrade modes are available. Strict mode aborts as soon as an unsupported 2016.3 feature is encountered (for example a non-zero resurfacing fraction or herbicide operation code 17). Fallback mode zeroes resurfacing fractions, maps herbicide operations to code 4 (`other`), and injects comment notes documenting the original values so users understand the loss in fidelity. The helper writes the explanatory comments at the top of the downgraded file before emitting the standard 98.4 content.
+
+### Multi-OFE stacking utilities
+
+`wepppy/wepp/management/utils/multi_ofe.py` provides helpers for synthesizing multi-OFE (Overland Flow Element) managements programmatically. The `ManagementMultipleOfeSynth` class takes an existing single-OFE management, replicates the management loop, and stitches together multiple OFE variants while preserving consistent plant, operation, and initial-condition references—allowing automated generation of multi-element hillslope scenarios without manual editing.
+
 ## Plant/Management Input File Sections
 The general form of a **Section** is:
 * `Scen.number` - the number of scenarios declared
@@ -41,7 +57,7 @@ The plant/management file for WEPP v95.7 is described in Table 16. Please note t
     * 1.1) WEPP version, (up to) 8 characters - (`datver`)
         * `95.7` Initial version
         * `98.4` - Update
-        * `2016.3` Residue management updates, additional parameters
+        * `2016.3` and `2017.1` Residue management updates, additional parameters
         * ***Note*** `datver` is used to detect older management file formats, which are incompatible with the current WEPP erosion model.
 * **Info.header**
     * 2.1) number of Overland Flow Elements for hillslopes, integer (`nofe`), or number of channels for watershed (`nchan`)
