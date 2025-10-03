@@ -180,6 +180,7 @@ class BatchRunner(NoDbBase):
         
         logger.info(f'init_required: {init_required}')
         prep = None
+        locks_cleared = None
         if init_required:
             logger.info(f'copying base project to runid_wd: {runid_wd}')
             shutil.copytree(base_wd, runid_wd)
@@ -199,7 +200,7 @@ class BatchRunner(NoDbBase):
                 locks_cleared = clear_locks(runid)
                 logger.info(f'cleared NoDb locks: {locks_cleared}')
             except RuntimeError:
-                locks_cleared = None
+                pass
          
         logger.info('getting RedisPrep instance')
         prep = RedisPrep.getInstance(runid_wd)
@@ -217,7 +218,7 @@ class BatchRunner(NoDbBase):
         soils = Soils.getInstance(runid_wd)
         climate = Climate.getInstance(runid_wd)
         wepp = Wepp.getInstance(runid_wd)
-
+        
         if self.is_task_enabled(TaskEnum.fetch_dem) and prep[str(TaskEnum.fetch_dem)] is None:
             logger.info('fetching DEM')
             pad = 0.02
@@ -432,5 +433,38 @@ class BatchRunner(NoDbBase):
                 "run_state": run_states,
             }
         return report
+
+    def generate_runstate_cli_report(self) -> Dict[str, Any]:
+        watershed_collection = self.get_watershed_collection()
+
+        s = []
+        
+        for wf in watershed_collection:
+            _runid = wf.runid
+            run_states = {str(task): None for task in BatchRunner.DEFAULT_TASKS}
+            run_wd = _join(self.wd, "runs", _runid)
+            if _exists(run_wd):
+                prep = RedisPrep.getInstance(run_wd)
+                for task in BatchRunner.DEFAULT_TASKS:
+                    run_states[str(task)] = prep[task]
+                
+            _checked_states = ''.join(
+                '✅' if v is not None else '❌' for v in run_states.values())
+            s.append(f'{_runid:10} {_checked_states}')
+
+        # arrange in columns
+        n_cols = 6
+        col_width = max(len(line) for line in s) + 4
+        rows = [s[i:i+n_cols] for i in range(0, len(s), n_cols)]
+        formatted_rows = []
+        for row in rows:
+            formatted_row = ''.join(f'{item:<{col_width}}' for item in row)
+            formatted_rows.append(formatted_row)
+        cli_report = '\n'.join(formatted_rows)
+
+        # clear screen and print
+        cli_report = '\033c' + cli_report
+
+        print(cli_report)
 
 __all__ = ["BatchRunner"]
