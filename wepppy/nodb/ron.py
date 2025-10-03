@@ -434,6 +434,25 @@ class Ron(NoDbBase):
     def enable_landuse_change(self) -> bool:
         return self._enable_landuse_change
 
+    def remove_mod(self, mod_name):
+        import wepppy
+        from wepppy.nodb.base import iter_nodb_mods_subclasses
+
+        if mod_name in self.mods:
+            with self.locked():
+                self._mods.remove(mod_name)
+
+        mod_nodb_fn = _join(self.wd, f'{mod_name}.nodb')
+        if _exists(mod_nodb_fn):
+            os.remove(mod_nodb_fn)
+
+        for mod, cls in iter_nodb_mods_subclasses():
+            mod_instance = cls.tryGetInstance(self.wd)
+            if mod_instance is not None:
+                if mod_name in self.mods:
+                    with mod_instance.locked():
+                        self._mods.remove(mod_name)
+
     #
     # map
     #
