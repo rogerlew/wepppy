@@ -48,3 +48,38 @@ Resources stored in weppcloud `ag_fields` directory
    - MOFE management with the rotation schedule for the field
 3. Run WEPP hillslopes and watershed as normal
 
+
+### Hangman notes
+
+# all management files are 2017.1
+(wepppy310-env) roger@forest.local:/wc1/runs/du/dumbfounded-patentee/ag_fields/plant_files$ head -n 1 *.man
+==> alfalfa,spr-seeded,NT,-cm8-wepp.man <==
+2017.1
+
+==> barley,spr,MT,-cm8,-fchisel-wepp.man <==
+2017.1
+
+==> beans,spr,CONV,-cm8-wepp.man <==
+2017.1
+
+==> canola,spr,MT,-cm8-wepp.man <==
+2017.1
+
+==> chickpeas,spr,NT,-cm8-wepp.man <==
+2017.1
+
+==> lentils,spr,NT,-cm8-wepp.man <==
+2017.1
+
+==> oats,spr,-CONV,-cm8-wepp.man <==
+2017.1
+
+==> peas,spr,NT,-cm8-wepp.man <==
+2017.1
+
+==> wheat,spr,MT,-cm8,-fchisel-wepp.man <==
+2017.1
+
+==> wheat,winter,MT,-cm8-wepp.man <==
+2017.1
+
