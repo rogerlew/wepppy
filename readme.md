@@ -38,6 +38,14 @@ NoDb subclass logger
 - Log verbosity goes through Redis DB 15. Operators can dial runs to DEBUG without touching config files, and every handler respects the remote setting on init.
 - `RedisPrep` time-stamps milestones (`timestamps:run_wepp_watershed`, `timestamps:abstract_watershed`) and stores RQ job IDs, giving microservices/preflight enough context to render readiness checklists.
 
+## NoDb Module Exports & Legacy Imports
+- Every NoDb controller module now declares an explicit `__all__` that captures the public surface (the primary `NoDbBase` subclass, its companion enums/exceptions, and any helper utilities used outside the module). When you add new public functions or classes, update the module’s `__all__` immediately.
+- Package aggregators (`wepppy.nodb.core`, `wepppy.nodb.mods`) build their own `__all__` from the per-module lists, keeping the top-level namespace tidy while preserving ergonomic imports such as `from wepppy.nodb.core import Wepp` or `from wepppy.nodb.mods import Disturbed`.
+- The `__getattr__` hook in `wepppy.nodb.mods` lazily imports mod packages. This keeps fresh projects fast to hydrate and allows optional dependencies (e.g. `geopandas`, `utm`) to remain truly optional until the mod is touched.
+- Legacy `.nodb` payloads still deserialize because `wepppy.nodb.base` builds `_LEGACY_MODULE_REDIRECTS` by walking the package tree and binding old module paths (for example `wepppy.nodb.wepp`) to their new homes (`wepppy.nodb.core.wepp`). The `NoDbBase._ensure_legacy_module_imports()` hook loads those modules on demand before jsonpickle decodes.
+- If a refactor moves or renames a module, update the redirect map by ensuring the file still lives under `wepppy/nodb/` (the scanner picks up new paths automatically). For one-off overrides, call `NoDbBase._import_mod_module('mod_name')` to pre-load the replacement prior to deserialization.
+- Best practice: keep module-level side effects lightweight, prefer absolute imports (`from wepppy.nodb.core.climate import Climate`), and treat anything underscored as private so it stays out of `__all__`.
+
 ## Rust-Powered Geospatial Acceleration
 - [`wepppyo3`](https://github.com/wepp-in-the-woods/wepppyo3) exposes Rust bindings for climate interpolation, raster mode lookups, and soil loss grids. Python falls back gracefully when the crate is absent, but production boxes pin the wheel for SIMD speedups.
 - Hillslope delineation can be configured to use TOPAZ or a custom tool implmented in Rust [`hillslopes_topaz.rs`](https://github.com/rogerlew/whitebox-tools/blob/master/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.rs). The watershed abstraction is delegated to [`peridot`](https://github.com/wepp-in-the-woods/peridot)
