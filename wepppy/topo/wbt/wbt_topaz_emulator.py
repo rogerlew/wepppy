@@ -16,18 +16,7 @@ import inspect
 from wepppy.all_your_base.geo import get_utm_zone, utm_srid
 
 from wepppy.topo.watershed_abstraction.support import (
-    cummnorm_distance,
-    compute_direction,
-    representative_normalized_elevations,
-    weighted_slope_average,
-    rect_to_polar,
-    write_slp,
-    HillSummary,
-    ChannelSummary,
-    CentroidSummary,
-    slp_asp_color,
     polygonize_netful,
-    polygonize_bound,
     polygonize_subcatchments,
     json_to_wgs,
 )
