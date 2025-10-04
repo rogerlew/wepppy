@@ -10,7 +10,8 @@ from os.path import split as _split
 
 import shutil
 from glob import glob
-from wepppy.nodb import Ron, Wepp, Ash, AshPost
+from wepppy.nodb.core import *
+from wepppy.nodb.mods.ash_transport import Ash, AshPost
 from wepppy.wepp.stats import HillSummary, ChannelSummary, OutletSummary, SedimentDelivery
 
 

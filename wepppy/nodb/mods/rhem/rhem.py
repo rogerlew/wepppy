@@ -9,12 +9,8 @@ from wepppy.topo.watershed_abstraction import SlopeFile
 
 # wepppy submodules
 from wepppy.nodb.base import NoDbBase
-from wepppy.nodb.mods import RangelandCover
-from wepppy.nodb.watershed import Watershed
-from wepppy.nodb.soils import Soils
-from wepppy.nodb.climate import Climate
-
-from wepppy.nodb.wepp import Wepp
+from wepppy.nodb.mods.rangeland_cover import RangelandCover
+from wepppy.nodb.core import *
 
 # Copyright (c) 2016-2018, University of Idaho
 # All rights reserved.
@@ -66,8 +62,7 @@ class Rhem(NoDbBase):
 
             self.clean()
 
-        import wepppy
-        wepppy.nodb.mods.RhemPost(wd, cfg_fn)
+        RhemPost(wd, cfg_fn)
 
     @property
     def rhem_dir(self):

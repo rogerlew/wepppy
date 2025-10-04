@@ -39,7 +39,7 @@ class HillslopeWatbal(ReportBase):
     def __init__(self, wd):
         self.wd = wd
 
-        from wepppy.nodb import Watershed
+        from wepppy.nodb.core import Watershed
         watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         output_dir = _join(wd, 'wepp/output')

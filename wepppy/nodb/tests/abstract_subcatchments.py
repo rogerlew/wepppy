@@ -1,4 +1,4 @@
-from wepppy.nodb import Watershed
+from wepppy.nodb.core import Watershed
 
 if __name__ == '__main__':
     wd = '/geodata/weppcloud_runs/leery-amphetamine/'

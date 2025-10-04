@@ -1,5 +1,5 @@
 import wepppy
-from wepppy.nodb import Ron, Watershed
+from wepppy.nodb.core import Ron, Watershed
 
 import json
 import os

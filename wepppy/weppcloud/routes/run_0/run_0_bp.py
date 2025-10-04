@@ -11,11 +11,16 @@ from .._common import *  # noqa: F401,F403
 import wepppy
 from wepppy.all_your_base import isint
 from wepppy.nodb.base import get_configs
-from wepppy.nodb import Landuse, Ron, Unitizer, Watershed, Wepp, WeppPost, Soils, Topaz, Observed, RangelandCover, Rhem, Treatments
+from wepppy.nodb.core import * 
+from wepppy.nodb.unitizer import Unitizer
+from wepppy.nodb.mods.observed import Observed
+from wepppy.nodb.mods.rangeland_cover import RangelandCover
+from wepppy.nodb.mods.rhem import Rhem
+from wepppy.nodb.mods.treatments import Treatments
 from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.omni import Omni, OmniScenario
-from wepppy.nodb.climate import Climate
+from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
 from wepppy.wepp.out import DisturbedTotalWatSed2, Element, HillWat, TotalWatSed2

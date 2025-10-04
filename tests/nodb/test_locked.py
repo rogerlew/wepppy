@@ -2,7 +2,7 @@ import os
 import unittest
 from tempfile import TemporaryDirectory
 
-from wepppy.nodb.ron import Ron
+from wepppy.nodb.core import Ron
 from wepppy.nodb.base import redis_lock_client
 
 

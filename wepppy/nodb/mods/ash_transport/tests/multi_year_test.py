@@ -2,7 +2,7 @@ from os.path import join as _join
 
 if __name__ == "__main__":
     from pprint import pprint
-    from wepppy.nodb import Ron
+    from wepppy.nodb.core import Ron
     from wepppy.nodb.mods.ash_transport import Ash, AshPost
     from wepppy.nodb.mods.ash_transport.ash_multi_year_model import *
     """

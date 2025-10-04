@@ -14,7 +14,7 @@ import numpy as np
 from pandas.core.series import Series
 from collections import namedtuple
 
-from wepppy.nodb.soils import Soils
+from wepppy.nodb.core import Soils
 
 
 try:
@@ -98,7 +98,7 @@ def gpkg_extract_objective_parameter(gpkg_fn: str, obj_param: str) -> Tuple[List
 
 
 def gpkg_export(wd: str):
-    from wepppy.nodb import Watershed
+    from wepppy.nodb.core import Watershed
     watershed = Watershed.getInstance(wd)
 
     if wd.endswith('/'):

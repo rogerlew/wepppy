@@ -6,7 +6,7 @@ from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 
-from wepppy.nodb import Ron
+from wepppy.nodb.core import Ron
 from wepppy.weppcloud.utils.helpers import error_factory, get_wd, handle_with_exception_factory
 
 from ._common import *  # noqa: F401,F403

@@ -147,7 +147,7 @@ def _read_hill_wat_sed(pass_fn):
     return result
 
 def process_measures_df(d, totarea_m2, baseflow_opts, phos_opts):
-    from wepppy.nodb import PhosphorusOpts
+    from wepppy.nodb.core.wepp import PhosphorusOpts
 
     totarea_ha = totarea_m2 / 10000.0
 
@@ -296,7 +296,7 @@ class AbstractTotalWatSed2(ABC):
 
         # determine baseflow and phosphorus options
         if self.baseflow_opts is None or self.phos_opts is None:
-            from wepppy.nodb import Wepp
+            from wepppy.nodb.core import Wepp
             wepp = Wepp.getInstance(self.wd)
 
         if self.baseflow_opts is None:
@@ -308,7 +308,7 @@ class AbstractTotalWatSed2(ABC):
 
         # load the data
         if chn_id is not None:
-            from wepppy.nodb import Watershed
+            from wepppy.nodb.core import Watershed
             watershed = Watershed.getInstance(self.wd)
             translator = watershed.translator_factory()
             network = watershed.network
@@ -536,11 +536,11 @@ class DisturbedTotalWatSed2(AbstractTotalWatSed2):
 
     def compile_data(self, results):
         # need to translator to identify topaz_ids from wepp_ids
-        from wepppy.nodb import Watershed
+        from wepppy.nodb.core import Watershed
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
 
-        from wepppy.nodb import Landuse
+        from wepppy.nodb.core import Landuse
         landuse = Landuse.getInstance(self.wd)
 
         # compile the data
@@ -597,7 +597,7 @@ class DisturbedTotalWatSed2(AbstractTotalWatSed2):
 
 
     def _calculate_annuals(self):
-        from wepppy.nodb import Landuse
+        from wepppy.nodb.core import Landuse
         landuse = Landuse.getInstance(self.wd)
 
         measures = ['Precipitation (mm)', 'Rain + Melt (mm)', 'ET (mm)', 'Percolation (mm)',
@@ -650,8 +650,7 @@ class TotalWatSed(object):
     def __init__(self, fn,
                  baseflow_opts,
                  phos_opts=None):
-
-        from wepppy.nodb import PhosphorusOpts, BaseflowOpts
+        from wepppy.nodb.core.wepp import PhosphorusOpts, BaseflowOpts
         wd = _join(_split(fn)[0], '../../')
 
         hdr = self.hdr
@@ -787,7 +786,7 @@ def totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_chann
     The TotalWatSed2 aggregates daily values from the .wat.txt and .pass.txt files of all the upstream hillslopes to the channel
     """
     from wepppy.nodb.status_messenger import StatusMessenger
-    from wepppy.nodb import Watershed
+    from wepppy.nodb.core import Watershed
 
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
@@ -844,7 +843,7 @@ if __name__ == "__main__":
 
     from pprint import pprint
     fn = '/geodata/weppcloud_runs/srivas42-greatest-ballad/wepp/output/totalwatsed.txt'
-    from wepppy.nodb import PhosphorusOpts, BaseflowOpts
+    from wepppy.nodb.core.wepp import PhosphorusOpts, BaseflowOpts
     phosOpts = PhosphorusOpts()
     phosOpts.surf_runoff = 0.0118
     phosOpts.lateral_flow = 0.0118

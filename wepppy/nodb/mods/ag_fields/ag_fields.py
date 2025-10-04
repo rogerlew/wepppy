@@ -31,7 +31,8 @@ import utm
 
 # wepppy
 from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
-from wepppy.nodb.watershed import Watershed
+from wepppy.nodb.core import Watershed
+from wepppy.topo.peridot.peridot_runner import run_peridot_wbt_sub_fields_abstraction, post_abstract_sub_fields
 
 from ...base import (
     NoDbBase,
@@ -83,7 +84,41 @@ class AgFields(NoDbBase):
             self._field_id_key = None
             self._rotation_schedule_tsv = None
             self._crop_kv_lookup_tsv = None
+            self._sub_field_min_area_threshold_m2 = 0.0  # threshold in m2 for defining sub-field in peridot
+            
+            self._field_n = 0
+            self._sub_field_n = 0
+            self._sub_field_fp_n = 0
 
+            self._geojson_hash = None
+            self._geojson_timestamp = None
+            self._geojson_is_valid = False
+            self._field_columns = []
+
+    @property
+    def field_n(self):
+        return getattr(self, '_field_n', 0)
+
+    @property
+    def sub_field_n(self):
+        return getattr(self, '_sub_field_n', 0)
+
+    @property
+    def sub_field_fp_n(self):
+        return getattr(self, '_sub_field_fp_n', 0)
+
+    @property
+    def geojson_timestamp(self):
+        return getattr(self, '_geojson_timestamp', None)
+
+    @property
+    def geojson_is_valid(self):
+        return getattr(self, '_geojson_is_valid', False)
+
+    @property
+    def field_columns(self):
+        return deepcopy(getattr(self, '_field_columns', []))
+    
     @property
     def field_boundaries_geojson(self):
         return self._field_boundaries_geojson
@@ -92,26 +127,26 @@ class AgFields(NoDbBase):
     def field_id_key(self):
         return self._field_id_key
 
-    def validate_field_boundary_geojson(self, fn, field_id_key):
+    def validate_field_boundary_geojson(self, fn):
         geojson_path = _join(self.ag_fields_dir, fn)
         if not _exists(geojson_path):
             raise FileNotFoundError(f'Field boundary geojson file not found: {geojson_path}')
 
         with self.locked():
             self._field_boundaries_geojson = fn
-            self._field_id_key = field_id_key
 
         import geopandas as gpd
         df = gpd.read_file(geojson_path,  ignore_geometry=True)
 
-        if field_id_key not in df.columns:
-            raise ValueError(f'Field ID key "{field_id_key}" not found in geojson properties: {df.columns.tolist()}')
-
-        # validate the field_id_key column is numeric
-        if not pd.api.types.is_numeric_dtype(df[field_id_key]):
-            raise ValueError(f'Field ID key "{field_id_key}" must be numeric. Found dtype: {df[field_id_key].dtype}')
-        
+        # dump attributes to parquet
         df.to_parquet(self.rotation_schedule_parquet, index=False)
+
+        with self.locked():
+            self._field_n = len(df)
+            self._geojson_hash = hashlib.sha1(open(geojson_path, 'rb').read()).hexdigest()
+            self._geojson_timestamp = int(time.time())
+            self._geojson_is_valid = True
+            self._field_columns = list([str(col) for col in df.columns])
 
     @property
     def field_boundaries_tif(self):
@@ -246,6 +281,42 @@ class AgFields(NoDbBase):
             out.write(burned_array, 1)
 
         self.logger.info(f"Successfully created rasterized field boundaries at {output_filepath}")
+
+    @property
+    def sub_field_min_area_threshold_m2(self):
+        return self._cfg.get('_sub_field_min_area_threshold_m2', 0.0)
+    
+    @sub_field_min_area_threshold_m2.setter
+    @nodb_setter
+    def sub_field_min_area_threshold_m2(self, value: float):
+        if value < 0.0:
+            raise ValueError('sub_field_min_area_threshold_m2 must be non-negative.')
+        self._cfg['_sub_field_min_area_threshold_m2'] = float(value)
+
+    def periodot_abstract_sub_fields(
+        self,
+        sub_field_min_area_threshold_m2: Optional[float] = None,
+        verbose: bool = True
+    ):
+        """
+        Run Peridot to abstract sub-fields using WhiteboxTools and post-process the results.
+        """
+        if sub_field_min_area_threshold_m2 is not None:
+            self.sub_field_min_area_threshold_m2 = sub_field_min_area_threshold_m2
+        
+        watershed = Watershed.getInstance(self.wd)
+        clip_hillslopes = watershed.clip_hillslopes
+        clip_hillslope_length = watershed.clip_hillslope_length
+
+        with self.locked():
+            run_peridot_wbt_sub_fields_abstraction(
+                self.wd,
+                clip_hillslopes=clip_hillslopes,
+                clip_hillslope_length=clip_hillslope_length,
+                sub_field_min_area_threshold_m2=self.sub_field_min_area_threshold_m2,
+                verbose=verbose
+            )
+            self._sub_field_n, self._sub_field_fp_n = post_abstract_sub_fields(self.wd, verbose=verbose)
 
     @property
     def rotation_schedule_parquet(self):

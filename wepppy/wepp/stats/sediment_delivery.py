@@ -14,7 +14,7 @@ class SedimentDelivery(object):
     def __init__(self, wd):
         self.wd = wd
 
-        from wepppy.nodb import Wepp
+        from wepppy.nodb.core import Wepp
         wepp = Wepp.getInstance(wd)
 
         loss_pw0 = _join(wepp.output_dir, 'loss_pw0.txt')

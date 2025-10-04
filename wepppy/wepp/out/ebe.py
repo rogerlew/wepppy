@@ -191,7 +191,7 @@ if __name__ == "__main__":
     from time import time
     from os.path import exists as _exists
 
-    from wepppy.nodb import Watershed
+    from wepppy.nodb.core import Watershed
 
     translator = Watershed.getInstanceFromRunID('rlew-confirmed-complementarity/').translator_factory()
 

@@ -12,8 +12,11 @@
 import os
 
 import functools
+import importlib
 import inspect
 import multiprocessing as mp
+import re
+import sys
 from concurrent.futures import ProcessPoolExecutor
 from dotenv import load_dotenv
 from os.path import join as _join
@@ -43,8 +46,6 @@ from configparser import (
     NoSectionError
 )
 
-from pathlib import Path
-
 import logging
 import queue
 from logging.handlers import QueueHandler, QueueListener
@@ -57,11 +58,42 @@ class NoDbAlreadyLockedError(Exception):
     """Raised when attempting to lock a NoDb instance that is already locked."""
     pass
 
-from .redis_prep import RedisPrep
 from wepppy.all_your_base import isfloat, isint, isbool
-
+from .redis_prep import RedisPrep
 # Configure redis
 import redis
+
+
+def _discover_legacy_module_redirects():
+    """Build lookup of legacy module stems to their relocated modules."""
+    base_dir = Path(__file__).resolve().parent
+    redirects = {}
+
+    def register(stem, module_path):
+        if stem in ('', '__init__'):
+            return
+        redirects.setdefault(stem, module_path)
+
+    # Prefer package-level modules when available.
+    for init_path in base_dir.rglob('__init__.py'):
+        rel = init_path.relative_to(base_dir)
+        parts = rel.with_suffix('').parts[:-1]
+        if not parts:
+            continue
+        module_path = 'wepppy.nodb.' + '.'.join(parts)
+        register(init_path.parent.name, module_path)
+
+    for py_path in base_dir.rglob('*.py'):
+        if py_path.name == '__init__.py':
+            continue
+        rel = py_path.relative_to(base_dir)
+        module_path = 'wepppy.nodb.' + '.'.join(rel.with_suffix('').parts)
+        register(py_path.stem, module_path)
+
+    return redirects
+
+
+_LEGACY_MODULE_REDIRECTS = _discover_legacy_module_redirects()
 
 redis_nodb_cache_client = None
 redis_status_client = None
@@ -81,7 +113,7 @@ try:
     redis_nodb_cache_client = redis.StrictRedis(connection_pool=redis_nodb_cache_pool)
     redis_nodb_cache_client.ping()
 except Exception as e:
-    logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
+    logging.critical(f'Error connecting to Redis with pool: {e}')
     redis_nodb_cache_client = None
 
 try:
@@ -92,7 +124,7 @@ try:
     redis_status_client = redis.StrictRedis(connection_pool=redis_status_pool)
     redis_status_client.ping()
 except Exception as e:
-    logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
+    logging.critical(f'Error connecting to Redis with pool: {e}')
     redis_status_client = None
 
 try:
@@ -103,7 +135,7 @@ try:
     redis_lock_client = redis.StrictRedis(connection_pool=redis_lock_pool)
     redis_lock_client.ping()
 except Exception as e:
-    logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
+    logging.critical(f'Error connecting to Redis with pool: {e}')
     redis_lock_client = None
 
 try:
@@ -114,7 +146,7 @@ try:
     redis_log_level_client = redis.StrictRedis(connection_pool=redis_log_level_pool)
     redis_log_level_client.ping()
 except Exception as e:
-    logging.CRITICAL(f'Error connecting to Redis with pool: {e}')
+    logging.critical(f'Error connecting to Redis with pool: {e}')
     redis_log_level_client = None
 
 class LogLevel(IntEnum):
@@ -302,6 +334,7 @@ class NoDbBase(object):
     _js_decode_replacements = ()
 
     filename: ClassVar[str] = None # just the basename
+    _legacy_module_redirects: ClassVar[dict[str, str]] = _LEGACY_MODULE_REDIRECTS
 
     def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
         assert _exists(wd)
@@ -553,6 +586,7 @@ class NoDbBase(object):
             json_text = fp.read()
 
         json_text = cls._preprocess_json_for_decode(json_text)
+        cls._ensure_legacy_module_imports(json_text)
         db = cls._decode_jsonpickle(json_text)
 
         # update cache if it is available
@@ -686,38 +720,81 @@ class NoDbBase(object):
         return jsonpickle.decode(json_text)
 
     @classmethod
+    def _ensure_legacy_module_imports(cls, json_text: str):
+        if 'wepppy.nodb.' not in json_text:
+            return
+
+        legacy_modules = {
+            token.rsplit('.', 1)[0]
+            for token in re.findall(r'"py/(?:object|class)":\s*"(wepppy\.nodb\.[^"]+)"', json_text)
+        }
+
+        for legacy_module in legacy_modules:
+            if legacy_module in sys.modules:
+                continue
+
+            simple_name = legacy_module.rsplit('.', 1)[-1]
+            target_module = cls._legacy_module_redirects.get(simple_name)
+            if not target_module:
+                continue
+
+            try:
+                module = importlib.import_module(target_module)
+            except ModuleNotFoundError:
+                continue
+
+            sys.modules.setdefault(legacy_module, module)
+
+    @classmethod
+    def _import_mod_module(cls, mod_name: str):
+        """Ensure the NoDb mod module that defines ``mod_name`` is imported."""
+        target_module = cls._legacy_module_redirects.get(mod_name)
+        if not target_module:
+            return
+
+        if target_module in sys.modules:
+            return
+
+        try:
+            importlib.import_module(target_module)
+        except ModuleNotFoundError:
+            logging.getLogger(__name__).warning(
+                "NoDb mod '%s' module '%s' not found during import", mod_name, target_module
+            )
+
+    @classmethod
     def _post_instance_loaded(cls, instance):
         # hook for subclasses needing to mutate the decoded instance
         return instance
 
     @property
     def watershed_instance(self):
-        from .watershed import Watershed
+        from .core.watershed import Watershed
         return Watershed.getInstance(self.wd)
     
     @property
     def wepp_instance(self):
-        from .wepp import Wepp
+        from .core.wepp import Wepp
         return Wepp.getInstance(self.wd)
     
     @property
     def climate_instance(self):
-        from .climate import Climate
+        from .core.climate import Climate
         return Climate.getInstance(self.wd)
     
     @property
     def soils_instance(self):
-        from .soils import Soils
+        from .core.soils import Soils
         return Soils.getInstance(self.wd)
     
     @property
     def landuse_instance(self):
-        from .landuse import Landuse
+        from .core.landuse import Landuse
         return Landuse.getInstance(self.wd)
     
     @property
     def ron_instance(self):
-        from .ron import Ron
+        from .core.ron import Ron
         return Ron.getInstance(self.wd)
     
     @property
@@ -726,18 +803,18 @@ class NoDbBase(object):
     
     @property
     def disturbed_instance(self):
-        from .mods import Disturbed
+        from .mods.disturbed import Disturbed
         return Disturbed.getInstance(self.wd)
     
     @property
     def wepppost_instance(self):
-        from .wepppost import WeppPost
+        from .core.wepppost import WeppPost
         return WeppPost.getInstance(self.wd)
     
     @property
     def has_sbs(self):
-        from wepppy.nodb.mods import Disturbed
-        from wepppy.nodb.mods import Baer
+        from wepppy.nodb.mods.disturbed import Disturbed
+        from wepppy.nodb.mods.baer import Baer
 
         try:
             baer = Disturbed.getInstance(self.wd)
@@ -861,8 +938,7 @@ class NoDbBase(object):
 
     @property
     def locales(self):
-        from .ron import Ron
-        ron = Ron.getInstance(self.wd)
+        ron = self.ron_instance
 
         if hasattr(ron, '_locales'):
             return ron._locales
@@ -960,8 +1036,7 @@ class NoDbBase(object):
 
     @property
     def multi_ofe(self):
-        import wepppy
-        return getattr(wepppy.nodb.Wepp.getInstance(self.wd), '_multi_ofe', False)
+        return getattr(self.wepp_instance, '_multi_ofe', False)
 
     @property
     def readonly(self):
@@ -1094,42 +1169,52 @@ class NoDbBase(object):
         assert isinstance(evt, TriggerEvents)
         import wepppy.nodb.mods
 
+        from wepppy.nodb.mods.baer import Baer
+        from wepppy.nodb.mods.disturbed import Disturbed
+        from wepppy.nodb.mods.revegetation import Revegetation
+        from wepppy.nodb.mods.rred import Rred
+        from wepppy.nodb.mods.shrubland import Shrubland
+
         if 'lt' in self.mods:
-            lt = wepppy.nodb.mods.locations.LakeTahoe.getInstance(self.wd)
+            from wepppy.nodb.mods.locations import LakeTahoe
+            lt = LakeTahoe.getInstance(self.wd)
             lt.on(evt)
 
         if 'portland' in self.mods:
-            portland = wepppy.nodb.mods.locations.PortlandMod.getInstance(self.wd)
+            from wepppy.nodb.mods.locations import PortlandMod
+            portland = PortlandMod.getInstance(self.wd)
             portland.on(evt)
 
         if 'seattle' in self.mods:
             try:
-                seattle = wepppy.nodb.mods.locations.SeattleMod.getInstance(self.wd)
+                from wepppy.nodb.mods.locations import SeattleMod
+                seattle = SeattleMod.getInstance(self.wd)
                 seattle.on(evt)
             except:
                 pass
         if 'general' in self.mods:
-            general = wepppy.nodb.mods.locations.GeneralMod.getInstance(self.wd)
+            from wepppy.nodb.mods.locations import GeneralMod
+            general = GeneralMod.getInstance(self.wd)
             general.on(evt)
 
         if 'baer' in self.mods:
-            baer = wepppy.nodb.mods.Baer.getInstance(self.wd)
+            baer = Baer.getInstance(self.wd)
             baer.on(evt)
 
         if 'disturbed' in self.mods:
-            disturbed = wepppy.nodb.mods.Disturbed.getInstance(self.wd)
+            disturbed = Disturbed.getInstance(self.wd)
             disturbed.on(evt)
 
         if 'revegetation' in self.mods:
-            reveg = wepppy.nodb.mods.Revegetation.getInstance(self.wd)
+            reveg = Revegetation.getInstance(self.wd)
             reveg.on(evt)
 
         if 'rred' in self.mods:
-            rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
+            rred = Rred.getInstance(self.wd)
             rred.on(evt)
 
         if 'shrubland' in self.mods:
-            shrubland = wepppy.nodb.mods.Shrubland.getInstance(self.wd)
+            shrubland = Shrubland.getInstance(self.wd)
             shrubland.on(evt)
 
     @property

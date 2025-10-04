@@ -205,7 +205,7 @@ class SkidTrails(NoDbBase):
         return _join(self.skid_trails_dir, 'skid.tif')
 
     def rasterize_skid_trails(self):
-        from wepppy.nodb import Watershed
+        from wepppy.nodb.core import Watershed
         watershed = Watershed.getInstance(self.wd)
 
         # Load the DEM and the skid trails
@@ -238,7 +238,7 @@ class SkidTrails(NoDbBase):
 
     def walk_skid_trails(self):
 
-        from wepppy.nodb import Watershed
+        from wepppy.nodb.core import Watershed
         wd = self.wd
 
         watershed = Watershed.getInstance(wd)

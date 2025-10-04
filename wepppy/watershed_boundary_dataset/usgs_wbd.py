@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from osgeo import gdal, osr, ogr
 
 from wepppy.all_your_base.geo import wgs84_proj4, read_raster, shapefile, GeoTransformer
-from wepppy.nodb import Ron, Topaz
+from wepppy.nodb.core import Ron, Topaz
 
 
 def build_mask(points, georef_fn):

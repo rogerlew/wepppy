@@ -25,8 +25,8 @@ import pandas as pd
 from wepppy.wepp.out import TotalWatSed2, Chanwb, Ebe
 from wepppy.all_your_base.hydro.objective_functions import calculate_all_functions
 
-from .base import NoDbBase
-from .redis_prep import RedisPrep, TaskEnum
+from ...base import NoDbBase
+from ...redis_prep import RedisPrep, TaskEnum
 
 
 def validate(Qm, Qo):

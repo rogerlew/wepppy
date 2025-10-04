@@ -300,7 +300,7 @@ def htmltree(_dir='.', padding='', print_files=True, recurse=False):
 def authorize(runid, config, require_owner=False):
     from flask_login import current_user
     from flask import abort
-    from wepppy.nodb.ron import Ron
+    from wepppy.nodb.core import Ron
     from wepppy.weppcloud.app import get_run_owners
 
 

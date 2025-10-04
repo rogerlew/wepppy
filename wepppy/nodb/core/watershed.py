@@ -33,7 +33,7 @@ from deprecated import deprecated
 
 from wepppy.topo.watershed_abstraction import WatershedAbstraction, WeppTopTranslator
 from wepppy.topo.taudem import TauDEMTopazEmulator
-from wepppy.topo.peridot.runner import (
+from wepppy.topo.peridot.peridot_runner import (
     run_peridot_abstract_watershed,
     run_peridot_wbt_abstract_watershed,
     post_abstract_watershed,
@@ -51,10 +51,9 @@ from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
 from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 from wepppy.all_your_base.geo import read_raster, haversine
 
-from .ron import Ron
-from .base import NoDbBase, TriggerEvents, nodb_setter
+from ..base import NoDbBase, TriggerEvents, nodb_setter
 from .topaz import Topaz
-from .redis_prep import RedisPrep, TaskEnum
+from ..redis_prep import RedisPrep, TaskEnum
 
 from wepppy.all_your_base import NCPU
 
@@ -836,7 +835,7 @@ class Watershed(NoDbBase):
             taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
             taudem.set_outlet(lng=lng, lat=lat)
 
-            map = Ron.getInstance(self.wd).map
+            map = self.ron_instance.map
             o_x, o_y = map.lnglat_to_px(*taudem.outlet)
             distance = haversine((lng, lat), taudem.outlet) * 1000  # in m
             self.outlet = Outlet(
@@ -1174,7 +1173,7 @@ class Watershed(NoDbBase):
 
     @deprecated
     def _taudem_abstract_watershed(self):
-        from wepppy.nodb import Wepp
+        from wepppy.nodb.core import Wepp
 
         with self.locked():
             taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
@@ -1208,7 +1207,7 @@ class Watershed(NoDbBase):
 
             self._structure = taudem.structure
 
-        ron = Ron.getInstance(self.wd)
+        ron = self.ron_instance
         if any(
             [
                 "lt" in ron.mods,
@@ -1310,7 +1309,7 @@ class Watershed(NoDbBase):
             pool.close()
             pool.join()
 
-        ron = Ron.getInstance(self.wd)
+        ron = self.ron_instance
         if any(
             [
                 "lt" in ron.mods,
@@ -1319,7 +1318,7 @@ class Watershed(NoDbBase):
                 "general" in ron.mods,
             ]
         ):
-            from wepppy.nodb import Wepp
+            from wepppy.nodb.core import Wepp
 
             wepp = Wepp.getInstance(self.wd)
             wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)

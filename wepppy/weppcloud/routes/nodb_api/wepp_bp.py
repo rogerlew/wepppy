@@ -5,8 +5,8 @@ import wepppy
 from .._common import *  # noqa: F401,F403
 
 from wepppy.all_your_base import isint
-from wepppy.nodb import Landuse, Ron, Unitizer, Watershed, Wepp, WeppPost
-from wepppy.nodb.climate import Climate
+from wepppy.nodb.core import Landuse, Ron, Climate, Watershed, Wepp, WeppPost
+from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
 from wepppy.wepp.out import DisturbedTotalWatSed2, Element, HillWat, TotalWatSed2

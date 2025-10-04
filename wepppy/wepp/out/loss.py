@@ -296,11 +296,11 @@ class Loss(object):
         assert exclude_yr_indxs is None
 
         if wd is not None:
-            import wepppy
+            from wepppy.nodb.core import Landuse, Soils, Watershed
 
-            landuse = wepppy.nodb.Landuse.getInstance(wd)
-            soils = wepppy.nodb.Soils.getInstance(wd)
-            watershed = wepppy.nodb.Watershed.getInstance(wd)
+            landuse = Landuse.getInstance(wd)
+            soils = Soils.getInstance(wd)
+            watershed = Watershed.getInstance(wd)
             translator = watershed.translator_factory()
 
             for i in range(len(hill_tbl)):

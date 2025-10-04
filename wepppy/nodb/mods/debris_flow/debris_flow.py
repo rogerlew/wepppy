@@ -23,11 +23,9 @@ from wepppy.climates import holden_wrf_atlas
 
 # wepppy submodules
 from wepppy.nodb.base import NoDbBase
-from wepppy.nodb.ron import Ron
-from wepppy.nodb.watershed import Watershed
-from wepppy.nodb.soils import Soils
-from wepppy.nodb.topaz import Topaz
-from wepppy.nodb.mods import Baer, Disturbed
+from wepppy.nodb.core import *
+from wepppy.nodb.mods.baer import Baer
+from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 

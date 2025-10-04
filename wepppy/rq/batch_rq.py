@@ -96,13 +96,6 @@ def run_batch_watershed_rq(
     watershed_feature: WatershedFeature,
 ):
     try:
-        from wepppy.nodb.ron import Ron
-        from wepppy.nodb.watershed import Watershed
-        from wepppy.nodb.landuse import Landuse
-        from wepppy.nodb.soils import Soils
-        from wepppy.nodb.mods.rap.rap_ts import RAP_TS
-        from wepppy.nodb.wepp import Wepp
-
         job = get_current_job()
         _runid = watershed_feature.runid
         runid = f'batch;;{batch_name};;{_runid}'

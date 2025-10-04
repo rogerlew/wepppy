@@ -18,7 +18,7 @@ from wepppy.topo.watershed_collection.watershed_collection import WatershedColle
 from .._common import Blueprint, roles_required, secure_filename
 from wepppy.nodb import unitizer as unitizer_module
 from wepppy.nodb.base import get_configs, get_config_dir
-from wepppy.nodb.ron import RonViewModel
+from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.weppcloud.utils.helpers import exception_factory, get_batch_root_dir, handle_with_exception_factory
 

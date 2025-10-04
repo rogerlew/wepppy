@@ -2,7 +2,7 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
-from wepppy.nodb import Watershed
+from wepppy.nodb.core import Watershed
 from wepppy.wepp.out import TotalWatSed2
 
 def totalwatsed_partitioned_dss_export(wd):

@@ -20,7 +20,7 @@ import numpy as np
 from wepppy.wepp.out import TotalWatSed2
 
 # wepppy submodules
-from .base import NoDbBase
+from ..base import NoDbBase
 
 
 class WeppPostNoDbLockedException(Exception):

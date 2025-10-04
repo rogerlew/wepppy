@@ -25,17 +25,10 @@ from wepppy.all_your_base.geo import (
     GeoTransformer
 )
 from wepppy.all_your_base.geo import shapefile
-from wepppy.nodb import (
-    Ron,
-    Topaz,
-    Watershed,
-    Landuse, LanduseMode,
-    Soils, SoilsMode,
-    Baer,
-    Climate, ClimateSpatialMode,
-    Wepp,
-    Ash, AshPost
-)
+from wepppy.nodb.core import *
+from wepppy.nodb.mods.baer import Baer
+from wepppy.nodb.mods.ash_transport import Ash, AshPost
+
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
 

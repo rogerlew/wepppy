@@ -1,6 +1,6 @@
 import pytest
 
-from wepppy.nodb import Wepp
+from wepppy.nodb.core import Wepp
 
 WD = '/wc1/runs/ca/calculable-clang/omni/scenarios/undisturbed'
 

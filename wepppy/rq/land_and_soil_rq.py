@@ -17,7 +17,7 @@ from rq import Queue, get_current_job
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from wepppy.nodb import Landuse, Soils, Ron, LanduseMode, SoilsMode
+from wepppy.nodb.core import Landuse, Soils, Ron, LanduseMode, SoilsMode
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.nodb.status_messenger import StatusMessenger

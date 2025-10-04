@@ -1,4 +1,10 @@
-from .ash import *
-from .ash_multi_year_model import *
-from .ashpost import *
-from .wind_transport_thresholds import *
+from .ash import Ash, AshSpatialMode
+from .ashpost import AshPost
+from .ash_type import AshType
+
+__all__ = [
+    'Ash',
+    'AshSpatialMode',
+    'AshPost',
+    'AshType'
+]

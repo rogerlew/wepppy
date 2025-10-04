@@ -70,10 +70,8 @@ import pyproj
 from pyproj import Proj
 
 # wepppy submodules
-from .base import NoDbBase, TriggerEvents, nodb_setter
-from .watershed import Watershed, WatershedNotAbstractedError
-from .ron import Ron
-from .redis_prep import RedisPrep, TaskEnum
+from ..base import NoDbBase, TriggerEvents, nodb_setter
+from ..redis_prep import RedisPrep, TaskEnum
 
 
 import requests
@@ -633,7 +631,6 @@ class Climate(NoDbBase):
             self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
 
-            # this gets called from Ron.__init__ before it serializes
             locales = self.config_get_list('general', 'locales')
 
             if 'eu' in locales:
@@ -1070,7 +1067,7 @@ class Climate(NoDbBase):
             return self.closest_stations
         
         with self.locked():
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             lng, lat = watershed.centroid
             station_manager = CligenStationsManager(version=self.cligen_db)
             results = station_manager.get_closest_stations((lng, lat), num_stations)
@@ -1101,7 +1098,7 @@ class Climate(NoDbBase):
             return self.find_au_heuristic_stations(num_stations=num_stations)
 
         with self.locked():
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             lng, lat = watershed.centroid
             station_manager = CligenStationsManager(version=self.cligen_db)
             results = station_manager\
@@ -1112,7 +1109,7 @@ class Climate(NoDbBase):
 
     def find_eu_heuristic_stations(self, num_stations=10):
         with self.locked():
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             lng, lat = watershed.centroid
 
             rdi = RasterDatasetInterpolator(watershed.dem_fn)
@@ -1128,7 +1125,7 @@ class Climate(NoDbBase):
 
     def find_au_heuristic_stations(self, num_stations=None):
         with self.locked():
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             lng, lat = watershed.centroid
 
             rdi = RasterDatasetInterpolator(watershed.dem_fn)
@@ -1396,9 +1393,10 @@ class Climate(NoDbBase):
         assert not self.islocked()
 
         wd = self.wd
-        watershed = Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         if not watershed.is_abstracted:
             self.logger.info('  watershed is not abstracted, raising error')
+            from wepppy.nodb.core.watershed import WatershedNotAbstractedError
             raise WatershedNotAbstractedError()
 
         if self.climatestation is None and self.orig_cli_fn is None:
@@ -1696,7 +1694,7 @@ class Climate(NoDbBase):
             rdi = RasterDatasetInterpolator(scale_factor_map)
             wd = self.wd
 
-            watershed = Watershed.getInstance(wd)
+            watershed = self.watershed_instance
             ws_lng, ws_lat = watershed.centroid
             scale_factor = rdi.get_location_info(ws_lng, ws_lat)
 
@@ -1747,7 +1745,7 @@ class Climate(NoDbBase):
             self.set_attrs(attrs)
 
             cli_dir = os.path.abspath(self.cli_dir)
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
 
             # build a climate for the channels.
             lng, lat = watershed.centroid
@@ -1865,7 +1863,7 @@ class Climate(NoDbBase):
             randseed = self._cligen_seed
 
             cli_dir = os.path.abspath(self.cli_dir)
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
 
             climatestation = self.climatestation
             years = self._input_years
@@ -1893,7 +1891,7 @@ class Climate(NoDbBase):
             cli_fn    = self.cli_fn
             cli_path  = self.cli_path
 
-            _map = Ron.getInstance(self.wd).map
+            _map = self.ron_instance.map
 
             ppt_fn  = _join(cli_dir, 'ppt.tif')
             tmin_fn = _join(cli_dir, 'tmin.tif')
@@ -1917,7 +1915,7 @@ class Climate(NoDbBase):
             wmesque_retrieve('prism/tmax', _map.extent, tmax_fn, _map.cellsize, resample='cubic', 
                              v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
 
-            watershed = Watershed.getInstance(wd)
+            watershed = self.watershed_instance
             ws_lng, ws_lat = watershed.centroid
             ws_ppts  = get_monthlies(ppt_fn,  ws_lng, ws_lat)
             ws_tmins = get_monthlies(tmin_fn, ws_lng, ws_lat)
@@ -1992,7 +1990,6 @@ class Climate(NoDbBase):
             assert _exists(orig_cli_fn)
 
             cli_dir = os.path.abspath(self.cli_dir)
-            watershed = Watershed.getInstance(self.wd)
 
             cli_fn = _split(orig_cli_fn)[1]
             cli_path = _join(cli_dir, cli_fn)
@@ -2027,7 +2024,7 @@ class Climate(NoDbBase):
             randseed = self._cligen_seed
 
             cli_dir = os.path.abspath(self.cli_dir)
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
 
             climatestation = self.climatestation
             years = self._input_years
@@ -2147,7 +2144,7 @@ class Climate(NoDbBase):
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_daymet')
 
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             ws_lng, ws_lat = watershed.centroid
 
             cli_dir = self.cli_dir
@@ -2163,7 +2160,6 @@ class Climate(NoDbBase):
             par_fn = stationMeta.par
             cligen = Cligen(stationMeta, wd=cli_dir)
 
-            ron = Ron.getInstance(self.wd)
             cli_fn = 'wepp.cli'
             prn_fn = 'ws.prn'
             self.logger.info('  building {}... '.format(cli_fn))
@@ -2233,8 +2229,7 @@ class Climate(NoDbBase):
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_gridmet_multiple')
 
-            ron = Ron.getInstance(self.wd)
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             ws_lng, ws_lat = watershed.centroid
 
             cli_dir = self.cli_dir
@@ -2254,7 +2249,7 @@ class Climate(NoDbBase):
                 _lng, _lat = watershed.hillslope_centroid_lnglat(topaz_id)
                 hillslope_locations[topaz_id] = {'longitude': _lng, 'latitude': _lat}
 
-            extent = ron.extent
+            extent = self.ron_instance.extent
             cellsize = 0.04166601298087771
             pad = cellsize * 3
             extent = [extent[0] - pad, extent[1] - pad, extent[2] + pad, extent[3] + pad]
@@ -2418,7 +2413,7 @@ class Climate(NoDbBase):
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_daymet_multiple')
 
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             ws_lng, ws_lat = watershed.centroid
 
             cli_dir = self.cli_dir
@@ -2517,7 +2512,7 @@ class Climate(NoDbBase):
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_gridmet')
 
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             ws_lng, ws_lat = watershed.centroid
 
             cli_dir = self.cli_dir
@@ -2532,7 +2527,6 @@ class Climate(NoDbBase):
             par_fn = stationMeta.par
             cligen = Cligen(stationMeta, wd=cli_dir)
 
-            ron = Ron.getInstance(self.wd)
             cli_fn = 'wepp.cli'
             prn_fn = 'ws.prn'
             self.logger.info('  building {}... '.format(cli_fn))
@@ -2549,7 +2543,7 @@ class Climate(NoDbBase):
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_future')
 
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             ws_lng, ws_lat = watershed.centroid
 
             cli_dir = self.cli_dir
@@ -2564,7 +2558,6 @@ class Climate(NoDbBase):
             par_fn = stationMeta.par
             cligen = Cligen(stationMeta, wd=cli_dir)
 
-            ron = Ron.getInstance(self.wd)
             cli_fn = 'wepp.cli'
             prn_fn = 'ws.prn'
             self.logger.info('  building {}... '.format(cli_fn))
@@ -2695,7 +2688,7 @@ class Climate(NoDbBase):
             raise IndexError
 
         if self._climate_spatialmode == ClimateSpatialMode.Multiple:
-            translator = Watershed.getInstance(self.wd).translator_factory()
+            translator = self.watershed_instance.translator_factory()
             topaz_id = str(translator.top(wepp=int(wepp_id)))
 
             if topaz_id in self.sub_cli_fns:

@@ -6,7 +6,7 @@ from datetime import datetime
 
 from typing import Optional, Type
 
-from wepppy.nodb.ron import Ron
+from wepppy.nodb.core import Ron
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.weppcloud.utils.helpers import get_wd, url_for_run
 from wepppy.all_your_base import isfloat
@@ -110,7 +110,7 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
     def current_ron_processor():
         # get current runid from request path
         from flask import request
-        from wepppy.nodb.ron import RonViewModel
+        from wepppy.nodb.core.ron import RonViewModel
         runid = None
         path_parts = request.path.split('/')
         try:

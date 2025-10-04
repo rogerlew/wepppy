@@ -289,8 +289,8 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
     # Setup stuff
     #
 
-    from wepppy.nodb import Watershed
-    from wepppy.nodb import Ash
+    from wepppy.nodb.core import Watershed
+    from wepppy.nodb.mods.ash_transport import Ash
 
     # Get NoDB instances
     watershed = Watershed.getInstance(wd)
@@ -456,13 +456,13 @@ class AshPost(NoDbBase):
 
     @property
     def meta(self):
-        from wepppy.nodb import Ash
+        from wepppy.nodb.mods.ash_transport import Ash
         ash = Ash.getInstance(self.wd)
         return ash.meta
 
     @property
     def fire_date(self):
-        from wepppy.nodb import Ash
+        from wepppy.nodb.mods.ash_transport import Ash
         ash = Ash.getInstance(self.wd)
         return ash.fire_date
 

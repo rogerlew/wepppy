@@ -16,10 +16,10 @@ import inspect
 import numpy as np
 import numpy.ma as ma
 
-from wepppy.topo.topaz import TopazRunner
+from wepppy.topo.topaz import TopazRunner, WatershedBoundaryTouchesEdgeError, MinimumChannelLengthTooShortError
 from wepppy.all_your_base.geo import read_arc
 
-from .base import NoDbBase
+from ..base import NoDbBase
 
 
 # this needs to be here to unpickle old projects
@@ -166,7 +166,7 @@ class Topaz(NoDbBase):
         return self._outlet is not None
 
     def set_outlet(self, lng, lat, pixelcoords=False, da=0.0):
-        from wepppy.nodb.watershed import Outlet
+        from wepppy.nodb.core.watershed import Outlet
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(lng={lng}, lat={lat}, pixelcoords={pixelcoords}, da={da})')
 

@@ -26,8 +26,7 @@ from osgeo import gdal
 
 from wepppy.all_your_base import cmyk_to_rgb, RGBA
 from wepppy.landcover import LandcoverMap
-
-from ...watershed import Watershed
+from wepppy.nodb.core import Watershed
 from ...base import NoDbBase, TriggerEvents, nodb_setter
 
 gdal.UseExceptions()

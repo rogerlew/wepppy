@@ -2,8 +2,9 @@
 
 from ._common import *  # noqa: F401,F403
 
-from wepppy.nodb import Baer, Disturbed, Landuse, Ron, Soils
-
+from wepppy.nodb.core import Landuse, Ron, Soils
+from wepppy.nodb.mods.baer import Baer
+from wepppy.nodb.mods.disturbed import Disturbed
 
 map_bp = Blueprint('map', __name__)
 

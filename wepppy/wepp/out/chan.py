@@ -201,7 +201,7 @@ def chanout_dss_export(wd, status_channel=None):
     Exports 
     """
     from wepppy.nodb.status_messenger import StatusMessenger
-    from wepppy.nodb import Watershed
+    from wepppy.nodb.core import Watershed
 
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
@@ -233,7 +233,7 @@ if __name__ == "__main__":
     from time import time
     from os.path import exists as _exists
 
-    from wepppy.nodb import Watershed
+    from wepppy.nodb.core import Watershed
 
     translator = Watershed.getInstanceFromRunID('rlew-confirmed-complementarity/').translator_factory()
 

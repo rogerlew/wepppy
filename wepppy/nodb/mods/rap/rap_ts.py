@@ -27,10 +27,8 @@ except ImportError:
 
 
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
-
-from ...ron import Ron
+from wepppy.nodb.core import *
 from ...base import NoDbBase, TriggerEvents, nodb_setter
-from ...watershed import Watershed
 
 from wepppy.landcover.rap import (
     RangelandAnalysisPlatformV2,
@@ -237,7 +235,7 @@ class RAP_TS(NoDbBase):
         return cover
 
     def analyze(self, use_sbs=False, verbose=False):
-        from wepppy.nodb import Ron
+        from wepppy.nodb.core import Ron
         from wepppy.nodb.mods import Disturbed
 
         start_year = self.rap_start_year
@@ -436,7 +434,7 @@ class RAP_TS(NoDbBase):
     def _prep_transformed_cover(self, runs_dir):
         from wepppy.nodb.mods.disturbed import Disturbed
         from wepppy.nodb.mods.revegetation import Revegetation
-        from wepppy.nodb.landuse import Landuse
+        from wepppy.nodb.core import Landuse
 
         self.logger.info('RAP_TS::_prep_transformed_cover\n')
 

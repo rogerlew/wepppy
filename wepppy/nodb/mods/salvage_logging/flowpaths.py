@@ -7,7 +7,7 @@ from glob import glob
 import numpy as np
 
 
-from wepppy.nodb import Watershed
+from wepppy.nodb.core import Watershed
 from wepppy.all_your_base.geo import read_raster
 
 from osgeo import osr

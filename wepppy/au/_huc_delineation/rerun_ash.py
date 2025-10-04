@@ -9,7 +9,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
-from wepppy.nodb import Ash
+from wepppy.nodb.mods.ash_transport import Ash
 
 wds = glob(_join('/geodata/weppcloud_runs/au', '*'))
 wds = [wd for wd in wds if os.path.isdir(wd)]

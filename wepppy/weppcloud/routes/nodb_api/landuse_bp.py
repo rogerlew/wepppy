@@ -2,7 +2,7 @@
 
 from .._common import *  # noqa: F401,F403
 
-from wepppy.nodb import Landuse, LanduseMode, Ron
+from wepppy.nodb.core import Landuse, LanduseMode, Ron
 
 
 landuse_bp = Blueprint('landuse', __name__)

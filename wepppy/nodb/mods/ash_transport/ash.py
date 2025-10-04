@@ -24,19 +24,15 @@ from wepppy.wepp.out import HillWat
 from wepppy.climates.cligen import ClimateFile
 
 # wepppy submodules
-from wepppy.nodb.parameter_map import ParameterMap
 from wepppy.nodb.base import NoDbBase, nodb_setter, createProcessPoolExecutor
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
-from wepppy.nodb.watershed import Watershed
-from wepppy.nodb.climate import Climate
-from wepppy.nodb.mods import Baer, Disturbed
-from wepppy.nodb.wepp import Wepp
-from wepppy.nodb.landuse import Landuse
-from wepppy.nodb.ron import Ron
+from wepppy.nodb.core import Watershed, Wepp, Climate, Landuse, Ron
+from wepppy.nodb.core.climate import Climate
+from wepppy.nodb.mods.baer import Baer
+from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.all_your_base.dateutils import YearlessDate
-
 from wepppy.all_your_base.geo import raster_stacker
 
 from wepppyo3.raster_characteristics import identify_median_single_raster_key
@@ -46,6 +42,7 @@ _data_dir = _join(_thisdir, 'data')
 
 MULTIPROCESSING = True
 
+from .ashpost import AshPost
 from .ash_multi_year_model import WHITE_ASH_BD, BLACK_ASH_BD, AshType
 from .ash_multi_year_model import WhiteAshModel as WhiteAshModelAnu
 from .ash_multi_year_model import BlackAshModel as BlackAshModelAnu
@@ -138,8 +135,7 @@ class Ash(NoDbBase):
         os.mkdir(ash_dir)
         self._load_contaminants_from_config()
 
-        import wepppy
-        wepppy.nodb.mods.AshPost(wd, cfg_fn)
+        AshPost(wd, cfg_fn)
     
     def _load_contaminants_from_config(self):
         with self.locked():
@@ -742,7 +738,7 @@ class Ash(NoDbBase):
             except:
                 pass
 
-        from wepppy.nodb import AshPost
+        from wepppy.nodb.mods.ash_transport import AshPost
 
         if not _exists(_join(wd, 'ashpost.nodb')):
             ashpost = AshPost(wd, '{}.cfg'.format(self.config_stem))

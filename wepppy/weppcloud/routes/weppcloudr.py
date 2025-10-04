@@ -21,7 +21,7 @@ from flask_security import current_user
 
 from wepppy.weppcloud.utils.helpers import get_wd, exception_factory
 
-from wepppy.nodb import Ron, Wepp, Watershed
+from wepppy.nodb.core import Ron, Wepp, Watershed
 
 from ._run_context import RunContext, load_run_context
 
