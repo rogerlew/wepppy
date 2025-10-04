@@ -24,7 +24,8 @@ from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
 from wepppy.wepp.out import DisturbedTotalWatSed2, Element, HillWat, TotalWatSed2
-from wepppy.wepp.stats import ChannelSummary, HillSummary, OutletSummary, TotalWatbal
+from wepppy.wepp.stats.summary import HillSummary, ChannelSummary, OutletSummary
+from wepppy.wepp.stats.total_watbal import TotalWatbal
 from wepppy.weppcloud.utils.helpers import (
     get_wd, authorize, get_run_owners_lazy, 
     authorize_and_handle_with_exception_factory,

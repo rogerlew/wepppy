@@ -19,6 +19,9 @@ import numpy as np
 from .row_data import parse_units, RowData
 from .report_base import ReportBase
 
+__all__ = [
+    'TotalWatbal',
+]
 
 class TotalWatbal(ReportBase):
     def __init__(self, totalwatsed, exclude_yr_indxs=[0, 1]):

@@ -21,6 +21,12 @@ from .row_data import parse_name, parse_units, RowData
 from wepppy.wepp.out import Loss
 from wepppy.wepp.stats.report_base import ReportBase
 
+__all__ = [
+    'HillSummary',
+    'ChannelSummary',
+    'OutletSummary'
+]
+
 _hill_default_hdr = [
     'WeppID',
     'TopazID',

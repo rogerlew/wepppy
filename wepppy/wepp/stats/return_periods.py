@@ -14,6 +14,10 @@ from wepppy.wepp.out import Loss, Ebe, TotalWatSed2
 
 from copy import deepcopy
 
+__all__ = [
+    'ReturnPeriods',
+]
+
 class ReturnPeriods:
     def __init__(self, ebe: Ebe = None, loss: Loss = None,
                  cli_df: DataFrame = None, 

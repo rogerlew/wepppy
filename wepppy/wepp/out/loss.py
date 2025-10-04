@@ -571,14 +571,8 @@ if __name__ == "__main__":
     loss = Loss('/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/wepp/output/loss_pw0.txt',
                 '/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/')
 
-    #print(loss.excluded_years)
-
-    from wepppy.wepp.stats import (
-        OutletSummary,
-        HillSummary,
-        ChannelSummary,
-        TotalWatbal
-    )
+    from wepppy.wepp.stats.summary import HillSummary, ChannelSummary, OutletSummary
+    from wepppy.wepp.stats.total_watbal import TotalWatbal
 
     chn_rpt = ChannelSummary(loss)
 
