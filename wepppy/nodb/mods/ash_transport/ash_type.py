@@ -11,3 +11,7 @@ class AshType(enum.IntEnum):
             return 'White'
         else:
             raise ValueError(f'Unknown ash type {self}')
+
+__all__ = [
+    'AshType',
+]

@@ -19,6 +19,18 @@ from os.path import exists as _exists
 
 import jsonpickle
 import jsonpickle.ext.numpy as jsonpickle_numpy
+
+__all__ = [
+    'NCPU',
+    'DelineationBackend',
+    'WatershedNotAbstractedError',
+    'WatershedNoDbLockedException',
+    'process_channel',
+    'process_subcatchment',
+    'TRANSIENT_FIELDS',
+    'Watershed',
+    'Outlet',
+]
 jsonpickle_numpy.register_handlers()
 
 import pandas as pd
@@ -44,6 +56,7 @@ from wepppy.topo.peridot.flowpath import (
     PeridotHillslope,
     PeridotChannel,
 )
+
 from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.topo.watershed_abstraction import SlopeFile
 from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummary, identify_edge_hillslopes
@@ -52,14 +65,22 @@ from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 from wepppy.all_your_base.geo import read_raster, haversine
 from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 
-from ..base import NoDbBase, TriggerEvents, nodb_setter
+from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+
 from .topaz import Topaz
-from ..redis_prep import RedisPrep, TaskEnum
 
 from wepppy.all_your_base import NCPU
 
 NCPU = multiprocessing.cpu_count() - 2
 
+__all__ = [
+    'DelineationBackend',
+    'WatershedNotAbstractedError',
+    'WatershedNoDbLockedException',
+    'Watershed',
+    'Outlet',
+]
 
 class DelineationBackend(IntEnum):
     TOPAZ = 1
@@ -1622,7 +1643,6 @@ class Watershed(NoDbBase):
             i += 1
 
         assert i == self.sub_n, (i, self.sub_n)
-
 
 class Outlet(object):
     def __init__(

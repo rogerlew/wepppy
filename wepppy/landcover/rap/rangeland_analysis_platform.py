@@ -23,6 +23,17 @@ _thisdir = os.path.dirname(__file__)
 DEFAULT_VERSION = 'v3'
 
 
+__all__ = [
+    'RangelandAnalysisPlatform',
+    'RangelandAnalysisPlatformV2',
+    'RangelandAnalysisPlatformV3',
+    'RAP_Band',
+    'RangelandAnalysisPlatformDataset',
+    'RangelandAnalysisPlatformV2Dataset',
+    'RangelandAnalysisPlatformV3Dataset',
+]
+
+
 class RangelandAnalysisPlatform(object):
     def __init__(self, wd='.', bbox=None, cellsize=30, version=DEFAULT_VERSION):
         self.wd = wd
@@ -203,7 +214,6 @@ class RangelandAnalysisPlatformDataset(object):
 
 RangelandAnalysisPlatformV2Dataset = RangelandAnalysisPlatformDataset
 RangelandAnalysisPlatformV3Dataset = RangelandAnalysisPlatformDataset
-
 
 if __name__ == "__main__":
     bbox = [-114.63661319270066,45.41139471986449,-114.60663682475024,45.43207316134328]

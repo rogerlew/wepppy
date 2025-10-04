@@ -8,6 +8,10 @@ from urllib.request import urlopen
 
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
+__all__ = [
+    'send_request',
+    'retrieve_rred',
+]
 
 def send_request(sbs_fn, srid, class_low=2, class_mod=3, class_high=4):
     assert _exists(sbs_fn)

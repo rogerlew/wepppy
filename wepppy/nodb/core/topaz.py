@@ -19,7 +19,13 @@ import numpy.ma as ma
 from wepppy.topo.topaz import TopazRunner, WatershedBoundaryTouchesEdgeError, MinimumChannelLengthTooShortError
 from wepppy.all_your_base.geo import read_arc
 
-from ..base import NoDbBase
+from wepppy.nodb.base import NoDbBase
+
+__all__ = [
+    'Outlet',
+    'TopazNoDbLockedException',
+    'Topaz',
+]
 
 
 # this needs to be here to unpickle old projects

@@ -24,6 +24,11 @@ from wepppy.nodb.base import NoDbBase
 
 from wepppy.rhem.out import RhemOutput, RhemSummary
 
+__all__ = [
+    'RhemPostNoDbLockedException',
+    'RhemPost',
+]
+
 class RhemPostNoDbLockedException(Exception):
     pass
 

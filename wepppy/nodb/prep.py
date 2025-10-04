@@ -20,6 +20,11 @@ from deprecated import deprecated
 # weppy submodules
 from .base import NoDbBase, nodb_setter
 
+__all__ = [
+    'PrepNoDbLockedException',
+    'Prep',
+]
+
 @deprecated
 class PrepNoDbLockedException(Exception):
     pass

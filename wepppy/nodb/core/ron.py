@@ -16,12 +16,7 @@ from os.path import isdir
 
 import shutil
 import inspect
-
-# non-standard
 import utm
-import what3words
-
-# wepppy
 import requests
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -30,13 +25,25 @@ from wepppy.all_your_base.geo import haversine, read_raster, utm_srid
 
 from wepppy.locales.earth.opentopography import opentopo_retrieve
 
-# wepppy submodules
-from ..base import (
+from wepppy.nodb.base import (
     NoDbBase,
     TriggerEvents,
     nodb_setter,
 )
 
+from wepppy.nodb.duckdb_agents import (
+    get_watershed_sub_summary,
+    get_watershed_subs_summary, 
+    get_soil_subs_summary, 
+    get_landuse_subs_summary
+)
+
+__all__ = [
+    'Map',
+    'RonNoDbLockedException',
+    'Ron',
+    'RonViewModel',
+]
 
 _thisdir = os.path.dirname(__file__)
 
@@ -627,8 +634,7 @@ class Ron(NoDbBase):
         if  _exists(_join(wd, 'watershed/hillslopes.parquet')) and \
             _exists(_join(wd, 'soils/soils.parquet')) and \
             _exists(_join(wd, 'landuse/landuse.parquet')):  
-            from .duckdb_agents import get_watershed_subs_summary, get_soil_subs_summary, get_landuse_subs_summary
-
+            
             _watershed_summaries =  get_watershed_subs_summary(wd, return_as_df=False)
             _soils_summaries = get_soil_subs_summary(wd, return_as_df=False)
             _landuse_summaries = get_landuse_subs_summary(wd, return_as_df=False)
@@ -678,7 +684,6 @@ class Ron(NoDbBase):
         _watershed = None
         # use parquet if availablem they are faster and have topaz_id and wepp_id
         if _exists(_join(wd, 'watershed/hillslopes.parquet')): 
-            from .duckdb_agents import get_watershed_sub_summary
             _watershed = get_watershed_sub_summary(wd, topaz_id=topaz_id)
 
             topaz_id = str(_watershed['TopazID'])
@@ -745,7 +750,6 @@ class Ron(NoDbBase):
 
         # use parquet if available, they are faster and have topaz_id and wepp_id
         if _exists(_join(wd, 'watershed/channels.parquet')):
-            from .duckdb_agents import get_watershed_chns_summary
             chns_summary =  get_watershed_chns_summary(wd)
 
             summaries = []

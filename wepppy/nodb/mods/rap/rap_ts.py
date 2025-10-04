@@ -8,37 +8,19 @@
 from typing import Dict, Tuple
 
 import os
-
 from os.path import join as _join
 from os.path import exists as _exists
-
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
-
 from osgeo import gdal
-
 import numpy as np
-
-try:
-    import pandas as pd
-    import pyarrow
-except ImportError:
-    pd = None
-    pyarrow = None
-
+import pandas as pd
+import pyarrow
 
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.nodb.core import *
-from ...base import NoDbBase, TriggerEvents, nodb_setter
-
-from wepppy.landcover.rap import (
-    RangelandAnalysisPlatformV2,
-    RangelandAnalysisPlatformV3,
-    RAP_Band,
-    RangelandAnalysisPlatformV2Dataset,
-    RangelandAnalysisPlatformV3Dataset
-)
-
-from ...redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.landcover.rap import *
 
 import wepppyo3
 from wepppyo3.raster_characteristics import identify_median_single_raster_key
@@ -51,6 +33,11 @@ gdal.UseExceptions()
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
+
+__all__ = [
+    'RAPNoDbLockedException',
+    'RAP_TS',
+]
 
 
 class RAPNoDbLockedException(Exception):

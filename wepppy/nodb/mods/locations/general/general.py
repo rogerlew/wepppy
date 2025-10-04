@@ -22,6 +22,11 @@ from wepppy.wepp.soils.utils import modify_kslast
 
 from ..location_mixin import LocationMixin
 
+__all__ = [
+    'GeneralModNoDbLockedException',
+    'GeneralMod',
+]
+
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 

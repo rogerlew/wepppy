@@ -41,6 +41,16 @@ from ..baer.sbs_map import SoilBurnSeverityMap
 
 from wepppyo3.raster_characteristics import identify_mode_single_raster_key
 
+__all__ = [
+    'disturbed_class_aliases',
+    'read_disturbed_land_soil_lookup',
+    'migrate_land_soil_lookup',
+    'write_disturbed_land_soil_lookup',
+    'DisturbedNoDbLockedException',
+    'InvalidProjection',
+    'Disturbed',
+]
+
 gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)

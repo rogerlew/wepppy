@@ -32,7 +32,15 @@ from wepppy.all_your_base.geo import GeoTransformer
 
 import numpy as np
 
-class skid_trailsNoDbLockedException(Exception):
+__all__ = [
+    'SkidTrailsNoDbLockedException',
+    'convert_to_geojson',
+    'unmasked_neighbors',
+    'n_neighbors',
+    'SkidTrails',
+]
+
+class SkidTrailsNoDbLockedException(Exception):
     pass
 
 

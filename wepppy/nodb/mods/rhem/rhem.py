@@ -1,24 +1,3 @@
-# non-standard
-
-# wepppy
-
-from wepppy.all_your_base import NCPU
-
-from wepppy.topo.watershed_abstraction import SlopeFile
-
-
-# wepppy submodules
-from wepppy.nodb.base import NoDbBase
-from wepppy.nodb.mods.rangeland_cover import RangelandCover
-from wepppy.nodb.core import *
-
-# Copyright (c) 2016-2018, University of Idaho
-# All rights reserved.
-#
-# Roger Lew (rogerlew@gmail.com)
-#
-# The project described was supported by NSF award number IIA-1301792
-# from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 # standard library
 import os
@@ -34,13 +13,20 @@ from time import sleep
 
 # non-standard
 
-# wepppy
+from wepppy.all_your_base import NCPU
+from wepppy.topo.watershed_abstraction import SlopeFile
 
+from wepppy.nodb.core import *
+from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.rhem import make_parameter_file, make_hillslope_run, run_hillslope
-
 from wepppy.climates.cligen import ClimateFile
-
 from .rhempost import RhemPost
+
+__all__ = [
+    'RhemNoDbLockedException',
+    'Rhem',
+]
 
 
 class RhemNoDbLockedException(Exception):

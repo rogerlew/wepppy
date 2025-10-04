@@ -20,39 +20,38 @@ import time
 
 from copy import deepcopy
 
-# non-standard
 import numpy as np
 import pandas as pd
 
 from deprecated import deprecated
 
-# wepppy
 from wepppy.landcover import LandcoverMap
 from wepppy.wepp.management import get_management_summary
 from wepppy.topo.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import read_raster
-
-# wepppy submodules
-from ..base import (
+    
+from wepppy.nodb.base import (
     NoDbBase,
     TriggerEvents,
     nodb_setter,
 )
 
-from ..redis_prep import RedisPrep, TaskEnum
-
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.landcover.rap import RAP_Band
 
-try:
-    import wepppyo3
-    from wepppyo3.raster_characteristics import identify_mode_single_raster_key
-    from wepppyo3.raster_characteristics import identify_mode_intersecting_raster_keys
-except ImportError:
-    print("wepppyo3 not found, using fallback methods.")
-    wepppyo3 = None
+__all__ = [
+    'LanduseNoDbLockedException',
+    'LanduseMode',
+    'read_cover_defaults',
+    'Landuse',
+]
+
+import wepppyo3
+from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+from wepppyo3.raster_characteristics import identify_mode_intersecting_raster_keys
 
 class LanduseNoDbLockedException(Exception):
     pass

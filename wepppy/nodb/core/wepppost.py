@@ -11,16 +11,16 @@ from os.path import exists as _exists
 from os.path import join as _join
 
 from glob import glob
-
-
-# non-standard
 import numpy as np
 
-# wepppy
 from wepppy.wepp.out import TotalWatSed2
+from wepppy.nodb.base import NoDbBase
 
-# wepppy submodules
-from ..base import NoDbBase
+
+__all__ = [
+    'WeppPostNoDbLockedException',
+    'WeppPost',
+]
 
 
 class WeppPostNoDbLockedException(Exception):
