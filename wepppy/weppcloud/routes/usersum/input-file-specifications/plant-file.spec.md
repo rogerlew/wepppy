@@ -35,7 +35,7 @@ Recent updates teach the parser about parameters introduced in the 2016.3/2017.1
 
 ### Downgrading managements to 98.4
 
-`convert_to_98_4_format` constructs a sanitized copy of a parsed management and exports it using the 98.4 layout. Two downgrade modes are available. Strict mode aborts as soon as an unsupported 2016.3 feature is encountered (for example a non-zero resurfacing fraction or herbicide operation code 17). Fallback mode zeroes resurfacing fractions, maps herbicide operations to code 4 (`other`), and injects comment notes documenting the original values so users understand the loss in fidelity. The helper writes the explanatory comments at the top of the downgraded file before emitting the standard 98.4 content.
+`downgrade_to_98_4_format` constructs a sanitized copy of a parsed management and exports it using the 98.4 layout. Two downgrade modes are available. Strict mode aborts as soon as an unsupported 2016.3 feature is encountered (for example a non-zero resurfacing fraction or herbicide operation code 17). Fallback mode zeroes resurfacing fractions, maps herbicide operations to code 4 (`other`), and injects comment notes documenting the original values so users understand the loss in fidelity. The helper writes the explanatory comments at the top of the downgraded file before emitting the standard 98.4 content.
 
 ### Multi-OFE stacking utilities
 
