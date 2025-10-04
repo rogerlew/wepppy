@@ -58,7 +58,7 @@ class AgFields(NoDbBase):
                    '_dem_db',
                    '_boundary')
 
-    filename = 'agfields.nodb'
+    filename = 'ag_fields.nodb'
 
     def __init__(self, wd, cfg_fn='disturbed_9002.cfg', run_group=None, group_name=None):
         super(AgFields, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
@@ -93,7 +93,7 @@ class AgFields(NoDbBase):
         return self._field_id_key
 
     def validate_field_boundary_geojson(self, fn, field_id_key):
-        geojson_path = _join(self.wd, fn)
+        geojson_path = _join(self.ag_fields_dir, fn)
         if not _exists(geojson_path):
             raise FileNotFoundError(f'Field boundary geojson file not found: {geojson_path}')
 
@@ -122,6 +122,8 @@ class AgFields(NoDbBase):
         Rasterizes the field boundaries GeoJSON file to a TIFF using the project's DEM as a template.
         The values in the raster correspond to the field IDs specified by self.field_id_key.
         """
+        # ogr2ogr -f GeoJSON -t_srs EPSG:4325 field_boundaries.geojson CSB_2008_2024_Hangman_with_Crop_and_Performance.shp
+
         # Ensure necessary properties are set before proceeding
         if not self.field_boundaries_geojson:
             raise ValueError("field_boundaries_geojson is not set. Call validate_field_boundary_geojson first.")
@@ -129,9 +131,18 @@ class AgFields(NoDbBase):
         if not self.field_id_key:
             raise ValueError("field_id_key is not set. Call validate_field_boundary_geojson first.")
 
-        geojson_path = _join(self.wd, self.field_boundaries_geojson)
+        # file is in ag_fields_dir don't change 
+        geojson_path = _join(self.ag_fields_dir, self.field_boundaries_geojson)
         template_filepath = self.dem_fn
         output_filepath = self.field_boundaries_tif
+
+        def _bounds_intersect(bounds_a, bounds_b):
+            return not (
+                bounds_a[2] <= bounds_b[0]
+                or bounds_a[0] >= bounds_b[2]
+                or bounds_a[3] <= bounds_b[1]
+                or bounds_a[1] >= bounds_b[3]
+            )
 
         # Verify that the input files exist
         if not _exists(template_filepath):
@@ -145,7 +156,7 @@ class AgFields(NoDbBase):
             import rasterio
             from rasterio.features import rasterize
         except ImportError:
-            self.logging.error("This function requires geopandas and rasterio. Please install them.")
+            self.logger.error("This function requires geopandas and rasterio. Please install them.")
             raise
 
         # Read the vector data
@@ -154,34 +165,63 @@ class AgFields(NoDbBase):
         if gdf.empty:
             raise ValueError(f'Field boundary GeoJSON "{geojson_path}" does not contain any features.')
 
+        # Drop features that lack usable geometry so rasterization does not silently fail.
+        gdf = gdf[gdf.geometry.notnull() & ~gdf.geometry.is_empty]
+        if gdf.empty:
+            raise ValueError(f'Field boundary GeoJSON "{geojson_path}" does not contain any valid geometries.')
+
         # Check for duplicate field IDs and warn the user, as requested
         if gdf[self.field_id_key].duplicated().any():
             duplicates = gdf[gdf[self.field_id_key].duplicated()][self.field_id_key].tolist()
-            self.logging.warning(f'Duplicate values found for field_id_key "{self.field_id_key}": {set(duplicates)}')
+            self.logger.warning(f'Duplicate values found for field_id_key "{self.field_id_key}": {set(duplicates)}')
 
         if gdf.crs is None:
             raise ValueError(f'Field boundary GeoJSON "{geojson_path}" lacks a coordinate reference system; one is required to rasterize.')
+
+        original_bounds = gdf.total_bounds
+        has_nonzero_field_ids = bool((gdf[self.field_id_key] != 0).any())
 
         # Open the template DEM to get its metadata (CRS, transform, dimensions)
         with rasterio.open(template_filepath) as src:
             meta = src.meta.copy()
             template_crs = src.crs
+            template_bounds = src.bounds
 
             if template_crs is None:
                 raise ValueError(f'DEM "{template_filepath}" lacks a coordinate reference system; unable to rasterize fields.')
 
             if gdf.crs != template_crs:
-                self.logging.info(
+                self.logger.info(
                     'Reprojecting field boundary geometry from %s to %s for rasterization.',
                     gdf.crs,
                     template_crs,
                 )
-                gdf = gdf.to_crs(template_crs)
+                reprojected_gdf = gdf.to_crs(template_crs)
+                reprojected_bounds = reprojected_gdf.total_bounds
+
+                intersects_after = _bounds_intersect(reprojected_bounds, template_bounds)
+                intersects_before = _bounds_intersect(original_bounds, template_bounds)
+
+                if not intersects_after and intersects_before:
+                    self.logger.warning(
+                        'Field boundary features overlap the DEM grid before reprojection but not after. '
+                        'Assuming the GeoJSON coordinates already match the DEM CRS and overriding the declared CRS.'
+                    )
+                    gdf = gdf.copy()
+                    gdf = gdf.set_crs(template_crs, allow_override=True)
+                else:
+                    gdf = reprojected_gdf
 
             # Update metadata for the new output raster
             # Field IDs are integers, so we set dtype to int32.
             # nodata=0 means pixels outside the fields will have a value of 0.
             meta.update(compress='lzw', dtype=rasterio.int32, nodata=0)
+
+        if not _bounds_intersect(gdf.total_bounds, template_bounds):
+            raise ValueError(
+                'Field boundary geometries do not overlap the DEM extent after reprojection. '
+                'Check that the GeoJSON covers the same area as the DEM or update the CRS definition.'
+            )
 
         # Prepare shapes for rasterization. This creates a generator of (geometry, value) tuples.
         shapes = ((geom, value) for geom, value in zip(gdf.geometry, gdf[self.field_id_key]))
@@ -196,10 +236,16 @@ class AgFields(NoDbBase):
                 dtype=rasterio.int32
             )
 
+            if not burned_array.any() and has_nonzero_field_ids:
+                raise ValueError(
+                    'Rasterization produced no field pixels. Ensure the field boundaries overlap the DEM '
+                    'and that the GeoJSON CRS is declared correctly.'
+                )
+
             # Write the resulting array to the first band of the output raster
             out.write(burned_array, 1)
 
-        self.logging.info(f"Successfully created rasterized field boundaries at {output_filepath}")
+        self.logger.info(f"Successfully created rasterized field boundaries at {output_filepath}")
 
     @property
     def rotation_schedule_parquet(self):
