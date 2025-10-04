@@ -3,3 +3,9 @@ from .omni import (
     OmniNoDbLockedException,
     OmniScenario
 )
+
+__all__ = [
+    'Omni',
+    'OmniNoDbLockedException',
+    'OmniScenario'
+]

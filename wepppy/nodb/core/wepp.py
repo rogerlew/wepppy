@@ -109,7 +109,7 @@ from ..redis_prep import RedisPrep, TaskEnum
 from wepppy.wepp.soils.utils import simple_texture
 from wepppy.nodb.core.climate import ClimateMode
 from wepppy.nodb.mods.disturbed import Disturbed
-
+from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 
 def compress_fn(fn):
     if _exists(fn):
