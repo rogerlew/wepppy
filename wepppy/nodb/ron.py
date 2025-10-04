@@ -436,8 +436,9 @@ class Ron(NoDbBase):
 
     def remove_mod(self, mod_name):
         import wepppy
-        from wepppy.nodb.base import iter_nodb_mods_subclasses
+        from wepppy.nodb.base import iter_nodb_mods_subclasses, clear_locks, clear_nodb_file_cache
 
+        clear_locks(self.runid)
         if mod_name in self.mods:
             with self.locked():
                 self._mods.remove(mod_name)
@@ -452,6 +453,8 @@ class Ron(NoDbBase):
                 if mod_name in self.mods:
                     with mod_instance.locked():
                         self._mods.remove(mod_name)
+
+        clear_nodb_file_cache(self.runid)
 
     #
     # map
