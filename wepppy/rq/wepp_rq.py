@@ -27,6 +27,7 @@ from wepp_runner import (
 )
 
 from wepppy.nodb.core import *
+from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.nodb.status_messenger import StatusMessenger

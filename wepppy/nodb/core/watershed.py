@@ -50,6 +50,7 @@ from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummar
 from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
 from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 from wepppy.all_your_base.geo import read_raster, haversine
+from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 
 from ..base import NoDbBase, TriggerEvents, nodb_setter
 from .topaz import Topaz
@@ -1451,7 +1452,6 @@ class Watershed(NoDbBase):
     @property
     def chns_summary(self) -> Dict[str, PeridotChannel]:
         if _exists(_join(self.wat_dir, "channels.parquet")):
-            from .duckdb_agents import get_watershed_chns_summary
 
             summaries = get_watershed_chns_summary(self.wd)
             return {
