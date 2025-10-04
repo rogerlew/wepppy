@@ -214,6 +214,10 @@
                 return;
             }
 
+            if (this.shouldIgnoreTriggerTarget(event.target)) {
+                return;
+            }
+
             // Use a switch statement for different key presses
             switch (event.key.toUpperCase()) {
             case 'G':
