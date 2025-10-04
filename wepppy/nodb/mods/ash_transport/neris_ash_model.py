@@ -18,11 +18,7 @@ from .wind_transport_thresholds import *
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
-
-class AshType(enum.IntEnum):
-    BLACK = 0
-    WHITE = 1
-
+from .ash_type import AshType
 
 class AshNoDbLockedException(Exception):
     pass

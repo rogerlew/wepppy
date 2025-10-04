@@ -15,9 +15,8 @@ from osgeo import gdal
 
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
-from ...ron import Ron
+from wepppy.nodb.core import Ron, Watershed
 from ...base import NoDbBase, TriggerEvents
-from ...watershed import Watershed
 
 from .treecanopy_map import TreecanopyMap
 

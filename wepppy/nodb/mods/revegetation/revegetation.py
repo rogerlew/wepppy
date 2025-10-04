@@ -35,16 +35,9 @@ from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture
 
 # wepppy submodules
-from wepppy.nodb.base import NoDbBase
-
-from wepppy.nodb.mods import RangelandCover
-from wepppy.nodb.watershed import Watershed
-from wepppy.nodb.soils import Soils
+from wepppy.nodb.core import *
+from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.wepp.soils.utils import WeppSoilUtil, SoilMultipleOfeSynth
-
-from wepppy.nodb.climate import Climate
-
-from wepppy.nodb.wepp import Wepp
 
 from wepppy.all_your_base import isfloat, NCPU
 

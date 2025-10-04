@@ -14,7 +14,7 @@ WEPPcloud keeps long-lived project state in a constellation of "NoDb" singleton 
 Typical access pattern:
 
 ```python
-from wepppy.nodb import Wepp, Landuse, Watershed
+from wepppy.nodb.core import Wepp, Landuse, Watershed
 
 wd = "/wc1/runs/fl/flying-cockatoo"
 wepp = Wepp.getInstance(wd)
@@ -35,7 +35,7 @@ All NoDb classes inherit from `wepppy.nodb.base.NoDbBase`, which layers common s
 Creating a NoDb file:
 
 ```python
-from wepppy.nodb import Landuse
+from wepppy.nodb.core import Landuse
 
 landuse = Landuse("/tmp/runid", cfg_fn="some.cfg")  # Raises if a landuse.nodb already exists
 with landuse.locked():
@@ -46,7 +46,7 @@ with landuse.locked():
 Loading an existing instance safely:
 
 ```python
-from wepppy.nodb import Landuse
+from wepppy.nodb.core import Landuse
 
 landuse = Landuse.getInstance(wd)
 print(landuse.mapping)
@@ -95,7 +95,7 @@ Below is a tour of the core singletons. Each section highlights what the class m
 - Integration: used by UI templates, README editor, and authorization helpers. Because many routes call `Ron.getInstance`, keep the payload lean.
 
 ```python
-from wepppy.nodb import Ron
+from wepppy.nodb.core import Ron
 
 ron = Ron.getInstance(wd)
 print(f"Run {ron.name} in scenario {ron.scenario}")
@@ -108,7 +108,7 @@ print(f"Run {ron.name} in scenario {ron.scenario}")
 - Notes: `RedisPrep.getInstance(wd)` loads the hash straight from Redis; calling `.dump()` mirrors it to disk for offline diagnostics.
 
 ```python
-from wepppy.nodb import RedisPrep, TaskEnum
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 prep = RedisPrep.getInstance(wd)
 prep.timestamp(TaskEnum.run_wepp_watershed)
@@ -122,7 +122,7 @@ print(prep.get_rq_job_ids())
 - Gotchas: large JSON payloads; use `_post_instance_loaded` to normalize/transcode when structure changes (see `TRANSIENT_FIELDS`).
 
 ```python
-from wepppy.nodb import Watershed, WatershedNotAbstractedError
+from wepppy.nodb.core import Watershed, WatershedNotAbstractedError
 
 watershed = Watershed.getInstance(wd)
 translator = watershed.translator_factory()

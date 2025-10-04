@@ -1,4 +1,4 @@
-from wepppy.nodb import Ron
+from wepppy.nodb.core import Ron
 
 
 import sys

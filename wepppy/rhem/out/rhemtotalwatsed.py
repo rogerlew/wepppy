@@ -4,7 +4,7 @@ import pandas as pd
 
 class RhemTotalWatSed:
     def __init__(self, wd):
-        from wepppy.nodb import Watershed, Rhem, Climate
+        from wepppy.nodb.core import Watershed, Rhem, Climate
         from wepppy.rhem.out import RhemOutput
 
         self.wd = wd

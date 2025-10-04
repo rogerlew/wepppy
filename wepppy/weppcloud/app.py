@@ -37,7 +37,7 @@ from flask_migrate import Migrate
 
 from wtforms import StringField
 
-from wepppy.nodb import Ron
+from wepppy.nodb.core import Ron
 from wepppy.weppcloud.utils.helpers import get_wd
 
 import logging

@@ -24,8 +24,8 @@ from scipy import stats
 
 import numpy as np
 
-from wepppy.nodb import Watershed, Landuse, Ron, Climate, Soils
-
+from wepppy.nodb.core import *
+from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.climates.cligen import nullStation
 
 

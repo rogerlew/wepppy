@@ -2,7 +2,7 @@
 
 from .._common import *  # noqa: F401,F403
 
-from wepppy.nodb import Ron, Watershed
+from wepppy.nodb.core import Ron, Watershed
 from wepppy.topo.watershed_abstraction import ChannelRoutingError
 from wepppy.weppcloud.utils.helpers import authorize, authorize_and_handle_with_exception_factory
 

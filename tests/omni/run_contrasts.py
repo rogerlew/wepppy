@@ -1,5 +1,5 @@
 
-from wepppy.nodb.omni import Omni, OmniScenario
+from wepppy.nodb.mods.omni import Omni, OmniScenario
 
 if __name__ == '__main__':
     runid = 'rlew-confirmed-complementarity'
@@ -20,9 +20,9 @@ if __name__ == '__main__':
     for contrast_scenario_def in contrast_scenario_defs:
         omni.build_contrasts(control_scenario_def, contrast_scenario_def,
                             obj_param='Soil_Loss_kg',
-                            contrast_cumulative_obj_param_threshold_fraction=0.8)
+                            contrast_cumulative_obj_param_threshold_fraction=1.0)
         
     #from pprint import pprint
     #pprint(omni.contrasts)
 
-    #omni.run_omni_contrasts()
+    omni.run_omni_contrasts()

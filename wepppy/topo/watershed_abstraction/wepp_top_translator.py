@@ -280,7 +280,7 @@ class WeppTopTranslator:
 if __name__ == '__main__':
     wd = '/geodata/weppcloud_runs/insomniac-boatload/'
 
-    from wepppy.nodb import Watershed
+    from wepppy.nodb.core import Watershed
 
     watershed = Watershed.getInstance(wd)
 

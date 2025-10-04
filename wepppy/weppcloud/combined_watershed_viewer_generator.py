@@ -3,7 +3,7 @@ from os.path import join as _join
 
 import numpy as np
 
-from wepppy.nodb import Ron, Wepp
+from wepppy.nodb.core import Ron, Wepp
 from wepppy.weppcloud.utils.helpers import get_wd
 
 def combined_watershed_viewer_generator(runids, title, units=None, varopts=None, varname=None, asjson=False):

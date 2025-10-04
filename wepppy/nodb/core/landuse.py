@@ -35,14 +35,13 @@ from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import read_raster
 
 # wepppy submodules
-from .base import (
+from ..base import (
     NoDbBase,
     TriggerEvents,
     nodb_setter,
 )
-from .ron import Ron
-from .watershed import Watershed, WatershedNotAbstractedError
-from .redis_prep import RedisPrep, TaskEnum
+
+from ..redis_prep import RedisPrep, TaskEnum
 
 
 from wepppy.landcover.rap import RAP_Band
@@ -251,11 +250,10 @@ class Landuse(NoDbBase):
     def _build_ESDAC(self):
         from wepppy.eu.soils.esdac import ESDAC
         esd = ESDAC()
-        # _map = Ron.getInstance(self.wd).map
 
         domlc_d = {}
 
-        watershed = Watershed.getInstance(self.wd)
+        watershed = self.watershed_instance
         for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
             d = esd.query(lng, lat, ['usedo'])
             assert 'usedom' in d, d
@@ -267,11 +265,10 @@ class Landuse(NoDbBase):
     def _build_lu10v5ua(self):
         from wepppy.au.landuse_201011 import Lu10v5ua
         lu = Lu10v5ua()
-        # _map = Ron.getInstance(self.wd).map
 
         domlc_d = {}
 
-        watershed = Watershed.getInstance(self.wd)
+        watershed = self.watershed_instance
         for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
             dom = lu.query_dom(lng, lat)
             domlc_d[topaz_id] = dom
@@ -299,7 +296,7 @@ class Landuse(NoDbBase):
     def _build_NLCD(self, retrieve_nlcd=True):
         global wepppyo3
 
-        _map = Ron.getInstance(self.wd).map
+        _map = self.ron_instance.map
 
         # Get NLCD 2011 from wmesque webservice
         lc_fn = self.lc_fn
@@ -310,7 +307,7 @@ class Landuse(NoDbBase):
         elif not _exists(lc_fn):
             raise FileNotFoundError(f"'{lc_fn}' not found!")
             
-        subwta_fn = Watershed.getInstance(self.wd).subwta
+        subwta_fn = self.watershed_instance.subwta
 
         if wepppyo3 is None:
             self.logger.info('Building landcover grid from NLCD raster using LandcoverMap.build_lcgrid')
@@ -332,7 +329,7 @@ class Landuse(NoDbBase):
 
         domlc_d = {}
 
-        watershed = Watershed.getInstance(self.wd)
+        watershed = self.watershed_instance
         for topaz_id in watershed._subs_summary:
             domlc_d[topaz_id] = str(self.single_selection)
 
@@ -341,7 +338,7 @@ class Landuse(NoDbBase):
     def _build_spatial_api(self):
         # fetch landcover map
 
-        _map = Ron.getInstance(self.wd).map
+        _map = self.ron_instance.map
 
         # Get NLCD 2011 from wmesque webservice
         lc_fn = self.lc_fn
@@ -376,13 +373,14 @@ class Landuse(NoDbBase):
             self._build_spatial_api()
             return
 
-        watershed = Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         if not watershed.is_abstracted:
+            from wepppy.nodb.core.watershed import WatershedNotAbstractedError
             raise WatershedNotAbstractedError()
 
         if self._mode in [LanduseMode.RRED_Burned, LanduseMode.RRED_Unburned]:
-            import wepppy
-            rred = wepppy.nodb.mods.Rred.getInstance(wd)
+            from wepppy.nodb.mods.rred import Rred
+            rred = Rred.getInstance(wd)
             rred.build_landuse(self._mode)
             self = self.getInstance(wd)  # reload instance from .nodb
             self.build_managements()
@@ -502,8 +500,8 @@ class Landuse(NoDbBase):
 
         os.makedirs(frac_dir, exist_ok=True)
 
-        _map = Ron.getInstance(self.wd).map
-        subwta_fn = Watershed.getInstance(self.wd).subwta
+        _map = self.ron_instance.map
+        subwta_fn = self.watershed_instance.subwta
 
         frac_d = {}
         dom_d = {}
@@ -538,7 +536,7 @@ class Landuse(NoDbBase):
 
         wd = self.wd
 
-        watershed = Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         disturbed = Disturbed.tryGetInstance(wd)
         if disturbed is not None:
             _land_soil_replacements_d = disturbed.land_soil_replacements_d
@@ -620,7 +618,7 @@ class Landuse(NoDbBase):
         lc_dir = self.lc_dir
         managements = self.managements
 
-        watershed = Watershed.getInstance(self.wd)
+        watershed = self.watershed_instance
         cancov_d = {}
         for topaz_id in watershed._subs_summary:
             if rap is not None:
@@ -836,8 +834,8 @@ class Landuse(NoDbBase):
             _map = self.mapping
 
         with self.locked(): 
-            watershed = Watershed.getInstance(self.wd)
-            ron = Ron.getInstance(self.wd)
+            watershed = self.watershed_instance
+            ron = self.ron_instance
             cell2 = ron.cellsize ** 2
             domlc_d = self.domlc_d
 
@@ -1099,7 +1097,7 @@ class Landuse(NoDbBase):
     def _(self, wepp_id):
         wd = self.wd
 
-        translator = Watershed.getInstance(wd).translator_factory()
+        translator = self.watershed_instance.translator_factory()
         topaz_id = str(translator.top(wepp=int(wepp_id)))
         domlc_d = self.domlc_d
 

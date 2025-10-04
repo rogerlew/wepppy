@@ -138,7 +138,7 @@ class OmniScenario(IntEnum):
     
 
 def _run_contrast(contrast_id, contrast_name, contrasts, wd, runid, wepp_bin='wepp_a557997'):
-    from wepppy.nodb import Landuse, Soils, Wepp
+    from wepppy.nodb.core import Landuse, Soils, Wepp
     global OMNI_REL_DIR
 
     new_wd = _join(wd, OMNI_REL_DIR, 'contrasts', contrast_id)
@@ -725,7 +725,7 @@ class Omni(NoDbBase):
         # filter and selection report
 
 
-        from wepppy.nodb import Watershed
+        from wepppy.nodb.core import Watershed
 
         wd = self.wd
 
@@ -859,7 +859,6 @@ class Omni(NoDbBase):
 
     def contrasts_report(self):
         global OMNI_REL_DIR
-        from wepppy.nodb.wepp import Wepp
 
         parquet_files = {}
 
@@ -978,7 +977,7 @@ class Omni(NoDbBase):
         return hashlib.sha1(json.dumps(payload_serializable, sort_keys=True).encode('utf-8')).hexdigest()
 
     def _post_omni_run(self, omni_wd: str, scenario_name: str):
-        from wepppy.nodb.ron import Ron
+        from wepppy.nodb.core import Ron
         ron = Ron.getInstance(omni_wd)
         with ron.locked():
             ron._mods = [mod for mod in ron._mods if mod != 'omni']
@@ -1195,9 +1194,9 @@ class Omni(NoDbBase):
         self.compile_hillslope_summaries()
 
     def run_omni_scenario(self, scenario_def: dict):
-        from wepppy.nodb import Landuse, Soils, Wepp
-        from wepppy.nodb.mods import Disturbed
-        from wepppy.nodb.mods import Treatments
+        from wepppy.nodb.core import Landuse, Soils, Wepp
+        from wepppy.nodb.mods.disturbed import Disturbed
+        from wepppy.nodb.mods.treatments import Treatments
             
         wd = self.wd
         base_scenario = self.base_scenario
@@ -1459,7 +1458,7 @@ class Omni(NoDbBase):
     
     def compile_hillslope_summaries(self, exclude_yr_indxs=None):
         global OMNI_REL_DIR
-        from wepppy.nodb import Wepp
+        from wepppy.nodb.core import Wepp
         from wepppy.wepp.stats import HillSummary
 
         scenario_wds = {str(self.base_scenario): self.wd}
@@ -1504,7 +1503,7 @@ class Omni(NoDbBase):
 
     def compile_channel_summaries(self, exclude_yr_indxs=None):
         global OMNI_REL_DIR
-        from wepppy.nodb import Wepp
+        from wepppy.nodb.core import Wepp
         from wepppy.wepp.stats import ChannelSummary
 
         scenario_wds = {str(self.base_scenario): self.wd}

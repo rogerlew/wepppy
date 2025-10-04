@@ -9,14 +9,17 @@ from glob import glob
 
 from deprecated import deprecated
 
+from wepppy.nodb.core import *
+from wepppy.nodb.mods.ash_transport import Ash
+from wepppy.nodb.mods.rhem import RhemPost
 from wepppy.all_your_base import isnan, isinf
-from wepppy.nodb import Ron, Wepp, Watershed, Ash
 from wepppy.topo.watershed_abstraction.support import json_to_wgs
 
 from wepppy.topo.peridot.flowpath import PeridotFlowpath, PeridotHillslope, PeridotChannel
 
 @deprecated()
 def has_arc_export(wd):
+
     ron = Ron.getInstance(wd)
     name = ron.name
     export_dir = ron.export_arc_dir
@@ -34,7 +37,6 @@ def has_arc_export(wd):
 
     
 def legacy_arc_export(wd, verbose=False):
-    from wepppy.nodb.mods import AshPost
 
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
@@ -353,8 +355,6 @@ def legacy_arc_export(wd, verbose=False):
 
 @deprecated()
 def arc_export(wd, verbose=False):
-    from wepppy.nodb.mods.ash_transport import AshPost
-    from wepppy.nodb.mods.rhem import RhemPost
 
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)

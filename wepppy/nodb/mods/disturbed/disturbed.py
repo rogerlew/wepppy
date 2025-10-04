@@ -34,11 +34,7 @@ from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil, SoilMultipleOfeSynth
 
-from ...landuse import Landuse, LanduseMode
-from ...soils import Soils
-from ...watershed import Watershed
-from ...ron import Ron
-from ...topaz import Topaz
+from wepppy.nodb.core import *
 from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents, nodb_setter
 from ..baer.sbs_map import SoilBurnSeverityMap
@@ -572,8 +568,8 @@ class Disturbed(NoDbBase):
         wd = self.wd
 
         if 'treecanopy' in self.mods:
-            import wepppy
-            treecanopy = wepppy.nodb.mods.Treecanopy.getInstance(wd)
+            from wepppy.nodb.mods.treecanopy import Treecanopy
+            treecanopy = Treecanopy.getInstance(wd)
             treecanopy.acquire_raster()
             treecanopy.analyze()
         else:
@@ -911,7 +907,7 @@ class Disturbed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
-        from wepppy.nodb import Wepp
+        from wepppy.nodb.core import Wepp
         _land_soil_replacements_d = self.land_soil_replacements_d
 
         wd = self.wd

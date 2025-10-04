@@ -193,7 +193,7 @@ class HillPass:
 
 
 def read_all_hill_pass(wd):
-    from wepppy.nodb import Watershed
+    from wepppy.nodb.core import Watershed
 
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()

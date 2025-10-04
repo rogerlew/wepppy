@@ -17,7 +17,7 @@ from flask_security import current_user
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # pip install cmarkgfm
 # https://github.com/sindresorhus/github-markdown-css for styling
 from wepppy.weppcloud.utils.helpers import exception_factory, authorize, get_wd, url_for_run
-from wepppy.nodb import Ron
+from wepppy.nodb.core import Ron
 from wepppy.nodb.base import _iter_nodb_subclasses
 
 from .._run_context import RunContext, load_run_context

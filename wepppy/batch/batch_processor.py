@@ -10,9 +10,12 @@ import warnings
 
 import awesome_codename
 
-from wepppy.nodb import Ron, Watershed, Landuse, Soils, Climate
-from wepppy.nodb.climate import ClimateSpatialMode
-from wepppy.nodb.mods import RangelandCover
+from wepppy.nodb.core import Ron
+from wepppy.nodb.core import Watershed
+from wepppy.nodb.core import Landuse
+from wepppy.nodb.core import Soils
+from wepppy.nodb.core.climate import Climate, ClimateSpatialMode
+from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.weppcloud.app import get_wd
 from wepppy.weppcloud.utils.archive import has_archive
 

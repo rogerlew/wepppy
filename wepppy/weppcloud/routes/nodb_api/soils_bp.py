@@ -2,7 +2,8 @@
 
 from .._common import *  # noqa: F401,F403
 
-from wepppy.nodb import Disturbed, Soils, SoilsMode
+from wepppy.nodb.core import Soils, SoilsMode
+from wepppy.nodb.mods.disturbed import Disturbed
 
 
 soils_bp = Blueprint('soils', __name__)

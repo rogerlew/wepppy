@@ -2,7 +2,8 @@
 
 from .._common import *  # noqa: F401,F403
 
-from wepppy.nodb import RangelandCover, Ron
+from wepppy.nodb.core import Ron
+from wepppy.nodb.mods.rangeland_cover import RangelandCover
 
 
 rangeland_bp = Blueprint('rangeland', __name__)

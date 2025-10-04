@@ -1,5 +1,5 @@
 import wepppy
-from wepppy.nodb import Ron, Watershed
+from wepppy.nodb.core import Ron, Watershed
 from glob import glob
 
 import json
@@ -21,9 +21,7 @@ from shapely.ops import transform as shapely_transform
 
 
 import wepppy
-from wepppy.nodb import (
-    Ron, Topaz, Watershed, Landuse, Soils, Climate, Wepp, SoilsMode, ClimateMode, ClimateSpatialMode, LanduseMode
-)
+from wepppy.nodb.core import *
 from wepppy.nodb.mods.locations import LakeTahoe
 
 from os.path import join as _join

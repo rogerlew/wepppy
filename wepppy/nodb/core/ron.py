@@ -24,20 +24,18 @@ import what3words
 # wepppy
 import requests
 
-from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import haversine, read_raster, utm_srid
 
 from wepppy.locales.earth.opentopography import opentopo_retrieve
 
 # wepppy submodules
-from .base import (
+from ..base import (
     NoDbBase,
     TriggerEvents,
     nodb_setter,
 )
-
-from .redis_prep import TaskEnum
 
 
 _thisdir = os.path.dirname(__file__)
@@ -302,9 +300,17 @@ class Ron(NoDbBase):
     filename = 'ron.nodb'
 
     def __init__(self, wd, cfg_fn='0.cfg', run_group=None, group_name=None):
-        import wepppy
         from wepppy.nodb.base import iter_nodb_mods_subclasses
-        from wepppy.nodb.watershed import DelineationBackend
+        from wepppy.nodb.core.watershed import DelineationBackend
+        from wepppy.nodb.core.watershed import Watershed
+        from wepppy.nodb.core.topaz import Topaz
+        from wepppy.nodb.core.landuse import Landuse
+        from wepppy.nodb.core.soils import Soils
+        from wepppy.nodb.core.climate import Climate
+        from wepppy.nodb.core.wepp import Wepp
+        from wepppy.nodb.core.wepppost import WeppPost
+        from wepppy.nodb.unitizer import Unitizer
+        from wepppy.nodb.mods.observed import Observed
 
         super(Ron, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
@@ -352,24 +358,28 @@ class Ron(NoDbBase):
 
             # gotcha: need to import the nodb submodules
             # through wepppy to avoid circular references
-            watershed = wepppy.nodb.Watershed(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            watershed = Watershed(wd, cfg_fn, run_group=run_group, group_name=group_name)
             if watershed.delineation_backend == DelineationBackend.TOPAZ:
-                wepppy.nodb.Topaz(wd, cfg_fn, run_group=run_group, group_name=group_name)
+                Topaz(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
-            wepppy.nodb.Landuse(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            wepppy.nodb.Soils(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            wepppy.nodb.Climate(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            wepppy.nodb.Wepp(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            wepppy.nodb.Unitizer(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            wepppy.nodb.WeppPost(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            wepppy.nodb.Observed(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            prep = wepppy.nodb.RedisPrep(wd, cfg_fn)
+            Landuse(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            Soils(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            Climate(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            Wepp(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            WeppPost(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            Observed(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            Unitizer(wd, cfg_fn, run_group=run_group, group_name=group_name)
+            prep = RedisPrep(wd, cfg_fn)
             prep.timestamp(TaskEnum.project_init)
 
             # Initialize mods
+            mods_to_init = self.mods or ()
+            for mod in mods_to_init:
+                type(self)._import_mod_module(mod)
+
             mods_registry = {mod: cls for mod, cls in iter_nodb_mods_subclasses()}
-            
-            for mod in self.mods:
+
+            for mod in mods_to_init:
                 if mod not in mods_registry:
                     raise Exception(f'unknown mod {mod}')
                 mod_instance = mods_registry[mod](wd, cfg_fn, run_group=run_group, group_name=group_name)
@@ -435,7 +445,6 @@ class Ron(NoDbBase):
         return self._enable_landuse_change
 
     def remove_mod(self, mod_name):
-        import wepppy
         from wepppy.nodb.base import iter_nodb_mods_subclasses, clear_locks, clear_nodb_file_cache
 
         clear_locks(self.runid)
@@ -514,8 +523,7 @@ class Ron(NoDbBase):
     @property
     def location_hash(self):
         wd = self.wd
-        import wepppy.nodb
-        watershed = wepppy.nodb.Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         w3w = self.w3w
         sub_n = watershed.sub_n
         is_topaz = int(watershed.delineation_backend_is_topaz)
@@ -613,9 +621,8 @@ class Ron(NoDbBase):
     # summary
     #
     def subs_summary(self, abbreviated=False):
-        import wepppy.nodb
         wd = self.wd
-        climate = wepppy.nodb.Climate.getInstance(wd)
+        climate = self.climate_instance
 
         if  _exists(_join(wd, 'watershed/hillslopes.parquet')) and \
             _exists(_join(wd, 'soils/soils.parquet')) and \
@@ -643,11 +650,11 @@ class Ron(NoDbBase):
             return summaries
         
         # slower deprecated option
-        watershed = wepppy.nodb.Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         translator = watershed.translator_factory()
-        soils = wepppy.nodb.Soils.getInstance(wd)
-        climate = wepppy.nodb.Climate.getInstance(wd)
-        landuse = wepppy.nodb.Landuse.getInstance(wd)
+        soils = self.soils_instance
+        climate = self.climate_instance
+        landuse = self.landuse_instance
 
         summaries = []
         for wepp_id in translator.iter_wepp_sub_ids():
@@ -665,7 +672,6 @@ class Ron(NoDbBase):
         return summaries
 
     def sub_summary(self, topaz_id=None, wepp_id=None):
-        import wepppy.nodb
 
         wd = self.wd
 
@@ -680,7 +686,7 @@ class Ron(NoDbBase):
         else:
             # get Watershed instance
             # and translator to get topaz_id and wepp_id
-            watershed = wepppy.nodb.Watershed.getInstance(wd)
+            watershed = self.watershed_instance
             translator = watershed.translator_factory()
 
             if topaz_id is None:
@@ -709,7 +715,7 @@ class Ron(NoDbBase):
             from .duckdb_agents import get_soil_sub_summary
             _soils = get_soil_sub_summary(wd, topaz_id=topaz_id)
         else:
-            soils = wepppy.nodb.Soils.getInstance(wd)
+            soils = self.soils_instance
             _soils = soils.sub_summary(topaz_id)
 
 
@@ -718,10 +724,10 @@ class Ron(NoDbBase):
             from .duckdb_agents import get_landuse_sub_summary
             _landuse = get_landuse_sub_summary(wd, topaz_id=topaz_id)
         else:
-            landuse = wepppy.nodb.Landuse.getInstance(wd)
+            landuse = self.landuse_instance
             _landuse = landuse.sub_summary(topaz_id)        
 
-        climate = wepppy.nodb.Climate.getInstance(wd)
+        climate = self.climate_instance
 
         if not isinstance(_watershed, dict):
             _watershed = _watershed.as_dict()
@@ -736,7 +742,6 @@ class Ron(NoDbBase):
 
     def chns_summary(self, abbreviated=False):
         wd = self.wd
-        import wepppy.nodb
 
         # use parquet if available, they are faster and have topaz_id and wepp_id
         if _exists(_join(wd, 'watershed/channels.parquet')):
@@ -757,7 +762,7 @@ class Ron(NoDbBase):
 
 
         # slower deprecated option
-        watershed = wepppy.nodb.Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         translator = watershed.translator_factory()
 
         summaries = []
@@ -780,7 +785,6 @@ class Ron(NoDbBase):
 
     def chn_summary(self, topaz_id=None, wepp_id=None):
         wd = self.wd
-        import wepppy.nodb
         _watershed = None
         if _exists(_join(wd, 'watershed/channels.parquet')):
             from .duckdb_agents import get_watershed_chn_summary
@@ -788,7 +792,7 @@ class Ron(NoDbBase):
             chn_enum = _watershed['chn_enum']
             wepp_id = _watershed['wepp_id']
         else:
-            watershed = wepppy.nodb.Watershed.getInstance(wd)
+            watershed = self.watershed_instance
             translator = watershed.translator_factory()
 
             if topaz_id is None:

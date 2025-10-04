@@ -15,9 +15,8 @@ from osgeo import gdal
 
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
-from ...ron import Ron
+from wepppy.nodb.core import *
 from ...base import NoDbBase, TriggerEvents, nodb_setter
-from ...watershed import Watershed
 
 from wepppy.landcover.rap import (
     RangelandAnalysisPlatformV3,

@@ -13,9 +13,8 @@ from os.path import exists as _exists
 
 from osgeo import gdal
 
-from ...ron import Ron
+from wepppy.nodb.core import Ron, Watershed
 from ...base import NoDbBase, TriggerEvents, nodb_setter
-from ...watershed import Watershed
 
 from wepppy.landcover.emapr import (
     OSUeMapR,

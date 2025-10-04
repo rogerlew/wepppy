@@ -1,6 +1,6 @@
 # `AgFields` mod
 
-Model fields within a watershed with crop schedule (observed climates over a period of time)
+Model agricultural fields in WEPP within a watershed with crop schedule (observed climates over a period of time)
 
 Resources stored in weppcloud `ag_fields` directory
 
@@ -28,8 +28,8 @@ Resources stored in weppcloud `ag_fields` directory
 2. Rasterize `ag_fields.field_boundaries_geojson` to `ag_fields.field_boundaries`
 3. Intersect `ag_fields.field_boundaries` with `watershed.subwta` to yield `ag_fields.sub_field_boundaries`
    - These "sub" fields will be treated sa hydrologically disconnected
-   - filter out `sub_fields` smaller than some pre-determined area threshold `ag_fields.sub_field_area_threshold_m2`
-4. Abstract the `sub_fields` to hillslopes
+   - filter out `sub_fields` smaller than some pre-determined area threshold `ag_fields.sub_field_min_area_threshold_m2`
+4. Abstract the `sub_fields` to hillslopes generating slope files in `ag_fields\slope_files`
 5. For each sub field hillslope
    - 5.1 Build multi-year management files
    - 5.2 use soil, climate from sub_fields `topaz` hillslope
@@ -37,9 +37,11 @@ Resources stored in weppcloud `ag_fields` directory
 6. Compile spatio-temporal outputs
 
 ## Watershed model - Running subfields as OFEs
-1. Calculate area of sub fields
+1. Calculate area of sub fields (there could be multiple)
+   - order the sub fields by area in ascending order
    - if the area of the sub field is less than 1/8 the subcatchment's area disregard
    - determine if the sub field area is closest to 1/4, 1/3, 1/2, of 1/1 of the subcatchment
+   - this become the division factor for breaking the hillslope into OFEs
    - use the inverse to determine how many OFEs (1/4 -> 4, 1/3 -> 3, 1/2 -> 2, 1/1 -> 1)
    - use the distance to channel map to detemine which OFE the sub field should be assigned to (e.g. bottom 1/2, middle 1/3, ...)
 2. Hillslope prep fro sub-fields
@@ -51,16 +53,22 @@ Resources stored in weppcloud `ag_fields` directory
 
 ### Hangman notes
 
+Hangman is the weppcloud alpha project for developing AgFields
+
+runid: dumbfounded-patentee
+
+wd: /wc1/runs/du/dumbfounded-patentee/
+
 ## remaining for hangman
 
-1. Setup a new NoBbBase subclass AgFields to model and rasterize the geojson 
-2. Intersect the fields raster with the subwta to identify sub fields
-2. Then abstract hillslopes form the subfields using rust code and generate slope files with fields_hillslope.csv metadata. 
-3. setup a routine in AgFields to prep the sub field hillslopes 
-  - using the slope file from rust
-  - the stacked managements from the rotation_schedule.tsv
-  - the soil and the climate from the associated hillslope
-4. setup routine in AgFields to run wepp
+- [x] 1. Setup a new NoBbBase subclass AgFields to model and rasterize the geojson 
+- [x] 2. Intersect the fields raster with the subwta to identify sub fields
+- [ ] 3. write a program in peridot to abstract representative hillslopes (e.g. wepp slope file) for each subfield and a fields_hillslope.csv metadata. 
+- [ ] 4. setup a routine in AgFields to prep the sub field hillslopes 
+      - using the slope file from rust
+      - the stacked managements from the rotation_schedule.tsv
+      - the soil and the climate from the associated hillslope
+- [ ] 4. setup routine in AgFields to run wepp
 
 
 # all management files are 2017.1

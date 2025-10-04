@@ -25,17 +25,7 @@ _data_dir = _join(_thisdir, 'data')
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
-class AshType(enum.IntEnum):
-    BLACK = 0
-    WHITE = 1
-
-    def __str__(self):
-        if self == AshType.BLACK:
-            return 'Black'
-        elif self == AshType.WHITE:
-            return 'White'
-        else:
-            raise ValueError(f'Unknown ash type {self}')
+from .ash_type import AshType
         
 
 class AshNoDbLockedException(Exception):

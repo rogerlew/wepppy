@@ -39,15 +39,14 @@ from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
 
 # wepppy submodules
-from .base import (
+from ..base import (
     NoDbBase,
     TriggerEvents, nodb_setter,
     createProcessPoolExecutor,
 )
 
 from .ron import Ron
-from .watershed import Watershed, WatershedNotAbstractedError
-from .redis_prep import RedisPrep, TaskEnum
+from ..redis_prep import RedisPrep, TaskEnum
 
 try:
     import wepppyo3
@@ -242,11 +241,12 @@ class Soils(NoDbBase):
         from wepppy.wepp.soils.utils import WeppSoilUtil
 
         wd = self.wd
-        watershed = Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         if not watershed.is_abstracted:
+            from wepppy.nodb.core.watershed import WatershedNotAbstractedError
             raise WatershedNotAbstractedError()
 
-        ron = Ron.getInstance(wd)
+        ron = self.ron_instance
         _map = ron.map 
 
         soils_dir = self.soils_dir
@@ -319,11 +319,12 @@ class Soils(NoDbBase):
             max_workers = 16
 
         wd = self.wd
-        watershed = Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         if not watershed.is_abstracted:
+            from wepppy.nodb.core.watershed import WatershedNotAbstractedError
             raise WatershedNotAbstractedError()
 
-        ron = Ron.getInstance(wd)
+        ron = self.ron_instance
 
         soils_dir = self.soils_dir
 
@@ -416,8 +417,9 @@ class Soils(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
 
         wd = self.wd
-        watershed = Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         if not watershed.is_abstracted:
+            from wepppy.nodb.core.watershed import WatershedNotAbstractedError
             raise WatershedNotAbstractedError()
 
         soils_dir = self.soils_dir
@@ -429,7 +431,7 @@ class Soils(NoDbBase):
                 self._ksflag = bool(ksflag)
 
             statsgoSpatial = StatsgoSpatial()
-            watershed = Watershed.getInstance(wd)
+            watershed = self.watershed_instance
 
             domsoil_d = {}
             for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
@@ -481,7 +483,7 @@ class Soils(NoDbBase):
         soils_dir = self.soils_dir
         wd = self.wd
         with self.locked():
-            watershed = Watershed.getInstance(wd)
+            watershed = self.watershed_instance
 
             orders = []
             for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
@@ -511,7 +513,7 @@ class Soils(NoDbBase):
         from wepppy.wepp.soils.utils import WeppSoilUtil
 
         wd = self.wd
-        watershed = Watershed.getInstance(wd)
+        watershed = self.watershed_instance
 
         soils_dir = self.soils_dir
 
@@ -570,7 +572,7 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
-        _map = Ron.getInstance(self.wd).map
+        _map = self.ron_instance.map
 
         ssurgo_fn = self.ssurgo_fn
         soils_dir = self.soils_dir
@@ -624,8 +626,9 @@ class Soils(NoDbBase):
             return
 
         wd = self.wd
-        watershed = Watershed.getInstance(wd)
+        watershed = self.watershed_instance
         if not watershed.is_abstracted:
+            from wepppy.nodb.core.watershed import WatershedNotAbstractedError
             raise WatershedNotAbstractedError()
 
         if 'ChileCayumanque' in self.locales:
@@ -765,7 +768,7 @@ class Soils(NoDbBase):
 
         totalarea = 0.0
         wsum = 0.0
-        watershed = Watershed.getInstance(self.wd)
+        watershed = self.watershed_instance
 
         for topaz_id in watershed._subs_summary:
             mukey = domsoil_d[str(topaz_id)]
@@ -787,7 +790,7 @@ class Soils(NoDbBase):
 
         totalarea = 0.0
         wsum = 0.0
-        watershed = Watershed.getInstance(self.wd)
+        watershed = self.watershed_instance
         for topaz_id in watershed._subs_summary:
             mukey = domsoil_d[str(topaz_id)]
             ll = ll_d[str(mukey)]
@@ -808,7 +811,7 @@ class Soils(NoDbBase):
 
         wd = self.wd
         with self.locked():
-            watershed = Watershed.getInstance(wd)
+            watershed = self.watershed_instance
             mukey = -9999
 
             domsoil_d = {}
@@ -848,7 +851,7 @@ class Soils(NoDbBase):
             if ksflag is not None:
                 self._ksflag = None
 
-            watershed = Watershed.getInstance(self.wd)
+            watershed = self.watershed_instance
             mukey = self.single_selection
             surgo_c = SurgoSoilCollection([mukey])
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
@@ -893,7 +896,7 @@ class Soils(NoDbBase):
         soils_dir = self.soils_dir
 
         with self.locked():
-            watershed = Watershed.getInstance(wd)
+            watershed = self.watershed_instance
             key = self.single_dbselection
 
             sol = get_soil(key)
@@ -944,8 +947,8 @@ class Soils(NoDbBase):
             if ksflag is not None:
                 self._ksflag = ksflag
 
-            _map = Ron.getInstance(self.wd).map
-            watershed = Watershed.getInstance(self.wd)
+            _map = self.ron_instance.map
+            watershed = self.watershed_instance
 
             with self.timed('  Retrieving ssurgo data'):
                 ssurgo_fn = self.ssurgo_fn
@@ -1188,7 +1191,7 @@ class Soils(NoDbBase):
         if domsoil_d is None:
             raise IndexError
         
-        translator = Watershed.getInstance(self.wd).translator_factory()
+        translator = self.watershed_instance.translator_factory()
         topaz_id = str(translator.top(wepp=int(wepp_id)))
         
         if topaz_id in domsoil_d:

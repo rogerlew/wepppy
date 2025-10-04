@@ -9,9 +9,9 @@ from .._common import *  # noqa: F401,F403
 
 from sqlalchemy import func
 
-from wepppy.nodb import Ron
+from wepppy.nodb.core import Ron
 from wepppy.nodb.base import clear_nodb_file_cache
-from wepppy.nodb.watershed import Watershed
+from wepppy.nodb.core import Watershed
 
 from wepppy.weppcloud.utils.helpers import (
     success_factory, error_factory, exception_factory,
@@ -30,7 +30,7 @@ def clear_locks(runid, config):
     Clear the nodb locks
     """
     load_run_context(runid, config)
-    from wepppy.nodb import clear_locks
+    from wepppy.nodb.base import clear_locks
     clear_locks(runid)
     return success_factory()
 

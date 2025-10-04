@@ -19,7 +19,7 @@ import shutil
 import numpy as np
 
 # wepppy submodules
-from wepppy.nodb.watershed import Watershed
+from wepppy.nodb.core import Watershed
 from wepppy.nodb.base import NoDbBase
 
 from wepppy.rhem.out import RhemOutput, RhemSummary
@@ -50,7 +50,7 @@ class RhemPost(NoDbBase):
         return getattr(self, '_missing_summaries_count', 0)
 
     def run_post(self):
-        from wepppy.nodb import Rhem
+        from wepppy.nodb.mods.rhem import Rhem
 
         wd = self.wd
         with self.locked():
