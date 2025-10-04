@@ -8,13 +8,12 @@ Resources stored in weppcloud `ag_fields` directory
 
 ### GeoJSON of field boundaries within the watershed
 
-- `field_id` of some sort
 - filename saved as `ag_fields\field_boundaries_geojson` property of AgFields
 - rasterize to `ag_fields.field_boundaries`
 
 ### Rotation schedule (`rotation_schedule.tsv`)
 
-- table with `field_id`, `year`, and `crop_id`
+- with field id and rotation by year info
 
 ### Crop managements (`ag_fields\crop_kv_lookup.tsv`)
 
@@ -51,6 +50,18 @@ Resources stored in weppcloud `ag_fields` directory
 
 
 ### Hangman notes
+
+## remaining for hangman
+
+1. Setup a new NoBbBase subclass AgFields to model and rasterize the geojson 
+2. Intersect the fields raster with the subwta to identify sub fields
+2. Then abstract hillslopes form the subfields using rust code and generate slope files with fields_hillslope.csv metadata. 
+3. setup a routine in AgFields to prep the sub field hillslopes 
+  - using the slope file from rust
+  - the stacked managements from the rotation_schedule.tsv
+  - the soil and the climate from the associated hillslope
+4. setup routine in AgFields to run wepp
+
 
 # all management files are 2017.1
 (wepppy310-env) roger@forest.local:/wc1/runs/du/dumbfounded-patentee/ag_fields/plant_files$ head -n 1 *.man
