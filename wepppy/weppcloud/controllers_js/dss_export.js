@@ -28,13 +28,10 @@ var DssExport = function () {
                 that.ws_client.disconnect();
                 that.report();
 
-                if (typeof Omni !== 'undefined') {
-                    var omni = Omni.getInstance();
-                    if (omni && omni.ws_client && typeof omni.ws_client.disconnect === 'function') {
-                        omni.ws_client.disconnect();
-                    }
-                    if (omni && typeof omni.report_scenarios === 'function') {
-                        omni.report_scenarios();
+                if (typeof DssExport !== 'undefined') {
+                    var dss_export = DssExport.getInstance();
+                    if (dss_export && dss_export.ws_client && typeof dss_export.ws_client.disconnect === 'function') {
+                        dss_export.ws_client.disconnect();
                     }
                 }
             }
