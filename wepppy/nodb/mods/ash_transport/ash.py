@@ -37,6 +37,13 @@ from wepppy.all_your_base.geo import raster_stacker
 
 from wepppyo3.raster_characteristics import identify_median_single_raster_key
 
+__all__ = [
+    'run_ash_model',
+    'AshSpatialMode',
+    'AshNoDbLockedException',
+    'Ash',
+]
+
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 

@@ -22,6 +22,11 @@ from wepppy.landcover.emapr import (
     OSUeMapR_Dataset
 )
 
+__all__ = [
+    'OSUeMapRNoDbLockedException',
+    'OSUeMapR_TS',
+]
+
 
 gdal.UseExceptions()
 

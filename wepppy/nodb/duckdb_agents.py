@@ -4,6 +4,17 @@ from os.path import exists as _exists
 
 import duckdb
 
+__all__ = [
+    'get_soil_sub_summary',
+    'get_soil_subs_summary',
+    'get_landuse_sub_summary',
+    'get_landuse_subs_summary',
+    'get_watershed_sub_summary',
+    'get_watershed_subs_summary',
+    'get_watershed_chn_summary',
+    'get_watershed_chns_summary',
+]
+
 def _get_sub_summary(parquet_fn, topaz_id):
     with duckdb.connect() as con:
         result = con.execute(f"SELECT * FROM read_parquet('{parquet_fn}') WHERE TopazID = ?", [topaz_id]).fetchall()

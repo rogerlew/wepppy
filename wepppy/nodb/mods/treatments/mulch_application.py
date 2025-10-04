@@ -3,22 +3,28 @@ import matplotlib.pyplot as plt
 
 # https://chatgpt.com/share/689688e1-f3b4-8009-bc94-ffdcdca8e71f
 
-# Exponential saturation model for ground cover change with mulch application.
-#
-# Calibrated Hill-type (saturating) model with L=100%
-# Derived from constraints: for G0=30, G(1)=60 and G(2)=80
-#
-#                 Validation data
-# ------------------+--------+--------+-------
-# Initial Cover (%) |  m=0.5 |  m=1.0 |  m=2.0
-# ------------------+--------+--------+-------
-#                 0 |   18.4 |   42.9 |   71.4
-#                10 |   26.5 |   48.6 |   74.3
-#                30 |   42.9 |  *60.0 |  *80.0
-#                60 |   67.3 |   77.1 |   88.6
-#                85 |   87.8 |   91.4 |   95.7
-# ------------------+--------+--------+-------
-# * = calibration points
+"""
+Exponential saturation model for ground cover change with mulch application.
+
+Calibrated Hill-type (saturating) model with L=100%
+Derived from constraints: for G0=30, G(1)=60 and G(2)=80
+
+                Validation data
+------------------+--------+--------+-------
+Initial Cover (%) |  m=0.5 |  m=1.0 |  m=2.0
+------------------+--------+--------+-------
+                0 |   18.4 |   42.9 |   71.4
+               10 |   26.5 |   48.6 |   74.3
+               30 |   42.9 |  *60.0 |  *80.0
+               60 |   67.3 |   77.1 |   88.6
+               85 |   87.8 |   91.4 |   95.7
+------------------+--------+--------+-------
+* = calibration points
+"""
+
+__all__ = [
+    'ground_cover_change',
+]
 
 L = 100.0
 a = 0.8473653284334487

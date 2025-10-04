@@ -41,6 +41,16 @@ from osgeo.gdalconst import *
 
 from wepppyo3.wepp_viz import make_soil_loss_grid, make_soil_loss_grid_fps
 
+__all__ = [
+    'ChannelRoutingMethod',
+    'SnowOpts',
+    'BaseflowOpts',
+    'PhosphorusOpts',
+    'TCROpts',
+    'WeppNoDbLockedException',
+    'Wepp',
+]
+
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
 except:
@@ -95,7 +105,7 @@ from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, Sed
 
 # wepppy submodules
 from wepppy.wepp.stats.frq_flood import FrqFlood
-from ..base import (
+from wepppy.nodb.base import (
     NoDbBase,
     TriggerEvents,
     nodb_setter,
@@ -104,7 +114,7 @@ from ..base import (
 )
 
 from .wepppost import WeppPost
-from ..redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.wepp.soils.utils import simple_texture
 from wepppy.nodb.core.climate import ClimateMode
@@ -125,7 +135,6 @@ def _copyfile(src_fn, dst_fn):
         shutil.copyfile(src_fn, dst_fn)
     else:
         os.link(src_fn, dst_fn)
-
 
 
 class ChannelRoutingMethod(IntEnum):

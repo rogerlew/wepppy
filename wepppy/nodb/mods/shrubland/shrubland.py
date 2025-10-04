@@ -16,9 +16,16 @@ from osgeo import gdal
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 from wepppy.nodb.core import Ron, Watershed
-from ...base import NoDbBase, TriggerEvents
+from wepppy.nodb.base import NoDbBase, TriggerEvents
 
 from .shrubland_map import ShrublandMap
+
+__all__ = [
+    'ShrublandNoDbLockedException',
+    'nlcd_shrubland_layers',
+    'ShrublandPointData',
+    'Shrubland',
+]
 
 gdal.UseExceptions()
 

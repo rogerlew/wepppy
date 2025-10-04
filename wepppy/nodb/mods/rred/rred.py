@@ -27,6 +27,11 @@ from wepppy.wepp.soils.utils import WeppSoilUtil
 from wepppy.nodb.core import *
 from ...base import NoDbBase
 
+__all__ = [
+    'RredNoDbLockedException',
+    'Rred',
+]
+
 gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)

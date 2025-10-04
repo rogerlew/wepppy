@@ -28,6 +28,11 @@ from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
+__all__ = [
+    'DebrisFlowNoDbLockedException',
+    'DebrisFlow',
+]
+
 
 def _duration_in_hours(duration):
     x, unit = duration.split('-')

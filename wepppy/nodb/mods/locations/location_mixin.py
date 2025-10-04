@@ -24,6 +24,10 @@ from wepppy.wepp.soils.utils import WeppSoilUtil
 
 from ...base import NoDbBase, TriggerEvents
 
+__all__ = [
+    'LocationMixin',
+]
+
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 

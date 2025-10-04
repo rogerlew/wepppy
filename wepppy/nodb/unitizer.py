@@ -21,6 +21,13 @@ from .base import NoDbBase
 
 from wepppy.all_your_base import isfloat, isnan
 
+__all__ = [
+    'converters',
+    'precisions',
+    'UnitizerNoDbLockedException',
+    'Unitizer',
+]
+
 converters = {
     'temperature': {
         ('degf', 'degc'): lambda v: (v - 32.0) / 1.8,

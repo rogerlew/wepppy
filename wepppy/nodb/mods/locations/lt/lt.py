@@ -18,6 +18,12 @@ from ....base import NoDbBase, TriggerEvents, nodb_setter
 
 from ..location_mixin import LocationMixin
 
+__all__ = [
+    'LakeTahoeNoDbLockedException',
+    'DEFAULT_WEPP_TYPE',
+    'LakeTahoe',
+]
+
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 

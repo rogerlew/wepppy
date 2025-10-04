@@ -28,6 +28,10 @@ from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, c
 from .redis_prep import RedisPrep, TaskEnum
 
 
+__all__ = [
+    'BatchRunner',
+]
+
 class BatchRunner(NoDbBase):
     """NoDb controller for batch runner state."""
 
@@ -479,4 +483,3 @@ class BatchRunner(NoDbBase):
 
         print(cli_report)
 
-__all__ = ["BatchRunner"]

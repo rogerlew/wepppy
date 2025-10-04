@@ -16,9 +16,16 @@ from osgeo import gdal
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 from wepppy.nodb.core import Ron, Watershed
-from ...base import NoDbBase, TriggerEvents
+from wepppy.nodb.base import NoDbBase, TriggerEvents
 
 from .treecanopy_map import TreecanopyMap
+
+__all__ = [
+    'TreecanopyNoDbLockedException',
+    'nlcd_treecanopy_layers',
+    'TreecanopyPointData',
+    'Treecanopy',
+]
 
 gdal.UseExceptions()
 

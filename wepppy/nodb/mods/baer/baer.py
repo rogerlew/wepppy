@@ -33,6 +33,12 @@ from ...redis_prep import RedisPrep, TaskEnum
 
 from .sbs_map import SoilBurnSeverityMap
 
+__all__ = [
+    'BaerNoDbLockedException',
+    'sbs_soil_replacements',
+    'Baer',
+]
+
 gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)

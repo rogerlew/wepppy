@@ -38,15 +38,20 @@ from wepppy.all_your_base.geo import read_raster, raster_stacker
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
 
-# wepppy submodules
-from ..base import (
+from wepppy.nodb.base import (
     NoDbBase,
     TriggerEvents, nodb_setter,
     createProcessPoolExecutor,
 )
 
 from .ron import Ron
-from ..redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+
+__all__ = [
+    'SoilsNoDbLockedException',
+    'SoilsMode',
+    'Soils',
+]
 
 try:
     import wepppyo3

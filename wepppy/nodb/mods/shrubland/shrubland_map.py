@@ -17,6 +17,9 @@ from osgeo.gdalconst import *
 
 from wepppy.all_your_base.geo import read_raster
 
+__all__ = [
+    'ShrublandMap'
+]
 
 class ShrublandMap:
     def __init__(self, fname):

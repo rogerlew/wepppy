@@ -29,6 +29,13 @@ from wepppy.landcover import LandcoverMap
 from wepppy.nodb.core import Watershed
 from ...base import NoDbBase, TriggerEvents, nodb_setter
 
+__all__ = [
+    'gen_cover_color',
+    'RangelandCoverNoDbLockedException',
+    'RangelandCoverMode',
+    'RangelandCover',
+]
+
 gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)

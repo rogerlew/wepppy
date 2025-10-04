@@ -40,6 +40,14 @@ from ...base import (
     clear_nodb_file_cache,
 )
 
+__all__ = [
+    'OMNI_REL_DIR',
+    'LOGGER',
+    'OmniScenario',
+    'OmniNoDbLockedException',
+    'Omni',
+]
+
 OMNI_REL_DIR = '_pups/omni'
 
 LOGGER = logging.getLogger(__name__)
