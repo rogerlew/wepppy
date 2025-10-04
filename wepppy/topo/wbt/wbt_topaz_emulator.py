@@ -585,7 +585,7 @@ class WhiteboxToolsTopazEmulator:
         return dst
 
     def set_outlet(self, lng, lat, pixelcoords=False, logger=None):
-        from wepppy.nodb.watershed import Outlet
+        from wepppy.nodb.core.watershed import Outlet
 
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -623,7 +623,7 @@ class WhiteboxToolsTopazEmulator:
             Logger used to record debug information.
         """
 
-        from wepppy.nodb.watershed import Outlet
+        from wepppy.nodb.core.watershed import Outlet
 
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
