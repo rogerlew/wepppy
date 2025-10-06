@@ -585,32 +585,37 @@ class WhiteboxToolsTopazEmulator:
         return dst
 
     def set_outlet(self, lng, lat, pixelcoords=False, logger=None):
-        from wepppy.nodb.core.watershed import Outlet
-
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             logger.info(
                 f"WhiteBoxToolsTopazEmulator.{func_name}(lng={lng}, lat={lat}, pixelcoords={pixelcoords})"
             )
 
-        (x, y), distance = self.find_closest_channel2(
-            lng, lat, pixelcoords=pixelcoords, logger=logger
-        )
-        _lng, _lat = self.pixel_to_lnglat(x, y, logger=logger)
+        if pixelcoords:
+            col = int(round(lng))
+            row = int(round(lat))
+            lng, lat = self.pixel_to_lnglat(col, row, logger=logger)
+        else:
+            col, row = self.lnglat_to_pixel(lng, lat, logger=logger)
 
-        _e, _n = self.pixel_to_utm(x, y, logger=logger)
-        self._make_outlet_geojson(
-            easting=_e, northing=_n, dst=self.outlet_geojson, logger=logger
+        remove_if_exists(self.outlet_geojson)
+
+        kwargs = dict(
+            d8_pntr=self.flovec,
+            streams=self.netful,
+            output=self.outlet_geojson,
+            requested_outlet_lng_lat=(lng, lat),
+            requested_outlet_row_col=(row, col),
         )
 
-        self._outlet = Outlet(
-            requested_loc=(lng, lat),
-            actual_loc=(_lng, _lat),
-            distance_from_requested=distance,
-            pixel_coords=(x, y),
-        )
+        watershed_mask = getattr(self, "bound", None)
+        if watershed_mask and _exists(watershed_mask):
+            kwargs["watershed"] = watershed_mask
 
-        return self._outlet
+        self.wbt.find_outlet(**kwargs)
+
+        outlet = self.set_outlet_from_geojson(logger=logger)
+        return outlet
 
     def set_outlet_from_geojson(self, geojson_path=None, logger=None):
         """Populate ``self._outlet`` based on a GeoJSON file produced by ``find_outlet``.
@@ -678,10 +683,34 @@ class WhiteboxToolsTopazEmulator:
         )
         lng, lat = float(lng), float(lat)
 
+        requested_lon = properties.get("requested_lon")
+        requested_lat = properties.get("requested_lat")
+        requested_loc = None
+        if requested_lon is not None and requested_lat is not None:
+            try:
+                requested_loc = (float(requested_lon), float(requested_lat))
+            except (TypeError, ValueError):
+                requested_loc = None
+
+        requested_row = properties.get("requested_row")
+        requested_col = properties.get("requested_col")
+        distance_from_requested = 0.0
+        if requested_row is not None and requested_col is not None:
+            try:
+                distance_from_requested = math.hypot(
+                    float(requested_col) - float(col),
+                    float(requested_row) - float(row),
+                )
+            except (TypeError, ValueError):
+                distance_from_requested = 0.0
+
+        if requested_loc is None:
+            requested_loc = (lng, lat)
+
         outlet = Outlet(
-            requested_loc=(lng, lat),
+            requested_loc=requested_loc,
             actual_loc=(lng, lat),
-            distance_from_requested=0.0,
+            distance_from_requested=distance_from_requested,
             pixel_coords=(col, row),
         )
 
