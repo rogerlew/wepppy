@@ -1,3 +1,4 @@
+from copy import deepcopy
 
 def downgrade_to_98_4_format(
     management,

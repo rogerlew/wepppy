@@ -2,6 +2,7 @@ import os
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -206,7 +207,7 @@ def post_abstract_sub_fields(wd: str, verbose: bool = True):
 
     field_df = pd.read_csv(_join(wd, 'ag_fields/sub_fields/fields.csv'))
 
-    translator = Watershed.getInstance(wd)
+    translator = Watershed.getInstance(wd).translator_factory()
     get_wepp_id = lambda topaz_id: translator.wepp(topaz_id)
     field_df['topaz_id'] = field_df['topaz_id'].astype(str)
     field_df['wepp_id'] = field_df['topaz_id'].apply(get_wepp_id)

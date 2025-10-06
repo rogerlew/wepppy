@@ -1,0 +1,31 @@
+m                               # metric units
+Yes                             # not watershed option
+1                               # storm option, 1=abbreviated annual soil loss output option for continuous simulation
+1                               # hillslope version
+Yes                             # pass file output
+../output/H{sub_field_id}.pass.dat   #
+1                               # abbreviated annual soil loss output option for continuous simulation
+No                              # initial condition scenario output
+../output/H{sub_field_id}.loss.dat   #
+Yes                             # water balance output
+../output/H{sub_field_id}.wat.dat    #
+No                              # crop output
+Yes                             # soil output
+../output/H{sub_field_id}.soil.dat   #
+Yes                             # distance and sediment loss
+../output/H{sub_field_id}.plot.dat   #
+No                              # large graphics output
+Yes                             # event by event output
+../output/H{sub_field_id}.ebe.dat    #
+Yes                             # element output
+../output/H{sub_field_id}.element.dat    #
+No                              # final summary output
+No                              # daily winter output
+No                              # plant yield output
+{man_relpath}     # management filepath relative to runs_dir
+{slp_relpath}     # slope filepath relative to runs_dir
+{cli_relpath}     # climate filepath relative to runs_dir
+{sol_relpath}     # soil filepath relative to runs_dir
+0                               # irrigation option, 0=no irrigation
+{sim_years}                     # years to simulate
+0                               # erosion calculation, 0=route all events
