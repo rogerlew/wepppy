@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import re
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 
 import os
 import hashlib
@@ -358,6 +358,46 @@ class AgFields(NoDbBase):
             )
             self._sub_field_n, self._sub_field_fp_n = post_abstract_sub_fields(self.wd, verbose=verbose)
 
+    def get_sub_field_translator(self) -> Dict[str, Tuple [int, int, int] ]:
+        """
+        returns a lookup dict of sub_field_id -> (field_id, topaz_id, wepp_id)
+        """
+        sub_field_translator = {}
+
+        subfields_df = self.subfields_parquet
+
+        for index, field in subfields_df.iterrows():
+            field_id = field['field_id']
+            topaz_id = str(field['topaz_id'])
+            wepp_id = field['wepp_id']
+            sub_field_id = field['sub_field_id']
+            sub_field_translator[str(sub_field_id)] = (int(field_id), int(topaz_id), int(wepp_id))
+
+        return sub_field_translator
+    
+    @property
+    def sub_fields_map(self):
+        return _join(self.ag_fields_dir, 'sub_fields/sub_field_id_map.tif')
+
+    @property
+    def sub_fields_geojson(self):
+        return _join(self.ag_fields_dir, 'sub_fields/sub_fields.geojson')
+
+    @property
+    def sub_fields_wgs_geojson(self):
+        return _join(self.ag_fields_dir, 'sub_fields/sub_fields.WGS.geojson')
+
+    def polygonize_sub_fields(self):
+        """
+        polygonize sub fields
+        """
+        from .polygonize_sub_fields import polygonize_sub_fields
+
+        polygonize_sub_fields(
+            self.sub_fields_map, 
+            self.get_sub_field_translator(),
+            self.sub_fields_geojson)
+
     @property
     def rotation_schedule_parquet(self):
         return _join(self.ag_fields_dir, 'rotation_schedule.parquet')
@@ -697,6 +737,14 @@ class CropRotation:
 class CropRotationManager:
     """
     Manages crop rotation for agricultural fields.
+
+    encapsulates the logic to associate crops with management files
+
+    user will use webform to produce a tsv file with three columns:
+    - crop_name
+    - database (weppcloud or plant_file_db)
+    - rotation_id (weppcloud dom/nlcd id or plant file name)
+    and place it in ag_fields_dir/rotation_lookup.tsv
     """
     def __init__(self, ag_fields_dir: str, landuse_mapping: str, logger_name: str | None):
         logger = logging.getLogger(logger_name or __name__)
