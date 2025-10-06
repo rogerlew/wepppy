@@ -4,7 +4,8 @@ def downgrade_to_98_4_format(
     management,
     filepath,
     resurfacing_fraction_mode='fallback',
-    unsupported_operation_mode='fallback'
+    unsupported_operation_mode='fallback',
+    first_year_only=False,
 ):
     """Downgrade a 2016.3+ management to 98.4 and write it to disk.
 
@@ -31,6 +32,10 @@ def downgrade_to_98_4_format(
         * ``'fallback'`` maps code 17 to code 4 ("other") and records a note in
           the exported management explaining that herbicide behaviour is not
           simulated in 98.4.
+    first_year_only : bool, optional
+        When ``True`` and the management contains multiple yearly rotations,
+        retain only the first year while adjusting the simulation length to a
+        single year.
 
     Returns
     -------
@@ -63,11 +68,55 @@ def downgrade_to_98_4_format(
             return abs(val) > 1e-9
         return True
 
+    def _apply_first_year_only(mf_obj):
+        """Trim management rotations down to a single exported year."""
+
+        man_section = getattr(mf_obj, 'man', None)
+        loops = getattr(man_section, 'loops', None) if man_section is not None else None
+
+        if not loops:
+            return False
+
+        trimmed = False
+
+        if len(loops) > 1:
+            del loops[1:]
+            trimmed = True
+
+        first_rotation = loops[0]
+        years_collection = getattr(first_rotation, 'years', None)
+
+        if years_collection and len(years_collection) > 1:
+            del years_collection[1:]
+            trimmed = True
+
+        if years_collection and len(years_collection) >= 1:
+            first_year = years_collection[0]
+            if hasattr(first_year, '__iter__'):
+                for ofe_index, schedule in enumerate(first_year):
+                    if hasattr(schedule, '_year'):
+                        schedule._year = 1
+                    if hasattr(schedule, '_ofe'):
+                        schedule._ofe = ofe_index + 1
+
+        if trimmed:
+            mf_obj.sim_years = 1
+            if hasattr(man_section, 'setroot'):
+                man_section.setroot(mf_obj)
+
+        return trimmed
+
     mf = deepcopy(management)
     errors = []
     general_notes = []
     resurfacing_notes = []
     operation_fallback_notes = []
+
+    if first_year_only:
+        if _apply_first_year_only(mf):
+            general_notes.append(
+                "# Conversion note: Only the first rotation year was exported; simulation length forced to 1 year."
+            )
 
     # Plant section
     for plant in mf.plants:
