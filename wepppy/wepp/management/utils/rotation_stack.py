@@ -8,30 +8,16 @@ from typing import Sequence
 
 import sys
 
-repo_root = Path(__file__).resolve().parents[4]
-if str(repo_root) not in sys.path:
-    sys.path.insert(0, str(repo_root))
+from wepppy.wepp.management.managements import (
+    Loops,
+    Management,
+    ManagementLoopMan,
+    ScenarioReference,
+)
 
-try:
-    from wepppy.wepp.management.managements import (
-        Loops,
-        Management,
-        ManagementLoopMan,
-        ScenarioReference,
-    )
-except (ModuleNotFoundError, ImportError):
-    import types
-
-    pkg = types.ModuleType('wepppy.wepp')
-    pkg.__path__ = [str(Path(__file__).resolve().parents[2])]
-    sys.modules['wepppy.wepp'] = pkg
-
-    from wepppy.wepp.management.managements import (
-        Loops,
-        Management,
-        ManagementLoopMan,
-        ScenarioReference,
-    )
+__all__ = [
+    'ManagementRotationSynth',
+]
 
 
 class ManagementRotationSynth(object):
@@ -224,10 +210,21 @@ class ManagementRotationSynth(object):
         dst_path = Path(dst_path)
         dst_path.parent.mkdir(parents=True, exist_ok=True)
         management = self.build(key or dst_path.stem, desc)
+
+        man_text = str(management)
+        if include_header:
+            lines = man_text.splitlines()
+            if lines:
+                lines = [lines[0], self.description, *lines[1:]]
+            else:
+                lines = [self.description]
+            man_text = '\n'.join(lines)
+
+        if not man_text.endswith('\n'):
+            man_text += '\n'
+
         with dst_path.open('w', encoding='utf-8', newline='\n') as fp:
-            if include_header:
-                fp.write(self.description + '\n')
-            fp.write(str(management))
+            fp.write(man_text)
         return dst_path
 
     def _validate_year_references(self, management: Management) -> None:

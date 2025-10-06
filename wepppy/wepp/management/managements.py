@@ -39,6 +39,80 @@ import random
 from wepppy.all_your_base import RGBA, isfloat
 from wepppy.all_your_base.dateutils import Julian
 
+__all__ = [
+    'WEPPPY_MAN_DIR',
+    'ScenarioBase',
+    'SectionType',
+    'ScenarioReference',
+    'PlantLoopCropland',
+    'PlantLoopRangeland',
+    'PlantLoopForest',
+    'PlantLoopRoads',
+    'OpLoopCropland',
+    'OpLoopRangeland',
+    'OpLoopForest',
+    'OpLoopRoads',
+    'IniLoopCropland',
+    'IniLoopRangeland',
+    'IniLoopForest',
+    'IniLoopRoads',
+    'SurfLoopCropland',
+    'SurfLoopRangeland',
+    'SurfLoopForest',
+    'SurfLoopRoads',
+    'ContourLoopCropland',
+    'DrainLoopCropland',
+    'DrainLoopRangeland',
+    'DrainLoopRoads',
+    'YearLoopCroplandAnnualFallowHerb',
+    'YearLoopCroplandAnnualFallowBurn',
+    'YearLoopCroplandAnnualFallowSillage',
+    'YearLoopCroplandAnnualFallowCut',
+    'YearLoopCroplandAnnualFallowRemove',
+    'YearLoopCroplandAnnualFallow',
+    'YearLoopCroplandPerennialCut',
+    'YearLoopCroplandPerennialGraze',
+    'YearLoopCroplandPerennial',
+    'YearLoopCropland',
+    'YearLoopRangelandGrazeLoop',
+    'YearLoopRangelandGraze',
+    'YearLoopRangelandHerb',
+    'YearLoopRangelandBurn',
+    'YearLoopRangeland',
+    'YearLoopForest',
+    'YearLoopRoads',
+    'Loops',
+    'PlantLoops',
+    'OpLoops',
+    'IniLoops',
+    'SurfLoops',
+    'ContourLoops',
+    'DrainLoops',
+    'YearLoops',
+    'Loop',
+    'PlantLoop',
+    'OpLoop',
+    'IniLoop',
+    'SurfLoop',
+    'ContourLoop',
+    'DrainLoop',
+    'YearLoop',
+    'ManagementLoopManLoop',
+    'ManagementLoopMan',
+    'ManagementLoop',
+    'get_disturbed_classes',
+    'ManagementSummary',
+    'Management',
+    'merge_managements',
+    'load_map',
+    'InvalidManagementKey',
+    'get_management_summary',
+    'get_management',
+    'get_channel_management',
+    'read_management',
+    'get_plant_loop_names'
+ ]
+
 _thisdir = os.path.dirname(__file__)
 _management_dir = _join(_thisdir, "data")
 _map_fn = _join(_management_dir, "map.json")
@@ -55,6 +129,8 @@ _esdac_map_fn = _join(_management_dir, "esdac_map.json")
 _lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
 _turkey_map_fn = _join(_management_dir, "turkey_map.json")
 _palouse_map_fn = _join(_management_dir, "palouse_map.json")
+
+WEPPPY_MAN_DIR = _management_dir
 
 def _parse_julian(x):
     foo = int(x)
@@ -291,7 +367,6 @@ oratea:{0.oratea:0.5f} orater:{0.orater:0.5f} otemp:{0.otemp:0.5f} pltol:{0.plto
 rdmax:{0.rdmax:0.5f} rsr:{0.rsr:0.5f} rtmmax:{0.rtmmax:0.5f} spriod:{0.spriod} tmpmax:{0.tmpmax:0.5f}
 tmpmin:{0.tmpmin:0.5f} xmxlai:{0.xmxlai:0.5f} yld:{0.yld:0.5f} rcc:{0.rcc}
 """.format(self)
-
 
 
 class PlantLoopRangeland(ScenarioBase):
@@ -1123,6 +1198,7 @@ class YearLoopCroplandPerennial(ScenarioBase):
             s += '{0.ncycle}\n{graze}'.format(self, graze=repr(self.graze))
 
         return s
+
 
 class YearLoopCropland(ScenarioBase):
     def __init__(self, lines, root):

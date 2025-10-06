@@ -36,6 +36,95 @@ Resources stored in weppcloud `ag_fields` directory
    - 5.3 run hillslope in `wepp\ag_fields\runs` and generate outputs in `wepp\ag_fields\output`
 6. Compile spatio-temporal outputs
 
+## Data files `/wc1/runs/co/copacetic-note`
+
+### `ag_fields/<field_boundaries_geojson>.geojson`
+- `ag_fields/rotation_schedule.parquet`
+- `ag_fields/field_boundaries.tif`
+
+#### `ag_fields/rotation_schedule.parquet`
+- the rotation schedule has rotations over several years as separate columns
+- each field is a separate row and has a unique field id
+e.g.
+```
+ #   Column      Non-Null Count  Dtype  
+---  ------      --------------  -----  
+ 30  field_ID    2177 non-null   float64
+ 31  Crop2008    2177 non-null   object 
+ 32  Crop2009    2177 non-null   object 
+ 33  Crop2010    2177 non-null   object 
+ 34  Crop2011    2177 non-null   object 
+ 35  <rotation>    2177 non-null   object 
+ ...
+```
+
+- Field ID is configurable as `AgFields.field_id_key`
+- Crop<year> is accessed by `AgFields.crop_year_accessor.format(year)`
+  - e.g 'Crop{}' and is set using `AgFields.set_crop_year_accessor`
+  - the `rotation` columns have `crop_name`s
+
+###
+
+#### `ag_fields/field_boundaries.tif`
+- raster with the field id burned in
+- aligned with weppcloud project rasters
+
+### Each field is divided into hydrologiccal sub fields `ag_fields/sub_fields` by PERIDOT
+
+#### `ag_fields/sub_fields/sub_field_id_map.tif`
+- intersection of subwta and field boundaries has sub field id keys
+
+#### `fields.parquet` similiar to `watershed/hillslopes.parquet` but for fields
+
+schema
+```
+ #   Column        Non-Null Count  Dtype  
+---  ------        --------------  -----  
+ 0   field_id      8109 non-null   int64  
+ 1   topaz_id      8109 non-null   object 
+ 2   sub_field_id  8109 non-null   int64  
+ 3   slope_scalar  8109 non-null   float64
+ 4   length        8109 non-null   float64
+ 5   width         8109 non-null   float64
+ 6   direction     8109 non-null   float64
+ 7   aspect        8109 non-null   float64
+ 8   area          8109 non-null   float64
+ 9   elevation     8109 non-null   float64
+ 10  centroid_px   8109 non-null   int64  
+ 11  centroid_py   8109 non-null   int64  
+ 12  centroid_lon  8109 non-null   float64
+ 13  centroid_lat  8109 non-null   float64
+ 14  wepp_id       8109 non-null   int64  
+ 15  TopazID       8109 non-null   int64  
+```
+
+#### slope files from PERIDOT
+- `ag_fields/sub_fields/slope_files`
+- names convention is `field_{field_id}_{topaz_id}.slp`
+
+(flowpaths and flowpaths table are also produced by PERIDOT but not used)
+
+### plant_files (`.man`) user supplied plant database
+- user uploads a zip archive
+- the .zip files are extracted and converted to 98.4 format with normalized file names
+- `ag_fields/plant_files` contains the 98.4 format managements
+- `ag_fields/plant_files/2017.1` contains the 2017.1 format managements if they were supplied
+
+
+
+## Weppcloud Controls
+
+Upload GeoJSON
+
+define field_id column
+define crop lookup template
+upload plants.zip
+- extracts and converts to 98.4
+
+build rotation table lookup
+
+
+
 ## Watershed model - Running subfields as OFEs
 1. Calculate area of sub fields (there could be multiple)
    - order the sub fields by area in ascending order

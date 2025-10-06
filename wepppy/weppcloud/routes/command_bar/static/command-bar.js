@@ -191,6 +191,42 @@
             return target.isContentEditable || tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT';
         }
 
+        isPrintableKey(event) {
+            if (!event || typeof event.key !== 'string') {
+                return false;
+            }
+
+            if (event.ctrlKey || event.metaKey || event.altKey) {
+                return false;
+            }
+
+            return event.key.length === 1 && event.key !== 'Unidentified';
+        }
+
+        insertPrintableKey(key) {
+            if (!this.inputEl || typeof key !== 'string') {
+                return;
+            }
+
+            const { selectionStart, selectionEnd, value } = this.inputEl;
+
+            if (selectionStart === null || selectionEnd === null) {
+                this.inputEl.value = `${value}${key}`;
+                return;
+            }
+
+            const start = Math.min(selectionStart, selectionEnd);
+            const end = Math.max(selectionStart, selectionEnd);
+            const before = value.slice(0, start);
+            const after = value.slice(end);
+
+            this.inputEl.value = `${before}${key}${after}`;
+            const newCaretPosition = before.length + key.length;
+            if (typeof this.inputEl.setSelectionRange === 'function') {
+                this.inputEl.setSelectionRange(newCaretPosition, newCaretPosition);
+            }
+        }
+
         handleDocumentKeyDown(event) {
             if (this.active) {
                 if (event.key === 'Escape') {
@@ -199,7 +235,15 @@
                     return;
                 }
 
-                if (event.target !== this.inputEl && !this.shouldIgnoreTriggerTarget(event.target)) {
+                if (event.target === this.inputEl || this.shouldIgnoreTriggerTarget(event.target)) {
+                    return;
+                }
+
+                if (this.isPrintableKey(event)) {
+                    event.preventDefault();
+                    this.focusInput();
+                    this.insertPrintableKey(event.key);
+                } else {
                     this.focusInput();
                 }
                 return;
