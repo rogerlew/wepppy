@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
-<title>{{ runid }} - Not Found</title>
+<title>{{ runid }} - {{ page_title|default('Not Found') }}</title>
 <script>
 function redirectToDiff() {
     const runId = document.getElementById('runIdInput').value;
