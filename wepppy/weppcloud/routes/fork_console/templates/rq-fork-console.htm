@@ -39,6 +39,8 @@
           this.shouldReconnect = true;
           this.status = $("#" + this.formId + " #status");
           this.stacktrace = $("#" + this.formId + " #stacktrace");
+          this.maxStatusMessages = 3000;
+          this.statusMessages = [];
       }
 
       WSClient.prototype.connect = function() {
@@ -97,8 +99,7 @@
                           }
                       }
                   } else {
-                      this.status.append(data);
-                      this.status.scrollTop(this.status.prop("scrollHeight"));
+                      this.appendStatus(data);
                   }
               }
           };
@@ -122,6 +123,28 @@
               this.ws.close();
               this.ws = null;
           }
+      };
+
+      WSClient.prototype.appendStatus = function(message) {
+          if (!message || !this.status || !this.status.length) {
+              return;
+          }
+          if (!this.statusMessages.length) {
+              var existing = this.status.text();
+              if (existing) {
+                  this.statusMessages = existing.split('\n');
+                  if (this.statusMessages[this.statusMessages.length - 1] === '') {
+                      this.statusMessages.pop();
+                  }
+              }
+          }
+          var text = (typeof message === 'string') ? message : String(message);
+          this.statusMessages.push(text);
+          if (this.statusMessages.length > this.maxStatusMessages) {
+              this.statusMessages.splice(0, this.statusMessages.length - this.maxStatusMessages);
+          }
+          this.status.text(this.statusMessages.length ? this.statusMessages.join('\n') + '\n' : '');
+          this.status.scrollTop(this.status.prop('scrollHeight'));
       };
 
       // Function to fork the project
