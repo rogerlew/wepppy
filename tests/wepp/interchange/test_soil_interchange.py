@@ -1,26 +1,14 @@
-import importlib.util
 from pathlib import Path
 import shutil
 
 import pyarrow.parquet as pq
 import pytest
 
-
-def _load_soil_module():
-    module_path = Path(__file__).resolve().parents[3] / "wepppy/wepp/interchange/soil_interchange.py"
-    spec = importlib.util.spec_from_file_location("soil_interchange", module_path)
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
+from wepppy.wepp.interchange import concurrency as concurrency_module
+from wepppy.wepp.interchange import hill_soil_interchange as soil_module
 
 
-@pytest.fixture(scope="module")
-def soil_module():
-    return _load_soil_module()
-
-
-def test_soil_interchange_writes_parquet(tmp_path, soil_module):
+def test_soil_interchange_writes_parquet(tmp_path, monkeypatch):
     src = Path("tests/wepp/interchange/test_project/output")
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
@@ -45,8 +33,19 @@ def test_soil_interchange_writes_parquet(tmp_path, soil_module):
     h1_path = workdir / "H1.soil.dat"
     h1_path.write_text("\n".join(header + rows) + "\n")
 
+    calls = []
+
+    def _wrapper(files, parser, schema, target_path, **kwargs):
+        file_list = [Path(p) for p in files]
+        calls.append({"files": file_list, "schema": schema})
+        return concurrency_module.write_parquet_with_pool(file_list, parser, schema, target_path, **kwargs)
+
+    monkeypatch.setattr(soil_module, "write_parquet_with_pool", _wrapper)
+
     target = soil_module.run_wepp_hillslope_soil_interchange(workdir)
     assert target.exists()
+    assert calls
+    assert all(p.name.lower().endswith(".soil.dat") for p in calls[0]["files"])
 
     table = pq.read_table(target)
     assert table.schema == soil_module.SCHEMA
@@ -69,7 +68,7 @@ def test_soil_interchange_writes_parquet(tmp_path, soil_module):
     assert second["TSW (mm)"] == pytest.approx(40.00)
 
 
-def test_soil_interchange_handles_missing_files(tmp_path, soil_module):
+def test_soil_interchange_handles_missing_files(tmp_path):
     workdir = tmp_path / "empty_output"
     workdir.mkdir()
 

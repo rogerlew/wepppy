@@ -1,32 +1,31 @@
-import importlib.util
 from pathlib import Path
 import shutil
 
 import pyarrow.parquet as pq
 import pytest
 
-
-def _load_loss_module():
-    module_path = Path(__file__).resolve().parents[3] / "wepppy/wepp/interchange/loss_interchange.py"
-    spec = importlib.util.spec_from_file_location("loss_interchange", module_path)
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
+from wepppy.wepp.interchange import concurrency as concurrency_module
+from wepppy.wepp.interchange import hil_loss_interchange as loss_module
 
 
-@pytest.fixture(scope="module")
-def loss_module():
-    return _load_loss_module()
-
-
-def test_loss_interchange_writes_parquet(tmp_path, loss_module):
+def test_loss_interchange_writes_parquet(tmp_path, monkeypatch):
     src = Path("tests/wepp/interchange/test_project/output")
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
 
+    calls = []
+
+    def _wrapper(files, parser, schema, target_path, **kwargs):
+        file_list = [Path(p) for p in files]
+        calls.append({"files": file_list, "schema": schema})
+        return concurrency_module.write_parquet_with_pool(file_list, parser, schema, target_path, **kwargs)
+
+    monkeypatch.setattr(loss_module, "write_parquet_with_pool", _wrapper)
+
     target = loss_module.run_wepp_hillslope_loss_interchange(workdir)
     assert target.exists()
+    assert calls
+    assert all(p.name.lower().endswith(".loss.dat") for p in calls[0]["files"])
 
     table = pq.read_table(target)
     assert table.schema == loss_module.SCHEMA
@@ -42,7 +41,7 @@ def test_loss_interchange_writes_parquet(tmp_path, loss_module):
     assert first["In Flow Exiting"] == pytest.approx(0.0)
 
 
-def test_loss_interchange_handles_missing_files(tmp_path, loss_module):
+def test_loss_interchange_handles_missing_files(tmp_path):
     workdir = tmp_path / "empty_output"
     workdir.mkdir()
 
