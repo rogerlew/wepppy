@@ -130,6 +130,11 @@ wd: /wc1/runs/co/copacetic-note/
 - [x] 5. setup routine in AgFields to run wepp
 
 
+# model output files
+
+field_id, year, crop_name, runoff, sed_del, sed_det, sed_dep, (hill_wat) Ep+Es+Er, (hill_wat) Dp
+
+
 
 ## Watershed model - Running subfields as OFEs (Future Feature 0% complete)
 1. Calculate area of sub fields (there could be multiple)
