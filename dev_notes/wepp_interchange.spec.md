@@ -108,8 +108,9 @@ The legacy parsers live under `wepppy/wepp/out/` and act as data brokers for oth
 
 # Developer Log
 - 2025-02-14: Implemented `run_wepp_hillslope_pass_interchange` producing `H.pass.parquet` with Fortran-aligned field names, Julian-to-calendar enrichments, and zero-filling per event type. Added coverage at `tests/wepp/interchange/test_pass_interchange.py` and refreshed spec guidance for PASS outputs.
-- 2025-02-17: Landed dedicated hillslope interchange writers (`hill_ebe_interchange.py`, `hill_element_interchange.py`, `hil_loss_interchange.py`, `hill_soil_interchange.py`, `hill_wat_interchange.py`) with Arrow schemas mirroring WEPP column labels. Added regression coverage per product.
+- 2025-02-17: Landed dedicated hillslope interchange writers (`hill_ebe_interchange.py`, `hill_element_interchange.py`, `hill_loss_interchange.py`, `hill_soil_interchange.py`, `hill_wat_interchange.py`) with Arrow schemas mirroring WEPP column labels. Added regression coverage per product.
 - 2025-02-17: Elevated orchestration via `run_wepp_hillslope_pass_interchange`/`run_wepp_hillslope_interchange` so a single call materializes all hillslope parquet artifacts beneath `wepp/output/interchange/`. Tests now assert every parquet target is emitted when PASS runs.
+- 2025-02-20: Added worker-pool helper integration across all hillslope writers with `/dev/shm` staging, taught EBE parsing to accept a `start_year` offset for 1-indexed WEPP years, and refreshed the interchange tests to assert the concurrent fan-out path.
 
 ```
 >>> pd.read_parquet('/workdir/wepppy/tests/wepp/interchange/test_project/output/interchange/H.element.parquet').info()
