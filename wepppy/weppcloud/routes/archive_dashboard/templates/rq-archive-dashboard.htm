@@ -36,6 +36,8 @@
       let currentJobId = null;
       let pendingRestoreName = null;
       let pendingDeleteName = null;
+      const MAX_STATUS_MESSAGES = 3000;
+      let statusLogMessages = [];
 
       class WSClient {
         constructor(runid, channel) {
@@ -109,10 +111,22 @@
 
       function appendStatus(message) {
         const statusEl = document.getElementById('status_log');
-        if (!message) {
+        if (!message || !statusEl) {
           return;
         }
-        statusEl.textContent += message + '\n';
+        if (!statusLogMessages.length && statusEl.textContent) {
+          statusLogMessages = statusEl.textContent.split('\n');
+          if (statusLogMessages[statusLogMessages.length - 1] === '') {
+            statusLogMessages.pop();
+          }
+        }
+        const text = typeof message === 'string' ? message : String(message);
+        statusLogMessages.push(text);
+        if (statusLogMessages.length > MAX_STATUS_MESSAGES) {
+          // Trim oldest messages to keep the log responsive on large projects.
+          statusLogMessages.splice(0, statusLogMessages.length - MAX_STATUS_MESSAGES);
+        }
+        statusEl.textContent = statusLogMessages.length ? `${statusLogMessages.join('\n')}\n` : '';
         statusEl.scrollTop = statusEl.scrollHeight;
       }
 
