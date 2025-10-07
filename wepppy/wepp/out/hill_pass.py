@@ -114,7 +114,8 @@ class HillPass:
                 year = int(year)
                 day = int(day)
                 sbrunf = float(sbrunf)
-                lateral_m3 = sbrunv = float(sbrunf)
+                sbrunv = float(sbrunv)
+                lateral_m3 = sbrunv
                 runoff_m3 = 0.0
                 drainq = float(drainq)
                 drrunv = float(drrunv)
