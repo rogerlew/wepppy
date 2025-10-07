@@ -1,0 +1,1058 @@
+{
+  "py/object": "wepppy.wepp.management.managements.Management",
+  "key": null,
+  "man_fn": "man42_5.man",
+  "man_dir": "",
+  "desc": "-",
+  "color": {
+    "py/tuple": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "nofe": 7,
+  "datver": "98.4",
+  "datver_value": 98.4,
+  "sim_years": 1,
+  "plants": {
+    "py/object": "wepppy.wepp.management.managements.PlantLoops",
+    "root": {
+      "py/id": 0
+    },
+    "py/seq": [
+      {
+        "py/object": "wepppy.wepp.management.managements.PlantLoop",
+        "root": {
+          "py/id": 0
+        },
+        "name": "Tah_4899",
+        "description": [
+          "With no Senescence or decomposition",
+          "(null)",
+          "W. Elliot 05/10"
+        ],
+        "landuse": 1,
+        "ntill": null,
+        "data": {
+          "py/object": "wepppy.wepp.management.managements.PlantLoopCropland",
+          "root": {
+            "py/id": 0
+          },
+          "crunit": "WeppWillSet",
+          "bb": 14.0,
+          "bbb": 3.0,
+          "beinp": 0.0,
+          "btemp": 2.0,
+          "cf": 5.0,
+          "crit": 5.0,
+          "critvm": 0.0,
+          "cuthgt": 20.0,
+          "decfct": 1.0,
+          "diam": 1.0,
+          "dlai": 0.5,
+          "dropfc": 1.0,
+          "extnct": 0.9,
+          "fact": 0.99,
+          "flivmx": 17.0,
+          "gddmax": 0.0,
+          "hi": 0.42,
+          "hmax": 20.0,
+          "mfocod": 2,
+          "oratea": 0.0,
+          "orater": 0.0,
+          "otemp": 20.0,
+          "pltol": 0.1,
+          "pltsp": 4.0,
+          "rdmax": 2.0,
+          "rsr": 0.33,
+          "rtmmax": 0.5,
+          "spriod": 90,
+          "tmpmax": 40.0,
+          "tmpmin": -40.0,
+          "xmxlai": 14.0,
+          "yld": 0.0,
+          "rcc": ""
+        }
+      }
+    ]
+  },
+  "ops": {
+    "py/object": "wepppy.wepp.management.managements.OpLoops",
+    "root": {
+      "py/id": 0
+    },
+    "py/seq": []
+  },
+  "inis": {
+    "py/object": "wepppy.wepp.management.managements.IniLoops",
+    "root": {
+      "py/id": 0
+    },
+    "py/seq": [
+      {
+        "py/object": "wepppy.wepp.management.managements.IniLoop",
+        "root": {
+          "py/id": 0
+        },
+        "name": "Tah_4089",
+        "description": [
+          "For no growth, no decomp, no senescence",
+          "(null)",
+          "W. Elliot  05/10"
+        ],
+        "landuse": 1,
+        "ntill": null,
+        "data": {
+          "py/object": "wepppy.wepp.management.managements.IniLoopCropland",
+          "root": {
+            "py/id": 0
+          },
+          "bdtill": 1.1,
+          "cancov": 0.9,
+          "daydis": 330,
+          "dsharv": 1000,
+          "frdp": 0.0,
+          "inrcov": 1.0,
+          "iresd": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": {
+              "py/id": 0
+            },
+            "section_type": {
+              "py/reduce": [
+                {
+                  "py/type": "wepppy.wepp.management.managements.SectionType"
+                },
+                {
+                  "py/tuple": [
+                    1
+                  ]
+                }
+              ]
+            },
+            "loop_name": "Tah_4899",
+            "this": {
+              "py/id": 9
+            }
+          },
+          "imngmt": 2,
+          "rfcum": 400.0,
+          "rhinit": 0.1,
+          "rilcov": 1.0,
+          "rrinit": 0.1,
+          "rspace": 0.0,
+          "rtyp": 1,
+          "snodpy": 0.0,
+          "thdp": 0.0,
+          "tillay1": 0.0,
+          "tillay2": 0.0,
+          "width": 0.0,
+          "sumrtm": 0.5,
+          "sumsrm": 0.5,
+          "usinrco": "",
+          "usrilco": ""
+        }
+      }
+    ]
+  },
+  "surfs": {
+    "py/object": "wepppy.wepp.management.managements.SurfLoops",
+    "root": {
+      "py/id": 0
+    },
+    "py/seq": []
+  },
+  "contours": {
+    "py/object": "wepppy.wepp.management.managements.ContourLoops",
+    "root": {
+      "py/id": 0
+    },
+    "py/seq": []
+  },
+  "drains": {
+    "py/object": "wepppy.wepp.management.managements.DrainLoops",
+    "root": {
+      "py/id": 0
+    },
+    "py/seq": []
+  },
+  "years": {
+    "py/object": "wepppy.wepp.management.managements.YearLoops",
+    "root": {
+      "py/id": 0
+    },
+    "py/seq": [
+      {
+        "py/object": "wepppy.wepp.management.managements.YearLoop",
+        "root": {
+          "py/id": 0
+        },
+        "name": "Year 1",
+        "description": [
+          "(null)",
+          "(null)",
+          "(null)"
+        ],
+        "landuse": 1,
+        "ntill": null,
+        "data": {
+          "py/object": "wepppy.wepp.management.managements.YearLoopCropland",
+          "root": {
+            "py/id": 0
+          },
+          "itype": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": {
+              "py/id": 0
+            },
+            "section_type": {
+              "py/id": 11
+            },
+            "loop_name": "Tah_4899",
+            "this": {
+              "py/id": 18
+            }
+          },
+          "tilseq": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "conset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "drset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "imngmt": 2,
+          "annualfallow": "",
+          "perennial": {
+            "py/object": "wepppy.wepp.management.managements.YearLoopCroplandPerennial",
+            "root": {
+              "py/id": 0
+            },
+            "jdharv": 0,
+            "jdplt": 0,
+            "jdstop": 0,
+            "rw": 0.0,
+            "mgtopt": 3,
+            "ncut": "",
+            "cut": "",
+            "ncycle": "",
+            "graze": ""
+          }
+        }
+      },
+      {
+        "py/object": "wepppy.wepp.management.managements.YearLoop",
+        "root": {
+          "py/id": 0
+        },
+        "name": "OFE2 Year 1",
+        "description": [
+          "(null)",
+          "(null)",
+          "(null)"
+        ],
+        "landuse": 1,
+        "ntill": null,
+        "data": {
+          "py/object": "wepppy.wepp.management.managements.YearLoopCropland",
+          "root": {
+            "py/id": 0
+          },
+          "itype": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": {
+              "py/id": 0
+            },
+            "section_type": {
+              "py/id": 11
+            },
+            "loop_name": "Tah_4899",
+            "this": {
+              "py/id": 26
+            }
+          },
+          "tilseq": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "conset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "drset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "imngmt": 2,
+          "annualfallow": "",
+          "perennial": {
+            "py/object": "wepppy.wepp.management.managements.YearLoopCroplandPerennial",
+            "root": {
+              "py/id": 0
+            },
+            "jdharv": 0,
+            "jdplt": 0,
+            "jdstop": 0,
+            "rw": 0.0,
+            "mgtopt": 3,
+            "ncut": "",
+            "cut": "",
+            "ncycle": "",
+            "graze": ""
+          }
+        }
+      },
+      {
+        "py/object": "wepppy.wepp.management.managements.YearLoop",
+        "root": {
+          "py/id": 0
+        },
+        "name": "OFE3 Year 1",
+        "description": [
+          "(null)",
+          "(null)",
+          "(null)"
+        ],
+        "landuse": 1,
+        "ntill": null,
+        "data": {
+          "py/object": "wepppy.wepp.management.managements.YearLoopCropland",
+          "root": {
+            "py/id": 0
+          },
+          "itype": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": {
+              "py/id": 0
+            },
+            "section_type": {
+              "py/id": 11
+            },
+            "loop_name": "Tah_4899",
+            "this": {
+              "py/id": 34
+            }
+          },
+          "tilseq": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "conset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "drset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "imngmt": 2,
+          "annualfallow": "",
+          "perennial": {
+            "py/object": "wepppy.wepp.management.managements.YearLoopCroplandPerennial",
+            "root": {
+              "py/id": 0
+            },
+            "jdharv": 0,
+            "jdplt": 0,
+            "jdstop": 0,
+            "rw": 0.0,
+            "mgtopt": 3,
+            "ncut": "",
+            "cut": "",
+            "ncycle": "",
+            "graze": ""
+          }
+        }
+      },
+      {
+        "py/object": "wepppy.wepp.management.managements.YearLoop",
+        "root": {
+          "py/id": 0
+        },
+        "name": "OFE4 Year 1",
+        "description": [
+          "(null)",
+          "(null)",
+          "(null)"
+        ],
+        "landuse": 1,
+        "ntill": null,
+        "data": {
+          "py/object": "wepppy.wepp.management.managements.YearLoopCropland",
+          "root": {
+            "py/id": 0
+          },
+          "itype": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": {
+              "py/id": 0
+            },
+            "section_type": {
+              "py/id": 11
+            },
+            "loop_name": "Tah_4899",
+            "this": {
+              "py/id": 42
+            }
+          },
+          "tilseq": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "conset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "drset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "imngmt": 2,
+          "annualfallow": "",
+          "perennial": {
+            "py/object": "wepppy.wepp.management.managements.YearLoopCroplandPerennial",
+            "root": {
+              "py/id": 0
+            },
+            "jdharv": 0,
+            "jdplt": 0,
+            "jdstop": 0,
+            "rw": 0.0,
+            "mgtopt": 3,
+            "ncut": "",
+            "cut": "",
+            "ncycle": "",
+            "graze": ""
+          }
+        }
+      },
+      {
+        "py/object": "wepppy.wepp.management.managements.YearLoop",
+        "root": {
+          "py/id": 0
+        },
+        "name": "OFE5 Year 1",
+        "description": [
+          "(null)",
+          "(null)",
+          "(null)"
+        ],
+        "landuse": 1,
+        "ntill": null,
+        "data": {
+          "py/object": "wepppy.wepp.management.managements.YearLoopCropland",
+          "root": {
+            "py/id": 0
+          },
+          "itype": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": {
+              "py/id": 0
+            },
+            "section_type": {
+              "py/id": 11
+            },
+            "loop_name": "Tah_4899",
+            "this": {
+              "py/id": 50
+            }
+          },
+          "tilseq": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "conset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "drset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "imngmt": 2,
+          "annualfallow": "",
+          "perennial": {
+            "py/object": "wepppy.wepp.management.managements.YearLoopCroplandPerennial",
+            "root": {
+              "py/id": 0
+            },
+            "jdharv": 0,
+            "jdplt": 0,
+            "jdstop": 0,
+            "rw": 0.0,
+            "mgtopt": 3,
+            "ncut": "",
+            "cut": "",
+            "ncycle": "",
+            "graze": ""
+          }
+        }
+      },
+      {
+        "py/object": "wepppy.wepp.management.managements.YearLoop",
+        "root": {
+          "py/id": 0
+        },
+        "name": "OFE6 Year 1",
+        "description": [
+          "(null)",
+          "(null)",
+          "(null)"
+        ],
+        "landuse": 1,
+        "ntill": null,
+        "data": {
+          "py/object": "wepppy.wepp.management.managements.YearLoopCropland",
+          "root": {
+            "py/id": 0
+          },
+          "itype": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": {
+              "py/id": 0
+            },
+            "section_type": {
+              "py/id": 11
+            },
+            "loop_name": "Tah_4899",
+            "this": {
+              "py/id": 58
+            }
+          },
+          "tilseq": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "conset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "drset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "imngmt": 2,
+          "annualfallow": "",
+          "perennial": {
+            "py/object": "wepppy.wepp.management.managements.YearLoopCroplandPerennial",
+            "root": {
+              "py/id": 0
+            },
+            "jdharv": 0,
+            "jdplt": 0,
+            "jdstop": 0,
+            "rw": 0.0,
+            "mgtopt": 3,
+            "ncut": "",
+            "cut": "",
+            "ncycle": "",
+            "graze": ""
+          }
+        }
+      },
+      {
+        "py/object": "wepppy.wepp.management.managements.YearLoop",
+        "root": {
+          "py/id": 0
+        },
+        "name": "OFE7 Year 1",
+        "description": [
+          "(null)",
+          "(null)",
+          "(null)"
+        ],
+        "landuse": 1,
+        "ntill": null,
+        "data": {
+          "py/object": "wepppy.wepp.management.managements.YearLoopCropland",
+          "root": {
+            "py/id": 0
+          },
+          "itype": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": {
+              "py/id": 0
+            },
+            "section_type": {
+              "py/id": 11
+            },
+            "loop_name": "Tah_4899",
+            "this": {
+              "py/id": 66
+            }
+          },
+          "tilseq": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "conset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "drset": {
+            "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+            "root": null,
+            "section_type": null,
+            "loop_name": null,
+            "this": null
+          },
+          "imngmt": 2,
+          "annualfallow": "",
+          "perennial": {
+            "py/object": "wepppy.wepp.management.managements.YearLoopCroplandPerennial",
+            "root": {
+              "py/id": 0
+            },
+            "jdharv": 0,
+            "jdplt": 0,
+            "jdstop": 0,
+            "rw": 0.0,
+            "mgtopt": 3,
+            "ncut": "",
+            "cut": "",
+            "ncycle": "",
+            "graze": ""
+          }
+        }
+      }
+    ]
+  },
+  "man": {
+    "py/object": "wepppy.wepp.management.managements.ManagementLoop",
+    "root": {
+      "py/id": 0
+    },
+    "name": "Manage",
+    "description": [
+      "description 1",
+      "description 2",
+      "description 3"
+    ],
+    "nofes": 7,
+    "ofeindx": {
+      "py/object": "wepppy.wepp.management.managements.Loops",
+      "root": null,
+      "py/seq": [
+        {
+          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+          "root": {
+            "py/id": 0
+          },
+          "section_type": {
+            "py/reduce": [
+              {
+                "py/type": "wepppy.wepp.management.managements.SectionType"
+              },
+              {
+                "py/tuple": [
+                  3
+                ]
+              }
+            ]
+          },
+          "loop_name": "Tah_4089",
+          "this": {
+            "py/id": 72
+          }
+        },
+        {
+          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+          "root": {
+            "py/id": 0
+          },
+          "section_type": {
+            "py/id": 76
+          },
+          "loop_name": "Tah_4089",
+          "this": {
+            "py/id": 72
+          }
+        },
+        {
+          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+          "root": {
+            "py/id": 0
+          },
+          "section_type": {
+            "py/id": 76
+          },
+          "loop_name": "Tah_4089",
+          "this": {
+            "py/id": 72
+          }
+        },
+        {
+          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+          "root": {
+            "py/id": 0
+          },
+          "section_type": {
+            "py/id": 76
+          },
+          "loop_name": "Tah_4089",
+          "this": {
+            "py/id": 72
+          }
+        },
+        {
+          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+          "root": {
+            "py/id": 0
+          },
+          "section_type": {
+            "py/id": 76
+          },
+          "loop_name": "Tah_4089",
+          "this": {
+            "py/id": 72
+          }
+        },
+        {
+          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+          "root": {
+            "py/id": 0
+          },
+          "section_type": {
+            "py/id": 76
+          },
+          "loop_name": "Tah_4089",
+          "this": {
+            "py/id": 72
+          }
+        },
+        {
+          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+          "root": {
+            "py/id": 0
+          },
+          "section_type": {
+            "py/id": 76
+          },
+          "loop_name": "Tah_4089",
+          "this": {
+            "py/id": 72
+          }
+        }
+      ]
+    },
+    "loops": {
+      "py/object": "wepppy.wepp.management.managements.Loops",
+      "root": null,
+      "py/seq": [
+        {
+          "py/object": "wepppy.wepp.management.managements.ManagementLoopMan",
+          "root": {
+            "py/id": 0
+          },
+          "parent": {
+            "py/id": 72
+          },
+          "years": {
+            "py/object": "wepppy.wepp.management.managements.Loops",
+            "root": null,
+            "py/seq": [
+              {
+                "py/object": "wepppy.wepp.management.managements.Loops",
+                "root": null,
+                "py/seq": [
+                  {
+                    "py/object": "wepppy.wepp.management.managements.ManagementLoopManLoop",
+                    "root": {
+                      "py/id": 0
+                    },
+                    "parent": {
+                      "py/id": 84
+                    },
+                    "nycrop": 1,
+                    "_year": 1,
+                    "_ofe": 1,
+                    "manindx": {
+                      "py/object": "wepppy.wepp.management.managements.Loops",
+                      "root": null,
+                      "py/seq": [
+                        {
+                          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+                          "root": {
+                            "py/id": 0
+                          },
+                          "section_type": {
+                            "py/reduce": [
+                              {
+                                "py/type": "wepppy.wepp.management.managements.SectionType"
+                              },
+                              {
+                                "py/tuple": [
+                                  7
+                                ]
+                              }
+                            ]
+                          },
+                          "loop_name": "Year 1",
+                          "this": {
+                            "py/id": 87
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "py/object": "wepppy.wepp.management.managements.ManagementLoopManLoop",
+                    "root": {
+                      "py/id": 0
+                    },
+                    "parent": {
+                      "py/id": 84
+                    },
+                    "nycrop": 1,
+                    "_year": 1,
+                    "_ofe": 2,
+                    "manindx": {
+                      "py/object": "wepppy.wepp.management.managements.Loops",
+                      "root": null,
+                      "py/seq": [
+                        {
+                          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+                          "root": {
+                            "py/id": 0
+                          },
+                          "section_type": {
+                            "py/id": 90
+                          },
+                          "loop_name": "OFE2 Year 1",
+                          "this": {
+                            "py/id": 91
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "py/object": "wepppy.wepp.management.managements.ManagementLoopManLoop",
+                    "root": {
+                      "py/id": 0
+                    },
+                    "parent": {
+                      "py/id": 84
+                    },
+                    "nycrop": 1,
+                    "_year": 1,
+                    "_ofe": 3,
+                    "manindx": {
+                      "py/object": "wepppy.wepp.management.managements.Loops",
+                      "root": null,
+                      "py/seq": [
+                        {
+                          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+                          "root": {
+                            "py/id": 0
+                          },
+                          "section_type": {
+                            "py/id": 90
+                          },
+                          "loop_name": "OFE3 Year 1",
+                          "this": {
+                            "py/id": 94
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "py/object": "wepppy.wepp.management.managements.ManagementLoopManLoop",
+                    "root": {
+                      "py/id": 0
+                    },
+                    "parent": {
+                      "py/id": 84
+                    },
+                    "nycrop": 1,
+                    "_year": 1,
+                    "_ofe": 4,
+                    "manindx": {
+                      "py/object": "wepppy.wepp.management.managements.Loops",
+                      "root": null,
+                      "py/seq": [
+                        {
+                          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+                          "root": {
+                            "py/id": 0
+                          },
+                          "section_type": {
+                            "py/id": 90
+                          },
+                          "loop_name": "OFE4 Year 1",
+                          "this": {
+                            "py/id": 97
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "py/object": "wepppy.wepp.management.managements.ManagementLoopManLoop",
+                    "root": {
+                      "py/id": 0
+                    },
+                    "parent": {
+                      "py/id": 84
+                    },
+                    "nycrop": 1,
+                    "_year": 1,
+                    "_ofe": 5,
+                    "manindx": {
+                      "py/object": "wepppy.wepp.management.managements.Loops",
+                      "root": null,
+                      "py/seq": [
+                        {
+                          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+                          "root": {
+                            "py/id": 0
+                          },
+                          "section_type": {
+                            "py/id": 90
+                          },
+                          "loop_name": "OFE5 Year 1",
+                          "this": {
+                            "py/id": 100
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "py/object": "wepppy.wepp.management.managements.ManagementLoopManLoop",
+                    "root": {
+                      "py/id": 0
+                    },
+                    "parent": {
+                      "py/id": 84
+                    },
+                    "nycrop": 1,
+                    "_year": 1,
+                    "_ofe": 6,
+                    "manindx": {
+                      "py/object": "wepppy.wepp.management.managements.Loops",
+                      "root": null,
+                      "py/seq": [
+                        {
+                          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+                          "root": {
+                            "py/id": 0
+                          },
+                          "section_type": {
+                            "py/id": 90
+                          },
+                          "loop_name": "OFE6 Year 1",
+                          "this": {
+                            "py/id": 103
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "py/object": "wepppy.wepp.management.managements.ManagementLoopManLoop",
+                    "root": {
+                      "py/id": 0
+                    },
+                    "parent": {
+                      "py/id": 84
+                    },
+                    "nycrop": 1,
+                    "_year": 1,
+                    "_ofe": 7,
+                    "manindx": {
+                      "py/object": "wepppy.wepp.management.managements.Loops",
+                      "root": null,
+                      "py/seq": [
+                        {
+                          "py/object": "wepppy.wepp.management.managements.ScenarioReference",
+                          "root": {
+                            "py/id": 0
+                          },
+                          "section_type": {
+                            "py/id": 90
+                          },
+                          "loop_name": "OFE7 Year 1",
+                          "this": {
+                            "py/id": 106
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
