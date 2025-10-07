@@ -4,6 +4,7 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+from functools import partial
 
 import re
 
@@ -141,7 +142,7 @@ def _extract_tokens(lines: List[str]) -> tuple[List[str], List[str], List[str]]:
     return header_tokens, unit_tokens, data_lines
 
 
-def _parse_ebe_file(path: Path) -> pa.Table:
+def _parse_ebe_file(path: Path, *, start_year: int | None = None) -> pa.Table:
     match = EBE_FILE_RE.match(path.name)
     if not match:
         raise ValueError(f"Unrecognized EBE filename pattern: {path}")
@@ -165,12 +166,13 @@ def _parse_ebe_file(path: Path) -> pa.Table:
 
         day_of_month = int(tokens[0])
         month = int(tokens[1])
-        year = int(tokens[2])
-        try:
-            julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
-        except ValueError:
-            print(f'error on line "{raw_line}", {year}, {month}, {day_of_month}')
-            raise
+        raw_year = int(tokens[2])
+        if start_year is not None and raw_year < 1000:
+            year = start_year + raw_year - 1
+        else:
+            year = raw_year
+            
+        julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
         water_year = int(determine_wateryear(year, julian))
 
         row: Dict[str, object] = {
@@ -191,7 +193,7 @@ def _parse_ebe_file(path: Path) -> pa.Table:
     return table
 
 
-def run_wepp_hillslope_ebe_interchange(wepp_output_dir: Path | str) -> Path:
+def run_wepp_hillslope_ebe_interchange(wepp_output_dir: Path | str, *, start_year: int | None = None) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
@@ -201,5 +203,10 @@ def run_wepp_hillslope_ebe_interchange(wepp_output_dir: Path | str) -> Path:
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.ebe.parquet"
 
-    write_parquet_with_pool(ebe_files, _parse_ebe_file, SCHEMA, target_path, empty_table=EMPTY_TABLE)
+    if start_year is None:
+        parser = _parse_ebe_file
+    else:
+        parser = partial(_parse_ebe_file, start_year=start_year)
+
+    write_parquet_with_pool(ebe_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path
