@@ -1088,7 +1088,7 @@ class YearLoopCroplandAnnualFallow(ScenarioBase):
    rw:{0.rw:0.5f} \t# Row width (rw)
    resmgt:{0.resmgt} \t# Residue management option (resmgt)
    {data}
-""".format(self, data=repr(data))
+""".format(self, data=repr(self.data))
 
 
 class YearLoopCroplandPerennialCut(ScenarioBase):
@@ -2420,6 +2420,209 @@ man:{man}
     years=repr(self.years),
     man=repr(self.man)
 )
+
+    def operations_report(self):
+        """Return a chronological list of operations applied in this management."""
+
+        def _resolve(reference):
+            if not isinstance(reference, ScenarioReference):
+                return None
+            if reference.section_type is None or reference.loop_name is None:
+                return None
+
+            lookup = {
+                SectionType.Plant: getattr(self, 'plants', None),
+                SectionType.Op: getattr(self, 'ops', None),
+                SectionType.Ini: getattr(self, 'inis', None),
+                SectionType.Surf: getattr(self, 'surfs', None),
+                SectionType.Contour: getattr(self, 'contours', None),
+                SectionType.Drain: getattr(self, 'drains', None),
+                SectionType.Year: getattr(self, 'years', None),
+            }.get(reference.section_type)
+
+            if not lookup:
+                return None
+
+            for loop in lookup:
+                if getattr(loop, 'name', None) == reference.loop_name:
+                    return loop
+
+            return None
+
+        def _julian_value(value):
+            if value is None:
+                return None
+            if isinstance(value, Julian):
+                return int(value.julian)
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                return None
+
+        def _format_julian(value):
+            if isinstance(value, Julian):
+                return f"{value.julian:03d} ({value.month:02d}-{value.day:02d})"
+            if isinstance(value, int):
+                return f"{value:03d}"
+            try:
+                ivalue = int(value)
+            except (TypeError, ValueError):
+                return None
+            return f"{ivalue:03d}"
+
+        if not getattr(self, 'man', None):
+            return []
+
+        self.setroot()
+
+        report = []
+
+        for rotation_index, rotation in enumerate(self.man.loops, start=1):
+            for year_index, year_block in enumerate(rotation.years, start=1):
+                for ofe_index, management_loop in enumerate(year_block, start=1):
+                    for crop_index, year_reference in enumerate(management_loop.manindx, start=1):
+                        year_loop = _resolve(year_reference)
+                        if year_loop is None:
+                            continue
+
+                        year_loop_data = getattr(year_loop, 'data', None)
+                        plant_loop = None
+                        crop_display_name = None
+                        crop_description = None
+                        plant_loop_name = None
+                        if year_loop_data is not None and hasattr(year_loop_data, 'itype'):
+                            plant_loop = _resolve(year_loop_data.itype)
+                            if plant_loop is not None:
+                                crop_description = list(getattr(plant_loop, 'description', []) or [])
+                                plant_loop_name = getattr(plant_loop, 'name', None)
+                                if crop_description:
+                                    crop_display_name = crop_description[0].strip()
+                                else:
+                                    crop_display_name = plant_loop_name
+
+                        surf_loop = None
+                        surf_loop_name = None
+                        surf_loop_description = None
+                        operations_sequence = []
+                        if year_loop_data is not None and hasattr(year_loop_data, 'tilseq'):
+                            surf_loop = _resolve(year_loop_data.tilseq)
+                            if surf_loop is not None:
+                                surf_loop_name = getattr(surf_loop, 'name', None)
+                                surf_loop_description = list(getattr(surf_loop, 'description', []) or [])
+                                operations_sequence = list(getattr(surf_loop, 'data', []) or [])
+
+                        if not operations_sequence:
+                            continue
+
+                        for op_index, surf_step in enumerate(operations_sequence, start=1):
+                            op_reference = getattr(surf_step, 'op', None)
+                            op_loop = _resolve(op_reference) if op_reference else None
+                            op_name = getattr(op_loop, 'name', None)
+                            op_description_lines = list(getattr(op_loop, 'description', []) or []) if op_loop else None
+
+                            op_data = getattr(op_loop, 'data', None)
+                            op_code = getattr(op_data, 'pcode', None) if op_data is not None else None
+                            op_loop_name = getattr(op_loop, 'name', None)
+
+                            mdate = getattr(surf_step, 'mdate', None)
+                            julian_value = _julian_value(mdate)
+                            date_display = _format_julian(mdate)
+                            if date_display:
+                                date_display += '-' + str(year_index)
+                                
+                            report.append({
+                                'rotation': rotation_index,
+                                'year': year_index,
+                                'ofe': ofe_index,
+                                'crop_sequence': crop_index,
+                                'operation_sequence': op_index,
+                                'julian_day': julian_value,
+                                'date': date_display,
+                                'operation': op_name,
+                                'operation_description': op_description_lines[0].strip() if op_description_lines else None,
+                                'operation_description_lines': op_description_lines,
+                                'operation_code': op_code,
+                                'crop': crop_display_name,
+                                'crop_description_lines': crop_description,
+                                'crop_loop': plant_loop_name,
+                                'year_loop': getattr(year_loop, 'name', None),
+                                'year_loop_description_lines': list(getattr(year_loop, 'description', []) or []),
+                                'surface_loop': surf_loop_name,
+                                'surface_loop_description_lines': surf_loop_description,
+                                'operation_loop': op_loop_name,
+                                'operation_loop_description_lines': op_description_lines,
+                            })
+
+        report.sort(key=lambda row: (
+            row['rotation'],
+            row['year'],
+            row['crop_sequence'],
+            row['julian_day'] if row['julian_day'] is not None else -1,
+            row['operation_sequence'],
+        ))
+
+        return report
+
+
+    def operations_report_cli(self):
+        """Return a simplified text table of key operation details."""
+
+        rows = self.operations_report()
+        if not rows:
+            return 'No operations scheduled.'
+
+        columns = (
+            ('Date', 'date'),
+            ('OFE', 'ofe'),
+            ('Operation', 'operation'),
+            ('Crop', 'crop'),
+        )
+
+        def _stringify(value, default=''):
+            if value is None:
+                return default
+            return str(value)
+
+        width = {}
+        for header, key in columns:
+            width[header] = len(header)
+
+        table_rows = []
+        for row in rows:
+            printable = []
+            for header, key in columns:
+                if key == 'date':
+                    value = row.get('date') or (_stringify(row.get('julian_day')) if row.get('julian_day') else '')
+                elif key == 'operation':
+                    op_name = row.get('operation')
+                    op_desc = row.get('operation_description')
+                    if op_desc:
+                        op_desc = op_desc.replace('comment...', '').replace('comment: ', '')
+                    rendered_value = (op_desc or op_name or '')
+                    op_loop_name = row.get('operation_loop')
+                    if op_loop_name:
+                        rendered_value = f"{rendered_value} ({op_loop_name})" if rendered_value else f"({op_loop_name})"
+                    value = rendered_value
+                elif key == 'crop':
+                    display_name = row.get('crop')
+                    loop_name = row.get('crop_loop')
+                    rendered_value = display_name or ''
+                    if loop_name:
+                        rendered_value = f"{rendered_value} ({loop_name})" if rendered_value else f"({loop_name})"
+                    value = rendered_value
+                else:
+                    value = row.get(key)
+                rendered = _stringify(value)
+                printable.append(rendered)
+                width[header] = max(width[header], len(rendered))
+            table_rows.append(printable)
+
+        header_line = '  '.join(h.ljust(width[h]) for h, _ in columns)
+        separator_line = '  '.join('-' * width[h] for h, _ in columns)
+        data_lines = ['  '.join(value.ljust(width[header]) for value, (header, _) in zip(row, columns)) for row in table_rows]
+
+        return '\n'.join([header_line, separator_line, *data_lines])
+
 
 def merge_managements(mans):
     assert len(mans) > 1
