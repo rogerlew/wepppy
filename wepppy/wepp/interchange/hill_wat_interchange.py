@@ -7,9 +7,9 @@ from typing import Dict, List, Optional
 import re
 
 import pyarrow as pa
-import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
+from .concurrency import write_parquet_with_pool
 
 WAT_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 RAW_HEADER_SUBSTITUTIONS = (
@@ -75,6 +75,8 @@ SCHEMA = pa.schema(
         ("Area (m^2)", pa.float64()),
     ]
 )
+
+EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
 
 def _parse_float(token: str) -> float:
@@ -194,33 +196,5 @@ def run_wepp_hillslope_wat_interchange(wepp_output_dir: Path | str) -> Path:
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.wat.parquet"
 
-    if not wat_files:
-        empty_table = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
-        pq.write_table(empty_table, target_path)
-        return target_path
-
-    tmp_path = target_path.with_suffix(".tmp")
-    writer: Optional[pq.ParquetWriter] = None
-    try:
-        for wat_file in wat_files:
-            table = _parse_wat_file(wat_file)
-            if table.num_rows == 0:
-                continue
-            if writer is None:
-                writer = pq.ParquetWriter(tmp_path, SCHEMA, compression="snappy", use_dictionary=True)
-            writer.write_table(table)
-
-        if writer is None:
-            empty_table = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
-            pq.write_table(empty_table, tmp_path)
-        else:
-            writer.close()
-            writer = None
-        tmp_path.replace(target_path)
-    finally:
-        if writer is not None:
-            writer.close()
-        if tmp_path.exists() and not target_path.exists():
-            tmp_path.unlink()
-
+    write_parquet_with_pool(wat_files, _parse_wat_file, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

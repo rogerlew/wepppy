@@ -3,14 +3,14 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import re
 
 import pyarrow as pa
-import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
+from .concurrency import write_parquet_with_pool
 
 EBE_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 UNIT_SKIP_TOKENS = {"---", "--", "----"}
@@ -80,6 +80,8 @@ SCHEMA = pa.schema(
         ("ER", pa.float64()),
     ]
 )
+
+EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
 
 def _parse_float(token: str) -> float:
@@ -164,7 +166,11 @@ def _parse_ebe_file(path: Path) -> pa.Table:
         day_of_month = int(tokens[0])
         month = int(tokens[1])
         year = int(tokens[2])
-        julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
+        try:
+            julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
+        except ValueError:
+            print(f'error on line "{raw_line}", {year}, {month}, {day_of_month}')
+            raise
         water_year = int(determine_wateryear(year, julian))
 
         row: Dict[str, object] = {
@@ -195,33 +201,5 @@ def run_wepp_hillslope_ebe_interchange(wepp_output_dir: Path | str) -> Path:
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.ebe.parquet"
 
-    if not ebe_files:
-        table = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
-        pq.write_table(table, target_path)
-        return target_path
-
-    tmp_path = target_path.with_suffix(".tmp")
-    writer: Optional[pq.ParquetWriter] = None
-    try:
-        for ebe_file in ebe_files:
-            table = _parse_ebe_file(ebe_file)
-            if table.num_rows == 0:
-                continue
-            if writer is None:
-                writer = pq.ParquetWriter(tmp_path, SCHEMA, compression="snappy", use_dictionary=True)
-            writer.write_table(table)
-
-        if writer is None:
-            empty_table = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
-            pq.write_table(empty_table, tmp_path)
-        else:
-            writer.close()
-            writer = None
-        tmp_path.replace(target_path)
-    finally:
-        if writer is not None:
-            writer.close()
-        if tmp_path.exists() and not target_path.exists():
-            tmp_path.unlink()
-
+    write_parquet_with_pool(ebe_files, _parse_ebe_file, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path
