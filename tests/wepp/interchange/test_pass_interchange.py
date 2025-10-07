@@ -1,40 +1,86 @@
-import importlib.util
+from __future__ import annotations
+
 from pathlib import Path
 import shutil
+import threading
+import time
 
+import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-
-def _load_pass_module():
-    module_path = Path(__file__).resolve().parents[3] / "wepppy/wepp/interchange/pass_interchange.py"
-    spec = importlib.util.spec_from_file_location("pass_interchange", module_path)
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
+from wepppy.wepp.interchange.concurrency import write_parquet_with_pool
+from wepppy.wepp.interchange.hill_pass_interchange import (
+    SCHEMA,
+    run_wepp_hillslope_pass_interchange,
+)
 
 
-@pytest.fixture(scope="module")
-def pass_module():
-    return _load_pass_module()
+def _make_dummy_inputs(tmp_path: Path, count: int) -> list[Path]:
+    inputs: list[Path] = []
+    for idx in range(count):
+        path = tmp_path / f"{idx}.dat"
+        path.write_text(str(idx))
+        inputs.append(path)
+    return inputs
 
 
-def test_pass_interchange_writes_parquet(tmp_path, pass_module):
+def test_write_parquet_with_pool_concurrent(tmp_path: Path) -> None:
+    schema = pa.schema([("value", pa.int32())])
+    inputs = _make_dummy_inputs(tmp_path, 2)
+    barrier = threading.Barrier(len(inputs))
+
+    def parser(path: Path) -> pa.Table:
+        barrier.wait(timeout=5)
+        if path.stem == "0":
+            time.sleep(0.1)
+        return pa.table({"value": [int(path.stem)]}, schema=schema)
+
+    target = tmp_path / "pool.parquet"
+    write_parquet_with_pool(inputs, parser, schema, target, max_workers=2)
+
+    table = pq.read_table(target)
+    assert table.column("value").to_pylist() == [0, 1]
+
+
+def test_write_parquet_with_pool_handles_empty(tmp_path: Path) -> None:
+    schema = pa.schema([("value", pa.int32())])
+    target = tmp_path / "empty.parquet"
+
+    write_parquet_with_pool([], lambda _: NotImplemented, schema, target, max_workers=1)
+
+    table = pq.read_table(target)
+    assert table.num_rows == 0
+    assert table.schema == schema
+
+
+def test_write_parquet_with_pool_falls_back_when_tmp_invalid(tmp_path: Path) -> None:
+    schema = pa.schema([("value", pa.int32())])
+    inputs = _make_dummy_inputs(tmp_path, 1)
+
+    def parser(path: Path) -> pa.Table:
+        return pa.table({"value": [int(path.stem)]}, schema=schema)
+
+    bad_tmp = tmp_path / "not_a_dir.tmp"
+    bad_tmp.write_text("x")
+    target = tmp_path / "fallback.parquet"
+    write_parquet_with_pool(inputs, parser, schema, target, max_workers=1, tmp_dir=bad_tmp)
+
+    table = pq.read_table(target)
+    assert table.column("value").to_pylist() == [0]
+
+
+def test_hill_pass_interchange_writes_parquet(tmp_path: Path) -> None:
     src = Path("tests/wepp/interchange/test_project/output")
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
 
-    target = pass_module.run_wepp_hillslope_pass_interchange(workdir)
+    target = run_wepp_hillslope_pass_interchange(workdir)
     assert target.exists()
 
     table = pq.read_table(target)
-    assert table.schema == pass_module.SCHEMA
+    assert table.schema == SCHEMA
     assert table.num_rows > 0
-
-    interchange_dir = workdir / "interchange"
-    for name in ["H.ebe.parquet", "H.element.parquet", "H.loss.parquet", "H.soil.parquet", "H.wat.parquet"]:
-        assert (interchange_dir / name).exists()
 
     df = table.to_pandas()
     assert set(df["event"].unique()).issubset({"SUBEVENT", "NO EVENT"})
@@ -49,15 +95,13 @@ def test_pass_interchange_writes_parquet(tmp_path, pass_module):
     assert first_row["julian"] == first_row["day"]
 
 
-def test_pass_interchange_handles_missing_files(tmp_path, pass_module):
+def test_hill_pass_interchange_handles_missing_files(tmp_path: Path) -> None:
     workdir = tmp_path / "empty_output"
     workdir.mkdir()
 
-    target = pass_module.run_wepp_hillslope_pass_interchange(workdir)
-    table = pq.read_table(target)
-    assert table.schema == pass_module.SCHEMA
-    assert table.num_rows == 0
+    target = run_wepp_hillslope_pass_interchange(workdir)
+    assert target.exists()
 
-    interchange_dir = workdir / "interchange"
-    for name in ["H.ebe.parquet", "H.element.parquet", "H.loss.parquet", "H.soil.parquet", "H.wat.parquet"]:
-        assert (interchange_dir / name).exists()
+    table = pq.read_table(target)
+    assert table.schema == SCHEMA
+    assert table.num_rows == 0

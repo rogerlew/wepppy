@@ -1,32 +1,31 @@
-import importlib.util
 from pathlib import Path
 import shutil
 
 import pyarrow.parquet as pq
 import pytest
 
-
-def _load_wat_module():
-    module_path = Path(__file__).resolve().parents[3] / "wepppy/wepp/interchange/wat_interchange.py"
-    spec = importlib.util.spec_from_file_location("wat_interchange", module_path)
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
+from wepppy.wepp.interchange import concurrency as concurrency_module
+from wepppy.wepp.interchange import hill_wat_interchange as wat_module
 
 
-@pytest.fixture(scope="module")
-def wat_module():
-    return _load_wat_module()
-
-
-def test_wat_interchange_writes_parquet(tmp_path, wat_module):
+def test_wat_interchange_writes_parquet(tmp_path, monkeypatch):
     src = Path("tests/wepp/interchange/test_project/output")
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
 
+    calls = []
+
+    def _wrapper(files, parser, schema, target_path, **kwargs):
+        file_list = [Path(p) for p in files]
+        calls.append({"files": file_list, "schema": schema})
+        return concurrency_module.write_parquet_with_pool(file_list, parser, schema, target_path, **kwargs)
+
+    monkeypatch.setattr(wat_module, "write_parquet_with_pool", _wrapper)
+
     target = wat_module.run_wepp_hillslope_wat_interchange(workdir)
     assert target.exists()
+    assert calls
+    assert all(p.name.lower().endswith(".wat.dat") for p in calls[0]["files"])
 
     table = pq.read_table(target)
     assert table.schema == wat_module.SCHEMA
@@ -43,7 +42,7 @@ def test_wat_interchange_writes_parquet(tmp_path, wat_module):
     assert pytest.approx(first_row["P (mm)"], rel=1e-6) == 12.20
 
 
-def test_wat_interchange_handles_missing_files(tmp_path, wat_module):
+def test_wat_interchange_handles_missing_files(tmp_path):
     workdir = tmp_path / "empty_output"
     workdir.mkdir()
 

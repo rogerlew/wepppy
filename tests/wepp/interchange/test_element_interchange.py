@@ -1,26 +1,14 @@
-import importlib.util
 from pathlib import Path
 import shutil
 
 import pyarrow.parquet as pq
 import pytest
 
-
-def _load_element_module():
-    module_path = Path(__file__).resolve().parents[3] / "wepppy/wepp/interchange/element_interchange.py"
-    spec = importlib.util.spec_from_file_location("element_interchange", module_path)
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
+from wepppy.wepp.interchange import concurrency as concurrency_module
+from wepppy.wepp.interchange import hill_element_interchange as element_module
 
 
-@pytest.fixture(scope="module")
-def element_module():
-    return _load_element_module()
-
-
-def test_element_interchange_writes_parquet(tmp_path, element_module):
+def test_element_interchange_writes_parquet(tmp_path, monkeypatch):
     src = Path("tests/wepp/interchange/test_project/output")
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
@@ -35,8 +23,19 @@ def test_element_interchange_writes_parquet(tmp_path, element_module):
             break
     h1_path.write_text("\n".join(lines) + "\n")
 
+    calls = []
+
+    def _wrapper(files, parser, schema, target_path, **kwargs):
+        file_list = [Path(p) for p in files]
+        calls.append({"files": file_list, "schema": schema})
+        return concurrency_module.write_parquet_with_pool(file_list, parser, schema, target_path, **kwargs)
+
+    monkeypatch.setattr(element_module, "write_parquet_with_pool", _wrapper)
+
     target = element_module.run_wepp_hillslope_element_interchange(workdir)
     assert target.exists()
+    assert calls
+    assert all(p.name.lower().endswith(".element.dat") for p in calls[0]["files"])
 
     table = pq.read_table(target)
     assert table.schema == element_module.SCHEMA
@@ -55,7 +54,7 @@ def test_element_interchange_writes_parquet(tmp_path, element_module):
     assert first_row["Precip (mm)"] == pytest.approx(0.0)
 
 
-def test_element_interchange_handles_missing_files(tmp_path, element_module):
+def test_element_interchange_handles_missing_files(tmp_path):
     workdir = tmp_path / "empty_output"
     workdir.mkdir()
 
