@@ -46,6 +46,7 @@ import math
 import json
 import logging
 import html
+import traceback
 from html import escape as html_escape
 import sqlite3
 
@@ -60,6 +61,7 @@ import gzip
 from functools import lru_cache
 from pathlib import Path
 from datetime import datetime
+from http import HTTPStatus
 
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -631,7 +633,7 @@ def _generate_repr_content(path):
             return repr(soil)
     except Exception:
         _logger.exception('Failed to generate repr content for %s', path)
-        return None
+        raise
 
     return None
 
@@ -647,6 +649,32 @@ def _validate_filter_pattern(pattern):
         return True
     safe_pattern = r'^[a-zA-Z0-9_*?[\]\-\.]+$'
     return bool(re.match(safe_pattern, pattern))
+
+
+def _ensure_markup(value):
+    if isinstance(value, Markup):
+        return value
+    return Markup(value)
+
+
+def _render_browse_error_page(*,
+                              runid: str,
+                              config: str,
+                              diff_runid: str,
+                              breadcrumbs_html: str | Markup,
+                              project_href: str | Markup,
+                              error_message: str | Markup,
+                              page_title: str) -> str:
+    return render_template(
+        'browse/not_found.htm',
+        runid=runid,
+        config=config,
+        diff_runid=diff_runid,
+        breadcrumbs_html=_ensure_markup(breadcrumbs_html),
+        project_href=_ensure_markup(project_href),
+        error_message=_ensure_markup(error_message),
+        page_title=page_title,
+    )
 
 
 def _path_not_found_response(runid, subpath, wd, request, config):
@@ -703,20 +731,142 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     home_href = _prefix_path(f'/runs/{runid}/{config}')
     project_href = Markup(f'<a href="{home_href}">☁️</a> ')
 
-    return (
-        render_template(
-            'browse/not_found.htm',
-            runid=runid,
-            config=config,
-            diff_runid=diff_runid,
-            breadcrumbs_html=Markup(breadcrumbs_html),
-            project_href=project_href,
-            error_message=Markup(error_message),
-        ),
-        404,
+    page_html = _render_browse_error_page(
+        runid=runid,
+        config=config,
+        diff_runid=diff_runid,
+        breadcrumbs_html=breadcrumbs_html,
+        project_href=project_href,
+        error_message=error_message,
+        page_title='Not Found',
     )
 
-    
+    return page_html, 404
+
+
+async def browse_http_exception_handler(request: StarletteRequest, exc: HTTPException):
+    detail = exc.detail
+    if isinstance(detail, (dict, list)):
+        response = JSONResponse(detail, status_code=exc.status_code)
+    else:
+        if detail is None:
+            try:
+                detail = HTTPStatus(exc.status_code).phrase
+            except ValueError:
+                detail = 'Error'
+        response = PlainTextResponse(str(detail), status_code=exc.status_code)
+
+    if exc.headers:
+        response.headers.update(exc.headers)
+
+    return response
+
+
+def _format_exception_message(exc: BaseException) -> str:
+    try:
+        detail = str(exc)
+    except Exception:
+        detail = repr(exc)
+
+    if detail and detail != exc.__class__.__name__:
+        return f'{exc.__class__.__name__}: {detail}'
+    return exc.__class__.__name__
+
+
+def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
+    timestamp = datetime.now()
+
+    if runid:
+        try:
+            wd = os.path.abspath(get_wd(runid))
+        except Exception:
+            wd = None
+
+        if wd and _exists(wd):
+            try:
+                with open(_join(wd, 'exceptions.log'), 'a', encoding='utf-8') as fp:
+                    fp.write(f'[{timestamp}]\n')
+                    fp.write(stacktrace_text)
+                    fp.write('\n\n')
+            except OSError:
+                _logger.warning('Unable to append to run exception log for %s', runid, exc_info=True)
+
+    try:
+        with open('/var/log/exceptions.log', 'a', encoding='utf-8') as fp:
+            fp.write(f'[{timestamp}] ')
+            if runid:
+                fp.write(f'{runid}\n')
+            fp.write(stacktrace_text)
+            fp.write('\n\n')
+    except OSError:
+        _logger.debug('Unable to append to /var/log/exceptions.log', exc_info=True)
+
+
+async def browse_exception_handler(request: StarletteRequest, exc: Exception):
+    stacktrace_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+    stacktrace_text = ''.join(stacktrace_lines)
+    stacktrace_display = stacktrace_text.strip('\n')
+
+    runid = request.path_params.get('runid')
+    config = request.path_params.get('config')
+    diff_runid = request.query_params.get('diff', '')
+    subpath = request.path_params.get('subpath') or ''
+
+    _logger.exception('Unhandled exception for %s', request.url)
+    _log_exception_details(stacktrace_text, runid)
+
+    message = _format_exception_message(exc)
+    escaped_message = html_escape(message)
+    escaped_stacktrace = html_escape(stacktrace_display)
+
+    breadcrumbs = []
+    if runid and config:
+        base_browse_url = _prefix_path(f'/runs/{runid}/{config}/browse/')
+        diff_arg = f'?diff={diff_runid}' if diff_runid else ''
+        breadcrumbs.append(f'<a href="{base_browse_url}{diff_arg}"><b>{html_escape(runid)}</b></a>')
+
+        if subpath:
+            for part in [p for p in subpath.split('/') if p]:
+                breadcrumbs.append(f'<b>{html_escape(part)}</b>')
+    else:
+        breadcrumbs.append('<b>Browse</b>')
+
+    breadcrumbs.append('<b>Error</b>')
+    breadcrumbs.append('<input type="text" id="pathInput" placeholder="../output/p1.*" size="50">')
+    breadcrumbs_html = ' ❯ '.join(breadcrumbs)
+
+    if runid and config:
+        home_href = _prefix_path(f'/runs/{runid}/{config}')
+        project_href = Markup(f'<a href="{home_href}">☁️</a> ')
+    else:
+        project_href = Markup('')
+
+    error_message = f"""
+<div style="padding: 1em 0 0 2em;">
+    <h3 style="color: #d9534f;">500 - Internal Server Error</h3>
+    <p>{escaped_message}</p>
+    <details open>
+        <summary>Stack Trace</summary>
+        <pre style="white-space: pre-wrap; font-family: monospace;">{escaped_stacktrace}</pre>
+    </details>
+</div>"""
+
+    run_display = runid if runid else 'Browse'
+    config_display = config if config else ''
+
+    page_html = _render_browse_error_page(
+        runid=run_display,
+        config=config_display,
+        diff_runid=diff_runid,
+        breadcrumbs_html=breadcrumbs_html,
+        project_href=project_href,
+        error_message=error_message,
+        page_title='Server Error',
+    )
+
+    return HTMLResponse(page_html, status_code=500)
+
+
 async def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_default=''):
     """
     Helper function to handle common browse tree logic.
@@ -1209,8 +1359,12 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
         if path_lower.endswith('.tsv'):
             skiprows = 0
-            df = await asyncio.to_thread(pd.read_table, path, sep='\t', skiprows=skiprows)
-            html = await _async_df_to_html(df)
+            try:
+                df = await asyncio.to_thread(pd.read_table, path, sep='\t', skiprows=skiprows)
+            except Exception:
+                _logger.warning('Unable to parse TSV at %s; falling back to plain text view', path, exc_info=True)
+            else:
+                html = await _async_df_to_html(df)
 
         if html is not None:
             table_markup = Markup(html)
@@ -1290,7 +1444,12 @@ def create_app():
     routes.extend(create_download_routes(_prefix_path))
     routes.extend(create_gdalinfo_routes(_prefix_path))
 
-    return Starlette(routes=routes)
+    exception_handlers = {
+        HTTPException: browse_http_exception_handler,
+        Exception: browse_exception_handler,
+    }
+
+    return Starlette(routes=routes, exception_handlers=exception_handlers)
 
 
 app = create_app()
