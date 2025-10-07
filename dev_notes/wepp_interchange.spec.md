@@ -111,6 +111,7 @@ The legacy parsers live under `wepppy/wepp/out/` and act as data brokers for oth
 - 2025-02-17: Landed dedicated hillslope interchange writers (`hill_ebe_interchange.py`, `hill_element_interchange.py`, `hill_loss_interchange.py`, `hill_soil_interchange.py`, `hill_wat_interchange.py`) with Arrow schemas mirroring WEPP column labels. Added regression coverage per product.
 - 2025-02-17: Elevated orchestration via `run_wepp_hillslope_pass_interchange`/`run_wepp_hillslope_interchange` so a single call materializes all hillslope parquet artifacts beneath `wepp/output/interchange/`. Tests now assert every parquet target is emitted when PASS runs.
 - 2025-02-20: Added worker-pool helper integration across all hillslope writers with `/dev/shm` staging, taught EBE parsing to accept a `start_year` offset for 1-indexed WEPP years, and refreshed the interchange tests to assert the concurrent fan-out path.
+- 2025-02-21: Swapped the thread pool for a `ProcessPoolExecutor` plus a streaming writer queue so parsing and parquet emission overlap fully. End-to-end runtime on `/wc1/runs/co/copacetic-note/wepp/ag_fields/output/` dropped from ~5,360 s to ~469 s (≈11× faster), leaving raw file I/O as the primary cost.
 
 ```
 >>> pd.read_parquet('/workdir/wepppy/tests/wepp/interchange/test_project/output/interchange/H.element.parquet').info()
