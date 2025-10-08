@@ -13,6 +13,18 @@
 - **Canonical IDs**: include `wepp_id` (hillslope integer), `ofe_id` (when applicable), and a unified date bundle: `year`, `month`, `day`, `julian`, `water_year`.
 - Writers now stream their source text in configurable chunks (default 250k–500k rows) and flush via `pyarrow.ParquetWriter`. Memory use remains bounded on very large watersheds and single-row files still emit an empty table with the expected schema metadata.
 
+## Schema Standardization
+- All interchange writers share a single helper (`schema_utils.pa_field`) so column units and descriptions are embedded as Arrow metadata instead of being encoded in column names. Downstream consumers can inspect these attributes directly (`field.metadata['units']`, `field.metadata['description']`).
+- Raw WEPP headers frequently duplicate names or include units (e.g. `Point`, `Point (m)_2`, `Precp (mm)`). Each module normalises the raw tokens to canonical column names for the parquet schema (see the alias tables in `hill_*_interchange.py` and `watershed_*_interchange.py`). Tests assert the canonical schema so that parquet readers never depend on legacy spellings.
+- Redundant date fields printed in the flat files (`DD`, `MM`, `YYYY`, etc.) are removed once the calendar bundle (`year`, `month`, `day_of_month`, `julian`, `water_year`) is derived. This keeps tables compact and avoids ambiguous duplicate columns.
+
+## Metadata Publishing
+- A helper (`generate_interchange_documentation` in `wepppy/wepp/interchange/documentation.py`) walks an interchange directory, collects each parquet schema, and emits a Markdown README. The README contains:
+  - a short product description (hillslopes first, then watershed artefacts),
+  - a schema table showing canonical column names, types, units, and descriptions sourced from the Arrow metadata, and
+  - a preview table (header row + units row + first few records with integer-friendly formatting).
+- The README is written to `<interchange>/README.md` by default after generation, ensuring users browsing the directory get human-readable context without opening the parquet files.
+- For ad-hoc scripting the function can be called with `to_readme_md=False` to simply return the Markdown string.
 ## Legacy Outputs and Source Mapping
 ### `chan.out` -> `chan.out.parquet`
 - Source: opened on unit 66 in `wepp-forest/src/wshinp.for:497`; peak-flow rows written in `wepp-forest/src/wshchr.for:633` via format 104 when `ichout` selects the Muskingum-Cunge report (sub-daily support depends on the user-configured channel timestep).
