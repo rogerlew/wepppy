@@ -79,6 +79,39 @@ def _write_impl(
 ) -> Path:
     tmp_path = _resolve_tmp_path(target, tmp_dir)
     tmp_persisted = False
+
+    def _write_serial() -> None:
+        writer: Optional[pq.ParquetWriter] = None
+        wrote_any_local = False
+        try:
+            for path in file_list:
+                table = parser(path)
+                if table.num_rows == 0:
+                    continue
+                if writer is None:
+                    writer = pq.ParquetWriter(
+                        tmp_path,
+                        schema,
+                        compression="snappy",
+                        use_dictionary=True,
+                        filesystem=_LOCAL_FILESYSTEM,
+                    )
+                table = table.combine_chunks()
+                writer.write_table(table)
+                wrote_any_local = True
+
+            if not wrote_any_local:
+                pq.write_table(
+                    empty_table,
+                    tmp_path,
+                    filesystem=_LOCAL_FILESYSTEM,
+                    compression="snappy",
+                    use_dictionary=True,
+                )
+        finally:
+            if writer is not None:
+                writer.close()
+
     try:
         if not file_list:
             pq.write_table(empty_table, tmp_path, filesystem=_LOCAL_FILESYSTEM, compression="snappy", use_dictionary=True)
@@ -88,7 +121,13 @@ def _write_impl(
 
         worker_count = max_workers or NCPU
         mp_context = _select_context()
-        result_queue = mp_context.SimpleQueue()
+        try:
+            result_queue = mp_context.SimpleQueue()
+        except PermissionError:
+            _write_serial()
+            tmp_persisted = True
+            _commit_tmp(tmp_path, target)
+            return target
         writer_state: dict[str, object] = {"exception": None, "wrote_any": False}
 
         def writer_loop() -> None:
