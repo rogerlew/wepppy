@@ -11,6 +11,7 @@
 - Watershed deliverables are the next scope after hillslope Parquet builds; goal is a unified `pw0` (project watershed 0) interchange bundle covering channel routing, water balance, event discharge, and watershed summaries.
 - Each project has a set of watershed (`pw0` / `ch(a)n*`) with 1 file for each output type.
 - **Canonical IDs**: include `wepp_id` (hillslope integer), `ofe_id` (when applicable), and a unified date bundle: `year`, `month`, `day`, `julian`, `water_year`.
+- Writers now stream their source text in configurable chunks (default 250k–500k rows) and flush via `pyarrow.ParquetWriter`. Memory use remains bounded on very large watersheds and single-row files still emit an empty table with the expected schema metadata.
 
 ## Legacy Outputs and Source Mapping
 ### `chan.out` -> `chan.out.parquet`
@@ -169,12 +170,14 @@ The legacy parsers live under `wepppy/wepp/out/` and act as data brokers for oth
 ## Test Assets
 - Mini project for unit tests: `tests/wepp/interchange/test_project/output/`. Contains representative hill files (`H1`, `H2`) plus watershed loss parquet snapshots for regression comparisons.
 - Use this dataset to validate new interchange writers and to backfill tests for legacy parity (e.g., cross-check `TotalWatSed2` metrics).
+- Process pool fixtures fall back to serial mode when the runtime disallows `fork`/`spawn`; tests assert both the streaming output and the fallback path (see `tests/wepp/interchange/test_pass_interchange.py` for the pattern).
 
 ## Open Questions / To Refine
 - Do we version schemas via Arrow metadata (e.g., `schema_version=1`)? : yes
 - How do we expose snow/ash augmentation in interchange (embed extra columns or separate Parquet)? : separate
 - What is the retention policy for the raw `wepp/output` folder once interchange completes—delete automatically or gated by config? : delete on wepp run
 - Confirm concurrency limits that play nicely with HPC environments (default worker count vs CPU detection). : CPU/manual tuning for now
+- Ensure chunk sizes remain tunable for watershed runs (default reviewed at 250k–500k rows); expose overrides if projects surface new bottlenecks.
 
 # Developer Log
 - 2025-02-14: Implemented `run_wepp_hillslope_pass_interchange` producing `H.pass.parquet` with Fortran-aligned field names, Julian-to-calendar enrichments, and zero-filling per event type. Added coverage at `tests/wepp/interchange/test_pass_interchange.py` and refreshed spec guidance for PASS outputs.
@@ -182,6 +185,8 @@ The legacy parsers live under `wepppy/wepp/out/` and act as data brokers for oth
 - 2025-02-17: Elevated orchestration via `run_wepp_hillslope_pass_interchange`/`run_wepp_hillslope_interchange` so a single call materializes all hillslope parquet artifacts beneath `wepp/output/interchange/`. Tests now assert every parquet target is emitted when PASS runs.
 - 2025-02-20: Added worker-pool helper integration across all hillslope writers with `/dev/shm` staging, taught EBE parsing to accept a `start_year` offset for 1-indexed WEPP years, and refreshed the interchange tests to assert the concurrent fan-out path.
 - 2025-02-21: Swapped the thread pool for a `ProcessPoolExecutor` plus a streaming writer queue so parsing and parquet emission overlap fully. End-to-end runtime on `/wc1/runs/co/copacetic-note/wepp/ag_fields/output/` dropped from ~5,360 s to ~469 s (≈11× faster), leaving raw file I/O as the primary cost.
+- 2025-02-24: Added watershed counterparts to the streaming writers (chan/chanwb/chan_peak/ebe/soil/pass) and introduced `run_wepp_watershed_interchange` with threaded fan-out. All writers now flush via chunked `ParquetWriter` calls and fall back to serial mode when the sandbox blocks process pools.
+- 2025-02-24: Hardened `write_parquet_with_pool` with a serial fallback when multiprocessing semaphores are unavailable; updated tests to encode per-file delays rather than cross-process barriers so concurrency assumptions hold across Python start methods.
 
 
 ```
