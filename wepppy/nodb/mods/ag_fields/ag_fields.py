@@ -511,7 +511,7 @@ class AgFields(NoDbBase):
                 man_2017_1 = read_management(man_path)
                 man_fn = _split(man_path)[-1]
                 _man = downgrade_to_98_4_format(man_2017_1, _join(self.plant_files_dir, man_fn),
-                                                first_year_only=True)
+                                                first_year_only=False)
                 self.logger.info(f'. Downgraded {man_fn} to 98.4 format')
 
         valid_plant_files = []
@@ -830,7 +830,7 @@ class CropRotationManager:
             man = read_management(self.rotation_lookup[crop].man_path)
             stack.append(man)
             
-        full_rotation = ManagementRotationSynth(stack)
+        full_rotation = ManagementRotationSynth(stack, mode='stack-and-merge')
         full_rotation.write(man_filepath)
                 
 _thisdir = os.path.dirname(__file__)
