@@ -3,7 +3,7 @@ import os
 import sys
 import rasterio
 
-from collections import deque
+from collections import deque, defaultdict
 import math
 from osgeo import gdal, osr
 import utm
@@ -12,6 +12,8 @@ import numpy as np
 import pandas as pd
 import json
 import inspect
+from functools import wraps
+from typing import Callable, Optional
 
 from wepppy.all_your_base.geo import get_utm_zone, utm_srid
 
@@ -20,8 +22,8 @@ from wepppy.topo.watershed_abstraction.support import (
     polygonize_subcatchments,
     json_to_wgs,
 )
+from wepppy.topo.wbt.wbt_documentation import generate_wbt_documentation
 
-sys.path.append("/Users/roger/src/whitebox-tools/WBT/")
 from whitebox_tools import WhiteboxTools
 
 _outlet_template_geojson = """{{
@@ -66,6 +68,33 @@ def remove_if_exists(fn):
         os.remove(fn)
 
 
+def build_step(step_name=None):
+    """
+    Decorator for tagging build steps and invoking registered hooks.
+    """
+
+    def decorator(func):
+        name = step_name or func.__name__
+
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            result = func(self, *args, **kwargs)
+            execute_hooks = getattr(self, "_execute_build_hooks", None)
+            if callable(execute_hooks):
+                execute_hooks(
+                    name,
+                    result=result,
+                    args=args,
+                    kwargs=kwargs,
+                )
+            return result
+
+        wrapper._build_step_name = name  # type: ignore[attr-defined]
+        return wrapper
+
+    return decorator
+
+
 class WhiteboxToolsTopazEmulator:
     def __init__(self, wbt_wd, dem_fn=None, verbose=True, raise_on_error=True, logger=None):
         if logger is not None:
@@ -93,6 +122,7 @@ class WhiteboxToolsTopazEmulator:
         self._raise_on_error = raise_on_error
 
         self._outlet = None  # Outlet object
+        self._build_hooks = defaultdict(list)
 
     @property
     def raise_on_error(self):
@@ -110,6 +140,65 @@ class WhiteboxToolsTopazEmulator:
         if not isinstance(value, bool):
             raise ValueError("raise_on_error must be a boolean value")
         self._raise_on_error = value
+
+    def register_build_hook(self, step_name: str, hook: Callable[..., None]):
+        """
+        Register a callable to run after a build step completes.
+
+        Parameters
+        ----------
+        step_name : str
+            Identifier supplied via the ``@build_step`` decorator.
+        hook : Callable
+            Invoked as ``hook(emulator, step_name, result, args, kwargs)``.
+        """
+        if not callable(hook):
+            raise TypeError("hook must be callable")
+        step = str(step_name)
+        if not step:
+            raise ValueError("step_name must be a non-empty string")
+        self._build_hooks[step].append(hook)
+        return hook
+
+    def clear_build_hooks(self, step_name: Optional[str] = None):
+        """
+        Remove registered build hooks.
+
+        Parameters
+        ----------
+        step_name : str, optional
+            When provided, clears hooks for that step only; otherwise clears all hooks.
+        """
+        if step_name is None:
+            self._build_hooks.clear()
+        else:
+            self._build_hooks.pop(str(step_name), None)
+
+    @property
+    def build_hooks(self) -> dict[str, tuple[Callable[..., None], ...]]:
+        """
+        Return a snapshot of registered hooks keyed by step name.
+        """
+        return {step: tuple(hooks) for step, hooks in self._build_hooks.items()}
+
+    def _execute_build_hooks(
+        self,
+        step_name: str,
+        *,
+        result=None,
+        args: tuple = (),
+        kwargs: Optional[dict] = None,
+    ):
+        """
+        Internal helper invoked by ``@build_step`` decorated methods.
+        """
+        hooks = self._build_hooks.get(step_name)
+        if not hooks:
+            return
+        if kwargs is None:
+            kwargs = {}
+        for hook in list(hooks):
+            hook(self, step_name, result, args, kwargs)
 
     @property
     def wbt(self):
@@ -352,6 +441,7 @@ class WhiteboxToolsTopazEmulator:
 
         del ds
 
+    @build_step("relief")
     def _create_relief(self, fill_or_breach="fill", blc_dist=None, logger=None):
         """
         Create a relief file from the DEM using WBT using either fill or breach method.
@@ -383,6 +473,7 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Relief file created successfully: {relief_fn}")
 
+    @build_step("flow_vector")
     def _create_flow_vector(self, logger=None):
         """
         Create a flow vector file from the relief file using WBT.
@@ -407,6 +498,7 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Flow vector file created successfully: {flovec_fn}")
 
+    @build_step("flow_accumulation")
     def _create_flow_accumulation(self, logger=None):
         """
         Create a flow accumulation file from the flow vector file using WBT.
@@ -439,6 +531,7 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Flow accumulation file created successfully: {floaccum_fn}")
 
+    @build_step("extract_streams")
     def _extract_streams(self, logger=None):
         """
         Extract streams from the flow accumulation file using WBT.
@@ -491,6 +584,7 @@ class WhiteboxToolsTopazEmulator:
             esri_pntr=False,
         )
 
+    @build_step("identify_stream_junctions")
     def _identify_stream_junctions(self, logger=None):
         """
         Identify stream junctions from the stream network file using WBT.
@@ -517,6 +611,7 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Stream junction file created successfully: {chnjnt_fn}")
 
+    @build_step("delineate_channels")
     def delineate_channels(self, csa=5.0, mcl=60.0, fill_or_breach="fill", blc_dist=None, logger=None):
         """
         Delineate channels from the DEM using WBT.
@@ -584,6 +679,7 @@ class WhiteboxToolsTopazEmulator:
         assert _exists(dst), dst
         return dst
 
+    @build_step("find_outlet")
     def set_outlet(self, lng, lat, pixelcoords=False, logger=None):
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -863,6 +959,7 @@ class WhiteboxToolsTopazEmulator:
         lng, lat = float(lng), float(lat)
         return lng, lat
 
+    @build_step("bound")
     def _create_bound(self, logger=None):
         """
         Create a bound raster from the DEM using WBT.
@@ -886,6 +983,7 @@ class WhiteboxToolsTopazEmulator:
 
         return bound_fn
 
+    @build_step("aspect")
     def _create_aspect(self, logger=None):
         """
         Create an aspect raster from the DEM using WBT.
@@ -907,6 +1005,7 @@ class WhiteboxToolsTopazEmulator:
 
         return aspect_fn
 
+    @build_step("flow_vector_slope")
     def _create_flow_vector_slope(self, logger=None):
         """
         Create a flow vector slope raster from the flow vector file using WBT.
@@ -928,6 +1027,7 @@ class WhiteboxToolsTopazEmulator:
 
         return fvslop_fn
 
+    @build_step("netw0")
     def _create_netw0(self, logger=None):
         """
         Create a netw0 raster from the stream network and bound using WBT.
@@ -950,6 +1050,7 @@ class WhiteboxToolsTopazEmulator:
 
         return netw0_fn
 
+    @build_step("distance_to_channel")
     def _create_distance_to_channel(self, logger=None):
         """
         Create a distance to channel raster from the stream network using WBT.
@@ -973,6 +1074,7 @@ class WhiteboxToolsTopazEmulator:
 
         return discha_fn
 
+    @build_step("strahler")
     def _create_strahler_order(self, logger=None):
         """
         Create a Strahler order raster from the stream network using WBT.
@@ -996,6 +1098,7 @@ class WhiteboxToolsTopazEmulator:
 
         return strahler_fn
 
+    @build_step("subcatchments")
     def _create_subcatchments(self, logger=None):
         """
         Create subcatchments from the stream network.
@@ -1061,6 +1164,7 @@ class WhiteboxToolsTopazEmulator:
         """
         return _join(self.wbt_wd, "channels.WGS.geojson")
 
+    @build_step("delineate_subcatchments")
     def delineate_subcatchments(self, logger=None):
         """
         Delineate subcatchments from the stream network and outlet.
@@ -1079,6 +1183,54 @@ class WhiteboxToolsTopazEmulator:
         polygonize_subcatchments(self.subwta, self.subwta_json, self.subcatchments_json)
         self._polygonize_channels(logger=logger)
 
+    @build_step("generate_documentation")
+    def generate_documentation(self, to_readme_md=True, logger=None):
+        """
+        Generate Markdown documentation for the current working directory.
+        """
+        if logger is not None:
+            func_name = inspect.currentframe().f_code.co_name
+            logger.info(
+                f"WhiteBoxToolsTopazEmulator.{func_name}(to_readme_md={to_readme_md})"
+            )
+
+        context = {}
+        if hasattr(self, "_dem"):
+            context["DEM"] = self._dem
+        context["EPSG"] = getattr(self, "epsg", None)
+        context["UTM zone"] = getattr(self, "utm_zone", None)
+        context["Hemisphere"] = getattr(self, "hemisphere", None)
+
+        if hasattr(self, "cellsize"):
+            context["Cell size (m)"] = self.cellsize
+        if hasattr(self, "num_cols"):
+            context["Raster columns"] = self.num_cols
+        if hasattr(self, "num_rows"):
+            context["Raster rows"] = self.num_rows
+        if hasattr(self, "minimum_elevation"):
+            context["Minimum elevation (m)"] = self.minimum_elevation
+        if hasattr(self, "maximum_elevation"):
+            context["Maximum elevation (m)"] = self.maximum_elevation
+
+        if self.csa is not None:
+            context["Channel source area (ha)"] = self.csa
+        if self.mcl is not None:
+            context["Minimum channel length (m)"] = self.mcl
+
+        outlet = getattr(self, "_outlet", None)
+        if outlet is not None:
+            lon, lat = outlet.actual_loc
+            context["Outlet (lon, lat)"] = f"{lon:.6f}, {lat:.6f}"
+            col, row = outlet.pixel_coords
+            context["Outlet pixel (col, row)"] = f"{col}, {row}"
+            context["Outlet offset (pixels)"] = outlet.distance_from_requested
+
+        return generate_wbt_documentation(
+            self.wbt_wd,
+            context=context,
+            to_readme_md=to_readme_md,
+        )
+
     def _read_chn_order_from_netw_tab(self, logger=None):
         """
         returns a dictionary of topaz ids strings and their order
@@ -1093,6 +1245,7 @@ class WhiteboxToolsTopazEmulator:
         return dict(zip([str(v) for v in tbl["topaz_id"]], 
                         [int(v) for v in tbl["order"]]))
 
+    @build_step("polygonize_channels")
     def _polygonize_channels(self, logger=None):
         from wepppy.topo.watershed_abstraction import WeppTopTranslator
 
