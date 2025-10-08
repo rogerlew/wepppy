@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
+<title>{{ filename }} - {{ runid }}</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown-light.css" integrity="sha512-CxC9MO8FBaaq8vl9yaXHjgWd7uXqx3pWMSBP3daioTTI0gpXijlypuMV67NoE1bPYMzj7ZSNNS0o+jFFdFodgA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+  :root {
+    color-scheme: light;
+  }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    background: #f6f8fa;
+    padding-top: 52px;
+    padding-bottom: 80px;
+  }
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #343a40;
+    color: #ecf0f1;
+    padding: 10px 16px;
+    box-sizing: border-box;
+    z-index: 1000;
+    font-size: 13px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  header .file-path {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: monospace;
+  }
+  .markdown-body {
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+    margin: 0 16px;
+    padding: 32px 32px 48px;
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(27, 31, 35, 0.1);
+    overflow-x: auto;
+  }
+  @media (max-width: 768px) {
+    body {
+      padding-top: 60px;
+    }
+    .markdown-body {
+      width: calc(100% - 24px);
+      padding: 20px 20px 32px;
+      margin: 0 12px;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="file-path"><strong>File:</strong> {{ path }}</div>
+</header>
+<main>
+  <article class="markdown-body">
+    {{ markdown_html | safe }}
+  </article>
+</main>
+{% include 'command-bar.htm' %}
+</body>
+</html>
