@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import errno
+import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
@@ -85,61 +87,108 @@ def _parse_float(token: str) -> float:
         return float(stripped)
 
 
-def _parse_chanwb_file(path: Path, *, start_year: int | None = None) -> pa.Table:
-    with path.open("r") as stream:
-        lines = stream.readlines()
+def _init_column_store() -> Dict[str, List]:
+    return {name: [] for name in SCHEMA.names}
 
-    header_idx = None
-    for idx, line in enumerate(lines):
-        if line.strip().startswith("OFE"):
-            header_idx = idx
-            break
 
-    if header_idx is None:
-        raise ValueError("Unable to locate header line in chnwb.txt")
+def _flush_chunk(store: Dict[str, List], writer: pq.ParquetWriter) -> None:
+    if not store["wepp_id"]:
+        return
+    table = pa.table(store, schema=SCHEMA)
+    writer.write_table(table)
+    store.clear()
+    store.update(_init_column_store())
 
-    data_lines = lines[header_idx + 3 :]
-    column_store: Dict[str, List] = {name: [] for name in SCHEMA.names}
 
-    for raw_line in data_lines:
-        stripped = raw_line.strip()
-        if not stripped or stripped.startswith("-"):
-            continue
+def _write_chanwb_parquet(
+    source: Path,
+    target: Path,
+    *,
+    start_year: int | None = None,
+    chunk_size: int = 250_000,
+) -> None:
+    tmp_target = target.with_suffix(f"{target.suffix}.tmp")
+    if tmp_target.exists():
+        tmp_target.unlink()
 
-        tokens = stripped.split()
-        if len(tokens) != 22:
-            continue
+    writer = pq.ParquetWriter(
+        tmp_target,
+        SCHEMA,
+        compression="snappy",
+        use_dictionary=True,
+    )
 
-        ofe = int(tokens[0])
-        julian = int(tokens[1])
-        sim_year = int(tokens[2])
+    store = _init_column_store()
+    row_counter = 0
+    header_found = False
+    data_offset = 0
 
-        if start_year is not None and sim_year < 1000:
-            year = start_year + sim_year - 1
-        else:
-            year = sim_year
+    try:
+        with source.open("r") as stream:
+            for idx, raw_line in enumerate(stream):
+                stripped = raw_line.strip()
+                if not header_found:
+                    if stripped.startswith("OFE"):
+                        header_found = True
+                        data_offset = idx + 3
+                    continue
+                if idx < data_offset:
+                    continue
 
-        date_obj = datetime(year, 1, 1) + timedelta(days=julian - 1)
-        month = date_obj.month
-        day_of_month = date_obj.day
-        water_year = int(determine_wateryear(year, julian))
+                if not stripped or stripped.startswith("-"):
+                    continue
 
-        column_store["wepp_id"].append(ofe)
-        column_store["julian"].append(julian)
-        column_store["year"].append(year)
-        column_store["simulation_year"].append(sim_year)
-        column_store["month"].append(month)
-        column_store["day_of_month"].append(day_of_month)
-        column_store["water_year"].append(water_year)
-        column_store["OFE"].append(ofe)
-        column_store["J"].append(julian)
-        column_store["Y"].append(sim_year)
+                tokens = stripped.split()
+                if len(tokens) != 22:
+                    continue
 
-        measurement_values = tokens[3:]
-        for (key, _units, _description), token in zip(MEASUREMENT_COLUMNS, measurement_values):
-            column_store[key].append(_parse_float(token))
+                ofe = int(tokens[0])
+                julian = int(tokens[1])
+                sim_year = int(tokens[2])
 
-    return pa.table(column_store, schema=SCHEMA)
+                if start_year is not None and sim_year < 1000:
+                    year = start_year + sim_year - 1
+                else:
+                    year = sim_year
+
+                date_obj = datetime(year, 1, 1) + timedelta(days=julian - 1)
+                store["wepp_id"].append(ofe)
+                store["julian"].append(julian)
+                store["year"].append(year)
+                store["simulation_year"].append(sim_year)
+                store["month"].append(date_obj.month)
+                store["day_of_month"].append(date_obj.day)
+                store["water_year"].append(int(determine_wateryear(year, julian)))
+                store["OFE"].append(ofe)
+                store["J"].append(julian)
+                store["Y"].append(sim_year)
+
+                measurement_values = tokens[3:]
+                for (key, _units, _description), token in zip(MEASUREMENT_COLUMNS, measurement_values):
+                    store[key].append(_parse_float(token))
+
+                row_counter += 1
+                if row_counter % chunk_size == 0:
+                    _flush_chunk(store, writer)
+
+        if store["wepp_id"]:
+            _flush_chunk(store, writer)
+        elif row_counter == 0:
+            writer.write_table(pa.table(_init_column_store(), schema=SCHEMA))
+    except Exception:
+        writer.close()
+        if tmp_target.exists():
+            tmp_target.unlink()
+        raise
+    else:
+        writer.close()
+        try:
+            tmp_target.replace(target)
+        except OSError as exc:
+            if exc.errno == errno.EXDEV:
+                shutil.move(str(tmp_target), str(target))
+            else:
+                raise
 
 
 def run_wepp_watershed_chanwb_interchange(
@@ -153,10 +202,8 @@ def run_wepp_watershed_chanwb_interchange(
     if not source.exists():
         raise FileNotFoundError(source)
 
-    table = _parse_chanwb_file(source, start_year=start_year)
-
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / CHANWB_PARQUET
-    pq.write_table(table, target, compression="snappy", use_dictionary=True)
+    _write_chanwb_parquet(source, target, start_year=start_year)
     return target

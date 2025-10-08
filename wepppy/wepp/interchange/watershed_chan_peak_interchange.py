@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import errno
+import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
@@ -11,6 +13,7 @@ from wepppy.all_your_base.hydro import determine_wateryear
 
 CHAN_PEAK_FILENAME = "chan.out"
 CHAN_PEAK_PARQUET = "chan.out.parquet"
+CHUNK_SIZE = 500_000
 
 
 def _field(name: str, dtype: pa.DataType, *, units: str | None = None, description: str | None = None) -> pa.Field:
@@ -35,7 +38,12 @@ SCHEMA = pa.schema(
         _field("Elmt_ID", pa.int32(), description="Channel element identifier"),
         _field("Chan_ID", pa.int32(), description="Channel ID reported by WEPP"),
         _field("Time (s)", pa.float64(), units="s", description="Time to peak discharge"),
-        _field("Peak_Discharge (m^3/s)", pa.float64(), units="m^3/s", description="Peak discharge within the reporting interval"),
+        _field(
+            "Peak_Discharge (m^3/s)",
+            pa.float64(),
+            units="m^3/s",
+            description="Peak discharge within the reporting interval",
+        ),
     ]
 )
 
@@ -57,57 +65,101 @@ def _parse_float(token: str) -> float:
         return float(stripped)
 
 
-def _parse_chan_peak_file(path: Path, *, start_year: int | None = None) -> pa.Table:
-    with path.open("r") as stream:
-        lines = stream.readlines()
+def _init_column_store() -> Dict[str, List]:
+    return {name: [] for name in SCHEMA.names}
 
-    data_start = None
-    for idx, line in enumerate(lines):
-        if line.strip().startswith("Year") and "Elmt_ID" in line:
-            data_start = idx + 1
-            break
 
-    if data_start is None:
-        raise ValueError("Unable to locate data header in chan.out")
+def _flush_chunk(store: Dict[str, List], writer: pq.ParquetWriter) -> None:
+    if not store["year"]:
+        return
+    table = pa.table(store, schema=SCHEMA)
+    writer.write_table(table)
+    store.clear()
+    store.update(_init_column_store())
 
-    column_store: Dict[str, List] = {name: [] for name in SCHEMA.names}
-    data_lines = lines[data_start:]
 
-    for raw_line in data_lines:
-        stripped = raw_line.strip()
-        if not stripped:
-            continue
-        tokens = stripped.split()
-        if len(tokens) != 6:
-            continue
+def _write_chan_peak_parquet(
+    source: Path,
+    target: Path,
+    *,
+    start_year: int | None = None,
+    chunk_size: int = CHUNK_SIZE,
+) -> None:
+    tmp_target = target.with_suffix(f"{target.suffix}.tmp")
+    if tmp_target.exists():
+        tmp_target.unlink()
 
-        sim_year = int(tokens[0])
-        julian = int(tokens[1])
-        elmt_id = int(tokens[2])
-        chan_id = int(tokens[3])
+    writer = pq.ParquetWriter(
+        tmp_target,
+        SCHEMA,
+        compression="snappy",
+        use_dictionary=True,
+    )
 
-        if start_year is not None and sim_year < 1000:
-            year = start_year + sim_year - 1
+    store = _init_column_store()
+    row_counter = 0
+    data_section = False
+
+    try:
+        with source.open("r") as stream:
+            for raw_line in stream:
+                stripped = raw_line.strip()
+                if not data_section:
+                    if stripped.startswith("Year") and "Elmt_ID" in stripped:
+                        data_section = True
+                    continue
+
+                if not stripped:
+                    continue
+
+                tokens = stripped.split()
+                if len(tokens) != 6:
+                    continue
+
+                sim_year = int(tokens[0])
+                julian = int(tokens[1])
+                elmt_id = int(tokens[2])
+                chan_id = int(tokens[3])
+
+                if start_year is not None and sim_year < 1000:
+                    year = start_year + sim_year - 1
+                else:
+                    year = sim_year
+
+                date_obj = datetime(year, 1, 1) + timedelta(days=julian - 1)
+                store["year"].append(year)
+                store["simulation_year"].append(sim_year)
+                store["julian"].append(julian)
+                store["month"].append(date_obj.month)
+                store["day_of_month"].append(date_obj.day)
+                store["water_year"].append(int(determine_wateryear(year, julian)))
+                store["Elmt_ID"].append(elmt_id)
+                store["Chan_ID"].append(chan_id)
+                store["Time (s)"].append(_parse_float(tokens[4]))
+                store["Peak_Discharge (m^3/s)"].append(_parse_float(tokens[5]))
+
+                row_counter += 1
+                if row_counter % chunk_size == 0:
+                    _flush_chunk(store, writer)
+
+        if store["year"]:
+            _flush_chunk(store, writer)
         else:
-            year = sim_year
-
-        date_obj = datetime(year, 1, 1) + timedelta(days=julian - 1)
-        month = date_obj.month
-        day_of_month = date_obj.day
-        water_year = int(determine_wateryear(year, julian))
-
-        column_store["year"].append(year)
-        column_store["simulation_year"].append(sim_year)
-        column_store["julian"].append(julian)
-        column_store["month"].append(month)
-        column_store["day_of_month"].append(day_of_month)
-        column_store["water_year"].append(water_year)
-        column_store["Elmt_ID"].append(elmt_id)
-        column_store["Chan_ID"].append(chan_id)
-        column_store["Time (s)"].append(_parse_float(tokens[4]))
-        column_store["Peak_Discharge (m^3/s)"].append(_parse_float(tokens[5]))
-
-    return pa.table(column_store, schema=SCHEMA)
+            writer.write_table(pa.table(_init_column_store(), schema=SCHEMA))
+    except Exception:
+        writer.close()
+        if tmp_target.exists():
+            tmp_target.unlink()
+        raise
+    else:
+        writer.close()
+        try:
+            tmp_target.replace(target)
+        except OSError as exc:
+            if exc.errno == errno.EXDEV:
+                shutil.move(str(tmp_target), str(target))
+            else:
+                raise
 
 
 def run_wepp_watershed_chan_peak_interchange(
@@ -121,11 +173,8 @@ def run_wepp_watershed_chan_peak_interchange(
     if not source.exists():
         raise FileNotFoundError(source)
 
-    table = _parse_chan_peak_file(source, start_year=start_year)
-
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / CHAN_PEAK_PARQUET
-    pq.write_table(table, target, compression="snappy", use_dictionary=True)
+    _write_chan_peak_parquet(source, target, start_year=start_year)
     return target
-

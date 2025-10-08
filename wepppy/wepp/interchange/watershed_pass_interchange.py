@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import re
+import errno
+import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, Iterator, List, Tuple
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -13,6 +15,7 @@ from wepppy.all_your_base.hydro import determine_wateryear
 PASS_FILENAME = "pass_pw0.txt"
 EVENTS_PARQUET = "pass_pw0.events.parquet"
 METADATA_PARQUET = "pass_pw0.metadata.parquet"
+EVENT_CHUNK_SIZE = 250_000
 
 _EVENT_LINE_RE = re.compile(r"(?P<label>[A-Z ]+?)\s+(?P<year>\d+)\s+(?P<day>\d+)")
 
@@ -24,20 +27,6 @@ def _parse_float(token: str) -> float:
     if stripped[0] == ".":
         stripped = f"0{stripped}"
     return float(stripped)
-
-
-def _collect_values(lines: List[str], start_idx: int, count: int) -> Tuple[List[float], int]:
-    values: List[float] = []
-    idx = start_idx
-    while len(values) < count:
-        if idx >= len(lines):
-            raise ValueError("Unexpected end of pass file while collecting numeric values.")
-        line = lines[idx].strip()
-        idx += 1
-        if not line:
-            continue
-        values.extend(_parse_float(token) for token in line.split())
-    return values[:count], idx
 
 
 def _julian_to_calendar(year: int, julian: int) -> Tuple[int, int]:
@@ -150,12 +139,34 @@ def _parse_metadata(header_lines: List[str]) -> Tuple[Dict[str, object], pa.Tabl
     return global_meta, metadata_table, npart, hillslope_ids, nhill
 
 
-def _parse_events(data_lines: List[str], hillslope_ids: List[int], nhill: int, npart: int) -> pa.Table:
-    column_store: Dict[str, List[object]] = {}
+class _ValueCollector:
+    def __init__(self, line_iter: Iterator[str]) -> None:
+        self._iter = line_iter
+        self._buffer: List[float] = []
 
-    def _init_column(name: str):
-        column_store[name] = []
+    def read(self, count: int) -> List[float]:
+        values: List[float] = []
+        while len(values) < count:
+            if self._buffer:
+                take = min(count - len(values), len(self._buffer))
+                values.extend(self._buffer[:take])
+                self._buffer = self._buffer[take:]
+                continue
 
+            try:
+                line = next(self._iter)
+            except StopIteration as exc:
+                raise ValueError("Unexpected end of pass file while collecting numeric values.") from exc
+
+            stripped = line.strip()
+            if not stripped:
+                continue
+            self._buffer.extend(_parse_float(token) for token in stripped.split())
+
+        return values
+
+
+def _build_event_columns(npart: int) -> Tuple[List[str], List[str], List[str]]:
     base_columns = [
         "event",
         "year",
@@ -180,157 +191,13 @@ def _parse_events(data_lines: List[str], hillslope_ids: List[int], nhill: int, n
         "gwbfv",
         "gwdsv",
     ]
-
     sed_columns = [f"sedcon_{idx + 1}" for idx in range(npart)]
     frc_columns = [f"frcflw_{idx + 1}" for idx in range(npart)]
-    all_columns = base_columns + sed_columns + frc_columns
+    return base_columns, sed_columns, frc_columns
 
-    for name in all_columns:
-        _init_column(name)
 
-    idx = 0
-    while idx < len(data_lines):
-        raw_line = data_lines[idx].strip()
-        if not raw_line:
-            idx += 1
-            continue
-
-        match = _EVENT_LINE_RE.match(raw_line)
-        if not match:
-            raise ValueError(f"Unrecognized event header line: {raw_line}")
-
-        label = match.group("label").strip()
-        year = int(match.group("year"))
-        julian = int(match.group("day"))
-        idx += 1
-
-        month, day_of_month = _julian_to_calendar(year, julian)
-        water_year = int(determine_wateryear(year, julian))
-
-        if label == "EVENT":
-            dur, idx = _collect_values(data_lines, idx, nhill)
-            tcs, idx = _collect_values(data_lines, idx, nhill)
-            oalpha, idx = _collect_values(data_lines, idx, nhill)
-            runoff, idx = _collect_values(data_lines, idx, nhill)
-            runvol, idx = _collect_values(data_lines, idx, nhill)
-            sbrunf, idx = _collect_values(data_lines, idx, nhill)
-            sbrunv, idx = _collect_values(data_lines, idx, nhill)
-            drainq, idx = _collect_values(data_lines, idx, nhill)
-            drrunv, idx = _collect_values(data_lines, idx, nhill)
-            peakro, idx = _collect_values(data_lines, idx, nhill)
-            tdet, idx = _collect_values(data_lines, idx, nhill)
-            tdep, idx = _collect_values(data_lines, idx, nhill)
-            sedcon_vals, idx = _collect_values(data_lines, idx, npart * nhill)
-            frcflw_vals, idx = _collect_values(data_lines, idx, npart * nhill)
-            gwbfv, idx = _collect_values(data_lines, idx, nhill)
-            gwdsv, idx = _collect_values(data_lines, idx, nhill)
-
-            for pos, wepp_id in enumerate(hillslope_ids):
-                row_sed = sedcon_vals[pos * npart : (pos + 1) * npart]
-                row_frc = frcflw_vals[pos * npart : (pos + 1) * npart]
-                for name, value in [
-                    ("event", label),
-                    ("year", year),
-                    ("day", julian),
-                    ("julian", julian),
-                    ("month", month),
-                    ("day_of_month", day_of_month),
-                    ("water_year", water_year),
-                    ("wepp_id", wepp_id),
-                    ("dur", dur[pos]),
-                    ("tcs", tcs[pos]),
-                    ("oalpha", oalpha[pos]),
-                    ("runoff", runoff[pos]),
-                    ("runvol", runvol[pos]),
-                    ("sbrunf", sbrunf[pos]),
-                    ("sbrunv", sbrunv[pos]),
-                    ("drainq", drainq[pos]),
-                    ("drrunv", drrunv[pos]),
-                    ("peakro", peakro[pos]),
-                    ("tdet", tdet[pos]),
-                    ("tdep", tdep[pos]),
-                    ("gwbfv", gwbfv[pos]),
-                    ("gwdsv", gwdsv[pos]),
-                ]:
-                    column_store[name].append(value)
-                for col_name, value in zip(sed_columns, row_sed):
-                    column_store[col_name].append(value)
-                for col_name, value in zip(frc_columns, row_frc):
-                    column_store[col_name].append(value)
-
-        elif label == "SUBEVENT":
-            sbrunf, idx = _collect_values(data_lines, idx, nhill)
-            sbrunv, idx = _collect_values(data_lines, idx, nhill)
-            drainq, idx = _collect_values(data_lines, idx, nhill)
-            drrunv, idx = _collect_values(data_lines, idx, nhill)
-            gwbfv, idx = _collect_values(data_lines, idx, nhill)
-            gwdsv, idx = _collect_values(data_lines, idx, nhill)
-
-            for pos, wepp_id in enumerate(hillslope_ids):
-                for name, value in [
-                    ("event", label),
-                    ("year", year),
-                    ("day", julian),
-                    ("julian", julian),
-                    ("month", month),
-                    ("day_of_month", day_of_month),
-                    ("water_year", water_year),
-                    ("wepp_id", wepp_id),
-                    ("dur", 0.0),
-                    ("tcs", 0.0),
-                    ("oalpha", 0.0),
-                    ("runoff", 0.0),
-                    ("runvol", 0.0),
-                    ("sbrunf", sbrunf[pos]),
-                    ("sbrunv", sbrunv[pos]),
-                    ("drainq", drainq[pos]),
-                    ("drrunv", drrunv[pos]),
-                    ("peakro", 0.0),
-                    ("tdet", 0.0),
-                    ("tdep", 0.0),
-                    ("gwbfv", gwbfv[pos]),
-                    ("gwdsv", gwdsv[pos]),
-                ]:
-                    column_store[name].append(value)
-                for col_name in sed_columns + frc_columns:
-                    column_store[col_name].append(0.0)
-
-        elif label == "NO EVENT":
-            gwbfv, idx = _collect_values(data_lines, idx, nhill)
-            gwdsv, idx = _collect_values(data_lines, idx, nhill)
-
-            for pos, wepp_id in enumerate(hillslope_ids):
-                for name, value in [
-                    ("event", label),
-                    ("year", year),
-                    ("day", julian),
-                    ("julian", julian),
-                    ("month", month),
-                    ("day_of_month", day_of_month),
-                    ("water_year", water_year),
-                    ("wepp_id", wepp_id),
-                    ("dur", 0.0),
-                    ("tcs", 0.0),
-                    ("oalpha", 0.0),
-                    ("runoff", 0.0),
-                    ("runvol", 0.0),
-                    ("sbrunf", 0.0),
-                    ("sbrunv", 0.0),
-                    ("drainq", 0.0),
-                    ("drrunv", 0.0),
-                    ("peakro", 0.0),
-                    ("tdet", 0.0),
-                    ("tdep", 0.0),
-                    ("gwbfv", gwbfv[pos]),
-                    ("gwdsv", gwdsv[pos]),
-                ]:
-                    column_store[name].append(value)
-                for col_name in sed_columns + frc_columns:
-                    column_store[col_name].append(0.0)
-
-        else:
-            raise ValueError(f"Unsupported pass file event label: {label}")
-
+def _build_event_schema(npart: int, meta: Dict[str, object], nhill: int) -> pa.Schema:
+    base_columns, sed_columns, frc_columns = _build_event_columns(npart)
     schema_fields = [
         pa.field("event", pa.string()),
         pa.field("year", pa.int16()),
@@ -358,45 +225,241 @@ def _parse_events(data_lines: List[str], hillslope_ids: List[int], nhill: int, n
 
     schema = pa.schema(schema_fields).with_metadata(
         {
-            b"npart": str(npart).encode(),
-            b"nhill": str(nhill).encode(),
+            b"version": str(meta["version"]).encode(),
+            b"nhill": str(meta["nhill"]).encode(),
+            b"max_years": str(meta["max_years"]).encode(),
+            b"begin_year": str(meta["begin_year"]).encode(),
+            b"npart": str(meta["npart"]).encode(),
         }
     )
+    return schema
 
-    return pa.table(column_store, schema=schema)
+
+def _init_event_store(column_names: Iterable[str]) -> Dict[str, List[object]]:
+    return {name: [] for name in column_names}
 
 
-def _parse_pass_file(path: Path) -> Tuple[pa.Table, pa.Table]:
-    with path.open("r") as stream:
-        lines = stream.readlines()
+def _flush_event_store(store: Dict[str, List[object]], writer: pq.ParquetWriter) -> None:
+    if not store["event"]:
+        return
+    table = pa.table(store, schema=writer.schema)
+    writer.write_table(table)
+    for key in store:
+        store[key] = []
 
-    stripped_lines = [line.rstrip("\n") for line in lines]
+
+def _write_events_parquet(
+    line_iter: Iterator[str],
+    hillslope_ids: List[int],
+    nhill: int,
+    npart: int,
+    global_meta: Dict[str, object],
+    target: Path,
+    *,
+    chunk_size: int = EVENT_CHUNK_SIZE,
+) -> None:
+    base_columns, sed_columns, frc_columns = _build_event_columns(npart)
+    column_order = base_columns + sed_columns + frc_columns
+    schema = _build_event_schema(npart, global_meta, nhill)
+
+    tmp_target = target.with_suffix(f"{target.suffix}.tmp")
+    if tmp_target.exists():
+        tmp_target.unlink()
+
+    writer = pq.ParquetWriter(
+        tmp_target,
+        schema,
+        compression="snappy",
+        use_dictionary=True,
+    )
+
+    store = _init_event_store(column_order)
+    value_reader = _ValueCollector(line_iter)
+    row_counter = 0
 
     try:
-        begin_idx = next(
-            idx for idx, line in enumerate(stripped_lines) if line.strip() == "BEGIN HILLSLOPE HYDROLOGY AND SEDIMENT INFORMATION"
-        )
-    except StopIteration:
+        for raw_line in line_iter:
+            stripped = raw_line.strip()
+            if not stripped:
+                continue
+
+            match = _EVENT_LINE_RE.match(stripped)
+            if not match:
+                raise ValueError(f"Unrecognized event header line: {raw_line}")
+
+            label = match.group("label").strip()
+            year = int(match.group("year"))
+            julian = int(match.group("day"))
+            month, day_of_month = _julian_to_calendar(year, julian)
+            water_year = int(determine_wateryear(year, julian))
+
+            if label == "EVENT":
+                dur = value_reader.read(nhill)
+                tcs = value_reader.read(nhill)
+                oalpha = value_reader.read(nhill)
+                runoff = value_reader.read(nhill)
+                runvol = value_reader.read(nhill)
+                sbrunf = value_reader.read(nhill)
+                sbrunv = value_reader.read(nhill)
+                drainq = value_reader.read(nhill)
+                drrunv = value_reader.read(nhill)
+                peakro = value_reader.read(nhill)
+                tdet = value_reader.read(nhill)
+                tdep = value_reader.read(nhill)
+                sedcon_vals = value_reader.read(npart * nhill) if npart else []
+                frcflw_vals = value_reader.read(npart * nhill) if npart else []
+                gwbfv = value_reader.read(nhill)
+                gwdsv = value_reader.read(nhill)
+
+                for pos, wepp_id in enumerate(hillslope_ids):
+                    store["event"].append(label)
+                    store["year"].append(year)
+                    store["day"].append(julian)
+                    store["julian"].append(julian)
+                    store["month"].append(month)
+                    store["day_of_month"].append(day_of_month)
+                    store["water_year"].append(water_year)
+                    store["wepp_id"].append(wepp_id)
+                    store["dur"].append(dur[pos])
+                    store["tcs"].append(tcs[pos])
+                    store["oalpha"].append(oalpha[pos])
+                    store["runoff"].append(runoff[pos])
+                    store["runvol"].append(runvol[pos])
+                    store["sbrunf"].append(sbrunf[pos])
+                    store["sbrunv"].append(sbrunv[pos])
+                    store["drainq"].append(drainq[pos])
+                    store["drrunv"].append(drrunv[pos])
+                    store["peakro"].append(peakro[pos])
+                    store["tdet"].append(tdet[pos])
+                    store["tdep"].append(tdep[pos])
+                    store["gwbfv"].append(gwbfv[pos])
+                    store["gwdsv"].append(gwdsv[pos])
+
+                    if npart:
+                        row_sed = sedcon_vals[pos * npart : (pos + 1) * npart]
+                        row_frc = frcflw_vals[pos * npart : (pos + 1) * npart]
+                        for col_name, value in zip(sed_columns, row_sed):
+                            store[col_name].append(value)
+                        for col_name, value in zip(frc_columns, row_frc):
+                            store[col_name].append(value)
+                    else:
+                        for col_name in sed_columns + frc_columns:
+                            store[col_name].append(0.0)
+
+                    row_counter += 1
+                    if row_counter % chunk_size == 0:
+                        _flush_event_store(store, writer)
+
+            elif label == "SUBEVENT":
+                sbrunf = value_reader.read(nhill)
+                sbrunv = value_reader.read(nhill)
+                drainq = value_reader.read(nhill)
+                drrunv = value_reader.read(nhill)
+                gwbfv = value_reader.read(nhill)
+                gwdsv = value_reader.read(nhill)
+
+                for pos, wepp_id in enumerate(hillslope_ids):
+                    store["event"].append(label)
+                    store["year"].append(year)
+                    store["day"].append(julian)
+                    store["julian"].append(julian)
+                    store["month"].append(month)
+                    store["day_of_month"].append(day_of_month)
+                    store["water_year"].append(water_year)
+                    store["wepp_id"].append(wepp_id)
+                    store["dur"].append(0.0)
+                    store["tcs"].append(0.0)
+                    store["oalpha"].append(0.0)
+                    store["runoff"].append(0.0)
+                    store["runvol"].append(0.0)
+                    store["sbrunf"].append(sbrunf[pos])
+                    store["sbrunv"].append(sbrunv[pos])
+                    store["drainq"].append(drainq[pos])
+                    store["drrunv"].append(drrunv[pos])
+                    store["peakro"].append(0.0)
+                    store["tdet"].append(0.0)
+                    store["tdep"].append(0.0)
+                    store["gwbfv"].append(gwbfv[pos])
+                    store["gwdsv"].append(gwdsv[pos])
+
+                    for col_name in sed_columns + frc_columns:
+                        store[col_name].append(0.0)
+
+                    row_counter += 1
+                    if row_counter % chunk_size == 0:
+                        _flush_event_store(store, writer)
+
+            elif label == "NO EVENT":
+                gwbfv = value_reader.read(nhill)
+                gwdsv = value_reader.read(nhill)
+
+                for pos, wepp_id in enumerate(hillslope_ids):
+                    store["event"].append(label)
+                    store["year"].append(year)
+                    store["day"].append(julian)
+                    store["julian"].append(julian)
+                    store["month"].append(month)
+                    store["day_of_month"].append(day_of_month)
+                    store["water_year"].append(water_year)
+                    store["wepp_id"].append(wepp_id)
+                    store["dur"].append(0.0)
+                    store["tcs"].append(0.0)
+                    store["oalpha"].append(0.0)
+                    store["runoff"].append(0.0)
+                    store["runvol"].append(0.0)
+                    store["sbrunf"].append(0.0)
+                    store["sbrunv"].append(0.0)
+                    store["drainq"].append(0.0)
+                    store["drrunv"].append(0.0)
+                    store["peakro"].append(0.0)
+                    store["tdet"].append(0.0)
+                    store["tdep"].append(0.0)
+                    store["gwbfv"].append(gwbfv[pos])
+                    store["gwdsv"].append(gwdsv[pos])
+
+                    for col_name in sed_columns + frc_columns:
+                        store[col_name].append(0.0)
+
+                    row_counter += 1
+                    if row_counter % chunk_size == 0:
+                        _flush_event_store(store, writer)
+
+            else:
+                raise ValueError(f"Unsupported pass file event label: {label}")
+
+        if store["event"]:
+            _flush_event_store(store, writer)
+        elif row_counter == 0:
+            empty_store = _init_event_store(column_order)
+            writer.write_table(pa.table(empty_store, schema=schema))
+    except Exception:
+        writer.close()
+        if tmp_target.exists():
+            tmp_target.unlink()
+        raise
+    else:
+        writer.close()
+        try:
+            tmp_target.replace(target)
+        except OSError as exc:
+            if exc.errno == errno.EXDEV:
+                shutil.move(str(tmp_target), str(target))
+            else:
+                raise
+
+
+def _parse_pass_file(stream) -> Tuple[Dict[str, object], pa.Table, int, List[int], int, Iterator[str]]:
+    stripped_lines = (line.rstrip("\n") for line in stream)
+    header_lines: List[str] = []
+    for line in stripped_lines:
+        if line.strip() == "BEGIN HILLSLOPE HYDROLOGY AND SEDIMENT INFORMATION":
+            break
+        header_lines.append(line)
+    else:
         raise ValueError("Unable to locate beginning of hydrology section in pass file.")
 
-    header_lines = stripped_lines[:begin_idx]
-    data_lines = stripped_lines[begin_idx + 1 :]
-
     global_meta, metadata_table, npart, hillslope_ids, nhill = _parse_metadata(header_lines)
-    events_table = _parse_events(data_lines, hillslope_ids, nhill, npart)
-
-    # Attach simulation metadata to events table as schema metadata
-    events_table = events_table.replace_schema_metadata(
-        {
-            b"version": str(global_meta["version"]).encode(),
-            b"nhill": str(global_meta["nhill"]).encode(),
-            b"max_years": str(global_meta["max_years"]).encode(),
-            b"begin_year": str(global_meta["begin_year"]).encode(),
-            b"npart": str(global_meta["npart"]).encode(),
-        }
-    )
-
-    return events_table, metadata_table
+    return global_meta, metadata_table, npart, hillslope_ids, nhill, stripped_lines
 
 
 def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str, Path]:
@@ -408,15 +471,23 @@ def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str
     if not pass_path.exists():
         raise FileNotFoundError(pass_path)
 
-    events_table, metadata_table = _parse_pass_file(pass_path)
-
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
 
     events_path = interchange_dir / EVENTS_PARQUET
     metadata_path = interchange_dir / METADATA_PARQUET
 
-    pq.write_table(events_table, events_path, compression="snappy", use_dictionary=True)
+    with pass_path.open("r") as stream:
+        global_meta, metadata_table, npart, hillslope_ids, nhill, data_iter = _parse_pass_file(stream)
+        _write_events_parquet(
+            data_iter,
+            hillslope_ids,
+            nhill,
+            npart,
+            global_meta,
+            events_path,
+        )
+
     pq.write_table(metadata_table, metadata_path, compression="snappy", use_dictionary=True)
 
     return {"events": events_path, "metadata": metadata_path}
