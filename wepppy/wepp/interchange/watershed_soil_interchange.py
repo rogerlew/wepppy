@@ -4,6 +4,22 @@ import errno
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
+import gzip
+
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
 from typing import Dict, List
 
 import pyarrow as pa
@@ -16,36 +32,28 @@ SOIL_PARQUET = "soil_pw0.parquet"
 CHUNK_SIZE = 250_000
 
 
-def _field(name: str, dtype: pa.DataType, units: str | None = None) -> pa.Field:
-    if units is None:
-        return pa.field(name, dtype)
-    return pa.field(name, dtype).with_metadata({b"units": units.encode()})
-
-
 SCHEMA = pa.schema(
     [
-        _field("wepp_id", pa.int32()),
-        _field("ofe_id", pa.int16()),
-        _field("year", pa.int16()),
-        _field("day", pa.int16()),
-        _field("julian", pa.int16()),
-        _field("month", pa.int8()),
-        _field("day_of_month", pa.int8()),
-        _field("water_year", pa.int16()),
-        _field("OFE", pa.int16()),
-        _field("Day", pa.int16()),
-        _field("Y", pa.int16()),
-        _field("Poros", pa.float64(), "%"),
-        _field("Keff", pa.float64(), "mm/hr"),
-        _field("Suct", pa.float64(), "mm"),
-        _field("FC", pa.float64(), "mm/mm"),
-        _field("WP", pa.float64(), "mm/mm"),
-        _field("Rough", pa.float64(), "mm"),
-        _field("Ki", pa.float64(), "adjsmt"),
-        _field("Kr", pa.float64(), "adjsmt"),
-        _field("Tauc", pa.float64(), "adjsmt"),
-        _field("Saturation", pa.float64(), "frac"),
-        _field("TSW", pa.float64(), "mm"),
+        pa_field("wepp_id", pa.int32()),
+        pa_field("ofe_id", pa.int16()),
+        pa_field("year", pa.int16()),
+        pa_field("day", pa.int16()),
+        pa_field("julian", pa.int16()),
+        pa_field("month", pa.int8()),
+        pa_field("day_of_month", pa.int8()),
+        pa_field("water_year", pa.int16()),
+        pa_field("OFE", pa.int16()),
+        pa_field("Poros", pa.float64(), units="%", description="Soil porosity"),
+        pa_field("Keff", pa.float64(), units="mm/hr", description="Effective hydraulic conductivity"),
+        pa_field("Suct", pa.float64(), units="mm", description="Suction across wetting front"),
+        pa_field("FC", pa.float64(), units="mm/mm", description="Field capacity"),
+        pa_field("WP", pa.float64(), units="mm/mm", description="Wilting point"),
+        pa_field("Rough", pa.float64(), units="mm", description="Surface roughness"),
+        pa_field("Ki", pa.float64(), units="adjsmt", description="Interrill erodibility adjustment factor"),
+        pa_field("Kr", pa.float64(), units="adjsmt", description="Rill erodibility adjustment factor"),
+        pa_field("Tauc", pa.float64(), units="adjsmt", description="Critical shear stress adjustment factor"),
+        pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction"),
+        pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
     ]
 )
 
@@ -142,8 +150,6 @@ def _write_soil_parquet(
                 store["day_of_month"].append(day_of_month)
                 store["water_year"].append(water_year)
                 store["OFE"].append(ofe)
-                store["Day"].append(julian)
-                store["Y"].append(year)
                 store["Poros"].append(poros)
                 store["Keff"].append(keff)
                 store["Suct"].append(suct)
@@ -186,12 +192,28 @@ def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path:
         raise FileNotFoundError(base)
 
     soil_path = base / SOIL_FILENAME
+    is_gzip = False
     if not soil_path.exists():
-        raise FileNotFoundError(soil_path)
+        gz_path = soil_path.with_suffix(soil_path.suffix + ".gz")
+        if gz_path.exists():
+            soil_path = gz_path
+            is_gzip = True
+        else:
+            raise FileNotFoundError(base / SOIL_FILENAME)
 
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
 
     target = interchange_dir / SOIL_PARQUET
-    _write_soil_parquet(soil_path, target)
+    if is_gzip:
+        with gzip.open(soil_path, "rt") as stream:
+            tmp_source = target.with_suffix(target.suffix + ".src")
+            tmp_source.write_text(stream.read())
+        try:
+            _write_soil_parquet(tmp_source, target)
+        finally:
+            if tmp_source.exists():
+                tmp_source.unlink()
+    else:
+        _write_soil_parquet(soil_path, target)
     return target

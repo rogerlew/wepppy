@@ -11,39 +11,55 @@ import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
 
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
+
 EBE_FILENAME = "ebe_pw0.txt"
 EBE_PARQUET = "ebe_pw0.parquet"
 CHUNK_SIZE = 250_000
 
 
-MEASUREMENT_COLUMNS: List[tuple[str, str]] = [
-    ("Precip Depth (mm)", "mm"),
-    ("Runoff Volume (m^3)", "m^3"),
-    ("Peak Runoff (m^3/s)", "m^3/s"),
-    ("Sediment Yield (kg)", "kg"),
-    ("Solub. React. Phosphorus (kg)", "kg"),
-    ("Particulate Phosphorus (kg)", "kg"),
-    ("Total Phosphorus (kg)", "kg"),
+MEASUREMENT_COLUMNS: List[str] = [
+    "precip",
+    "runoff_volume",
+    "peak_runoff",
+    "sediment_yield",
+    "soluble_pollutant",
+    "particulate_pollutant",
+    "total_pollutant",
 ]
-
-
-def _field(name: str, dtype: pa.DataType, units: str | None = None) -> pa.Field:
-    if units is None:
-        return pa.field(name, dtype)
-    return pa.field(name, dtype).with_metadata({b"units": units.encode()})
 
 
 SCHEMA = pa.schema(
     [
-        _field("year", pa.int16()),
-        _field("simulation_year", pa.int16()),
-        _field("month", pa.int8()),
-        _field("day_of_month", pa.int8()),
-        _field("julian", pa.int16()),
-        _field("water_year", pa.int16()),
+        pa_field("year", pa.int16(), description="Calendar year"),
+        pa_field("simulation_year", pa.int16(), description="WEPP simulation year reported in output"),
+        pa_field("month", pa.int8(), description="Calendar month"),
+        pa_field("day_of_month", pa.int8(), description="Calendar day of month"),
+        pa_field("julian", pa.int16(), description="Julian day from WEPP output"),
+        pa_field("water_year", pa.int16(), description="Water year derived from year/julian"),
+        pa_field("precip", pa.float64(), units="mm", description="Watershed precipitation depth for the event"),  # sedout.for:3100
+        pa_field("runoff_volume", pa.float64(), units="m^3", description="Watershed runoff volume for the event"),  # sedout.for:3100
+        pa_field("peak_runoff", pa.float64(), units="m^3/s", description="Peak watershed discharge"),  # sedout.for:3100
+        pa_field("sediment_yield", pa.float64(), units="kg", description="Sediment yield at the watershed outlet"),  # sedout.for:3100
+        pa_field("soluble_pollutant", pa.float64(), units="kg", description="Soluble pollutant mass delivered at watershed outlet"),
+        pa_field("particulate_pollutant", pa.float64(), units="kg", description="Particulate pollutant mass delivered at watershed outlet"),
+        pa_field("total_pollutant", pa.float64(), units="kg", description="Total pollutant mass delivered (soluble + particulate)"),
+        pa_field("element_id", pa.int32(), description="Channel element identifier (Elmt_ID)"),
     ]
-    + [_field(name, pa.float64(), units) for name, units in MEASUREMENT_COLUMNS]
-    + [_field("Elmt ID", pa.int32())]
 )
 
 
@@ -133,10 +149,15 @@ def _write_ebe_parquet(
                 store["julian"].append(julian)
                 store["water_year"].append(int(determine_wateryear(year, julian)))
 
-                for (column_name, _units), token in zip(MEASUREMENT_COLUMNS, tokens[3:10]):
-                    store[column_name].append(_parse_float(token))
+                store["precip"].append(_parse_float(tokens[3]))
+                store["runoff_volume"].append(_parse_float(tokens[4]))
+                store["peak_runoff"].append(_parse_float(tokens[5]))
+                store["sediment_yield"].append(_parse_float(tokens[6]))
+                store["soluble_pollutant"].append(_parse_float(tokens[7]))
+                store["particulate_pollutant"].append(_parse_float(tokens[8]))
+                store["total_pollutant"].append(_parse_float(tokens[9]))
 
-                store["Elmt ID"].append(int(tokens[10]))
+                store["element_id"].append(int(tokens[10]))
 
                 row_counter += 1
                 if row_counter % chunk_size == 0:

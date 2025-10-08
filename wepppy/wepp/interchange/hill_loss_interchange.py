@@ -47,7 +47,7 @@ SCHEMA = pa.schema(
     [
         pa_field("wepp_id", pa.int32()),
         pa_field("class_id", pa.int8()),
-        pa_field("Class", pa.int8()),
+        pa_field("Class", pa.int8(), description="Sediment particle size class"),
         pa_field("Diameter", pa.float64(), units="mm"),
         pa_field("Specific Gravity", pa.float64()),
         pa_field("% Sand", pa.float64(), units="%"),

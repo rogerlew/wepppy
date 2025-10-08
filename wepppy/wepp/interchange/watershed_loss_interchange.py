@@ -9,6 +9,20 @@ from typing import Dict, Iterable, List, Optional, Tuple
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
+
 LOSS_FILENAME = "loss_pw0.txt"
 
 AVERAGE_FILENAMES = {
@@ -43,9 +57,9 @@ HILL_HEADER = (
     "Soil Loss",
     "Sediment Deposition",
     "Sediment Yield",
-    "Solub. React. Phosphorus",
-    "Particulate Phosphorus",
-    "Total Phosphorus",
+    "Solub. React. Pollutant",
+    "Particulate Pollutant",
+    "Total Pollutant",
 )
 
 HILL_AVG_HEADER = (
@@ -58,9 +72,9 @@ HILL_AVG_HEADER = (
     "Sediment Deposition",
     "Sediment Yield",
     "Hillslope Area",
-    "Solub. React. Phosphorus",
-    "Particulate Phosphorus",
-    "Total Phosphorus",
+    "Solub. React. Pollutant",
+    "Particulate Pollutant",
+    "Total Pollutant",
 )
 
 HILL_UNITS = (
@@ -100,9 +114,9 @@ CHN_HEADER = (
     "Soil Loss",
     "Upland Charge",
     "Subsuface Flow Volume",
-    "Solub. React. Phosphorus",
-    "Particulate Phosphorus",
-    "Total Phosphorus",
+    "Solub. React. Pollutant",
+    "Particulate Pollutant",
+    "Total Pollutant",
 )
 
 CHN_AVG_HEADER = (
@@ -114,9 +128,9 @@ CHN_AVG_HEADER = (
     "Upland Charge",
     "Subsuface Flow Volume",
     "Contributing Area",
-    "Solub. React. Phosphorus",
-    "Particulate Phosphorus",
-    "Total Phosphorus",
+    "Solub. React. Pollutant",
+    "Particulate Pollutant",
+    "Total Pollutant",
 )
 
 CHN_UNITS = (
@@ -176,66 +190,54 @@ CHN_TYPES = (pa.int32(),) + (pa.float64(),) * 8
 CHN_AVG_TYPES = (pa.int32(),) + (pa.float64(),) * 9
 
 
-def _field(name: str, dtype: pa.DataType, *, units: Optional[str] = None, description: Optional[str] = None) -> pa.Field:
-    metadata: Dict[bytes, bytes] = {}
-    if units:
-        metadata[b"units"] = units.encode()
-    if description:
-        metadata[b"description"] = description.encode()
-    field = pa.field(name, dtype)
-    if metadata:
-        field = field.with_metadata(metadata)
-    return field
-
-
 HILL_ALL_YEARS_SCHEMA = pa.schema(
-    [_field("year", pa.int16())]
-    + [_field("Type", pa.string())]
-    + [_field(name, dtype, units=units) for name, dtype, units in zip(HILL_HEADER[1:], HILL_TYPES, HILL_UNITS[1:])]
+    [pa_field("year", pa.int16())]
+    + [pa_field("Type", pa.string())]
+    + [pa_field(name, dtype, units=units) for name, dtype, units in zip(HILL_HEADER[1:], HILL_TYPES, HILL_UNITS[1:])]
 ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.hill"})
 
 HILL_AVERAGE_SCHEMA = pa.schema(
-    [_field("Type", pa.string())]
-    + [_field(name, dtype, units=units) for name, dtype, units in zip(HILL_AVG_HEADER[1:], HILL_AVG_TYPES, HILL_AVG_UNITS[1:])]
+    [pa_field("Type", pa.string())]
+    + [pa_field(name, dtype, units=units) for name, dtype, units in zip(HILL_AVG_HEADER[1:], HILL_AVG_TYPES, HILL_AVG_UNITS[1:])]
 ).with_metadata(
     {b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.hill"}
 )
 
 CHN_ALL_YEARS_SCHEMA = pa.schema(
-    [_field("year", pa.int16())]
-    + [_field("Type", pa.string())]
-    + [_field(name, dtype, units=units) for name, dtype, units in zip(CHN_HEADER[1:], CHN_TYPES, CHN_UNITS[1:])]
+    [pa_field("year", pa.int16())]
+    + [pa_field("Type", pa.string())]
+    + [pa_field(name, dtype, units=units) for name, dtype, units in zip(CHN_HEADER[1:], CHN_TYPES, CHN_UNITS[1:])]
 ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.chn"})
 
 CHN_AVERAGE_SCHEMA = pa.schema(
-    [_field("Type", pa.string())]
-    + [_field(name, dtype, units=units) for name, dtype, units in zip(CHN_AVG_HEADER[1:], CHN_AVG_TYPES, CHN_AVG_UNITS[1:])]
+    [pa_field("Type", pa.string())]
+    + [pa_field(name, dtype, units=units) for name, dtype, units in zip(CHN_AVG_HEADER[1:], CHN_AVG_TYPES, CHN_AVG_UNITS[1:])]
 ).with_metadata(
     {b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.chn"}
 )
 
 OUT_ALL_YEARS_SCHEMA = pa.schema(
     [
-        _field("year", pa.int16()),
-        _field("key", pa.string()),
-        _field("value", pa.float64()),
-        _field("units", pa.string()),
+        pa_field("year", pa.int16()),
+        pa_field("key", pa.string()),
+        pa_field("value", pa.float64()),
+        pa_field("units", pa.string()),
     ]
 ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.out"})
 
 OUT_AVERAGE_SCHEMA = pa.schema(
     [
-        _field("key", pa.string()),
-        _field("value", pa.float64()),
-        _field("units", pa.string()),
+        pa_field("key", pa.string()),
+        pa_field("value", pa.float64()),
+        pa_field("units", pa.string()),
     ]
 ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.out"})
 
-CLASS_ALL_YEARS_SCHEMA = pa.schema([_field("year", pa.int16())] + [_field(name, pa.float64() if name != "Class" else pa.int8(), units=unit if name != "Class" else None) for name, unit in zip(CLASS_HEADER, CLASS_UNITS)]).with_metadata(
+CLASS_ALL_YEARS_SCHEMA = pa.schema([pa_field("year", pa.int16())] + [pa_field(name, pa.float64() if name != "Class" else pa.int8(), units=unit if name != "Class" else None) for name, unit in zip(CLASS_HEADER, CLASS_UNITS)]).with_metadata(
     {b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.class_data"}
 )
 
-CLASS_AVERAGE_SCHEMA = pa.schema([_field(name, pa.float64() if name != "Class" else pa.int8(), units=unit if name != "Class" else None) for name, unit in zip(CLASS_HEADER, CLASS_UNITS)]).with_metadata(
+CLASS_AVERAGE_SCHEMA = pa.schema([pa_field(name, pa.float64() if name != "Class" else pa.int8(), units=unit if name != "Class" else None) for name, unit in zip(CLASS_HEADER, CLASS_UNITS)]).with_metadata(
     {b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.class_data"}
 )
 
