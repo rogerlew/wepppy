@@ -556,6 +556,8 @@ class SoilSummary(object):
             ll=self.ll,
             bd=self.bd,
             simple_texture=self.simple_texture,
+            soil_depth=self.soil_depth,
+            rock=self.rock,
         )
 
     @property
@@ -600,6 +602,14 @@ class SoilSummary(object):
     @property
     def sand(self):
         return self.get_weppsoilutil().sand
+
+    @property
+    def soil_depth(self):
+        return self.get_weppsoilutil().soil_depth
+
+    @property
+    def rock(self):
+        return self.get_weppsoilutil().rock
 
     @property
     def bd(self):

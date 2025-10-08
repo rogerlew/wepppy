@@ -10,7 +10,7 @@ except ImportError:
     from yaml import Loader, Dumper
 
 
-from wepppy.all_your_base import try_parse, isfloat
+from wepppy.all_your_base import try_parse, try_parse_float, isfloat
 
 
 def _replace_parameter(original, replacement):
@@ -453,7 +453,7 @@ class WeppSoilUtil(object):
             for j, horizon in enumerate(ofe['horizons']):
                 pars = 'solthk bd ksat anisotropy fc wp sand clay orgmat cec rfg'.split()
                 s.append('\t' + '\t '.join([str(horizon[p]) for p in pars]))
-
+ # hrdric parameter yes or no
                 if datver >= 9002.0:
                     clay = horizon['clay']
                     sand = horizon['sand']
@@ -856,6 +856,44 @@ class WeppSoilUtil(object):
             bd = s7778.obj['ofes'][0]['horizons'][0]['bd']
 #        assert bd is not None
         return bd
+
+    @property
+    def soil_depth(self):
+        horizons = self.obj['ofes'][0].get('horizons', [])
+        if not horizons:
+            return None
+
+        solthk = horizons[-1].get('solthk')
+        if solthk is None:
+            s7778 = self.to7778()
+            horizons = s7778.obj['ofes'][0].get('horizons', [])
+            if not horizons:
+                return None
+            solthk = horizons[-1].get('solthk')
+
+        if solthk is None:
+            return None
+
+        return try_parse_float(solthk, default=None)
+
+    @property
+    def rock(self):
+        horizons = self.obj['ofes'][0].get('horizons', [])
+        if not horizons:
+            return None
+
+        rock = horizons[0].get('rfg')
+        if rock is None:
+            s7778 = self.to7778()
+            horizons = s7778.obj['ofes'][0].get('horizons', [])
+            if not horizons:
+                return None
+            rock = horizons[0].get('rfg')
+
+        if rock is None:
+            return None
+
+        return try_parse_float(rock, default=None)
 
     @property
     def simple_texture(self):
