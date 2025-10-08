@@ -2260,11 +2260,11 @@ class Wepp(NoDbBase):
                 with self.timed('  running hillslope_watbal'):
                     self._run_hillslope_watbal()
 
-                with self.timed('  compressing pass_pw0.txt'):
-                    compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
-
-                with self.timed('  compressing soil_pw0.txt'):
-                    compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
+#                with self.timed('  compressing pass_pw0.txt'):
+#                    compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
+#
+#                with self.timed('  compressing soil_pw0.txt'):
+#                    compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
 
                 if self.legacy_arc_export_on_run_completion:
                     with self.timed('  running legacy_arc_export'):
