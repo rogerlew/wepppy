@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import errno
+import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
@@ -11,6 +13,7 @@ from wepppy.all_your_base.hydro import determine_wateryear
 
 EBE_FILENAME = "ebe_pw0.txt"
 EBE_PARQUET = "ebe_pw0.parquet"
+CHUNK_SIZE = 250_000
 
 
 MEASUREMENT_COLUMNS: List[tuple[str, str]] = [
@@ -61,55 +64,102 @@ def _parse_float(token: str) -> float:
         return float(stripped)
 
 
-def _parse_ebe_file(path: Path, *, start_year: int | None = None) -> pa.Table:
-    with path.open("r") as stream:
-        lines = stream.readlines()
+def _init_column_store() -> Dict[str, List]:
+    return {name: [] for name in SCHEMA.names}
 
-    store: Dict[str, List] = {name: [] for name in SCHEMA.names}
 
-    for raw_line in lines:
-        stripped = raw_line.strip()
-        if (
-            not stripped
-            or stripped.startswith("WATERSHED")
-            or stripped.startswith("(")
-            or stripped.startswith("Day")
-            or stripped.startswith("-")
-            or stripped.startswith("Month")
-            or stripped.startswith("Year")
-        ):
-            continue
+def _flush_chunk(store: Dict[str, List], writer: pq.ParquetWriter) -> None:
+    if not store["year"]:
+        return
+    table = pa.table(store, schema=SCHEMA)
+    writer.write_table(table)
+    store.clear()
+    store.update(_init_column_store())
 
-        tokens = stripped.split()
-        if len(tokens) != 11:
-            continue
 
-        day_of_month = int(tokens[0])
-        month = int(tokens[1])
-        sim_year = int(tokens[2])
-        if start_year is not None and sim_year < 1000:
-            year = start_year + sim_year - 1
-        else:
-            year = sim_year
+def _write_ebe_parquet(
+    source: Path,
+    target: Path,
+    *,
+    start_year: int | None = None,
+    chunk_size: int = CHUNK_SIZE,
+) -> None:
+    tmp_target = target.with_suffix(f"{target.suffix}.tmp")
+    if tmp_target.exists():
+        tmp_target.unlink()
 
-        # datetime supports year >= 1; simulation years should satisfy this.
-        julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
-        water_year = int(determine_wateryear(year, julian))
+    writer = pq.ParquetWriter(
+        tmp_target,
+        SCHEMA,
+        compression="snappy",
+        use_dictionary=True,
+    )
 
-        store["year"].append(year)
-        store["simulation_year"].append(sim_year)
-        store["month"].append(month)
-        store["day_of_month"].append(day_of_month)
-        store["julian"].append(julian)
-        store["water_year"].append(water_year)
+    store = _init_column_store()
+    row_counter = 0
 
-        for (column_name, _units), token in zip(MEASUREMENT_COLUMNS, tokens[3:10]):
-            store[column_name].append(_parse_float(token))
+    try:
+        with source.open("r") as stream:
+            for raw_line in stream:
+                stripped = raw_line.strip()
+                if (
+                    not stripped
+                    or stripped.startswith("WATERSHED")
+                    or stripped.startswith("(")
+                    or stripped.startswith("Day")
+                    or stripped.startswith("-")
+                    or stripped.startswith("Month")
+                    or stripped.startswith("Year")
+                ):
+                    continue
 
-        store["Elmt ID"].append(int(tokens[10]))
+                tokens = stripped.split()
+                if len(tokens) != 11:
+                    continue
 
-    return pa.table(store, schema=SCHEMA)
+                day_of_month = int(tokens[0])
+                month = int(tokens[1])
+                sim_year = int(tokens[2])
+                if start_year is not None and sim_year < 1000:
+                    year = start_year + sim_year - 1
+                else:
+                    year = sim_year
 
+                julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
+                store["year"].append(year)
+                store["simulation_year"].append(sim_year)
+                store["month"].append(month)
+                store["day_of_month"].append(day_of_month)
+                store["julian"].append(julian)
+                store["water_year"].append(int(determine_wateryear(year, julian)))
+
+                for (column_name, _units), token in zip(MEASUREMENT_COLUMNS, tokens[3:10]):
+                    store[column_name].append(_parse_float(token))
+
+                store["Elmt ID"].append(int(tokens[10]))
+
+                row_counter += 1
+                if row_counter % chunk_size == 0:
+                    _flush_chunk(store, writer)
+
+        if store["year"]:
+            _flush_chunk(store, writer)
+        elif row_counter == 0:
+            writer.write_table(pa.table(_init_column_store(), schema=SCHEMA))
+    except Exception:
+        writer.close()
+        if tmp_target.exists():
+            tmp_target.unlink()
+        raise
+    else:
+        writer.close()
+        try:
+            tmp_target.replace(target)
+        except OSError as exc:
+            if exc.errno == errno.EXDEV:
+                shutil.move(str(tmp_target), str(target))
+            else:
+                raise
 
 def run_wepp_watershed_ebe_interchange(
     wepp_output_dir: Path | str, *, start_year: int | None = None
@@ -122,10 +172,8 @@ def run_wepp_watershed_ebe_interchange(
     if not ebe_path.exists():
         raise FileNotFoundError(ebe_path)
 
-    table = _parse_ebe_file(ebe_path, start_year=start_year)
-
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / EBE_PARQUET
-    pq.write_table(table, target, compression="snappy", use_dictionary=True)
+    _write_ebe_parquet(ebe_path, target, start_year=start_year)
     return target
