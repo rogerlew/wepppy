@@ -18,6 +18,7 @@ import zipfile
 import pandas as pd
 from functools import partial
 from copy import deepcopy
+from pathlib import PurePosixPath
 
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from enum import Enum, IntEnum
@@ -481,44 +482,88 @@ class AgFields(NoDbBase):
         with self.timed('Extracting .man files from plant file DB zip'):
             with zipfile.ZipFile(zip_path, 'r') as z:
                 for file_info in z.infolist():
-                    if file_info.filename.endswith('.man'):
-                        # read the first line of the file to check if it is a 2017.1 file
-                        is_2017_1 = False
-                        with z.open(file_info) as f:
-                            first_line = f.readline().decode('utf-8').strip()
-                            if '2017.1' in first_line:
-                                is_2017_1 = True
-                        
-                        if is_2017_1:
-                            z.extract(file_info, self.plant_files_2017_1_dir)
-                            self.logger.info(f'  Extracted 2017.1 plant file {file_info.filename} to {self.plant_files_2017_1_dir}')
-                            os.rename(
-                                _join(self.plant_files_2017_1_dir, file_info.filename),
-                                _join(self.plant_files_2017_1_dir, file_info.filename.replace(' ', '_'))
-                            )
-                            self.logger.info(f'. Renamed plant file {file_info.filename} to {file_info.filename.replace(" ", "_")}')
-                        else:
-                            z.extract(file_info, self.plant_files_dir)
-                            self.logger.info(f'. Extracted plant file {file_info.filename} to {self.plant_files_dir}')
-                            os.rename(
-                                _join(self.plant_files_dir, file_info.filename),
-                                _join(self.plant_files_dir, file_info.filename.replace(' ', '_'))
-                            )
-                            self.logger.info(f'. Renamed plant file {file_info.filename} to {file_info.filename.replace(" ", "_")}')
+                    if not file_info.filename.endswith('.man'):
+                        continue
+
+                    path_in_zip = PurePosixPath(file_info.filename)
+                    if path_in_zip.is_absolute() or '..' in path_in_zip.parts:
+                        self.logger.warning(f'Skipping plant file with unsafe path: {file_info.filename}')
+                        continue
+
+                    # read the first line of the file to check if it is a 2017.1 file
+                    is_2017_1 = False
+                    with z.open(file_info) as f:
+                        first_line = f.readline().decode('utf-8').strip()
+                        if '2017.1' in first_line:
+                            is_2017_1 = True
+
+                    target_root = self.plant_files_2017_1_dir if is_2017_1 else self.plant_files_dir
+                    os.makedirs(target_root, exist_ok=True)
+                    z.extract(file_info, target_root)
+
+                    if is_2017_1:
+                        self.logger.info(f'  Extracted 2017.1 plant file {file_info.filename} to {self.plant_files_2017_1_dir}')
+                    else:
+                        self.logger.info(f'. Extracted plant file {file_info.filename} to {self.plant_files_dir}')
+
+                    # flatten into the plant_files directory and normalize spaces to underscores (filename only)
+                    src_path = os.path.join(target_root, *path_in_zip.parts)
+                    sanitized_name = path_in_zip.name.replace(' ', '_')
+                    dest_path = os.path.join(target_root, sanitized_name)
+
+                    if os.path.isdir(src_path):
+                        # skip directories created during extraction
+                        continue
+
+                    src_abs = os.path.abspath(src_path)
+                    dest_abs = os.path.abspath(dest_path)
+
+                    if src_abs != dest_abs:
+                        if os.path.exists(dest_path):
+                            base, ext = os.path.splitext(sanitized_name)
+                            counter = 1
+                            while True:
+                                candidate = f'{base}_{counter}{ext}'
+                                candidate_path = os.path.join(target_root, candidate)
+                                if not os.path.exists(candidate_path):
+                                    dest_path = candidate_path
+                                    break
+                                counter += 1
+
+                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                        os.replace(src_path, dest_path)
+
+                        # remove empty directories left behind after flattening
+                        cleanup_dir = os.path.dirname(src_path)
+                        while cleanup_dir and cleanup_dir != target_root:
+                            try:
+                                os.rmdir(cleanup_dir)
+                            except OSError:
+                                break
+                            cleanup_dir = os.path.dirname(cleanup_dir)
+
+                    self.logger.info(f'. Renamed plant file {file_info.filename} to {os.path.basename(dest_path)}')
 
         with self.timed('Downgrading 2017.1 plant files to 98.4 format'):
             for man_path in glob(_join(self.plant_files_2017_1_dir, '*.man')):
-                man_2017_1 = read_management(man_path)
-                man_fn = _split(man_path)[-1]
-                _man = downgrade_to_98_4_format(man_2017_1, _join(self.plant_files_dir, man_fn),
-                                                first_year_only=False)
-                self.logger.info(f'. Downgraded {man_fn} to 98.4 format')
+                try:
+                    man_2017_1 = read_management(man_path)
+                except Exception as e:
+                    self.logger.error(f'  Failed to read 2017.1 plant file {man_path}: {e}')
+                    raise
+                target_man_path = _join(self.plant_files_dir, os.path.basename(man_path))
+                _man = downgrade_to_98_4_format(man_2017_1, target_man_path, first_year_only=False)
+                self.logger.info(f'. Downgraded {os.path.basename(man_path)} to 98.4 format')
 
         valid_plant_files = []
         with self.timed('Validating plant files'):
             for man_path in glob(_join(self.plant_files_dir, '*.man')):
                 man_fn = _split(man_path)[-1]
-                _man = read_management(man_path)
+                try:
+                    _man = read_management(man_path)
+                except Exception as e:
+                    self.logger.error(f'  Failed to validate plant file {man_path}: {e}')
+                    continue
                 valid_plant_files.append(man_fn)
                 self.logger.info(f'  Valid plant file found: {man_fn}')
 
@@ -587,6 +632,9 @@ class AgFields(NoDbBase):
 
         tasks = []
         for index, field in subfields_df.iterrows():
+            if index > 4:
+                break  # limit to first 5 for testing
+
             field_id = field['field_id']
             topaz_id = str(field['topaz_id'])
             wepp_id = field['wepp_id']
@@ -775,9 +823,9 @@ class CropRotationManager:
             if len(parts) != 3:
                 raise ValueError(f'Invalid line in crop key-value lookup TSV file: {line.strip()}')
             
-            crop_name = parts[0]
-            database = parts[1]
-            rotation_id = parts[2].replace(' ', '_')  # normalize file names by removing spaces
+            crop_name = parts[0].strip()
+            database = parts[1].strip()
+            rotation_id = parts[2].strip().replace(' ', '_')  # normalize file names by removing spaces
 
             # remove quotes if present
             if (rotation_id[0] == '"' and rotation_id[-1] == '"') or \

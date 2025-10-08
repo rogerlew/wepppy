@@ -1096,8 +1096,13 @@ class YearLoopCroplandPerennialCut(ScenarioBase):
         super().__init__()
 
         self.root = root
-        self.cutday = _parse_julian(lines.pop(0))
-
+        _line = lines.pop(0).strip().split()
+        self.cutday = _parse_julian(_line[0])
+        if len(_line) == 2:
+            self._wtf = _line[1]  # TODO: get wepp source with 2017.1 suppport figure out wtf this is for
+        elif len(_line) > 2:
+            raise ValueError(f"Unexpected data after cutday: {_line}")
+            
     def __str__(self):
         return """\
 {0.cutday}
