@@ -35,6 +35,7 @@ class _FirstYearMerge:
     surf_name: Optional[str]
     operations: List[_MergedOperation]
     event_days: List[int]
+    remove_year: bool
 
 
 class ManagementRotationSynth(object):
@@ -241,15 +242,36 @@ class ManagementRotationSynth(object):
             return management.key
         return f"{type(management).__name__}"
 
-    def _single_rotation(self, management: Management) -> ManagementLoopMan:
+    def _normalize_rotations(self, management: Management) -> ManagementLoopMan:
         loops = getattr(management.man, 'loops', None)
-        if not loops or len(loops) != 1:
+        if not loops:
             label = self._segment_label(management)
-            raise ValueError(
-                f"Segment '{label}' has {0 if not loops else len(loops)} management rotations; "
-                "stack-and-merge requires exactly one."
-            )
-        return loops[0]
+            raise ValueError(f"Segment '{label}' contains no management rotations.")
+
+        if len(loops) == 1:
+            return loops[0]
+
+        combined_years = Loops()
+        for rot in loops:
+            for year_list in rot.years:
+                combined_years.append(year_list)
+
+        normalized = ManagementLoopMan.__new__(ManagementLoopMan)
+        normalized.root = management
+        normalized.parent = management.man
+        normalized.years = Loops()
+
+        for year_idx, year_list in enumerate(combined_years, start=1):
+            for man_loop in year_list:
+                man_loop.parent = normalized
+                man_loop._year = year_idx
+            normalized.years.append(year_list)
+
+        management.man.loops = Loops()
+        management.man.loops.append(normalized)
+        management.sim_years = len(normalized.years)
+
+        return normalized
 
     def _capture_first_year_payload(
         self,
@@ -265,9 +287,11 @@ class ManagementRotationSynth(object):
         second_year = rotation.years[1] if len(rotation.years) > 1 else None
 
         second_year_surf_names: Dict[int, Optional[str]] = {}
+        second_year_names: Dict[int, Optional[str]] = {}
         if second_year:
             for ofe_idx, man_loop in enumerate(second_year):
                 year_name = self._first_year_ref_name(man_loop.manindx)
+                second_year_names[ofe_idx] = year_name
                 year_loop = self._find_loop(segment.years, year_name)
                 surf_name = None
                 if year_loop is not None:
@@ -288,9 +312,11 @@ class ManagementRotationSynth(object):
                     if surf_name == '':
                         surf_name = None
 
-            # Avoid duplicating operations when both years reference the same surface scenario.
             same_surface_as_second = (
                 surf_name is not None and second_year_surf_names.get(ofe_idx) == surf_name
+            )
+            same_year_as_second = (
+                year_name is not None and second_year_names.get(ofe_idx) == year_name
             )
 
             if surf_name is not None and not same_surface_as_second:
@@ -302,7 +328,9 @@ class ManagementRotationSynth(object):
                         day = self._julian_to_int(getattr(op_copy, 'mdate', None))
                         operations.append(_MergedOperation(obj=op_copy, name=op_name, day=day))
 
-            event_days = self._collect_year_event_days(year_loop)
+            event_days: List[int] = []
+            if not same_year_as_second:
+                event_days = self._collect_year_event_days(year_loop)
 
             payload.append(
                 _FirstYearMerge(
@@ -311,6 +339,7 @@ class ManagementRotationSynth(object):
                     surf_name=None if same_surface_as_second else surf_name,
                     operations=operations,
                     event_days=event_days,
+                    remove_year=not same_year_as_second,
                 )
             )
 
@@ -325,7 +354,9 @@ class ManagementRotationSynth(object):
         if rotation.years:
             del rotation.years[0]
 
-        year_names_to_remove = {item.year_name for item in payload if item.year_name}
+        year_names_to_remove = {
+            item.year_name for item in payload if item.year_name and item.remove_year
+        }
         if year_names_to_remove:
             rotation_years = [loop for loop in segment.years if getattr(loop, 'name', None) not in year_names_to_remove]
             segment.years[:] = rotation_years
@@ -501,10 +532,9 @@ class ManagementRotationSynth(object):
 
         for idx, original in enumerate(self.managements):
             segment = deepcopy(original)
+            rotation = self._normalize_rotations(segment)
             if idx > 0:
                 self._apply_prefix(segment, f"SEG{idx + 1}_")
-
-            rotation = self._single_rotation(segment)
             nyears = rotation.nyears
             if nyears not in (1, 2):
                 label = self._segment_label(original)
