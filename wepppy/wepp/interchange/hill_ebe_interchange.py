@@ -12,6 +12,7 @@ import pyarrow as pa
 
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
+from .schema_utils import pa_field
 
 EBE_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 UNIT_SKIP_TOKENS = {"---", "--", "----"}
@@ -60,25 +61,26 @@ MEASUREMENT_COLUMNS = [
     "Sed.Del (kg/m)",
     "ER",
 ]
+
 SCHEMA = pa.schema(
     [
-        ("wepp_id", pa.int32()),
-        ("year", pa.int16()),
-        ("month", pa.int8()),
-        ("day_of_month", pa.int8()),
-        ("julian", pa.int16()),
-        ("water_year", pa.int16()),
-        ("Precp (mm)", pa.float64()),
-        ("Runoff (mm)", pa.float64()),
-        ("IR-det (kg/m^2)", pa.float64()),
-        ("Av-det (kg/m^2)", pa.float64()),
-        ("Mx-det (kg/m^2)", pa.float64()),
-        ("Point (m)", pa.float64()),
-        ("Av-dep (kg/m^2)", pa.float64()),
-        ("Max-dep (kg/m^2)", pa.float64()),
-        ("Point (m)_2", pa.float64()),
-        ("Sed.Del (kg/m)", pa.float64()),
-        ("ER", pa.float64()),
+        pa_field("wepp_id", pa.int32()),
+        pa_field("year", pa.int16()),
+        pa_field("month", pa.int8()),
+        pa_field("day_of_month", pa.int8()),
+        pa_field("julian", pa.int16()),
+        pa_field("water_year", pa.int16()),
+        pa_field("Precp (mm)", pa.float64(), units="mm"),
+        pa_field("Runoff (mm)", pa.float64(), units="mm"),
+        pa_field("IR-det (kg/m^2)", pa.float64(), units="kg/m^2"),
+        pa_field("Av-det (kg/m^2)", pa.float64(), units="kg/m^2"),
+        pa_field("Mx-det (kg/m^2)", pa.float64(), units="kg/m^2"),
+        pa_field("Point (m)", pa.float64(), units="m"),
+        pa_field("Av-dep (kg/m^2)", pa.float64(), units="kg/m^2"),
+        pa_field("Max-dep", pa.float64(), units="kg/m^2"),
+        pa_field("Point_2", pa.float64(), units="m"),
+        pa_field("Sed.Del", pa.float64(), units="kg/m"),
+        pa_field("ER", pa.float64()),
     ]
 )
 

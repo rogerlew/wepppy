@@ -71,14 +71,14 @@ def test_element_interchange_writes_parquet(tmp_path, monkeypatch):
     df = table.to_pandas()
     assert set(df["wepp_id"].unique()) == {1, 2, 3}
     assert (df["ofe_id"] == df["OFE"]).all()
-    assert (df["month"] == df["MM"]).all()
-    assert (df["day_of_month"] == df["DD"]).all()
-    assert (df["year"] == df["YYYY"]).all()
-    assert (df["day"] == df["julian"]).all()
+    assert "MM" not in df.columns
+    assert "DD" not in df.columns
+    assert "YYYY" not in df.columns
+    assert "day" not in df.columns
 
     first_row = df.sort_values(["wepp_id", "julian", "ofe_id"]).iloc[0]
-    assert first_row["Runoff (mm)"] == pytest.approx(0.0)
-    assert first_row["Precip (mm)"] == pytest.approx(0.0)
+    assert first_row["Runoff"] == pytest.approx(0.0)
+    assert first_row["Precip"] == pytest.approx(0.0)
 
 
 def test_element_interchange_handles_missing_files(tmp_path):

@@ -63,7 +63,7 @@ def test_loss_interchange_writes_parquet(tmp_path, monkeypatch):
     assert (df.groupby("wepp_id")["Class"].nunique() == 5).all()
 
     first = df.sort_values(["wepp_id", "Class"]).iloc[0]
-    assert first["Diameter (mm)"] == pytest.approx(0.002)
+    assert first["Diameter"] == pytest.approx(0.002)
     assert first["Sediment Fraction"] == pytest.approx(0.010)
     assert first["In Flow Exiting"] == pytest.approx(0.0)
 

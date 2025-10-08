@@ -11,68 +11,103 @@ import pyarrow as pa
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
 
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
+
 WAT_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 RAW_HEADER_SUBSTITUTIONS = (
     (" -", ""),
     ("#", "(#)"),
-    (" mm", " (mm)"),
-    ("Water(mm)", "Water (mm)"),
+    (" mm", ""),
+    ("Water(mm)", "Water"),
     ("m^2", "(m^2)"),
 )
 
 WAT_COLUMN_NAMES = [
-    "OFE (#)",
+    "OFE",
     "J",
     "Y",
-    "P (mm)",
-    "RM (mm)",
-    "Q (mm)",
-    "Ep (mm)",
-    "Es (mm)",
-    "Er (mm)",
-    "Dp (mm)",
-    "UpStrmQ (mm)",
-    "SubRIn (mm)",
-    "latqcc (mm)",
-    "Total-Soil Water (mm)",
-    "frozwt (mm)",
-    "Snow-Water (mm)",
-    "QOFE (mm)",
-    "Tile (mm)",
-    "Irr (mm)",
-    "Area (m^2)",
+    "P",
+    "RM",
+    "Q",
+    "Ep",
+    "Es",
+    "Er",
+    "Dp",
+    "UpStrmQ",
+    "SubRIn",
+    "latqcc",
+    "Total-Soil Water",
+    "frozwt",
+    "Snow-Water",
+    "QOFE",
+    "Tile",
+    "Irr",
+    "Area",
 ]
+
+HEADER_ALIASES = {
+    "OFE (#)": "OFE",
+    "OFE": "OFE",
+    "P (mm)": "P",
+    "RM (mm)": "RM",
+    "Q (mm)": "Q",
+    "Ep (mm)": "Ep",
+    "Es (mm)": "Es",
+    "Er (mm)": "Er",
+    "Dp (mm)": "Dp",
+    "UpStrmQ (mm)": "UpStrmQ",
+    "SubRIn (mm)": "SubRIn",
+    "latqcc (mm)": "latqcc",
+    "Total-Soil Water (mm)": "Total-Soil Water",
+    "frozwt (mm)": "frozwt",
+    "Snow-Water (mm)": "Snow-Water",
+    "QOFE (mm)": "QOFE",
+    "Tile (mm)": "Tile",
+    "Irr (mm)": "Irr",
+    "Area (m^2)": "Area",
+}
 
 SCHEMA = pa.schema(
     [
-        ("wepp_id", pa.int32()),
-        ("ofe_id", pa.int16()),
-        ("year", pa.int16()),
-        ("day", pa.int16()),
-        ("julian", pa.int16()),
-        ("month", pa.int8()),
-        ("day_of_month", pa.int8()),
-        ("water_year", pa.int16()),
-        ("OFE (#)", pa.int16()),
-        ("J", pa.int16()),
-        ("Y", pa.int16()),
-        ("P (mm)", pa.float64()),
-        ("RM (mm)", pa.float64()),
-        ("Q (mm)", pa.float64()),
-        ("Ep (mm)", pa.float64()),
-        ("Es (mm)", pa.float64()),
-        ("Er (mm)", pa.float64()),
-        ("Dp (mm)", pa.float64()),
-        ("UpStrmQ (mm)", pa.float64()),
-        ("SubRIn (mm)", pa.float64()),
-        ("latqcc (mm)", pa.float64()),
-        ("Total-Soil Water (mm)", pa.float64()),
-        ("frozwt (mm)", pa.float64()),
-        ("Snow-Water (mm)", pa.float64()),
-        ("QOFE (mm)", pa.float64()),
-        ("Tile (mm)", pa.float64()),
-        ("Irr (mm)", pa.float64()),
-        ("Area (m^2)", pa.float64()),
+        pa_field("wepp_id", pa.int32()),
+        pa_field("ofe_id", pa.int16()),
+        pa_field("year", pa.int16()),
+        pa_field("julian", pa.int16()),
+        pa_field("month", pa.int8()),
+        pa_field("day_of_month", pa.int8()),
+        pa_field("water_year", pa.int16()),
+        pa_field("OFE", pa.int16()),
+        pa_field("P", pa.float64(), units="mm", description="Precipitation"),
+        pa_field("RM", pa.float64(), units="mm", description="Rainfall+Irrigation+Snowmelt"),
+        pa_field("Q", pa.float64(), units="mm", description="Daily runoff over eff length"),
+        pa_field("Ep", pa.float64(), units="mm", description="Plant transpiration"),
+        pa_field("Es", pa.float64(), units="mm", description="Soil evaporation"),
+        pa_field("Er", pa.float64(), units="mm", description="Residue evaporation"),
+        pa_field("Dp", pa.float64(), units="mm", description="Deep percolation"),
+        pa_field("UpStrmQ", pa.float64(), units="mm", description="Runon added to OFE"),
+        pa_field("SubRIn", pa.float64(), units="mm", description="Subsurface runon added to OFE"),
+        pa_field("latqcc", pa.float64(), units="mm", description="Lateral subsurface flow"),
+        pa_field("Total-Soil Water", pa.float64(), units="mm", description="Unfrozen water in soil profile"),
+        pa_field("frozwt", pa.float64(), units="mm", description="Frozen water in soil profile"),
+        pa_field("Snow-Water", pa.float64(), units="mm", description="Water in surface snow"),
+        pa_field("QOFE", pa.float64(), units="mm", description="Daily runoff scaled to single OFE"),
+        pa_field("Tile", pa.float64(), units="mm", description="Tile drainage"),
+        pa_field("Irr", pa.float64(), units="mm", description="Irrigation"),
+        pa_field("Area", pa.float64(), units="m^2", description="Area that depths apply over"),
     ]
 )
 
@@ -124,7 +159,7 @@ def _extract_header(lines: List[str]) -> tuple[List[str], int]:
         raise ValueError("Unable to locate WAT header delimiters")
 
     raw_header_rows = [line.split() for line in lines[header_start + 1 : header_end]]
-    transposed = zip(*raw_header_rows)
+    transposed = list(zip(*raw_header_rows))
     header: List[str] = []
     for column_parts in transposed:
         merged = " ".join(column_parts)
@@ -132,10 +167,12 @@ def _extract_header(lines: List[str]) -> tuple[List[str], int]:
             merged = merged.replace(old, new)
         header.append(merged.strip())
 
-    if header != WAT_COLUMN_NAMES:
+    canonical_header: List[str] = [HEADER_ALIASES.get(value, value) for value in header]
+
+    if canonical_header != WAT_COLUMN_NAMES:
         raise ValueError(f"Unexpected WAT column layout: {header}")
 
-    return header, header_end + 2
+    return canonical_header, header_end + 2
 
 
 def _parse_wat_file(path: Path) -> pa.Table:
@@ -161,20 +198,17 @@ def _parse_wat_file(path: Path) -> pa.Table:
         year = int(tokens[column_positions["Y"]])
         month, day_of_month = _julian_to_calendar(year, julian)
         wy = determine_wateryear(year, julian)
-        ofe_id = int(tokens[column_positions["OFE (#)"]])
+        ofe_id = int(tokens[column_positions["OFE"]])
 
         row: Dict[str, object] = {
             "wepp_id": wepp_id,
             "ofe_id": ofe_id,
             "year": year,
-            "day": julian,
             "julian": julian,
             "month": month,
             "day_of_month": day_of_month,
             "water_year": int(wy),
-            "OFE (#)": ofe_id,
-            "J": julian,
-            "Y": year,
+            "OFE": ofe_id,
         }
 
         for name in WAT_COLUMN_NAMES[3:]:

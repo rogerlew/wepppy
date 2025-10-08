@@ -81,18 +81,17 @@ def test_soil_interchange_writes_parquet(tmp_path, monkeypatch):
     df = table.to_pandas()
     assert set(df["wepp_id"].unique()) == {1}
     assert list(df["ofe_id"]) == [1, 2]
-    assert (df["day"] == df["Day"]).all()
     assert (df["julian"] == df["day"]).all()
 
     first = df.iloc[0]
     assert first["month"] == 1
     assert first["day_of_month"] == 15
-    assert first["Saturation (frac)"] == pytest.approx(0.46)
+    assert first["Saturation"] == pytest.approx(0.46)
 
     second = df.iloc[1]
     assert second["month"] == 7
     assert second["day_of_month"] == 19
-    assert second["TSW (mm)"] == pytest.approx(40.00)
+    assert second["TSW"] == pytest.approx(40.00)
 
 
 def test_soil_interchange_handles_missing_files(tmp_path):

@@ -9,6 +9,22 @@ import pyarrow as pa
 
 from .concurrency import write_parquet_with_pool
 
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
+
 LOSS_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
 MEASUREMENT_COLUMNS = [
@@ -23,19 +39,23 @@ MEASUREMENT_COLUMNS = [
     "In Flow Exiting",
 ]
 
+COLUMN_ALIASES = {
+    "Diameter (mm)": "Diameter",
+}
+
 SCHEMA = pa.schema(
     [
-        ("wepp_id", pa.int32()),
-        ("class_id", pa.int8()),
-        ("Class", pa.int8()),
-        ("Diameter (mm)", pa.float64()),
-        ("Specific Gravity", pa.float64()),
-        ("% Sand", pa.float64()),
-        ("% Silt", pa.float64()),
-        ("% Clay", pa.float64()),
-        ("% O.M.", pa.float64()),
-        ("Sediment Fraction", pa.float64()),
-        ("In Flow Exiting", pa.float64()),
+        pa_field("wepp_id", pa.int32()),
+        pa_field("class_id", pa.int8()),
+        pa_field("Class", pa.int8()),
+        pa_field("Diameter", pa.float64(), units="mm"),
+        pa_field("Specific Gravity", pa.float64()),
+        pa_field("% Sand", pa.float64(), units="%"),
+        pa_field("% Silt", pa.float64(), units="%"),
+        pa_field("% Clay", pa.float64(), units="%"),
+        pa_field("% O.M.", pa.float64(), units="%"),
+        pa_field("Sediment Fraction", pa.float64()),
+        pa_field("In Flow Exiting", pa.float64()),
     ]
 )
 
@@ -110,7 +130,8 @@ def _parse_loss_file(path: Path) -> pa.Table:
         }
 
         for column_name, token in zip(MEASUREMENT_COLUMNS[1:], measurements):
-            row[column_name] = _parse_float(token)
+            target_name = COLUMN_ALIASES.get(column_name, column_name)
+            row[target_name] = _parse_float(token)
 
         _append_row(store, row)
 

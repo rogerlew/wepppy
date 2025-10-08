@@ -10,8 +10,22 @@ import pyarrow as pa
 
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
-from .schema_utils import pa_field
 
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
 
 ELEMENT_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
@@ -54,21 +68,21 @@ SCHEMA = pa.schema(
         pa_field("OFE", pa.int16()),
         pa_field("Precip", pa.float64(), units="mm"),
         pa_field("Runoff", pa.float64(), units="mm"),
-        pa_field("EffInt", pa.float64(), units="mm/h"),
-        pa_field("PeakRO", pa.float64(), units="mm/h"),
+        pa_field("EffInt", pa.float64(), units="mm/h", description="Effective rainfall intensity"),
+        pa_field("PeakRO", pa.float64(), units="mm/h", description="Peak runoff rate"),
         pa_field("EffDur", pa.float64(), units="h"),
-        pa_field("Enrich", pa.float64()),
-        pa_field("Keff", pa.float64(), units="mm/h"),
+        pa_field("Enrich", pa.float64(), description="Sediment enrichment ratio"),
+        pa_field("Keff", pa.float64(), units="mm/h", description="Effective hydraulic conductivity"),
         pa_field("Sm", pa.float64(), units="mm"),
-        pa_field("LeafArea", pa.float64()),
-        pa_field("CanHgt", pa.float64(), units="m"),
-        pa_field("Cancov", pa.float64(), units="%"),
-        pa_field("IntCov", pa.float64(), units="%"),
-        pa_field("RilCov", pa.float64(), units="%"),
+        pa_field("LeafArea", pa.float64(), description="Leaf area index"),
+        pa_field("CanHgt", pa.float64(), units="m", description="Canopy height"),
+        pa_field("Cancov", pa.float64(), units="%", description="Canopy cover"),
+        pa_field("IntCov", pa.float64(), units="%", description="Interrill cover"),
+        pa_field("RilCov", pa.float64(), units="%", description="Rill cover"),
         pa_field("LivBio", pa.float64(), units="kg/m^2"),
         pa_field("DeadBio", pa.float64(), units="kg/m^2"),
-        pa_field("Ki", pa.float64()),
-        pa_field("Kr", pa.float64()),
+        pa_field("Ki", pa.float64(), units="kg s/m^4", description="Interrill erodibility"),
+        pa_field("Kr", pa.float64(), units="s/m", description="Rill erodibility"),
         pa_field("Tcrit", pa.float64()),
         pa_field("RilWid", pa.float64(), units="m"),
         pa_field("SedLeave", pa.float64(), units="kg/m"),
