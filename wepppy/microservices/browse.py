@@ -64,6 +64,7 @@ from datetime import datetime
 from http import HTTPStatus
 
 import pandas as pd
+from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 from starlette.applications import Starlette
@@ -330,6 +331,7 @@ def ensure_response(value):
     return value
 
 MAX_FILE_LIMIT = 100
+MARKDOWN_EXTENSIONS = ('.md', '.markdown', '.mdown', '.mkdn')
 
 
 _logger = logging.getLogger(__name__)
@@ -1339,6 +1341,29 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
                 runid=runid,
                 contents=contents,
             )
+
+        markdown_markup = None
+        if path_lower.endswith(MARKDOWN_EXTENSIONS):
+            if contents is None:
+                try:
+                    contents = await _async_read_text(path)
+                except UnicodeDecodeError:
+                    contents = None
+            if contents is not None:
+                try:
+                    rendered_markdown = markdown_to_html(contents)
+                except Exception:
+                    _logger.exception('Failed to render Markdown file at %s', path)
+                else:
+                    markdown_markup = Markup(rendered_markdown)
+            if markdown_markup is not None:
+                return render_template(
+                    'browse/markdown_file.htm',
+                    runid=runid,
+                    path=path,
+                    filename=basename(path),
+                    markdown_html=markdown_markup,
+                )
 
         html = None
         if path_lower.endswith('.pkl'):
