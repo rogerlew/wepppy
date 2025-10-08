@@ -11,6 +11,22 @@ import pyarrow as pa
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
 
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
+
 EVENT_LABELS = {"EVENT", "SUBEVENT", "NO EVENT"}
 SEDCLASS_COUNT = 5
 EVENT_FLOAT_COUNT = 12 + (2 * SEDCLASS_COUNT) + 2  # dur..tdep + sedcon + frcflw + gwbfv/gwdsv
@@ -37,38 +53,38 @@ def _julian_to_calendar(year: int, julian: int) -> tuple[int, int]:
 
 SCHEMA = pa.schema(
     [
-        ("wepp_id", pa.int32()),
-        ("event", pa.string()),
-        ("year", pa.int16()),
-        ("day", pa.int16()),
-        ("julian", pa.int16()),
-        ("month", pa.int8()),
-        ("day_of_month", pa.int8()),
-        ("water_year", pa.int16()),
-        ("dur", pa.float64()),
-        ("tcs", pa.float64()),
-        ("oalpha", pa.float64()),
-        ("runoff", pa.float64()),
-        ("runvol", pa.float64()),
-        ("sbrunf", pa.float64()),
-        ("sbrunv", pa.float64()),
-        ("drainq", pa.float64()),
-        ("drrunv", pa.float64()),
-        ("peakro", pa.float64()),
-        ("tdet", pa.float64()),
-        ("tdep", pa.float64()),
-        ("sedcon_1", pa.float64()),
-        ("sedcon_2", pa.float64()),
-        ("sedcon_3", pa.float64()),
-        ("sedcon_4", pa.float64()),
-        ("sedcon_5", pa.float64()),
-        ("frcflw_1", pa.float64()),
-        ("frcflw_2", pa.float64()),
-        ("frcflw_3", pa.float64()),
-        ("frcflw_4", pa.float64()),
-        ("frcflw_5", pa.float64()),
-        ("gwbfv", pa.float64()),
-        ("gwdsv", pa.float64()),
+        pa_field("wepp_id", pa.int32()),
+        pa_field("event", pa.string(), description="Record type: EVENT, SUBEVENT, NO EVENT"),
+        pa_field("year", pa.int16()),
+        pa_field("day", pa.int16()),
+        pa_field("julian", pa.int16()),
+        pa_field("month", pa.int8()),
+        pa_field("day_of_month", pa.int8()),
+        pa_field("water_year", pa.int16()),
+        pa_field("dur", pa.float64(), units="s", description="Storm duration"),
+        pa_field("tcs", pa.float64(), units="h", description="Overland flow time of concentration"),
+        pa_field("oalpha", pa.float64(), units="unitless", description="Overland flow alpha parameter"),
+        pa_field("runoff", pa.float64(), units="m", description="Runoff depth"),
+        pa_field("runvol", pa.float64(), units="m^3", description="Runoff volume"),
+        pa_field("sbrunf", pa.float64(), units="m", description="Subsurface runoff depth"),
+        pa_field("sbrunv", pa.float64(), units="m^3", description="Subsurface runoff volume"),
+        pa_field("drainq", pa.float64(), units="m/day", description="Drainage flux"),
+        pa_field("drrunv", pa.float64(), units="m^3", description="Tile Drainage volume"),
+        pa_field("peakro", pa.float64(), units="m^3/s", description="Peak runoff rate"),
+        pa_field("tdet", pa.float64(), units="kg", description="Total detachment"),
+        pa_field("tdep", pa.float64(), units="kg", description="Total deposition"),
+        pa_field("sedcon_1", pa.float64(), units="kg/m^3", description="Sediment concentration 1"),
+        pa_field("sedcon_2", pa.float64(), units="kg/m^3", description="Sediment concentration 2"),
+        pa_field("sedcon_3", pa.float64(), units="kg/m^3", description="Sediment concentration 3"),
+        pa_field("sedcon_4", pa.float64(), units="kg/m^3", description="Sediment concentration 4"),
+        pa_field("sedcon_5", pa.float64(), units="kg/m^3", description="Sediment concentration 5"),
+        pa_field("clot", pa.float64(), units="m^3/s", description="Friction flow 1"),
+        pa_field("slot", pa.float64(), units="%", description="% of exiting sediment in the silt size class"),
+        pa_field("saot", pa.float64(), units="%", description="% of exiting sediment in the small aggregate size class"),
+        pa_field("laot", pa.float64(), units="%", description="% of exiting sediment in the large aggregate size class"),
+        pa_field("sdot", pa.float64(), units="%", description="% of exiting sediment in the sand size class"),
+        pa_field("gwbfv", pa.float64(), description="Groundwater baseflow"),
+        pa_field("gwdsv", pa.float64(), description="Groundwater deep seepage"),
     ]
 )
 
@@ -178,11 +194,11 @@ def _parse_pass_file(path: Path) -> pa.Table:
             "sedcon_3": 0.0,
             "sedcon_4": 0.0,
             "sedcon_5": 0.0,
-            "frcflw_1": 0.0,
-            "frcflw_2": 0.0,
-            "frcflw_3": 0.0,
-            "frcflw_4": 0.0,
-            "frcflw_5": 0.0,
+            "clot": 0.0,
+            "slot": 0.0,
+            "saot": 0.0,
+            "laot": 0.0,
+            "sdot": 0.0,
             "gwbfv": 0.0,
             "gwdsv": 0.0,
         }

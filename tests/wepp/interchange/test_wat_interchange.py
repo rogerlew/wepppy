@@ -60,13 +60,12 @@ def test_wat_interchange_writes_parquet(tmp_path, monkeypatch):
 
     df = table.to_pandas()
     assert set(df["wepp_id"].unique()) == {1, 2, 3}
-    assert (df["day"] == df["julian"]).all()
-    assert (df["ofe_id"] == df["OFE (#)"]).all()
+    assert (df["ofe_id"] == df["OFE"]).all()
 
     first_row = df.iloc[0]
     assert first_row["month"] == 1
     assert first_row["day_of_month"] == 1
-    assert pytest.approx(first_row["P (mm)"], rel=1e-6) == 12.20
+    assert pytest.approx(first_row["P"], rel=1e-6) == 12.20
 
 
 def test_wat_interchange_handles_missing_files(tmp_path):

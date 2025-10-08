@@ -4,8 +4,6 @@ from typing import Dict
 
 import pyarrow as pa
 
-__all__ = ["pa_field"]
-
 def pa_field(name: str, dtype: pa.DataType, *, units: str | None = None, description: str | None = None) -> pa.Field:
     metadata: Dict[bytes, bytes] = {}
     if units is not None:

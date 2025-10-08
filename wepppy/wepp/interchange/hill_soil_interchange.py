@@ -11,6 +11,22 @@ import pyarrow as pa
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
 
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
+
 SOIL_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
 RAW_HEADER = [
@@ -48,43 +64,41 @@ RAW_UNITS = [
 ]
 
 MEASUREMENT_COLUMNS = [
-    "Poros (%)",
-    "Keff (mm/hr)",
-    "Suct (mm)",
-    "FC (mm/mm)",
-    "WP (mm/mm)",
-    "Rough (mm)",
-    "Ki (adjsmt)",
-    "Kr (adjsmt)",
-    "Tauc (adjsmt)",
-    "Saturation (frac)",
-    "TSW (mm)",
+    "Poros",
+    "Keff",
+    "Suct",
+    "FC",
+    "WP",
+    "Rough",
+    "Ki",
+    "Kr",
+    "Tauc",
+    "Saturation",
+    "TSW",
 ]
 
 SCHEMA = pa.schema(
     [
-        ("wepp_id", pa.int32()),
-        ("ofe_id", pa.int16()),
-        ("year", pa.int16()),
-        ("day", pa.int16()),
-        ("julian", pa.int16()),
-        ("month", pa.int8()),
-        ("day_of_month", pa.int8()),
-        ("water_year", pa.int16()),
-        ("OFE", pa.int16()),
-        ("Day", pa.int16()),
-        ("Y", pa.int16()),
-        ("Poros (%)", pa.float64()),
-        ("Keff (mm/hr)", pa.float64()),
-        ("Suct (mm)", pa.float64()),
-        ("FC (mm/mm)", pa.float64()),
-        ("WP (mm/mm)", pa.float64()),
-        ("Rough (mm)", pa.float64()),
-        ("Ki (adjsmt)", pa.float64()),
-        ("Kr (adjsmt)", pa.float64()),
-        ("Tauc (adjsmt)", pa.float64()),
-        ("Saturation (frac)", pa.float64()),
-        ("TSW (mm)", pa.float64()),
+        pa_field("wepp_id", pa.int32()),
+        pa_field("ofe_id", pa.int16()),
+        pa_field("year", pa.int16()),
+        pa_field("day", pa.int16()),
+        pa_field("julian", pa.int16()),
+        pa_field("month", pa.int8()),
+        pa_field("day_of_month", pa.int8()),
+        pa_field("water_year", pa.int16()),
+        pa_field("OFE", pa.int16()),
+        pa_field("Poros", pa.float64(), units="%", description="Soil porosity"),
+        pa_field("Keff", pa.float64(), units="mm/hr", description="Effective hydraulic conductivity"),
+        pa_field("Suct", pa.float64(), units="mm", description="Suction across wetting front"),
+        pa_field("FC", pa.float64(), units="mm/mm", description="Field capacity"),
+        pa_field("WP", pa.float64(), units="mm/mm", description="Wilting point"),
+        pa_field("Rough", pa.float64(), units="mm", description="Surface roughness"),
+        pa_field("Ki", pa.float64(), units="adjsmt", description="Interrill erodibility adjustment factor"),
+        pa_field("Kr", pa.float64(), units="adjsmt", description="Rill erodibility adjustment factor"),
+        pa_field("Tauc", pa.float64(), units="adjsmt", description="Critical shear stress adjustment factor"),
+        pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction"),
+        pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
     ]
 )
 
@@ -190,8 +204,6 @@ def _parse_soil_file(path: Path) -> pa.Table:
             "day_of_month": day_of_month,
             "water_year": water_year,
             "OFE": ofe,
-            "Day": julian,
-            "Y": year,
         }
 
         for column_name, token in zip(MEASUREMENT_COLUMNS, tokens[3:]):
