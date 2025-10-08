@@ -5,7 +5,23 @@ import errno
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
+import gzip
 from typing import Dict, Iterable, Iterator, List, Tuple
+
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -468,8 +484,15 @@ def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str
         raise FileNotFoundError(base)
 
     pass_path = base / PASS_FILENAME
+    source_stream = None
+    is_gzip = False
     if not pass_path.exists():
-        raise FileNotFoundError(pass_path)
+        gz_path = pass_path.with_suffix(pass_path.suffix + ".gz")
+        if gz_path.exists():
+            pass_path = gz_path
+            is_gzip = True
+        else:
+            raise FileNotFoundError(base / PASS_FILENAME)
 
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
@@ -477,7 +500,12 @@ def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str
     events_path = interchange_dir / EVENTS_PARQUET
     metadata_path = interchange_dir / METADATA_PARQUET
 
-    with pass_path.open("r") as stream:
+    if is_gzip:
+        stream = gzip.open(pass_path, "rt")
+    else:
+        stream = pass_path.open("r")
+
+    with stream:
         global_meta, metadata_table, npart, hillslope_ids, nhill, data_iter = _parse_pass_file(stream)
         _write_events_parquet(
             data_iter,

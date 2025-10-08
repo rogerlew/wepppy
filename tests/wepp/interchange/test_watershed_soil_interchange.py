@@ -63,8 +63,6 @@ def test_watershed_soil_interchange_writes_parquet(tmp_path: Path) -> None:
         "day_of_month",
         "water_year",
         "OFE",
-        "Day",
-        "Y",
         "Poros",
         "Keff",
         "Suct",
@@ -89,8 +87,9 @@ def test_watershed_soil_interchange_writes_parquet(tmp_path: Path) -> None:
     df = table.to_pandas()
     assert not df.empty
     assert set(df["wepp_id"].unique()) == {1}
+    assert (df["wepp_id"] == df["ofe_id"]).all()
+    assert (df["wepp_id"] == df["OFE"]).all()
+    assert (df["day"] == df["julian"]).all()
     first_row = df.iloc[0]
-    assert first_row["year"] == first_row["Y"]
-    assert first_row["julian"] == first_row["Day"]
     assert 1 <= first_row["month"] <= 12
     assert 1 <= first_row["day_of_month"] <= 31

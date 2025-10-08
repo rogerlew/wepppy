@@ -79,8 +79,8 @@ def test_ebe_interchange_writes_parquet(tmp_path, monkeypatch):
     df = table.to_pandas()
     assert set(df["wepp_id"].unique()) == {1}
     assert set(df["year"].unique()) == {2012}
-    assert list(df["Precp (mm)"]) == pytest.approx([10.6, 0.0])
-    assert list(df["Point (m)_2"]) == pytest.approx([0.0, 0.0])
+    assert list(df["Precip"]) == pytest.approx([10.6, 0.0])
+    assert list(df["Dep-point"]) == pytest.approx([0.0, 0.0])
 
     first = df.iloc[0]
     assert first["month"] == 2

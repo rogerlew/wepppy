@@ -12,7 +12,22 @@ import pyarrow as pa
 
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
-from .schema_utils import pa_field
+
+try:
+    from .schema_utils import pa_field
+except ModuleNotFoundError:
+    import importlib.machinery
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    schema_utils_path = Path(__file__).with_name("schema_utils.py")
+    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[loader.name] = module
+    loader.exec_module(module)
+    pa_field = module.pa_field
 
 EBE_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 UNIT_SKIP_TOKENS = {"---", "--", "----"}
@@ -62,6 +77,19 @@ MEASUREMENT_COLUMNS = [
     "ER",
 ]
 
+COLUMN_ALIASES = {
+    "Precp (mm)": "Precip",
+    "Runoff (mm)": "Runoff",
+    "IR-det (kg/m^2)": "IR-det",
+    "Av-det (kg/m^2)": "Av-det",
+    "Mx-det (kg/m^2)": "Mx-det",
+    "Point (m)": "Det-point",
+    "Point (m)_2": "Dep-point",
+    "Sed.Del (kg/m)": "Sed.Del",
+    "Av-dep (kg/m^2)": "Av-dep",
+    "Max-dep (kg/m^2)": "Max-dep",
+}
+
 SCHEMA = pa.schema(
     [
         pa_field("wepp_id", pa.int32()),
@@ -70,17 +98,17 @@ SCHEMA = pa.schema(
         pa_field("day_of_month", pa.int8()),
         pa_field("julian", pa.int16()),
         pa_field("water_year", pa.int16()),
-        pa_field("Precp (mm)", pa.float64(), units="mm"),
-        pa_field("Runoff (mm)", pa.float64(), units="mm"),
-        pa_field("IR-det (kg/m^2)", pa.float64(), units="kg/m^2"),
-        pa_field("Av-det (kg/m^2)", pa.float64(), units="kg/m^2"),
-        pa_field("Mx-det (kg/m^2)", pa.float64(), units="kg/m^2"),
-        pa_field("Point (m)", pa.float64(), units="m"),
-        pa_field("Av-dep (kg/m^2)", pa.float64(), units="kg/m^2"),
-        pa_field("Max-dep", pa.float64(), units="kg/m^2"),
-        pa_field("Point_2", pa.float64(), units="m"),
-        pa_field("Sed.Del", pa.float64(), units="kg/m"),
-        pa_field("ER", pa.float64()),
+        pa_field("Precip", pa.float64(), units="mm", description="Storm precipitation depth"),  # sedout.for:439
+        pa_field("Runoff", pa.float64(), units="mm", description="Runoff depth scaled by effective flow length"),  # sedout.for:433-438
+        pa_field("IR-det", pa.float64(), units="kg/m^2", description="Weighted interrill detachment over the hillslope"),  # sedout.for:420-429
+        pa_field("Av-det", pa.float64(), units="kg/m^2", description="Average soil detachment across detachment regions"),  # cseddet.inc
+        pa_field("Mx-det", pa.float64(), units="kg/m^2", description="Maximum soil detachment across detachment regions"),  # cseddet.inc
+        pa_field("Det-point", pa.float64(), units="m", description="Location of maximum soil detachment along hillslope"),  # cseddet.inc
+        pa_field("Av-dep", pa.float64(), units="kg/m^2", description="Average sediment deposition across deposition regions"),  # cseddet.inc
+        pa_field("Max-dep", pa.float64(), units="kg/m^2", description="Maximum sediment deposition across deposition regions"),  # cseddet.inc
+        pa_field("Dep-point", pa.float64(), units="m", description="Location of maximum sediment deposition along hillslope"),  # cseddet.inc
+        pa_field("Sed.Del", pa.float64(), units="kg/m", description="Storm sediment load per unit width at hillslope outlet"),  # cavloss.inc / sedout.for:439
+        pa_field("ER", pa.float64(), description="Specific surface enrichment ratio for event sediment"),  # cenrpa2.inc / sedout.for:439
     ]
 )
 
@@ -187,7 +215,8 @@ def _parse_ebe_file(path: Path, *, start_year: int | None = None) -> pa.Table:
         }
 
         for column_name, token in zip(measurement_columns, tokens[3:]):
-            row[column_name] = _parse_float(token)
+            target_name = COLUMN_ALIASES.get(column_name, column_name)
+            row[target_name] = _parse_float(token)
 
         _append_row(store, row)
 

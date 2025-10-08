@@ -81,9 +81,9 @@ def test_watershed_loss_interchange_outputs_expected_tables(tmp_path: Path) -> N
         "Sediment Deposition",
         "Sediment Yield",
         "Hillslope Area",
-        "Solub. React. Phosphorus",
-        "Particulate Phosphorus",
-        "Total Phosphorus",
+        "Solub. React. Pollutant",
+        "Particulate Pollutant",
+        "Total Pollutant",
     ]
     assert avg_hill.shape == (3, 12)
     hill1 = avg_hill.loc[avg_hill["Hillslopes"] == 1].iloc[0]

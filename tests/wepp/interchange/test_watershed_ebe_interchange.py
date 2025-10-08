@@ -55,22 +55,17 @@ def test_watershed_ebe_interchange_writes_parquet(tmp_path: Path) -> None:
     table = pq.read_table(target)
     schema = table.schema
 
-    expected_measurements = [
-        "Precip Depth (mm)",
-        "Runoff Volume (m^3)",
-        "Peak Runoff (m^3/s)",
-        "Sediment Yield (kg)",
-        "Solub. React. Phosphorus (kg)",
-        "Particulate Phosphorus (kg)",
-        "Total Phosphorus (kg)",
-    ]
+    expected_measurements = {
+        "precip": b"mm",
+        "runoff_volume": b"m^3",
+        "peak_runoff": b"m^3/s",
+        "sediment_yield": b"kg",
+        "soluble_pollutant": b"kg",
+        "particulate_pollutant": b"kg",
+        "total_pollutant": b"kg",
+    }
 
-    for column, units in [
-        ("Precip Depth (mm)", b"mm"),
-        ("Runoff Volume (m^3)", b"m^3"),
-        ("Peak Runoff (m^3/s)", b"m^3/s"),
-        ("Sediment Yield (kg)", b"kg"),
-    ]:
+    for column, units in expected_measurements.items():
         field = schema.field(schema.get_field_index(column))
         assert field.metadata.get(b"units") == units
 
@@ -78,7 +73,7 @@ def test_watershed_ebe_interchange_writes_parquet(tmp_path: Path) -> None:
     assert not df.empty
     assert df["year"].min() == start_year
     assert df["year"].max() == start_year + 6 - 1
-    assert set(df["Elmt ID"].unique()) == {4}
+    assert set(df["element_id"].unique()) == {4}
     assert set(df.columns) == {
         "year",
         "simulation_year",
@@ -86,18 +81,17 @@ def test_watershed_ebe_interchange_writes_parquet(tmp_path: Path) -> None:
         "day_of_month",
         "julian",
         "water_year",
-        "Precip Depth (mm)",
-        "Runoff Volume (m^3)",
-        "Peak Runoff (m^3/s)",
-        "Sediment Yield (kg)",
-        "Solub. React. Phosphorus (kg)",
-        "Particulate Phosphorus (kg)",
-        "Total Phosphorus (kg)",
-        "Elmt ID",
+        "precip",
+        "runoff_volume",
+        "peak_runoff",
+        "sediment_yield",
+        "soluble_pollutant",
+        "particulate_pollutant",
+        "total_pollutant",
+        "element_id",
     }
 
     first_row = df.iloc[0]
     assert first_row["simulation_year"] == 1
     assert first_row["year"] == start_year
     assert first_row["julian"] == 1
-
