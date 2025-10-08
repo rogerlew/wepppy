@@ -40,14 +40,14 @@
 - Metrics captured: hillslope runoff/subrunoff/baseflow volumes, soil loss, sediment deposition/yield plus soluble and particulate phosphorus (derived from `tmpsrp`, `tmpslfp`, `tmpscp`); channel rows add upland charge, subsurface flow, and P partitions scaled by `tmppvoly` and `tmpscpch`. Watershed totals report areas, precipitation/runoff volumes, sediment delivery ratios, and particle composition.
 - Legacy parser: `wepppy/wepp/out/loss.py:153` hydrates the aggregated tables and is referenced widely in watershed reporting (`wepppy/nodb/core/wepp.py:2336`, `:2492`), FSWEPP wrappers (`wepppy/fswepppy/wr/wr.py:425`), and statistics modules (`wepppy/wepp/stats/summary.py:21`). Interchange work must extend parsing beyond annual aggregates to expose per-year hillslope and channel tables.
 - parquet file outputs
-  - average annual tables (replicate what is currently produced by legacy parser)
+  - average annual tables (conceptual replication of what is currently produced by legacy parser)
     - `loss_pw0.chn.parquet`
-    - `loss_pw0.class_data.parquet`
+    - `loss_pw0.class_data.parquet` (use format established by `wepppy/wepp/interchange/hill_loss_interchange.py`)
     - `loss_pw0.hill.parquet`
     - `loss_pw0.out.parquet`
   - all years tables (with `year` column)
     - `loss_pw0.all_years.chn.parquet`
-    - `loss_pw0.all_years.class_data.parquet`
+    - `loss_pw0.all_years.class_data.parquet` (use format established by `wepppy/wepp/interchange/hill_loss_interchange.py`)
     - `loss_pw0.all_years.hill.parquet`
     - `loss_pw0.all_years.out.parquet`
 
