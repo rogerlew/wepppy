@@ -1,11 +1,81 @@
-# WEPP Hillslope Interchange (Draft Spec)
+# WEPP Interchange
 
 ## Motivation
 - Replace ad-hoc parsing of WEPP flat files with durable, columnar interchange artifacts that downstream analytics can query uniformly.
 - Reduce filesystem load by allowing post-processing tools to depend on a compact `wepp/interchange` directory instead of the raw `wepp/output` tree.
 - Provide well-defined schemas with stable typing so DuckDB / Arrow clients can be used without custom adapters.
 
-## Scope (Phase 1)
+# Watershed Interchange
+
+## Overview
+- Watershed deliverables are the next scope after hillslope Parquet builds; goal is a unified `pw0` (project watershed 0) interchange bundle covering channel routing, water balance, event discharge, and watershed summaries.
+- Each project has a set of watershed (`pw0` / `ch(a)n*`) with 1 file for each output type.
+- **Canonical IDs**: include `wepp_id` (hillslope integer), `ofe_id` (when applicable), and a unified date bundle: `year`, `month`, `day`, `julian`, `water_year`.
+
+## Legacy Outputs and Source Mapping
+### `chan.out` -> `chan.out.parquet`
+- Source: opened on unit 66 in `wepp-forest/src/wshinp.for:497`; peak-flow rows written in `wepp-forest/src/wshchr.for:633` via format 104 when `ichout` selects the Muskingum-Cunge report (sub-daily support depends on the user-configured channel timestep).
+- Legacy parser: `wepppy/wepp/out/chan.py:73` validates headers, converts to Gregorian dates, and can append Topo IDs via `WeppTopTranslator`.
+- Dependents: DSS exporter (`wepppy/wepp/out/chan.py:199`) and request queue wiring (`wepppy/rq/wepp_rq.py:713`); new interchange output must continue to satisfy these workflows or provide adapters. The existing Chan class can be refactored to load the Parquet output directly.
+- Interchange notes: compute calendar fields from the Julian day, retain the column units (`Time (s)`, `Peak_Discharge (m^3/s)`) as metadata, support multiple channels (`Elmt_ID`/`Chan_ID`), and include both simulation and calendar years so sub-daily runs remain traceable.
+
+### `chanwb.out` -> `chanwb.out.parquet`
+- Source: opened alongside `chan.out` on unit 67 (`wepp-forest/src/wshinp.for:499`) with one row per channel per day emitted in `wepp-forest/src/wshchr.for:643` via format 106. Columns correspond to the channel water balance equation: inflow (`rvolon + chnvol`), outflow (`chvol`), storage (`sfnl`), baseflow (`qbase`), transmission loss (`rtrans`), and the residual balance.
+- Legacy parser: `wepppy/wepp/out/chanwb.py:17` strips the header and loads the numeric block into NumPy arrays, augmenting with `Date`, `Month`, `Day`, and `Julian`.
+- Dependents: `ChannelWatbal` report (`wepppy/wepp/stats/channel_watbal.py:128`) and observed-run ingestion (`wepppy/nodb/mods/observed/observed.py:128`); interchange tables must keep those consumers whole. ChannelWatbal should be refactored to consume the new Parquet output instead of re-parsing the text file.
+- Interchange notes: use calendar fields (`month`, `day_of_month`, `year`, `water_year`) derived from the Julian day, persist the header descriptions ("Inflow = Total inflow above channel outlet…") as column metadata, and drop the redundant printed `Day` field once Julian/day-of-month are present.
+
+### `chnwb.txt` -> `chnwb.txt.parquet` X
+- Source: header written via formats 1400/1401/1510 in `wepp-forest/src/outfil.for:200` and data lines produced by `watbalPrint` (`wepp-forest/src/watbalprint.for:90`) each timestep when `lunw` is set; driver invokes `watbalPrint` from `wepp-forest/src/wshdrv.for:1179`.
+- Columns (mm unless noted): `OFE`, `Julian`, `Year`, `P`, `RM`, `Q`, `Ep`, `Es`, `Er`, `Dp`, `UpStrmQ`, `SubRIn`, `latqcc`, `Total Soil Water`, `frozwt`, `Snow Water`, `QOFE`, `Tile`, `Irr`, `Surf`, `Base`, `Area`. Baseflow is zeroed when `lr_bf = 1`, otherwise derived from `qBase`.
+- Legacy handling: `wepppy/wepp/out/chnwb.py:24` cubes the record grid into NumPy arrays and computes area weights; `ChannelWatbal` currently reparses the raw text directly for per-channel aggregations. ChannelWatbal should be refactor to consume .parquet directly
+
+### `ebe_pw0.txt` -> `ebe_pw0.parquet` X
+- Source: event-by-event watershed output enabled when `useout('event by event') == 1`; headers written with format 3200 in `wepp-forest/src/outfil.for:526`, records emitted by `write(30,3100)` inside `wepp-forest/src/sedout.for:446` when `runvol > 0.005 m^3`.
+- Columns: `Day`, `Month`, simulation `Year`, `Precipitation Depth (mm)`, `Runoff Volume (m^3)`, `Peak Runoff (m^3/s)`, `Sediment Yield (kg)`, `Soluble Reactive P (kg)`, `Particulate P (kg)`, `Total P (kg)`, and channel `Element ID`.
+- Legacy parser: `wepppy/wepp/out/ebe.py:111` (watershed variant) preserves WEPP labels and adds optional Topo IDs; consumers include watershed post-processing (`wepppy/nodb/core/wepp.py:2383`), observed comparisons (`wepppy/nodb/mods/observed/observed.py:127`), and statistical summaries (`wepppy/wepp/stats/frq_flood.py:120`, `return_periods.py:368`).
+
+### `loss_pw0.txt`
+- Source: watershed erosion summary opened on unit 38 in `wepp-forest/src/outfil.for:372`; annual tables written in `wepp-forest/src/annchn.for:120` onward (`write(38,1300)` for hillslopes, `write(38,1400)` for channels, watershed totals in `write(38,2300)`, particle classes in `write(38,2400)`).
+- Metrics captured: hillslope runoff/subrunoff/baseflow volumes, soil loss, sediment deposition/yield plus soluble and particulate phosphorus (derived from `tmpsrp`, `tmpslfp`, `tmpscp`); channel rows add upland charge, subsurface flow, and P partitions scaled by `tmppvoly` and `tmpscpch`. Watershed totals report areas, precipitation/runoff volumes, sediment delivery ratios, and particle composition.
+- Legacy parser: `wepppy/wepp/out/loss.py:153` hydrates the aggregated tables and is referenced widely in watershed reporting (`wepppy/nodb/core/wepp.py:2336`, `:2492`), FSWEPP wrappers (`wepppy/fswepppy/wr/wr.py:425`), and statistics modules (`wepppy/wepp/stats/summary.py:21`). Interchange work must extend parsing beyond annual aggregates to expose per-year hillslope and channel tables.
+- parquet file outputs
+  - average annual tables (replicate what is currently produced by legacy parser)
+    - `loss_pw0.chn.parquet`
+    - `loss_pw0.class_data.parquet`
+    - `loss_pw0.hill.parquet`
+    - `loss_pw0.out.parquet`
+  - all years tables (with `year` column)
+    - `loss_pw0.all_years.chn.parquet`
+    - `loss_pw0.all_years.class_data.parquet`
+    - `loss_pw0.all_years.hill.parquet`
+    - `loss_pw0.all_years.out.parquet`
+
+### `soil_pw0.txt` -> `soil_pw0.parquet` X
+- Source: soil daily output enabled via `useout('soil')`; file opened on unit 39 in `wepp-forest/src/outfil.for:217` and rows written each timestep from both `watbal.for:1000` and `watbal_hourly.for:1000` through format 1100.
+- Columns: `OFE`, `Day`, `Year`, `Poros (%)`, `Keff (mm/hr)`, `Suct (mm)`, `FC (mm/mm)`, `WP (mm/mm)`, `Rough (mm)`, `Ki adj`, `Kr adj`, `Tauc adj`, `Saturation frac`, `TSW (mm)`—values align with the header printed in `outfil.for:1900`.
+- Legacy parser: `wepppy/wepp/out/soil.py` is absent; consumers typically read `soil_pw0.txt` ad-hoc. Interchange should introduce a canonical Parquet (e.g., `soil_pw0.parquet`) keyed by `wepp_id`/`ofe_id` with calendar fields mirroring hillslope element outputs.
+- Dependencies: soil water balance analytics in `wepppy/wepp/stats/hillslope_watbal.py` and calibration tooling that currently parse the text file; migration will require swapping those to Arrow readers.
+- Schema decisions: include `julian`, `month`, `day_of_month`, `water_year`, and retain WEPP column titles with units annotations, matching the hillslope soil interchange style.
+
+### `pass_pw0.txt` -> `pass_pw0.parquet` X
+- Source: watershed pass file opened on unit 65 in `wepp-forest/src/outfil.for` when `iwpass == 1`; climate mapping and sediment class metadata written in `wepp-forest/src/wshout.for:111`, followed by SUBEVENT blocks emitted for each hillslope/time step via `write(65,...)` inside `wshout.for` and `sedout.for`.
+- Structure: initial header section listing hillslope climate files, particle diameters, contributing areas, and phosphorus concentrations, followed by repeated `SUBEVENT` groups containing three-column arrays (per hillslope) for runoff depth, sediment delivery, and enrichment-related metrics.
+- Legacy parser: none in `wepppy/wepp/out`; pass data is currently consumed indirectly via `H*.pass.dat` merges. Interchange should normalize the metadata into reference tables (climate mapping, particle definitions) and flatten SUBEVENT records into a longitudinal table with `event`, `year`, `julian`, `wepp_id`, and the per-hillslope runoff/sediment vectors.
+- Consumers: watershed calibration scripts and reporting that rely on pass metadata (for example, `wepppy/wepp/interchange/hill_pass_interchange.py` references `SEDCLASS_COUNT`); new processors must expose equivalent context for channel runs.
+- Schema considerations: adopt the same event labeling (`EVENT`/`SUBEVENT`/`NO EVENT`) used in hillslope pass interchange, include sediment class delivery columns, and preserve particle diameter arrays for downstream erosivity checks.
+
+## Migration Considerations
+- Many WEPPCloud pipelines still import `wepppy.wepp.out` (see `wepppy/wepp/out/__init__.py:1` and clients listed via `rg "from wepppy.wepp.out"`); staged deprecation will require either direct consumer migration or thin compatibility adapters emitting interchange-backed objects.
+- Watershed schemas should reuse Fortran variable names in parser code to keep mappings transparent during code review and debugging, mirroring the approach taken in `hill_pass_interchange.py`.
+- Testing strategy: replicate the pass interchange pattern—fixture copies of `tests/wepp/interchange/test_project/output/*.out` feed new processors, and assertions validate Arrow schemas, row counts, and numeric invariants (e.g., zeroed runoff metrics for `NO EVENT` rows).
+
+
+
+
+# Hillslope Interchange
+
+## Scope
 - Hillslope-level products emitted by classic WEPP runs: `H*.ebe.dat`, `H*.element.dat`, `H*.pass.dat`, `H*.loss.dat`, `H*.soil.dat`, `H*.wat.dat`.
 - Generate a single Parquet file per product type inside `wepp/interchange/` for each project run:
   - `H.ebe.parquet`
@@ -14,7 +84,7 @@
   - `H.loss.parquet`
   - `H.soil.parquet`
   - `H.wat.parquet`
-- Implementation presently lives under `wepppy/wepp/interchange/hill_*.py` with `run_wepp_hillslope_interchange` orchestrating the per-product writers. The pass runner (`hill_pass_interchange.py`) hydrates the other artifacts to keep existing call sites working during the transition.
+- Implementation presently lives under `wepppy/wepp/interchange/hill_*.py` with `run_wepp_hillslope_interchange` orchestrating the per-product "interchange processors." The pass runner (`hill_pass_interchange.py`) hydrates the other artifacts to keep existing call sites working during the transition.
 - Target watershed (pw0) interchange deliverables in a follow-up scope.
 - Plot-level hillslope outputs are explicitly out-of-scope for the interchange.
 
@@ -112,6 +182,7 @@ The legacy parsers live under `wepppy/wepp/out/` and act as data brokers for oth
 - 2025-02-17: Elevated orchestration via `run_wepp_hillslope_pass_interchange`/`run_wepp_hillslope_interchange` so a single call materializes all hillslope parquet artifacts beneath `wepp/output/interchange/`. Tests now assert every parquet target is emitted when PASS runs.
 - 2025-02-20: Added worker-pool helper integration across all hillslope writers with `/dev/shm` staging, taught EBE parsing to accept a `start_year` offset for 1-indexed WEPP years, and refreshed the interchange tests to assert the concurrent fan-out path.
 - 2025-02-21: Swapped the thread pool for a `ProcessPoolExecutor` plus a streaming writer queue so parsing and parquet emission overlap fully. End-to-end runtime on `/wc1/runs/co/copacetic-note/wepp/ag_fields/output/` dropped from ~5,360 s to ~469 s (≈11× faster), leaving raw file I/O as the primary cost.
+
 
 ```
 >>> pd.read_parquet('/workdir/wepppy/tests/wepp/interchange/test_project/output/interchange/H.element.parquet').info()
