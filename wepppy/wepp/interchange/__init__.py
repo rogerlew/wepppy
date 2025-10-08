@@ -13,8 +13,10 @@ from .hill_wat_interchange import run_wepp_hillslope_wat_interchange
 from .hill_interchange import run_wepp_hillslope_interchange
 from .watershed_loss_interchange import run_wepp_watershed_loss_interchange
 from .watershed_interchange import run_wepp_watershed_interchange
+from .documentation import generate_interchange_documentation
 
 __all__ = [
+    "generate_interchange_documentation",
     "run_wepp_hillslope_interchange",
     "run_wepp_hillslope_ebe_interchange",
     "run_wepp_hillslope_element_interchange",
