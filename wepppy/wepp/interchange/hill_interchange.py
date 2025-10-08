@@ -17,3 +17,5 @@ def run_wepp_hillslope_interchange(wepp_output_dir: Path | str, *, start_year: i
     run_wepp_hillslope_loss_interchange(base)
     run_wepp_hillslope_soil_interchange(base)
     run_wepp_hillslope_wat_interchange(base)
+
+    return base / "interchange"
