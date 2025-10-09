@@ -20,17 +20,6 @@ from os.path import exists as _exists
 import jsonpickle
 import jsonpickle.ext.numpy as jsonpickle_numpy
 
-__all__ = [
-    'NCPU',
-    'DelineationBackend',
-    'WatershedNotAbstractedError',
-    'WatershedNoDbLockedException',
-    'process_channel',
-    'process_subcatchment',
-    'TRANSIENT_FIELDS',
-    'Watershed',
-    'Outlet',
-]
 jsonpickle_numpy.register_handlers()
 
 import pandas as pd
@@ -68,6 +57,11 @@ from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
+from wepppy.nodb.duckdb_agents import (
+    get_watershed_subs_summary,
+    get_watershed_sub_summary
+)
+
 from .topaz import Topaz
 
 from wepppy.all_your_base import NCPU
@@ -75,13 +69,16 @@ from wepppy.all_your_base import NCPU
 NCPU = multiprocessing.cpu_count() - 2
 
 __all__ = [
+    'NCPU',
     'DelineationBackend',
     'WatershedNotAbstractedError',
     'WatershedNoDbLockedException',
+    'process_channel',
+    'process_subcatchment',
+    'TRANSIENT_FIELDS',
     'Watershed',
     'Outlet',
 ]
-
 class DelineationBackend(IntEnum):
     TOPAZ = 1
     TauDEM = 2
@@ -1357,8 +1354,6 @@ class Watershed(NoDbBase):
 
     def sub_summary(self, topaz_id) -> Union[PeridotHillslope, None]:
         if _exists(_join(self.wat_dir, "hillslopes.parquet")):
-            from .duckdb_agents import get_watershed_sub_summary
-
             return PeridotHillslope.from_dict(
                 get_watershed_sub_summary(self.wd, topaz_id)
             )
@@ -1426,7 +1421,6 @@ class Watershed(NoDbBase):
     @property
     def subs_summary(self) -> Dict[str, Dict]:
         if _exists(_join(self.wat_dir, "hillslopes.parquet")):
-            from .duckdb_agents import get_watershed_subs_summary
 
             summaries = get_watershed_subs_summary(self.wd)
             return {
@@ -1438,8 +1432,6 @@ class Watershed(NoDbBase):
 
     def chn_summary(self, topaz_id) -> Union[Dict, None]:
         if _exists(_join(self.wat_dir, "channels.parquet")):
-            from .duckdb_agents import get_watershed_chn_summary
-
             return PeridotChannel.from_dict(
                 get_watershed_chn_summary(self.wd, topaz_id)
             )

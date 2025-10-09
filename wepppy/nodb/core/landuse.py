@@ -38,6 +38,11 @@ from wepppy.nodb.base import (
     nodb_setter,
 )
 
+from wepppy.nodb.duckdb_agents import (
+    get_landuse_subs_summary,
+    get_landuse_sub_summary
+)
+
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.landcover.rap import RAP_Band
@@ -924,7 +929,6 @@ class Landuse(NoDbBase):
     def _x_summary(self, topaz_id: str):
         
         if _exists(_join(self.lc_dir, 'landuse.parquet')):
-            from .duckdb_agents import get_landuse_sub_summary
             return get_landuse_sub_summary(self.wd, topaz_id)
         
         return self._deprecated_x_summary(topaz_id)
@@ -981,8 +985,6 @@ class Landuse(NoDbBase):
         Returns a dictionary with topaz_id keys and dictionary soils values.
         """
         if _exists(_join(self.lc_dir, 'landuse.parquet')):
-
-            from .duckdb_agents import get_landuse_subs_summary
             return get_landuse_subs_summary(self.wd)
             
         return self._subs_summary_gen()
@@ -1032,7 +1034,6 @@ class Landuse(NoDbBase):
         Returns a pandas DataFrame with the hill table.
         """
         if _exists(_join(self.lc_dir, 'landuse.parquet')):
-            from .duckdb_agents import get_landuse_subs_summary
             return get_landuse_subs_summary(self.wd, return_as_df=True)
         
         return self._deprecated_hill_table()

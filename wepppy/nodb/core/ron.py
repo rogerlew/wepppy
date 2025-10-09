@@ -717,7 +717,6 @@ class Ron(NoDbBase):
 
         _soils = None
         if _exists(_join(wd, 'soils/soils.parquet')):
-            from .duckdb_agents import get_soil_sub_summary
             _soils = get_soil_sub_summary(wd, topaz_id=topaz_id)
         else:
             soils = self.soils_instance
@@ -726,7 +725,6 @@ class Ron(NoDbBase):
 
         _landuse = None
         if _exists(_join(wd, 'landuse/landuse.parquet')):
-            from .duckdb_agents import get_landuse_sub_summary
             _landuse = get_landuse_sub_summary(wd, topaz_id=topaz_id)
         else:
             landuse = self.landuse_instance
@@ -791,7 +789,6 @@ class Ron(NoDbBase):
         wd = self.wd
         _watershed = None
         if _exists(_join(wd, 'watershed/channels.parquet')):
-            from .duckdb_agents import get_watershed_chn_summary
             _watershed = get_watershed_chn_summary(wd, topaz_id=topaz_id)
             chn_enum = _watershed['chn_enum']
             wepp_id = _watershed['wepp_id']
