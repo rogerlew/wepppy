@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from wepppy.query_engine.activate import activate_query_engine
 from wepppy.query_engine.catalog import DatasetCatalog, load_catalog
 
 
@@ -28,6 +27,8 @@ def resolve_run_context(runid: str, *, scenario: Optional[str] = None, auto_acti
             raise FileNotFoundError(scenario_dir)
 
     if auto_activate:
+        from wepppy.query_engine.activate import activate_query_engine
+
         activate_query_engine(scenario_dir)
 
     catalog = load_catalog(scenario_dir)

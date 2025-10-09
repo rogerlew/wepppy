@@ -3,13 +3,19 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
 
-
-class QueryRequest(BaseModel):
+@dataclass(slots=True)
+class QueryRequest:
     datasets: List[str]
     columns: Optional[List[str]] = None
-    limit: Optional[int] = Field(default=None, ge=1)
+    limit: Optional[int] = None
+    include_schema: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.datasets:
+            raise ValueError("At least one dataset must be provided")
+        if self.limit is not None and self.limit < 1:
+            raise ValueError("limit must be >= 1")
 
 
 @dataclass
