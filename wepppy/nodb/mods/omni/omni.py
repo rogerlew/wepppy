@@ -224,7 +224,7 @@ def _omni_clone(scenario_def: dict, wd: str, runid):
             if not _exists(dst):
                 os.symlink(src, dst)
 
-        elif fn in ['disturbed', 'soils']:
+        elif fn in ['disturbed', 'soils', 'rap']:
             src = _join(wd, fn)
             dst = _join(new_wd, fn)
             if not _exists(dst):
