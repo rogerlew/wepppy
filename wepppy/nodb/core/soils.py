@@ -47,11 +47,17 @@ from wepppy.nodb.base import (
 from .ron import Ron
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
+from wepppy.nodb.duckdb_agents import (
+    get_soil_sub_summary,
+    get_soil_subs_summary
+)
+
 __all__ = [
     'SoilsNoDbLockedException',
     'SoilsMode',
     'Soils',
 ]
+
 
 try:
     import wepppyo3
@@ -946,6 +952,7 @@ class Soils(NoDbBase):
         global wepppyo3
 
         soils_dir = self.soils_dir
+        failed = True
         with self.locked():
             if initial_sat is not None:
                 self._initial_sat = initial_sat
@@ -998,38 +1005,41 @@ class Soils(NoDbBase):
                     dom_mukey = str(valid[0])
 
 
-            if dom_mukey is None:
-                self.logger.info('no surgo keys found, falling back to statsgo')
-                self.build_statsgo(initial_sat=self.initial_sat,
-                                   ksflag=self.ksflag)
-                return
+            failed = dom_mukey is None
 
-            for topaz_id, mukey in domsoil_d.items():
-                if mukey not in soils:
-                    domsoil_d[topaz_id] = dom_mukey
+            if not failed:
+                for topaz_id, mukey in domsoil_d.items():
+                    if mukey not in soils:
+                        domsoil_d[topaz_id] = dom_mukey
 
-            # while we are at it we will calculate the pct coverage
-            # for the landcover types in the watershed
-            with self.timed('  Calculating soil coverage'):
-                for k in soils:
-                    soils[k].area = 0.0
+                # while we are at it we will calculate the pct coverage
+                # for the landcover types in the watershed
+                with self.timed('  Calculating soil coverage'):
+                    for k in soils:
+                        soils[k].area = 0.0
 
-                total_area = watershed.wsarea
-                for topaz_id, k in domsoil_d.items():
-                    soils[k].area += watershed.hillslope_area(topaz_id)
+                    total_area = watershed.wsarea
+                    for topaz_id, k in domsoil_d.items():
+                        soils[k].area += watershed.hillslope_area(topaz_id)
 
-                for k in soils:
-                    coverage = 100.0 * soils[k].area / total_area
-                    soils[k].pct_coverage = coverage
+                    for k in soils:
+                        coverage = 100.0 * soils[k].area / total_area
+                        soils[k].pct_coverage = coverage
 
-            with self.timed('  Storing soils'):
-                self.domsoil_d = domsoil_d
-                self.ssurgo_domsoil_d = deepcopy(domsoil_d)
-                self.soils = {str(k): v for k, v in soils.items()}
+                with self.timed('  Storing soils'):
+                    self.domsoil_d = domsoil_d
+                    self.ssurgo_domsoil_d = deepcopy(domsoil_d)
+                    self.soils = {str(k): v for k, v in soils.items()}
 
-        self.logger.info('triggering SOILS_BUILD_COMPLETE')
-        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-        self = type(self).getInstance(self.wd)  # reload instance from .nodb
+                self.logger.info('triggering SOILS_BUILD_COMPLETE')
+                self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+                self = type(self).getInstance(self.wd)  # reload instance from .nodb
+
+        # fallback to statsgo if surgo failed
+        if failed:
+            self.logger.info('no surgo keys found, falling back to statsgo')
+            self.build_statsgo(initial_sat=self.initial_sat,
+                                ksflag=self.ksflag)
 
 
     @property
@@ -1046,7 +1056,6 @@ class Soils(NoDbBase):
     def _x_summary(self, topaz_id, abbreviated=False):
 
         if _exists(_join(self.soils_dir, 'soils.parquet')):
-            from .duckdb_agents import get_soil_sub_summary
             return get_soil_sub_summary(self.wd, topaz_id)
         
         domsoil_d = self.domsoil_d
@@ -1072,8 +1081,6 @@ class Soils(NoDbBase):
         Returns a dictionary with topaz_id keys and dictionary soils values.
         """
         if _exists(_join(self.soils_dir, 'soils.parquet')):
-
-            from .duckdb_agents import get_soil_subs_summary
             return get_soil_subs_summary(self.wd)
             
         return self._subs_summary_gen()
@@ -1129,7 +1136,6 @@ class Soils(NoDbBase):
         Returns a pandas DataFrame with the hill table.
         """
         if _exists(_join(self.soils_dir, 'soils.parquet')):
-            from .duckdb_agents import get_soil_subs_summary
             return get_soil_subs_summary(self.wd, return_as_df=True)
         
         result_dict = self._subs_summary_gen()
