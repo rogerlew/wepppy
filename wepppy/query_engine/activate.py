@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Iterable, List
 
-from wepppy.nodb.core.climate import Climate
 from wepppy.wepp.interchange import (
     generate_interchange_documentation,
     run_wepp_hillslope_interchange,
@@ -65,6 +64,8 @@ def activate_query_engine(
     if run_interchange:
         start_year = None
         try:
+            from wepppy.nodb.core.climate import Climate  # local import to avoid heavy deps during import
+
             climate = Climate.getInstance(str(base))
             if getattr(climate, "observed_start_year", None) is not None:
                 start_year = climate.observed_start_year
