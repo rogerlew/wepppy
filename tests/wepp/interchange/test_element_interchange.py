@@ -44,9 +44,14 @@ def test_element_interchange_writes_parquet(tmp_path, monkeypatch):
     lines = h1_path.read_text().splitlines()
     for idx, raw in enumerate(lines):
         if raw.strip().startswith("1  1  1 2000"):
-            tokens = raw.split()
-            tokens[5] = "******"  # Set Runoff to missing for first record
-            lines[idx] = " ".join(tokens)
+            runoff_idx = element_module.ELEMENT_COLUMN_NAMES.index("Runoff")
+            start = sum(element_module.ELEMENT_FIELD_WIDTHS[:runoff_idx])
+            width = element_module.ELEMENT_FIELD_WIDTHS[runoff_idx]
+            end = start + width
+            replacement = f"{'******':>{width}}"
+            # Ensure the line is padded to the expected width before substitution
+            padded = raw.ljust(sum(element_module.ELEMENT_FIELD_WIDTHS))
+            lines[idx] = padded[:start] + replacement + padded[end:]
             break
     h1_path.write_text("\n".join(lines) + "\n")
 
