@@ -1114,7 +1114,7 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff
                 dl_url = _join(request_path, _file).replace('/browse/', '/download/')
                 dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
             file_lower = _file.lower()
-            gl_link = '          '
+            gl_link = '      '
             if file_lower.endswith(('.arc', '.tif', '.img', '.nc')):
                 gl_url = _join(request_path, _file).replace('/browse/', '/gdalinfo/')
                 gl_link = f'  <a href="{gl_url}">gdalinfo</a>'
