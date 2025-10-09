@@ -56,6 +56,33 @@ ELEMENT_COLUMN_NAMES = [
     "SedLeave",
 ]
 
+ELEMENT_FIELD_WIDTHS = [
+    3,  # OFE
+    3,  # DD
+    3,  # MM
+    5,  # YYYY
+    9,  # Precip
+    9,  # Runoff
+    8,  # EffInt
+    8,  # PeakRO
+    8,  # EffDur
+    6,  # Enrich
+    8,  # Keff
+    8,  # Sm
+    8,  # LeafArea
+    7,  # CanHgt
+    9,  # Cancov
+    9,  # IntCov
+    9,  # RilCov
+    9,  # LivBio
+    7,  # DeadBio
+    7,  # Ki
+    7,  # Kr
+    7,  # Tcrit
+    7,  # RilWid
+    9,  # SedLeave
+]
+
 SCHEMA = pa.schema(
     [
         pa_field("wepp_id", pa.int32()),
@@ -123,6 +150,24 @@ def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
         store[name].append(row[name])
 
 
+_LINE_WIDTH = sum(ELEMENT_FIELD_WIDTHS)
+
+
+def _split_fixed_width_line(raw_line: str) -> List[str]:
+    if len(raw_line) < _LINE_WIDTH:
+        raw_line = raw_line.ljust(_LINE_WIDTH)
+    tokens: List[str] = []
+    idx = 0
+    for width in ELEMENT_FIELD_WIDTHS:
+        segment = raw_line[idx : idx + width]
+        tokens.append(segment.strip())
+        idx += width
+    remainder = raw_line[idx:]
+    if remainder.strip():
+        raise ValueError(f"Unexpected trailing characters past fixed width payload: {remainder!r}")
+    return tokens
+
+
 def _parse_element_file(path: Path) -> pa.Table:
     match = ELEMENT_FILE_RE.match(path.name)
     if not match:
@@ -130,19 +175,17 @@ def _parse_element_file(path: Path) -> pa.Table:
     wepp_id = int(match.group("wepp_id"))
 
     raw_lines = path.read_text().splitlines()
-    stripped_lines = [line.strip() for line in raw_lines if line.strip()]
-    if len(stripped_lines) < 3:
+    trimmed_lines = [line.rstrip("\n") for line in raw_lines if line.strip()]
+    if len(trimmed_lines) < 3:
         return pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
-    data_lines = stripped_lines[2:]
+    data_lines = trimmed_lines[2:]
     out = _init_column_store()
 
     previous_values: Dict[str, float] = {}
 
     for idx, raw_line in enumerate(data_lines):
-        tokens = raw_line.split()
-        if len(tokens) != len(ELEMENT_COLUMN_NAMES):
-            raise ValueError(f"Unexpected token count in {path}: {len(tokens)}")
+        tokens = _split_fixed_width_line(raw_line)
 
         ofe = int(tokens[0])
         day_of_month = int(tokens[1])
