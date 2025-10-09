@@ -632,8 +632,6 @@ class AgFields(NoDbBase):
 
         tasks = []
         for index, field in subfields_df.iterrows():
-            if index > 4:
-                break  # limit to first 5 for testing
 
             field_id = field['field_id']
             topaz_id = str(field['topaz_id'])
