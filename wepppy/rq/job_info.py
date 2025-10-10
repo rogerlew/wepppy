@@ -8,11 +8,16 @@ from rq.exceptions import NoSuchJobError
 import redis
 import json
 from dotenv import load_dotenv
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+    redis_host,
+)
 
 load_dotenv()
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-RQ_DB = 9
+REDIS_HOST = redis_host()
+RQ_DB = int(RedisDB.RQ)
 
 
 def recursive_get_job_details(job, redis_conn, now):
@@ -51,7 +56,8 @@ def recursive_get_job_details(job, redis_conn, now):
 
 def get_wepppy_rq_job_info(job_id: str) -> dict:
     now = utcnow()
-    with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    with redis.Redis(**conn_kwargs) as redis_conn:
         try:
             job = Job.fetch(job_id, connection=redis_conn)
         except NoSuchJobError:
@@ -86,7 +92,8 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> dict[str, dict]:
     now = utcnow()
     results: dict[str, dict] = {}
 
-    with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    with redis.Redis(**conn_kwargs) as redis_conn:
         for job_id in normalized_ids:
             try:
                 job = Job.fetch(job_id, connection=redis_conn)
@@ -137,7 +144,8 @@ def _flatten_job_tree(job_info: dict) -> tuple[list, list]:
 
 def get_wepppy_rq_job_status(job_id: str) -> dict:
     now = utcnow()
-    with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    with redis.Redis(**conn_kwargs) as redis_conn:
         try:
             job = Job.fetch(job_id, connection=redis_conn)
         except NoSuchJobError:

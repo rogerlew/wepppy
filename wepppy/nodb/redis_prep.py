@@ -7,15 +7,12 @@ from os.path import exists as _exists
 
 import json
 import time
-import redis
+from wepppy.config.redis_settings import RedisDB, redis_client
 
 from dotenv import load_dotenv
 _thisdir = os.path.dirname(__file__)
 
 load_dotenv(_join(_thisdir, '.env'))
-
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-
 
 class TaskEnum(Enum):
     if_exists_rmtree = 'rmtree'
@@ -109,7 +106,7 @@ class RedisPrep:
     def __init__(self, wd, cfg_fn=None):
         self.wd = wd
         self.cfg_fn = cfg_fn
-        self.redis = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
+        self.redis = redis_client(RedisDB.LOCK, decode_responses=True)
         parent, run_id = _split(wd.rstrip('/'))
         self.run_id = run_id
         if not _exists(self.dump_filepath):

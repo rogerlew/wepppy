@@ -21,6 +21,11 @@ from typing import Optional
 
 import redis
 from rq import Queue, get_current_job
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+    redis_host,
+)
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -43,8 +48,8 @@ _thisdir = os.path.dirname(__file__)
 
 load_dotenv(_join(_thisdir, '.env'))
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-RQ_DB = 9
+REDIS_HOST = redis_host()
+RQ_DB = int(RedisDB.RQ)
 
 TIMEOUT = 43_200
 DEFAULT_ZOOM = 12
@@ -319,7 +324,8 @@ def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl, 
         watershed.set_extent_mode = set_extent_mode
         watershed.map_bounds_text = map_bounds_text
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
             
             ajob = q.enqueue_call(fetch_dem_rq, (runid, extent, center, zoom))
@@ -399,7 +405,8 @@ def build_subcatchments_and_abstract_watershed_rq(runid: str):
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
             
             ajob = q.enqueue_call(build_subcatchments_rq, (runid,), timeout=TIMEOUT)
@@ -752,7 +759,8 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
             # Connect to Redis and enqueue the jobs
             final_wepp_job = run_wepp_rq(new_runid)
 
-            with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+            with redis.Redis(**conn_kwargs) as redis_conn:
                 q = Queue(connection=redis_conn)
             
                 # Enqueue the final completion message job, dependent on the WEPP run
