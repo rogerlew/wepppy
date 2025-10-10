@@ -11,10 +11,11 @@ import tornado.websocket
 import redis.asyncio as aioredis          # keep the async bits separate
 from redis.backoff import ExponentialBackoff
 from redis.retry import Retry
+from wepppy.config.redis_settings import RedisDB, redis_async_url
 
 # ─────────────────────────── Config ────────────────────────────
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost")
-REDIS_KEY_PATTERN = "__keyspace@0__:*"
+REDIS_URL = redis_async_url(RedisDB.LOCK)
+REDIS_KEY_PATTERN = f"__keyspace@{int(RedisDB.LOCK)}__:*"
 HEARTBEAT_INTERVAL_MS = 30_000
 CLIENT_CHECK_INTERVAL_MS = 5_000
 
@@ -23,7 +24,6 @@ def new_redis():
     """Return a fresh Redis connection with sane defaults."""
     return aioredis.from_url(
         REDIS_URL,
-        db=0,
         health_check_interval=30,        # send PING every 30 s
         retry_on_timeout=True,
         retry=Retry(backoff=ExponentialBackoff(1, 60), retries=-1),
