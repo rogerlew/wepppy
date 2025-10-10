@@ -37,6 +37,17 @@ class DatasetCatalog:
     def has(self, rel_path: str) -> bool:
         return rel_path in self._by_path
 
+    def get_column_type(self, rel_path: str, column: str) -> Optional[str]:
+        entry = self.get(rel_path)
+        if entry is None or not entry.schema:
+            return None
+        fields = entry.schema.get("fields")
+        if isinstance(fields, list):
+            for field in fields:
+                if isinstance(field, dict) and field.get("name") == column:
+                    return str(field.get("type"))
+        return None
+
 
 def load_catalog(base: Path) -> DatasetCatalog:
     catalog_path = base / "_query_engine" / "catalog.json"

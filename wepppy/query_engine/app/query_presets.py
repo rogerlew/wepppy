@@ -36,7 +36,8 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     "landuse.TopazID",
                     "landuse.key",
                 ],
-                "limit": 25
+                "limit": 25,
+                "include_schema": True,
             },
         },
         {
@@ -56,7 +57,51 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     "soils.simple_texture",
                     "soils.soil_depth",
                 ],
-                "limit": 25
+                "limit": 25,
+                "include_schema": True,
+            },
+        },
+        {
+            "id": "landuse-filter",
+            "name": "Landuse key 43, canopy < 0.6",
+            "description": "Filter landuse to key 43 and canopy coverage under 0.6, returning the first 50 sorted entries.",
+            "payload": {
+                "datasets": [
+                    {
+                        "path": "landuse/landuse.parquet",
+                        "alias": "landuse",
+                    }
+                ],
+                "columns": [
+                    "landuse.TopazID AS topaz_id",
+                    "landuse.key AS landuse_key",
+                    "landuse.cancov AS canopy_cover",
+                ],
+                "filters": [
+                    {"column": "landuse.key", "operator": "=", "value": 43},
+                    {"column": "landuse.cancov", "operator": "<", "value": 0.6},
+                ],
+                "order_by": ["landuse.TopazID"],
+                "limit": 50,
+                "include_schema": True,
+                "include_sql": True,
+            },
+        },
+        {
+            "id": "landuse-filter-in",
+            "name": "Landuse keys in [105, 118]",
+            "description": "Demonstrate IN filter support by returning landuse rows with key 43 or 45.",
+            "payload": {
+                "datasets": [
+                    {"path": "landuse/landuse.parquet", "alias": "landuse"},
+                ],
+                "filters": [
+                    {"column": "landuse.key", "operator": "IN", "value": [105, 118]},
+                ],
+                "order_by": ["landuse.TopazID"],
+                "limit": 100,
+                "include_schema": True,
+                "include_sql": True,
             },
         },
     ],

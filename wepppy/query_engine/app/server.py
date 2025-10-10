@@ -195,6 +195,16 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
             {"error": str(exc), "stacktrace": stacktrace},
             status_code=404,
         )
+    except ValueError as exc:
+        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        LOGGER.debug("Query validation error for %s: %s", run_path, exc, exc_info=True)
+        return JSONResponse(
+            {
+                "error": str(exc),
+                "stacktrace": stacktrace,
+            },
+            status_code=422,
+        )
     except Exception as exc:  # pragma: no cover - defensive error reporting
         stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         LOGGER.exception("Query execution failed for %s", run_path)

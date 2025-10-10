@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+import pytest
 
 from wepppy.query_engine.catalog import DatasetCatalog
 from wepppy.query_engine.context import RunContext
@@ -27,12 +28,23 @@ def _write_catalog_entries(root: Path, rel_paths: list[str]) -> None:
     files = []
     for rel_path in rel_paths:
         full_path = root / rel_path
+        parquet_schema = None
+        if full_path.exists():
+            parquet_schema = pq.read_table(full_path).schema
+
         catalog_entry = {
             "path": rel_path,
             "extension": full_path.suffix or ".parquet",
             "size_bytes": full_path.stat().st_size,
             "modified": "2024-01-01T00:00:00Z",
         }
+        if parquet_schema is not None:
+            catalog_entry["schema"] = {
+                "fields": [
+                    {"name": field.name, "type": str(field.type)}
+                    for field in parquet_schema
+                ]
+            }
         files.append(catalog_entry)
 
     catalog = {
@@ -178,3 +190,50 @@ def test_run_query_aggregation(tmp_path: Path) -> None:
         assert row["sediment_sum"] == expected[key]["sediment_sum"]
         ordered_keys.append(key)
     assert ordered_keys == sorted(ordered_keys)
+
+
+def test_filter_numeric_cast(tmp_path: Path) -> None:
+    rel = "landuse/landuse.parquet"
+    table = pa.table(
+            {
+                "TopazID": [1, 2, 3],
+                "key": pa.array([43, 44, 45], type=pa.int64()),
+                "cancov": pa.array([0.5, 0.8, 0.4], type=pa.float32()),
+            }
+        )
+
+    _write_parquet(tmp_path / rel, table)
+    _write_catalog_entries(tmp_path, [rel])
+
+    catalog = DatasetCatalog.load(tmp_path / "_query_engine" / "catalog.json")
+    run_context = RunContext(runid=str(tmp_path), base_dir=tmp_path, scenario=None, catalog=catalog)
+
+    payload = QueryRequest(
+        datasets=[{"path": rel, "alias": "landuse"}],
+        columns=[
+            "landuse.TopazID AS topaz_id",
+            "landuse.key",
+            "landuse.cancov",
+        ],
+        filters=[
+            {"column": "landuse.key", "operator": "=", "value": "43"},
+            {"column": "landuse.cancov", "operator": "<", "value": 0.6},
+        ],
+        include_sql=True,
+    )
+
+    result = run_query(run_context, payload)
+    assert result.row_count == 1
+    row = result.records[0]
+    assert row.get("landuse.key", row.get("key")) == 43
+    assert "WHERE landuse.key = 43" in (result.sql or "")
+
+    payload_invalid = QueryRequest(
+        datasets=[{"path": rel, "alias": "landuse"}],
+        filters=[
+            {"column": "landuse.key", "operator": "=", "value": "forest"},
+        ],
+    )
+
+    with pytest.raises(ValueError):
+        run_query(run_context, payload_invalid)
