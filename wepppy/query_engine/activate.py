@@ -19,6 +19,10 @@ SUPPORTED_EXTENSIONS: tuple[str, ...] = (
     ".geojson",
 )
 
+GEO_SCHEMA_EXTENSIONS: tuple[str, ...] = (
+    ".geojson",
+)
+
 
 def activate_query_engine(
     wd: str | Path,
@@ -142,6 +146,8 @@ def _build_catalog(base: Path) -> List[Dict[str, object]]:
 
             if suffix == ".parquet":
                 entry["schema"] = _read_parquet_schema(path)
+            elif suffix in GEO_SCHEMA_EXTENSIONS:
+                entry["schema"] = _read_geo_schema(path)
 
             entries.append(entry)
 
@@ -173,3 +179,35 @@ def _read_parquet_schema(path: Path) -> Dict[str, object] | None:
         fields.append(field_info)
 
     return {"fields": fields}
+
+
+def _read_geo_schema(path: Path) -> Dict[str, object] | None:
+    try:
+        import duckdb
+    except ImportError:  # pragma: no cover
+        LOGGER.debug("duckdb not available; skipping geo schema for %s", path)
+        return None
+
+    try:
+        with duckdb.connect(database=":memory:") as conn:
+            try:
+                conn.load_extension("spatial")
+            except duckdb.IOException:
+                try:
+                    conn.install_extension("spatial")
+                    conn.load_extension("spatial")
+                except Exception:  # pragma: no cover - environment dependent
+                    LOGGER.debug("Spatial extension unavailable for %s", path, exc_info=True)
+                    return None
+
+            try:
+                table = conn.execute("SELECT * FROM ST_Read(?) LIMIT 0", [str(path)]).fetch_arrow_table()
+            except Exception:  # pragma: no cover - invalid geojson
+                LOGGER.debug("Unable to read geo schema for %s", path, exc_info=True)
+                return None
+
+        fields = [{"name": field.name, "type": str(field.type)} for field in table.schema]
+        return {"fields": fields}
+    except Exception:  # pragma: no cover - defensive logging
+        LOGGER.debug("Geo schema extraction failed for %s", path, exc_info=True)
+        return None

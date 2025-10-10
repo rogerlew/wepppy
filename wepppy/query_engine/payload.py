@@ -239,7 +239,7 @@ class QueryRequest:
                     raise ValueError("Each filter must define a 'column' string")
                 op = str(filt.get("op") or filt.get("operator") or "=").upper()
                 value = filt.get("value")
-                if value is None:
+                if op not in {"IS NULL", "IS NOT NULL"} and value is None:
                     raise ValueError("Each filter must supply a 'value'")
                 allowed_ops = {"=", "!=", "<", "<=", ">", ">=", "LIKE", "ILIKE", "IN", "NOT IN", "BETWEEN", "IS NULL", "IS NOT NULL"}
                 if op not in allowed_ops:

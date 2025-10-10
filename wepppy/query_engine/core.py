@@ -9,6 +9,9 @@ from wepppy.query_engine.formatter import QueryResult, format_table
 from wepppy.query_engine.payload import DatasetSpec, JoinSpec, QueryPlan, QueryRequest
 
 
+_GEO_READ_EXTENSIONS = {".geojson", ".fgb", ".gpkg", ".shp"}
+
+
 def _escape_sql_literal(value: str) -> str:
     return value.replace("'", "''")
 
@@ -50,10 +53,20 @@ def _coerce_filter_value(value: object, column_type: str | None, *, operator: st
         raise ValueError(f"Unable to coerce filter value '{value}' to type '{column_type}'") from exc
 
 
-def _dataset_source_sql(root: Path, spec: DatasetSpec) -> str:
-    source_path = (root / Path(spec.path)).as_posix()
+def _dataset_source_sql(root: Path, spec: DatasetSpec) -> tuple[str, bool]:
+    dataset_path = root / Path(spec.path)
+    source_path = dataset_path.as_posix()
     escaped = _escape_sql_literal(source_path)
-    return f"read_parquet('{escaped}') AS {spec.alias}"
+    suffix = dataset_path.suffix.lower()
+
+    if suffix in _GEO_READ_EXTENSIONS:
+        reader = f"ST_Read('{escaped}')"
+        requires_spatial = True
+    else:
+        reader = f"read_parquet('{escaped}')"
+        requires_spatial = False
+
+    return f"{reader} AS {spec.alias}", requires_spatial
 
 
 def _build_join_clause(
@@ -61,7 +74,7 @@ def _build_join_clause(
     alias_to_spec: dict[str, DatasetSpec],
     used_aliases: set[str],
     root: Path,
-) -> tuple[str, str]:
+) -> tuple[str, str, bool]:
     if join_spec.left not in used_aliases:
         raise ValueError(f"Join references alias '{join_spec.left}' before it appears in the FROM clause")
     if join_spec.right not in alias_to_spec:
@@ -70,7 +83,7 @@ def _build_join_clause(
         raise ValueError(f"Join alias '{join_spec.right}' referenced multiple times in join list")
 
     right_spec = alias_to_spec[join_spec.right]
-    join_source = _dataset_source_sql(root, right_spec)
+    join_source, requires_spatial = _dataset_source_sql(root, right_spec)
     used_aliases.add(join_spec.right)
 
     conditions = [
@@ -79,7 +92,7 @@ def _build_join_clause(
     ]
     condition_sql = " AND ".join(conditions)
     join_clause = f"{join_spec.join_type} JOIN {join_source} ON {condition_sql}"
-    return join_clause, join_spec.right
+    return join_clause, join_spec.right, requires_spatial
 
 
 def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPlan:
@@ -95,13 +108,14 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
         raise FileNotFoundError(missing_paths[0])
 
     base_spec = dataset_specs[0]
-    from_clause = _dataset_source_sql(catalog_root, base_spec)
+    from_clause, requires_spatial = _dataset_source_sql(catalog_root, base_spec)
     used_aliases = {base_spec.alias}
 
     join_clauses: list[str] = []
     for join_spec in payload.join_specs:
-        clause, _ = _build_join_clause(join_spec, alias_to_spec, used_aliases, catalog_root)
+        clause, _, join_requires_spatial = _build_join_clause(join_spec, alias_to_spec, used_aliases, catalog_root)
         join_clauses.append(clause)
+        requires_spatial = requires_spatial or join_requires_spatial
 
     if used_aliases != set(alias_to_spec):
         missing_aliases = sorted(set(alias_to_spec) - used_aliases)
@@ -189,7 +203,7 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
 
     if payload.limit:
         sql += f" LIMIT {payload.limit}"
-    return QueryPlan(sql=sql, params=[])
+    return QueryPlan(sql=sql, params=[], requires_spatial=requires_spatial)
 
 
 def run_query(run_context: RunContext, payload: QueryRequest) -> QueryResult:
