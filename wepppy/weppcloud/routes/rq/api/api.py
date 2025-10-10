@@ -22,6 +22,11 @@ from wepppy.weppcloud.utils.helpers import get_wd, success_factory, error_factor
 import redis
 from rq import Queue, Callback
 from rq.job import Job
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+    redis_host,
+)
 
 from wepppy.soils.ssurgo import NoValidSoilsException
 
@@ -72,8 +77,14 @@ import inspect
 import time
 from rq import Queue, get_current_job
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-RQ_DB = 9
+REDIS_HOST = redis_host()
+RQ_DB = int(RedisDB.RQ)
+
+
+def _redis_conn():
+    """Create a Redis connection using the centralized configuration."""
+    return redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+
 
 TIMEOUT = 216_000
 
@@ -128,7 +139,7 @@ def hello_world(runid, config):
     This is useful for debugging rq worker issues
     """
     try:
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue('m4', connection=redis_conn)
             job = q.enqueue_call(hello_world_rq, (runid,), timeout=TIMEOUT,
               on_success=Callback(report_success),  # default callback timeout (60 seconds)
@@ -152,7 +163,7 @@ def api_run_batch(batch_name: str):
         return jsonify({'success': False, 'error': str(exc)}), 404
 
     try:
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(run_batch_rq, (batch_name,), timeout=TIMEOUT)
     except Exception:
@@ -225,7 +236,7 @@ def build_landuse_and_soils():
         nlcd_db = data.get('nlcd_db', None)
         ssurgo_db = data.get('ssurgo_db', None)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(land_and_soil_rq, (None, extent, cfg, nlcd_db, ssurgo_db), timeout=TIMEOUT)
             uuid = job.id
@@ -281,7 +292,7 @@ def fetch_dem_and_build_channels(runid, config):
         prep.remove_timestamp(TaskEnum.fetch_dem)
         prep.remove_timestamp(TaskEnum.build_channels)
         
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(fetch_dem_and_build_channels_rq, (runid, extent, center, zoom, csa, mcl, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text), timeout=TIMEOUT)
             prep.set_rq_job_id('fetch_dem_and_build_channels_rq', job.id)
@@ -306,7 +317,7 @@ def api_set_outlet(runid, config):
         wd = get_wd(runid)
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.set_outlet)
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(set_outlet_rq, (runid, outlet_lng, outlet_lat), timeout=TIMEOUT)
             prep.set_rq_job_id('set_outlet_rq', job.id)
@@ -401,7 +412,7 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
             prep.remove_timestamp(TaskEnum.abstract_watershed)
             prep.remove_timestamp(TaskEnum.build_subcatchments)
 
-            with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            with _redis_conn() as redis_conn:
                 q = Queue(connection=redis_conn)
                 job = q.enqueue_call(build_subcatchments_and_abstract_watershed_rq, (runid,), timeout=TIMEOUT)
                 prep.set_rq_job_id('build_subcatchments_and_abstract_watershed_rq', job.id)
@@ -497,7 +508,7 @@ def api_build_landuse(runid, config):
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_landuse)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(build_landuse_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('build_landuse_rq', job.id)
@@ -561,7 +572,7 @@ def api_build_treatments(runid, config):
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_landuse)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(build_landuse_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('build_landuse_rq', job.id)
@@ -593,7 +604,7 @@ def api_build_soils(runid, config):
         if soils.run_group == 'batch':
             return success_factory('Set soils inputs for batch processing')
     
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(build_soils_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('build_soils_rq', job.id)
@@ -624,7 +635,7 @@ def api_build_climate(runid, config):
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_climate)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(build_climate_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('build_climate_rq', job.id)
@@ -691,7 +702,7 @@ def api_post_dss_export_rq(runid, config):
         prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
         prep.remove_timestamp(TaskEnum.run_wepp_watershed)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(post_dss_export_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('post_dss_export_rq', job.id)
@@ -816,7 +827,7 @@ def api_run_wepp(runid, config):
         prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
         prep.remove_timestamp(TaskEnum.run_wepp_watershed)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(run_wepp_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_wepp_rq', job.id)
@@ -899,7 +910,7 @@ def api_run_omni(runid, config):
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_omni_scenarios)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(run_omni_scenarios_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_omni_rq', job.id)
@@ -969,7 +980,7 @@ def run_omni_contrasts(runid, config):
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_omni_scenarios)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(run_omni_scenarios_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_omni_rq', job.id)
@@ -1053,7 +1064,7 @@ def api_run_ash(runid, config):
         prep.remove_timestamp(TaskEnum.run_watar)
         rq_timeout = globals().get('TIMEOUT', 600)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(
                 run_ash_rq,
@@ -1077,7 +1088,7 @@ def api_run_debris_flow(runid, config):
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_debris)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(run_debris_flow_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_debris_flow_rq', job.id)
@@ -1096,7 +1107,7 @@ def api_run_rhem(runid, config):
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_rhem)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(run_rhem_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_rhem_rq', job.id)
@@ -1115,7 +1126,7 @@ def api_rap_ts_acquire(runid, config):
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.fetch_rap_ts)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(fetch_and_analyze_rap_ts_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('fetch_and_analyze_rap_ts_rq', job.id)
@@ -1195,7 +1206,7 @@ def api_fork(runid, config):
 
         prep = RedisPrep.getInstance(wd)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(fork_rq, (runid, new_runid, undisturbify), timeout=TIMEOUT)
             prep.set_rq_job_id('fork_rq', job.id)
@@ -1233,7 +1244,7 @@ def api_archive(runid, config):
         existing_job_id = prep.get_archive_job_id()
         if existing_job_id:
             try:
-                with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+                with _redis_conn() as redis_conn:
                     job = Job.fetch(existing_job_id, connection=redis_conn)
                     status = job.get_status(refresh=True)
             except Exception:
@@ -1244,7 +1255,7 @@ def api_archive(runid, config):
             else:
                 prep.clear_archive_job_id()
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             queue = Queue(connection=redis_conn)
             job = queue.enqueue_call(archive_rq, (runid, comment), timeout=TIMEOUT)
 
@@ -1281,7 +1292,7 @@ def api_restore_archive(runid, config):
         existing_job_id = prep.get_archive_job_id()
         if existing_job_id:
             try:
-                with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+                with _redis_conn() as redis_conn:
                     job = Job.fetch(existing_job_id, connection=redis_conn)
                     status = job.get_status(refresh=True)
             except Exception:
@@ -1292,7 +1303,7 @@ def api_restore_archive(runid, config):
             else:
                 prep.clear_archive_job_id()
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with _redis_conn() as redis_conn:
             queue = Queue(connection=redis_conn)
             job = queue.enqueue_call(restore_archive_rq, (runid, archive_name), timeout=TIMEOUT)
 
@@ -1329,7 +1340,7 @@ def api_delete_archive(runid, config):
         existing_job_id = prep.get_archive_job_id()
         if existing_job_id:
             try:
-                with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+                with _redis_conn() as redis_conn:
                     job = Job.fetch(existing_job_id, connection=redis_conn)
                     status = job.get_status(refresh=True)
             except Exception:

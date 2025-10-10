@@ -4,6 +4,10 @@ from datetime import datetime
 from subprocess import PIPE, Popen
 import redis
 from rq import Queue
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+)
 
 from .._common import *  # noqa: F401,F403
 
@@ -271,8 +275,6 @@ def task_set_public(runid, config):
 def task_set_readonly(runid, config):
     from wepppy.rq.project_rq import (
         set_run_readonly_rq,
-        REDIS_HOST,
-        RQ_DB,
         TIMEOUT,
     )
 
@@ -288,7 +290,7 @@ def task_set_readonly(runid, config):
         load_run_context(runid, config)
         desired_state = bool(state)
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
             queue = Queue(connection=redis_conn)
             job = queue.enqueue_call(set_run_readonly_rq, (runid, desired_state), timeout=TIMEOUT)
     except Exception:

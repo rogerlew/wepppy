@@ -24,19 +24,26 @@ from .._run_context import RunContext, load_run_context
 
 
 import redis
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+    redis_host,
+)
 
 redis_readme_client = None
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-REDIS_README_DB = 14
+REDIS_HOST = redis_host()
+REDIS_README_DB = int(RedisDB.README)
 _LOCK_TTL_SECONDS = 1800  # 30 minutes to keep session locks fresh
 _CLIENT_STATE_TTL_SECONDS = 3600
 _STALE_CLIENT_TTL_SECONDS = 600
 
 try:
-    redis_readme_pool = redis.ConnectionPool(
-        host=REDIS_HOST, port=6379, db=REDIS_README_DB,
-        decode_responses=True, max_connections=50
+    pool_kwargs = redis_connection_kwargs(
+        RedisDB.README,
+        decode_responses=True,
+        extra={"max_connections": 50},
     )
+    redis_readme_pool = redis.ConnectionPool(**pool_kwargs)
     redis_readme_client = redis.StrictRedis(connection_pool=redis_readme_pool)
     redis_readme_client.ping()
 except Exception as e:
