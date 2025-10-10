@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
 def _ensure_str_list(value: Iterable[Any], *, name: str) -> List[str]:
@@ -179,6 +179,7 @@ class QueryRequest:
     group_by: Optional[List[str]] = None
     aggregations: Optional[List[Any]] = None
     order_by: Optional[List[str]] = None
+    filters: Optional[List[Dict[str, Any]]] = None
 
     _dataset_specs: List[DatasetSpec] = field(init=False, repr=False)
     _join_specs: List[JoinSpec] = field(init=False, repr=False)
@@ -225,6 +226,45 @@ class QueryRequest:
             if not isinstance(self.order_by, Sequence) or isinstance(self.order_by, (str, bytes)):
                 raise TypeError("order_by must be a list of strings")
             self.order_by = _ensure_str_list(self.order_by, name="order_by")
+
+        if self.filters is not None:
+            if not isinstance(self.filters, Sequence):
+                raise TypeError("filters must be a list of dicts")
+            normalised_filters: List[dict[str, object]] = []
+            for filt in self.filters:
+                if not isinstance(filt, dict):
+                    raise TypeError("filters entries must be objects")
+                column = filt.get("column") or filt.get("field")
+                if not column or not isinstance(column, str):
+                    raise ValueError("Each filter must define a 'column' string")
+                op = str(filt.get("op") or filt.get("operator") or "=").upper()
+                value = filt.get("value")
+                if value is None:
+                    raise ValueError("Each filter must supply a 'value'")
+                allowed_ops = {"=", "!=", "<", "<=", ">", ">=", "LIKE", "ILIKE", "IN", "NOT IN", "BETWEEN", "IS NULL", "IS NOT NULL"}
+                if op not in allowed_ops:
+                    raise ValueError(f"Unsupported filter operator '{op}'")
+                filter_payload: dict[str, object] = {"column": column, "operator": op}
+                if op in {"IS NULL", "IS NOT NULL"}:
+                    if value not in (None, "", False):
+                        raise ValueError("IS NULL/IS NOT NULL filters do not accept a value")
+                elif op == "BETWEEN":
+                    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+                        raise ValueError("BETWEEN filters expect a list/tuple with two values")
+                    if len(value) != 2:
+                        raise ValueError("BETWEEN filters require exactly two values")
+                    filter_payload["value"] = list(value)
+                elif op in {"IN", "NOT IN"}:
+                    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+                        raise ValueError("IN/NOT IN filters expect a list of values")
+                    values = list(value)
+                    if not values:
+                        raise ValueError("IN/NOT IN filters require at least one value")
+                    filter_payload["value"] = values
+                else:
+                    filter_payload["value"] = value
+                normalised_filters.append(filter_payload)
+            self.filters = normalised_filters
 
     @property
     def dataset_specs(self) -> List[DatasetSpec]:

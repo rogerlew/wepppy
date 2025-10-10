@@ -13,6 +13,43 @@ def _escape_sql_literal(value: str) -> str:
     return value.replace("'", "''")
 
 
+def _format_value(value: object) -> str:
+    if isinstance(value, bool):
+        return "TRUE" if value else "FALSE"
+    if isinstance(value, (int, float)):
+        return str(value)
+    return f"'{_escape_sql_literal(str(value))}'"
+
+
+def _coerce_filter_value(value: object, column_type: str | None, *, operator: str) -> object:
+    if column_type is None:
+        return value
+
+    normalized = column_type.lower()
+
+    if operator in {"LIKE", "ILIKE"}:
+        return str(value)
+
+    try:
+        if any(name in normalized for name in ("int", "long")):
+            return int(value)
+        if any(name in normalized for name in ("float", "double", "real", "decimal")):
+            return float(value)
+        if "bool" in normalized:
+            if isinstance(value, bool):
+                return value
+            text = str(value).strip().lower()
+            if text in {"true", "t", "1", "yes"}:
+                return True
+            if text in {"false", "f", "0", "no"}:
+                return False
+            raise ValueError(f"Cannot coerce '{value}' to boolean")
+        # default to string for utf8 or unknown types
+        return str(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Unable to coerce filter value '{value}' to type '{column_type}'") from exc
+
+
 def _dataset_source_sql(root: Path, spec: DatasetSpec) -> str:
     source_path = (root / Path(spec.path)).as_posix()
     escaped = _escape_sql_literal(source_path)
@@ -98,6 +135,51 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
     if group_by and payload.aggregation_specs:
         group_by_sql = ", ".join(group_by)
         sql_parts.append(f"GROUP BY {group_by_sql}")
+
+    if payload.filters:
+        filter_clauses = []
+        for filt in payload.filters:
+            column = filt["column"]
+            operator = filt["operator"]
+            value = filt.get("value")
+
+            if "." in column:
+                alias_part, column_name = column.split(".", 1)
+            else:
+                alias_part, column_name = base_spec.alias, column
+
+            if alias_part not in alias_to_spec:
+                raise ValueError(f"Filter references unknown dataset alias '{alias_part}'")
+            dataset_spec = alias_to_spec[alias_part]
+            column_type = catalog.get_column_type(dataset_spec.path, column_name)
+
+            if operator in {"IS NULL", "IS NOT NULL"}:
+                filter_clauses.append(f"{column} {operator}")
+                continue
+
+            if operator == "BETWEEN":
+                low, high = value  # type: ignore
+                low_cast = _coerce_filter_value(low, column_type, operator=operator)
+                high_cast = _coerce_filter_value(high, column_type, operator=operator)
+                filter_clauses.append(
+                    f"{column} BETWEEN {_format_value(low_cast)} AND {_format_value(high_cast)}"
+                )
+                continue
+
+            if operator in {"IN", "NOT IN"}:
+                values = value  # type: ignore
+                cast_values = [
+                    _format_value(_coerce_filter_value(item, column_type, operator=operator))
+                    for item in values
+                ]
+                filter_clauses.append(f"{column} {operator} ({', '.join(cast_values)})")
+                continue
+
+            typed_value = _coerce_filter_value(value, column_type, operator=operator)
+            formatted_value = _format_value(typed_value)
+            filter_clauses.append(f"{column} {operator} {formatted_value}")
+
+        sql_parts.append("WHERE " + " AND ".join(filter_clauses))
 
     if payload.order_by:
         order_by_sql = ", ".join(payload.order_by)
