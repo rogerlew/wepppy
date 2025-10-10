@@ -1031,16 +1031,15 @@ class Soils(NoDbBase):
                     self.ssurgo_domsoil_d = deepcopy(domsoil_d)
                     self.soils = {str(k): v for k, v in soils.items()}
 
-                self.logger.info('triggering SOILS_BUILD_COMPLETE')
-                self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-                self = type(self).getInstance(self.wd)  # reload instance from .nodb
-
         # fallback to statsgo if surgo failed
         if failed:
             self.logger.info('no surgo keys found, falling back to statsgo')
             self.build_statsgo(initial_sat=self.initial_sat,
                                 ksflag=self.ksflag)
-
+        else:
+            self.logger.info('triggering SOILS_BUILD_COMPLETE')
+            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+            self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     @property
     def report(self):
