@@ -638,7 +638,7 @@ class AgFields(NoDbBase):
             wepp_id = field['wepp_id']
             sub_field_id = field['sub_field_id']
 
-            self.logger.info(f'. Running WEPP for field_id={field_id}, topaz_id={topaz_id}, wepp_id={wepp_id}, sub_field_id={sub_field_id}')
+            self.logger.info(f'  Running WEPP for field_id={field_id}, topaz_id={topaz_id}, wepp_id={wepp_id}, sub_field_id={sub_field_id}')
 
             # find the field row in the rotation schedule and extract the crop rotation schedule
             field_rotation_schedule_row = rotation_schedule_df.loc[
