@@ -1,0 +1,19 @@
+FROM python:3.8-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    RQ_DASHBOARD_URL_PREFIX=/rq-dashboard
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        bash \
+        gcc \
+        libc-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /rq-dashboard
+
+COPY rq-dashboard/requirements.txt /tmp/rq-dashboard-requirements.txt
+
+RUN pip3 install --no-cache-dir -r /tmp/rq-dashboard-requirements.txt \
+    && pip3 install --no-cache-dir gunicorn
+
+EXPOSE 9181

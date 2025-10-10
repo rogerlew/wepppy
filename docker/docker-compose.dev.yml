@@ -214,7 +214,7 @@ services:
       - -n
       - "4"
       - -u
-      - redis://redis:6379/9?socket_timeout=10&health_check_interval=30
+      - redis://redis:6379/9
       - --logging-level
       - INFO
       - --worker-class
@@ -286,16 +286,57 @@ services:
       timeout: 5s
       retries: 5
 
+  rq-dashboard:
+    build:
+      context: ../..
+      dockerfile: wepppy/docker/Dockerfile.rq-dashboard
+    container_name: wepppy-rq-dashboard
+    environment:
+      RQ_DASHBOARD_REDIS_URL: redis://redis:6379/9
+      RQ_DASHBOARD_URL_PREFIX: /rq-dashboard
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    volumes:
+      - ../../rq-dashboard:/rq-dashboard
+    working_dir: /rq-dashboard
+    expose:
+      - "9181"
+    command:
+      - gunicorn
+      - --bind
+      - 0.0.0.0:9181
+      - --workers
+      - "2"
+      - --threads
+      - "2"
+      - --timeout
+      - "30"
+      - --log-level
+      - info
+      - rq_dashboard.app:create_app()
+    depends_on:
+      redis:
+        condition: service_started
+
   caddy:
     image: caddy:2
     container_name: wepppy-caddy
     ports:
       - "8080:8080"
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${CADDY_FILE}:/etc/caddy/Caddyfile:ro
       - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
     depends_on:
       - weppcloud
       - status
       - preflight
       - browse
+      - rq-dashboard
+
+networks:
+  default:
+    name: wepppy-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16
+          gateway: 10.0.0.1

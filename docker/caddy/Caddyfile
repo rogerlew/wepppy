@@ -51,6 +51,14 @@ http://:8080 {
         reverse_proxy browse:9009
     }
 
+    handle /rq-dashboard* {
+        reverse_proxy rq-dashboard:9181 {
+            header_up X-Forwarded-Prefix /rq-dashboard
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+        }
+    }
+
     @root path /
     redir @root /weppcloud
 
