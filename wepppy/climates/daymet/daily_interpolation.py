@@ -308,12 +308,3 @@ if __name__ == "__main__":
     print(hillslope_locations)
 
 
-    """
-    on wepp.cloud the netcdf/h5py/gdal libraries SNAFU
-
-    work around is this /var/www/.bashrc
-export LD_LIBRARY_PATH=/workdir/miniconda3/envs/wepppy310-env/lib:$LD_LIBRARY_PATH
-export LD_PRELOAD=/workdir/miniconda3/envs/wepppy310-env/lib/libhdf5.so
-source /workdir/miniconda3/etc/profile.d/conda.sh
-conda activate wepppy310-env
-    """
