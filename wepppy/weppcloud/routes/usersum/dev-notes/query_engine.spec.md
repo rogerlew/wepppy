@@ -27,7 +27,7 @@ Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud 
 - Updated `/query/runs/{runid}/query` POST handling to include defensive catalog checks, improved error status codes (422 for invalid payloads, 404 for missing datasets), and stack traces in JSON responses for debugging—mirroring the rich error feedback approach used by the browse microservice.
 - Activation endpoint now surfaces full stack traces on failure for easier diagnosis in web UIs.
 - Route table simplified so GET and POST handlers share the same path while ensuring the GET console is registered ahead of the POST handler.
-- `QueryRequest` now normalises dataset descriptors (path + alias), join definitions, and aggregation specs. The planner can join multiple Parquet assets (e.g., `landuse` ↔ `soils` on `TopazID`) and compute grouped aggregations (e.g., daily WEPP interchange sums across `wepp_id`) while exposing ordered results (`order_by`) and an optional `include_sql` flag that returns the generated DuckDB statement.
+- `QueryRequest` now normalises dataset descriptors (path + alias), join definitions, aggregation specs, and flexible filter clauses. The planner can join multiple Parquet assets (e.g., `landuse` ↔ `soils` on `TopazID`), apply type-aware filters (supporting `=`, `IN`, `BETWEEN`, `IS NULL`, etc. with automatic casting like `'43'` → `INT64`), compute grouped aggregations (e.g., daily WEPP interchange sums across `wepp_id`), order results, and optionally echo the generated DuckDB SQL.
 - Added unit coverage for join/aggregation planners (`tests/query_engine/test_core.py::test_run_query_join`, `test_run_query_aggregation`).
 
 ## Activation & Catalog Workflow
@@ -108,6 +108,22 @@ print(run_query(ctx, payload).records[:1])
 payload.include_sql = True
 sql_result = run_query(ctx, payload)
 print(sql_result.sql)
+
+# filter landuse by key and canopy coverage (string 43 coerces to INT64)
+payload = QueryRequest(
+    datasets=[{"path": "landuse/landuse.parquet", "alias": "landuse"}],
+    columns=[
+        "landuse.TopazID AS topaz_id",
+        "landuse.key",
+        "landuse.cancov",
+    ],
+    filters=[
+        {"column": "landuse.key", "operator": "=", "value": "43"},
+        {"column": "landuse.cancov", "operator": "<", "value": 0.6},
+    ],
+    include_sql=True,
+)
+print(run_query(ctx, payload).records[:2])
 ```
 
 ## Benchmark & Integration Tests
@@ -127,7 +143,7 @@ Located in `tests/query_engine/`:
 
 ### Near-Term Planner Roadmap
 1. **Query ergonomics**
-   - Add optional dataset filters (`where`, `between`, `in`, spatial predicates) and parameter binding so clients can narrow result sets without custom SQL strings.
+   - Extend filter expressiveness (`IN`, `BETWEEN`, null checks, spatial predicates) and support parameter binding so clients can narrow result sets without constructing raw SQL.
    - Support join graphs that re-use aliases (e.g., landuse ↔ soils ↔ disturbances) and expose explicit join ordering controls.
 
 2. **Aggregation helpers**
