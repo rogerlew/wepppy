@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Query Console – {{ runid }}</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        margin: 2rem;
+        max-width: 1200px;
+      }
+      h1 {
+        margin-bottom: 0.5rem;
+      }
+      p {
+        line-height: 1.4;
+      }
+      textarea {
+        width: 100%;
+        min-height: 18rem;
+        font-family: "Fira Code", "Source Code Pro", monospace;
+        font-size: 0.95rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #bbb;
+        resize: vertical;
+      }
+      textarea:focus {
+        outline: 2px solid #0b6efd;
+        outline-offset: 2px;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+      }
+      button {
+        padding: 0.55rem 1.5rem;
+        border: none;
+        border-radius: 0.4rem;
+        background-color: #0b6efd;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.secondary {
+        background-color: #6c757d;
+      }
+      button:disabled {
+        cursor: progress;
+        opacity: 0.7;
+      }
+      code {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0 0.4rem;
+        border-radius: 0.3rem;
+      }
+      .status-block {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #bbb;
+        background-color: rgba(0, 0, 0, 0.02);
+      }
+      .status-line {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family: "Fira Code", "Source Code Pro", monospace;
+        font-size: 0.9rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background-color: rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        max-height: 28rem;
+        overflow: auto;
+      }
+      details {
+        margin-top: 1rem;
+      }
+      .note {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        border-left: 4px solid #ff8800;
+        background-color: rgba(255, 136, 0, 0.1);
+        border-radius: 0.4rem;
+      }
+      ul.dataset-preview {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0;
+      }
+      ul.dataset-preview li {
+        font-family: "Fira Code", "Source Code Pro", monospace;
+        font-size: 0.85rem;
+        padding: 0.15rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Query Console</h1>
+    <p>
+      Target run: <code>{{ runid }}</code><br />
+      POST endpoint: <code>/query/runs/{{ runid_slug }}/query</code>
+    </p>
+    <p>
+      Paste or edit the query payload below, then click <strong>POST</strong> to execute it. The response body
+      and HTTP status will appear underneath. This is handy for testing payloads before wiring them into scripts
+      or dashboards.
+    </p>
+
+    {% if not catalog_ready %}
+      <div class="note">
+        Catalog metadata was not found. Visit
+        <a href="{{ activate_url }}">/query/runs/{{ runid_slug }}/activate</a>
+        to activate the run, then reload this page.
+      </div>
+    {% endif %}
+
+    {% if catalog_entries %}
+      <details>
+        <summary>Sample datasets (first {{ catalog_entries|length }})</summary>
+        <ul class="dataset-preview">
+          {% for entry in catalog_entries %}
+            <li>{{ entry.path }}</li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+
+    <form id="queryForm">
+      <label for="payload"><strong>Query payload (JSON)</strong></label>
+      <textarea id="payload" name="payload" spellcheck="false"></textarea>
+      <div class="controls">
+        <button type="submit" id="submitBtn">POST Query</button>
+        <button type="button" class="secondary" id="formatBtn">Format JSON</button>
+        <button type="button" class="secondary" id="resetBtn">Reset</button>
+      </div>
+    </form>
+
+    <div class="status-block">
+      <div id="status" class="status-line">Waiting for request…</div>
+      <pre id="response" aria-live="polite" aria-label="Response body"></pre>
+      <details id="stacktraceContainer" style="display: none;">
+        <summary>Stack Trace</summary>
+        <pre id="stacktrace" aria-live="polite" aria-label="Stack trace"></pre>
+      </details>
+    </div>
+
+    <script>
+      const form = document.getElementById('queryForm');
+      const payloadInput = document.getElementById('payload');
+      const statusLine = document.getElementById('status');
+      const responseBlock = document.getElementById('response');
+      const stacktraceContainer = document.getElementById('stacktraceContainer');
+      const stacktraceBlock = document.getElementById('stacktrace');
+      const submitBtn = document.getElementById('submitBtn');
+      const formatBtn = document.getElementById('formatBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const postUrl = window.location.pathname;
+
+      const defaultPayload = {{ default_payload | tojson }};
+      const defaultPayloadString = JSON.stringify(defaultPayload, null, 2);
+      payloadInput.value = defaultPayloadString;
+
+      function setStatus(text) {
+        statusLine.textContent = text;
+      }
+
+      function clearOutputs() {
+        responseBlock.textContent = '';
+        stacktraceBlock.textContent = '';
+        stacktraceContainer.style.display = 'none';
+      }
+
+      formatBtn.addEventListener('click', () => {
+        try {
+          const parsed = JSON.parse(payloadInput.value);
+          payloadInput.value = JSON.stringify(parsed, null, 2);
+          setStatus('JSON formatted locally');
+        } catch (err) {
+          setStatus(`Format failed: ${err.message}`);
+        }
+      });
+
+      resetBtn.addEventListener('click', () => {
+        payloadInput.value = defaultPayloadString;
+        clearOutputs();
+        setStatus('Reset to starter payload.');
+      });
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        let payloadObject;
+        try {
+          payloadObject = JSON.parse(payloadInput.value);
+          payloadInput.value = JSON.stringify(payloadObject, null, 2);
+        } catch (err) {
+          setStatus(`Client-side JSON parsing error: ${err.message}`);
+          responseBlock.textContent = '';
+          return;
+        }
+
+        submitBtn.disabled = true;
+        setStatus('Sending request…');
+        clearOutputs();
+
+        try {
+          const response = await fetch(postUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payloadObject),
+          });
+
+          const statusText = `HTTP ${response.status} ${response.statusText || ''}`.trim();
+          setStatus(statusText);
+
+          const contentType = response.headers.get('content-type') || '';
+          const bodyText = await response.text();
+          let parsedBody = null;
+
+          if (contentType.includes('application/json')) {
+            try {
+              parsedBody = JSON.parse(bodyText);
+              responseBlock.textContent = JSON.stringify(parsedBody, null, 2);
+            } catch (err) {
+              responseBlock.textContent = bodyText;
+            }
+          } else {
+            responseBlock.textContent = bodyText;
+          }
+
+          if (parsedBody && parsedBody.stacktrace) {
+            stacktraceBlock.textContent = parsedBody.stacktrace;
+            stacktraceContainer.style.display = 'block';
+          } else {
+            stacktraceBlock.textContent = '';
+            stacktraceContainer.style.display = 'none';
+          }
+        } catch (err) {
+          setStatus('Request failed');
+          responseBlock.textContent = err.message;
+          stacktraceContainer.style.display = 'none';
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

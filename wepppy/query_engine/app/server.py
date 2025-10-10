@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import traceback
 from dataclasses import asdict
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from wepppy.query_engine.payload import QueryRequest
 from wepppy.weppcloud.utils.helpers import get_wd
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
+LOGGER = logging.getLogger(__name__)
 
 
 def _resolve_run_path(runid_param: str) -> Path:
@@ -100,6 +102,51 @@ async def run_schema(request: StarletteRequest) -> Response:
     return JSONResponse(data)
 
 
+async def make_query_endpoint(request: StarletteRequest) -> Response:
+    runid_param: str = request.path_params["runid"]
+    try:
+        run_path = _resolve_run_path(runid_param)
+    except FileNotFoundError:
+        return PlainTextResponse(f"Run '{runid_param}' not found", status_code=404)
+
+    catalog_entries = []
+    catalog_ready = True
+    sample_dataset = "landuse/landuse.parquet"
+
+    try:
+        context = resolve_run_context(str(run_path), auto_activate=False)
+        catalog_entries = context.catalog.entries()
+        if catalog_entries:
+            sample_dataset = catalog_entries[0].path
+    except FileNotFoundError:
+        catalog_ready = False
+    except Exception:  # pragma: no cover - defensive logging
+        catalog_ready = False
+        LOGGER.debug("Failed to load catalog for %s", run_path, exc_info=True)
+
+    default_payload = {
+        "datasets": [sample_dataset],
+        "limit": 25,
+        "include_schema": True,
+    }
+
+    runid_str = str(run_path)
+    activate_url = f"/query/runs/{runid_str.lstrip('/')}/activate"
+
+    return TEMPLATES.TemplateResponse(
+        "query_console.html",
+        {
+            "request": request,
+            "runid": runid_str,
+            "runid_slug": runid_str.lstrip("/"),
+            "catalog_entries": catalog_entries[:20],
+            "catalog_ready": catalog_ready,
+            "default_payload": default_payload,
+            "activate_url": activate_url,
+        },
+    )
+
+
 async def run_query_endpoint(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
     try:
@@ -121,9 +168,37 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     try:
         payload = QueryRequest(**body)
     except Exception as exc:  # pragma: no cover - simple validation error reporting
-        return JSONResponse({"error": f"Invalid query payload: {exc}"}, status_code=422)
+        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        LOGGER.debug("Invalid query payload for %s: %s", run_path, exc, exc_info=True)
+        return JSONResponse({"error": f"Invalid query payload: {exc}", "stacktrace": stacktrace}, status_code=422)
 
-    result = run_query(context, payload)
+    missing = [spec.path for spec in payload.dataset_specs if not context.catalog.has(spec.path)]
+    if missing:
+        message = f"Dataset(s) not found: {', '.join(missing)}"
+        stacktrace = "".join(traceback.format_stack())
+        LOGGER.warning("Query referenced missing datasets for %s: %s", run_path, missing)
+        return JSONResponse({"error": message, "stacktrace": stacktrace}, status_code=404)
+
+    try:
+        result = run_query(context, payload)
+    except FileNotFoundError as exc:
+        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        LOGGER.warning("Query dataset missing for %s", run_path, exc_info=True)
+        return JSONResponse(
+            {"error": str(exc), "stacktrace": stacktrace},
+            status_code=404,
+        )
+    except Exception as exc:  # pragma: no cover - defensive error reporting
+        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        LOGGER.exception("Query execution failed for %s", run_path)
+        return JSONResponse(
+            {
+                "error": f"Query execution failed: {exc}",
+                "stacktrace": stacktrace,
+            },
+            status_code=500,
+        )
+
     return JSONResponse({
         "records": result.records,
         "schema": result.schema,
@@ -144,9 +219,12 @@ async def activate_run(request: StarletteRequest) -> Response:
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
     except Exception as exc:
-        return JSONResponse({"error": f"Activation failed: {exc}"}, status_code=500)
+        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        LOGGER.exception("Activation failed for %s", run_path)
+        return JSONResponse({"error": f"Activation failed: {exc}", "stacktrace": stacktrace}, status_code=500)
 
     return JSONResponse(catalog)
+
 
 class _HealthLogFilter(logging.Filter):
     def filter(self, record):
@@ -173,10 +251,11 @@ def create_app() -> Starlette:
             methods=['GET']
         ),
         Route("/", homepage),
-        Route("/query/runs/{runid:path}/activate", activate_run, methods=["GET", "POST"]),
-        Route("/query/runs/{runid:path}/schema", run_schema, methods=["GET"]),
-        Route("/query/runs/{runid:path}/query", run_query_endpoint, methods=["POST"]),
-        Route("/query/runs/{runid:path}", run_info, methods=["GET"]),
+        Route("/runs/{runid:path}/activate", activate_run, methods=["GET", "POST"]),
+        Route("/runs/{runid:path}/schema", run_schema, methods=["GET"]),
+        Route("/runs/{runid:path}/query", make_query_endpoint, methods=["GET"]),
+        Route("/runs/{runid:path}/query", run_query_endpoint, methods=["POST"]),
+        Route("/runs/{runid:path}", run_info, methods=["GET"]),
     ]
 
     app = Starlette(debug=False, routes=routes)
