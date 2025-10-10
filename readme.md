@@ -67,6 +67,39 @@ NoDb subclass logger
 ## Getting Started (developer edition)
 1. Provision Python 3.10 + Poetry/conda (see `install/` and `wepppy/weppcloud/_baremetal/` for reference scripts).
 
+## Docker Compose Dev Stack
+The repository ships with a multi-container development stack (`docker/docker-compose.dev.yml`) that mirrors the production topology: Flask (`weppcloud`), Tornado microservices (`status`, `preflight`), the Starlette browse service, Redis, PostgreSQL, an RQ worker pool, and a Caddy reverse proxy that fronts the entire bundle (and now serves `/weppcloud/static/*` directly).
+
+### Quick start
+```bash
+# 1. Set the UID/GID you want the containers to use (defaults to 1000:1000).
+cat > docker/.env <<EOF
+UID=$(id -u)          # customise as needed
+GID=$(id -g)
+POSTGRES_PASSWORD=localdev
+EOF
+
+# 2. Bring up the stack.
+docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build
+
+# 3. Visit http://localhost:8080/weppcloud once the services report "ready".
+```
+
+By default the containers inherit your host UID/GID so any files written to the bind mounts stay editable from the host. To run everything as a service account such as `www-data:webgroup`, set those ids explicitly in `docker/.env`:
+
+```env
+UID=33            # www-data
+GID=993           # output of `getent group docker | cut -d: -f3`
+```
+
+💡 Make sure the group exists locally; Compose passes numeric ids straight through, so the host must recognise them to keep permissions tidy.
+
+### Common tasks
+- **Tail the main app logs**: `docker compose -f docker/docker-compose.dev.yml logs -f weppcloud`
+- **Open a shell in the app container**: `docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec weppcloud bash`
+- **Reset a single service**: `docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build weppcloud`
+- **View static assets**: Caddy proxies `/weppcloud/static/*` from the repository mount; updates to `wepppy/weppcloud/static` land immediately without hitting Gunicorn.
+
 For deployment, see the gunicorn config (`wepppy/weppcloud/gunicorn.conf.py`), the systemd snippets under `_scripts/`, and the BareMetal notes for Ubuntu 24.04 provisioning.
 
 ## Further Reading
