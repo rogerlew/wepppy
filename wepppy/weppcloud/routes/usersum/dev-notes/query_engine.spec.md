@@ -23,11 +23,11 @@ Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud 
 
 ### Recent Enhancements (2025-10)
 - Added `_resolve_run_path` helper so all routes honour WEPPcloud storage conventions via `get_wd`.
-- Introduced an interactive “query console” HTML view that allows users to paste/edit POST payloads, trigger queries, and view responses directly in the browser. The console renders example dataset paths and provides JSON formatting/reset helpers.
+- Introduced an interactive “query console” HTML view that allows users to paste/edit POST payloads, trigger queries, and view responses directly in the browser. The console renders example dataset paths, provides JSON formatting/reset helpers, and now offers a preset selector backed by `query_engine/app/query_presets.py`.
 - Updated `/query/runs/{runid}/query` POST handling to include defensive catalog checks, improved error status codes (422 for invalid payloads, 404 for missing datasets), and stack traces in JSON responses for debugging—mirroring the rich error feedback approach used by the browse microservice.
 - Activation endpoint now surfaces full stack traces on failure for easier diagnosis in web UIs.
 - Route table simplified so GET and POST handlers share the same path while ensuring the GET console is registered ahead of the POST handler.
-- `QueryRequest` now normalises dataset descriptors (path + alias), join definitions, and aggregation specs. The planner can join multiple Parquet assets (e.g., `landuse` ↔ `soils` on `TopazID`) and compute grouped aggregations (e.g., daily WEPP interchange sums across `wepp_id`).
+- `QueryRequest` now normalises dataset descriptors (path + alias), join definitions, and aggregation specs. The planner can join multiple Parquet assets (e.g., `landuse` ↔ `soils` on `TopazID`) and compute grouped aggregations (e.g., daily WEPP interchange sums across `wepp_id`) while exposing ordered results (`order_by`) and an optional `include_sql` flag that returns the generated DuckDB statement.
 - Added unit coverage for join/aggregation planners (`tests/query_engine/test_core.py::test_run_query_join`, `test_run_query_aggregation`).
 
 ## Activation & Catalog Workflow
@@ -103,6 +103,11 @@ payload = QueryRequest(
     ],
 )
 print(run_query(ctx, payload).records[:1])
+
+# same aggregation but include the generated SQL text
+payload.include_sql = True
+sql_result = run_query(ctx, payload)
+print(sql_result.sql)
 ```
 
 ## Benchmark & Integration Tests

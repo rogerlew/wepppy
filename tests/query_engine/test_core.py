@@ -158,16 +158,23 @@ def test_run_query_aggregation(tmp_path: Path) -> None:
             {"fn": "sum", "column": "pass.runoff", "alias": "runoff_sum"},
             {"fn": "sum", "column": "pass.sediment", "alias": "sediment_sum"},
         ],
+        order_by=["year", "month", "day"],
+        include_sql=True,
     )
     result = run_query(run_context, payload)
 
     assert result.row_count == 2
+    assert result.sql is not None
+    assert "ORDER BY year, month, day" in result.sql
     expected = {
         (2020, 6, 1): {"runoff_sum": 3.0, "sediment_sum": 0.6},
         (2020, 7, 1): {"runoff_sum": 7.0, "sediment_sum": 0.5},
     }
+    ordered_keys = []
     for row in result.records:
         key = (row.get("year"), row.get("month"), row.get("day"))
         assert key in expected
         assert row["runoff_sum"] == expected[key]["runoff_sum"]
         assert row["sediment_sum"] == expected[key]["sediment_sum"]
+        ordered_keys.append(key)
+    assert ordered_keys == sorted(ordered_keys)
