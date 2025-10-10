@@ -174,9 +174,11 @@ class QueryRequest:
     columns: Optional[List[str]] = None
     limit: Optional[int] = None
     include_schema: bool = False
+    include_sql: bool = False
     joins: Optional[List[Dict[str, Any]]] = None
     group_by: Optional[List[str]] = None
     aggregations: Optional[List[Any]] = None
+    order_by: Optional[List[str]] = None
 
     _dataset_specs: List[DatasetSpec] = field(init=False, repr=False)
     _join_specs: List[JoinSpec] = field(init=False, repr=False)
@@ -187,6 +189,11 @@ class QueryRequest:
             raise ValueError("At least one dataset must be provided")
         if self.limit is not None and self.limit < 1:
             raise ValueError("limit must be >= 1")
+
+        if not isinstance(self.include_schema, bool):
+            raise TypeError("include_schema must be a boolean")
+        if not isinstance(self.include_sql, bool):
+            raise TypeError("include_sql must be a boolean")
 
         if self.columns is not None:
             if not isinstance(self.columns, Sequence) or isinstance(self.columns, (str, bytes)):
@@ -213,6 +220,11 @@ class QueryRequest:
             if not isinstance(self.group_by, Sequence) or isinstance(self.group_by, (str, bytes)):
                 raise TypeError("group_by must be a list of strings")
             self.group_by = _ensure_str_list(self.group_by, name="group_by")
+
+        if self.order_by is not None:
+            if not isinstance(self.order_by, Sequence) or isinstance(self.order_by, (str, bytes)):
+                raise TypeError("order_by must be a list of strings")
+            self.order_by = _ensure_str_list(self.order_by, name="order_by")
 
     @property
     def dataset_specs(self) -> List[DatasetSpec]:

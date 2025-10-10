@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import traceback
+from collections import OrderedDict
 from dataclasses import asdict
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from starlette.templating import Jinja2Templates
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
 from wepppy.weppcloud.utils.helpers import get_wd
+from .query_presets import QUERY_PRESETS
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
 LOGGER = logging.getLogger(__name__)
@@ -124,11 +126,13 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
         catalog_ready = False
         LOGGER.debug("Failed to load catalog for %s", run_path, exc_info=True)
 
-    default_payload = {
-        "datasets": [sample_dataset],
-        "limit": 25,
-        "include_schema": True,
-    }
+    default_payload = OrderedDict([
+        ("datasets", [sample_dataset]),
+        ("limit", 25),
+        ("include_schema", True),
+    ])
+    default_payload_json = json.dumps(default_payload, ensure_ascii=False, sort_keys=False)
+    query_presets_json = json.dumps(QUERY_PRESETS, ensure_ascii=False, sort_keys=False)
 
     runid_str = str(run_path)
     activate_url = f"/query/runs/{runid_str.lstrip('/')}/activate"
@@ -142,7 +146,10 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
             "catalog_entries": catalog_entries[:20],
             "catalog_ready": catalog_ready,
             "default_payload": default_payload,
+            "default_payload_json": default_payload_json,
             "activate_url": activate_url,
+            "query_presets": QUERY_PRESETS,
+            "query_presets_json": query_presets_json,
         },
     )
 
@@ -199,11 +206,15 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
             status_code=500,
         )
 
-    return JSONResponse({
+    response_payload = {
         "records": result.records,
         "schema": result.schema,
         "row_count": result.row_count,
-    })
+    }
+    if result.sql is not None:
+        response_payload["sql"] = result.sql
+
+    return JSONResponse(response_payload)
 
 
 async def activate_run(request: StarletteRequest) -> Response:

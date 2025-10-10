@@ -11,9 +11,15 @@ class QueryResult:
     records: List[Dict[str, Any]]
     schema: Optional[List[Dict[str, Any]]] = None
     row_count: int = 0
+    sql: Optional[str] = None
 
 
-def format_table(table: pa.Table, *, include_schema: bool = False) -> QueryResult:
+def format_table(
+    table: pa.Table,
+    *,
+    include_schema: bool = False,
+    sql: Optional[str] = None,
+) -> QueryResult:
     records = table.to_pylist()
     schema = None
     if include_schema:
@@ -21,4 +27,4 @@ def format_table(table: pa.Table, *, include_schema: bool = False) -> QueryResul
             {"name": field.name, "type": str(field.type)}
             for field in table.schema
         ]
-    return QueryResult(records=records, schema=schema, row_count=table.num_rows)
+    return QueryResult(records=records, schema=schema, row_count=table.num_rows, sql=sql)

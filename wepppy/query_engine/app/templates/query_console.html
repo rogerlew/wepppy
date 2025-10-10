@@ -54,6 +54,18 @@
         cursor: progress;
         opacity: 0.7;
       }
+      select {
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.4rem;
+        border: 1px solid #bbb;
+        background-color: rgba(0, 0, 0, 0.02);
+        font-family: inherit;
+        font-size: 0.95rem;
+      }
+      select:focus {
+        outline: 2px solid #0b6efd;
+        outline-offset: 1px;
+      }
       code {
         background: rgba(0, 0, 0, 0.05);
         padding: 0 0.4rem;
@@ -102,6 +114,17 @@
         font-size: 0.85rem;
         padding: 0.15rem 0;
       }
+      .preset-picker {
+        margin: 1rem 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+      .preset-description {
+        margin: 0;
+        font-size: 0.9rem;
+        color: rgba(0, 0, 0, 0.65);
+      }
     </style>
   </head>
   <body>
@@ -137,6 +160,20 @@
 
     <form id="queryForm">
       <label for="payload"><strong>Query payload (JSON)</strong></label>
+      <div class="preset-picker">
+        <label for="presetSelect">Example payloads</label>
+        <select id="presetSelect">
+          <option value="">Choose an example…</option>
+          {% for category, presets in query_presets.items() %}
+            <optgroup label="{{ category }}">
+              {% for preset in presets %}
+                <option value="{{ preset.id }}">{{ preset.name }}</option>
+              {% endfor %}
+            </optgroup>
+          {% endfor %}
+        </select>
+        <p id="presetDescription" class="preset-description"></p>
+      </div>
       <textarea id="payload" name="payload" spellcheck="false"></textarea>
       <div class="controls">
         <button type="submit" id="submitBtn">POST Query</button>
@@ -164,11 +201,25 @@
       const submitBtn = document.getElementById('submitBtn');
       const formatBtn = document.getElementById('formatBtn');
       const resetBtn = document.getElementById('resetBtn');
+      const presetSelect = document.getElementById('presetSelect');
+      const presetDescription = document.getElementById('presetDescription');
       const postUrl = window.location.pathname;
 
-      const defaultPayload = {{ default_payload | tojson }};
+      const defaultPayloadJson = {{ default_payload_json | tojson }};
+      const defaultPayload = JSON.parse(defaultPayloadJson);
       const defaultPayloadString = JSON.stringify(defaultPayload, null, 2);
       payloadInput.value = defaultPayloadString;
+      const presetCatalogJson = {{ query_presets_json | tojson }};
+      const presetCatalog = JSON.parse(presetCatalogJson);
+      const presetIndex = {};
+      Object.entries(presetCatalog).forEach(([category, presets]) => {
+        presets.forEach((preset) => {
+          presetIndex[preset.id] = {
+            ...preset,
+            category,
+          };
+        });
+      });
 
       function setStatus(text) {
         statusLine.textContent = text;
@@ -179,6 +230,19 @@
         stacktraceBlock.textContent = '';
         stacktraceContainer.style.display = 'none';
       }
+
+      presetSelect.addEventListener('change', () => {
+        const presetId = presetSelect.value;
+        if (!presetId || !presetIndex[presetId]) {
+          presetDescription.textContent = '';
+          return;
+        }
+        const preset = presetIndex[presetId];
+        payloadInput.value = JSON.stringify(preset.payload, null, 2);
+        presetDescription.textContent = preset.description;
+        clearOutputs();
+        setStatus(`Loaded example: ${preset.name}`);
+      });
 
       formatBtn.addEventListener('click', () => {
         try {

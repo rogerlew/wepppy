@@ -99,6 +99,10 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
         group_by_sql = ", ".join(group_by)
         sql_parts.append(f"GROUP BY {group_by_sql}")
 
+    if payload.order_by:
+        order_by_sql = ", ".join(payload.order_by)
+        sql_parts.append(f"ORDER BY {order_by_sql}")
+
     sql = " ".join(sql_parts)
 
     if payload.limit:
@@ -110,4 +114,8 @@ def run_query(run_context: RunContext, payload: QueryRequest) -> QueryResult:
     plan = build_query_plan(payload, run_context.catalog)
     executor = DuckDBExecutor(run_context.base_dir)
     table = executor.execute(plan.sql, plan.params, use_spatial=plan.requires_spatial)
-    return format_table(table, include_schema=payload.include_schema)
+    return format_table(
+        table,
+        include_schema=payload.include_schema,
+        sql=plan.sql if payload.include_sql else None,
+    )
