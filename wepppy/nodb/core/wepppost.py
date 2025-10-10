@@ -7,6 +7,7 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
+import time
 from os.path import exists as _exists
 from os.path import join as _join
 
@@ -53,6 +54,30 @@ class WeppPost(NoDbBase):
             self._hill_streamflow = None
             self._chn_streamflow = None
 
+    def _wait_for_path(self, path, timeout=60.0, poll=0.5):
+        """
+        Wait for ``path`` to become available before attempting to read it.
+        Dockerized deployments occasionally surface slower I/O, so give the
+        filesystem a chance to catch up before raising.
+        """
+        deadline = time.time() + timeout
+        logged = False
+
+        while True:
+            if _exists(path):
+                return
+
+            if time.time() >= deadline:
+                raise FileNotFoundError(
+                    f'Expected file {path} to be available within {timeout}s'
+                )
+
+            if not logged:
+                self.logger.info('Waiting for %s to be created', path)
+                logged = True
+
+            time.sleep(poll)
+
     def run_post(self):
 
         with self.locked():
@@ -60,6 +85,7 @@ class WeppPost(NoDbBase):
             chnwb_fn = _join(output_dir, 'chnwb.txt')
 
             _chn_areas = {}
+            self._wait_for_path(chnwb_fn)
             with open(chnwb_fn) as fp:
                 i = 0
                 while 1:
@@ -86,6 +112,7 @@ class WeppPost(NoDbBase):
             for wepp_id in range(1, n + 1):
                 wat_fn = _join(output_dir, 'H{}.wat.dat'.format(wepp_id))
 
+                self._wait_for_path(wat_fn)
                 with open(wat_fn) as wat_fp:
                     ofe = None
                     for i, line in enumerate(wat_fp.readlines()):
@@ -100,6 +127,7 @@ class WeppPost(NoDbBase):
             ebe_fn = _join(output_dir, 'ebe_pw0.txt')
 
             _days, _months, _years = [], [], []
+            self._wait_for_path(ebe_fn)
             with open(ebe_fn) as fp:
                 for line in fp.readlines()[9:]:
                     _days.append(int(line[0:5]))
@@ -109,6 +137,7 @@ class WeppPost(NoDbBase):
             chanwb_fn = _join(output_dir, 'chanwb.out')
 
             _julians = []
+            self._wait_for_path(chanwb_fn, timeout=120.0)
             with open(chanwb_fn) as fp:
                 for line in fp.readlines()[11:]:
                     _julians.append(int(line[6:13]))
