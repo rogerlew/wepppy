@@ -37,6 +37,15 @@ http://:8080 {
         reverse_proxy query-engine:8041
     }
 
+    handle_path /weppcloud/static/* {
+        root * /srv/weppcloud/static
+        file_server
+    }
+
+    handle_path /browse* {
+        reverse_proxy browse:9009
+    }
+
     @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|download(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
     handle @browse_proxy {
         reverse_proxy browse:9009
