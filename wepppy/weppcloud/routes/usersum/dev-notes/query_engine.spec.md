@@ -19,7 +19,16 @@ Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud 
   - `DuckDBExecutor` (`executor.py`): runs parametrised SQL/Arrow queries with optional spatial extension loading.
   - `QueryRequest`/`QueryPlan` (`payload.py`): dataclasses defining the payload and compiled plan.
   - `format_table` (`formatter.py`): converts Arrow tables to Python records + optional schema metadata (unit conversion deferred to a final presentation step).
-- Starlette façade (`query_engine/app`): `create_app()` exposes routes for human/browser discovery (`GET /query/runs/{runid}`), schema downloads (`GET /query/runs/{runid}/schema`), and JSON query execution (`POST /query/runs/{runid}/query`). Templates live under `query_engine/app/templates` and render catalog summaries.
+- Starlette façade (`query_engine/app`): `create_app()` exposes routes for human/browser discovery (`GET /query/runs/{runid}`), catalog activation (`GET|POST /query/runs/{runid}/activate`), schema downloads (`GET /query/runs/{runid}/schema`), an interactive query console (`GET /query/runs/{runid}/query`), and JSON query execution (`POST /query/runs/{runid}/query`). Templates live under `query_engine/app/templates` and render catalog summaries as well as the in-browser console.
+
+### Recent Enhancements (2025-10)
+- Added `_resolve_run_path` helper so all routes honour WEPPcloud storage conventions via `get_wd`.
+- Introduced an interactive “query console” HTML view that allows users to paste/edit POST payloads, trigger queries, and view responses directly in the browser. The console renders example dataset paths and provides JSON formatting/reset helpers.
+- Updated `/query/runs/{runid}/query` POST handling to include defensive catalog checks, improved error status codes (422 for invalid payloads, 404 for missing datasets), and stack traces in JSON responses for debugging—mirroring the rich error feedback approach used by the browse microservice.
+- Activation endpoint now surfaces full stack traces on failure for easier diagnosis in web UIs.
+- Route table simplified so GET and POST handlers share the same path while ensuring the GET console is registered ahead of the POST handler.
+- `QueryRequest` now normalises dataset descriptors (path + alias), join definitions, and aggregation specs. The planner can join multiple Parquet assets (e.g., `landuse` ↔ `soils` on `TopazID`) and compute grouped aggregations (e.g., daily WEPP interchange sums across `wepp_id`).
+- Added unit coverage for join/aggregation planners (`tests/query_engine/test_core.py::test_run_query_join`, `test_run_query_aggregation`).
 
 ## Activation & Catalog Workflow
 1. `activate_query_engine` recurses the run (and scenarios) collecting known extensions (`.parquet`, `.csv`, `.tsv`, `.tif`, `.json`, `.geojson`, `.nodb`).
@@ -47,8 +56,7 @@ Client payload (QueryRequest)
                     └── QueryPlan (SQL, params, spatial flag)
                             └── DuckDBExecutor (Arrow table)
                                     └── Formatter (records, optional schema)
-```
-- Present implementation supports single-dataset projections with optional column selection, `LIMIT`, and schema echoing. Future work will flesh out joins, filters, groupings, ranking/windowing, spatial filters, and preferred unit conversions.
+- Present implementation handles single-dataset projections as well as multi-dataset joins driven by alias-based join specs, with optional grouping/aggregation clauses (including per-day/month/year rollups for interchange datasets). Filters, ranking/windowing, spatial predicates, and preferred unit conversions remain future work.
 - Unit conversions will be applied as a presentation layer via `Unitizer` without mutating the underlying Parquet assets.
 
 ## Output Formats
@@ -68,6 +76,33 @@ ctx = resolve_run_context(runid, auto_activate=False)
 payload = QueryRequest(datasets=["landuse/landuse.parquet"], limit=5)
 result = run_query(ctx, payload)
 print(result.records[:2])
+
+# join soils on TopazID
+payload = QueryRequest(
+    datasets=[
+        {"path": "landuse/landuse.parquet", "alias": "landuse"},
+        {"path": "soils/soils.parquet", "alias": "soils"},
+    ],
+    joins=[{"left": "landuse", "right": "soils", "on": ["TopazID"]}],
+    columns=[
+        "landuse.TopazID AS topaz_id",
+        "landuse.landuse AS landuse_desc",
+        "soils.texture AS soil_texture",
+    ],
+)
+print(run_query(ctx, payload).records[:2])
+
+# aggregate WEPP interchange outputs to daily sums across all hillslopes
+payload = QueryRequest(
+    datasets=[{"path": "wepp/output/interchange/H.pass.parquet", "alias": "pass"}],
+    columns=["pass.year AS year", "pass.month AS month", "pass.day AS day"],
+    group_by=["year", "month", "day"],
+    aggregations=[
+        {"fn": "sum", "column": "pass.runoff", "alias": "runoff_sum"},
+        {"fn": "sum", "column": "pass.sediment", "alias": "sediment_sum"},
+    ],
+)
+print(run_query(ctx, payload).records[:1])
 ```
 
 ## Benchmark & Integration Tests
@@ -79,8 +114,21 @@ Located in `tests/query_engine/`:
   These tests are marked `@pytest.mark.benchmark` and skipped automatically when the expected run directories are absent.
 
 ## Future Work
-- Full SQL planner: dataset aliasing, join graphs, filter predicates, group/aggregate operators, ranking/window functions, spatial predicates (point-in-polygon, bounding boxes, hillslope groups).
+- Query planner extensions: filter predicates, parameter binding, ranking/window functions, spatial predicates (point-in-polygon, bounding boxes, hillslope groups), and join graphs beyond simple star joins.
 - Expanded formatter support (CSV/Parquet streaming, GeoJSON, GDAL-backed GIS formats).
 - Preferred unit conversion via `Unitizer` hooks.
 - Batch querying that unions results across multiple run contexts.
 - API wiring (Starlette/FastAPI routes) building on the reusable core modules.
+
+### Near-Term Planner Roadmap
+1. **Query ergonomics**
+   - Add optional dataset filters (`where`, `between`, `in`, spatial predicates) and parameter binding so clients can narrow result sets without custom SQL strings.
+   - Support join graphs that re-use aliases (e.g., landuse ↔ soils ↔ disturbances) and expose explicit join ordering controls.
+
+2. **Aggregation helpers**
+   - Provide shorthand aggregators for common WEPP metrics (e.g., `total_runoff`, `sediment_mass`) and automate cache keys for expensive rollups.
+   - Allow multiple aggregation levels in a single request (daily + monthly) via window functions.
+
+3. **Validation & optimisation**
+   - Enhance catalog validation with column existence/type checks before generating SQL, returning expressive error messages.
+   - Surface estimated costs / row counts for large queries and optionally leverage DuckDB's persistent caches for repeated workloads.
