@@ -17,10 +17,6 @@ http://:8080 {
         reverse_proxy preflight:9001
     }
 
-    handle_path /browse* {
-        reverse_proxy browse:9009
-    }
-
     handle_path /webservices/elevationquery* {
         reverse_proxy elevationquery:8002
     }
@@ -39,6 +35,11 @@ http://:8080 {
 
     handle_path /query-engine* {
         reverse_proxy query-engine:8041
+    }
+
+    @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|download(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
+    handle @browse_proxy {
+        reverse_proxy browse:9009
     }
 
     @root path /
