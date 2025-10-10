@@ -377,7 +377,9 @@ class ISRICSoilData:
 
         if simple_texture is None:
             return None, None, meta
-
+        
+        mukey = f'{wrb}-{simple_texture}'
+        
         s = ['7778',
              '#',
              '#            WEPPcloud (c) University of Idaho',
@@ -394,7 +396,7 @@ class ISRICSoilData:
         s.append('Any comments:')
         s.append(f'1 {ksflag}')
 
-        print(wrb, simple_texture, nsl, h0.albedo, ini_sat, h0.interrill, h0.rill, h0.shear)
+        #print(wrb, simple_texture, nsl, h0.albedo, ini_sat, h0.interrill, h0.rill, h0.shear)
 
 
         s.append(f"'{wrb}'\t\t'{simple_texture}'\t"\
@@ -415,7 +417,6 @@ class ISRICSoilData:
         else:
             s.append('1 10000.0 %0.5f' % (res_lyr_ksat * 3.6))
 
-        mukey = short_hash_id('\n'.join(s[9:]))
         if soil_fn is None:
             soil_fn = f'{mukey}.sol'
 
