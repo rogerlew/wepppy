@@ -64,11 +64,11 @@ NoDb subclass logger
 - Workers scale horizontally. `wepppy/rq/*.py` modules provide CLI entry points, while `wepppy/weppcloud/routes/rq/api` exposes REST endpoints for job orchestration, cancellation, and status polling.
 - Structured logging is collected per run in the working directory (`<runid>/_logs/`). The queue handler replicates to console, file, and Redis so you get local artifacts plus live dashboards.
 
-## Getting Started (developer edition)
-1. Provision Python 3.10 + Poetry/conda (see `install/` and `wepppy/weppcloud/_baremetal/` for reference scripts).
-
-## Docker Compose Dev Stack
+## Docker Compose Dev Stack (Recommended)
 The repository ships with a multi-container development stack (`docker/docker-compose.dev.yml`) that mirrors the production topology: Flask (`weppcloud`), Tornado microservices (`status`, `preflight`), the Starlette browse service, Redis, PostgreSQL, an RQ worker pool, and a Caddy reverse proxy that fronts the entire bundle (and now serves `/weppcloud/static/*` directly).
+
+> docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up -d
+
 
 ### Quick start
 ```bash
@@ -92,7 +92,7 @@ UID=33            # www-data
 GID=993           # output of `getent group docker | cut -d: -f3`
 ```
 
-💡 Make sure the group exists locally; Compose passes numeric ids straight through, so the host must recognise them to keep permissions tidy.
+Make sure the group exists locally; Compose passes numeric ids straight through, so the host must recognise them to keep permissions tidy.
 
 ### Common tasks
 - **Tail the main app logs**: `docker compose -f docker/docker-compose.dev.yml logs -f weppcloud`
@@ -100,7 +100,9 @@ GID=993           # output of `getent group docker | cut -d: -f3`
 - **Reset a single service**: `docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build weppcloud`
 - **View static assets**: Caddy proxies `/weppcloud/static/*` from the repository mount; updates to `wepppy/weppcloud/static` land immediately without hitting Gunicorn.
 
-For deployment, see the gunicorn config (`wepppy/weppcloud/gunicorn.conf.py`), the systemd snippets under `_scripts/`, and the BareMetal notes for Ubuntu 24.04 provisioning.
+## Baremetal (not recommended)
+- Provision Python 3.10 + Poetry/conda (see `install/` and `wepppy/weppcloud/_baremetal/` for reference scripts).
+- For deployment, see the gunicorn config (`wepppy/weppcloud/gunicorn.conf.py`), the systemd snippets under `_scripts/`, and the BareMetal notes for Ubuntu 24.04 provisioning.
 
 ## Further Reading
 - `wepppy/weppcloud/routes/usersum/dev-notes/redis_dev_notes.md` — deep dive into Redis usage, DB allocations, and debugging recipes.
