@@ -21,21 +21,27 @@ import socket
 _hostname = socket.gethostname()
 
 import redis
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+    redis_host,
+)
 
 redis_wd_cache_client = None
-REDIS_HOST = os.environ.get('REDIS_HOST', None)
-REDIS_WD_CACHE_DB = 11
-if REDIS_HOST is not None:
-    try:
-        redis_wd_cache_pool = redis.ConnectionPool(
-            host=REDIS_HOST, port=6379, db=REDIS_WD_CACHE_DB,
-            decode_responses=True, max_connections=50
-        )
-        redis_wd_cache_client = redis.StrictRedis(connection_pool=redis_wd_cache_pool)
-        redis_wd_cache_client.ping()
-    except Exception as e:
-        print(f'Error connecting to Redis: {e}')
-        redis_wd_cache_client = None
+REDIS_HOST = redis_host()
+REDIS_WD_CACHE_DB = int(RedisDB.WD_CACHE)
+try:
+    pool_kwargs = redis_connection_kwargs(
+        RedisDB.WD_CACHE,
+        decode_responses=True,
+        extra={"max_connections": 50},
+    )
+    redis_wd_cache_pool = redis.ConnectionPool(**pool_kwargs)
+    redis_wd_cache_client = redis.StrictRedis(connection_pool=redis_wd_cache_pool)
+    redis_wd_cache_client.ping()
+except Exception as e:
+    print(f'Error connecting to Redis: {e}')
+    redis_wd_cache_client = None
     
 
 def get_wd(runid: str, *, prefer_active: bool = True) -> str:
