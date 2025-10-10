@@ -23,7 +23,14 @@ def config_app(app):
     app.config['SECRET_KEY'] = 'jdskdu29uhr2uh2uheufujhe287'
     app.config['SECURITY_PASSWORD_SALT'] = b'djskhfusdifwuhfsdkjf'
     app.config['SECURITY_PASSWORD_HASH'] = 'bcrypt'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////geodata/weppcloud_runs/standalone.db'
+    db_uri_env = (
+        os.getenv('SQLALCHEMY_DATABASE_URI')
+        or os.getenv('DATABASE_URL')
+    )
+    if db_uri_env:
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri_env
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////geodata/weppcloud_runs/standalone.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     # Use endpoint names so Flask-Security runs responses through url_for,
     # which keeps redirects correct regardless of reverse-proxy layout.
@@ -31,7 +38,7 @@ def config_app(app):
     app.config['SECURITY_POST_LOGIN_VIEW'] = 'index'
     app.config['SECURITY_POST_REGISTER_VIEW'] = 'index'
     app.config['SECURITY_LOGIN_ERROR_VIEW'] = 'security.login'
-    app.config['SITE_PREFIX'] = ''
+    app.config['SITE_PREFIX'] = os.getenv('SITE_PREFIX', '')
     app.config['SECURITY_CONFIRMABLE'] = True
     app.config['SECURITY_LOGIN_WITHOUT_CONFIRMATION'] = True
     app.config['SECURITY_REGISTERABLE'] = True

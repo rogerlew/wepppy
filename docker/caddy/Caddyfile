@@ -1,0 +1,54 @@
+{
+	auto_https off
+}
+
+http://:8080 {
+    encode gzip
+
+    handle_path /health* {
+        respond "OK"
+    }
+
+    handle_path /weppcloud-microservices/status* {
+        reverse_proxy status:9002
+    }
+
+    handle_path /weppcloud-microservices/preflight* {
+        reverse_proxy preflight:9001
+    }
+
+    handle_path /browse* {
+        reverse_proxy browse:9009
+    }
+
+    handle_path /webservices/elevationquery* {
+        reverse_proxy elevationquery:8002
+    }
+
+    handle_path /webservices/metquery* {
+        reverse_proxy metquery:8004
+    }
+
+    handle_path /webservices/wmesque2* {
+        reverse_proxy wmesque2:8030
+    }
+
+    handle_path /webservices/wmesque* {
+        reverse_proxy wmesque:8003
+    }
+
+    handle_path /query-engine* {
+        reverse_proxy query-engine:8041
+    }
+
+    @root path /
+    redir @root /weppcloud
+
+    handle_path /weppcloud* {
+        reverse_proxy weppcloud:8000 {
+            header_up X-Forwarded-Prefix /weppcloud
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+        }
+    }
+}

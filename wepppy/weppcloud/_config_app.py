@@ -10,19 +10,17 @@ def config_app(app, logger=None):
     logger.info(f"Hostname detected as {_hostname}")
 
     _config_app = None
-    if 'wepp1' in _hostname or 'forest' in _hostname:
-        try:
-            from wepppy.weppcloud.wepp1_config import config_app as _config_app
-            logger.info("Using wepp1 configuration")
-        except:
-            pass
-    elif 'wepp2' in _hostname:
-        from wepppy.weppcloud.wepp2_config import config_app as _config_app
-        logger.info("Using wepp2 configuration")
+    try:
+        from wepppy.weppcloud.wepp1_config import config_app as _config_app
+        logger.info("Using wepp1 configuration")
+    except:
+        pass
 
     if _config_app is None:
-        from wepppy.weppcloud.standalone_config import config_app as _config_app
-        logger.info("Using standalone configuration")
+        #from wepppy.weppcloud.standalone_config import config_app as _config_app
+        #logger.info("Using standalone configuration")
+        logger.error("Standalone configuration is deprecated. Please set up WEPPcloud with wepp1_config.py")
+        raise RuntimeError("Standalone configuration is deprecated. Please set up WEPPcloud with wepp1_config.py")
 
     assert _config_app is not None, "Could not determine configuration"
     logger.info(f"Configuring app")

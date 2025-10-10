@@ -33,6 +33,7 @@ from flask_security import (
 from wtforms.validators import DataRequired as Required
 from flask_mail import Mail
 from flask_session import Session
+from flask_session.sessions import RedisSessionInterface
 from flask_migrate import Migrate
 
 from wtforms import StringField
@@ -51,6 +52,11 @@ config_logging(logging.INFO)
 
 app = Flask(__name__)
 config_app(app)
+
+# Flask 3 removed the legacy attribute that older extensions (Flask-Session)
+# still reference; reintroduce it for compatibility.
+if not hasattr(app, "session_cookie_name"):
+    app.session_cookie_name = app.config.get("SESSION_COOKIE_NAME", "session")
 
 # Configure ProxyFix middleware to handle reverse proxy headers
 # This ensures Flask correctly interprets X-Forwarded-* headers when
