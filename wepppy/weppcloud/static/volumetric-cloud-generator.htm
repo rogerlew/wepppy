@@ -239,16 +239,16 @@
                 </div>
                 <div class="control-row">
                     <label for="puffInput">Puffs / pass</label>
-                    <input id="puffInput" type="range" min="2" max="90" step="2" value="36">
+                    <input id="puffInput" type="range" min="12" max="90" step="2" value="36">
                     <span class="value" id="puffValue">36</span>
                 </div>
                 <div class="control-row two-column">
                     <label for="densityInput">Volume density</label>
-                    <input id="densityInput" type="number" min="0.1" max="3" step="0.05" value="1.2">
+                    <input id="densityInput" type="number" min="0.1" max="4" step="0.05" value="2.0">
                 </div>
                 <div class="control-row two-column">
                     <label for="softnessInput">Softness (blur passes)</label>
-                    <input id="softnessInput" type="number" min="0" max="4" step="1" value="2">
+                    <input id="softnessInput" type="number" min="0" max="4" step="1" value="1">
                 </div>
                 <div class="control-row">
                     <label for="scaleInput">Cloud scale</label>
@@ -257,16 +257,41 @@
                 </div>
                 <div class="control-row">
                     <label for="contrastInput">Display contrast</label>
-                    <input id="contrastInput" type="range" min="0.2" max="0.8" step="0.05" value="0.45">
-                    <span class="value" id="contrastValue">0.45</span>
+                    <input id="contrastInput" type="range" min="0.2" max="0.8" step="0.05" value="0.6">
+                    <span class="value" id="contrastValue">0.60</span>
                 </div>
                 <div class="control-row two-column">
                     <label>Distribution (XYZ)</label>
                     <div class="cluster">
-                        <input id="distX" type="number" min="0.5" max="2.5" step="0.1" value="1.5" title="Width">
-                        <input id="distY" type="number" min="0.5" max="2.5" step="0.1" value="1.0" title="Height">
-                        <input id="distZ" type="number" min="0.5" max="2.5" step="0.1" value="1.3" title="Depth">
+                        <input id="distX" type="number" min="0.01" max="2.5" step="0.01" value="0.05" title="Width">
+                        <input id="distY" type="number" min="0.01" max="2.5" step="0.01" value="0.05" title="Height">
+                        <input id="distZ" type="number" min="0.01" max="2.5" step="0.01" value="0.10" title="Depth">
                     </div>
+                </div>
+                <div class="control-row">
+                    <label for="ambientInput">Light ambient</label>
+                    <input id="ambientInput" type="range" min="0" max="1" step="0.01" value="0.38">
+                    <span class="value" id="ambientValue">0.38</span>
+                </div>
+                <div class="control-row">
+                    <label for="diffuseInput">Light diffuse</label>
+                    <input id="diffuseInput" type="range" min="0" max="2" step="0.05" value="0.78">
+                    <span class="value" id="diffuseValue">0.78</span>
+                </div>
+                <div class="control-row">
+                    <label for="intensityInput">Light intensity</label>
+                    <input id="intensityInput" type="range" min="0" max="1.5" step="0.05" value="0.85">
+                    <span class="value" id="intensityValue">0.85</span>
+                </div>
+                <div class="control-row">
+                    <label for="azimuthInput">Light azimuth</label>
+                    <input id="azimuthInput" type="range" min="0" max="360" step="1" value="238">
+                    <span class="value" id="azimuthValue">238deg</span>
+                </div>
+                <div class="control-row">
+                    <label for="elevationInput">Light elevation</label>
+                    <input id="elevationInput" type="range" min="-85" max="85" step="1" value="-25">
+                    <span class="value" id="elevationValue">-25deg</span>
                 </div>
                 <div class="control-row two-column">
                     <label>Debug overlay</label>
@@ -284,6 +309,7 @@
             <li>Detail raises the number of particle passes. Each pass scatters new puff seeds, shrinks them slightly, and nests extra fine structure.</li>
             <li>Distribution stretches the ellipsoidal base mesh before voxelisation, matching Blender’s “cloud box” concept.</li>
             <li>The export stays intentionally low-contrast (white background, darker core between ~70–100% luminance) to favor UI logos.</li>
+            <li>Lighting controls adjust ambient fill, directional intensity, and sun angles; use them to bias highlights or flatten the sprite.</li>
             <li>Cloud scale trims the ellipsoidal volume so the rendered sprite keeps generous white margins; push it higher if you prefer edge-to-edge coverage.</li>
             <li>Mesh overlay sketches the projected base ellipsoid and puff anchor locations; it does not affect the exported texture.</li>
         </ul>
@@ -298,6 +324,16 @@
             const GRID_SIZE = 32;
             const RAY_STEPS = 48;
             const FRONT_TO_BACK = true;
+            const LIGHT_DEFAULTS = Object.freeze({
+                ambient: 0.38,
+                diffuse: 0.78,
+                intensity: 0.85,
+                azimuth: 238,
+                elevation: -25
+            });
+            const LIGHT_SHADOW_STEP = 1.35;
+            const LIGHT_SHADOW_STEPS = 14;
+            const LIGHT_SHADOW_DENSITY_SCALE = 0.85;
 
             const hiddenCanvas = document.createElement("canvas");
             hiddenCanvas.width = WIDTH;
@@ -323,6 +359,16 @@
             const puffValue = document.getElementById("puffValue");
             const scaleValue = document.getElementById("scaleValue");
             const contrastValue = document.getElementById("contrastValue");
+            const ambientInput = document.getElementById("ambientInput");
+            const diffuseInput = document.getElementById("diffuseInput");
+            const intensityInput = document.getElementById("intensityInput");
+            const azimuthInput = document.getElementById("azimuthInput");
+            const elevationInput = document.getElementById("elevationInput");
+            const ambientValue = document.getElementById("ambientValue");
+            const diffuseValue = document.getElementById("diffuseValue");
+            const intensityValue = document.getElementById("intensityValue");
+            const azimuthValue = document.getElementById("azimuthValue");
+            const elevationValue = document.getElementById("elevationValue");
 
             const base64Output = document.getElementById("base64Output");
             const seedEcho = document.getElementById("seedEcho");
@@ -347,6 +393,33 @@
             contrastInput.addEventListener("input", () => {
                 contrastValue.textContent = Number.parseFloat(contrastInput.value).toFixed(2);
             });
+            if (ambientInput) {
+                ambientInput.addEventListener("input", () => {
+                    ambientValue.textContent = Number.parseFloat(ambientInput.value).toFixed(2);
+                });
+            }
+            if (diffuseInput) {
+                diffuseInput.addEventListener("input", () => {
+                    diffuseValue.textContent = Number.parseFloat(diffuseInput.value).toFixed(2);
+                });
+            }
+            if (intensityInput) {
+                intensityInput.addEventListener("input", () => {
+                    intensityValue.textContent = Number.parseFloat(intensityInput.value).toFixed(2);
+                });
+            }
+            if (azimuthInput) {
+                azimuthInput.addEventListener("input", () => {
+                    const value = Number.parseFloat(azimuthInput.value) || 0;
+                    azimuthValue.textContent = value.toFixed(0) + "deg";
+                });
+            }
+            if (elevationInput) {
+                elevationInput.addEventListener("input", () => {
+                    const value = Number.parseFloat(elevationInput.value) || 0;
+                    elevationValue.textContent = value.toFixed(0) + "deg";
+                });
+            }
 
             meshToggle.addEventListener("change", () => {
                 drawPreview(lastRender);
@@ -378,10 +451,15 @@
                 softnessInput,
                 scaleInput,
                 contrastInput,
+                ambientInput,
+                diffuseInput,
+                intensityInput,
+                azimuthInput,
+                elevationInput,
                 distX,
                 distY,
                 distZ
-            ];
+            ].filter(Boolean);
 
             autoInputs.forEach((input) => {
                 input.addEventListener("change", generate);
@@ -397,6 +475,23 @@
                     }
                     if (input === scaleInput) {
                         scaleValue.textContent = Number.parseFloat(input.value).toFixed(2) + "×";
+                    }
+                    if (input === ambientInput) {
+                        ambientValue.textContent = Number.parseFloat(input.value).toFixed(2);
+                    }
+                    if (input === diffuseInput) {
+                        diffuseValue.textContent = Number.parseFloat(input.value).toFixed(2);
+                    }
+                    if (input === intensityInput) {
+                        intensityValue.textContent = Number.parseFloat(input.value).toFixed(2);
+                    }
+                    if (input === azimuthInput) {
+                        const value = Number.parseFloat(input.value) || 0;
+                        azimuthValue.textContent = value.toFixed(0) + "deg";
+                    }
+                    if (input === elevationInput) {
+                        const value = Number.parseFloat(input.value) || 0;
+                        elevationValue.textContent = value.toFixed(0) + "deg";
                     }
                 });
             });
@@ -418,6 +513,7 @@
 
             function generate() {
                 const settings = readSettings();
+                seedInput.value = String(settings.seed);
                 const volumeResult = buildVolume(settings);
                 const renderResult = renderVolume(volumeResult, settings);
                 updateOutputs(renderResult);
@@ -430,26 +526,60 @@
             }
 
             function readSettings() {
-                const seedValue = Number.parseInt(seedInput.value, 10);
-                const seed = Number.isFinite(seedValue) ? seedValue : Math.floor(Math.random() * 1e9);
+                const seedValue = readInt(seedInput, Math.floor(Math.random() * 1e9));
+                const detail = readInt(detailInput, 3);
+                const puffs = readInt(puffInput, 36);
+                const density = clamp(readNumber(densityInput, 2.0), 0.1, 4);
+                const softness = clamp(readInt(softnessInput, 1), 0, 4);
+                const contrast = clamp(readNumber(contrastInput, 0.6), 0.2, 0.8);
+                const cloudScale = clamp(readNumber(scaleInput, 0.45), 0.35, 1.15);
+                const distXVal = clamp(readNumber(distX, 0.05), 0.01, 2.5);
+                const distYVal = clamp(readNumber(distY, 0.05), 0.01, 2.5);
+                const distZVal = clamp(readNumber(distZ, 0.1), 0.01, 2.5);
+                const ambient = clamp(readNumber(ambientInput, LIGHT_DEFAULTS.ambient), 0, 1);
+                const diffuse = clamp(readNumber(diffuseInput, LIGHT_DEFAULTS.diffuse), 0, 2);
+                const intensity = clamp(readNumber(intensityInput, LIGHT_DEFAULTS.intensity), 0, 1.5);
+                const azimuth = readNumber(azimuthInput, LIGHT_DEFAULTS.azimuth);
+                const elevation = readNumber(elevationInput, LIGHT_DEFAULTS.elevation);
+
                 return {
-                    seed,
-                    detail: Number.parseInt(detailInput.value, 10),
-                    puffsPerPass: Number.parseInt(puffInput.value, 10),
-                    volumeDensity: Number.parseFloat(densityInput.value),
-                    softness: Math.max(0, Number.parseInt(softnessInput.value, 10)),
-                    contrast: Number.parseFloat(contrastInput.value),
-                    cloudScale: clamp(Number.parseFloat(scaleInput.value), 0.35, 1.15),
+                    seed: seedValue,
+                    detail,
+                    puffsPerPass: puffs,
+                    volumeDensity: density,
+                    softness,
+                    contrast,
+                    cloudScale,
                     distribution: {
-                        x: clamp(Number.parseFloat(distX.value), 0.5, 2.5),
-                        y: clamp(Number.parseFloat(distY.value), 0.5, 2.5),
-                        z: clamp(Number.parseFloat(distZ.value), 0.5, 2.5)
+                        x: distXVal,
+                        y: distYVal,
+                        z: distZVal
+                    },
+                    lighting: {
+                        ambient,
+                        diffuse,
+                        intensity,
+                        direction: makeDirectionFromAngles(azimuth, elevation),
+                        azimuth,
+                        elevation
                     }
                 };
             }
 
             function clamp(value, min, max) {
                 return Math.min(Math.max(value, min), max);
+            }
+
+            function readNumber(input, fallback) {
+                if (!input) return fallback;
+                const value = Number.parseFloat(input.value);
+                return Number.isFinite(value) ? value : fallback;
+            }
+
+            function readInt(input, fallback) {
+                if (!input) return fallback;
+                const value = Number.parseInt(input.value, 10);
+                return Number.isFinite(value) ? value : fallback;
             }
 
             function innerDistributionOf(base, scale) {
@@ -459,6 +589,90 @@
                     y: base.y * safeScale,
                     z: base.z * safeScale
                 };
+            }
+
+            function makeDirection(x, y, z) {
+                const length = Math.hypot(x, y, z) || 1;
+                return {
+                    x: x / length,
+                    y: y / length,
+                    z: z / length
+                };
+            }
+
+            function toRadians(deg) {
+                const value = Number.isFinite(deg) ? deg : 0;
+                return (value * Math.PI) / 180;
+            }
+
+            function makeDirectionFromAngles(azimuthDeg, elevationDeg) {
+                const azimuth = toRadians(azimuthDeg);
+                const elevation = toRadians(elevationDeg);
+                const cosElevation = Math.cos(elevation);
+                return makeDirection(
+                    Math.cos(azimuth) * cosElevation,
+                    Math.sin(azimuth) * cosElevation,
+                    Math.sin(elevation)
+                );
+            }
+
+            function dot(a, b) {
+                return a.x * b.x + a.y * b.y + a.z * b.z;
+            }
+
+            function estimateNormal(volume, worldX, worldY, worldZ, spacing, distribution) {
+                const sampleXPos = sampleVolume(volume, worldX + spacing.x, worldY, worldZ, distribution, spacing);
+                const sampleXNeg = sampleVolume(volume, worldX - spacing.x, worldY, worldZ, distribution, spacing);
+                const sampleYPos = sampleVolume(volume, worldX, worldY + spacing.y, worldZ, distribution, spacing);
+                const sampleYNeg = sampleVolume(volume, worldX, worldY - spacing.y, worldZ, distribution, spacing);
+                const sampleZPos = sampleVolume(volume, worldX, worldY, worldZ + spacing.z, distribution, spacing);
+                const sampleZNeg = sampleVolume(volume, worldX, worldY, worldZ - spacing.z, distribution, spacing);
+
+                const gradX = sampleXPos - sampleXNeg;
+                const gradY = sampleYPos - sampleYNeg;
+                const gradZ = sampleZPos - sampleZNeg;
+
+                const length = Math.hypot(gradX, gradY, gradZ);
+                if (length <= 1e-5) {
+                    return {
+                        normal: { x: 0, y: 0, z: 1 },
+                        strength: 0
+                    };
+                }
+                const invLen = 1 / length;
+                return {
+                    normal: {
+                        x: -(gradX * invLen),
+                        y: -(gradY * invLen),
+                        z: -(gradZ * invLen)
+                    },
+                    strength: length
+                };
+            }
+
+            function traceLightTransmittance(volume, start, lightDir, distribution, spacing, densityScale) {
+                const stepSize = Math.min(spacing.x, spacing.y, spacing.z) * LIGHT_SHADOW_STEP;
+                let transmittance = 1.0;
+                let px = start.x;
+                let py = start.y;
+                let pz = start.z;
+                for (let i = 0; i < LIGHT_SHADOW_STEPS && transmittance > 0.02; i++) {
+                    px += lightDir.x * stepSize;
+                    py += lightDir.y * stepSize;
+                    pz += lightDir.z * stepSize;
+                    if (
+                        px < -distribution.x || px > distribution.x ||
+                        py < -distribution.y || py > distribution.y ||
+                        pz < -distribution.z || pz > distribution.z
+                    ) {
+                        break;
+                    }
+                    const density = sampleVolume(volume, px, py, pz, distribution, spacing);
+                    if (density <= 0) continue;
+                    const attenuation = Math.exp(-density * densityScale * stepSize * LIGHT_SHADOW_DENSITY_SCALE);
+                    transmittance *= attenuation;
+                }
+                return transmittance;
             }
 
             function createRng(seed) {
@@ -533,20 +747,24 @@
                     const passDensityScale = 1 + passRatio * 0.35;
                     const passCount = Math.max(1, Math.round(puffsPerPass * (1 + passRatio * 0.2)));
                     for (let p = 0; p < passCount; p++) {
-                        const rawCenter = randomPointInEllipsoid(rng, halfX, halfY, halfZ);
-                        const center = {
-                            x: clamp(rawCenter.x * cloudScale, -halfX * 0.98, halfX * 0.98),
-                            y: clamp(rawCenter.y * cloudScale, -halfY * 0.98, halfY * 0.98),
-                            z: clamp(rawCenter.z * cloudScale, -halfZ * 0.98, halfZ * 0.98)
-                        };
-                        const sizeBias = Math.min(1.35, 0.55 + cloudScale * 0.65);
+                        const center = randomPointInEllipsoid(rng, halfX, halfY, halfZ);
+                        const normRadius = Math.sqrt(
+                            Math.pow(center.x / Math.max(halfX, 1e-4), 2) +
+                            Math.pow(center.y / Math.max(halfY, 1e-4), 2) +
+                            Math.pow(center.z / Math.max(halfZ, 1e-4), 2)
+                        );
+                        const edgeFalloff = Math.pow(Math.max(0, 1 - normRadius), 1.4);
+                        const attenuation = cloudScale + (1 - cloudScale) * edgeFalloff;
+
+                        const sizeBiasBase = Math.min(1.35, 0.55 + cloudScale * 0.65);
+                        const sizeBias = sizeBiasBase * clamp(attenuation, 0.25, 1.15);
                         const puffRadius = baseRadius * passRadiusScale * (0.65 + rng() * 0.55) * sizeBias;
                         const puffScale = {
                             x: puffRadius * (0.85 + rng() * 0.3),
                             y: puffRadius * (0.75 + rng() * 0.4),
                             z: puffRadius * (0.9 + rng() * 0.3)
                         };
-                        const amplitudeScale = Math.min(1.4, 0.65 + cloudScale * 0.5);
+                        const amplitudeScale = Math.min(1.4, 0.65 + cloudScale * 0.5) * clamp(attenuation + 0.15, 0.2, 1.4);
                         const amplitude = 0.35 * volumeDensity * passDensityScale * (0.7 + rng() * 0.6) * amplitudeScale;
                         puffRecords.push({
                             center,
@@ -708,6 +926,28 @@
                 const imageData = hiddenCtx.createImageData(WIDTH, HEIGHT);
                 const data = imageData.data;
 
+                const lightingSettings = settings.lighting || {};
+                const lightAmbient = clamp(
+                    lightingSettings.ambient ?? LIGHT_DEFAULTS.ambient,
+                    0,
+                    1
+                );
+                const lightDiffuse = clamp(
+                    lightingSettings.diffuse ?? LIGHT_DEFAULTS.diffuse,
+                    0,
+                    2
+                );
+                const lightIntensity = clamp(
+                    lightingSettings.intensity ?? LIGHT_DEFAULTS.intensity,
+                    0,
+                    1.5
+                );
+                const lightDir = lightingSettings.direction
+                    || makeDirectionFromAngles(
+                        lightingSettings.azimuth ?? LIGHT_DEFAULTS.azimuth,
+                        lightingSettings.elevation ?? LIGHT_DEFAULTS.elevation
+                    );
+
                 for (let py = 0; py < HEIGHT; py++) {
                     const v = (py + 0.5) / HEIGHT;
                     const worldY = lerp(-distribution.y, distribution.y, v);
@@ -716,6 +956,7 @@
                         const worldX = lerp(-distribution.x, distribution.x, u);
                         let transmittance = 1.0;
                         let lightAccum = 0.0;
+                        let densityAccum = 0.0;
                         const renderRng = createRng(settings.seed ^ 0x9e3779b9 ^ (px * 131 + py * 17));
                         for (let step = 0; step < RAY_STEPS; step++) {
                             const t = FRONT_TO_BACK ? step : (RAY_STEPS - 1 - step);
@@ -725,8 +966,24 @@
                                 continue;
                             }
                             const attenuation = Math.exp(-density * densityScale * rayStep);
-                            const contribution = transmittance * (1 - attenuation);
-                            lightAccum += contribution;
+                            const scatteringBase = transmittance * (1 - attenuation);
+
+                            const normalInfo = estimateNormal(volume, worldX, worldY, worldZ, spacing, distribution);
+                            const normalStrength = Math.min(1, normalInfo.strength * 0.6);
+                            const shadow = traceLightTransmittance(
+                                volume,
+                                { x: worldX, y: worldY, z: worldZ },
+                                lightDir,
+                                distribution,
+                                spacing,
+                                densityScale
+                            );
+                            const diffuseTerm = Math.max(0, dot(normalInfo.normal, lightDir));
+                            const lightingEnergy = lightAmbient + lightDiffuse * diffuseTerm * shadow;
+                            const litContribution = scatteringBase * lightIntensity * lightingEnergy * (0.55 + 0.45 * normalStrength);
+
+                            lightAccum += litContribution;
+                            densityAccum += scatteringBase;
                             transmittance *= attenuation;
                             if (transmittance < 0.01) {
                                 break;
@@ -734,7 +991,9 @@
                         }
                         const baseLuma = 1.0;
                         const minLuma = 0.68;
-                        const shaded = baseLuma - clamp(lightAccum * contrast, 0, baseLuma - minLuma);
+                        const occlusion = clamp(densityAccum * contrast, 0, baseLuma - minLuma);
+                        const highlights = clamp(lightAccum * Math.min(0.45, 0.2 + lightIntensity * 0.2), 0, 0.22);
+                        const shaded = clamp(baseLuma - occlusion + highlights, minLuma, 1.0);
                         const grain = (renderRng() * 0.015) - 0.0075;
                         const finalValue = clamp(shaded + grain, minLuma, 1.0);
                         const channel = Math.round(finalValue * 255);
@@ -895,6 +1154,23 @@
             applyZoom(initialZoom);
             if (scaleValue && scaleInput) {
                 scaleValue.textContent = Number.parseFloat(scaleInput.value).toFixed(2) + "×";
+            }
+            if (ambientValue && ambientInput) {
+                ambientValue.textContent = Number.parseFloat(ambientInput.value).toFixed(2);
+            }
+            if (diffuseValue && diffuseInput) {
+                diffuseValue.textContent = Number.parseFloat(diffuseInput.value).toFixed(2);
+            }
+            if (intensityValue && intensityInput) {
+                intensityValue.textContent = Number.parseFloat(intensityInput.value).toFixed(2);
+            }
+            if (azimuthValue && azimuthInput) {
+                const value = Number.parseFloat(azimuthInput.value) || 0;
+                azimuthValue.textContent = value.toFixed(0) + "deg";
+            }
+            if (elevationValue && elevationInput) {
+                const value = Number.parseFloat(elevationInput.value) || 0;
+                elevationValue.textContent = value.toFixed(0) + "deg";
             }
             seedInput.value = String(Math.floor(Math.random() * 1e9));
             generate();
