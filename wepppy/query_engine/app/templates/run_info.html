@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>WEPPcloud Query Engine &ndash; {{ runid }}</title>
+    <style>
+      body { font-family: sans-serif; margin: 2rem; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ccc; padding: 0.4rem; text-align: left; }
+      th { background-color: #f0f0f0; }
+    </style>
+  </head>
+  <body>
+    <h1>Run: {{ runid }}</h1>
+    <p>Catalog entries: {{ entry_count }}</p>
+    <p>
+      Schema endpoint: <code>/query/runs/{{ runid_slug }}/schema</code><br />
+      Query endpoint: <code>/query/runs/{{ runid_slug }}/query</code>
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Path</th>
+          <th>Extension</th>
+          <th>Size (bytes)</th>
+          <th>Modified</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in catalog_entries %}
+        <tr>
+          <td>{{ entry.path }}</td>
+          <td>{{ entry.extension }}</td>
+          <td>{{ entry.size_bytes }}</td>
+          <td>{{ entry.modified }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>
