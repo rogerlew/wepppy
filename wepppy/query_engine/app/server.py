@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
-from typing import Any
 import logging
+from dataclasses import asdict
+from pathlib import Path
 
 from starlette.applications import Starlette
 from starlette.requests import Request as StarletteRequest
@@ -14,8 +14,37 @@ from starlette.templating import Jinja2Templates
 
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
+from wepppy.weppcloud.utils.helpers import get_wd
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
+
+
+def _resolve_run_path(runid_param: str) -> Path:
+    """Resolve a run identifier or path to an absolute existing directory."""
+
+    # Prefer the canonical lookup so we honor WEPPcloud storage layout and caches.
+    try:
+        wd = get_wd(runid_param)
+    except Exception:
+        wd = None
+
+    if wd:
+        run_path = Path(wd).expanduser()
+        if run_path.exists():
+            return run_path.resolve()
+
+    # Allow callers to pass absolute paths directly (e.g. local testing).
+    param_path = Path(runid_param)
+    if param_path.is_absolute():
+        if param_path.exists():
+            return param_path.expanduser().resolve()
+
+    # Fallback to treating the runid as a root-level path segment.
+    candidate = Path("/" + runid_param)
+    if candidate.exists():
+        return candidate.resolve()
+
+    raise FileNotFoundError(runid_param)
 
 
 async def homepage(request: StarletteRequest) -> Response:
@@ -26,12 +55,16 @@ async def homepage(request: StarletteRequest) -> Response:
 
 async def run_info(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
-    run_path = Path("/" + runid_param).resolve()
+    try:
+        run_path = _resolve_run_path(runid_param)
+    except FileNotFoundError:
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
+
     try:
         activate_query_engine(run_path, run_interchange=False)
         context = resolve_run_context(str(run_path), auto_activate=False)
     except FileNotFoundError:
-        return JSONResponse({"error": f"Run '{run_path}' not found"}, status_code=404)
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     catalog_entries = context.catalog.entries()
     runid_str = str(run_path)
@@ -49,23 +82,30 @@ async def run_info(request: StarletteRequest) -> Response:
 
 async def run_schema(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
-    run_path = Path("/" + runid_param).resolve()
+    try:
+        run_path = _resolve_run_path(runid_param)
+    except FileNotFoundError:
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
+
     try:
         activate_query_engine(run_path, run_interchange=False)
         context = resolve_run_context(str(run_path), auto_activate=False)
     except FileNotFoundError:
-        return JSONResponse({"error": f"Run '{run_path}' not found"}, status_code=404)
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     data = {
         "runid": str(run_path),
-        "entries": [entry.__dict__ for entry in context.catalog.entries()],
+        "entries": [asdict(entry) for entry in context.catalog.entries()],
     }
     return JSONResponse(data)
 
 
 async def run_query_endpoint(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
-    run_path = Path("/" + runid_param).resolve()
+    try:
+        run_path = _resolve_run_path(runid_param)
+    except FileNotFoundError:
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
         body = await request.json()
@@ -76,7 +116,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
         activate_query_engine(run_path, run_interchange=False)
         context = resolve_run_context(str(run_path), auto_activate=False)
     except FileNotFoundError:
-        return JSONResponse({"error": f"Run '{run_path}' not found"}, status_code=404)
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
         payload = QueryRequest(**body)
@@ -89,6 +129,24 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
         "schema": result.schema,
         "row_count": result.row_count,
     })
+
+
+async def activate_run(request: StarletteRequest) -> Response:
+    runid_param: str = request.path_params["runid"]
+
+    try:
+        run_path = _resolve_run_path(runid_param)
+    except FileNotFoundError:
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
+
+    try:
+        catalog = activate_query_engine(run_path)
+    except FileNotFoundError:
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
+    except Exception as exc:
+        return JSONResponse({"error": f"Activation failed: {exc}"}, status_code=500)
+
+    return JSONResponse(catalog)
 
 class _HealthLogFilter(logging.Filter):
     def filter(self, record):
@@ -115,9 +173,10 @@ def create_app() -> Starlette:
             methods=['GET']
         ),
         Route("/", homepage),
-        Route("/query/runs/{runid:path}", run_info, methods=["GET"]),
+        Route("/query/runs/{runid:path}/activate", activate_run, methods=["GET", "POST"]),
         Route("/query/runs/{runid:path}/schema", run_schema, methods=["GET"]),
         Route("/query/runs/{runid:path}/query", run_query_endpoint, methods=["POST"]),
+        Route("/query/runs/{runid:path}", run_info, methods=["GET"]),
     ]
 
     app = Starlette(debug=False, routes=routes)
