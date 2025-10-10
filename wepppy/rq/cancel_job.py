@@ -5,6 +5,11 @@ from rq.job import Job
 from rq.utils import get_version
 import redis
 import json
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+    redis_host,
+)
 
 from dotenv import load_dotenv
 from datetime import datetime
@@ -14,8 +19,8 @@ from rq.exceptions import NoSuchJobError, InvalidJobOperation
 
 load_dotenv()
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-RQ_DB = 9
+REDIS_HOST = redis_host()
+RQ_DB = int(RedisDB.RQ)
 
 
 def cancel_job(job, redis_conn):
@@ -38,7 +43,8 @@ def cancel_job(job, redis_conn):
 
 
 def cancel_jobs(job_id: str) -> dict:
-    with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    with redis.Redis(**conn_kwargs) as redis_conn:
         try:
             job = Job.fetch(job_id, connection=redis_conn)
         except NoSuchJobError:

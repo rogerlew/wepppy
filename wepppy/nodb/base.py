@@ -29,6 +29,7 @@ __all__ = [
     'redis_status_client',
     'redis_log_level_client',
     'REDIS_HOST',
+    'REDIS_PORT',
     'REDIS_NODB_CACHE_DB',
     'REDIS_STATUS_DB',
     'REDIS_LOCK_DB',
@@ -91,6 +92,12 @@ from wepppy.all_your_base import isfloat, isint, isbool
 from .redis_prep import RedisPrep
 # Configure redis
 import redis
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+    redis_host,
+    redis_port,
+)
 
 
 def _discover_legacy_module_redirects():
@@ -127,18 +134,21 @@ _LEGACY_MODULE_REDIRECTS = _discover_legacy_module_redirects()
 redis_nodb_cache_client = None
 redis_status_client = None
 redis_log_level_client = None
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-REDIS_NODB_CACHE_DB = 13  # to check keys use: redis-cli -n 13 KEYS "*"    
-REDIS_STATUS_DB = 2       # to monitor db 2 in real-time use: redis-cli MONITOR | grep '\[2 '
-REDIS_LOCK_DB = 0  # this is the same db as RedisPrep
-REDIS_NODB_EXPIRY = 72*3600  # 72 hours
-REDIS_LOG_LEVEL_DB = 15
+REDIS_HOST = redis_host()
+REDIS_PORT = redis_port()
+REDIS_NODB_CACHE_DB = int(RedisDB.NODB_CACHE)
+REDIS_STATUS_DB = int(RedisDB.STATUS)
+REDIS_LOCK_DB = int(RedisDB.LOCK)
+REDIS_NODB_EXPIRY = 72 * 3600  # 72 hours
+REDIS_LOG_LEVEL_DB = int(RedisDB.LOG_LEVEL)
 
 try:
-    redis_nodb_cache_pool = redis.ConnectionPool(
-        host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, 
-        decode_responses=True, max_connections=50
+    pool_kwargs = redis_connection_kwargs(
+        RedisDB.NODB_CACHE,
+        decode_responses=True,
+        extra={"max_connections": 50},
     )
+    redis_nodb_cache_pool = redis.ConnectionPool(**pool_kwargs)
     redis_nodb_cache_client = redis.StrictRedis(connection_pool=redis_nodb_cache_pool)
     redis_nodb_cache_client.ping()
 except Exception as e:
@@ -146,10 +156,12 @@ except Exception as e:
     redis_nodb_cache_client = None
 
 try:
-    redis_status_pool = redis.ConnectionPool(
-        host=REDIS_HOST, port=6379, db=REDIS_NODB_CACHE_DB, 
-        decode_responses=True, max_connections=50
+    pool_kwargs = redis_connection_kwargs(
+        RedisDB.STATUS,
+        decode_responses=True,
+        extra={"max_connections": 50},
     )
+    redis_status_pool = redis.ConnectionPool(**pool_kwargs)
     redis_status_client = redis.StrictRedis(connection_pool=redis_status_pool)
     redis_status_client.ping()
 except Exception as e:
@@ -157,10 +169,12 @@ except Exception as e:
     redis_status_client = None
 
 try:
-    redis_lock_pool = redis.ConnectionPool(
-        host=REDIS_HOST, port=6379, db=REDIS_LOCK_DB, 
-        decode_responses=True, max_connections=50
+    pool_kwargs = redis_connection_kwargs(
+        RedisDB.LOCK,
+        decode_responses=True,
+        extra={"max_connections": 50},
     )
+    redis_lock_pool = redis.ConnectionPool(**pool_kwargs)
     redis_lock_client = redis.StrictRedis(connection_pool=redis_lock_pool)
     redis_lock_client.ping()
 except Exception as e:
@@ -168,10 +182,12 @@ except Exception as e:
     redis_lock_client = None
 
 try:
-    redis_log_level_pool = redis.ConnectionPool(
-        host=REDIS_HOST, port=6379, db=REDIS_LOG_LEVEL_DB, 
-        decode_responses=True, max_connections=50
+    pool_kwargs = redis_connection_kwargs(
+        RedisDB.LOG_LEVEL,
+        decode_responses=True,
+        extra={"max_connections": 50},
     )
+    redis_log_level_pool = redis.ConnectionPool(**pool_kwargs)
     redis_log_level_client = redis.StrictRedis(connection_pool=redis_log_level_pool)
     redis_log_level_client.ping()
 except Exception as e:

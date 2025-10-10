@@ -12,8 +12,11 @@ import time
 from functools import wraps
 from subprocess import Popen, PIPE, call
 
-import redis
 from rq import Queue, get_current_job
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_host,
+)
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -32,8 +35,8 @@ except:
 
 _hostname = socket.gethostname()
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-RQ_DB = 9
+REDIS_HOST = redis_host()
+RQ_DB = int(RedisDB.RQ)
 
 TIMEOUT = 43_200
 

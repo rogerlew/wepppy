@@ -11,6 +11,11 @@ import json
 import traceback
 
 import redis
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+    redis_host,
+)
 
 import rq
 from rq import Worker, Queue
@@ -26,8 +31,8 @@ _thisdir = os.path.dirname(__file__)
 
 load_dotenv(_join(_thisdir, '.env'))
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-RQ_DB = 9
+REDIS_HOST = redis_host()
+RQ_DB = int(RedisDB.RQ)
 
 DEFAULT_RESULT_TTL = 604_800  # 1 week
 
@@ -97,9 +102,15 @@ class WepppyRqWorker(Worker):
 
 def start_worker():
     from redis import Connection as RedisConnection
-    with RedisConnection(redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB)):
-        qs = [Queue('high'), Queue('default'), Queue('low')]
-        w = WepppyRqWorker(qs)
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    redis_conn = redis.Redis(**conn_kwargs)
+    with RedisConnection(redis_conn):
+        qs = [
+            Queue('high', connection=redis_conn),
+            Queue('default', connection=redis_conn),
+            Queue('low', connection=redis_conn),
+        ]
+        w = WepppyRqWorker(qs, connection=redis_conn)
         w.work()
 
 

@@ -8,6 +8,11 @@ from typing import Any, Dict, List, Optional
 
 import redis
 from rq import Queue, get_current_job
+from wepppy.config.redis_settings import (
+    RedisDB,
+    redis_connection_kwargs,
+    redis_host,
+)
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -28,8 +33,8 @@ except Exception:
 
 _hostname = socket.gethostname()
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-RQ_DB = 9
+REDIS_HOST = redis_host()
+RQ_DB = int(RedisDB.RQ)
 
 TIMEOUT = 43_200
 
@@ -331,7 +336,8 @@ def run_omni_scenarios_rq(runid: str):
         stage1_jobs = []
         stage2_jobs = []
 
-        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
 
             for task in stage1_tasks:
