@@ -4,7 +4,7 @@ x-wepppy-service: &wepppy-service
     dockerfile: docker/Dockerfile
   image: wepppy-dev
   init: true
-  user: "${UID:-1000}:${GID:-1000}"
+  user: "${UID:-33}:${GID:-993}"
   working_dir: /workdir/wepppy
   environment:
     PYTHONUNBUFFERED: "1"
@@ -21,8 +21,9 @@ x-wepppy-service: &wepppy-service
     - ../../peridot:/workdir/peridot
     - ../../whitebox-tools:/workdir/whitebox-tools
     - ../../wepppyo3:/workdir/wepppyo3
-    - /wc1:/wc1
-    - /home/geodata:/geodata
+    - ${WC1_DIR}:/wc1
+    - ${GEODATA_DIR}:/geodata
+    - /var/run/docker.sock:/var/run/docker.sock
 
 services:
   weppcloud:
@@ -239,6 +240,26 @@ services:
         tail -f /dev/null
     profiles: ["webpush"]
 
+  f-esri:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.f-esri
+    image: wepppy-f-esri
+    container_name: wepppy-f-esri
+    init: true
+    user: "${UID:-33}:${GID:-993}"
+    working_dir: /workdir/wepppy
+    command: ["tail", "-f", "/dev/null"]
+    volumes:
+      - ../:/workdir/wepppy
+      - ../../wepppy2:/workdir/wepppy2
+      - ../../rosetta:/workdir/rosetta
+      - ../../peridot:/workdir/peridot
+      - ../../whitebox-tools:/workdir/whitebox-tools
+      - ../../wepppyo3:/workdir/wepppyo3
+      - ${WC1_DIR}:/wc1
+      - ${GEODATA_DIR}:/geodata
+
   redis:
     image: redis:7.4.6
     container_name: wepppy-redis
@@ -272,6 +293,7 @@ services:
       - "8080:8080"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
     depends_on:
       - weppcloud
       - status

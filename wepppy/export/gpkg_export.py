@@ -15,16 +15,7 @@ from pandas.core.series import Series
 from collections import namedtuple
 
 from wepppy.nodb.core import Soils
-
-
-try:
-    import f_esri
-except ImportError:
-    class FEsri:
-        @staticmethod
-        def has_f_esri():
-            return False
-    f_esri = FEsri()
+from wepppy import f_esri
     
 
 def esri_compatible_colnames(df):
@@ -277,18 +268,8 @@ def gpkg_export(wd: str):
 
     if f_esri.has_f_esri():
         if _exists(gdb_fn):
-            try:
-                _chown_and_rmtree(gdb_fn)
-                f_esri.gpkg_to_gdb(gpkg_fn, gdb_fn, user='www-data', group='webgroup')
-                _chown(gdb_fn)
-            except:
-                pass
-        else:
-            try:
-                f_esri.gpkg_to_gdb(gpkg_fn, gdb_fn, user='www-data', group='webgroup')
-                _chown(gdb_fn)
-            except:
-                pass
+            _chown_and_rmtree(gdb_fn)
+        f_esri.c2c_gpkg_to_gdb(gpkg_fn, gdb_fn)
         
 def _chown(dir_path):
     assert os.path.isdir(dir_path), f"{dir_path} is not a directory"
