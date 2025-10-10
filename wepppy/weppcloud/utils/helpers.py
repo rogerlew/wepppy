@@ -90,11 +90,8 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
         # If not found, fall back to the prefixed, partitioned locations
         if not _exists(path):
             prefix = runid[:2]
-            if _hostname.startswith('forest'):
-                path = _join('/wc1/runs', prefix, runid)
-            else:
-                path = _join('/geodata/wc1/runs', prefix, runid)
-
+            path = _join('/wc1/runs', prefix, runid)
+            
     if context_override:
         path = context_override
 
