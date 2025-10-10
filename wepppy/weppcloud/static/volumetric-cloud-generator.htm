@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volumetric Cloud Logo Generator</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            margin: 0;
+            background: #ffffff;
+            color: #1f1f1f;
+        }
+        header {
+            padding: 1.5rem 2rem 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+        header p {
+            margin: 0.35rem 0 0;
+            max-width: 48rem;
+            line-height: 1.5;
+            color: #4a4a4a;
+        }
+        main {
+            display: grid;
+            gap: 1.5rem;
+            padding: 1.5rem 2rem 3rem;
+            grid-template-columns: minmax(18rem, 24rem) minmax(20rem, 1fr);
+            align-items: start;
+        }
+        section {
+            background: #fafafa;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+        }
+        h2 {
+            margin: 0 0 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d2d2d;
+        }
+        canvas.preview {
+            width: 128px;
+            height: 128px;
+            image-rendering: pixelated;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            background: #ffffff;
+            display: block;
+            margin: 0 auto 0.75rem;
+        }
+        .preview-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 0 auto 0.75rem;
+            max-width: 16rem;
+        }
+        .preview-controls label {
+            font-size: 0.78rem;
+            color: #3a3a3a;
+            white-space: nowrap;
+        }
+        .preview-controls input[type="range"] {
+            flex: 1 1 auto;
+            max-width: 10rem;
+        }
+        .preview-controls span {
+            font-size: 0.78rem;
+            font-variant-numeric: tabular-nums;
+            color: #333;
+            min-width: 2.4rem;
+            text-align: right;
+        }
+        .status {
+            font-size: 0.85rem;
+            color: #444;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        textarea {
+            width: 100%;
+            min-height: 7rem;
+            font-family: "Cascadia Code", "Fira Code", Menlo, monospace;
+            font-size: 0.75rem;
+            color: #2f2f2f;
+            background: #fff;
+            border: 1px solid #d3d3d3;
+            border-radius: 6px;
+            padding: 0.65rem 0.75rem;
+            resize: vertical;
+        }
+        .controls {
+            display: grid;
+            gap: 0.75rem;
+        }
+        .control-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(6rem, 1fr));
+            gap: 0.6rem;
+            align-items: center;
+        }
+        .control-row label {
+            font-size: 0.82rem;
+            color: #333;
+        }
+        .control-row input[type="number"],
+        .control-row input[type="range"] {
+            width: 100%;
+        }
+        input[type="number"] {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.45rem;
+            border: 1px solid #cfcfcf;
+            border-radius: 6px;
+            background: #fff;
+        }
+        input[type="range"] {
+            accent-color: #0078d4;
+        }
+        .control-row span.value {
+            justify-self: end;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.8rem;
+            color: #555;
+        }
+        .two-column {
+            grid-template-columns: minmax(0, 1fr) auto;
+        }
+        .cluster {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        button {
+            border: none;
+            border-radius: 999px;
+            background: #0078d4;
+            color: #fff;
+            padding: 0.45rem 1.05rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        button.secondary {
+            background: #efefef;
+            color: #1f1f1f;
+            border: 1px solid #d5d5d5;
+        }
+        button:hover {
+            background: #005fa3;
+        }
+        button.secondary:hover {
+            background: #e0e0e0;
+        }
+        .notes {
+            list-style: disc;
+            margin: 0.35rem 0 0 1.25rem;
+            padding: 0;
+            color: #444;
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+        .inline-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.82rem;
+            color: #333;
+        }
+        footer {
+            padding: 0.75rem 2rem 2rem;
+            font-size: 0.8rem;
+            color: #656565;
+            line-height: 1.5;
+        }
+        @media (max-width: 960px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Volumetric Cloud Logo Generator</h1>
+        <p>
+            This page experiments with a Blender-inspired volumetric workflow that layers stochastic “puff” particles
+            inside an implicit base mesh, filters them into a density grid, and then ray-marches the result into a 64×64
+            grayscale sprite. Each export is returned as a base64-encoded PNG that keeps a white field with subdued,
+            darker cloud forms for low-contrast UI applications.
+        </p>
+    </header>
+    <main>
+        <section>
+            <h2>Preview &amp; Export</h2>
+            <canvas id="cloudPreview" class="preview" width="128" height="128"></canvas>
+            <div class="status">
+                <span>Seed <strong id="seedEcho">–</strong></span> ·
+                <span>Density Peak <strong id="peakEcho">–</strong></span> ·
+                <span>Base64 bytes <strong id="lengthEcho">–</strong></span>
+            </div>
+            <div class="preview-controls">
+                <label for="zoomInput">Preview zoom</label>
+                <input id="zoomInput" type="range" min="1" max="6" step="1" value="2">
+                <span id="zoomValue">2×</span>
+            </div>
+            <div class="cluster" style="justify-content:center; margin-bottom:0.75rem;">
+                <button id="renderButton">Render Cloud</button>
+                <button id="seedButton" class="secondary">Randomize Seed</button>
+            </div>
+            <label for="base64Output" style="display:block; font-size:0.82rem; margin-bottom:0.35rem; color:#333;">
+                64×64 PNG (base64):
+            </label>
+            <textarea id="base64Output" readonly></textarea>
+        </section>
+
+        <section>
+            <h2>Generation Parameters</h2>
+            <div class="controls">
+                <div class="control-row two-column">
+                    <label for="seedInput">Seed</label>
+                    <input id="seedInput" type="number" step="1" min="0" value="0">
+                </div>
+                <div class="control-row">
+                    <label for="detailInput">Detail passes</label>
+                    <input id="detailInput" type="range" min="1" max="6" step="1" value="3">
+                    <span class="value" id="detailValue">3</span>
+                </div>
+                <div class="control-row">
+                    <label for="puffInput">Puffs / pass</label>
+                    <input id="puffInput" type="range" min="2" max="90" step="2" value="36">
+                    <span class="value" id="puffValue">36</span>
+                </div>
+                <div class="control-row two-column">
+                    <label for="densityInput">Volume density</label>
+                    <input id="densityInput" type="number" min="0.1" max="3" step="0.05" value="1.2">
+                </div>
+                <div class="control-row two-column">
+                    <label for="softnessInput">Softness (blur passes)</label>
+                    <input id="softnessInput" type="number" min="0" max="4" step="1" value="2">
+                </div>
+                <div class="control-row">
+                    <label for="scaleInput">Cloud scale</label>
+                    <input id="scaleInput" type="range" min="0.35" max="1.15" step="0.05" value="0.45">
+                    <span class="value" id="scaleValue">0.45×</span>
+                </div>
+                <div class="control-row">
+                    <label for="contrastInput">Display contrast</label>
+                    <input id="contrastInput" type="range" min="0.2" max="0.8" step="0.05" value="0.45">
+                    <span class="value" id="contrastValue">0.45</span>
+                </div>
+                <div class="control-row two-column">
+                    <label>Distribution (XYZ)</label>
+                    <div class="cluster">
+                        <input id="distX" type="number" min="0.5" max="2.5" step="0.1" value="1.5" title="Width">
+                        <input id="distY" type="number" min="0.5" max="2.5" step="0.1" value="1.0" title="Height">
+                        <input id="distZ" type="number" min="0.5" max="2.5" step="0.1" value="1.3" title="Depth">
+                    </div>
+                </div>
+                <div class="control-row two-column">
+                    <label>Debug overlay</label>
+                    <label class="inline-toggle">
+                        <input id="meshToggle" type="checkbox">
+                        Show underlying mesh &amp; puff anchors
+                    </label>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        Notes:
+        <ul class="notes">
+            <li>Detail raises the number of particle passes. Each pass scatters new puff seeds, shrinks them slightly, and nests extra fine structure.</li>
+            <li>Distribution stretches the ellipsoidal base mesh before voxelisation, matching Blender’s “cloud box” concept.</li>
+            <li>The export stays intentionally low-contrast (white background, darker core between ~70–100% luminance) to favor UI logos.</li>
+            <li>Cloud scale trims the ellipsoidal volume so the rendered sprite keeps generous white margins; push it higher if you prefer edge-to-edge coverage.</li>
+            <li>Mesh overlay sketches the projected base ellipsoid and puff anchor locations; it does not affect the exported texture.</li>
+        </ul>
+    </footer>
+
+    <script>
+        (function () {
+            "use strict";
+
+            const WIDTH = 64;
+            const HEIGHT = 64;
+            const GRID_SIZE = 32;
+            const RAY_STEPS = 48;
+            const FRONT_TO_BACK = true;
+
+            const hiddenCanvas = document.createElement("canvas");
+            hiddenCanvas.width = WIDTH;
+            hiddenCanvas.height = HEIGHT;
+            const hiddenCtx = hiddenCanvas.getContext("2d");
+
+            const previewCanvas = document.getElementById("cloudPreview");
+            let previewCtx = previewCanvas.getContext("2d");
+            previewCtx.imageSmoothingEnabled = false;
+
+            const seedInput = document.getElementById("seedInput");
+            const detailInput = document.getElementById("detailInput");
+            const puffInput = document.getElementById("puffInput");
+            const densityInput = document.getElementById("densityInput");
+            const softnessInput = document.getElementById("softnessInput");
+            const scaleInput = document.getElementById("scaleInput");
+            const contrastInput = document.getElementById("contrastInput");
+            const meshToggle = document.getElementById("meshToggle");
+            const distX = document.getElementById("distX");
+            const distY = document.getElementById("distY");
+            const distZ = document.getElementById("distZ");
+            const detailValue = document.getElementById("detailValue");
+            const puffValue = document.getElementById("puffValue");
+            const scaleValue = document.getElementById("scaleValue");
+            const contrastValue = document.getElementById("contrastValue");
+
+            const base64Output = document.getElementById("base64Output");
+            const seedEcho = document.getElementById("seedEcho");
+            const peakEcho = document.getElementById("peakEcho");
+            const lengthEcho = document.getElementById("lengthEcho");
+            const renderButton = document.getElementById("renderButton");
+            const seedButton = document.getElementById("seedButton");
+            const zoomInput = document.getElementById("zoomInput");
+            const zoomValue = document.getElementById("zoomValue");
+
+            detailInput.addEventListener("input", () => {
+                detailValue.textContent = detailInput.value;
+            });
+            puffInput.addEventListener("input", () => {
+                puffValue.textContent = puffInput.value;
+            });
+            if (scaleInput) {
+                scaleInput.addEventListener("input", () => {
+                    scaleValue.textContent = Number.parseFloat(scaleInput.value).toFixed(2) + "×";
+                });
+            }
+            contrastInput.addEventListener("input", () => {
+                contrastValue.textContent = Number.parseFloat(contrastInput.value).toFixed(2);
+            });
+
+            meshToggle.addEventListener("change", () => {
+                drawPreview(lastRender);
+            });
+
+            renderButton.addEventListener("click", () => {
+                generate();
+            });
+
+            seedButton.addEventListener("click", () => {
+                seedInput.value = String(Math.floor(Math.random() * 1e9));
+                generate();
+            });
+
+            if (zoomInput) {
+                zoomInput.addEventListener("input", () => {
+                    const factor = Number.parseInt(zoomInput.value, 10) || 1;
+                    if (zoomValue) {
+                        zoomValue.textContent = factor + "×";
+                    }
+                    applyZoom(factor);
+                });
+            }
+
+            const autoInputs = [
+                detailInput,
+                puffInput,
+                densityInput,
+                softnessInput,
+                scaleInput,
+                contrastInput,
+                distX,
+                distY,
+                distZ
+            ];
+
+            autoInputs.forEach((input) => {
+                input.addEventListener("change", generate);
+                input.addEventListener("input", () => {
+                    if (input === contrastInput) {
+                        contrastValue.textContent = Number.parseFloat(input.value).toFixed(2);
+                    }
+                    if (input === detailInput) {
+                        detailValue.textContent = input.value;
+                    }
+                    if (input === puffInput) {
+                        puffValue.textContent = input.value;
+                    }
+                    if (input === scaleInput) {
+                        scaleValue.textContent = Number.parseFloat(input.value).toFixed(2) + "×";
+                    }
+                });
+            });
+
+            let lastRender = null;
+
+            function applyZoom(rawFactor) {
+                const factor = clamp(Math.round(rawFactor), 1, 6);
+                const scaledWidth = WIDTH * factor;
+                const scaledHeight = HEIGHT * factor;
+                previewCanvas.width = scaledWidth;
+                previewCanvas.height = scaledHeight;
+                previewCanvas.style.width = scaledWidth + "px";
+                previewCanvas.style.height = scaledHeight + "px";
+                previewCtx = previewCanvas.getContext("2d");
+                previewCtx.imageSmoothingEnabled = false;
+                drawPreview(lastRender);
+            }
+
+            function generate() {
+                const settings = readSettings();
+                const volumeResult = buildVolume(settings);
+                const renderResult = renderVolume(volumeResult, settings);
+                updateOutputs(renderResult);
+                lastRender = {
+                    renderResult,
+                    settings,
+                    volumeMeta: volumeResult.meta
+                };
+                drawPreview(lastRender);
+            }
+
+            function readSettings() {
+                const seedValue = Number.parseInt(seedInput.value, 10);
+                const seed = Number.isFinite(seedValue) ? seedValue : Math.floor(Math.random() * 1e9);
+                return {
+                    seed,
+                    detail: Number.parseInt(detailInput.value, 10),
+                    puffsPerPass: Number.parseInt(puffInput.value, 10),
+                    volumeDensity: Number.parseFloat(densityInput.value),
+                    softness: Math.max(0, Number.parseInt(softnessInput.value, 10)),
+                    contrast: Number.parseFloat(contrastInput.value),
+                    cloudScale: clamp(Number.parseFloat(scaleInput.value), 0.35, 1.15),
+                    distribution: {
+                        x: clamp(Number.parseFloat(distX.value), 0.5, 2.5),
+                        y: clamp(Number.parseFloat(distY.value), 0.5, 2.5),
+                        z: clamp(Number.parseFloat(distZ.value), 0.5, 2.5)
+                    }
+                };
+            }
+
+            function clamp(value, min, max) {
+                return Math.min(Math.max(value, min), max);
+            }
+
+            function innerDistributionOf(base, scale) {
+                const safeScale = Math.max(0, scale);
+                return {
+                    x: base.x * safeScale,
+                    y: base.y * safeScale,
+                    z: base.z * safeScale
+                };
+            }
+
+            function createRng(seed) {
+                let state = seed >>> 0;
+                if (state === 0) {
+                    state = 0x6d2b79f5;
+                }
+                return function rng() {
+                    state += 0x6d2b79f5;
+                    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+                    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+                    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+                };
+            }
+
+            function buildVolume(settings) {
+                const {
+                    distribution: baseDistribution,
+                    detail,
+                    puffsPerPass,
+                    volumeDensity,
+                    softness,
+                    cloudScale
+                } = settings;
+                const innerDistribution = innerDistributionOf(baseDistribution, cloudScale);
+                const halfX = baseDistribution.x;
+                const halfY = baseDistribution.y;
+                const halfZ = baseDistribution.z;
+                const spanX = halfX * 2;
+                const spanY = halfY * 2;
+                const spanZ = halfZ * 2;
+
+                const spacingX = spanX / (GRID_SIZE - 1);
+                const spacingY = spanY / (GRID_SIZE - 1);
+                const spacingZ = spanZ / (GRID_SIZE - 1);
+
+                const volume = new Float32Array(GRID_SIZE * GRID_SIZE * GRID_SIZE);
+                const rng = createRng(settings.seed);
+
+                const puffRecords = [];
+
+                const baseShellScale = Math.min(1.3, 0.4 + cloudScale * 0.8);
+
+                // Base ellipsoidal mesh falloff
+                for (let z = 0; z < GRID_SIZE; z++) {
+                    const worldZ = -halfZ + z * spacingZ;
+                    const normZ = worldZ / halfZ;
+                    for (let y = 0; y < GRID_SIZE; y++) {
+                        const worldY = -halfY + y * spacingY;
+                        const normY = worldY / halfY;
+                        for (let x = 0; x < GRID_SIZE; x++) {
+                            const worldX = -halfX + x * spacingX;
+                            const normX = worldX / halfX;
+                            const inside = normX * normX + normY * normY + normZ * normZ;
+                            if (inside <= 1) {
+                                const softnessBias = Math.pow(1 - inside, 1.4);
+                                const idx = x + y * GRID_SIZE + z * GRID_SIZE * GRID_SIZE;
+                                volume[idx] = softnessBias * 0.45 * baseShellScale;
+                            }
+                        }
+                    }
+                }
+
+                const minAxis = Math.min(halfX, halfY, halfZ);
+                const maxAxis = Math.max(halfX, halfY, halfZ);
+                const baseRadius = minAxis * 0.6;
+
+                // Scatter puff particles
+                for (let pass = 0; pass < detail; pass++) {
+                    const passRatio = pass / Math.max(1, detail - 1);
+                    const passRadiusScale = 1 - passRatio * 0.55;
+                    const passDensityScale = 1 + passRatio * 0.35;
+                    const passCount = Math.max(1, Math.round(puffsPerPass * (1 + passRatio * 0.2)));
+                    for (let p = 0; p < passCount; p++) {
+                        const rawCenter = randomPointInEllipsoid(rng, halfX, halfY, halfZ);
+                        const center = {
+                            x: clamp(rawCenter.x * cloudScale, -halfX * 0.98, halfX * 0.98),
+                            y: clamp(rawCenter.y * cloudScale, -halfY * 0.98, halfY * 0.98),
+                            z: clamp(rawCenter.z * cloudScale, -halfZ * 0.98, halfZ * 0.98)
+                        };
+                        const sizeBias = Math.min(1.35, 0.55 + cloudScale * 0.65);
+                        const puffRadius = baseRadius * passRadiusScale * (0.65 + rng() * 0.55) * sizeBias;
+                        const puffScale = {
+                            x: puffRadius * (0.85 + rng() * 0.3),
+                            y: puffRadius * (0.75 + rng() * 0.4),
+                            z: puffRadius * (0.9 + rng() * 0.3)
+                        };
+                        const amplitudeScale = Math.min(1.4, 0.65 + cloudScale * 0.5);
+                        const amplitude = 0.35 * volumeDensity * passDensityScale * (0.7 + rng() * 0.6) * amplitudeScale;
+                        puffRecords.push({
+                            center,
+                            radius: puffRadius,
+                            amplitude
+                        });
+                        addGaussianPuff(volume, center, puffScale, amplitude, spacingX, spacingY, spacingZ, halfX, halfY, halfZ);
+                    }
+                }
+
+                // VDB-style diffusion to smooth densities
+                if (softness > 0) {
+                    const tmp = new Float32Array(volume.length);
+                    for (let iter = 0; iter < softness; iter++) {
+                        blurVolume(volume, tmp);
+                    }
+                }
+
+                const { maxDensity, avgDensity } = summariseVolume(volume);
+
+                return {
+                    volume,
+                    spacing: { x: spacingX, y: spacingY, z: spacingZ },
+                    meta: {
+                        maxDensity,
+                        avgDensity,
+                        puffRecords,
+                        innerDistribution,
+                        baseDistribution,
+                        scale: cloudScale,
+                        minAxis,
+                        maxAxis
+                    }
+                };
+            }
+
+            function index3D(x, y, z) {
+                return x + y * GRID_SIZE + z * GRID_SIZE * GRID_SIZE;
+            }
+
+            function addGaussianPuff(volume, center, scale, amplitude, spacingX, spacingY, spacingZ, halfX, halfY, halfZ) {
+                const radius = Math.max(scale.x, scale.y, scale.z);
+                const minWorld = {
+                    x: center.x - radius,
+                    y: center.y - radius,
+                    z: center.z - radius
+                };
+                const maxWorld = {
+                    x: center.x + radius,
+                    y: center.y + radius,
+                    z: center.z + radius
+                };
+
+                const minX = Math.max(0, Math.floor((minWorld.x + halfX) / spacingX));
+                const maxX = Math.min(GRID_SIZE - 1, Math.ceil((maxWorld.x + halfX) / spacingX));
+                const minY = Math.max(0, Math.floor((minWorld.y + halfY) / spacingY));
+                const maxY = Math.min(GRID_SIZE - 1, Math.ceil((maxWorld.y + halfY) / spacingY));
+                const minZ = Math.max(0, Math.floor((minWorld.z + halfZ) / spacingZ));
+                const maxZ = Math.min(GRID_SIZE - 1, Math.ceil((maxWorld.z + halfZ) / spacingZ));
+
+                const invScaleX = 1 / Math.max(scale.x, 0.0001);
+                const invScaleY = 1 / Math.max(scale.y, 0.0001);
+                const invScaleZ = 1 / Math.max(scale.z, 0.0001);
+
+                for (let z = minZ; z <= maxZ; z++) {
+                    const worldZ = -halfZ + z * spacingZ;
+                    const dz = (worldZ - center.z) * invScaleZ;
+                    const dz2 = dz * dz;
+                    for (let y = minY; y <= maxY; y++) {
+                        const worldY = -halfY + y * spacingY;
+                        const dy = (worldY - center.y) * invScaleY;
+                        const dy2 = dy * dy;
+                        for (let x = minX; x <= maxX; x++) {
+                            const worldX = -halfX + x * spacingX;
+                            const dx = (worldX - center.x) * invScaleX;
+                            const dist2 = dx * dx + dy2 + dz2;
+                            if (dist2 <= 9) {
+                                const weight = Math.exp(-dist2 * 0.8);
+                                const idx = index3D(x, y, z);
+                                volume[idx] += amplitude * weight;
+                            }
+                        }
+                    }
+                }
+            }
+
+            function blurVolume(volume, scratch) {
+                scratch.fill(0);
+                for (let z = 0; z < GRID_SIZE; z++) {
+                    for (let y = 0; y < GRID_SIZE; y++) {
+                        for (let x = 0; x < GRID_SIZE; x++) {
+                            let accum = 0;
+                            let weight = 0;
+                            for (let dz = -1; dz <= 1; dz++) {
+                                const nz = z + dz;
+                                if (nz < 0 || nz >= GRID_SIZE) continue;
+                                for (let dy = -1; dy <= 1; dy++) {
+                                    const ny = y + dy;
+                                    if (ny < 0 || ny >= GRID_SIZE) continue;
+                                    for (let dx = -1; dx <= 1; dx++) {
+                                        const nx = x + dx;
+                                        if (nx < 0 || nx >= GRID_SIZE) continue;
+                                        const idx = index3D(nx, ny, nz);
+                                        accum += volume[idx];
+                                        weight++;
+                                    }
+                                }
+                            }
+                            const targetIdx = index3D(x, y, z);
+                            scratch[targetIdx] = accum / Math.max(1, weight);
+                        }
+                    }
+                }
+                volume.set(scratch);
+            }
+
+            function summariseVolume(volume) {
+                let max = 0;
+                let sum = 0;
+                for (let i = 0; i < volume.length; i++) {
+                    const v = volume[i];
+                    if (v > max) max = v;
+                    sum += v;
+                }
+                return {
+                    maxDensity: max,
+                    avgDensity: sum / volume.length
+                };
+            }
+
+            function randomPointInEllipsoid(rng, halfX, halfY, halfZ) {
+                // Rejection sampling inside unit sphere then scale to ellipsoid axes.
+                for (let i = 0; i < 12; i++) {
+                    const x = rng() * 2 - 1;
+                    const y = rng() * 2 - 1;
+                    const z = rng() * 2 - 1;
+                    if (x * x + y * y + z * z <= 1) {
+                        return {
+                            x: x * halfX,
+                            y: y * halfY,
+                            z: z * halfZ
+                        };
+                    }
+                }
+                return {
+                    x: 0,
+                    y: 0,
+                    z: 0
+                };
+            }
+
+            function renderVolume(volumeResult, settings) {
+                const { volume, spacing, meta } = volumeResult;
+                const { distribution: baseDistribution, contrast } = settings;
+                const distribution = baseDistribution;
+                const densityScale = settings.volumeDensity * 0.65;
+                const halfZ = distribution.z;
+                const rayStep = (halfZ * 2) / RAY_STEPS;
+                const imageData = hiddenCtx.createImageData(WIDTH, HEIGHT);
+                const data = imageData.data;
+
+                for (let py = 0; py < HEIGHT; py++) {
+                    const v = (py + 0.5) / HEIGHT;
+                    const worldY = lerp(-distribution.y, distribution.y, v);
+                    for (let px = 0; px < WIDTH; px++) {
+                        const u = (px + 0.5) / WIDTH;
+                        const worldX = lerp(-distribution.x, distribution.x, u);
+                        let transmittance = 1.0;
+                        let lightAccum = 0.0;
+                        const renderRng = createRng(settings.seed ^ 0x9e3779b9 ^ (px * 131 + py * 17));
+                        for (let step = 0; step < RAY_STEPS; step++) {
+                            const t = FRONT_TO_BACK ? step : (RAY_STEPS - 1 - step);
+                            const worldZ = distribution.z - (t + 0.5) * rayStep;
+                            const density = sampleVolume(volume, worldX, worldY, worldZ, distribution, spacing);
+                            if (density <= 0) {
+                                continue;
+                            }
+                            const attenuation = Math.exp(-density * densityScale * rayStep);
+                            const contribution = transmittance * (1 - attenuation);
+                            lightAccum += contribution;
+                            transmittance *= attenuation;
+                            if (transmittance < 0.01) {
+                                break;
+                            }
+                        }
+                        const baseLuma = 1.0;
+                        const minLuma = 0.68;
+                        const shaded = baseLuma - clamp(lightAccum * contrast, 0, baseLuma - minLuma);
+                        const grain = (renderRng() * 0.015) - 0.0075;
+                        const finalValue = clamp(shaded + grain, minLuma, 1.0);
+                        const channel = Math.round(finalValue * 255);
+                        const idx = (py * WIDTH + px) * 4;
+                        data[idx] = channel;
+                        data[idx + 1] = channel;
+                        data[idx + 2] = channel;
+                        data[idx + 3] = 255;
+                    }
+                }
+
+                hiddenCtx.putImageData(imageData, 0, 0);
+
+                return {
+                    base64: hiddenCanvas.toDataURL("image/png"),
+                    maxDensity: meta.maxDensity,
+                    imageData
+                };
+            }
+
+            function sampleVolume(volume, worldX, worldY, worldZ, distribution, spacing) {
+                if (worldX < -distribution.x || worldX > distribution.x) return 0;
+                if (worldY < -distribution.y || worldY > distribution.y) return 0;
+                if (worldZ < -distribution.z || worldZ > distribution.z) return 0;
+
+                const fx = (worldX + distribution.x) / spacing.x;
+                const fy = (worldY + distribution.y) / spacing.y;
+                const fz = (worldZ + distribution.z) / spacing.z;
+
+                const x0 = Math.floor(fx);
+                const y0 = Math.floor(fy);
+                const z0 = Math.floor(fz);
+
+                const x1 = clamp(x0 + 1, 0, GRID_SIZE - 1);
+                const y1 = clamp(y0 + 1, 0, GRID_SIZE - 1);
+                const z1 = clamp(z0 + 1, 0, GRID_SIZE - 1);
+
+                const tx = fx - x0;
+                const ty = fy - y0;
+                const tz = fz - z0;
+
+                const c000 = getVolume(volume, x0, y0, z0);
+                const c100 = getVolume(volume, x1, y0, z0);
+                const c010 = getVolume(volume, x0, y1, z0);
+                const c110 = getVolume(volume, x1, y1, z0);
+                const c001 = getVolume(volume, x0, y0, z1);
+                const c101 = getVolume(volume, x1, y0, z1);
+                const c011 = getVolume(volume, x0, y1, z1);
+                const c111 = getVolume(volume, x1, y1, z1);
+
+                const c00 = lerp(c000, c100, tx);
+                const c01 = lerp(c001, c101, tx);
+                const c10 = lerp(c010, c110, tx);
+                const c11 = lerp(c011, c111, tx);
+
+                const c0 = lerp(c00, c10, ty);
+                const c1 = lerp(c01, c11, ty);
+
+                return lerp(c0, c1, tz);
+            }
+
+            function getVolume(volume, x, y, z) {
+                if (x < 0 || x >= GRID_SIZE) return 0;
+                if (y < 0 || y >= GRID_SIZE) return 0;
+                if (z < 0 || z >= GRID_SIZE) return 0;
+                return volume[index3D(x, y, z)];
+            }
+
+            function lerp(a, b, t) {
+                return a + (b - a) * t;
+            }
+
+            function updateOutputs(renderResult) {
+                base64Output.value = renderResult.base64;
+                seedEcho.textContent = seedInput.value || "–";
+                peakEcho.textContent = Number.isFinite(renderResult.maxDensity)
+                    ? renderResult.maxDensity.toFixed(2)
+                    : "–";
+                lengthEcho.textContent = renderResult.base64.length;
+            }
+
+            function drawPreview(payload) {
+                if (!payload) return;
+                const { renderResult, settings, volumeMeta } = payload;
+                const baseDistribution = volumeMeta?.baseDistribution || settings.distribution;
+                const cloudDistribution = volumeMeta?.innerDistribution || innerDistributionOf(settings.distribution, settings.cloudScale);
+                previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                previewCtx.drawImage(hiddenCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+
+                if (meshToggle.checked && volumeMeta) {
+                    previewCtx.save();
+                    previewCtx.lineWidth = 1.5;
+                    const baseRadiusX = previewCanvas.width * 0.5 * 0.95;
+                    const baseRadiusY = previewCanvas.height * 0.5 * 0.95;
+                    const safeBaseX = Math.max(baseDistribution.x, 0.0001);
+                    const safeBaseY = Math.max(baseDistribution.y, 0.0001);
+                    const cloudRadiusX = baseRadiusX * clamp(cloudDistribution.x / safeBaseX, 0, 1);
+                    const cloudRadiusY = baseRadiusY * clamp(cloudDistribution.y / safeBaseY, 0, 1);
+
+                    previewCtx.setLineDash([4, 4]);
+                    previewCtx.strokeStyle = "rgba(120, 120, 120, 0.45)";
+                    previewCtx.beginPath();
+                    previewCtx.ellipse(
+                        previewCanvas.width / 2,
+                        previewCanvas.height / 2,
+                        baseRadiusX,
+                        baseRadiusY,
+                        0,
+                        0,
+                        Math.PI * 2
+                    );
+                    previewCtx.stroke();
+
+                    previewCtx.setLineDash([6, 4]);
+                    previewCtx.strokeStyle = "rgba(255, 99, 71, 0.8)";
+                    previewCtx.beginPath();
+                    previewCtx.ellipse(
+                        previewCanvas.width / 2,
+                        previewCanvas.height / 2,
+                        cloudRadiusX,
+                        cloudRadiusY,
+                        0,
+                        0,
+                        Math.PI * 2
+                    );
+                    previewCtx.stroke();
+                    previewCtx.setLineDash([]);
+
+                    previewCtx.fillStyle = "rgba(30, 144, 255, 0.65)";
+                    const points = volumeMeta.puffRecords || [];
+                    const spanX = Math.max(baseDistribution.x * 2, 0.0001);
+                    const spanY = Math.max(baseDistribution.y * 2, 0.0001);
+                    const scaleX = previewCanvas.width / spanX;
+                    const scaleY = previewCanvas.height / spanY;
+                    for (const puff of points) {
+                        const px = clamp((puff.center.x / spanX) + 0.5, 0, 1) * previewCanvas.width;
+                        const py = clamp((puff.center.y / spanY) + 0.5, 0, 1) * previewCanvas.height;
+                        const puffRadiusPx = Math.max(2, puff.radius * (scaleX + scaleY) * 0.25);
+                        previewCtx.beginPath();
+                        previewCtx.arc(px, py, puffRadiusPx, 0, Math.PI * 2);
+                        previewCtx.globalAlpha = 0.3;
+                        previewCtx.fill();
+                        previewCtx.globalAlpha = 1;
+                        previewCtx.beginPath();
+                        previewCtx.arc(px, py, 1.5, 0, Math.PI * 2);
+                        previewCtx.fillStyle = "rgba(0, 84, 149, 0.85)";
+                        previewCtx.fill();
+                    }
+                    previewCtx.restore();
+                }
+            }
+
+            // Initialise with random seed on first load for uniqueness.
+            const initialZoom = zoomInput ? Number.parseInt(zoomInput.value, 10) || 2 : 2;
+            if (zoomValue) {
+                zoomValue.textContent = initialZoom + "×";
+            }
+            applyZoom(initialZoom);
+            if (scaleValue && scaleInput) {
+                scaleValue.textContent = Number.parseFloat(scaleInput.value).toFixed(2) + "×";
+            }
+            seedInput.value = String(Math.floor(Math.random() * 1e9));
+            generate();
+        })();
+    </script>
+</body>
+</html>
