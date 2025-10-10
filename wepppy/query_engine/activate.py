@@ -7,12 +7,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Iterable, List
 
-from wepppy.wepp.interchange import (
-    generate_interchange_documentation,
-    run_wepp_hillslope_interchange,
-    run_wepp_watershed_interchange,
-)
-
 LOGGER = logging.getLogger(__name__)
 
 SUPPORTED_EXTENSIONS: tuple[str, ...] = (
@@ -94,6 +88,12 @@ def activate_query_engine(
 
 def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
     """Generate WEPP interchange outputs when missing."""
+
+    from wepppy.wepp.interchange import (
+        generate_interchange_documentation,
+        run_wepp_hillslope_interchange,
+        run_wepp_watershed_interchange,
+    )
 
     for output_dir in base.rglob("output"):
         if output_dir.parent.name != "wepp":
