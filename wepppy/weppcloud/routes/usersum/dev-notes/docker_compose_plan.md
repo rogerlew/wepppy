@@ -7,19 +7,19 @@
 - Centralize environment via the existing project `.env` so all services inherit identical settings.
 
 ## Services (first pass)
-| Service | Purpose |
+| Service | Purpose | Port |
 | --- | --- |
-| `weppcloud` | Gunicorn/Flask primary web app + static assets |
-| `status` | Tornado WebSocket proxy for Redis status channels |
-| `preflight` | Tornado preflight microservice |
-| `browse` | Starlette File browser service |
-| `webpush` | Push notifications/webpush worker |
-| `elevationquery` | Elevation lookup microservice |
-| `wmesque` | Legacy WMESque interface (deprecated but kept for parity) |
-| `wmesque2` | WMESque v2 service |
-| `metquery` | Meteorological (MET) query service |
+| `weppcloud` | Gunicorn/Flask primary web app + static assets | 8000 |
+| `status` | Tornado WebSocket proxy for Redis status channels | 9002 |
+| `preflight` | Tornado preflight microservice | 9001 |
+| `browse` | Starlette File browser service | 9009 |
+| `webpush` | Push notifications/webpush worker | 9003 |
+| `elevationquery` | Elevation lookup microservice | 8002 |
+| `wmesque` | Legacy WMESque interface (deprecated but kept for parity) | 8003 |
+| `wmesque2` | WMESque v2 service | 8030 |
+| `metquery` | Meteorological (MET) query service | 8004 |
 | `postgres` | Application database (shared) |
-| `redis` | Redis broker/cache (if not using external instance) |
+| `redis` | Redis broker/cache (if not using external instance) | 6379 |
 | `caddy` | Reverse Proxy |
 
 > All Python services consume the same repository mount and `.env` file. Profiles can be used to toggle optional services (e.g., omit `wmesque` by default).
@@ -78,3 +78,24 @@ volumes:
 ## References
 - `wepppy/weppcloud/routes/usersum/dev-notes/redis_config_refactor.md` for central Redis configuration.
 
+## postgres database restoration - DON'T DELETE
+base) roger@wepp1:~$ sudo -u postgres psql -c "SHOW data_directory;"
+[sudo] password for roger: 
+Sorry, try again.
+[sudo] password for roger: 
+       data_directory        
+-----------------------------
+ /var/lib/postgresql/16/main
+
+
+### dump and restore database
+sudo systemctl start postgresql.service 
+pg_dump -h localhost -U wepppy -d wepppy -f /tmp/wepppy.sql
+sudo systemctl stop postgresql.service 
+docker cp /tmp/wepppy.sql wepppy-postgres:/tmp/wepppy.sql
+docker compose -f docker/docker-compose.dev.yml exec postgres \
+  psql -U wepppy -d wepppy -f /tmp/wepppy.sql
+docker compose -f docker/docker-compose.dev.yml exec postgres \
+  psql -U wepppy -d wepppy -c "ALTER USER wepppy WITH PASSWORD 'password';"
+
+  docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up 
