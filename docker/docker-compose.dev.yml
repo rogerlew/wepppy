@@ -1,0 +1,279 @@
+x-wepppy-service: &wepppy-service
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  image: wepppy-dev
+  init: true
+  user: "${UID:-1000}:${GID:-1000}"
+  working_dir: /workdir/wepppy
+  environment:
+    PYTHONUNBUFFERED: "1"
+    REDIS_URL: redis://redis:6379/0
+    REDIS_HOST: redis
+    MPLCONFIGDIR: /tmp/matplotlib
+    DATABASE_URL: ${DATABASE_URL}
+    SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
+    SITE_PREFIX: /weppcloud
+  volumes:
+    - ../:/workdir/wepppy
+    - ../../wepppy2:/workdir/wepppy2
+    - ../../rosetta:/workdir/rosetta
+    - ../../peridot:/workdir/peridot
+    - ../../whitebox-tools:/workdir/whitebox-tools
+    - ../../wepppyo3:/workdir/wepppyo3
+    - /wc1:/wc1
+    - /home/geodata:/geodata
+
+services:
+  weppcloud:
+    <<: *wepppy-service
+    container_name: weppcloud
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+    command:
+      - gunicorn
+      - --workers
+      - "4"
+      - --threads
+      - "2"
+      - --timeout
+      - "1800"
+      - --bind
+      - 0.0.0.0:8000
+      - --log-level
+      - info
+      - --reload
+      - wepppy.weppcloud.app:app
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  status:
+    <<: *wepppy-service
+    container_name: weppcloud-status
+    command:
+      - gunicorn
+      - -k
+      - tornado
+      - --workers
+      - "2"
+      - --bind
+      - 0.0.0.0:9002
+      - --log-level
+      - info
+      - --config
+      - wepppy/microservices/_service_files/status_conf.py
+      - wepppy.microservices.status:app
+    ports:
+      - "9002:9002"
+    depends_on:
+      redis:
+        condition: service_started
+
+  preflight:
+    <<: *wepppy-service
+    container_name: weppcloud-preflight
+    command:
+      - gunicorn
+      - -k
+      - tornado
+      - --workers
+      - "2"
+      - --bind
+      - 0.0.0.0:9001
+      - --log-level
+      - info
+      - --config
+      - wepppy/microservices/_service_files/preflight_conf.py
+      - wepppy.microservices.preflight:app
+    ports:
+      - "9001:9001"
+    depends_on:
+      redis:
+        condition: service_started
+
+  browse:
+    <<: *wepppy-service
+    container_name: wepppy-browse
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+    command:
+      - gunicorn
+      - --workers
+      - "3"
+      - --bind
+      - 0.0.0.0:9009
+      - --log-level
+      - info
+      - -k
+      - uvicorn.workers.UvicornWorker
+      - wepppy.microservices.browse:app
+    ports:
+      - "9009:9009"
+
+  elevationquery:
+    <<: *wepppy-service
+    container_name: wepppy-elevationquery
+    command:
+      - gunicorn
+      - --workers
+      - "2"
+      - --bind
+      - 0.0.0.0:8002
+      - --log-level
+      - info
+      - wepppy.webservices.elevationquery:app
+    profiles: ["legacy"]
+    ports:
+      - "8002:8002"
+
+  metquery:
+    <<: *wepppy-service
+    container_name: wepppy-metquery
+    command:
+      - gunicorn
+      - --workers
+      - "2"
+      - --bind
+      - 0.0.0.0:8004
+      - --log-level
+      - info
+      - wepppy.webservices.metquery:app
+    profiles: ["legacy"]
+    ports:
+      - "8004:8004"
+
+  wmesque:
+    <<: *wepppy-service
+    container_name: wepppy-wmesque
+    command:
+      - gunicorn
+      - --workers
+      - "2"
+      - --bind
+      - 0.0.0.0:8003
+      - --log-level
+      - info
+      - wepppy.webservices.wmesque:app
+    profiles: ["legacy"]
+    ports:
+      - "8003:8003"
+
+  wmesque2:
+    <<: *wepppy-service
+    container_name: wepppy-wmesque2
+    command:
+      - gunicorn
+      - --workers
+      - "4"
+      - --bind
+      - 0.0.0.0:8030
+      - --log-level
+      - info
+      - -k
+      - uvicorn.workers.UvicornWorker
+      - wepppy.webservices.wmesque2:app
+    profiles: ["legacy"]
+    ports:
+      - "8030:8030"
+
+  query-engine:
+    <<: *wepppy-service
+    container_name: wepppy-query-engine
+    command:
+      - uvicorn
+      - wepppy.query_engine.app.server:create_app
+      - --factory
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8041"
+      - --reload
+    ports:
+      - "8041:8041"
+
+  rq-worker:
+    <<: *wepppy-service
+    container_name: wepppy-rq-worker
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+    command:
+      - rq
+      - worker-pool
+      - -n
+      - "4"
+      - -u
+      - redis://redis:6379/9?socket_timeout=10&health_check_interval=30
+      - --logging-level
+      - INFO
+      - --worker-class
+      - wepppy.rq.WepppyRqWorker
+      - default
+    environment:
+      LOGLEVEL: DEBUG
+      RQ_LOGGING_LEVEL: DEBUG
+      REDIS_HOST: redis
+      MPLCONFIGDIR: /tmp/matplotlib
+    depends_on:
+      redis:
+        condition: service_started
+
+  webpush:
+    <<: *wepppy-service
+    container_name: wepppy-webpush
+    command:
+      - bash
+      - -lc
+      - |
+        echo "webpush service placeholder – update command once implementation is available.";
+        tail -f /dev/null
+    profiles: ["webpush"]
+
+  redis:
+    image: redis:7.4.6
+    container_name: wepppy-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - ../.docker-data/redis:/data
+
+  postgres:
+    image: postgres:16
+    container_name: wepppy-postgres
+    environment:
+      POSTGRES_DB: wepppy
+      POSTGRES_USER: wepppy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../.docker-data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  caddy:
+    image: caddy:2
+    container_name: wepppy-caddy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - weppcloud
+      - status
+      - preflight
+      - browse
