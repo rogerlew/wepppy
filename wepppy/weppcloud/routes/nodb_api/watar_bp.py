@@ -236,16 +236,6 @@ def query_ash_out(runid, config):
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash_by_hillslope')
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash_by_hillslope/')
 def report_ash_by_hillslope(runid, config):
-    try:
-        res = request.args.get('exclude_yr_indxs')
-        exclude_yr_indxs = []
-        for yr in res.split(','):
-            if isint(yr):
-                exclude_yr_indxs.append(int(yr))
-
-    except:
-        exclude_yr_indxs = None
-
     class_fractions = request.args.get('class_fractions', False)
     class_fractions = str(class_fractions).lower() == 'true'
 
@@ -259,7 +249,7 @@ def report_ash_by_hillslope(runid, config):
     try:
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
-        loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+        loss = Wepp.getInstance(wd).report_loss()
         ash = Ash.getInstance(wd)
         ashpost = AshPost.getInstance(wd)
 
@@ -267,7 +257,6 @@ def report_ash_by_hillslope(runid, config):
         hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
         chn_rpt = ChannelSummary(loss)
         avg_annual_years = loss.avg_annual_years
-        excluded_years = loss.excluded_years
         translator = Watershed.getInstance(wd).translator_factory()
         unitizer = Unitizer.getInstance(wd)
 
@@ -283,7 +272,6 @@ def report_ash_by_hillslope(runid, config):
                                hill_rpt=hill_rpt,
                                chn_rpt=chn_rpt,
                                avg_annual_years=avg_annual_years,
-                               excluded_years=excluded_years,
                                translator=translator,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
