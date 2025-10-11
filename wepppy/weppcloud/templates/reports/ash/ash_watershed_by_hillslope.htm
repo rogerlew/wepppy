@@ -3,7 +3,6 @@
 {% block report_content %}
 <h2>WEPP Results Summary</h2>
 <h5>Average Annual Delivery From Channel Outlet for Years {{ avg_annual_years }}
-    <!-- (excluding years {{ excluded_years }}) -->
     <a onclick="javascript:copytable('out_tbl')">
         <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
@@ -32,7 +31,6 @@
 
 <br/>
 <h5>Average Annual Summary for Subcatchments for Years {{ avg_annual_years }}
-    <!-- (excluding years {{ excluded_years }}) -->
     <a onclick="javascript:copytable('hill_tbl')">
         <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>

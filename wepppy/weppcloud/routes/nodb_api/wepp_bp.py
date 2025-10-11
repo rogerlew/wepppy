@@ -202,15 +202,6 @@ def report_wepp_run_summary(runid, config):
 def report_wepp_loss(runid, config):
     extraneous = request.args.get('extraneous', None) == 'true'
 
-    try:
-        res = request.args.get('exclude_yr_indxs')
-        exclude_yr_indxs = []
-        for yr in res.split(','):
-            if isint(yr):
-                exclude_yr_indxs.append(int(yr))
-
-    except:
-        exclude_yr_indxs = None
 
     class_fractions = request.args.get('class_fractions', False)
     class_fractions = str(class_fractions).lower() == 'true'
@@ -224,13 +215,11 @@ def report_wepp_loss(runid, config):
 
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
-    is_singlestorm = loss.is_singlestorm
+    loss = Wepp.getInstance(wd).report_loss()
+    is_singlestorm = Climate.getInstance(wd).is_single_storm
     out_rpt = OutletSummary(loss)
     hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
     chn_rpt = ChannelSummary(loss)
-    avg_annual_years = loss.avg_annual_years
-    excluded_years = loss.excluded_years
     translator = Watershed.getInstance(wd).translator_factory()
     unitizer = Unitizer.getInstance(wd)
 
@@ -239,8 +228,6 @@ def report_wepp_loss(runid, config):
                         out_rpt=out_rpt,
                         hill_rpt=hill_rpt,
                         chn_rpt=chn_rpt,
-                        avg_annual_years=avg_annual_years,
-                        excluded_years=excluded_years,
                         translator=translator,
                         unitizer_nodb=unitizer,
                         precisions=wepppy.nodb.unitizer.precisions,

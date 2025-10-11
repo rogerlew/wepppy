@@ -94,10 +94,11 @@ from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInte
 from wepppy.wepp.soils.utils import WeppSoilUtil
 
 from wepppy.wepp.out import (
-    Loss,
     Ebe,
     TotalWatSed2
 )
+
+from wepppy.wepp.interchange.watershed_loss import Loss
 
 from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
 
@@ -1847,9 +1848,6 @@ class Wepp(NoDbBase):
         except FileNotFoundError:
             pass
 
-        run_wepp_hillslope_interchange(self.output_dir)
-        generate_interchange_documentation(self.wepp_interchange_dir)
-
     #
     # watershed
     #
@@ -2342,10 +2340,10 @@ class Wepp(NoDbBase):
         from wepppy.wepp.out import totalwatsed_partitioned_dss_export
         totalwatsed_partitioned_dss_export(self.wd)
 
-    def report_loss(self, exclude_yr_indxs=None):
+    def report_loss(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        return Loss(loss_pw0, self.has_phosphorus, self.wd, exclude_yr_indxs=exclude_yr_indxs)
+        return Loss(loss_pw0, self.has_phosphorus, self.wd)
 
     def report_return_periods(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
                               exclude_yr_indxs=None, 
