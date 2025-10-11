@@ -2334,8 +2334,9 @@ class Wepp(NoDbBase):
 
     @nodb_timed
     def _build_totalwatsed3(self):
-        from wepppy.wepp.interchange import run_totalwatsed3
+        from wepppy.wepp.interchange import run_totalwatsed3, generate_interchange_documentation
         run_totalwatsed3(self.wepp_interchange_dir, baseflow_opts=self.baseflow_opts)
+        generate_interchange_documentation(self.wepp_interchange_dir)
 
     @nodb_timed
     def _export_partitioned_totalwatsed2_dss(self):
