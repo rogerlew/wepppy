@@ -263,14 +263,14 @@ class WhiteboxToolsTopazEmulator:
         """
         Returns the path to the stream network file in JSON format.
         """
-        return _join(self.wbt_wd, "netful.json")
+        return _join(self.wbt_wd, "netful.geojson")
 
     @property
     def netful_wgs_json(self):
         """
         Returns the path to the stream network file in WGS84 JSON format.
         """
-        return _join(self.wbt_wd, "netful.WGS.json")
+        return _join(self.wbt_wd, "netful.WGS.geojson")
 
     @property
     def chnjnt(self):
