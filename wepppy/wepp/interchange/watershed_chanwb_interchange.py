@@ -9,23 +9,13 @@ from typing import Dict, List
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from .schema_utils import pa_field
+from ._utils import _wait_for_path, _parse_float
+
 from wepppy.all_your_base.hydro import determine_wateryear
 
 CHANWB_FILENAME = "chnwb.txt"
 CHANWB_PARQUET = "chnwb.parquet"
-
-
-def _field(name: str, dtype: pa.DataType, *, units: str | None = None, description: str | None = None) -> pa.Field:
-    metadata: Dict[bytes, bytes] = {}
-    if units is not None:
-        metadata[b"units"] = units.encode()
-    if description is not None:
-        metadata[b"description"] = description.encode()
-
-    if metadata:
-        return pa.field(name, dtype).with_metadata(metadata)
-    return pa.field(name, dtype)
-
 
 MEASUREMENT_COLUMNS: List[tuple[str, str | None, str | None]] = [
     ("P (mm)", "mm", "precipitation"),
@@ -52,39 +42,22 @@ MEASUREMENT_COLUMNS: List[tuple[str, str | None, str | None]] = [
 
 SCHEMA = pa.schema(
     [
-        _field("wepp_id", pa.int32(), description="Channel (OFE) identifier"),
-        _field("julian", pa.int16(), description="Julian day"),
-        _field("year", pa.int16(), description="Calendar year"),
-        _field("simulation_year", pa.int16(), description="Simulation year value from input file"),
-        _field("month", pa.int8(), description="Calendar month"),
-        _field("day_of_month", pa.int8(), description="Calendar day of month"),
-        _field("water_year", pa.int16(), description="Computed water year"),
-        _field("OFE", pa.int16(), description="Channel OFE index"),
-        _field("J", pa.int16(), description="Julian day as reported"),
-        _field("Y", pa.int16(), description="Simulation year as reported"),
+        pa_field("wepp_id", pa.int32(), description="Channel (OFE) identifier"),
+        pa_field("julian", pa.int16(), description="Julian day"),
+        pa_field("year", pa.int16(), description="Calendar year"),
+        pa_field("simulation_year", pa.int16(), description="Simulation year value from input file"),
+        pa_field("month", pa.int8(), description="Calendar month"),
+        pa_field("day_of_month", pa.int8(), description="Calendar day of month"),
+        pa_field("water_year", pa.int16(), description="Computed water year"),
+        pa_field("OFE", pa.int16(), description="Channel OFE index"),
+        pa_field("J", pa.int16(), description="Julian day as reported"),
+        pa_field("Y", pa.int16(), description="Simulation year as reported"),
     ]
     + [
-        _field(name, pa.float64(), units=units, description=description)
+        pa_field(name, pa.float64(), units=units, description=description)
         for name, units, description in MEASUREMENT_COLUMNS
     ]
 )
-
-
-def _parse_float(token: str) -> float:
-    stripped = token.strip()
-    if not stripped:
-        return 0.0
-    if stripped[0] == ".":
-        stripped = f"0{stripped}"
-    try:
-        return float(stripped)
-    except ValueError:
-        if "E" not in stripped.upper():
-            if "-" in stripped[1:]:
-                return float(stripped.replace("-", "E-", 1))
-            if "+" in stripped[1:]:
-                return float(stripped.replace("+", "E+", 1))
-        return float(stripped)
 
 
 def _init_column_store() -> Dict[str, List]:
@@ -199,8 +172,7 @@ def run_wepp_watershed_chanwb_interchange(
         raise FileNotFoundError(base)
 
     source = base / CHANWB_FILENAME
-    if not source.exists():
-        raise FileNotFoundError(source)
+    _wait_for_path(source)
 
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
