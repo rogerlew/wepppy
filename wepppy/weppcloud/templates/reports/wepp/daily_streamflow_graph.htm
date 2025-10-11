@@ -123,6 +123,8 @@
 
         <div id="legend" class="legend-horizontal"></div>
         <div id="area1"></div>
+        <script id="streamflow-data" type="application/json">{{ streamflow_data_json|default('{}')|safe }}</script>
+        <script id="streamflow-query" type="application/json">{{ streamflow_query_json|default('{}')|safe }}</script>
 
         <script>
             /* ===== Layout / sizes ===== */
@@ -133,8 +135,8 @@
                 height2 = window.innerHeight * 0.95 - 80 - margin2.top - margin2.bottom;
 
             /* ===== Parsers / formatters ===== */
-            const parseDate = d3.timeParse("%Y%m%d");
-            const fmtDate = d3.timeFormat("%Y-%m-%d");
+            const parseISODate = d3.utcParse("%Y-%m-%d");
+            const fmtDate = d3.utcFormat("%Y-%m-%d");
 
             /* ===== Scales ===== */
             const x = d3.scaleTime().range([0, width]);
@@ -143,7 +145,9 @@
             const yC = d3.scaleLinear().range([height2, 0]);
 
             /* ===== Axes ===== */
-            const yTick = d => `${d} mm`;  // add units on ticks
+            let flowUnitLabel = 'mm';
+            let precipUnitLabel = 'mm';
+            const yTick = d => `${d} ${flowUnitLabel}`;  // add units on ticks
             const xAxis = d3.axisBottom(x);
             const xAxisC = d3.axisBottom(xC);
             const yAxis = d3.axisLeft(y).tickFormat(yTick);
@@ -190,48 +194,104 @@
 
             /* ===== Globals ===== */
             let flowsG, barsG, barsGC, hoverLine, redrawBars, redrawAreas, legendOverlay;
-            const flowColors = {
-                "Baseflow": "#1e90ff",
+            const FLOW_COLOR_DEFAULTS = {
+                Runoff: "#FF3B30",
+                runoff: "#FF3B30",
+                Baseflow: "#1e90ff",
+                baseflow: "#1e90ff",
                 "Lateral Flow": "#32cd32",
-                "Runoff": "#FF3B30"
+                lateral_flow: "#32cd32",
             };
-            const meteoColors = {
-                "Precipitation": "#FF6F30",
-                "Rain + Melt": "#00B2A9"
+            const METEO_COLOR_DEFAULTS = {
+                Precipitation: "#FF6F30",
+                precipitation: "#FF6F30",
+                "Rain + Melt": "#00B2A9",
+                rain_melt: "#00B2A9",
             };
 
             /* ===== Load data ===== */
-            d3.csv("../../../resources/wepp/daily_streamflow.csv?exclude_yr_indxs={{ exclude_yr_indxs }}",
-                d => { d.date = parseDate(d.date); return d; }
-            ).then(data => {
+            const dataElement = document.getElementById("streamflow-data");
+            let timeseriesData = { index: { values: [] }, series: [] };
+            if (dataElement) {
+                try {
+                    const parsed = JSON.parse(dataElement.textContent || "{}");
+                    if (parsed && typeof parsed === "object") {
+                        timeseriesData = parsed;
+                    }
+                } catch (err) {
+                    console.warn("Failed to parse embedded streamflow data", err);
+                }
+            }
+            const queryElement = document.getElementById("streamflow-query");
+            if (queryElement) {
+                try {
+                    window.WEPP_STREAMFLOW_QUERY = JSON.parse(queryElement.textContent || "{}");
+                } catch (err) {
+                    console.warn("Failed to parse embedded streamflow query payload", err);
+                }
+            }
+            {% if streamflow_sql %}
+            window.WEPP_STREAMFLOW_SQL = {{ streamflow_sql|tojson|safe }};
+            {% endif %}
+            const indexValues = (timeseriesData.index && Array.isArray(timeseriesData.index.values)) ? timeseriesData.index.values : [];
+            const seriesDefs = Array.isArray(timeseriesData.series) ? timeseriesData.series : [];
+            const flowSeries = seriesDefs.filter(series => (series.group || "flow") === "flow");
+            const meteoSeries = seriesDefs.filter(series => series.group === "meteo");
+            const rainMeltSeries = meteoSeries.find(series => series.role === "rain_melt") || meteoSeries[0];
+            const precipSeries = meteoSeries.find(series => series.role === "precip") || (meteoSeries.length > 1 ? meteoSeries[1] : meteoSeries[0]);
+            const flowColors = {};
+            flowSeries.forEach(series => {
+                const fallback = FLOW_COLOR_DEFAULTS[series.id] || FLOW_COLOR_DEFAULTS[series.label] || "#1e90ff";
+                flowColors[series.id] = series.color || fallback;
+            });
+            const meteoColors = {};
+            if (rainMeltSeries) {
+                const fallback = METEO_COLOR_DEFAULTS[rainMeltSeries.id] || METEO_COLOR_DEFAULTS[rainMeltSeries.label] || "#00B2A9";
+                meteoColors[rainMeltSeries.id] = rainMeltSeries.color || fallback;
+            }
+            if (precipSeries) {
+                const fallback = METEO_COLOR_DEFAULTS[precipSeries.id] || METEO_COLOR_DEFAULTS[precipSeries.label] || "#FF6F30";
+                meteoColors[precipSeries.id] = precipSeries.color || fallback;
+            }
+            const indexDates = indexValues.map(value => parseISODate(value) || new Date(value));
+            const rows = indexDates.map((date, idx) => {
+                const row = { date };
+                seriesDefs.forEach(series => {
+                    const values = Array.isArray(series.values) ? series.values : [];
+                    const raw = values[idx];
+                    row[series.id] = raw == null ? 0 : +raw;
+                });
+                return row;
+            });
+            const meteo = rows.map(row => ({
+                date: row.date,
+                rm: rainMeltSeries ? row[rainMeltSeries.id] : 0,
+                p: precipSeries ? row[precipSeries.id] : 0,
+            }));
+            const flowKeys = flowSeries.map(series => series.id);
+            const flowUnit = flowSeries.length ? (flowSeries[0].units || "mm") : "mm";
+            const precipUnit = (rainMeltSeries && rainMeltSeries.units) || (precipSeries && precipSeries.units) || "mm";
+            flowUnitLabel = flowUnit;
+            precipUnitLabel = precipUnit;
 
-                /* --- Keys / tidy rows --- */
-                const flowKeys = ["Runoff", "Lateral Flow", "Baseflow"];   // back→front order
-                const rows = data.map(d => ({
-                    date: d.date,
-                    "Precipitation": +d["Precipitation"],
-                    "Rain + Melt": +d["Rain + Melt"],
-                    "Baseflow": +d["Baseflow"],
-                    "Lateral Flow": +d["Lateral Flow"],
-                    "Runoff": +d["Runoff"]
-                }));
-
+            if (!rows.length) {
+                d3.select("#area1").append("p")
+                    .attr("class", "alert alert-warning mt-3")
+                    .text("No streamflow data available for the selected filters.");
+            } else {
                 /* --- Domains --- */
                 x.domain(d3.extent(rows, d => d.date));
                 xC.domain(x.domain());
 
-                const yMax = d3.max(rows, d => d3.max(flowKeys, k => d[k]));
+                const yMax = d3.max(rows, d => d3.max(flowKeys, k => d[k] ?? 0)) || 0;
                 y.domain([0, yMax]);
                 yC.domain(y.domain());
 
                 /* --- Meteo for bars --- */
-                const meteo = rows.map(d => ({ date: d.date, p: d["Precipitation"], rm: d["Rain + Melt"] }));
-                const pMax = d3.max(meteo, d => d.rm);
-
-                // Note: this right-side scale is pixel-height oriented as in your original code.
+                const pMax = d3.max(meteo, d => Math.max(d.rm || 0, d.p || 0)) || 0;
                 const yPbar = d3.scaleLinear().domain([0, pMax]).range([0, height]);
                 const yPC = d3.scaleLinear().domain([0, pMax]).range([height2, 0]);
-                const yAxisRight = d3.axisRight(yPbar).ticks(3).tickFormat(yTick); // add units on ticks
+                const yAxisRight = d3.axisRight(yPbar).ticks(3).tickFormat(d => `${d} ${precipUnitLabel}`);
 
                 /* --- Axes (focus) --- */
                 focus.append("g")
@@ -246,25 +306,27 @@
                     .attr("transform", "rotate(-90)")
                     .attr("y", 6).attr("dy", ".71em")
                     .style("text-anchor", "end")
-                    .text("Streamflow (mm)");
+                    .text(`Streamflow (${flowUnit})`);
 
                 const precipAxisG = focus.append("g")
                     .attr("class", "y axis precip-axis")
                     .attr("transform", `translate(${width},0)`)
                     .call(yAxisRight);
 
+                const precipLabel = precipSeries ? (precipSeries.label || "Precipitation") : "Precipitation";
+                const rainLabel = rainMeltSeries ? (rainMeltSeries.label || "Rain + Melt") : "Rain + Melt";
                 precipAxisG.append("text")
                     .attr("transform", "rotate(-90)")
                     .attr("y", -12).attr("dy", ".71em")
                     .style("text-anchor", "end")
-                    .text("Precip / Rain+Melt (mm)");
+                    .text(`${precipLabel} / ${rainLabel} (${precipUnit})`);
 
                 /* --- Flow areas --- */
                 function areaGen(k, xS, yS) {
                     return d3.area()
                         .x(d => xS(d.date))
                         .y0(yS(0))
-                        .y1(d => yS(d[k]));
+                        .y1(d => yS(d[k] ?? 0));
                 }
 
                 flowsG = focus.append("g")
@@ -274,11 +336,10 @@
                 flowsG.selectAll("path")
                     .data(flowKeys)
                     .enter().append("path")
-                    .attr("class", d => `area area-${d.replace(/\s+/g, '-')}`)  // e.g. area-Runoff
-                    .attr("fill", d => flowColors[d])
+                    .attr("class", d => `area area-${d.replace(/\s+/g, '-')}`)
+                    .attr("fill", d => flowColors[d] || "#1e90ff")
                     .attr("opacity", 1.0)
                     .attr("d", k => areaGen(k, x, y)(rows));
-
 
                 redrawAreas = () => flowsG.selectAll("path")
                     .attr("d", k => areaGen(k, x, y)(rows));
@@ -299,13 +360,21 @@
                         d = (!d1 || (t - d0.date) < (d1.date - t)) ? d0 : d1;
 
                     hoverLine.attr("x1", x(d.date)).attr("x2", x(d.date)).style("opacity", 1);
+
+                    const parts = [`${fmtDate(d.date)}`];
+                    if (precipSeries) {
+                        parts.push(`${precipLabel}: ${(d[precipSeries.id] ?? 0).toFixed(2)} ${precipUnitLabel}`);
+                    }
+                    if (rainMeltSeries) {
+                        parts.push(`${rainLabel}: ${(d[rainMeltSeries.id] ?? 0).toFixed(2)} ${precipUnitLabel}`);
+                    }
+                    flowSeries.forEach(series => {
+                        const label = series.label || series.id;
+                        parts.push(`${label}: ${(d[series.id] ?? 0).toFixed(2)} ${series.units || flowUnitLabel}`);
+                    });
+
                     tooltip.style("opacity", 1)
-                        .html(`${fmtDate(d.date)}<br>
-             Precipitation: ${d["Precipitation"].toFixed(2)} mm<br>
-             Rain + Melt : ${d["Rain + Melt"].toFixed(2)} mm<br>
-             Runoff      : ${d["Runoff"].toFixed(2)} mm<br>
-             Lateral Flow: ${d["Lateral Flow"].toFixed(2)} mm<br>
-             Baseflow    : ${d["Baseflow"].toFixed(2)} mm`)
+                        .html(parts.join("<br>"))
                         .style("left", (event.clientX + 12) + "px")
                         .style("top", (event.clientY - 28) + "px");
                 }
@@ -322,7 +391,6 @@
                     .attr("class", "precip")
                     .attr("clip-path", "url(#clip)");
 
-                /** Dynamic pixel width: distance between first two visible days */
                 const barWidth = () => {
                     const domain = x.domain(),
                         i0 = bisect(rows, domain[0]),
@@ -345,14 +413,16 @@
                     .data(meteo, d => d.date)
                     .enter().append("rect")
                     .attr("y", 0)
-                    .attr("fill", d => d.rm > d.p ? meteoColors["Rain + Melt"] : meteoColors["Precipitation"])
+                    .attr("fill", d => d.rm > d.p
+                        ? (rainMeltSeries ? meteoColors[rainMeltSeries.id] : "#00B2A9")
+                        : (precipSeries ? meteoColors[precipSeries.id] : "#FF6F30"))
                     .attr("opacity", 0.35)
                     .on("mouseenter", function (event, d) {
                         d3.select(this).attr("opacity", 0.8);
                         tooltip.style("opacity", 1)
                             .html(`${fmtDate(d.date)}<br>
-                 Precip: ${d.p.toFixed(2)} mm<br>
-                 Rain+Melt: ${d.rm.toFixed(2)} mm`);
+                 ${precipLabel}: ${d.p.toFixed(2)} ${precipUnitLabel}<br>
+                 ${rainLabel}: ${d.rm.toFixed(2)} ${precipUnitLabel}`);
                     })
                     .on("mousemove", e => tooltip.style("left", (e.clientX + 12) + "px").style("top", (e.clientY - 28) + "px"))
                     .on("mouseleave", function () { d3.select(this).attr("opacity", 0.35); tooltip.style("opacity", 0); });
@@ -374,7 +444,7 @@
                 flowsGC.selectAll("path")
                     .data(flowKeys)
                     .enter().append("path")
-                    .attr("fill", d => flowColors[d]).attr("opacity", 1.0)
+                    .attr("fill", d => flowColors[d] || "#1e90ff").attr("opacity", 1.0)
                     .attr("d", k => areaGen(k, xC, yC)(rows));
 
                 /* --- Context precip bars (no tooltip) --- */
@@ -383,7 +453,9 @@
                     .data(meteo)
                     .enter().append("rect")
                     .attr("y", 0)
-                    .attr("fill", d => d.rm > d.p ? meteoColors["Rain + Melt"] : meteoColors["Precipitation"])
+                    .attr("fill", d => d.rm > d.p
+                        ? (rainMeltSeries ? meteoColors[rainMeltSeries.id] : "#00B2A9")
+                        : (precipSeries ? meteoColors[precipSeries.id] : "#FF6F30"))
                     .attr("opacity", 0.25);
 
                 function drawBarsC() {
@@ -407,12 +479,32 @@
                     .style("text-anchor", "middle")
                     .text("Date");
 
+                const legendData = flowSeries.map(series => ({
+                    id: series.id,
+                    label: `${series.label || series.id} (${series.units || flowUnit})`,
+                    colors: [flowColors[series.id] || "#1e90ff"],
+                    type: "area",
+                }));
+                if (rainMeltSeries || precipSeries) {
+                    legendData.push({
+                        id: "Bars",
+                        label: [
+                            rainMeltSeries ? `${rainLabel} (${rainMeltSeries.units || precipUnit})` : null,
+                            precipSeries ? `${precipLabel} (${precipSeries.units || precipUnit})` : null,
+                        ].filter(Boolean).join(" / "),
+                        colors: [
+                            rainMeltSeries ? (meteoColors[rainMeltSeries.id] || "#00B2A9") : null,
+                            precipSeries ? (meteoColors[precipSeries.id] || "#FF6F30") : null,
+                        ].filter(Boolean),
+                        type: "bar",
+                    });
+                }
 
-                buildLegend();
+                buildLegend(legendData);
 
                 /* === initial clipping === */
                 redrawBars = () => drawBars(barsG.selectAll("rect"), x, yPbar, true);
-            });
+            }
 
             /* ===== Brush handler ===== */
 
@@ -426,18 +518,7 @@
                 hoverLine && hoverLine.style("opacity", 0);
                 redrawBars && redrawBars();
             }
-            function buildLegend() {
-                const legendData = [
-                    { id: "Runoff", label: "Runoff (mm)", colors: [flowColors["Runoff"]], type: "area" },
-                    { id: "Lateral Flow", label: "Lateral Flow (mm)", colors: [flowColors["Lateral Flow"]], type: "area" },
-                    { id: "Baseflow", label: "Baseflow (mm)", colors: [flowColors["Baseflow"]], type: "area" },
-                    // one checkbox, two swatches
-                    {
-                        id: "Bars", label: "Rain+Melt / Precip (mm)", colors: [meteoColors["Rain + Melt"],
-                        meteoColors["Precipitation"]], type: "bar"
-                    }
-                ];
-
+            function buildLegend(legendData) {
                 const cont = d3.select("#legend");
 
                 const item = cont.selectAll("label.legend-item")

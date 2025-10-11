@@ -221,6 +221,8 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
         "schema": result.schema,
         "row_count": result.row_count,
     }
+    if result.formatted is not None:
+        response_payload["formatted"] = result.formatted
     if result.sql is not None:
         response_payload["sql"] = result.sql
 

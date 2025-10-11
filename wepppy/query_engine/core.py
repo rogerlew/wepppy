@@ -131,6 +131,9 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
     else:
         select_parts.extend([])
 
+    for computed in payload.computed_column_specs:
+        select_parts.append(f"{computed.sql} AS {computed.alias}")
+
     for aggregation in payload.aggregation_specs:
         expression = aggregation.sql
         if aggregation.alias:
@@ -214,4 +217,5 @@ def run_query(run_context: RunContext, payload: QueryRequest) -> QueryResult:
         table,
         include_schema=payload.include_schema,
         sql=plan.sql if payload.include_sql else None,
+        reshape=payload.reshape_spec,
     )

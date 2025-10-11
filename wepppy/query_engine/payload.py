@@ -47,6 +47,183 @@ class AggregationSpec:
     alias: Optional[str]
 
 
+@dataclass(slots=True)
+class ComputedColumnSpec:
+    sql: str
+    alias: str
+
+
+@dataclass(slots=True)
+class TimeseriesSeriesSpec:
+    column: str
+    key: str
+    label: Optional[str]
+    group: Optional[str]
+    role: Optional[str]
+    color: Optional[str]
+    units: Optional[str]
+    description: Optional[str]
+
+
+@dataclass(slots=True)
+class TimeseriesReshapeSpec:
+    index_column: str
+    index_key: str
+    series: List[TimeseriesSeriesSpec]
+    year_column: Optional[str]
+    exclude_year_indexes: List[int]
+    compact: bool
+    include_records: bool
+
+
+def _normalise_computed_column(item: Any, *, used_aliases: set[str]) -> ComputedColumnSpec:
+    if not isinstance(item, dict):
+        raise TypeError("computed_columns entries must be objects")
+
+    alias = item.get("alias")
+    if not alias or not isinstance(alias, str):
+        raise ValueError("Computed column requires an 'alias' string")
+    alias = alias.strip()
+    if not alias:
+        raise ValueError("Computed column alias cannot be empty")
+    if alias in used_aliases:
+        raise ValueError(f"Computed column alias '{alias}' defined multiple times")
+    used_aliases.add(alias)
+
+    if "sql" in item:
+        expression = item["sql"]
+    elif "expression" in item:
+        expression = item["expression"]
+    elif "date_parts" in item:
+        parts = item["date_parts"]
+        if not isinstance(parts, dict):
+            raise TypeError("Computed column 'date_parts' must be an object with 'year', 'month', 'day'")
+        try:
+            year_expr = parts["year"]
+            month_expr = parts["month"]
+            day_expr = parts["day"]
+        except KeyError as exc:  # pragma: no cover - defensive
+            raise ValueError("Computed column 'date_parts' requires 'year', 'month', and 'day' keys") from exc
+        expression = f"MAKE_DATE({year_expr}, {month_expr}, {day_expr})"
+    else:
+        raise ValueError("Computed column must define 'sql', 'expression', or 'date_parts'")
+
+    expression = str(expression).strip()
+    if not expression:
+        raise ValueError("Computed column expression cannot be empty")
+
+    return ComputedColumnSpec(sql=expression, alias=alias)
+
+
+def _normalise_timeseries_series(entry: Any) -> TimeseriesSeriesSpec:
+    if not isinstance(entry, dict):
+        raise TypeError("reshape.series entries must be objects")
+    column = entry.get("column")
+    if not column or not isinstance(column, str):
+        raise ValueError("reshape.series entries require a 'column' string")
+
+    key = entry.get("key") or entry.get("id") or column
+    if not isinstance(key, str):
+        raise TypeError("reshape.series 'key' must be a string when provided")
+    key = key.strip()
+    if not key:
+        raise ValueError("reshape.series key cannot be empty")
+
+    label = entry.get("label")
+    if label is not None and not isinstance(label, str):
+        raise TypeError("reshape.series label must be a string")
+
+    group = entry.get("group")
+    if group is not None and not isinstance(group, str):
+        raise TypeError("reshape.series group must be a string")
+
+    role = entry.get("role")
+    if role is not None and not isinstance(role, str):
+        raise TypeError("reshape.series role must be a string")
+
+    color = entry.get("color")
+    if color is not None and not isinstance(color, str):
+        raise TypeError("reshape.series color must be a string")
+
+    units = entry.get("units")
+    if units is not None and not isinstance(units, str):
+        raise TypeError("reshape.series units must be a string")
+
+    description = entry.get("description")
+    if description is not None and not isinstance(description, str):
+        raise TypeError("reshape.series description must be a string")
+
+    return TimeseriesSeriesSpec(
+        column=column,
+        key=key,
+        label=label,
+        group=group,
+        role=role,
+        color=color,
+        units=units,
+        description=description,
+    )
+
+
+def _normalise_reshape(reshape: Any) -> TimeseriesReshapeSpec | None:
+    if reshape is None:
+        return None
+    if not isinstance(reshape, dict):
+        raise TypeError("reshape must be an object")
+
+    reshape_type = str(reshape.get("type") or "timeseries").lower()
+    if reshape_type != "timeseries":
+        raise ValueError(f"Unsupported reshape type '{reshape_type}'")
+
+    index_entry = reshape.get("index")
+    if not isinstance(index_entry, dict):
+        raise TypeError("reshape.index must be an object")
+    index_column = index_entry.get("column")
+    if not index_column or not isinstance(index_column, str):
+        raise ValueError("reshape.index requires a 'column' string")
+    index_key = index_entry.get("key") or index_column
+    if not isinstance(index_key, str):
+        raise TypeError("reshape.index 'key' must be a string when provided")
+    index_key = index_key.strip()
+    if not index_key:
+        raise ValueError("reshape.index key cannot be empty")
+
+    series_entries = reshape.get("series")
+    if not isinstance(series_entries, Sequence) or isinstance(series_entries, (str, bytes)):
+        raise TypeError("reshape.series must be a list of objects")
+    series_specs = [_normalise_timeseries_series(entry) for entry in series_entries]
+    if not series_specs:
+        raise ValueError("reshape.series must contain at least one series")
+
+    year_column = reshape.get("year_column")
+    if year_column is not None and not isinstance(year_column, str):
+        raise TypeError("reshape.year_column must be a string")
+
+    exclude_indexes_value = reshape.get("exclude_year_indexes") or reshape.get("exclude_year_indices")
+    exclude_year_indexes: List[int] = []
+    if exclude_indexes_value is not None:
+        if not isinstance(exclude_indexes_value, Sequence):
+            raise TypeError("reshape.exclude_year_indexes must be a list of integers")
+        for item in exclude_indexes_value:
+            try:
+                exclude_year_indexes.append(int(item))
+            except (TypeError, ValueError) as exc:  # pragma: no cover - defensive
+                raise ValueError("reshape.exclude_year_indexes must contain integers") from exc
+
+    compact = bool(reshape.get("compact", False))
+    include_records = bool(reshape.get("include_records", not compact))
+
+    return TimeseriesReshapeSpec(
+        index_column=index_column,
+        index_key=index_key,
+        series=series_specs,
+        year_column=year_column,
+        exclude_year_indexes=exclude_year_indexes,
+        compact=compact,
+        include_records=include_records,
+    )
+
+
 def _normalise_dataset(
     dataset: Any,
     *,
@@ -180,10 +357,14 @@ class QueryRequest:
     aggregations: Optional[List[Any]] = None
     order_by: Optional[List[str]] = None
     filters: Optional[List[Dict[str, Any]]] = None
+    computed_columns: Optional[List[Dict[str, Any]]] = None
+    reshape: Optional[Dict[str, Any]] = None
 
     _dataset_specs: List[DatasetSpec] = field(init=False, repr=False)
     _join_specs: List[JoinSpec] = field(init=False, repr=False)
     _aggregation_specs: List[AggregationSpec] = field(init=False, repr=False)
+    _computed_columns_specs: List[ComputedColumnSpec] = field(init=False, repr=False)
+    _reshape_spec: TimeseriesReshapeSpec | None = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if not self.datasets:
@@ -205,6 +386,13 @@ class QueryRequest:
         self._dataset_specs = [
             _normalise_dataset(dataset, index=index, used_aliases=used_aliases)
             for index, dataset in enumerate(self.datasets)
+        ]
+
+        computed_entries = self.computed_columns or []
+        computed_aliases: set[str] = set()
+        self._computed_columns_specs = [
+            _normalise_computed_column(entry, used_aliases=computed_aliases)
+            for entry in computed_entries
         ]
 
         join_entries = self.joins or []
@@ -266,6 +454,8 @@ class QueryRequest:
                 normalised_filters.append(filter_payload)
             self.filters = normalised_filters
 
+        self._reshape_spec = _normalise_reshape(self.reshape)
+
     @property
     def dataset_specs(self) -> List[DatasetSpec]:
         return list(self._dataset_specs)
@@ -277,6 +467,14 @@ class QueryRequest:
     @property
     def aggregation_specs(self) -> List[AggregationSpec]:
         return list(self._aggregation_specs)
+
+    @property
+    def computed_column_specs(self) -> List[ComputedColumnSpec]:
+        return list(self._computed_columns_specs)
+
+    @property
+    def reshape_spec(self) -> TimeseriesReshapeSpec | None:
+        return self._reshape_spec
 
 
 @dataclass

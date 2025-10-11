@@ -13,6 +13,9 @@ from wepppy.wepp.out import DisturbedTotalWatSed2, Element, HillWat, TotalWatSed
 from wepppy.wepp.stats.summary import ChannelSummary, HillSummary, OutletSummary
 from wepppy.wepp.stats.total_watbal import TotalWatbal
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
+import json
+from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
+from wepppy.query_engine.payload import QueryRequest
 
 wepp_bp = Blueprint('wepp', __name__)
 
@@ -376,68 +379,104 @@ def resources_wepp_totalwatsed2(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/plot/wepp/streamflow/')
 @authorize_and_handle_with_exception_factory
 def plot_wepp_streamflow(runid, config):
-    try:
-        res = request.args.get('exclude_yr_indxs')
-        exclude_yr_indxs = []
-        for yr in res.split(','):
-            if isint(yr):
-                exclude_yr_indxs.append(int(yr))
-    except:
+    res = request.args.get('exclude_yr_indxs')
+    if res:
+        exclude_yr_indxs = [int(yr) for yr in res.split(',') if isint(yr)]
+    else:
         exclude_yr_indxs = [0, 1]
 
     wd = get_wd(runid)
+    stream_rel_path = 'wepp/output/interchange/totalwatsed3.parquet'
+    stream_parquet = _join(wd, stream_rel_path)
+    if not _exists(stream_parquet):
+        return error_factory('totalwatsed3.parquet is not available; please run the WEPP interchange workflow first.')
 
-    if _exists(_join(wd, 'wepp/output/interchange/totalwatsed3.parquet')):
-        payload = {
-            "datasets": [
-                {
-                    "path": "wepp/output/interchange/totalwatsed3.parquet",
-                    "alias": "totalwatsed3",
-                }
+    try:
+        activate_query_engine(wd, run_interchange=False)
+        run_context = resolve_run_context(wd, auto_activate=False)
+    except FileNotFoundError:
+        return error_factory('Unable to resolve query engine catalog for this run')
+    except Exception:
+        return exception_factory('Error activating query engine', runid=runid)
+
+    payload_dict = {
+        "datasets": [
+            {
+                "path": stream_rel_path,
+                "alias": "stream",
+            }
+        ],
+        "columns": [
+            "stream.year AS year",
+            "stream.\"Precipitation\"",
+            "stream.\"Rain+Melt\"",
+            "stream.\"Lateral Flow\"",
+            "stream.Baseflow",
+            "stream.Runoff",
+        ],
+        "computed_columns": [
+            {
+                "alias": "flow_date",
+                "date_parts": {
+                    "year": "stream.year",
+                    "month": "stream.month",
+                    "day": "stream.day_of_month",
+                },
+            }
+        ],
+        "order_by": ["flow_date"],
+        "include_schema": True,
+        "include_sql": True,
+        "reshape": {
+            "type": "timeseries",
+            "index": {"column": "flow_date", "key": "date"},
+            "year_column": "year",
+            "exclude_year_indexes": exclude_yr_indxs,
+            "series": [
+                {"column": "Runoff", "key": "runoff", "label": "Runoff", "group": "flow", "color": "#FF3B30", "units": "mm", "description": "Daily runoff depth"},
+                {"column": "Baseflow", "key": "baseflow", "label": "Baseflow", "group": "flow", "color": "#1e90ff", "units": "mm", "description": "Daily baseflow depth"},
+                {"column": "Lateral Flow", "key": "lateral_flow", "label": "Lateral Flow", "group": "flow", "color": "#32cd32", "units": "mm", "description": "Daily lateral flow depth"},
+                {"column": "Precipitation", "key": "precipitation", "label": "Precipitation", "group": "meteo", "role": "precip", "color": "#FF6F30", "units": "mm", "description": "Daily precipitation depth"},
+                {"column": "Rain+Melt", "key": "rain_melt", "label": "Rain + Melt", "group": "meteo", "role": "rain_melt", "color": "#00B2A9", "units": "mm", "description": "Daily rain plus melt depth"},
             ],
-            "columns": [
-                "totalwatsed3.year",  # as year
-                "totalwatsed3.month", # as month
-                "totalwatsed3.day_of_month", # as day_of_month
-                "totalwatsed3.Precipitation", # as Precipitation
-                "totalwatsed3.Rain+Melt", # as RainMelt
-                "totalwatsed3.Lateral Flow", # as LateralFlow
-                "totalwatsed3.Baseflow", # as Baseflow
-                "totalwatsed3.Runoff", # as Runoff
-            ],
-            #...more payload details...
-        }
-    elif _exists(_join(wd, 'wepp/output/totalwatsed2.parquet')):
-        payload = {
-            "datasets": [
-                {
-                    "path": "wepp/output/totalwatsed2.parquet",
-                    "alias": "totalwatsed2",
-                }
-            ],
-            "columns": [
-                "totalwatsed2.Year",  # as year
-                "totalwatsed2.Month", # as month
-                "totalwatsed2.Day", # day_of_month
-                "totalwatsed2.Precipitation (mm)", # as Precipitation
-                "totalwatsed2.Rain + Melt (mm)", # as RainMelt
-                "totalwatsed2.Lateral Flow (mm)", # as LateralFlow
-                "totalwatsed2.Baseflow (mm)", # as Baseflow
-                "totalwatsed2.Runoff (mm)", # as Runoff
-            ],
-            #...more payload details...
-        }
-    else:
-        return error_factory('No daily streamflow data available for plotting')
-    
+            "compact": True,
+        },
+    }
+
+    try:
+        query = QueryRequest(**payload_dict)
+    except Exception:
+        return exception_factory('Invalid streamflow query payload', runid=runid)
+
+    try:
+        result = run_query(run_context, query)
+    except Exception:
+        return exception_factory('Error running streamflow query', runid=runid)
+
+    if result.formatted is None:
+        return error_factory('Streamflow query did not produce a timeseries payload')
+
+    try:
+        timeseries_json = json.dumps(result.formatted, ensure_ascii=False)
+        payload_json = json.dumps(payload_dict, indent=2, ensure_ascii=False)
+    except (TypeError, ValueError):
+        return exception_factory('Error serializing query engine response', runid=runid)
+
     ron = Ron.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
-    return render_template('reports/wepp/daily_streamflow_graph.htm', runid=runid, config=config,
-                            unitizer_nodb=unitizer,
-                            precisions=wepppy.nodb.unitizer.precisions,
-                            exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
-                            ron=ron,
-                            user=current_user)
+    return render_template(
+        'reports/wepp/daily_streamflow_graph.htm',
+        runid=runid,
+        config=config,
+        unitizer_nodb=unitizer,
+        precisions=wepppy.nodb.unitizer.precisions,
+        exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
+        streamflow_data_json=timeseries_json,
+        streamflow_query_json=payload_json,
+        streamflow_sql=result.sql,
+        ron=ron,
+        user=current_user,
+    )
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/return_periods')
