@@ -7,6 +7,7 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import logging
+from types import MethodType
 from datetime import datetime
 from glob import glob
 from os.path import exists as _exists
@@ -258,6 +259,31 @@ security = Security(app, user_datastore,
 
 mail = Mail(app)
 session_manager = Session(app)
+
+# Ensure Flask-Session always provides string cookie values; Werkzeug 3+ rejects bytes.
+if isinstance(app.session_interface, RedisSessionInterface):
+    original_save_session = app.session_interface.save_session
+
+    def _save_session_with_str_cookies(self, flask_app, session, response):
+        original_set_cookie = response.set_cookie
+
+        def _safe_set_cookie(key, value="", *args, **kwargs):
+            if isinstance(value, bytes):
+                value = value.decode("utf-8")
+            if "value" in kwargs and isinstance(kwargs["value"], bytes):
+                kwargs["value"] = kwargs["value"].decode("utf-8")
+            return original_set_cookie(key, value, *args, **kwargs)
+
+        response.set_cookie = _safe_set_cookie
+        try:
+            return original_save_session(flask_app, session, response)
+        finally:
+            response.set_cookie = original_set_cookie
+
+    app.session_interface.save_session = MethodType(
+        _save_session_with_str_cookies,
+        app.session_interface,
+    )
 
 register_jinja_filters(app)
 register_blueprints(app)
