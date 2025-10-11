@@ -11,44 +11,14 @@ import pyarrow as pa
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
 
-try:
-    from .schema_utils import pa_field
-except ModuleNotFoundError:
-    import importlib.machinery
-    import importlib.util
-    import sys
-    from pathlib import Path
-
-    schema_utils_path = Path(__file__).with_name("schema_utils.py")
-    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
-    spec = importlib.util.spec_from_loader(loader.name, loader)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[loader.name] = module
-    loader.exec_module(module)
-    pa_field = module.pa_field
+from .schema_utils import pa_field
+from ._utils import _parse_float, _julian_to_calendar
 
 EVENT_LABELS = {"EVENT", "SUBEVENT", "NO EVENT"}
 SEDCLASS_COUNT = 5
 EVENT_FLOAT_COUNT = 12 + (2 * SEDCLASS_COUNT) + 2  # dur..tdep + sedcon + frcflw + gwbfv/gwdsv
 SUBEVENT_FLOAT_COUNT = 6  # sbrunf, sbrunv, drainq, drrunv, gwbfv, gwdsv
 NOEVENT_FLOAT_COUNT = 2  # gwbfv, gwdsv
-
-
-def _parse_float(token: str) -> float:
-    try:
-        return float(token)
-    except ValueError:
-        if "E" not in token.upper():
-            if "-" in token[1:]:
-                return float(token.replace("-", "E-", 1))
-            if "+" in token[1:]:
-                return float(token.replace("+", "E+", 1))
-        raise
-
-
-def _julian_to_calendar(year: int, julian: int) -> tuple[int, int]:
-    base = datetime(year, 1, 1) + timedelta(days=julian - 1)
-    return base.month, base.day
 
 
 SCHEMA = pa.schema(

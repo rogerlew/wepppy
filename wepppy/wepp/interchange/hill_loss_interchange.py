@@ -9,21 +9,8 @@ import pyarrow as pa
 
 from .concurrency import write_parquet_with_pool
 
-try:
-    from .schema_utils import pa_field
-except ModuleNotFoundError:
-    import importlib.machinery
-    import importlib.util
-    import sys
-    from pathlib import Path
-
-    schema_utils_path = Path(__file__).with_name("schema_utils.py")
-    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
-    spec = importlib.util.spec_from_loader(loader.name, loader)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[loader.name] = module
-    loader.exec_module(module)
-    pa_field = module.pa_field
+from ._utils import _parse_float
+from .schema_utils import pa_field
 
 LOSS_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
@@ -60,22 +47,6 @@ SCHEMA = pa.schema(
 )
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
-
-
-def _parse_float(token: str) -> float:
-    stripped = token.strip()
-    if not stripped or set(stripped) <= {"*"}:
-        return float("nan")
-    try:
-        return float(stripped)
-    except ValueError:
-        if "E" not in stripped.upper():
-            if "-" in stripped[1:]:
-                return float(stripped.replace("-", "E-", 1))
-            if "+" in stripped[1:]:
-                return float(stripped.replace("+", "E+", 1))
-        return float(stripped)
-
 
 def _init_column_store() -> Dict[str, List]:
     return {name: [] for name in SCHEMA.names}

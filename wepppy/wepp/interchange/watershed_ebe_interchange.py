@@ -10,22 +10,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
-
-try:
-    from .schema_utils import pa_field
-except ModuleNotFoundError:
-    import importlib.machinery
-    import importlib.util
-    import sys
-    from pathlib import Path
-
-    schema_utils_path = Path(__file__).with_name("schema_utils.py")
-    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
-    spec = importlib.util.spec_from_loader(loader.name, loader)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[loader.name] = module
-    loader.exec_module(module)
-    pa_field = module.pa_field
+from ._utils import _wait_for_path, _parse_float
+from .schema_utils import pa_field
 
 EBE_FILENAME = "ebe_pw0.txt"
 EBE_PARQUET = "ebe_pw0.parquet"
@@ -61,23 +47,6 @@ SCHEMA = pa.schema(
         pa_field("element_id", pa.int32(), description="Channel element identifier (Elmt_ID)"),
     ]
 )
-
-
-def _parse_float(token: str) -> float:
-    stripped = token.strip()
-    if not stripped:
-        return 0.0
-    if stripped[0] == ".":
-        stripped = f"0{stripped}"
-    try:
-        return float(stripped)
-    except ValueError:
-        if "E" not in stripped.upper():
-            if "-" in stripped[1:]:
-                return float(stripped.replace("-", "E-", 1))
-            if "+" in stripped[1:]:
-                return float(stripped.replace("+", "E+", 1))
-        return float(stripped)
 
 
 def _init_column_store() -> Dict[str, List]:
@@ -190,8 +159,7 @@ def run_wepp_watershed_ebe_interchange(
         raise FileNotFoundError(base)
 
     ebe_path = base / EBE_FILENAME
-    if not ebe_path.exists():
-        raise FileNotFoundError(ebe_path)
+    _wait_for_path(ebe_path)
 
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
