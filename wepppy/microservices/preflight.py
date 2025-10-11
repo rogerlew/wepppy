@@ -173,12 +173,13 @@ class RunWebSocket(tornado.websocket.WebSocketHandler):
 
     # ───── class-level heartbeat utils ─────
     def _ping(self):
-        if self.ws_connection and self.ws_connection.stream.socket:
-            try:
-                self.write_message('{"type":"ping"}')
-            except Exception:
-                logging.info("Ping failed; closing %s", self.run_id)
-                self.close()
+        if not self.ws_connection:
+            return
+        try:
+            self.write_message('{"type":"ping"}')
+        except Exception:
+            logging.info("Ping failed; closing %s", self.run_id)
+            self.close()
                 
     @classmethod
     async def send_heartbeats(cls):
@@ -192,13 +193,19 @@ class RunWebSocket(tornado.websocket.WebSocketHandler):
         now = tornado.ioloop.IOLoop.current().time()
         for sockset in list(cls.clients.values()):
             for client in list(sockset):
-                dead = (
-                    now - client.last_pong > 65 or
-                    not client.ws_connection or
-                    not client.ws_connection.stream.socket
+                ws = client.ws_connection
+                timed_out = now - client.last_pong > 65
+                closing = (
+                    ws is None or
+                    getattr(ws, "is_closing", lambda: False)()
                 )
-                if dead:
-                    logging.info("Closing stale %s", client.run_id)
+                if timed_out or closing:
+                    logging.info(
+                        "Closing stale %s (timed_out=%s closing=%s)",
+                        client.run_id,
+                        timed_out,
+                        closing,
+                    )
                     client.close()
 
 # ─────────────────── Redis Pub/Sub listener ────────────────────
