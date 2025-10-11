@@ -55,6 +55,15 @@ COPY docker/wheels /tmp/wheels
 RUN uv venv /opt/venv && \
     . /opt/venv/bin/activate && \
     uv pip install --requirement requirements-uv.txt
+    
+# Install and load DuckDB's spatial extension using the venv's python.
+
+RUN /opt/venv/bin/python -c "import duckdb; \
+               con = duckdb.connect(); \
+               con.execute('SET home_directory=\'/tmp\''); \
+               con.execute('INSTALL spatial;'); \
+               con.execute('LOAD spatial;'); \
+               con.close()"
 
 # Mirror historical conda .pth injections so sibling repos resolve in development.
 COPY install/conda/*.pth /tmp/pth/

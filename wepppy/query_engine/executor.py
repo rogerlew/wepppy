@@ -17,6 +17,7 @@ class DuckDBExecutor:
         with duckdb.connect() as conn:
             if use_spatial:
                 try:
+                    conn.execute("SET home_directory='/tmp';")
                     conn.load_extension("spatial")
                 except duckdb.IOException:
                     try:
