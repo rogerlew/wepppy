@@ -102,6 +102,7 @@ class TaskEnum(Enum):
     def __getstate__(self):
         return self.value
 
+
 class RedisPrep:
     def __init__(self, wd, cfg_fn=None):
         self.wd = wd
