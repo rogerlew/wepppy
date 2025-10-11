@@ -17,6 +17,7 @@ from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.nodb.base import NoDbBase, TriggerEvents
+from wepppy.query_engine.activate import update_catalog_entry
 
 from .shrubland_map import ShrublandMap
 
@@ -143,6 +144,8 @@ class Shrubland(NoDbBase):
             wmesque_retrieve('nlcd_shrubland/2016/%s' % ds, _map.extent,
                              fn, _map.cellsize, v=self.wmesque_version,
                              wmesque_endpoint=self.wmesque_endpoint)
+
+            update_catalog_entry(self.wd, self.shrubland_dir)
 
     def on(self, evt):
         pass

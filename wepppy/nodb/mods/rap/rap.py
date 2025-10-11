@@ -13,7 +13,6 @@ from os.path import exists as _exists
 
 from osgeo import gdal
 
-from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 from wepppy.nodb.core import *
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
@@ -27,6 +26,8 @@ from wepppy.landcover.rap import (
 import wepppyo3
 from wepppyo3.raster_characteristics import identify_median_single_raster_key
 from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
+
+from wepppy.query_engine import update_catalog_entry
 
 __all__ = [
     'RAPNoDbLockedException',
@@ -156,6 +157,8 @@ class RAP(NoDbBase):
         with self.locked():
             self._rap_year = year
             self._rap_mgr = rap_mgr
+
+        update_catalog_entry(self.wd, self.rap_dir)
 
     def on(self, evt):
         pass

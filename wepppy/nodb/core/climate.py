@@ -59,6 +59,7 @@ from wepppy.climates.cligen import (
 from wepppy.all_your_base import isint, isfloat, NCPU
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
+from wepppy.query_engine.activate import update_catalog_entry
 from wepppy.topo.watershed_abstraction.support import is_channel
 import numpy as np
 
@@ -2003,6 +2004,8 @@ class Climate(NoDbBase):
 
             self.sub_par_fns = sub_par_fns
             self.sub_cli_fns = sub_cli_fns
+
+            update_catalog_entry(wd, 'climate')
 
     def _post_defined_climate(self, verbose=False, attrs=None):
         with self.locked():

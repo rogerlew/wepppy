@@ -30,6 +30,8 @@ from wepppy.nodb.base import NoDbBase
 
 from pprint import pprint
 
+from wepppy.query_engine.activate import update_catalog_entry
+
 __all__ = [
     'AshPostNoDbLockedException',
     'AshPost',
@@ -459,6 +461,8 @@ class AshPost(NoDbBase):
             else:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = None, None, None
 
+        update_catalog_entry(self.wd, 'ash')
+        
     @property
     def meta(self):
         from wepppy.nodb.mods.ash_transport import Ash

@@ -1329,11 +1329,15 @@ class NoDbBase(object):
     @property
     def runs_dir(self):
         return _join(self.wd, 'wepp', 'runs')
-
+    
     @property
     def output_dir(self):
         return _join(self.wd, 'wepp', 'output')
 
+    @property
+    def wepp_interchange_dir(self):
+        return _join(self.wd, 'wepp', 'output', 'interchange')
+    
     @property
     def fp_runs_dir(self):
         return _join(self.wd, 'wepp', 'flowpaths', 'runs')

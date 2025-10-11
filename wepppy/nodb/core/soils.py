@@ -52,6 +52,8 @@ from wepppy.nodb.duckdb_agents import (
     get_soil_subs_summary
 )
 
+from wepppy.query_engine import update_catalog_entry
+
 __all__ = [
     'SoilsNoDbLockedException',
     'SoilsMode',
@@ -270,6 +272,7 @@ class Soils(NoDbBase):
 
             ssurgo_fn = self.ssurgo_fn
             wmesque_retrieve(self.soils_map, _map.extent, ssurgo_fn, _map.cellsize, v=self.wmesque_version)
+            update_catalog_entry(self.wd, ssurgo_fn)
 
             domsoil_d = identify_mode_single_raster_key(
                 key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys=set())
@@ -593,6 +596,7 @@ class Soils(NoDbBase):
                                 ssurgo_fn, _map.cellsize, 
                                 v=self.wmesque_version, 
                                 wmesque_endpoint=self.wmesque_endpoint)
+            update_catalog_entry(self.wd, ssurgo_fn)
 
         # Make SSURGO Soils
         sm = SurgoMap(ssurgo_fn)
@@ -968,6 +972,7 @@ class Soils(NoDbBase):
                                 ssurgo_fn, _map.cellsize,
                                 v=self.wmesque_version, 
                                 wmesque_endpoint=self.wmesque_endpoint)
+                update_catalog_entry(self.wd, ssurgo_fn)
 
             with self.timed('  Building SSURGO Soils'):
                 sm = SurgoMap(ssurgo_fn)
@@ -1117,13 +1122,13 @@ class Soils(NoDbBase):
         if dict_result is None or len(dict_result) == 0:
             return
         
-
         df = pd.DataFrame.from_dict(dict_result, orient='index')
         df.index.name = 'TopazID'
         df.reset_index(inplace=True)
         df['TopazID'] = df['TopazID'].astype(str).astype('int64')
         df['mukey'] = df['mukey'].astype(str)
         df.to_parquet(_join(self.soils_dir, 'soils.parquet'))
+        update_catalog_entry(self.wd, 'soils/soils.parquet')
         
     def _post_dump_and_unlock(self):
         self.dump_soils_parquet()

@@ -9,7 +9,7 @@ import pytest
 
 from wepppy.query_engine.catalog import DatasetCatalog
 from wepppy.query_engine.context import RunContext
-from wepppy.query_engine.core import run_query
+from wepppy.query_engine.core import run_query, build_query_plan
 from wepppy.query_engine.payload import QueryRequest
 
 
@@ -29,7 +29,7 @@ def _write_catalog_entries(root: Path, rel_paths: list[str]) -> None:
     for rel_path in rel_paths:
         full_path = root / rel_path
         parquet_schema = None
-        if full_path.exists():
+        if full_path.exists() and full_path.suffix == ".parquet":
             parquet_schema = pq.read_table(full_path).schema
 
         catalog_entry = {
@@ -237,3 +237,119 @@ def test_filter_numeric_cast(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError):
         run_query(run_context, payload_invalid)
+
+
+def test_filter_between_in_null(tmp_path: Path) -> None:
+    rel = "data/filters.parquet"
+    table = pa.table(
+        {
+            "id": [1, 2, 3, 4],
+            "score": [5, 7, 9, 12],
+            "category": ["A", "B", "C", "A"],
+            "note": [None, "present", None, ""],
+        }
+    )
+    _write_parquet(tmp_path / rel, table)
+    _write_catalog_entries(tmp_path, [rel])
+
+    catalog = DatasetCatalog.load(tmp_path / "_query_engine" / "catalog.json")
+    run_context = RunContext(runid=str(tmp_path), base_dir=tmp_path, scenario=None, catalog=catalog)
+
+    payload = QueryRequest(
+        datasets=[{"path": rel, "alias": "data"}],
+        columns=["data.id AS row_id", "data.score", "data.category"],
+        filters=[
+            {"column": "data.score", "operator": "BETWEEN", "value": [6, 10]},
+            {"column": "data.category", "operator": "IN", "value": ["A", "C"]},
+            {"column": "data.note", "operator": "IS NULL", "value": None},
+        ],
+    )
+
+    result = run_query(run_context, payload)
+    assert result.row_count == 1
+    assert result.records[0]["row_id"] == 3
+
+    payload_not_in = QueryRequest(
+        datasets=[{"path": rel, "alias": "data"}],
+        filters=[{"column": "data.category", "operator": "NOT IN", "value": ["A"]}],
+    )
+
+    result_not_in = run_query(run_context, payload_not_in)
+    categories = {row.get("data.category", row.get("category")) for row in result_not_in.records}
+    assert categories == {"B", "C"}
+
+
+def test_build_plan_for_geojson(tmp_path: Path) -> None:
+    landuse_rel = "landuse/landuse.parquet"
+    geo_rel = "geo/points.geojson"
+
+    landuse_table = pa.table(
+        {
+            "TopazID": [1, 2, 3],
+            "desc": ["A", "B", "C"],
+        }
+    )
+    _write_parquet(tmp_path / landuse_rel, landuse_table)
+
+    geo_path = tmp_path / geo_rel
+    geo_path.parent.mkdir(parents=True, exist_ok=True)
+    geo_path.write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {"topaz_id": 1, "name": "Alpha"},
+                        "geometry": {"type": "Point", "coordinates": [0.0, 0.0]},
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": {"topaz_id": 2, "name": "Beta"},
+                        "geometry": {"type": "Point", "coordinates": [1.0, 1.0]},
+                    },
+                ],
+            }
+        )
+    )
+
+    _write_catalog_entries(tmp_path, [landuse_rel])
+    catalog_path = tmp_path / "_query_engine" / "catalog.json"
+    catalog_data = json.loads(catalog_path.read_text())
+    catalog_data["files"].append(
+        {
+            "path": geo_rel,
+            "extension": ".geojson",
+            "size_bytes": geo_path.stat().st_size,
+            "modified": "2024-01-01T00:00:00Z",
+            "schema": {
+                "fields": [
+                    {"name": "topaz_id", "type": "INT64"},
+                    {"name": "name", "type": "VARCHAR"},
+                    {"name": "geometry", "type": "GEOMETRY"},
+                ]
+            },
+        }
+    )
+    catalog_path.write_text(json.dumps(catalog_data), encoding="utf-8")
+
+    catalog = DatasetCatalog.load(catalog_path)
+
+    payload = QueryRequest(
+        datasets=[
+            {"path": landuse_rel, "alias": "landuse"},
+            {"path": geo_rel, "alias": "geo"},
+        ],
+        joins=[
+            {"left": "landuse", "right": "geo", "left_on": ["TopazID"], "right_on": ["topaz_id"]},
+        ],
+        columns=[
+            "landuse.TopazID AS topaz_id",
+            "geo.name",
+            "ST_AsGeoJSON(geo.geometry) AS geometry_json",
+        ],
+    )
+
+    plan = build_query_plan(payload, catalog)
+    assert "ST_Read" in plan.sql
+    assert plan.requires_spatial is True
