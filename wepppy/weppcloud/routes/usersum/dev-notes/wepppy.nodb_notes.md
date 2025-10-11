@@ -202,7 +202,7 @@ Historical payloads sometimes require awkward patches (re-ordered dicts, renamed
 ### Redis integration recap
 
 - `db0`: hash per run (locks, attrs, timestamps, RQ job IDs, archive pointer).
-- `db2`: Pub/Sub channels for streaming logs (`StatusMessenger` → `microservices/status`).
+- `db2`: Pub/Sub channels for streaming logs (`StatusMessenger` → `services/status2`).
 - `db13`: cached JSONPickle blobs for faster cold loads.
 
 Ensure Redis is reachable before manipulating NoDb instances: startup code in `base.py` logs CRITICAL errors and falls back to slow path if the cache is offline.

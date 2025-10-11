@@ -1,7 +1,7 @@
 # Docker Compose Topology Plan
 
 ## Goals
-- Run the WEPP monolith (Flask app, RQ workers, Tornado microservices, legacy webservices) with one `docker compose` command.
+- Run the WEPP monolith (Flask app, RQ workers, Go microservices, legacy webservices) with one `docker compose` command.
 - Share the same Python environment across containers using [`uv`](https://github.com/astral-sh/uv) for fast dependency installs and rebuilds.
 - Mount the local `wepppy/` source tree into every service container for live-edit development.
 - Centralize environment via the existing project `.env` so all services inherit identical settings.
@@ -10,8 +10,8 @@
 | Service | Purpose | Port |
 | --- | --- |
 | `weppcloud` | Gunicorn/Flask primary web app + static assets | 8000 |
-| `status` | Tornado WebSocket proxy for Redis status channels | 9002 |
-| `preflight` | Tornado preflight microservice | 9001 |
+| `status` | Go WebSocket proxy (`services/status2`) for Redis status channels | 9002 |
+| `preflight` | Go preflight microservice (`services/preflight2`) | 9001 |
 | `browse` | Starlette File browser service | 9009 |
 | `webpush` | Push notifications/webpush worker | 9003 |
 | `elevationquery` | Elevation lookup microservice | 8002 |
@@ -66,7 +66,7 @@ volumes:
 ## Startup Workflow
 1. Ensure `.env` is populated with Redis host, Postgres creds, and any feature flags.
 2. Run `docker compose build` (uses `uv` to install Python deps).
-3. Bring up the stack: `docker compose up weppcloud status preflight ...` (or `docker compose up --profile core`).
+3. Bring up the stack: `docker compose up weppcloud status preflight ...` (or `docker compose up --profile core`). Remember to start Redis with keyspace notifications (`--notify-keyspace-events Kh`) so preflight2 receives checklist updates.
 4. Run migrations inside the `weppcloud` container if needed: `docker compose run --rm weppcloud flask db upgrade`.
 
 ## Open Questions / Next Steps

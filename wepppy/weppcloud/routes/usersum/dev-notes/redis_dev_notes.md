@@ -34,8 +34,8 @@ Redis underpins WEPPcloud's run orchestration, caching, and collaborative toolin
 
 | DB | Primary role | Typical writers | Typical readers | Notes |
 |----|--------------|----------------|-----------------|-------|
-| 0  | Run-scoped state, timestamps, and file-lock flags (`RedisPrep`) | `wepppy.nodb.redis_prep`, `wepppy.nodb.base`, RQ tasks | `microservices/preflight`, `wepppy` services, CLI utilities | Hash per run ID storing `attrs:*`, `timestamps:*`, `rq:*`, `archive:*`, and `locked:*`. Requires Redis keyspace notifications (`notify-keyspace-events` should include `Kh`) for live preflight updates. |
-| 2  | Real-time status streaming via Pub/Sub | `StatusMessenger`, long-running RQ jobs, climate/soil builders | `microservices/status`, web clients subscribed over WebSockets | Channels follow `<runid>:<channel>` (examples: `:wepp`, `:archive`, `:omni`). No persistence—messages disappear if no subscriber is listening. |
+| 0  | Run-scoped state, timestamps, and file-lock flags (`RedisPrep`) | `wepppy.nodb.redis_prep`, `wepppy.nodb.base`, RQ tasks | `services/preflight2`, `wepppy` services, CLI utilities | Hash per run ID storing `attrs:*`, `timestamps:*`, `rq:*`, `archive:*`, and `locked:*`. Requires Redis keyspace notifications (`notify-keyspace-events` should include `Kh`) for live preflight updates. |
+| 2  | Real-time status streaming via Pub/Sub | `StatusMessenger`, long-running RQ jobs, climate/soil builders | `services/status2`, web clients subscribed over WebSockets | Channels follow `<runid>:<channel>` (examples: `:wepp`, `:archive`, `:omni`). No persistence—messages disappear if no subscriber is listening. |
 | 9  | RQ queues and job metadata | `wepppy.weppcloud.routes.rq.api`, worker callbacks, `wepppy.rq.*` helpers | RQ workers, dashboards, jobinfo APIs, admin scripts | Holds queue lists (`rq:m4`) plus job hashes (`rq:job:<id>`). Make sure `RQ_DB` stays consistent across web, workers, and CLI tooling. |
 | 11 | Server-side Flask sessions (`Flask-Session`) | WEPPcloud web app | WEPPcloud web app | Keys prefixed `session:` with 12-hour TTL. Configurable via `SESSION_REDIS_URL`, `SESSION_REDIS_DB`, or the shared `REDIS_*` settings. |
 | 13 | NoDb JSON cache to accelerate repeated object loads | `wepppy.nodb.base` when saving or rebuilding | Same modules when calling `NoDbBase.getInstance` | Values are JSONPickle payloads keyed `<runid>:<filename>`, TTL 72h. Fails open: if the cache is missing or corrupt we fall back to disk. |
@@ -87,9 +87,9 @@ from wepppy.nodb.status_messenger import StatusMessenger
 StatusMessenger.publish(f"{runid}:wepp", f"rq:{job.id} STARTED run_wepp_rq({runid})")
 ```
 
-- `wepppy.microservices.preflight`: async Tornado service that watches DB 0 keyspace notifications, recomputes the preflight checklist when hashes change, and streams updates to `/run/<runid>` WebSocket clients.
+- `services/preflight2`: Go service that watches DB 0 keyspace notifications, recomputes the preflight checklist when hashes change, and streams updates to `/run/<runid>` WebSocket clients.
 
-- `wepppy.microservices.status`: similar Tornado proxy that subscribes to DB 2 channels and relays those Pub/Sub messages to the browser for live log feeds.
+- `services/status2`: Go WebSocket proxy that subscribes to DB 2 channels and relays those Pub/Sub messages to the browser for live log feeds.
 
 - `wepppy.rq` workers (`wepp_rq.py`, `project_rq.py`, `land_and_soil_rq.py`, etc.): enqueue work in DB 9, publish lifecycle updates through `StatusMessenger`, and record metadata (job IDs, archive pointers) back into `RedisPrep`.
 
@@ -148,14 +148,14 @@ self._exception_file_handler.setLevel(try_redis_get_log_level(self.runid, loggin
 
 The command bar provides a web interface for changing log levels via the `/runs/<runid>/<config>/command_bar/loglevel` POST endpoint. Valid levels are validated against the enum before storage.
 
-### status messenger to microservices.status
+### status messenger to services/status2
 
-`StatusMessenger.publish` pushes plain strings onto `<runid>:<channel>` in DB 2. The `microservices/status` Tornado app subscribes to requested channels, forwards payloads as `{"type": "status", "data": ..}` JSON frames, and maintains heartbeat ping/pong to drop dead sockets. Channel naming consistency (`wepp`, `archive`, `omni`, `fork`, etc.) keeps the front-end selectors simple.
+`StatusMessenger.publish` pushes plain strings onto `<runid>:<channel>` in DB 2. The Go-based `services/status2` WebSocket app subscribes to requested channels, forwards payloads as `{"type": "status", "data": ..}` JSON frames, and maintains heartbeat ping/pong to drop dead sockets. Channel naming consistency (`wepp`, `archive`, `omni`, `fork`, etc.) keeps the front-end selectors simple.
 Jobs that want to surface command-bar notifications can embed the `COMMAND_BAR_RESULT` keyword in their payload. The WebSocket client peels off the message body and calls `commandBar.showResult(...)`, so long-running tasks (for example `set_run_readonly_rq`) can report `manifest.db creation finished`. Keep the leading `rq:<jobid>` prefix so troubleshooting still maps back to Redis job metadata.
 
-### RedisPrep and NoDb file locking to microservices.preflight
+### RedisPrep and NoDb file locking to services/preflight2
 
-The preflight microservice listens to `__keyspace@0__:*` events so it knows when the per-run hash changes. Whenever `RedisPrep` adds a timestamp or a lock flips state, the microservice fetches the updated hash, recomputes checklist booleans (`timestamps:build_soils` > `timestamps:abstract_watershed`, etc.), and pushes a `{"type": "preflight"}` payload to connected browsers. This depends on Redis being configured with keyspace notifications (e.g., `notify-keyspace-events Kh`).
+The preflight microservice listens to `__keyspace@0__:*` events so it knows when the per-run hash changes. Whenever `RedisPrep` adds a timestamp or a lock flips state, the Go service fetches the updated hash, recomputes checklist booleans (`timestamps:build_soils` > `timestamps:abstract_watershed`, etc.), and pushes a `{"type": "preflight"}` payload to connected browsers. This depends on Redis being configured with keyspace notifications (e.g., `notify-keyspace-events Kh`).
 
 ### WEPPcloud README.md editor
 

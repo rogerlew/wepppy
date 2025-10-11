@@ -13,30 +13,30 @@ At the heart of the system is a "NoDb" philosophy: instead of a monolithic datab
 - A queue-driven logging pipeline streams structured status updates from background workers to the browser in milliseconds.
 - Heavy geospatial math is offloaded to Rust crates (`wepppyo3`, `peridot`, WhiteboxTools bindings) so Python orchestrates while SIMD cores do the heavy lifting.
 - Controllers are bundled from source via an automated Gunicorn hook, keeping the UI and back end in lockstep.
-- Everything is wired for DevOps: gunicorn hooks, RQ workers, Tornado microservices, structured logging, and Redis keyspace notifications are treated as first-class infrastructure.
+- Everything is wired for DevOps: gunicorn hooks, RQ workers, Go microservices (`preflight2`, `status2`), structured logging, and Redis keyspace notifications are treated as first-class infrastructure.
 
 ## Architecture at a Glance
 
-Each run lives in a working directory ("wd") seeded by RedisPrep. The Flask layer hands off tasks to Redis Queue (RQ); long-running jobs mutate the NoDb structures and emit telemetry; Tornado apps watch Redis for new signals and stream them to the browser so operators see progress in real time.
+Each run lives in a working directory ("wd") seeded by RedisPrep. The Flask layer hands off tasks to Redis Queue (RQ); long-running jobs mutate the NoDb structures and emit telemetry; Go microservices watch Redis for new signals and stream them to the browser so operators see progress in real time.
 
 ## High Performance Scalable Telemetry Pipeline
 ```text
 NoDb subclass logger
   ↓ QueueHandler + QueueListener (async fan-out)
   ↓ StatusMessengerHandler pushes to Redis DB 2 Pub/Sub
-  ↓ microservices/status Tornado service
+  ↓ services/status2 Go WebSocket service
   ↓ WSClient (controllers.js) WebSocket bridge, offloads from flask workers, enables multiple gunicorn workers (unlike Flask-SocketIO)
   ↓ controlBase panels update logs, checklists, charts
 ```
 - `wepppy.nodb.base` wires every NoDb instance with a `QueueHandler`, pushing log records through `StatusMessengerHandler` into Redis channels like `<runid>:wepp`.
-- `microservices/status.py` is a Tornado WebSocket proxy that subscribes to the channels and fans out JSON frames to browsers, complete with heartbeat pings and exponential backoff reconnects.
+- `services/status2` is a Go WebSocket proxy that subscribes to the channels and fans out JSON frames to browsers, complete with heartbeat pings and exponential backoff reconnects.
 - `controllers_js/ws_client.js` mixes the stream into `controlBase`, so every task panel renders live stdout, RQ job states, and exception traces without page refreshes.
 
 ## NoDb Singletons + Redis Caching
 - `NoDbBase.getInstance(wd)` guarantees a singleton per working directory. Instances are serialized to disk and mirrored into Redis DB 13 for 72 hours so hot runs rebuild instantly.
 - Locking is implemented via Redis hashes in DB 0 (`locked:*.nodb`) to prevent concurrent writers during multi-process jobs. Context managers like `with watershed.locked()` guard critical sections.
 - Log verbosity goes through Redis DB 15. Operators can dial runs to DEBUG without touching config files, and every handler respects the remote setting on init.
-- `RedisPrep` time-stamps milestones (`timestamps:run_wepp_watershed`, `timestamps:abstract_watershed`) and stores RQ job IDs, giving microservices/preflight enough context to render readiness checklists.
+- `RedisPrep` time-stamps milestones (`timestamps:run_wepp_watershed`, `timestamps:abstract_watershed`) and stores RQ job IDs, giving `preflight2` enough context to render readiness checklists.
 
 ## NoDb Module Exports & Legacy Imports
 - Every NoDb controller module now declares an explicit `__all__` that captures the public surface (the primary `NoDbBase` subclass, its companion enums/exceptions, and any helper utilities used outside the module). When you add new public functions or classes, update the module’s `__all__` immediately.
@@ -60,12 +60,12 @@ NoDb subclass logger
 ## DevOps Notes
 - Redis is mission control. DB 0 tracks run metadata, DB 2 streams status, DB 9 powers RQ, DB 11 stores Flask sessions, DB 13 caches NoDb JSON, DB 14 manages README editor locks, DB 15 holds log levels. See `wepppy/weppcloud/routes/usersum/dev-notes/redis_dev_notes.md` for ops drills.
 - Coding conventions live in `wepppy/weppcloud/routes/usersum/dev-notes/style-guide.md`; skim it before touching batch runners, NoDb modules, or microservices.
-- The microservices are lightweight Tornado apps (`microservices/preflight.py`, `microservices/status.py`) that boot via systemd or the dev scripts under `_scripts/`. They require Redis keyspace notifications (`notify-keyspace-events Kh`) for preflight streaming.
+- The microservices are lightweight Go services (`services/preflight2`, `services/status2`) that boot via systemd or the dev scripts under `_scripts/`. They require Redis keyspace notifications (`notify-keyspace-events Kh`) for preflight streaming.
 - Workers scale horizontally. `wepppy/rq/*.py` modules provide CLI entry points, while `wepppy/weppcloud/routes/rq/api` exposes REST endpoints for job orchestration, cancellation, and status polling.
 - Structured logging is collected per run in the working directory (`<runid>/_logs/`). The queue handler replicates to console, file, and Redis so you get local artifacts plus live dashboards.
 
 ## Docker Compose Dev Stack (Recommended)
-The repository ships with a multi-container development stack (`docker/docker-compose.dev.yml`) that mirrors the production topology: Flask (`weppcloud`), Tornado microservices (`status`, `preflight`), the Starlette browse service, Redis, PostgreSQL, an RQ worker pool, and a Caddy reverse proxy that fronts the entire bundle (and now serves `/weppcloud/static/*` directly).
+The repository ships with a multi-container development stack (`docker/docker-compose.dev.yml`) that mirrors the production topology: Flask (`weppcloud`), Go microservices (`status`, `preflight`), the Starlette browse service, Redis, PostgreSQL, an RQ worker pool, and a Caddy reverse proxy that fronts the entire bundle (and now serves `/weppcloud/static/*` directly).
 
 > docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up -d
 
