@@ -98,7 +98,6 @@ from wepppy.wepp.out import (
     TotalWatSed2
 )
 
-from wepppy.wepp.interchange.watershed_loss import Loss
 
 from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
 
@@ -114,11 +113,6 @@ from wepppy.nodb.base import (
     createProcessPoolExecutor,
 )
 
-from wepppy.wepp.interchange import (
-    generate_interchange_documentation,
-    run_wepp_hillslope_interchange,
-    run_wepp_watershed_interchange
-)
 
 from .wepppost import WeppPost
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -2261,8 +2255,8 @@ class Wepp(NoDbBase):
                 with self.timed('  running wepppost'):
                     self._run_wepppost()
 
-                with self.timed('  running totalwatsed2'):
-                    self._build_totalwatsed2()
+                with self.timed('  running totalwatsed3'):
+                    self._build_totalwatsed3()
 
                 with self.timed('  running hillslope_watbal'):
                     self._run_hillslope_watbal()
@@ -2295,6 +2289,9 @@ class Wepp(NoDbBase):
             prep.timestamp(TaskEnum.run_wepp_watershed)
         except FileNotFoundError:
             pass
+
+        from wepppy.wepp.interchange.watershed_interchange import run_wepp_watershed_interchange
+        from wepppy.wepp.interchange.interchange_documentation import generate_interchange_documentation
 
         run_wepp_watershed_interchange(self.output_dir)
         generate_interchange_documentation(self.wepp_interchange_dir)
@@ -2336,11 +2333,17 @@ class Wepp(NoDbBase):
         totwatsed2.export(fn)
 
     @nodb_timed
+    def _build_totalwatsed3(self):
+        from wepppy.wepp.interchange import run_totalwatsed3
+        run_totalwatsed3(self.wepp_interchange_dir, baseflow_opts=self.baseflow_opts)
+
+    @nodb_timed
     def _export_partitioned_totalwatsed2_dss(self):
         from wepppy.wepp.out import totalwatsed_partitioned_dss_export
         totalwatsed_partitioned_dss_export(self.wd)
 
     def report_loss(self):
+        from wepppy.wepp.interchange.watershed_loss import Loss
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return Loss(loss_pw0, self.has_phosphorus, self.wd)
@@ -2351,6 +2354,7 @@ class Wepp(NoDbBase):
                               meoization=True,
                               exclude_months=None,
                               chn_topaz_id_of_interest=None):
+        from wepppy.wepp.interchange.watershed_loss import Loss
 
         output_dir = self.output_dir
 
@@ -2437,6 +2441,7 @@ class Wepp(NoDbBase):
         return_periods.export_tsv_summary(_join(self.export_dir, fn), extraneous=extraneous)
 
     def report_frq_flood(self):
+        from wepppy.wepp.interchange.watershed_loss import Loss
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
@@ -2492,6 +2497,7 @@ class Wepp(NoDbBase):
 
     @property
     def loss_report(self):
+        from wepppy.wepp.interchange.watershed_loss import Loss
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
 
@@ -2527,6 +2533,7 @@ class Wepp(NoDbBase):
         return d
 
     def query_chn_val(self, measure):
+        from wepppy.wepp.interchange.watershed_loss import Loss
         wd = self.wd
 
         translator = self.watershed_instance.translator_factory()

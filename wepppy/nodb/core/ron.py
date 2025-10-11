@@ -402,7 +402,7 @@ class Ron(NoDbBase):
                         self.init_sbs_map(sbs_map, mod_instance)
                         
         
-        activate_query_engine(self.wd)
+        activate_query_engine(self.wd, run_interchange=False)
         self.trigger(TriggerEvents.ON_INIT_FINISH)
 
     def clean_export_dir(self):

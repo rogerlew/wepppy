@@ -237,12 +237,12 @@ def run_wepp_rq(runid):
                 job.meta['jobs:2,func:_build_hillslope_interchange_rq'] = job2_hillslope_interchange.id
                 job.save()
 
-                job2_totalwatsed2 = q.enqueue_call(_build_totalwatsed2_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
-                job.meta['jobs:2,func:_build_totalwatsed2_rq'] = job2_totalwatsed2.id
+                job2_totalwatsed2 = q.enqueue_call(_build_totalwatsed3_rq, (runid,),  timeout=TIMEOUT, depends_on=job2_hillslope_interchange)
+                job.meta['jobs:2,func:_build_totalwatsed3_rq'] = job2_totalwatsed2.id
                 job.save()
 
                 if wepp.dss_export_on_run_completion:
-                    job2_post_dss_export = q.enqueue_call(post_dss_export_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
+                    job2_post_dss_export = q.enqueue_call(post_dss_export_rq, (runid,),  timeout=TIMEOUT, depends_on=job2_hillslope_interchange)
                     job.meta['jobs:2,func:_post_dss_export_rq'] = job2_post_dss_export.id
                     job.save()
 
@@ -618,7 +618,7 @@ def _build_hillslope_interchange_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def _build_totalwatsed2_rq(runid):
+def _build_totalwatsed3_rq(runid):
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -626,7 +626,7 @@ def _build_totalwatsed2_rq(runid):
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
-        wepp._build_totalwatsed2()
+        wepp._build_totalwatsed3()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

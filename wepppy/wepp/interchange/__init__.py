@@ -14,6 +14,7 @@ from .hill_interchange import run_wepp_hillslope_interchange
 from .watershed_loss_interchange import run_wepp_watershed_loss_interchange
 from .watershed_interchange import run_wepp_watershed_interchange
 from .interchange_documentation import generate_interchange_documentation
+from .totalwatsed3 import run_totalwatsed3
 
 __all__ = [
     "generate_interchange_documentation",
@@ -32,4 +33,5 @@ __all__ = [
     "run_wepp_watershed_chan_peak_interchange",
     "run_wepp_watershed_loss_interchange",
     "run_wepp_watershed_interchange",
+    "run_totalwatsed3",
 ]

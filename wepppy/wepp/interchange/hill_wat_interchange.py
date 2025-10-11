@@ -73,6 +73,7 @@ SCHEMA = pa.schema(
         pa_field("wepp_id", pa.int32()),
         pa_field("ofe_id", pa.int16()),
         pa_field("year", pa.int16()),
+        pa_field("day", pa.int16()),
         pa_field("julian", pa.int16()),
         pa_field("month", pa.int8()),
         pa_field("day_of_month", pa.int8()),
@@ -157,7 +158,7 @@ def _parse_wat_file(path: Path) -> pa.Table:
 
     out = _init_column_store()
 
-    for raw_line in lines[data_start:]:
+    for i, raw_line in enumerate(lines[data_start:]):
         if not raw_line.strip():
             continue
         tokens = raw_line.split()
@@ -167,6 +168,7 @@ def _parse_wat_file(path: Path) -> pa.Table:
         julian = int(tokens[column_positions["J"]])
         year = int(tokens[column_positions["Y"]])
         month, day_of_month = _julian_to_calendar(year, julian)
+        day = i + 1
         wy = determine_wateryear(year, julian)
         ofe_id = int(tokens[column_positions["OFE"]])
 
@@ -174,6 +176,7 @@ def _parse_wat_file(path: Path) -> pa.Table:
             "wepp_id": wepp_id,
             "ofe_id": ofe_id,
             "year": year,
+            "day": day,
             "julian": julian,
             "month": month,
             "day_of_month": day_of_month,
