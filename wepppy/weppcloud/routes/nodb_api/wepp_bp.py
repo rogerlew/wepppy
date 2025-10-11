@@ -386,6 +386,50 @@ def plot_wepp_streamflow(runid, config):
         exclude_yr_indxs = [0, 1]
 
     wd = get_wd(runid)
+
+    if _exists(_join(wd, 'wepp/output/interchange/totalwatsed3.parquet')):
+        payload = {
+            "datasets": [
+                {
+                    "path": "wepp/output/interchange/totalwatsed3.parquet",
+                    "alias": "totalwatsed3",
+                }
+            ],
+            "columns": [
+                "totalwatsed3.year",  # as year
+                "totalwatsed3.month", # as month
+                "totalwatsed3.day_of_month", # as day_of_month
+                "totalwatsed3.Precipitation", # as Precipitation
+                "totalwatsed3.Rain+Melt", # as RainMelt
+                "totalwatsed3.Lateral Flow", # as LateralFlow
+                "totalwatsed3.Baseflow", # as Baseflow
+                "totalwatsed3.Runoff", # as Runoff
+            ],
+            #...more payload details...
+        }
+    elif _exists(_join(wd, 'wepp/output/totalwatsed2.parquet')):
+        payload = {
+            "datasets": [
+                {
+                    "path": "wepp/output/totalwatsed2.parquet",
+                    "alias": "totalwatsed2",
+                }
+            ],
+            "columns": [
+                "totalwatsed2.Year",  # as year
+                "totalwatsed2.Month", # as month
+                "totalwatsed2.Day", # day_of_month
+                "totalwatsed2.Precipitation (mm)", # as Precipitation
+                "totalwatsed2.Rain + Melt (mm)", # as RainMelt
+                "totalwatsed2.Lateral Flow (mm)", # as LateralFlow
+                "totalwatsed2.Baseflow (mm)", # as Baseflow
+                "totalwatsed2.Runoff (mm)", # as Runoff
+            ],
+            #...more payload details...
+        }
+    else:
+        return error_factory('No daily streamflow data available for plotting')
+    
     ron = Ron.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
     return render_template('reports/wepp/daily_streamflow_graph.htm', runid=runid, config=config,
