@@ -608,7 +608,11 @@ def _build_hillslope_interchange_rq(runid):
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        run_wepp_hillslope_interchange(wd)
+        start_year = None
+        climate = Climate.getInstance(wd)
+        if getattr(climate, "observed_start_year", None) is not None:
+            start_year = climate.observed_start_year
+        run_wepp_hillslope_interchange(_join(wd, 'wepp/output'), start_year=start_year)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -682,7 +686,12 @@ def _post_watershed_interchange_rq(runid):
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        run_wepp_watershed_interchange(wd)
+        start_year = None
+        climate = Climate.getInstance(wd)
+        if getattr(climate, "observed_start_year", None) is not None:
+            start_year = climate.observed_start_year
+        run_wepp_watershed_interchange(_join(wd, 'wepp/output'), start_year=start_year)
+        generate_interchange_documentation(_join(wd, 'wepp/output/interchange'))
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
