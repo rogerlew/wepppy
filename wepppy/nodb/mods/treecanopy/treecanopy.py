@@ -17,6 +17,7 @@ from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.nodb.base import NoDbBase, TriggerEvents
+from wepppy.query_engine import update_catalog_entry
 
 from .treecanopy_map import TreecanopyMap
 
@@ -85,6 +86,8 @@ class Treecanopy(NoDbBase):
                          self.treecanopy_fn, _map.cellsize,
                          v=self.wmesque_version, 
                          wmesque_endpoint=self.wmesque_endpoint)
+        
+        update_catalog_entry(self.wd, self.treecanopy_dir)
 
     def on(self, evt):
         pass

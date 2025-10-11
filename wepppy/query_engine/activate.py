@@ -23,6 +23,8 @@ GEO_SCHEMA_EXTENSIONS: tuple[str, ...] = (
     ".geojson",
 )
 
+READONLY_SENTINEL = "READONLY"
+
 
 def activate_query_engine(
     wd: str | Path,
@@ -53,6 +55,8 @@ def activate_query_engine(
     base = Path(wd).expanduser().resolve()
     if not base.exists():
         raise FileNotFoundError(base)
+
+    _raise_if_readonly(base)
 
     query_engine_dir = base / "_query_engine"
     query_engine_dir.mkdir(exist_ok=True)
@@ -88,6 +92,84 @@ def activate_query_engine(
     catalog_path.write_text(json.dumps(catalog, indent=2, sort_keys=True), encoding="utf-8")
 
     return catalog
+
+
+def update_catalog_entry(
+    wd: str | Path,
+    asset_path: str,
+) -> Dict[str, object] | None:
+    """
+    Update the catalog entry for a single asset under the WEPP working directory.
+
+    Parameters
+    ----------
+    wd : str | Path
+        Working directory for a WEPPcloud run.
+    asset_path : str
+        Path to the asset relative to the working directory.
+
+    Returns
+    -------
+    dict | None
+        The updated catalog entry, or None if the file no longer exists and was removed.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the working directory or catalog does not exist.
+    PermissionError
+        If the working directory is flagged as read-only.
+    ValueError
+        If the requested path is outside the working directory.
+    """
+
+    base = Path(wd).expanduser().resolve()
+    if not base.exists():
+        raise FileNotFoundError(base)
+
+    _raise_if_readonly(base)
+
+    rel_path_obj = Path(asset_path)
+    if rel_path_obj.is_absolute():
+        target = rel_path_obj.resolve()
+    else:
+        target = (base / rel_path_obj).resolve()
+
+    try:
+        rel_from_base = target.relative_to(base)
+    except ValueError as exc:
+        raise ValueError(f"Path '{asset_path}' is outside working directory '{base}'") from exc
+
+    catalog_path = base / "_query_engine" / "catalog.json"
+    if not catalog_path.exists():
+        # fall back to full activation
+        return activate_query_engine(base, run_interchange=False)
+
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    files: List[Dict[str, object]] = catalog.get("files", [])
+    files_by_path = {entry["path"]: entry for entry in files}
+
+    updated_entry: Dict[str, object] | None = None
+    if target.exists():
+        if target.is_dir():
+            new_entries = _build_catalog_subset(base, target)
+            for entry in new_entries:
+                files_by_path[entry["path"]] = entry
+            updated_entry = None
+        else:
+            entry = _build_entry(base, target)
+            if entry is None:
+                raise ValueError(f"Unsupported asset type for '{target}'")
+            files_by_path[entry["path"]] = entry
+            updated_entry = entry
+    else:
+        files_by_path.pop(str(rel_from_base).replace(os.sep, "/"), None)
+
+    catalog["files"] = sorted(files_by_path.values(), key=lambda item: item["path"])
+    catalog["generated_at"] = datetime.now(timezone.utc).isoformat()
+    catalog_path.write_text(json.dumps(catalog, indent=2, sort_keys=True), encoding="utf-8")
+
+    return updated_entry
 
 
 def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
@@ -127,31 +209,28 @@ def _build_catalog(base: Path) -> List[Dict[str, object]]:
         root_path = Path(root)
         for name in files:
             path = root_path / name
-            suffix = path.suffix.lower()
-            if suffix not in SUPPORTED_EXTENSIONS:
+            entry = _build_entry(base, path, base_len=base_len)
+            if entry is None:
                 continue
-
-            try:
-                stat = path.stat()
-            except FileNotFoundError:
-                continue
-
-            rel_path = str(path)[base_len:]
-            entry: Dict[str, object] = {
-                "path": rel_path.replace(os.sep, "/"),
-                "extension": suffix,
-                "size_bytes": stat.st_size,
-                "modified": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat(),
-            }
-
-            if suffix == ".parquet":
-                entry["schema"] = _read_parquet_schema(path)
-            elif suffix in GEO_SCHEMA_EXTENSIONS:
-                entry["schema"] = _read_geo_schema(path)
-
             entries.append(entry)
 
     entries.sort(key=lambda item: item["path"])
+    return entries
+
+
+def _build_catalog_subset(base: Path, directory: Path) -> List[Dict[str, object]]:
+    entries: List[Dict[str, object]] = []
+    base_len = len(str(base)) + 1
+
+    for root, _, files in os.walk(directory):
+        root_path = Path(root)
+        for name in files:
+            path = root_path / name
+            entry = _build_entry(base, path, base_len=base_len)
+            if entry is None:
+                continue
+            entries.append(entry)
+
     return entries
 
 
@@ -188,26 +267,36 @@ def _read_geo_schema(path: Path) -> Dict[str, object] | None:
         LOGGER.debug("duckdb not available; skipping geo schema for %s", path)
         return None
 
-    try:
-        with duckdb.connect(database=":memory:") as conn:
-            try:
-                conn.load_extension("spatial")
-            except duckdb.IOException:
-                try:
-                    conn.install_extension("spatial")
-                    conn.load_extension("spatial")
-                except Exception:  # pragma: no cover - environment dependent
-                    LOGGER.debug("Spatial extension unavailable for %s", path, exc_info=True)
-                    return None
 
-            try:
-                table = conn.execute("SELECT * FROM ST_Read(?) LIMIT 0", [str(path)]).fetch_arrow_table()
-            except Exception:  # pragma: no cover - invalid geojson
-                LOGGER.debug("Unable to read geo schema for %s", path, exc_info=True)
-                return None
-
-        fields = [{"name": field.name, "type": str(field.type)} for field in table.schema]
-        return {"fields": fields}
-    except Exception:  # pragma: no cover - defensive logging
-        LOGGER.debug("Geo schema extraction failed for %s", path, exc_info=True)
+def _build_entry(base: Path, path: Path, *, base_len: int | None = None) -> Dict[str, object] | None:
+    suffix = path.suffix.lower()
+    if suffix not in SUPPORTED_EXTENSIONS:
         return None
+
+    try:
+        stat = path.stat()
+    except FileNotFoundError:
+        return None
+
+    if base_len is None:
+        base_len = len(str(base)) + 1
+
+    rel_path = str(path)[base_len:]
+    entry: Dict[str, object] = {
+        "path": rel_path.replace(os.sep, "/"),
+        "extension": suffix,
+        "size_bytes": stat.st_size,
+        "modified": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat(),
+    }
+
+    if suffix == ".parquet":
+        entry["schema"] = _read_parquet_schema(path)
+    elif suffix in GEO_SCHEMA_EXTENSIONS:
+        entry["schema"] = _read_geo_schema(path)
+
+    return entry
+
+
+def _raise_if_readonly(base: Path) -> None:
+    if (base / READONLY_SENTINEL).exists():
+        raise PermissionError(f"Working directory '{base}' is flagged as read-only")

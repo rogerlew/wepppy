@@ -16,7 +16,6 @@ import numpy as np
 import pandas as pd
 import pyarrow
 
-from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.nodb.core import *
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -25,6 +24,8 @@ from wepppy.landcover.rap import *
 import wepppyo3
 from wepppyo3.raster_characteristics import identify_median_single_raster_key
 from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
+
+from wepppy.query_engine.activate import update_catalog_entry
 
 from .rap import RAPPointData
 
@@ -202,6 +203,7 @@ class RAP_TS(NoDbBase):
                             raise
 
             self._rap_mgr = rap_mgr
+            update_catalog_entry(self.wd, self.rap_dir)
 
     def on(self, evt):
         pass
@@ -329,6 +331,7 @@ class RAP_TS(NoDbBase):
                     df = pd.DataFrame(records)
                     parquet_path = _join(self.rap_dir, 'rap_ts.parquet')
                     df.to_parquet(parquet_path)
+                    update_catalog_entry(self.wd, 'rap/rap_ts.parquet')
                     
             self.data = data_ds
 

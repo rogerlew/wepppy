@@ -26,6 +26,7 @@ import pandas as pd
 from deprecated import deprecated
 
 from wepppy.landcover import LandcoverMap
+from wepppy.query_engine import update_catalog_entry
 from wepppy.wepp.management import get_management_summary
 from wepppy.topo.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import isfloat
@@ -308,6 +309,7 @@ class Landuse(NoDbBase):
         if retrieve_nlcd:
             wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize, 
                              v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
+            update_catalog_entry(self.wd, lc_fn)
         elif not _exists(lc_fn):
             raise FileNotFoundError(f"'{lc_fn}' not found!")
             
@@ -349,6 +351,7 @@ class Landuse(NoDbBase):
 
         wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize, 
                          v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
+        update_catalog_entry(self.wd, lc_fn)
 
         # read the keys out of the raster
         nlcd, transform, proj = read_raster(lc_fn, dtype=np.int32)
@@ -513,6 +516,7 @@ class Landuse(NoDbBase):
             lc_fn = _join(frac_dir, frac.replace('/', '_') + '.tif')
             wmesque_retrieve(frac, _map.extent, lc_fn, _map.cellsize, 
                              v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
+            update_catalog_entry(self.wd, lc_fn)
 
             if wepppyo3 is None:
                 lc = LandcoverMap(lc_fn)
@@ -1027,6 +1031,7 @@ class Landuse(NoDbBase):
         df.reset_index(inplace=True)
         df['TopazID'] = df['TopazID'].astype(str).astype('int64')
         df.to_parquet(_join(self.lc_dir, 'landuse.parquet'))
+        update_catalog_entry(self.wd, 'landuse/landuse.parquet')
 
     @property
     def hill_table(self):

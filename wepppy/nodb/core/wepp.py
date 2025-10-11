@@ -113,6 +113,12 @@ from wepppy.nodb.base import (
     createProcessPoolExecutor,
 )
 
+from wepppy.wepp.interchange import (
+    generate_interchange_documentation,
+    run_wepp_hillslope_interchange,
+    run_wepp_watershed_interchange
+)
+
 from .wepppost import WeppPost
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
@@ -1841,6 +1847,9 @@ class Wepp(NoDbBase):
         except FileNotFoundError:
             pass
 
+        run_wepp_hillslope_interchange(self.output_dir)
+        generate_interchange_documentation(self.wepp_interchange_dir)
+
     #
     # watershed
     #
@@ -2288,6 +2297,9 @@ class Wepp(NoDbBase):
             prep.timestamp(TaskEnum.run_wepp_watershed)
         except FileNotFoundError:
             pass
+
+        run_wepp_watershed_interchange(self.output_dir)
+        generate_interchange_documentation(self.wepp_interchange_dir)
 
     def post_discord_wepp_run_complete(self):
         if send_discord_message is not None:

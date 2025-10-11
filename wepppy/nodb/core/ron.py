@@ -38,6 +38,8 @@ from wepppy.nodb.duckdb_agents import (
     get_landuse_subs_summary
 )
 
+from wepppy.query_engine.activate import activate_query_engine, update_catalog_entry
+
 __all__ = [
     'Map',
     'RonNoDbLockedException',
@@ -400,6 +402,7 @@ class Ron(NoDbBase):
                         self.init_sbs_map(sbs_map, mod_instance)
                         
         
+        activate_query_engine(self.wd)
         self.trigger(TriggerEvents.ON_INIT_FINISH)
 
     def clean_export_dir(self):
@@ -612,6 +615,7 @@ class Ron(NoDbBase):
                              v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
 
         assert _exists(self.dem_fn)
+        update_catalog_entry(self.wd, self.dem_fn)
 
         try:
             prep = RedisPrep.getInstance(self.wd)

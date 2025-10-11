@@ -21,6 +21,11 @@ from wepppy.config.redis_settings import (
     redis_host,
 )
 
+from wepppy.wepp.interchange import (
+    run_wepp_hillslope_interchange, 
+    run_wepp_watershed_interchange, 
+    generate_interchange_documentation
+)
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from wepp_runner import (
@@ -225,8 +230,13 @@ def run_wepp_rq(runid):
             job.meta[f'jobs:2,func:_prep_watershed_rq'] = job2_watershed_prep.id
 
             job2_totalwatsed2 = None
+            job2_hillslope_interchange = None
             job2_post_dss_export = None
             if not climate.is_single_storm:
+                job2_hillslope_interchange = q.enqueue_call(_build_hillslope_interchange_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
+                job.meta['jobs:2,func:_build_hillslope_interchange_rq'] = job2_hillslope_interchange.id
+                job.save()
+
                 job2_totalwatsed2 = q.enqueue_call(_build_totalwatsed2_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
                 job.meta['jobs:2,func:_build_totalwatsed2_rq'] = job2_totalwatsed2.id
                 job.save()
@@ -314,13 +324,8 @@ def run_wepp_rq(runid):
                 jobs4_post.append(_job)
                 job.save()
 
-            _job = q.enqueue_call(_post_compress_pass_pw0_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-            job.meta['jobs:4,func:_post_compress_pass_pw0_rq'] = _job.id
-            jobs4_post.append(_job)
-            job.save()
-
-            _job = q.enqueue_call(_post_compress_soil_pw0_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-            job.meta['jobs:4,func:_post_compress_soil_pw0_rq'] = _job.id
+            _job = q.enqueue_call(_post_watershed_interchange_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
+            job.meta['jobs:4,func:_post_watershed_interchange_rq'] = _job.id
             jobs4_post.append(_job)
             job.save()
 
@@ -336,6 +341,9 @@ def run_wepp_rq(runid):
                 job.meta['jobs:5,func:_post_gpkg_export_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
+
+            if job2_hillslope_interchange is not None:
+                jobs5_post.append(job2_hillslope_interchange)
 
             if job2_totalwatsed2 is not None:
                 jobs5_post.append(job2_totalwatsed2)
@@ -593,6 +601,19 @@ def _analyze_return_periods_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+def _build_hillslope_interchange_rq(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        run_wepp_hillslope_interchange(wd)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
 def _build_totalwatsed2_rq(runid):
     try:
         job = get_current_job()
@@ -654,31 +675,14 @@ def _post_run_wepp_post_rq(runid):
         raise
 
 
-def _post_compress_pass_pw0_rq(runid):
+def _post_watershed_interchange_rq(runid):
     try:
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        target = _join(wd, 'wepp/output/pass_pw0.txt')
-        if _exists(target):
-            compress_fn(target)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
-        raise
-
-
-def _post_compress_soil_pw0_rq(runid):
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        target = _join(wd, 'wepp/output/soil_pw0.txt')
-        compress_fn(target)
+        run_wepp_watershed_interchange(wd)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
