@@ -414,7 +414,7 @@ class Omni(NoDbBase):
             - run_omni_contrasts(): invoke _run_contrast for each saved contrast
         • Reporting
             - scenarios_report(): concatenate per-scenario loss_pw0 parquet files into one DataFrame
-            - compile_hillslope_summaries(exclude_yr_indxs=None): build and save detailed
+            - compile_hillslope_summaries(): build and save detailed
                 hillslope summaries across base and all parsed scenarios
     Public Attributes (stored in omni.nodb):
         - wd: working directory for WEPP inputs/outputs
@@ -1459,7 +1459,7 @@ class Omni(NoDbBase):
 
         return combined
     
-    def compile_hillslope_summaries(self, exclude_yr_indxs=None):
+    def compile_hillslope_summaries(self):
         global OMNI_REL_DIR
         from wepppy.nodb.core import Wepp
         from wepppy.wepp.stats import HillSummary
@@ -1473,8 +1473,7 @@ class Omni(NoDbBase):
 
         dfs = []
         for scenario, wd in scenario_wds.items():
-            loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
-            is_singlestorm = loss.is_singlestorm
+            loss = Wepp.getInstance(wd).report_loss()
             hill_rpt = HillSummary(loss)
             df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
             df['scenario'] = scenario
@@ -1504,7 +1503,7 @@ class Omni(NoDbBase):
         combined.to_parquet(out_path)
 
 
-    def compile_channel_summaries(self, exclude_yr_indxs=None):
+    def compile_channel_summaries(self):
         global OMNI_REL_DIR
         from wepppy.nodb.core import Wepp
         from wepppy.wepp.stats import ChannelSummary
@@ -1518,8 +1517,7 @@ class Omni(NoDbBase):
 
         dfs = []
         for scenario, wd in scenario_wds.items():
-            loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
-            is_singlestorm = loss.is_singlestorm
+            loss = Wepp.getInstance(wd).report_loss()
             channel_rpt = ChannelSummary(loss)
             df = channel_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
             df['scenario'] = scenario
