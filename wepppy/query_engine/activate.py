@@ -195,8 +195,8 @@ def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
             run_wepp_watershed_interchange(output_dir, start_year=start_year)
             generate_interchange_documentation(interchange_dir)
         except Exception as exc:  # pragma: no cover - defensive logging
-            LOGGER.exception("Failed to generate interchange products for %s", output_dir)
-            raise
+            LOGGER.warning("Failed to generate interchange products for %s", output_dir)
+            pass
 
 
 def _build_catalog(base: Path) -> List[Dict[str, object]]:
