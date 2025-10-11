@@ -1,12 +1,12 @@
 import csv
-from os.path import join as _join
-
+import math
 from collections import OrderedDict
+from os.path import join as _join
+from typing import Dict
 
 from wepppy.wepp.out import TotalWatSed2
-from wepppy.wepp.out.loss import _parse_tbl
+from wepppy.wepp.out.loss import Loss
 
-from wepppy.all_your_base import try_parse
 from .row_data import RowData
 
 
@@ -18,89 +18,51 @@ class SedimentDelivery(object):
         wepp = Wepp.getInstance(wd)
 
         loss_pw0 = _join(wepp.output_dir, 'loss_pw0.txt')
-        # read the loss report
-        with open(loss_pw0) as fp:
-            lines = fp.readlines()
+        loss_report = Loss(loss_pw0, wepp.has_phosphorus, wepp.wd)
 
-        # strip trailing and leading white space
-        lines = [L.strip() for L in lines]
-
-        sed_discharge = None
-        indx0 = []
-        for i, L in enumerate(lines):
-            if 'Avg. Ann. sediment discharge from outlet' in L:
-                indx0.append(i)
-        if len(indx0) > 0:
-
-            sed_discharge = float(lines[indx0[-1]].split('=')[-1].split()[0])
-
-        # Find class table
-        indx0 = []
-        for i, L in enumerate(lines):
-            if 'sediment particle information leaving' in L.lower():
-                indx0.append(i)
-
-        if len(indx0) == 0:
+        class_data = loss_report.class_data
+        if not class_data:
             self.class_data = None
             return
 
-        indx0 = indx0[-1]
-        lines = lines[indx0:]
+        def _safe_value(entry: Dict[str, object], key: str) -> float:
+            value = entry.get(key)
+            try:
+                numeric = float(value)
+            except (TypeError, ValueError):
+                return 0.0
+            return 0.0 if math.isnan(numeric) else numeric
 
-        assert lines[7].startswith('1')
-        assert lines[8].startswith('2')
-        assert lines[9].startswith('3')
-        assert lines[10].startswith('4')
-        assert lines[11].startswith('5')
+        self.class_data = class_data
+        self.class_fractions = [_safe_value(row, 'Fraction In Flow Exiting') for row in class_data]
 
-        class_data = _parse_tbl(lines[7:12],
-                                ['Class', 'Diameter', 'Specific Gravity',
-                                 'Pct Sand', 'Pct Silt', 'Pct Clay', 'Pct OM',
-                                 'Fraction In Flow Exiting'])
+        particle_distribution = {
+            'clay': sum(_safe_value(row, 'Pct Clay') / 100.0 * _safe_value(row, 'Fraction In Flow Exiting') for row in class_data),
+            'silt': sum(_safe_value(row, 'Pct Silt') / 100.0 * _safe_value(row, 'Fraction In Flow Exiting') for row in class_data),
+            'sand': sum(_safe_value(row, 'Pct Sand') / 100.0 * _safe_value(row, 'Fraction In Flow Exiting') for row in class_data),
+            'organic matter': sum(_safe_value(row, 'Pct OM') / 100.0 * _safe_value(row, 'Fraction In Flow Exiting') for row in class_data),
+        }
 
-        class_fractions = [row['Fraction In Flow Exiting'] for row in class_data]
+        out_lookup = {row['key']: row['value'] for row in loss_report.out_tbl}
+        sed_discharge = out_lookup.get('Avg. Ann. sediment discharge from outlet', 0.0)
+        specific_surface_index = out_lookup.get('Index of specific surface', 0.0)
+        enrichment_ratio_of_spec_surf = out_lookup.get('Enrichment ratio of specific surface', 0.0)
 
-        assert lines[20].startswith('clay')
-        assert lines[21].startswith('silt')
-        assert lines[22].startswith('sand')
-        assert lines[23].startswith('organic matter')
-
-        particle_distribution = {}
-        particle_distribution['clay'] = try_parse(lines[20].split()[-1])
-        particle_distribution['silt'] = try_parse(lines[21].split()[-1])
-        particle_distribution['sand'] = try_parse(lines[22].split()[-1])
-        particle_distribution['organic matter'] = try_parse(lines[23].split()[-1])
-
-        totwatsed_fn = _join(wepp.output_dir, 'totalwatsed.txt')
         totwatsed = TotalWatSed2(wd)
-
         hill_class_fractions = totwatsed.class_fractions
 
-        hill_particle_distribution = {}
-        hill_particle_distribution['clay'] = [c['Pct Clay']/100.0 * f for c, f in zip(class_data, hill_class_fractions)]
-        hill_particle_distribution['silt'] = [c['Pct Silt']/100.0 * f for c, f in zip(class_data, hill_class_fractions)]
-        hill_particle_distribution['sand'] = [c['Pct Sand']/100.0 * f for c, f in zip(class_data, hill_class_fractions)]
-        hill_particle_distribution['organic matter'] = [c['Pct OM']/100.0 * f for c, f in zip(class_data, hill_class_fractions)]
+        hill_particle_distribution = {
+            'clay': sum(_safe_value(row, 'Pct Clay') / 100.0 * frac for row, frac in zip(class_data, hill_class_fractions)),
+            'silt': sum(_safe_value(row, 'Pct Silt') / 100.0 * frac for row, frac in zip(class_data, hill_class_fractions)),
+            'sand': sum(_safe_value(row, 'Pct Sand') / 100.0 * frac for row, frac in zip(class_data, hill_class_fractions)),
+            'organic matter': sum(_safe_value(row, 'Pct OM') / 100.0 * frac for row, frac in zip(class_data, hill_class_fractions)),
+        }
 
-        for k in hill_particle_distribution:
-            hill_particle_distribution[k] = sum(hill_particle_distribution[k])
-
-        assert lines[26].startswith('Index of specific surface')
-        assert lines[27].startswith('Enrichment ratio of specific surface')
-
-        specific_surface_index = try_parse(lines[26].split('=')[-1].split()[0])
-        enrichment_ratio_of_spec_surf = try_parse(lines[27].split('=')[-1].split()[0])
-        
-        self.class_data = class_data
-
-        self.sed_discharge = sed_discharge
-        self.class_fractions = class_fractions
         self.particle_distribution = particle_distribution
-
+        self.sed_discharge = sed_discharge
         self.hill_sed_delivery = totwatsed.sed_delivery / totwatsed.num_years / 1000.0
         self.hill_class_fractions = hill_class_fractions
         self.hill_particle_distribution = hill_particle_distribution
-
         self.specific_surface_index = specific_surface_index  # m**2/g of total sediment
         self.enrichment_ratio_of_spec_surf = enrichment_ratio_of_spec_surf
 
