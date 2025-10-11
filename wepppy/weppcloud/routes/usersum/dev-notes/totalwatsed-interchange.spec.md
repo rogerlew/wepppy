@@ -2,7 +2,7 @@
 
 At after `run_wepp_hillslope_interchange` create `interchange/totalwatsed3.parquet`
 
-Kitchen sink of daily (`day` is day index) measures aggregatd over hillslopes (`wepp_id`s) 
+Kitchen sink of daily (`day` is day index) measures for watershed.
 
 `def run_totalwatsed3(interchange_dir, baseflow_opts: BaseflowOpts, wepp_ids = None | List[int])`
 
@@ -12,11 +12,10 @@ if `wepp_ids` is None aggregate all the wepp_ids, otherwise filter to only inclu
 - H.wat.parquet -> wat
 - H.pass.parquet -> pass
 
-## Schema for totalwatsed3
+## Schema for totalwatsed3, use `schema_utils.pa_field`
 
 | Column | Type | Units | Description | Calculation |
 | --- | --- | --- | --- | --- |
-| wepp_id | int32 |  |  |  |
 | year | int16 |  |  |  |
 | day | int16 |  |  |  |
 | julian | int16 |  |  |  |
@@ -25,43 +24,41 @@ if `wepp_ids` is None aggregate all the wepp_ids, otherwise filter to only inclu
 | water_year | int16 |  |  |  |
 | runvol | double | m^3 | Runoff volume | sum(pass.runvol ) |
 | sbrunv | double | m^3 | Subsurface runoff volume | sum(pass.sbrunv ) |
-| peakro | double | m^3/s | Peak runoff rate | sum(pass.peakro ) |
 | tdet | double | kg | Total detachment | sum(pass.tdet ) |
 | tdep | double | kg | Total deposition | sum(pass.tdep ) |
-| seddep_1 | double | kg | Sediment Class 1 deposition | pass.sedcon_1 * runvol |
-| seddep_2 | double | kg | Sediment Class 2 deposition | pass.sedcon_2 * runvol |
-| seddep_3 | double | kg | Sediment Class 3 deposition | pass.sedcon_3 * runvol |
-| seddep_4 | double | kg | Sediment Class 4 deposition | pass.sedcon_4 * runvol |
-| seddep_5 | double | kg | Sediment Class 5 deposition | pass.sedcon_5 * runvol |
-| Area | double | m^2 | Area that depths apply over | sum(wat.Area)
-| P | double | m^3 | Precipitation | sum(wat.p * 0.001 *  wat.Area) |
+| seddep_1 | double | kg | Sediment Class 1 deposition | sum(pass.sedcon_1 * pass.runvol) |
+| seddep_2 | double | kg | Sediment Class 2 deposition | sum(pass.sedcon_2 * pass.runvol) |
+| seddep_3 | double | kg | Sediment Class 3 deposition | sum(pass.sedcon_3 * pass.runvol) |
+| seddep_4 | double | kg | Sediment Class 4 deposition | sum(pass.sedcon_4 * pass.runvol) |
+| seddep_5 | double | kg | Sediment Class 5 deposition | sum(pass.sedcon_5 * pass.runvol) |
+| Area | double | m^2 | Area that depths apply over | sum(wat.Area) |
+| P | double | m^3 | Precipitation | sum(wat.P * 0.001 *  wat.Area) |
 | RM | double | m^3 | Rainfall+Irrigation+Snowmelt | sum(wat.RM * 0.001 *  wat.Area) |
 | Q | double | m^3 | Daily runoff over eff length | sum(wat.Q * 0.001 *  wat.Area) |
 | Dp | double | m^3 | Deep percolation | sum(wat.Dp * 0.001 *  wat.Area) |
 | latqcc | double | m^3  | Lateral subsurface flow | sum(wat.latqcc * 0.001 *  wat.Area) |
 | QOFE | double | m^3  | Daily runoff scaled to single OFE | sum(wat.QOFE * 0.001 *  wat.Area) |
-| Ep | double | mm | Plant transpiration | sum(wat.Ep * 0.001 *  wat.Area) / Area * 1000 |
-| Es | double | mm | Soil evaporation | sum(wat.Es * 0.001 *  wat.Area) / Area * 1000 |
-| Er | double | mm | Residue evaporation | sum(wat.Er * 0.001 *  wat.Area) / Area * 1000 |
+| Ep | double | m^3 | Plant transpiration | sum(wat.Ep * 0.001 *  wat.Area) |
+| Es | double | m^3 | Soil evaporation | sum(wat.Es * 0.001 *  wat.Area) |
+| Er | double | m^3 | Residue evaporation | sum(wat.Er * 0.001 *  wat.Area) |
 | UpStrmQ | double | mm  | Runon added to OFE | sum(wat.UpStrmQ * 0.001 *  wat.Area) / Area * 1000 |
 | SubRIn | double | mm  | Subsurface runon added to OFE | sum(wat.SubRIn * 0.001 *  wat.Area) / Area * 1000 |
 | Total-Soil Water | double | mm  | Unfrozen water in soil profile | sum(wat.Total-Soil Water * 0.001 *  wat.Area) / Area * 1000 |
 | frozwt | double | mm  | Frozen water in soil profile | sum(wat.frozwt * 0.001 *  wat.Area) / Area * 1000 |
 | Snow-Water | double | mm  | Water in surface snow | sum(wat.Snow-Water * 0.001 *  wat.Area) / Area * 1000 |
-| Tile | double | mm3  | Tile drainage | sum(wat.Tile * 0.001 *  wat.Area) / Area * 1000 |
+| Tile | double | mm  | Tile drainage | sum(wat.Tile * 0.001 *  wat.Area) / Area * 1000 |
 | Irr | double | mm  | Irrigation | sum(wat.Irr * 0.001 *  wat.Area) / Area * 1000 |
 | Precipitation | double | mm | Precipitation | P / Area * 1000 |
 | Rain+Melt | double | mm | Rainfall+Irrigation+Snowmelt | RM / Area * 1000 |
-| Runoff | double | mm | Daily runoff over eff length | Q / Area * 1000 |
 | Percolation | double | mm | Deep percolation | Dp / Area * 1000 |
 | Lateral Flow | double | mm  | Lateral subsurface flow | latqcc / Area * 1000 |
 | Runoff | double | mm  | Daily runoff scaled to single OFE | QOFE / Area * 1000 |
-| Transpiration | double | mm | Plant & Soil transpiration | Ep+Es |
-| Evaporation | double | mm | Plant & Soil transpiration | Er |
-| ET | double | mm | Total ET | Ep+Es+Er |
+| Transpiration | double | mm | Plant transpiration (Ep depth normalized) | Ep / Area * 1000 |
+| Evaporation | double | mm | Soil (Es) + Residue (Er) evaporation (depth normalized) | (Es+Er) / Area * 1000 |
+| ET | double | mm | Total ET (depth normalized Ep+Es+Er)  | (Ep+Es+Er) / Area * 1000 |
 | Baseflow | double | mm | Baseflow | reimplement running calc from totalwatsed.py provided below |
-| Aquifer losses | double | mm | Baseflow | reimplement running calc from totalwatsed.py provided below |
-| Reservoir Volume | double | mm | Baseflow | reimplement running calc from totalwatsed.py provided below |
+| Aquifer losses | double | mm | Aquifer losses | reimplement running calc from totalwatsed.py provided below |
+| Reservoir Volume | double | mm | Reservoir Volume | reimplement running calc from totalwatsed.py provided below |
 | Streamflow | double | mm | Streamflow | Runoff + Lateral Flow + Baseflow |
 
 
@@ -82,6 +79,9 @@ totalwatsed.py
         _res_vol[i] = _res_vol[i - 1] - _baseflow[i - 1] + perc - _aq_losses[i - 1]
         _baseflow[i] = _res_vol[i] * baseflow_opts.bfcoeff
 ```
+
+## interchange specs for relevant input files from `generate_interchange_documentation`
+
 
 ### `H.pass.parquet`
 
