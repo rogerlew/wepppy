@@ -353,3 +353,134 @@ def test_build_plan_for_geojson(tmp_path: Path) -> None:
     plan = build_query_plan(payload, catalog)
     assert "ST_Read" in plan.sql
     assert plan.requires_spatial is True
+
+
+def test_build_plan_with_computed_columns(tmp_path: Path) -> None:
+    rel = "stream/data.parquet"
+    table = pa.table(
+        {
+            "year": [2020, 2020],
+            "month": [1, 1],
+            "day_of_month": [1, 2],
+            "value": [1.0, 2.0],
+        }
+    )
+    _write_parquet(tmp_path / rel, table)
+    _write_catalog_entries(tmp_path, [rel])
+    catalog_path = tmp_path / "_query_engine" / "catalog.json"
+    catalog = DatasetCatalog.load(catalog_path)
+
+    payload = QueryRequest(
+        datasets=[{"path": rel, "alias": "stream"}],
+        columns=["stream.year"],
+        computed_columns=[
+            {
+                "alias": "flow_date",
+                "date_parts": {
+                    "year": "stream.year",
+                    "month": "stream.month",
+                    "day": "stream.day_of_month",
+                },
+            }
+        ],
+    )
+
+    plan = build_query_plan(payload, catalog)
+    assert "MAKE_DATE(stream.year" in plan.sql
+    assert "AS flow_date" in plan.sql
+
+
+def test_run_query_timeseries_reshape(tmp_path: Path) -> None:
+    rel = "wepp/output/interchange/totalwatsed3.parquet"
+    data_dir = (tmp_path / rel).parent
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    schema = pa.schema(
+        [
+            pa.field("year", pa.int16()),
+            pa.field("month", pa.int8()),
+            pa.field("day_of_month", pa.int8()),
+            pa.field("Precipitation", pa.float64()).with_metadata({b"units": b"mm"}),
+            pa.field("Rain+Melt", pa.float64()).with_metadata({b"units": b"mm"}),
+            pa.field("Runoff", pa.float64()).with_metadata({b"units": b"mm", b"description": b"Daily runoff depth"}),
+        ]
+    )
+    table = pa.Table.from_arrays(
+        [
+            pa.array([2000, 2000, 2001], type=pa.int16()),
+            pa.array([1, 1, 1], type=pa.int8()),
+            pa.array([1, 2, 1], type=pa.int8()),
+            pa.array([1.0, 2.0, 3.0]),
+            pa.array([1.5, 1.2, 2.5]),
+            pa.array([0.4, 0.5, 0.6]),
+        ],
+        schema=schema,
+    )
+    pq.write_table(table, tmp_path / rel)
+    _write_catalog_entries(tmp_path, [rel])
+    catalog = DatasetCatalog.load(tmp_path / "_query_engine" / "catalog.json")
+
+    run_context = RunContext(runid=str(tmp_path), base_dir=tmp_path, scenario=None, catalog=catalog)
+
+    payload = QueryRequest(
+        datasets=[{"path": rel, "alias": "tw3"}],
+        columns=[
+            "tw3.year AS year",
+            "tw3.\"Precipitation\"",
+            "tw3.\"Rain+Melt\"",
+            "tw3.Runoff",
+        ],
+        computed_columns=[
+            {
+                "alias": "flow_date",
+                "date_parts": {
+                    "year": "tw3.year",
+                    "month": "tw3.month",
+                    "day": "tw3.day_of_month",
+                },
+            }
+        ],
+        order_by=["flow_date"],
+        include_schema=True,
+        reshape={
+            "type": "timeseries",
+            "index": {"column": "flow_date", "key": "date"},
+            "year_column": "year",
+            "exclude_year_indexes": [0],
+            "series": [
+                {
+                    "column": "Runoff",
+                    "key": "runoff",
+                    "label": "Runoff",
+                    "group": "flow",
+                    "color": "#123456",
+                    "units": "mm",
+                    "description": "Daily runoff depth",
+                },
+                {
+                    "column": "Precipitation",
+                    "key": "precip",
+                    "label": "Precipitation",
+                    "group": "meteo",
+                    "units": "mm",
+                    "description": "Daily precipitation depth",
+                },
+            ],
+            "compact": True,
+        },
+    )
+
+    result = run_query(run_context, payload)
+
+    assert result.records == []
+    assert result.row_count == 1
+    assert result.schema is not None
+    assert result.formatted is not None
+
+    formatted = result.formatted
+    assert formatted["index"]["values"] == ["2001-01-01"]
+    runoff_series = next(series for series in formatted["series"] if series["id"] == "runoff")
+    assert runoff_series["values"] == [0.6]
+    assert runoff_series["units"] == "mm"
+    assert runoff_series["description"] == "Daily runoff depth"
+    assert formatted["excluded_years"] == [2000]
