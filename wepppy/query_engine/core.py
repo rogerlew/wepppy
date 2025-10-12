@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from wepppy.query_engine.catalog import DatasetCatalog
@@ -69,6 +70,29 @@ def _dataset_source_sql(root: Path, spec: DatasetSpec) -> tuple[str, bool]:
     return f"{reader} AS {spec.alias}", requires_spatial
 
 
+_SIMPLE_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _qualify_join_column(alias: str, column: str) -> str:
+    """Return a qualified column suitable for a join condition."""
+    column = column.strip()
+    if not column:
+        raise ValueError("Join column name cannot be empty")
+
+    if "." in column:
+        # Assume already qualified or expression-based; leave unchanged.
+        return column
+
+    if column.startswith('"') and column.endswith('"'):
+        return f"{alias}.{column}"
+
+    if _SIMPLE_IDENTIFIER_RE.match(column):
+        return f"{alias}.{column}"
+
+    escaped = column.replace('"', '""')
+    return f'{alias}."{escaped}"'
+
+
 def _build_join_clause(
     join_spec: JoinSpec,
     alias_to_spec: dict[str, DatasetSpec],
@@ -87,7 +111,7 @@ def _build_join_clause(
     used_aliases.add(join_spec.right)
 
     conditions = [
-        f"{join_spec.left}.{left_col} = {join_spec.right}.{right_col}"
+        f"{_qualify_join_column(join_spec.left, left_col)} = {_qualify_join_column(join_spec.right, right_col)}"
         for left_col, right_col in zip(join_spec.left_on, join_spec.right_on)
     ]
     condition_sql = " AND ".join(conditions)
