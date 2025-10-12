@@ -317,7 +317,6 @@ class Ron(NoDbBase):
         from wepppy.nodb.core.soils import Soils
         from wepppy.nodb.core.climate import Climate
         from wepppy.nodb.core.wepp import Wepp
-        from wepppy.nodb.core.wepppost import WeppPost
         from wepppy.nodb.unitizer import Unitizer
         from wepppy.nodb.mods.observed import Observed
 
@@ -375,7 +374,6 @@ class Ron(NoDbBase):
             Soils(wd, cfg_fn, run_group=run_group, group_name=group_name)
             Climate(wd, cfg_fn, run_group=run_group, group_name=group_name)
             Wepp(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            WeppPost(wd, cfg_fn, run_group=run_group, group_name=group_name)
             Observed(wd, cfg_fn, run_group=run_group, group_name=group_name)
             Unitizer(wd, cfg_fn, run_group=run_group, group_name=group_name)
             prep = RedisPrep(wd, cfg_fn)
