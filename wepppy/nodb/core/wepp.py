@@ -2311,7 +2311,7 @@ class Wepp(NoDbBase):
 
     @nodb_timed
     def _export_partitioned_totalwatsed2_dss(self):
-        from wepppy.wepp.out import totalwatsed_partitioned_dss_export
+        from wepppy.wepp.interchange import totalwatsed_partitioned_dss_export
         totalwatsed_partitioned_dss_export(self.wd)
 
     def report_loss(self):
