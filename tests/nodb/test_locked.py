@@ -1,9 +1,11 @@
+import json
 import os
 import unittest
 from tempfile import TemporaryDirectory
+from time import sleep
 
 from wepppy.nodb.core import Ron
-from wepppy.nodb.base import redis_lock_client
+from wepppy.nodb.base import clear_locks, redis_lock_client
 
 
 @unittest.skipIf(redis_lock_client is None, "Redis lock client is unavailable")
@@ -56,6 +58,47 @@ class RonLockedTests(unittest.TestCase):
             with self.wepp.locked():
                 float('dsd')
         self.assertFalse(self.wepp.islocked())
+
+    def test_distributed_lock_records_token(self):
+        with self.wepp.locked():
+            payload = redis_lock_client.get(self.wepp._distributed_lock_key)
+            self.assertIsNotNone(payload)
+            data = json.loads(payload)
+            self.assertIn('token', data)
+            self.assertTrue(data['token'])
+            self.assertIn('owner', data)
+        self.assertIsNone(redis_lock_client.get(self.wepp._distributed_lock_key))
+
+    def test_lock_expiration_resets_flag(self):
+        try:
+            self.wepp.lock(ttl=2)
+            lock_key = self.wepp._distributed_lock_key
+            self.assertIsNotNone(redis_lock_client.get(lock_key))
+            sleep(3)
+            self.assertFalse(self.wepp.islocked())
+            self.assertIsNone(redis_lock_client.get(lock_key))
+            flag_value = redis_lock_client.hget(self.wepp.runid, self.wepp._file_lock_key)
+            self.assertEqual('false', flag_value)
+        finally:
+            try:
+                self.wepp.unlock(flag='-f')
+            except Exception:
+                pass
+
+    def test_clear_locks_releases_distributed_lock(self):
+        try:
+            self.wepp.lock()
+            lock_key = self.wepp._distributed_lock_key
+            self.assertIsNotNone(redis_lock_client.get(lock_key))
+            cleared = clear_locks(self.wepp.runid)
+            self.assertIn(self.wepp._file_lock_key, cleared)
+            self.assertFalse(self.wepp.islocked())
+            self.assertIsNone(redis_lock_client.get(lock_key))
+        finally:
+            try:
+                self.wepp.unlock(flag='-f')
+            except Exception:
+                pass
 
 
 if __name__ == '__main__':

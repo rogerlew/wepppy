@@ -1,4 +1,5 @@
 import sys
+import os
 import importlib
 
 def test_imports_in_directory(base_path):
