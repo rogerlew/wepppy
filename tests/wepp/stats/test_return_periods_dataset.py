@@ -6,9 +6,11 @@ import sys
 import types
 from pathlib import Path
 
+import duckdb
 import numpy as np
 import pandas as pd
 import pytest
+import pyarrow.parquet as pq
 
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
@@ -184,3 +186,50 @@ def test_return_period_dataset_pipeline(tmp_path):
         gringorten_correction=True,
     )
     assert cached_report.return_periods["Runoff"]
+
+
+def test_refresh_return_period_events_handles_pyarrow_table(monkeypatch, tmp_path):
+    run_dir = _prepare_run_directory(tmp_path)
+
+    original_arrow = duckdb.DuckDBPyRelation.arrow
+
+    def _table_arrow(self):
+        result = original_arrow(self)
+        if hasattr(result, "read_all"):
+            return result.read_all()
+        return result
+
+    monkeypatch.setattr(duckdb.DuckDBPyRelation, "arrow", _table_arrow)
+
+    events_path, ranks_path = refresh_return_period_events(run_dir)
+    events_table = pq.read_table(events_path)
+    ranks_table = pq.read_table(ranks_path)
+
+    assert events_table.num_rows > 0
+    assert ranks_table.num_rows > 0
+
+
+def test_return_periods_export_summary_variants(tmp_path):
+    run_dir = _prepare_run_directory(tmp_path)
+
+    refresh_return_period_events(run_dir)
+    dataset = ReturnPeriodDataset(run_dir, auto_refresh=False)
+    report = dataset.create_report(
+        (2, 5),
+        exclude_yr_indxs=None,
+        exclude_months=None,
+        method="cta",
+        gringorten_correction=True,
+    )
+
+    simple_path = tmp_path / "summary_simple.tsv"
+    report.export_tsv_summary(simple_path)
+    simple_text = simple_path.read_text(encoding="utf-8")
+    assert "WEPPcloud Return Period Analysis" in simple_text
+    assert "Runoff" in simple_text
+
+    extraneous_path = tmp_path / "summary_extraneous.tsv"
+    report.export_tsv_summary(extraneous_path, extraneous=True)
+    extraneous_text = extraneous_path.read_text(encoding="utf-8")
+    assert "Recurrence Interval (years)" in extraneous_text
+    assert "Weibull T" in extraneous_text
