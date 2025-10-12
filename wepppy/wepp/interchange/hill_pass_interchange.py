@@ -14,6 +14,20 @@ from .concurrency import write_parquet_with_pool
 from .schema_utils import pa_field
 from ._utils import _parse_float, _julian_to_calendar
 
+
+"""
+Example PASS file content:
+p1.cli                                             
+  100         1
+.23400E+05
+  5    0.20000E-05 0.10000E-04 0.34500E-04 0.54500E-03 0.20000E-03
+    0.00     0.00     0.00     0.00
+NO EVENT      2    25      0.65587E+01 0.00000E+00
+EVENT         3     8      0.10800E+05 0.11345E+00 0.63642E-01 0.27836E-02 0.65137E+02 0.00000E+00 0.00000E+00 0.00000E+00 0.00000E+00 0.10150E-01      0.31549E+01 0.00000E+00 0.34317E-02 0.33028E-02 0.13868E-01      0.24152E-01 0.36816E-02 0.70850E-01 0.68190E-01 0.28631E+00
+SUBEVENT      2   152      0.91566E-05 0.21426E+00 0.00000E+00 0.00000E+00 0.15037E+02 0.00000E+00
+"""
+
+
 EVENT_LABELS = {"EVENT", "SUBEVENT", "NO EVENT"}
 SEDCLASS_COUNT = 5
 EVENT_FLOAT_COUNT = 12 + (2 * SEDCLASS_COUNT) + 2  # dur..tdep + sedcon + frcflw + gwbfv/gwdsv
