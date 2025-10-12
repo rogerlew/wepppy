@@ -5,11 +5,11 @@ import wepppy
 from .._common import *  # noqa: F401,F403
 
 from wepppy.all_your_base import isint
-from wepppy.nodb.core import Landuse, Ron, Climate, Watershed, Wepp, WeppPost
+from wepppy.nodb.core import Landuse, Ron, Climate, Watershed, Wepp
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
-from wepppy.wepp.out import DisturbedTotalWatSed2, Element, HillWat, TotalWatSed2
+from wepppy.wepp.out import Element, HillWat, TotalWatSed2
 from wepppy.wepp.stats.summary import ChannelSummary, HillSummary, OutletSummary
 from wepppy.wepp.stats.total_watbal import TotalWatbal
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
@@ -205,36 +205,22 @@ def report_wepp_run_summary(runid, config):
 def report_wepp_loss(runid, config):
     extraneous = request.args.get('extraneous', None) == 'true'
 
-
-    class_fractions = request.args.get('class_fractions', False)
-    class_fractions = str(class_fractions).lower() == 'true'
-
-    fraction_under = request.args.get('fraction_under', None)
-    if fraction_under is not None:
-        try:
-            fraction_under = float(fraction_under)
-        except:
-            fraction_under = None
-
     wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    loss = Wepp.getInstance(wd).report_loss()
     is_singlestorm = Climate.getInstance(wd).is_single_storm
-    out_rpt = OutletSummary(loss)
-    hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
-    chn_rpt = ChannelSummary(loss)
-    translator = Watershed.getInstance(wd).translator_factory()
+    out_rpt = OutletSummary(wd)
+    hill_rpt = HillSummary(wd)
+    chn_rpt = ChannelSummary(wd)
     unitizer = Unitizer.getInstance(wd)
+    ron = Ron.getInstance(wd)
 
     return render_template('reports/wepp/summary.htm', runid=runid, config=config,
+                        ron=ron,
                         extraneous=extraneous,
                         out_rpt=out_rpt,
                         hill_rpt=hill_rpt,
                         chn_rpt=chn_rpt,
-                        translator=translator,
                         unitizer_nodb=unitizer,
                         precisions=wepppy.nodb.unitizer.precisions,
-                        ron=ron,
                         is_singlestorm=is_singlestorm,
                         user=current_user)
 
@@ -274,17 +260,18 @@ def report_wepp_yearly_watbal(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse/')
 @authorize_and_handle_with_exception_factory
 def report_wepp_avg_annual_by_landuse(runid, config):
+    from wepppy.wepp.stats.average_annuals_by_landuse import AverageAnnualsByLanduse
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
     wepp = Wepp.getInstance(wd)
-    dwat = DisturbedTotalWatSed2(wd, wepp.baseflow_opts, wepp.phosphorus_opts)
     unitizer = Unitizer.getInstance(wd)
+    report = AverageAnnualsByLanduse(wd)
 
     return render_template('reports/wepp/avg_annuals_by_landuse.htm', runid=runid, config=config,
                         unitizer_nodb=unitizer,
                         precisions=wepppy.nodb.unitizer.precisions,
-                        report=dwat.annual_averages_report,
+                        report=report,
                         ron=ron,
                         user=current_user)
 
@@ -308,36 +295,6 @@ def report_wepp_avg_annual_watbal(runid, config):
                             # chn_rpt=chn_rpt,
                             ron=ron,
                             user=current_user)
-
-
-@wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp/daily_streamflow.csv')
-@authorize_and_handle_with_exception_factory
-def resources_wepp_streamflow(runid, config):
-    try:
-        res = request.args.get('exclude_yr_indxs')
-        exclude_yr_indxs = []
-        for yr in res.split(','):
-            if isint(yr):
-                exclude_yr_indxs.append(int(yr))
-
-    except:
-        exclude_yr_indxs = [0, 1]
-
-    stacked = request.args.get('stacked', None)
-    if stacked is None:
-        stacked = False
-    else:
-        stacked = stacked.lower() == 'true'
-
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    wepppost = WeppPost.getInstance(wd)
-    fn = _join(ron.export_dir, 'daily_streamflow.csv')
-    wepppost.export_streamflow(fn, exclude_yr_indxs=exclude_yr_indxs, stacked=stacked)
-
-    assert _exists(fn)
-
-    return send_file(fn, mimetype='text/csv', download_name='daily_streamflow.csv')
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed.csv')

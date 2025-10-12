@@ -9,7 +9,7 @@ WEPPcloud keeps long-lived project state in a constellation of "NoDb" singleton 
 - **Per-run singletons.** Every `*.nodb` class is effectively a singleton per run directory (`wd`). `NoDbBase.getInstance(wd)` either loads from Redis cache/db13 or hydrates the JSON file on disk, so callers always receive the same in-memory object for that run.
 - **File-backed structures.** Instances serialize themselves with `jsonpickle` into `<runid>/<name>.nodb`. The class' `filename` attribute ties the Python type to its persisted payload.
 - **Redis-aware.** Instantiation primes logging, publishes into Redis status channels, and consults Redis for locks (`db0`) and cache snapshots (`db13`).
-- **Domain modules.** Each major domain—watershed delineation, land use, soils, climate, WEPP configuration, run metadata (`Ron`), post-processing (`WeppPost`), observed data—implements a subclass with additional behavior, helpers, and computed properties.
+- **Domain modules.** Each major domain—watershed delineation, land use, soils, climate, WEPP configuration, run metadata (`Ron`), observed data—implements a subclass with additional behavior, helpers, and computed properties.
 
 Typical access pattern:
 
@@ -152,11 +152,6 @@ wepp_id = translator.wepp(top=topaz_id)
 - Purpose: central orchestrator for running WEPP: holds binary paths, generated runs (`wepp/runs`), baseflow/snow configs, selected scenarios, and convenience wrappers around `wepp_runner` utilities.
 - Patterns: heavy use of `StatusMessenger` to stream real-time progress; interacts closely with `Watershed`, `Landuse`, `Soils`, and `Climate` instances.
 - Locking: functions like `run_wepp_rq` obtain `Wepp.getInstance(wd)` and immediately check `wepp.islocked()` to avoid overlapping runs.
-
-#### `WeppPost`
-
-- Purpose: handles post-processing exports (DSS files, aggregated statistics). Integrates with Redis for job tracking and publishes updates via `StatusMessenger`.
-- Tip: After injecting new post-processing steps, ensure `dump()` only persists lightweight attributes—write heavy derived files to `wepp/post/` on disk instead of stuffing them into the JSON.
 
 #### `Observed`
 
