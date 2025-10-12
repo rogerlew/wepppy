@@ -101,7 +101,7 @@ from wepppy.wepp.out import (
 
 from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
 
-from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentDelivery
+from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentCharacteristics
 
 # wepppy submodules
 from wepppy.wepp.stats.frq_flood import FrqFlood
@@ -2440,7 +2440,7 @@ class Wepp(NoDbBase):
         return FrqFlood(ebe_rpt, loss_rpt)
 
     def report_sediment_delivery(self):
-        return SedimentDelivery(self.wd)
+        return SedimentCharacteristics(self.wd)
 
     def report_hill_watbal(self):
         return HillslopeWatbal(self.wd)

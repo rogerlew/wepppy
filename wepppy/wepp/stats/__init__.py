@@ -4,7 +4,18 @@ from .return_periods import ReturnPeriods
 from .summary import HillSummary, ChannelSummary, OutletSummary
 from .report_base import ReportBase
 from .total_watbal import TotalWatbal
-from .sediment_delivery import SedimentDelivery, SedimentClassInfo
+from .sediment_characteristics import SedimentCharacteristics
+from .sediment_class_info_report import SedimentClassInfoReport
+from .sediment_channel_distribution_report import (
+    ChannelSedimentDistribution,
+    ChannelClassFractionReport,
+    ChannelParticleDistributionReport,
+)
+from .sediment_hillslope_distribution_report import (
+    HillslopeSedimentDistribution,
+    HillslopeClassFractionReport,
+    HillslopeParticleDistributionReport,
+)
 
 __all__ = [
     'ChannelWatbal',
@@ -15,6 +26,12 @@ __all__ = [
     'OutletSummary',
     'ReportBase',
     'TotalWatbal',
-    'SedimentDelivery',
-    'SedimentClassInfo',
+    'SedimentCharacteristics',
+    'SedimentClassInfoReport',
+    'ChannelSedimentDistribution',
+    'ChannelClassFractionReport',
+    'ChannelParticleDistributionReport',
+    'HillslopeSedimentDistribution',
+    'HillslopeClassFractionReport',
+    'HillslopeParticleDistributionReport',
 ]

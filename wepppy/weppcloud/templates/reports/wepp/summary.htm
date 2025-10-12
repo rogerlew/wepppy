@@ -14,6 +14,7 @@
 {% endif %}
 
 
+{% set outlet_rows = out_rpt.rows(include_extraneous=extraneous) %}
 <table class="table table-condensed" style="width: auto !important;" id="out_tbl">
   <thead>
     <tr>
@@ -25,13 +26,31 @@
     </tr>
   </thead>
   <tbody>
-    {% for name, value, units, v_normed, units_normed in out_rpt.iter(extraneous) %}
+    {% for row in outlet_rows %}
       <tr>
-        <td>{{ name }}&nbsp;</td>
-        <td class="text-right">{{ unitizer(value, units) | safe }}</td>
-        <td>{{ unitizer_units(units) | safe }}&nbsp;</td>
-        <td class="text-right">{{ unitizer(v_normed, units_normed) | safe }}</td>
-        <td>{{ unitizer_units(units_normed) | safe }}</td>
+        <td>{{ row.label }}&nbsp;</td>
+        <td class="text-right">{{ unitizer(row.value, row.units) | safe }}</td>
+        <td>
+          {% if row.units %}
+            {{ unitizer_units(row.units) | safe }}&nbsp;
+          {% else %}
+            &nbsp;
+          {% endif %}
+        </td>
+        <td class="text-right">
+          {% if row.per_area_value is not none %}
+            {{ unitizer(row.per_area_value, row.per_area_units) | safe }}
+          {% else %}
+            &mdash;
+          {% endif %}
+        </td>
+        <td>
+          {% if row.per_area_units %}
+            {{ unitizer_units(row.per_area_units) | safe }}
+          {% else %}
+            &nbsp;
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
   </tbody>

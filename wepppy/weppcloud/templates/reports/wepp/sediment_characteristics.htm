@@ -1,6 +1,19 @@
 {% extends "reports/_page_container.htm" %}
 {% block report_title %}Sediment Characteristics{% endblock %}
 {% block report_content %}
+{% macro render_value(value, units) -%}
+    {% if units == 'ratio' %}
+        {{ '%.3f'|format(value|float) }}
+    {% elif units in ['m**2/g'] %}
+        {{ '%.3f'|format(value|float) }}
+    {% elif units %}
+        {{ unitizer(value, units) | safe }}
+    {% else %}
+        {{ value }}
+    {% endif %}
+{%- endmacro %}
+
+{% set class_report = sediment.class_info_report %}
 <h2>Sediment Characteristics</h2>
 <h5>Sediment Particle Class Information Leaving Channel
     <a onclick="javascript:copytable('class_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
@@ -8,24 +21,16 @@
 <table class="table table-condensed" style="width: auto !important;" id="class_tbl">
   <thead>
     <tr>
-    {% for colname in sed_del.class_info_report.hdr %}
-       <th>{{  colname }}</th>
-    {% endfor %}
+      {% for name in class_report.hdr %}
+        <th>{{ name }}</th>
+      {% endfor %}
     </tr>
   </thead>
   <tbody>
-    {% for row in sed_del.class_info_report %}
+    {% for row in class_report %}
     <tr>
       {% for value, units in row %}
-          <td class="text-right">
-          {% if loop.first %}
-          {{ value}}
-          {% elif loop.index > 3 %}
-          {{'%0.1f'| format(value | float)}}
-          {% else %}
-          {{'%0.3f'| format(value | float)}}
-          {% endif %}
-          </td>
+        <td class="text-right">{{ render_value(value, units) }}</td>
       {% endfor %}
     </tr>
     {% endfor %}
@@ -37,61 +42,77 @@
   <tbody>
     <tr>
       <td>Average Annual Sediment Discharge from Outlet</td>
-      <td style="width:10em;">{{ unitizer(sed_del.sed_discharge, 'tonne/yr') | safe }}&nbsp;</td>
+      <td style="width:10em;">{{ unitizer(sediment.channel.total_discharge_tonne, 'tonne/yr') | safe }}&nbsp;</td>
       <td style="width:5em;">{{ unitizer_units('tonne/yr') | safe }}&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Index of Specific Surface</td>
+      <td style="width:10em;">{{ render_value(sediment.specific_surface_index, 'm**2/g') }}</td>
+      <td style="width:5em;">m²/g&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Enrichment Ratio of Specific Surface</td>
+      <td style="width:10em;">{{ render_value(sediment.enrichment_ratio_of_spec_surface, None) }}</td>
+      <td style="width:5em;">&nbsp;</td>
     </tr>
   </tbody>
 </table>
 
+{% set channel_class_report = sediment.channel.class_fraction_report %}
 <h5>Distribution by Sediment Class
     <a onclick="javascript:copytable('class_fractions')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="class_fractions">
   <thead>
     <tr>
-      <th>Class</th>
-      <th>Fraction</th>
-      <th>Sediment Discharge</th>
+      {% for name in channel_class_report.hdr %}
+        <th>{{ name }}<br>
+            {% set unit = channel_class_report.units[loop.index0] %}
+            {% if unit == 'ratio' %}
+              <span class="header-units">ratio</span>
+            {% elif unit %}
+              <span class="header-units">{{ unitizer_units(unit) | safe }}</span>
+            {% endif %}
+        </th>
+      {% endfor %}
     </tr>
   </thead>
   <tbody>
+    {% for row in channel_class_report %}
     <tr>
-      <td></td>
-      <td>ratio</td>
-      <td>{{ unitizer_units('tonne/yr') | safe }}</td>
-    </tr>
-    {% for fraction in sed_del.class_fractions %}
-    <tr>
-      <td> {{ loop.index }} </td>
-      <td> {{'%0.3f'| format(fraction | float)}} </td>
-      <td>{{ unitizer(fraction * sed_del.sed_discharge, 'tonne/yr') | safe }}</td>
+      {% for value, units in row %}
+        <td class="text-right">{{ render_value(value, units) }}</td>
+      {% endfor %}
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
+{% set channel_particle_report = sediment.channel.particle_distribution_report %}
 <h5>Distribution of Primary Particles and Organic Matter
     <a onclick="javascript:copytable('part_dist')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="part_dist">
   <thead>
     <tr>
-      <th>Type</th>
-      <th>Fraction</th>
-      <th>Sediment Discharge</th>
+      {% for name in channel_particle_report.hdr %}
+        <th>{{ name }}<br>
+            {% set unit = channel_particle_report.units[loop.index0] %}
+            {% if unit == 'ratio' %}
+              <span class="header-units">ratio</span>
+            {% elif unit %}
+              <span class="header-units">{{ unitizer_units(unit) | safe }}</span>
+            {% endif %}
+        </th>
+      {% endfor %}
     </tr>
   </thead>
   <tbody>
+    {% for row in channel_particle_report %}
     <tr>
-      <td></td>
-      <td>ratio</td>
-      <td>{{ unitizer_units('tonne/yr') | safe }}</td>
-    </tr>
-    {% for ptype, fraction in sed_del.particle_distribution.items() %}
-    <tr>
-      <td> {{ ptype }} </td>
-      <td> {{'%0.3f'| format(fraction | float)}} </td>
-      <td>{{ unitizer(fraction * sed_del.sed_discharge, 'tonne/yr') | safe }}</td>
+      {% for value, units in row %}
+        <td class="text-right">{{ render_value(value, units) }}</td>
+      {% endfor %}
     </tr>
     {% endfor %}
   </tbody>
@@ -102,68 +123,75 @@
   <tbody>
     <tr>
       <td>Average Annual Sediment Delivery from Hillslopes</td>
-      <td style="width:10em;">{{ unitizer(sed_del.hill_sed_delivery, 'tonne/yr') | safe }}&nbsp;</td>
+      <td style="width:10em;">{{ unitizer(sediment.hillslope.total_delivery_tonne, 'tonne/yr') | safe }}&nbsp;</td>
       <td style="width:5em;">{{ unitizer_units('tonne/yr') | safe }}&nbsp;</td>
     </tr>
   </tbody>
 </table>
 
+{% set hill_class_report = sediment.hillslope.class_fraction_report %}
 <h5>Distribution by Sediment Class
     <a onclick="javascript:copytable('hill_class_fractions')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="hill_class_fractions">
   <thead>
     <tr>
-      <th>Class</th>
-      <th>Fraction</th>
-      <th>Sediment Delivery</th>
+      {% for name in hill_class_report.hdr %}
+        <th>{{ name }}<br>
+            {% set unit = hill_class_report.units[loop.index0] %}
+            {% if unit == 'ratio' %}
+              <span class="header-units">ratio</span>
+            {% elif unit %}
+              <span class="header-units">{{ unitizer_units(unit) | safe }}</span>
+            {% endif %}
+        </th>
+      {% endfor %}
     </tr>
   </thead>
   <tbody>
+    {% for row in hill_class_report %}
     <tr>
-      <td></td>
-      <td>ratio</td>
-      <td>{{ unitizer_units('tonne/yr') | safe }}</td>
-    </tr>
-    {% for fraction in sed_del.hill_class_fractions %}
-    <tr>
-      <td>{{ loop.index }} </td>
-      <td> {{'%0.3f'| format(fraction | float)}}</td>
-      <td>{{ unitizer(fraction * sed_del.hill_sed_delivery, 'tonne/yr') | safe }}</td>
+      {% for value, units in row %}
+        <td class="text-right">{{ render_value(value, units) }}</td>
+      {% endfor %}
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
+{% set hill_particle_report = sediment.hillslope.particle_distribution_report %}
 <h5>Distribution of Primary Particles and Organic Matter
     <a onclick="javascript:copytable('hill_part_dist')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="hill_part_dist">
   <thead>
     <tr>
-      <th>Type</th>
-      <th>Fraction</th>
-      <th>Sediment Delivery</th>
+      {% for name in hill_particle_report.hdr %}
+        <th>{{ name }}<br>
+            {% set unit = hill_particle_report.units[loop.index0] %}
+            {% if unit == 'ratio' %}
+              <span class="header-units">ratio</span>
+            {% elif unit %}
+              <span class="header-units">{{ unitizer_units(unit) | safe }}</span>
+            {% endif %}
+        </th>
+      {% endfor %}
     </tr>
   </thead>
   <tbody>
+    {% for row in hill_particle_report %}
     <tr>
-      <td></td>
-      <td>ratio</td>
-      <td>{{ unitizer_units('tonne/yr') | safe }}</td>
-    </tr>
-    {% for ptype, fraction in sed_del.hill_particle_distribution.items() %}
-    <tr>
-      <td> {{ ptype }} </td>
-      <td> {{'%0.3f'| format(fraction | float)}} </td>
-      <td>{{ unitizer(fraction * sed_del.hill_sed_delivery, 'tonne/yr') | safe }}</td>
+      {% for value, units in row %}
+        <td class="text-right">{{ render_value(value, units) }}</td>
+      {% endfor %}
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
- <p>The Sediment Particle Class Information Leaving Channel is from the watershed loss file (loss_pw0.txt) the outlet class
-distribution and soil component distributions are also from the watershed loss file. The hillslope statistics are
-aggregated from the hillslope pass file and the soil components are calculated based on the class information leaving
-the channel.</p>
+<p>The sediment characteristics leverage the query-engine parquet assets:
+`loss_pw0.class_data.parquet` for channel particle information, `loss_pw0.out.parquet`
+for outlet totals, and `H.pass.parquet` for hillslope class distributions. All
+per-area conversions and unit normalisations are handled server-side before rendering
+these tables.</p>
 {% endblock %}

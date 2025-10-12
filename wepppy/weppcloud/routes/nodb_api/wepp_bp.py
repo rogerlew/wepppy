@@ -530,7 +530,7 @@ def report_wepp_frq_flood(runid, config):
 def report_wepp_sediment_delivery(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    sed_del = Wepp.getInstance(wd).report_sediment_delivery()
+    sediment = Wepp.getInstance(wd).report_sediment_delivery()
     translator = Watershed.getInstance(wd).translator_factory()
 
     unitizer = Unitizer.getInstance(wd)
@@ -538,7 +538,7 @@ def report_wepp_sediment_delivery(runid, config):
     return render_template('reports/wepp/sediment_characteristics.htm', runid=runid, config=config,
                             unitizer_nodb=unitizer,
                             precisions=wepppy.nodb.unitizer.precisions,
-                            sed_del=sed_del,
+                            sediment=sediment,
                             translator=translator,
                             ron=ron,
                             user=current_user)

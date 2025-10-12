@@ -30,3 +30,16 @@
   optional phosphorus densities). All per-area conversions are handled in SQL with
   `CASE` guards for zero-area channels, yielding a clean DataFrame for the summary
   template.
+
+## Sediment Characteristics
+
+- `SedimentCharacteristics` orchestrates the channel and hillslope sediment views.
+  It reads `loss_pw0.class_data.parquet` for particle definitions/fractions,
+  `loss_pw0.out.parquet` for outlet totals (sediment discharge, specific surface
+  metrics), `H.pass.parquet` for hillslope sediment class masses, and
+  `loss_pw0.all_years.hill.parquet` to determine the simulation year span.
+- `SedimentClassInfoReport` exposes the particle class table rendered in the report.
+- `ChannelSedimentDistribution` supplies both the class-wise discharge table and
+  the particle-type distribution (fractions + tonne·yr⁻¹) derived from outlet totals.
+- `HillslopeSedimentDistribution` aggregates the pass file to average-annual class
+  masses, providing hillslope totals, class distributions, and particle-type splits.
