@@ -5,7 +5,6 @@ from .soils import Soils, SoilsMode
 from .topaz import Topaz, WatershedBoundaryTouchesEdgeError, MinimumChannelLengthTooShortError
 from .watershed import Watershed, WatershedNotAbstractedError
 from .wepp import Wepp
-from .wepppost import WeppPost
 
 __all__ = [
     'Climate', 
@@ -23,6 +22,5 @@ __all__ = [
     'MinimumChannelLengthTooShortError',
     'Watershed', 
     'WatershedNotAbstractedError',
-    'Wepp',
-    'WeppPost'
+    'Wepp'
     ]
