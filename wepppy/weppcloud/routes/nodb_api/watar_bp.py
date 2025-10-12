@@ -4,6 +4,8 @@ import wepppy
 
 from ast import literal_eval
 
+from wepppy.nodb.mods.ash_transport.ash_type import AshType
+
 from .._common import *  # noqa: F401,F403
 
 from wepppy.all_your_base.dateutils import YearlessDate
@@ -15,11 +17,10 @@ from wepppy.nodb.base import *
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.mods.ash_transport import Ash, AshPost
 from wepppy.nodb.mods.disturbed import Disturbed
-from wepppy.wepp.out import Element, HillWat
+from wepppy.wepp.out import HillWat
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize, parse_rec_intervals
 
 from wepppy.wepp.reports import HillSummaryReport, ChannelSummaryReport, OutletSummaryReport
-from wepppy.wepp.reports import TotalWatbalReport
 
 
 watar_bp = Blueprint('watar', __name__)
@@ -89,23 +90,21 @@ def hillslope0_ash(runid, config, topaz_id):
         cli_path = climate.cli_path
         cli_df = ClimateFile(cli_path).as_dataframe()
 
-        element_fn = _join(wepp.output_dir, 'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
-        element = Element(element_fn)
-
         hill_wat_fn = _join(wepp.output_dir, 'H{wepp_id}.wat.dat'.format(wepp_id=wepp_id))
         hill_wat = HillWat(hill_wat_fn)
 
         prefix = 'H{wepp_id}'.format(wepp_id=wepp_id)
         recurrence = [100, 50, 20, 10, 2.5, 1]
 
+        # model selection as alex or anu
         from wepppy.nodb.mods.ash_transport.ash_multi_year_model import WhiteAshModel, BlackAshModel
 
         if _ash_type == AshType.BLACK:
-            _, results, annuals = BlackAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
+            _, results, annuals = BlackAshModel().run_model(_fire_date, cli_df, hill_wat,
                                                             ash_dir, prefix=prefix, recurrence=recurrence,
                                                             ini_ash_depth=ini_ash_depth)
         elif _ash_type == AshType.WHITE:
-            _, results, annuals = WhiteAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
+            _, results, annuals = WhiteAshModel().run_model(_fire_date, cli_df, hill_wat,
                                                             ash_dir, prefix=prefix, recurrence=recurrence,
                                                             ini_ash_depth=ini_ash_depth)
         else:
