@@ -45,11 +45,6 @@ from .core.wepp import (
     WeppNoDbLockedException,
 )
 
-from .core.wepppost import (
-    WeppPost,
-    WeppPostNoDbLockedException,
-)
-
 from .mods.observed.observed import (
     Observed,
     ObservedNoDbLockedException,
