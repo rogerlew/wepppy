@@ -56,21 +56,16 @@ services:
         condition: service_started
 
   status:
-    <<: *wepppy-service
+    build:
+      context: ..
+      dockerfile: services/status2/Dockerfile
+    image: status2-dev
     container_name: weppcloud-status
-    command:
-      - gunicorn
-      - -k
-      - tornado
-      - --workers
-      - "2"
-      - --bind
-      - 0.0.0.0:9002
-      - --log-level
-      - info
-      - --config
-      - wepppy/microservices/_service_files/status_conf.py
-      - wepppy.microservices.status:app
+    environment:
+      STATUS_REDIS_URL: redis://redis:6379/2
+      STATUS_LISTEN_ADDR: 0.0.0.0:9002
+      STATUS_LOG_LEVEL: info
+      STATUS_METRICS_ENABLED: "true"
     ports:
       - "9002:9002"
     depends_on:
@@ -78,21 +73,16 @@ services:
         condition: service_started
 
   preflight:
-    <<: *wepppy-service
+    build:
+      context: ..
+      dockerfile: services/preflight2/Dockerfile
+    image: preflight2-dev
     container_name: weppcloud-preflight
-    command:
-      - gunicorn
-      - -k
-      - tornado
-      - --workers
-      - "2"
-      - --bind
-      - 0.0.0.0:9001
-      - --log-level
-      - info
-      - --config
-      - wepppy/microservices/_service_files/preflight_conf.py
-      - wepppy.microservices.preflight:app
+    environment:
+      PREFLIGHT_REDIS_URL: redis://redis:6379/0
+      PREFLIGHT_LISTEN_ADDR: 0.0.0.0:9001
+      PREFLIGHT_LOG_LEVEL: info
+      PREFLIGHT_METRICS_ENABLED: "true"
     ports:
       - "9001:9001"
     depends_on:
@@ -263,7 +253,7 @@ services:
   redis:
     image: redis:7.4.6
     container_name: wepppy-redis
-    command: ["redis-server", "--appendonly", "yes"]
+    command: ["redis-server", "--notify-keyspace-events", "Kh"]
     ports:
       - "6379:6379"
     volumes:
