@@ -9,21 +9,28 @@
 import os
 from os.path import exists as _exists
 from os.path import join as _join
-from os.path import split as _split
 
-from datetime import datetime, timedelta
+from datetime import datetime
 import io
 import math
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
 
-# wepppy submodules
-from wepppy.wepp.out import TotalWatSed2, Chanwb, Ebe
 from wepppy.all_your_base.hydro.objective_functions import calculate_all_functions
 
 from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.core.wepp import BaseflowOpts
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.wepp.interchange import (
+    run_totalwatsed3,
+    run_wepp_hillslope_pass_interchange,
+    run_wepp_hillslope_wat_interchange,
+    run_wepp_watershed_chanwb_interchange,
+    run_wepp_watershed_ebe_interchange,
+)
 
 __all__ = [
     'validate',
@@ -107,35 +114,14 @@ class Observed(NoDbBase):
     def calc_model_fit(self):
         assert self.has_observed
 
+        observed_df = pd.read_csv(self.observed_fn)
+
+        hillslope_sim, wsarea_m2 = self._load_hillslope_simulation()
         results = {}
-        df = pd.read_csv(self.observed_fn)
+        results['Hillslopes'] = self.run_measures(observed_df, hillslope_sim, 'Hillslopes')
 
-        #
-        # Hillslopes
-        #
-
-        # load hilslope simulation results
-        totwatsed = TotalWatSed2(self.wd)
-        sim = totwatsed.d
-        year0 = sorted(set(sim['Year']))[0]
-        results['Hillslopes'] = self.run_measures(df, sim, 'Hillslopes')
-
-        #
-        # Channels
-        #
-
-        ebe = Ebe(_join(self.output_dir, 'ebe_pw0.txt'))
-        chanwb = Chanwb(_join(self.output_dir, 'chanwb.out'))
-
-        sim = ebe.df
-        sim['Year'] = sim['year'] + year0 - 1
-        sim['Month'] = sim['mo']
-        sim['Day'] = sim['da']
-        sim['Streamflow (mm)'] = chanwb.calc_streamflow(totwatsed.wsarea)
-
-        # TODO: Use chan.out for peak flow
-
-        results['Channels'] = self.run_measures(df, sim, 'Channels')
+        channel_sim = self._load_channel_simulation(wsarea_m2, hillslope_sim['Year'].min() if not hillslope_sim.empty else None)
+        results['Channels'] = self.run_measures(observed_df, channel_sim, 'Channels')
 
         with self.locked():
             self.results = results
@@ -216,6 +202,220 @@ class Observed(NoDbBase):
             ('Daily', dict(calculate_all_functions(Qo, Qm))),
             ('Yearly', dict(calculate_all_functions(Qo_yearly, Qm_yearly)))
         ])
+
+    def _load_hillslope_simulation(self):
+        output_dir = Path(self.output_dir)
+        run_wepp_hillslope_pass_interchange(output_dir)
+        run_wepp_hillslope_wat_interchange(output_dir)
+
+        interchange_dir = output_dir / 'interchange'
+
+        wepp = self.wepp_instance
+        baseflow_opts = getattr(wepp, 'baseflow_opts', None)
+        if baseflow_opts is None:
+            baseflow_opts = BaseflowOpts()
+
+        tot_path = run_totalwatsed3(interchange_dir, baseflow_opts)
+        table = pq.read_table(tot_path)
+        sim = table.to_pandas()
+
+        if sim.empty:
+            empty_columns = [
+                'Year', 'Month', 'Day', 'Julian', 'Water Year',
+                'Streamflow (mm)', 'Sed Del (kg)',
+                'Total P (kg)', 'Soluble Reactive P (kg)', 'Particulate P (kg)',
+            ]
+            return pd.DataFrame(columns=empty_columns), 0.0
+
+        rename_map = {
+            'year': 'Year',
+            'month': 'Month',
+            'day_of_month': 'Day',
+            'julian': 'Julian',
+            'water_year': 'Water Year',
+            'Area': 'Area (m^2)',
+            'P': 'P (m^3)',
+            'RM': 'RM (m^3)',
+            'Q': 'Q (m^3)',
+            'Dp': 'Dp (m^3)',
+            'latqcc': 'latqcc (m^3)',
+            'QOFE': 'QOFE (m^3)',
+            'Ep': 'Ep (m^3)',
+            'Es': 'Es (m^3)',
+            'Er': 'Er (m^3)',
+            'Precipitation': 'Precipitation (mm)',
+            'Rain+Melt': 'Rain + Melt (mm)',
+            'Percolation': 'Percolation (mm)',
+            'Lateral Flow': 'Lateral Flow (mm)',
+            'Runoff': 'Runoff (mm)',
+            'Transpiration': 'Transpiration (mm)',
+            'Evaporation': 'Evaporation (mm)',
+            'ET': 'ET (mm)',
+            'Baseflow': 'Baseflow (mm)',
+            'Aquifer losses': 'Aquifer Losses (mm)',
+            'Reservoir Volume': 'Reservoir Volume (mm)',
+            'Streamflow': 'Streamflow (mm)',
+            'Total-Soil Water': 'Storage (mm)',
+            'Snow-Water': 'Snow-Water (mm)',
+        }
+        sim.rename(columns=rename_map, inplace=True)
+
+        if 'day' in sim:
+            sim.drop(columns=['day'], inplace=True)
+
+        sed_cols = [col for col in sim.columns if col.startswith('seddep_')]
+        if sed_cols:
+            sim[sed_cols] = sim[sed_cols].fillna(0.0)
+            sim['Sed Del (kg)'] = sim[sed_cols].sum(axis=1)
+            for idx, col in enumerate(sed_cols, start=1):
+                sim[f'Sed Del c{idx} (kg)'] = sim[col]
+            sim.drop(columns=sed_cols, inplace=True)
+        else:
+            sim['Sed Del (kg)'] = 0.0
+
+        if {'Es (m^3)', 'Er (m^3)'}.issubset(sim.columns):
+            sim['Es+Er (m^3)'] = sim['Es (m^3)'] + sim['Er (m^3)']
+
+        for col in ('Year', 'Month', 'Day', 'Julian', 'Water Year'):
+            if col in sim:
+                sim[col] = sim[col].astype(int, copy=False)
+
+        if 'Area (m^2)' in sim:
+            sim['Area (m^2)'] = sim['Area (m^2)'].astype(float, copy=False)
+            wsarea_m2 = float(sim['Area (m^2)'].max())
+        else:
+            wsarea_m2 = 0.0
+
+        phos_opts = getattr(wepp, 'phos_opts', None)
+        if phos_opts is None:
+            phos_opts = getattr(wepp, 'phosphorus_opts', None)
+
+        if (
+            phos_opts is not None
+            and getattr(phos_opts, 'isvalid', False)
+            and wsarea_m2 > 0
+            and all(col in sim for col in ('Runoff (mm)', 'Lateral Flow (mm)', 'Baseflow (mm)'))
+        ):
+            totarea_ha = wsarea_m2 / 10000.0
+            sim['P Load (mg)'] = sim['Sed Del (kg)'] * phos_opts.sediment
+            sim['P Runoff (mg)'] = sim['Runoff (mm)'] * phos_opts.surf_runoff * totarea_ha
+            sim['P Lateral (mg)'] = sim['Lateral Flow (mm)'] * phos_opts.lateral_flow * totarea_ha
+            sim['P Baseflow (mg)'] = sim['Baseflow (mm)'] * phos_opts.baseflow * totarea_ha
+            total_p_mg = sim['P Load (mg)'] + sim['P Runoff (mg)'] + sim['P Lateral (mg)'] + sim['P Baseflow (mg)']
+            sim['Total P (kg)'] = total_p_mg / 1_000_000.0
+            sim['Particulate P (kg)'] = sim['P Load (mg)'] / 1_000_000.0
+            sim['Soluble Reactive P (kg)'] = sim['Total P (kg)'] - sim['Particulate P (kg)']
+        else:
+            for col in ('Total P (kg)', 'Particulate P (kg)', 'Soluble Reactive P (kg)'):
+                if col not in sim:
+                    sim[col] = np.nan
+
+        sim.sort_values(['Year', 'Julian', 'Day'], inplace=True, ignore_index=True)
+        return sim, wsarea_m2
+
+    def _load_channel_simulation(self, wsarea_m2, first_year):
+        output_dir = Path(self.output_dir)
+        ebe_path = run_wepp_watershed_ebe_interchange(output_dir)
+        chan_path = run_wepp_watershed_chanwb_interchange(output_dir)
+
+        ebe_table = pq.read_table(ebe_path)
+        ebe_df = ebe_table.to_pandas()
+        if ebe_df.empty:
+            empty_columns = [
+                'Year', 'Month', 'Day', 'Julian', 'Water Year',
+                'Streamflow (mm)', 'Sed Del (kg)',
+                'Total P (kg)', 'Soluble Reactive P (kg)', 'Particulate P (kg)',
+            ]
+            return pd.DataFrame(columns=empty_columns)
+
+        rename_map = {
+            'year': 'Year',
+            'simulation_year': 'simulation_year',
+            'month': 'Month',
+            'day_of_month': 'Day',
+            'julian': 'Julian',
+            'water_year': 'Water Year',
+            'precip': 'Precipitation Depth (mm)',
+            'runoff_volume': 'Runoff Volume (m^3)',
+            'peak_runoff': 'Peak Runoff (m^3/s)',
+            'sediment_yield': 'Sediment Yield (kg)',
+            'soluble_pollutant': 'Soluble Reactive P (kg)',
+            'particulate_pollutant': 'Particulate P (kg)',
+            'total_pollutant': 'Total P (kg)',
+        }
+        ebe_df.rename(columns=rename_map, inplace=True)
+
+        if first_year is not None and 'Year' in ebe_df:
+            mask = ebe_df['Year'] < 1000
+            if mask.any() and 'simulation_year' in ebe_df:
+                ebe_df.loc[mask, 'Year'] = ebe_df.loc[mask, 'simulation_year'].astype(int) + first_year - 1
+
+        for col in ('Year', 'Month', 'Day', 'Julian', 'Water Year'):
+            if col in ebe_df:
+                ebe_df[col] = ebe_df[col].astype(int, copy=False)
+
+        if 'Sediment Yield (kg)' in ebe_df and 'Sed Del (kg)' not in ebe_df:
+            ebe_df['Sed Del (kg)'] = ebe_df['Sediment Yield (kg)']
+        elif 'Sed Del (kg)' not in ebe_df:
+            ebe_df['Sed Del (kg)'] = np.nan
+
+        chan_table = pq.read_table(chan_path)
+        chan_df = chan_table.to_pandas()
+
+        if chan_df.empty:
+            ebe_df['Streamflow (mm)'] = np.nan
+        else:
+            chan_rename = {
+                'year': 'Year',
+                'month': 'Month',
+                'day_of_month': 'Day',
+                'julian': 'Julian',
+                'water_year': 'Water Year',
+            }
+            chan_df.rename(columns=chan_rename, inplace=True)
+
+            for col in ('Year', 'Month', 'Day'):
+                if col in chan_df:
+                    chan_df[col] = chan_df[col].astype(int, copy=False)
+
+            if wsarea_m2 > 0 and 'Outflow (m^3)' in chan_df:
+                chan_df['Streamflow (mm)'] = chan_df['Outflow (m^3)'] / wsarea_m2 * 1000.0
+            else:
+                chan_df['Streamflow (mm)'] = np.nan
+
+            agg_map = {'Streamflow (mm)': 'sum'}
+            if 'Julian' in chan_df:
+                agg_map['Julian'] = 'first'
+            if 'Water Year' in chan_df:
+                agg_map['Water Year'] = 'first'
+
+            chan_daily = chan_df.groupby(['Year', 'Month', 'Day'], as_index=False).agg(agg_map)
+            chan_daily = chan_daily.rename(columns={
+                'Streamflow (mm)': '_chan_streamflow',
+                'Julian': '_chan_julian',
+                'Water Year': '_chan_water_year',
+            })
+
+            ebe_df = ebe_df.merge(chan_daily, on=['Year', 'Month', 'Day'], how='left')
+            if '_chan_streamflow' in ebe_df:
+                ebe_df['Streamflow (mm)'] = ebe_df['_chan_streamflow']
+                ebe_df.drop(columns=['_chan_streamflow'], inplace=True)
+            else:
+                ebe_df['Streamflow (mm)'] = np.nan
+
+            if '_chan_julian' in ebe_df:
+                ebe_df['Julian'] = ebe_df['Julian'].fillna(ebe_df['_chan_julian'])
+                ebe_df.drop(columns=['_chan_julian'], inplace=True)
+
+            if '_chan_water_year' in ebe_df:
+                ebe_df['Water Year'] = ebe_df['Water Year'].fillna(ebe_df['_chan_water_year'])
+                ebe_df.drop(columns=['_chan_water_year'], inplace=True)
+
+        if 'simulation_year' in ebe_df:
+            ebe_df.drop(columns=['simulation_year'], inplace=True)
+
+        ebe_df.sort_values(['Year', 'Julian', 'Day'], inplace=True, ignore_index=True)
+        return ebe_df
 
     def _write_measure(self, Qm, Qo, dates, measure, hillorChannel, dailyorYearly):
         assert len(Qm) == len(Qo)
