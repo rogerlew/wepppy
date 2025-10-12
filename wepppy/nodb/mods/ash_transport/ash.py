@@ -19,7 +19,6 @@ from wepppy.all_your_base import (
     NCPU
 )
 
-from wepppy.wepp import Element
 from wepppy.wepp.out import HillWat
 from wepppy.climates.cligen import ClimateFile
 
@@ -625,10 +624,6 @@ class Ash(NoDbBase):
                     if load_d[topaz_id] <= 0.0:
                         continue
 
-                element_fn = _join(wepp.output_dir,
-                                   'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
-                element = Element(element_fn)
-
                 hill_wat_fn = _join(wepp.output_dir,
                                    'H{wepp_id}.wat.dat'.format(wepp_id=wepp_id))
                 hill_wat = HillWat(hill_wat_fn)
@@ -700,7 +695,6 @@ class Ash(NoDbBase):
                             ini_ash_load=ini_ash_load,
                             ash_bulkdensity=ash_bulkdensity,
                             fire_date=fire_date,
-                            element_d=element.d,
                             cli_df=cli_df,
                             hill_wat=hill_wat,
                             out_dir=ash_dir,

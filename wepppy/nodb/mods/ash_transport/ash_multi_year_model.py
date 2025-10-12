@@ -86,7 +86,7 @@ class AshModel(object):
         elif self.ash_type == AshType.WHITE:
             return lookup_wind_threshold_white_ash_proportion(w)
 
-    def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
+    def run_model(self, fire_date: YearlessDate, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
                   recurrence=[100, 50, 25, 20, 10, 5, 2],
                   area_ha: Optional[float] = None,
                   ini_ash_depth: Optional[float] = None,  # not used
@@ -98,9 +98,6 @@ class AshModel(object):
 
         :param fire_date:
             month, day of fire as a YearlessDate instance
-        :param element_d:
-            dictionary runoff events from the element WEPP output. The keys are (year, mo, da) and the values contain
-            the row data as dictionaries with header keys
         :param cli_df:
             the climate file produced by CLIGEN as a pandas.Dataframe
         :param hill_wat:
