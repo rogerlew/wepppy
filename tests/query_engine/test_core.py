@@ -140,6 +140,58 @@ def test_run_query_join(tmp_path: Path) -> None:
     ]
 
 
+def test_run_query_join_with_spaces(tmp_path: Path) -> None:
+    loss_rel = "wepp/output/interchange/loss_pw0.chn.parquet"
+    chn_rel = "watershed/channels.parquet"
+
+    loss_table = pa.table(
+        {
+            "Channels and Impoundments": [1, 2, 3],
+            "Value": ["a", "b", "c"],
+        }
+    )
+    chn_table = pa.table(
+        {
+            "Channel Number": [1, 4, 5],
+            "Name": ["Channel A", "Channel B", "Channel C"],
+        }
+    )
+
+    _write_parquet(tmp_path / loss_rel, loss_table)
+    _write_parquet(tmp_path / chn_rel, chn_table)
+    _write_catalog_entries(tmp_path, [loss_rel, chn_rel])
+
+    catalog = DatasetCatalog.load(tmp_path / "_query_engine" / "catalog.json")
+    run_context = RunContext(runid=str(tmp_path), base_dir=tmp_path, scenario=None, catalog=catalog)
+
+    payload = QueryRequest(
+        datasets=[
+            {"path": loss_rel, "alias": "loss"},
+            {"path": chn_rel, "alias": "chn"},
+        ],
+        joins=[
+            {
+                "left": "loss",
+                "right": "chn",
+                "left_on": ["Channels and Impoundments"],
+                "right_on": ["Channel Number"],
+            },
+        ],
+        columns=[
+            'loss."Channels and Impoundments" AS loss_channel',
+            'chn."Channel Number" AS chn_channel',
+            "chn.Name AS name",
+        ],
+    )
+
+    result = run_query(run_context, payload)
+
+    assert result.row_count == 1
+    assert result.records == [
+        {"loss_channel": 1, "chn_channel": 1, "name": "Channel A"},
+    ]
+
+
 def test_run_query_aggregation(tmp_path: Path) -> None:
     rel = "wepp/output/interchange/pass_daily.parquet"
     table = pa.table(
