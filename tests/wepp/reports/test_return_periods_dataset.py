@@ -54,7 +54,7 @@ if "rasterio" not in sys.modules:
     sys.modules["rasterio"] = rasterio_module
     sys.modules["rasterio.warp"] = warp_module
 
-from wepppy.wepp.stats.return_periods import (
+from wepppy.wepp.reports.return_periods import (
     ReturnPeriodDataset,
     ReturnPeriods,
     refresh_return_period_events,

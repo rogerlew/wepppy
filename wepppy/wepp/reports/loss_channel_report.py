@@ -5,13 +5,16 @@ from typing import Iterable, List
 
 import pandas as pd
 
-from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
-from wepppy.wepp.stats.report_base import ReportBase
-from wepppy.wepp.stats.row_data import RowData
+
+from .helpers import ReportQueryContext
+from .report_base import ReportBase
+from .row_data import RowData
+
+__all__ = ["ChannelSummaryReport", "ChannelSummary"]
 
 
-class ChannelSummary(ReportBase):
+class ChannelSummaryReport(ReportBase):
     """Channel-scale summary derived from loss_pw0.chn and watershed channel metadata."""
 
     _LOSS_DATASET = "wepp/output/interchange/loss_pw0.chn.parquet"
@@ -29,14 +32,8 @@ class ChannelSummary(ReportBase):
         self.header = list(dataframe.columns)
 
     def _prepare_context(self):
-        activate_query_engine(self._wd, run_interchange=False)
-        context = resolve_run_context(str(self._wd), auto_activate=False)
-        required = [self._LOSS_DATASET, self._CHANNEL_DATASET]
-        missing = [path for path in required if not context.catalog.has(path)]
-        if missing:
-            raise FileNotFoundError(
-                f"Missing required dataset(s) for channel summary: {', '.join(missing)}"
-            )
+        context = ReportQueryContext(self._wd, run_interchange=False)
+        context.ensure_datasets(self._LOSS_DATASET, self._CHANNEL_DATASET)
         return context
 
     def _build_dataframe(self, context) -> pd.DataFrame:
@@ -75,7 +72,7 @@ class ChannelSummary(ReportBase):
             ],
             order_by=['loss."Channels and Impoundments"'],
         )
-        result = run_query(context, payload)
+        result = context.query(payload)
         records = result.records or []
         if not records:
             return pd.DataFrame(columns=self._column_order(include_phosphorus=False))
@@ -182,7 +179,6 @@ class ChannelSummary(ReportBase):
         frame = frame[columns]
 
         return frame
-
     def _column_order(self, *, include_phosphorus: bool) -> List[str]:
         columns = [
             "Channel ID",
@@ -219,3 +215,7 @@ class ChannelSummary(ReportBase):
     def __iter__(self) -> Iterable[RowData]:
         for record in self._dataframe.to_dict(orient="records"):
             yield RowData(record)
+
+
+# Backwards compatibility.
+ChannelSummary = ChannelSummaryReport

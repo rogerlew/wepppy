@@ -18,8 +18,8 @@ from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.wepp.out import Element, HillWat
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize, parse_rec_intervals
 
-from wepppy.wepp.stats.summary import HillSummary, ChannelSummary, OutletSummary
-from wepppy.wepp.stats.total_watbal import TotalWatbal
+from wepppy.wepp.reports import HillSummaryReport, ChannelSummaryReport, OutletSummaryReport
+from wepppy.wepp.reports import TotalWatbalReport
 
 
 watar_bp = Blueprint('watar', __name__)
@@ -253,9 +253,9 @@ def report_ash_by_hillslope(runid, config):
         ash = Ash.getInstance(wd)
         ashpost = AshPost.getInstance(wd)
 
-        out_rpt = OutletSummary(loss)
-        hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
-        chn_rpt = ChannelSummary(loss)
+        out_rpt = OutletSummaryReport(loss)
+        hill_rpt = HillSummaryReport(loss, class_fractions=class_fractions, fraction_under=fraction_under)
+        chn_rpt = ChannelSummaryReport(loss)
         avg_annual_years = loss.avg_annual_years
         translator = Watershed.getInstance(wd).translator_factory()
         unitizer = Unitizer.getInstance(wd)

@@ -49,69 +49,43 @@ if "geopandas" not in sys.modules:
 
 
 
-from wepppy.wepp.stats.loss_channel_report import ChannelSummary
-from wepppy.wepp.stats.loss_hill_report import HillSummary
-from wepppy.wepp.stats.loss_outlet_report import OutletSummary
+from wepppy.wepp.reports.loss_channel_report import ChannelSummaryReport
+from wepppy.wepp.reports.loss_hill_report import HillSummaryReport
+from wepppy.wepp.reports.loss_outlet_report import OutletSummaryReport
+
 
 
 def _configure_query_engine_stubs(monkeypatch, tmp_path: Path, dataset_paths: set[str], records_map: dict[str, list[dict]]):
-    def fake_activate(wd, run_interchange=False):
-        assert Path(wd) == tmp_path
+    class StubQueryContext:
+        def __init__(self, run_directory, *, run_interchange=False, auto_activate=True):
+            assert Path(run_directory) == tmp_path
+            self.run_directory = Path(run_directory)
+            self.catalog = SimpleNamespace(has=lambda path: path in dataset_paths)
 
-    def fake_resolve(wd, auto_activate=False):
-        assert wd == str(tmp_path)
+        def ensure_datasets(self, *paths: str) -> None:
+            missing = [path for path in paths if path not in dataset_paths]
+            if missing:
+                raise FileNotFoundError(', '.join(sorted(missing)))
 
-        def has(path: str) -> bool:
-            return path in dataset_paths
-
-        return SimpleNamespace(base_dir=tmp_path, catalog=SimpleNamespace(has=has))
-
-    def fake_run_query(context, payload):
-        alias = payload.datasets[0]["path"]
-        records = records_map.get(alias, [])
-        return SimpleNamespace(records=records, schema=None, row_count=len(records))
-
-    monkeypatch.setattr(
-        "wepppy.wepp.stats.loss_hill_report.activate_query_engine",
-        fake_activate,
-    )
-    monkeypatch.setattr(
-        "wepppy.wepp.stats.loss_hill_report.resolve_run_context",
-        fake_resolve,
-    )
-    monkeypatch.setattr(
-        "wepppy.wepp.stats.loss_channel_report.activate_query_engine",
-        fake_activate,
-    )
-    monkeypatch.setattr(
-        "wepppy.wepp.stats.loss_channel_report.resolve_run_context",
-        fake_resolve,
-    )
-    monkeypatch.setattr(
-        "wepppy.wepp.stats.loss_outlet_report.activate_query_engine",
-        fake_activate,
-    )
-    monkeypatch.setattr(
-        "wepppy.wepp.stats.loss_outlet_report.resolve_run_context",
-        fake_resolve,
-    )
-
-    def run_query_dispatch(context, payload):
-        path = next(item["path"] for item in payload["datasets"]) if isinstance(payload, dict) else payload.datasets[0]["path"]
-        records = records_map.get(path, [])
-        return SimpleNamespace(records=records, schema=None, row_count=len(records))
+        def query(self, payload):
+            if isinstance(payload, dict):
+                path = next(item['path'] for item in payload["datasets"])
+            else:
+                path = payload.datasets[0]["path"]
+            records = records_map.get(path, [])
+            return SimpleNamespace(records=records, schema=None, row_count=len(records))
 
     monkeypatch.setattr(
-        "wepppy.wepp.stats.loss_hill_report.run_query",
-        run_query_dispatch,
+        "wepppy.wepp.reports.loss_hill_report.ReportQueryContext",
+        StubQueryContext,
     )
     monkeypatch.setattr(
-        "wepppy.wepp.stats.loss_channel_report.run_query",
-        run_query_dispatch,
+        "wepppy.wepp.reports.loss_channel_report.ReportQueryContext",
+        StubQueryContext,
     )
     monkeypatch.setattr(
-        "wepppy.wepp.stats.loss_outlet_report.run_query",
-        run_query_dispatch,
+        "wepppy.wepp.reports.loss_outlet_report.ReportQueryContext",
+        StubQueryContext,
     )
 
 
@@ -153,7 +127,7 @@ def test_hill_summary_builds_rows(monkeypatch, tmp_path):
 
     _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
 
-    report = HillSummary(tmp_path)
+    report = HillSummaryReport(tmp_path)
     df = pd.DataFrame([dict(row.row) for row in report])
 
     assert "Runoff Depth (mm/yr)" in df.columns
@@ -195,7 +169,7 @@ def test_channel_summary_builds_rows(monkeypatch, tmp_path):
 
     _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
 
-    report = ChannelSummary(tmp_path)
+    report = ChannelSummaryReport(tmp_path)
     df = pd.DataFrame([dict(row.row) for row in report])
     assert "Discharge Depth (mm/yr)" in df.columns
     expected_depth = 1000.0 * 1000.0 / (50.0 * 10000.0)
@@ -220,7 +194,7 @@ def test_outlet_summary_rows(monkeypatch, tmp_path):
 
     _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
 
-    report = OutletSummary(tmp_path)
+    report = OutletSummaryReport(tmp_path)
     rows = report.rows()
     assert rows[0].label == "Total contributing area to outlet"
     precipitation_row = next(row for row in rows if row.label == "Precipitation")

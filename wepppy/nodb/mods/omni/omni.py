@@ -1462,7 +1462,7 @@ class Omni(NoDbBase):
     def compile_hillslope_summaries(self):
         global OMNI_REL_DIR
         from wepppy.nodb.core import Wepp
-        from wepppy.wepp.stats import HillSummary
+        from wepppy.wepp.reports import HillSummaryReport
 
         scenario_wds = {str(self.base_scenario): self.wd}
 
@@ -1474,7 +1474,7 @@ class Omni(NoDbBase):
         dfs = []
         for scenario, wd in scenario_wds.items():
             loss = Wepp.getInstance(wd).report_loss()
-            hill_rpt = HillSummary(loss)
+            hill_rpt = HillSummaryReport(loss)
             df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
             df['scenario'] = scenario
             dfs.append(df)
@@ -1506,7 +1506,7 @@ class Omni(NoDbBase):
     def compile_channel_summaries(self):
         global OMNI_REL_DIR
         from wepppy.nodb.core import Wepp
-        from wepppy.wepp.stats import ChannelSummary
+        from wepppy.wepp.reports import ChannelSummaryReport
 
         scenario_wds = {str(self.base_scenario): self.wd}
 

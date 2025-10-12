@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from wepppy.wepp.stats.sediment_characteristics import SedimentCharacteristics
+from wepppy.wepp.reports.sediment_characteristics import SedimentCharacteristics
 
 
 def _configure_sediment_stubs(monkeypatch, tmp_path: Path):
@@ -76,48 +76,48 @@ def _configure_sediment_stubs(monkeypatch, tmp_path: Path):
         "Enrichment ratio of specific surface": 2.2,
     }
 
-    def fake_activate(wd, run_interchange=False):
-        assert Path(wd) == tmp_path
+    class StubQueryContext:
+        def __init__(self, run_directory, *, run_interchange=False, auto_activate=True):
+            assert Path(run_directory) == tmp_path
+            self.catalog = SimpleNamespace(has=lambda path: path in dataset_paths)
 
-    def fake_resolve(wd, auto_activate=False):
-        assert wd == str(tmp_path)
+        def ensure_datasets(self, *paths: str) -> None:
+            missing = [path for path in paths if not self.catalog.has(path)]
+            if missing:
+                raise FileNotFoundError(', '.join(sorted(missing)))
 
-        def has(path: str) -> bool:
-            return path in dataset_paths
+        def query(self, payload):
+            dataset = payload.datasets[0]["path"]
+            if dataset == "wepp/output/interchange/loss_pw0.class_data.parquet":
+                return SimpleNamespace(records=class_records, schema=None, row_count=len(class_records))
+            if dataset == "wepp/output/interchange/loss_pw0.all_years.hill.parquet":
+                return SimpleNamespace(records=[{"year_count": 5}], schema=None, row_count=1)
+            if dataset == "wepp/output/interchange/H.pass.parquet":
+                return SimpleNamespace(
+                    records=[
+                        {
+                            "mass_c1": 6000.0,
+                            "mass_c2": 14000.0,
+                            "mass_c3": 0.0,
+                            "mass_c4": 0.0,
+                            "mass_c5": 0.0,
+                        }
+                    ],
+                    schema=None,
+                    row_count=1,
+                )
+            if dataset == "wepp/output/interchange/loss_pw0.out.parquet":
+                key = payload.filters[0]["value"] if payload.filters else None
+                value = out_value_map.get(key, 0.0)
+                if payload.columns == ["out.key", "out.value"]:
+                    return SimpleNamespace(records=[{"key": key, "value": value}], schema=None, row_count=1)
+                return SimpleNamespace(records=[{"value": value}], schema=None, row_count=1)
+            raise AssertionError(f"Unexpected dataset requested: {dataset}")
 
-        return SimpleNamespace(base_dir=tmp_path, catalog=SimpleNamespace(has=has))
-
-    def fake_run_query(context, payload):
-        dataset = payload.datasets[0]["path"]
-        if dataset == "wepp/output/interchange/loss_pw0.class_data.parquet":
-            return SimpleNamespace(records=class_records, schema=None, row_count=len(class_records))
-        if dataset == "wepp/output/interchange/loss_pw0.all_years.hill.parquet":
-            return SimpleNamespace(records=[{"year_count": 5}], schema=None, row_count=1)
-        if dataset == "wepp/output/interchange/H.pass.parquet":
-            return SimpleNamespace(
-                records=[
-                    {
-                        "mass_c1": 6000.0,
-                        "mass_c2": 14000.0,
-                        "mass_c3": 0.0,
-                        "mass_c4": 0.0,
-                        "mass_c5": 0.0,
-                    }
-                ],
-                schema=None,
-                row_count=1,
-            )
-        if dataset == "wepp/output/interchange/loss_pw0.out.parquet":
-            key = payload.filters[0]["value"] if payload.filters else None
-            value = out_value_map.get(key, 0.0)
-            if payload.columns == ["out.key", "out.value"]:
-                return SimpleNamespace(records=[{"key": key, "value": value}], schema=None, row_count=1)
-            return SimpleNamespace(records=[{"value": value}], schema=None, row_count=1)
-        raise AssertionError(f"Unexpected dataset requested: {dataset}")
-
-    monkeypatch.setattr("wepppy.wepp.stats.sediment_characteristics.activate_query_engine", fake_activate)
-    monkeypatch.setattr("wepppy.wepp.stats.sediment_characteristics.resolve_run_context", fake_resolve)
-    monkeypatch.setattr("wepppy.wepp.stats.sediment_characteristics.run_query", fake_run_query)
+    monkeypatch.setattr(
+        "wepppy.wepp.reports.sediment_characteristics.ReportQueryContext",
+        StubQueryContext,
+    )
 
 
 def test_sediment_characteristics_builds_reports(monkeypatch, tmp_path):

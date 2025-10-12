@@ -92,25 +92,16 @@ from wepppy.all_your_base import try_parse_float, isint
 from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInterpolator, RDIOutOfBoundsException
 
 from wepppy.wepp.soils.utils import WeppSoilUtil
-
-from wepppy.wepp.out import (
-    Ebe,
-    TotalWatSed2
-)
-
-
 from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
 
-from wepppy.wepp.stats import (
-    ChannelWatbal,
-    HillslopeWatbal,
-    ReturnPeriods,
+from wepppy.wepp.reports import (
+    ChannelWatbalReport,
+    FrqFloodReport,
+    HillslopeWatbalReport,
     ReturnPeriodDataset,
+    ReturnPeriods,
     SedimentCharacteristics,
 )
-
-# wepppy submodules
-from wepppy.wepp.stats.frq_flood import FrqFlood
 from wepppy.nodb.base import (
     NoDbBase,
     TriggerEvents,
@@ -2310,13 +2301,7 @@ class Wepp(NoDbBase):
 
     @nodb_timed
     def _run_hillslope_watbal(self):
-        HillslopeWatbal(self.wd)
-
-    @nodb_timed
-    def _build_totalwatsed2(self):
-        totwatsed2 = TotalWatSed2(self.wd, rebuild=True)
-        fn = _join(self.export_dir, 'totalwatsed2.csv')
-        totwatsed2.export(fn)
+        HillslopeWatbalReport(self.wd)
 
     @nodb_timed
     def _build_totalwatsed3(self):
@@ -2416,24 +2401,16 @@ class Wepp(NoDbBase):
         return_periods.export_tsv_summary(_join(self.export_dir, fn), extraneous=extraneous)
 
     def report_frq_flood(self):
-        from wepppy.wepp.interchange.watershed_loss import Loss
-        output_dir = self.output_dir
-        loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
-
-        ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
-        ebe_rpt = Ebe(ebe_pw0)
-
-        return FrqFlood(ebe_rpt, loss_rpt)
+        return FrqFloodReport(self.wd)
 
     def report_sediment_delivery(self):
         return SedimentCharacteristics(self.wd)
 
     def report_hill_watbal(self):
-        return HillslopeWatbal(self.wd)
+        return HillslopeWatbalReport(self.wd)
 
     def report_chn_watbal(self):
-        return ChannelWatbal(self.wd)
+        return ChannelWatbalReport(self.wd)
 
     def set_run_flowpaths(self, state):
         assert state in [True, False]

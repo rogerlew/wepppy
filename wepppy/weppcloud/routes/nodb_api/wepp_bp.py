@@ -9,9 +9,9 @@ from wepppy.nodb.core import Landuse, Ron, Climate, Watershed, Wepp
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
-from wepppy.wepp.out import Element, HillWat, TotalWatSed2
-from wepppy.wepp.stats.summary import ChannelSummary, HillSummary, OutletSummary
-from wepppy.wepp.stats.total_watbal import TotalWatbal
+from wepppy.wepp.out import Element, HillWat
+from wepppy.wepp.reports import ChannelSummaryReport, HillSummaryReport, OutletSummaryReport
+from wepppy.wepp.reports import TotalWatbalReport
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
 import json
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
@@ -207,9 +207,9 @@ def report_wepp_loss(runid, config):
 
     wd = get_wd(runid)
     is_singlestorm = Climate.getInstance(wd).is_single_storm
-    out_rpt = OutletSummary(wd)
-    hill_rpt = HillSummary(wd)
-    chn_rpt = ChannelSummary(wd)
+    out_rpt = OutletSummaryReport(wd)
+    hill_rpt = HillSummaryReport(wd)
+    chn_rpt = ChannelSummaryReport(wd)
     unitizer = Unitizer.getInstance(wd)
     ron = Ron.getInstance(wd)
 
@@ -242,9 +242,7 @@ def report_wepp_yearly_watbal(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
-    totwatsed = TotalWatSed2(wd)
-    totwatbal = TotalWatbal(totwatsed,
-                            exclude_yr_indxs=exclude_yr_indxs)
+    totwatbal = TotalWatbalReport(wd, exclude_yr_indxs=exclude_yr_indxs)
 
     unitizer = Unitizer.getInstance(wd)
 
@@ -260,13 +258,13 @@ def report_wepp_yearly_watbal(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse/')
 @authorize_and_handle_with_exception_factory
 def report_wepp_avg_annual_by_landuse(runid, config):
-    from wepppy.wepp.stats.average_annuals_by_landuse import AverageAnnualsByLanduse
+    from wepppy.wepp.reports import AverageAnnualsByLanduseReport
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
     wepp = Wepp.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
-    report = AverageAnnualsByLanduse(wd)
+    report = AverageAnnualsByLanduseReport(wd)
 
     return render_template('reports/wepp/avg_annuals_by_landuse.htm', runid=runid, config=config,
                         unitizer_nodb=unitizer,
@@ -284,7 +282,11 @@ def report_wepp_avg_annual_watbal(runid, config):
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
     hill_rpt = wepp.report_hill_watbal()
-    # chn_rpt = wepp.report_chn_watbal()
+    chn_rpt = None
+    try:
+        chn_rpt = wepp.report_chn_watbal()
+    except FileNotFoundError:
+        chn_rpt = None
 
     unitizer = Unitizer.getInstance(wd)
 
@@ -292,44 +294,9 @@ def report_wepp_avg_annual_watbal(runid, config):
                             unitizer_nodb=unitizer,
                             precisions=wepppy.nodb.unitizer.precisions,
                             hill_rpt=hill_rpt,
-                            # chn_rpt=chn_rpt,
+                            chn_rpt=chn_rpt,
                             ron=ron,
                             user=current_user)
-
-
-@wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed.csv')
-@authorize_and_handle_with_exception_factory
-def resources_wepp_totalwatsed(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    fn = _join(ron.export_dir, 'totalwatsed.csv')
-    if not _exists(fn):
-        totwatsed_txt = _join(ron.output_dir, 'totalwatsed.txt')
-        if not _exists(totwatsed_txt):
-           return error_factory('totalwatsed.csv is not available for this project. Please use totalwatsed2.csv')
-        wepp = Wepp.getInstance(wd)
-        totwatsed = TotalWatSed2(totwatsed_txt,
-                                wepp.baseflow_opts, wepp.phosphorus_opts)
-        totwatsed.export(fn)
-
-    assert _exists(fn)
-
-    return send_file(fn, mimetype='text/csv', download_name='totalwatsed.csv')
-
-
-@wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed2.csv')
-@authorize_and_handle_with_exception_factory
-def resources_wepp_totalwatsed2(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    fn = _join(ron.export_dir, 'totalwatsed2.csv')
-
-    if not _exists(fn):
-        totwatsed = TotalWatSed2(wd)
-        totwatsed.export(fn)
-    assert _exists(fn)
-
-    return send_file(fn, mimetype='text/csv', download_name='totalwatsed2.csv', as_attachment=True)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/plot/wepp/streamflow')

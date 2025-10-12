@@ -3,7 +3,6 @@ from .ebe import *
 from .plot import *
 from .hill_wat import HillWat, watershed_swe
 from .chnwb import Chnwb
-from .chanwb import Chanwb
 from .totalwatsed import TotalWatSed2, totalwatsed_partitioned_dss_export, archive_dss_export_zip
 from .chan import ChanOut, chanout_dss_export
 from .element import *

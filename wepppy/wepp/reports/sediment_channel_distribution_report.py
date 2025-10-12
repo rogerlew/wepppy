@@ -4,10 +4,8 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Iterable, Sequence
 
-import pandas as pd
-
-from wepppy.wepp.stats.report_base import ReportBase
-from wepppy.wepp.stats.row_data import RowData
+from .report_base import ReportBase
+from .row_data import RowData
 
 
 class ChannelClassFractionReport(ReportBase):

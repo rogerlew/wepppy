@@ -10,7 +10,7 @@ import csv
 
 import pandas as pd
 
-from wepppy.wepp.stats.row_data import parse_name, parse_units
+from .row_data import parse_name, parse_units
 
 
 class ReportBase(object):

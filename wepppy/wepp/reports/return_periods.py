@@ -333,7 +333,11 @@ def refresh_return_period_events(
             ORDER BY topaz_id, event_id
             """
         ).arrow()
-        event_table = event_table_reader.read_all()
+        event_table = (
+            event_table_reader.read_all()
+            if hasattr(event_table_reader, "read_all")
+            else event_table_reader
+        )
 
         ranks_table_reader = con.execute(
             f"""
@@ -348,7 +352,11 @@ def refresh_return_period_events(
             ORDER BY measure_id, topaz_id, rank
             """
         ).arrow()
-        ranks_table = ranks_table_reader.read_all()
+        ranks_table = (
+            ranks_table_reader.read_all()
+            if hasattr(ranks_table_reader, "read_all")
+            else ranks_table_reader
+        )
 
         wsarea_lookup = {}
         if event_table.num_rows > 0:

@@ -5,13 +5,16 @@ from typing import Iterable, List
 
 import pandas as pd
 
-from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
-from wepppy.wepp.stats.report_base import ReportBase
-from wepppy.wepp.stats.row_data import RowData
+
+from .helpers import ReportQueryContext
+from .report_base import ReportBase
+from .row_data import RowData
+
+__all__ = ["HillSummaryReport", "HillSummary"]
 
 
-class HillSummary(ReportBase):
+class HillSummaryReport(ReportBase):
     """Per-hillslope summary derived from loss_pw0.hill + spatial metadata."""
 
     _LOSS_DATASET = "wepp/output/interchange/loss_pw0.hill.parquet"
@@ -31,14 +34,8 @@ class HillSummary(ReportBase):
         self.header = list(dataframe.columns)
 
     def _prepare_context(self):
-        activate_query_engine(self._wd, run_interchange=False)
-        context = resolve_run_context(str(self._wd), auto_activate=False)
-        required = [self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET]
-        missing = [path for path in required if not context.catalog.has(path)]
-        if missing:
-            raise FileNotFoundError(
-                f"Missing required dataset(s) for hill summary: {', '.join(missing)}"
-            )
+        context = ReportQueryContext(self._wd, run_interchange=False)
+        context.ensure_datasets(self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET)
         return context
 
     def _build_dataframe(self, context) -> pd.DataFrame:
@@ -99,7 +96,7 @@ class HillSummary(ReportBase):
             joins=joins,
             order_by=['loss."Hillslopes"'],
         )
-        result = run_query(context, payload)
+        result = context.query(payload)
         records = result.records or []
         if not records:
             return pd.DataFrame(columns=self._default_columns(include_soils))
@@ -244,3 +241,7 @@ class HillSummary(ReportBase):
     def __iter__(self) -> Iterable[RowData]:
         for record in self._dataframe.to_dict(orient="records"):
             yield RowData(record)
+
+
+# Backwards compatibility.
+HillSummary = HillSummaryReport

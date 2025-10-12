@@ -6,8 +6,11 @@ from typing import List, Optional
 
 import pandas as pd
 
-from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
+
+from .helpers import ReportQueryContext
+
+__all__ = ["OutletSummaryReport", "OutletSummary"]
 
 
 @dataclass(slots=True)
@@ -19,7 +22,7 @@ class OutletRow:
     per_area_units: Optional[str]
 
 
-class OutletSummary:
+class OutletSummaryReport:
     """Summarise outlet delivery metrics using loss_pw0.out interchange assets."""
 
     _DATASET_PATH = "wepp/output/interchange/loss_pw0.out.parquet"
@@ -33,12 +36,8 @@ class OutletSummary:
         self._rows = self._build_rows(context)
 
     def _prepare_context(self):
-        activate_query_engine(self._wd, run_interchange=False)
-        context = resolve_run_context(str(self._wd), auto_activate=False)
-        if not context.catalog.has(self._DATASET_PATH):
-            raise FileNotFoundError(
-                f"Required dataset '{self._DATASET_PATH}' not found in the query engine catalog for {self._wd}"
-            )
+        context = ReportQueryContext(self._wd, run_interchange=False)
+        context.ensure_datasets(self._DATASET_PATH)
         return context
 
     def _load_table(self, context) -> pd.DataFrame:
@@ -50,7 +49,7 @@ class OutletSummary:
                 "out.units AS units",
             ],
         )
-        result = run_query(context, payload)
+        result = context.query(payload)
         frame = pd.DataFrame(result.records or [], columns=["key", "value", "units"])
         if frame.empty:
             raise ValueError(f"{self._DATASET_PATH} did not return any rows")
@@ -197,3 +196,7 @@ class OutletSummary:
             "Phosphorus discharge",
         }
         return [row for row in self._rows if row.label in primary_labels]
+
+
+# Backwards compatibility.
+OutletSummary = OutletSummaryReport

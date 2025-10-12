@@ -8,7 +8,12 @@ import sys
 import shutil
 from glob import glob
 from wepppy.nodb import Ron, Wepp
-from wepppy.wepp.stats import HillSummary, ChannelSummary, OutletSummary, SedimentDelivery
+from wepppy.wepp.reports import (
+    ChannelSummaryReport,
+    HillSummaryReport,
+    OutletSummaryReport,
+    SedimentDelivery,
+)
 
 from wepppy.wepp.management import pmetpara_prep
 

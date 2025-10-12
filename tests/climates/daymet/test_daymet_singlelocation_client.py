@@ -2,12 +2,277 @@ from __future__ import annotations
 
 import datetime as _dt
 from calendar import isleap
+import sys
+import types
 from dataclasses import dataclass
 from typing import Iterable
 
 import numpy as np
 import pandas as pd
 import pytest
+
+if "pyproj" not in sys.modules:
+    pyproj_module = types.ModuleType("pyproj")
+
+    class _FakeProj:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    pyproj_module.Proj = _FakeProj
+    pyproj_module.transform = lambda *args, **kwargs: (0.0, 0.0)
+    sys.modules["pyproj"] = pyproj_module
+
+sys.modules.setdefault("utm", types.ModuleType("utm"))
+sys.modules.setdefault("geopandas", types.ModuleType("geopandas"))
+if "deprecated" not in sys.modules:
+    deprecated_module = types.ModuleType("deprecated")
+    sys.modules["deprecated"] = deprecated_module
+else:
+    deprecated_module = sys.modules["deprecated"]
+
+if not hasattr(deprecated_module, "deprecated"):
+    def _noop_deprecated(*args, **kwargs):
+        if args and callable(args[0]) and len(args) == 1 and not kwargs:
+            return args[0]
+
+        def decorator(func):
+            return func
+
+        return decorator
+
+    deprecated_module.deprecated = _noop_deprecated
+
+sys.modules.setdefault("oyaml", types.ModuleType("oyaml"))
+if "imageio" not in sys.modules:
+    imageio_module = types.ModuleType("imageio")
+    sys.modules["imageio"] = imageio_module
+else:
+    imageio_module = sys.modules["imageio"]
+
+if not hasattr(imageio_module, "imread"):
+    imageio_module.imread = lambda *args, **kwargs: None
+
+if "whitebox_tools" not in sys.modules:
+    whitebox_module = types.ModuleType("whitebox_tools")
+    sys.modules["whitebox_tools"] = whitebox_module
+else:
+    whitebox_module = sys.modules["whitebox_tools"]
+
+if not hasattr(whitebox_module, "WhiteboxTools"):
+    class _WhiteboxTools:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    whitebox_module.WhiteboxTools = _WhiteboxTools
+
+if "shapely" not in sys.modules:
+    shapely_module = types.ModuleType("shapely")
+    sys.modules["shapely"] = shapely_module
+
+if "shapely.geometry" not in sys.modules:
+    geometry_module = types.ModuleType("shapely.geometry")
+
+    class _FakePolygon:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    class _FakePoint:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    geometry_module.Polygon = _FakePolygon
+    geometry_module.Point = _FakePoint
+    sys.modules["shapely.geometry"] = geometry_module
+
+if "rasterio" not in sys.modules:
+    rasterio_module = types.ModuleType("rasterio")
+    rasterio_module.__path__ = []
+
+    class _Env:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            return False
+
+    rasterio_module.Env = _Env
+    sys.modules["rasterio"] = rasterio_module
+    warp_module = types.ModuleType("rasterio.warp")
+    warp_module.reproject = lambda *args, **kwargs: None
+    warp_module.calculate_default_transform = lambda *args, **kwargs: (None, None, None)
+
+    class _Resampling:
+        nearest = 0
+
+    warp_module.Resampling = _Resampling
+    sys.modules["rasterio.warp"] = warp_module
+
+if "rasterio.transform" not in sys.modules:
+    transform_module = types.ModuleType("rasterio.transform")
+    transform_module.from_origin = lambda *args, **kwargs: None
+    transform_module.rowcol = lambda *args, **kwargs: (0, 0)
+    sys.modules["rasterio.transform"] = transform_module
+
+if "metpy" not in sys.modules:
+    sys.modules["metpy"] = types.ModuleType("metpy")
+
+if "metpy.calc" not in sys.modules:
+    calc_module = types.ModuleType("metpy.calc")
+
+    class _FakeDewPoint:
+        def __init__(self, data):
+            self.magnitude = np.asarray(data, dtype=float)
+
+    def _fake_dewpoint(value):
+        data = np.asarray(value, dtype=float)
+        return _FakeDewPoint(data * 0.0)
+
+    calc_module.dewpoint = _fake_dewpoint
+    calc_module.dewpoint_from_relative_humidity = lambda *args, **kwargs: _FakeDewPoint(0.0)
+    sys.modules["metpy.calc"] = calc_module
+
+if "metpy.units" not in sys.modules:
+    units_module = types.ModuleType("metpy.units")
+
+    class _FakeUnits:
+        Pa = 1.0
+
+    units_module.units = _FakeUnits()
+    sys.modules["metpy.units"] = units_module
+if "flask" not in sys.modules:
+    flask_module = types.ModuleType("flask")
+
+    class _FakeFlask:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    flask_module.Flask = _FakeFlask
+    flask_module.current_app = types.SimpleNamespace(config={})
+    flask_module.g = types.SimpleNamespace()
+    flask_module.request = types.SimpleNamespace(args={}, json=None)
+    flask_module.Response = lambda *args, **kwargs: None
+    flask_module.jsonify = lambda *args, **kwargs: None
+    flask_module.make_response = lambda *args, **kwargs: None
+    flask_module.render_template = lambda *args, **kwargs: ""
+    flask_module.url_for = lambda *args, **kwargs: ""
+    flask_module.Blueprint = _FakeFlask
+    sys.modules["flask"] = flask_module
+
+if "werkzeug" not in sys.modules:
+    sys.modules["werkzeug"] = types.ModuleType("werkzeug")
+if "werkzeug.exceptions" not in sys.modules:
+    exceptions_module = types.ModuleType("werkzeug.exceptions")
+
+    class _HTTPException(Exception):
+        pass
+
+    exceptions_module.HTTPException = _HTTPException
+    sys.modules["werkzeug.exceptions"] = exceptions_module
+if "requests_toolbelt" not in sys.modules:
+    requests_toolbelt_module = types.ModuleType("requests_toolbelt")
+    requests_toolbelt_module.__path__ = []
+    sys.modules["requests_toolbelt"] = requests_toolbelt_module
+else:
+    requests_toolbelt_module = sys.modules["requests_toolbelt"]
+
+if "requests_toolbelt.multipart" not in sys.modules:
+    multipart_module = types.ModuleType("requests_toolbelt.multipart")
+    sys.modules["requests_toolbelt.multipart"] = multipart_module
+else:
+    multipart_module = sys.modules["requests_toolbelt.multipart"]
+
+if "requests_toolbelt.multipart.encoder" not in sys.modules:
+    encoder_module = types.ModuleType("requests_toolbelt.multipart.encoder")
+
+    class _MultipartEncoder:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    encoder_module.MultipartEncoder = _MultipartEncoder
+    sys.modules["requests_toolbelt.multipart.encoder"] = encoder_module
+if "xarray" not in sys.modules:
+    xarray_module = types.ModuleType("xarray")
+
+    class _FakeDataset:
+        def __init__(self, *args, **kwargs):
+            self.dims = {}
+
+        def close(self):
+            pass
+
+    xarray_module.Dataset = _FakeDataset
+    xarray_module.open_dataset = lambda *args, **kwargs: _FakeDataset()
+    sys.modules["xarray"] = xarray_module
+
+if "wepppyo3" not in sys.modules:
+    wepppyo3_module = types.ModuleType("wepppyo3")
+    wepppyo3_module.__path__ = []
+    sys.modules["wepppyo3"] = wepppyo3_module
+else:
+    wepppyo3_module = sys.modules["wepppyo3"]
+
+if "wepppyo3.climate" not in sys.modules:
+    climate_module = types.ModuleType("wepppyo3.climate")
+
+    def _fake_interpolate_geospatial(*args, **kwargs):
+        raise NotImplementedError
+
+    climate_module.interpolate_geospatial = _fake_interpolate_geospatial
+    climate_module.cli_revision = lambda *args, **kwargs: None
+
+    def _climate_getattr(name):
+        return lambda *args, **kwargs: None
+
+    climate_module.__getattr__ = _climate_getattr
+    sys.modules["wepppyo3.climate"] = climate_module
+    wepppyo3_module.climate = climate_module
+
+if "wepppyo3.raster_characteristics" not in sys.modules:
+    raster_characteristics_module = types.ModuleType("wepppyo3.raster_characteristics")
+    sys.modules["wepppyo3.raster_characteristics"] = raster_characteristics_module
+else:
+    raster_characteristics_module = sys.modules["wepppyo3.raster_characteristics"]
+
+if not hasattr(raster_characteristics_module, "identify_mode_single_raster_key"):
+    raster_characteristics_module.identify_mode_single_raster_key = lambda *args, **kwargs: None
+if not hasattr(raster_characteristics_module, "identify_mode_intersecting_raster_keys"):
+    raster_characteristics_module.identify_mode_intersecting_raster_keys = lambda *args, **kwargs: None
+if not hasattr(raster_characteristics_module, "identify_median_single_raster_key"):
+    raster_characteristics_module.identify_median_single_raster_key = lambda *args, **kwargs: None
+if not hasattr(raster_characteristics_module, "identify_median_intersecting_raster_keys"):
+    raster_characteristics_module.identify_median_intersecting_raster_keys = lambda *args, **kwargs: None
+
+if "wepppyo3.wepp_viz" not in sys.modules:
+    wepp_viz_module = types.ModuleType("wepppyo3.wepp_viz")
+    sys.modules["wepppyo3.wepp_viz"] = wepp_viz_module
+else:
+    wepp_viz_module = sys.modules["wepppyo3.wepp_viz"]
+
+if not hasattr(wepp_viz_module, "make_soil_loss_grid"):
+    wepp_viz_module.make_soil_loss_grid = lambda *args, **kwargs: None
+if not hasattr(wepp_viz_module, "make_soil_loss_grid_fps"):
+    wepp_viz_module.make_soil_loss_grid_fps = lambda *args, **kwargs: None
+
+if "wepp_runner" not in sys.modules:
+    wepp_runner_module = types.ModuleType("wepp_runner")
+    wepp_runner_module.__path__ = []
+    sys.modules["wepp_runner"] = wepp_runner_module
+else:
+    wepp_runner_module = sys.modules["wepp_runner"]
+
+if "wepp_runner.wepp_runner" not in sys.modules:
+    wepp_runner_impl = types.ModuleType("wepp_runner.wepp_runner")
+    sys.modules["wepp_runner.wepp_runner"] = wepp_runner_impl
+else:
+    wepp_runner_impl = sys.modules["wepp_runner.wepp_runner"]
+
+if not hasattr(wepp_runner_impl, "make_hillslope_run"):
+    wepp_runner_impl.make_hillslope_run = lambda *args, **kwargs: None
+
+def _wepp_runner_getattr(name):
+    return lambda *args, **kwargs: None
+
+wepp_runner_impl.__getattr__ = _wepp_runner_getattr
 
 from wepppy.climates.daymet.daymet_singlelocation_client import retrieve_historical_timeseries
 

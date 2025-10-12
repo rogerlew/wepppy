@@ -141,7 +141,7 @@ def _write_chan_parquet(
                 raise
 
 
-def run_wepp_watershed_chan_interchange(
+def run_wepp_watershed_chanwb_interchange(
     wepp_output_dir: Path | str, *, start_year: int | None = None
 ) -> Path:
     base = Path(wepp_output_dir)

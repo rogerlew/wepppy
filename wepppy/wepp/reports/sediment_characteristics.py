@@ -6,9 +6,9 @@ from typing import List, Union
 
 import pandas as pd
 
-from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
 
+from .helpers import ReportQueryContext
 from .sediment_class_info_report import SedimentClassInfoReport
 from .sediment_channel_distribution_report import (
     ChannelClassFractionReport,
@@ -77,20 +77,14 @@ class SedimentCharacteristics:
         raise TypeError("SedimentCharacteristics expects a run directory path or a loss report instance")
 
     def _prepare_context(self):
-        activate_query_engine(self._wd, run_interchange=False)
-        context = resolve_run_context(str(self._wd), auto_activate=False)
-        required = {
+        context = ReportQueryContext(self._wd, run_interchange=False)
+        context.ensure_datasets(
             self._CLASS_DATASET,
             self._OUTLET_DATASET,
             self._HILL_DATASET,
             self._HILL_ALL_YEARS_DATASET,
             self._PASS_DATASET,
-        }
-        missing = [path for path in required if not context.catalog.has(path)]
-        if missing:
-            raise FileNotFoundError(
-                f"Missing required dataset(s) for sediment characteristics: {', '.join(sorted(missing))}"
-            )
+        )
         return context
 
     def _load_class_dataframe(self, context) -> pd.DataFrame:
@@ -108,7 +102,7 @@ class SedimentCharacteristics:
             ],
             order_by=["class.Class"],
         )
-        result = run_query(context, payload)
+        result = context.query(payload)
         records = result.records or []
         if not records:
             raise ValueError("loss_pw0.class_data.parquet returned no records")
@@ -119,7 +113,7 @@ class SedimentCharacteristics:
             datasets=[{"path": self._HILL_ALL_YEARS_DATASET, "alias": "ay"}],
             columns=["COUNT(DISTINCT ay.year) AS year_count"],
         )
-        result = run_query(context, payload)
+        result = context.query(payload)
         years = int(result.records[0]["year_count"]) if result.records else 0
         return max(years, 1)
 
@@ -129,7 +123,7 @@ class SedimentCharacteristics:
             columns=["out.key", "out.value"],
             filters=[{"column": "out.key", "operator": "=", "value": "Avg. Ann. sediment discharge from outlet"}],
         )
-        result = run_query(context, payload)
+        result = context.query(payload)
         if not result.records:
             return 0.0
         return float(result.records[0]["value"] or 0.0)
@@ -140,7 +134,7 @@ class SedimentCharacteristics:
             columns=["out.value"],
             filters=[{"column": "out.key", "operator": "=", "value": key}],
         )
-        result = run_query(context, payload)
+        result = context.query(payload)
         return float(result.records[0]["value"] or 0.0) if result.records else 0.0
 
     def _build_channel_class_rows(self, class_table: pd.DataFrame, total_tonne: float) -> List[OrderedDict[str, float]]:
@@ -194,7 +188,7 @@ class SedimentCharacteristics:
                 "SUM(pass.runvol * pass.sedcon_5) AS mass_c5",
             ],
         )
-        result = run_query(context, payload)
+        result = context.query(payload)
         if not result.records:
             return [0.0] * 5
         row = result.records[0]

@@ -48,12 +48,12 @@ if "geopandas" not in sys.modules:
     sys.modules["geopandas"] = geopandas_module
 
 from wepppy.query_engine.formatter import QueryResult
-from wepppy.wepp.stats.average_annuals_by_landuse import AverageAnnualsByLanduse
+from wepppy.wepp.reports.average_annuals_by_landuse import AverageAnnualsByLanduseReport
 
 
 def test_average_annuals_by_landuse_builds_dataframe(monkeypatch, tmp_path):
     run_dir = tmp_path / "example_run"
-    cache_dir = run_dir / "wepp" / "output" / "interchange"
+    cache_dir = run_dir / "wepp" / "reports" / "cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
 
     records = [
@@ -81,42 +81,34 @@ def test_average_annuals_by_landuse_builds_dataframe(monkeypatch, tmp_path):
         },
     ]
 
-    def fake_activate(wd, run_interchange=False):
-        assert Path(wd) == run_dir
+    class StubQueryContext:
+        def __init__(self, run_directory, *, run_interchange=False, auto_activate=True):
+            assert Path(run_directory) == run_dir
+            required = {
+                "wepp/output/interchange/loss_pw0.hill.parquet",
+                "watershed/hillslopes.parquet",
+                "landuse/landuse.parquet",
+            }
+            self.catalog = SimpleNamespace(has=lambda path: path in required)
 
-    def fake_resolve(wd, auto_activate=False):
-        assert wd == str(run_dir)
-        required = {
-            "wepp/output/interchange/loss_pw0.hill.parquet",
-            "watershed/hillslopes.parquet",
-            "landuse/landuse.parquet",
-        }
+        def ensure_datasets(self, *paths: str) -> None:
+            missing = [path for path in paths if not self.catalog.has(path)]
+            if missing:
+                raise FileNotFoundError(', '.join(missing))
 
-        def _has(path: str) -> bool:
-            return path in required
-
-        catalog = SimpleNamespace(has=_has)
-        return SimpleNamespace(base_dir=run_dir, catalog=catalog)
-
-    def fake_run_query(context, payload):
-        return QueryResult(records=records, schema=None, row_count=len(records))
+        def query(self, payload):
+            return QueryResult(records=records, schema=None, row_count=len(records))
 
     monkeypatch.setattr(
-        "wepppy.wepp.stats.average_annuals_by_landuse.activate_query_engine",
-        fake_activate,
-    )
-    monkeypatch.setattr(
-        "wepppy.wepp.stats.average_annuals_by_landuse.resolve_run_context",
-        fake_resolve,
-    )
-    monkeypatch.setattr(
-        "wepppy.wepp.stats.average_annuals_by_landuse.run_query",
-        fake_run_query,
+        "wepppy.wepp.reports.average_annuals_by_landuse.ReportQueryContext",
+        StubQueryContext,
     )
 
-    report = AverageAnnualsByLanduse(run_dir)
-    cache_path = run_dir / "wepp" / "output" / "interchange" / "average_annuals_by_landuse.parquet"
+    report = AverageAnnualsByLanduseReport(run_dir)
+    cache_path = run_dir / "wepp" / "reports" / "cache" / "average_annuals_by_landuse.parquet"
     assert cache_path.exists()
+    meta_path = cache_path.with_suffix(".meta.json")
+    assert meta_path.exists()
 
     df = pd.read_parquet(cache_path)
     assert not df.empty

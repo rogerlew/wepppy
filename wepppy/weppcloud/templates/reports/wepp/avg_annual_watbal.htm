@@ -1,42 +1,56 @@
 {% extends "reports/_page_container.htm" %}
 {% block report_title %}Avg Annual Water Balance{% endblock %}
 {% block report_content %}
-<h2>Water Balance Average Annual Summary (averaged by water year)</h5>
-<h5>Hillslopes
-  <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
- <table class="table table-condensed" id="hill_tbl">
-    <thead>
-      <tr>
-        {% for colname in hill_rpt.avg_annual_header %}
-        <th>{{ colname }}</th>
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
+<h2>Water Balance Average Annual Summary (averaged by water year)</h2>
+
+{% macro render_table(report, table_id) -%}
+<table class="table table-condensed" id="{{ table_id }}">
+  <thead>
     <tr>
-      {% for units in hill_rpt.avg_annual_units %}
-        {% if units is none%}
+      {% for colname in report.avg_annual_header %}
+      <th>{{ colname }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      {% for units in report.avg_annual_units %}
+        {% if units is none %}
         <td>&nbsp;</td>
         {% else %}
         <td>{{ unitizer_units(units) | safe }}</td>
         {% endif %}
       {% endfor %}
     </tr>
-    {% for row in hill_rpt.avg_annual_iter() %}
+    {% for row in report.avg_annual_iter() %}
     <tr>
-    {% for value, units in row %}
+      {% for value, units in row %}
         {% if loop.first %}
-        <td>{{ value | round | int}}</td>
+        <td>{{ value | round | int }}</td>
         {% else %}
-       <td>{{ unitizer(value, units) | safe }}</td>
+        <td>{{ unitizer(value, units) | safe }}</td>
         {% endif %}
-    {% endfor %}
+      {% endfor %}
     </tr>
     {% endfor %}
-    </tbody>
+  </tbody>
 </table>
- <p>Hillslope water balance measures are calculated for each hillslope from the hillslopes water balance output file
-     (.wat.dat) by summing values within each water year and then dividing by the number of water years - 1.
- </p>
+{%- endmacro %}
+
+<h5>Hillslopes
+  <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+</h5>
+{{ render_table(hill_rpt, 'hill_tbl') }}
+<p>Hillslope water balance measures are calculated for each hillslope from the hillslopes water balance output file
+   (.wat.dat) by summing values within each water year and then averaging across the simulation period.
+</p>
+
+{% if chn_rpt %}
+<h5>Channels
+  <a onclick="javascript:copytable('chn_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+</h5>
+{{ render_table(chn_rpt, 'chn_tbl') }}
+<p>Channel water balance values are derived from the channel OFE interchange parquet by aggregating daily depths
+   to water-year totals for each Topaz channel and reporting the multi-year average.</p>
+{% endif %}
 {% endblock %}

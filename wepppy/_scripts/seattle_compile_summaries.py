@@ -8,7 +8,12 @@ import sys
 import shutil
 from glob import glob
 from wepppy.nodb import Ron, Wepp
-from wepppy.wepp.stats import HillSummary, ChannelSummary, OutletSummary, SedimentDelivery
+from wepppy.wepp.reports import (
+    ChannelSummaryReport,
+    HillSummaryReport,
+    OutletSummaryReport,
+    SedimentDelivery,
+)
 
 os.chdir('/geodata/weppcloud_runs/')
 
@@ -67,10 +72,10 @@ if __name__ == "__main__":
 
         loss = Wepp.getInstance(wd).report_loss()
 
-        hill_rpt = HillSummary(loss, class_fractions=True, fraction_under=0.016, subs_summary=subcatchments_summary)
+        hill_rpt = HillSummaryReport(loss, class_fractions=True, fraction_under=0.016, subs_summary=subcatchments_summary)
 
-        chn_rpt = ChannelSummary(loss, chns_summary=channels_summary)
-        out_rpt = OutletSummary(loss)
+        chn_rpt = ChannelSummaryReport(loss, chns_summary=channels_summary)
+        out_rpt = OutletSummaryReport(loss)
         sed_del = SedimentDelivery(wd)
 
         hill_rpt.write(fp_hill, write_header=write_header, run_descriptors=run_descriptors)

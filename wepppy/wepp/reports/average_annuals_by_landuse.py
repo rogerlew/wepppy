@@ -5,16 +5,20 @@ from typing import Iterable
 
 import pandas as pd
 
-from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
-from wepppy.wepp.stats import ReportBase
-from wepppy.wepp.stats.row_data import RowData
+
+from .helpers import ReportCacheManager, ReportQueryContext
+from .report_base import ReportBase
+from .row_data import RowData
+
+__all__ = ["AverageAnnualsByLanduseReport", "AverageAnnualsByLanduse"]
 
 
-class AverageAnnualsByLanduse(ReportBase):
+class AverageAnnualsByLanduseReport(ReportBase):
     """Summarise average annual hydrologic metrics per landuse using query-engine assets."""
 
-    _CACHE_REL_PATH = Path("wepp/output/interchange/average_annuals_by_landuse.parquet")
+    _CACHE_KEY = "average_annuals_by_landuse"
+    _CACHE_VERSION = "1"
     _LOSS_DATASET = "wepp/output/interchange/loss_pw0.hill.parquet"
     _HILLSLOPE_DATASET = "watershed/hillslopes.parquet"
     _LANDUSE_DATASET = "landuse/landuse.parquet"
@@ -36,35 +40,20 @@ class AverageAnnualsByLanduse(ReportBase):
         if not self.wd.exists():
             raise FileNotFoundError(self.wd)
 
-        cache_path = self.wd / self._CACHE_REL_PATH
-        dataframe: pd.DataFrame | None = None
+        cache = ReportCacheManager(self.wd)
+        dataframe = cache.read_parquet(self._CACHE_KEY, version=self._CACHE_VERSION)
 
-        if cache_path.exists():
-            try:
-                cached = pd.read_parquet(cache_path)
-                if list(cached.columns) == self._DISPLAY_COLUMNS:
-                    dataframe = cached
-            except Exception:  # pragma: no cover - cache read failure
-                dataframe = None
-
-        if dataframe is None:
+        if dataframe is None or list(dataframe.columns) != self._DISPLAY_COLUMNS:
             dataframe = self._build_dataframe()
-            cache_path.parent.mkdir(parents=True, exist_ok=True)
-            dataframe.to_parquet(cache_path, index=False)
+            cache.write_parquet(self._CACHE_KEY, dataframe, version=self._CACHE_VERSION, index=False)
 
         self._dataframe = dataframe
         self.header = dataframe.columns.tolist()
 
     def _build_dataframe(self) -> pd.DataFrame:
-        activate_query_engine(self.wd, run_interchange=False)
-        context = resolve_run_context(str(self.wd), auto_activate=False)
+        context = ReportQueryContext(self.wd, run_interchange=False)
 
-        catalog = context.catalog
-        for path in (self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET):
-            if not catalog.has(path):
-                raise FileNotFoundError(
-                    f"Required dataset '{path}' not found in the query engine catalog for {self.wd}"
-                )
+        context.ensure_datasets(self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET)
 
         payload = QueryRequest(
             datasets=[
@@ -103,7 +92,7 @@ class AverageAnnualsByLanduse(ReportBase):
             order_by=["lu.key"],
         )
 
-        result = run_query(context, payload)
+        result = context.query(payload)
         records = result.records
         if not records:
             return self._empty_dataframe()
@@ -147,3 +136,7 @@ class AverageAnnualsByLanduse(ReportBase):
     def __iter__(self) -> Iterable[RowData]:
         for record in self._dataframe.to_dict(orient="records"):
             yield RowData(record)
+
+
+# Backwards compatibility.
+AverageAnnualsByLanduse = AverageAnnualsByLanduseReport

@@ -5,8 +5,8 @@ from .hill_pass_interchange import run_wepp_hillslope_pass_interchange
 from .watershed_pass_interchange import run_wepp_watershed_pass_interchange
 from .watershed_soil_interchange import run_wepp_watershed_soil_interchange
 from .watershed_ebe_interchange import run_wepp_watershed_ebe_interchange
+from .watershed_chnwb_interchange import run_wepp_watershed_chnwb_interchange
 from .watershed_chanwb_interchange import run_wepp_watershed_chanwb_interchange
-from .watershed_chan_interchange import run_wepp_watershed_chan_interchange
 from .watershed_chan_peak_interchange import run_wepp_watershed_chan_peak_interchange
 from .hill_soil_interchange import run_wepp_hillslope_soil_interchange
 from .hill_wat_interchange import run_wepp_hillslope_wat_interchange
@@ -28,8 +28,8 @@ __all__ = [
     "run_wepp_watershed_pass_interchange",
     "run_wepp_watershed_soil_interchange",
     "run_wepp_watershed_ebe_interchange",
+    "run_wepp_watershed_chnwb_interchange",
     "run_wepp_watershed_chanwb_interchange",
-    "run_wepp_watershed_chan_interchange",
     "run_wepp_watershed_chan_peak_interchange",
     "run_wepp_watershed_loss_interchange",
     "run_wepp_watershed_interchange",
