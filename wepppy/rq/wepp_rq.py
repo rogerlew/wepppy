@@ -308,11 +308,6 @@ def run_wepp_rq(runid):
                 job.meta['jobs:4,func:_run_hillslope_watbal_rq'] = _job.id
                 jobs4_post.append(_job)
                 job.save()
-                
-                _job = q.enqueue_call(_analyze_return_periods_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-                job.meta['jobs:4,func:_analyze_return_periods_rq'] = _job.id
-                jobs4_post.append(_job)
-                job.save()
 
             if not wepp.multi_ofe:
                 _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
@@ -320,10 +315,26 @@ def run_wepp_rq(runid):
                 jobs4_post.append(_job)
                 job.save()
 
-            _job = q.enqueue_call(_post_watershed_interchange_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-            job.meta['jobs:4,func:_post_watershed_interchange_rq'] = _job.id
-            jobs4_post.append(_job)
+            job_post_watershed_interchange = q.enqueue_call(
+                _post_watershed_interchange_rq,
+                (runid,),
+                timeout=TIMEOUT,
+                depends_on=post_dependencies,
+            )
+            job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
+            jobs4_post.append(job_post_watershed_interchange)
             job.save()
+
+            if not climate.is_single_storm:
+                _job = q.enqueue_call(
+                    _analyze_return_periods_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=job_post_watershed_interchange,
+                )
+                job.meta['jobs:4,func:_analyze_return_periods_rq'] = _job.id
+                jobs4_post.append(_job)
+                job.save()
 
             jobs5_post = []
             if wepp.legacy_arc_export_on_run_completion:
