@@ -194,6 +194,14 @@ Historical payloads sometimes require awkward patches (re-ordered dicts, renamed
 
 `locked()` automatically calls `dump_and_unlock()` on success. If an exception bubbles out, the context manager resets the Redis flag to `false` but skips `dump()`. Always rethrow or handle errors so callers know the state may be incomplete.
 
+#### Atomic Redis locks (2025 refresh)
+
+- Lock acquisition now uses `SETNX` keys named `nodb-lock:{runid}:{relpath}` with JSON payloads that record a UUID token, host/pid owner, and TTL metadata (`acquired_at`, `expires_at`, `ttl`). The legacy `locked:{relpath}` hash flag is still written for compatibility, but the SETNX key is authoritative.
+- Default TTL is 6 hours (configure via `WEPPPY_LOCK_TTL_SECONDS`). When the key expires Redis drops the lock automatically; the next `islocked()` call also normalizes the companion hash flag back to `false`.
+- Unlocking validates the caller’s token (tracked per-instance) and refuses to release unless the token matches. Pass `unlock(flag='-f')` to forcibly clear a lock you do not own—this mirrors the admin “clear locks” UI.
+- `clear_locks(runid, pup_relpath=None)` now deletes the distributed keys and resets the compatibility flags in one sweep, so crash recovery no longer leaves stale Redis state.
+- Diagnostics (`lock_statuses`) merge the authoritative SETNX keys with the legacy hash so dashboards stay readable while still reflecting the atomic model.
+
 ### Redis integration recap
 
 - `db0`: hash per run (locks, attrs, timestamps, RQ job IDs, archive pointer).
@@ -238,7 +246,7 @@ class Example(NoDbBase):
 
 - `NoDbBase.getInstanceFromRunID(runid)` fetches by run identifier without knowing the full path.
 - `NoDbBase.timed("task")` context manager logs start/end to Redis and log files.
-- `clear_locks(runid)` (from `base.py`) resets `locked:*` flags for all NoDb files in a run—helpful after interrupted RQ batches. (With the locked contextmanager and redis file locking; locking has become much more reliable)
+- `clear_locks(runid)` (from `base.py`) removes `nodb-lock:*` keys and resets companion `locked:*` fields—useful when recovering from a crashed worker or migrating long-lived runs.
 - `lock_statuses(runid)` returns current lock booleans for UI diagnostics.
 - Redis is non-persistent `RedisPrep.dump()` writes the run hash to `redisprep.dump`; `lazy_load()` restores it into Redis if necessary. The dump contains timestamps of when operations finished to populate the preflight checklist.
 

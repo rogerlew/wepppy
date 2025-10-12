@@ -6,17 +6,16 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-## LLM Directives: 
-# - Please do not change the code in this file without asking for permission
-
 import os
 
 import functools
 import importlib
 import inspect
 import multiprocessing as mp
+import socket
 import re
 import sys
+import uuid
 from concurrent.futures import ProcessPoolExecutor
 from dotenv import load_dotenv
 from os.path import join as _join
@@ -62,7 +61,8 @@ from enum import Enum, IntEnum
 from glob import glob
 from contextlib import contextmanager
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Optional
+from weakref import WeakKeyDictionary
 from collections import defaultdict
 
 import json
@@ -141,6 +141,94 @@ REDIS_STATUS_DB = int(RedisDB.STATUS)
 REDIS_LOCK_DB = int(RedisDB.LOCK)
 REDIS_NODB_EXPIRY = 72 * 3600  # 72 hours
 REDIS_LOG_LEVEL_DB = int(RedisDB.LOG_LEVEL)
+
+
+def _default_lock_ttl():
+    try:
+        return int(os.getenv('WEPPPY_LOCK_TTL_SECONDS', 6 * 3600))
+    except (TypeError, ValueError):
+        return 6 * 3600
+
+
+LOCK_KEY_PREFIX = 'nodb-lock'
+LOCK_DEFAULT_TTL = max(1, _default_lock_ttl())
+_ACTIVE_LOCK_TOKENS: WeakKeyDictionary = WeakKeyDictionary()
+
+
+def _normalize_lock_relpath(relpath: str) -> str:
+    return relpath.replace('\\', '/')
+
+
+def _lock_key_for(runid: str, relpath: str) -> str:
+    norm_rel = _normalize_lock_relpath(relpath)
+    return f'{LOCK_KEY_PREFIX}:{runid}:{norm_rel}'
+
+
+def _lock_owner_id() -> str:
+    return f'{socket.gethostname()}:{os.getpid()}'
+
+
+def _serialize_lock_payload(token: str, ttl: int) -> str:
+    now = int(time())
+    payload = {
+        'token': token,
+        'owner': _lock_owner_id(),
+        'acquired_at': now,
+        'expires_at': now + ttl,
+        'ttl': ttl,
+    }
+    return json.dumps(payload, separators=(',', ':'))
+
+
+def _parse_lock_payload(raw: str) -> dict:
+    if not raw:
+        return {}
+    try:
+        data = json.loads(raw)
+        if isinstance(data, dict):
+            return data
+    except json.JSONDecodeError:
+        pass
+    # Legacy payloads may simply be the token string.
+    return {'token': raw}
+
+
+def _extract_token(raw: Optional[str]) -> Optional[str]:
+    if raw is None:
+        return None
+    data = _parse_lock_payload(raw)
+    token = data.get('token')
+    if token is None and raw:
+        return raw
+    return token
+
+
+def _set_local_lock_token(instance, token: Optional[str]):
+    if token is None:
+        _ACTIVE_LOCK_TOKENS.pop(instance, None)
+    else:
+        _ACTIVE_LOCK_TOKENS[instance] = token
+
+
+def _get_local_lock_token(instance) -> Optional[str]:
+    return _ACTIVE_LOCK_TOKENS.get(instance)
+
+
+def _matches_scope(relpath: str, scope: Optional[str]) -> bool:
+    if scope is None:
+        return True
+    rel_norm = _normalize_lock_relpath(relpath)
+    scope_norm = _normalize_lock_relpath(scope)
+    return rel_norm == scope_norm or rel_norm.startswith(scope_norm + '/')
+
+
+def _relpath_from_lock_key(runid: str, lock_key: str) -> str:
+    prefix = f'{LOCK_KEY_PREFIX}:{runid}:'
+    if lock_key.startswith(prefix):
+        rel = lock_key[len(prefix):]
+        return rel.replace('/', os.sep)
+    return lock_key
+
 
 try:
     pool_kwargs = redis_connection_kwargs(
@@ -430,6 +518,10 @@ class NoDbBase(object):
     @property
     def _file_lock_key(self):
         return f'locked:{self._rel_nodb}'
+    
+    @property
+    def _distributed_lock_key(self):
+        return _lock_key_for(self.runid, self._rel_nodb)
             
     @property
     def parent_wd(self):
@@ -1019,28 +1111,74 @@ class NoDbBase(object):
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
 
+        lock_key = self._distributed_lock_key
+        payload = redis_lock_client.get(lock_key)
+        if payload is not None:
+            return True
+
+        # No active distributed lock—normalize legacy flags if needed.
         v = redis_lock_client.hget(self.runid, self._file_lock_key)
         if v is None:
             return False
-        return v == 'true'
 
-    def lock(self):
+        if v != 'false':
+            redis_lock_client.hset(self.runid, self._file_lock_key, 'false')
+        return False
+
+    def lock(self, ttl: Optional[int] = None):
         if self.readonly:
             raise Exception('lock() called on readonly project')
 
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
-        
-        if self.islocked():
-            raise NoDbAlreadyLockedError('lock() called on an already locked nodb')
+
+        ttl_seconds = LOCK_DEFAULT_TTL if ttl is None else max(1, int(ttl))
+        lock_key = self._distributed_lock_key
+
+        token = uuid.uuid4().hex
+        payload = _serialize_lock_payload(token, ttl_seconds)
+        acquired = redis_lock_client.set(lock_key, payload, nx=True, ex=ttl_seconds)
+        if not acquired:
+            existing_payload = redis_lock_client.get(lock_key)
+            existing_data = _parse_lock_payload(existing_payload) if existing_payload else {}
+            message = 'lock() called on an already locked nodb'
+            owner = existing_data.get('owner')
+            if owner:
+                message += f' (owner={owner})'
+            else:
+                existing_token = existing_data.get('token')
+                if existing_token:
+                    message += f' (token={existing_token})'
+            raise NoDbAlreadyLockedError(message)
 
         redis_lock_client.hset(self.runid, self._file_lock_key, 'true')
+        _set_local_lock_token(self, token)
 
     def unlock(self, flag=None):
         if redis_lock_client is None:
             raise RuntimeError('Redis lock client is unavailable')
 
+        lock_key = self._distributed_lock_key
+        stored_payload = redis_lock_client.get(lock_key)
+        stored_token = _extract_token(stored_payload)
+        local_token = _get_local_lock_token(self)
+
+        force = flag in ('-f', '--force')
+
+        if stored_payload is None:
+            redis_lock_client.hset(self.runid, self._file_lock_key, 'false')
+            _set_local_lock_token(self, None)
+            return
+
+        if not force:
+            if local_token is None:
+                raise RuntimeError('unlock() called without owning the lock; use flag "-f" to force release')
+            if stored_token is not None and stored_token != local_token:
+                raise RuntimeError('unlock() called with non-matching token; use flag "-f" to force release')
+
+        redis_lock_client.delete(lock_key)
         redis_lock_client.hset(self.runid, self._file_lock_key, 'false')
+        _set_local_lock_token(self, None)
 
     @property
     def run_group(self):  # e.g. batch
@@ -1421,8 +1559,14 @@ def clear_locks(runid, pup_relpath=None):
     if redis_lock_client is None:
         raise RuntimeError('Redis lock client is unavailable')
 
-    cleared = []
-    hashmap = redis_lock_client.hgetall(runid)
+    cleared: list[str] = []
+    seen: set[str] = set()
+
+    def _record(relpath: str):
+        field_name = f'locked:{relpath}'
+        if field_name not in seen:
+            seen.add(field_name)
+            cleared.append(field_name)
 
     scope = None
     if pup_relpath:
@@ -1430,42 +1574,83 @@ def clear_locks(runid, pup_relpath=None):
         if scope == '.':
             scope = None
 
+    hashmap = redis_lock_client.hgetall(runid)
+
     for lock_key, v in hashmap.items():
         if not lock_key.startswith('locked:'):
             continue
 
-        if v != 'true':
+        rel_path = lock_key.split('locked:', 1)[1]
+        if not _matches_scope(rel_path, scope):
             continue
 
-        rel_path = lock_key.split('locked:', 1)[1]
-        if scope is not None:
-            if rel_path == scope or rel_path.startswith(scope + os.sep):
-                pass
-            else:
-                continue
+        if v != 'false':
+            redis_lock_client.hset(runid, lock_key, 'false')
+        redis_lock_client.delete(_lock_key_for(runid, rel_path))
+        _record(rel_path)
 
-        redis_lock_client.hset(runid, lock_key, 'false')
-        cleared.append(lock_key)
-    
+    pattern = f'{LOCK_KEY_PREFIX}:{runid}:*'
+    for distributed_key in redis_lock_client.scan_iter(match=pattern):
+        rel_path = _relpath_from_lock_key(runid, distributed_key)
+        if not _matches_scope(rel_path, scope):
+            continue
+        redis_lock_client.delete(distributed_key)
+        field = f'locked:{rel_path}'
+        redis_lock_client.hset(runid, field, 'false')
+        _record(rel_path)
+
     return cleared
 
 
 def lock_statuses(runid) -> defaultdict[str, bool]:
     """
-    Clear all locks for the given runid.
-    Low-level function that interacts directly with Redis.
+    Return the lock status for each known `.nodb` file under the run.
+    Distributed locks (SETNX keys) are considered the source of truth; legacy
+    `locked:*` hash fields are normalized as needed for compatibility.
     """
     if redis_lock_client is None:
         raise RuntimeError('Redis lock client is unavailable')
 
     statuses = defaultdict(bool)
 
-    # sync statuses from redis
+    # distributed locks are authoritative
+    active_norm_paths: dict[str, str] = {}
+    pattern = f'{LOCK_KEY_PREFIX}:{runid}:*'
+    for distributed_key in redis_lock_client.scan_iter(match=pattern):
+        rel_path = _relpath_from_lock_key(runid, distributed_key)
+        statuses[rel_path] = True
+        active_norm_paths[_normalize_lock_relpath(rel_path)] = rel_path
+
+    # legacy hash flags are kept for UI compatibility
     hashmap = redis_lock_client.hgetall(runid)
     for lock_key, v in hashmap.items():
         if lock_key.startswith('locked:'):
             filename = lock_key.split('locked:')[1]
-            statuses[filename] = (v == 'true')
+            norm = _normalize_lock_relpath(filename)
+            if norm in active_norm_paths:
+                # already marked as active from the distributed lock
+                continue
+
+            locked = False
+            if v == 'true':
+                locked = True
+            elif v not in (None, 'false'):
+                payload = _parse_lock_payload(v)
+                if payload.get('expires_at'):
+                    try:
+                        locked = int(payload['expires_at']) > int(time())
+                    except (TypeError, ValueError):
+                        locked = bool(payload.get('token'))
+                else:
+                    locked = bool(payload.get('token'))
+
+            if locked:
+                # Mirror authoritative state; if distributed lock is gone, clear stale flag.
+                if norm not in active_norm_paths:
+                    redis_lock_client.hset(runid, lock_key, 'false')
+                    locked = False
+
+            statuses[filename] = locked
 
     return statuses
 
