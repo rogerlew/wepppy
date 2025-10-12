@@ -719,7 +719,11 @@ def _post_gpkg_export_rq(runid):
 
 def post_dss_export_rq(runid):
     try:
-        from wepppy.wepp.out import totalwatsed_partitioned_dss_export, chanout_dss_export, archive_dss_export_zip
+        from wepppy.wepp.interchange import (
+            totalwatsed_partitioned_dss_export,
+            archive_dss_export_zip,
+            chanout_dss_export,
+        )
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
