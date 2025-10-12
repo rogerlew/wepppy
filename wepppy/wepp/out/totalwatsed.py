@@ -46,7 +46,6 @@ from datetime import datetime
 from wepppy.all_your_base import isint
 from wepppy.all_your_base.hydro import determine_wateryear
 import logging
-from wepppy.wepp.out import watershed_swe
 from wepppy.all_your_base import NCPU
 
 from wepppy.topo.watershed_abstraction import upland_hillslopes
@@ -573,7 +572,6 @@ class TotalWatSed(object):
 
         d['Sed. Del (tonne)'] = d['Sed. Del (kg)'] / 1000.0
 
-        d['SWE (mm)'] = watershed_swe(wd)
 
         if phos_opts is not None:
             assert isinstance(phos_opts, PhosphorusOpts)
@@ -645,77 +643,3 @@ class TotalWatSed(object):
             for i, yr in enumerate(d['Year']):
                 wtr.writerow(OrderedDict([(k, d[k][i]) for k in d]))
 
-
-def totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_channel=None):
-    """
-    Runs TotalWatSed2 report for each channel in teh export_channel_ids list containing topaz_id list of channels
-
-    The TotalWatSed2 aggregates daily values from the .wat.txt and .pass.txt files of all the upstream hillslopes to the channel
-    """
-    from wepppy.nodb.status_messenger import StatusMessenger
-    from wepppy.nodb.core import Watershed
-
-    watershed = Watershed.getInstance(wd)
-    translator = watershed.translator_factory()
-    dss_export_dir = _join(wd, 'export/dss')
-
-    if status_channel is not None:
-        StatusMessenger.publish(status_channel, 'totalwatsed_partitioned_dss_export()...\n')
-
-    if _exists(dss_export_dir):
-        if status_channel is not None:
-            StatusMessenger.publish(status_channel, 'cleaning export/dss/totwatsed2_chn_*.dss\n')
-            
-        old_dss_files = glob(_join(dss_export_dir, 'totwatsed2_chn_*.dss'))
-        for fn in old_dss_files:
-            os.remove(fn)
-
-    if not _exists(dss_export_dir):
-        os.makedirs(dss_export_dir, exist_ok=True)
-
-    for chn_id in translator.iter_chn_ids():  # yields `chn_{id}` strings
-        if export_channel_ids is not None:
-            if int(chn_id.split('_')[1]) not in export_channel_ids:
-                continue
-
-        if status_channel is not None:
-            StatusMessenger.publish(status_channel, f'processing channel {chn_id}...\n')
-
-        dss_file = _join(dss_export_dir, f'totwatsed2_chn_{chn_id}.dss')
-        totwatsed = TotalWatSed2(wd, chn_id=chn_id)
-        totwatsed.to_dss(dss_file)
-
-
-def archive_dss_export_zip(wd, status_channel=None):
-    from wepppy.nodb.status_messenger import StatusMessenger
-    import zipfile
-
-    if status_channel is not None:
-        StatusMessenger.publish(status_channel, 'zipping export/dss\n')
-
-    dss_export_dir = _join(wd, 'export/dss')
-
-    # zip the dss_export_dir to a zip file
-    zip_file = _join(wd, 'export/dss.zip')
-    with zipfile.ZipFile(zip_file, 'w') as zipf:
-        for root, dirs, files in os.walk(dss_export_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                zipf.write(file_path, os.path.relpath(file_path, dss_export_dir))
-
-
-if __name__ == "__main__":
-    import sys
-    sys.exit()
-
-    from pprint import pprint
-    fn = '/geodata/weppcloud_runs/srivas42-greatest-ballad/wepp/output/totalwatsed.txt'
-    from wepppy.nodb.core.wepp import PhosphorusOpts, BaseflowOpts
-    phosOpts = PhosphorusOpts()
-    phosOpts.surf_runoff = 0.0118
-    phosOpts.lateral_flow = 0.0118
-    phosOpts.baseflow = 0.0196
-    phosOpts.sediment = 1024
-    baseflowOpts = BaseflowOpts()
-    totwatsed = TotalWatSed(fn, baseflowOpts, phos_opts=phosOpts)
-    totwatsed.export('/home/roger/totwatsed.csv')

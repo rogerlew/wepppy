@@ -7,7 +7,11 @@ from .watershed_soil_interchange import run_wepp_watershed_soil_interchange
 from .watershed_ebe_interchange import run_wepp_watershed_ebe_interchange
 from .watershed_chnwb_interchange import run_wepp_watershed_chnwb_interchange
 from .watershed_chanwb_interchange import run_wepp_watershed_chanwb_interchange
-from .watershed_chan_peak_interchange import run_wepp_watershed_chan_peak_interchange
+from .watershed_chan_peak_interchange import run_wepp_watershed_chan_peak_interchange, chanout_dss_export
+from .watershed_totalwatsed_export import (
+    totalwatsed_partitioned_dss_export,
+    archive_dss_export_zip,
+)
 from .hill_soil_interchange import run_wepp_hillslope_soil_interchange
 from .hill_wat_interchange import run_wepp_hillslope_wat_interchange
 from .hill_interchange import run_wepp_hillslope_interchange
@@ -31,6 +35,9 @@ __all__ = [
     "run_wepp_watershed_chnwb_interchange",
     "run_wepp_watershed_chanwb_interchange",
     "run_wepp_watershed_chan_peak_interchange",
+    "chanout_dss_export",
+    "totalwatsed_partitioned_dss_export",
+    "archive_dss_export_zip",
     "run_wepp_watershed_loss_interchange",
     "run_wepp_watershed_interchange",
     "run_totalwatsed3",

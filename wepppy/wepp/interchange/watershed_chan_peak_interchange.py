@@ -8,6 +8,7 @@ from typing import Dict, List
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+import pandas as pd
 
 from wepppy.all_your_base.hydro import determine_wateryear
 
@@ -153,3 +154,72 @@ def run_wepp_watershed_chan_peak_interchange(
     target = interchange_dir / CHAN_PEAK_PARQUET
     _write_chan_peak_parquet(source, target, start_year=start_year)
     return target
+
+
+def chanout_dss_export(wd: Path | str, status_channel: str | None = None) -> None:
+    """
+    Export channel-peak flow data to a DSS time-series file.
+    """
+    from pydsstools.heclib.dss import HecDss
+    from pydsstools.core import TimeSeriesContainer
+    from wepppy.nodb.status_messenger import StatusMessenger
+    from wepppy.nodb.core import Watershed
+
+    wd_path = Path(wd)
+    watershed = Watershed.getInstance(wd_path)
+    translator = watershed.translator_factory()
+
+    dss_dir = wd_path / "export" / "dss"
+    dss_dir.mkdir(parents=True, exist_ok=True)
+    chan_dss = dss_dir / "chan.dss"
+
+    if chan_dss.exists():
+        if status_channel is not None:
+            StatusMessenger.publish(status_channel, "cleaning export/dss/chan.dss\n")
+        chan_dss.unlink()
+
+    if status_channel is not None:
+        StatusMessenger.publish(status_channel, "chanout_dss_export()...\n")
+
+    parquet_path = run_wepp_watershed_chan_peak_interchange(wd_path / "wepp" / "output")
+    df = pd.read_parquet(parquet_path)
+
+    id_column = "Chan_ID"
+    if translator is not None and hasattr(translator, "top"):
+        try:
+            df["TopazID"] = df["Elmt_ID"].apply(lambda wepp_id: translator.top(wepp=int(wepp_id)))
+            id_column = "TopazID"
+        except Exception:
+            if "TopazID" in df.columns:
+                df.drop(columns=["TopazID"], inplace=True)
+
+    df["year"] = df["year"].astype(int)
+    df["julian"] = df["julian"].astype(int)
+    df["Time (s)"] = df["Time (s)"].fillna(0.0).astype(float)
+
+    base_dates = pd.to_datetime(df["year"].astype(str), format="%Y")
+    base_dates = base_dates + pd.to_timedelta(df["julian"] - 1, unit="D")
+    df["datetime"] = base_dates + pd.to_timedelta(df["Time (s)"], unit="s")
+
+    with HecDss.Open(str(chan_dss)) as fid:
+        for channel_id, group in df.groupby(id_column):
+            values = group["Peak_Discharge (m^3/s)"].astype(float).to_list()
+            times = group["datetime"].to_list()
+
+            # DSS Pathname Parts: /A/B/C/D/E/F/
+            # A: Project -> WEPP
+            # B: Version -> CHAN-OUT
+            # C: Parameter -> PEAK-FLOW
+            # D: Time Window -> IR-YEAR (Irregular Yearly)
+            # E: Interval -> Blank for irregular data
+            # F: Location -> Channel ID
+            tsc = TimeSeriesContainer()
+            tsc.pathname = f"/WEPP/CHAN-OUT/PEAK-FLOW//IR-YEAR/{channel_id}/"
+            tsc.times = times
+            tsc.values = values
+            tsc.numberValues = len(values)
+            tsc.units = "M3/S"
+            tsc.type = "INST"
+            tsc.interval = -1
+
+            fid.put_ts(tsc)
