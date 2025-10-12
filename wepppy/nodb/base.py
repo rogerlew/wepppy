@@ -852,11 +852,6 @@ class NoDbBase(object):
         return Disturbed.getInstance(self.wd)
     
     @property
-    def wepppost_instance(self):
-        from .core.wepppost import WeppPost
-        return WeppPost.getInstance(self.wd)
-    
-    @property
     def has_sbs(self):
         from wepppy.nodb.mods.disturbed import Disturbed
         from wepppy.nodb.mods.baer import Baer
