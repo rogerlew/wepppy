@@ -9,7 +9,6 @@ from wepppy.nodb.core import Landuse, Ron, Climate, Watershed, Wepp
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
-from wepppy.wepp.out import Element, HillWat
 from wepppy.wepp.reports import ChannelSummaryReport, HillSummaryReport, OutletSummaryReport
 from wepppy.wepp.reports import TotalWatbalReport
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
