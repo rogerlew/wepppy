@@ -303,10 +303,6 @@ def run_wepp_rq(runid):
                 job.save()
 
             if not climate.is_single_storm:
-                _job = q.enqueue_call(_post_run_wepp_post_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-                job.meta['jobs:4,func:_post_run_wepp_post_rq'] = _job.id
-                jobs4_post.append(_job)
-                job.save()
                 
                 _job = q.enqueue_call(_run_hillslope_watbal_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
                 job.meta['jobs:4,func:_run_hillslope_watbal_rq'] = _job.id
@@ -661,23 +657,6 @@ def _post_prep_details_rq(runid):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
-
-
-def _post_run_wepp_post_rq(runid):
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        time.sleep(1)
-        wepppost = WeppPost.getInstance(wd)
-        wepppost.run_post()
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
-        raise
-
 
 def _post_watershed_interchange_rq(runid):
     try:
