@@ -19,8 +19,8 @@ from wepppy.all_your_base import (
     NCPU
 )
 
-from wepppy.wepp.out import HillWat
 from wepppy.climates.cligen import ClimateFile
+from wepppy.wepp.interchange.hill_wat_interchange import load_hill_wat_dataframe
 
 # wepppy submodules
 from wepppy.nodb.base import NoDbBase, nodb_setter, createProcessPoolExecutor
@@ -624,9 +624,9 @@ class Ash(NoDbBase):
                     if load_d[topaz_id] <= 0.0:
                         continue
 
-                hill_wat_fn = _join(wepp.output_dir,
-                                   'H{wepp_id}.wat.dat'.format(wepp_id=wepp_id))
-                hill_wat = HillWat(hill_wat_fn)
+                hill_wat_df = load_hill_wat_dataframe(
+                    wepp.output_dir, wepp_id, collapse="daily"
+                )
 
                 field_white_ash_bulkdensity = self.field_white_ash_bulkdensity
                 field_black_ash_bulkdensity = self.field_black_ash_bulkdensity
@@ -696,7 +696,7 @@ class Ash(NoDbBase):
                             ash_bulkdensity=ash_bulkdensity,
                             fire_date=fire_date,
                             cli_df=cli_df,
-                            hill_wat=hill_wat,
+                            hill_wat_df=hill_wat_df,
                             out_dir=ash_dir,
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
                             area_ha=area_ha,

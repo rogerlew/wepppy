@@ -15,8 +15,6 @@ from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.dateutils import YearlessDate
 from wepppy.all_your_base.stats import weibull_series, probability_of_occurrence
 
-from wepppy.wepp.out import HillWat
-
 from .wind_transport_thresholds import *
 
 
@@ -86,7 +84,7 @@ class AshModel(object):
         elif self.ash_type == AshType.WHITE:
             return lookup_wind_threshold_white_ash_proportion(w)
 
-    def run_model(self, fire_date: YearlessDate, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
+    def run_model(self, fire_date: YearlessDate, cli_df: pd.DataFrame, hill_wat_df: pd.DataFrame, out_dir, prefix,
                   recurrence=[100, 50, 25, 20, 10, 5, 2],
                   area_ha: Optional[float] = None,
                   ini_ash_depth: Optional[float] = None,  # not used
@@ -100,8 +98,8 @@ class AshModel(object):
             month, day of fire as a YearlessDate instance
         :param cli_df:
             the climate file produced by CLIGEN as a pandas.Dataframe
-        :param hill_wat:
-               the hillslope water model output
+        :param hill_wat_df:
+               daily hillslope water balance dataframe aggregated across OFEs
         :param out_dir:
             the directory save the model output
         :param prefix:
@@ -132,14 +130,28 @@ class AshModel(object):
         # Create an empty list to store DataFrames
         dfs = []
 
-        # use np.unique to get the unique years in the climate file
-        for year0 in np.unique(hill_wat.data['Y']):
-            start_index = np.where((hill_wat.data['Y'] == year0) &
-                                   (hill_wat.data['M'] == fire_date.month) &
-                                   (hill_wat.data['D'] == fire_date.day))[0][0]
+        years = hill_wat_df['year'].to_numpy(dtype=np.int32, copy=False)
+        months = hill_wat_df['month'].to_numpy(dtype=np.int16, copy=False)
+        days = hill_wat_df['day_of_month'].to_numpy(dtype=np.int16, copy=False)
 
-            df = self._run_ash_model_until_gone(fire_date, hill_wat, cli_df,
-                                                ini_ash_load, start_index, year0)
+        # use np.unique to get the unique years in the climate file
+        for year0 in np.unique(years):
+            matches = np.flatnonzero((years == year0) &
+                                     (months == fire_date.month) &
+                                     (days == fire_date.day))
+            if len(matches) == 0:
+                continue
+
+            start_index = matches[0]
+
+            df = self._run_ash_model_until_gone(
+                fire_date,
+                hill_wat_df,
+                cli_df,
+                ini_ash_load,
+                start_index,
+                year0,
+            )
             dfs.append(df)
 
             dates = np.linspace(start_index, start_index + len(df), len(df))
@@ -200,27 +212,34 @@ class AshModel(object):
         return remaining_mm, transportable_tonspha
 
 
-    def _run_ash_model_until_gone(self, fire_date, hill_wat, cli_df, ini_ash_load,
+    def _run_ash_model_until_gone(self, fire_date, hill_wat_df, cli_df, ini_ash_load,
                                   start_index, year0):
 
         assert self.roughness_limit >= 0.0, self.roughness_limit
 
+        source_label = hill_wat_df.attrs.get("source_path", "H.wat.parquet")
+
         # number of days in the file
-        s_len = hill_wat.days_in_sim
+        s_len = len(hill_wat_df)
+
+        years = hill_wat_df['year'].to_numpy(dtype=np.int32, copy=False)
+        months = hill_wat_df['month'].to_numpy(dtype=np.int16, copy=False)
+        day_of_month = hill_wat_df['day_of_month'].to_numpy(dtype=np.int16, copy=False)
+        julian_days = hill_wat_df['julian'].to_numpy(dtype=np.int16, copy=False)
 
         days_from_fire = np.arange(s_len, dtype=np.int64)
-        yr = np.roll(hill_wat.data['Y'], -start_index)
-        mo = np.roll(hill_wat.data['M'], -start_index)
-        da = np.roll(hill_wat.data['D'], -start_index)
-        julian = np.roll(hill_wat.data['J'], -start_index)
+        yr = np.roll(years, -start_index)
+        mo = np.roll(months, -start_index)
+        da = np.roll(day_of_month, -start_index)
+        julian = np.roll(julian_days, -start_index)
 
         assert year0 == yr[0], (year0, yr[0])
 
-        precip = np.roll(hill_wat.data['P (mm)'], -start_index)
-        rm = np.roll(hill_wat.data['RM (mm)'], -start_index)
-        q = np.roll(hill_wat.data['Q (mm)'], -start_index)
-        tsw = np.roll(hill_wat.data['Total-Soil Water (mm)'], -start_index)
-        swe = np.roll(hill_wat.data['Snow-Water (mm)'], -start_index)
+        precip = np.roll(hill_wat_df['P'].to_numpy(dtype=np.float64, copy=False), -start_index)
+        rm = np.roll(hill_wat_df['RM'].to_numpy(dtype=np.float64, copy=False), -start_index)
+        q = np.roll(hill_wat_df['Q'].to_numpy(dtype=np.float64, copy=False), -start_index)
+        tsw = np.roll(hill_wat_df['Total-Soil Water'].to_numpy(dtype=np.float64, copy=False), -start_index)
+        swe = np.roll(hill_wat_df['Snow-Water'].to_numpy(dtype=np.float64, copy=False), -start_index)
         cum_q_mm = np.cumsum(q)
 
         wind_vel = np.roll(cli_df['w-vl'], -start_index)
@@ -362,7 +381,9 @@ class AshModel(object):
             i += 1
 
         if transportable_ash_tonspha[i-1] > 0:
-            warnings.warn(f'ash transportable {transportable_ash_tonspha[i-1]} not zero, ({hill_wat.fname}, {i}, {s_len})')
+            warnings.warn(
+                f'ash transportable {transportable_ash_tonspha[i-1]} not zero, ({source_label}, {i}, {s_len})'
+            )
 
 #        print(f'{i}\t{np.max(water_transport_tonspha[:i]):.2f}\t{remaining_ash_tonspha[i]:.2f}\t{cum_ash_transport_tonspha[i]:.2f}')
 
@@ -476,6 +497,3 @@ class BlackAshModel(AshModel):
 # 40 mm of Rain over 3 months 2 to 3 storms (13-20 mm per storm).
 # Removed 10 to 20 mm of ash. 15 mm of ash 46.5 tonne/ha
 # Removed all the Ash
-
-
-

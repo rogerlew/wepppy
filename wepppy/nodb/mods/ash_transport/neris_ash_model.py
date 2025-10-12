@@ -11,8 +11,6 @@ import pandas as pd
 from wepppy.all_your_base.dateutils import YearlessDate
 from wepppy.all_your_base.stats import weibull_series, probability_of_occurrence
 
-from wepppy.wepp.out import HillWat
-
 from .wind_transport_thresholds import *
 
 _thisdir = os.path.dirname(__file__)
@@ -82,7 +80,7 @@ class AshModel(object):
         elif self.ash_type == AshType.WHITE:
             return lookup_wind_threshold_white_ash_proportion(w)
 
-    def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
+    def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat_df: pd.DataFrame, out_dir, prefix,
                   recurrence=[100, 50, 25, 20, 10, 5, 2], 
                   area_ha: Optional[float]=None, 
                   ini_ash_depth: Optional[float]=None, 
@@ -113,7 +111,15 @@ class AshModel(object):
         # copy the DataFrame
         df = deepcopy(cli_df)
 
-        hill_wat_d = hill_wat.as_dict()
+        drop_columns = {'Area', 'day', 'ofe_id', 'OFE'}
+        hill_wat_d = {}
+        for record in hill_wat_df.to_dict('records'):
+            key = (
+                int(record['year']),
+                int(record['month']),
+                int(record['day_of_month']),
+            )
+            hill_wat_d[key] = {k: v for k, v in record.items() if k not in drop_columns}
 
         # number of days in the file
         s_len = len(df.da)
@@ -224,7 +230,7 @@ class AshModel(object):
                 precip[i] = 0.0
 
             if yr_mo_da in hill_wat_d:
-                soil_evap[i] = hill_wat_d[yr_mo_da]['Es (mm)']
+                soil_evap[i] = hill_wat_d[yr_mo_da]['Es']
             else:
                 soil_evap[i] = 0.0
 
