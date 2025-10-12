@@ -113,8 +113,6 @@ from wepppy.nodb.base import (
     createProcessPoolExecutor,
 )
 
-
-from .wepppost import WeppPost
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.wepp.soils.utils import simple_texture
@@ -2246,15 +2244,9 @@ class Wepp(NoDbBase):
                     export_channels_prep_details(wd)
                     export_hillslopes_prep_details(wd)
 
-            if not _exists(_join(wd, 'wepppost.nodb')):
-                WeppPost(wd, '0.cfg')
-
             climate = self.climate_instance
 
             if not climate.is_single_storm:
-                with self.timed('  running wepppost'):
-                    self._run_wepppost()
-
                 with self.timed('  running totalwatsed3'):
                     self._build_totalwatsed3()
 
@@ -2320,11 +2312,6 @@ class Wepp(NoDbBase):
     @nodb_timed
     def _run_hillslope_watbal(self):
         HillslopeWatbal(self.wd)
-
-    @nodb_timed
-    def _run_wepppost(self):
-        wepppost = WeppPost.getInstance(self.wd)
-        wepppost.run_post()
 
     @nodb_timed
     def _build_totalwatsed2(self):
