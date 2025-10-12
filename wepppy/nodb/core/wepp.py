@@ -126,12 +126,6 @@ from wepppy.nodb.core.climate import ClimateMode
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 
-def compress_fn(fn):
-    if _exists(fn):
-        p = call('gzip %s -f' % fn, shell=True)
-        assert _exists(fn + '.gz')
-
-
 def _copyfile(src_fn, dst_fn):
     if _exists(dst_fn):
         os.remove(dst_fn)
@@ -1054,15 +1048,20 @@ class Wepp(NoDbBase):
             if _exists(_dir):
                 try:
                     shutil.rmtree(_dir)
-                except:
+                except Exception as exc:
+                    self.logger.warning(f'Cleanup unable to remove {_dir} on first attempt: {exc}', exc_info=True)
                     sleep(1.0)
                     try:
-                        shutil.rmtree(_dir, ignore_errors=True)
-                    except:
-                        pass
+                        shutil.rmtree(_dir)
+                    except Exception as retry_exc:
+                        self.logger.error(f'Cleanup failed to remove {_dir} after retry: {retry_exc}', exc_info=True)
+                        raise RuntimeError(f"Failed to clean directory '{_dir}'") from retry_exc
 
-            if not _exists(_dir):
-                os.makedirs(_dir)
+            try:
+                os.makedirs(_dir, exist_ok=True)
+            except Exception as exc:
+                self.logger.error(f'Cleanup failed to recreate {_dir}: {exc}', exc_info=True)
+                raise
 
         climate = self.climate_instance
         if climate.climate_mode == ClimateMode.SingleStormBatch:
@@ -2258,12 +2257,6 @@ class Wepp(NoDbBase):
 
                 with self.timed('  running hillslope_watbal'):
                     self._run_hillslope_watbal()
-
-#                with self.timed('  compressing pass_pw0.txt'):
-#                    compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
-#
-#                with self.timed('  compressing soil_pw0.txt'):
-#                    compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
 
                 if self.legacy_arc_export_on_run_completion:
                     with self.timed('  running legacy_arc_export'):
