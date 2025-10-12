@@ -101,7 +101,13 @@ from wepppy.wepp.out import (
 
 from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
 
-from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentCharacteristics
+from wepppy.wepp.stats import (
+    ChannelWatbal,
+    HillslopeWatbal,
+    ReturnPeriods,
+    ReturnPeriodDataset,
+    SedimentCharacteristics,
+)
 
 # wepppy submodules
 from wepppy.wepp.stats.frq_flood import FrqFlood
@@ -2342,17 +2348,15 @@ class Wepp(NoDbBase):
                               meoization=True,
                               exclude_months=None,
                               chn_topaz_id_of_interest=None):
-        from wepppy.wepp.interchange.watershed_loss import Loss
 
         output_dir = self.output_dir
 
         return_periods_fn = None
+        cached_report: ReturnPeriods | None = None
         if meoization:
-            # Normalize inputs: treat None/[] the same; dedupe+sort; keep as tuples or None
             req_yrs = None if not exclude_yr_indxs else tuple(sorted({int(x) for x in exclude_yr_indxs}))
-            req_mos = None if not exclude_months    else tuple(sorted({int(x) for x in exclude_months}))
+            req_mos = None if not exclude_months else tuple(sorted({int(x) for x in exclude_months}))
 
-            # Build cache filename
             parts = []
             if req_yrs:
                 parts.append("exclude_yr_indxs=" + ",".join(map(str, req_yrs)))
@@ -2365,37 +2369,27 @@ class Wepp(NoDbBase):
             suffix = ("__" + "__".join(parts)) if parts else ""
             return_periods_fn = _join(output_dir, f"return_periods{suffix}.json")
 
-            # Lazy load if cache exists and matches request args
             if _exists(return_periods_fn):
                 with open(return_periods_fn) as fp:
-                    report = ReturnPeriods.from_dict(json.load(fp))
+                    cached_report = ReturnPeriods.from_dict(json.load(fp))
 
-                rep_yrs = getattr(report, "exclude_yr_indxs", None)
-                rep_mos = getattr(report, "exclude_months", None)
+                rep_yrs = getattr(cached_report, "exclude_yr_indxs", None)
+                rep_mos = getattr(cached_report, "exclude_months", None)
                 rep_yrs = None if not rep_yrs else tuple(sorted({int(x) for x in rep_yrs}))
                 rep_mos = None if not rep_mos else tuple(sorted({int(x) for x in rep_mos}))
 
                 if req_yrs == rep_yrs and req_mos == rep_mos:
-                    return report
-                
-        loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
+                    return cached_report
 
-        ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
-        ebe_rpt = Ebe(ebe_pw0, wepp_top_translator=self.watershed_instance.translator_factory())
-
-        climate = self.climate_instance
-        cli = ClimateFile(_join(climate.cli_dir, climate.cli_fn))
-        cli_df = cli.as_dataframe(calc_peak_intensities=True)
-
-        totwatsed2 = TotalWatSed2(self.wd)
-
-        return_periods = ReturnPeriods(ebe_rpt, loss_rpt, cli_df, recurrence=rec_intervals,
-                                       exclude_yr_indxs=exclude_yr_indxs,
-                                       method=method, gringorten_correction=gringorten_correction,
-                                       totwatsed2=totwatsed2,
-                                       exclude_months=exclude_months,
-                                       chn_topaz_id_of_interest=chn_topaz_id_of_interest)
+        dataset = ReturnPeriodDataset(self.wd, auto_refresh=True)
+        return_periods = dataset.create_report(
+            rec_intervals,
+            exclude_yr_indxs=exclude_yr_indxs,
+            exclude_months=exclude_months,
+            method=method,
+            gringorten_correction=gringorten_correction,
+            topaz_id=chn_topaz_id_of_interest,
+        )
 
         if return_periods_fn is not None:
             with open(return_periods_fn, 'w') as fp:

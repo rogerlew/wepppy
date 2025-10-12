@@ -43,3 +43,47 @@
   the particle-type distribution (fractions + tonne·yr⁻¹) derived from outlet totals.
 - `HillslopeSedimentDistribution` aggregates the pass file to average-annual class
   masses, providing hillslope totals, class distributions, and particle-type splits.
+
+## Return Periods (Refactor Specification)
+
+- **Objective**: replace the legacy `ReturnPeriods` class with a query-engine
+  pipeline that narrows the event set to just the ranked observations needed for
+  common recurrence intervals, while allowing the template to request arbitrary
+  return periods at runtime.
+- **Inputs**:
+  - `wepp/output/interchange/ebe_pw0.parquet` – event-by-event channel metrics 
+    (runoff volume, peak discharge, sediment yield, pollutants, element id, etc.).
+  - `wepp/output/interchange/loss_pw0.all_years.chn.parquet` / `loss_pw0.all_years.hill.parquet`
+    – per-year summaries to track simulation years and filter excluded years.
+  - `wepp/output/interchange/totalwatsed3.parquet` – hillslope aggregates to attach
+    hill sediment delivery/streamflow to each event.
+  - `H.pass.parquet` – hillslope event sediment mass by class (when detailed hillslope
+    metrics are needed for the return-period rows).
+  - `climate/*.parquet` – climate intensities and storm durations (10/15/30 minute
+    peaks). Query these via DuckDB joins rather than pandas merges.
+- **Staging procedure**:
+  1. Use DuckDB to join the event table `ebe_pw0.parquet` with the climate parquet
+     and any hillslope/channels tables needed for the metrics shown in the report.
+  2. Apply year/month exclusions in SQL to trim the candidate event set.
+  3. For each metric (runoff, peak discharge, sediment yield, phosphorus, hill
+     sediment delivery, hill streamflow, etc.), compute a descending rank (dense)
+     and keep only the top *N* rows, where *N* ≥ max recurrence interval + buffer
+     (e.g., 50). Store the ranks along with the event metadata in a staged parquet
+     file such as `return_period_events.parquet`.
+  4. Persist a second mapping table `return_period_event_ranks.parquet` containing
+     `(measure, rank, event_id)` for fast lookups. Include per-measure metadata
+     (units, labels) in the parquet schema metadata so the report class can render
+     nicely formatted headers.
+- **Reporting API**:
+  - Implement a `ReturnPeriodDataset` class that loads the staged parquet files,
+    computes Weibull positions for the requested recurrence intervals, resolves the
+    appropriate events by rank, and returns the same structure the template expects
+    today (measure → period → values + units, Weibull rank/T, etc.).
+  - Provide a helper (e.g., `refresh_return_period_events(wd)`) that regenerates the
+    staged parquet files when a run is updated.
+- **Reboot prompt for implementation phase**:
+  > “Rebuild `ReturnPeriods` using the staged query-engine approach: generate
+  > `return_period_events.parquet` and `return_period_event_ranks.parquet` from
+  > `ebe_pw0.parquet`, climate intensities, and `totalwatsed3.parquet`, then expose
+  > a `ReturnPeriodDataset` that supplies the template without relying on the old
+  > pandas-based code.”
