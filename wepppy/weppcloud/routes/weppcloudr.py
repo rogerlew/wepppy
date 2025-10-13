@@ -252,10 +252,11 @@ def deval_details(runid, config):
         )
 
     response = Response(service_response.content, status=service_response.status_code)
-    for header_name in ('Content-Type', 'Content-Encoding', 'Cache-Control', 'Content-Disposition'):
+    for header_name in ('Content-Type', 'Cache-Control', 'Content-Disposition'):
         header_value = service_response.headers.get(header_name)
         if header_value:
             response.headers[header_name] = header_value
+    response.headers['Content-Length'] = str(len(service_response.content))
     return response
 
 
