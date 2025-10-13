@@ -31,6 +31,61 @@ BATCH_ROOT <- Sys.getenv("BATCH_ROOT", "/wc1/batch")
 
 .run_root_cache <- new.env(parent = emptyenv())
 
+first_present <- function(name_vector, candidates) {
+  for (candidate in candidates) {
+    if (candidate %in% name_vector) {
+      return(candidate)
+    }
+  }
+  NULL
+}
+
+mutate_from_candidates <- function(tbl, target, candidates, transform = identity, default = NA_real_, warn = TRUE) {
+  source_name <- first_present(names(tbl), candidates)
+  if (is.null(source_name)) {
+    if (warn) {
+      warning(
+        sprintf(
+          "Columns [%s] not found when populating '%s'",
+          paste(candidates, collapse = ", "),
+          target
+        ),
+        call. = FALSE
+      )
+    }
+    tbl[[target]] <- default
+  } else {
+    tbl[[target]] <- transform(tbl[[source_name]])
+  }
+  tbl
+}
+
+safe_depth_mm <- function(volume_m3, area_m2) {
+  volume <- as.numeric(volume_m3)
+  area <- as.numeric(area_m2)
+  result <- rep(0, length(volume))
+  valid <- !is.na(volume) & !is.na(area) & area > 0
+  result[valid] <- (volume[valid] * 1000) / area[valid]
+  result
+}
+
+safe_density_kg_ha <- function(mass_kg, area_ha) {
+  mass <- as.numeric(mass_kg)
+  area <- as.numeric(area_ha)
+  result <- rep(0, length(mass))
+  valid <- !is.na(mass) & !is.na(area) & area > 0
+  result[valid] <- mass[valid] / area[valid]
+  result
+}
+
+coerce_numeric_columns <- function(tbl, columns) {
+  existing <- intersect(columns, names(tbl))
+  for (column in existing) {
+    tbl[[column]] <- as.numeric(tbl[[column]])
+  }
+  tbl
+}
+
 resolve_run_root <- function(runid) {
   cached <- .run_root_cache[[runid]]
   if (!is.null(cached) && dir.exists(cached)) {
@@ -121,7 +176,7 @@ calc_watbal <- function(link){
                               dplyr::lag(Total_Soil_Water) - Total_Soil_Water +
                               dplyr::lag(frozwt) - frozwt+ dplyr::lag(Snow_Water) - Snow_Water) %>%
     dplyr::mutate(dplyr::across(where(is.numeric), round, 3)) %>% dplyr::select(wb) %>%
-    dplyr::summarise_all(.funs = sum, na.rm = TRUE) %>%
+    dplyr::summarise(dplyr::across(where(is.numeric), ~sum(.x, na.rm = TRUE))) %>%
     dplyr::mutate(WeppID =readr::parse_number(gsub("^.*/", "", link)))
   
   return(as.data.frame(a))
@@ -215,6 +270,10 @@ get_cli_summary <- function(runid){
       precip_mm = sum(precipitation_mm, na.rm = TRUE),
       streamflow_mm = sum(streamflow_mm, na.rm = TRUE),
       .groups = "drop"
+    ) %>%
+    dplyr::mutate(
+      precip_mm = as.numeric(precip_mm),
+      streamflow_mm = as.numeric(streamflow_mm)
     )
 
   list(
@@ -288,6 +347,24 @@ process_chanwb <- function(runid, Wshed_Area_m2){
       Q_outlet_mm
     )
 
+  chanwb <- coerce_numeric_columns(
+    chanwb,
+    c(
+      "Year_chan",
+      "Day_chan",
+      "WY",
+      "Elmt_ID_chan",
+      "Chan_ID_chan",
+      "Inflow_chan_m3",
+      "Outflow_chan_m3",
+      "Storage_chan_m3",
+      "Baseflow_chan_m3",
+      "Loss_chan_m3",
+      "Balance_chan_m3",
+      "Q_outlet_mm"
+    )
+  )
+
   chanwb
 }
 
@@ -320,7 +397,8 @@ read_subcatchments = function(runid) {
   landuse_path <- run_path(runid, "landuse", "landuse.parquet")
   soils_path <- run_path(runid, "soils", "soils.parquet")
 
-  hills <- arrow::read_parquet(hills_path)
+  hills <- arrow::read_parquet(hills_path) %>%
+    dplyr::as_tibble()
   if (!"TopazID" %in% names(hills)) {
     if ("topaz_id" %in% names(hills)) {
       hills$TopazID <- hills$topaz_id
@@ -331,14 +409,46 @@ read_subcatchments = function(runid) {
   if (!"wepp_id" %in% names(hills) && "WeppID" %in% names(hills)) {
     hills$wepp_id <- hills$WeppID
   }
+  area_col <- first_present(names(hills), c("area", "area_m2", "Area"))
+  area_m2 <- NULL
+  if (!is.null(area_col)) {
+    area_m2 <- as.numeric(hills[[area_col]])
+  }
+  if (is.null(area_m2) && "area_ha" %in% names(hills)) {
+    area_m2 <- as.numeric(hills$area_ha) * 10000
+  }
+  if (is.null(area_m2)) {
+    warning("Unable to resolve area for hillslopes.parquet; defaulting to NA", call. = FALSE)
+    area_m2 <- rep(NA_real_, nrow(hills))
+  }
+  area_ha_existing <- if ("area_ha" %in% names(hills)) as.numeric(hills$area_ha) else NULL
+  if (!is.null(area_ha_existing) && any(!is.na(area_ha_existing))) {
+    area_ha <- area_ha_existing
+  } else {
+    area_ha <- area_m2 / 10000
+  }
+
+  slope_percent <- NULL
+  if ("slope_scalar" %in% names(hills)) {
+    slope_percent <- as.numeric(hills$slope_scalar) * 100
+  } else if ("slope_percent" %in% names(hills)) {
+    slope_percent <- as.numeric(hills$slope_percent)
+  } else if ("slope" %in% names(hills)) {
+    slope_percent <- as.numeric(hills$slope)
+  } else {
+    warning("Unable to resolve slope information for hillslopes.parquet; defaulting to NA", call. = FALSE)
+    slope_percent <- rep(NA_real_, nrow(hills))
+  }
+
   hills <- hills %>%
     dplyr::mutate(
       TopazID = as.integer(TopazID),
       wepp_id = as.integer(wepp_id),
-      area_ha = as.numeric(area / 10000),
-      slope_percent = as.numeric(slope_scalar * 100),
+      area_ha = area_ha,
+      slope_percent = slope_percent,
+      slope = slope_percent
     ) %>%
-    dplyr::select(TopazID, wepp_id, area_ha, slope_percent)
+    dplyr::select(TopazID, wepp_id, area_ha, slope_percent, slope)
 
   landuse <- arrow::read_parquet(landuse_path)
   if (!"TopazID" %in% names(landuse) && "topaz_id" %in% names(landuse)) {
@@ -363,6 +473,108 @@ read_subcatchments = function(runid) {
     ) %>%
     dplyr::select(TopazID, soil, Texture)
 
+  loss_path <- run_path(runid, "wepp", "output", "interchange", "loss_pw0.hill.parquet")
+
+  empty_loss_summary <- dplyr::tibble(
+    wepp_id = integer(),
+    runoff_mm = numeric(),
+    lateral_flow_mm = numeric(),
+    baseflow_mm = numeric(),
+    Sediment_Yield_kg = numeric(),
+    sd_yd_kg_ha = numeric(),
+    soil_loss_kg = numeric(),
+    so_ls_kg_ha = numeric(),
+    Total_Phosphorus_kg = numeric(),
+    tp_kg_ha = numeric(),
+    SRP_kg = numeric(),
+    srp_kg_ha = numeric(),
+    PP_kg = numeric(),
+    pp_kg_ha = numeric()
+  )
+
+  if (file.exists(loss_path)) {
+    loss_raw <- arrow::read_parquet(loss_path) %>%
+      dplyr::as_tibble()
+
+    wepp_col <- first_present(names(loss_raw), c("Hillslopes", "wepp_id", "WeppID"))
+    area_col <- first_present(names(loss_raw), c("Hillslope Area", "area_ha", "Area_ha"))
+    runoff_col <- first_present(names(loss_raw), c("Runoff Volume", "runoff_volume"))
+    lateral_col <- first_present(names(loss_raw), c("Subrunoff Volume", "subrunoff_volume"))
+    baseflow_col <- first_present(names(loss_raw), c("Baseflow Volume", "baseflow_volume"))
+    soil_loss_col <- first_present(names(loss_raw), c("Soil Loss", "soil_loss_kg"))
+    sed_yield_col <- first_present(names(loss_raw), c("Sediment Yield", "sediment_yield_kg"))
+    total_p_col <- first_present(names(loss_raw), c("Total Pollutant", "total_p_kg"))
+    srp_col <- first_present(names(loss_raw), c("Solub. React. Pollutant", "srp_kg"))
+    pp_col <- first_present(names(loss_raw), c("Particulate Pollutant", "pp_kg"))
+
+    if (is.null(wepp_col) || is.null(area_col)) {
+      warning("loss_pw0.hill.parquet is missing required identifiers; skipping hillslope metrics", call. = FALSE)
+      loss_summary <- empty_loss_summary
+    } else {
+      loss_summary <- loss_raw %>%
+        dplyr::mutate(
+          wepp_id = as.integer(.data[[wepp_col]]),
+          area_ha_raw = as.numeric(.data[[area_col]]),
+          runoff_m3 = if (!is.null(runoff_col)) as.numeric(.data[[runoff_col]]) else 0,
+          lateral_m3 = if (!is.null(lateral_col)) as.numeric(.data[[lateral_col]]) else 0,
+          baseflow_m3 = if (!is.null(baseflow_col)) as.numeric(.data[[baseflow_col]]) else 0,
+          soil_loss_kg = if (!is.null(soil_loss_col)) as.numeric(.data[[soil_loss_col]]) else 0,
+          Sediment_Yield_kg = if (!is.null(sed_yield_col)) as.numeric(.data[[sed_yield_col]]) else 0,
+          Total_Phosphorus_kg = if (!is.null(total_p_col)) as.numeric(.data[[total_p_col]]) else 0,
+          SRP_kg = if (!is.null(srp_col)) as.numeric(.data[[srp_col]]) else 0,
+          PP_kg = if (!is.null(pp_col)) as.numeric(.data[[pp_col]]) else 0
+        ) %>%
+        dplyr::group_by(wepp_id) %>%
+        dplyr::summarise(
+          area_ha = {
+            valid <- area_ha_raw[!is.na(area_ha_raw)]
+            if (length(valid)) valid[1] else NA_real_
+          },
+          runoff_volume_m3 = sum(runoff_m3, na.rm = TRUE),
+          lateral_volume_m3 = sum(lateral_m3, na.rm = TRUE),
+          baseflow_volume_m3 = sum(baseflow_m3, na.rm = TRUE),
+          Sediment_Yield_kg = sum(Sediment_Yield_kg, na.rm = TRUE),
+          soil_loss_kg = sum(soil_loss_kg, na.rm = TRUE),
+          Total_Phosphorus_kg = sum(Total_Phosphorus_kg, na.rm = TRUE),
+          SRP_kg = sum(SRP_kg, na.rm = TRUE),
+          PP_kg = sum(PP_kg, na.rm = TRUE),
+          .groups = "drop"
+        ) %>%
+        dplyr::mutate(
+          area_m2 = area_ha * 10000,
+          runoff_mm = safe_depth_mm(runoff_volume_m3, area_m2),
+          lateral_flow_mm = safe_depth_mm(lateral_volume_m3, area_m2),
+          baseflow_mm = safe_depth_mm(baseflow_volume_m3, area_m2),
+          so_ls_kg_ha = safe_density_kg_ha(soil_loss_kg, area_ha),
+          sd_yd_kg_ha = safe_density_kg_ha(Sediment_Yield_kg, area_ha),
+          tp_kg_ha = safe_density_kg_ha(Total_Phosphorus_kg, area_ha),
+          srp_kg_ha = safe_density_kg_ha(SRP_kg, area_ha),
+          pp_kg_ha = safe_density_kg_ha(PP_kg, area_ha)
+        ) %>%
+        dplyr::select(
+          wepp_id,
+          runoff_mm,
+          lateral_flow_mm,
+          baseflow_mm,
+          Sediment_Yield_kg,
+          sd_yd_kg_ha,
+          soil_loss_kg,
+          so_ls_kg_ha,
+          Total_Phosphorus_kg,
+          tp_kg_ha,
+          SRP_kg,
+          srp_kg_ha,
+          PP_kg,
+          pp_kg_ha
+        )
+
+      loss_summary <- dplyr::bind_rows(empty_loss_summary[0, ], loss_summary)
+    }
+  } else {
+    warning(sprintf("loss_pw0.hill.parquet not found for run '%s'; runoff and sediment metrics set to zero", runid), call. = FALSE)
+    loss_summary <- empty_loss_summary
+  }
+
   subcatchments <- subcatchments %>%
     dplyr::left_join(hills, by = "TopazID") %>%
     dplyr::left_join(landuse, by = "TopazID") %>%
@@ -382,6 +594,36 @@ read_subcatchments = function(runid) {
         TRUE ~ "40%+ slopes"
       ),
       Watershed = runid
+    ) %>%
+    dplyr::left_join(loss_summary, by = "wepp_id")
+
+  numeric_metrics <- c(
+    "runoff_mm",
+    "lateral_flow_mm",
+    "baseflow_mm",
+    "Sediment_Yield_kg",
+    "sd_yd_kg_ha",
+    "soil_loss_kg",
+    "so_ls_kg_ha",
+    "Total_Phosphorus_kg",
+    "tp_kg_ha",
+    "SRP_kg",
+    "srp_kg_ha",
+    "PP_kg",
+    "pp_kg_ha"
+  )
+
+  subcatchments <- subcatchments %>%
+    dplyr::mutate(
+      area_ha = as.numeric(area_ha),
+      slope_percent = as.numeric(slope_percent),
+      slope = as.numeric(slope)
+    ) %>%
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::any_of(numeric_metrics),
+        ~as.numeric(dplyr::coalesce(., 0))
+      )
     )
 
   subcatchments
@@ -432,19 +674,39 @@ summarize_subcatch_by_var = function(subcatch, var_to_summarize_by){
 gen_cumulative_plt_df <- function(subcatch, var_to_use){
 
   var_to_use = dplyr::enquo(var_to_use)
+  value_col <- rlang::as_name(var_to_use)
+  value_sym <- rlang::sym(value_col)
 
   c_plt_df = subcatch %>%
       # as.data.frame()%>%
       dplyr::select(wepp_id,!!var_to_use,area_ha,geometry,landuse,soil,Texture,slope)%>%
+      dplyr::mutate(
+        !!value_sym := suppressWarnings(as.numeric(.data[[value_col]]))
+      ) %>%
       dplyr::arrange(desc(!!var_to_use)) %>%
-      dplyr::mutate(cumPercArea = cumsum(area_ha) / sum(area_ha) *100,
-                    new_col = cumsum(!!var_to_use) / sum(!!var_to_use) *100)%>%
+      dplyr::mutate(
+        cumPercArea = cumsum(area_ha) / sum(area_ha) *100,
+        new_col = cumsum(dplyr::coalesce(!!value_sym, 0)) / sum(dplyr::coalesce(!!value_sym, 0)) *100
+      )%>%
     dplyr::mutate_at(vars(new_col), ~replace(., is.nan(.), 0))%>%
-    dplyr::mutate(dplyr::across(where(is.numeric), round, 1))%>%
+    dplyr::mutate(
+      dplyr::across(where(is.numeric), round, 1),
+      !!value_sym := as.numeric(.data[[value_col]]),
+      new_col = as.numeric(new_col)
+    )%>%
     dplyr::select(wepp_id,!!var_to_use,area_ha,geometry,cumPercArea,new_col,landuse,
                   soil,Texture,slope)
   
   colnames(c_plt_df)[6] = paste0("cum_",colnames(c_plt_df)[2])
+  cum_col <- colnames(c_plt_df)[6]
+
+  c_plt_df <- c_plt_df %>%
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::all_of(c(value_col, cum_col)),
+        ~ suppressWarnings(as.numeric(.))
+      )
+    )
   
   return(c_plt_df)
 
@@ -454,20 +716,38 @@ gen_cumulative_plt_df <- function(subcatch, var_to_use){
 gen_cumulative_plt_df_map <- function(subcatch, var_to_use){
   
   var_to_use = dplyr::enquo(var_to_use)
+  value_col <- rlang::as_name(var_to_use)
+  value_sym <- rlang::sym(value_col)
   
   c_plt_df = subcatch %>%
     dplyr::group_by(Watershed, scenario)%>%
     # dplyr::select(wepp_id,!!var_to_use,area_ha,geometry,landuse,soil,Texture,slope)%>%
+    dplyr::mutate(
+      !!value_sym := suppressWarnings(as.numeric(.data[[value_col]]))
+    ) %>%
     dplyr::arrange(desc(!!var_to_use)) %>%
     dplyr::mutate(cumPercArea = cumsum(area_ha) / sum(area_ha) *100,
-                  new_col = cumsum(!!var_to_use) / sum(!!var_to_use) *100)%>%
+                  new_col = cumsum(dplyr::coalesce(!!value_sym, 0)) / sum(dplyr::coalesce(!!value_sym, 0)) *100)%>%
     dplyr::mutate_at(vars(new_col), ~replace(., is.nan(.), 0))%>%
-    dplyr::mutate(dplyr::across(where(is.numeric), round, 1))%>%
+    dplyr::mutate(
+      dplyr::across(where(is.numeric), round, 1),
+      !!value_sym := as.numeric(.data[[value_col]]),
+      new_col = as.numeric(new_col)
+    )%>%
     dplyr::select(wepp_id,!!var_to_use,area_ha,geometry,cumPercArea,new_col,landuse,
     soil,Texture,slope,Watershed,scenario,sd_yd_kg_ha,tp_kg_ha)%>%
     ungroup()
   
   colnames(c_plt_df)[6] = paste0("cum_",colnames(c_plt_df)[2])
+  cum_col <- colnames(c_plt_df)[6]
+  
+  c_plt_df <- c_plt_df %>%
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::all_of(c(value_col, cum_col)),
+        ~ suppressWarnings(as.numeric(.))
+      )
+    )
   
   return(c_plt_df)
   
@@ -521,6 +801,25 @@ load_ebe <- function(runid) {
       SRP_tonnes_ebe,
       PP_tonnes_ebe,
       TP_tonnes_ebe
+    ) %>%
+    coerce_numeric_columns(
+      c(
+        "Day_ebe",
+        "Month_ebe",
+        "Year_ebe",
+        "WY",
+        "P_ebe",
+        "Runoff_ebe",
+        "peak_ebe",
+        "Sediment_ebe",
+        "SRP_ebe",
+        "PP_ebe",
+        "TP_ebe",
+        "Sediment_tonnes_ebe",
+        "SRP_tonnes_ebe",
+        "PP_tonnes_ebe",
+        "TP_tonnes_ebe"
+      )
     )
 }
 
@@ -534,23 +833,107 @@ load_totalwatsed <- function(runid) {
     stop(sprintf("totalwatsed3.parquet not found for run '%s'", runid))
   }
   totals <- arrow::read_parquet(parquet_path) %>%
-    dplyr::as_tibble() %>%
-    dplyr::mutate(
-      Date = lubridate::make_date(year, month, day_of_month),
-      WY = water_year,
-      precipitation_mm = Precipitation,
-      rain_melt_mm = `Rain+Melt`,
-      transpiration_mm = Transpiration,
-      evaporation_mm = Evaporation,
-      percolation_mm = Percolation,
-      runoff_mm = Runoff,
-      lateral_flow_mm = `Lateral Flow`,
-      baseflow_mm = Baseflow,
-      streamflow_mm = Streamflow
+    dplyr::as_tibble()
+
+  year_col <- first_present(names(totals), c("year", "Year"))
+  month_col <- first_present(names(totals), c("month", "Month"))
+  day_col <- first_present(names(totals), c("day_of_month", "day", "Day"))
+
+  if (!is.null(year_col) && !is.null(month_col) && !is.null(day_col)) {
+    totals$Date <- lubridate::make_date(
+      year = as.integer(totals[[year_col]]),
+      month = as.integer(totals[[month_col]]),
+      day = as.integer(totals[[day_col]])
     )
+  } else {
+    warning("Unable to determine Date column from totalwatsed3 parquet metadata", call. = FALSE)
+    totals$Date <- as.Date(NA)
+  }
+
+  wy_col <- first_present(names(totals), c("water_year", "WaterYear", "WY", "wy"))
+  if (!is.null(wy_col)) {
+    totals$WY <- as.integer(totals[[wy_col]])
+  } else {
+    warning("Unable to determine water year column for totalwatsed3 parquet", call. = FALSE)
+    totals$WY <- as.integer(NA)
+  }
+
+  totals <- mutate_from_candidates(
+    totals,
+    "precipitation_mm",
+    c("Precipitation", "precipitation_mm", "precipitation"),
+    transform = as.numeric
+  )
+  totals <- mutate_from_candidates(
+    totals,
+    "rain_melt_mm",
+    c("Rain+Melt", "rain_melt_mm", "rain_melt"),
+    transform = as.numeric
+  )
+  totals <- mutate_from_candidates(
+    totals,
+    "transpiration_mm",
+    c("Transpiration", "transpiration_mm", "transpiration"),
+    transform = as.numeric
+  )
+  totals <- mutate_from_candidates(
+    totals,
+    "evaporation_mm",
+    c("Evaporation", "evaporation_mm", "evaporation"),
+    transform = as.numeric
+  )
+  totals <- mutate_from_candidates(
+    totals,
+    "percolation_mm",
+    c("Percolation", "percolation_mm", "percolation"),
+    transform = as.numeric
+  )
+  totals <- mutate_from_candidates(
+    totals,
+    "runoff_mm",
+    c("Runoff", "runoff_mm", "runoff"),
+    transform = as.numeric
+  )
+  totals <- mutate_from_candidates(
+    totals,
+    "lateral_flow_mm",
+    c("Lateral Flow", "lateral_flow_mm", "lateral_flow"),
+    transform = as.numeric
+  )
+  totals <- mutate_from_candidates(
+    totals,
+    "baseflow_mm",
+    c("Baseflow", "baseflow_mm", "baseflow"),
+    transform = as.numeric
+  )
+  totals <- mutate_from_candidates(
+    totals,
+    "streamflow_mm",
+    c("Streamflow", "streamflow_mm", "streamflow"),
+    transform = as.numeric
+  )
+
+  totals <- coerce_numeric_columns(
+    totals,
+    c(
+      "precipitation_mm",
+      "rain_melt_mm",
+      "transpiration_mm",
+      "evaporation_mm",
+      "percolation_mm",
+      "runoff_mm",
+      "lateral_flow_mm",
+      "baseflow_mm",
+      "streamflow_mm"
+    )
+  )
 
   if ("day_of_month" %in% names(totals)) {
-    totals <- totals %>% dplyr::rename(day = day_of_month)
+    if (!"day" %in% names(totals)) {
+      totals <- totals %>% dplyr::rename(day = day_of_month)
+    } else {
+      totals <- totals %>% dplyr::select(-day_of_month)
+    }
   }
 
   totals
@@ -568,6 +951,20 @@ process_totalwatsed_map_df <- function(runid){
 ## --------------------------------------------------------------------------------------##
 
 totwatsed_to_wbal = function(daily_totwatsed_df){
+
+  numeric_cols <- c(
+    "precipitation_mm",
+    "rain_melt_mm",
+    "transpiration_mm",
+    "evaporation_mm",
+    "percolation_mm",
+    "runoff_mm",
+    "lateral_flow_mm",
+    "baseflow_mm",
+    "streamflow_mm"
+  )
+
+  daily_totwatsed_df <- coerce_numeric_columns(daily_totwatsed_df, numeric_cols)
   
   totwatsed2wbal = daily_totwatsed_df %>% dplyr::select(
     "WY",
@@ -585,7 +982,7 @@ totwatsed_to_wbal = function(daily_totwatsed_df){
   
   totwatsed2wbal = totwatsed2wbal %>%
     dplyr::select(- c(Date,WY))%>%
-    dplyr::summarise_all(.funs = sum) %>%
+    dplyr::summarise(dplyr::across(where(is.numeric), ~sum(.x, na.rm = TRUE))) %>%
     dplyr::mutate(
       precipitation_mm = precipitation_mm / wys,
       rain_melt_mm = rain_melt_mm / wys,
@@ -627,6 +1024,20 @@ totwatsed_to_wbal = function(daily_totwatsed_df){
 ## --------------------------------------------------------------------------------------##
 
 totwatsed_to_wbal_map_dfs = function(daily_totwatsed_df){
+
+  numeric_cols <- c(
+    "precipitation_mm",
+    "rain_melt_mm",
+    "transpiration_mm",
+    "evaporation_mm",
+    "percolation_mm",
+    "runoff_mm",
+    "lateral_flow_mm",
+    "baseflow_mm",
+    "streamflow_mm"
+  )
+
+  daily_totwatsed_df <- coerce_numeric_columns(daily_totwatsed_df, numeric_cols)
   
   totwatsed2wbal = daily_totwatsed_df %>% dplyr::select("runid",
                                                         "WY",
@@ -648,7 +1059,7 @@ totwatsed_to_wbal_map_dfs = function(daily_totwatsed_df){
   totwatsed2wbal = totwatsed2wbal %>%
     dplyr::select(- c(Date,WY))%>%
     dplyr::group_by(runid)%>%
-    dplyr::summarise_all(.funs = sum) 
+    dplyr::summarise(dplyr::across(where(is.numeric), ~sum(.x, na.rm = TRUE))) 
   
   totwatsed2wbal = dplyr::left_join(totwatsed2wbal, n_wys, by = "runid")  %>%
     dplyr::mutate(
@@ -695,6 +1106,38 @@ totwatsed_to_wbal_map_dfs = function(daily_totwatsed_df){
 merge_daily_Vars <- function(totalwatsed_df, chanwb_df, ebe_df){
   daily<- dplyr::left_join(as.data.frame(totalwatsed_df), as.data.frame(chanwb_df), by = c("Date", "WY")) %>%
     dplyr::left_join(as.data.frame(ebe_df),  by = c("Date", "WY")) 
+  daily <- coerce_numeric_columns(
+    daily,
+    c(
+      "precipitation_mm",
+      "rain_melt_mm",
+      "transpiration_mm",
+      "evaporation_mm",
+      "percolation_mm",
+      "runoff_mm",
+      "lateral_flow_mm",
+      "baseflow_mm",
+      "streamflow_mm",
+      "Inflow_chan_m3",
+      "Outflow_chan_m3",
+      "Storage_chan_m3",
+      "Baseflow_chan_m3",
+      "Loss_chan_m3",
+      "Balance_chan_m3",
+      "Q_outlet_mm",
+      "P_ebe",
+      "Runoff_ebe",
+      "peak_ebe",
+      "Sediment_ebe",
+      "SRP_ebe",
+      "PP_ebe",
+      "TP_ebe",
+      "Sediment_tonnes_ebe",
+      "SRP_tonnes_ebe",
+      "PP_tonnes_ebe",
+      "TP_tonnes_ebe"
+    )
+  )
   # %>%
   #   dplyr::mutate_at(c("area_m_2",	"precip_vol_m_3",	"rain_melt_vol_m_3",	"transpiration_vol_m_3",
   #                      "evaporation_vol_m_3",	"percolation_vol_m_3",	"runoff_vol_m_3",	"lateral_flow_vol_m_3",

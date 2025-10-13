@@ -74,6 +74,101 @@ resolve_run_dir <- function(runid, config, pup = NULL) {
   NULL
 }
 
+extract_source_location <- function(trace) {
+  calls <- trace$calls
+  if (is.null(calls) || !length(calls)) {
+    return(NULL)
+  }
+  for (idx in rev(seq_along(calls))) {
+    call <- calls[[idx]]
+    sr <- attr(call, "srcref")
+    if (is.null(sr)) {
+      next
+    }
+    srcfile <- attr(sr, "srcfile")
+    filename <- tryCatch(srcfile$filename, error = function(e) NULL)
+    if (is.null(filename) || !nzchar(filename)) {
+      next
+    }
+    line <- tryCatch(as.integer(sr[[1]]), error = function(e) NA_integer_)
+    column <- tryCatch({
+      if (length(sr) >= 5) {
+        as.integer(sr[[5]])
+      } else {
+        NA_integer_
+      }
+    }, error = function(e) NA_integer_)
+    context <- tryCatch({
+      if (!is.null(srcfile$lines) && !is.na(line) && line >= 1 && line <= length(srcfile$lines)) {
+        srcfile$lines[[line]]
+      } else {
+        NULL
+      }
+    }, error = function(e) NULL)
+    return(list(
+      filename = filename,
+      line = line,
+      column = column,
+      context = context
+    ))
+  }
+  NULL
+}
+
+build_error_diagnostics <- function(err) {
+  call_repr <- tryCatch({
+    call <- conditionCall(err)
+    if (is.null(call)) {
+      NULL
+    } else {
+      paste(deparse(call), collapse = " ")
+    }
+  }, error = function(e) NULL)
+  if (!requireNamespace("rlang", quietly = TRUE)) {
+    return(list(
+      error = err,
+      call = call_repr,
+      note = "rlang package not available; install to capture annotated backtraces"
+    ))
+  }
+  tryCatch({
+    err <- rlang::cnd_entrace(err)
+    trace_formals <- tryCatch(names(formals(rlang::trace_back)), error = function(e) character())
+    trace_notes <- character()
+    trace <- tryCatch({
+      if ("simplify" %in% trace_formals) {
+        rlang::trace_back(err, simplify = "none")
+      } else {
+        trace_notes <- c(trace_notes, "rlang::trace_back() does not support 'simplify'; using default output")
+        rlang::trace_back(err)
+      }
+    }, error = function(e) {
+      trace_notes <<- c(
+        trace_notes,
+        sprintf("failed to request unsimplified trace: %s", conditionMessage(e))
+      )
+      rlang::trace_back(err)
+    })
+    trace_text <- paste(capture.output(trace), collapse = "\n")
+    origin <- extract_source_location(trace)
+    if (is.null(origin)) {
+      trace_notes <- c(trace_notes, "origin not available; template chunk may lack srcref information")
+    }
+    note_text <- if (length(trace_notes)) paste(trace_notes, collapse = "; ") else NULL
+    list(
+      error = err,
+      trace_text = trace_text,
+      origin = origin,
+      call = call_repr,
+      note = note_text
+    )
+  }, error = function(e) list(
+    error = err,
+    call = call_repr,
+    note = sprintf("failed to enrich diagnostics: %s", conditionMessage(e))
+  ))
+}
+
 render_deval <- function(run_path, runid) {
   template_path <- DEFAULT_TEMPLATE
   if (!file.exists(template_path)) {
@@ -108,14 +203,61 @@ render_deval <- function(run_path, runid) {
       if (is.null(msg) || identical(msg, "")) {
         msg <- paste(capture.output(print(err)), collapse = "\n")
       }
-      tb <- tryCatch(
-        {
-          calls <- sys.calls()
-          paste(sapply(calls, function(call) paste(deparse(call), collapse = " ")), collapse = "\n -> ")
-        },
-        error = function(e) "Failed to capture call stack"
+      diagnostics <- build_error_diagnostics(err)
+      err <- diagnostics$error
+      origin <- diagnostics$origin
+      tb <- diagnostics$trace_text
+      if (is.null(tb) || !nzchar(tb)) {
+        tb <- tryCatch(
+          {
+            calls <- sys.calls()
+            paste(sapply(calls, function(call) paste(deparse(call), collapse = " ")), collapse = "\n -> ")
+          },
+          error = function(e) "Failed to capture call stack"
+        )
+      }
+      origin_lines <- character()
+      if (!is.null(origin)) {
+        line_part <- if (!is.null(origin$line) && !is.na(origin$line)) {
+          as.character(origin$line)
+        } else {
+          "?"
+        }
+        location <- glue("{origin$filename}:{line_part}")
+        if (!is.null(origin$column) && !is.na(origin$column)) {
+          location <- glue("{location}:{origin$column}")
+        }
+        origin_lines <- c(
+          glue("Probable source: {location}"),
+          if (!is.null(origin$context) && nzchar(trimws(origin$context))) {
+            glue("Context: {trimws(origin$context)}")
+          } else {
+            NULL
+          }
+        )
+      }
+      call_line <- if (!is.null(diagnostics$call) && nzchar(diagnostics$call)) {
+        glue("Call: {diagnostics$call}")
+      } else {
+        NULL
+      }
+      note_line <- if (!is.null(diagnostics$note) && nzchar(diagnostics$note)) {
+        glue("Diagnostics: {diagnostics$note}")
+      } else {
+        NULL
+      }
+      detail <- paste(
+        c(
+          glue("Render failed for run {runid}: {msg}"),
+          call_line,
+          note_line,
+          origin_lines,
+          "Traceback:",
+          tb
+        ),
+        collapse = "\n"
       )
-      append_log("ERROR", glue("Render failed for run {runid}: {msg}\nTraceback:\n{tb}"))
+      append_log("ERROR", detail)
       stop(err)
     }
   )

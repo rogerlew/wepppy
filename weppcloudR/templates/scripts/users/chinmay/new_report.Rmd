@@ -63,7 +63,7 @@ totalwatseddf <- process_totalwatsed(params$proj_runid)
 totalwatsed_wy_mean_df = totalwatseddf %>%
           dplyr::select(-dplyr::any_of(c("julian","year","Date","month","day"))) %>%
           dplyr::group_by(WY) %>%
-          dplyr::summarise_all(mean)
+          dplyr::summarise(dplyr::across(where(is.numeric), ~mean(.x, na.rm = TRUE)))
 
 totalwatsed_wbal = totwatsed_to_wbal(totalwatseddf)
 
@@ -85,7 +85,7 @@ chanwb_WY_mean = chanwb %>%
                         -Elmt_ID_chan,
                         -Date) %>%
           dplyr::group_by(WY) %>%
-          dplyr::summarise_all(mean)
+          dplyr::summarise(dplyr::across(where(is.numeric), ~mean(.x, na.rm = TRUE)))
 ```
 
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
@@ -102,7 +102,7 @@ ebe = process_ebe(params$proj_runid,
 ebe_WY_mean = ebe %>%
           dplyr::select(-Date,-Day_ebe,-Month_ebe,-Year_ebe) %>%
           dplyr::group_by(WY) %>%
-          dplyr::summarise_all(mean)
+          dplyr::summarise(dplyr::across(where(is.numeric), ~mean(.x, na.rm = TRUE)))
 ```
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
 merged_daily_df = merge_daily_Vars(totalwatseddf, chanwb, ebe)
@@ -151,9 +151,6 @@ cli_stats = get_cli_summary(params$proj_runid)
 ```
 
 During the simulation period between water years `r cli_stats$water_year_start` and `r cli_stats$water_year_end`, `r cli_stats$storm_count` recorded events produced an average annual precipitation depth of `r round(cli_stats$mean_annual_precip_mm)` mm. This resulted in an average annual streamflow depth of `r round(cli_stats$mean_annual_streamflow_mm)` mm at the watershed outlet (total precipitation `r round(cli_stats$total_precip_mm)` mm, total streamflow `r round(cli_stats$total_streamflow_mm)` mm).
-
-<!-- on an average annual basis. `r as.numeric(stringr::str_extract_all(cli_sum, "\\d+([.,]\\d+)?")[[3]][1])` runoff events produced `r round(as.numeric(stringr::str_extract_all(cli_sum, "\\d+([.,]\\d+)?")[[3]][2]))` mm of runoff passing through the watershed outlet on an average annual basis. -->
-
 
 
 ### Hydrology
@@ -236,7 +233,7 @@ sd_yd_cp_df= gen_cumulative_plt_df(subcatchments, Sediment_Yield_kg)
 
 <div id="wrapper">
 
-`r if(sum(runoff_cp_df$cum_runoff_mm)==0) {"<!--"}`
+`r if(sum(runoff_cp_df$cum_runoff_mm, na.rm = TRUE)==0) {"<!--"}`
 
 <div class="column-left">
 
@@ -245,9 +242,9 @@ sd_yd_cp_df= gen_cumulative_plt_df(subcatchments, Sediment_Yield_kg)
 `r round(tail(df_head_percent(as.data.frame(runoff_cp_df), 30),1)[,5])`% watershed area.</span>
 
 
-`r if(sum(runoff_cp_df$cum_runoff_mm)==0) {"-->"}`
+`r if(sum(runoff_cp_df$cum_runoff_mm, na.rm = TRUE)==0) {"-->"}`
 
-`r if(sum(runoff_cp_df$cum_runoff_mm)==0) {"<span class='big_txt'>No runoff was generated during the entire simulation.</span>"}`
+`r if(sum(runoff_cp_df$cum_runoff_mm, na.rm = TRUE)==0) {"<span class='big_txt'>No runoff was generated during the entire simulation.</span>"}`
 
 </div>
 
@@ -448,12 +445,10 @@ DT::datatable(sd,
 
 
 ```{r echo=FALSE}
-file_path <- paste0("/geodata/weppcloud_runs/", params$proj_runid, "/wepp/runs/phosphorus.txt")
-has_phosphorus <- file.exists(file_path)
-if(has_phosphorus) {
-"<!--"
-
-tp_cp_df = gen_cumulative_plt_df(subcatchments, Total_Phosphorus_kg)
+has_phosphorus <- any(subcatchments$Total_Phosphorus_kg > 0, na.rm = TRUE) ||
+  any(subcatchments$tp_kg_ha > 0, na.rm = TRUE)
+if (has_phosphorus) {
+  tp_cp_df <- gen_cumulative_plt_df(subcatchments, Total_Phosphorus_kg)
 }
 ```
 
@@ -636,20 +631,29 @@ fig2
 The table below shows runoff, sediment and phosphorus averages for different land use categories.
 
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
-landuse_summary_tab = subcatchments %>% as.data.frame() %>%
-  dplyr::select(dplyr::any_of(c("landuse","slope",
-                              "runoff_mm", "so_ls_kg_ha", 
-                              "sd_yd_kg_ha", "tp_kg_ha")))%>%
-    plyr::rename( c("landuse" ="Landuse",
-                   "slope"="Slope",
-                   "so_ls_kg_ha"="Soil Loss (kg/ha)",
-                   "sd_yd_kg_ha" ="Sediment Yield (kg/ha)" ,
-                   "tp_kg_ha" ="Total Phosphorus (kg/ha)",
-                  "runoff_mm"="Runoff (mm)"),warn_missing = FALSE)%>%
-    group_by(Landuse) %>% dplyr::summarise_if(is.numeric, list(mean =
-                                                                       mean)) %>%
-                        dplyr::mutate_if(is.numeric, round, 2)
-colnames(landuse_summary_tab) = sapply(strsplit(colnames(landuse_summary_tab), "_mean"), `[[`, 1)
+landuse_summary_tab <- subcatchments %>%
+  sf::st_drop_geometry() %>%
+  dplyr::select(dplyr::any_of(c("landuse", "slope",
+                                "runoff_mm", "so_ls_kg_ha",
+                                "sd_yd_kg_ha", "tp_kg_ha"))) %>%
+  dplyr::rename(
+    Landuse = landuse,
+    Slope = slope,
+    `Soil Loss (kg/ha)` = so_ls_kg_ha,
+    `Sediment Yield (kg/ha)` = sd_yd_kg_ha,
+    `Total Phosphorus (kg/ha)` = tp_kg_ha,
+    `Runoff (mm)` = runoff_mm
+  ) %>%
+  dplyr::group_by(Landuse) %>%
+  dplyr::summarise(
+    dplyr::across(
+      where(is.numeric),
+      ~ mean(.x, na.rm = TRUE),
+      .names = "{.col}"
+    ),
+    .groups = "drop"
+  ) %>%
+  dplyr::mutate(dplyr::across(where(is.numeric), ~ round(.x, 2)))
 
 ```
 
@@ -678,21 +682,29 @@ DT::datatable(landuse_summary_tab,
 The table below shows runoff, sediment and phosphorus averages for different soil types.
 
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
-soils_summary_tab = subcatchments   %>% as.data.frame() %>%
-  dplyr::select(dplyr::any_of(c("soil","slope",
-                              "runoff_mm", "so_ls_kg_ha", 
-                              "sd_yd_kg_ha", "tp_kg_ha")))%>%
-    plyr::rename( c("soil" ="Soil",
-                   "slope"="Slope",
-                   "so_ls_kg_ha"="Soil Loss (kg/ha)",
-                   "sd_yd_kg_ha" ="Sediment Yield (kg/ha)" ,
-                   "tp_kg_ha" ="Total Phosphorus (kg/ha)",
-                  "runoff_mm"="Runoff (mm)"),warn_missing = FALSE)%>%
-    group_by(Soil) %>% dplyr::summarise_if(is.numeric, list(mean =
-                                                                       mean)) %>%
-                        dplyr::mutate_if(is.numeric, round, 2)
-
-colnames(soils_summary_tab) = sapply(strsplit(colnames(soils_summary_tab), "_mean"), `[[`, 1)
+soils_summary_tab <- subcatchments %>%
+  sf::st_drop_geometry() %>%
+  dplyr::select(dplyr::any_of(c("soil", "slope",
+                                "runoff_mm", "so_ls_kg_ha",
+                                "sd_yd_kg_ha", "tp_kg_ha"))) %>%
+  dplyr::rename(
+    Soil = soil,
+    Slope = slope,
+    `Soil Loss (kg/ha)` = so_ls_kg_ha,
+    `Sediment Yield (kg/ha)` = sd_yd_kg_ha,
+    `Total Phosphorus (kg/ha)` = tp_kg_ha,
+    `Runoff (mm)` = runoff_mm
+  ) %>%
+  dplyr::group_by(Soil) %>%
+  dplyr::summarise(
+    dplyr::across(
+      where(is.numeric),
+      ~ mean(.x, na.rm = TRUE),
+      .names = "{.col}"
+    ),
+    .groups = "drop"
+  ) %>%
+  dplyr::mutate(dplyr::across(where(is.numeric), ~ round(.x, 2)))
 
 ```
 
@@ -719,20 +731,28 @@ DT::datatable(soils_summary_tab,
 The table below shows runoff, sediment and phosphorus averages for different soil textures.
 
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
-texture_summary_tab = subcatchments   %>% as.data.frame() %>%
-  dplyr::select(dplyr::any_of(c("Texture","slope",
-                              "runoff_mm", "so_ls_kg_ha", 
-                              "sd_yd_kg_ha", "tp_kg_ha")))%>%
-    plyr::rename( c("slope"="Slope",
-                   "so_ls_kg_ha"="Soil Loss (kg/ha)",
-                   "sd_yd_kg_ha" ="Sediment Yield (kg/ha)" ,
-                   "tp_kg_ha" ="Total Phosphorus (kg/ha)",
-                  "runoff_mm"="Runoff (mm)"),warn_missing = FALSE)%>%
-    group_by(Texture) %>% dplyr::summarise_if(is.numeric, list(mean =
-                                                                       mean)) %>%
-                        dplyr::mutate_if(is.numeric, round, 2)
-
-colnames(texture_summary_tab) = sapply(strsplit(colnames(texture_summary_tab), "_mean"), `[[`, 1)
+texture_summary_tab <- subcatchments %>%
+  sf::st_drop_geometry() %>%
+  dplyr::select(dplyr::any_of(c("Texture", "slope",
+                                "runoff_mm", "so_ls_kg_ha",
+                                "sd_yd_kg_ha", "tp_kg_ha"))) %>%
+  dplyr::rename(
+    Slope = slope,
+    `Soil Loss (kg/ha)` = so_ls_kg_ha,
+    `Sediment Yield (kg/ha)` = sd_yd_kg_ha,
+    `Total Phosphorus (kg/ha)` = tp_kg_ha,
+    `Runoff (mm)` = runoff_mm
+  ) %>%
+  dplyr::group_by(Texture) %>%
+  dplyr::summarise(
+    dplyr::across(
+      where(is.numeric),
+      ~ mean(.x, na.rm = TRUE),
+      .names = "{.col}"
+    ),
+    .groups = "drop"
+  ) %>%
+  dplyr::mutate(dplyr::across(where(is.numeric), ~ round(.x, 2)))
 
 ```
 
@@ -759,22 +779,30 @@ DT::datatable(texture_summary_tab,
 The table below shows runoff, sediment and phosphorus averages for different combinations of land use categories and soil types.
 
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
-both_summary_tab = subcatchments   %>% as.data.frame() %>%
-  dplyr::select(dplyr::any_of(c("landuse", "soil","Texture","slope",
-                              "runoff_mm", "so_ls_kg_ha", 
-                              "sd_yd_kg_ha", "tp_kg_ha")))%>%
-    plyr::rename( c("landuse" ="Landuse",
-                    "soil" ="Soil",
-                   "slope"="Slope",
-                   "so_ls_kg_ha"="Soil Loss (kg/ha)",
-                   "sd_yd_kg_ha" ="Sediment Yield (kg/ha)" ,
-                   "tp_kg_ha" ="Total Phosphorus (kg/ha)",
-                  "runoff_mm"="Runoff (mm)"),warn_missing = FALSE)%>%
-    group_by(Landuse, Soil,Texture) %>% dplyr::summarise_if(is.numeric, list(mean =
-                                                                       mean)) %>%
-                        dplyr::mutate_if(is.numeric, round, 2)
-
-colnames(both_summary_tab) = sapply(strsplit(colnames(both_summary_tab), "_mean"), `[[`, 1)
+both_summary_tab <- subcatchments %>%
+  sf::st_drop_geometry() %>%
+  dplyr::select(dplyr::any_of(c("landuse", "soil", "Texture", "slope",
+                                "runoff_mm", "so_ls_kg_ha",
+                                "sd_yd_kg_ha", "tp_kg_ha"))) %>%
+  dplyr::rename(
+    Landuse = landuse,
+    Soil = soil,
+    Slope = slope,
+    `Soil Loss (kg/ha)` = so_ls_kg_ha,
+    `Sediment Yield (kg/ha)` = sd_yd_kg_ha,
+    `Total Phosphorus (kg/ha)` = tp_kg_ha,
+    `Runoff (mm)` = runoff_mm
+  ) %>%
+  dplyr::group_by(Landuse, Soil, Texture) %>%
+  dplyr::summarise(
+    dplyr::across(
+      where(is.numeric),
+      ~ mean(.x, na.rm = TRUE),
+      .names = "{.col}"
+    ),
+    .groups = "drop"
+  ) %>%
+  dplyr::mutate(dplyr::across(where(is.numeric), ~ round(.x, 2)))
 
 ```
 
