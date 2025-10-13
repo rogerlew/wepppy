@@ -169,7 +169,7 @@ build_error_diagnostics <- function(err) {
   ))
 }
 
-render_deval <- function(run_path, runid) {
+render_deval <- function(run_path, runid, config = NULL) {
   template_path <- DEFAULT_TEMPLATE
   if (!file.exists(template_path)) {
     log_warn("Template {template_path} not found; returning placeholder HTML")
@@ -178,12 +178,17 @@ render_deval <- function(run_path, runid) {
   output_dir <- file.path(run_path, "export", "WEPPcloudR")
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   output_file <- file.path(output_dir, glue("deval_{runid}.htm"))
-  params <- list(proj_runid = runid)
-  log_info("Rendering DEVAL report", runid = runid, template = template_path, output = output_file)
+  params <- list(proj_runid = runid, proj_config = config)
+  log_info("Rendering DEVAL report", runid = runid, config = config, template = template_path, output = output_file)
   log_path <- file.path(output_dir, "render.log")
   append_log <- function(level, message) {
     line <- sprintf("%s [%s] %s\n", format(Sys.time(), tz = "UTC", usetz = TRUE), level, message)
     cat(line, file = log_path, append = TRUE)
+  }
+  append_log("INFO", glue("Checking render cache for run {runid}"))
+  if (file.exists(output_file)) {
+    append_log("INFO", glue("Serving cached render for run {runid}"))
+    return(readChar(output_file, file.info(output_file)$size, useBytes = TRUE))
   }
   append_log("INFO", glue("Starting render for run {runid}"))
   tryCatch(
@@ -281,7 +286,7 @@ function(runid, config, res, pup = NULL) {
     return(glue("<html><body><h3>Run not found: {runid}/{config}</h3></body></html>"))
   }
   tryCatch(
-    render_deval(run_path, runid),
+    render_deval(run_path, runid, config),
     error = function(err) {
       log_error("Render failed: {err$message}", runid = runid, config = config)
       res$status <- 500

@@ -1,6 +1,6 @@
 # WEPPcloudR Service
 
-Containerised Plumber API that renders WEPPcloud reports (e.g. the
+Containerized Plumber API that renders WEPPcloud reports (e.g. the
 “DEVAL Details” HTML) using the interchange parquet assets shared by the
 main Flask app.
 
@@ -38,9 +38,5 @@ Environment variables:
 
 ## Next Steps
 
-- Refactor `new_report.Rmd` and helper functions to consume interchange
-  parquet data (drop legacy Arc/CSV shims).
 - Implement JWT validation when the Flask redirect starts forwarding
   auth headers.
-- Add automated smoke tests that mount a fixture run directory and
-  verify the HTML payload returned by the render endpoint.

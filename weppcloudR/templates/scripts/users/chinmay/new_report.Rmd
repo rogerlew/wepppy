@@ -1,5 +1,5 @@
 ---
-title: "A report generated for <span style='color: #6a4c93;'>`r params$proj_runid`</span> run</span>"
+title: "A report generated for `r (function(runid, config) { path <- if (!is.null(config) && nzchar(config)) sprintf('/weppcloud/runs/%s/%s', runid, config) else sprintf('/weppcloud/runs/%s', runid); sprintf('<a href=\"%s\" style=\"color: #6a4c93; text-decoration: none;\">%s</a>', path, runid) })(params$proj_runid, params$proj_config)` run"
 date: "`r Sys.Date()`"
 output: 
   cleanrmd::html_document_clean:
@@ -12,6 +12,7 @@ output:
     toc: true
 params:
   proj_runid: default
+  proj_config: ""
 ---
 
 ```{r setup, include=FALSE}
