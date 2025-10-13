@@ -1,5 +1,0 @@
-typer
-rich
-requests
-textual
-rq
