@@ -29,6 +29,7 @@ services:
   weppcloud:
     <<: *wepppy-service
     container_name: weppcloud
+    shm_size: "1g"
     ulimits:
       nofile:
         soft: 1000000
@@ -213,6 +214,7 @@ services:
   rq-worker:
     <<: *wepppy-service
     container_name: wepppy-rq-worker
+    shm_size: "8g"
     ulimits:
       nofile:
         soft: 1000000
