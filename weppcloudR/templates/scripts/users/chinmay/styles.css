@@ -1,0 +1,90 @@
+
+<style>
+
+
+.wrapper{
+        position: relative;
+        clear: both;
+    }
+    
+.column-left{
+  float: left;
+  width: 28%;
+  text-align: left;
+}
+
+.column-left-alt{
+  float: left;
+  width: 70%;
+  text-align: left;
+}
+
+.column-center{
+  display: inline-block;
+  width: 2%;
+  text-align: center;
+}
+
+.column-right{
+  float: right;
+  width: 70%;
+  text-align: right;
+}
+
+.column-right-alt{
+  float: right;
+  width: 28%;
+  text-align: right;
+}
+
+.bigger { font-size:350%;
+          color: #ED6A76;
+          font-weight: bold;
+}
+
+.big_txt { font-size:120%;}
+
+.column-right-plt-and-tab{
+  float: right;
+  width: 49%;
+  text-align: right;
+}
+
+.column-cntr-plt-and-tab{
+  float: right;
+  width: 2%;
+  text-align: right;
+}
+
+.column-left-plt-and-tab{
+  float: left;
+  width: 49%;
+  text-align: left;
+}
+
+
+.wrapper-two{
+        margin-left:auto;
+        margin-right:auto;
+        height:auto; 
+        width:auto;
+    }
+.map-canvas {
+   float:left; 
+}
+
+.tab-canvas{
+   float:left; 
+   clear: left;
+}
+
+.baseflow {color:darkgrey;
+}
+
+.lateral {color:red;
+}
+
+.runoff {color:blue;
+}
+
+</style>

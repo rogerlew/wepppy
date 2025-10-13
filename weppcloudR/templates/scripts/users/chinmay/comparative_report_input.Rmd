@@ -1,0 +1,51 @@
+---
+title: "`r paste0('A report generated for', ' PLACEHOLDER', ' WEPPcloud run')`"
+date: "`r Sys.Date()`"
+output: 
+  cleanrmd::html_document_clean:
+    css: "styles.css"
+    fig_caption: true
+    theme: axist
+    mathjax: default
+    use_fontawesome: true
+    toc: true
+    toc_float: true
+params:
+  ws: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+sys.source("weppcloudr_report_functions.R",envir = knitr::knit_global())
+```
+
+```{r include=FALSE}
+library(tidyverse, quietly = TRUE)
+library(cleanrmd, quietly = TRUE)
+library(plotly, quietly = TRUE)
+library(furrr, quietly = TRUE)
+library(janitor, quietly = TRUE)
+library(cleanrmd, quietly = TRUE)
+library(echarts4r, quietly = TRUE)
+library(DT, quietly = TRUE)
+library(leaflet, quietly = TRUE)
+library(data.table, quietly = TRUE)
+library(leafsync, quietly = TRUE)
+library(crosstalk, quietly = TRUE)
+library(reshape2, quietly = TRUE)
+library(RJSONIO, quietly = TRUE)
+
+```
+
+<!-- ######################### GENERATE REPORT ##################################-->
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+print(params$ws)
+ws <- RJSONIO::fromJSON(params$ws)
+print(ws)
+
+```
+# https://dev.wepp.cloud/weppcloud/WEPPcloudR/proxy/comparative_report_input.Rmd/?user=chinmay&runids=portland_LittleSandy_HighSevS.202009.chn_cs110,portland_LittleSandy_ModSevS.202009.chn_cs110 

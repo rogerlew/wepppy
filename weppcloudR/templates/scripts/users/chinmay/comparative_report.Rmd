@@ -1,0 +1,549 @@
+---
+title: "`r paste0('A run comparison report generated for the provided WEPPcloud runs')`"
+date: "`r Sys.Date()`"
+output: 
+  cleanrmd::html_document_clean:
+    css: "styles.css"
+    fig_caption: true
+    theme: axist
+    mathjax: default
+    use_fontawesome: true
+    toc: true
+    toc_float: true
+params:
+  ws: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+sys.source("weppcloudr_report_functions.R",envir = knitr::knit_global())
+```
+
+```{r include=FALSE}
+library(tidyverse, quietly = TRUE)
+library(cleanrmd, quietly = TRUE)
+library(plotly, quietly = TRUE)
+library(furrr, quietly = TRUE)
+library(janitor, quietly = TRUE)
+library(cleanrmd, quietly = TRUE)
+library(echarts4r, quietly = TRUE)
+library(DT, quietly = TRUE)
+library(leaflet, quietly = TRUE)
+library(data.table, quietly = TRUE)
+library(leafsync, quietly = TRUE)
+library(crosstalk, quietly = TRUE)
+library(reshape2, quietly = TRUE)
+library(jsonlite, quietly = TRUE)
+library(tidytext, quietly = TRUE)
+
+```
+
+<!-- ######################### GENERATE REPORT ##################################-->
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# a="[{\"runid\": \"lt_202012_21_Tunnel_Creek_CurCond\", \"cfg\": \"lt-wepp_bd16b69-snow\", \"name\": \"lt_202012_21_Tunnel_Creek_CurCond\", \"scenario\": null, \"location_hash\": \"lofts.pathfinder.careless\"}, {\"runid\": \"lt_202012_21_Tunnel_Creek_SimFire.landisFuels_fut_cli_A2\", \"cfg\": \"lt-fire-future-snow\", \"name\": \"lt_202012_21_Tunnel_Creek_SimFire.landisFuels_fut_cli_A2\", \"scenario\": null, \"location_hash\": \"lofts.pathfinder.careless\"},{\"runid\": \"lt_202012_20_Mill_Creek_CurCond\", \"cfg\": \"lt-wepp_bd16b69-snow\", \"name\": \"lt_202012_20_Mill_Creek_CurCond\", \"scenario\": null, \"location_hash\": \"lofts.pathfinder.careless\"}]"
+# 
+
+
+a = "[{\"runid\": \"lt_202012_10_Snow_Creek_CurCond\", \"cfg\": \"lt-wepp_bd16b69-snow\", \"name\": \"lt_202012_10_Snow_Creek_CurCond\", \"scenario\": null, \"location_hash\": \"blend.swaying.frantically\"},
+{\"runid\": \"lt_202012_20_Mill_Creek_CurCond\", \"cfg\": \"lt-wepp_bd16b69-snow\", \"name\": \"lt_202012_20_Mill_Creek_CurCond\", \"scenario\": null, \"location_hash\": \"lofts.pathfinder.careless\"},
+{\"runid\": \"lt_202012_5_Dollar_Creek_CurCond\", \"cfg\": \"lt-wepp_bd16b69-snow\", \"name\": \"lt_202012_5_Dollar_Creek_CurCond\", \"scenario\": null, \"location_hash\": \"total.stress.oiled\"},
+{\"runid\": \"lt_202012_10_Snow_Creek_SimFire.fccsFuels_obs_cli\", \"cfg\": \"lt-fire-snow.cfg\", \"name\": \"lt_202012_10_Snow_Creek_SimFire.fccsFuels_obs_cli\", \"scenario\": null, \"location_hash\": \"blend.swaying.frantically\"}]"
+# print(a)
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+runs_info=jsonlite::fromJSON(a) %>% dplyr::mutate(id = row_number()) 
+
+
+# runs_info = runs_info %>%
+#   dplyr::mutate(scenario = dplyr::case_when(is.na(scenario) ~ paste0("scenario_", id),
+#                                             TRUE ~ as.character(scenario)))%>% dplyr::select(-id)
+
+runs_info = runs_info %>%
+  dplyr::mutate(watershed_id = as.numeric(factor(location_hash)),
+    scenario_id = as.numeric(factor(cfg)),
+    Watershed = paste0("watershed_", watershed_id),
+    scenario = paste0("scenario_", scenario_id))
+
+vec_runids = as.vector(runs_info$runid)
+
+```
+
+#### Runs synthesized
+
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+runs_info %>% dplyr::select(runid, Watershed, scenario) %>% DT::datatable(class = "display",
+              extensions=c("Scroller","Buttons"),
+              options=list(dom = 'BRSfrti',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           deferRender=TRUE,
+                           scrollX=400,
+                           scrollY=250,
+                           scroller=TRUE,
+                           autoWidth = TRUE,
+                           fixedHeader = FALSE,
+                           fillContainer = FALSE))
+
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+subcatchments = purrr::map_df(vec_runids,read_subcatchments_map)
+subcatchments = dplyr::left_join(subcatchments, runs_info, by = c("runid"))
+
+```
+
+
+### Land Cover & Soils 
+
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+landuse_map= make_leaflet_map_multi(subcatchments, landuse, col_pal_type = "Factor")
+soil_map= make_leaflet_map_multi(subcatchments, soil, col_pal_type = "Factor")
+texture_map= make_leaflet_map_multi(subcatchments, Texture, col_pal_type = "Factor")
+gradient_map= make_leaflet_map_multi(subcatchments, gradient, col_pal_type = "Factor")
+leafsync::sync(landuse_map,
+               soil_map,
+               texture_map,
+               gradient_map,
+               ncol = 2,
+               sync = "all")
+
+```
+
+
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+### totalwatsed
+
+totalwatseddf = purrr::map_df(vec_runids, process_totalwatsed_map_df)
+totalwatseddf = dplyr::left_join(totalwatseddf, runs_info, by ="runid")
+
+totalwatsed_wy_mean_df = totalwatseddf %>%
+    dplyr::select(-julian,-year,-Date,-mo,-da, -Watershed, -scenario) %>%
+    dplyr::group_by(runid, WY) %>% dplyr::left_join(runs_info, by ="runid")
+
+totalwatsed_wbal = totwatsed_to_wbal_map_dfs(totalwatseddf)
+```
+
+
+
+<div style="clear: both;"></div>
+
+### Hydrology
+
+
+#### Watershed water balance 
+
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+totalwatsed_wbal1 = totalwatsed_wbal %>% dplyr::select(-c(`Precipitation (mm)`)) %>%
+  dplyr::rename('Precipitation' = 'Rain+Melt (%)')%>% tidyr::pivot_longer(-runid)
+```
+
+
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+
+totalwatsed_wbal1 =totalwatsed_wbal %>% dplyr::select(-c(`Precipitation (mm)`)) %>%
+  dplyr::rename('Precipitation' = 'Rain+Melt (%)')%>% tidyr::pivot_longer(-runid)%>% dplyr::mutate(name = str_replace(name,pattern = "\\([^()]{0,}\\)", ""))
+
+watbal_plt= totalwatsed_wbal1 %>%
+    mutate(runid = as.factor(runid),
+           name = reorder_within(name, value, runid)) %>%  ggplot(aes(name, value, fill = runid)) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~runid, scales = "free",ncol = 2) +
+    coord_flip() +
+    scale_x_reordered() +
+    scale_y_continuous(expand = c(0,0),labels = function(x)
+        paste0(x * 1, "%")) +ggthemes::theme_hc() + ggthemes::scale_fill_hc() +labs(y = "", x = "")+
+  theme(legend.position = "none")
+
+ggplotly(watbal_plt)
+```
+
+#### Runoff
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+ 
+runoff_cp_df= gen_cumulative_plt_df_map(subcatchments, runoff_mm)
+sd_yd_cp_df= gen_cumulative_plt_df_map(subcatchments, Sediment_Yield_kg)
+tp_cp_df = gen_cumulative_plt_df_map(subcatchments, Total_Phosphorus_kg)
+```
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+# Wrap data frame in SharedData
+runoff_cp_df = runoff_cp_df %>% 
+  tidyr::unite("Watershed_scenario",Watershed,scenario,remove = F) 
+sd_r=  runoff_cp_df %>%
+  sf::st_as_sf() %>% 
+  sf::st_cast() 
+sd_r <- SharedData$new(sd_r)
+
+```
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+
+ggplotly(ggplot() +
+  geom_line(data = sd_r$data(), aes(x = cumPercArea, y = cum_runoff_mm, color = Watershed_scenario), size = 1)+ 
+  ggthemes::theme_fivethirtyeight()+ ggthemes::scale_color_colorblind() +
+    scale_y_continuous(expand = c(0,0),labels = function(x)
+        paste0(x * 1, "%"))+
+    scale_x_continuous(expand = c(0,0),labels = function(x)
+        paste0(x * 1, "%")))%>% layout(legend = list(orientation = "h", y = -0.25,
+                                                title=list(text='')),
+                                   yaxis = list(title = "Runoff (%)"),
+                                  xaxis = list(title = "Percent of total hillslope area"))
+```
+</br></br></br>
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+runoff_totals_plt= sd_r$data() %>%as.data.frame() %>% 
+  dplyr::group_by(Watershed_scenario) %>%
+  dplyr::summarise_at(.vars = "runoff_mm", .funs = sum) %>% 
+  ggplot(aes(reorder(Watershed_scenario, runoff_mm),runoff_mm, fill = Watershed_scenario)) +
+    geom_col(show.legend = TRUE) +
+    coord_flip() +
+  ggthemes::theme_hc() +
+  ggthemes::scale_fill_hc() +labs(y = "", x = "")+theme(axis.text.y = element_blank())
+
+ggplotly(runoff_totals_plt)%>% layout(legend = list(orientation = "h", y = -0.25,
+                                                title=list(text='')),
+                                   yaxis = list(title = ""),
+                                  xaxis = list(title = "Total Runoff (mm)"))
+```
+
+<br><br><br>
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+map_multiplelayers_runoff <- function(df) {
+  
+  df = df %>% 
+    tidyr::unite("Watershed_scenario",Watershed,scenario,remove = F) 
+  #number of groups
+  n <- n_distinct(df$Watershed_scenario)
+  #colorpal
+  # pal1 <- colorNumeric("viridis", domain = df$runoff_mm)
+  # pal1 <- colorBin("viridis", df$runoff_mm,10, pretty = FALSE)
+  
+  #base map
+  map <- leaflet() %>%
+    addProviderTiles(providers$CartoDB.Positron)
+  
+  k=unique(df$Watershed_scenario)
+  
+  for (i in k) {
+    
+    a= df %>% filter(Watershed_scenario == i)
+    pal1 <- colorBin("viridis", a$runoff_mm,10, pretty = FALSE)
+  
+    map <- map %>%
+      addPolygons(
+        data= a,
+        fillColor = ~pal1(runoff_mm),
+        weight = 2,
+        opacity =1,
+        color = "white",
+        dashArray = "3",
+        fillOpacity = 1,
+        group = i,
+        popup = ~paste("WeppID:", a$wepp_id,
+                                          "<br>",
+                                          "Watershed:", a$Watershed,
+                                          "<br>",
+                                          "Scenario:", a$scenario,
+                                          "<br>",
+                                          "Runoff (mm):", a$runoff_mm,
+                                          "<br>")
+        )%>% addLegend("bottomleft",pal = pal1, values = a$runoff_mm)
+  }
+  #create layer control
+  map
+  map %>%
+    addLayersControl(
+      overlayGroups = k,
+      options = layersControlOptions(collapsed = FALSE,)) %>%
+    hideGroup(k[2:n]) 
+}
+```
+
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+
+map_multiplelayers_runoff(sd_r$data())
+
+```
+
+
+#### Sediments
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+ 
+sd_yd_cp_df= gen_cumulative_plt_df_map(subcatchments, Sediment_Yield_kg)
+
+sd_sed = sd_yd_cp_df %>% sf::st_as_sf() %>% sf::st_cast()%>% 
+  tidyr::unite("Watershed_scenario",Watershed,scenario,remove = F) %>% 
+  sf::st_as_sf() %>% 
+  sf::st_cast() 
+sd_sed <- SharedData$new(sd_sed)
+
+```
+
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+
+sd_yd_cp_df = sd_sed$data() %>% ggplot(aes(x = cumPercArea)) + 
+  geom_line(aes(y = cum_Sediment_Yield_kg, color = Watershed_scenario), size = 1)+ ggthemes::theme_fivethirtyeight()+ ggthemes::scale_color_colorblind() +
+    scale_y_continuous(expand = c(0,0),labels = function(x)
+        paste0(x * 1, "%"))+
+    scale_x_continuous(expand = c(0,0),labels = function(x)
+        paste0(x * 1, "%"))
+
+ggplotly(sd_yd_cp_df)%>% layout(legend = list(orientation = "h", y = -0.25,
+                                                title=list(text='')),
+                                   yaxis = list(title = "Sediment Yield (%)"),
+                                  xaxis = list(title = "Percent of total hillslope area"))
+```
+
+
+</br></br></br>
+
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+sed_yld_totals_plt= sd_sed$data() %>%as.data.frame() %>% 
+  dplyr::group_by(Watershed_scenario) %>%
+  dplyr::summarise_at(.vars = "sd_yd_kg_ha", .funs = sum) %>% 
+  ggplot(aes(reorder(Watershed_scenario, sd_yd_kg_ha),sd_yd_kg_ha, fill = Watershed_scenario)) +
+    geom_col() +
+    coord_flip() +
+  ggthemes::theme_hc() +
+  ggthemes::scale_fill_hc() +labs(y = "", x = "")+theme(axis.text.y = element_blank())
+
+ggplotly(sed_yld_totals_plt)%>% layout(legend = list(orientation = "h", y = -0.25,
+                                                title=list(text='')),
+                                   yaxis = list(title = ""),
+                                  xaxis = list(title = "Total Sediment Yield (kg/ha)"))
+```
+
+#### Phosphorus
+
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+tp_cp_df = gen_cumulative_plt_df_map(subcatchments, Total_Phosphorus_kg)
+```
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+# Wrap data frame in SharedData
+sd_tp= tp_cp_df %>% sf::st_as_sf() %>% sf::st_cast()%>% 
+  tidyr::unite("Watershed_scenario",Watershed,scenario,remove = F) %>% 
+  sf::st_as_sf() %>% 
+  sf::st_cast() 
+sd_tp <- SharedData$new(sd_tp)
+
+```
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+
+tp_yd_cp_df = sd_tp$data() %>% ggplot(aes(x = cumPercArea)) + 
+  geom_line(aes(y = cum_Total_Phosphorus_kg, color = Watershed_scenario), size = 1)+ ggthemes::theme_fivethirtyeight()+ ggthemes::scale_color_colorblind() +
+    scale_y_continuous(expand = c(0,0),labels = function(x)
+        paste0(x * 1, "%"))+
+    scale_x_continuous(expand = c(0,0),labels = function(x)
+        paste0(x * 1, "%"))
+
+ggplotly(tp_yd_cp_df)%>% layout(legend = list(orientation = "h", y = -0.25,
+                                                title=list(text='')),
+                                   yaxis = list(title = "Total Phosphorus Yield (%)"),
+                                  xaxis = list(title = "Percent of total hillslope area"))
+```
+
+</br></br></br>
+
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+tp_yld_totals_plt= sd_tp$data() %>%as.data.frame() %>% 
+  dplyr::group_by(Watershed_scenario) %>%
+  dplyr::summarise_at(.vars = "tp_kg_ha", .funs = sum) %>% 
+  ggplot(aes(reorder(Watershed_scenario, tp_kg_ha),tp_kg_ha, fill = Watershed_scenario)) +
+    geom_col() +
+    coord_flip() +
+  ggthemes::theme_hc() +
+  ggthemes::scale_fill_hc() +labs(y = "", x = "")+theme(axis.text.y = element_blank())
+
+ggplotly(tp_yld_totals_plt)%>% layout(legend = list(orientation = "h", y = -0.25,
+                                                title=list(text='')),
+                                   yaxis = list(title = ""),
+                                  xaxis = list(title = "Total Phosphorus Yield (kg/ha)"))
+```
+
+### Summary tables
+
+#### Grouped by land use
+
+The table below shows runoff, sediment and phosphorus averages for different land use categories.
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+landuse_summary_tab = subcatchments %>% as.data.frame() %>%
+  tidyr::unite("Watershed_scenario",Watershed,scenario,remove = F)%>%  
+  dplyr::select(dplyr::any_of(c("Watershed_scenario","landuse","slope",
+                              "runoff_mm", "so_ls_kg_ha", 
+                              "sd_yd_kg_ha", "tp_kg_ha")))%>%
+    plyr::rename( c("landuse" ="Landuse",
+                   "slope"="Slope",
+                   "so_ls_kg_ha"="Soil Loss (kg/ha)",
+                   "sd_yd_kg_ha" ="Sediment Yield (kg/ha)" ,
+                   "tp_kg_ha" ="Total Phosphorus (kg/ha)",
+                  "runoff_mm"="Runoff (mm)"),warn_missing = FALSE)%>%
+    group_by(Watershed_scenario, Landuse) %>% dplyr::summarise_if(is.numeric, list(mean =
+                                                                       mean)) %>%
+                        dplyr::mutate_if(is.numeric, round, 2)
+colnames(landuse_summary_tab) = sapply(strsplit(colnames(landuse_summary_tab), "_mean"), `[[`, 1)
+
+```
+
+```{r, echo=FALSE}
+DT::datatable(landuse_summary_tab,
+              class = "display",
+              extensions=c("Scroller","Buttons"),
+              options=list(dom = 'BRSfrti',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           deferRender=TRUE,
+                           searching = FALSE,
+                           scrollX=400,
+                          scrollY=250,
+                           scroller=TRUE,
+                           autoWidth = TRUE,
+                           fixedHeader = FALSE,
+            fillContainer = FALSE),
+               rownames= FALSE)
+
+  
+```
+
+#### Grouped by soils
+
+The table below shows runoff, sediment and phosphorus averages for different soil types.
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+soils_summary_tab = subcatchments   %>% as.data.frame()  %>%
+  tidyr::unite("Watershed_scenario",Watershed,scenario,remove = F)%>%
+  dplyr::select(dplyr::any_of(c("Watershed_scenario","soil","slope",
+                              "runoff_mm", "so_ls_kg_ha", 
+                              "sd_yd_kg_ha", "tp_kg_ha")))%>%
+    plyr::rename( c("soil" ="Soil",
+                   "slope"="Slope",
+                   "so_ls_kg_ha"="Soil Loss (kg/ha)",
+                   "sd_yd_kg_ha" ="Sediment Yield (kg/ha)" ,
+                   "tp_kg_ha" ="Total Phosphorus (kg/ha)",
+                  "runoff_mm"="Runoff (mm)"),warn_missing = FALSE)%>%
+    group_by(Watershed_scenario, Soil) %>% dplyr::summarise_if(is.numeric, list(mean =
+                                                                       mean)) %>%
+                        dplyr::mutate_if(is.numeric, round, 2)
+
+colnames(soils_summary_tab) = sapply(strsplit(colnames(soils_summary_tab), "_mean"), `[[`, 1)
+
+```
+
+```{r, echo=FALSE}
+DT::datatable(soils_summary_tab,
+              class = "display",
+              extensions=c("Scroller","Buttons"),
+              options=list(dom = 'BRSfrti',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           deferRender=TRUE,
+                           scrollX=250,
+                          scrollY=250,
+                           scroller=TRUE,
+                           autoWidth = TRUE,
+                           fixedHeader = FALSE,
+            fillContainer = FALSE),
+               rownames= FALSE)
+
+  
+```
+
+#### Grouped by texture
+
+The table below shows runoff, sediment and phosphorus averages for different soil textures.
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+texture_summary_tab = subcatchments   %>% as.data.frame() %>%
+  tidyr::unite("Watershed_scenario",Watershed,scenario,remove = F)%>%
+  dplyr::select(dplyr::any_of(c("Watershed_scenario","Texture","slope",
+                              "runoff_mm", "so_ls_kg_ha", 
+                              "sd_yd_kg_ha", "tp_kg_ha")))%>%
+    plyr::rename( c("slope"="Slope",
+                   "so_ls_kg_ha"="Soil Loss (kg/ha)",
+                   "sd_yd_kg_ha" ="Sediment Yield (kg/ha)" ,
+                   "tp_kg_ha" ="Total Phosphorus (kg/ha)",
+                  "runoff_mm"="Runoff (mm)"),warn_missing = FALSE)%>%
+    group_by(Watershed_scenario,Texture) %>% dplyr::summarise_if(is.numeric, list(mean =
+                                                                       mean)) %>%
+                        dplyr::mutate_if(is.numeric, round, 2)
+
+colnames(soils_summary_tab) = sapply(strsplit(colnames(soils_summary_tab), "_mean"), `[[`, 1)
+
+```
+
+```{r, echo=FALSE}
+DT::datatable(texture_summary_tab,
+              class = "display",
+              extensions=c("Scroller","Buttons"),
+              options=list(dom = 'BRSfrti',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           deferRender=TRUE,
+                           scrollX=250,
+                          scrollY=250,
+                           scroller=TRUE,
+                           autoWidth = TRUE,
+                           fixedHeader = FALSE,
+            fillContainer = FALSE),
+               rownames= FALSE)
+
+  
+```
+
+#### Grouped by landuse and soils type and texture.
+
+The table below shows runoff, sediment and phosphorus averages for different combinations of land use categories and soil types.
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+both_summary_tab = subcatchments   %>% as.data.frame() %>%
+  tidyr::unite("Watershed_scenario",Watershed,scenario,remove = F)%>%
+  dplyr::select(dplyr::any_of(c("Watershed_scenario","landuse", "soil","Texture","slope",
+                              "runoff_mm", "so_ls_kg_ha", 
+                              "sd_yd_kg_ha", "tp_kg_ha")))%>%
+    plyr::rename( c("landuse" ="Landuse",
+                    "soil" ="Soil",
+                   "slope"="Slope",
+                   "so_ls_kg_ha"="Soil Loss (kg/ha)",
+                   "sd_yd_kg_ha" ="Sediment Yield (kg/ha)" ,
+                   "tp_kg_ha" ="Total Phosphorus (kg/ha)",
+                  "runoff_mm"="Runoff (mm)"),warn_missing = FALSE)%>%
+    group_by(Watershed_scenario,Landuse, Soil,Texture) %>% dplyr::summarise_if(is.numeric, list(mean =
+                                                                       mean)) %>%
+                        dplyr::mutate_if(is.numeric, round, 2)
+
+colnames(both_summary_tab) = sapply(strsplit(colnames(both_summary_tab), "_mean"), `[[`, 1)
+
+```
+
+```{r, echo=FALSE}
+DT::datatable(both_summary_tab,
+              class = "display",
+              extensions=c("Scroller","Buttons"),
+              options=list(dom = 'BRSfrti',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           deferRender=TRUE,
+                           scrollX=400,
+                          scrollY=250,
+                           scroller=TRUE,
+                           autoWidth = TRUE,
+                           fixedHeader = FALSE,
+            fillContainer = FALSE),
+               rownames= FALSE)
+
+  
+```

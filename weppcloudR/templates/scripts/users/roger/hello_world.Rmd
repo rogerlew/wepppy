@@ -1,0 +1,64 @@
+---
+title: "Hello World!"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# Running the setup first allows you to set the options for how each chunk of R code
+# will be handled, and the options are in fact part of the first chunk.
+# In this example, I've set the echo = FALSE so the R code isn't displayed to the user
+
+#Note that if you want to load any other dependencies, you can load them here:
+library(ggplot2)
+
+# Always end the chunk before moving on to the regular markdown content using:
+
+```
+
+# Getting Started with RMarkdown
+
+The heading is denoted with the hashtag (#) and a space. Review the pandoc markdown 
+to see what's available knowing you can always write customized 
+HTML or LaTeX as needed.
+
+```{r intro, echo=TRUE}
+# for this chunk, I turned the echo = TRUE so you can see the R output.
+# each chunk should have different names so you can easily debug your code
+
+```
+
+# Graphs with RMarkdown
+
+```{r graphs}
+data <- cars
+ggplot(data, aes(x = speed, y = dist)) +
+  geom_point()
+```
+
+# Tables with RMarkdown
+
+## Using R Output
+
+```{r tables, echo =FALSE}
+# table with just R output
+head(cars, n=10)
+```
+
+## Tables with RMarkdown
+
+## Using grid.draw
+
+```{r tables_grid}
+# table with grid/gridExtra packages
+library(grid)
+library(gridExtra)
+x <- tableGrob(head(cars, n=10))
+grid.draw(x)
+
+```
+
+# You got this!
+
+Now try changing the output in the header/YAML from html_document to ioslides_presentation and see how things change!

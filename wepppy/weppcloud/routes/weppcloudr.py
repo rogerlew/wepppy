@@ -4,10 +4,7 @@ import io
 
 import pathlib
 from subprocess import Popen, PIPE
-import urllib
-from urllib.parse import urlencode
-
-from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlencode, urljoin
 
 from typing import Optional
 
@@ -16,12 +13,15 @@ from os.path import split as _split
 from os.path import exists as _exists
 from os.path import abspath, basename
 
-from flask import abort, Blueprint, request
+import requests
+
+from flask import Response, abort, Blueprint, current_app, request
 from flask_security import current_user
 
 from wepppy.weppcloud.utils.helpers import get_wd, exception_factory
 
 from wepppy.nodb.core import Ron, Wepp, Watershed
+from wepppy.query_engine.activate import activate_query_engine
 
 from ._run_context import RunContext, load_run_context
 
@@ -201,24 +201,67 @@ def weppcloudr_runner(runid, config, routine, user, ctx: Optional[RunContext] = 
         return exception_factory('Error running script')
 
 
+def _ensure_interchange(ctx: RunContext) -> None:
+    wd = str(ctx.active_root)
+    try:
+        activate_query_engine(wd, run_interchange=True)
+    except Exception:
+        current_app.logger.exception("Interchange activation failed for %s", wd)
+        raise
+
+
+def _weppcloudr_base_url() -> str:
+    base = current_app.config.get('WEPPCLOUDR_BASE_URL')
+    if not base:
+        base = os.environ.get('WEPPCLOUDR_BASE_URL', 'http://weppcloudr:8050')
+    return base.rstrip('/') + '/'
+
+
+def _fetch_deval_from_service(runid: str, config: str, query_args) -> requests.Response:
+    base_url = _weppcloudr_base_url()
+    target_path = f"runs/{runid}/{config}/report/deval_details"
+    url = urljoin(base_url, target_path)
+    params = query_args.to_dict(flat=False) if hasattr(query_args, "to_dict") else query_args
+    timeout = current_app.config.get('WEPPCLOUDR_TIMEOUT', 300)
+    current_app.logger.debug("Requesting DEVAL report from %s", url, extra={"params": params})
+    response = requests.get(url, params=params, timeout=timeout)
+    return response
+
+
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details')
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details/')
 def deval_details(runid, config):
     ctx = load_run_context(runid, config)
     try:
-        wd = str(ctx.active_root)
-        from wepppy.export import arc_export
-        arc_export(wd)
-    except:
-        return exception_factory('Error running script', runid=runid)
+        _ensure_interchange(ctx)
+    except Exception:
+        return exception_factory('Error preparing interchange assets', runid=runid)
 
-    return weppcloudr_runner(runid, config, routine='new_report.Rmd', user='chinmay', ctx=ctx)
+    try:
+        service_response = _fetch_deval_from_service(runid, config, request.args)
+    except requests.RequestException as exc:
+        current_app.logger.exception("Failed to render DEVAL report via weppcloudR", extra={"runid": runid, "config": config})
+        return exception_factory('Error rendering report', runid=runid)
+
+    if service_response.status_code >= 400:
+        current_app.logger.warning(
+            "weppcloudR responded with status %s for %s/%s",
+            service_response.status_code,
+            runid,
+            config,
+        )
+
+    response = Response(service_response.content, status=service_response.status_code)
+    for header_name in ('Content-Type', 'Content-Encoding', 'Cache-Control', 'Content-Disposition'):
+        header_value = service_response.headers.get(header_name)
+        if header_value:
+            response.headers[header_name] = header_value
+    return response
 
 
 @weppcloudr_bp.route('/WEPPcloudR/proxy/<routine>', methods=['GET', 'POST'])
 @weppcloudr_bp.route('/WEPPcloudR/proxy/<routine>/', methods=['GET', 'POST'])
 def weppcloudr_proxy(routine):
-    from wepppy.weppcloud.app import get_run_owners
     from wepppy.weppcloud.app import user_datastore
 
     if current_user.is_authenticated:

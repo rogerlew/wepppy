@@ -191,6 +191,24 @@ services:
     ports:
       - "8041:8041"
 
+  weppcloudr:
+    build:
+      context: ..
+      dockerfile: weppcloudR/Dockerfile
+    image: weppcloudr-dev
+    container_name: weppcloudr
+    environment:
+      PORT: "8050"
+      TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
+      DEVAL_TEMPLATE: /srv/weppcloudr/templates/scripts/users/chinmay/new_report.Rmd
+    volumes:
+      - ../weppcloudR:/srv/weppcloudr
+      - ../WEPPcloudR:/srv/original-weppcloudr
+      - ${GEODATA_DIR}:/geodata
+      - ${WC1_DIR}:/wc1
+    ports:
+      - "8050:8050"
+
   rq-worker:
     <<: *wepppy-service
     container_name: wepppy-rq-worker
@@ -320,6 +338,7 @@ services:
       - status
       - preflight
       - browse
+      - weppcloudr
       - rq-dashboard
 
 networks:

@@ -1,0 +1,508 @@
+---
+title: "`r paste0('A report generated for', ' PLACEHOLDER', ' WEPPcloud run')`"
+date: "`r Sys.Date()`"
+output: 
+  cleanrmd::html_document_clean:
+    theme: axist
+    mathjax: default
+    use_fontawesome: true
+    toc: true
+    toc_float: true
+params:
+  proj_runid: default 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r include=FALSE}
+# install.packages("devtools")
+# devtools::install_github("gadenbuie/cleanrmd")
+library(tidyverse, quietly = TRUE)
+library(cleanrmd, quietly = TRUE)
+library(plotly, quietly = TRUE)
+library(furrr, quietly = TRUE)
+library(janitor, quietly = TRUE)
+library(cleanrmd, quietly = TRUE)
+library(echarts4r, quietly = TRUE)
+library(DT, quietly = TRUE)
+library(leaflet, quietly = TRUE)
+library(data.table, quietly = TRUE)
+
+
+```
+
+
+<!-- ################################## FUNCTIONS AND PROCESSING #####################-->
+
+
+```{r, echo=FALSE}
+### spdf
+gethillwatfiles<- function(runid){
+  link <- paste0("/geodata/weppcloud_runs/", runid,"/wepp/output/")
+  wat_dat <- list.files(link, "*\\.wat.dat$", full.names=TRUE)
+  return(wat_dat)
+}
+
+calc_watbal <- function(link){
+  a <- read.table(link, skip = 23,
+                  col.names = c("OFE",	"J",	"Y",	"P",	"RM",	"Q",	"Ep",	"Es",
+                                "Er",	"Dp",	"UpStrmQ",	"SubRIn",	"latqcc",
+                                "Total_Soil_Water",	"frozwt",	"Snow_Water",	"QOFE",
+                                "Tile",	"Irr",	"Area")) %>%
+    dplyr::mutate_if(is.character,as.numeric)
+  
+  
+  a <- a %>%  dplyr::mutate(wb = P-Q-Ep - Es- Er - Dp - latqcc +
+                              dplyr::lag(Total_Soil_Water) - Total_Soil_Water +
+                              dplyr::lag(frozwt) - frozwt+ dplyr::lag(Snow_Water) - Snow_Water) %>%
+    dplyr::mutate(dplyr::across(where(is.numeric), round, 3)) %>% dplyr::select(wb) %>%
+    dplyr::summarise_all(.funs = sum, na.rm = TRUE) %>%
+    dplyr::mutate(WeppID =readr::parse_number(gsub("^.*/", "", link)))
+  
+  return(as.data.frame(a))
+}
+
+get_geometry <- function(runid){
+  link <- paste0("/geodata/weppcloud_runs/", params$proj_runid, "/export/arcmap/subcatchments.json")
+  geometry <- sf::st_read(link,quiet = TRUE)%>%
+    dplyr::select(WeppID, geometry) %>%
+    sf::st_transform(4326) %>%
+    dplyr::group_by(WeppID)%>%
+    dplyr::summarize(geometry = sf::st_union(geometry))
+
+  return(geometry)
+  
+}
+```
+
+```{r echo= FALSE}
+## channel water balance
+get_WatershedArea_m2 <- function(file){
+  getstring<- grep("Total contributing area to outlet ",
+                   readLines(file), value = TRUE)
+  getstring <- getstring[[1]]
+  num <- readr::parse_number(getstring)
+  num <- as.numeric(num) * 10000 ##convert ha to m2
+  return(num)
+
+}
+
+get_WY <- function(x, numeric=TRUE) {
+  x <- as.POSIXlt(x)
+  yr <- x$year + 1900L
+  mn <- x$mon + 1L
+  ## adjust for water year
+  yr <- yr + ifelse(mn < 10L, 0L, 1L)
+  if(numeric)
+    return(yr)
+  ordered(yr)
+}
+ 
+
+process_chanwb <- function(chanwb_path, Wshed_Area_m2){
+
+  ## read channel and watershed water and sediment data
+
+  chanwb <- data.table::fread(chanwb_path, skip = 11, header = F)
+
+  ### set names of the dataframes
+
+  colnames(chanwb) <- c("Year_chan", "Day_chan", "Elmt_ID_chan",
+                        "Chan_ID_chan", "Inflow_chan", "Outflow_chan",
+                        "Storage_chan", "Baseflow_chan", "Loss_chan",
+                        "Balance_chan")
+
+
+
+  chanwb <- chanwb %>% dplyr::mutate(Q_outlet_mm = (Outflow_chan/ Wshed_Area_m2 *1000),
+                                     originDate = as.Date(paste0(Year_chan, "-01-01"),tz = "UTC") - lubridate::days(1),
+                                     Date = as.Date(Day_chan, origin = originDate, tz = "UTC"),
+                                     WY = get_WY(Date)) %>% dplyr::select(-originDate) %>%
+    dplyr::select(Year_chan, Day_chan, Date, WY, everything())
+
+
+
+  return(as.data.frame(chanwb))
+
+}
+
+
+```
+
+```{r, echo=FALSE}
+wshed_area_m2= get_WatershedArea_m2(paste0(
+          "/geodata/weppcloud_runs/",
+          params$proj_runid,
+          "/wepp/output/",
+          "loss_pw0.txt"
+        ))
+```
+
+
+
+
+```{r, echo=FALSE}
+# Event by event file
+ 
+process_ebe <- function(ebe_path, yr_start, yr_end){
+
+  ## read channel and watershed water and sediment data
+# , SimStartDate, SimEndDate, SimStartDate, SimEndDate
+  ebe <- data.table::fread(ebe_path, skip = 9, header = F)
+
+  ### set names of the dataframe
+
+  colnames(ebe) <- c("Day_ebe", "Month_ebe", "Year_ebe",
+                     "P_ebe", "Runoff_ebe", "peak_ebe", "Sediment_ebe",
+                     "SRP_ebe", "PP_ebe", "TP_ebe")
+  
+  dt_head_d = as.character(head(ebe,1)[[1]])
+  dt_head_m = as.character(head(ebe,1)[[2]])
+  dt_tail_d = as.character(tail(ebe,1)[[1]])
+  dt_tail_m = as.character(tail(ebe,1)[[2]])
+
+  # calcs
+  ebe <- ebe %>% dplyr::mutate(Date = seq(from = as.Date(paste0(yr_start,"-",dt_head_m,"-",dt_head_d)), 
+                                          to = as.Date(paste0(yr_end,"-",dt_tail_m,"-",dt_tail_d)), by= 1),
+                               WY = get_WY(Date),
+                               Sediment_tonnes_ebe = Sediment_ebe/1000,
+                               SRP_tonnes_ebe = SRP_ebe/1000,
+                               PP_tonnes_ebe = PP_ebe/1000,
+                               TP_tonnes_ebe = TP_ebe/1000) %>%
+    dplyr::select(Day_ebe, Month_ebe, Year_ebe, Date, WY, everything())
+
+
+
+  return(as.data.frame(ebe))
+
+}
+```
+
+
+
+<!-- ############################ PREP DATA ######################################-->
+
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+### totalwatsed
+
+totalwatsed_fn = paste0("/geodata/weppcloud_runs/", params$proj_runid, "/export/totalwatsed.csv")
+
+if (file.exists(totalwatsed_fn)) {
+    totalwatseddf <- data.table::fread(totalwatsed_fn)
+} else {
+    totalwatseddf <- data.table::fread(paste0("https://wepp.cloud/weppcloud/runs/", params$proj_runid, "/cfg/resources/wepp/totalwatsed.csv"))
+}
+
+```
+
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+### totalwatsed
+totalwatseddf = totalwatseddf %>% 
+  janitor::clean_names()%>%
+  dplyr::rename("WY" = "water_year")%>%
+  dplyr::mutate(Date = lubridate::make_date(year,mo,da))
+
+
+totalwatsed_wy_mean_df = totalwatseddf %>%
+          dplyr::select(-julian,-year,-Date,-mo,-da) %>%
+          dplyr::group_by(WY) %>%
+          dplyr::summarise_all(mean)
+
+
+totalwatsed_wbal = totalwatseddf %>% dplyr::select(
+              "WY",
+              "Date",
+              "precipitation_mm",
+              "rain_melt_mm",
+              "transpiration_mm",
+              "evaporation_mm",
+              "percolation_mm",
+              "runoff_mm",
+              "lateral_flow_mm"
+          )%>% dplyr::filter(Date >= paste0(lubridate::year(Date[1]),"-10-01"))
+wys = as.numeric(length(unique(totalwatsed_wbal$WY)))
+
+totalwatsed_wbal= totalwatsed_wbal %>%
+  dplyr::select(- c(Date,WY))%>%
+          dplyr::summarise_all(.funs = sum) %>%
+          dplyr::mutate(
+              precipitation_mm = precipitation_mm / wys,
+              rain_melt_mm = rain_melt_mm / wys,
+              transpiration_mm = transpiration_mm / wys,
+              evaporation_mm = evaporation_mm / wys,
+              percolation_mm = percolation_mm / wys,
+              runoff_mm = runoff_mm / wys,
+              lateral_flow_mm = lateral_flow_mm / wys) %>%
+          dplyr::mutate(
+              rain_melt_mm = rain_melt_mm / precipitation_mm * 100,
+              transpiration_mm = transpiration_mm / precipitation_mm *
+                  100,
+              evaporation_mm = evaporation_mm / precipitation_mm *
+                  100,
+              percolation_mm = percolation_mm / precipitation_mm *
+                  100,
+              runoff_mm = runoff_mm / precipitation_mm * 100,
+              lateral_flow_mm = lateral_flow_mm / precipitation_mm *
+                  100,
+              WbalErr_mm = rain_melt_mm - (
+                  transpiration_mm + evaporation_mm + percolation_mm + runoff_mm + lateral_flow_mm
+              )
+          ) %>%
+          dplyr::rename(
+              "Precipitation (mm)" = "precipitation_mm",
+              "Rain+Melt (%)" = "rain_melt_mm",
+              "Transpiration (%)" = "transpiration_mm",
+              "Evaporation (%)" = "evaporation_mm",
+              "Percolation (%)" = "percolation_mm",
+              "Runoff(%)" = "runoff_mm",
+              "Lateral flow(%)" = "lateral_flow_mm",
+              "Water Balance Error(%)" = "WbalErr_mm"
+          ) %>%
+          tidyr::gather(key = "variable") %>% 
+  dplyr::mutate(dplyr::across(where(is.numeric), round, 2))
+    
+```
+
+
+
+```{r, echo=FALSE}
+chanwb = process_chanwb(
+                  paste0("/geodata/weppcloud_runs/",
+                      params$proj_runid,
+                      "/wepp/output/",
+                      "chanwb.out"
+                  ),
+                  wshed_area_m2
+              )
+
+chanwb_WY_mean = chanwb %>%
+          dplyr::select(-Year_chan,
+                        -Day_chan,
+                        -Chan_ID_chan,
+                        -Elmt_ID_chan,
+                        -Date) %>%
+          dplyr::group_by(WY) %>%
+          dplyr::summarise_all(mean)
+```
+
+```{r, echo=FALSE}
+yr_min= as.character(min(unique(chanwb$Year_chan)))
+yr_max= as.character(max(unique(chanwb$Year_chan)))
+```
+
+```{r, echo=FALSE}
+ebe = process_ebe(paste0("/geodata/weppcloud_runs/",
+                      params$proj_runid,
+                      "/wepp/output/",
+                      "ebe_pw0.txt"
+                  ),
+                  yr_min,
+                  yr_max)
+
+ebe_WY_mean = ebe %>%
+          dplyr::select(-Date,-Day_ebe,-Month_ebe,-Year_ebe) %>%
+          dplyr::group_by(WY) %>%
+          dplyr::summarise_all(mean)
+```
+
+```{r, echo=FALSE}
+merge_daily_Vars <- function(totalwatsed_df, chanwb_df, ebe_df){
+  daily<- dplyr::left_join(as.data.frame(totalwatsed_df), as.data.frame(chanwb_df), by = c("Date", "WY")) %>%
+    dplyr::left_join(as.data.frame(ebe_df),  by = c("Date", "WY")) %>%
+    dplyr::mutate_at(c("area_m_2",	"precip_vol_m_3",	"rain_melt_vol_m_3",	"transpiration_vol_m_3",
+                "evaporation_vol_m_3",	"percolation_vol_m_3",	"runoff_vol_m_3",	"lateral_flow_vol_m_3",
+                "storage_vol_m_3",	"sed_det_kg",	"sed_dep_kg",	"sed_del_kg",
+                "class_1",	"class_2",	"class_3",	"class_4",	"class_5",
+                "area_ha",	"cumulative_sed_del_tonnes",	"sed_del_density_tonne_ha",
+                "precipitation_mm",	"rain_melt_mm",	"transpiration_mm",	"evaporation_mm",	"et_mm",
+                "percolation_mm",	"runoff_mm",	"lateral_flow_mm",	"storage_mm",
+                "reservoir_volume_mm",	"baseflow_mm",	"aquifer_losses_mm",
+                "streamflow_mm",	"swe_mm",	"sed_del_tonne",	"p_load_mg",
+                "p_runoff_mg",	"p_lateral_mg",	"p_baseflow_mg",	"total_p_kg",
+                "particulate_p_kg",	"soluble_reactive_p_kg",	"p_total_kg_ha",	"particulate_p_kg_ha",
+                "soluble_reactive_p_kg_ha",	"Elmt_ID_chan",	"Chan_ID_chan",	"Inflow_chan",	"Outflow_chan",
+                "Storage_chan",	"Baseflow_chan",	"Loss_chan",	"Balance_chan",
+                "Q_outlet_mm",	"Day_ebe",	"P_ebe",	"Runoff_ebe",	"peak_ebe",
+                "Sediment_ebe",	"SRP_ebe",	"PP_ebe",	"TP_ebe",
+                "Sediment_tonnes_ebe",	"SRP_tonnes_ebe",	"PP_tonnes_ebe",
+                "TP_tonnes_ebe"),as.numeric)
+  return(daily)
+}
+```
+
+```{r, echo=FALSE}
+merged_daily_df = merge_daily_Vars(totalwatseddf, chanwb, ebe)
+merged_WY = dplyr::left_join(totalwatsed_wy_mean_df, chanwb_WY_mean, by = c("WY")) %>%
+          dplyr::left_join(ebe_WY_mean, by = c("WY")) %>%
+          dplyr::mutate(PercentRunoff = runoff_mm / Q_outlet_mm * 100,
+                        PercentLateral = lateral_flow_mm / Q_outlet_mm *100,
+                        PercentBaseflow = baseflow_mm / Q_outlet_mm *100)
+
+perc_flow = merged_WY %>%
+          dplyr::select(WY, PercentRunoff, PercentLateral, PercentBaseflow)%>% dplyr::mutate(WY = as.Date(paste0(WY,"-12-31")))
+```
+
+
+
+<!-- ################################# GENERATE REPORT ############################################-->
+
+## Dominant Land Cover & Soil Type 
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+watfilepaths <- gethillwatfiles(params$proj_runid)
+future::plan(multisession, workers = 6)
+watbal<- furrr::future_map(watfilepaths, calc_watbal)%>%
+  dplyr::bind_rows() %>%
+  dplyr::mutate_if(is.list, purrr::simplify_all) %>%
+  tidyr::unnest(cols = c("wb", "WeppID"))
+shp <- get_geometry(proj_runid)
+Hwatbal_spdf = dplyr::left_join(shp, watbal, by = c("WeppID"))
+
+```
+
+
+## Water Balance:
+
+### Watershed scale water balance
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged
+
+```{r, echo=FALSE}
+totalwatsed_wbal %>% dplyr::filter(variable != "Precipitation (mm)")  %>%
+            echarts4r::e_charts(variable)  %>%
+            echarts4r::e_pie(
+                value,
+                # roseType = "radius",
+                radius = c("55%", "70%"),
+                # legend = FALSE,
+                # hoverAnimation = TRUE
+            )%>%
+          echarts4r::e_tooltip(
+                # formatter = e_tooltip_item_formatter("percent")
+            )
+```
+
+
+#### Table
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged
+
+```{r, echo=FALSE}
+DT::datatable(totalwatsed_wbal)
+```
+
+### Water balance at hillslopes
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged
+
+```{r, echo=FALSE}
+pal <- leaflet::colorNumeric("viridis", domain = Hwatbal_spdf$wb)
+
+
+leaflet::leaflet(Hwatbal_spdf) %>%
+        leaflet::addProviderTiles(leaflet::providers$Esri.WorldTopoMap) %>%
+                      leaflet::addPolygons(fillColor = ~pal(wb),
+                                           weight = 2,
+                                           opacity = 1,
+                                           color = "white",
+                                           dashArray = "3",
+                                           fillOpacity = 0.7,
+                                           popup = ~paste("Hillslope ID:", Hwatbal_spdf$WeppID,
+                                                          "<br>","Total Water Balance Error (mm):", Hwatbal_spdf$wb),
+                                           label = ~WeppID,
+                                           highlightOptions = leaflet::highlightOptions(
+                                             weight = 5,
+                                             color = "#666",
+                                             dashArray = "",
+                                             fillOpacity = 0.7,
+                                             bringToFront = TRUE))%>% leaflet::addLegend(pal = pal,
+                                                                         values = ~wb)
+```
+
+
+## Contribution to streamflow
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged
+
+```{r, echo=FALSE}
+
+perc_flow %>%
+      echarts4r::e_charts(x = WY) %>%
+      echarts4r::e_area(PercentBaseflow) %>%
+      echarts4r::e_area(PercentLateral) %>%
+      echarts4r::e_area(PercentRunoff) %>%
+      echarts4r::e_tooltip(trigger = "axis")
+```
+
+<!-- "https://wepp.cloud/weppcloud/runs/lt_202012_26_Bliss_Creek_CurCond/lt-wepp_bd16b69-snow/" -->
+
+## WY SWE plot
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged
+
+```{r, echo=FALSE}
+merged_WY %>%
+  dplyr::select(WY, swe_mm ) %>% 
+  dplyr::mutate(WY = as.Date(paste0(WY,"-12-31")))%>%
+  dplyr::filter(complete.cases(.)) %>%
+  echarts4r::e_charts(WY) %>%
+  echarts4r::e_line(swe_mm, name = "Simulated") %>%
+  echarts4r::e_tooltip(trigger = "axis") %>%
+  echarts4r::e_datazoom(x_index = 0, type = "slider") %>%
+  echarts4r::e_datazoom(y_index = 0, type = "slider")
+```
+
+## Daily Timeseries plot
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged
+
+```{r, echo=FALSE}
+merged_daily_df %>%
+  echarts4r::e_charts(Date) %>%
+  echarts4r::e_line(Q_outlet_mm, name = "Simulated") %>%
+  echarts4r::e_tooltip(trigger = "axis") %>%
+  echarts4r::e_datazoom(x_index = 0, type = "slider") %>%
+  echarts4r::e_datazoom(y_index = 0, type = "slider")
+```
+
+<!-- ## Crosstalk with table and plot -->
+
+<!-- Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged -->
+
+```{r, echo=FALSE}
+# hwb_shared = crosstalk::SharedData$new(Hwatbal_spdf, key = ~WeppID, group = "maphwb")
+```
+
+```{r, echo=FALSE}
+# leafletmap using shared data
+# wbmap= leaflet::leaflet(hwb_shared) %>%
+#         leaflet::addProviderTiles(leaflet::providers$Esri.WorldTopoMap) %>%
+#                       leaflet::addPolygons(fillColor = ~pal(wb),
+#                                            weight = 2,
+#                                            opacity = 1,
+#                                            color = "white",
+#                                            dashArray = "3",
+#                                            fillOpacity = 0.7,
+#                                            popup = ~paste("Hillslope ID:", hwb_shared$WeppID,
+#                                                           "<br>","Total Water Balance Error (mm):", hwb_shared$wb),
+#                                            label = ~WeppID,
+#                                            highlightOptions = leaflet::highlightOptions(
+#                                              weight = 5,
+#                                              color = "#666",
+#                                              dashArray = "",
+#                                              fillOpacity = 0.7,
+#                                              bringToFront = TRUE))%>% leaflet::addLegend(pal = pal,
+#                                                                          values = ~wb)
+# 
+# wbtab= DT::datatable(hwb_shared)
+# wbmap
+# wbtab
+```
+

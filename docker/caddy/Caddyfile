@@ -37,6 +37,14 @@ http://:8080 {
         reverse_proxy query-engine:8041
     }
 
+    handle_path /weppcloudr* {
+        reverse_proxy weppcloudr:8050 {
+            header_up X-Forwarded-Prefix /weppcloudr
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+        }
+    }
+
     handle_path /weppcloud/static/* {
         root * /srv/weppcloud/static
         file_server
