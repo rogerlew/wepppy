@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
 import pyarrow as pa
+import pyarrow.compute as pc
 import pyarrow.parquet as pq
 
 try:
@@ -562,6 +563,61 @@ def _build_tables(parsed: Dict[str, List[Dict[str, object]]]) -> Dict[str, pa.Ta
     return tables
 
 
+def _rename_column(table: pa.Table, old: str, new: str) -> pa.Table:
+    names = list(table.schema.names)
+    try:
+        idx = names.index(old)
+    except ValueError:
+        return table
+    names[idx] = new
+    return table.rename_columns(names)
+
+
+def _enrich_loss_tables(tables: Dict[str, pa.Table]) -> Dict[str, pa.Table]:
+    enriched = dict(tables)
+
+    # Rename hillslope identifier to wepp_id
+    for key in ("average_hill", "all_years_hill"):
+        if key in enriched:
+            enriched[key] = _rename_column(enriched[key], "Hillslopes", "wepp_id")
+
+    hill_count: Optional[int] = None
+    hill_table = enriched.get("average_hill")
+    if hill_table is not None and "wepp_id" in hill_table.schema.names and hill_table.num_rows:
+        hill_col = hill_table.column(hill_table.schema.get_field_index("wepp_id"))
+        if hill_col.null_count < hill_col.length():
+            hill_max = pc.max(hill_col)
+            if hill_max is not None:
+                hill_count = int(hill_max.as_py())
+
+    # Normalize channel identifiers and derive wepp_id for channels
+    if hill_count is not None:
+        hill_scalar = pa.scalar(hill_count, pa.int32())
+        for key in ("average_chn", "all_years_chn"):
+            if key not in enriched:
+                continue
+            table = _rename_column(enriched[key], "Channels and Impoundments", "chn_enum")
+            if "chn_enum" not in table.schema.names:
+                enriched[key] = table
+                continue
+            chn_field_index = table.schema.get_field_index("chn_enum")
+            chn_array = table.column(chn_field_index)
+            chn_array = pc.cast(chn_array, pa.int32())
+            table = table.set_column(chn_field_index, pa.field("chn_enum", pa.int32(), metadata=table.schema.field(chn_field_index).metadata), chn_array)
+            wepp_array = pc.add(chn_array, hill_scalar)
+            if "wepp_id" in table.schema.names:
+                table = table.set_column(table.schema.get_field_index("wepp_id"), pa.field("wepp_id", pa.int32()), wepp_array)
+            else:
+                table = table.append_column(pa.field("wepp_id", pa.int32()), wepp_array)
+            enriched[key] = table
+    else:
+        for key in ("average_chn", "all_years_chn"):
+            if key in enriched:
+                enriched[key] = _rename_column(enriched[key], "Channels and Impoundments", "chn_enum")
+
+    return enriched
+
+
 def run_wepp_watershed_loss_interchange(wepp_output_dir: Path | str) -> Dict[str, Path]:
     base = Path(wepp_output_dir)
     if not base.exists():
@@ -573,6 +629,7 @@ def run_wepp_watershed_loss_interchange(wepp_output_dir: Path | str) -> Dict[str
 
     parsed = _parse_loss_file(source)
     tables = _build_tables(parsed)
+    tables = _enrich_loss_tables(tables)
 
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)

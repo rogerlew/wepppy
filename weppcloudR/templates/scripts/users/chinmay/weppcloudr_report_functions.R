@@ -151,6 +151,18 @@ run_path <- function(runid, ..., pup = NULL) {
   file.path(resolve_active_root(runid, pup), ...)
 }
 
+run_title_anchor <- function(runid, config = NULL) {
+  if (is.null(runid) || !nzchar(runid)) {
+    runid <- "unknown-run"
+  }
+  path <- if (!is.null(config) && nzchar(config)) {
+    sprintf("/weppcloud/runs/%s/%s", runid, config)
+  } else {
+    sprintf("/weppcloud/runs/%s", runid)
+  }
+  sprintf("<a href=\"%s\" style=\"color: #6a4c93; text-decoration: none;\">%s</a>", path, runid)
+}
+
 gethillwatfiles<- function(runid){
   link <- run_path(runid, "wepp", "output")
   if (!dir.exists(link)) {
@@ -852,10 +864,12 @@ load_totalwatsed <- function(runid) {
 
   wy_col <- first_present(names(totals), c("water_year", "WaterYear", "WY", "wy"))
   if (!is.null(wy_col)) {
-    totals$WY <- as.integer(totals[[wy_col]])
+    totals$WY <- suppressWarnings(as.integer(totals[[wy_col]]))
+    if (anyNA(totals$WY)) {
+      totals$WY <- get_WY(totals$Date, numeric = TRUE)
+    }
   } else {
-    warning("Unable to determine water year column for totalwatsed3 parquet", call. = FALSE)
-    totals$WY <- as.integer(NA)
+    totals$WY <- get_WY(totals$Date, numeric = TRUE)
   }
 
   totals <- mutate_from_candidates(
