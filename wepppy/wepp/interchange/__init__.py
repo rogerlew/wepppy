@@ -19,6 +19,14 @@ from .watershed_loss_interchange import run_wepp_watershed_loss_interchange
 from .watershed_interchange import run_wepp_watershed_interchange
 from .interchange_documentation import generate_interchange_documentation
 from .totalwatsed3 import run_totalwatsed3
+from .versioning import (
+    INTERCHANGE_VERSION,
+    needs_major_refresh,
+    read_version_manifest,
+    remove_incompatible_interchange,
+    schema_with_version,
+    write_version_manifest,
+)
 
 __all__ = [
     "generate_interchange_documentation",
@@ -41,4 +49,10 @@ __all__ = [
     "run_wepp_watershed_loss_interchange",
     "run_wepp_watershed_interchange",
     "run_totalwatsed3",
+    "INTERCHANGE_VERSION",
+    "schema_with_version",
+    "write_version_manifest",
+    "read_version_manifest",
+    "needs_major_refresh",
+    "remove_incompatible_interchange",
 ]

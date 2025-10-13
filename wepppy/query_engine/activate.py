@@ -181,6 +181,8 @@ def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
 
     from wepppy.wepp.interchange import (
         generate_interchange_documentation,
+        needs_major_refresh,
+        remove_incompatible_interchange,
         run_wepp_hillslope_interchange,
         run_wepp_watershed_interchange,
     )
@@ -190,8 +192,13 @@ def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
             continue
 
         interchange_dir = output_dir / "interchange"
-        if interchange_dir.exists():
+        refresh_required = needs_major_refresh(interchange_dir)
+        if interchange_dir.exists() and not refresh_required:
             continue
+
+        if refresh_required:
+            LOGGER.info("Refreshing interchange outputs for %s due to version change", output_dir)
+            remove_incompatible_interchange(interchange_dir)
 
         LOGGER.info("Generating interchange outputs for %s", output_dir)
         try:

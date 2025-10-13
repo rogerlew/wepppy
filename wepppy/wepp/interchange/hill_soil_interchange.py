@@ -13,6 +13,7 @@ from .concurrency import write_parquet_with_pool
 
 from .schema_utils import pa_field
 from ._utils import _parse_float
+from .versioning import schema_with_version
 
 SOIL_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
@@ -64,12 +65,13 @@ MEASUREMENT_COLUMNS = [
     "TSW",
 ]
 
-SCHEMA = pa.schema(
-    [
-        pa_field("wepp_id", pa.int32()),
-        pa_field("ofe_id", pa.int16()),
-        pa_field("year", pa.int16()),
-        pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day"),
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("wepp_id", pa.int32()),
+            pa_field("ofe_id", pa.int16()),
+            pa_field("year", pa.int16()),
+            pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day"),
         pa_field("julian", pa.int16()),
         pa_field("month", pa.int8()),
         pa_field("day_of_month", pa.int8()),
@@ -84,9 +86,10 @@ SCHEMA = pa.schema(
         pa_field("Ki", pa.float64(), units="adjsmt", description="Interrill erodibility adjustment factor"),
         pa_field("Kr", pa.float64(), units="adjsmt", description="Rill erodibility adjustment factor"),
         pa_field("Tauc", pa.float64(), units="adjsmt", description="Critical shear stress adjustment factor"),
-        pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction"),
-        pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
-    ]
+            pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction"),
+            pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
+        ]
+    )
 )
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)

@@ -7,6 +7,8 @@ from typing import List, Tuple
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from .versioning import INTERCHANGE_VERSION, read_version_manifest
+
 HILLSLOPE_DOC_ORDER: List[Tuple[str, str]] = [
     ("H.element.parquet", "Daily hillslope element hydrology and sediment metrics."),
     ("H.wat.parquet", "Hillslope water balance per OFE; aligns with wat.out content."),
@@ -117,6 +119,13 @@ def generate_interchange_documentation(interchange_dir: Path | str, to_readme_md
         raise FileNotFoundError(base)
 
     sections: List[str] = ["# Interchange Documentation\n"]
+
+    manifest_version = read_version_manifest(base)
+    if manifest_version is None:
+        version_text = f"{INTERCHANGE_VERSION} (manifest missing)"
+    else:
+        version_text = str(manifest_version)
+    sections.append(f"_Interchange Version: {version_text}_\n")
 
     sections.append("## Hillslope Products\n")
     for filename, description in HILLSLOPE_DOC_ORDER:

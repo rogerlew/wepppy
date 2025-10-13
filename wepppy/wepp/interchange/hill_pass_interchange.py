@@ -13,6 +13,7 @@ from .concurrency import write_parquet_with_pool
 
 from .schema_utils import pa_field
 from ._utils import _parse_float, _julian_to_calendar
+from .versioning import schema_with_version
 
 
 """
@@ -35,11 +36,12 @@ SUBEVENT_FLOAT_COUNT = 6  # sbrunf, sbrunv, drainq, drrunv, gwbfv, gwdsv
 NOEVENT_FLOAT_COUNT = 2  # gwbfv, gwdsv
 
 
-SCHEMA = pa.schema(
-    [
-        pa_field("wepp_id", pa.int32()),
-        pa_field("event", pa.string(), description="Record type: EVENT, SUBEVENT, NO EVENT"),
-        pa_field("year", pa.int16()),
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("wepp_id", pa.int32()),
+            pa_field("event", pa.string(), description="Record type: EVENT, SUBEVENT, NO EVENT"),
+            pa_field("year", pa.int16()),
         pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day since start year"),
         pa_field("julian", pa.int16()),
         pa_field("month", pa.int8()),
@@ -63,13 +65,14 @@ SCHEMA = pa.schema(
         pa_field("sedcon_4", pa.float64(), units="kg/m^3", description="Sediment concentration 4"),
         pa_field("sedcon_5", pa.float64(), units="kg/m^3", description="Sediment concentration 5"),
         pa_field("clot", pa.float64(), units="m^3/s", description="Friction flow 1"),
-        pa_field("slot", pa.float64(), units="%", description="% of exiting sediment in the silt size class"),
-        pa_field("saot", pa.float64(), units="%", description="% of exiting sediment in the small aggregate size class"),
-        pa_field("laot", pa.float64(), units="%", description="% of exiting sediment in the large aggregate size class"),
-        pa_field("sdot", pa.float64(), units="%", description="% of exiting sediment in the sand size class"),
-        pa_field("gwbfv", pa.float64(), description="Groundwater baseflow"),
-        pa_field("gwdsv", pa.float64(), description="Groundwater deep seepage"),
-    ]
+            pa_field("slot", pa.float64(), units="%", description="% of exiting sediment in the silt size class"),
+            pa_field("saot", pa.float64(), units="%", description="% of exiting sediment in the small aggregate size class"),
+            pa_field("laot", pa.float64(), units="%", description="% of exiting sediment in the large aggregate size class"),
+            pa_field("sdot", pa.float64(), units="%", description="% of exiting sediment in the sand size class"),
+            pa_field("gwbfv", pa.float64(), description="Groundwater baseflow"),
+            pa_field("gwdsv", pa.float64(), description="Groundwater deep seepage"),
+        ]
+    )
 )
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)

@@ -13,6 +13,7 @@ from wepppy.all_your_base.hydro import determine_wateryear
 
 from .schema_utils import pa_field
 from ._utils import _wait_for_path, _parse_float
+from .versioning import schema_with_version
 
 CHAN_FILENAME = "chanwb.out"
 CHAN_PARQUET = "chanwb.parquet"
@@ -28,18 +29,20 @@ MEASUREMENT_COLUMNS: List[tuple[str, str, str]] = [
 ]
 
 
-SCHEMA = pa.schema(
-    [
-        pa_field("year", pa.int16(), description="Calendar year"),
-        pa_field("simulation_year", pa.int16(), description="Simulation year from chanwb.out"),
-        pa_field("julian", pa.int16(), description="Julian day reported by WEPP"),
-        pa_field("month", pa.int8(), description="Calendar month derived from Julian day"),
-        pa_field("day_of_month", pa.int8(), description="Calendar day-of-month derived from Julian day"),
-        pa_field("water_year", pa.int16(), description="Water year computed from Julian day"),
-        pa_field("Elmt_ID", pa.int32(), description="Channel element identifier"),
-        pa_field("Chan_ID", pa.int32(), description="Channel ID reported by WEPP"),
-    ]
-    + [pa_field(name, pa.float64(), units=units, description=description) for name, units, description in MEASUREMENT_COLUMNS]
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("year", pa.int16(), description="Calendar year"),
+            pa_field("simulation_year", pa.int16(), description="Simulation year from chanwb.out"),
+            pa_field("julian", pa.int16(), description="Julian day reported by WEPP"),
+            pa_field("month", pa.int8(), description="Calendar month derived from Julian day"),
+            pa_field("day_of_month", pa.int8(), description="Calendar day-of-month derived from Julian day"),
+            pa_field("water_year", pa.int16(), description="Water year computed from Julian day"),
+            pa_field("Elmt_ID", pa.int32(), description="Channel element identifier"),
+            pa_field("Chan_ID", pa.int32(), description="Channel ID reported by WEPP"),
+        ]
+        + [pa_field(name, pa.float64(), units=units, description=description) for name, units, description in MEASUREMENT_COLUMNS]
+    )
 )
 
 

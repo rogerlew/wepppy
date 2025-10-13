@@ -26,35 +26,38 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
+from .versioning import schema_with_version
 
 SOIL_FILENAME = "soil_pw0.txt"
 SOIL_PARQUET = "soil_pw0.parquet"
 CHUNK_SIZE = 250_000
 
 
-SCHEMA = pa.schema(
-    [
-        pa_field("wepp_id", pa.int32()),
-        pa_field("ofe_id", pa.int16()),
-        pa_field("year", pa.int16()),
-        pa_field("day", pa.int16()),
-        pa_field("julian", pa.int16()),
-        pa_field("month", pa.int8()),
-        pa_field("day_of_month", pa.int8()),
-        pa_field("water_year", pa.int16()),
-        pa_field("OFE", pa.int16()),
-        pa_field("Poros", pa.float64(), units="%", description="Soil porosity"),
-        pa_field("Keff", pa.float64(), units="mm/hr", description="Effective hydraulic conductivity"),
-        pa_field("Suct", pa.float64(), units="mm", description="Suction across wetting front"),
-        pa_field("FC", pa.float64(), units="mm/mm", description="Field capacity"),
-        pa_field("WP", pa.float64(), units="mm/mm", description="Wilting point"),
-        pa_field("Rough", pa.float64(), units="mm", description="Surface roughness"),
-        pa_field("Ki", pa.float64(), units="adjsmt", description="Interrill erodibility adjustment factor"),
-        pa_field("Kr", pa.float64(), units="adjsmt", description="Rill erodibility adjustment factor"),
-        pa_field("Tauc", pa.float64(), units="adjsmt", description="Critical shear stress adjustment factor"),
-        pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction"),
-        pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
-    ]
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("wepp_id", pa.int32()),
+            pa_field("ofe_id", pa.int16()),
+            pa_field("year", pa.int16()),
+            pa_field("day", pa.int16()),
+            pa_field("julian", pa.int16()),
+            pa_field("month", pa.int8()),
+            pa_field("day_of_month", pa.int8()),
+            pa_field("water_year", pa.int16()),
+            pa_field("OFE", pa.int16()),
+            pa_field("Poros", pa.float64(), units="%", description="Soil porosity"),
+            pa_field("Keff", pa.float64(), units="mm/hr", description="Effective hydraulic conductivity"),
+            pa_field("Suct", pa.float64(), units="mm", description="Suction across wetting front"),
+            pa_field("FC", pa.float64(), units="mm/mm", description="Field capacity"),
+            pa_field("WP", pa.float64(), units="mm/mm", description="Wilting point"),
+            pa_field("Rough", pa.float64(), units="mm", description="Surface roughness"),
+            pa_field("Ki", pa.float64(), units="adjsmt", description="Interrill erodibility adjustment factor"),
+            pa_field("Kr", pa.float64(), units="adjsmt", description="Rill erodibility adjustment factor"),
+            pa_field("Tauc", pa.float64(), units="adjsmt", description="Critical shear stress adjustment factor"),
+            pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction"),
+            pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
+        ]
+    )
 )
 
 

@@ -22,6 +22,7 @@ except ModuleNotFoundError:
     sys.modules[loader.name] = module
     loader.exec_module(module)
     pa_field = module.pa_field
+from .versioning import schema_with_version
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -134,14 +135,16 @@ def _parse_metadata(header_lines: List[str]) -> Tuple[Dict[str, object], pa.Tabl
         pa.field("scp", pa.float64()).with_metadata({b"units": b"mg/kg"}),
     ] + [pa.field(name, pa.float64()).with_metadata({b"units": b"m"}) for name in dia_columns]
 
-    metadata_schema = pa.schema(metadata_schema_fields).with_metadata(
-        {
-            b"version": str(version).encode(),
-            b"nhill": str(nhill).encode(),
-            b"max_years": str(max_years).encode(),
-            b"begin_year": str(begin_year).encode(),
-            b"npart": str(npart).encode(),
-        }
+    metadata_schema = schema_with_version(
+        pa.schema(metadata_schema_fields).with_metadata(
+            {
+                b"version": str(version).encode(),
+                b"nhill": str(nhill).encode(),
+                b"max_years": str(max_years).encode(),
+                b"begin_year": str(begin_year).encode(),
+                b"npart": str(npart).encode(),
+            }
+        )
     )
     metadata_table = pa.table(metadata_columns, schema=metadata_schema)
 
@@ -240,14 +243,16 @@ def _build_event_schema(npart: int, meta: Dict[str, object], nhill: int) -> pa.S
         pa.field("gwdsv", pa.float64()),
     ] + [pa.field(name, pa.float64()) for name in sed_columns + frc_columns]
 
-    schema = pa.schema(schema_fields).with_metadata(
-        {
-            b"version": str(meta["version"]).encode(),
-            b"nhill": str(meta["nhill"]).encode(),
-            b"max_years": str(meta["max_years"]).encode(),
-            b"begin_year": str(meta["begin_year"]).encode(),
-            b"npart": str(meta["npart"]).encode(),
-        }
+    schema = schema_with_version(
+        pa.schema(schema_fields).with_metadata(
+            {
+                b"version": str(meta["version"]).encode(),
+                b"nhill": str(meta["nhill"]).encode(),
+                b"max_years": str(meta["max_years"]).encode(),
+                b"begin_year": str(meta["begin_year"]).encode(),
+                b"npart": str(meta["npart"]).encode(),
+            }
+        )
     )
     return schema
 

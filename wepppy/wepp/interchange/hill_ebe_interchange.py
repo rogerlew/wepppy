@@ -15,6 +15,7 @@ from .concurrency import write_parquet_with_pool
 
 from ._utils import _parse_float
 from .schema_utils import pa_field
+from .versioning import schema_with_version
 
 EBE_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 UNIT_SKIP_TOKENS = {"---", "--", "----"}
@@ -77,12 +78,13 @@ COLUMN_ALIASES = {
     "Max-dep (kg/m^2)": "Max-dep",
 }
 
-SCHEMA = pa.schema(
-    [
-        pa_field("wepp_id", pa.int32()),
-        pa_field("year", pa.int16()),
-        pa_field("month", pa.int8()),
-        pa_field("day_of_month", pa.int8()),
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("wepp_id", pa.int32()),
+            pa_field("year", pa.int16()),
+            pa_field("month", pa.int8()),
+            pa_field("day_of_month", pa.int8()),
         pa_field("julian", pa.int16()),
         pa_field("water_year", pa.int16()),
         pa_field("Precip", pa.float64(), units="mm", description="Storm precipitation depth"),  # sedout.for:439
@@ -97,6 +99,7 @@ SCHEMA = pa.schema(
         pa_field("Sed.Del", pa.float64(), units="kg/m", description="Storm sediment load per unit width at hillslope outlet"),  # cavloss.inc / sedout.for:439
         pa_field("ER", pa.float64(), description="Specific surface enrichment ratio for event sediment"),  # cenrpa2.inc / sedout.for:439
     ]
+    )
 )
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)

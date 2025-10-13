@@ -13,6 +13,7 @@ from .concurrency import write_parquet_with_pool
 
 from .schema_utils import pa_field
 from ._utils import _parse_float
+from .versioning import schema_with_version
 
 ELEMENT_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
@@ -70,12 +71,13 @@ ELEMENT_FIELD_WIDTHS = [
     9,  # SedLeave
 ]
 
-SCHEMA = pa.schema(
-    [
-        pa_field("wepp_id", pa.int32()),
-        pa_field("ofe_id", pa.int16()),
-        pa_field("year", pa.int16()),
-        pa_field("julian", pa.int16()),
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("wepp_id", pa.int32()),
+            pa_field("ofe_id", pa.int16()),
+            pa_field("year", pa.int16()),
+            pa_field("julian", pa.int16()),
         pa_field("month", pa.int8()),
         pa_field("day_of_month", pa.int8()),
         pa_field("water_year", pa.int16()),
@@ -98,9 +100,10 @@ SCHEMA = pa.schema(
         pa_field("Ki", pa.float64(), units="kg s/m^4", description="Interrill erodibility"),
         pa_field("Kr", pa.float64(), units="s/m", description="Rill erodibility"),
         pa_field("Tcrit", pa.float64()),
-        pa_field("RilWid", pa.float64(), units="m"),
-        pa_field("SedLeave", pa.float64(), units="kg/m"),
-    ]
+            pa_field("RilWid", pa.float64(), units="m"),
+            pa_field("SedLeave", pa.float64(), units="kg/m"),
+        ]
+    )
 )
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)

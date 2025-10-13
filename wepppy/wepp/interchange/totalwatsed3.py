@@ -13,6 +13,7 @@ import pyarrow.parquet as pq
 from wepppy.nodb.core.wepp import BaseflowOpts
 
 from .schema_utils import pa_field
+from .versioning import schema_with_version
 
 DATE_COLUMNS = ("year", "sim_day_index", "julian", "month", "day_of_month", "water_year")
 PASS_METRIC_COLUMNS = (
@@ -27,53 +28,55 @@ PASS_METRIC_COLUMNS = (
     "seddep_5",
 )
 
-SCHEMA = pa.schema(
-    [
-        pa_field("year", pa.int16()),
-        pa_field("sim_day_index", pa.int32()),
-        pa_field("julian", pa.int16()),
-        pa_field("month", pa.int8()),
-        pa_field("day_of_month", pa.int8()),
-        pa_field("water_year", pa.int16()),
-        pa_field("runvol", pa.float64(), units="m^3", description="Runoff volume"),
-        pa_field("sbrunv", pa.float64(), units="m^3", description="Subsurface runoff volume"),
-        pa_field("tdet", pa.float64(), units="kg", description="Total detachment"),
-        pa_field("tdep", pa.float64(), units="kg", description="Total deposition"),
-        pa_field("seddep_1", pa.float64(), units="kg", description="Sediment Class 1 deposition"),
-        pa_field("seddep_2", pa.float64(), units="kg", description="Sediment Class 2 deposition"),
-        pa_field("seddep_3", pa.float64(), units="kg", description="Sediment Class 3 deposition"),
-        pa_field("seddep_4", pa.float64(), units="kg", description="Sediment Class 4 deposition"),
-        pa_field("seddep_5", pa.float64(), units="kg", description="Sediment Class 5 deposition"),
-        pa_field("Area", pa.float64(), units="m^2", description="Area that depths apply over"),
-        pa_field("P", pa.float64(), units="m^3", description="Precipitation volume"),
-        pa_field("RM", pa.float64(), units="m^3", description="Rainfall+Irrigation+Snowmelt volume"),
-        pa_field("Q", pa.float64(), units="m^3", description="Daily runoff over effective length volume"),
-        pa_field("Dp", pa.float64(), units="m^3", description="Deep percolation volume"),
-        pa_field("latqcc", pa.float64(), units="m^3", description="Lateral subsurface flow volume"),
-        pa_field("QOFE", pa.float64(), units="m^3", description="Daily runoff scaled to single OFE volume"),
-        pa_field("Ep", pa.float64(), units="m^3", description="Plant transpiration volume"),
-        pa_field("Es", pa.float64(), units="m^3", description="Soil evaporation volume"),
-        pa_field("Er", pa.float64(), units="m^3", description="Residue evaporation volume"),
-        pa_field("UpStrmQ", pa.float64(), units="mm", description="Runon added to OFE depth"),
-        pa_field("SubRIn", pa.float64(), units="mm", description="Subsurface runon added to OFE depth"),
-        pa_field("Total-Soil Water", pa.float64(), units="mm", description="Unfrozen water in soil profile depth"),
-        pa_field("frozwt", pa.float64(), units="mm", description="Frozen water in soil profile depth"),
-        pa_field("Snow-Water", pa.float64(), units="mm", description="Water in surface snow depth"),
-        pa_field("Tile", pa.float64(), units="mm", description="Tile drainage depth"),
-        pa_field("Irr", pa.float64(), units="mm", description="Irrigation depth"),
-        pa_field("Precipitation", pa.float64(), units="mm", description="Precipitation depth"),
-        pa_field("Rain+Melt", pa.float64(), units="mm", description="Rainfall+Irrigation+Snowmelt depth"),
-        pa_field("Percolation", pa.float64(), units="mm", description="Deep percolation depth"),
-        pa_field("Lateral Flow", pa.float64(), units="mm", description="Lateral subsurface flow depth"),
-        pa_field("Runoff", pa.float64(), units="mm", description="Daily runoff scaled to single OFE depth"),
-        pa_field("Transpiration", pa.float64(), units="mm", description="Plant transpiration depth"),
-        pa_field("Evaporation", pa.float64(), units="mm", description="Soil + residue evaporation depth"),
-        pa_field("ET", pa.float64(), units="mm", description="Total evapotranspiration depth"),
-        pa_field("Baseflow", pa.float64(), units="mm", description="Baseflow depth"),
-        pa_field("Aquifer losses", pa.float64(), units="mm", description="Aquifer losses depth"),
-        pa_field("Reservoir Volume", pa.float64(), units="mm", description="Groundwater storage depth"),
-        pa_field("Streamflow", pa.float64(), units="mm", description="Streamflow depth"),
-    ]
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("year", pa.int16()),
+            pa_field("sim_day_index", pa.int32()),
+            pa_field("julian", pa.int16()),
+            pa_field("month", pa.int8()),
+            pa_field("day_of_month", pa.int8()),
+            pa_field("water_year", pa.int16()),
+            pa_field("runvol", pa.float64(), units="m^3", description="Runoff volume"),
+            pa_field("sbrunv", pa.float64(), units="m^3", description="Subsurface runoff volume"),
+            pa_field("tdet", pa.float64(), units="kg", description="Total detachment"),
+            pa_field("tdep", pa.float64(), units="kg", description="Total deposition"),
+            pa_field("seddep_1", pa.float64(), units="kg", description="Sediment Class 1 deposition"),
+            pa_field("seddep_2", pa.float64(), units="kg", description="Sediment Class 2 deposition"),
+            pa_field("seddep_3", pa.float64(), units="kg", description="Sediment Class 3 deposition"),
+            pa_field("seddep_4", pa.float64(), units="kg", description="Sediment Class 4 deposition"),
+            pa_field("seddep_5", pa.float64(), units="kg", description="Sediment Class 5 deposition"),
+            pa_field("Area", pa.float64(), units="m^2", description="Area that depths apply over"),
+            pa_field("P", pa.float64(), units="m^3", description="Precipitation volume"),
+            pa_field("RM", pa.float64(), units="m^3", description="Rainfall+Irrigation+Snowmelt volume"),
+            pa_field("Q", pa.float64(), units="m^3", description="Daily runoff over effective length volume"),
+            pa_field("Dp", pa.float64(), units="m^3", description="Deep percolation volume"),
+            pa_field("latqcc", pa.float64(), units="m^3", description="Lateral subsurface flow volume"),
+            pa_field("QOFE", pa.float64(), units="m^3", description="Daily runoff scaled to single OFE volume"),
+            pa_field("Ep", pa.float64(), units="m^3", description="Plant transpiration volume"),
+            pa_field("Es", pa.float64(), units="m^3", description="Soil evaporation volume"),
+            pa_field("Er", pa.float64(), units="m^3", description="Residue evaporation volume"),
+            pa_field("UpStrmQ", pa.float64(), units="mm", description="Runon added to OFE depth"),
+            pa_field("SubRIn", pa.float64(), units="mm", description="Subsurface runon added to OFE depth"),
+            pa_field("Total-Soil Water", pa.float64(), units="mm", description="Unfrozen water in soil profile depth"),
+            pa_field("frozwt", pa.float64(), units="mm", description="Frozen water in soil profile depth"),
+            pa_field("Snow-Water", pa.float64(), units="mm", description="Water in surface snow depth"),
+            pa_field("Tile", pa.float64(), units="mm", description="Tile drainage depth"),
+            pa_field("Irr", pa.float64(), units="mm", description="Irrigation depth"),
+            pa_field("Precipitation", pa.float64(), units="mm", description="Precipitation depth"),
+            pa_field("Rain+Melt", pa.float64(), units="mm", description="Rainfall+Irrigation+Snowmelt depth"),
+            pa_field("Percolation", pa.float64(), units="mm", description="Deep percolation depth"),
+            pa_field("Lateral Flow", pa.float64(), units="mm", description="Lateral subsurface flow depth"),
+            pa_field("Runoff", pa.float64(), units="mm", description="Daily runoff scaled to single OFE depth"),
+            pa_field("Transpiration", pa.float64(), units="mm", description="Plant transpiration depth"),
+            pa_field("Evaporation", pa.float64(), units="mm", description="Soil + residue evaporation depth"),
+            pa_field("ET", pa.float64(), units="mm", description="Total evapotranspiration depth"),
+            pa_field("Baseflow", pa.float64(), units="mm", description="Baseflow depth"),
+            pa_field("Aquifer losses", pa.float64(), units="mm", description="Aquifer losses depth"),
+            pa_field("Reservoir Volume", pa.float64(), units="mm", description="Groundwater storage depth"),
+            pa_field("Streamflow", pa.float64(), units="mm", description="Streamflow depth"),
+        ]
+    )
 )
 
 EMPTY_TABLE = pa.table({field.name: pa.array([], type=field.type) for field in SCHEMA}, schema=SCHEMA)

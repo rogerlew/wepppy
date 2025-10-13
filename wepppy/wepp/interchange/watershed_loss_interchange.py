@@ -23,6 +23,7 @@ except ModuleNotFoundError:
     sys.modules[loader.name] = module
     loader.exec_module(module)
     pa_field = module.pa_field
+from .versioning import schema_with_version
 
 LOSS_FILENAME = "loss_pw0.txt"
 
@@ -191,55 +192,86 @@ CHN_TYPES = (pa.int32(),) + (pa.float64(),) * 8
 CHN_AVG_TYPES = (pa.int32(),) + (pa.float64(),) * 9
 
 
-HILL_ALL_YEARS_SCHEMA = pa.schema(
-    [pa_field("year", pa.int16())]
-    + [pa_field("Type", pa.string())]
-    + [pa_field(name, dtype, units=units) for name, dtype, units in zip(HILL_HEADER[1:], HILL_TYPES, HILL_UNITS[1:])]
-).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.hill"})
-
-HILL_AVERAGE_SCHEMA = pa.schema(
-    [pa_field("Type", pa.string())]
-    + [pa_field(name, dtype, units=units) for name, dtype, units in zip(HILL_AVG_HEADER[1:], HILL_AVG_TYPES, HILL_AVG_UNITS[1:])]
-).with_metadata(
-    {b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.hill"}
+HILL_ALL_YEARS_SCHEMA = schema_with_version(
+    pa.schema(
+        [pa_field("year", pa.int16())]
+        + [pa_field("Type", pa.string())]
+        + [
+            pa_field(name, dtype, units=units)
+            for name, dtype, units in zip(HILL_HEADER[1:], HILL_TYPES, HILL_UNITS[1:])
+        ]
+    ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.hill"})
 )
 
-CHN_ALL_YEARS_SCHEMA = pa.schema(
-    [pa_field("year", pa.int16())]
-    + [pa_field("Type", pa.string())]
-    + [pa_field(name, dtype, units=units) for name, dtype, units in zip(CHN_HEADER[1:], CHN_TYPES, CHN_UNITS[1:])]
-).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.chn"})
-
-CHN_AVERAGE_SCHEMA = pa.schema(
-    [pa_field("Type", pa.string())]
-    + [pa_field(name, dtype, units=units) for name, dtype, units in zip(CHN_AVG_HEADER[1:], CHN_AVG_TYPES, CHN_AVG_UNITS[1:])]
-).with_metadata(
-    {b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.chn"}
+HILL_AVERAGE_SCHEMA = schema_with_version(
+    pa.schema(
+        [pa_field("Type", pa.string())]
+        + [
+            pa_field(name, dtype, units=units)
+            for name, dtype, units in zip(HILL_AVG_HEADER[1:], HILL_AVG_TYPES, HILL_AVG_UNITS[1:])
+        ]
+    ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.hill"})
 )
 
-OUT_ALL_YEARS_SCHEMA = pa.schema(
-    [
-        pa_field("year", pa.int16()),
-        pa_field("key", pa.string()),
-        pa_field("value", pa.float64()),
-        pa_field("units", pa.string()),
-    ]
-).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.out"})
-
-OUT_AVERAGE_SCHEMA = pa.schema(
-    [
-        pa_field("key", pa.string()),
-        pa_field("value", pa.float64()),
-        pa_field("units", pa.string()),
-    ]
-).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.out"})
-
-CLASS_ALL_YEARS_SCHEMA = pa.schema([pa_field("year", pa.int16())] + [pa_field(name, pa.float64() if name != "Class" else pa.int8(), units=unit if name != "Class" else None) for name, unit in zip(CLASS_HEADER, CLASS_UNITS)]).with_metadata(
-    {b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.class_data"}
+CHN_ALL_YEARS_SCHEMA = schema_with_version(
+    pa.schema(
+        [pa_field("year", pa.int16())]
+        + [pa_field("Type", pa.string())]
+        + [
+            pa_field(name, dtype, units=units)
+            for name, dtype, units in zip(CHN_HEADER[1:], CHN_TYPES, CHN_UNITS[1:])
+        ]
+    ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.chn"})
 )
 
-CLASS_AVERAGE_SCHEMA = pa.schema([pa_field(name, pa.float64() if name != "Class" else pa.int8(), units=unit if name != "Class" else None) for name, unit in zip(CLASS_HEADER, CLASS_UNITS)]).with_metadata(
-    {b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.class_data"}
+CHN_AVERAGE_SCHEMA = schema_with_version(
+    pa.schema(
+        [pa_field("Type", pa.string())]
+        + [
+            pa_field(name, dtype, units=units)
+            for name, dtype, units in zip(CHN_AVG_HEADER[1:], CHN_AVG_TYPES, CHN_AVG_UNITS[1:])
+        ]
+    ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.chn"})
+)
+
+OUT_ALL_YEARS_SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("year", pa.int16()),
+            pa_field("key", pa.string()),
+            pa_field("value", pa.float64()),
+            pa_field("units", pa.string()),
+        ]
+    ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.out"})
+)
+
+OUT_AVERAGE_SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("key", pa.string()),
+            pa_field("value", pa.float64()),
+            pa_field("units", pa.string()),
+        ]
+    ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.out"})
+)
+
+CLASS_ALL_YEARS_SCHEMA = schema_with_version(
+    pa.schema(
+        [pa_field("year", pa.int16())]
+        + [
+            pa_field(name, pa.float64() if name != "Class" else pa.int8(), units=unit if name != "Class" else None)
+            for name, unit in zip(CLASS_HEADER, CLASS_UNITS)
+        ]
+    ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.all_years.class_data"})
+)
+
+CLASS_AVERAGE_SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field(name, pa.float64() if name != "Class" else pa.int8(), units=unit if name != "Class" else None)
+            for name, unit in zip(CLASS_HEADER, CLASS_UNITS)
+        ]
+    ).with_metadata({b"schema_version": SCHEMA_VERSION, b"table": b"loss_pw0.class_data"})
 )
 
 

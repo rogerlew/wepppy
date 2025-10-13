@@ -17,6 +17,7 @@ from .concurrency import write_parquet_with_pool
 
 from ._utils import _parse_float, _julian_to_calendar
 from .schema_utils import pa_field
+from .versioning import schema_with_version
 
 WAT_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 RAW_HEADER_SUBSTITUTIONS = (
@@ -72,11 +73,12 @@ HEADER_ALIASES = {
     "Area (m^2)": "Area",
 }
 
-SCHEMA = pa.schema(
-    [
-        pa_field("wepp_id", pa.int32()),
-        pa_field("ofe_id", pa.int16()),
-        pa_field("year", pa.int16()),
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("wepp_id", pa.int32()),
+            pa_field("ofe_id", pa.int16()),
+            pa_field("year", pa.int16()),
         pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day"),
         pa_field("julian", pa.int16()),
         pa_field("month", pa.int8()),
@@ -97,10 +99,11 @@ SCHEMA = pa.schema(
         pa_field("frozwt", pa.float64(), units="mm", description="Frozen water in soil profile"),
         pa_field("Snow-Water", pa.float64(), units="mm", description="Water in surface snow"),
         pa_field("QOFE", pa.float64(), units="mm", description="Daily runoff scaled to single OFE"),
-        pa_field("Tile", pa.float64(), units="mm", description="Tile drainage"),
-        pa_field("Irr", pa.float64(), units="mm", description="Irrigation"),
-        pa_field("Area", pa.float64(), units="m^2", description="Area that depths apply over"),
-    ]
+            pa_field("Tile", pa.float64(), units="mm", description="Tile drainage"),
+            pa_field("Irr", pa.float64(), units="mm", description="Irrigation"),
+            pa_field("Area", pa.float64(), units="m^2", description="Area that depths apply over"),
+        ]
+    )
 )
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)

@@ -11,6 +11,7 @@ from .concurrency import write_parquet_with_pool
 
 from ._utils import _parse_float
 from .schema_utils import pa_field
+from .versioning import schema_with_version
 
 LOSS_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
@@ -30,20 +31,22 @@ COLUMN_ALIASES = {
     "Diameter (mm)": "Diameter",
 }
 
-SCHEMA = pa.schema(
-    [
-        pa_field("wepp_id", pa.int32()),
-        pa_field("class_id", pa.int8()),
-        pa_field("Class", pa.int8(), description="Sediment particle size class"),
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("wepp_id", pa.int32()),
+            pa_field("class_id", pa.int8()),
+            pa_field("Class", pa.int8(), description="Sediment particle size class"),
         pa_field("Diameter", pa.float64(), units="mm"),
         pa_field("Specific Gravity", pa.float64()),
         pa_field("% Sand", pa.float64(), units="%"),
         pa_field("% Silt", pa.float64(), units="%"),
         pa_field("% Clay", pa.float64(), units="%"),
         pa_field("% O.M.", pa.float64(), units="%"),
-        pa_field("Sediment Fraction", pa.float64()),
-        pa_field("In Flow Exiting", pa.float64()),
-    ]
+            pa_field("Sediment Fraction", pa.float64()),
+            pa_field("In Flow Exiting", pa.float64()),
+        ]
+    )
 )
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)

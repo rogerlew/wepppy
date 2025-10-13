@@ -11,6 +11,7 @@ import pyarrow.parquet as pq
 
 from .schema_utils import pa_field
 from ._utils import _wait_for_path, _parse_float
+from .versioning import schema_with_version
 
 from wepppy.all_your_base.hydro import determine_wateryear
 
@@ -40,23 +41,25 @@ MEASUREMENT_COLUMNS: List[tuple[str, str | None, str | None]] = [
 ]
 
 
-SCHEMA = pa.schema(
-    [
-        pa_field("wepp_id", pa.int32(), description="Channel (OFE) identifier"),
-        pa_field("julian", pa.int16(), description="Julian day"),
-        pa_field("year", pa.int16(), description="Calendar year"),
-        pa_field("simulation_year", pa.int16(), description="Simulation year value from input file"),
-        pa_field("month", pa.int8(), description="Calendar month"),
-        pa_field("day_of_month", pa.int8(), description="Calendar day of month"),
-        pa_field("water_year", pa.int16(), description="Computed water year"),
-        pa_field("OFE", pa.int16(), description="Channel OFE index"),
-        pa_field("J", pa.int16(), description="Julian day as reported"),
-        pa_field("Y", pa.int16(), description="Simulation year as reported"),
-    ]
-    + [
-        pa_field(name, pa.float64(), units=units, description=description)
-        for name, units, description in MEASUREMENT_COLUMNS
-    ]
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("wepp_id", pa.int32(), description="Channel (OFE) identifier"),
+            pa_field("julian", pa.int16(), description="Julian day"),
+            pa_field("year", pa.int16(), description="Calendar year"),
+            pa_field("simulation_year", pa.int16(), description="Simulation year value from input file"),
+            pa_field("month", pa.int8(), description="Calendar month"),
+            pa_field("day_of_month", pa.int8(), description="Calendar day of month"),
+            pa_field("water_year", pa.int16(), description="Computed water year"),
+            pa_field("OFE", pa.int16(), description="Channel OFE index"),
+            pa_field("J", pa.int16(), description="Julian day as reported"),
+            pa_field("Y", pa.int16(), description="Simulation year as reported"),
+        ]
+        + [
+            pa_field(name, pa.float64(), units=units, description=description)
+            for name, units, description in MEASUREMENT_COLUMNS
+        ]
+    )
 )
 
 

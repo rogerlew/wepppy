@@ -8,6 +8,7 @@ from .watershed_ebe_interchange import run_wepp_watershed_ebe_interchange
 from .watershed_loss_interchange import run_wepp_watershed_loss_interchange
 from .watershed_pass_interchange import run_wepp_watershed_pass_interchange
 from .watershed_soil_interchange import run_wepp_watershed_soil_interchange
+from .versioning import remove_incompatible_interchange, write_version_manifest
 
 
 def run_wepp_watershed_interchange(wepp_output_dir: Path | str, *, start_year: int | None = None) -> Path:
@@ -19,6 +20,9 @@ def run_wepp_watershed_interchange(wepp_output_dir: Path | str, *, start_year: i
         start_year = int(start_year)  # type: ignore
     except (TypeError, ValueError):
         start_year = None
+
+    interchange_dir = base / "interchange"
+    remove_incompatible_interchange(interchange_dir)
 
     start_year_kwargs = {"start_year": start_year} if start_year is not None else {}
 
@@ -41,4 +45,5 @@ def run_wepp_watershed_interchange(wepp_output_dir: Path | str, *, start_year: i
             except Exception as exc:
                 raise RuntimeError(f"Watershed interchange task {func.__name__} failed") from exc
 
-    return base / "interchange"
+    write_version_manifest(interchange_dir)
+    return interchange_dir
