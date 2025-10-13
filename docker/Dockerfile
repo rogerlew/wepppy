@@ -8,6 +8,7 @@ RUN apt-get update && \
         curl \
         git \
         git-lfs \
+        gfortran \
         pkg-config \
         cmake \
         gdal-bin \
@@ -55,9 +56,8 @@ COPY docker/wheels /tmp/wheels
 RUN uv venv /opt/venv && \
     . /opt/venv/bin/activate && \
     uv pip install --requirement requirements-uv.txt
-    
-# Install and load DuckDB's spatial extension using the venv's python.
 
+# Install and load DuckDB's spatial extension using the venv's python.
 RUN /opt/venv/bin/python -c "import duckdb; \
                con = duckdb.connect(); \
                con.execute('SET home_directory=\'/tmp\''); \
@@ -82,5 +82,7 @@ ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PROJ_LIB=/usr/share/proj
 ENV GDAL_DATA=/usr/share/gdal
+
+WORKDIR /workdir/wepppy
 
 CMD ["bash"]
