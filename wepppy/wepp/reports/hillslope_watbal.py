@@ -37,6 +37,12 @@ class HillslopeWatbalReport(ReportBase):
 
         cache = ReportCacheManager(self.wd)
         dataframe = cache.read_parquet(self._CACHE_KEY, version=self._CACHE_VERSION)
+        if dataframe is None:
+            legacy_cache = (
+                self.wd / "wepp" / "output" / "interchange" / f"{self._CACHE_KEY}.parquet"
+            )
+            if legacy_cache.exists():
+                dataframe = pd.read_parquet(legacy_cache)
 
         if dataframe is None or not self._validate_cache_columns(dataframe):
             dataframe = self._build_summary()

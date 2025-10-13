@@ -90,7 +90,7 @@ def totalwatsed_partitioned_dss_export(
             continue
 
         df = table.to_pandas()
-        df.sort_values(["year", "julian"], kind="mergesort", inplace=True)
+        df.sort_values(["year", "julian", "sim_day_index"], kind="mergesort", inplace=True)
         df.reset_index(drop=True, inplace=True)
 
         # Derive discharge in m^3/s for compatibility with legacy export.
@@ -108,7 +108,7 @@ def totalwatsed_partitioned_dss_export(
 
         identifier_columns = {
             "year",
-            "day",
+            "sim_day_index",
             "julian",
             "month",
             "day_of_month",

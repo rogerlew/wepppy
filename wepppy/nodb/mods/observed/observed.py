@@ -260,8 +260,9 @@ class Observed(NoDbBase):
         }
         sim.rename(columns=rename_map, inplace=True)
 
-        if 'day' in sim:
-            sim.drop(columns=['day'], inplace=True)
+        for col_name in ("day", "sim_day_index"):
+            if col_name in sim:
+                sim.drop(columns=[col_name], inplace=True)
 
         sed_cols = [col for col in sim.columns if col.startswith('seddep_')]
         if sed_cols:

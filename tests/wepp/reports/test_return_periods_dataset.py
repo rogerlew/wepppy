@@ -73,7 +73,7 @@ def _prepare_totwatsed3(source_tot2: Path, target_tot3: Path) -> None:
     tot3 = pd.DataFrame(
         {
             "year": df["Year"].astype(int),
-            "day": df["Day"].astype(int),
+            "sim_day_index": df["Day"].astype(int),
             "julian": df["Julian"].astype(int),
             "month": df["Month"].astype(int),
             "day_of_month": df["Day"].astype(int),

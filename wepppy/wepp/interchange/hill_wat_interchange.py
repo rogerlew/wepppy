@@ -77,7 +77,7 @@ SCHEMA = pa.schema(
         pa_field("wepp_id", pa.int32()),
         pa_field("ofe_id", pa.int16()),
         pa_field("year", pa.int16()),
-        pa_field("day", pa.int16()),
+        pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day"),
         pa_field("julian", pa.int16()),
         pa_field("month", pa.int8()),
         pa_field("day_of_month", pa.int8()),
@@ -108,6 +108,7 @@ EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 CANONICAL_COLUMN_ALIASES = {
     "wepp_id": ("wepp_id",),
     "year": ("year", "Y"),
+    "sim_day_index": ("sim_day_index", "day", "D"),
     "julian": ("julian", "J"),
     "month": ("month", "M"),
     "day_of_month": ("day_of_month", "day", "D"),
@@ -247,7 +248,7 @@ def _parse_wat_file(path: Path) -> pa.Table:
 
     out = _init_column_store()
 
-    for i, raw_line in enumerate(lines[data_start:]):
+    for idx, raw_line in enumerate(lines[data_start:]):
         if not raw_line.strip():
             continue
         tokens = raw_line.split()
@@ -257,7 +258,7 @@ def _parse_wat_file(path: Path) -> pa.Table:
         julian = int(tokens[column_positions["J"]])
         year = int(tokens[column_positions["Y"]])
         month, day_of_month = _julian_to_calendar(year, julian)
-        day = i + 1
+        sim_day_index = idx + 1
         wy = determine_wateryear(year, julian)
         ofe_id = int(tokens[column_positions["OFE"]])
 
@@ -265,7 +266,7 @@ def _parse_wat_file(path: Path) -> pa.Table:
             "wepp_id": wepp_id,
             "ofe_id": ofe_id,
             "year": year,
-            "day": day,
+            "sim_day_index": sim_day_index,
             "julian": julian,
             "month": month,
             "day_of_month": day_of_month,
@@ -351,7 +352,7 @@ def load_hill_wat_dataframe(
                 SELECT {', '.join(select_list)}
                 FROM read_parquet('{wat_path.as_posix()}')
                 WHERE "{alias_map['wepp_id']}" = {wepp_id_int}
-                ORDER BY "{alias_map['year']}", "{alias_map['julian']}", "{alias_map['day']}", "{alias_map['ofe_id']}"
+                ORDER BY "{alias_map['year']}", "{alias_map['julian']}", "{alias_map['sim_day_index']}", "{alias_map['ofe_id']}"
             """
             frame = con.execute(query).df()
             if frame.empty:
@@ -369,7 +370,7 @@ def load_hill_wat_dataframe(
                 SELECT
                     "{alias_map['wepp_id']}" AS wepp_id,
                     "{alias_map['year']}" AS year,
-                    "{alias_map['day']}" AS day,
+                    "{alias_map['sim_day_index']}" AS sim_day_index,
                     "{alias_map['julian']}" AS julian,
                     "{alias_map['month']}" AS month,
                     "{alias_map['day_of_month']}" AS day_of_month,
@@ -381,7 +382,7 @@ def load_hill_wat_dataframe(
                 GROUP BY
                     "{alias_map['wepp_id']}",
                     "{alias_map['year']}",
-                    "{alias_map['day']}",
+                    "{alias_map['sim_day_index']}",
                     "{alias_map['julian']}",
                     "{alias_map['month']}",
                     "{alias_map['day_of_month']}",
@@ -389,7 +390,7 @@ def load_hill_wat_dataframe(
                 ORDER BY
                     "{alias_map['year']}",
                     "{alias_map['julian']}",
-                    "{alias_map['day']}"
+                    "{alias_map['sim_day_index']}"
             """
             frame = con.execute(query).df()
             if frame.empty:

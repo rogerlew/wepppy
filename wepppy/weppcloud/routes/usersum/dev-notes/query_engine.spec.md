@@ -96,8 +96,12 @@ print(run_query(ctx, payload).records[:2])
 # aggregate WEPP interchange outputs to daily sums across all hillslopes
 payload = QueryRequest(
     datasets=[{"path": "wepp/output/interchange/H.pass.parquet", "alias": "pass"}],
-    columns=["pass.year AS year", "pass.month AS month", "pass.day AS day"],
-    group_by=["year", "month", "day"],
+    columns=[
+        "pass.year AS year",
+        "pass.month AS month",
+        "pass.sim_day_index AS sim_day_index",
+    ],
+    group_by=["year", "month", "sim_day_index"],
     aggregations=[
         {"fn": "sum", "column": "pass.runoff", "alias": "runoff_sum"},
         {"fn": "sum", "column": "pass.sediment", "alias": "sediment_sum"},

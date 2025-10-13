@@ -40,7 +40,7 @@ SCHEMA = pa.schema(
         pa_field("wepp_id", pa.int32()),
         pa_field("event", pa.string(), description="Record type: EVENT, SUBEVENT, NO EVENT"),
         pa_field("year", pa.int16()),
-        pa_field("day", pa.int16()),
+        pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day since start year"),
         pa_field("julian", pa.int16()),
         pa_field("month", pa.int8()),
         pa_field("day_of_month", pa.int8()),
@@ -119,6 +119,19 @@ def _parse_pass_file(path: Path) -> pa.Table:
     with path.open("r") as stream:
         lines = stream.readlines()
 
+    if len(lines) < 2:
+        raise ValueError(f"PASS file missing simulation metadata header: {path}")
+
+    header_tokens = lines[1].split()
+    if not header_tokens:
+        raise ValueError(f"Unable to determine simulation start year from PASS header in {path}")
+    try:
+        begin_year = int(header_tokens[-1])
+    except ValueError as exc:
+        raise ValueError(f"PASS header does not contain a valid start year in {path}") from exc
+
+    sim_start_date = datetime(begin_year, 1, 1)
+
     # skip header lines (climate setup, particle definitions)
     data_lines = lines[5:]
     out = _init_column_store()
@@ -151,12 +164,17 @@ def _parse_pass_file(path: Path) -> pa.Table:
         julian = int(tokens[1])
         month, day_of_month = _julian_to_calendar(year, julian)
         wy = determine_wateryear(year, julian)
+        sim_day_index = (datetime(year, month, day_of_month) - sim_start_date).days + 1
+        if sim_day_index < 1:
+            raise ValueError(
+                f"Computed negative simulation day index ({sim_day_index}) for {path} at year={year}, julian={julian}"
+            )
 
         row = {
             "wepp_id": wepp_id,
             "event": label_upper,
             "year": year,
-            "day": julian,
+            "sim_day_index": sim_day_index,
             "julian": julian,
             "month": month,
             "day_of_month": day_of_month,

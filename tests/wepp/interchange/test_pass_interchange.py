@@ -37,6 +37,8 @@ def _load_module(full_name: str, relative_path: str):
 _all_your_base = _load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
 _load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
 _concurrency = _load_module("wepppy.wepp.interchange.concurrency", "wepppy/wepp/interchange/concurrency.py")
+_load_module("wepppy.wepp.interchange.schema_utils", "wepppy/wepp/interchange/schema_utils.py")
+_load_module("wepppy.wepp.interchange._utils", "wepppy/wepp/interchange/_utils.py")
 _hill_pass = _load_module("wepppy.wepp.interchange.hill_pass_interchange", "wepppy/wepp/interchange/hill_pass_interchange.py")
 
 write_parquet_with_pool = _concurrency.write_parquet_with_pool
@@ -134,7 +136,8 @@ def test_hill_pass_interchange_writes_parquet(tmp_path: Path) -> None:
     first_row = df.iloc[0]
     assert first_row["month"] == 1
     assert first_row["day_of_month"] == 1
-    assert first_row["julian"] == first_row["day"]
+    assert first_row["sim_day_index"] == 1
+    assert first_row["julian"] == 1
 
 
 def test_hill_pass_interchange_handles_missing_files(tmp_path: Path) -> None:

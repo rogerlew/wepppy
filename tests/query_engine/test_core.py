@@ -199,7 +199,7 @@ def test_run_query_aggregation(tmp_path: Path) -> None:
             "wepp_id": [10, 11, 10, 11],
             "year": [2020, 2020, 2020, 2020],
             "month": [6, 6, 7, 7],
-            "day": [1, 1, 1, 1],
+            "sim_day_index": [1, 1, 31, 31],
             "runoff": [1.0, 2.0, 3.0, 4.0],
             "sediment": [0.5, 0.1, 0.3, 0.2],
         }
@@ -215,28 +215,28 @@ def test_run_query_aggregation(tmp_path: Path) -> None:
         columns=[
             "pass.year AS year",
             "pass.month AS month",
-            "pass.day AS day",
+            "pass.sim_day_index AS sim_day_index",
         ],
-        group_by=["year", "month", "day"],
+        group_by=["year", "month", "sim_day_index"],
         aggregations=[
             {"fn": "sum", "column": "pass.runoff", "alias": "runoff_sum"},
             {"fn": "sum", "column": "pass.sediment", "alias": "sediment_sum"},
         ],
-        order_by=["year", "month", "day"],
+        order_by=["year", "month", "sim_day_index"],
         include_sql=True,
     )
     result = run_query(run_context, payload)
 
     assert result.row_count == 2
     assert result.sql is not None
-    assert "ORDER BY year, month, day" in result.sql
+    assert "ORDER BY year, month, sim_day_index" in result.sql
     expected = {
         (2020, 6, 1): {"runoff_sum": 3.0, "sediment_sum": 0.6},
-        (2020, 7, 1): {"runoff_sum": 7.0, "sediment_sum": 0.5},
+        (2020, 7, 31): {"runoff_sum": 7.0, "sediment_sum": 0.5},
     }
     ordered_keys = []
     for row in result.records:
-        key = (row.get("year"), row.get("month"), row.get("day"))
+        key = (row.get("year"), row.get("month"), row.get("sim_day_index"))
         assert key in expected
         assert row["runoff_sum"] == expected[key]["runoff_sum"]
         assert row["sediment_sum"] == expected[key]["sediment_sum"]

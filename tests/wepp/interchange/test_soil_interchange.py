@@ -31,6 +31,8 @@ def _load_module(full_name: str, relative_path: str):
 
 _load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
 _load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
+_load_module("wepppy.wepp.interchange.schema_utils", "wepppy/wepp/interchange/schema_utils.py")
+_load_module("wepppy.wepp.interchange._utils", "wepppy/wepp/interchange/_utils.py")
 concurrency_module = _load_module("wepppy.wepp.interchange.concurrency", "wepppy/wepp/interchange/concurrency.py")
 soil_module = _load_module("wepppy.wepp.interchange.hill_soil_interchange", "wepppy/wepp/interchange/hill_soil_interchange.py")
 
@@ -81,7 +83,7 @@ def test_soil_interchange_writes_parquet(tmp_path, monkeypatch):
     df = table.to_pandas()
     assert set(df["wepp_id"].unique()) == {1}
     assert list(df["ofe_id"]) == [1, 2]
-    assert (df["julian"] == df["day"]).all()
+    assert (df["julian"] == df["sim_day_index"]).all()
 
     first = df.iloc[0]
     assert first["month"] == 1

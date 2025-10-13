@@ -2,7 +2,7 @@
 
 At after `run_wepp_hillslope_interchange` create `interchange/totalwatsed3.parquet`
 
-Kitchen sink of daily (`day` is day index) measures for watershed.
+Kitchen sink of daily (`sim_day_index` is the 1-indexed simulation day) measures for watershed.
 
 `def run_totalwatsed3(interchange_dir, baseflow_opts: BaseflowOpts, wepp_ids = None | List[int])`
 
@@ -17,7 +17,7 @@ if `wepp_ids` is None aggregate all the wepp_ids, otherwise filter to only inclu
 | Column | Type | Units | Description | Calculation |
 | --- | --- | --- | --- | --- |
 | year | int16 |  |  |  |
-| day | int16 |  |  |  |
+| sim_day_index | int32 |  |  |  |
 | julian | int16 |  |  |  |
 | month | int8 |  |  |  |
 | day_of_month | int8 |  |  |  |
@@ -92,7 +92,7 @@ Event/subevent sediment and runoff delivery by hillslope (PASS).
 | wepp_id | int32 |  |  |
 | event | string |  | Record type: EVENT, SUBEVENT, NO EVENT |
 | year | int16 |  |  |
-| day | int16 |  |  |
+| sim_day_index | int32 |  |  |
 | julian | int16 |  |  |
 | month | int8 |  |  |
 | day_of_month | int8 |  |  |
@@ -132,6 +132,7 @@ Hillslope water balance per OFE; aligns with wat.out content.
 | wepp_id | int32 |  |  |
 | ofe_id | int16 |  |  |
 | year | int16 |  |  |
+| sim_day_index | int32 |  | 1-indexed simulation day |
 | julian | int16 |  |  |
 | month | int8 |  |  |
 | day_of_month | int8 |  |  |

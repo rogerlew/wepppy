@@ -28,6 +28,7 @@ import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
 
+
 PASS_FILENAME = "pass_pw0.txt"
 EVENTS_PARQUET = "pass_pw0.events.parquet"
 METADATA_PARQUET = "pass_pw0.metadata.parquet"
@@ -186,7 +187,7 @@ def _build_event_columns(npart: int) -> Tuple[List[str], List[str], List[str]]:
     base_columns = [
         "event",
         "year",
-        "day",
+        "sim_day_index",
         "julian",
         "month",
         "day_of_month",
@@ -217,7 +218,7 @@ def _build_event_schema(npart: int, meta: Dict[str, object], nhill: int) -> pa.S
     schema_fields = [
         pa.field("event", pa.string()),
         pa.field("year", pa.int16()),
-        pa.field("day", pa.int16()),
+        pa.field("sim_day_index", pa.int32()),
         pa.field("julian", pa.int16()),
         pa.field("month", pa.int8()),
         pa.field("day_of_month", pa.int8()),
@@ -282,6 +283,8 @@ def _write_events_parquet(
     if tmp_target.exists():
         tmp_target.unlink()
 
+    sim_start_date = datetime(int(global_meta["begin_year"]), 1, 1)
+
     writer = pq.ParquetWriter(
         tmp_target,
         schema,
@@ -308,6 +311,11 @@ def _write_events_parquet(
             julian = int(match.group("day"))
             month, day_of_month = _julian_to_calendar(year, julian)
             water_year = int(determine_wateryear(year, julian))
+            sim_day_index = (datetime(year, month, day_of_month) - sim_start_date).days + 1
+            if sim_day_index < 1:
+                raise ValueError(
+                    f"Computed simulation day index {sim_day_index} before simulation start for {year=}, {julian=}."
+                )
 
             if label == "EVENT":
                 dur = value_reader.read(nhill)
@@ -330,7 +338,7 @@ def _write_events_parquet(
                 for pos, wepp_id in enumerate(hillslope_ids):
                     store["event"].append(label)
                     store["year"].append(year)
-                    store["day"].append(julian)
+                    store["sim_day_index"].append(sim_day_index)
                     store["julian"].append(julian)
                     store["month"].append(month)
                     store["day_of_month"].append(day_of_month)
@@ -377,7 +385,7 @@ def _write_events_parquet(
                 for pos, wepp_id in enumerate(hillslope_ids):
                     store["event"].append(label)
                     store["year"].append(year)
-                    store["day"].append(julian)
+                    store["sim_day_index"].append(sim_day_index)
                     store["julian"].append(julian)
                     store["month"].append(month)
                     store["day_of_month"].append(day_of_month)
@@ -412,7 +420,7 @@ def _write_events_parquet(
                 for pos, wepp_id in enumerate(hillslope_ids):
                     store["event"].append(label)
                     store["year"].append(year)
-                    store["day"].append(julian)
+                    store["sim_day_index"].append(sim_day_index)
                     store["julian"].append(julian)
                     store["month"].append(month)
                     store["day_of_month"].append(day_of_month)

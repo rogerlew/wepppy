@@ -10,7 +10,7 @@
 ## Overview
 - Watershed deliverables are the next scope after hillslope Parquet builds; goal is a unified `pw0` (project watershed 0) interchange bundle covering channel routing, water balance, event discharge, and watershed summaries.
 - Each project has a set of watershed (`pw0` / `ch(a)n*`) with 1 file for each output type.
-- **Canonical IDs**: include `wepp_id` (hillslope integer), `ofe_id` (when applicable), and a unified date bundle: `year`, `month`, `day`, `julian`, `water_year`.
+- **Canonical IDs**: include `wepp_id` (hillslope integer), `ofe_id` (when applicable), and a unified date bundle: `year`, `month`, `day_of_month`, `julian`, `water_year`, plus `sim_day_index` (1-indexed simulation day).
 - Writers now stream their source text in configurable chunks (default 250k–500k rows) and flush via `pyarrow.ParquetWriter`. Memory use remains bounded on very large watersheds and single-row files still emit an empty table with the expected schema metadata.
 
 ## Schema Standardization
@@ -102,7 +102,7 @@
 - Plot-level hillslope outputs are explicitly out-of-scope for the interchange.
 
 ## Key Requirements
-- **Canonical IDs**: include `wepp_id` (hillslope integer), `ofe_id` (when applicable), and a unified date bundle: `year`, `month`, `day`, `julian`, `water_year`.
+- **Canonical IDs**: include `wepp_id` (hillslope integer), `ofe_id` (when applicable), and a unified date bundle: `year`, `month`, `day_of_month`, `julian`, `water_year`, plus `sim_day_index` (1-indexed simulation day).
 - **Schema discipline**: define Arrow schemas up-front, including units metadata attributes where practical. Use column names from existing data files to avoid confusion
 - **Field naming**: preserve the legacy WEPP labels (e.g., `Runoff (m^3)`, `Sed Del (kg)`) so hydrologists can match terminology across WEPP and WEPPCloud surfaces.
 - **Parser ergonomics**: when porting the text files, reuse the Fortran variable names from the originating module (e.g., `wshpas.for`) for local variables and column mapping to improve traceability.
@@ -387,7 +387,7 @@ Data columns (total 32 columns):
  0   wepp_id       6576 non-null   int32  
  1   event         6576 non-null   object 
  2   year          6576 non-null   int16  
- 3   day           6576 non-null   int16  
+ 3   sim_day_index 6576 non-null   int32  
  4   julian        6576 non-null   int16  
  5   month         6576 non-null   int8   
  6   day_of_month  6576 non-null   int8   
@@ -416,22 +416,22 @@ Data columns (total 32 columns):
  29  frcflw_5      6576 non-null   float64
  30  gwbfv         6576 non-null   float64
  31  gwdsv         6576 non-null   float64
-dtypes: float64(24), int16(4), int32(1), int8(2), object(1)
+dtypes: float64(24), int16(4), int32(2), int8(2), object(1)
 memory usage: 1.3+ MB
 
 >>> pd.read_parquet('/workdir/wepppy/tests/wepp/interchange/test_project/output/interchange/H.pass.parquet')
-      wepp_id     event  year  day  julian  month  day_of_month  water_year  dur  tcs  ...  sedcon_3  sedcon_4  sedcon_5  frcflw_1  frcflw_2  frcflw_3  frcflw_4  frcflw_5     gwbfv  gwdsv
-0           1  SUBEVENT  2000    1       1      1             1        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  1.031100    0.0
-1           1  SUBEVENT  2000    2       2      1             2        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  2.021000    0.0
-2           1  SUBEVENT  2000    3       3      1             3        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  2.971200    0.0
-3           1  SUBEVENT  2000    4       4      1             4        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  3.883500    0.0
-4           1  SUBEVENT  2000    5       5      1             5        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  4.759200    0.0
+      wepp_id     event  year  sim_day_index  julian  month  day_of_month  water_year  dur  tcs  ...  sedcon_3  sedcon_4  sedcon_5  frcflw_1  frcflw_2  frcflw_3  frcflw_4  frcflw_5     gwbfv  gwdsv
+0           1  SUBEVENT  2000              1       1      1             1        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  1.031100    0.0
+1           1  SUBEVENT  2000              2       2      1             2        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  2.021000    0.0
+2           1  SUBEVENT  2000              3       3      1             3        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  2.971200    0.0
+3           1  SUBEVENT  2000              4       4      1             4        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  3.883500    0.0
+4           1  SUBEVENT  2000              5       5      1             5        2000  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  4.759200    0.0
 ...       ...       ...   ...  ...     ...    ...           ...         ...  ...  ...  ...       ...       ...       ...       ...       ...       ...       ...       ...       ...    ...
-6571        3  NO EVENT  2005  361     361     12            27        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.011365    0.0
-6572        3  NO EVENT  2005  362     362     12            28        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.010910    0.0
-6573        3  NO EVENT  2005  363     363     12            29        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.010474    0.0
-6574        3  NO EVENT  2005  364     364     12            30        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.010055    0.0
-6575        3  NO EVENT  2005  365     365     12            31        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.009653    0.0
+6571        3  NO EVENT  2005            361     361     12            27        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.011365    0.0
+6572        3  NO EVENT  2005            362     362     12            28        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.010910    0.0
+6573        3  NO EVENT  2005            363     363     12            29        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.010474    0.0
+6574        3  NO EVENT  2005            364     364     12            30        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.010055    0.0
+6575        3  NO EVENT  2005            365     365     12            31        2006  0.0  0.0  ...       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0  0.009653    0.0
 
 [6576 rows x 32 columns]
 
@@ -444,7 +444,7 @@ Data columns (total 22 columns):
  0   wepp_id            6576 non-null   int32  
  1   ofe_id             6576 non-null   int16  
  2   year               6576 non-null   int16  
- 3   day                6576 non-null   int16  
+ 3   sim_day_index      6576 non-null   int32  
  4   julian             6576 non-null   int16  
  5   month              6576 non-null   int8   
  6   day_of_month       6576 non-null   int8   
@@ -463,22 +463,22 @@ Data columns (total 22 columns):
  19  Tauc (adjsmt)      6576 non-null   float64
  20  Saturation (frac)  6576 non-null   float64
  21  TSW (mm)           6576 non-null   float64
-dtypes: float64(11), int16(8), int32(1), int8(2)
+dtypes: float64(11), int16(8), int32(2), int8(2)
 memory usage: 706.5 KB
 
 >>> pd.read_parquet('/workdir/wepppy/tests/wepp/interchange/test_project/output/interchange/H.soil.parquet')
-      wepp_id  ofe_id  year  day  julian  month  day_of_month  water_year  ...  FC (mm/mm)  WP (mm/mm)  Rough (mm)  Ki (adjsmt)  Kr (adjsmt)  Tauc (adjsmt)  Saturation (frac)  TSW (mm)
-0           1       1  2000    1       1      1             1        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.46     30.56
-1           1       1  2000    2       2      1             2        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.36     23.62
-2           1       1  2000    3       3      1             3        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.32     21.45
-3           1       1  2000    4       4      1             4        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.31     20.64
-4           1       1  2000    5       5      1             5        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.31     20.43
-...       ...     ...   ...  ...     ...    ...           ...         ...  ...         ...         ...         ...          ...          ...            ...                ...       ...
-6571        3       1  2005  361     361     12            27        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.37     24.55
-6572        3       1  2005  362     362     12            28        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.45     29.54
-6573        3       1  2005  363     363     12            29        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.38     24.86
-6574        3       1  2005  364     364     12            30        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.41     26.96
-6575        3       1  2005  365     365     12            31        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.47     30.71
+      wepp_id  ofe_id  year  sim_day_index  julian  month  day_of_month  water_year  ...  FC (mm/mm)  WP (mm/mm)  Rough (mm)  Ki (adjsmt)  Kr (adjsmt)  Tauc (adjsmt)  Saturation (frac)  TSW (mm)
+0           1       1  2000              1       1      1             1        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.46     30.56
+1           1       1  2000              2       2      1             2        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.36     23.62
+2           1       1  2000              3       3      1             3        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.32     21.45
+3           1       1  2000              4       4      1             4        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.31     20.64
+4           1       1  2000              5       5      1             5        2000  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.31     20.43
+...       ...     ...   ...            ...     ...    ...           ...         ...  ...         ...         ...         ...          ...          ...            ...                ...       ...
+6571        3       1  2005            361     361     12            27        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.37     24.55
+6572        3       1  2005            362     362     12            28        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.45     29.54
+6573        3       1  2005            363     363     12            29        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.38     24.86
+6574        3       1  2005            364     364     12            30        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.41     26.96
+6575        3       1  2005            365     365     12            31        2006  ...         0.2        0.05       100.0         0.04         0.13            2.0               0.47     30.71
 
 [6576 rows x 22 columns]
 
@@ -490,7 +490,7 @@ Data columns (total 28 columns):
  0   wepp_id                6576 non-null   int32  
  1   ofe_id                 6576 non-null   int16  
  2   year                   6576 non-null   int16  
- 3   day                    6576 non-null   int16  
+ 3   sim_day_index          6576 non-null   int32  
  4   julian                 6576 non-null   int16  
  5   month                  6576 non-null   int8   
  6   day_of_month           6576 non-null   int8   
@@ -515,7 +515,7 @@ Data columns (total 28 columns):
  25  Tile (mm)              6576 non-null   float64
  26  Irr (mm)               6576 non-null   float64
  27  Area (m^2)             6576 non-null   float64
-dtypes: float64(17), int16(8), int32(1), int8(2)
+dtypes: float64(17), int16(8), int32(2), int8(2)
 memory usage: 1014.8 KB
 
 >>> pd.read_parquet('/workdir/wepppy/tests/wepp/interchange/test_project/output/interchange/H.wat.parquet')

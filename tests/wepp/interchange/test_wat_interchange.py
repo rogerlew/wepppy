@@ -31,6 +31,8 @@ def _load_module(full_name: str, relative_path: str):
 
 _load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
 _load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
+_load_module("wepppy.wepp.interchange.schema_utils", "wepppy/wepp/interchange/schema_utils.py")
+_load_module("wepppy.wepp.interchange._utils", "wepppy/wepp/interchange/_utils.py")
 concurrency_module = _load_module("wepppy.wepp.interchange.concurrency", "wepppy/wepp/interchange/concurrency.py")
 wat_module = _load_module("wepppy.wepp.interchange.hill_wat_interchange", "wepppy/wepp/interchange/hill_wat_interchange.py")
 

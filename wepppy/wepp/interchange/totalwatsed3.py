@@ -14,7 +14,7 @@ from wepppy.nodb.core.wepp import BaseflowOpts
 
 from .schema_utils import pa_field
 
-DATE_COLUMNS = ("year", "day", "julian", "month", "day_of_month", "water_year")
+DATE_COLUMNS = ("year", "sim_day_index", "julian", "month", "day_of_month", "water_year")
 PASS_METRIC_COLUMNS = (
     "runvol",
     "sbrunv",
@@ -30,7 +30,7 @@ PASS_METRIC_COLUMNS = (
 SCHEMA = pa.schema(
     [
         pa_field("year", pa.int16()),
-        pa_field("day", pa.int16()),
+        pa_field("sim_day_index", pa.int32()),
         pa_field("julian", pa.int16()),
         pa_field("month", pa.int8()),
         pa_field("day_of_month", pa.int8()),
@@ -102,11 +102,21 @@ def _build_where_clause(wepp_ids: list[int] | None) -> str:
     return f"WHERE wepp_id IN ({id_list})"
 
 
+def _resolve_sim_day_column(path: Path) -> str:
+    schema = pq.read_schema(path)
+    if "sim_day_index" in schema.names:
+        return "sim_day_index"
+    if "day" in schema.names:
+        return "day"
+    raise KeyError(f"Neither 'sim_day_index' nor 'day' column present in {path}")
+
+
 def _aggregate_pass(con: duckdb.DuckDBPyConnection, pass_path: Path, where_clause: str) -> pd.DataFrame:
+    day_column = _resolve_sim_day_column(pass_path)
     query = f"""
         SELECT
             year,
-            day,
+            "{day_column}" AS sim_day_index,
             julian,
             month,
             day_of_month,
@@ -122,17 +132,18 @@ def _aggregate_pass(con: duckdb.DuckDBPyConnection, pass_path: Path, where_claus
             SUM(sedcon_5 * runvol) AS seddep_5
         FROM read_parquet('{pass_path.as_posix()}')
         {where_clause}
-        GROUP BY year, day, julian, month, day_of_month, water_year
-        ORDER BY year, julian, day
+        GROUP BY year, "{day_column}", julian, month, day_of_month, water_year
+        ORDER BY year, julian, "{day_column}"
     """
     return con.execute(query).df()
 
 
 def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause: str) -> pd.DataFrame:
+    day_column = _resolve_sim_day_column(wat_path)
     query = f"""
         SELECT
             year,
-            day,
+            "{day_column}" AS sim_day_index,
             julian,
             month,
             day_of_month,
@@ -156,8 +167,8 @@ def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause:
             SUM(Irr * 0.001 * Area) AS Irr_volume
         FROM read_parquet('{wat_path.as_posix()}')
         {where_clause}
-        GROUP BY year, day, julian, month, day_of_month, water_year
-        ORDER BY year, julian, day
+        GROUP BY year, "{day_column}", julian, month, day_of_month, water_year
+        ORDER BY year, julian, "{day_column}"
     """
     return con.execute(query).df()
 
@@ -206,13 +217,16 @@ def _prepare_paths(interchange_dir: Path | str) -> _QueryTargets:
 def _finalise_table(df: pd.DataFrame) -> pa.Table:
     if df.empty:
         return EMPTY_TABLE
-    int16_cols = ["year", "day", "julian", "water_year"]
+    int16_cols = ["year", "julian", "water_year"]
+    int32_cols = ["sim_day_index"]
     int8_cols = ["month", "day_of_month"]
     for col in int16_cols:
         df[col] = df[col].astype(np.int16, copy=False)
+    for col in int32_cols:
+        df[col] = df[col].astype(np.int32, copy=False)
     for col in int8_cols:
         df[col] = df[col].astype(np.int8, copy=False)
-    float_cols = [name for name in SCHEMA.names if name not in int16_cols + int8_cols]
+    float_cols = [name for name in SCHEMA.names if name not in int16_cols + int8_cols + int32_cols]
     for col in float_cols:
         df[col] = df[col].astype(np.float64, copy=False)
     df = df[SCHEMA.names]
@@ -275,7 +289,7 @@ def run_totalwatsed3(interchange_dir: Path | str, baseflow_opts: BaseflowOpts, w
     merged["Aquifer losses"] = aquifer_losses
     merged["Streamflow"] = merged["Runoff"] + merged["Lateral Flow"] + merged["Baseflow"]
 
-    merged = merged.sort_values(["year", "julian", "day"], kind="mergesort").reset_index(drop=True)
+    merged = merged.sort_values(["year", "julian", "sim_day_index"], kind="mergesort").reset_index(drop=True)
     table = _finalise_table(merged)
     pq.write_table(table.combine_chunks(), targets.output_path, compression="snappy", use_dictionary=True)
     return targets.output_path

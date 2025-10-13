@@ -140,10 +140,10 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                 "columns": [
                     "pass.year AS year",
                     "pass.month AS month",
-                    "pass.day AS day",
+                    "pass.sim_day_index AS sim_day_index",
                 ],
-                "group_by": ["year", "month", "day"],
-                "order_by": ["year", "month", "day"],
+                "group_by": ["year", "month", "sim_day_index"],
+                "order_by": ["year", "month", "sim_day_index"],
                 "aggregations": [
                     {
                     "alias": "detachment",

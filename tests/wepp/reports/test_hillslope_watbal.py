@@ -72,6 +72,7 @@ def _write_h_wat_parquet(path: Path) -> None:
                         {
                             "wepp_id": wepp_id,
                             "ofe_id": ofe_id,
+                            "sim_day_index": day + 1,
                             "water_year": water_year,
                             "P": 1.0 * scale,
                             "Dp": 0.5 * scale,
