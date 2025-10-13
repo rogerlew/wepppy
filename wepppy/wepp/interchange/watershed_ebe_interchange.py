@@ -158,6 +158,11 @@ def run_wepp_watershed_ebe_interchange(
     if not base.exists():
         raise FileNotFoundError(base)
 
+    try:
+        start_year = int(start_year)  # type: ignore
+    except (TypeError, ValueError):
+        start_year = None
+
     ebe_path = base / EBE_FILENAME
     _wait_for_path(ebe_path)
 

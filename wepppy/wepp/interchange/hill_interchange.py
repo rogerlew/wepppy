@@ -10,6 +10,12 @@ def run_wepp_hillslope_interchange(wepp_output_dir: Path | str, *, start_year: i
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
+    
+    try:
+        start_year = int(start_year)  # type: ignore
+    except (TypeError, ValueError):
+        start_year = None
+
 
     run_wepp_hillslope_pass_interchange(base)
     run_wepp_hillslope_ebe_interchange(base, start_year=start_year)

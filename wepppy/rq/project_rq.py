@@ -1,3 +1,4 @@
+import json
 import shutil
 from glob import glob
 
@@ -29,7 +30,7 @@ from wepppy.config.redis_settings import (
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from wepppy.nodb.base import clear_nodb_file_cache
+from wepppy.nodb.base import clear_locks, clear_nodb_file_cache
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.ash_transport import Ash
@@ -54,9 +55,8 @@ RQ_DB = int(RedisDB.RQ)
 TIMEOUT = 43_200
 DEFAULT_ZOOM = 12
 
-# This is WIP, the idea is to recreate projects from stubs. but all the branching in the NoDb files,
-# makes it kind of tedious to implement the stubs
-def new_project_rq(runid: str, project_def: dict):
+
+def test_run_rq(runid: str):
     """
     assumes a runid has been assigned and an empty wd has been created.
     """
@@ -66,96 +66,146 @@ def new_project_rq(runid: str, project_def: dict):
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
-        wd = get_wd(runid)
-        config = project_def['config']            
-        cfg = "%s.cfg" % config
+        class TaskStub:
+            @classmethod
+            def is_task_enabled(cls, task: TaskEnum) -> bool:
+                return True
+            
+        base_wd = get_wd(runid)
 
-        ron = Ron(wd, cfg)
+        new_runid = f'{runid}-latest'
+        runid_wd = get_wd(new_runid)
+
+        StatusMessenger.publish(status_channel, f'base_wd: {base_wd}')
+        init_required = False
+        if os.path.exists(runid_wd) and TaskStub.is_task_enabled(TaskEnum.fetch_dem):
+            StatusMessenger.publish(status_channel, f'removing existing runid_wd: {runid_wd}')
+            shutil.rmtree(runid_wd)
+            init_required = True
+
+        if not os.path.exists(runid_wd):
+            init_required = True
         
-        name = project_def.get('name')
-        scenario = project_def.get('scenario')
-        if name:
-            ron.name = name
-        if scenario:
-            ron.scenario = scenario
+        StatusMessenger.publish(status_channel, f'init_required: {init_required}')
+        prep = None
+        locks_cleared = None
+        if init_required:
+            StatusMessenger.publish(status_channel, f'copying base project to runid_wd: {runid_wd}')
+            shutil.copytree(base_wd, runid_wd)
 
-        # fetch dem
-        extent = project_def['map']['extent']       # in wgs84: left, bottom, right, top
-        center = project_def['map'].get('center')   # optional in wgs84
-        zoom = project_def['map'].get('zoom')       # optional in wgs84
-        fetch_dem_rq(runid, extent, center, zoom)
+            for nodb_fn in glob(_join(runid_wd, '*.nodb')):
+                with open(nodb_fn, 'r') as fp:
+                    state = json.load(fp)
+                state.setdefault('py/state', {})['wd'] = runid_wd
+                with open(nodb_fn, 'w') as fp:
+                    json.dump(state, fp)
+                    fp.flush()
+                    os.fsync(fp.fileno())
+            clear_nodb_file_cache(runid)
+            StatusMessenger.publish(status_channel, 'cleared NoDb file cache')
+            try:
+                locks_cleared = clear_locks(runid)
+                StatusMessenger.publish(status_channel, f'cleared NoDb locks: {locks_cleared}')
+            except RuntimeError:
+                pass
 
-        # delineate channels
-        build_channels_rq(runid)
+        StatusMessenger.publish(status_channel, 'getting RedisPrep instance')
+        prep = RedisPrep.getInstance(runid_wd)
+        StatusMessenger.publish(status_channel, prep.timestamps_report())
 
-        # set outlet
-        outlet_lng, outlet_lat = project_def['watershed']['outlet'] # in wgs84: lng, lat
-        build_channels_rq(runid, outlet_lng, outlet_lat)
+        if init_required:
+            StatusMessenger.publish(status_channel, f'init_required: {init_required} removing all RedisPrep timestamps')
+            prep.remove_all_timestamp()
+            StatusMessenger.publish(status_channel, prep.timestamps_report())
 
-        # delineate subcatchments
-        build_subcatchments_rq(runid)
+        StatusMessenger.publish(status_channel, 'getting NoDb instances')
+        ron = Ron.getInstance(runid_wd)
+        watershed = Watershed.getInstance(runid_wd)
+        landuse = Landuse.getInstance(runid_wd)
+        soils = Soils.getInstance(runid_wd)
+        climate = Climate.getInstance(runid_wd)
+        wepp = Wepp.getInstance(runid_wd)
+        
+        if TaskStub.is_task_enabled(TaskEnum.fetch_dem) and prep[str(TaskEnum.fetch_dem)] is None:
+            StatusMessenger.publish(status_channel, 'fetching DEM')
+            ron.fetch_dem()
 
-        # abstract watershed    
-        abstract_watershed_rq(runid)
+        if TaskStub.is_task_enabled(TaskEnum.build_channels) and prep[str(TaskEnum.build_channels)] is None:
+            StatusMessenger.publish(status_channel, f'building channels')
+            watershed.build_channels()
 
-        # check for sbs map
-        sbs_map = None
-        disturbed_def = project_def.get('disturbed')
-        if disturbed_def:
-            sbs_map = disturbed_def.get('sbs_map')
+        if TaskStub.is_task_enabled(TaskEnum.find_outlet) and prep[str(TaskEnum.find_outlet)] is None:
+            StatusMessenger.publish(status_channel, f'setting outlet')
+            watershed.set_outlet(
+                lng=watershed.outlet.requested_loc.lng, 
+                lat=watershed.outlet.requested_loc.lat
+            )
 
-        if sbs_map:
-            if 'disturbed' not in ron.mods:
-                raise Exception('disturbed module not defined in ron.mods')
-            
-            init_sbs_map_rq(runid, sbs_map)
+        if TaskStub.is_task_enabled(TaskEnum.build_subcatchments) and prep[str(TaskEnum.build_subcatchments)] is None:
+            StatusMessenger.publish(status_channel, f'building subcatchments')
+            watershed.build_subcatchments()
 
-        # build landuse
-        landuse = Landuse.getInstance(wd)
-        landuse.mode = LanduseMode.Gridded
+        if TaskStub.is_task_enabled(TaskEnum.abstract_watershed) and prep[str(TaskEnum.abstract_watershed)] is None:
+            StatusMessenger.publish(status_channel, f'abstracting watershed')
+            watershed.abstract_watershed()
 
-        build_landuse_rq(runid)
+        if TaskStub.is_task_enabled(TaskEnum.build_landuse) and prep[str(TaskEnum.build_landuse)] is None:
+            StatusMessenger.publish(status_channel, f'building landuse')
+            landuse.build()
 
-        # build soil
-        soils = Soils.getInstance(wd)
-        soils.mode = SoilsMode.Gridded
+        if TaskStub.is_task_enabled(TaskEnum.build_soils) and prep[str(TaskEnum.build_soils)] is None:
+            StatusMessenger.publish(status_channel, f'building soils')
+            soils.build()
 
-        build_soils_rq(runid)
+        if TaskStub.is_task_enabled(TaskEnum.build_climate) and prep[str(TaskEnum.build_climate)] is None:
+            StatusMessenger.publish(status_channel, f'building climate')
+            climate.build()
 
-        # build climate
-        climate_mode = project_def['climate'].get('mode', 'vanilla')
-        climate_spatialmode = project_def['climate'].get('spatial_mode', 'multiple')
+        rap_ts = RAP_TS.tryGetInstance(runid_wd)
+        StatusMessenger.publish(status_channel, f'rap_ts: {rap_ts}')
+        if rap_ts and TaskStub.is_task_enabled(TaskEnum.fetch_rap_ts) \
+            and prep[str(TaskEnum.fetch_rap_ts)] is None:
+            StatusMessenger.publish(status_channel, f'fetching RAP TS')
+            rap_ts.acquire_rasters(
+                start_year=climate.observed_start_year,
+                end_year=climate.observed_end_year,
+            )
+            StatusMessenger.publish(status_channel, f'analyzing RAP TS')
+            rap_ts.analyze()
 
-        climate = Climate.getInstance(wd)
-        climate.climate_mode = ClimateMode.parse(climate_mode)
-        climate.climate_spatialmode = ClimateSpatialMode.parse(climate_spatialmode)
+        run_hillslopes = TaskStub.is_task_enabled(TaskEnum.run_wepp_hillslopes) \
+            and prep[str(TaskEnum.run_wepp_hillslopes)] is None
+        run_watershed = TaskStub.is_task_enabled(TaskEnum.run_wepp_watershed) \
+            and prep[str(TaskEnum.run_wepp_watershed)] is None
 
-        climatestation = project_def['climate'].get('station_id')
-        if climatestation:
-            climate.climatestation = climatestation
-            
-            # validate climatestation id is in database
-            climatestation_meta = climate.climatestation_meta
-            assert climatestation_meta
+        StatusMessenger.publish(status_channel, f'run_hillslopes: {run_hillslopes}')
+        StatusMessenger.publish(status_channel, f'run_watershed: {run_watershed}')
 
-        else:
-            stations = climate.find_closest_stations()
-            climate.climatestation = stations[0]['id']
+        if run_hillslopes:
+            StatusMessenger.publish(status_channel, 'calling wepp.clean()')
+            wepp.clean()
 
-        start_year = project_def['climate'].get('start_year')
-        end_year = project_def['climate'].get('end_year')
+        if run_hillslopes or run_watershed:
+            StatusMessenger.publish(status_channel, 'calling wepp._check_and_set_baseflow_map()')
+            wepp._check_and_set_baseflow_map()
+            StatusMessenger.publish(status_channel, 'calling wepp._check_and_set_phosphorus_map()')
+            wepp._check_and_set_phosphorus_map()
 
-        if start_year or end_year:
-            if climate.climate_mode == ClimateMode.Future:
-                climate.set_future_pars(start_year=start_year, end_year=end_year)
-            else:
-                climate.set_observed_pars(start_year=start_year, end_year=end_year)
+        if run_hillslopes:
+            StatusMessenger.publish(status_channel, 'calling wepp.prep_hillslopes()')
+            wepp.prep_hillslopes()
+            StatusMessenger.publish(status_channel, 'calling wepp.run_hillslopes()')
+            wepp.run_hillslopes()
 
-        build_climate_rq(runid)
-
-        run_wepp_rq(runid)
+        if run_watershed:
+            StatusMessenger.publish(status_channel, 'calling wepp.prep_watershed()')
+            wepp.prep_watershed()
+            StatusMessenger.publish(status_channel, 'calling wepp.run_watershed()')
+            wepp.run_watershed()  # also triggers post wepp processing
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+
+        return tuple(locks_cleared) if locks_cleared else ()
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

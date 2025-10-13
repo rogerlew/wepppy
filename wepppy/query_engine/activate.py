@@ -69,7 +69,7 @@ def activate_query_engine(
             from wepppy.nodb.core.climate import Climate  # local import to avoid heavy deps during import
 
             climate = Climate.getInstance(str(base))
-            if getattr(climate, "observed_start_year", None) is not None:
+            if getattr(climate, "observed_start_year", '') != '':
                 start_year = climate.observed_start_year
         except Exception:  # pragma: no cover - best effort
             LOGGER.debug(
@@ -174,6 +174,10 @@ def update_catalog_entry(
 
 def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
     """Generate WEPP interchange outputs when missing."""
+    try:
+        start_year = int(start_year)  # type: ignore
+    except (TypeError, ValueError):
+        start_year = None
 
     from wepppy.wepp.interchange import (
         generate_interchange_documentation,

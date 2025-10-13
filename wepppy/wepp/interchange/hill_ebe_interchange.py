@@ -204,6 +204,11 @@ def run_wepp_hillslope_ebe_interchange(wepp_output_dir: Path | str, *, start_yea
     if not base.exists():
         raise FileNotFoundError(base)
 
+    try:
+        start_year = int(start_year)  # type: ignore
+    except (TypeError, ValueError):
+        start_year = None
+
     ebe_files = sorted(base.glob("H*.ebe.dat"))
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)

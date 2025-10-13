@@ -647,6 +647,9 @@ def _run_hillslope_watbal_rq(runid):
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        from wepppy.wepp.interchange._utils import _wait_for_path
+        wat_file = _join(wd, 'wepp/output/interchange/H.wat.parquet')
+        _wait_for_path(wat_file)
         wepp = Wepp.getInstance(wd)
         wepp._run_hillslope_watbal()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')

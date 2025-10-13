@@ -171,6 +171,11 @@ def run_wepp_watershed_chnwb_interchange(
     if not base.exists():
         raise FileNotFoundError(base)
 
+    try:
+        start_year = int(start_year)  # type: ignore
+    except (TypeError, ValueError):
+        start_year = None
+
     source = base / CHANWB_FILENAME
     _wait_for_path(source)
 
