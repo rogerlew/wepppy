@@ -206,6 +206,7 @@ services:
       - ../WEPPcloudR:/srv/original-weppcloudr
       - ${GEODATA_DIR}:/geodata
       - ${WC1_DIR}:/wc1
+      - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
     ports:
       - "8050:8050"
 
@@ -349,3 +350,6 @@ networks:
       config:
         - subnet: 10.0.0.0/16
           gateway: 10.0.0.1
+
+volumes:
+  weppcloudr-renv-cache:

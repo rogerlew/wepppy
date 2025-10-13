@@ -5,7 +5,7 @@ ENV RENV_CONFIG_CACHE_SYMLINKS=FALSE \
     RENV_PATHS_CACHE=/opt/weppcloudr/renv/cache \
     PORT=8000 \
     # Use the OS-specific URL for binaries. rocker/r-ver:4.3.2 is Debian Bookworm.
-    RSPM=https://packagemanager.posit.co/cran/__linux__/bookworm/latest
+    RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest
 
 # Add prerequisites for adding the Arrow repository
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -26,6 +26,7 @@ RUN apt-get install -y /tmp/apache-arrow-apt-source.deb && \
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libarrow-dev \
         libparquet-dev \
+        libicu-dev \
         pandoc \
         make \
         g++ \

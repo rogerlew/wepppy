@@ -152,16 +152,39 @@ get_geometry <- function(runid){
 ## --------------------------------------------------------------------------------------##
 
 get_WatershedArea_m2 <- function(runid){
+  hills_path <- run_path(runid, "watershed", "hillslopes.parquet")
+  if (file.exists(hills_path)) {
+    hills <- arrow::read_parquet(hills_path)
+    area_cols <- c("area", "area_m2", "area_ha")
+    existing <- area_cols[area_cols %in% names(hills)]
+    if (length(existing) > 0) {
+      area_m2 <- NULL
+      if ("area" %in% existing) {
+        area_m2 <- as.numeric(hills$area)
+      } else if ("area_m2" %in% existing) {
+        area_m2 <- as.numeric(hills$area_m2)
+      } else {
+        area_m2 <- as.numeric(hills$area_ha) * 10000
+      }
+      area_m2 <- area_m2[!is.na(area_m2)]
+      if (length(area_m2)) {
+        return(sum(area_m2))
+      }
+    }
+  }
+
   parquet_path <- run_path(runid, "wepp", "output", "interchange", "totalwatsed3.parquet")
-  if (!file.exists(parquet_path)) {
-    stop(sprintf("totalwatsed3.parquet not found for run '%s'", runid))
+  if (file.exists(parquet_path)) {
+    tbl <- arrow::read_parquet(parquet_path, as_data_frame = TRUE)
+    if ("Area" %in% names(tbl)) {
+      candidates <- tbl$Area[which(!is.na(tbl$Area) & tbl$Area > 0)]
+      if (length(candidates) > 0) {
+        return(as.numeric(candidates[1]))
+      }
+    }
   }
-  tbl <- arrow::read_parquet(parquet_path, as_data_frame = TRUE)
-  area_value <- tbl$Area[which(!is.na(tbl$Area))[1]]
-  if (is.na(area_value)) {
-    stop(sprintf("Unable to determine watershed area for run '%s'", runid))
-  }
-  as.numeric(area_value)
+
+  stop(sprintf("Unable to determine watershed area for run '%s'", runid))
 }
 
 ## --------------------------------------------------------------------------------------##
@@ -297,23 +320,42 @@ read_subcatchments = function(runid) {
   landuse_path <- run_path(runid, "landuse", "landuse.parquet")
   soils_path <- run_path(runid, "soils", "soils.parquet")
 
-  hills <- arrow::read_parquet(hills_path) %>%
+  hills <- arrow::read_parquet(hills_path)
+  if (!"TopazID" %in% names(hills)) {
+    if ("topaz_id" %in% names(hills)) {
+      hills$TopazID <- hills$topaz_id
+    } else {
+      stop("TopazID column missing from hillslopes parquet")
+    }
+  }
+  if (!"wepp_id" %in% names(hills) && "WeppID" %in% names(hills)) {
+    hills$wepp_id <- hills$WeppID
+  }
+  hills <- hills %>%
     dplyr::mutate(
-      TopazID = as.integer(dplyr::coalesce(TopazID, topaz_id)),
-      wepp_id = as.integer(dplyr::coalesce(wepp_id, WeppID)),
-      area_ha = as.numeric(dplyr::coalesce(area, 0)) / 10000,
-      slope_percent = as.numeric(dplyr::coalesce(slope_scalar, 0)) * 100
+      TopazID = as.integer(TopazID),
+      wepp_id = as.integer(wepp_id),
+      area_ha = as.numeric(area / 10000),
+      slope_percent = as.numeric(slope_scalar * 100),
     ) %>%
     dplyr::select(TopazID, wepp_id, area_ha, slope_percent)
 
-  landuse <- arrow::read_parquet(landuse_path) %>%
+  landuse <- arrow::read_parquet(landuse_path)
+  if (!"TopazID" %in% names(landuse) && "topaz_id" %in% names(landuse)) {
+    landuse$TopazID <- landuse$topaz_id
+  }
+  landuse <- landuse %>%
     dplyr::mutate(
       TopazID = as.integer(TopazID),
       landuse = dplyr::coalesce(desc, disturbed_class, as.character(key))
     ) %>%
     dplyr::select(TopazID, landuse)
 
-  soils <- arrow::read_parquet(soils_path) %>%
+  soils <- arrow::read_parquet(soils_path)
+  if (!"TopazID" %in% names(soils) && "topaz_id" %in% names(soils)) {
+    soils$TopazID <- soils$topaz_id
+  }
+  soils <- soils %>%
     dplyr::mutate(
       TopazID = as.integer(TopazID),
       soil = dplyr::coalesce(desc, mukey),
