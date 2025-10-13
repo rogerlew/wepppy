@@ -61,7 +61,7 @@ gradient_dt = summarize_subcatch_by_var(subcatchments, "gradient")
 totalwatseddf <- process_totalwatsed(params$proj_runid)
 
 totalwatsed_wy_mean_df = totalwatseddf %>%
-          dplyr::select(-dplyr::any_of(c("julian","year","Date","mo","da", "month", "day"))) %>%
+          dplyr::select(-dplyr::any_of(c("julian","year","Date","month","day"))) %>%
           dplyr::group_by(WY) %>%
           dplyr::summarise_all(mean)
 
@@ -147,10 +147,10 @@ leafsync::sync(landuse_map,
 
 ### Climate Summary
 ```{r, echo=FALSE,message=FALSE,warning=FALSE}
-cli_sum = get_cli_summary(params$proj_runid)
+cli_stats = get_cli_summary(params$proj_runid)
 ```
 
-During the simulation period between `r as.numeric(yr_min)` and `r as.numeric(yr_max)`, `r as.numeric(stringr::str_extract_all(cli_sum, "\\d+([.,]\\d+)?")[[1]][1])` storms produced `r round(as.numeric(stringr::str_extract_all(cli_sum, "\\d+([.,]\\d+)?")[[1]][2]))` mm of rainfall resulting in  `r round(as.numeric(stringr::str_extract_all(cli_sum, "\\d+([.,]\\d+)?")[[3]][2]))` mm of streamflow passing through the watershed outlet on an average annual basis.
+During the simulation period between water years `r cli_stats$water_year_start` and `r cli_stats$water_year_end`, `r cli_stats$storm_count` recorded events produced an average annual precipitation depth of `r round(cli_stats$mean_annual_precip_mm)` mm. This resulted in an average annual streamflow depth of `r round(cli_stats$mean_annual_streamflow_mm)` mm at the watershed outlet (total precipitation `r round(cli_stats$total_precip_mm)` mm, total streamflow `r round(cli_stats$total_streamflow_mm)` mm).
 
 <!-- on an average annual basis. `r as.numeric(stringr::str_extract_all(cli_sum, "\\d+([.,]\\d+)?")[[3]][1])` runoff events produced `r round(as.numeric(stringr::str_extract_all(cli_sum, "\\d+([.,]\\d+)?")[[3]][2]))` mm of runoff passing through the watershed outlet on an average annual basis. -->
 

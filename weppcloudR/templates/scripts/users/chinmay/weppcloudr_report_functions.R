@@ -25,22 +25,83 @@
 
 ## --------------------------------------------------------------------------------------##
 
-gethillwatfiles<- function(runid){
-  link <- paste0("/geodata/weppcloud_runs/", runid,"/wepp/output/")
-  if (file.exists(link)) {
-    wat_dat <- list.files(link, "*\\.wat.dat$", full.names=TRUE)
-    
-  }else{
-    link = paste0("https://wepp.cloud/weppcloud/runs/", runid,"/cfg/browse/wepp/output/")
-    pg <- rvest::read_html(link)
-    wat_dat <- rvest::html_attr(rvest::html_nodes(pg, "a"), "href") %>%
-      stringr::str_subset(".wat.dat", negate = FALSE)
-    wat_dat <- paste0(link, wat_dat)
-    
+PRIMARY_RUN_ROOT <- Sys.getenv("PRIMARY_RUN_ROOT", "/geodata/weppcloud_runs")
+PARTITIONED_RUN_ROOT <- Sys.getenv("PARTITIONED_RUN_ROOT", "/wc1/runs")
+BATCH_ROOT <- Sys.getenv("BATCH_ROOT", "/wc1/batch")
+
+.run_root_cache <- new.env(parent = emptyenv())
+
+resolve_run_root <- function(runid) {
+  cached <- .run_root_cache[[runid]]
+  if (!is.null(cached) && dir.exists(cached)) {
+    return(cached)
   }
-  
-  
-  return(wat_dat)
+
+  root <- NULL
+
+  if (grepl(";;", runid, fixed = TRUE)) {
+    tokens <- strsplit(runid, ";;", fixed = TRUE)[[1]]
+    if (length(tokens) == 3 && identical(tokens[1], "batch")) {
+      batch_dir <- file.path(BATCH_ROOT, tokens[2])
+      if (dir.exists(batch_dir)) {
+        if (identical(tokens[3], "_base")) {
+          root <- file.path(batch_dir, "_base")
+        } else {
+          root <- file.path(batch_dir, "runs", tokens[3])
+        }
+      }
+    }
+  } else {
+    primary <- file.path(PRIMARY_RUN_ROOT, runid)
+    if (dir.exists(primary)) {
+      root <- primary
+    } else {
+      prefix <- substr(runid, 1, min(2, nchar(runid)))
+      partitioned <- file.path(PARTITIONED_RUN_ROOT, prefix, runid)
+      if (dir.exists(partitioned)) {
+        root <- partitioned
+      }
+    }
+  }
+
+  if (is.null(root) || !dir.exists(root)) {
+    stop(sprintf("Run directory not found for '%s'", runid))
+  }
+
+  .run_root_cache[[runid]] <- root
+  root
+}
+
+resolve_active_root <- function(runid, pup = NULL) {
+  base_root <- resolve_run_root(runid)
+  if (is.null(pup) || !nzchar(pup)) {
+    return(base_root)
+  }
+  pups_dir <- file.path(base_root, "_pups")
+  if (!dir.exists(pups_dir)) {
+    stop(sprintf("PUP directory not available for '%s'", runid))
+  }
+  candidate <- normalizePath(file.path(pups_dir, pup), winslash = "/", mustWork = FALSE)
+  if (is.na(candidate) || !dir.exists(candidate)) {
+    stop(sprintf("PUP path '%s' not found for '%s'", pup, runid))
+  }
+  pups_dir_norm <- normalizePath(pups_dir, winslash = "/", mustWork = TRUE)
+  if (!(identical(candidate, pups_dir_norm) || startsWith(candidate, paste0(pups_dir_norm, "/")))) {
+    stop("PUP path escapes run directory")
+  }
+  candidate
+}
+
+run_path <- function(runid, ..., pup = NULL) {
+  file.path(resolve_active_root(runid, pup), ...)
+}
+
+gethillwatfiles<- function(runid){
+  link <- run_path(runid, "wepp", "output")
+  if (!dir.exists(link)) {
+    stop(sprintf("WEPP output directory not found for run '%s'", runid))
+  }
+  list.files(link, "*\\.wat.dat$", full.names = TRUE)
 }
 
 
@@ -71,61 +132,36 @@ calc_watbal <- function(link){
  
 
 get_geometry <- function(runid){
-  
-  link <- paste0("/geodata/weppcloud_runs/", runid, "/export/arcmap/subcatchments.json")
-  
-    
-  if (file.exists(link)) {
-    geometry <- sf::st_read(link,quiet = TRUE)%>%
-      dplyr::select(WeppID, geometry) %>%
-      sf::st_transform(4326) %>%
-      dplyr::group_by(WeppID)%>%
-      dplyr::summarize(geometry = sf::st_union(geometry))
-  }else{
-  
-  link <- paste0("https://wepp.cloud/weppcloud/runs/",
-                 runid,
-                 "/cfg/browse/export/arcmap/subcatchments.json")
-  geometry <- sf::st_read(link,quiet = TRUE)%>%
+  preferred <- run_path(runid, "watershed", "subcatchments.WGS.json")
+  fallback <- run_path(runid, "watershed", "subcatchments.json")
+
+  src <- if (file.exists(preferred)) preferred else if (file.exists(fallback)) fallback else NULL
+  if (is.null(src)) {
+    stop(sprintf("Subcatchments JSON not found for run '%s'", runid))
+  }
+
+  geometry <- sf::st_read(src, quiet = TRUE) %>%
     dplyr::select(WeppID, geometry) %>%
     sf::st_transform(4326) %>%
-    dplyr::group_by(WeppID)%>%
-    dplyr::summarize(geometry = sf::st_union(geometry))
-  
-  }
-  return(geometry)
-  
+    dplyr::group_by(WeppID) %>%
+    dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop")
+
+  geometry
 }
 
 ## --------------------------------------------------------------------------------------##
 
 get_WatershedArea_m2 <- function(runid){
-  #
-  fn = paste0(
-    "/geodata/weppcloud_runs/",
-    runid,
-    "/wepp/output/",
-    "loss_pw0.txt"
-  )
-  
-  if (file.exists(fn)) {
-    getstring<- grep("Total contributing area to outlet ",
-                     readLines(fn), value = TRUE)
-    getstring <- getstring[[1]]
-    num <- readr::parse_number(getstring)
-    num <- as.numeric(num) * 10000 ##convert ha to m2
+  parquet_path <- run_path(runid, "wepp", "output", "interchange", "totalwatsed3.parquet")
+  if (!file.exists(parquet_path)) {
+    stop(sprintf("totalwatsed3.parquet not found for run '%s'", runid))
   }
-  else{
-    fn = paste0("https://wepp.cloud/weppcloud/runs/", runid,"/cfg/browse/wepp/output/loss_pw0.txt")
-    getstring<- grep("Total contributing area to outlet ",
-                     readLines(fn), value = TRUE)
-    getstring <- getstring[[1]]
-    num <- readr::parse_number(getstring)
-    num <- as.numeric(num) * 10000 ##convert ha to m2
-    }
-  
-return(num)
-  
+  tbl <- arrow::read_parquet(parquet_path, as_data_frame = TRUE)
+  area_value <- tbl$Area[which(!is.na(tbl$Area))[1]]
+  if (is.na(area_value)) {
+    stop(sprintf("Unable to determine watershed area for run '%s'", runid))
+  }
+  as.numeric(area_value)
 }
 
 ## --------------------------------------------------------------------------------------##
@@ -137,28 +173,37 @@ extract_numbers <- function(strings) {
 }
 
 get_cli_summary <- function(runid){
-  #
-  fn = paste0(
-    "/geodata/weppcloud_runs/",
-    runid,
-    "/wepp/output/",
-    "loss_pw0.txt"
+  totals <- load_totalwatsed(runid)
+  storms <- tryCatch(
+    load_ebe(runid),
+    error = function(err) {
+      current_warning <- sprintf("EBE data unavailable for run '%s': %s", runid, err$message)
+      warning(current_warning, call. = FALSE)
+      dplyr::tibble()
+    }
   )
-  
-  
-  if (file.exists(fn)) {
-    
-    linenumber = grep("AVERAGE ANNUAL basis",readLines(fn))[1]
-    getstring<- readLines(con = fn)
-  }else{
-    fn = paste0("https://wepp.cloud/weppcloud/runs/", runid,"/cfg/browse/wepp/output/loss_pw0.txt")
-    linenumber = grep("AVERAGE ANNUAL basis",readLines(fn))[1]
-    getstring<- readLines(con = fn)
-    
-  }
-  
-  return(head(tail(getstring, n = -(linenumber - 1)), n = 6))
-  
+
+  wy_span <- range(totals$WY, na.rm = TRUE)
+  wy_count <- length(unique(totals$WY))
+
+  wy_summary <- totals %>%
+    dplyr::group_by(WY) %>%
+    dplyr::summarise(
+      precip_mm = sum(precipitation_mm, na.rm = TRUE),
+      streamflow_mm = sum(streamflow_mm, na.rm = TRUE),
+      .groups = "drop"
+    )
+
+  list(
+    water_year_start = wy_span[1],
+    water_year_end = wy_span[2],
+    water_year_count = wy_count,
+    storm_count = nrow(storms),
+    total_precip_mm = sum(wy_summary$precip_mm, na.rm = TRUE),
+    mean_annual_precip_mm = mean(wy_summary$precip_mm, na.rm = TRUE),
+    total_streamflow_mm = sum(wy_summary$streamflow_mm, na.rm = TRUE),
+    mean_annual_streamflow_mm = mean(wy_summary$streamflow_mm, na.rm = TRUE)
+  )
 }
 
 
@@ -180,424 +225,133 @@ get_WY <- function(x, numeric=TRUE) {
 ## --------------------------------------------------------------------------------------##
 
 process_chanwb <- function(runid, Wshed_Area_m2){
-  
-  chanwb_path = paste0("/geodata/weppcloud_runs/",
-                       runid,
-                       "/wepp/output/chanwb.out"
-  )
-  
-  if (file.exists(chanwb_path)) {
-    ## read channel and watershed water and sediment data
-    
-    chanwb <- data.table::fread(chanwb_path, skip = 11, header = F)
-    
-    ### set names of the dataframes
-    
-    colnames(chanwb) <- c("Year_chan", "Day_chan", "Elmt_ID_chan",
-                          "Chan_ID_chan", "Inflow_chan", "Outflow_chan",
-                          "Storage_chan", "Baseflow_chan", "Loss_chan",
-                          "Balance_chan")
-    
-    
-    
-    chanwb <- chanwb %>% dplyr::mutate(Q_outlet_mm = (Outflow_chan/ Wshed_Area_m2 *1000),
-                                       originDate = as.Date(paste0(Year_chan, "-01-01"),tz = "UTC") - lubridate::days(1),
-                                       Date = as.Date(Day_chan, origin = originDate, tz = "UTC"),
-                                       WY = get_WY(Date)) %>% dplyr::select(-originDate) %>%
-      dplyr::select(Year_chan, Day_chan, Date, WY, everything())
-  }else{
-  
-  chanwb_path= paste0("https://wepp.cloud/weppcloud/runs/",
-                      runid,
-         "/cfg/browse/wepp/output/chanwb.out"
-  )
-  
-  ## read channel and watershed water and sediment data
-  
-  chanwb <- data.table::fread(chanwb_path, skip = 11, header = F)
-  
-  ### set names of the dataframes
-  
-  colnames(chanwb) <- c("Year_chan", "Day_chan", "Elmt_ID_chan",
-                        "Chan_ID_chan", "Inflow_chan", "Outflow_chan",
-                        "Storage_chan", "Baseflow_chan", "Loss_chan",
-                        "Balance_chan")
-  
-  
-  
-  chanwb <- chanwb %>% dplyr::mutate(Q_outlet_mm = (Outflow_chan/ Wshed_Area_m2 *1000),
-                                     originDate = as.Date(paste0(Year_chan, "-01-01"),tz = "UTC") - lubridate::days(1),
-                                     Date = as.Date(Day_chan, origin = originDate, tz = "UTC"),
-                                     WY = get_WY(Date)) %>% dplyr::select(-originDate) %>%
-    dplyr::select(Year_chan, Day_chan, Date, WY, everything())
-  
+  parquet_path <- run_path(runid, "wepp", "output", "interchange", "chanwb.parquet")
+  if (!file.exists(parquet_path)) {
+    stop(sprintf("chanwb.parquet not found for run '%s'", runid))
   }
-  
-  return(as.data.frame(chanwb))
-  
-} 
 
-## --------------------------------------------------------------------------------------##
-## older function that read subcatchments file
-# read_subcatchments = function(runid) {
-#   link = paste0("/geodata/weppcloud_runs/", runid, "/export/arcmap/subcatchments.WGS.json")
-#   link_utm = paste0("/geodata/weppcloud_runs/", runid, "/export/arcmap/subcatchments.json")
-#   
-#   
-#   ## location to parse from if running locally
-#   link_l = paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/export/arcmap/subcatchments.WGS.json")
-#   link_utm_l = paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/export/arcmap/subcatchments.json")
-#   
-#   
-#   subcatchments <- NULL
-#   if (file.exists(link)) {
-#     subcatchments <- sf::st_read(link,quiet = TRUE)
-#     phosporus_flag = paste0("/geodata/weppcloud_runs/",runid, "/wepp/runs/phosphorus.txt")
-#     ermit_texture_csv = paste0("/geodata/weppcloud_runs/", runid,"/export/", 
-#                                paste0("ERMiT_input_", runid,".csv"))
-#   } else if (file.exists(link_utm)) {
-#     subcatchments <- sf::st_read(link_utm,quiet = TRUE)
-#     phosporus_flag = paste0("/geodata/weppcloud_runs/",runid, "/wepp/runs/phosphorus.txt")
-#     ermit_texture_csv = paste0("/geodata/weppcloud_runs/", runid,"/export/", 
-#                                paste0("ERMiT_input_", runid,".csv"))
-#   } else if(file.exists(link_l)){
-#     subcatchments <- sf::st_read(link_l,quiet = TRUE)
-#     phosporus_flag = paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/wepp/runs/phosphorus.txt")
-#     ermit_texture_csv = paste0("https://wepp.cloud/weppcloud/runs/", runid,"/cfg/browse/export/",paste0("ERMiT_input_", runid,".csv/?raw"))
-#   }else{
-#     subcatchments <- sf::st_read(link_utm_l,quiet = TRUE)
-#     phosporus_flag = paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/wepp/runs/phosphorus.txt")
-#     ermit_texture_csv = paste0("https://wepp.cloud/weppcloud/runs/", runid,"/cfg/browse/export/",paste0("ERMiT_input_", runid,".csv/?raw"))
-#   }
-#   
-#   subcatchments <- st_transform(subcatchments, 4326)
-#   
-#   geom_sum <- subcatchments %>%
-#     group_by(WeppID) %>%
-#     summarize(geometry = st_union(geometry)) 
-#   
-#   geom_sum <- geom_sum %>%
-#     left_join(subcatchments %>%
-#                 as.data.frame() %>%
-#                 select(-geometry) %>%
-#                 distinct(), by = "WeppID")
-#   
-#   geom_sum <- geom_sum %>%
-#     separate(soil, c("x1", "x2", "x3", "x4"), sep = ",", fill = "right") %>%
-#     mutate(Soil = ifelse(grepl("slopes", x2), x1, paste(x1, x2, sep = ",")),
-#            Gradient = ifelse(grepl("slopes", x2), x2,
-#                              ifelse(grepl("slopes", x3), x3, "Refer to the soil file for details")),
-#            Texture = ifelse(grepl("slopes", x2), x3, x4),
-#            Texture = replace_na(Texture, "Refer to the soil file for details"),
-#            Gradient = replace_na(Gradient, "Refer to the soil file for details"),
-#            Soil = str_remove(Soil, ",NA")) %>%
-#     select(-c(wepp_id, x1, x2, x3, x4)) %>%
-#     clean_names() %>%
-#     mutate(soil = str_replace(soil, "-", " ")) %>%
-#     mutate(across(contains('_kg_ha'), list(kg = ~ .*area_ha)))
-#   # print(phosporus_flag)
-#   if (file.exists(phosporus_flag)) {
-# 
-# 
-#     geom_sum = geom_sum %>% dplyr::rename("Particulate_Phosphorus_kg" ="pp_kg_ha_kg",
-#                                           "Soluble_Reactive_Phosohorus_kg"= "srp_kg_ha_kg",
-#                                           "Sediment_Deposition_kg" = "sd_dp_kg_ha_kg",
-#                                           "Sediment_Yield_kg"= "sd_yd_kg_ha_kg",
-#                                           "Soil_Loss_kg" = "so_ls_kg_ha_kg",
-#                                           "Total_Phosphorus_kg" = "tp_kg_ha_kg")
-# 
-#   }else{
-#     geom_sum = geom_sum %>% dplyr::rename("Sediment_Deposition_kg" = "sd_dp_kg_ha_kg",
-#                                           "Sediment_Yield_kg"= "sd_yd_kg_ha_kg",
-#                                           "Soil_Loss_kg" = "so_ls_kg_ha_kg")
-#   }
-# 
-#   if (file.exists(ermit_texture_csv)) {
-# 
-#     ermit_texture = data.table::fread(ermit_texture_csv, sep = ",")
-# 
-#     ermit_texture = ermit_texture %>%
-#       dplyr::select(HS_ID,SOIL_TYPE)%>%
-#       dplyr::rename("Texture" = "SOIL_TYPE",
-#                     "wepp_id" = "HS_ID")
-# 
-#     geom_sum = dplyr::left_join(geom_sum, ermit_texture, by ="wepp_id")%>%
-#       dplyr::rename("Texture_string" = "Texture.x",
-#                     "Texture" = "Texture.y")
-# 
-#   }else{
-#     geom_sum = geom_sum
-#   }
-#   
-#   return(geom_sum)
-#   
-# }
+  chanwb <- arrow::read_parquet(parquet_path) %>%
+    dplyr::as_tibble() %>%
+    dplyr::mutate(
+      Date = lubridate::make_date(year, month, day_of_month),
+      WY = water_year,
+      Q_outlet_mm = (`Outflow (m^3)` / Wshed_Area_m2) * 1000
+    ) %>%
+    dplyr::rename(
+      Year_chan = year,
+      Day_chan = day_of_month,
+      Elmt_ID_chan = Elmt_ID,
+      Chan_ID_chan = Chan_ID,
+      Inflow_chan_m3 = `Inflow (m^3)`,
+      Outflow_chan_m3 = `Outflow (m^3)`,
+      Storage_chan_m3 = `Storage (m^3)`,
+      Baseflow_chan_m3 = `Baseflow (m^3)`,
+      Loss_chan_m3 = `Loss (m^3)`,
+      Balance_chan_m3 = `Balance (m^3)`
+    ) %>%
+    dplyr::select(
+      Year_chan,
+      Day_chan,
+      Date,
+      WY,
+      Elmt_ID_chan,
+      Chan_ID_chan,
+      Inflow_chan_m3,
+      Outflow_chan_m3,
+      Storage_chan_m3,
+      Baseflow_chan_m3,
+      Loss_chan_m3,
+      Balance_chan_m3,
+      Q_outlet_mm
+    )
 
-## updated function to read subcatchments file with updated variable names (10/11/2023)
+  chanwb
+}
 
 read_subcatchments = function(runid) {
-  link = paste0("/geodata/weppcloud_runs/", runid, "/export/arcmap/subcatchments.WGS.json")
-  link_utm = paste0("/geodata/weppcloud_runs/", runid, "/export/arcmap/subcatchments.json")
-  
-  
-  ## location to parse from if running locally
-  link_l = paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/export/arcmap/subcatchments.WGS.json")
-  link_utm_l = paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/export/arcmap/subcatchments.json")
-  
-  
-  subcatchments <- NULL
-  if (file.exists(link)) {
-    subcatchments <- sf::st_read(link,quiet = TRUE)
-    phosporus_flag = paste0("/geodata/weppcloud_runs/",runid, "/wepp/runs/phosphorus.txt")
-    ermit_texture_csv = paste0("/geodata/weppcloud_runs/", runid,"/export/", 
-                               paste0("ERMiT_input_", runid,".csv"))
-  } else if (file.exists(link_utm)) {
-    subcatchments <- sf::st_read(link_utm,quiet = TRUE)
-    phosporus_flag = paste0("/geodata/weppcloud_runs/",runid, "/wepp/runs/phosphorus.txt")
-    ermit_texture_csv = paste0("/geodata/weppcloud_runs/", runid,"/export/", 
-                               paste0("ERMiT_input_", runid,".csv"))
-  } else if(file.exists(link_l)){
-    subcatchments <- sf::st_read(link_l,quiet = TRUE)
-    phosporus_flag = paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/wepp/runs/phosphorus.txt")
-    ermit_texture_csv = paste0("https://wepp.cloud/weppcloud/runs/", runid,"/cfg/browse/export/",paste0("ERMiT_input_", runid,".csv/?raw"))
-  }else{
-    subcatchments <- sf::st_read(link_utm_l,quiet = TRUE)
-    phosporus_flag = paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/wepp/runs/phosphorus.txt")
-    ermit_texture_csv = paste0("https://wepp.cloud/weppcloud/runs/", runid,"/cfg/browse/export/",paste0("ERMiT_input_", runid,".csv/?raw"))
+  wbt_wgs <- run_path(runid, "dem", "wbt", "subcatchments.WGS.geojson")
+  wbt_utm <- run_path(runid, "dem", "wbt", "subcatchments.geojson")
+  topaz_wgs <- run_path(runid, "dem", "topaz", "SUBCATCHMENTS.WGS.JSON")
+  topaz_utm <- run_path(runid, "dem", "topaz", "SUBCATCHMENTS.JSON")
+
+  candidate_paths <- c(wbt_wgs, wbt_utm, topaz_wgs, topaz_utm)
+  existing_path <- candidate_paths[file.exists(candidate_paths)][1]
+  if (is.na(existing_path)) {
+    stop(sprintf("Subcatchments GeoJSON not found for run '%s'", runid))
   }
-  
-  subcatchments <- st_transform(subcatchments, 4326)
-  
-  geom_sum <- subcatchments %>%
-    group_by(WeppID) %>%
-    summarize(geometry = st_union(geometry)) 
-  
-  geom_sum <- geom_sum %>%
-    left_join(subcatchments %>%
-                as.data.frame() %>%
-                select(-geometry) %>%
-                distinct(), by = "WeppID")
-  
-  geom_sum <- geom_sum %>%
-    separate(soil, c("x1", "x2", "x3", "x4"), sep = ",", fill = "right") %>%
-    mutate(Soil = ifelse(grepl("slopes", x2), x1, paste(x1, x2, sep = ",")),
-           Gradient = ifelse(grepl("slopes", x2), x2,
-                             ifelse(grepl("slopes", x3), x3, "Refer to the soil file for details")),
-           Texture = ifelse(grepl("slopes", x2), x3, x4),
-           Texture = replace_na(Texture, "Refer to the soil file for details"),
-           Gradient = replace_na(Gradient, "Refer to the soil file for details"),
-           Soil = str_remove(Soil, ",NA")) %>%
-    select(-c(wepp_id, x1, x2, x3, x4)) %>%
-    clean_names() %>%
-    mutate(soil = str_replace(soil, "-", " ")) %>%
-    mutate(across(contains('_kg_ha'), list(kg = ~ .*area_ha)))
-  print(phosporus_flag)
-  if (file.exists(phosporus_flag)) {
-    list_to_lookup = c(Particulate_Phosphorus_kg ="pp_kg_ha_kg",
-                       Particulate_Phosphorus_kg ="particulate_p_kg_ha_kg",
-                       Soluble_Reactive_Phosohorus_kg= "srp_kg_ha_kg",
-                       Soluble_Reactive_Phosohorus_kg= "solub_react_p_kg_ha_kg",
-                       Sediment_Yield_kg= "sd_yd_kg_ha_kg",
-                       Sediment_Yield_kg= "sediment_yield_kg_ha_kg",
-                       Soil_Loss_kg = "so_ls_kg_ha_kg",
-                       Soil_Loss_kg = "soil_loss_kg_ha_kg",
-                       Sediment_Deposition_kg = "sd_dp_kg_ha_kg",
-                       Sediment_Deposition_kg = "sediment_deposition_kg_ha_kg",
-                       Total_Phosphorus_kg = "tp_kg_ha_kg",
-                       Total_Phosphorus_kg = "total_p_kg_ha_kg")
-    geom_sum = geom_sum %>% dplyr::rename(dplyr::any_of(list_to_lookup))
-    
-  }else{
-    list_to_lookup = c(Sediment_Deposition_kg = "sd_dp_kg_ha_kg",
-                       Sediment_Deposition_kg = "sediment_deposition_kg_ha_kg",
-                       Sediment_Yield_kg= "sd_yd_kg_ha_kg",
-                       Sediment_Yield_kg= "sediment_yield_kg_ha_kg",
-                       Soil_Loss_kg = "so_ls_kg_ha_kg",
-                       Soil_Loss_kg = "soil_loss_kg_ha_kg")
-    geom_sum = geom_sum %>% dplyr::rename(dplyr::any_of(list_to_lookup))
+
+  subcatchments <- sf::st_read(existing_path, quiet = TRUE)
+
+  subcatchments <- sf::st_transform(subcatchments, 4326)
+  if (!("TopazID" %in% names(subcatchments))) {
+    stop("TopazID column missing from subcatchments geometry")
   }
-  
-  if (file.exists(ermit_texture_csv)) {
-    
-    ermit_texture = data.table::fread(ermit_texture_csv, sep = ",")
-    
-    ermit_texture = ermit_texture %>%
-      dplyr::select(HS_ID,SOIL_TYPE)%>%
-      dplyr::rename("Texture" = "SOIL_TYPE",
-                    "wepp_id" = "HS_ID")
-    
-    geom_sum = dplyr::left_join(geom_sum, ermit_texture, by ="wepp_id")%>%
-      dplyr::rename("Texture_string" = "Texture.x",
-                    "Texture" = "Texture.y")
-    
-  }else{
-    geom_sum = geom_sum
+  subcatchments$TopazID <- as.integer(subcatchments$TopazID)
+  if (!("WeppID" %in% names(subcatchments))) {
+    subcatchments$WeppID <- NA_integer_
+  } else {
+    subcatchments$WeppID <- as.integer(subcatchments$WeppID)
   }
-  
-  return(geom_sum)
-  
+
+  hills_path <- run_path(runid, "watershed", "hillslopes.parquet")
+  landuse_path <- run_path(runid, "landuse", "landuse.parquet")
+  soils_path <- run_path(runid, "soils", "soils.parquet")
+
+  hills <- arrow::read_parquet(hills_path) %>%
+    dplyr::mutate(
+      TopazID = as.integer(dplyr::coalesce(TopazID, topaz_id)),
+      wepp_id = as.integer(dplyr::coalesce(wepp_id, WeppID)),
+      area_ha = as.numeric(dplyr::coalesce(area, 0)) / 10000,
+      slope_percent = as.numeric(dplyr::coalesce(slope_scalar, 0)) * 100
+    ) %>%
+    dplyr::select(TopazID, wepp_id, area_ha, slope_percent)
+
+  landuse <- arrow::read_parquet(landuse_path) %>%
+    dplyr::mutate(
+      TopazID = as.integer(TopazID),
+      landuse = dplyr::coalesce(desc, disturbed_class, as.character(key))
+    ) %>%
+    dplyr::select(TopazID, landuse)
+
+  soils <- arrow::read_parquet(soils_path) %>%
+    dplyr::mutate(
+      TopazID = as.integer(TopazID),
+      soil = dplyr::coalesce(desc, mukey),
+      Texture = dplyr::coalesce(simple_texture, "Refer to the soil file for details")
+    ) %>%
+    dplyr::select(TopazID, soil, Texture)
+
+  subcatchments <- subcatchments %>%
+    dplyr::left_join(hills, by = "TopazID") %>%
+    dplyr::left_join(landuse, by = "TopazID") %>%
+    dplyr::left_join(soils, by = "TopazID") %>%
+    dplyr::mutate(
+      wepp_id = as.integer(dplyr::coalesce(wepp_id, WeppID)),
+      area_ha = dplyr::coalesce(area_ha, as.numeric(sf::st_area(geometry)) / 10000),
+      landuse = dplyr::coalesce(landuse, "Unknown"),
+      soil = dplyr::coalesce(soil, "Refer to the soil file for details"),
+      Texture = dplyr::coalesce(Texture, "Refer to the soil file for details"),
+      gradient = dplyr::case_when(
+        is.na(slope_percent) ~ "Refer to the soil file for details",
+        slope_percent < 10 ~ "0-10% slopes",
+        slope_percent < 20 ~ "10-20% slopes",
+        slope_percent < 30 ~ "20-30% slopes",
+        slope_percent < 40 ~ "30-40% slopes",
+        TRUE ~ "40%+ slopes"
+      ),
+      Watershed = runid
+    )
+
+  subcatchments
 }
 
 
 ## --------------------------------------------------------------------------------------##
 
 read_subcatchments_map = function(runid){
-  
-  link = paste0("/geodata/weppcloud_runs/", runid, "/export/arcmap/subcatchments.json")
-  
-  phosporus_flag = paste0("/geodata/weppcloud_runs/",runid, "/wepp/runs/phosphorus.txt")
-  
-  ermit_texture_csv = paste0("/geodata/weppcloud_runs/", runid,"/export/", 
-                             paste0("ERMiT_input_", runid,".csv"))
-  
-  
-  if(file.exists(link)){
-    
-    subcatchments <- sf::st_read(link,quiet = TRUE)
-    
-    subcatchments = subcatchments%>%sf::st_transform(4326)
-    
-    geom_sum = subcatchments%>%
-      dplyr::group_by(WeppID)%>%
-      dplyr::summarize(geometry = sf::st_union(geometry))
-    
-    subcatchments = subcatchments %>% as.data.frame() %>% 
-      dplyr::select(-geometry)%>% dplyr::distinct()
-    
-    geom_sum = dplyr::left_join(geom_sum, subcatchments, by =c("WeppID"))
-    
-    geom_sum = geom_sum %>% tidyr::separate(soil,
-                                            c("x1", "x2", "x3", "x4"),
-                                            sep = ",",
-                                            fill="right" )%>% 
-      dplyr::mutate(Soil= case_when(grepl("slopes", x2)==TRUE~x1,
-                                    grepl("slopes", x2)==FALSE~paste(x1,x2,sep=",")),
-                    Gradient = case_when((grepl("slopes", x2)==TRUE)~x2,
-                                         (grepl("slopes", x2)==FALSE & grepl("slopes", x3)==TRUE)~x3),
-                    Texture = case_when((grepl("slopes", x2)==TRUE)~x3,
-                                        (grepl("slopes", x2)==FALSE)~x4),
-                    Texture = replace_na(Texture, "Refer to the soil file for details"),
-                    Gradient = replace_na(Gradient, "Refer to the soil file for details"),
-                    Soil = str_remove(Soil, ",NA"))%>%
-      # dplyr::rename("Texture_from_string" = "Texture") %>%
-      dplyr::select(-c(wepp_id,x1,x2,x3,x4))%>%
-      janitor::clean_names()%>%
-      dplyr::mutate(soil = stringr::str_replace(soil,pattern = "-"," "),
-                    runid = runid)%>% 
-      dplyr::mutate(dplyr::across(dplyr::contains('_kg_ha'),
-                                  .fns = list(kg = ~.*area_ha)))
-    
-    if (file.exists(phosporus_flag)) {
-      
-      
-      geom_sum = geom_sum %>% dplyr::rename("Particulate_Phosphorus_kg" ="pp_kg_ha_kg",
-                                            "Soluble_Reactive_Phosohorus_kg"= "srp_kg_ha_kg",
-                                            "Sediment_Deposition_kg" = "sd_dp_kg_ha_kg",
-                                            "Sediment_Yield_kg"= "sd_yd_kg_ha_kg",
-                                            "Soil_Loss_kg" = "so_ls_kg_ha_kg",
-                                            "Total_Phosphorus_kg" = "tp_kg_ha_kg")
-      
-    }else{
-      geom_sum = geom_sum %>% dplyr::rename("Sediment_Deposition_kg" = "sd_dp_kg_ha_kg",
-                                            "Sediment_Yield_kg"= "sd_yd_kg_ha_kg",
-                                            "Soil_Loss_kg" = "so_ls_kg_ha_kg")
-    }
-    
-    if (file.exists(ermit_texture_csv)) {
-      
-      ermit_texture = data.table::fread(ermit_texture_csv ,sep = ",")
-      
-      ermit_texture = ermit_texture %>%
-        dplyr::select(HS_ID,SOIL_TYPE)%>%
-        dplyr::rename("Texture" = "SOIL_TYPE",
-                      "wepp_id" = "HS_ID")
-      
-      geom_sum = dplyr::left_join(geom_sum, ermit_texture, by ="wepp_id")%>% 
-        dplyr::rename("Texture_string" = "Texture.x",
-                      "Texture" = "Texture.y")
-      
-    }else{
-      geom_sum = geom_sum 
-    }
-    
-  }else{
-    link <- paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/export/arcmap/subcatchments.json")
-    
-    phosporus_flag = paste0("https://wepp.cloud/weppcloud/runs/",runid, "/cfg/browse/wepp/runs/phosphorus.txt")
-    
-    ermit_texture_csv = paste0("https://wepp.cloud/weppcloud/runs/", runid,"/cfg/browse/export/",paste0("ERMiT_input_", runid,".csv/?raw"))
-    
-    subcatchments <- sf::st_read(link,quiet = TRUE)
-    
-    subcatchments = subcatchments%>%sf::st_transform(4326)
-    
-    geom_sum = subcatchments%>%
-      dplyr::group_by(WeppID)%>%
-      dplyr::summarize(geometry = sf::st_union(geometry))
-    
-    subcatchments = subcatchments %>% as.data.frame() %>% 
-      dplyr::select(-geometry)%>% dplyr::distinct()
-    
-    geom_sum = dplyr::left_join(geom_sum, subcatchments, by =c("WeppID"))
-    
-    geom_sum = geom_sum %>% tidyr::separate(soil,
-                                            c("x1", "x2", "x3", "x4"),
-                                            sep = ",",
-                                            fill="right" )%>% 
-      dplyr::mutate(Soil= case_when(grepl("slopes", x2)==TRUE~x1,
-                                    grepl("slopes", x2)==FALSE~paste(x1,x2,sep=",")),
-                    Gradient = case_when((grepl("slopes", x2)==TRUE)~x2,
-                                         (grepl("slopes", x2)==FALSE & grepl("slopes", x3)==TRUE)~x3),
-                    Texture = case_when((grepl("slopes", x2)==TRUE)~x3,
-                                        (grepl("slopes", x2)==FALSE)~x4),
-                    Texture = replace_na(Texture, "Refer to the soil file for details"),
-                    Gradient = replace_na(Gradient, "Refer to the soil file for details"),
-                    Soil = str_remove(Soil, ",NA"))%>%
-      # dplyr::rename("Texture_from_string" = "Texture") %>%
-      dplyr::select(-c(wepp_id,x1,x2,x3,x4))%>%
-      janitor::clean_names()%>%
-      dplyr::mutate(soil = stringr::str_replace(soil,pattern = "-"," "),
-                    runid = runid)%>% 
-      dplyr::mutate(dplyr::across(dplyr::contains('_kg_ha'),
-                                  .fns = list(kg = ~.*area_ha)))
-    
-    if (file.exists(phosporus_flag)) {
-      
-      geom_sum = geom_sum %>% dplyr::rename("Particulate_Phosphorus_kg" ="pp_kg_ha_kg",
-                                            "Soluble_Reactive_Phosohorus_kg"= "srp_kg_ha_kg",
-                                            "Sediment_Deposition_kg" = "sd_dp_kg_ha_kg",
-                                            "Sediment_Yield_kg"= "sd_yd_kg_ha_kg",
-                                            "Soil_Loss_kg" = "so_ls_kg_ha_kg",
-                                            "Total_Phosphorus_kg" = "tp_kg_ha_kg")
-      
-    }else{
-      geom_sum = geom_sum %>% dplyr::rename("Sediment_Deposition_kg" = "sd_dp_kg_ha_kg",
-                                            "Sediment_Yield_kg"= "sd_yd_kg_ha_kg",
-                                            "Soil_Loss_kg" = "so_ls_kg_ha_kg")
-    }
-    
-    if (file.exists(ermit_texture_csv)) {
-
-      ermit_texture = data.table::fread(ermit_texture_csv ,sep = ",")
-
-      ermit_texture = ermit_texture %>%
-        dplyr::select(HS_ID,SOIL_TYPE)%>%
-        dplyr::rename("Texture" = "SOIL_TYPE",
-                      "wepp_id" = "HS_ID")
-
-      geom_sum = dplyr::left_join(geom_sum, ermit_texture, by ="wepp_id")%>%
-        dplyr::rename("Texture_string" = "Texture.x",
-                      "Texture" = "Texture.y")
-
-    }else{
-      geom_sum = geom_sum
-    }
-    
-  }
-  
-  return(geom_sum)
+  read_subcatchments(runid) %>%
+    dplyr::mutate(scenario = NA_character_)
 }
-
 
 ## --------------------------------------------------------------------------------------##
 
@@ -681,136 +435,92 @@ gen_cumulative_plt_df_map <- function(subcatch, var_to_use){
 ## --------------------------------------------------------------------------------------##
 # Event by event file
 
-process_ebe <- function(runid, yr_start, yr_end){
-  
-  ebe_path = paste0("/geodata/weppcloud_runs/",
-                    runid,
-                    "/wepp/output/ebe_pw0.txt")
-  
-  if(file.exists(ebe_path)){
-    ## read channel and watershed water and sediment data
-    # , SimStartDate, SimEndDate, SimStartDate, SimEndDate
-    ebe <- data.table::fread(ebe_path, skip = 9, header = F)
-    
-    ### set names of the dataframe
-    
-    if (ncol(ebe) == 11){
-      colnames(ebe) <- c("Day_ebe", "Month_ebe", "Year_ebe",
-                         "P_ebe", "Runoff_ebe", "peak_ebe", "Sediment_ebe",
-                         "SRP_ebe", "PP_ebe", "TP_ebe", "col11")
-    }else{
-    colnames(ebe) <- c("Day_ebe", "Month_ebe", "Year_ebe",
-                       "P_ebe", "Runoff_ebe", "peak_ebe", "Sediment_ebe",
-                       "SRP_ebe", "PP_ebe", "TP_ebe")}
-    
-    dt_head_d = as.character(head(ebe,1)[[1]])
-    dt_head_m = as.character(head(ebe,1)[[2]])
-    dt_tail_d = as.character(tail(ebe,1)[[1]])
-    dt_tail_m = as.character(tail(ebe,1)[[2]])
-    
-    # calcs
-    ebe <- ebe %>% dplyr::mutate(Date = seq(from = as.Date(paste0(yr_start,"-",dt_head_m,"-",dt_head_d)), 
-                                            to = as.Date(paste0(yr_end,"-",dt_tail_m,"-",dt_tail_d)), by= 1),
-                                 WY = get_WY(Date),
-                                 Sediment_tonnes_ebe = Sediment_ebe/1000,
-                                 SRP_tonnes_ebe = SRP_ebe/1000,
-                                 PP_tonnes_ebe = PP_ebe/1000,
-                                 TP_tonnes_ebe = TP_ebe/1000) %>%
-      dplyr::select(Day_ebe, Month_ebe, Year_ebe, Date, WY, everything())
-  }else{
-    ## read channel and watershed water and sediment data
-    # , SimStartDate, SimEndDate, SimStartDate, SimEndDate
-    ebe <- data.table::fread(paste0("https://wepp.cloud/weppcloud/runs/",runid,
-                                    "/cfg/browse/wepp/output/ebe_pw0.txt"), skip = 9, header = F)
-    
-    ### set names of the dataframe
-    
-    if (ncol(ebe) == 11){
-      colnames(ebe) <- c("Day_ebe", "Month_ebe", "Year_ebe",
-                         "P_ebe", "Runoff_ebe", "peak_ebe", "Sediment_ebe",
-                         "SRP_ebe", "PP_ebe", "TP_ebe", "col11")
-    }else{
-      colnames(ebe) <- c("Day_ebe", "Month_ebe", "Year_ebe",
-                         "P_ebe", "Runoff_ebe", "peak_ebe", "Sediment_ebe",
-                         "SRP_ebe", "PP_ebe", "TP_ebe")}
-    
-    dt_head_d = as.character(head(ebe,1)[[1]])
-    dt_head_m = as.character(head(ebe,1)[[2]])
-    dt_tail_d = as.character(tail(ebe,1)[[1]])
-    dt_tail_m = as.character(tail(ebe,1)[[2]])
-    
-    # calcs
-    ebe <- ebe %>% dplyr::mutate(Date = seq(from = as.Date(paste0(yr_start,"-",dt_head_m,"-",dt_head_d)), 
-                                            to = as.Date(paste0(yr_end,"-",dt_tail_m,"-",dt_tail_d)), by= 1),
-                                 WY = get_WY(Date),
-                                 Sediment_tonnes_ebe = Sediment_ebe/1000,
-                                 SRP_tonnes_ebe = SRP_ebe/1000,
-                                 PP_tonnes_ebe = PP_ebe/1000,
-                                 TP_tonnes_ebe = TP_ebe/1000) %>%
-      dplyr::select(Day_ebe, Month_ebe, Year_ebe, Date, WY, everything())
+load_ebe <- function(runid) {
+  parquet_path <- run_path(runid, "wepp", "output", "interchange", "ebe_pw0.parquet")
+  if (!file.exists(parquet_path)) {
+    stop(sprintf("ebe_pw0.parquet not found for run '%s'", runid))
   }
-  
-  
-  
-  return(as.data.frame(ebe))
-  
-}
-## --------------------------------------------------------------------------------------##
-process_totalwatsed <- function(runid){
-  
-  totalwatsed_fn = paste0("/geodata/weppcloud_runs/", runid, "/export/totalwatsed.csv")
-  totalwatsed2_fn = paste0("/geodata/weppcloud_runs/", runid, "/export/totalwatsed2.csv")
-  
-  totalwatsed_fn_l = paste0("https://wepp.cloud/weppcloud/runs/", runid, "/cfg/resources/wepp/totalwatsed.csv")
-  totalwatsed2_fn_l = paste0("https://wepp.cloud/weppcloud/runs/", runid, "/cfg/resources/wepp/totalwatsed2.csv")
-  
-  if (file.exists(totalwatsed_fn)) {
-    totalwatseddf <- data.table::fread(totalwatsed_fn) %>% 
-      janitor::clean_names()%>%
-      dplyr::rename("WY" = "water_year")%>%
-      dplyr::mutate(Date = lubridate::make_date(year,mo,da))
-  } else 
-    if(file.exists(totalwatsed2_fn)){
-      totalwatseddf <- data.table::fread(totalwatsed2_fn) %>% 
-        janitor::clean_names()%>%
-        dplyr::rename("WY" = "water_year")%>%
-        dplyr::mutate(Date = lubridate::make_date(year,month,day))
-    }else
-      if(file.exists(totalwatsed_fn_l)){
-    totalwatseddf <- data.table::fread(totalwatsed_fn_l) %>% 
-      janitor::clean_names()%>%
-      dplyr::rename("WY" = "water_year")%>%
-      dplyr::mutate(Date = lubridate::make_date(year,mo,da))
-      }else{
-        totalwatseddf <- data.table::fread(totalwatsed2_fn_l) %>% 
-          janitor::clean_names()%>%
-          dplyr::rename("WY" = "water_year") %>%
-          dplyr::mutate(Date = lubridate::make_date(year,month,day))
-      }
-  return(totalwatseddf)
-  
+  area_m2 <- get_WatershedArea_m2(runid)
+
+  arrow::read_parquet(parquet_path) %>%
+    dplyr::as_tibble() %>%
+    dplyr::mutate(
+      Day_ebe = day_of_month,
+      Month_ebe = month,
+      Year_ebe = year,
+      Date = lubridate::make_date(year, month, day_of_month),
+      WY = water_year,
+      P_ebe = precip,
+      Runoff_ebe = (runoff_volume / area_m2) * 1000,
+      peak_ebe = peak_runoff,
+      Sediment_ebe = sediment_yield,
+      SRP_ebe = soluble_pollutant,
+      PP_ebe = particulate_pollutant,
+      TP_ebe = total_pollutant,
+      Sediment_tonnes_ebe = Sediment_ebe / 1000,
+      SRP_tonnes_ebe = SRP_ebe / 1000,
+      PP_tonnes_ebe = PP_ebe / 1000,
+      TP_tonnes_ebe = TP_ebe / 1000
+    ) %>%
+    dplyr::select(
+      Day_ebe,
+      Month_ebe,
+      Year_ebe,
+      Date,
+      WY,
+      P_ebe,
+      Runoff_ebe,
+      peak_ebe,
+      Sediment_ebe,
+      SRP_ebe,
+      PP_ebe,
+      TP_ebe,
+      Sediment_tonnes_ebe,
+      SRP_tonnes_ebe,
+      PP_tonnes_ebe,
+      TP_tonnes_ebe
+    )
 }
 
+process_ebe <- function(runid, yr_start, yr_end){
+  load_ebe(runid)
+}
 ## --------------------------------------------------------------------------------------##
-process_totalwatsed_map_df <- function(runid){
-  
-  totalwatsed_fn = paste0("/geodata/weppcloud_runs/", runid, "/export/totalwatsed.csv")
-  
-  if (file.exists(totalwatsed_fn)) {
-    totalwatseddf <- data.table::fread(totalwatsed_fn) %>% 
-      janitor::clean_names()%>%
-      dplyr::rename("WY" = "water_year")%>%
-      dplyr::mutate(Date = lubridate::make_date(year,mo,da),
-                    runid= runid)
-  } else {
-    totalwatseddf <- data.table::fread(paste0("https://wepp.cloud/weppcloud/runs/", runid, "/cfg/resources/wepp/totalwatsed.csv")) %>% 
-      janitor::clean_names()%>%
-      dplyr::rename("WY" = "water_year")%>%
-      dplyr::mutate(Date = lubridate::make_date(year,mo,da),
-                    runid = runid)
+load_totalwatsed <- function(runid) {
+  parquet_path <- run_path(runid, "wepp", "output", "interchange", "totalwatsed3.parquet")
+  if (!file.exists(parquet_path)) {
+    stop(sprintf("totalwatsed3.parquet not found for run '%s'", runid))
   }
-  return(totalwatseddf)
-  
+  totals <- arrow::read_parquet(parquet_path) %>%
+    dplyr::as_tibble() %>%
+    dplyr::mutate(
+      Date = lubridate::make_date(year, month, day_of_month),
+      WY = water_year,
+      precipitation_mm = Precipitation,
+      rain_melt_mm = `Rain+Melt`,
+      transpiration_mm = Transpiration,
+      evaporation_mm = Evaporation,
+      percolation_mm = Percolation,
+      runoff_mm = Runoff,
+      lateral_flow_mm = `Lateral Flow`,
+      baseflow_mm = Baseflow,
+      streamflow_mm = Streamflow
+    )
+
+  if ("day_of_month" %in% names(totals)) {
+    totals <- totals %>% dplyr::rename(day = day_of_month)
+  }
+
+  totals
+}
+
+process_totalwatsed <- function(runid){
+  load_totalwatsed(runid)
+}
+
+process_totalwatsed_map_df <- function(runid){
+  load_totalwatsed(runid) %>%
+    dplyr::mutate(runid = runid)
 }
 
 ## --------------------------------------------------------------------------------------##
@@ -1090,4 +800,3 @@ make_leaflet_map_multi = function(plot_df, plot_var, col_pal_type, unit = NULL){
 }
 
 ## --------------------------------------------------------------------------------------##
-

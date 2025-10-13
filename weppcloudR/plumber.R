@@ -85,14 +85,40 @@ render_deval <- function(run_path, runid) {
   output_file <- file.path(output_dir, glue("deval_{runid}.htm"))
   params <- list(proj_runid = runid)
   log_info("Rendering DEVAL report", runid = runid, template = template_path, output = output_file)
-  rmarkdown::render(
-    input = template_path,
-    params = params,
-    output_file = output_file,
-    output_dir = output_dir,
-    envir = new.env(parent = globalenv())
+  log_path <- file.path(output_dir, "render.log")
+  append_log <- function(level, message) {
+    line <- sprintf("%s [%s] %s\n", format(Sys.time(), tz = "UTC", usetz = TRUE), level, message)
+    cat(line, file = log_path, append = TRUE)
+  }
+  append_log("INFO", glue("Starting render for run {runid}"))
+  tryCatch(
+    {
+      rmarkdown::render(
+        input = template_path,
+        params = params,
+        output_file = output_file,
+        output_dir = output_dir,
+        envir = new.env(parent = globalenv())
+      )
+      append_log("INFO", glue("Render succeeded for run {runid}"))
+      readChar(output_file, file.info(output_file)$size, useBytes = TRUE)
+    },
+    error = function(err) {
+      msg <- conditionMessage(err)
+      if (is.null(msg) || identical(msg, "")) {
+        msg <- paste(capture.output(print(err)), collapse = "\n")
+      }
+      tb <- tryCatch(
+        {
+          calls <- sys.calls()
+          paste(sapply(calls, function(call) paste(deparse(call), collapse = " ")), collapse = "\n -> ")
+        },
+        error = function(e) "Failed to capture call stack"
+      )
+      append_log("ERROR", glue("Render failed for run {runid}: {msg}\nTraceback:\n{tb}"))
+      stop(err)
+    }
   )
-  readChar(output_file, file.info(output_file)$size, useBytes = TRUE)
 }
 
 #* Health probe

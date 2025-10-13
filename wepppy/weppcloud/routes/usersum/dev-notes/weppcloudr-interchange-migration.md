@@ -167,3 +167,36 @@ Open tasks for the container:
 - Mirror the repo layout inside the container (bind `/geodata`,
   `/wc1`, and the legacy `WEPPcloudR` scripts) so the renderer can use
   existing R Markdown templates during the transition.
+
+---
+
+## Current progress (2025-10-13)
+
+- `deval_details` route now ensures interchange assets and proxies the
+  rendered HTML from the `weppcloudr` service, preserving query string
+  parameters (e.g. `pup`).
+- Plumber service writes render logs with call stacks (`sys.calls()`)
+  and now reports concise error messages. Dockerfile updated to install
+  `arrow` so parquet reads succeed.
+- R helpers refactored to consume interchange data:
+  * `read_subcatchments()` now reads WBT GeoJSON and joins
+    `hillslopes.parquet`, `landuse.parquet`, and `soils.parquet` to
+    produce enriched attributes (`area_ha`, `landuse`, `soil`, `Texture`,
+    `gradient`, `wepp_id`).
+  * `process_totalwatsed()`, `process_chanwb()`, and `process_ebe()` now
+    read from `totalwatsed3.parquet`, `chanwb.parquet`, and
+    `ebe_pw0.parquet`.
+  * Climate summary derives from parquet aggregates instead of scraping
+    `loss_pw0.txt`.
+- Outstanding work:
+  * Rebuild the container (with the new `arrow` dep) and rerun the
+    report—currently failing due to the bare GeoJSON missing `soil`,
+    `landuse`, etc. Verify the enriched joins produce the expected
+    columns for all runs.
+  * Update downstream helpers (`merge_daily_Vars`, cumulative charts) to
+    align with canonical column names (`Runoff`, `Lateral Flow`,
+    `Streamflow`, etc.).
+  * Remove remaining HTTP/Arc fallback code once the parquet pipeline is
+    validated.
+  * Add a smoke test that mounts a sample run directory and hits the
+    `/runs/.../report/deval_details` endpoint.
