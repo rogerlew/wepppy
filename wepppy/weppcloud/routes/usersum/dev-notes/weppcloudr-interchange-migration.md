@@ -131,7 +131,7 @@ choices for running R workloads.
 
 ---
 
-## R Service Container TODO (`weppcloudR/`)
+## R Service Container (`weppcloudR/`)
 
 1. **Dockerfile scaffold**
    - Base: `rocker/r-ver:4.3.2` (minimal Debian + R).
@@ -150,7 +150,7 @@ choices for running R workloads.
    - Write rendered HTML to stdout response; optionally persist to
      `/data/<runid>/export/WEPPcloudR`.
 3. **Networking and proxy**
-   - Container listens on `${PORT:-8000}`; Caddy routes `/weppcloudr/*`
+   - Container listens on `${PORT:-8050}`; Caddy routes `/weppcloudr/*`
      to that port.
    - Support `X-Forwarded-*` headers for logging, and leave hooks for
      future JWT validation.
