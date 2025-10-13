@@ -169,7 +169,7 @@ build_error_diagnostics <- function(err) {
   ))
 }
 
-render_deval <- function(run_path, runid, config = NULL) {
+render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE) {
   template_path <- DEFAULT_TEMPLATE
   if (!file.exists(template_path)) {
     log_warn("Template {template_path} not found; returning placeholder HTML")
@@ -178,7 +178,17 @@ render_deval <- function(run_path, runid, config = NULL) {
   output_dir <- file.path(run_path, "export", "WEPPcloudR")
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   output_file <- file.path(output_dir, glue("deval_{runid}.htm"))
-  params <- list(proj_runid = runid, proj_config = config)
+  anchor_runid <- if (!is.null(runid) && nzchar(runid)) runid else "unknown-run"
+  anchor_path <- if (!is.null(config) && nzchar(config)) {
+    glue("/weppcloud/runs/{anchor_runid}/{config}")
+  } else {
+    glue("/weppcloud/runs/{anchor_runid}")
+  }
+  params <- list(
+    proj_runid = runid,
+    proj_config = config,
+    proj_run_label = anchor_runid
+  )
   log_info("Rendering DEVAL report", runid = runid, config = config, template = template_path, output = output_file)
   log_path <- file.path(output_dir, "render.log")
   append_log <- function(level, message) {
@@ -186,9 +196,12 @@ render_deval <- function(run_path, runid, config = NULL) {
     cat(line, file = log_path, append = TRUE)
   }
   append_log("INFO", glue("Checking render cache for run {runid}"))
-  if (file.exists(output_file)) {
+  if (!skip_cache && file.exists(output_file)) {
     append_log("INFO", glue("Serving cached render for run {runid}"))
     return(readChar(output_file, file.info(output_file)$size, useBytes = TRUE))
+  }
+  if (skip_cache) {
+    append_log("INFO", glue("Cache bypass requested for run {runid}; regenerating report"))
   }
   append_log("INFO", glue("Starting render for run {runid}"))
   tryCatch(
@@ -279,14 +292,19 @@ function() {
 #* Render DEVAL Details report
 #* @serializer html
 #* @get /runs/<runid>/<config>/report/deval_details
-function(runid, config, res, pup = NULL) {
+function(runid, config, res, req, pup = NULL) {
   run_path <- resolve_run_dir(runid, config, pup)
   if (is.null(run_path)) {
     res$status <- 404
     return(glue("<html><body><h3>Run not found: {runid}/{config}</h3></body></html>"))
   }
+  args <- req$args
+  skip_cache <- FALSE
+  if (!is.null(args) && any(names(args) == "no-cache")) {
+    skip_cache <- TRUE
+  }
   tryCatch(
-    render_deval(run_path, runid, config),
+    render_deval(run_path, runid, config, skip_cache = skip_cache),
     error = function(err) {
       log_error("Render failed: {err$message}", runid = runid, config = config)
       res$status <- 500

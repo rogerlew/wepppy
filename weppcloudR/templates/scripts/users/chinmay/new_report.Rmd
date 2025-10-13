@@ -1,5 +1,5 @@
 ---
-title: "A report generated for `r (function(runid, config) { path <- if (!is.null(config) && nzchar(config)) sprintf('/weppcloud/runs/%s/%s', runid, config) else sprintf('/weppcloud/runs/%s', runid); sprintf('<a href=\"%s\" style=\"color: #6a4c93; text-decoration: none;\">%s</a>', path, runid) })(params$proj_runid, params$proj_config)` run"
+title: "A report generated for `r params$proj_run_label` run"
 date: "`r Sys.Date()`"
 output: 
   cleanrmd::html_document_clean:
@@ -13,6 +13,7 @@ output:
 params:
   proj_runid: default
   proj_config: ""
+  proj_run_label: "default"
 ---
 
 ```{r setup, include=FALSE}
@@ -115,8 +116,15 @@ merged_WY = dplyr::left_join(totalwatsed_wy_mean_df, chanwb_WY_mean, by = c("WY"
                         PercentBaseflow = (baseflow_mm / (runoff_mm+lateral_flow_mm+baseflow_mm) )*100)
 
 perc_flow = merged_WY %>%
-          dplyr::select(WY, PercentRunoff, PercentLateral, PercentBaseflow)%>% dplyr::mutate(WY = as.Date(paste0(WY,"-12-31")))%>%
-    dplyr::mutate(dplyr::across(where(is.numeric), round, 1))
+          dplyr::select(WY, PercentRunoff, PercentLateral, PercentBaseflow)%>%
+          dplyr::mutate(
+            WY_label = dplyr::case_when(
+              is.na(WY) ~ "Unknown",
+              WY >= 1000 ~ as.character(WY),
+              TRUE ~ paste0("Year ", WY)
+            )
+          )%>%
+          dplyr::mutate(dplyr::across(dplyr::where(is.numeric), round, 1))
 
 
 ```
@@ -208,7 +216,7 @@ The figure below shows the total simulated streamflow for each water year divide
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
 
 perc_flow %>%
-      echarts4r::e_charts(x = WY) %>%
+      echarts4r::e_charts(x = WY_label) %>%
       echarts4r::e_area(PercentBaseflow, name = "Baseflow (% relative to streamflow)") %>%
       echarts4r::e_area(PercentLateral, name = "Lateral Flow (% relative to streamflow)") %>%
       echarts4r::e_area(PercentRunoff, name = "Runoff (% relative to streamflow)") %>%
@@ -227,6 +235,8 @@ perc_flow %>%
 runoff_cp_df= gen_cumulative_plt_df(subcatchments, runoff_mm)
 sd_yd_cp_df= gen_cumulative_plt_df(subcatchments, Sediment_Yield_kg)
 
+total_runoff_depth_mm <- sum(totalwatseddf$runoff_mm, na.rm = TRUE)
+
 ```
 
 
@@ -234,7 +244,7 @@ sd_yd_cp_df= gen_cumulative_plt_df(subcatchments, Sediment_Yield_kg)
 
 <div id="wrapper">
 
-`r if(sum(runoff_cp_df$cum_runoff_mm, na.rm = TRUE)==0) {"<!--"}`
+`r if(total_runoff_depth_mm <= 0) {"<!--"}`
 
 <div class="column-left">
 
@@ -243,9 +253,9 @@ sd_yd_cp_df= gen_cumulative_plt_df(subcatchments, Sediment_Yield_kg)
 `r round(tail(df_head_percent(as.data.frame(runoff_cp_df), 30),1)[,5])`% watershed area.</span>
 
 
-`r if(sum(runoff_cp_df$cum_runoff_mm, na.rm = TRUE)==0) {"-->"}`
+`r if(total_runoff_depth_mm <= 0) {"-->"}`
 
-`r if(sum(runoff_cp_df$cum_runoff_mm, na.rm = TRUE)==0) {"<span class='big_txt'>No runoff was generated during the entire simulation.</span>"}`
+`r if(total_runoff_depth_mm <= 0) {"<span class='big_txt'>No runoff was generated during the entire simulation.</span>"}`
 
 </div>
 
