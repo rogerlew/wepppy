@@ -20,7 +20,17 @@ EOF
 Start or rebuild the stack with:
 
 ```bash
+cd /workdir/wepppy
 docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build
+```
+
+## wctl (weppcloud control)
+Wrapper for running docker compose commands
+
+e.g
+
+```
+wctl logs weppcloud
 ```
 
 ## Service Catalogue
