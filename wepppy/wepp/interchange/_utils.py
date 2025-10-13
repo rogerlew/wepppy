@@ -3,12 +3,15 @@ from os.path import exists as _exists
 from pathlib import Path
 from datetime import datetime, timedelta
 
-def _wait_for_path(path: Path, timeout=60.0, poll=0.5):
+def _wait_for_path(path: Path | str, timeout=60.0, poll=0.5):
     """
     Wait for ``path`` to become available before attempting to read it.
     Dockerized deployments occasionally surface slower I/O, so give the
     filesystem a chance to catch up before raising.
     """
+    if isinstance(path, str):
+        path = Path(path)
+
     deadline = time.time() + timeout
 
     while True:
