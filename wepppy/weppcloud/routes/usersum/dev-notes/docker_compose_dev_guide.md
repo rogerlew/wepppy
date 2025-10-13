@@ -47,7 +47,7 @@ docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --buil
 - `/weppcloud/static/*` directly from the mounted repo (`wepppy/weppcloud/static`) using Caddy’s `file_server`.
 - `/weppcloud/*` to the Flask app, preserving `X-Forwarded-*` headers.
 - `/weppcloud/runs/.../(browse|download|aria2c.spec|gdalinfo)` to the Starlette browse microservice.
-- `/weppcloudr/*` to the Plumber renderer (port 8050) for report generation.
+- `/weppcloudr/*` to the Plumber renderer (port 8050) for report generation (Deval in the Details).
 - `/weppcloud-microservices/status` and `/weppcloud-microservices/preflight` to the Go microservices.
 
 ### Volumes & Bind Mounts
