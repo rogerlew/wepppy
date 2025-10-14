@@ -238,9 +238,9 @@ def set_run_readonly_rq(runid: str, readonly: bool):
                 ron.readonly = True
 
             if ron.is_child_run:
-                StatusMessenger.publish(
-                    status_channel,
-                    f'rq:{job.id} COMMAND_BAR_RESULT {MANIFEST_FILENAME} skipped (child run)'
+                StatusMessenger.publish_command(
+                    runid,
+                    f'rq:{job.id} {MANIFEST_FILENAME} skipped (child run)'
                 )
             else:
                 StatusMessenger.publish(
@@ -251,9 +251,9 @@ def set_run_readonly_rq(runid: str, readonly: bool):
                     create_manifest(wd)
                     if not _exists(_join(wd, MANIFEST_FILENAME)):
                         raise RuntimeError(f'{MANIFEST_FILENAME} was not created')
-                StatusMessenger.publish(
-                    status_channel,
-                    f'rq:{job.id} COMMAND_BAR_RESULT {MANIFEST_FILENAME} creation finished'
+                StatusMessenger.publish_command(
+                    runid,
+                    f'rq:{job.id} {MANIFEST_FILENAME} creation finished'
                 )
         else:
             if previous_state:
@@ -262,9 +262,9 @@ def set_run_readonly_rq(runid: str, readonly: bool):
             remove_manifest(wd)
             if _exists(_join(wd, MANIFEST_FILENAME)):
                 raise RuntimeError(f'Unable to remove {MANIFEST_FILENAME}')
-            StatusMessenger.publish(
-                status_channel,
-                f'rq:{job.id} COMMAND_BAR_RESULT {MANIFEST_FILENAME} removed'
+            StatusMessenger.publish_command(
+                runid,
+                f'rq:{job.id} {MANIFEST_FILENAME} removed'
             )
 
         if prep is not None:
@@ -282,9 +282,9 @@ def set_run_readonly_rq(runid: str, readonly: bool):
             pass
 
         failure_suffix = 'creation failed' if readonly else 'removal failed'
-        StatusMessenger.publish(
-            status_channel,
-            f'rq:{job.id} COMMAND_BAR_RESULT {MANIFEST_FILENAME} {failure_suffix}'
+        StatusMessenger.publish_command(
+            runid,
+            f'rq:{job.id} {MANIFEST_FILENAME} {failure_suffix}'
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, readonly={readonly})')
         raise
