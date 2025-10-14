@@ -6,8 +6,6 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-import os
-
 import functools
 import importlib
 import inspect
@@ -21,6 +19,8 @@ from dotenv import load_dotenv
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
+
+import os
 
 __all__ = [
     'NoDbAlreadyLockedError',
@@ -98,6 +98,7 @@ from wepppy.config.redis_settings import (
     redis_host,
     redis_port,
 )
+from .version import CURRENT_VERSION, ensure_version, write_version
 
 
 def _discover_legacy_module_redirects():
@@ -470,7 +471,11 @@ class NoDbBase(object):
     _legacy_module_redirects: ClassVar[dict[str, str]] = _LEGACY_MODULE_REDIRECTS
 
     def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+        wd = os.path.abspath(wd)
         assert _exists(wd)
+
+        if not _exists(_join(wd, 'READONLY')):
+            ensure_version(wd)
 
         if run_group is not None:
             self._run_group = run_group
@@ -697,6 +702,10 @@ class NoDbBase(object):
 
         wd = os.path.abspath(wd)
         filepath = cls._get_nodb_path(wd)
+        readonly = _exists(_join(wd, 'READONLY'))
+
+        if not readonly and _exists(filepath):
+            ensure_version(wd)
 
         # if redis_nodb_cache_client is available try to load from cache
         if redis_nodb_cache_client is not None:
@@ -743,7 +752,7 @@ class NoDbBase(object):
         abs_wd = os.path.abspath(wd)
         db_wd = db.wd
 
-        if _exists(_join(wd, 'READONLY')) or ignore_lock:
+        if readonly or ignore_lock:
             db.wd = abs_wd
             db._init_logging()
             return db
@@ -827,6 +836,8 @@ class NoDbBase(object):
             fp.write(js)
             fp.flush()                 # flush Python’s userspace buffer
             os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
+
+        write_version(self.wd, CURRENT_VERSION)
 
         if redis_nodb_cache_client is not None:
             try:
