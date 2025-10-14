@@ -191,6 +191,14 @@ The legacy parsers live under `wepppy/wepp/out/` and act as data brokers for oth
 - Confirm concurrency limits that play nicely with HPC environments (default worker count vs CPU detection). : CPU/manual tuning for now
 - Ensure chunk sizes remain tunable for watershed runs (default reviewed at 250k–500k rows); expose overrides if projects surface new bottlenecks.
 
+## Interchange Versioning Plan
+- Goals: embed a `major.minor` interchange version across all generated artifacts so orchestrators can detect incompatible data and re-run migrations automatically on major bumps, expose a manifest that downstream services can query without touching parquet payloads, and limit scope to newly generated bundles (legacy projects without metadata must re-run).
+- Phase 1 – Version primitives: add `wepppy/wepp/interchange/versioning.py` with `INTERCHANGE_VERSION = Version(major=1, minor=0)` plus helpers to serialize/parse strings and dict payloads; define `interchange_version.json` manifest schema.
+- Phase 2 – Writer integration: teach `run_wepp_hillslope_interchange`, `run_wepp_hillslope_pass_interchange`, and `run_wepp_watershed_interchange` to call `write_version_manifest(bundle_root)` after successful builds and stamp the same value into each parquet schema’s Arrow metadata (`dataset_version` field).
+- Phase 3 – Migration enforcement: update the orchestration guard (`wepppy/wepp/interchange/orchestrate.py` or equivalent) to load the manifest before reuse; treat a missing manifest as `0.0` (force rebuild), trigger deletions/rebuilds on major mismatches, and allow reuse with logged warnings on minor differences.
+- Phase 4 – Tooling & observability: extend the CLI/driver to support `--show-version`, `--force-rebuild`, and structured logging (emit `interchange_version=1.0` at run start and manifest write) so operators can trace version decisions in job logs.
+- Phase 5 – Validation & docs: backfill unit tests around manifest helpers and guardrail logic using temp directories, ensure integration tests assert the manifest contents, update `generate_interchange_documentation` to surface the manifest version in README headers, and capture the bump workflow in this spec plus cloud route guidance.
+
 # Developer Log
 - 2025-02-14: Implemented `run_wepp_hillslope_pass_interchange` producing `H.pass.parquet` with Fortran-aligned field names, Julian-to-calendar enrichments, and zero-filling per event type. Added coverage at `tests/wepp/interchange/test_pass_interchange.py` and refreshed spec guidance for PASS outputs.
 - 2025-02-17: Landed dedicated hillslope interchange writers (`hill_ebe_interchange.py`, `hill_element_interchange.py`, `hill_loss_interchange.py`, `hill_soil_interchange.py`, `hill_wat_interchange.py`) with Arrow schemas mirroring WEPP column labels. Added regression coverage per product.

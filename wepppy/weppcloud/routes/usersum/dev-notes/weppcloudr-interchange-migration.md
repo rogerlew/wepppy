@@ -200,3 +200,25 @@ Open tasks for the container:
     validated.
   * Add a smoke test that mounts a sample run directory and hits the
     `/runs/.../report/deval_details` endpoint.
+
+### Runoff cumulative plot remediation (2025-10-13)
+
+- **ID alignment.** `read_subcatchments()` now resolves the sequential
+  WEPP id by coalescing `wepp_id.y`, `WeppID`, `wepp_id.x`, etc., after
+  the GeoJSON + hillslope joins, guaranteeing that
+  `loss_pw0.hill.parquet` rows match.
+- **Helper cleanup.** `gen_cumulative_plt_df()` (and the map variant)
+  coalesce area/runoff to numeric, compute totals, then round—no more
+  reassigning the original (possibly `NA`) vectors.
+- **Rmd recompute.** Before rendering, the Rmd resorts by `runoff_mm` and
+  recomputes `cumPercArea` / `cum_runoff_mm` from the actual data so the
+  chart/headline stay accurate even if helper defaults change.
+
+Dead ends to avoid:
+
+- Multiplying the cumulative percent columns by 100 without recomputing
+  left every value stuck at ~3.32%.
+- Dropping rows where cumulative columns were `NA` emptied the dataset.
+
+Next up for sediments: mirror the runoff fix (ID coalesce + cumulative
+recompute after sorting by `Sediment_Yield_kg`).

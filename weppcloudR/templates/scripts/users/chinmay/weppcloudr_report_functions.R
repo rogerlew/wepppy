@@ -590,9 +590,25 @@ read_subcatchments = function(runid) {
   subcatchments <- subcatchments %>%
     dplyr::left_join(hills, by = "TopazID") %>%
     dplyr::left_join(landuse, by = "TopazID") %>%
-    dplyr::left_join(soils, by = "TopazID") %>%
+    dplyr::left_join(soils, by = "TopazID")
+
+  sub_wepp_source <- first_present(names(subcatchments), c("WeppID", "wepp_id", "wepp_id.x", "wepp_id.y"))
+  hills_wepp_source <- first_present(names(hills), c("wepp_id"))
+
+  subcatchments <- subcatchments %>%
     dplyr::mutate(
-      wepp_id = as.integer(dplyr::coalesce(wepp_id, WeppID)),
+      sub_wepp_id = if (!is.null(sub_wepp_source)) as.integer(.data[[sub_wepp_source]]) else NA_integer_,
+      hill_wepp_id = if (!is.null(hills_wepp_source)) as.integer(.data[[hills_wepp_source]]) else NA_integer_
+    )
+
+  resolved_wepp <- dplyr::coalesce(subcatchments$hill_wepp_id, subcatchments$sub_wepp_id)
+  if (any(is.na(resolved_wepp))) {
+    stop("Unable to resolve wepp_id for subcatchments; ensure loss and geometry IDs align")
+  }
+
+  subcatchments <- subcatchments %>%
+    dplyr::mutate(
+      wepp_id = resolved_wepp,
       area_ha = dplyr::coalesce(area_ha, as.numeric(sf::st_area(geometry)) / 10000),
       landuse = dplyr::coalesce(landuse, "Unknown"),
       soil = dplyr::coalesce(soil, "Refer to the soil file for details"),
@@ -608,6 +624,12 @@ read_subcatchments = function(runid) {
       Watershed = runid
     ) %>%
     dplyr::left_join(loss_summary, by = "wepp_id")
+
+  subcatchments <- subcatchments %>%
+    {
+      drop_cols <- intersect(names(.), c("wepp_id.x", "wepp_id.y", "sub_wepp_id", "hill_wepp_id"))
+      if (length(drop_cols)) dplyr::select(., -dplyr::all_of(drop_cols)) else .
+    }
 
   numeric_metrics <- c(
     "runoff_mm",
@@ -693,22 +715,38 @@ gen_cumulative_plt_df <- function(subcatch, var_to_use){
       # as.data.frame()%>%
       dplyr::select(wepp_id,!!var_to_use,area_ha,geometry,landuse,soil,Texture,slope)%>%
       dplyr::mutate(
-        !!value_sym := suppressWarnings(as.numeric(.data[[value_col]]))
+        area_ha = suppressWarnings(as.numeric(area_ha)),
+        area_ha = dplyr::coalesce(area_ha, 0),
+        !!value_sym := suppressWarnings(as.numeric(.data[[value_col]])),
+        !!value_sym := dplyr::coalesce(!!value_sym, 0)
+      ) %>%
+      dplyr::mutate(
+        total_area = sum(area_ha, na.rm = TRUE),
+        total_value = sum(!!value_sym, na.rm = TRUE)
       ) %>%
       dplyr::arrange(desc(!!var_to_use)) %>%
       dplyr::mutate(
-        cumPercArea = cumsum(area_ha) / sum(area_ha) *100,
-        new_col = cumsum(dplyr::coalesce(!!value_sym, 0)) / sum(dplyr::coalesce(!!value_sym, 0)) *100
+        cumPercArea = ifelse(total_area > 0,
+          cumsum(area_ha) / total_area * 100,
+          0
+        ),
+        new_col = ifelse(total_value > 0,
+          cumsum(!!value_sym) / total_value * 100,
+          0
+        )
       )%>%
-    dplyr::mutate_at(vars(new_col), ~replace(., is.nan(.), 0))%>%
+    dplyr::select(-total_area, -total_value) %>%
     dplyr::mutate(
-      dplyr::across(where(is.numeric), round, 1),
-      !!value_sym := as.numeric(.data[[value_col]]),
-      new_col = as.numeric(new_col)
+      cumPercArea = replace(cumPercArea, is.na(cumPercArea), 0),
+      new_col = replace(new_col, is.na(new_col), 0),
+      cumPercArea = round(cumPercArea, 1),
+      new_col = round(new_col, 1),
+      !!value_sym := round(!!value_sym, 1),
+      area_ha = round(area_ha, 1)
     )%>%
     dplyr::select(wepp_id,!!var_to_use,area_ha,geometry,cumPercArea,new_col,landuse,
                   soil,Texture,slope)
-  
+
   colnames(c_plt_df)[6] = paste0("cum_",colnames(c_plt_df)[2])
   cum_col <- colnames(c_plt_df)[6]
 
@@ -735,16 +773,34 @@ gen_cumulative_plt_df_map <- function(subcatch, var_to_use){
     dplyr::group_by(Watershed, scenario)%>%
     # dplyr::select(wepp_id,!!var_to_use,area_ha,geometry,landuse,soil,Texture,slope)%>%
     dplyr::mutate(
-      !!value_sym := suppressWarnings(as.numeric(.data[[value_col]]))
+      area_ha = suppressWarnings(as.numeric(area_ha)),
+      area_ha = dplyr::coalesce(area_ha, 0),
+      !!value_sym := suppressWarnings(as.numeric(.data[[value_col]])),
+      !!value_sym := dplyr::coalesce(!!value_sym, 0)
+    ) %>%
+    dplyr::mutate(
+      total_area = sum(area_ha, na.rm = TRUE),
+      total_value = sum(!!value_sym, na.rm = TRUE)
     ) %>%
     dplyr::arrange(desc(!!var_to_use)) %>%
-    dplyr::mutate(cumPercArea = cumsum(area_ha) / sum(area_ha) *100,
-                  new_col = cumsum(dplyr::coalesce(!!value_sym, 0)) / sum(dplyr::coalesce(!!value_sym, 0)) *100)%>%
-    dplyr::mutate_at(vars(new_col), ~replace(., is.nan(.), 0))%>%
     dplyr::mutate(
-      dplyr::across(where(is.numeric), round, 1),
-      !!value_sym := as.numeric(.data[[value_col]]),
-      new_col = as.numeric(new_col)
+      cumPercArea = ifelse(total_area > 0,
+        cumsum(area_ha) / total_area * 100,
+        0
+      ),
+      new_col = ifelse(total_value > 0,
+        cumsum(!!value_sym) / total_value * 100,
+        0
+      )
+    )%>%
+    dplyr::select(-total_area, -total_value) %>%
+    dplyr::mutate(
+      cumPercArea = replace(cumPercArea, is.na(cumPercArea), 0),
+      new_col = replace(new_col, is.na(new_col), 0),
+      cumPercArea = round(cumPercArea, 1),
+      new_col = round(new_col, 1),
+      !!value_sym := round(!!value_sym, 1),
+      area_ha = round(area_ha, 1)
     )%>%
     dplyr::select(wepp_id,!!var_to_use,area_ha,geometry,cumPercArea,new_col,landuse,
     soil,Texture,slope,Watershed,scenario,sd_yd_kg_ha,tp_kg_ha)%>%

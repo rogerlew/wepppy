@@ -151,7 +151,7 @@ The command bar provides a web interface for changing log levels via the `/runs/
 ### status messenger to services/status2
 
 `StatusMessenger.publish` pushes plain strings onto `<runid>:<channel>` in DB 2. The Go-based `services/status2` WebSocket app subscribes to requested channels, forwards payloads as `{"type": "status", "data": ..}` JSON frames, and maintains heartbeat ping/pong to drop dead sockets. Channel naming consistency (`wepp`, `archive`, `omni`, `fork`, etc.) keeps the front-end selectors simple.
-Jobs that want to surface command-bar notifications can embed the `COMMAND_BAR_RESULT` keyword in their payload. The WebSocket client peels off the message body and calls `commandBar.showResult(...)`, so long-running tasks (for example `set_run_readonly_rq`) can report `manifest.db creation finished`. Keep the leading `rq:<jobid>` prefix so troubleshooting still maps back to Redis job metadata.
+Jobs that want to surface command-bar notifications should publish to the dedicated command channel with `StatusMessenger.publish_command(runid, message)`. The command bar listens on `<runid>:command` and renders whatever text is published (we still recommend keeping the leading `rq:<jobid>` prefix so troubleshooting maps back to Redis job metadata).
 
 ### RedisPrep and NoDb file locking to services/preflight2
 

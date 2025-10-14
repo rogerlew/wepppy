@@ -2,6 +2,7 @@ from .climate_bp import climate_bp
 from .debris_flow_bp import debris_flow_bp
 from .disturbed_bp import disturbed_bp
 from .landuse_bp import landuse_bp
+from .interchange_bp import interchange_bp
 from .observed_bp import observed_bp
 from .omni_bp import omni_bp
 from .project_bp import project_bp
@@ -20,6 +21,7 @@ __all__ = [
     'debris_flow_bp',
     'disturbed_bp',
     'landuse_bp',
+    'interchange_bp',
     'observed_bp',
     'omni_bp',
     'project_bp',
