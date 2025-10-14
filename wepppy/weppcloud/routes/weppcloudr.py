@@ -315,7 +315,7 @@ def _enqueue_deval_job(
             args=(runid, config, str(ctx.active_root)),
             kwargs=job_kwargs,
             timeout=job_timeout,
-            description=f"Render DEVAL report for {runid}/{config}",
+            description=f"Render Deval-In-The-Details report for {runid}/{config}",
         )
 
         if prep:
@@ -410,7 +410,7 @@ def deval_details(runid, config):
         refresh_kwargs['pup'] = ctx.pup_relpath
 
     refresh_url = url_for_run('weppcloud.deval_details', **refresh_kwargs)
-    job_status_url = url_for('rq_jobinfo.jobstatus_route', job_id=job_id) if job_id else None
+    job_status_url = url_for('rq_job_dashboard.job_dashboard_route', job_id=job_id) if job_id else None
 
     context = {
         'runid': runid,

@@ -18,4 +18,3 @@ def job_dashboard_route(job_id):
         
     # Assuming you have a function to get job details
     return render_template('dashboard.htm', job_id=job_id)
-

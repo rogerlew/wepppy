@@ -288,8 +288,7 @@ function() {
   list(status = "ok", timestamp = format(Sys.time(), tz = "UTC"))
 }
 
-#* Render DEVAL Details report
-#* Render DEVAL Details report
+#* Render Deval-In-The-Details report
 #* @serializer html
 #* @get /runs/<runid>/<config>/report/deval_details
 function(runid, config, res, req, pup = NULL) {

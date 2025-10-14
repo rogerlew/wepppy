@@ -102,10 +102,12 @@
       border: 1px solid rgba(26, 61, 143, 0.18);
       color: #1a315f;
       font-size: 0.95rem;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 0.75rem;
       min-height: 2.5rem;
+      width: 100%;
+      box-sizing: border-box;
     }
     .status-note .spinner {
       font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
@@ -140,7 +142,7 @@
       <div>Configuration: <code>{{ config }}</code></div>
       {% endif %}
       {% if job_id %}
-      <div>Job ID: <code>{{ job_id }}</code>{% if job_status_url %} · <a href="{{ job_status_url }}" target="_blank" rel="noopener">Inspect job status JSON</a>{% endif %}</div>
+      <div>Job ID: <code>{{ job_id }}</code>{% if job_status_url %} · <a href="{{ job_status_url }}" target="_blank" rel="noopener">Inspect job status</a>{% endif %}</div>
       {% endif %}
       <div>This page refreshes once the render finishes.</div>
     </div>
@@ -171,10 +173,6 @@
         or refresh this page manually to check whether the report is ready.
       </div>
     </noscript>
-
-    <div style="margin-top: 2rem;">
-      <button type="button" onclick="window.location.href = refreshUrl;">Refresh now</button>
-    </div>
   </main>
 
   <script>
