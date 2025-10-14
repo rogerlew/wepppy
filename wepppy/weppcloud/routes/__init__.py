@@ -5,6 +5,7 @@ from .nodb_api.climate_bp import climate_bp
 from .nodb_api.debris_flow_bp import debris_flow_bp
 from .nodb_api.disturbed_bp import disturbed_bp
 from .nodb_api.landuse_bp import landuse_bp
+from .nodb_api.interchange_bp import interchange_bp
 from .nodb_api.observed_bp import observed_bp
 from .nodb_api.omni_bp import omni_bp
 from .nodb_api.project_bp import project_bp
@@ -49,6 +50,7 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     archive_bp,
     climate_bp,
     command_bar_bp,
+    interchange_bp,
     debris_flow_bp,
     diff_bp,
     disturbed_bp,
@@ -93,6 +95,7 @@ __all__ = [
     'command_bar_bp',
     'debris_flow_bp',
     'disturbed_bp',
+    'interchange_bp',
     'export_bp',
     'fork_bp',
     'diff_bp',
