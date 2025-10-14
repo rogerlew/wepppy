@@ -727,4 +727,4 @@ def test_execute_query_requires_scope(monkeypatch, tmp_path):
     assert response.status_code == 403
     payload = response.json()
     assert "trace_id" in payload.get("meta", {})
-*** End Patch
+
