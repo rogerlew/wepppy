@@ -1,5 +1,7 @@
 # wepppy/weppcloud on bare-metal server with conda env (wepppy310-env)
 
+## These notes are old and not applicable
+
 1. Install Ubuntu 24.04
 1.1 Create webgroup with gid 1002 and add user to webgroup
 2. Install dependencies based on [wepppy-docker-base](https://github.com/rogerlew/wepppy-docker-base/)
