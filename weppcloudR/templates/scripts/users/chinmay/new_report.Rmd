@@ -235,6 +235,20 @@ perc_flow %>%
 runoff_cp_df= gen_cumulative_plt_df(subcatchments, runoff_mm)
 sd_yd_cp_df= gen_cumulative_plt_df(subcatchments, Sediment_Yield_kg)
 
+sd_yd_cp_df <- sd_yd_cp_df %>%
+  dplyr::arrange(dplyr::desc(Sediment_Yield_kg))
+
+total_sediment_hill <- sum(sd_yd_cp_df$Sediment_Yield_kg, na.rm = TRUE)
+total_area_sediment <- sum(sd_yd_cp_df$area_ha, na.rm = TRUE)
+
+if (total_sediment_hill > 0 && total_area_sediment > 0) {
+  sd_yd_cp_df <- sd_yd_cp_df %>%
+    dplyr::mutate(
+      cumPercArea = cumsum(area_ha) / total_area_sediment * 100,
+      cum_Sediment_Yield_kg = cumsum(Sediment_Yield_kg) / total_sediment_hill * 100
+    )
+}
+
 runoff_cp_df <- runoff_cp_df %>%
   dplyr::arrange(dplyr::desc(runoff_mm))
 
