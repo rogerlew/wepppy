@@ -26,15 +26,27 @@ http://:8080 {
     }
 
     handle_path /webservices/wmesque2* {
-        reverse_proxy wmesque2:8030
+        reverse_proxy wmesque2:8030 {
+            transport http {
+                read_timeout 3m
+            }
+        }
     }
 
     handle_path /webservices/wmesque* {
-        reverse_proxy wmesque:8003
+        reverse_proxy wmesque:8003 {
+            transport http {
+                read_timeout 3m
+            }
+        }
     }
 
     handle_path /query-engine* {
-        reverse_proxy query-engine:8041
+        reverse_proxy query-engine:8041 {
+            transport http {
+                read_timeout 3m
+            }
+        }
     }
 
     handle_path /weppcloudr* {
@@ -51,12 +63,20 @@ http://:8080 {
     }
 
     handle_path /browse* {
-        reverse_proxy browse:9009
+        reverse_proxy browse:9009 {
+            transport http {
+                read_timeout 3m
+            }
+        }
     }
 
     @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|download(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
     handle @browse_proxy {
-        reverse_proxy browse:9009
+        reverse_proxy browse:9009 {
+            transport http {
+                read_timeout 3m
+            }
+        }
     }
 
     handle /rq-dashboard* {
