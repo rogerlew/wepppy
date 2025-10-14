@@ -84,6 +84,44 @@ prep.set_rq_job_id("build_landuse", job.id)
 
 `TriggerEvents` in `base.py` enumerate major milestones. Long-running RQ jobs publish both `TriggerEvents` (via logging/status messages) and `TaskEnum` timestamps, ensuring the microservices know when a step is finished and any dependent UI panels can unlock.
 
+### Schema versioning
+
+NoDb payloads now track a monotonically increasing schema version in `<run>/nodb.version`. The baseline is `1000`, leaving space to backfill legacy projects that shipped before versioning existed. `NoDbBase` stamps this file any time a singleton is created or dumped, and `getInstance` upgrades writable runs before hydrating objects so callers always interact with the latest structure.
+
+Version orchestration lives in `wepppy/nodb/version.py`. It exposes:
+
+- `CURRENT_VERSION` and `VERSION_FILENAME` for easy introspection.
+- `ensure_version(wd)` which reads the stored value, executes any required migrations, and rewrites the version file.
+- A `MIGRATIONS` registry of `(target_version, func, description)` tuples, applied in order until the requested target is reached.
+
+When the version marker is missing or explicitly set to `0`, `read_version` consults `_determine_version(wd)`. The default heuristics treat empty runs (no `*.nodb` yet) as fresh and immediately stamp `CURRENT_VERSION`, while populated legacy runs remain `0`. `ensure_version` writes that `0` sentinel back to disk and deliberately skips migrations, keeping those historical payloads untouched until we teach `_determine_version` how to map them into a concrete revision. This gives us room to add forensic checks later—scanning filenames or object attributes—without forcing risky mass rewrites in the meantime.
+
+Migrations are small functions that accept the run directory (`Path`). They are free to load NoDb instances—re-entrancy guards temporarily disable `ensure_version` so you can call `Landuse.getInstance(wd)` inside a migration without triggering recursion. Keep them idempotent, and remember to bust Redis caches if you materially change a `.nodb` payload.
+
+Example scaffold:
+
+```python
+from wepppy.nodb.version import Migration, MIGRATIONS
+
+def migrate_landuse_grid_flags(wd_path: Path) -> None:
+    from wepppy.nodb.core.landuse import Landuse
+
+    landuse = Landuse.getInstance(wd_path, ignore_lock=True)
+    if getattr(landuse, "grid_flags", None):
+        return
+
+    with landuse.locked():
+        landuse.grid_flags = {}
+
+MIGRATIONS += (Migration(1001, migrate_landuse_grid_flags, "Initialize grid flags"),)
+```
+
+When you change the schema:
+
+1. Pick the next integer, bump `CURRENT_VERSION`, and append a migration entry.
+2. Perform the run-specific rewrite inside the migration function.
+3. Ship any tests or fixtures that exercise the new structure so we can verify upgrades in CI.
+
 ### Modules overview
 
 Below is a tour of the core singletons. Each section highlights what the class manages, common helpers, and gotchas when extending the code.
