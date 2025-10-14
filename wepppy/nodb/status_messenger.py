@@ -27,6 +27,13 @@ class StatusMessenger:
         # Use the lazy-initialized client for publishing messages
         return cls._get_client().publish(channel, message)
 
+    @classmethod
+    def publish_command(cls, runid: str, message: str):
+        if not runid:
+            raise ValueError("runid is required to publish command messages.")
+        channel = f'{runid}:command'
+        return cls.publish(channel, message)
+
 
 class StatusMessengerHandler(logging.Handler):
     """
