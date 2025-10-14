@@ -94,6 +94,27 @@
       font-size: 0.95rem;
       line-height: 1.5;
     }
+    .status-note {
+      margin-top: 1.5rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      background: rgba(26, 61, 143, 0.08);
+      border: 1px solid rgba(26, 61, 143, 0.18);
+      color: #1a315f;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-height: 2.5rem;
+    }
+    .status-note .spinner {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 1.4rem;
+      line-height: 1;
+      min-width: 1.4rem;
+      text-align: center;
+      color: #1a3d8f;
+    }
     button {
       display: inline-flex;
       align-items: center;
@@ -130,6 +151,11 @@
     </div>
     {% endif %}
 
+    <div id="statusNote" class="status-note">
+      <span id="statusSpinner" class="spinner" aria-hidden="true"></span>
+      <span id="statusText">Waiting for the renderer to acknowledge the job…</span>
+    </div>
+
     <div id="errorPanel" class="error" hidden>
       <strong>Rendering failed.</strong>
       <div id="errorMessage"></div>
@@ -161,13 +187,77 @@
     const statusChip = document.getElementById("statusChip");
     const errorPanel = document.getElementById("errorPanel");
     const errorMessage = document.getElementById("errorMessage");
-    const POLL_INTERVAL_MS = 5000;
+    const statusText = document.getElementById("statusText");
+    const statusSpinner = document.getElementById("statusSpinner");
+    const POLL_INTERVAL_MS = 800;
     let pollTimer = null;
+    let lastState = initialStatus || "queued";
+    let spinnerTimer = null;
+    let spinnerIndex = 0;
+    const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+
+    if (statusSpinner) {
+      statusSpinner.style.visibility = "hidden";
+    }
 
     function updateStatusChip(state) {
       const normalized = (state || "unknown").toLowerCase();
       statusChip.dataset.state = normalized;
       statusChip.textContent = normalized.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function describeState(state) {
+      switch (state) {
+        case "queued":
+          return "Job is queued — waiting for an RQ worker to pick it up.";
+        case "started":
+          return "Rendering in progress inside the weppcloudR container.";
+        case "deferred":
+          return "Job is deferred until its dependencies complete.";
+        case "scheduled":
+          return "Job is scheduled to start soon.";
+        case "finished":
+          return "Render finished. Refreshing…";
+        case "failed":
+          return "Rendering failed — please check the job logs.";
+        case "stopped":
+          return "Job stopped before completion.";
+        case "canceled":
+          return "Job was canceled.";
+        case "not_found":
+          return "Job not found. It may have expired from Redis.";
+        case "unknown":
+          return "Awaiting status update…";
+        default:
+          return `Status: ${state}.`;
+      }
+    }
+
+    function updateStatusNote(state) {
+      const note = describeState(state);
+      if (statusText) {
+        statusText.textContent = note;
+      }
+      if (statusSpinner) {
+        if (state === "started") {
+          statusSpinner.style.visibility = "visible";
+          statusSpinner.textContent = SPINNER_FRAMES[spinnerIndex];
+          if (!spinnerTimer) {
+            spinnerTimer = setInterval(() => {
+              spinnerIndex = (spinnerIndex + 1) % SPINNER_FRAMES.length;
+              statusSpinner.textContent = SPINNER_FRAMES[spinnerIndex];
+            }, 120);
+          }
+        } else {
+          statusSpinner.style.visibility = "hidden";
+          statusSpinner.textContent = "";
+          if (spinnerTimer) {
+            clearInterval(spinnerTimer);
+            spinnerTimer = null;
+            spinnerIndex = 0;
+          }
+        }
+      }
     }
 
     function scheduleNextPoll() {
@@ -188,8 +278,15 @@
         const state = (payload && payload.status) ? String(payload.status) : "unknown";
         updateStatusChip(state);
 
+        const normalizedState = state.toLowerCase();
+        const changed = normalizedState !== (lastState || "").toLowerCase();
+        updateStatusNote(normalizedState);
+
+        lastState = normalizedState;
+
         if (state === "finished") {
           clearTimeout(pollTimer);
+          updateStatusNote(state);
           window.location.href = refreshUrl;
           return;
         }
@@ -214,11 +311,17 @@
         // Any other terminal state -> re-check after a delay.
         scheduleNextPoll();
       } catch (err) {
+        updateStatusNote("unknown");
         scheduleNextPoll();
       }
     }
 
     updateStatusChip(initialStatus);
+    if (initialStatus) {
+      updateStatusNote(initialStatus.toLowerCase());
+    } else {
+      updateStatusNote("unknown");
+    }
     if (jobStatusUrl) {
       scheduleNextPoll();
     }
