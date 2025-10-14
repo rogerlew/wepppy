@@ -35,15 +35,22 @@ def _is_writable(path: Path) -> bool:
 
 
 def _resolve_tmp_path(target_path: Path, tmp_dir: Optional[Path]) -> Path:
-    if tmp_dir is not None and _is_writable(tmp_dir):
+    target_parent = target_path.parent
+    target_parent.mkdir(parents=True, exist_ok=True)
+
+    def _same_device(path_a: Path, path_b: Path) -> bool:
+        try:
+            return os.stat(path_a).st_dev == os.stat(path_b).st_dev
+        except OSError:
+            return False
+
+    if tmp_dir is not None and _is_writable(tmp_dir) and _same_device(tmp_dir, target_parent):
         candidate = tmp_dir / f"{target_path.name}.tmp"
         if candidate.exists():
             candidate.unlink()
         return candidate
 
-    fallback_dir = target_path.parent
-    fallback_dir.mkdir(parents=True, exist_ok=True)
-    fallback_path = fallback_dir / f"{target_path.name}.tmp"
+    fallback_path = target_parent / f"{target_path.name}.tmp"
     if fallback_path.exists():
         fallback_path.unlink()
     return fallback_path
