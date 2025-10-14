@@ -65,13 +65,7 @@ def portland_results(file):
 @locations_bp.route('/locations/lt')
 @locations_bp.route('/locations/lt/')
 def lt_index():
-    return render_template('lt/index.htm', user=current_user)
-
-
-@locations_bp.route('/ltf')
-@locations_bp.route('/ltf/')
-def ltf_index():
-    return render_template('ltf/index.htm', user=current_user)
+    return redirect('https://doc.wepp.cloud/lake-tahoe-2020/', code=301)
 
 
 @locations_bp.route('/lt/SteepSlopes')
@@ -79,11 +73,12 @@ def ltf_index():
 @locations_bp.route('/locations/lt/SteepSlopes')
 @locations_bp.route('/locations/lt/SteepSlopes/')
 def lt_steep_slope_index():
-    return render_template('lt/SteepSlopes.html', user=current_user)
+    return redirect('https://doc.wepp.cloud/lake-tahoe-2020/SteepSlopes.html', code=301)
+
 
 @locations_bp.route('/locations/caldor')
 @locations_bp.route('/locations/caldor/')
-def calsor_index():
+def caldor_index():
     return render_template('locations/caldor/Caldor.html', user=current_user)
 
 @locations_bp.route('/locations/caldor/results/<file>')
