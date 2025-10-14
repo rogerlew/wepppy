@@ -67,17 +67,6 @@ WSClient.prototype.connect = function () {
                 }, 500);
             }
 
-            if (data.includes("COMMAND_BAR_RESULT")) {
-                const marker = 'COMMAND_BAR_RESULT';
-                const markerIndex = data.indexOf(marker);
-                let commandMessage = data;
-                if (markerIndex !== -1) {
-                    commandMessage = data.substring(markerIndex + marker.length).trim();
-                }
-                $("#" + this.formId + " #status").html(commandMessage);
-                this.pushCommandBarResult(commandMessage);
-            }
-
             if (data.includes("TRIGGER")) {
                 const tokens = data.trim().split(/\s+/);
                 const event = tokens.length > 0 ? tokens[tokens.length - 1] : null;

@@ -39,10 +39,20 @@
             this.historySnapshot = '';
             this.projectBaseUrl = this.getProjectBaseUrl();
             this.getCommandHandlers = this.createGetCommandHandlers();
+            this.runCommandHandlers = this.createRunCommandHandlers();
             this.commands = this.createCommands();
+            this.commandChannelSocket = null;
+            this.commandChannelReconnectTimer = null;
+            this.commandChannelReconnectDelayMs = 2000;
+            this.commandChannelUrl = this.getCommandChannelUrl();
+            this.commandChannelShouldReconnect = false;
 
             this.handleDocumentKeyDown = this.handleDocumentKeyDown.bind(this);
             this.handleInputKeyDown = this.handleInputKeyDown.bind(this);
+            this.handleCommandChannelOpen = this.handleCommandChannelOpen.bind(this);
+            this.handleCommandChannelMessage = this.handleCommandChannelMessage.bind(this);
+            this.handleCommandChannelClose = this.handleCommandChannelClose.bind(this);
+            this.handleCommandChannelError = this.handleCommandChannelError.bind(this);
         }
 
         init() {
@@ -57,6 +67,9 @@
 
             document.addEventListener('keydown', this.handleDocumentKeyDown);
             this.inputEl.addEventListener('keydown', this.handleInputKeyDown);
+
+            this.connectCommandChannel();
+            window.addEventListener('beforeunload', () => this.disconnectCommandChannel(), { once: true });
         }
 
         focusInput(selectAll = false) {
@@ -98,6 +111,15 @@
             };
         }
 
+        createRunCommandHandlers() {
+            return {
+                interchange_migration: {
+                    description: 'Queue an interchange migration job for this run (optional subpath)',
+                    handler: (args) => this.routeRunInterchangeMigration(args)
+                }
+            };
+        }
+
         createCommands() {
             return {
                 help: {
@@ -107,6 +129,10 @@
                 get: {
                     description: 'Run GET utility commands (e.g., loadavg)',
                     action: (args) => this.handleGetCommand(args)
+                },
+                run: {
+                    description: 'Run project automation tasks (e.g., interchange_migration)',
+                    action: (args) => this.handleRunCommand(args)
                 },
                 usersum: {
                     description: '',
@@ -435,6 +461,7 @@
             const clearHelp = CLEAR_HELP_LINES.map((line) => `  ${line}`).join('\n');
             const keyboardShortcuts = 'Navigation shortcuts:\n   Shift+G go to bottom  |  Shift+T go to top  |  Shift+U page up  |  Shift+H page down';
             const getHelpLines = this.buildGetCommandHelpLines();
+            const runHelpLines = this.buildRunCommandHelpLines();
             const usersumUsage = [
                 'usersum command usage:',
                 '  usersum <parameter> - concise description',
@@ -452,6 +479,9 @@
             if (getHelpLines.length) {
                 sections.push(`Get command usage:\n${getHelpLines.join('\n')}`);
             }
+            if (runHelpLines.length) {
+                sections.push(`Run command usage:\n${runHelpLines.join('\n')}`);
+            }
 
             sections.push(keyboardShortcuts);
 
@@ -461,6 +491,227 @@
         getProjectBaseUrl() {
             const match = window.location.pathname.match(/^(?:\/weppcloud)?\/runs\/[^\/]+\/[^\/]+\//);
             return match ? match[0] : null;
+        }
+
+        getRunContextFromPath() {
+            const match = window.location.pathname.match(/^(?:\/weppcloud)?\/runs\/([^\/]+)\/([^\/]+)\//);
+            if (!match) {
+                return null;
+            }
+            return {
+                runId: match[1],
+                config: match[2]
+            };
+        }
+
+        getCommandChannelUrl() {
+            const context = this.getRunContextFromPath();
+            if (!context || !context.runId) {
+                return null;
+            }
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const host = window.location.host;
+            return `${protocol}://${host}/weppcloud-microservices/status/${context.runId}:command`;
+        }
+
+        connectCommandChannel() {
+            if (!this.commandChannelUrl) {
+                return;
+            }
+            if (typeof window.WebSocket !== 'function') {
+                console.warn('CommandBar: WebSocket is not supported in this environment.');
+                return;
+            }
+            this.commandChannelShouldReconnect = true;
+            if (this.commandChannelSocket &&
+                (this.commandChannelSocket.readyState === WebSocket.OPEN ||
+                this.commandChannelSocket.readyState === WebSocket.CONNECTING)) {
+                return;
+            }
+
+            this.clearCommandChannelReconnect();
+
+            try {
+                this.commandChannelSocket = new WebSocket(this.commandChannelUrl);
+            } catch (error) {
+                console.warn('CommandBar: Unable to open command channel socket:', error);
+                this.scheduleCommandChannelReconnect();
+                return;
+            }
+
+            this.commandChannelSocket.addEventListener('open', this.handleCommandChannelOpen);
+            this.commandChannelSocket.addEventListener('message', this.handleCommandChannelMessage);
+            this.commandChannelSocket.addEventListener('close', this.handleCommandChannelClose);
+            this.commandChannelSocket.addEventListener('error', this.handleCommandChannelError);
+        }
+
+        disconnectCommandChannel() {
+            this.clearCommandChannelReconnect();
+            this.commandChannelShouldReconnect = false;
+            if (this.commandChannelSocket) {
+                try {
+                    this.commandChannelSocket.removeEventListener('open', this.handleCommandChannelOpen);
+                    this.commandChannelSocket.removeEventListener('message', this.handleCommandChannelMessage);
+                    this.commandChannelSocket.removeEventListener('close', this.handleCommandChannelClose);
+                    this.commandChannelSocket.removeEventListener('error', this.handleCommandChannelError);
+                    this.commandChannelSocket.close();
+                } catch (error) {
+                    console.warn('CommandBar: Error closing command channel socket:', error);
+                }
+                this.commandChannelSocket = null;
+            }
+        }
+
+        scheduleCommandChannelReconnect() {
+            this.clearCommandChannelReconnect();
+            this.commandChannelReconnectTimer = window.setTimeout(() => {
+                this.commandChannelReconnectTimer = null;
+                this.connectCommandChannel();
+            }, this.commandChannelReconnectDelayMs);
+        }
+
+        clearCommandChannelReconnect() {
+            if (this.commandChannelReconnectTimer !== null) {
+                window.clearTimeout(this.commandChannelReconnectTimer);
+                this.commandChannelReconnectTimer = null;
+            }
+        }
+
+        handleCommandChannelOpen() {
+            this.commandChannelReconnectDelayMs = 2000;
+        }
+
+        handleCommandChannelMessage(event) {
+            const processed = this.processCommandChannelPayload(event && event.data);
+            if (!processed) {
+                return;
+            }
+            const { message } = processed;
+            if (typeof message === 'string' && message.trim().length > 0) {
+                this.showResult(message.trim());
+            }
+        }
+
+        handleCommandChannelClose() {
+            this.commandChannelSocket = null;
+            if (!this.commandChannelShouldReconnect) {
+                return;
+            }
+            this.commandChannelReconnectDelayMs = Math.min(this.commandChannelReconnectDelayMs * 2, 30000);
+            this.scheduleCommandChannelReconnect();
+        }
+
+        handleCommandChannelError(event) {
+            console.warn('CommandBar: Command channel socket error:', event);
+            if (this.commandChannelSocket) {
+                try {
+                    this.commandChannelSocket.close();
+                } catch (error) {
+                    console.warn('CommandBar: Error closing command channel socket after error:', error);
+                }
+            }
+        }
+
+        processCommandChannelPayload(rawData) {
+            if (rawData === undefined || rawData === null) {
+                return null;
+            }
+
+            if (typeof rawData === 'string') {
+                const trimmed = rawData.trim();
+                if (!trimmed) {
+                    return null;
+                }
+
+                if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                    const parsed = this.tryParseJson(trimmed);
+                    if (parsed) {
+                        return this.handleStructuredCommandPayload(parsed);
+                    }
+                }
+
+                const legacyMessage = this.stripCommandBarMarker(trimmed);
+                if (!legacyMessage) {
+                    return null;
+                }
+                return { message: legacyMessage };
+            }
+
+            if (rawData instanceof Blob) {
+                // Unsupported payload; skip but warn.
+                console.warn('CommandBar: Received unsupported Blob message from command channel.');
+                return null;
+            }
+
+            if (typeof rawData === 'object') {
+                const handled = this.handleStructuredCommandPayload(rawData);
+                if (handled) {
+                    return handled;
+                }
+                try {
+                    const message = JSON.stringify(rawData);
+                    return { message };
+                } catch (error) {
+                    console.warn('CommandBar: Unable to stringify command channel payload:', error);
+                    return null;
+                }
+            }
+
+            return { message: String(rawData) };
+        }
+
+        handleStructuredCommandPayload(payload) {
+            if (!payload || typeof payload !== 'object') {
+                return null;
+            }
+
+            const type = typeof payload.type === 'string' ? payload.type.toLowerCase() : '';
+            if (!type) {
+                return null;
+            }
+
+            if (type === 'status') {
+                const data = this.stringifyCommandData(payload.data);
+                return { message: data };
+            }
+
+            // Treat non-status types as handled with no visual output for now.
+            return { message: '' };
+        }
+
+        stripCommandBarMarker(message) {
+            if (!message) {
+                return '';
+            }
+            const marker = 'COMMAND_BAR_RESULT';
+            const markerIndex = message.indexOf(marker);
+            if (markerIndex !== -1) {
+                return message.substring(markerIndex + marker.length).trim();
+            }
+            return message;
+        }
+
+        stringifyCommandData(data) {
+            if (data === undefined || data === null) {
+                return '';
+            }
+            if (typeof data === 'string') {
+                return data.trim();
+            }
+            try {
+                return JSON.stringify(data);
+            } catch (error) {
+                console.warn('CommandBar: Unable to stringify command data payload:', error);
+                return String(data);
+            }
+        }
+
+        tryParseJson(raw) {
+            try {
+                return JSON.parse(raw);
+            } catch (error) {
+                return null;
+            }
         }
 
         navigateToProjectPage(subpath) {
@@ -621,6 +872,39 @@
             this.showResult('Error: Could not find the specified section on this page.');
         }
 
+        handleRunCommand(args = []) {
+            if (!Array.isArray(args) || args.length === 0) {
+                const helpLines = this.buildRunCommandHelpLines();
+                if (helpLines.length === 0) {
+                    this.showResult('No run commands are available yet.');
+                    return;
+                }
+
+                const messageParts = [
+                    'Usage:',
+                    '  run <command>',
+                    '',
+                    'Available run commands:',
+                    ...helpLines
+                ];
+                this.showResult(messageParts.join('\n'));
+                return;
+            }
+
+            const [subcommandRaw, ...rest] = args;
+            const subcommand = (subcommandRaw || '').toLowerCase();
+            const handlerEntry = this.runCommandHandlers[subcommand];
+
+            if (!handlerEntry) {
+                const helpLines = this.buildRunCommandHelpLines();
+                const details = helpLines.length ? `\nAvailable run commands:\n${helpLines.join('\n')}` : '';
+                this.showResult(`Error: Unknown run command "${subcommand}".${details}`);
+                return;
+            }
+
+            return handlerEntry.handler(rest);
+        }
+
         handleGetCommand(args = []) {
             if (!Array.isArray(args) || args.length === 0) {
                 const helpLines = this.buildGetCommandHelpLines();
@@ -662,6 +946,18 @@
                     return `  ${label}`;
                 }
                 const padded = label.padEnd(18);
+                return `  ${padded}- ${description}`;
+            });
+        }
+
+        buildRunCommandHelpLines() {
+            return Object.entries(this.runCommandHandlers).map(([name, meta]) => {
+                const description = (meta && meta.description) || '';
+                const label = `run ${name}`;
+                if (!description) {
+                    return `  ${label}`;
+                }
+                const padded = label.padEnd(25);
                 return `  ${padded}- ${description}`;
             });
         }
@@ -822,6 +1118,51 @@
                 console.error('Error fetching lock statuses:', error);
                 this.showResult(`Error: Unable to fetch lock statuses. ${error.message || error}`);
             });
+        }
+
+        routeRunInterchangeMigration(args = []) {
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: The run command is only available on a project page.');
+                return;
+            }
+
+            const normalizedArgs = Array.isArray(args)
+                ? args.map((value) => String(value || '').trim()).filter((value) => value.length > 0)
+                : [];
+
+            const subpath = normalizedArgs.length > 0 ? normalizedArgs.join(' ').trim() : null;
+
+            const targetUrl = `${this.projectBaseUrl}tasks/interchange/migrate`;
+            const payload = subpath ? { wepp_output_subpath: subpath } : {};
+
+            return fetch(targetUrl, {
+                method: 'POST',
+                cache: 'no-store',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
+                .then(({ response, data }) => {
+                    if (!response.ok) {
+                        const message = (data && (data.Error || data.error || data.message)) || `HTTP ${response.status}`;
+                        throw new Error(message);
+                    }
+
+                    if (!data || data.Success !== true) {
+                        const message = (data && (data.Error || data.error || data.message)) || 'Unknown error';
+                        throw new Error(message);
+                    }
+                    const jobId = data.job_id || (data.Content && data.Content.job_id);
+                    const suffix = jobId ? ` (job ${jobId})` : '';
+                    const targetDetail = subpath ? ` for "${subpath}"` : '';
+                    this.showResult(`Success: Interchange migration queued${targetDetail}${suffix}.`);
+                })
+                .catch((error) => {
+                    console.error('Error starting interchange migration:', error);
+                    this.showResult(`Error: Unable to queue interchange migration. ${error.message || error}`);
+                });
         }
 
         routeUsersum(args = []) {
