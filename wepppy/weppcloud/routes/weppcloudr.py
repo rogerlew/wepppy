@@ -3,8 +3,8 @@ import json
 import io
 
 import pathlib
+from pathlib import Path
 from subprocess import Popen, PIPE
-from urllib.parse import urlencode, urljoin
 
 from typing import Optional
 
@@ -13,12 +13,20 @@ from os.path import split as _split
 from os.path import exists as _exists
 from os.path import abspath, basename
 
-import requests
+import redis
 
-from flask import Response, abort, Blueprint, current_app, request
+from flask import Response, abort, Blueprint, current_app, request, render_template, url_for
 from flask_security import current_user
 
-from wepppy.weppcloud.utils.helpers import get_wd, exception_factory
+from rq import Queue
+from rq.exceptions import NoSuchJobError
+from rq.job import Job
+
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.rq.weppcloudr_rq import render_deval_details_rq
+
+from wepppy.weppcloud.utils.helpers import get_wd, exception_factory, url_for_run
 
 from wepppy.nodb.core import Ron, Wepp, Watershed
 from wepppy.query_engine.activate import activate_query_engine
@@ -210,21 +218,172 @@ def _ensure_interchange(ctx: RunContext) -> None:
         raise
 
 
-def _weppcloudr_base_url() -> str:
-    base = current_app.config.get('WEPPCLOUDR_BASE_URL')
-    if not base:
-        base = os.environ.get('WEPPCLOUDR_BASE_URL', 'http://weppcloudr:8050')
-    return base.rstrip('/') + '/'
+ACTIVE_JOB_STATUSES = {'queued', 'started', 'deferred', 'scheduled'}
 
 
-def _fetch_deval_from_service(runid: str, config: str, query_args) -> requests.Response:
-    base_url = _weppcloudr_base_url()
-    target_path = f"runs/{runid}/{config}/report/deval_details"
-    url = urljoin(base_url, target_path)
-    params = query_args.to_dict(flat=False) if hasattr(query_args, "to_dict") else query_args
-    timeout = current_app.config.get('WEPPCLOUDR_TIMEOUT', 300)
-    current_app.logger.debug("Requesting DEVAL report from %s", url, extra={"params": params})
-    response = requests.get(url, params=params, timeout=timeout)
+def _deval_output_path(ctx: RunContext, runid: str) -> Path:
+    export_root = Path(ctx.active_root) / "export" / "WEPPcloudR"
+    return export_root / f"deval_{runid}.htm"
+
+
+def _normalize_job_key_component(value: str) -> str:
+    return (
+        value.replace('/', '__')
+        .replace('\\', '__')
+        .replace(':', '_')
+        .replace(' ', '_')
+    )
+
+
+def _deval_job_key(ctx: RunContext) -> str:
+    parts = ['deval_details']
+    if ctx.pup_relpath:
+        parts.append(_normalize_job_key_component(ctx.pup_relpath))
+    elif ctx.config:
+        parts.append(_normalize_job_key_component(ctx.config))
+    return '_'.join(parts)
+
+
+def _resolve_prep(ctx: RunContext) -> Optional[RedisPrep]:
+    prep = RedisPrep.tryGetInstance(str(ctx.active_root))
+    if prep is None:
+        prep = RedisPrep.tryGetInstance(str(ctx.run_root))
+    return prep
+
+
+def _lookup_job_status(redis_conn: redis.Redis, job_id: str) -> str:
+    try:
+        job = Job.fetch(job_id, connection=redis_conn)
+    except NoSuchJobError:
+        return 'not_found'
+    status = job.get_status()
+    return status or 'unknown'
+
+
+def _clear_tracked_job(prep: RedisPrep, job_key: str) -> None:
+    try:
+        prep.redis.hdel(prep.run_id, f"rq:{job_key}")
+        prep.dump()
+    except Exception:
+        # Clearing the cached metadata is best-effort; failures shouldn't break the request flow.
+        pass
+
+
+def _enqueue_deval_job(
+    ctx: RunContext,
+    runid: str,
+    config: str,
+    *,
+    skip_cache: bool,
+) -> tuple[str, str]:
+    job_key = _deval_job_key(ctx)
+    prep = _resolve_prep(ctx)
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        existing_job_id: Optional[str] = None
+        existing_status: Optional[str] = None
+
+        if prep:
+            try:
+                existing_job_id = prep.get_rq_job_id(job_key)
+            except Exception:
+                existing_job_id = None
+
+        if existing_job_id:
+            existing_status = _lookup_job_status(redis_conn, existing_job_id)
+            if existing_status in ACTIVE_JOB_STATUSES:
+                return existing_job_id, existing_status
+            if prep:
+                _clear_tracked_job(prep, job_key)
+
+        job_kwargs = {'skip_cache': bool(skip_cache)}
+
+        container_name = current_app.config.get('WEPPCLOUDR_CONTAINER')
+        if container_name:
+            job_kwargs['container_name'] = container_name
+
+        docker_timeout = current_app.config.get('WEPPCLOUDR_COMMAND_TIMEOUT')
+        if docker_timeout:
+            job_kwargs['timeout'] = docker_timeout
+
+        job_timeout = current_app.config.get('WEPPCLOUDR_JOB_TIMEOUT', current_app.config.get('WEPPCLOUDR_TIMEOUT', 3600))
+
+        queue = Queue(connection=redis_conn)
+        job = queue.enqueue_call(
+            func=render_deval_details_rq,
+            args=(runid, config, str(ctx.active_root)),
+            kwargs=job_kwargs,
+            timeout=job_timeout,
+            description=f"Render DEVAL report for {runid}/{config}",
+        )
+
+        if prep:
+            try:
+                prep.set_rq_job_id(job_key, job.id)
+            except Exception:
+                # Persisting job metadata is best-effort.
+                pass
+
+        return job.id, 'queued'
+
+
+def _determine_job(
+    ctx: RunContext,
+    runid: str,
+    config: str,
+    *,
+    skip_cache: bool,
+) -> tuple[Optional[str], Optional[str]]:
+    job_key = _deval_job_key(ctx)
+    prep = _resolve_prep(ctx)
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        job_id: Optional[str] = None
+        job_status: Optional[str] = None
+
+        if prep:
+            try:
+                job_id = prep.get_rq_job_id(job_key)
+            except Exception:
+                job_id = None
+
+        if job_id:
+            job_status = _lookup_job_status(redis_conn, job_id)
+        else:
+            job_status = None
+
+        file_exists = _deval_output_path(ctx, runid).exists()
+
+        # Skip cache requests always enqueue a fresh job unless one is already active.
+        if skip_cache:
+            if job_id and job_status in ACTIVE_JOB_STATUSES:
+                return job_id, job_status
+            return _enqueue_deval_job(ctx, runid, config, skip_cache=skip_cache)
+
+        if file_exists:
+            if job_id and job_status in ACTIVE_JOB_STATUSES:
+                return job_id, job_status
+            return job_id, job_status
+
+        # No cached file; ensure a job is enqueued.
+        if job_id and job_status in ACTIVE_JOB_STATUSES:
+            return job_id, job_status
+
+        if job_id and job_status not in ACTIVE_JOB_STATUSES and prep:
+            _clear_tracked_job(prep, job_key)
+
+        return _enqueue_deval_job(ctx, runid, config, skip_cache=skip_cache)
+
+
+def _serve_deval_file(path: Path) -> Response:
+    content = path.read_bytes()
+    response = Response(content, mimetype='text/html')
+    response.headers['Content-Length'] = str(len(content))
+    response.headers.setdefault('Cache-Control', 'no-store, max-age=0, must-revalidate')
+    response.headers.setdefault('Content-Disposition', f'inline; filename="{path.name}"')
+    response.headers['X-Report-Cache'] = 'hit'
     return response
 
 
@@ -237,26 +396,35 @@ def deval_details(runid, config):
     except Exception:
         return exception_factory('Error preparing interchange assets', runid=runid)
 
-    try:
-        service_response = _fetch_deval_from_service(runid, config, request.args)
-    except requests.RequestException as exc:
-        current_app.logger.exception("Failed to render DEVAL report via weppcloudR", extra={"runid": runid, "config": config})
-        return exception_factory('Error rendering report', runid=runid)
+    skip_cache = 'no-cache' in request.args
+    output_path = _deval_output_path(ctx, runid)
 
-    if service_response.status_code >= 400:
-        current_app.logger.warning(
-            "weppcloudR responded with status %s for %s/%s",
-            service_response.status_code,
-            runid,
-            config,
-        )
+    job_id, job_status = _determine_job(ctx, runid, config, skip_cache=skip_cache)
 
-    response = Response(service_response.content, status=service_response.status_code)
-    for header_name in ('Content-Type', 'Cache-Control', 'Content-Disposition'):
-        header_value = service_response.headers.get(header_name)
-        if header_value:
-            response.headers[header_name] = header_value
-    response.headers['Content-Length'] = str(len(service_response.content))
+    # Serve the cached file when no active job is running (unless skip-cache was requested).
+    if not skip_cache and output_path.exists() and job_status not in ACTIVE_JOB_STATUSES:
+        return _serve_deval_file(output_path)
+
+    refresh_kwargs = {'runid': runid, 'config': config}
+    if ctx.pup_relpath:
+        refresh_kwargs['pup'] = ctx.pup_relpath
+
+    refresh_url = url_for_run('weppcloud.deval_details', **refresh_kwargs)
+    job_status_url = url_for('rq_jobinfo.jobstatus_route', job_id=job_id) if job_id else None
+
+    context = {
+        'runid': runid,
+        'config': config,
+        'job_id': job_id,
+        'job_status': job_status,
+        'job_status_url': job_status_url,
+        'refresh_url': refresh_url,
+        'skip_cache': skip_cache,
+    }
+
+    html = render_template('reports/deval_loading.htm', **context)
+    response = Response(html, status=202, mimetype='text/html')
+    response.headers['Cache-Control'] = 'no-store, max-age=0, must-revalidate'
     return response
 
 

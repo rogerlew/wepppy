@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Generating DEVAL Details</title>
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      color: #1f1f1f;
+    }
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: inherit;
+      color: inherit;
+    }
+    .card {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.75rem;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 1rem 0;
+      padding: 0.6rem 1rem;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: #edf2ff;
+      color: #1a3d8f;
+    }
+    .status[data-state="finished"] {
+      background: #e6fbef;
+      color: #146c2e;
+    }
+    .status[data-state="failed"],
+    .status[data-state="stopped"],
+    .status[data-state="canceled"] {
+      background: #ffeaea;
+      color: #9f1f1f;
+    }
+    .status[data-state="unknown"] {
+      background: #f0f0f0;
+      color: #4c4c4c;
+    }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.95rem;
+      background: rgba(27, 31, 35, 0.08);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+    .meta {
+      display: grid;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    a {
+      color: #1a3d8f;
+    }
+    .error {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      border: 1px solid rgba(159, 31, 31, 0.35);
+      background: rgba(159, 31, 31, 0.1);
+      color: #5d1111;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .notice {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      border: 1px solid rgba(26, 61, 143, 0.25);
+      background: rgba(26, 61, 143, 0.08);
+      color: #1a3d8f;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #1a3d8f;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Preparing “Deval in the Details”</h1>
+    <div id="statusChip" class="status" data-state="queued">Queued</div>
+    <div class="meta">
+      <div>Run ID: <code>{{ runid }}</code></div>
+      {% if config %}
+      <div>Configuration: <code>{{ config }}</code></div>
+      {% endif %}
+      {% if job_id %}
+      <div>Job ID: <code>{{ job_id }}</code>{% if job_status_url %} · <a href="{{ job_status_url }}" target="_blank" rel="noopener">Inspect job status JSON</a>{% endif %}</div>
+      {% endif %}
+      <div>This page refreshes once the render finishes.</div>
+    </div>
+
+    {% if skip_cache %}
+    <div class="notice">
+      A fresh render was requested. The cached HTML will be replaced when the job completes.
+    </div>
+    {% endif %}
+
+    <div id="errorPanel" class="error" hidden>
+      <strong>Rendering failed.</strong>
+      <div id="errorMessage"></div>
+      <div style="margin-top:0.75rem;">
+        You can retry from the run summary by clicking “Deval in the Details” again,
+        or force a rebuild with the <code>?no-cache=1</code> query parameter.
+      </div>
+    </div>
+
+    <noscript>
+      <div class="error">
+        JavaScript is required to monitor the job status automatically. Enable JavaScript and reload,
+        or refresh this page manually to check whether the report is ready.
+      </div>
+    </noscript>
+
+    <div style="margin-top: 2rem;">
+      <button type="button" onclick="window.location.href = refreshUrl;">Refresh now</button>
+    </div>
+  </main>
+
+  <script>
+    const jobId = {{ job_id|tojson }};
+    const initialStatus = {{ job_status|tojson }};
+    const jobStatusUrl = {{ job_status_url|tojson }};
+    const refreshUrl = {{ refresh_url|tojson }};
+    const ACTIVE_STATES = new Set(["queued", "started", "deferred", "scheduled"]);
+    const FAILURE_STATES = new Set(["failed", "stopped", "canceled"]);
+    const statusChip = document.getElementById("statusChip");
+    const errorPanel = document.getElementById("errorPanel");
+    const errorMessage = document.getElementById("errorMessage");
+    const POLL_INTERVAL_MS = 5000;
+    let pollTimer = null;
+
+    function updateStatusChip(state) {
+      const normalized = (state || "unknown").toLowerCase();
+      statusChip.dataset.state = normalized;
+      statusChip.textContent = normalized.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function scheduleNextPoll() {
+      clearTimeout(pollTimer);
+      pollTimer = setTimeout(pollJobStatus, POLL_INTERVAL_MS);
+    }
+
+    async function pollJobStatus() {
+      if (!jobStatusUrl) {
+        return;
+      }
+      try {
+        const response = await fetch(jobStatusUrl, { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Status endpoint returned HTTP ${response.status}`);
+        }
+        const payload = await response.json();
+        const state = (payload && payload.status) ? String(payload.status) : "unknown";
+        updateStatusChip(state);
+
+        if (state === "finished") {
+          clearTimeout(pollTimer);
+          window.location.href = refreshUrl;
+          return;
+        }
+
+        if (FAILURE_STATES.has(state)) {
+          clearTimeout(pollTimer);
+          errorPanel.hidden = false;
+          errorMessage.textContent = `Job ${jobId} ended with status "${state}". Check the job log for details.`;
+          return;
+        }
+
+        if (state === "not_found" || state === "unknown") {
+          scheduleNextPoll();
+          return;
+        }
+
+        if (ACTIVE_STATES.has(state)) {
+          scheduleNextPoll();
+          return;
+        }
+
+        // Any other terminal state -> re-check after a delay.
+        scheduleNextPoll();
+      } catch (err) {
+        scheduleNextPoll();
+      }
+    }
+
+    updateStatusChip(initialStatus);
+    if (jobStatusUrl) {
+      scheduleNextPoll();
+    }
+  </script>
+</body>
+</html>

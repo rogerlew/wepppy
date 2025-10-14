@@ -25,9 +25,7 @@
       <!-- <p><a href="report/wepp/frq_flood/" target="_blank">Flooding Frequency Report</a></p> -->
       <p><a href="{{ url_for_run('wepp.report_wepp_avg_annual_by_landuse', runid=runid, config=config) }}" target="_blank">Summary by Landuse Report</a></p>
       <p><a href="{{ url_for_run('wepp.report_wepp_sediment_delivery', runid=runid, config=config) }}" target="_blank">Sediment Characteristics Report</a></p>
-      {% if climate.has_observed %}
-        <p><a href="{{ url_for_run('weppcloud.deval_details', runid=runid, config=config) }}" target="_blank">The Deval in the Details Report</a></p>
-      {% endif %}
+      <p><a href="{{ url_for_run('weppcloud.deval_details', runid=runid, config=config) }}" target="_blank">The Deval in the Details Report</a></p>
   </div>
   <div>
       <h4>Water Balance Reports</h4>
