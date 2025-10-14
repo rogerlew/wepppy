@@ -34,6 +34,7 @@ from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
 from wepppy.nodb.core import *
 from wepppy.nodb.base import *
+from wepppy.nodb.version import copy_version_for_clone
 
 __all__ = [
     'OMNI_REL_DIR',
@@ -152,6 +153,8 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, runid, wepp_bin='we
         _clear_nodb_cache_and_locks(runid, pup_relpath)
 
     os.makedirs(new_wd)
+    copy_version_for_clone(wd, new_wd)
+
     os.makedirs(_join(new_wd, 'soils'), exist_ok=True)
     os.makedirs(_join(new_wd, 'landuse'), exist_ok=True)
 
@@ -299,6 +302,8 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid:str, pa
 
     pup_relpath = os.path.relpath(new_wd, parent_wd)
 
+    copy_version_for_clone(sibling_wd, new_wd)
+    
     # replace disturbed, landuse, and soils
     os.remove(_join(new_wd, 'disturbed.nodb'))
     os.remove(_join(new_wd, 'landuse.nodb'))
