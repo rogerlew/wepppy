@@ -79,7 +79,8 @@ def lt_steep_slope_index():
 @locations_bp.route('/locations/caldor')
 @locations_bp.route('/locations/caldor/')
 def caldor_index():
-    return render_template('locations/caldor/Caldor.html', user=current_user)
+    return redirect('https://doc.wepp.cloud/caldor-fire-2025/', code=301)
+
 
 @locations_bp.route('/locations/caldor/results/<file>')
 @locations_bp.route('/locations//results/<file>/')
@@ -87,104 +88,33 @@ def caldor_results(file):
     """
     recursive list the file structure of the working directory
     """
-    fn = _join('/workdir/wepppy/wepppy/weppcloud/templates/locations/caldor/results', file)
-    
-    if _exists(fn):
-        return send_file(fn, as_attachment=True)
-    else:
-        return error_factory('File does not exist')
-    
+    return redirect('https://github.com/ui-weppcloud/caldor-fire-2025/tree/storage', code=301)
+ 
+
 @locations_bp.route('/seattle-municipal')
 @locations_bp.route('/seattle-municipal/')
 @locations_bp.route('/locations/seattle-municipal')
 @locations_bp.route('/locations/seattle-municipal/')
 def seattle_index():
-    return render_template('locations/spu/index.htm', user=current_user)
+    return redirect('https://doc.wepp.cloud/seattle-municipal/', code=301)
+
 
 @locations_bp.route('/seattle-municipal/results')
 @locations_bp.route('/seattle-municipal/results/')
 @locations_bp.route('/locations/seattle-municipal/results')
 @locations_bp.route('/locations/seattle-municipal/results/')
 def seattle_results_index():
-
-    import io
-    import wepppy
-    fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'results', 'index.htm')
-
-    if _exists(fn):
-        with io.open(fn, mode="r", encoding="utf-8") as fp:
-            return fp.read()
+    return redirect('https://github.com/ui-weppcloud/seattle-municipal/tree/storage', code=301)
 
 
-@locations_bp.route('/seattle-municipal/results/<file>')
-@locations_bp.route('/seattle-municipal/results/<file>/')
-@locations_bp.route('/locations/seattle-municipal/results/<file>')
-@locations_bp.route('/locations/seattle-municipal/results/<file>/')
+@locations_bp.route('/seattle-municipal/results/<path:subpath>')
+@locations_bp.route('/seattle-municipal/results/<path:subpath>/')
+@locations_bp.route('/locations/seattle-municipal/results/<path:subpath>')
+@locations_bp.route('/locations/seattle-municipal/results/<path:subpath>/')
 # roles_required('SeattleGroup')
-def seattle_results(file):
+def seattle_results(subpath):
     """
     recursive list the file structure of the working directory
     """
-    import io
-    import wepppy
-    fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'results', file)
-
-    if _exists(fn):
-
-        if '.htm' in fn:
-            with io.open(fn, mode="r", encoding="utf-8") as fp:
-                return fp.read()
-        elif '.jpeg' in fn or '.jpg' in fn:
-            return send_file(fn, mimetype='image/jpg')
-
-        return send_file(fn, as_attachment=True)
-    else:
-        return error_factory('File does not exist')
     
-
-@locations_bp.route('/seattle-municipal/results/<foo>/<bar>')
-@locations_bp.route('/seattle-municipal/results/<foo>/<bar>/')
-@locations_bp.route('/locations/seattle-municipal/results/<foo>/<bar>')
-@locations_bp.route('/locations/seattle-municipal/results/<foo>/<bar>/')
-# roles_required('SeattleGroup')
-def seattle_results2(foo, bar):
-    """
-    recursive list the file structure of the working directory
-    """
-    import io
-    import wepppy
-    fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'results', foo, bar)
-
-    if _exists(fn):
-
-        if '.htm' in fn:
-            with io.open(fn, mode="r", encoding="utf-8") as fp:
-                return fp.read()
-
-        elif '.jpeg' in fn or '.jpg' in fn:
-            return send_file(fn, mimetype='image/jpg')
-
-        return send_file(fn, as_attachment=True)
-    else:
-        return error_factory('File does not exist')
-    
-
-@locations_bp.route('/seattle-municipal/static/<file>')
-@locations_bp.route('/seattle-municipal/static/<file>/')
-@locations_bp.route('/locations/seattle-municipal/static/<file>')
-@locations_bp.route('/locations/seattle-municipal/static/<file>/')
-# roles_required('SeattleGroup')
-def seattle_static(file):
-    """
-    recursive list the file structure of the working directory
-    """
-    import wepppy
-    fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'static', file)
-
-    if _exists(fn):
-        
-        with io.open(fn, "r", encoding="utf-8") as fp:
-            return fp.read()
-    else:
-        return error_factory('File does not exist')
-    
+    return redirect('https://github.com/ui-weppcloud/seattle-municipal/tree/storage', code=301)
