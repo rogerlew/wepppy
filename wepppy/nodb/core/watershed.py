@@ -33,7 +33,6 @@ from osgeo.gdalconst import *
 from deprecated import deprecated
 
 from wepppy.topo.watershed_abstraction import WatershedAbstraction, WeppTopTranslator
-from wepppy.topo.taudem import TauDEMTopazEmulator
 from wepppy.topo.peridot.peridot_runner import (
     run_peridot_abstract_watershed,
     run_peridot_wbt_abstract_watershed,
@@ -775,12 +774,7 @@ class Watershed(NoDbBase):
             )
             self.wbt = wbt
 
-        else:
-            self.logger.info(f' delineation_backend_is_taudem')
-            TauDEMTopazEmulator(self.taudem_wd, self.dem_fn).build_channels(
-                csa=self.csa
-            )
-
+      
         if _exists(self.subwta):
             self.logger.info(f' Removing subcatchment: {self.subwta}')
             os.remove(self.subwta)
@@ -849,21 +843,6 @@ class Watershed(NoDbBase):
             wbt = self.wbt
             self.outlet = wbt.set_outlet(lng=lng, lat=lat, logger=self.logger)
             self.wbt = wbt
-        else:
-            self.logger.info(f' delineation_backend_is_taudem')
-            taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
-            taudem.set_outlet(lng=lng, lat=lat)
-
-            map = self.ron_instance.map
-            o_x, o_y = map.lnglat_to_px(*taudem.outlet)
-            distance = haversine((lng, lat), taudem.outlet) * 1000  # in m
-            self.outlet = Outlet(
-                requested_loc=(lng, lat),
-                actual_loc=taudem.outlet,
-                distance_from_requested=distance,
-                pixel_coords=(o_x, o_y),
-            )
-
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.set_outlet)
@@ -929,34 +908,6 @@ class Watershed(NoDbBase):
     @property
     def pkcsa(self):
         return getattr(self, "_pkcsa", None)
-
-    @property
-    def pkcsa_drop_table_html(self):
-        assert self.delineation_backend_is_taudem
-        taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
-
-        import pandas as pd
-
-        df = pd.read_csv(taudem._drp, skipfooter=1, engine="python")
-        return df.to_html(border=0, classes=["table"], index=False, index_names=False)
-
-    @property
-    def pkcsa_drop_analysis_threshold(self):
-        assert self.delineation_backend_is_taudem
-        taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
-        return taudem.drop_analysis_threshold
-
-    def _taudem_build_subcatchments(self):
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name}()')
-
-        with self.locked():
-            taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
-
-            pkcsa = self.pkcsa
-            if pkcsa == "auto":
-                pkcsa = None
-            taudem.build_subcatchments(threshold=pkcsa)
 
     @property
     def network(self):
@@ -1189,56 +1140,6 @@ class Watershed(NoDbBase):
         del dst  # Writes and closes file
 
         assert _exists(self.mofe_map)
-
-    @deprecated
-    def _taudem_abstract_watershed(self):
-        from wepppy.nodb.core import Wepp
-
-        with self.locked():
-            taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
-            taudem.abstract_watershed(
-                wepp_chn_type=self.wepp_chn_type,
-                clip_hillslopes=self.clip_hillslopes,
-                clip_hillslope_length=self.clip_hillslope_length,
-            )
-
-            self._subs_summary = taudem.abstracted_subcatchments
-            self._chns_summary = taudem.abstracted_channels
-
-            ws_stats = taudem.calculate_watershed_statistics()
-
-            self._fps_summary = None
-            self._wsarea = ws_stats["wsarea"]
-            self._sub_area = sum(
-                summary.area for summary in self._subs_summary.values()
-            )
-            self._chn_area = sum(
-                summary.area for summary in self._chns_summary.values()
-            )
-            self._minz = ws_stats["minz"]
-            self._maxz = ws_stats["maxz"]
-            self._ruggedness = ws_stats["ruggedness"]
-            self._area_gt30 = ws_stats["area_gt30"]
-            self._centroid = ws_stats["ws_centroid"]
-            self._outlet_top_id = ws_stats["outlet_top_id"]
-
-            taudem.write_slps(out_dir=self.wat_dir)
-
-            self._structure = taudem.structure
-
-        ron = self.ron_instance
-        if any(
-            [
-                "lt" in ron.mods,
-                "portland" in ron.mods,
-                "seattle" in ron.mods,
-                "general" in ron.mods,
-            ]
-        ):
-            wepp = Wepp.getInstance(self.wd)
-            wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
-
-        self.trigger(TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE)
 
     @deprecated
     def _topaz_abstract_watershed(self):

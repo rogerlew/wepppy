@@ -12,6 +12,7 @@ The command bar provides a keyboard-driven palette for common actions on project
   3. Update `SET_HELP_LINES` or other user-facing help text so `:help` remains accurate.
   4. Register a Flask endpoint (usually under `command_bar_bp`) that responds with `{ Success: bool, Content?: {...}, Error?: str }` and wire it into the handler.
 - **Routes** – Network-backed actions expect `projectBaseUrl = /runs/<runid>/<config>/`. Concatenate the relative path (for example `command_bar/loglevel`) to reach the matching backend endpoint.
+- **Query Engine Tokens** – The `get query_engine_api_key` command calls `command_bar_bp.issue_query_engine_api_key`. The handler uses `weppcloud.utils.auth_tokens.issue_token` to mint a run-scoped JWT (scopes: `runs:read`, `queries:validate`, `queries:execute`). The response includes expiration, suggested workflows (ChatGPT Custom GPT, Gemini Extension, Claude tool use), and instructions to send the token as `Authorization: Bearer <token>`. Ensure `WEPP_AUTH_JWT_SECRET` is set in the environment; otherwise the endpoint returns a configuration error.
 
 ## `data-usersum` Hover Previews
 - The browse blueprint (and any other renderer) can wrap parameter names in `<span data-usersum="<parameter>">` to opt into hover previews.

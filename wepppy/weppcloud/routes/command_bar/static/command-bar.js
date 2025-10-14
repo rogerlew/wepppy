@@ -107,6 +107,10 @@
                 locks: {
                     description: 'Show active NoDb file locks for this run',
                     handler: (args) => this.routeGetLocks(args)
+                },
+                query_engine_api_key: {
+                    description: 'Generate a short-lived Query Engine API token with setup instructions',
+                    handler: (args) => this.routeGetQueryEngineApiKey(args)
                 }
             };
         }
@@ -1118,6 +1122,66 @@
                 console.error('Error fetching lock statuses:', error);
                 this.showResult(`Error: Unable to fetch lock statuses. ${error.message || error}`);
             });
+        }
+
+        routeGetQueryEngineApiKey(args = []) {
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: This command is only available on a project page.');
+                return;
+            }
+
+            if (Array.isArray(args) && args.length > 0) {
+                this.showResult('Usage: get query_engine_api_key');
+                return;
+            }
+
+            const targetUrl = `${this.projectBaseUrl}command_bar/query_engine_api_key`;
+
+            return fetch(targetUrl, {
+                method: 'POST',
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+                .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
+                .then(({ response, data }) => {
+                    if (!response.ok || !data || data.Success !== true) {
+                        const message = (data && (data.Error || data.error || data.message)) || `HTTP ${response.status}`;
+                        throw new Error(message);
+                    }
+
+                    const content = data.Content || {};
+                    const token = content.token || '';
+                    const expiresAt = content.expires_at ? new Date(content.expires_at * 1000).toISOString() : null;
+                    const scopes = Array.isArray(content.scopes) ? content.scopes.join(', ') : String(content.scopes || '');
+                    const instructions = Array.isArray(content.instructions) ? content.instructions : [];
+
+                    const messageLines = [
+                        'Query Engine API token generated.',
+                        '',
+                        `Token: ${token || '(missing)'}`,
+                        expiresAt ? `Expires At (UTC): ${expiresAt}` : 'Expires At: unknown',
+                        scopes ? `Scopes: ${scopes}` : '',
+                        'HTTP Header: Authorization: Bearer <token>',
+                        '',
+                    ].filter(Boolean);
+
+                    if (instructions.length > 0) {
+                        messageLines.push('Suggested Workflows:');
+                        instructions.forEach((line, index) => {
+                            messageLines.push(`  ${index + 1}. ${line}`);
+                        });
+                    }
+
+                    this.showResult(messageLines.join('\n'));
+                })
+                .catch((error) => {
+                    console.error('Error generating Query Engine token:', error);
+                    this.showResult(`Error: Unable to generate Query Engine API token. ${error.message || error}`);
+                });
         }
 
         routeRunInterchangeMigration(args = []) {

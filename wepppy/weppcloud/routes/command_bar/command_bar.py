@@ -19,6 +19,7 @@ Keep endpoints small and focused. Here are some guidelines:
 import logging
 
 from flask import Blueprint, jsonify, request
+from flask_login import current_user
 
 from wepppy.nodb.base import (
     LogLevel,
@@ -27,6 +28,8 @@ from wepppy.nodb.base import (
     try_redis_set_log_level,
 )
 from wepppy.weppcloud.utils.helpers import authorize
+from wepppy.weppcloud.utils import auth_tokens
+from wepppy.weppcloud.utils.auth_tokens import JWTConfigurationError
 
 from .._run_context import load_run_context
 
@@ -103,5 +106,50 @@ def get_lock_statuses(runid, config):
         'Success': True,
         'Content': {
             'locked_files': locked_files
+        }
+    })
+
+
+@command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/query_engine_api_key', methods=['POST'])
+def issue_query_engine_api_key(runid, config):
+    authorize(runid, config)
+    load_run_context(runid, config)
+
+    subject = None
+    if current_user and hasattr(current_user, 'get_id'):
+        subject = current_user.get_id()
+    if not subject:
+        subject = getattr(current_user, 'email', None) or 'weppcloud-user'
+
+    try:
+        token_payload = auth_tokens.issue_token(
+            str(subject),
+            scopes=["runs:read", "queries:validate", "queries:execute"],
+            runs=[runid],
+            audience=["query-engine"],
+        )
+    except JWTConfigurationError as exc:
+        return jsonify({'Success': False, 'Error': f'JWT configuration error: {exc}'}), 500
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logging.exception("Failed to issue Query Engine API key for %s", runid)
+        return jsonify({'Success': False, 'Error': 'Unexpected error generating API key.'}), 500
+
+    claims = token_payload.get('claims', {})
+    expires_at = claims.get('exp')
+    scopes = claims.get('scope')
+
+    instructions = [
+        'ChatGPT Custom GPT: paste the OpenAPI spec, choose API key auth, and provide this token as the Bearer secret.',
+        'Google Gemini Extensions: register the OpenAPI tool, configure API-key authentication, and supply this token as the Authorization header.',
+        'Anthropic Claude Tool Use: handle tool invocation server-side, send this token as the Authorization header when proxying requests.'
+    ]
+
+    return jsonify({
+        'Success': True,
+        'Content': {
+            'token': token_payload.get('token'),
+            'expires_at': expires_at,
+            'scopes': scopes.split(auth_tokens.get_jwt_config().scope_separator) if isinstance(scopes, str) else scopes,
+            'instructions': instructions,
         }
     })

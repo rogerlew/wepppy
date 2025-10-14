@@ -207,15 +207,25 @@ def runs0(runid, config):
 @handle_with_exception_factory
 def create_index():
     configs = get_configs()
-    x = ['<tr><td><a href="{0}" rel="nofollow">{0}</a></td>'
-        '<td><a href="{0}?general:dem_db=ned1/2016" rel="nofollow">{0} ned1/2016</a></td>'
-        '<td><a href="{0}?watershed:delineation_backend=wbt" rel="nofollow">{0} WhiteBoxTools</a></td></tr>'
-        .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
+    rows = []
+    for cfg in sorted(configs):
+        if cfg == '_defaults':
+            continue
+
+        base_url = url_for_run('run_0.create', config=cfg)
+        rows.append(
+            '<tr>'
+            f'<td><a href="{base_url}" rel="nofollow">{cfg}</a></td>'
+            f'<td><a href="{base_url}?general:dem_db=ned1/2016" rel="nofollow">{cfg} ned1/2016</a></td>'
+            f'<td><a href="{base_url}?watershed:delineation_backend=wbt" rel="nofollow">{cfg} WhiteBoxTools</a></td>'
+            '</tr>'
+        )
+
     return '<!DOCTYPE html><html><body>'\
         '<link rel="stylesheet" '\
         'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
         'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
-        '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(x))
+        '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(rows))
 
 def create_run_dir(current_user):
     from wepppy.weppcloud.utils.archive import has_archive

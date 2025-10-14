@@ -1369,18 +1369,6 @@ class NoDbBase(object):
             lt = LakeTahoe.getInstance(self.wd)
             lt.on(evt)
 
-        if 'portland' in self.mods:
-            from wepppy.nodb.mods.locations import PortlandMod
-            portland = PortlandMod.getInstance(self.wd)
-            portland.on(evt)
-
-        if 'seattle' in self.mods:
-            try:
-                from wepppy.nodb.mods.locations import SeattleMod
-                seattle = SeattleMod.getInstance(self.wd)
-                seattle.on(evt)
-            except:
-                pass
         if 'general' in self.mods:
             from wepppy.nodb.mods.locations import GeneralMod
             general = GeneralMod.getInstance(self.wd)

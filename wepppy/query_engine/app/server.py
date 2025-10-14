@@ -6,49 +6,22 @@ import traceback
 from collections import OrderedDict
 from dataclasses import asdict
 from pathlib import Path
+import os
 
 from starlette.applications import Starlette
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse
-from starlette.routing import Route
+from starlette.routing import Route, Mount
 from starlette.templating import Jinja2Templates
 
 
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
-from wepppy.weppcloud.utils.helpers import get_wd
 from .query_presets import QUERY_PRESETS
+from .helpers import resolve_run_path
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
 LOGGER = logging.getLogger(__name__)
-
-
-def _resolve_run_path(runid_param: str) -> Path:
-    """Resolve a run identifier or path to an absolute existing directory."""
-
-    # Prefer the canonical lookup so we honor WEPPcloud storage layout and caches.
-    try:
-        wd = get_wd(runid_param)
-    except Exception:
-        wd = None
-
-    if wd:
-        run_path = Path(wd).expanduser()
-        if run_path.exists():
-            return run_path.resolve()
-
-    # Allow callers to pass absolute paths directly (e.g. local testing).
-    param_path = Path(runid_param)
-    if param_path.is_absolute():
-        if param_path.exists():
-            return param_path.expanduser().resolve()
-
-    # Fallback to treating the runid as a root-level path segment.
-    candidate = Path("/" + runid_param)
-    if candidate.exists():
-        return candidate.resolve()
-
-    raise FileNotFoundError(runid_param)
 
 
 async def homepage(request: StarletteRequest) -> Response:
@@ -60,7 +33,7 @@ async def homepage(request: StarletteRequest) -> Response:
 async def run_info(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
     try:
-        run_path = _resolve_run_path(runid_param)
+        run_path = resolve_run_path(runid_param)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -87,7 +60,7 @@ async def run_info(request: StarletteRequest) -> Response:
 async def run_schema(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
     try:
-        run_path = _resolve_run_path(runid_param)
+        run_path = resolve_run_path(runid_param)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -107,7 +80,7 @@ async def run_schema(request: StarletteRequest) -> Response:
 async def make_query_endpoint(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
     try:
-        run_path = _resolve_run_path(runid_param)
+        run_path = resolve_run_path(runid_param)
     except FileNotFoundError:
         return PlainTextResponse(f"Run '{runid_param}' not found", status_code=404)
 
@@ -157,7 +130,7 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
 async def run_query_endpoint(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
     try:
-        run_path = _resolve_run_path(runid_param)
+        run_path = resolve_run_path(runid_param)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -233,7 +206,7 @@ async def activate_run(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
 
     try:
-        run_path = _resolve_run_path(runid_param)
+        run_path = resolve_run_path(runid_param)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -280,6 +253,19 @@ def create_app() -> Starlette:
         Route("/runs/{runid:path}/query", run_query_endpoint, methods=["POST"]),
         Route("/runs/{runid:path}", run_info, methods=["GET"]),
     ]
+
+    if os.getenv("WEPP_MCP_JWT_SECRET"):
+        try:
+            from .mcp import create_mcp_app
+
+            mcp_app = create_mcp_app()
+        except RuntimeError as exc:
+            LOGGER.warning("Failed to initialise MCP API: %s", exc, exc_info=True)
+        else:
+            routes.append(Mount("/mcp", app=mcp_app))
+            LOGGER.info("MCP API mounted at /mcp")
+    else:
+        LOGGER.info("WEPP_MCP_JWT_SECRET not configured; MCP API disabled")
 
     app = Starlette(debug=False, routes=routes)
     return app

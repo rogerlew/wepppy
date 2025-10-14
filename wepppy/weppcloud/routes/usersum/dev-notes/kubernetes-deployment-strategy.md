@@ -59,3 +59,41 @@ On-premise storage is a key consideration.
 * **Metrics**: Deploy **Prometheus** and **Grafana** to monitor cluster and application performance, providing dashboards for resource utilization and service health.
 
 This strategy combines the best of both worlds: a simple, productive development environment and a robust, scalable, and manageable production deployment tailored to your on-premise infrastructure.
+
+(wepppy310-env) roger@forest.local:/workdir$ du -ah wepppy | sort -rh | head -n 10
+du: cannot read directory 'wepppy/.docker-data/redis/appendonlydir': Permission denied
+du: cannot read directory 'wepppy/.docker-data/postgres': Permission denied
+14G     wepppy
+11G     wepppy/wepppy
+5.2G    wepppy/wepppy/climates
+5.1G    wepppy/wepppy/climates/cligen
+4.3G    wepppy/wepppy/climates/cligen/county_db/observed_climates
+4.3G    wepppy/wepppy/climates/cligen/county_db
+3.3G    wepppy/.git
+2.9G    wepppy/wepppy/soils/ssurgo/data/statsgo
+2.9G    wepppy/wepppy/soils/ssurgo/data
+2.9G    wepppy/wepppy/soils/ssurgo
+(wepppy310-env) roger@forest.local:/workdir$ cd wepppy
+(wepppy310-env) roger@forest.local:/workdir/wepppy$ du -ah wepppy | sort -rh | head -n 10
+11G     wepppy
+5.2G    wepppy/climates
+5.1G    wepppy/climates/cligen
+4.3G    wepppy/climates/cligen/county_db/observed_climates
+4.3G    wepppy/climates/cligen/county_db
+2.9G    wepppy/soils/ssurgo/data/statsgo
+2.9G    wepppy/soils/ssurgo/data
+2.9G    wepppy/soils/ssurgo
+2.9G    wepppy/soils
+1.5G    wepppy/soils/ssurgo/data/statsgo/build/spatial
+(wepppy310-env) roger@forest.local:/workdir/wepppy$ cd wepppy/
+(wepppy310-env) roger@forest.local:/workdir/wepppy/wepppy$ du -ah climates | sort -rh | head -n 10
+5.2G    climates
+5.1G    climates/cligen
+4.3G    climates/cligen/county_db/observed_climates
+4.3G    climates/cligen/county_db
+567M    climates/cligen/ghcn_daily/tests/ghcn_daily
+567M    climates/cligen/ghcn_daily/tests
+567M    climates/cligen/ghcn_daily
+152M    climates/cligen/GHCN_Intl_Stations
+61M     climates/cligen/GHCN_Intl_Stations/30-year
+51M     climates/cligen/GHCN_Intl_Stations/all_years

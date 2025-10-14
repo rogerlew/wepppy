@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import os
+import tempfile
 import threading
 from dataclasses import dataclass
 from pathlib import Path
@@ -65,6 +67,37 @@ def _version_file(wd: Path) -> Path:
     return wd / VERSION_FILENAME
 
 
+def _atomic_write(path: Path, contents: str) -> None:
+    """Write ``contents`` to ``path`` atomically using a unique temp file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    fd, tmp_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f"{path.name}.",
+        suffix=".tmp",
+    )
+    tmp_path = Path(tmp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="ascii") as tmp_file:
+            tmp_file.write(contents)
+            tmp_file.flush()
+            fsync = getattr(os, "fsync", None)
+            if fsync is not None:
+                try:
+                    fsync(tmp_file.fileno())
+                except OSError:
+                    # Best-effort fsync; fall back to relying on rename if it fails.
+                    pass
+
+        tmp_path.replace(path)
+    finally:
+        try:
+            if tmp_path.exists():
+                tmp_path.unlink()
+        except OSError:
+            pass
+
+
 def read_version(wd: str | Path) -> int:
     """Return the stored schema version for ``wd`` (defaults to 0)."""
     wd_path = Path(wd)
@@ -96,20 +129,11 @@ def write_version(wd: str | Path, version: int) -> None:
     """Persist ``version`` to the NoDb version file under ``wd``."""
     wd_path = Path(wd)
     path = _version_file(wd_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
     try:
-        tmp_path.write_text(f"{version}\n", encoding="ascii")
-        tmp_path.replace(path)
+        _atomic_write(path, f"{version}\n")
     except OSError as exc:
         logger.error("Failed to write NoDb version file %s: %s", path, exc)
         raise
-    finally:
-        try:
-            if tmp_path.exists():
-                tmp_path.unlink()
-        except OSError:
-            pass
 
 
 def copy_version_for_clone(base_wd: str | Path, new_wd: str | Path) -> None:
@@ -132,10 +156,8 @@ def copy_version_for_clone(base_wd: str | Path, new_wd: str | Path) -> None:
         logger.error("Failed to read NoDb version file %s: %s", base_path, exc)
         raise
 
-    tmp_path = target_path.with_suffix(target_path.suffix + ".tmp")
     try:
-        tmp_path.write_text(contents, encoding="ascii")
-        tmp_path.replace(target_path)
+        _atomic_write(target_path, contents)
     except OSError as exc:
         logger.error(
             "Failed to copy NoDb version file from %s to %s: %s",
@@ -144,12 +166,6 @@ def copy_version_for_clone(base_wd: str | Path, new_wd: str | Path) -> None:
             exc,
         )
         raise
-    finally:
-        try:
-            if tmp_path.exists():
-                tmp_path.unlink()
-        except OSError:
-            pass
 
 
 def ensure_version(
