@@ -65,7 +65,7 @@ NoDb subclass logger
 - Structured logging is collected per run in the working directory (`<runid>/_logs/`). The queue handler replicates to console, file, and Redis so you get local artifacts plus live dashboards.
 
 ## Docker Compose Dev Stack (Recommended)
-The repository ships with a multi-container development stack (`docker/docker-compose.dev.yml`) that mirrors the production topology: Flask (`weppcloud`), Go microservices (`status`, `preflight`), the Starlette browse service, Redis, PostgreSQL, an RQ worker pool, and a Caddy reverse proxy that fronts the entire bundle (and now serves `/weppcloud/static/*` directly).
+The repository ships with a multi-container development stack (`docker/docker-compose.dev.yml`) that mirrors the production topology: Flask (`weppcloud`), Go microservices (`status`, `preflight`), the Starlette browse service, Redis, PostgreSQL, an RQ worker pool, and a Caddy reverse proxy that fronts the entire bundle (and now serves `/weppcloud/static/*` directly). The dev image is built from `docker/Dockerfile.dev` so all repos under `/workdir` stay bind-mounted for instant reloads.
 
 > docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up -d
 
@@ -73,10 +73,14 @@ The repository ships with a multi-container development stack (`docker/docker-co
 ### Quick start
 ```bash
 # 1. Set the UID/GID you want the containers to use (defaults to 1000:1000).
+SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
+SECURITY_PASSWORD_SALT=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
 cat > docker/.env <<EOF
 UID=$(id -u)          # customise as needed
 GID=$(id -g)
 POSTGRES_PASSWORD=localdev
+SECRET_KEY=$SECRET_KEY
+SECURITY_PASSWORD_SALT=$SECURITY_PASSWORD_SALT
 EOF
 
 # 2. Bring up the stack.
@@ -99,6 +103,25 @@ Make sure the group exists locally; Compose passes numeric ids straight through,
 - **Open a shell in the app container**: `docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec weppcloud bash`
 - **Reset a single service**: `docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build weppcloud`
 - **View static assets**: Caddy proxies `/weppcloud/static/*` from the repository mount; updates to `wepppy/weppcloud/static` land immediately without hitting Gunicorn.
+
+## Docker Compose Production Stack
+`docker/docker-compose.prod.yml` builds the production image (`docker/Dockerfile`) that vendors all Python dependencies, cloned sibling repositories, and `.pth` shims directly into the container. The compose file keeps bind mounts to a minimum (only data volumes for WC1/GeoData, Redis, and Postgres), sets `restart: unless-stopped`, and exposes only the required ports so the stack can drop behind a reverse proxy or a Kubernetes ingress later.
+
+```bash
+# Build the production image (tags as wepppy:latest by default)
+docker compose -f docker/docker-compose.prod.yml build weppcloud
+
+# Launch the full stack
+docker compose -f docker/docker-compose.prod.yml up -d
+
+# Override the published image/tag when deploying from CI
+WEPPCLOUD_IMAGE=registry.example.com/wepppy:2025.02 docker compose -f docker/docker-compose.prod.yml up -d weppcloud
+```
+
+- The `.env` file in `docker/` continues to feed secrets and connection strings; update it (or set environment variables) before building so the values bake into the image metadata.
+- WC1/GeoData are mounted as named volumes (`wc1-data`, `geodata-data`) by default. Swap them for bind mounts or CSI-backed volumes in Kubernetes as needed.
+- Health checks (`/health`) gate container readiness. For Kubernetes, reuse the same endpoint for your liveness/readiness probes.
+- The production image runs as the non-root `wepp` user (UID/GID configurable via build args) to satisfy PodSecurity/OCI hardening requirements.
 
 ## Baremetal (not recommended)
 - Provision Python 3.10 + Poetry/conda (see `install/` and `wepppy/weppcloud/_baremetal/` for reference scripts).
