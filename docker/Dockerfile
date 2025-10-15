@@ -16,7 +16,7 @@ ARG APP_GID=1000
 # External repositories that historically lived beside the working tree.
 ARG F_ESRI_REPO=https://github.com/rogerlew/f-esri.git
 ARG F_ESRI_REF=main
-ARG WBT_REPO=https://github.com/rogerlew/whitebox-tools.git
+ARG WBT_REPO=https://github.com/rogerlew/weppcloud-wbt.git
 ARG WBT_REF=master
 ARG WEPPCLOUD2_REPO=https://github.com/wepp-in-the-woods/weppcloud2.git
 ARG WEPPCLOUD2_REF=main
