@@ -368,10 +368,55 @@ function onReady() {
      * Table of Contents
      * =================
      */
+    var tocTaskEmojis = {{ toc_task_emojis | tojson }};
+    window.tocTaskEmojis = tocTaskEmojis;
+
+    function registerTocEmojiMetadata(navElement, emojiMap) {
+        if (!navElement || !emojiMap) {
+            return;
+        }
+        var anchors = navElement.querySelectorAll('a.nav-link');
+        Array.prototype.forEach.call(anchors, function (anchor) {
+            var href = anchor.getAttribute('href');
+            if (!href) {
+                return;
+            }
+            var emoji = emojiMap[href];
+            if (!emoji) {
+                return;
+            }
+            var existingText = (anchor.textContent || '').trim();
+            var storedText = anchor.getAttribute('data-original-text');
+            if (!storedText) {
+                if (emoji && existingText.indexOf(emoji) === 0) {
+                    existingText = existingText.slice(emoji.length).trim();
+                }
+                storedText = existingText;
+            }
+            anchor.setAttribute('data-original-text', storedText);
+            anchor.setAttribute('data-toc-emoji-value', emoji);
+            if (!anchor.hasAttribute('data-toc-emoji')) {
+                anchor.setAttribute('data-toc-emoji', '');
+            }
+            if (anchor.dataset) {
+                anchor.dataset.originalText = storedText;
+                anchor.dataset.tocEmojiValue = emoji;
+                if (typeof anchor.dataset.tocEmoji === 'undefined') {
+                    anchor.dataset.tocEmoji = '';
+                }
+            }
+            anchor.textContent = storedText;
+        });
+    }
+
     $(function () {
         var navSelector = "#toc";
         var $myNav = $(navSelector);
         Toc.init($myNav);
+        registerTocEmojiMetadata($myNav.get(0), tocTaskEmojis);
+        if (typeof updateUI === 'function' && typeof lastPreflightChecklist !== 'undefined' && lastPreflightChecklist) {
+            updateUI(lastPreflightChecklist);
+        }
     });
 
     function computeScrollOffset() {

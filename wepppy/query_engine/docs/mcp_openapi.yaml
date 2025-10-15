@@ -1,411 +1,85 @@
 openapi: 3.1.0
 info:
   title: WEPPcloud Query Engine MCP API
-  summary: Machine Control Protocol endpoints for querying WEPPcloud run catalogues.
   version: 0.1.0
   description: |
-    The MCP API exposes run metadata, dataset catalogues, curated presets, prompt templates,
-    and query execution capabilities for WEPPcloud runs. All endpoints require a valid JWT bearer
-    token issued by WEPPcloud. Individual operations enforce scope checks and run-level access.
+    Simplified subset of the WEPPcloud Query Engine MCP API for testing with ChatGPT Actions.
+    Endpoints expose run metadata and a lightweight health probe. All operations require a
+    valid WEPPcloud-issued JWT bearer token.
   contact:
-    name: WEPPcloud
-    url: https://wepp.cloud
+    name: WEPPcloud Dev
+    url: https://wepp.cloud/weppcloud/
 servers:
-  - url: https://{host}/query-engine/mcp
-    description: Production deployment (mounted under `/query-engine/mcp`)
-    variables:
-      host:
-        default: wepp.cloud
-        description: Hostname for the WEPPcloud deployment.
-externalDocs:
-  description: Implementation notes and onboarding guide
-  url: https://wepp.cloud/docs/query-engine
+  - url: https://wepp.cloud/query-engine/mcp
+    description: Production deployment
 security:
-  - BearerAuth: []
+  - bearerAuth: []
 tags:
   - name: Utility
     description: Health probes and supporting endpoints.
   - name: Runs
     description: Discovery and metadata for accessible WEPPcloud runs.
-  - name: Catalog
-    description: Dataset catalogue browsing and filtering.
-  - name: Activation
-    description: Catalogue activation workflow.
-  - name: Presets
-    description: Curated payload samples.
-  - name: Prompts
-    description: Prompt template rendering for LLM agents.
-  - name: Queries
-    description: Validation and execution of query payloads.
 paths:
   /ping:
     get:
       tags: [Utility]
-      summary: Check service availability and resolve the calling principal.
+      summary: Check service availability.
+      description: Verify that the service is reachable and the provided token is valid.
       operationId: ping
       responses:
-        "200":
+        '200':
           description: Service is reachable and the token is valid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PingResponse'
-        "401":
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-  /runs:
-    get:
-      tags: [Runs]
-      summary: List runs the caller can access.
-      operationId: listRuns
-      parameters:
-        - $ref: '#/components/parameters/PageSize'
-        - $ref: '#/components/parameters/PageNumber'
-        - $ref: '#/components/parameters/PageOffset'
-      responses:
-        "200":
-          description: A list of run resources visible to the token.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RunListResponse'
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-  /runs/{run_id}:
+      security:
+        - bearerAuth: []
+  /runs/{runid}:
     get:
       tags: [Runs]
       summary: Retrieve metadata for a specific run.
+      description: Returns detailed information about a single run resource.
       operationId: getRun
       parameters:
-        - $ref: '#/components/parameters/RunId'
+        - name: runid
+          in: path
+          required: true
+          description: Identifier of the WEPPcloud run.
+          schema:
+            type: string
+            minLength: 1
       responses:
-        "200":
+        '200':
           description: Metadata for the requested run.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RunDetailResponse'
-        "401":
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "404":
+        '404':
           $ref: '#/components/responses/NotFound'
-  /runs/{run_id}/catalog:
-    get:
-      tags: [Catalog]
-      summary: Browse the dataset catalogue for a run.
-      operationId: getCatalog
-      parameters:
-        - $ref: '#/components/parameters/RunId'
-        - $ref: '#/components/parameters/IncludeFields'
-        - $ref: '#/components/parameters/LimitDatasets'
-        - $ref: '#/components/parameters/LimitFields'
-        - $ref: '#/components/parameters/CatalogPageSize'
-        - $ref: '#/components/parameters/PageNumber'
-        - $ref: '#/components/parameters/PageOffset'
-      responses:
-        "200":
-          description: A slice of the run catalogue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CatalogResponse'
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "404":
-          $ref: '#/components/responses/CatalogNotFound'
-        "500":
-          $ref: '#/components/responses/CatalogInvalid'
-  /runs/{run_id}/activate:
-    post:
-      tags: [Activation]
-      summary: Generate or refresh the run catalogue.
-      operationId: activateRun
-      parameters:
-        - $ref: '#/components/parameters/RunId'
-      responses:
-        "202":
-          description: Activation job accepted; poll the run resource for completion.
-          headers:
-            Retry-After:
-              description: Suggested number of seconds to wait before retrying the status check.
-              schema:
-                type: integer
-                minimum: 0
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ActivationAcceptedResponse'
-        "200":
-          description: Activation completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ActivationResponse'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "404":
-          $ref: '#/components/responses/NotFound'
-        "500":
-          $ref: '#/components/responses/ActivationFailed'
-  /runs/{run_id}/presets:
-    get:
-      tags: [Presets]
-      summary: Retrieve curated query presets grouped by category.
-      operationId: getPresets
-      parameters:
-        - $ref: '#/components/parameters/RunId'
-      responses:
-        "200":
-          description: Preset payloads suitable for seeding agents.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PresetResponse'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "404":
-          $ref: '#/components/responses/NotFound'
-  /runs/{run_id}/prompt-template:
-    get:
-      tags: [Prompts]
-      summary: Render the markdown prompt template for the run.
-      operationId: getPromptTemplate
-      parameters:
-        - $ref: '#/components/parameters/RunId'
-      responses:
-        "200":
-          description: Prompt template with hydrated placeholders.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PromptTemplateResponse'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "404":
-          $ref: '#/components/responses/NotFound'
-  /runs/{run_id}/queries/validate:
-    post:
-      tags: [Queries]
-      summary: Validate a query payload against the run catalogue.
-      operationId: validateQuery
-      parameters:
-        - $ref: '#/components/parameters/RunId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/QueryRequest'
-      responses:
-        "200":
-          description: Query is valid and normalised payload is returned.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/QueryValidationResponse'
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "404":
-          $ref: '#/components/responses/CatalogNotFound'
-        "422":
-          $ref: '#/components/responses/ValidationFailed'
-  /runs/{run_id}/queries/execute:
-    post:
-      tags: [Queries]
-      summary: Execute a validated query payload.
-      operationId: executeQuery
-      parameters:
-        - $ref: '#/components/parameters/RunId'
-        - $ref: '#/components/parameters/DryRun'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/QueryRequest'
-      responses:
-        "200":
-          description: Query executed (or dry-run validation succeeded).
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/QueryExecuteResponse'
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "404":
-          $ref: '#/components/responses/CatalogNotFound'
-        "422":
-          $ref: '#/components/responses/ValidationFailed'
-        "500":
-          $ref: '#/components/responses/ExecutionFailed'
+      security:
+        - bearerAuth: []
 components:
   securitySchemes:
-    BearerAuth:
+    bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: >
-        Provide a WEPPcloud-issued JWT using the `Authorization: Bearer <token>` header.
-        Tokens include scopes (e.g. `runs:read`, `queries:execute`) and allowed run identifiers.
-  parameters:
-    RunId:
-      name: run_id
-      in: path
-      required: true
-      description: Identifier of the WEPPcloud run.
-      schema:
-        type: string
-        minLength: 1
-    PageSize:
-      name: page[size]
-      in: query
-      description: Number of runs to return per page (default 50, max 200). Alias: `page_size`.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 200
-      x-aliases:
-        - page_size
-    CatalogPageSize:
-      name: page[size]
-      in: query
-      description: Number of catalogue datasets returned per page (default 50, max 200). Alias: `page_size`.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 200
-      x-aliases:
-        - page_size
-    PageNumber:
-      name: page[number]
-      in: query
-      description: 1-based page index when using page/number pagination (default 1). Alias: `page_number`.
-      schema:
-        type: integer
-        minimum: 1
-      x-aliases:
-        - page_number
-    PageOffset:
-      name: page[offset]
-      in: query
-      description: Zero-based offset when using offset pagination. Mutually exclusive with `page[number]`. Alias: `page_offset`.
-      schema:
-        type: integer
-        minimum: 0
-      x-aliases:
-        - page_offset
-    IncludeFields:
-      name: include_fields
-      in: query
-      description: When false, omit dataset schema information from catalogue entries. Alias: `include-fields`.
-      schema:
-        type: boolean
-        default: true
-      x-aliases:
-        - include-fields
-    LimitDatasets:
-      name: limit[datasets]
-      in: query
-      description: Maximum number of datasets to include before pagination. Alias: `limit_datasets`.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 200
-      x-aliases:
-        - limit_datasets
-    LimitFields:
-      name: limit[fields]
-      in: query
-      description: Maximum number of fields per dataset schema. Alias: `limit_fields`.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 1000
-      x-aliases:
-        - limit_fields
-    DryRun:
-      name: dry_run
-      in: query
-      description: When true, validate the payload without executing it.
-      schema:
-        type: boolean
-        default: false
+      description: Provide a WEPPcloud-issued JWT in the Authorization header.
   responses:
-    BadRequest:
-      description: Invalid request parameters or body.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
     Unauthorized:
       description: Missing or invalid bearer token.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    Forbidden:
-      description: Token is missing required scopes or run access.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
     NotFound:
-      description: Run not visible to the token or does not exist.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    CatalogNotFound:
-      description: Catalogue data has not been generated for the run.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    CatalogInvalid:
-      description: Catalogue metadata is present but could not be parsed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    ActivationFailed:
-      description: Activation encountered an unexpected error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    ValidationFailed:
-      description: Query payload validation failed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    ExecutionFailed:
-      description: Query execution failed after validation.
+      description: Requested resource could not be found.
       content:
         application/json:
           schema:
@@ -413,30 +87,23 @@ components:
   schemas:
     TraceMeta:
       type: object
-      description: Base metadata envelope appended to most responses.
       properties:
         trace_id:
           type: string
-          description: Unique identifier suitable for correlating logs.
-      required:
-        - trace_id
-      additionalProperties: true
+          description: Identifier suitable for correlating logs.
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp captured when the response was generated.
+      required: [trace_id]
     ErrorEntry:
       type: object
       properties:
         code:
           type: string
-          description: Machine readable error code.
         detail:
           type: string
-          description: Human friendly description of the error.
-        meta:
-          type: object
-          description: Additional contextual information.
-          additionalProperties: true
-      required:
-        - code
-        - detail
+      required: [code, detail]
     ErrorResponse:
       type: object
       properties:
@@ -445,28 +112,19 @@ components:
           items:
             $ref: '#/components/schemas/ErrorEntry'
         meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-      required:
-        - errors
+          $ref: '#/components/schemas/TraceMeta'
+      required: [errors]
     PingResponse:
       type: object
       properties:
         data:
           type: object
-          required:
-            - type
-            - attributes
           properties:
             type:
               type: string
               enum: [mcp_ping]
             attributes:
               type: object
-              required:
-                - service
-                - status
-                - principal
               properties:
                 service:
                   type: string
@@ -475,28 +133,27 @@ components:
                   enum: [ok]
                 principal:
                   type: string
-                version:
-                  type: string
-                  nullable: true
+              required: [service, status, principal]
+          required: [type, attributes]
         meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                timestamp:
-                  type: integer
-                  format: int64
-                  description: UNIX timestamp captured when the response was produced.
-      required:
-        - data
-        - meta
+          $ref: '#/components/schemas/TraceMeta'
+      required: [data, meta]
+    RunDetailResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RunResource'
+        meta:
+          type: object
+          properties:
+            catalog_status:
+              type: string
+            trace:
+              $ref: '#/components/schemas/TraceMeta'
+          required: [catalog_status]
+      required: [data, meta]
     RunResource:
       type: object
-      required:
-        - id
-        - type
-        - attributes
-        - links
       properties:
         id:
           type: string
@@ -505,22 +162,18 @@ components:
           enum: [run]
         attributes:
           type: object
-          required:
-            - path
-            - activated
-            - dataset_count
           properties:
-            path:
+            name:
               type: string
-            activated:
-              type: boolean
-            last_catalog_refresh:
+            watershed:
+              type: string
+            created_at:
               type: string
               format: date-time
-              nullable: true
-            dataset_count:
-              type: integer
-              minimum: 0
+            updated_at:
+              type: string
+              format: date-time
+          required: [name]
         links:
           type: object
           properties:
@@ -530,906 +183,4 @@ components:
             catalog:
               type: string
               format: uri
-            query:
-              type: string
-              format: uri
-              description: Deprecated alias for `query_execute`.
-              deprecated: true
-            query_execute:
-              type: string
-              format: uri
-            query_validate:
-              type: string
-              format: uri
-            activate:
-              type: string
-              format: uri
-          additionalProperties: false
-    RunListResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/RunResource'
-        meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                total_items:
-                  type: integer
-                  minimum: 0
-                page:
-                  $ref: '#/components/schemas/PageMeta'
-        links:
-          $ref: '#/components/schemas/PaginationLinks'
-      required:
-        - data
-        - meta
-    RunDetailResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/RunResource'
-        meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                catalog:
-                  type: object
-                  properties:
-                    activated:
-                      type: boolean
-                    dataset_count:
-                      type: integer
-                      minimum: 0
-                    generated_at:
-                      type: string
-                      format: date-time
-                      nullable: true
-                  additionalProperties: false
-      required:
-        - data
-        - meta
-    CatalogEntry:
-      type: object
-      description: |
-        Catalogue entry describing a dataset available within the run.
-      properties:
-        path:
-          type: string
-        extension:
-          type: string
-        size_bytes:
-          type: integer
-          minimum: 0
-        modified:
-          type: string
-          description: ISO-8601 timestamp for last modification.
-        schema:
-          type: object
-          nullable: true
-          properties:
-            fields:
-              type: array
-              items:
-                $ref: '#/components/schemas/CatalogField'
-          additionalProperties: true
-      additionalProperties: true
-    CatalogField:
-      type: object
-      properties:
-        name:
-          type: string
-        type:
-          type: string
-        units:
-          type: string
-        description:
-          type: string
-      additionalProperties: true
-    CatalogResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/CatalogEntry'
-        meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                catalog:
-                  type: object
-                  properties:
-                    generated_at:
-                      type: string
-                      format: date-time
-                      nullable: true
-                    total:
-                      type: integer
-                      minimum: 0
-                    filtered:
-                      type: integer
-                      minimum: 0
-                    returned:
-                      type: integer
-                      minimum: 0
-                limits:
-                  type: object
-                  properties:
-                    datasets:
-                      type: integer
-                      minimum: 1
-                      nullable: true
-                    fields:
-                      type: integer
-                      minimum: 1
-                      nullable: true
-                    include_fields:
-                      type: boolean
-                page:
-                  $ref: '#/components/schemas/PageMeta'
-        links:
-          $ref: '#/components/schemas/PaginationLinks'
-      required:
-        - data
-        - meta
-    PageMeta:
-      type: object
-      properties:
-        size:
-          type: integer
-          minimum: 0
-        number:
-          type: integer
-          minimum: 0
-        offset:
-          type: integer
-          minimum: 0
-        total_pages:
-          type: integer
-          minimum: 0
-        total_items:
-          type: integer
-          minimum: 0
-      additionalProperties: false
-    PaginationLinks:
-      type: object
-      description: Pagination helper URLs.
-      properties:
-        self:
-          type: string
-          format: uri
-        next:
-          type: string
-          format: uri
-        prev:
-          type: string
-          format: uri
-      additionalProperties: false
-    ActivationResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          required:
-            - type
-            - attributes
-          properties:
-            type:
-              type: string
-              enum: [activation_job]
-            attributes:
-              type: object
-              properties:
-                run_id:
-                  type: string
-                status:
-                  type: string
-                generated_at:
-                  type: string
-                  format: date-time
-                  nullable: true
-                dataset_count:
-                  type: integer
-                  minimum: 0
-        meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                catalog:
-                  type: object
-                  properties:
-                    generated_at:
-                      type: string
-                      format: date-time
-                      nullable: true
-                    dataset_count:
-                      type: integer
-                      minimum: 0
-      required:
-        - data
-        - meta
-    ActivationAcceptedResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          required:
-            - type
-            - id
-            - attributes
-          properties:
-            type:
-              type: string
-              enum: [activation_job]
-            id:
-              type: string
-            attributes:
-              type: object
-              properties:
-                status:
-                  type: string
-                  enum: [accepted, in_progress]
-                submitted_at:
-                  type: string
-                  format: date-time
-                  nullable: true
-              required:
-                - status
-            links:
-              type: object
-              properties:
-                status:
-                  type: string
-                  format: uri
-              additionalProperties: true
-          additionalProperties: false
-        meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                poll_after_seconds:
-                  type: integer
-                  minimum: 0
-      required:
-        - data
-        - meta
-      example:
-        data:
-          type: activation_job
-          id: copacetic-note:20240507T1633Z
-          attributes:
-            status: accepted
-            submitted_at: '2024-05-07T16:33:22Z'
-          links:
-            status: https://host/query-engine/mcp/runs/copacetic-note
-        meta:
-          trace_id: 2c5d8bd6f91c4d319a9053d9a9721d3b
-          poll_after_seconds: 10
-    PresetResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          required:
-            - type
-            - attributes
-          properties:
-            type:
-              type: string
-              enum: [preset_collection]
-            attributes:
-              type: object
-              properties:
-                categories:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/PresetCategory'
-        meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                categories:
-                  type: integer
-                  minimum: 0
-                presets:
-                  type: integer
-                  minimum: 0
-      required:
-        - data
-        - meta
-    PresetCategory:
-      type: object
-      properties:
-        category:
-          type: string
-        presets:
-          type: array
-          items:
-            $ref: '#/components/schemas/QueryPreset'
-      required:
-        - category
-        - presets
-    QueryPreset:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        payload:
-          $ref: '#/components/schemas/QueryRequest'
-      required:
-        - id
-        - name
-        - description
-        - payload
-    PromptTemplateResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          required:
-            - type
-            - attributes
-          properties:
-            type:
-              type: string
-              enum: [prompt_template]
-            attributes:
-              type: object
-              properties:
-                markdown:
-                  type: string
-                placeholders:
-                  type: object
-                  additionalProperties:
-                    type: string
-                default_payload:
-                  $ref: '#/components/schemas/QueryRequest'
-                schema_summary:
-                  type: string
-        meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                catalog:
-                  type: object
-                  properties:
-                    generated_at:
-                      type: string
-                      format: date-time
-                      nullable: true
-                    dataset_count:
-                      type: integer
-                      minimum: 0
-      required:
-        - data
-        - meta
-    QueryDatasetInput:
-      type: object
-      description: Dataset reference used in query payloads.
-      properties:
-        path:
-          type: string
-        alias:
-          type: string
-        columns:
-          type: array
-          items:
-            type: string
-      required:
-        - path
-      additionalProperties: false
-    QueryJoin:
-      type: object
-      required:
-        - left
-        - right
-      properties:
-        left:
-          type: string
-        right:
-          type: string
-        type:
-          type: string
-          description: Join type (inner, left, right, full). Defaults to inner.
-          enum: [inner, left, right, full, left_outer, right_outer, full_outer, outer]
-          default: inner
-        on:
-          oneOf:
-            - type: string
-            - type: array
-              items:
-                type: string
-              minItems: 1
-        left_on:
-          type: array
-          items:
-            type: string
-          minItems: 1
-        right_on:
-          type: array
-          items:
-            type: string
-          minItems: 1
-      oneOf:
-        - required: [on]
-        - required:
-            - left_on
-            - right_on
-      additionalProperties: false
-    QueryAggregation:
-      type: object
-      properties:
-        column:
-          type: string
-        fn:
-          type: string
-          description: Aggregation function (e.g. sum, avg).
-          enum: [sum, avg, min, max, count]
-        expression:
-          type: string
-          description: SQL expression used verbatim.
-        sql:
-          type: string
-          description: Alias for `expression`.
-        alias:
-          type: string
-      oneOf:
-        - required: [expression]
-        - required: [sql]
-        - required:
-            - fn
-            - column
-      additionalProperties: false
-    QueryFilter:
-      type: object
-      required:
-        - column
-        - operator
-      properties:
-        column:
-          type: string
-        operator:
-          type: string
-          enum: ["=", "!=", "<", "<=", ">", ">=", "LIKE", "ILIKE", "IN", "NOT IN", "BETWEEN", "IS NULL", "IS NOT NULL"]
-        value:
-          description: Filter comparison value. Lists allowed for IN/NOT IN/BETWEEN.
-          nullable: true
-          oneOf:
-            - type: string
-            - type: number
-            - type: boolean
-            - type: array
-              items:
-                oneOf:
-                  - type: string
-                  - type: number
-                  - type: boolean
-              minItems: 1
-      additionalProperties: false
-    QueryComputedColumn:
-      type: object
-      required:
-        - alias
-      properties:
-        alias:
-          type: string
-        sql:
-          type: string
-          description: SQL expression rendered as-is in the SELECT list.
-        expression:
-          type: string
-          description: Convenience alias for SQL expressions when quoting is unnecessary.
-        date_parts:
-          type: object
-          description: Helper for constructing a date from year/month/day expressions.
-          properties:
-            year:
-              type: string
-            month:
-              type: string
-            day:
-              type: string
-          required:
-            - year
-            - month
-            - day
-          additionalProperties: false
-      oneOf:
-        - required: [sql]
-        - required: [expression]
-        - required: [date_parts]
-      additionalProperties: false
-    TimeseriesReshape:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Currently only `timeseries` is supported.
-        index:
-          type: object
-          properties:
-            column:
-              type: string
-            key:
-              type: string
-          required:
-            - column
-        series:
-          type: array
-          items:
-            $ref: '#/components/schemas/TimeseriesSeries'
-        year_column:
-          type: string
-        exclude_year_indexes:
-          type: array
-          items:
-            type: integer
-        compact:
-          type: boolean
-        include_records:
-          type: boolean
-      required:
-        - series
-      additionalProperties: false
-    TimeseriesSeries:
-      type: object
-      properties:
-        column:
-          type: string
-        key:
-          type: string
-        label:
-          type: string
-        group:
-          type: string
-        role:
-          type: string
-        color:
-          type: string
-        units:
-          type: string
-        description:
-          type: string
-      required:
-        - column
-      additionalProperties: false
-    QueryRequest:
-      type: object
-      description: Raw query payload accepted by validation and execution endpoints.
-      properties:
-        datasets:
-          type: array
-          minItems: 1
-          items:
-            oneOf:
-              - type: string
-              - $ref: '#/components/schemas/QueryDatasetInput'
-        columns:
-          type: array
-          items:
-            type: string
-        limit:
-          type: integer
-          minimum: 1
-        include_schema:
-          type: boolean
-          default: false
-        include_sql:
-          type: boolean
-          default: false
-        joins:
-          type: array
-          items:
-            $ref: '#/components/schemas/QueryJoin'
-        group_by:
-          type: array
-          items:
-            type: string
-        aggregations:
-          type: array
-          items:
-            oneOf:
-              - type: string
-              - $ref: '#/components/schemas/QueryAggregation'
-        order_by:
-          type: array
-          items:
-            type: string
-        filters:
-          type: array
-          items:
-            $ref: '#/components/schemas/QueryFilter'
-        computed_columns:
-          type: array
-          items:
-            $ref: '#/components/schemas/QueryComputedColumn'
-        reshape:
-          $ref: '#/components/schemas/TimeseriesReshape'
-      required:
-        - datasets
-      additionalProperties: false
-      example:
-        datasets:
-          - path: landuse/landuse.parquet
-            alias: landuse
-          - path: soils/soils.parquet
-            alias: soils
-        joins:
-          - left: landuse
-            right: soils
-            on: TopazID
-        columns:
-          - landuse.TopazID AS topaz_id
-          - soils.simple_texture AS soil_texture
-        filters:
-          - column: landuse.key
-            operator: IN
-            value: [105, 118]
-        limit: 25
-        include_schema: true
-    NormalizedDataset:
-      type: object
-      properties:
-        path:
-          type: string
-        alias:
-          type: string
-        columns:
-          type: array
-          items:
-            type: string
-      required:
-        - path
-        - alias
-      additionalProperties: false
-    NormalizedQuery:
-      type: object
-      description: Canonical representation of a query payload.
-      properties:
-        datasets:
-          type: array
-          items:
-            $ref: '#/components/schemas/NormalizedDataset'
-        limit:
-          type: integer
-          minimum: 1
-        include_schema:
-          type: boolean
-        include_sql:
-          type: boolean
-        columns:
-          type: array
-          items:
-            type: string
-        group_by:
-          type: array
-          items:
-            type: string
-        order_by:
-          type: array
-          items:
-            type: string
-        filters:
-          type: array
-          items:
-            $ref: '#/components/schemas/QueryFilter'
-        joins:
-          type: array
-          items:
-            $ref: '#/components/schemas/QueryJoin'
-        aggregations:
-          type: array
-          items:
-            $ref: '#/components/schemas/QueryAggregation'
-        computed_columns:
-          type: array
-          items:
-            $ref: '#/components/schemas/QueryComputedColumn'
-        reshape:
-          $ref: '#/components/schemas/TimeseriesReshape'
-      additionalProperties: false
-    QueryValidationResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          required:
-            - type
-            - attributes
-          properties:
-            type:
-              type: string
-              enum: [query_validation]
-            attributes:
-              type: object
-              properties:
-                normalized_payload:
-                  $ref: '#/components/schemas/NormalizedQuery'
-                warnings:
-                  type: array
-                  items:
-                    type: string
-                missing_datasets:
-                  type: array
-                  items:
-                    type: string
-        meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                catalog:
-                  type: object
-                  properties:
-                    generated_at:
-                      type: string
-                      format: date-time
-                      nullable: true
-                    dataset_count:
-                      type: integer
-                      minimum: 0
-      required:
-        - data
-        - meta
-      example:
-        data:
-          type: query_validation
-          attributes:
-            normalized_payload:
-              datasets:
-                - path: landuse/landuse.parquet
-                  alias: landuse
-              limit: 25
-              include_schema: true
-            warnings: []
-            missing_datasets: []
-        meta:
-          trace_id: 8f9bcbf3a5dc4a3386b42b2ffb7a9d1d
-          catalog:
-            generated_at: '2024-05-07T16:33:22Z'
-            dataset_count: 84
-    QueryResultSchemaField:
-      type: object
-      properties:
-        name:
-          type: string
-        type:
-          type: string
-        description:
-          type: string
-        units:
-          type: string
-      additionalProperties: true
-    QueryResultPayload:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
-        row_count:
-          type: integer
-          minimum: 0
-        schema:
-          type: array
-          items:
-            $ref: '#/components/schemas/QueryResultSchemaField'
-        sql:
-          type: string
-        formatted:
-          type: object
-          description: Enriched presentation of the result (e.g. timeseries bundle).
-          additionalProperties: true
-      required:
-        - records
-        - row_count
-      additionalProperties: false
-    QueryExecuteResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          required:
-            - type
-            - attributes
-          properties:
-            type:
-              type: string
-              enum: [query_execute]
-            attributes:
-              type: object
-              properties:
-                normalized_payload:
-                  $ref: '#/components/schemas/NormalizedQuery'
-                warnings:
-                  type: array
-                  items:
-                    type: string
-                dry_run:
-                  type: boolean
-                result:
-                  nullable: true
-                  $ref: '#/components/schemas/QueryResultPayload'
-        meta:
-          allOf:
-            - $ref: '#/components/schemas/TraceMeta'
-            - type: object
-              properties:
-                catalog:
-                  type: object
-                  properties:
-                    generated_at:
-                      type: string
-                      format: date-time
-                      nullable: true
-                    dataset_count:
-                      type: integer
-                      minimum: 0
-                execution:
-                  type: object
-                  properties:
-                    dry_run:
-                      type: boolean
-                    row_count:
-                      type: integer
-                      minimum: 0
-                    duration_ms:
-                      type: integer
-                      minimum: 0
-      required:
-        - data
-        - meta
-      example:
-        data:
-          type: query_execute
-          attributes:
-            normalized_payload:
-              datasets:
-                - path: landuse/landuse.parquet
-                  alias: landuse
-              limit: 10
-              include_schema: true
-            warnings: []
-            dry_run: false
-            result:
-              records:
-                - topaz_id: 101
-                  soil_loss: 0.42
-                - topaz_id: 102
-                  soil_loss: 0.57
-              row_count: 2
-              schema:
-                - name: topaz_id
-                  type: int64
-                - name: soil_loss
-                  type: double
-              sql: |
-                SELECT landuse.TopazID AS topaz_id, soils.soil_loss
-                FROM landuse
-                JOIN soils ON landuse.TopazID = soils.TopazID
-                WHERE landuse.key IN (105, 118)
-                ORDER BY landuse.TopazID
-        meta:
-          trace_id: c6f0c77e58f044f1b7c9e148abf8ff5e
-          catalog:
-            generated_at: '2024-05-07T16:33:22Z'
-            dataset_count: 84
-          execution:
-            dry_run: false
-            row_count: 2
-            duration_ms: 123
+      required: [id, type, attributes]

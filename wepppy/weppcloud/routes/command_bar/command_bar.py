@@ -16,7 +16,11 @@ Keep endpoints small and focused. Here are some guidelines:
 
 """
 
+from __future__ import annotations
+
 import logging
+from datetime import datetime, timezone
+from pathlib import Path
 
 from flask import Blueprint, jsonify, request
 from flask_login import current_user
@@ -110,10 +114,68 @@ def get_lock_statuses(runid, config):
     })
 
 
-@command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/query_engine_api_key', methods=['POST'])
-def issue_query_engine_api_key(runid, config):
+def _build_mcp_markdown(
+    *,
+    runid: str,
+    subject: str,
+    token: str,
+    scopes: list[str] | None,
+    expires_at: int | None,
+    spec_url: str,
+    instructions: list[str],
+) -> str:
+    """Render a Markdown document with MCP integration instructions."""
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    expires_at_iso = None
+    if isinstance(expires_at, (int, float)):
+        try:
+            expires_at_iso = datetime.fromtimestamp(expires_at, tz=timezone.utc).isoformat()
+        except Exception:  # pragma: no cover - defensive
+            expires_at_iso = None
+
+    scope_text = ", ".join(scopes or [])
+    if not scope_text:
+        scope_text = "runs:read, queries:validate, queries:execute"
+
+    header_lines = [
+        "# Query Engine MCP Integration",
+        "",
+        f"- Generated at: {generated_at}",
+        f"- Run ID: `{runid}`",
+        f"- Token subject: `{subject}`",
+        f"- Scopes: {scope_text}",
+        f"- Expires: {expires_at_iso or 'unknown'}",
+        "",
+        "⚠️ Treat this document as sensitive. The token grants access to run data until it expires.",
+        "",
+        "## Authorization Header",
+        "```http",
+        f"Authorization: Bearer {token}",
+        "```",
+        "",
+        "## Setup Steps",
+    ]
+
+    step_lines = [f"{index}. {step}" for index, step in enumerate(instructions, start=1)]
+
+    reference_lines = [
+        "",
+        "## Resources",
+        f"- OpenAPI spec: {spec_url}",
+        "- Integration guide: `wepppy/query_engine/README.md`",
+        "",
+        "_This file is regenerated whenever a new Query Engine MCP token is issued from the command bar._",
+        "",
+    ]
+
+    return "\n".join(header_lines + step_lines + reference_lines)
+
+
+@command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/query_engine_mcp_token', methods=['POST'])
+def issue_query_engine_mcp_token(runid, config):
     authorize(runid, config)
-    load_run_context(runid, config)
+    context = load_run_context(runid, config)
 
     subject = None
     if current_user and hasattr(current_user, 'get_id'):
@@ -131,8 +193,8 @@ def issue_query_engine_api_key(runid, config):
     except JWTConfigurationError as exc:
         return jsonify({'Success': False, 'Error': f'JWT configuration error: {exc}'}), 500
     except Exception as exc:  # pragma: no cover - defensive logging
-        logging.exception("Failed to issue Query Engine API key for %s", runid)
-        return jsonify({'Success': False, 'Error': 'Unexpected error generating API key.'}), 500
+        logging.exception("Failed to issue Query Engine MCP token for %s", runid)
+        return jsonify({'Success': False, 'Error': 'Unexpected error generating MCP token.'}), 500
 
     claims = token_payload.get('claims', {})
     expires_at = claims.get('exp')
@@ -144,12 +206,49 @@ def issue_query_engine_api_key(runid, config):
         'Anthropic Claude Tool Use: handle tool invocation server-side, send this token as the Authorization header when proxying requests.'
     ]
 
+    if isinstance(scopes, str):
+        scope_list = scopes.split(auth_tokens.get_jwt_config().scope_separator)
+    elif isinstance(scopes, (list, tuple)):
+        scope_list = list(scopes)
+    else:
+        scope_list = ["runs:read", "queries:validate", "queries:execute"]
+
+    token_value = token_payload.get('token') or ''
+
+    host = (request.headers.get("Host") or request.host or "").rstrip("/")
+    spec_url = f"https://{host}/query-engine/docs/mcp_openapi.yaml" if host else "https://query-engine/docs/mcp_openapi.yaml"
+    markdown_body = _build_mcp_markdown(
+        runid=runid,
+        subject=str(subject),
+        token=token_value,
+        scopes=scope_list,
+        expires_at=expires_at if isinstance(expires_at, (int, float)) else None,
+        spec_url=spec_url,
+        instructions=instructions,
+    )
+
+    instructions_relpath = Path("_query_engine") / "mcp_integration_instructions.md"
+    instructions_path = Path(context.active_root) / instructions_relpath
+
+    try:
+        instructions_path.parent.mkdir(parents=True, exist_ok=True)
+        instructions_path.write_text(markdown_body, encoding="utf-8")
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logging.warning(
+            "Failed to write MCP instructions for run %s at %s: %s",
+            runid,
+            instructions_path,
+            exc,
+        )
+
     return jsonify({
         'Success': True,
         'Content': {
-            'token': token_payload.get('token'),
+            'token': token_value,
             'expires_at': expires_at,
-            'scopes': scopes.split(auth_tokens.get_jwt_config().scope_separator) if isinstance(scopes, str) else scopes,
+            'scopes': scope_list,
             'instructions': instructions,
+            'spec_url': spec_url,
+            'instructions_path': str(instructions_relpath),
         }
     })

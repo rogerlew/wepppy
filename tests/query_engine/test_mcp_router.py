@@ -35,16 +35,13 @@ def test_create_mcp_app(monkeypatch):
     assert isinstance(app, Starlette)
     paths = {route.path for route in app.routes}
     assert "/ping" in paths
-    assert "/runs" in paths
-    assert "/runs/{run_id:str}" in paths
-    assert "/runs/{run_id:str}/catalog" in paths
-    assert "/runs/{run_id:str}/queries/validate" in paths
-    assert "/runs/{run_id:str}/queries/execute" in paths
-    assert "/runs/{run_id:str}/activate" in paths
-    assert "/runs/{run_id:str}/presets" in paths
-    assert "/runs/{run_id:str}/prompt-template" in paths
-    assert "/runs/{run_id:str}/queries/validate" in paths
-    assert "/runs/{run_id:str}/queries/execute" in paths
+    assert "/runs/{runid:str}" in paths
+    assert "/runs/{runid:str}/catalog" in paths
+    assert "/runs/{runid:str}/queries/validate" in paths
+    assert "/runs/{runid:str}/queries/execute" in paths
+    assert "/runs/{runid:str}/activate" in paths
+    assert "/runs/{runid:str}/presets" in paths
+    assert "/runs/{runid:str}/prompt-template" in paths
 
 
 def test_server_mounts_mcp(monkeypatch):
@@ -59,8 +56,8 @@ def test_server_mounts_mcp(monkeypatch):
     assert "/mcp" in paths
 
 
-def _bootstrap_run(tmp_path, run_id: str, files: list[dict[str, Any]] | None = None):
-    run_dir = tmp_path / run_id
+def _bootstrap_run(tmp_path, runid: str, files: list[dict[str, Any]] | None = None):
+    run_dir = tmp_path / runid
     catalog_dir = run_dir / "_query_engine"
     catalog_dir.mkdir(parents=True)
     catalog_path = catalog_dir / "catalog.json"
@@ -88,12 +85,12 @@ def _bootstrap_run(tmp_path, run_id: str, files: list[dict[str, Any]] | None = N
     return run_dir
 
 
-def _issue_token(auth_module, run_id: str | None = None, scopes: Sequence[str] | str = ("runs:read",), runs: list[str] | None = None):
+def _issue_token(auth_module, runid: str | None = None, scopes: Sequence[str] | str = ("runs:read",), runs: list[str] | None = None):
     runs_payload: list[str]
     if runs is not None:
         runs_payload = runs
-    elif run_id is not None:
-        runs_payload = [run_id]
+    elif runid is not None:
+        runs_payload = [runid]
     else:
         runs_payload = []
 
@@ -113,23 +110,23 @@ def _issue_token(auth_module, run_id: str | None = None, scopes: Sequence[str] |
     )
 
 
-def _make_client(monkeypatch, tmp_path, run_id: str, *, files: list[dict[str, Any]] | None = None, create_catalog: bool = True):
+def _make_client(monkeypatch, tmp_path, runid: str, *, files: list[dict[str, Any]] | None = None, create_catalog: bool = True):
     try:
         from starlette.testclient import TestClient
     except (ImportError, RuntimeError) as exc:
         pytest.skip(f"starlette.testclient unavailable: {exc}")
 
     if create_catalog:
-        run_dir = _bootstrap_run(tmp_path, run_id, files=files)
+        run_dir = _bootstrap_run(tmp_path, runid, files=files)
     else:
-        run_dir = tmp_path / run_id
+        run_dir = tmp_path / runid
         run_dir.mkdir(parents=True, exist_ok=True)
 
     from wepppy.query_engine.app import helpers
 
-    def fake_resolve(runid: str):
-        if runid != run_id:
-            raise FileNotFoundError(runid)
+    def fake_resolve(candidate: str):
+        if candidate != runid:
+            raise FileNotFoundError(candidate)
         return run_dir
 
     monkeypatch.setattr(helpers, "resolve_run_path", fake_resolve)
@@ -144,61 +141,24 @@ def _make_client(monkeypatch, tmp_path, run_id: str, *, files: list[dict[str, An
     return app, run_dir
 
 
-def test_list_runs(monkeypatch, tmp_path):
-    _set_auth_env(monkeypatch)
-
-    run_id = "demo-run"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
-
-    from starlette.testclient import TestClient  # type: ignore
-    from wepppy.query_engine.app.mcp import auth
-
-    client = TestClient(app)
-    token = _issue_token(auth, run_id)
-
-    response = client.get(
-        "/mcp/runs",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response.status_code == 200
-    payload = response.json()
-    assert "trace_id" in payload["meta"]
-    assert payload["meta"]["page"]["total_pages"] == 1
-    assert payload["meta"]["total_items"] == 1
-    assert len(payload["data"]) == 1
-    record = payload["data"][0]
-    assert record["id"] == run_id
-    assert record["attributes"]["activated"] is True
-    assert record["attributes"]["dataset_count"] == 1
-    assert record["attributes"]["last_catalog_refresh"] == "2024-05-07T16:33:22Z"
-    links = record["links"]
-    assert links["query"].endswith(f"/mcp/runs/{run_id}/queries/execute")
-    assert links["query_execute"] == links["query"]
-    assert links["query_validate"].endswith(f"/mcp/runs/{run_id}/queries/validate")
-    page_meta = payload["meta"]["page"]
-    assert page_meta["offset"] == 0
-    assert "self" in payload["links"]
-
-
 def test_get_run_success(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "sample-run"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "sample-run"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id)
+    token = _issue_token(auth, runid)
     response = client.get(
-        f"/mcp/runs/{run_id}",
+        f"/mcp/runs/{runid}",
         headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["data"]["id"] == run_id
+    assert payload["data"]["id"] == runid
     assert payload["meta"]["catalog"]["activated"] is True
     assert payload["meta"]["catalog"]["dataset_count"] == 1
     assert "trace_id" in payload["meta"]
@@ -207,17 +167,17 @@ def test_get_run_success(monkeypatch, tmp_path):
 def test_catalog_supports_parameter_aliases(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
 
-    run_id = "alias-run"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "alias-run"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id)
+    token = _issue_token(auth, runid)
 
     response = client.get(
-        f"/mcp/runs/{run_id}/catalog?limit_datasets=1&limit_fields=1&page_size=1&page_number=1",
+        f"/mcp/runs/{runid}/catalog?limit_datasets=1&limit_fields=1&page_size=1&page_number=1",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -231,7 +191,7 @@ def test_catalog_supports_parameter_aliases(monkeypatch, tmp_path):
 
 def test_get_run_catalog(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "catalog-run"
+    runid = "catalog-run"
     files = [
         {
             "path": "datasets/one.parquet",
@@ -259,15 +219,15 @@ def test_get_run_catalog(monkeypatch, tmp_path):
             },
         },
     ]
-    app, _ = _make_client(monkeypatch, tmp_path, run_id, files=files)
+    app, _ = _make_client(monkeypatch, tmp_path, runid, files=files)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id)
+    token = _issue_token(auth, runid)
     response = client.get(
-        f"/mcp/runs/{run_id}/catalog",
+        f"/mcp/runs/{runid}/catalog",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -290,7 +250,7 @@ def test_get_run_catalog(monkeypatch, tmp_path):
 
 def test_get_run_catalog_limits(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "catalog-limits"
+    runid = "catalog-limits"
     files = [
         {
             "path": "datasets/a.parquet",
@@ -316,15 +276,15 @@ def test_get_run_catalog_limits(monkeypatch, tmp_path):
             },
         },
     ]
-    app, _ = _make_client(monkeypatch, tmp_path, run_id, files=files)
+    app, _ = _make_client(monkeypatch, tmp_path, runid, files=files)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id)
+    token = _issue_token(auth, runid)
     response = client.get(
-        f"/mcp/runs/{run_id}/catalog?limit[fields]=1&page[size]=1&page[number]=2",
+        f"/mcp/runs/{runid}/catalog?limit[fields]=1&page[size]=1&page[number]=2",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
@@ -343,16 +303,16 @@ def test_get_run_catalog_limits(monkeypatch, tmp_path):
 
 def test_get_run_catalog_without_schema(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "catalog-nofields"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "catalog-nofields"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id)
+    token = _issue_token(auth, runid)
     response = client.get(
-        f"/mcp/runs/{run_id}/catalog?include_fields=false",
+        f"/mcp/runs/{runid}/catalog?include_fields=false",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -365,16 +325,16 @@ def test_get_run_catalog_without_schema(monkeypatch, tmp_path):
 
 def test_get_run_catalog_missing(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "missing-catalog"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id, create_catalog=False)
+    runid = "missing-catalog"
+    app, _ = _make_client(monkeypatch, tmp_path, runid, create_catalog=False)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id)
+    token = _issue_token(auth, runid)
     response = client.get(
-        f"/mcp/runs/{run_id}/catalog",
+        f"/mcp/runs/{runid}/catalog",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -386,7 +346,7 @@ def test_get_run_catalog_missing(monkeypatch, tmp_path):
 
 def test_validate_query_success(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "validate-run"
+    runid = "validate-run"
     files = [
         {
             "path": "datasets/one.parquet",
@@ -395,20 +355,20 @@ def test_validate_query_success(monkeypatch, tmp_path):
             "modified": "2024-01-01T00:00:00Z",
         }
     ]
-    app, _ = _make_client(monkeypatch, tmp_path, run_id, files=files)
+    app, _ = _make_client(monkeypatch, tmp_path, runid, files=files)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes="runs:read queries:validate")
+    token = _issue_token(auth, runid, scopes="runs:read queries:validate")
     payload = {
         "datasets": ["datasets/one.parquet"],
         "limit": 5,
         "include_schema": True,
     }
     response = client.post(
-        f"/mcp/runs/{run_id}/queries/validate",
+        f"/mcp/runs/{runid}/queries/validate",
         headers={"Authorization": f"Bearer {token}"},
         json=payload,
     )
@@ -426,16 +386,16 @@ def test_validate_query_success(monkeypatch, tmp_path):
 
 def test_validate_query_missing_dataset(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "validate-missing"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "validate-missing"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes="runs:read queries:validate")
+    token = _issue_token(auth, runid, scopes="runs:read queries:validate")
     response = client.post(
-        f"/mcp/runs/{run_id}/queries/validate",
+        f"/mcp/runs/{runid}/queries/validate",
         headers={"Authorization": f"Bearer {token}"},
         json={"datasets": ["missing.parquet"]},
     )
@@ -448,16 +408,16 @@ def test_validate_query_missing_dataset(monkeypatch, tmp_path):
 
 def test_validate_query_requires_scope(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "validate-scope"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "validate-scope"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes="runs:read")
+    token = _issue_token(auth, runid, scopes="runs:read")
     response = client.post(
-        f"/mcp/runs/{run_id}/queries/validate",
+        f"/mcp/runs/{runid}/queries/validate",
         headers={"Authorization": f"Bearer {token}"},
         json={"datasets": ["a.parquet"]},
     )
@@ -469,16 +429,16 @@ def test_validate_query_requires_scope(monkeypatch, tmp_path):
 
 def test_validate_query_invalid_json(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "validate-json"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "validate-json"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes="runs:read queries:validate")
+    token = _issue_token(auth, runid, scopes="runs:read queries:validate")
     response = client.post(
-        f"/mcp/runs/{run_id}/queries/validate",
+        f"/mcp/runs/{runid}/queries/validate",
         headers={"Authorization": f"Bearer {token}", "Content-Type": "text/plain"},
         data="not-json",
     )
@@ -488,59 +448,18 @@ def test_validate_query_invalid_json(monkeypatch, tmp_path):
     assert "trace_id" in payload.get("meta", {})
 
 
-def test_list_runs_with_offset(monkeypatch, tmp_path):
-    _set_auth_env(monkeypatch)
-    run_ids = ["run-a", "run-b"]
-    run_dirs = {run_id: _bootstrap_run(tmp_path, run_id) for run_id in run_ids}
-
-    from wepppy.query_engine.app import helpers
-
-    def fake_resolve(runid: str):
-        if runid in run_dirs:
-            return run_dirs[runid]
-        raise FileNotFoundError(runid)
-
-    monkeypatch.setattr(helpers, "resolve_run_path", fake_resolve)
-
-    from wepppy.query_engine.app import server
-    from wepppy.query_engine.app.mcp import router, auth
-
-    reload(router)
-    reload(server)
-
-    from starlette.testclient import TestClient  # type: ignore
-
-    app = server.create_app()
-    client = TestClient(app)
-    token = _issue_token(auth, runs=run_ids)
-
-    response = client.get(
-        "/mcp/runs?page[size]=1&page[offset]=1",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    assert response.status_code == 200
-    payload = response.json()
-    assert len(payload["data"]) == 1
-    assert payload["data"][0]["id"] == "run-b"
-    page_meta = payload["meta"]["page"]
-    assert page_meta["number"] == 2
-    assert page_meta["offset"] == 1
-    assert "prev" in payload["links"]
-    assert "trace_id" in payload["meta"]
-
-
 def test_get_run_forbidden(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "accessible-run"
+    runid = "accessible-run"
     other_run = "other-run"
-    _bootstrap_run(tmp_path, run_id)
+    _bootstrap_run(tmp_path, runid)
 
     from wepppy.query_engine.app import helpers
 
-    def fake_resolve(runid: str):
-        if runid == run_id:
-            return tmp_path / run_id
-        raise FileNotFoundError(runid)
+    def fake_resolve(candidate: str):
+        if candidate == runid:
+            return tmp_path / runid
+        raise FileNotFoundError(candidate)
 
     monkeypatch.setattr(helpers, "resolve_run_path", fake_resolve)
 
@@ -554,7 +473,7 @@ def test_get_run_forbidden(monkeypatch, tmp_path):
 
     app = server.create_app()
     client = TestClient(app)
-    token = _issue_token(auth, run_id)
+    token = _issue_token(auth, runid)
 
     response = client.get(
         f"/mcp/runs/{other_run}",
@@ -568,8 +487,8 @@ def test_get_run_forbidden(monkeypatch, tmp_path):
 
 def test_activate_run_endpoint(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "activate-run"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "activate-run"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import router, auth
@@ -581,9 +500,9 @@ def test_activate_run_endpoint(monkeypatch, tmp_path):
     )
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes=["runs:read", "runs:activate"])
+    token = _issue_token(auth, runid, scopes=["runs:read", "runs:activate"])
     response = client.post(
-        f"/mcp/runs/{run_id}/activate",
+        f"/mcp/runs/{runid}/activate",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -596,16 +515,16 @@ def test_activate_run_endpoint(monkeypatch, tmp_path):
 
 def test_get_presets(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "presets-run"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "presets-run"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes="runs:read")
+    token = _issue_token(auth, runid, scopes="runs:read")
     response = client.get(
-        f"/mcp/runs/{run_id}/presets",
+        f"/mcp/runs/{runid}/presets",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -617,8 +536,8 @@ def test_get_presets(monkeypatch, tmp_path):
 
 def test_get_prompt_template(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "prompt-run"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "prompt-run"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import router, auth
@@ -630,9 +549,9 @@ def test_get_prompt_template(monkeypatch, tmp_path):
     )
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes="runs:read")
+    token = _issue_token(auth, runid, scopes="runs:read")
     response = client.get(
-        f"/mcp/runs/{run_id}/prompt-template",
+        f"/mcp/runs/{runid}/prompt-template",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -645,11 +564,11 @@ def test_get_prompt_template(monkeypatch, tmp_path):
 
 def test_execute_query_dry_run(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "execute-dry"
+    runid = "execute-dry"
     app, _ = _make_client(
         monkeypatch,
         tmp_path,
-        run_id,
+        runid,
         files=[
             {
                 "path": "datasets/one.parquet",
@@ -673,9 +592,9 @@ def test_execute_query_dry_run(monkeypatch, tmp_path):
     monkeypatch.setattr(router, "resolve_run_context", lambda *args, **kwargs: SimpleNamespace())
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes=["runs:read", "queries:execute"])
+    token = _issue_token(auth, runid, scopes=["runs:read", "queries:execute"])
     response = client.post(
-        f"/mcp/runs/{run_id}/queries/execute?dry_run=true",
+        f"/mcp/runs/{runid}/queries/execute?dry_run=true",
         headers={"Authorization": f"Bearer {token}"},
         json={"datasets": ["datasets/one.parquet"], "limit": 5},
     )
@@ -690,11 +609,11 @@ def test_execute_query_dry_run(monkeypatch, tmp_path):
 
 def test_execute_query_success(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "execute-success"
+    runid = "execute-success"
     app, _ = _make_client(
         monkeypatch,
         tmp_path,
-        run_id,
+        runid,
         files=[
             {
                 "path": "datasets/one.parquet",
@@ -722,9 +641,9 @@ def test_execute_query_success(monkeypatch, tmp_path):
     monkeypatch.setattr(router, "resolve_run_context", lambda *args, **kwargs: SimpleNamespace())
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes=["runs:read", "queries:execute"])
+    token = _issue_token(auth, runid, scopes=["runs:read", "queries:execute"])
     response = client.post(
-        f"/mcp/runs/{run_id}/queries/execute",
+        f"/mcp/runs/{runid}/queries/execute",
         headers={"Authorization": f"Bearer {token}"},
         json={"datasets": ["datasets/one.parquet"], "limit": 10},
     )
@@ -739,16 +658,16 @@ def test_execute_query_success(monkeypatch, tmp_path):
 
 def test_execute_query_requires_scope(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
-    run_id = "execute-scope"
-    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+    runid = "execute-scope"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
     client = TestClient(app)
-    token = _issue_token(auth, run_id, scopes="runs:read")
+    token = _issue_token(auth, runid, scopes="runs:read")
     response = client.post(
-        f"/mcp/runs/{run_id}/queries/execute",
+        f"/mcp/runs/{runid}/queries/execute",
         headers={"Authorization": f"Bearer {token}"},
         json={"datasets": ["a.parquet"]},
     )

@@ -45,6 +45,76 @@
   font-family: monospace;
   font-size: x-small;
 }
+.command-bar-token-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+  background: #212529;
+  border: 1px solid #6c757d;
+  border-radius: 4px;
+  color: #f8f9fa;
+  font-family: inherit;
+  font-size: inherit;
+}
+.command-bar-token-card__title {
+  font-weight: 600;
+  font-size: 1.1em;
+}
+.command-bar-token-card__subtitle {
+  font-weight: 600;
+  margin-top: 4px;
+}
+.command-bar-token-card__secret-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.command-bar-token-card__secret-input {
+  flex: 1;
+  padding: 4px 6px;
+  border-radius: 3px;
+  border: 1px solid #6c757d;
+  background: #343a40;
+  color: #f8f9fa;
+}
+.command-bar-token-card__actions {
+  display: flex;
+  gap: 4px;
+}
+.command-bar-token-card__button {
+  background: #0d6efd;
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  padding: 3px 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+.command-bar-token-card__button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.command-bar-token-card__button + .command-bar-token-card__button {
+  margin-left: 0;
+}
+.command-bar-token-card__header-example {
+  margin: 0;
+  padding: 4px 6px;
+  background: #343a40;
+  border: 1px dashed #6c757d;
+  font-family: inherit;
+}
+.command-bar-token-card__note {
+  margin: 0;
+  line-height: 1.4;
+}
+.command-bar-token-card__meta,
+.command-bar-token-card__instructions {
+  margin: 0;
+  padding-left: 18px;
+}
 </style>
 <div class="command-bar-container" data-command-bar>
   <div data-command-tip>Tip: Press ':' to activate the command bar, type ':help' for help</div>

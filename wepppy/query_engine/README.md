@@ -45,14 +45,13 @@
 | Method & Path | Description | Required Scope |
 | --- | --- | --- |
 | `GET /mcp/ping` | Health probe; returns service metadata. | none |
-| `GET /mcp/runs` | List runs visible to the caller; supports `page[size]`, `page[number]`, `page[offset]` (aliases `page_size`, `page_number`, `page_offset`). | `runs:read` |
-| `GET /mcp/runs/{run_id}` | Detailed run info (activation status, last refresh). | `runs:read` |
-| `POST /mcp/runs/{run_id}/activate` | Trigger catalogue activation; returns activation job status. | `runs:activate` |
-| `GET /mcp/runs/{run_id}/catalog` | Fetch catalogue subset; supports `include_fields`, `limit[datasets]`/`limit_datasets`, `limit[fields]`/`limit_fields`, `page[size]`/`page_size`, `page[number]`/`page_number`, `page[offset]`/`page_offset`. | `runs:read` |
-| `GET /mcp/runs/{run_id}/presets` | Retrieve curated query presets. | `runs:read` |
-| `GET /mcp/runs/{run_id}/prompt-template` | Hydrated Markdown prompt with schema snapshot and endpoint URLs. | `runs:read` |
-| `POST /mcp/runs/{run_id}/queries/validate` | Validate payload; respond with normalized payload and warnings. | `queries:validate` |
-| `POST /mcp/runs/{run_id}/queries/execute` | Execute payload; optional `dry_run` query parameter. | `queries:execute` |
+| `GET /mcp/runs/{runid}` | Detailed run info (activation status, last refresh). | `runs:read` |
+| `POST /mcp/runs/{runid}/activate` | Trigger catalogue activation; returns activation job status. | `runs:activate` |
+| `GET /mcp/runs/{runid}/catalog` | Fetch catalogue subset; supports `include_fields`, `limit[datasets]`/`limit_datasets`, `limit[fields]`/`limit_fields`, `page[size]`/`page_size`, `page[number]`/`page_number`, `page[offset]`/`page_offset`. | `runs:read` |
+| `GET /mcp/runs/{runid}/presets` | Retrieve curated query presets. | `runs:read` |
+| `GET /mcp/runs/{runid}/prompt-template` | Hydrated Markdown prompt with schema snapshot and endpoint URLs. | `runs:read` |
+| `POST /mcp/runs/{runid}/queries/validate` | Validate payload; respond with normalized payload and warnings. | `queries:validate` |
+| `POST /mcp/runs/{runid}/queries/execute` | Execute payload; optional `dry_run` query parameter. | `queries:execute` |
 
 - Every endpoint responds with JSON using: `{ "data": ..., "meta": ..., "errors": [...] }`.
 - Errors include machine-readable `code` (`catalog_missing`, `validation_failed`, `permission_denied`, `rate_limited`, `activation_in_progress`, `internal_error`) and human `detail`.
@@ -61,41 +60,8 @@
 
 ## 6. Request / Response Contracts
 
-### 6.1 `GET /mcp/runs`
-```json
-{
-  "data": [
-    {
-      "id": "copacetic-note",
-      "type": "run",
-      "attributes": {
-        "path": "/wc1/runs/co/copacetic-note",
-        "activated": true,
-        "last_catalog_refresh": "2024-05-07T16:33:22Z",
-        "dataset_count": 84
-      },
-      "links": {
-        "self": "https://host/query-engine/mcp/runs/copacetic-note",
-        "catalog": "https://host/query-engine/mcp/runs/copacetic-note/catalog",
-        "query": "https://host/query-engine/mcp/runs/copacetic-note/queries/execute",
-        "query_execute": "https://host/query-engine/mcp/runs/copacetic-note/queries/execute",
-        "query_validate": "https://host/query-engine/mcp/runs/copacetic-note/queries/validate",
-        "activate": "https://host/query-engine/mcp/runs/copacetic-note/activate"
-      }
-    }
-  ],
-  "meta": {
-    "page": {
-      "size": 50,
-      "number": 1,
-      "total_pages": 3
-    }
-  }
-}
-```
-
-### 6.2 `GET /mcp/runs/{id}`
-- Returns a single run record with the same shape as `GET /mcp/runs`, plus `meta.catalog` stats when the catalogue is active.
+### 6.1 `GET /mcp/runs/{runid}`
+- Returns a single run record including catalogue status metadata when available.
 - Errors:
   - `404` when the run is not visible to the current token.
   - `403` if the run exists but the token lacks `runs:read`.
@@ -129,7 +95,7 @@
 }
 ```
 
-### 6.3 `GET /mcp/runs/{id}/catalog`
+### 6.2 `GET /mcp/runs/{runid}/catalog`
 - Returns the dataset catalogue after applying prefix filtering and optional limits.
 - Query parameters: `include_fields`, `limit[datasets]` (`limit_datasets` alias), `limit[fields]` (`limit_fields` alias), `page[size]` (`page_size` alias), `page[number]` (`page_number` alias), `page[offset]` (`page_offset` alias) (see §7).
 - Errors:
@@ -137,7 +103,7 @@
   - `404` (`catalog_missing`) when the catalogue has not been generated.
   - `400` (`invalid_request`) for malformed boolean or limit values.
 
-### 6.4 `POST /mcp/runs/{id}/queries/validate`
+### 6.3 `POST /mcp/runs/{runid}/queries/validate`
 - Returns a normalized payload and warnings when validation succeeds.
 - Requires `queries:validate` (or `queries:execute`) scope in addition to `runs:read`.
 - `aggregations` entries can be supplied either as shorthand strings (rendered verbatim) or as objects defining `fn`/`column`, `expression`, or `sql`.
@@ -169,7 +135,7 @@
 }
 ```
 
-### 6.5 `POST /mcp/runs/{id}/queries/execute`
+### 6.4 `POST /mcp/runs/{runid}/queries/execute`
 - Executes a validated payload and returns result records. Set `dry_run=true` to perform validation without execution.
 - Requires `queries:execute` scope in addition to `runs:read`.
 - `result.schema` entries mirror Arrow field metadata; `result.records` are truncated by `limit` unless `dry_run=true`.
@@ -210,7 +176,7 @@
 - `limit_fields` trims schema field listings per dataset; `limit_datasets` caps dataset count in the response.
 - For each field include `name`, `type`, optional `units`, `description`.
 - Provide `meta.catalog.filtered_count` so clients know the original dataset count.
-- `/mcp/runs/{id}/catalog` query parameters:
+- `/mcp/runs/{runid}/catalog` query parameters:
   - `include_fields` (bool, default `true`) — when false, excludes schema information entirely.
   - `limit[datasets]` / `limit_datasets` — max number of datasets returned (after prefix filtering).
   - `limit[fields]` / `limit_fields` — max number of fields per dataset schema when `include_fields=true`.
@@ -219,7 +185,7 @@
 - `filters` support operators `=`, `!=`, `<`, `<=`, `>`, `>=`, `LIKE`, `ILIKE`, `IN`, `NOT IN`, `BETWEEN`, `IS NULL`, and `IS NOT NULL`. Provide arrays for `IN`/`NOT IN` (any length) and `BETWEEN` (two values, inclusive bounds).
 
 ## 8. Activation Workflow
-- `POST /mcp/runs/{id}/activate` responds with:
+- `POST /mcp/runs/{runid}/activate` responds with:
   ```json
   {
     "data": {
@@ -241,12 +207,12 @@
 - When the job is accepted but still running, the API returns `202 Accepted`, sets a `Retry-After` header, and includes `meta.poll_after_seconds` to guide status polling.
 - If activation is already running, return `202` with `status: "in_progress"` and include both a `Retry-After` header and `meta.poll_after_seconds`.
 - A `409` response is under consideration for clients that prefer an immediate conflict signal instead of polling; the current behaviour remains `202 Accepted`.
-- Upon completion, `GET /mcp/runs/{id}` reflects updated `last_catalog_refresh`.
+- Upon completion, `GET /mcp/runs/{runid}` reflects updated `last_catalog_refresh`.
 
 ## 9. Prompt Template Endpoint
 - Returns Markdown similar to the current console template.
 - Injects:
-  - `run_id`
+  - `runid`
   - `query_endpoint` (full URL)
   - `schema_snapshot` (respecting dataset/field limits)
   - Default payload sample (first dataset or preset)
@@ -266,7 +232,7 @@
 - Include `trace_id` in `meta` for observability.
 
 ## 11. Monitoring & Logging
-- Tag every request with `mcp.endpoint`, `mcp.scope`, `run_id`, and `trace_id`.
+- Tag every request with `mcp.endpoint`, `mcp.scope`, `runid`, and `trace_id`.
 - Log activation outcomes and query execution timing histogram.
 - Emit Prometheus metrics: request counts per endpoint, validation failures, execution duration, activation failures.
 

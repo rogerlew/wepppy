@@ -6,7 +6,7 @@ x-wepppy-service: &wepppy-service
   init: true
   user: "${UID:-33}:${GID:-993}"
   working_dir: /workdir/wepppy
-  environment:
+  environment: &wepppy-env
     PYTHONUNBUFFERED: "1"
     REDIS_URL: redis://redis:6379/0
     REDIS_HOST: redis
@@ -181,6 +181,11 @@ services:
   query-engine:
     <<: *wepppy-service
     container_name: wepppy-query-engine
+    environment:
+      <<: *wepppy-env
+      WEPP_MCP_HOST: ${WEPP_MCP_HOST}
+      WEPP_MCP_HOST_DESCRIPTION: ${WEPP_MCP_HOST_DESCRIPTION}
+      WEPP_MCP_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET}
     command:
       - uvicorn
       - wepppy.query_engine.app.server:create_app

@@ -6,11 +6,19 @@ import traceback
 from collections import OrderedDict
 from dataclasses import asdict
 from pathlib import Path
+from typing import Any
+
+import yaml
 import os
 
 from starlette.applications import Starlette
 from starlette.requests import Request as StarletteRequest
-from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse
+from starlette.responses import (
+    HTMLResponse,
+    JSONResponse,
+    Response,
+    PlainTextResponse,
+)
 from starlette.routing import Route, Mount
 from starlette.templating import Jinja2Templates
 
@@ -22,6 +30,45 @@ from .helpers import resolve_run_path
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
 LOGGER = logging.getLogger(__name__)
+DOCS_ROOT = Path(__file__).resolve().parent.parent / "docs"
+MCP_OPENAPI_PATH = DOCS_ROOT / "mcp_openapi.yaml"
+
+
+def _render_mcp_openapi_yaml() -> str | None:
+    try:
+        raw_spec = MCP_OPENAPI_PATH.read_text(encoding="utf-8")
+    except OSError as exc:
+        LOGGER.warning("Failed to read MCP OpenAPI spec at %s: %s", MCP_OPENAPI_PATH, exc)
+        return None
+
+    try:
+        spec_data: dict[str, Any] = yaml.safe_load(raw_spec)
+    except yaml.YAMLError as exc:
+        LOGGER.warning("Failed to parse MCP OpenAPI spec: %s", exc)
+        return None
+
+    host = os.getenv("WEPP_MCP_HOST")
+    description = os.getenv("WEPP_MCP_HOST_DESCRIPTION")
+
+    if host:
+        contact = spec_data.get("info", {}).get("contact")
+        if isinstance(contact, dict):
+            contact.setdefault("name", "WEPPcloud Dev")
+            contact["url"] = f"https://{host}/weppcloud/"
+
+        for server in spec_data.get("servers", []) or []:
+            if isinstance(server, dict):
+                server["url"] = f"https://{host}/query-engine/mcp"
+                if description:
+                    server["description"] = description
+                elif not server.get("description"):
+                    server["description"] = f"{host} deployment"
+    elif description:
+        for server in spec_data.get("servers", []) or []:
+            if isinstance(server, dict) and not server.get("description"):
+                server["description"] = description
+
+    return yaml.safe_dump(spec_data, sort_keys=False)
 
 
 async def homepage(request: StarletteRequest) -> Response:
@@ -239,6 +286,16 @@ def health(_: StarletteRequest):
     return PlainTextResponse('OK')
 
 
+async def mcp_openapi_spec(_: StarletteRequest) -> Response:
+    if not MCP_OPENAPI_PATH.is_file():
+        LOGGER.warning("MCP OpenAPI spec not found at %s", MCP_OPENAPI_PATH)
+        return PlainTextResponse("OpenAPI specification not found", status_code=404)
+    rendered = _render_mcp_openapi_yaml()
+    if rendered is None:
+        return PlainTextResponse("Failed to render OpenAPI specification", status_code=500)
+    return Response(rendered, media_type="application/yaml")
+
+
 def create_app() -> Starlette:
     routes = [
         Route(
@@ -252,6 +309,7 @@ def create_app() -> Starlette:
         Route("/runs/{runid:path}/query", make_query_endpoint, methods=["GET"]),
         Route("/runs/{runid:path}/query", run_query_endpoint, methods=["POST"]),
         Route("/runs/{runid:path}", run_info, methods=["GET"]),
+        Route("/docs/mcp_openapi.yaml", mcp_openapi_spec, methods=["GET"]),
     ]
 
     if os.getenv("WEPP_MCP_JWT_SECRET"):

@@ -21,7 +21,7 @@ from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core.climate import Climate
-from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.weppcloud.utils.helpers import (
     get_wd, authorize, get_run_owners_lazy, 
     authorize_and_handle_with_exception_factory,
@@ -38,6 +38,30 @@ if _VAPID_PATH.exists():
     with _VAPID_PATH.open() as fp:
         vapid = json.load(fp)
         VAPID_PUBLIC_KEY = vapid.get('publicKey', '')
+
+TOC_TASK_ANCHOR_TO_TASK = {
+    '#map': TaskEnum.fetch_dem,
+    '#soil-burn-severity': TaskEnum.init_sbs_map,
+    '#soil-burn-severity-optional': TaskEnum.init_sbs_map,
+    '#channel-delineation': TaskEnum.build_channels,
+    '#outlet': TaskEnum.set_outlet,
+    '#subcatchments-delineation': TaskEnum.build_subcatchments,
+    '#landuse-options': TaskEnum.build_landuse,
+    '#soil-options': TaskEnum.build_soils,
+    '#climate-options': TaskEnum.build_climate,
+    '#rap-time-series-acquisition': TaskEnum.fetch_rap_ts,
+    '#wepp': TaskEnum.run_wepp_watershed,
+    '#observed-data-model-fit': TaskEnum.run_observed,
+    '#debris-flow-analysis': TaskEnum.run_debris,
+    '#wildfire-ash-transport-and-risk-watar': TaskEnum.run_watar,
+    '#rhem': TaskEnum.run_rhem,
+    '#omni-scenario-runner': TaskEnum.run_omni_scenarios,
+    '#omni-contrast-definitions': TaskEnum.run_omni_contrasts,
+    '#partitioned-dss-export-for-hec': TaskEnum.dss_export,
+    '#export': TaskEnum.dss_export,
+}
+
+TOC_TASK_EMOJI_MAP = {anchor: task.emoji() for anchor, task in TOC_TASK_ANCHOR_TO_TASK.items()}
 
 @run_0_bp.route('/sw.js')
 def service_worker():
@@ -200,6 +224,7 @@ def runs0(runid, config):
                             run_id=runid,
                             runid=runid,
                             config=config,
+                            toc_task_emojis=TOC_TASK_EMOJI_MAP,
                             pup_relpath=ctx.pup_relpath,
                             VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
 

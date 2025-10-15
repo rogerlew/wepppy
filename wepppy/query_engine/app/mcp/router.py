@@ -31,8 +31,6 @@ from wepppy.query_engine.payload import QueryRequest
 LOGGER = logging.getLogger(__name__)
 SERVICE_NAME = "weppcloud-query-engine"
 SERVICE_VERSION = os.getenv("WEPP_MCP_SERVICE_VERSION") or os.getenv("WEPP_RELEASE") or "unknown"
-DEFAULT_PAGE_SIZE = 50
-MAX_PAGE_SIZE = 200
 CATALOG_PAGE_SIZE = 50
 CATALOG_MAX_PAGE_SIZE = 200
 IGNORED_CATALOG_PREFIXES = (".mypy_cache/", ".mypy_cache", "_query_engine/", "_query_engine")
@@ -199,19 +197,19 @@ def _parse_pagination_params(params, *, default_size: int, max_size: int) -> tup
     return size, number, offset, use_offset
 
 
-def _resolve_run_entry(request: Request, run_id: str) -> tuple[Path, dict[str, Any]]:
+def _resolve_run_entry(request: Request, runid: str) -> tuple[Path, dict[str, Any]]:
     try:
-        run_path = resolve_run_path(run_id)
+        run_path = resolve_run_path(runid)
     except FileNotFoundError:
         raise
 
     activated, generated_at, dataset_count = _load_catalog_metadata(run_path)
     root_path = request.scope.get("root_path", "")
-    self_path = _join_path(root_path, f"runs/{run_id}")
-    catalog_path = _join_path(root_path, f"runs/{run_id}/catalog")
-    query_execute_path = _join_path(root_path, f"runs/{run_id}/queries/execute")
-    query_validate_path = _join_path(root_path, f"runs/{run_id}/queries/validate")
-    activate_path = _join_path(root_path, f"runs/{run_id}/activate")
+    self_path = _join_path(root_path, f"runs/{runid}")
+    catalog_path = _join_path(root_path, f"runs/{runid}/catalog")
+    query_execute_path = _join_path(root_path, f"runs/{runid}/queries/execute")
+    query_validate_path = _join_path(root_path, f"runs/{runid}/queries/validate")
+    activate_path = _join_path(root_path, f"runs/{runid}/activate")
 
     attributes = {
         "path": str(run_path),
@@ -230,7 +228,7 @@ def _resolve_run_entry(request: Request, run_id: str) -> tuple[Path, dict[str, A
     }
 
     entry = {
-        "id": run_id,
+        "id": runid,
         "type": "run",
         "attributes": attributes,
         "links": links,
@@ -238,19 +236,10 @@ def _resolve_run_entry(request: Request, run_id: str) -> tuple[Path, dict[str, A
     return run_path, entry
 
 
-def _serialise_run(request: Request, run_id: str) -> dict[str, Any] | None:
-    try:
-        _, entry = _resolve_run_entry(request, run_id)
-        return entry
-    except FileNotFoundError:
-        LOGGER.warning("Run '%s' referenced in token but not found on disk", run_id)
-        return None
-
-
-def _principal_has_run(principal: MCPPrincipal, run_id: str) -> bool:
-    if principal.run_ids is None:
+def _principal_has_run(principal: MCPPrincipal, runid: str) -> bool:
+    if principal.runids is None:
         return False
-    return run_id in principal.run_ids
+    return runid in principal.runids
 
 
 def _filter_catalog_entries(entries: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -289,7 +278,7 @@ def _clone_entry(entry: dict[str, Any], *, include_fields: bool, field_limit: in
     return clone
 
 
-def _prepare_query_request(payload: Mapping[str, Any], *, run_id: str, run_path: Path) -> tuple[QueryRequest, dict[str, Any], list[dict[str, Any]], str | None]:
+def _prepare_query_request(payload: Mapping[str, Any], *, runid: str, run_path: Path) -> tuple[QueryRequest, dict[str, Any], list[dict[str, Any]], str | None]:
     try:
         query_request = QueryRequest(**payload)
     except Exception as exc:  # pragma: no cover - validation error formatting
@@ -298,10 +287,10 @@ def _prepare_query_request(payload: Mapping[str, Any], *, run_id: str, run_path:
     try:
         raw_entries, generated_at = _load_catalog_data(run_path)
     except FileNotFoundError as exc:
-        raise QueryValidationException(404, "catalog_missing", f"Catalog for run '{run_id}' not found") from exc
+        raise QueryValidationException(404, "catalog_missing", f"Catalog for run '{runid}' not found") from exc
     except Exception as exc:  # pragma: no cover - malformed catalog files
-        LOGGER.warning("Failed to parse catalog for %s", run_id, exc_info=True)
-        raise QueryValidationException(500, "catalog_invalid", f"Catalog for run '{run_id}' is invalid") from exc
+        LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
+        raise QueryValidationException(500, "catalog_invalid", f"Catalog for run '{runid}' is invalid") from exc
 
     available_paths = {str(entry.get("path")) for entry in raw_entries if entry.get("path")}
     missing = [spec.path for spec in query_request.dataset_specs if spec.path not in available_paths]
@@ -429,62 +418,17 @@ def _build_pagination_links(request: Request, page_number: int, total_pages: int
     return links
 
 
-async def list_runs(request: Request) -> JSONResponse:
-    principal = require_scope(request, "runs:read")
-    run_ids: Iterable[str] | None = principal.run_ids
-
-    if run_ids is None:
-        return _error_response(403, "forbidden", "Token is not scoped to any runs")
-
-    try:
-        page_size, page_number, offset, use_offset = _parse_pagination_params(
-            request.query_params,
-            default_size=DEFAULT_PAGE_SIZE,
-            max_size=MAX_PAGE_SIZE,
-        )
-    except ValueError as exc:
-        return _error_response(400, "invalid_request", str(exc))
-
-    sorted_runs = sorted(run_ids)
-    total_items = len(sorted_runs)
-    total_pages = math.ceil(total_items / page_size) if total_items else 0
-
-    start_index = offset
-    end_index = offset + page_size
-    page_slice = sorted_runs[start_index:end_index]
-
-    data: list[dict[str, Any]] = []
-    for run_id in page_slice:
-        entry = _serialise_run(request, run_id)
-        if entry:
-            data.append(entry)
-
-    meta = {
-        "total_items": total_items,
-        "page": {
-            "size": page_size,
-            "number": page_number,
-            "offset": offset,
-            "total_pages": total_pages,
-        },
-    }
-    meta = _with_trace_id(meta)
-    links = _build_pagination_links(request, page_number, total_pages, page_size=page_size, use_offset=use_offset)
-
-    return JSONResponse({"data": data, "meta": meta, "links": links})
-
-
 async def get_run(request: Request) -> JSONResponse:
-    run_id = request.path_params.get("run_id") or ""
+    runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
-    if not _principal_has_run(principal, run_id):
-        return _error_response(404, "not_found", f"Run '{run_id}' is not accessible")
+    if not _principal_has_run(principal, runid):
+        return _error_response(404, "not_found", f"Run '{runid}' is not accessible")
 
     try:
-        run_path, entry = _resolve_run_entry(request, run_id)
+        run_path, entry = _resolve_run_entry(request, runid)
     except FileNotFoundError:
-        return _error_response(404, "not_found", f"Run '{run_id}' not found")
+        return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     activated, generated_at, dataset_count = _load_catalog_metadata(run_path)
     meta: dict[str, Any] = {
@@ -538,24 +482,24 @@ def _clone_entry(entry: dict[str, Any], *, include_fields: bool, field_limit: in
 
 
 async def get_catalog(request: Request) -> JSONResponse:
-    run_id = request.path_params.get("run_id") or ""
+    runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
-    if not _principal_has_run(principal, run_id):
-        return _error_response(404, "not_found", f"Run '{run_id}' is not accessible")
+    if not _principal_has_run(principal, runid):
+        return _error_response(404, "not_found", f"Run '{runid}' is not accessible")
 
     try:
-        run_path = resolve_run_path(run_id)
+        run_path = resolve_run_path(runid)
     except FileNotFoundError:
-        return _error_response(404, "not_found", f"Run '{run_id}' not found")
+        return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     try:
         raw_entries, generated_at = _load_catalog_data(run_path)
     except FileNotFoundError:
-        return _error_response(404, "catalog_missing", f"Catalog for run '{run_id}' not found")
+        return _error_response(404, "catalog_missing", f"Catalog for run '{runid}' not found")
     except Exception as exc:  # pragma: no cover - malformed catalog files
-        LOGGER.warning("Failed to parse catalog for %s", run_id, exc_info=True)
-        return _error_response(500, "catalog_invalid", f"Catalog for run '{run_id}' is invalid")
+        LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
+        return _error_response(500, "catalog_invalid", f"Catalog for run '{runid}' is invalid")
 
     try:
         include_fields = _parse_bool(
@@ -635,19 +579,19 @@ async def get_catalog(request: Request) -> JSONResponse:
 
 
 async def validate_query(request: Request) -> JSONResponse:
-    run_id = request.path_params.get("run_id") or ""
+    runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
-    if not _principal_has_run(principal, run_id):
-        return _error_response(404, "not_found", f"Run '{run_id}' is not accessible")
+    if not _principal_has_run(principal, runid):
+        return _error_response(404, "not_found", f"Run '{runid}' is not accessible")
 
     if not (principal.has_scope("queries:validate") or principal.has_scope("queries:execute")):
         return _error_response(403, "forbidden", "Token lacks query validation scope")
 
     try:
-        run_path = resolve_run_path(run_id)
+        run_path = resolve_run_path(runid)
     except FileNotFoundError:
-        return _error_response(404, "not_found", f"Run '{run_id}' not found")
+        return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     try:
         payload = await request.json()
@@ -660,7 +604,7 @@ async def validate_query(request: Request) -> JSONResponse:
     try:
         query_request, normalized_payload, raw_entries, generated_at = _prepare_query_request(
             payload,
-            run_id=run_id,
+            runid=runid,
             run_path=run_path,
         )
     except QueryValidationException as exc:
@@ -685,11 +629,11 @@ async def validate_query(request: Request) -> JSONResponse:
 
 
 async def execute_query(request: Request) -> JSONResponse:
-    run_id = request.path_params.get("run_id") or ""
+    runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
-    if not _principal_has_run(principal, run_id):
-        return _error_response(404, "not_found", f"Run '{run_id}' is not accessible")
+    if not _principal_has_run(principal, runid):
+        return _error_response(404, "not_found", f"Run '{runid}' is not accessible")
 
     if not principal.has_scope("queries:execute"):
         return _error_response(403, "forbidden", "Token lacks query execution scope")
@@ -700,9 +644,9 @@ async def execute_query(request: Request) -> JSONResponse:
         return _error_response(400, "invalid_request", str(exc))
 
     try:
-        run_path = resolve_run_path(run_id)
+        run_path = resolve_run_path(runid)
     except FileNotFoundError:
-        return _error_response(404, "not_found", f"Run '{run_id}' not found")
+        return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     try:
         payload = await request.json()
@@ -715,7 +659,7 @@ async def execute_query(request: Request) -> JSONResponse:
     try:
         query_request, normalized_payload, raw_entries, generated_at = _prepare_query_request(
             payload,
-            run_id=run_id,
+            runid=runid,
             run_path=run_path,
         )
     except QueryValidationException as exc:
@@ -746,9 +690,9 @@ async def execute_query(request: Request) -> JSONResponse:
     try:
         context = resolve_run_context(str(run_path), auto_activate=False)
     except FileNotFoundError:
-        return _error_response(404, "not_found", f"Run '{run_id}' not found")
+        return _error_response(404, "not_found", f"Run '{runid}' not found")
     except Exception as exc:  # pragma: no cover - defensive logging
-        LOGGER.warning("Failed to resolve run context for %s", run_id, exc_info=True)
+        LOGGER.warning("Failed to resolve run context for %s", runid, exc_info=True)
         return _error_response(500, "context_unavailable", f"Unable to resolve run context: {exc}")
 
     started = time.perf_counter()
@@ -760,7 +704,7 @@ async def execute_query(request: Request) -> JSONResponse:
     except ValueError as exc:
         return _error_response(422, "invalid_payload", str(exc))
     except Exception as exc:  # pragma: no cover - defensive logging
-        LOGGER.exception("Query execution failed for %s", run_id)
+        LOGGER.exception("Query execution failed for %s", runid)
         return _error_response(500, "execution_failed", f"Query execution failed: {exc}")
     finally:
         duration_ms = int((time.perf_counter() - started) * 1000)
@@ -802,23 +746,23 @@ async def execute_query(request: Request) -> JSONResponse:
 
 
 async def activate_run_endpoint(request: Request) -> JSONResponse:
-    run_id = request.path_params.get("run_id") or ""
+    runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:activate")
 
-    if not _principal_has_run(principal, run_id):
-        return _error_response(404, "not_found", f"Run '{run_id}' is not accessible")
+    if not _principal_has_run(principal, runid):
+        return _error_response(404, "not_found", f"Run '{runid}' is not accessible")
 
     try:
-        run_path = resolve_run_path(run_id)
+        run_path = resolve_run_path(runid)
     except FileNotFoundError:
-        return _error_response(404, "not_found", f"Run '{run_id}' not found")
+        return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     try:
         catalog = activate_query_engine(run_path)
     except FileNotFoundError:
-        return _error_response(404, "not_found", f"Run '{run_id}' not found")
+        return _error_response(404, "not_found", f"Run '{runid}' not found")
     except Exception as exc:  # pragma: no cover - defensive logging
-        LOGGER.exception("Activation failed for %s", run_id)
+        LOGGER.exception("Activation failed for %s", runid)
         return _error_response(500, "activation_failed", f"Activation failed: {exc}")
 
     generated_at = catalog.get("generated_at") if isinstance(catalog, Mapping) else None
@@ -827,7 +771,7 @@ async def activate_run_endpoint(request: Request) -> JSONResponse:
     data = {
         "type": "activation_job",
         "attributes": {
-            "run_id": run_id,
+            "runid": runid,
             "status": "completed",
             "generated_at": generated_at,
             "dataset_count": dataset_count,
@@ -843,11 +787,11 @@ async def activate_run_endpoint(request: Request) -> JSONResponse:
 
 
 async def get_presets(request: Request) -> JSONResponse:
-    run_id = request.path_params.get("run_id") or ""
+    runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
-    if not _principal_has_run(principal, run_id):
-        return _error_response(404, "not_found", f"Run '{run_id}' is not accessible")
+    if not _principal_has_run(principal, runid):
+        return _error_response(404, "not_found", f"Run '{runid}' is not accessible")
 
     categories = [
         {
@@ -874,23 +818,23 @@ async def get_presets(request: Request) -> JSONResponse:
 
 
 async def get_prompt_template(request: Request) -> JSONResponse:
-    run_id = request.path_params.get("run_id") or ""
+    runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
-    if not _principal_has_run(principal, run_id):
-        return _error_response(404, "not_found", f"Run '{run_id}' is not accessible")
+    if not _principal_has_run(principal, runid):
+        return _error_response(404, "not_found", f"Run '{runid}' is not accessible")
 
     try:
-        run_path = resolve_run_path(run_id)
+        run_path = resolve_run_path(runid)
     except FileNotFoundError:
-        return _error_response(404, "not_found", f"Run '{run_id}' not found")
+        return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     try:
         raw_entries, generated_at = _load_catalog_data(run_path)
     except FileNotFoundError:
         raw_entries, generated_at = [], None
     except Exception as exc:  # pragma: no cover - defensive logging
-        LOGGER.warning("Failed to parse catalog for %s", run_id, exc_info=True)
+        LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
         raw_entries, generated_at = [], None
 
     schema_summary = _build_schema_summary(raw_entries)
@@ -898,7 +842,7 @@ async def get_prompt_template(request: Request) -> JSONResponse:
     sample_payload_json = json.dumps(default_payload, indent=2)
 
     root_path = request.scope.get("root_path", "")
-    query_endpoint_path = _join_path(root_path, f"runs/{run_id}/query")
+    query_endpoint_path = _join_path(root_path, f"runs/{runid}/query")
     query_endpoint = _absolute_url(request, query_endpoint_path)
 
     template = _load_prompt_template()
@@ -935,14 +879,13 @@ async def get_prompt_template(request: Request) -> JSONResponse:
 def create_mcp_app() -> Starlette:
     routes = [
         Route("/ping", ping, methods=["GET"], name="mcp_ping"),
-        Route("/runs", list_runs, methods=["GET"], name="mcp_list_runs"),
-        Route("/runs/{run_id:str}", get_run, methods=["GET"], name="mcp_get_run"),
-        Route("/runs/{run_id:str}/catalog", get_catalog, methods=["GET"], name="mcp_get_catalog"),
-        Route("/runs/{run_id:str}/activate", activate_run_endpoint, methods=["POST"], name="mcp_activate_run"),
-        Route("/runs/{run_id:str}/presets", get_presets, methods=["GET"], name="mcp_get_presets"),
-        Route("/runs/{run_id:str}/prompt-template", get_prompt_template, methods=["GET"], name="mcp_get_prompt_template"),
-        Route("/runs/{run_id:str}/queries/validate", validate_query, methods=["POST"], name="mcp_validate_query"),
-        Route("/runs/{run_id:str}/queries/execute", execute_query, methods=["POST"], name="mcp_execute_query"),
+        Route("/runs/{runid:str}", get_run, methods=["GET"], name="mcp_get_run"),
+        Route("/runs/{runid:str}/catalog", get_catalog, methods=["GET"], name="mcp_get_catalog"),
+        Route("/runs/{runid:str}/activate", activate_run_endpoint, methods=["POST"], name="mcp_activate_run"),
+        Route("/runs/{runid:str}/presets", get_presets, methods=["GET"], name="mcp_get_presets"),
+        Route("/runs/{runid:str}/prompt-template", get_prompt_template, methods=["GET"], name="mcp_get_prompt_template"),
+        Route("/runs/{runid:str}/queries/validate", validate_query, methods=["POST"], name="mcp_validate_query"),
+        Route("/runs/{runid:str}/queries/execute", execute_query, methods=["POST"], name="mcp_execute_query"),
     ]
 
     app = Starlette(debug=False, routes=routes)
