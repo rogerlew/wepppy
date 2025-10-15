@@ -134,6 +134,18 @@ paths:
       parameters:
         - $ref: '#/components/parameters/RunId'
       responses:
+        "202":
+          description: Activation job accepted; poll the run resource for completion.
+          headers:
+            Retry-After:
+              description: Suggested number of seconds to wait before retrying the status check.
+              schema:
+                type: integer
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivationAcceptedResponse'
         "200":
           description: Activation completed successfully.
           content:
@@ -743,6 +755,64 @@ components:
       required:
         - data
         - meta
+    ActivationAcceptedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - id
+            - attributes
+          properties:
+            type:
+              type: string
+              enum: [activation_job]
+            id:
+              type: string
+            attributes:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [accepted, in_progress]
+                submitted_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+              required:
+                - status
+            links:
+              type: object
+              properties:
+                status:
+                  type: string
+                  format: uri
+              additionalProperties: true
+          additionalProperties: false
+        meta:
+          allOf:
+            - $ref: '#/components/schemas/TraceMeta'
+            - type: object
+              properties:
+                poll_after_seconds:
+                  type: integer
+                  minimum: 0
+      required:
+        - data
+        - meta
+      example:
+        data:
+          type: activation_job
+          id: copacetic-note:20240507T1633Z
+          attributes:
+            status: accepted
+            submitted_at: '2024-05-07T16:33:22Z'
+          links:
+            status: https://host/query-engine/mcp/runs/copacetic-note
+        meta:
+          trace_id: 2c5d8bd6f91c4d319a9053d9a9721d3b
+          poll_after_seconds: 10
     PresetResponse:
       type: object
       properties:
