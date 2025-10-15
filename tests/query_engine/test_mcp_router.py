@@ -172,6 +172,10 @@ def test_list_runs(monkeypatch, tmp_path):
     assert record["attributes"]["activated"] is True
     assert record["attributes"]["dataset_count"] == 1
     assert record["attributes"]["last_catalog_refresh"] == "2024-05-07T16:33:22Z"
+    links = record["links"]
+    assert links["query"].endswith(f"/mcp/runs/{run_id}/queries/execute")
+    assert links["query_execute"] == links["query"]
+    assert links["query_validate"].endswith(f"/mcp/runs/{run_id}/queries/validate")
     page_meta = payload["meta"]["page"]
     assert page_meta["offset"] == 0
     assert "self" in payload["links"]
@@ -198,6 +202,31 @@ def test_get_run_success(monkeypatch, tmp_path):
     assert payload["meta"]["catalog"]["activated"] is True
     assert payload["meta"]["catalog"]["dataset_count"] == 1
     assert "trace_id" in payload["meta"]
+
+
+def test_catalog_supports_parameter_aliases(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+
+    run_id = "alias-run"
+    app, _ = _make_client(monkeypatch, tmp_path, run_id)
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import auth
+
+    client = TestClient(app)
+    token = _issue_token(auth, run_id)
+
+    response = client.get(
+        f"/mcp/runs/{run_id}/catalog?limit_datasets=1&limit_fields=1&page_size=1&page_number=1",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert len(payload["data"]) <= 1
+    page_meta = payload["meta"]["page"]
+    assert page_meta["size"] == 1
+    assert page_meta["number"] == 1
 
 
 def test_get_run_catalog(monkeypatch, tmp_path):
@@ -727,4 +756,3 @@ def test_execute_query_requires_scope(monkeypatch, tmp_path):
     assert response.status_code == 403
     payload = response.json()
     assert "trace_id" in payload.get("meta", {})
-

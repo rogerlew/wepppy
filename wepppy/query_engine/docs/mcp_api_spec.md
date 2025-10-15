@@ -1,5 +1,9 @@
 # WEPPcloud Query Engine MCP API Specification
 
+## OpenAPI Specification
+- The machine-readable OpenAPI definition lives in `wepppy/query_engine/docs/mcp_openapi.yaml`. LLM agents and tooling can ingest it directly to discover endpoints, schemas, and authentication requirements.
+- Update the OpenAPI file alongside this document when endpoints or payload contracts change.
+
 ## 1. Purpose and Scope
 - Enable MCP-compatible LLM agents and tooling to explore, validate, and execute WEPPcloud Query Engine jobs in a safe and observable way.
 - Provide a uniform JSON interface that mirrors the existing Starlette console features (run activation, schema browsing, preset payloads, query execution).
@@ -41,10 +45,10 @@
 | Method & Path | Description | Required Scope |
 | --- | --- | --- |
 | `GET /mcp/ping` | Health probe; returns service metadata. | none |
-| `GET /mcp/runs` | List runs visible to the caller (pagination, filtering). | `runs:read` |
+| `GET /mcp/runs` | List runs visible to the caller; supports `page[size]`, `page[number]`, `page[offset]` (aliases `page_size`, `page_number`, `page_offset`). | `runs:read` |
 | `GET /mcp/runs/{run_id}` | Detailed run info (activation status, last refresh). | `runs:read` |
 | `POST /mcp/runs/{run_id}/activate` | Trigger catalogue activation; returns activation job status. | `runs:activate` |
-| `GET /mcp/runs/{run_id}/catalog` | Fetch catalogue subset; supports `include_fields`, `limit_datasets`, `limit_fields`, `page[size]`, `page[number]`, `page[offset]`. | `runs:read` |
+| `GET /mcp/runs/{run_id}/catalog` | Fetch catalogue subset; supports `include_fields`, `limit[datasets]`/`limit_datasets`, `limit[fields]`/`limit_fields`, `page[size]`/`page_size`, `page[number]`/`page_number`, `page[offset]`/`page_offset`. | `runs:read` |
 | `GET /mcp/runs/{run_id}/presets` | Retrieve curated query presets. | `runs:read` |
 | `GET /mcp/runs/{run_id}/prompt-template` | Hydrated Markdown prompt with schema snapshot and endpoint URLs. | `runs:read` |
 | `POST /mcp/runs/{run_id}/queries/validate` | Validate payload; respond with normalized payload and warnings. | `queries:validate` |
@@ -52,7 +56,8 @@
 
 - Every endpoint responds with JSON using: `{ "data": ..., "meta": ..., "errors": [...] }`.
 - Errors include machine-readable `code` (`catalog_missing`, `validation_failed`, `permission_denied`, `rate_limited`, `activation_in_progress`, `internal_error`) and human `detail`.
-- `GET` endpoints accept `page[size]`, `page[number]` for pagination; `sort` for ordering (e.g., `sort=-modified` on catalog).
+- `GET` endpoints accept `page[size]`/`page_size`, `page[number]`/`page_number` for pagination; `sort` for ordering (e.g., `sort=-modified` on catalog).
+- Run-level responses include both `links.query_execute` and `links.query_validate`; the legacy `links.query` is maintained as a deprecated alias for `links.query_execute` to avoid breaking existing clients.
 
 ## 6. Request / Response Contracts
 
@@ -71,7 +76,11 @@
       },
       "links": {
         "self": "https://host/query-engine/mcp/runs/copacetic-note",
-        "catalog": "https://host/query-engine/mcp/runs/copacetic-note/catalog"
+        "catalog": "https://host/query-engine/mcp/runs/copacetic-note/catalog",
+        "query": "https://host/query-engine/mcp/runs/copacetic-note/queries/execute",
+        "query_execute": "https://host/query-engine/mcp/runs/copacetic-note/queries/execute",
+        "query_validate": "https://host/query-engine/mcp/runs/copacetic-note/queries/validate",
+        "activate": "https://host/query-engine/mcp/runs/copacetic-note/activate"
       }
     }
   ],
@@ -104,7 +113,9 @@
     "links": {
       "self": "https://host/query-engine/mcp/runs/copacetic-note",
       "catalog": "https://host/query-engine/mcp/runs/copacetic-note/catalog",
-      "query": "https://host/query-engine/mcp/runs/copacetic-note/query",
+      "query": "https://host/query-engine/mcp/runs/copacetic-note/queries/execute",
+      "query_execute": "https://host/query-engine/mcp/runs/copacetic-note/queries/execute",
+      "query_validate": "https://host/query-engine/mcp/runs/copacetic-note/queries/validate",
       "activate": "https://host/query-engine/mcp/runs/copacetic-note/activate"
     }
   },
@@ -120,7 +131,7 @@
 
 ### 6.3 `GET /mcp/runs/{id}/catalog`
 - Returns the dataset catalogue after applying prefix filtering and optional limits.
-- Query parameters: `include_fields`, `limit[datasets]`, `limit[fields]`, `page[size]`, `page[number]`, `page[offset]` (see §7).
+- Query parameters: `include_fields`, `limit[datasets]` (`limit_datasets` alias), `limit[fields]` (`limit_fields` alias), `page[size]` (`page_size` alias), `page[number]` (`page_number` alias), `page[offset]` (`page_offset` alias) (see §7).
 - Errors:
   - `404` (`not_found`) when the run is not visible to the token.
   - `404` (`catalog_missing`) when the catalogue has not been generated.
@@ -129,6 +140,8 @@
 ### 6.4 `POST /mcp/runs/{id}/queries/validate`
 - Returns a normalized payload and warnings when validation succeeds.
 - Requires `queries:validate` (or `queries:execute`) scope in addition to `runs:read`.
+- `aggregations` entries can be supplied either as shorthand strings (rendered verbatim) or as objects defining `fn`/`column`, `expression`, or `sql`.
+- `computed_columns` require an `alias` and exactly one of `sql`, `expression`, or `date_parts`.
 - Errors:
   - `400` (`invalid_request`) for invalid JSON bodies.
   - `404` (`catalog_missing`) when the catalogue has not been generated.
@@ -159,6 +172,7 @@
 ### 6.5 `POST /mcp/runs/{id}/queries/execute`
 - Executes a validated payload and returns result records. Set `dry_run=true` to perform validation without execution.
 - Requires `queries:execute` scope in addition to `runs:read`.
+- `result.schema` entries mirror Arrow field metadata; `result.records` are truncated by `limit` unless `dry_run=true`.
 - Errors mirror the validation endpoint plus:
   - `500` (`context_unavailable`, `execution_failed`) for runtime issues.
 ```json
@@ -198,10 +212,11 @@
 - Provide `meta.catalog.filtered_count` so clients know the original dataset count.
 - `/mcp/runs/{id}/catalog` query parameters:
   - `include_fields` (bool, default `true`) — when false, excludes schema information entirely.
-  - `limit[datasets]` — max number of datasets returned (after prefix filtering).
-  - `limit[fields]` — max number of fields per dataset schema when `include_fields=true`.
-  - `page[size]` / `page[number]` — paginate the filtered dataset list (defaults 50/1).
-  - `page[offset]` — zero-based offset alternative to `page[number]`.
+  - `limit[datasets]` / `limit_datasets` — max number of datasets returned (after prefix filtering).
+  - `limit[fields]` / `limit_fields` — max number of fields per dataset schema when `include_fields=true`.
+  - `page[size]` / `page_size` and `page[number]` / `page_number` — paginate the filtered dataset list (defaults 50/1).
+  - `page[offset]` / `page_offset` — zero-based offset alternative to `page[number]`.
+- `filters` support operators `=`, `!=`, `<`, `<=`, `>`, `>=`, `LIKE`, `ILIKE`, `IN`, `NOT IN`, `BETWEEN`, `IS NULL`, and `IS NOT NULL`. Provide arrays for `IN`/`NOT IN` (any length) and `BETWEEN` (two values, inclusive bounds).
 
 ## 8. Activation Workflow
 - `POST /mcp/runs/{id}/activate` responds with:
@@ -224,6 +239,7 @@
   }
   ```
 - If activation is already running, return `202` with `status: "in_progress"` and include both a `Retry-After` header and `meta.poll_after_seconds`.
+- A `409` response is under consideration for clients that prefer an immediate conflict signal instead of polling; the current behaviour remains `202 Accepted`.
 - Upon completion, `GET /mcp/runs/{id}` reflects updated `last_catalog_refresh`.
 
 ## 9. Prompt Template Endpoint

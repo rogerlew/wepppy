@@ -160,6 +160,14 @@ def _parse_optional_positive_int(value: str | None, *, field: str, minimum: int 
     return parsed
 
 
+def _get_query_param(params: Mapping[str, Any], *names: str) -> str | None:
+    for name in names:
+        value = params.get(name)
+        if value is not None:
+            return value
+    return None
+
+
 def _parse_bool(value: str | None, *, field: str, default: bool) -> bool:
     if value is None:
         return default
@@ -172,14 +180,20 @@ def _parse_bool(value: str | None, *, field: str, default: bool) -> bool:
 
 
 def _parse_pagination_params(params, *, default_size: int, max_size: int) -> tuple[int, int, int, bool]:
-    size = _parse_positive_int(params.get("page[size]"), field="page[size]", default=default_size, minimum=1, maximum=max_size)
-    offset_param = params.get("page[offset]")
+    size_raw = _get_query_param(params, "page[size]", "page_size")
+    size_field = "page[size]" if "page[size]" in params else ("page_size" if "page_size" in params else "page[size]")
+    size = _parse_positive_int(size_raw, field=size_field, default=default_size, minimum=1, maximum=max_size)
+
+    offset_param = _get_query_param(params, "page[offset]", "page_offset")
     if offset_param is not None:
-        offset = _parse_non_negative_int(offset_param, field="page[offset]", default=0)
+        offset_field = "page[offset]" if "page[offset]" in params else ("page_offset" if "page_offset" in params else "page[offset]")
+        offset = _parse_non_negative_int(offset_param, field=offset_field, default=0)
         number = (offset // size) + 1
         use_offset = True
     else:
-        number = _parse_positive_int(params.get("page[number]"), field="page[number]", default=1, minimum=1)
+        number_raw = _get_query_param(params, "page[number]", "page_number")
+        number_field = "page[number]" if "page[number]" in params else ("page_number" if "page_number" in params else "page[number]")
+        number = _parse_positive_int(number_raw, field=number_field, default=1, minimum=1)
         offset = (number - 1) * size
         use_offset = False
     return size, number, offset, use_offset
@@ -195,7 +209,8 @@ def _resolve_run_entry(request: Request, run_id: str) -> tuple[Path, dict[str, A
     root_path = request.scope.get("root_path", "")
     self_path = _join_path(root_path, f"runs/{run_id}")
     catalog_path = _join_path(root_path, f"runs/{run_id}/catalog")
-    query_path = _join_path(root_path, f"runs/{run_id}/query")
+    query_execute_path = _join_path(root_path, f"runs/{run_id}/queries/execute")
+    query_validate_path = _join_path(root_path, f"runs/{run_id}/queries/validate")
     activate_path = _join_path(root_path, f"runs/{run_id}/activate")
 
     attributes = {
@@ -208,7 +223,9 @@ def _resolve_run_entry(request: Request, run_id: str) -> tuple[Path, dict[str, A
     links = {
         "self": _absolute_url(request, self_path),
         "catalog": _absolute_url(request, catalog_path),
-        "query": _absolute_url(request, query_path),
+        "query": _absolute_url(request, query_execute_path),
+        "query_execute": _absolute_url(request, query_execute_path),
+        "query_validate": _absolute_url(request, query_validate_path),
         "activate": _absolute_url(request, activate_path),
     }
 
@@ -386,13 +403,20 @@ def _build_pagination_links(request: Request, page_number: int, total_pages: int
     base_url = str(request.base_url).rstrip("/")
     path = request.url.path
     query_items = list(request.query_params.multi_items())
+    removal_keys = {"page[number]", "page[offset]", "page_number", "page_offset"}
+    number_key = "page[number]" if "page[number]" in request.query_params else (
+        "page_number" if "page_number" in request.query_params else "page[number]"
+    )
+    offset_key = "page[offset]" if "page[offset]" in request.query_params else (
+        "page_offset" if "page_offset" in request.query_params else "page[offset]"
+    )
 
     def build_url(target_page: int) -> str:
-        items = [(k, v) for k, v in query_items if k not in {"page[number]", "page[offset]"}]
+        items = [(k, v) for k, v in query_items if k not in removal_keys]
         if use_offset:
-            items.append(("page[offset]", str((target_page - 1) * page_size)))
+            items.append((offset_key, str((target_page - 1) * page_size)))
         else:
-            items.append(("page[number]", str(target_page)))
+            items.append((number_key, str(target_page)))
         query = urlencode(items, doseq=True)
         return f"{base_url}{path}?{query}" if query else f"{base_url}{path}"
 
@@ -534,9 +558,23 @@ async def get_catalog(request: Request) -> JSONResponse:
         return _error_response(500, "catalog_invalid", f"Catalog for run '{run_id}' is invalid")
 
     try:
-        include_fields = _parse_bool(request.query_params.get("include_fields"), field="include_fields", default=True)
-        datasets_limit = _parse_optional_positive_int(request.query_params.get("limit[datasets]"), field="limit[datasets]", minimum=1, maximum=CATALOG_MAX_PAGE_SIZE)
-        fields_limit = _parse_optional_positive_int(request.query_params.get("limit[fields]"), field="limit[fields]", minimum=1, maximum=1000)
+        include_fields = _parse_bool(
+            _get_query_param(request.query_params, "include_fields", "include-fields"),
+            field="include_fields",
+            default=True,
+        )
+        datasets_limit = _parse_optional_positive_int(
+            _get_query_param(request.query_params, "limit[datasets]", "limit_datasets"),
+            field="limit[datasets]",
+            minimum=1,
+            maximum=CATALOG_MAX_PAGE_SIZE,
+        )
+        fields_limit = _parse_optional_positive_int(
+            _get_query_param(request.query_params, "limit[fields]", "limit_fields"),
+            field="limit[fields]",
+            minimum=1,
+            maximum=1000,
+        )
         page_size, page_number, offset, use_offset = _parse_pagination_params(
             request.query_params,
             default_size=CATALOG_PAGE_SIZE,
@@ -586,7 +624,13 @@ async def get_catalog(request: Request) -> JSONResponse:
         },
     }
     meta = _with_trace_id(meta)
-    links = _build_pagination_links(request, page_number, total_pages, page_size=page_size, use_offset=use_offset)
+    links = _build_pagination_links(
+        request,
+        page_number,
+        total_pages,
+        page_size=page_size,
+        use_offset=use_offset,
+    )
     return JSONResponse({"data": data, "meta": meta, "links": links})
 
 
