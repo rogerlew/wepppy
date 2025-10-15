@@ -88,6 +88,68 @@ services:
       - "${BROWSE_PORT:-9009}:9009"
     profiles: ["legacy"]
 
+  elevationquery:
+    <<: *wepppy-service
+    command:
+      - gunicorn
+      - --workers
+      - "2"
+      - --bind
+      - 0.0.0.0:8002
+      - --log-level
+      - info
+      - wepppy.webservices.elevationquery:app
+    profiles: ["legacy"]
+    ports:
+      - "${ELEVATIONQUERY_PORT:-8002}:8002"
+
+  metquery:
+    <<: *wepppy-service
+    command:
+      - gunicorn
+      - --workers
+      - "2"
+      - --bind
+      - 0.0.0.0:8004
+      - --log-level
+      - info
+      - wepppy.webservices.metquery:app
+    profiles: ["legacy"]
+    ports:
+      - "${METQUERY_PORT:-8004}:8004"
+
+  wmesque:
+    <<: *wepppy-service
+    command:
+      - gunicorn
+      - --workers
+      - "2"
+      - --bind
+      - 0.0.0.0:8003
+      - --log-level
+      - info
+      - wepppy.webservices.wmesque:app
+    profiles: ["legacy"]
+    ports:
+      - "${WMESQUE_PORT:-8003}:8003"
+
+  wmesque2:
+    <<: *wepppy-service
+    command:
+      - gunicorn
+      - --workers
+      - "4"
+      - --bind
+      - 0.0.0.0:8030
+      - --log-level
+      - info
+      - -k
+      - uvicorn.workers.UvicornWorker
+      - wepppy.webservices.wmesque2:app
+    profiles: ["legacy"]
+    ports:
+      - "${WMESQUE2_PORT:-8030}:8030"
+
   query-engine:
     <<: *wepppy-service
     environment:
@@ -105,6 +167,35 @@ services:
       - "8041"
     expose:
       - "8041"
+
+  weppcloudr:
+    image: ${WEPPCLOUDR_IMAGE:-weppcloudr:latest}
+    build:
+      context: ..
+      dockerfile: weppcloudR/Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: ${WEPPCLOUDR_PORT:-8050}
+      TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
+      DEVAL_TEMPLATE: /srv/weppcloudr/templates/scripts/users/chinmay/new_report.Rmd
+    volumes:
+      - geodata-data:/geodata
+      - wc1-data:/wc1
+      - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
+    ports:
+      - "${WEPPCLOUDR_PORT:-8050}:${WEPPCLOUDR_PORT:-8050}"
+    networks:
+      - backend
+
+  webpush:
+    <<: *wepppy-service
+    command:
+      - bash
+      - -lc
+      - |
+        echo "webpush service placeholder – update command once implementation is available.";
+        tail -f /dev/null
+    profiles: ["webpush"]
 
   rq-worker:
     <<: *wepppy-service
@@ -168,6 +259,38 @@ services:
     networks:
       - backend
 
+  rq-dashboard:
+    image: ${WEPPCLOUD_RQ_DASHBOARD_IMAGE:-wepppy-rq-dashboard:latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.rq-dashboard
+    restart: unless-stopped
+    environment:
+      RQ_DASHBOARD_REDIS_URL: redis://redis:6379/9
+      RQ_DASHBOARD_URL_PREFIX: /rq-dashboard
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    working_dir: /rq-dashboard
+    command:
+      - gunicorn
+      - --bind
+      - 0.0.0.0:9181
+      - --workers
+      - "2"
+      - --threads
+      - "2"
+      - --timeout
+      - "30"
+      - --log-level
+      - info
+      - rq_dashboard.app:create_app()
+    ports:
+      - "${RQ_DASHBOARD_PORT:-9181}:9181"
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - backend
+
   caddy:
     image: caddy:2
     restart: unless-stopped
@@ -185,6 +308,21 @@ services:
         condition: service_started
       browse:
         condition: service_started
+      weppcloudr:
+        condition: service_started
+      rq-dashboard:
+        condition: service_started
+    networks:
+      - backend
+
+  f-esri:
+    image: ${F_ESRI_IMAGE:-wepppy-f-esri:latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.f-esri
+    restart: unless-stopped
+    init: true
+    command: ["tail", "-f", "/dev/null"]
     networks:
       - backend
 
@@ -227,3 +365,4 @@ volumes:
   geodata-data:
   redis-data:
   postgres-data:
+  weppcloudr-renv-cache:
