@@ -3,6 +3,7 @@
 var preflight_ws;
 let lastPreflightChecklist = null;
 let controller_lock_statuses = null;
+window.lastPreflightChecklist = lastPreflightChecklist;
 
 // Map .nodb files to the UI elements we surface lock icons for.
 // NOTE: if a new controller or PowerUser entry needs visual lock feedback,
@@ -57,6 +58,7 @@ function initPreflight(runid) {
                 updateLocks(payload.lock_statuses);
 
                 lastPreflightChecklist = payload.checklist;
+                window.lastPreflightChecklist = payload.checklist;
                 controller_lock_statuses = payload.lock_statuses;
 
             }
@@ -118,21 +120,32 @@ function updateLocks(lockStatuses) {
 
 function updateUI(checklist) {
     for (var key in checklist) {
-        var selector = getSelectorForKey(key);
-        if (readonly === true) {
-            $(selector).removeClass('checked').removeClass('unchecked');
-        } else if (checklist[key]) {
-            $(selector).addClass('checked').removeClass('unchecked');
-        } else {
-            $(selector).addClass('unchecked').removeClass('checked');
+        if (!Object.prototype.hasOwnProperty.call(checklist, key)) {
+            continue;
         }
+        var selector = getSelectorForKey(key);
+        if (!selector || key === "sbs_map") {
+            continue;
+        }
+        var isComplete = readonly === true ? false : Boolean(checklist[key]);
+        setTocEmojiState(selector, isComplete);
     }
 
     var selector = getSelectorForKey("sbs_map");
-    if (checklist.sbs_map) {
-        $(selector).addClass('burned').removeClass('unburned');
+    if (!selector) {
+        return;
+    }
+
+    if (readonly === true) {
+        $(selector).removeClass('burned').removeClass('unburned');
+        setTocEmojiState(selector, false);
     } else {
-        $(selector).addClass('unburned').removeClass('burned');
+        setTocEmojiState(selector, Boolean(checklist.sbs_map));
+        if (checklist.sbs_map) {
+            $(selector).addClass('burned').removeClass('unburned');
+        } else {
+            $(selector).addClass('unburned').removeClass('burned');
+        }
     }
 }
 
@@ -155,4 +168,67 @@ function getSelectorForKey(key) {
     };
 
     return mapping[key];
+}
+
+function setTocEmojiState(selector, isComplete) {
+    if (!selector) {
+        return;
+    }
+    var $targets = $(selector);
+    if (!$targets.length) {
+        return;
+    }
+
+    $targets.each(function () {
+        var anchor = this;
+        if (!anchor || anchor.nodeType !== 1) {
+            return;
+        }
+
+        if (anchor.classList) {
+            anchor.classList.remove('checked');
+            anchor.classList.remove('unchecked');
+        } else {
+            $(anchor).removeClass('checked unchecked');
+        }
+
+        var href = anchor.getAttribute('href');
+        var emoji = anchor.getAttribute('data-toc-emoji-value');
+
+        if (!emoji && anchor.dataset && anchor.dataset.tocEmojiValue) {
+            emoji = anchor.dataset.tocEmojiValue;
+        }
+
+        if (!emoji && window.tocTaskEmojis && href && window.tocTaskEmojis[href]) {
+            emoji = window.tocTaskEmojis[href];
+        }
+
+        if (anchor.dataset) {
+            anchor.dataset.tocEmojiValue = emoji || '';
+            anchor.dataset.tocEmoji = isComplete && emoji ? emoji : '';
+        }
+        anchor.setAttribute('data-toc-emoji-value', emoji || '');
+        anchor.setAttribute('data-toc-emoji', (isComplete && emoji) ? emoji : '');
+
+        var originalText = anchor.getAttribute('data-original-text');
+        if (!originalText && anchor.dataset && anchor.dataset.originalText) {
+            originalText = anchor.dataset.originalText;
+        }
+
+        if (!originalText) {
+            var current = (anchor.textContent || '').trim();
+            if (emoji && current.indexOf(emoji) === 0) {
+                current = current.slice(emoji.length).trim();
+            }
+            originalText = current;
+        }
+
+        anchor.setAttribute('data-original-text', originalText);
+        if (anchor.dataset) {
+            anchor.dataset.originalText = originalText;
+        }
+        if (anchor.textContent !== originalText) {
+            anchor.textContent = originalText;
+        }
+    });
 }

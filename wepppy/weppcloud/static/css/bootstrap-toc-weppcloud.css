@@ -8,14 +8,16 @@
 /* All levels of nav */
 nav[data-toggle="toc"] .nav > li > a {
   display: block;
-  padding: 4px 20px;
+  position: relative;
+  padding: 4px 20px 4px 36px;
   font-size: 13px;
   font-weight: 500;
   color: #767676;
+  text-align: left;
 }
 nav[data-toggle="toc"] .nav > li > a:hover,
 nav[data-toggle="toc"] .nav > li > a:focus {
-  padding-left: 19px;
+  padding-left: 35px;
   color: #563d7c;
   text-decoration: none;
   background-color: transparent;
@@ -24,11 +26,21 @@ nav[data-toggle="toc"] .nav > li > a:focus {
 nav[data-toggle="toc"] .nav-link.active,
 nav[data-toggle="toc"] .nav-link.active:hover,
 nav[data-toggle="toc"] .nav-link.active:focus {
-  padding-left: 18px;
+  padding-left: 34px;
   font-weight: bold;
   color: #563d7c;
   background-color: transparent;
   border-left: 2px solid #563d7c;
+}
+
+nav[data-toggle="toc"] .nav > li > a::before,
+nav[data-toggle="toc"] .nav .nav > li > a::before {
+  content: attr(data-toc-emoji);
+  position: absolute;
+  left: 12px;
+  width: 20px;
+  text-align: center;
+  line-height: 1.4;
 }
 
 /* Nav: second level (shown on .active) */
@@ -38,49 +50,30 @@ nav[data-toggle="toc"] .nav-link + ul {
 }
 
 
-ul li a.checked::before {
-  content: "\2705";
-  display: inline-block; 
-  width: 2em;
-  margin-left: -1em;
-}
-
-ul li a.unchecked::before {
-  content: "\274C";
-  display: inline-block; 
-  width: 2em;
-  margin-left: -1em;
-}
-
 ul li a.unburned::before {
-  content: "\1F332";
-  display: inline-block; 
-  width: 2em;
-  margin-left: -1em;
+  content: '';
 }
 
 ul li a.burned::before {
-  content: "\1F525";
-  display: inline-block; 
-  width: 2em;
-  margin-left: -1em;
+  content: '';
 }
 
 nav[data-toggle="toc"] .nav .nav > li > a {
   padding-top: 1px;
   padding-bottom: 1px;
-  padding-left: 30px;
+  padding-left: 46px;
   font-size: 12px;
   font-weight: normal;
+  text-align: left;
 }
 nav[data-toggle="toc"] .nav .nav > li > a:hover,
 nav[data-toggle="toc"] .nav .nav > li > a:focus {
-  padding-left: 29px;
+  padding-left: 45px;
 }
 nav[data-toggle="toc"] .nav .nav > li > .active,
 nav[data-toggle="toc"] .nav .nav > li > .active:hover,
 nav[data-toggle="toc"] .nav .nav > li > .active:focus {
-  padding-left: 28px;
+  padding-left: 44px;
   font-weight: 500;
 }
 
