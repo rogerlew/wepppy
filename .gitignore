@@ -18,3 +18,4 @@ wepppy/climates/cligen/_scripts/*.db
 wepppy/climates/daymet/test/*
 wepppy/wepppy/weppcloud/static/js/controllers.js
 _notes/*
+.docker-data
