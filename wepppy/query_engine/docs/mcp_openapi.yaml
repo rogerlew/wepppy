@@ -19,6 +19,12 @@ tags:
     description: Health probes and supporting endpoints.
   - name: Runs
     description: Discovery and metadata for accessible WEPPcloud runs.
+  - name: Catalog
+    description: Dataset catalogue browsing and filtering.
+  - name: Prompts
+    description: Prompt template rendering and guidance for agents.
+  - name: Queries
+    description: Validation and execution of query payloads.
 paths:
   /ping:
     get:
@@ -64,6 +70,171 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - bearerAuth: []
+  /runs/{runid}/catalog:
+    get:
+      tags: [Catalog]
+      summary: Retrieve the dataset catalogue for a run.
+      description: Returns catalogue entries with optional schema details and pagination metadata.
+      operationId: getCatalog
+      parameters:
+        - name: runid
+          in: path
+          required: true
+          description: Identifier of the WEPPcloud run.
+          schema:
+            type: string
+            minLength: 1
+        - name: include_fields
+          in: query
+          description: When false, omit dataset schema information from catalogue entries.
+          schema:
+            type: boolean
+            default: true
+        - name: limit_datasets
+          in: query
+          description: Maximum number of datasets to return (default 50, max 200).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: limit_fields
+          in: query
+          description: Maximum number of fields to include per dataset schema (default unlimited, max 1000).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+        - name: page_size
+          in: query
+          description: Number of catalogue entries per page (default 50, max 200).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: page_number
+          in: query
+          description: 1-based page index (default 1).
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Catalogue entries for the run.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - bearerAuth: []
+  /runs/{runid}/prompt-template:
+    get:
+      tags: [Prompts]
+      summary: Retrieve the prompt template for the run.
+      description: Returns a markdown prompt with schema summaries and example payload.
+      operationId: getPromptTemplate
+      parameters:
+        - name: runid
+          in: path
+          required: true
+          description: Identifier of the WEPPcloud run.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Prompt template content with supporting metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromptTemplateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - bearerAuth: []
+  /runs/{runid}/queries/validate:
+    post:
+      tags: [Queries]
+      summary: Validate a query payload for the run.
+      description: Validates the supplied payload and returns the normalized request plus warnings.
+      operationId: validateQuery
+      parameters:
+        - name: runid
+          in: path
+          required: true
+          description: Identifier of the WEPPcloud run.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Validation succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryValidationResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - bearerAuth: []
+  /runs/{runid}/queries/execute:
+    post:
+      tags: [Queries]
+      summary: Execute a query payload for the run.
+      description: Executes the payload against the run, optionally in dry-run mode.
+      operationId: executeQuery
+      parameters:
+        - name: runid
+          in: path
+          required: true
+          description: Identifier of the WEPPcloud run.
+          schema:
+            type: string
+            minLength: 1
+        - name: dry_run
+          in: query
+          description: When true, only validates the payload without executing it.
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Execution (or dry-run validation) succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryExecuteResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - bearerAuth: []
 components:
   securitySchemes:
     bearerAuth:
@@ -72,6 +243,12 @@ components:
       bearerFormat: JWT
       description: Provide a WEPPcloud-issued JWT in the Authorization header.
   responses:
+    InvalidRequest:
+      description: Invalid request parameters or body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     Unauthorized:
       description: Missing or invalid bearer token.
       content:
@@ -182,5 +359,256 @@ components:
               format: uri
             catalog:
               type: string
-              format: uri
+          format: uri
       required: [id, type, attributes]
+    CatalogEntry:
+      type: object
+      properties:
+        path:
+          type: string
+        extension:
+          type: string
+          nullable: true
+        size_bytes:
+          type: integer
+          minimum: 0
+          nullable: true
+        schema:
+          type: object
+          description: Optional schema summary for the dataset.
+          additionalProperties: true
+      required: [path]
+      additionalProperties: true
+    CatalogResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogEntry'
+        meta:
+          type: object
+          properties:
+            catalog:
+              type: object
+              properties:
+                generated_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                total:
+                  type: integer
+                  minimum: 0
+                returned:
+                  type: integer
+                  minimum: 0
+              required: [total, returned]
+            page:
+              type: object
+              properties:
+                size:
+                  type: integer
+                  minimum: 0
+                number:
+                  type: integer
+                  minimum: 0
+              required: [size, number]
+            trace:
+              $ref: '#/components/schemas/TraceMeta'
+          required: [catalog, page, trace]
+        links:
+          type: object
+          additionalProperties: true
+      required: [data, meta]
+    PromptTemplateResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [prompt_template]
+            attributes:
+              type: object
+              properties:
+                markdown:
+                  type: string
+                placeholders:
+                  type: object
+                  additionalProperties: true
+                default_payload:
+                  type: object
+                  additionalProperties: true
+                schema_summary:
+                  type: string
+              required: [markdown]
+          required: [type, attributes]
+        meta:
+          $ref: '#/components/schemas/TraceMeta'
+      required: [data, meta]
+    QueryRequest:
+      type: object
+      description: Query payload accepted by validation and execution endpoints.
+      properties:
+        datasets:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        columns:
+          type: array
+          items:
+            type: string
+        limit:
+          type: integer
+          minimum: 1
+        include_schema:
+          type: boolean
+          default: false
+        include_sql:
+          type: boolean
+          default: false
+        group_by:
+          type: array
+          items:
+            type: string
+        order_by:
+          type: array
+          items:
+            type: string
+        filters:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        aggregations:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      required: [datasets]
+      additionalProperties: true
+      example:
+        datasets:
+          - datasets/one.parquet
+        columns:
+          - datasets_one.col_a
+        limit: 10
+        include_schema: true
+    QueryValidationResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [query_validation]
+            attributes:
+              type: object
+              properties:
+                normalized_payload:
+                  type: object
+                  additionalProperties: true
+                warnings:
+                  type: array
+                  items:
+                    type: string
+                missing_datasets:
+                  type: array
+                  items:
+                    type: string
+          required: [type, attributes]
+        meta:
+          type: object
+          properties:
+            catalog:
+              type: object
+              properties:
+                generated_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                dataset_count:
+                  type: integer
+                  minimum: 0
+              required: [dataset_count]
+            trace_id:
+              type: string
+          required: [trace_id]
+      required: [data, meta]
+    QueryResultPayload:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        row_count:
+          type: integer
+          minimum: 0
+        schema:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        sql:
+          type: string
+      required: [records, row_count]
+      additionalProperties: true
+    QueryExecuteResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [query_execute]
+            attributes:
+              type: object
+              properties:
+                normalized_payload:
+                  type: object
+                  additionalProperties: true
+                warnings:
+                  type: array
+                  items:
+                    type: string
+                dry_run:
+                  type: boolean
+                result:
+                  oneOf:
+                    - $ref: '#/components/schemas/QueryResultPayload'
+                    - type: 'null'
+          required: [type, attributes]
+        meta:
+          type: object
+          properties:
+            catalog:
+              type: object
+              properties:
+                generated_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                dataset_count:
+                  type: integer
+                  minimum: 0
+            execution:
+              type: object
+              properties:
+                dry_run:
+                  type: boolean
+                row_count:
+                  type: integer
+                  minimum: 0
+                duration_ms:
+                  type: integer
+                  minimum: 0
+            trace_id:
+              type: string
+          required: [trace_id]
+      required: [data, meta]
