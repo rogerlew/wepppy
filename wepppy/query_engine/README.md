@@ -47,7 +47,7 @@
 | `GET /mcp/ping` | Health probe; returns service metadata. | none |
 | `GET /mcp/runs/{runid}` | Detailed run info (activation status, last refresh). | `runs:read` |
 | `POST /mcp/runs/{runid}/activate` | Trigger catalogue activation; returns activation job status. | `runs:activate` |
-| `GET /mcp/runs/{runid}/catalog` | Fetch catalogue subset; supports `include_fields`, `limit[datasets]`/`limit_datasets`, `limit[fields]`/`limit_fields`, `page[size]`/`page_size`, `page[number]`/`page_number`, `page[offset]`/`page_offset`. | `runs:read` |
+| `GET /mcp/runs/{runid}/catalog` | Fetch the curated catalogue for a run (full dataset list, excluding internal files); supports `include_fields` and `limit[fields]` to tune schema verbosity. | `runs:read` |
 | `GET /mcp/runs/{runid}/presets` | Retrieve curated query presets. | `runs:read` |
 | `GET /mcp/runs/{runid}/prompt-template` | Hydrated Markdown prompt with schema snapshot and endpoint URLs. | `runs:read` |
 | `POST /mcp/runs/{runid}/queries/validate` | Validate payload; respond with normalized payload and warnings. | `queries:validate` |
@@ -55,7 +55,7 @@
 
 - Every endpoint responds with JSON using: `{ "data": ..., "meta": ..., "errors": [...] }`.
 - Errors include machine-readable `code` (`catalog_missing`, `validation_failed`, `permission_denied`, `rate_limited`, `activation_in_progress`, `internal_error`) and human `detail`.
-- `GET` endpoints accept `page[size]`/`page_size`, `page[number]`/`page_number` for pagination; `sort` for ordering (e.g., `sort=-modified` on catalog).
+- `GET` endpoints return metadata that includes the original catalogue totals and a trace identifier for diagnostics.
 - Run-level responses include both `links.query_execute` and `links.query_validate`; the legacy `links.query` is maintained as a deprecated alias for `links.query_execute` to avoid breaking existing clients.
 
 ## 6. Request / Response Contracts
@@ -96,8 +96,8 @@
 ```
 
 ### 6.2 `GET /mcp/runs/{runid}/catalog`
-- Returns the dataset catalogue after applying prefix filtering and optional limits.
-- Query parameters: `include_fields`, `limit[datasets]` (`limit_datasets` alias), `limit[fields]` (`limit_fields` alias), `page[size]` (`page_size` alias), `page[number]` (`page_number` alias), `page[offset]` (`page_offset` alias) (see §7).
+- Returns the curated dataset catalogue (internal files such as `ash/H*.parquet` are excluded automatically).
+- Query parameters: `include_fields` to toggle schema hydration and `limit[fields]` (`limit_fields`) to cap the number of fields per dataset in the response.
 - Errors:
   - `404` (`not_found`) when the run is not visible to the token.
   - `404` (`catalog_missing`) when the catalogue has not been generated.
@@ -173,15 +173,12 @@
 
 ## 7. Catalogue Filtering Rules
 - Skip entries whose path starts with `.mypy_cache/`, `_query_engine/`, or any value configured in `IGNORED_CATALOG_PREFIXES`.
-- `limit_fields` trims schema field listings per dataset; `limit_datasets` caps dataset count in the response.
-- For each field include `name`, `type`, optional `units`, `description`.
-- Provide `meta.catalog.filtered_count` so clients know the original dataset count.
+- Entire `ash` datasets (e.g., `ash/` parquet outputs, `ash.nodb`) are excluded to keep catalogues concise.
+- `limit_fields` trims schema field listings per dataset; all datasets are always returned.
+- Provide `meta.catalog.total`, `meta.catalog.filtered`, and `meta.catalog.returned` so clients know how many items were produced and removed.
 - `/mcp/runs/{runid}/catalog` query parameters:
   - `include_fields` (bool, default `true`) — when false, excludes schema information entirely.
-  - `limit[datasets]` / `limit_datasets` — max number of datasets returned (after prefix filtering).
   - `limit[fields]` / `limit_fields` — max number of fields per dataset schema when `include_fields=true`.
-  - `page[size]` / `page_size` and `page[number]` / `page_number` — paginate the filtered dataset list (defaults 50/1).
-  - `page[offset]` / `page_offset` — zero-based offset alternative to `page[number]`.
 - `filters` support operators `=`, `!=`, `<`, `<=`, `>`, `>=`, `LIKE`, `ILIKE`, `IN`, `NOT IN`, `BETWEEN`, `IS NULL`, and `IS NOT NULL`. Provide arrays for `IN`/`NOT IN` (any length) and `BETWEEN` (two values, inclusive bounds).
 
 ## 8. Activation Workflow

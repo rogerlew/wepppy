@@ -177,16 +177,26 @@ def test_catalog_supports_parameter_aliases(monkeypatch, tmp_path):
     token = _issue_token(auth, runid)
 
     response = client.get(
-        f"/mcp/runs/{runid}/catalog?limit_datasets=1&limit_fields=1&page_size=1&page_number=1",
+        f"/mcp/runs/{runid}/catalog?limit_fields=1&include-fields=true",
         headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == 200
     payload = response.json()
-    assert len(payload["data"]) <= 1
+    assert len(payload["data"]) == 2
+    meta = payload["meta"]["catalog"]
+    assert meta["filtered"] == 2
+    assert meta["returned"] == 2
     page_meta = payload["meta"]["page"]
-    assert page_meta["size"] == 1
+    assert page_meta["size"] == 2
     assert page_meta["number"] == 1
+    assert page_meta["offset"] == 0
+    limits = payload["meta"]["limits"]
+    assert limits["fields"] == 1
+    assert limits["include_fields"] is True
+    for entry in payload["data"]:
+        fields = entry["schema"]["fields"]
+        assert len(fields) <= 1
 
 
 def test_get_run_catalog(monkeypatch, tmp_path):
@@ -218,6 +228,39 @@ def test_get_run_catalog(monkeypatch, tmp_path):
                 ]
             },
         },
+        {
+            "path": "ash/H2024_ash.parquet",
+            "extension": ".parquet",
+            "size_bytes": 3,
+            "modified": "2024-01-03T00:00:00Z",
+            "schema": {
+                "fields": [
+                    {"name": "ignore_me", "type": "INTEGER"},
+                ]
+            },
+        },
+        {
+            "path": "ash/H2025.parquet",
+            "extension": ".parquet",
+            "size_bytes": 4,
+            "modified": "2024-01-04T00:00:00Z",
+            "schema": {
+                "fields": [
+                    {"name": "ignore_me_too", "type": "INTEGER"},
+                ]
+            },
+        },
+        {
+            "path": "datasets/ash/H2026.parquet",
+            "extension": ".parquet",
+            "size_bytes": 6,
+            "modified": "2024-01-05T00:00:00Z",
+            "schema": {
+                "fields": [
+                    {"name": "ignore_me_three", "type": "INTEGER"},
+                ]
+            },
+        },
     ]
     app, _ = _make_client(monkeypatch, tmp_path, runid, files=files)
 
@@ -235,15 +278,21 @@ def test_get_run_catalog(monkeypatch, tmp_path):
     payload = response.json()
     assert len(payload["data"]) == 2
     meta = payload["meta"]["catalog"]
-    assert meta["total"] == 2
+    assert meta["total"] == 5
+    assert meta["filtered"] == 2
     assert meta["returned"] == 2
     assert meta["generated_at"] == "2024-05-07T16:33:22Z"
     first = payload["data"][0]
     assert "schema" in first
     assert len(first["schema"]["fields"]) == 3
+    paths = [entry["path"] for entry in payload["data"]]
+    assert all(not path.startswith("ash/") for path in paths)
     page_meta = payload["meta"]["page"]
     assert page_meta["number"] == 1
+    assert page_meta["size"] == 2
+    assert page_meta["offset"] == 0
     assert page_meta["total_pages"] == 1
+    assert page_meta["total_items"] == 2
     assert "self" in payload["links"]
     assert "trace_id" in payload["meta"]
 
@@ -284,20 +333,21 @@ def test_get_run_catalog_limits(monkeypatch, tmp_path):
     client = TestClient(app)
     token = _issue_token(auth, runid)
     response = client.get(
-        f"/mcp/runs/{runid}/catalog?limit[fields]=1&page[size]=1&page[number]=2",
+        f"/mcp/runs/{runid}/catalog?limit[fields]=1",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
     payload = response.json()
-    assert len(payload["data"]) == 1
-    fields = payload["data"][0]["schema"]["fields"]
-    assert len(fields) == 1
-    assert payload["meta"]["catalog"]["returned"] == 1
+    assert len(payload["data"]) == 2
+    for entry in payload["data"]:
+        fields = entry["schema"]["fields"]
+        assert len(fields) == 1
+    assert payload["meta"]["catalog"]["returned"] == 2
     page_meta = payload["meta"]["page"]
-    assert page_meta["number"] == 2
-    assert page_meta["size"] == 1
-    assert page_meta["total_pages"] == 2
-    assert "prev" in payload["links"]
+    assert page_meta["number"] == 1
+    assert page_meta["size"] == 2
+    assert page_meta["offset"] == 0
+    assert page_meta["total_pages"] == 1
     assert "trace_id" in payload["meta"]
 
 

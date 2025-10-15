@@ -19,6 +19,7 @@ from starlette.responses import (
     Response,
     PlainTextResponse,
 )
+from starlette.exceptions import HTTPException
 from starlette.routing import Route, Mount
 from starlette.templating import Jinja2Templates
 
@@ -69,6 +70,33 @@ def _render_mcp_openapi_yaml() -> str | None:
                 server["description"] = description
 
     return yaml.safe_dump(spec_data, sort_keys=False)
+
+
+async def query_engine_http_exception_handler(request: StarletteRequest, exc: HTTPException) -> JSONResponse:
+    payload: dict[str, Any] = {
+        "error": exc.detail if exc.detail else exc.__class__.__name__,
+        "status_code": exc.status_code,
+    }
+
+    if exc.status_code >= 500:
+        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        payload["stacktrace"] = stacktrace
+        LOGGER.exception("HTTPException %s for %s: %s", exc.status_code, request.url, exc.detail)
+    else:
+        LOGGER.warning("HTTPException %s for %s: %s", exc.status_code, request.url, exc.detail)
+
+    return JSONResponse(payload, status_code=exc.status_code)
+
+
+async def query_engine_exception_handler(request: StarletteRequest, exc: Exception) -> JSONResponse:
+    stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+    LOGGER.exception("Unhandled exception for %s", request.url)
+
+    payload = {
+        "error": str(exc) or exc.__class__.__name__,
+        "stacktrace": stacktrace,
+    }
+    return JSONResponse(payload, status_code=500)
 
 
 async def homepage(request: StarletteRequest) -> Response:
@@ -312,6 +340,11 @@ def create_app() -> Starlette:
         Route("/docs/mcp_openapi.yaml", mcp_openapi_spec, methods=["GET"]),
     ]
 
+    exception_handlers = {
+        HTTPException: query_engine_http_exception_handler,
+        Exception: query_engine_exception_handler,
+    }
+
     if os.getenv("WEPP_MCP_JWT_SECRET"):
         try:
             from .mcp import create_mcp_app
@@ -325,5 +358,5 @@ def create_app() -> Starlette:
     else:
         LOGGER.info("WEPP_MCP_JWT_SECRET not configured; MCP API disabled")
 
-    app = Starlette(debug=False, routes=routes)
+    app = Starlette(debug=False, routes=routes, exception_handlers=exception_handlers)
     return app

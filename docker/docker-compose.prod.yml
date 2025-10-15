@@ -21,8 +21,6 @@ x-wepppy-env: &wepppy-env
   WEPP_MCP_HOST_DESCRIPTION: ${WEPP_MCP_HOST_DESCRIPTION:-}
   WC1_DIR: ${WC1_DIR:-/srv/wc1}
   GEODATA_DIR: ${GEODATA_DIR:-/srv/geodata}
-  SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set}
-  SECURITY_PASSWORD_SALT: ${SECURITY_PASSWORD_SALT:?SECURITY_PASSWORD_SALT must be set}
   OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
 
 x-wepppy-service: &wepppy-service
@@ -31,7 +29,7 @@ x-wepppy-service: &wepppy-service
   restart: unless-stopped
   working_dir: /workdir/wepppy
   env_file:
-    - .env
+    - ${WEPPPY_ENV_FILE:-.env}
   environment:
     <<: *wepppy-env
   volumes:
@@ -135,7 +133,7 @@ services:
       dockerfile: services/status2/Dockerfile
     restart: unless-stopped
     env_file:
-      - .env
+      - ${WEPPPY_ENV_FILE:-.env}
     environment:
       STATUS_REDIS_URL: redis://redis:6379/2
       STATUS_LISTEN_ADDR: 0.0.0.0:9002
@@ -156,7 +154,7 @@ services:
       dockerfile: services/preflight2/Dockerfile
     restart: unless-stopped
     env_file:
-      - .env
+      - ${WEPPPY_ENV_FILE:-.env}
     environment:
       PREFLIGHT_REDIS_URL: redis://redis:6379/0
       PREFLIGHT_LISTEN_ADDR: 0.0.0.0:9001

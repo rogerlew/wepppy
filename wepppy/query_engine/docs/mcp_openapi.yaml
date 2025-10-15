@@ -74,7 +74,7 @@ paths:
     get:
       tags: [Catalog]
       summary: Retrieve the dataset catalogue for a run.
-      description: Returns catalogue entries with optional schema details and pagination metadata.
+      description: Returns catalogue entries with optional schema details. All entries are included; the client is responsible for further curation if needed.
       operationId: getCatalog
       parameters:
         - name: runid
@@ -90,13 +90,6 @@ paths:
           schema:
             type: boolean
             default: true
-        - name: limit_datasets
-          in: query
-          description: Maximum number of datasets to return (default 50, max 200).
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 200
         - name: limit_fields
           in: query
           description: Maximum number of fields to include per dataset schema (default unlimited, max 1000).
@@ -104,19 +97,6 @@ paths:
             type: integer
             minimum: 1
             maximum: 1000
-        - name: page_size
-          in: query
-          description: Number of catalogue entries per page (default 50, max 200).
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 200
-        - name: page_number
-          in: query
-          description: 1-based page index (default 1).
-          schema:
-            type: integer
-            minimum: 1
       responses:
         '200':
           description: Catalogue entries for the run.
@@ -399,10 +379,23 @@ components:
                 total:
                   type: integer
                   minimum: 0
+                filtered:
+                  type: integer
+                  minimum: 0
                 returned:
                   type: integer
                   minimum: 0
-              required: [total, returned]
+              required: [total, filtered, returned]
+            limits:
+              type: object
+              properties:
+                fields:
+                  type: integer
+                  minimum: 1
+                  nullable: true
+                include_fields:
+                  type: boolean
+              required: [include_fields]
             page:
               type: object
               properties:
@@ -412,12 +405,25 @@ components:
                 number:
                   type: integer
                   minimum: 0
-              required: [size, number]
-            trace:
-              $ref: '#/components/schemas/TraceMeta'
-          required: [catalog, page, trace]
+                offset:
+                  type: integer
+                  minimum: 0
+                total_pages:
+                  type: integer
+                  minimum: 0
+                total_items:
+                  type: integer
+                  minimum: 0
+              required: [size, number, offset, total_pages, total_items]
+            trace_id:
+              type: string
+          required: [catalog, page, trace_id]
         links:
           type: object
+          properties:
+            self:
+              type: string
+              format: uri
           additionalProperties: true
       required: [data, meta]
     PromptTemplateResponse:
