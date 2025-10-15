@@ -160,6 +160,7 @@ prompt-toolkit==3.0.50
 psutil==7.0.0
 psycopg2==2.9.9
 ptyprocess==0.7.0
+PuLP==3.3.0
 pure-eval==0.2.3
 py==1.10.0
 pyarrow==16.1.0
