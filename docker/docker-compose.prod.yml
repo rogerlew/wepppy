@@ -3,6 +3,11 @@ x-wepppy-image: &wepppy-image
   build:
     context: ..
     dockerfile: docker/Dockerfile
+    args:
+      APP_USER: www-data
+      APP_GROUP: docker
+      APP_UID: "33"
+      APP_GID: "993"
 
 x-wepppy-env: &wepppy-env
   PYTHONUNBUFFERED: "1"
@@ -10,7 +15,6 @@ x-wepppy-env: &wepppy-env
   REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
   REDIS_HOST: ${REDIS_HOST:-redis}
   DATABASE_URL: ${DATABASE_URL}
-  SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
   SITE_PREFIX: ${SITE_PREFIX:-/weppcloud}
   WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET:-change-me}
   WEPP_MCP_HOST: ${WEPP_MCP_HOST:-}

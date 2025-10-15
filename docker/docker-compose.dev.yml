@@ -12,7 +12,6 @@ x-wepppy-service: &wepppy-service
     REDIS_HOST: redis
     MPLCONFIGDIR: /tmp/matplotlib
     DATABASE_URL: ${DATABASE_URL}
-    SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
     SITE_PREFIX: /weppcloud
     WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET}
     SECRET_KEY: ${SECRET_KEY}

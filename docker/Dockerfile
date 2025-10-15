@@ -9,6 +9,7 @@ ARG DOCKER_CLI_VERSION=26.1.4
 
 # Allow enforcing a non-root runtime user at build time.
 ARG APP_USER=wepp
+ARG APP_GROUP=wepp
 ARG APP_UID=1000
 ARG APP_GID=1000
 
@@ -154,19 +155,20 @@ ENV PYTHONUNBUFFERED=1
 ENV MPLCONFIGDIR=/tmp/matplotlib
 
 RUN set -euxo pipefail; \
+    GROUP_NAME="${APP_GROUP}"; \
     if getent group "${APP_GID}" >/dev/null; then \
         GROUP_NAME="$(getent group "${APP_GID}" | cut -d: -f1)"; \
+    elif getent group "${APP_GROUP}" >/dev/null; then \
+        groupmod -g "${APP_GID}" "${APP_GROUP}"; \
     else \
-        GROUP_NAME="${APP_USER}"; \
-        groupadd -g "${APP_GID}" "${GROUP_NAME}"; \
+        groupadd -g "${APP_GID}" "${APP_GROUP}"; \
     fi; \
     if id -u "${APP_USER}" >/dev/null 2>&1; then \
         usermod -g "${GROUP_NAME}" -u "${APP_UID}" "${APP_USER}"; \
     else \
         useradd --no-log-init -r -g "${GROUP_NAME}" -u "${APP_UID}" -m "${APP_USER}"; \
-    fi
-
-RUN chown -R "${APP_USER}:${APP_GID}" /workdir /opt/vendor /opt/venv /var/log/wepppy /var/lib/wepppy /tmp
+    fi; \
+    chown -R "${APP_USER}:${GROUP_NAME}" /workdir /opt/vendor /opt/venv /var/log/wepppy /var/lib/wepppy /tmp
 
 USER ${APP_USER}
 
