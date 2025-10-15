@@ -37,6 +37,7 @@ services:
       nofile:
         soft: 1000000
         hard: 1000000
+    entrypoint: ./docker/weppcloud-entrypoint.sh
     command:
       - gunicorn
       - --workers
