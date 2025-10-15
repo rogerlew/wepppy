@@ -9,8 +9,8 @@ x-wepppy-env: &wepppy-env
   MPLCONFIGDIR: /tmp/matplotlib
   REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
   REDIS_HOST: ${REDIS_HOST:-redis}
-  DATABASE_URL: ${DATABASE_URL:-postgresql://wepppy:${POSTGRES_PASSWORD:-c0ff33}@postgres/wepppy}
-  SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI:-postgresql://wepppy:${POSTGRES_PASSWORD:-c0ff33}@postgres/wepppy}
+  DATABASE_URL: ${DATABASE_URL}
+  SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
   SITE_PREFIX: ${SITE_PREFIX:-/weppcloud}
   WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET:-change-me}
   WEPP_MCP_HOST: ${WEPP_MCP_HOST:-}
@@ -19,6 +19,7 @@ x-wepppy-env: &wepppy-env
   GEODATA_DIR: ${GEODATA_DIR:-/srv/geodata}
   SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set}
   SECURITY_PASSWORD_SALT: ${SECURITY_PASSWORD_SALT:?SECURITY_PASSWORD_SALT must be set}
+  OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
 
 x-wepppy-service: &wepppy-service
   <<: *wepppy-image

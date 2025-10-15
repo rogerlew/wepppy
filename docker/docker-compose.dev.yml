@@ -17,6 +17,7 @@ x-wepppy-service: &wepppy-service
     WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET}
     SECRET_KEY: ${SECRET_KEY}
     SECURITY_PASSWORD_SALT: ${SECURITY_PASSWORD_SALT}
+    OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
   volumes:
     - ../:/workdir/wepppy
     - ../../wepppy2:/workdir/wepppy2
