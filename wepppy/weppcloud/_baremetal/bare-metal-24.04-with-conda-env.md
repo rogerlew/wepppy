@@ -66,44 +66,37 @@ git lfs install
 git clone https://github.com/rogerlew/wepppy
 ```
 
-7. clone all-your-base
-```bash
-cd /workdir/wepppy/all_your_base
-rmdir all_your_base
-git clone https://github.com/rogerlew/all_your_base
-```
-
-8. create wepppy.pth
+7. create wepppy.pth
 ```bash
 echo "/workdir/wepppy/" > /workdir/miniconda3/envs/wepppy310-env/lib/python3.10/site-packages/wepppy.pth
 ```
 
-9. Install rosetta
+8. Install rosetta
 ```bash
 cd /workdir/miniconda3/envs/wepppy310-env/lib/python3.10/site-packages
 git clone https://github.com/rogerlew/rosetta
 ```
 
 
-10. install wepppy2
+9. install wepppy2
 ```bash
 cd /workdir && git clone https://github.com/wepp-in-the-woods/wepppy2/
 echo "/workdir/wepppy2/" > /workdir/miniconda3/envs/wepppy310-env/lib/python3.10/site-packages/wepp_runner.pth
 ```
 
-11. install weppcloud2
+10. install weppcloud2
 ```bash
 cd /workdir && git clone https://github.com/wepp-in-the-woods/weppcloud2/
 echo "/workdir/wepppycloud2/" > /workdir/miniconda3/envs/wepppy310-env/lib/python3.10/site-packages/weppcloud2.pth
 ```
 
-12. install wepppyo3
+11. install wepppyo3
 ```bash
 cd /workdir && git clone https://github.com/wepp-in-the-woods/wepppyo3
 rsync -av --progress /workdir/wepppyo3/release/linux/py310-wepppy310-env/wepppyo3/  /workdir/miniconda3/envs/wepppy310-env/lib/python3.10/site-packages/wepppyo3/
 ```
 
-13. install pydsstools
+12. install pydsstools
 ```bash
 cd /workdir && git clone https://github.com/rogerlew/pydsstools/
 cd /workdir/pydsstools && pip3 install .

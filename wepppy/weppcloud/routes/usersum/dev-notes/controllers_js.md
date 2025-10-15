@@ -5,7 +5,7 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
 ## Layout and Bundling
 - Authoring happens in `wepppy/weppcloud/controllers_js/*.js` (one file per controller plus shared helpers such as `control_base.js` and `ws_client.js`).
 - The browser still downloads a single bundle, `wepppy/weppcloud/static/js/controllers.js`. The bundle is rendered from `controllers_js/templates/controllers.js.j2`, which includes each controller file in the desired order.
-- The `build_controllers_js.py` helper (same directory) renders the template with Jinja, stamps a build date, and writes the bundle on gunicorn startup.
+- The `build_controllers_js.py` helper (same directory) renders the template with Jinja, stamps a build date, and writes the bundle just before Gunicorn starts.
 
 ## Singleton Controller Modules
 - Each controller file exposes a global (for example `var Project = function () { … }();`). The module keeps a private `instance` and returns an object containing `getInstance`, so we effectively have singletons.
@@ -27,9 +27,9 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
 - `_base.htm` defines the canonical form structure: `#status`, `#info`, `#rq_job`, `#stacktrace`, `#preflight_status`, and other fields that the JS expects. As long as new controls keep those IDs, `controlBase` can update the UI without per-controller duplication.
 - Higher-level pages (for example `templates/controls/poweruser_panel.htm`) compose multiple control templates, which in turn rely on the singleton controllers to bind behavior once the bundle loads.
 
-## Build Script and Gunicorn Integration
+## Build Script and Startup Integration
 - `wepppy/weppcloud/controllers_js/build_controllers_js.py` is the entry point for producing the bundle. It configures Jinja to treat the controller files as literal text (so existing `{{ }}` tokens meant for client-side templating survive), renders `controllers.js.j2`, and writes the output to `static/js/controllers.js`.
-- Gunicorn executes the builder on startup. The service unit passes `--config /workdir/wepppy/wepppy/weppcloud/gunicorn.conf.py`, and that config file’s `on_starting` hook runs the script, logs stdout/stderr, and aborts startup on failure. Check `/var/log/weppcloud/gunicorn-weppcloud-error.log` if the master keeps restarting.
+- The Docker entrypoint (`docker/weppcloud-entrypoint.sh`) executes the builder before launching Gunicorn, logging stdout/stderr and aborting container start on failure. Bare-metal deployments can run the same command from systemd units or other pre-start hooks.
 - You can run the same command manually inside the virtualenv: `python wepppy/weppcloud/controllers_js/build_controllers_js.py`. The generated file header includes a UTC build timestamp so you can confirm the rebuild in the browser.
 
 ## Working With Controllers

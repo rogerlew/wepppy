@@ -6,19 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from wepppy.weppcloud.app import Run
 
 # load app configuration based on deployment
-import socket
-_hostname = socket.gethostname()
-config_app = None
-if 'wepp1' in _hostname or 'forest' in _hostname:
-    from wepppy.weppcloud.configuration import config_app
-elif 'wepp2' in _hostname:
-    from wepppy.weppcloud.wepp2_config import config_app
-elif 'wepp3' in _hostname:
-    from wepppy.weppcloud.wepp3_config import config_app
-
-
-if config_app is None:
-    from wepppy.weppcloud.standalone_config import config_app
+from wepppy.weppcloud.configuration import config_app
 
 app = Flask(__name__)
 

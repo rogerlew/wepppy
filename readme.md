@@ -125,7 +125,7 @@ WEPPCLOUD_IMAGE=registry.example.com/wepppy:2025.02 docker compose -f docker/doc
 
 ## Baremetal (not recommended)
 - Provision Python 3.10 + Poetry/conda (see `install/` and `wepppy/weppcloud/_baremetal/` for reference scripts).
-- For deployment, see the gunicorn config (`wepppy/weppcloud/gunicorn.conf.py`), the systemd snippets under `_scripts/`, and the BareMetal notes for Ubuntu 24.04 provisioning.
+- Prefer the Docker stacks (`docker/docker-compose.*`) plus the `docker/weppcloud-entrypoint.sh` bootstrapper; legacy systemd snippets remain in `_scripts/` if you absolutely must run without containers.
 
 ## Further Reading
 - `wepppy/weppcloud/routes/usersum/dev-notes/redis_dev_notes.md` — deep dive into Redis usage, DB allocations, and debugging recipes.
