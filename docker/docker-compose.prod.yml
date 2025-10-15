@@ -86,7 +86,6 @@ services:
       - wepppy.microservices.browse:app
     ports:
       - "${BROWSE_PORT:-9009}:9009"
-    profiles: ["legacy"]
 
   elevationquery:
     <<: *wepppy-service
