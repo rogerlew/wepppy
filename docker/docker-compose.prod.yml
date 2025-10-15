@@ -1,0 +1,205 @@
+x-wepppy-image: &wepppy-image
+  image: ${WEPPCLOUD_IMAGE:-wepppy:latest}
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+
+x-wepppy-env: &wepppy-env
+  PYTHONUNBUFFERED: "1"
+  MPLCONFIGDIR: /tmp/matplotlib
+  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  DATABASE_URL: ${DATABASE_URL:-postgresql://wepppy:${POSTGRES_PASSWORD:-c0ff33}@postgres/wepppy}
+  SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI:-postgresql://wepppy:${POSTGRES_PASSWORD:-c0ff33}@postgres/wepppy}
+  SITE_PREFIX: ${SITE_PREFIX:-/weppcloud}
+  WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET:-change-me}
+  WEPP_MCP_HOST: ${WEPP_MCP_HOST:-}
+  WEPP_MCP_HOST_DESCRIPTION: ${WEPP_MCP_HOST_DESCRIPTION:-}
+  WC1_DIR: ${WC1_DIR:-/srv/wc1}
+  GEODATA_DIR: ${GEODATA_DIR:-/srv/geodata}
+  SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set}
+  SECURITY_PASSWORD_SALT: ${SECURITY_PASSWORD_SALT:?SECURITY_PASSWORD_SALT must be set}
+
+x-wepppy-service: &wepppy-service
+  <<: *wepppy-image
+  init: true
+  restart: unless-stopped
+  working_dir: /workdir/wepppy
+  env_file:
+    - .env
+  environment:
+    <<: *wepppy-env
+  volumes:
+    - wc1-data:${WC1_DIR:-/srv/wc1}
+    - geodata-data:${GEODATA_DIR:-/srv/geodata}
+  depends_on:
+    redis:
+      condition: service_started
+    postgres:
+      condition: service_healthy
+  networks:
+    - backend
+
+services:
+  weppcloud:
+    <<: *wepppy-service
+    command:
+      - gunicorn
+      - --workers
+      - "4"
+      - --threads
+      - "2"
+      - --timeout
+      - "1800"
+      - --bind
+      - 0.0.0.0:8000
+      - --log-level
+      - info
+      - wepppy.weppcloud.app:app
+    ports:
+      - "${WEPPCLOUD_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  browse:
+    <<: *wepppy-service
+    environment:
+      <<: *wepppy-env
+      REDIS_URL: ${BROWSE_REDIS_URL:-redis://redis:6379/0}
+    command:
+      - gunicorn
+      - --workers
+      - "3"
+      - --bind
+      - 0.0.0.0:9009
+      - --log-level
+      - info
+      - -k
+      - uvicorn.workers.UvicornWorker
+      - wepppy.microservices.browse:app
+    ports:
+      - "${BROWSE_PORT:-9009}:9009"
+    profiles: ["legacy"]
+
+  query-engine:
+    <<: *wepppy-service
+    environment:
+      <<: *wepppy-env
+      WEPP_MCP_HOST: ${WEPP_MCP_HOST}
+      WEPP_MCP_HOST_DESCRIPTION: ${WEPP_MCP_HOST_DESCRIPTION}
+      WEPP_MCP_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET}
+    command:
+      - uvicorn
+      - wepppy.query_engine.app.server:create_app
+      - --factory
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8041"
+    expose:
+      - "8041"
+
+  rq-worker:
+    <<: *wepppy-service
+    environment:
+      <<: *wepppy-env
+      LOGLEVEL: INFO
+      RQ_LOGGING_LEVEL: INFO
+      REDIS_URL: redis://redis:6379/9
+    command:
+      - rq
+      - worker-pool
+      - -n
+      - "4"
+      - -u
+      - redis://redis:6379/9
+      - --logging-level
+      - INFO
+      - --worker-class
+      - wepppy.rq.WepppyRqWorker
+      - default
+
+  status:
+    image: ${WEPPCLOUD_STATUS_IMAGE:-wepppy-status:latest}
+    build:
+      context: ..
+      dockerfile: services/status2/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      STATUS_REDIS_URL: redis://redis:6379/2
+      STATUS_LISTEN_ADDR: 0.0.0.0:9002
+      STATUS_LOG_LEVEL: info
+      STATUS_METRICS_ENABLED: "true"
+    ports:
+      - "${STATUS_PORT:-9002}:9002"
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - backend
+
+  preflight:
+    image: ${WEPPCLOUD_PREFLIGHT_IMAGE:-wepppy-preflight:latest}
+    build:
+      context: ..
+      dockerfile: services/preflight2/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PREFLIGHT_REDIS_URL: redis://redis:6379/0
+      PREFLIGHT_LISTEN_ADDR: 0.0.0.0:9001
+      PREFLIGHT_LOG_LEVEL: info
+      PREFLIGHT_METRICS_ENABLED: "true"
+    ports:
+      - "${PREFLIGHT_PORT:-9001}:9001"
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - backend
+
+  redis:
+    image: redis:7.4.6
+    restart: unless-stopped
+    command: ["redis-server", "--notify-keyspace-events", "Kh"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wepppy
+      POSTGRES_USER: wepppy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-c0ff33}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  wc1-data:
+  geodata-data:
+  redis-data:
+  postgres-data:

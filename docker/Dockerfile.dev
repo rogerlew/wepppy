@@ -1,0 +1,88 @@
+# syntax=docker/dockerfile:1
+FROM python:3.10-slim AS base
+
+# Preinstall build toolchain and native libraries required by geospatial wheels.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        curl \
+        git \
+        git-lfs \
+        gfortran \
+        pkg-config \
+        cmake \
+        gdal-bin \
+        libgdal-dev \
+        libproj-dev \
+        proj-bin \
+        libgeos-dev \
+        libhdf5-dev \
+        libnetcdf-dev \
+        libopenblas-dev \
+        liblapack-dev \
+        libcurl4-openssl-dev \
+        libssl-dev \
+        libffi-dev \
+        libpq-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        libjpeg-dev \
+        libpng-dev \
+        libtiff-dev \
+        libwebp-dev \
+        libzip-dev \
+        libbz2-dev \
+        liblzma-dev \
+        zlib1g-dev && \
+    git lfs install --system && \
+    rm -rf /var/lib/apt/lists/*
+
+ARG DOCKER_CLI_VERSION=26.1.4
+RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLI_VERSION}.tgz" -o /tmp/docker.tgz && \
+    tar -xzf /tmp/docker.tgz -C /tmp && \
+    mv /tmp/docker/docker /usr/local/bin/docker && \
+    chmod +x /usr/local/bin/docker && \
+    rm -rf /tmp/docker /tmp/docker.tgz
+
+ENV UV_SKIP_UPDATE_CHECK=1
+
+# Install the uv CLI from Astral.
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    ln -s /root/.local/bin/uv /usr/local/bin/uv
+
+# Resolve Python dependencies with uv inside a dedicated virtual environment.
+COPY docker/requirements-uv.txt ./requirements-uv.txt
+COPY docker/wheels /tmp/wheels
+RUN uv venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    uv pip install --requirement requirements-uv.txt
+
+# Install and load DuckDB's spatial extension using the venv's python.
+RUN /opt/venv/bin/python -c "import duckdb; \
+               con = duckdb.connect(); \
+               con.execute('SET home_directory=\'/tmp\''); \
+               con.execute('INSTALL spatial;'); \
+               con.execute('LOAD spatial;'); \
+               con.close()"
+
+# Mirror historical conda .pth injections so sibling repos resolve in development.
+COPY install/conda/*.pth /tmp/pth/
+RUN for f in /tmp/pth/*.pth; do \
+        cp "$f" /opt/venv/lib/python3.10/site-packages/; \
+    done
+
+# Vendor Rosetta directly from GitHub into site-packages, including LFS assets.
+RUN git clone --depth=1 https://github.com/rogerlew/rosetta /tmp/rosetta && \
+    cd /tmp/rosetta && \
+    git lfs pull && \
+    rm -rf .git && \
+    mv /tmp/rosetta /opt/venv/lib/python3.10/site-packages/rosetta
+
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+ENV PROJ_LIB=/usr/share/proj
+ENV GDAL_DATA=/usr/share/gdal
+
+WORKDIR /workdir/wepppy
+
+CMD ["bash"]

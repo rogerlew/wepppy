@@ -1,7 +1,7 @@
 x-wepppy-service: &wepppy-service
   build:
     context: ..
-    dockerfile: docker/Dockerfile
+    dockerfile: docker/Dockerfile.dev
   image: wepppy-dev
   init: true
   user: "${UID:-33}:${GID:-993}"
@@ -15,6 +15,8 @@ x-wepppy-service: &wepppy-service
     SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
     SITE_PREFIX: /weppcloud
     WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET}
+    SECRET_KEY: ${SECRET_KEY}
+    SECURITY_PASSWORD_SALT: ${SECURITY_PASSWORD_SALT}
   volumes:
     - ../:/workdir/wepppy
     - ../../wepppy2:/workdir/wepppy2

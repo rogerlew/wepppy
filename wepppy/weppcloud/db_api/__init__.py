@@ -10,10 +10,7 @@ import socket
 _hostname = socket.gethostname()
 config_app = None
 if 'wepp1' in _hostname or 'forest' in _hostname:
-    try:
-        from wepppy.weppcloud.wepp1_config import config_app
-    except:
-        pass
+    from wepppy.weppcloud.configuration import config_app
 elif 'wepp2' in _hostname:
     from wepppy.weppcloud.wepp2_config import config_app
 elif 'wepp3' in _hostname:

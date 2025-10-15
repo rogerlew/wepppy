@@ -9,18 +9,12 @@ def config_app(app, logger=None):
     _hostname = socket.gethostname()
     logger.info(f"Hostname detected as {_hostname}")
 
-    _config_app = None
     try:
-        from wepppy.weppcloud.wepp1_config import config_app as _config_app
-        logger.info("Using wepp1 configuration")
-    except:
-        pass
-
-    if _config_app is None:
-        #from wepppy.weppcloud.standalone_config import config_app as _config_app
-        #logger.info("Using standalone configuration")
-        logger.error("Standalone configuration is deprecated. Please set up WEPPcloud with wepp1_config.py")
-        raise RuntimeError("Standalone configuration is deprecated. Please set up WEPPcloud with wepp1_config.py")
+        from wepppy.weppcloud.configuration import config_app as _config_app
+        logger.info("Using environment-driven configuration")
+    except ImportError as exc:
+        logger.error("Failed to import wepppy.weppcloud.configuration: %s", exc)
+        raise
 
     assert _config_app is not None, "Could not determine configuration"
     logger.info(f"Configuring app")
