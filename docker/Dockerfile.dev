@@ -52,7 +52,6 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 
 # Resolve Python dependencies with uv inside a dedicated virtual environment.
 COPY docker/requirements-uv.txt ./requirements-uv.txt
-COPY docker/wheels /tmp/wheels
 RUN uv venv /opt/venv && \
     . /opt/venv/bin/activate && \
     uv pip install --requirement requirements-uv.txt
