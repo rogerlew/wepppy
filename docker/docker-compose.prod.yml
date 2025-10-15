@@ -168,6 +168,26 @@ services:
     networks:
       - backend
 
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "${CADDY_PORT:-8080}:8080"
+    volumes:
+      - ${CADDY_FILE:-./docker/caddy/Caddyfile}:/etc/caddy/Caddyfile:ro
+      - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
+    depends_on:
+      weppcloud:
+        condition: service_started
+      status:
+        condition: service_started
+      preflight:
+        condition: service_started
+      browse:
+        condition: service_started
+    networks:
+      - backend
+
   redis:
     image: redis:7.4.6
     restart: unless-stopped
