@@ -1,9 +1,0 @@
-[submodule "wepppy/weppcloud/wepp1_config"]
-	path = wepppy/weppcloud/wepp1_config
-	url = https://github.com/rogerlew/wepppy-weppcloud-wepp1-config
-[submodule "wepppy/all_your_base"]
-	path = wepppy/all_your_base
-	url = https://github.com/rogerlew/all_your_base
-[submodule "wepppy/weppcloud/_migrations"]
-	path = wepppy/weppcloud/_migrations
-	url = https://github.com/rogerlew/wepppy-weppcloud-migrations

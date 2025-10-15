@@ -141,6 +141,7 @@
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
+            align-items: center;
         }
         button {
             border: none;
@@ -218,6 +219,7 @@
             <div class="cluster" style="justify-content:center; margin-bottom:0.75rem;">
                 <button id="renderButton">Render Cloud</button>
                 <button id="seedButton" class="secondary">Randomize Seed</button>
+                <button id="renderHdButton" class="secondary">HD Render</button>
             </div>
             <label for="base64Output" style="display:block; font-size:0.82rem; margin-bottom:0.35rem; color:#333;">
                 64×64 PNG (base64):
@@ -310,6 +312,7 @@
             <li>Distribution stretches the ellipsoidal base mesh before voxelisation, matching Blender’s “cloud box” concept.</li>
             <li>The export stays intentionally low-contrast (white background, darker core between ~70–100% luminance) to favor UI logos.</li>
             <li>Lighting controls adjust ambient fill, directional intensity, and sun angles; use them to bias highlights or flatten the sprite.</li>
+            <li>Use HD Render to export a 320×320 PNG snapshot with the current parameters and lighting.</li>
             <li>Cloud scale trims the ellipsoidal volume so the rendered sprite keeps generous white margins; push it higher if you prefer edge-to-edge coverage.</li>
             <li>Mesh overlay sketches the projected base ellipsoid and puff anchor locations; it does not affect the exported texture.</li>
         </ul>
@@ -376,6 +379,7 @@
             const lengthEcho = document.getElementById("lengthEcho");
             const renderButton = document.getElementById("renderButton");
             const seedButton = document.getElementById("seedButton");
+            const renderHdButton = document.getElementById("renderHdButton");
             const zoomInput = document.getElementById("zoomInput");
             const zoomValue = document.getElementById("zoomValue");
 
@@ -433,6 +437,21 @@
                 seedInput.value = String(Math.floor(Math.random() * 1e9));
                 generate();
             });
+
+            if (renderHdButton) {
+                renderHdButton.addEventListener("click", () => {
+                    const settings = readSettings();
+                    seedInput.value = String(settings.seed);
+                    renderHdButton.disabled = true;
+                    renderHdButton.textContent = "Rendering…";
+                    setTimeout(() => {
+                        const hdRender = renderVolume(buildVolume(settings), settings, { width: 320, height: 320 });
+                        downloadBase64(hdRender.base64, `cloud-${settings.seed}-320.png`);
+                        renderHdButton.textContent = "HD Render";
+                        renderHdButton.disabled = false;
+                    }, 15);
+                });
+            }
 
             if (zoomInput) {
                 zoomInput.addEventListener("input", () => {
@@ -916,14 +935,23 @@
                 };
             }
 
-            function renderVolume(volumeResult, settings) {
+            function renderVolume(volumeResult, settings, overrideResolution) {
                 const { volume, spacing, meta } = volumeResult;
                 const { distribution: baseDistribution, contrast } = settings;
                 const distribution = baseDistribution;
                 const densityScale = settings.volumeDensity * 0.65;
                 const halfZ = distribution.z;
                 const rayStep = (halfZ * 2) / RAY_STEPS;
-                const imageData = hiddenCtx.createImageData(WIDTH, HEIGHT);
+
+                const targetWidth = overrideResolution?.width ?? WIDTH;
+                const targetHeight = overrideResolution?.height ?? HEIGHT;
+                const reuseHidden = !overrideResolution;
+                const renderCanvas = reuseHidden ? hiddenCanvas : document.createElement("canvas");
+                renderCanvas.width = targetWidth;
+                renderCanvas.height = targetHeight;
+                const renderCtx = renderCanvas.getContext("2d");
+                
+                const imageData = renderCtx.createImageData(targetWidth, targetHeight);
                 const data = imageData.data;
 
                 const lightingSettings = settings.lighting || {};
@@ -948,11 +976,11 @@
                         lightingSettings.elevation ?? LIGHT_DEFAULTS.elevation
                     );
 
-                for (let py = 0; py < HEIGHT; py++) {
-                    const v = (py + 0.5) / HEIGHT;
+                for (let py = 0; py < targetHeight; py++) {
+                    const v = (py + 0.5) / targetHeight;
                     const worldY = lerp(-distribution.y, distribution.y, v);
-                    for (let px = 0; px < WIDTH; px++) {
-                        const u = (px + 0.5) / WIDTH;
+                    for (let px = 0; px < targetWidth; px++) {
+                        const u = (px + 0.5) / targetWidth;
                         const worldX = lerp(-distribution.x, distribution.x, u);
                         let transmittance = 1.0;
                         let lightAccum = 0.0;
@@ -997,7 +1025,7 @@
                         const grain = (renderRng() * 0.015) - 0.0075;
                         const finalValue = clamp(shaded + grain, minLuma, 1.0);
                         const channel = Math.round(finalValue * 255);
-                        const idx = (py * WIDTH + px) * 4;
+                        const idx = (py * targetWidth + px) * 4;
                         data[idx] = channel;
                         data[idx + 1] = channel;
                         data[idx + 2] = channel;
@@ -1005,13 +1033,17 @@
                     }
                 }
 
-                hiddenCtx.putImageData(imageData, 0, 0);
+                renderCtx.putImageData(imageData, 0, 0);
 
-                return {
-                    base64: hiddenCanvas.toDataURL("image/png"),
+                const result = {
+                    base64: renderCanvas.toDataURL("image/png"),
                     maxDensity: meta.maxDensity,
                     imageData
                 };
+                if (!reuseHidden) {
+                    result.canvas = renderCanvas;
+                }
+                return result;
             }
 
             function sampleVolume(volume, worldX, worldY, worldZ, distribution, spacing) {
@@ -1174,6 +1206,15 @@
             }
             seedInput.value = String(Math.floor(Math.random() * 1e9));
             generate();
+            function downloadBase64(dataUrl, filename) {
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
         })();
     </script>
 </body>

@@ -2,7 +2,7 @@
  * Controllers (controllers.js)
  * NOTE: Generated via build_controllers_js.py from
  *       wepppy/weppcloud/controllers_js/templates/*.js
- * Build date: 2025-09-28T23:20:53Z
+ * Build date: 2025-10-09T19:33:56Z
  * See developer notes: wepppy/weppcloud/routes/usersum/dev-notes/controllers_js.md
  * ----------------------------------------------------------------------------
  */
@@ -196,7 +196,7 @@ WSClient.prototype.connect = function () {
         var payload = JSON.parse(event.data);
         if (payload.type === "ping") {
             this.ws.send(JSON.stringify({ "type": "pong" }));
-        } else if (payload.type === "hangup") {
+        } else if (payload.type === "hangup") { // intended for server in distress signaling
             this.disconnect();
         } else if (payload.type === "status") {
             var data = payload.data;
@@ -225,17 +225,6 @@ WSClient.prototype.connect = function () {
                         }
                     });
                 }, 500);
-            }
-
-            if (data.includes("COMMAND_BAR_RESULT")) {
-                const marker = 'COMMAND_BAR_RESULT';
-                const markerIndex = data.indexOf(marker);
-                let commandMessage = data;
-                if (markerIndex !== -1) {
-                    commandMessage = data.substring(markerIndex + marker.length).trim();
-                }
-                $("#" + this.formId + " #status").html(commandMessage);
-                this.pushCommandBarResult(commandMessage);
             }
 
             if (data.includes("TRIGGER")) {
@@ -1365,6 +1354,35 @@ var Map = function () {
         that.ctrls = L.control.layers(that.baseMaps, that.overlayMaps);
         that.ctrls.addTo(that);
 
+        that.addGeoJsonOverlay = function (options) {
+            options = options || {};
+            var url = options.url;
+            if (!url) {
+                console.warn('addGeoJsonOverlay called without a url');
+                return null;
+            }
+
+            var layerName = options.layerName || 'Overlay';
+            var style = options.style || null;
+
+            $.get({
+                url: url,
+                cache: false,
+                success: function success(response) {
+                    var overlay = L.geoJSON(response, {
+                        style: style
+                    });
+                    overlay.addTo(that);
+                    that.ctrls.addOverlay(overlay, layerName);
+                },
+                error: function error(jqXHR) {
+                    console.warn('Failed to load overlay', layerName, jqXHR);
+                }
+            });
+
+            return that;
+        };
+
         function handleViewportChange() {
             that.onMapChange();
 
@@ -1677,7 +1695,7 @@ var Baer = function () {
             var map = Map.getInstance();
 
             $.post({
-                url: "tasks/remove_sbs/",
+                url: "tasks/remove_sbs",
                 contentType: false,
                 cache: false,
                 processData: false,
@@ -1742,7 +1760,7 @@ var Baer = function () {
             var self = instance;
 
             $.get({
-                url: "view/modify_burn_class/",
+                url: "view/modify_burn_class",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -1773,7 +1791,7 @@ var Baer = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "tasks/modify_burn_class/",
+                url: "tasks/modify_burn_class",
                 data: JSON.stringify({ classes: data, nodata_vals: nodata_vals }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -1815,7 +1833,7 @@ var Baer = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "tasks/modify_color_map/",
+                url: "tasks/modify_color_map",
                 data: JSON.stringify({ color_map: data }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -2316,6 +2334,16 @@ var Outlet = function () {
 
     function createInstance() {
         var that = controlBase();
+        const MODE_SECTIONS = {
+            0: $("#set_outlet_mode0_controls"),
+            1: $("#set_outlet_mode1_controls")
+        };
+
+        function parseMode(value, fallback) {
+            var parsed = parseInt(value, 10);
+            return Number.isNaN(parsed) ? fallback : parsed;
+        }
+
         that.form = $("#set_outlet_form");
         that.info = $("#set_outlet_form #info");
         that.status = $("#set_outlet_form  #status");
@@ -2408,6 +2436,9 @@ var Outlet = function () {
         };
 
         // Cursor Selection Control
+        that.cursorButton = $("#btn_set_outlet_cursor");
+        that.cursorHint = $("#hint_set_outlet_cursor");
+        that.entryInput = $("#input_set_outlet_entry");
         that.popup = L.popup();
         that.cursorSelectionOn = false;
 
@@ -2460,29 +2491,75 @@ var Outlet = function () {
             self.cursorSelectionOn = state;
 
             if (state) {
-                $("#btn_set_outlet_cursor").text("Cancel");
+                if (self.cursorButton && self.cursorButton.length) {
+                    self.cursorButton.text("Cancel");
+                }
                 $(".leaflet-container").css("cursor", "crosshair");
-                $("#hint_set_outlet_cursor").text("Click on the map to define outlet.");
+                if (self.cursorHint && self.cursorHint.length) {
+                    self.cursorHint.text("Click on the map to define outlet.");
+                }
             } else {
-                $("#btn_set_outlet_cursor").text("Use Cursor");
+                if (self.cursorButton && self.cursorButton.length) {
+                    self.cursorButton.text("Use Cursor");
+                }
                 $(".leaflet-container").css("cursor", "");
-                $("#hint_set_outlet_cursor").text("");
+                if (self.cursorHint && self.cursorHint.length) {
+                    self.cursorHint.text("");
+                }
             }
         };
 
         that.setMode = function (mode) {
             var self = instance;
-            self.mode = parseInt(mode, 10);
-            if (self.mode === 0) {
-                // Enter lng, lat
-                $("#set_outlet_mode0_controls").show();
-                $("#set_outlet_mode1_controls").hide();
-            } else {
-                // user cursor
-                $("#set_outlet_mode0_controls").hide();
-                $("#set_outlet_mode1_controls").show();
+            self.mode = parseMode(mode, 0);
+
+            Object.keys(MODE_SECTIONS).forEach(function (key) {
+                var section = MODE_SECTIONS[key];
+                if (!section || section.length === 0) {
+                    return;
+                }
+                if (Number(key) === self.mode) {
+                    section.show();
+                } else {
+                    section.hide();
+                }
+            });
+
+            if (self.mode !== 0) {
                 self.setCursorSelection(false);
             }
+        };
+
+        that.handleModeChange = function (mode) {
+            that.setMode(mode);
+        };
+
+        that.handleCursorToggle = function () {
+            var self = instance;
+            self.setCursorSelection(!self.cursorSelectionOn);
+        };
+
+        that.handleEntrySubmit = function () {
+            var self = instance;
+            var raw = self.entryInput && self.entryInput.length ? self.entryInput.val() : '';
+            var parts = String(raw || '').split(',');
+
+            if (parts.length < 2) {
+                self.status.html('<span class="text-danger">Enter coordinates as "lon, lat".</span>');
+                return false;
+            }
+
+            var lng = parseFloat(parts[0]);
+            var lat = parseFloat(parts[1]);
+
+            if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+                self.status.html('<span class="text-danger">Invalid coordinates.</span>');
+                return false;
+            }
+
+            var ev = { latlng: L.latLng(lat, lng) };
+            self.set_outlet(ev);
+            return true;
         };
 
         return that;
@@ -4866,6 +4943,35 @@ var Wepp = function () {
             });
         };
 
+        that.handleCoverTransformUpload = function (input) {
+            if (!input || !input.files || input.files.length === 0) {
+                return false;
+            }
+
+            var file = input.files[0];
+            var formData = new FormData();
+            formData.append('input_upload_cover_transform', file);
+
+            $.post({
+                url: "tasks/upload_cover_transform",
+                data: formData,
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function success() {
+                    console.log('upload cover transform successful');
+                },
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            return true;
+        };
+
         that.run = function () {
             var self = instance;
             var task_msg = "Submitting wepp run";
@@ -4984,7 +5090,7 @@ var DebrisFlow = function () {
             self.stacktrace.hide();
         };
 
-        that.run_model = function () {
+        that.run = function () {
             var self = instance;
 
             var task_msg = "Running debris_flow model fit";
@@ -5146,6 +5252,17 @@ var Ash = function () {
 
     function createInstance() {
         var that = controlBase();
+        const DEPTH_MODE_SECTIONS = {
+            0: '#ash_depth_mode0_controls',
+            1: '#ash_depth_mode1_controls',
+            2: '#ash_depth_mode2_controls'
+        };
+
+        function parseDepthMode(value, fallback) {
+            var parsed = parseInt(value, 10);
+            return Number.isNaN(parsed) ? fallback : parsed;
+        }
+
         that.form = $("#ash_form");
         that.info = $("#ash_form #info");
         that.status = $("#ash_form  #status");
@@ -5171,7 +5288,7 @@ var Ash = function () {
             self.stacktrace.hide();
         };
 
-        that.run_model = function () {
+        that.run = function () {
             var self = instance;
 
             var task_msg = "Running ash model";
@@ -5213,9 +5330,13 @@ var Ash = function () {
                 mode = $("input[name='ash_depth_mode']:checked").val();
             }
 
-            self.ash_depth_mode = parseInt(mode, 10);
+            self.ash_depth_mode = parseDepthMode(mode, 0);
             self.showHideControls();
-        }
+        };
+
+        that.handleDepthModeChange = function (mode) {
+            that.setAshDepthMode(mode);
+        };
 
         that.set_wind_transport = function (state) {
             var self = instance;
@@ -5248,23 +5369,18 @@ var Ash = function () {
 
         that.showHideControls = function () {
             var self = instance;
+            var active = DEPTH_MODE_SECTIONS.hasOwnProperty(self.ash_depth_mode)
+                ? DEPTH_MODE_SECTIONS[self.ash_depth_mode]
+                : DEPTH_MODE_SECTIONS[0];
 
-            if (self.ash_depth_mode === 1) {
-                $("#ash_depth_mode0_controls").hide();
-                $("#ash_depth_mode1_controls").show();
-                $("#ash_depth_mode2_controls").hide();
-            }
-            else if (self.ash_depth_mode === 2) {
-                $("#ash_depth_mode0_controls").hide();
-                $("#ash_depth_mode1_controls").hide();
-                $("#ash_depth_mode2_controls").show();
-            }
-            else {
-                $("#ash_depth_mode0_controls").show();
-                $("#ash_depth_mode1_controls").hide();
-                $("#ash_depth_mode2_controls").hide();
-            }
-        }
+            Object.values(DEPTH_MODE_SECTIONS).forEach(function (selector) {
+                if (selector === active) {
+                    $(selector).show();
+                } else {
+                    $(selector).hide();
+                }
+            });
+        };
 
         that.report = function () {
             var self = instance;
@@ -6304,8 +6420,10 @@ var Omni = function () {
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
             if (eventName === 'OMNI_SCENARIO_RUN_TASK_COMPLETED') {
-                that.ws_client.disconnect();
                 that.report_scenarios();
+            }
+            else if (eventName === 'END_BROADCAST') {
+                that.ws_client.disconnect();
             }
 
             baseTriggerEvent(eventName, payload);
@@ -6472,13 +6590,10 @@ var DssExport = function () {
                 that.ws_client.disconnect();
                 that.report();
 
-                if (typeof Omni !== 'undefined') {
-                    var omni = Omni.getInstance();
-                    if (omni && omni.ws_client && typeof omni.ws_client.disconnect === 'function') {
-                        omni.ws_client.disconnect();
-                    }
-                    if (omni && typeof omni.report_scenarios === 'function') {
-                        omni.report_scenarios();
+                if (typeof DssExport !== 'undefined') {
+                    var dss_export = DssExport.getInstance();
+                    if (dss_export && dss_export.ws_client && typeof dss_export.ws_client.disconnect === 'function') {
+                        dss_export.ws_client.disconnect();
                     }
                 }
             }
@@ -6566,3 +6681,1582 @@ var DssExport = function () {
         }
     };
 }();
+/* ----------------------------------------------------------------------------
+ * Batch Runner (Phase 2)
+ * ----------------------------------------------------------------------------
+ */
+var BatchRunner = (function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+
+        that.container = null;
+        that.resourceCard = null;
+        that.templateCard = null;
+        that.state = {};
+        that.sitePrefix = '';
+        that.baseUrl = '';
+        that.templateInitialised = false;
+        that.command_btn_id = 'btn_run_batch';
+        that.ws_client = null;
+        that._jobInfoAbortController = null;
+        that._jobInfoTrackedIds = new Set();
+        that._jobInfoLastPayload = null;
+        that._runDirectivesSaving = false;
+        that._runDirectivesStatus = { message: '', css: 'text-muted' };
+        that._jobInfoPollIntervalMs = 3000;
+        that._jobInfoRefreshTimer = null;
+        that._jobInfoFetchInFlight = false;
+        that._jobInfoRefreshPending = false;
+        that._jobInfoLastFetchStartedAt = 0;
+        that._jobInfoForceNextFetch = false;
+        that._jobInfoCompletedIds = new Set();
+        that._jobInfoTerminalStatuses = new Set(['finished', 'failed', 'stopped', 'canceled', 'not_found', 'complete', 'completed', 'success', 'error']);
+
+        that.init = function init(bootstrap) {
+            bootstrap = bootstrap || {};
+            this.state = {
+                enabled: Boolean(bootstrap.enabled),
+                batchName: bootstrap.batchName || '',
+                snapshot: bootstrap.state || {},
+                geojsonLimitMb: bootstrap.geojsonLimitMb,
+            };
+            this._bootstrapTrackedJobIds(bootstrap);
+            this.state.validation = this._extractValidation(this.state.snapshot);
+            this.sitePrefix = bootstrap.sitePrefix || '';
+            this.baseUrl = this._buildBaseUrl();
+
+            this.form = $('#batch_runner_form');
+            this.statusDisplay = $('#batch_runner_form #status');
+            this.stacktrace = $('#batch_runner_form #stacktrace');
+            this.infoPanel = $('#batch_runner_form #info');
+            this.rq_job = $('#batch_runner_form #rq_job');
+
+            if (!this.ws_client) {
+                this.ws_client = new WSClient('batch_runner_form', 'batch');
+                this.ws_client.attachControl(this);
+            }
+
+            if (this.ws_client && this.state.batchName) {
+                this.ws_client.wsUrl = `wss://${window.location.host}/weppcloud-microservices/status/${encodeURIComponent(this.state.batchName)}:batch`;
+            }
+
+            this.container = $("#batch-runner-root");
+            this.resourceCard = $("#batch-runner-resource-card");
+            this.templateCard = $("#batch-runner-template-card");
+
+            if (!this.container.length) {
+                console.warn("BatchRunner container not found");
+                return this;
+            }
+
+            this._cacheElements();
+            this._bindEvents();
+            this._renderCoreStatus();
+            this.render();
+            this.refreshJobInfo();
+            this.render_job_status(this);
+            return this;
+        };
+
+        that.initManage = that.init;
+        that.initCreate = that.init;
+
+        that._cacheElements = function () {
+            this.uploadForm = this.resourceCard.find('[data-role="upload-form"]');
+            this.uploadInput = this.resourceCard.find('[data-role="geojson-input"]');
+            this.uploadButton = this.resourceCard.find('[data-role="upload-button"]');
+            this.uploadStatus = this.resourceCard.find('[data-role="upload-status"]');
+            this.resourceEmpty = this.resourceCard.find('[data-role="resource-empty"]');
+            this.resourceDetails = this.resourceCard.find('[data-role="resource-details"]');
+            this.resourceMeta = this.resourceCard.find('[data-role="resource-meta"]');
+            this.resourceSchema = this.resourceCard.find('[data-role="resource-schema"]');
+            this.resourceSchemaBody = this.resourceCard.find('[data-role="resource-schema-body"]');
+            this.resourceSamples = this.resourceCard.find('[data-role="resource-samples"]');
+            this.resourceSamplesBody = this.resourceCard.find('[data-role="resource-samples-body"]');
+            this.runBatchButton = $('#btn_run_batch');
+            this.runBatchHint = $('#hint_run_batch');
+            this.runBatchLock = $('#run_batch_lock');
+            this.runDirectiveList = this.container.find('[data-role="run-directive-list"]');
+            this.runDirectiveStatus = this.container.find('[data-role="run-directive-status"]');
+
+            this.templateInput = this.templateCard.find('[data-role="template-input"]');
+            this.validateButton = this.templateCard.find('[data-role="validate-button"]');
+            this.templateStatus = this.templateCard.find('[data-role="template-status"]');
+            this.validationSummary = this.templateCard.find('[data-role="validation-summary"]');
+            this.validationSummaryList = this.templateCard.find('[data-role="validation-summary-list"]');
+            this.validationIssues = this.templateCard.find('[data-role="validation-issues"]');
+            this.validationIssuesList = this.templateCard.find('[data-role="validation-issues-list"]');
+            this.validationPreview = this.templateCard.find('[data-role="validation-preview"]');
+            this.previewBody = this.templateCard.find('[data-role="preview-body"]');
+        };
+
+        that._bindEvents = function () {
+            var self = this;
+            if (this.uploadForm.length) {
+                if (this.uploadForm.is('form')) {
+                    this.uploadForm.on('submit', function (evt) {
+                        evt.preventDefault();
+                        self._handleUpload();
+                    });
+                } else if (this.uploadButton.length && !this.uploadButton.attr('onclick')) {
+                    this.uploadButton.on('click', function (evt) {
+                        evt.preventDefault();
+                        self._handleUpload();
+                    });
+                }
+            }
+            if (this.validateButton.length && !this.validateButton.attr('onclick')) {
+                this.validateButton.on('click', function (evt) {
+                    evt.preventDefault();
+                    self._handleValidate();
+                });
+            }
+            if (this.runDirectiveList && this.runDirectiveList.length) {
+                this.runDirectiveList.on('change', 'input[data-slug]', function (evt) {
+                    self._handleRunDirectiveToggle(evt);
+                });
+            }
+        };
+
+        that._extractValidation = function (snapshot) {
+            snapshot = snapshot || {};
+            var metadata = snapshot.metadata || {};
+            return metadata.template_validation || null;
+        };
+
+        that._buildBaseUrl = function () {
+            var prefix = this.sitePrefix || '';
+            if (prefix && prefix.slice(-1) === '/') {
+                prefix = prefix.slice(0, -1);
+            }
+            if (this.state.batchName) {
+                return prefix + '/batch/_/' + encodeURIComponent(this.state.batchName);
+            }
+            var pathname = window.location.pathname || '';
+            return pathname.replace(/\/$/, '');
+        };
+
+        that._apiUrl = function (suffix) {
+            var base = this.baseUrl || '';
+            if (!suffix) {
+                return base;
+            }
+            if (suffix.charAt(0) !== '/') {
+                suffix = '/' + suffix;
+            }
+            return base + suffix;
+        };
+
+        that._renderCoreStatus = function () {
+            var snapshot = this.state.snapshot || {};
+            this.container.find('[data-role="enabled-flag"]').text(this.state.enabled ? 'True' : 'False');
+            this.container.find('[data-role="batch-name"]').text(this.state.batchName || '—');
+            this.container.find('[data-role="manifest-version"]').text(snapshot.state_version || '—');
+            this.container.find('[data-role="created-by"]').text(snapshot.created_by || '—');
+            this.container.find('[data-role="manifest-json"]').text(JSON.stringify(snapshot, null, 2));
+        };
+
+        that.render = function render() {
+            this._renderResource();
+            this._renderValidation();
+            this._renderRunDirectives();
+            this._renderRunControls();
+        };
+
+        that._setRunBatchMessage = function (message, cssClass) {
+            if (!this.runBatchHint || !this.runBatchHint.length) {
+                return;
+            }
+            this.runBatchHint.removeClass('text-danger text-success text-warning text-muted text-info');
+            if (cssClass) {
+                this.runBatchHint.addClass(cssClass);
+            }
+            this.runBatchHint.text(message || '');
+        };
+
+        that._renderRunControls = function (options) {
+            options = options || {};
+            var preserveMessage = options.preserveMessage === true;
+
+            if (!this.runBatchButton || !this.runBatchButton.length) {
+                return;
+            }
+
+            var jobLocked = this.should_disable_command_button(this);
+            this.update_command_button_state(this);
+
+            if (this.runBatchLock && this.runBatchLock.length) {
+                if (jobLocked) {
+                    this.runBatchLock.show();
+                } else {
+                    this.runBatchLock.hide();
+                }
+            }
+
+            if (jobLocked) {
+                this.runBatchButton.prop('disabled', true);
+                this._setRunBatchMessage('Batch run in progress…', 'text-muted');
+                return;
+            }
+
+            var enabled = Boolean(this.state.enabled);
+            var snapshot = this.state.snapshot || {};
+            var resources = snapshot.resources || {};
+            var resource = resources.watershed_geojson;
+            var templateState = this.state.validation || (snapshot.metadata && snapshot.metadata.template_validation) || null;
+            var templateStatus = templateState && (templateState.status || 'ok');
+            var summary = templateState && templateState.summary;
+            var templateIsValid = Boolean(templateState && summary && summary.is_valid && templateStatus === 'ok');
+
+            var allowRun = enabled && Boolean(resource) && templateIsValid;
+            var message = '';
+            var cssClass = 'text-muted';
+
+            if (!enabled) {
+                message = 'Batch runner is disabled.';
+                cssClass = 'text-warning';
+            } else if (!resource) {
+                message = 'Upload a watershed GeoJSON before running.';
+            } else if (!templateIsValid) {
+                message = 'Validate and resolve template issues before running.';
+                cssClass = 'text-warning';
+            } else {
+                message = 'Ready to run batch.';
+            }
+
+            this.runBatchButton.prop('disabled', !allowRun);
+
+            if (!preserveMessage || !allowRun) {
+                this._setRunBatchMessage(message, cssClass);
+            }
+        };
+
+        that._syncRunDirectiveDisabledState = function () {
+            if (!this.runDirectiveList || !this.runDirectiveList.length) {
+                return;
+            }
+            var shouldDisable = this._runDirectivesSaving || !this.state.enabled;
+            this.runDirectiveList.find('input[data-slug]').prop('disabled', shouldDisable);
+        };
+
+        that._setRunDirectivesStatus = function (message, cssClass) {
+            this._runDirectivesStatus = {
+                message: message || '',
+                css: cssClass || '',
+            };
+            if (!this.runDirectiveStatus || !this.runDirectiveStatus.length) {
+                return;
+            }
+            this.runDirectiveStatus.removeClass('text-danger text-success text-muted text-warning');
+            if (cssClass) {
+                this.runDirectiveStatus.addClass(cssClass);
+            }
+            this.runDirectiveStatus.text(message || '');
+        };
+
+        that._applyStoredRunDirectiveStatus = function () {
+            if (!this.runDirectiveStatus || !this.runDirectiveStatus.length) {
+                return;
+            }
+            var status = this._runDirectivesStatus || {};
+            this.runDirectiveStatus.removeClass('text-danger text-success text-muted text-warning');
+            if (status.css) {
+                this.runDirectiveStatus.addClass(status.css);
+            }
+            this.runDirectiveStatus.text(status.message || '');
+        };
+
+        that._renderRunDirectives = function () {
+            if (!this.runDirectiveList || !this.runDirectiveList.length) {
+                return;
+            }
+
+            var snapshot = this.state.snapshot || {};
+            var directives = snapshot.run_directives || [];
+            var self = this;
+
+            if (!Array.isArray(directives) || directives.length === 0) {
+                this.runDirectiveList.html('<div class="text-muted small">No batch tasks configured.</div>');
+                this._setRunDirectivesStatus('No batch tasks configured.', 'text-muted');
+                return;
+            }
+
+            var html = directives.map(function (directive, index) {
+                if (!directive || typeof directive !== 'object') {
+                    return '';
+                }
+                var slug = directive.slug || ('directive-' + index);
+                var label = directive.label || slug;
+                var controlId = 'batch-runner-directive-' + slug;
+                var checked = directive.enabled ? ' checked' : '';
+                var disabled = (!self.state.enabled || self._runDirectivesSaving) ? ' disabled' : '';
+                return '<div class="custom-control custom-checkbox mb-1">' +
+                    '<input type="checkbox" class="custom-control-input" id="' + controlId + '" data-slug="' + slug + '"' + checked + disabled + '>' +
+                    '<label class="custom-control-label" for="' + controlId + '">' + self._escapeHtml(label) + '</label>' +
+                    '</div>';
+            }).join('');
+
+            this.runDirectiveList.html(html);
+            this._syncRunDirectiveDisabledState();
+            if (!this._runDirectivesStatus || !this._runDirectivesStatus.message) {
+                if (!this.state.enabled) {
+                    this._setRunDirectivesStatus('Batch runner is disabled; tasks cannot be edited.', 'text-muted');
+                } else {
+                    this._applyStoredRunDirectiveStatus();
+                }
+            } else {
+                this._applyStoredRunDirectiveStatus();
+            }
+        };
+
+        that._setRunDirectivesBusy = function (busy) {
+            this._runDirectivesSaving = busy === true;
+            this._syncRunDirectiveDisabledState();
+        };
+
+        that._collectRunDirectiveValues = function () {
+            var result = {};
+            if (!this.runDirectiveList || !this.runDirectiveList.length) {
+                return result;
+            }
+            this.runDirectiveList.find('input[data-slug]').each(function () {
+                var $input = $(this);
+                var slug = $input.data('slug');
+                if (!slug) {
+                    return;
+                }
+                result[String(slug)] = $input.is(':checked');
+            });
+            return result;
+        };
+
+        that._submitRunDirectives = function (values) {
+            if (!values) {
+                return;
+            }
+            var self = this;
+            this._setRunDirectivesBusy(true);
+            this._setRunDirectivesStatus('Saving batch task selection…', 'text-muted');
+
+            fetch(this._apiUrl('run-directives'), {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ run_directives: values })
+            })
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        data._httpStatus = response.status;
+                        return data;
+                    });
+                })
+                .then(function (payload) {
+                    if (!payload || payload.success !== true) {
+                        throw (payload && (payload.error || payload.message)) || 'Failed to update batch tasks.';
+                    }
+
+                    if (payload.snapshot) {
+                        self.state.snapshot = payload.snapshot;
+                    } else if (Array.isArray(payload.run_directives)) {
+                        var snapshot = self.state.snapshot || {};
+                        snapshot.run_directives = payload.run_directives;
+                        self.state.snapshot = snapshot;
+                    }
+
+                    self._setRunDirectivesStatus('Batch tasks updated.', 'text-success');
+                    self._renderRunDirectives();
+                })
+                .catch(function (error) {
+                    var message = typeof error === 'string' ? error : (error && error.error) || 'Failed to update batch tasks.';
+                    self._setRunDirectivesStatus(message, 'text-danger');
+                    self._renderRunDirectives();
+                })
+                .finally(function () {
+                    self._setRunDirectivesBusy(false);
+                });
+        };
+
+        that._handleRunDirectiveToggle = function (evt) {
+            if (this._runDirectivesSaving) {
+                if (evt && typeof evt.preventDefault === 'function') {
+                    evt.preventDefault();
+                }
+                return;
+            }
+
+            if (!this.state.enabled) {
+                if (evt && typeof evt.preventDefault === 'function') {
+                    evt.preventDefault();
+                }
+                this._renderRunDirectives();
+                return;
+            }
+
+            var values = this._collectRunDirectiveValues();
+            this._submitRunDirectives(values);
+        };
+
+        that._collectJobNodes = function (jobInfo, acc) {
+            if (!jobInfo) {
+                return;
+            }
+            acc.push(jobInfo);
+            var children = jobInfo.children || {};
+            Object.keys(children).forEach(function (orderKey) {
+                var bucket = children[orderKey] || [];
+                bucket.forEach(function (child) {
+                    if (child) {
+                        that._collectJobNodes(child, acc);
+                    }
+                });
+            });
+        };
+
+        that._registerTrackedJobId = function (jobId) {
+            if (jobId === undefined || jobId === null) {
+                return false;
+            }
+            var normalized = String(jobId).trim();
+            if (!normalized) {
+                return false;
+            }
+            if (this._jobInfoCompletedIds && this._jobInfoCompletedIds.has(normalized)) {
+                return false;
+            }
+            if (!this._jobInfoTrackedIds.has(normalized)) {
+                this._jobInfoTrackedIds.add(normalized);
+                return true;
+            }
+            return false;
+        };
+
+        that._unregisterTrackedJobId = function (jobId) {
+            if (jobId === undefined || jobId === null) {
+                return false;
+            }
+            var normalized = String(jobId).trim();
+            if (!normalized) {
+                return false;
+            }
+            if (this._jobInfoTrackedIds.has(normalized)) {
+                this._jobInfoTrackedIds.delete(normalized);
+                return true;
+            }
+            return false;
+        };
+
+        that._registerTrackedJobIds = function (collection) {
+            var self = this;
+            if (!collection) {
+                return;
+            }
+            if (Array.isArray(collection)) {
+                collection.forEach(function (value) {
+                    self._registerTrackedJobId(value);
+                });
+                return;
+            }
+            if (typeof collection === 'object') {
+                Object.keys(collection).forEach(function (key) {
+                    self._registerTrackedJobId(collection[key]);
+                });
+                return;
+            }
+            self._registerTrackedJobId(collection);
+        };
+
+        that._bootstrapTrackedJobIds = function (bootstrap) {
+            if (!bootstrap || typeof bootstrap !== 'object') {
+                return;
+            }
+
+            if (Array.isArray(bootstrap.jobIds)) {
+                this._registerTrackedJobIds(bootstrap.jobIds);
+            }
+
+            if (bootstrap.rqJobIds && typeof bootstrap.rqJobIds === 'object') {
+                this._registerTrackedJobIds(bootstrap.rqJobIds);
+            }
+
+            var snapshot = bootstrap.state || {};
+            var metadata = snapshot && typeof snapshot === 'object' ? (snapshot.metadata || {}) : {};
+
+            this._registerTrackedJobIds(snapshot.job_ids);
+            this._registerTrackedJobIds(metadata.job_ids);
+            this._registerTrackedJobIds(metadata.rq_job_ids);
+            this._registerTrackedJobIds(metadata.tracked_job_ids);
+        };
+
+        that._resolveJobInfoRequestIds = function () {
+            var ids = new Set();
+            var self = this;
+            var completedIds = this._jobInfoCompletedIds || new Set();
+
+            if (this.rq_job_id) {
+                var rootId = String(this.rq_job_id).trim();
+                if (rootId && !completedIds.has(rootId)) {
+                    ids.add(rootId);
+                }
+            }
+
+            if (this._jobInfoTrackedIds && this._jobInfoTrackedIds.size) {
+                this._jobInfoTrackedIds.forEach(function (value) {
+                    if (value) {
+                        var normalizedTracked = String(value).trim();
+                        if (normalizedTracked && !completedIds.has(normalizedTracked)) {
+                            ids.add(normalizedTracked);
+                        }
+                    }
+                });
+            }
+
+            var snapshot = (this.state && this.state.snapshot) || {};
+            var metadata = snapshot && typeof snapshot === 'object' ? (snapshot.metadata || {}) : {};
+
+            [snapshot.job_ids, metadata.job_ids, metadata.rq_job_ids, metadata.tracked_job_ids].forEach(function (collection) {
+                if (!collection) {
+                    return;
+                }
+                var items;
+                if (Array.isArray(collection)) {
+                    items = collection;
+                } else if (typeof collection === 'object') {
+                    items = Object.values(collection);
+                } else {
+                    items = [collection];
+                }
+                items.forEach(function (item) {
+                    if (item === undefined || item === null) {
+                        return;
+                    }
+                    var normalized = String(item).trim();
+                    if (normalized && !completedIds.has(normalized)) {
+                        ids.add(normalized);
+                    }
+                });
+            });
+
+            return Array.from(ids).filter(function (value) {
+                return typeof value === 'string' && value.length > 0;
+            });
+        };
+
+        that._normalizeJobInfoPayload = function (payload) {
+            if (!payload) {
+                return [];
+            }
+
+            if (Array.isArray(payload)) {
+                return payload.filter(function (item) {
+                    return item && typeof item === 'object';
+                });
+            }
+
+            if (payload.jobs && typeof payload.jobs === 'object') {
+                return Object.keys(payload.jobs).map(function (key) {
+                    return payload.jobs[key];
+                }).filter(function (item) {
+                    return item && typeof item === 'object';
+                });
+            }
+
+            if (payload.job && typeof payload.job === 'object') {
+                return [payload.job];
+            }
+
+            if (payload && typeof payload === 'object' && (payload.id || payload.status || payload.children)) {
+                return [payload];
+            }
+
+            return [];
+        };
+
+        that._registerJobInfoTrees = function (jobInfos) {
+            var self = this;
+            if (!Array.isArray(jobInfos) || jobInfos.length === 0) {
+                return;
+            }
+            jobInfos.forEach(function (info) {
+                if (!info || typeof info !== 'object') {
+                    return;
+                }
+                var nodes = [];
+                self._collectJobNodes(info, nodes);
+                nodes.forEach(function (node) {
+                    if (node && node.id) {
+                        self._registerTrackedJobId(node.id);
+                    }
+                });
+            });
+        };
+
+        that._dedupeJobNodes = function (nodes) {
+            if (!Array.isArray(nodes)) {
+                return [];
+            }
+            var deduped = [];
+            var seen = new Set();
+
+            nodes.forEach(function (node) {
+                if (!node) {
+                    return;
+                }
+                var key = node.id ? String(node.id) : (node.runid ? 'runid:' + node.runid : null);
+                if (key && seen.has(key)) {
+                    return;
+                }
+                if (key) {
+                    seen.add(key);
+                }
+                deduped.push(node);
+            });
+
+            return deduped;
+        };
+
+        that._pruneCompletedJobIds = function (nodes) {
+            if (!Array.isArray(nodes) || nodes.length === 0) {
+                return;
+            }
+
+            var self = this;
+            nodes.forEach(function (node) {
+                if (!node || !node.id) {
+                    return;
+                }
+                var status = node.status;
+                if (!status || typeof status !== 'string') {
+                    return;
+                }
+                var normalizedStatus = status.toLowerCase();
+                if (!self._jobInfoTerminalStatuses.has(normalizedStatus)) {
+                    return;
+                }
+                var normalizedId = String(node.id).trim();
+                if (!normalizedId) {
+                    return;
+                }
+                if (self._jobInfoCompletedIds) {
+                    self._jobInfoCompletedIds.add(normalizedId);
+                }
+                self._unregisterTrackedJobId(normalizedId);
+            });
+        };
+
+        that._renderJobInfo = function (payload) {
+            if (!this.infoPanel || !this.infoPanel.length) {
+                return;
+            }
+
+            this._jobInfoLastPayload = payload;
+
+            var jobInfos = this._normalizeJobInfoPayload(payload);
+            if (!jobInfos.length) {
+                this.infoPanel.html('<span class="text-muted">Job information unavailable.</span>');
+                return;
+            }
+
+            this._registerJobInfoTrees(jobInfos);
+
+            var that = this;
+            var nodes = [];
+            jobInfos.forEach(function (info) {
+                that._collectJobNodes(info, nodes);
+            });
+            var dedupedNodes = this._dedupeJobNodes(nodes);
+            this._pruneCompletedJobIds(dedupedNodes);
+
+            var watershedNodes = dedupedNodes.filter(function (node) {
+                return node && node.runid;
+            });
+
+            var totalWatersheds = watershedNodes.length;
+            var completedWatersheds = watershedNodes.filter(function (node) {
+                return node.status === 'finished';
+            }).length;
+            var failedWatersheds = watershedNodes.filter(function (node) {
+                return node.status === 'failed' || node.status === 'stopped' || node.status === 'canceled';
+            });
+            var activeWatersheds = watershedNodes.filter(function (node) {
+                return node.status && node.status !== 'finished' && node.status !== 'failed' && node.status !== 'stopped' && node.status !== 'canceled';
+            });
+
+            var parts = [];
+
+            if (jobInfos.length === 1) {
+                var rootInfo = jobInfos[0] || {};
+                parts.push('<div><strong>Batch status:</strong> ' + this._escapeHtml(rootInfo.status || 'unknown') + '</div>');
+                if (rootInfo.id) {
+                    parts.push('<div class="small text-muted">Job ID: <code>' + this._escapeHtml(rootInfo.id) + '</code></div>');
+                }
+            } else {
+                parts.push('<div><strong>Tracked jobs:</strong></div>');
+                var maxJobsToShow = 6;
+                var jobBadges = jobInfos.slice(0, maxJobsToShow).map(function (info) {
+                    var safeStatus = that._escapeHtml((info && info.status) || 'unknown');
+                    var safeId = that._escapeHtml((info && info.id) || '—');
+                    return '<span class="badge badge-light text-dark border mr-1 mb-1">' + safeStatus + ' · <code>' + safeId + '</code></span>';
+                });
+                if (jobInfos.length > maxJobsToShow) {
+                    jobBadges.push('<span class="text-muted">…</span>');
+                }
+                parts.push('<div class="mt-1">' + jobBadges.join(' ') + '</div>');
+            }
+
+            var allNotFound = jobInfos.every(function (info) {
+                return info && info.status === 'not_found';
+            });
+
+            if (allNotFound) {
+                parts.push('<div class="small text-muted">Requested job IDs were not found in the queue.</div>');
+                this.infoPanel.html(parts.join(''));
+                return;
+            }
+
+            if (totalWatersheds > 0) {
+                parts.push('<div class="small text-muted">Watersheds: ' + completedWatersheds + '/' + totalWatersheds + ' finished</div>');
+            } else {
+                parts.push('<div class="small text-muted">Watershed tasks have not started yet.</div>');
+            }
+
+            if (activeWatersheds.length) {
+                var activeList = activeWatersheds.slice(0, 6).map(function (node) {
+                    return '<span class="badge badge-info text-dark mr-1 mb-1">' + that._escapeHtml(node.runid) + ' · ' + that._escapeHtml(node.status || 'pending') + '</span>';
+                });
+                if (activeWatersheds.length > activeList.length) {
+                    activeList.push('<span class="text-muted">…</span>');
+                }
+                parts.push('<div class="mt-2"><strong>Active</strong><div>' + activeList.join(' ') + '</div></div>');
+            }
+
+            if (failedWatersheds.length) {
+                var failedList = failedWatersheds.slice(0, 6).map(function (node) {
+                    return '<span class="badge badge-danger text-light mr-1 mb-1">' + that._escapeHtml(node.runid) + '</span>';
+                });
+                if (failedWatersheds.length > failedList.length) {
+                    failedList.push('<span class="text-muted">…</span>');
+                }
+                parts.push('<div class="mt-2"><strong class="text-danger">Failures</strong><div>' + failedList.join(' ') + '</div></div>');
+            }
+
+            this.infoPanel.html(parts.join(''));
+        };
+
+        that._cancelJobInfoTimer = function () {
+            if (this._jobInfoRefreshTimer) {
+                clearTimeout(this._jobInfoRefreshTimer);
+                this._jobInfoRefreshTimer = null;
+            }
+        };
+
+        that._ensureJobInfoFetchScheduled = function () {
+            if (this._jobInfoFetchInFlight) {
+                return;
+            }
+
+            var now = Date.now();
+            var interval = this._jobInfoPollIntervalMs || 0;
+            var lastStarted = this._jobInfoLastFetchStartedAt || 0;
+            var elapsed = now - lastStarted;
+            var forceNext = this._jobInfoForceNextFetch === true;
+
+            if (!forceNext && interval > 0 && elapsed < interval) {
+                if (this._jobInfoRefreshTimer) {
+                    return;
+                }
+                var self = this;
+                this._jobInfoRefreshTimer = setTimeout(function () {
+                    self._jobInfoRefreshTimer = null;
+                    self._performJobInfoFetch();
+                }, interval - elapsed);
+                return;
+            }
+
+            this._jobInfoForceNextFetch = false;
+            this._performJobInfoFetch();
+        };
+
+        that._performJobInfoFetch = function () {
+            if (!this.infoPanel || !this.infoPanel.length) {
+                return;
+            }
+
+            if (this._jobInfoFetchInFlight) {
+                return;
+            }
+
+            this._cancelJobInfoTimer();
+            this._jobInfoForceNextFetch = false;
+
+            var jobIds = this._resolveJobInfoRequestIds();
+            if (!jobIds.length) {
+                this._jobInfoRefreshPending = false;
+                if (!this._jobInfoLastPayload) {
+                    this.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
+                }
+                return;
+            }
+
+            var self = this;
+            jobIds.forEach(function (jobId) {
+                self._registerTrackedJobId(jobId);
+            });
+
+            this._jobInfoRefreshPending = false;
+            this._jobInfoFetchInFlight = true;
+            this._jobInfoLastFetchStartedAt = Date.now();
+
+            if (typeof AbortController !== 'undefined') {
+                if (this._jobInfoAbortController) {
+                    this._jobInfoAbortController.abort();
+                }
+                this._jobInfoAbortController = new AbortController();
+            }
+
+            var controller = this._jobInfoAbortController;
+            fetch('/weppcloud/rq/api/jobinfo', {
+                method: 'POST',
+                signal: controller ? controller.signal : undefined,
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ job_ids: jobIds })
+            })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch job info');
+                    }
+                    return response.json();
+                })
+                .then(function (payload) {
+                    if (payload && Array.isArray(payload.job_ids)) {
+                        self._registerTrackedJobIds(payload.job_ids);
+                    } else if (payload && payload.jobs && typeof payload.jobs === 'object') {
+                        self._registerTrackedJobIds(Object.keys(payload.jobs));
+                    }
+
+                    self._renderJobInfo(payload);
+                })
+                .catch(function (error) {
+                    if (error && error.name === 'AbortError') {
+                        return;
+                    }
+                    console.warn('Unable to refresh batch job info:', error);
+                    if (self.infoPanel && self.infoPanel.length) {
+                        self.infoPanel.html('<span class="text-muted">Unable to refresh batch job details.</span>');
+                    }
+                })
+                .finally(function () {
+                    if (controller && controller === self._jobInfoAbortController) {
+                        self._jobInfoAbortController = null;
+                    }
+                    self._jobInfoFetchInFlight = false;
+                    if (self._jobInfoRefreshPending) {
+                        self._ensureJobInfoFetchScheduled();
+                    }
+                });
+        };
+
+        that.refreshJobInfo = function (options) {
+            options = options || {};
+            if (!this.infoPanel || !this.infoPanel.length) {
+                return;
+            }
+
+            if (options.force === true) {
+                this._jobInfoForceNextFetch = true;
+                this._jobInfoRefreshPending = true;
+                this._cancelJobInfoTimer();
+                if (!this._jobInfoFetchInFlight) {
+                    this._performJobInfoFetch();
+                }
+                return;
+            }
+
+            this._jobInfoRefreshPending = true;
+            this._ensureJobInfoFetchScheduled();
+        };
+
+        that._renderResource = function () {
+            var snapshot = this.state.snapshot || {};
+            var resources = snapshot.resources || {};
+            var resource = resources.watershed_geojson;
+            var self = this;
+            console.debug('[BatchRunner] _renderResource snapshot', snapshot);
+            console.debug('[BatchRunner] _renderResource resource present?', Boolean(resource), resource);
+
+            if (!this.resourceCard.length) {
+                return;
+            }
+
+            if (!resource) {
+                console.debug('[BatchRunner] No watershed resource on render; showing empty state.');
+                this._setHidden(this.resourceEmpty, false);
+                this._setHidden(this.resourceDetails, true);
+                this._setHidden(this.resourceSchema, true);
+                this._setHidden(this.resourceSamples, true);
+                return;
+            }
+
+            console.debug('[BatchRunner] Watershed resource detected; updating details card.');
+            this._setHidden(this.resourceEmpty, true);
+            this._setHidden(this.resourceDetails, false);
+
+            var metaHtml = [];
+            metaHtml.push(this._renderMetaRow('Filename', resource.filename || resource.original_filename || '—'));
+            if (resource.original_filename && resource.original_filename !== resource.filename) {
+                metaHtml.push(this._renderMetaRow('Original Filename', resource.original_filename));
+            }
+            metaHtml.push(this._renderMetaRow('Size', this._formatBytes(resource.size_bytes)));
+            metaHtml.push(this._renderMetaRow('Checksum', resource.checksum || '—'));
+            metaHtml.push(this._renderMetaRow('Feature Count', resource.feature_count != null ? resource.feature_count : '—'));
+            if (Array.isArray(resource.properties)) {
+                metaHtml.push(this._renderMetaRow('Property Count', resource.properties.length));
+            }
+            if (resource.bbox) {
+                metaHtml.push(this._renderMetaRow('Bounding Box', this._formatBBox(resource.bbox)));
+            }
+            if (resource.epsg) {
+                var epsgLabel = resource.epsg;
+                if (resource.epsg_source && resource.epsg_source !== 'declared') {
+                    epsgLabel += ' (inferred)';
+                }
+                metaHtml.push(this._renderMetaRow('CRS', epsgLabel));
+            }
+            if (resource.uploaded_at) {
+                metaHtml.push(this._renderMetaRow('Uploaded', this._formatTimestamp(resource.uploaded_at)));
+            }
+            if (resource.uploaded_by) {
+                metaHtml.push(this._renderMetaRow('Uploaded By', resource.uploaded_by));
+            }
+            if (resource.replaced) {
+                metaHtml.push(this._renderMetaRow('Replaced Existing', resource.replaced ? 'Yes' : 'No'));
+            }
+
+            this.resourceMeta.html(metaHtml.join(''));
+
+            var schema = resource.attribute_schema || {};
+            var schemaKeys = Object.keys(schema || {});
+            if (schemaKeys.length) {
+                schemaKeys.sort();
+                var schemaRows = schemaKeys.map(function (name) {
+                    return '<tr><td>' + self._escapeHtml(name) + '</td><td>' + self._escapeHtml(schema[name]) + '</td></tr>';
+                });
+                this.resourceSchemaBody.html(schemaRows.join(''));
+                this._setHidden(this.resourceSchema, false);
+            } else {
+                this.resourceSchemaBody.empty();
+                this._setHidden(this.resourceSchema, true);
+            }
+
+            var samples = Array.isArray(resource.sample_properties) ? resource.sample_properties : [];
+            if (samples.length) {
+                var sampleRows = samples.map(function (sample) {
+                    var props = sample.properties || {};
+                    var propsJson;
+                    try {
+                        propsJson = JSON.stringify(props, null, 2);
+                    } catch (err) {
+                        propsJson = String(props);
+                    }
+                    return '<tr><td>' + self._escapeHtml(sample.index != null ? sample.index : '—') + '</td>' +
+                        '<td><pre class="mb-0 small">' + self._escapeHtml(propsJson) + '</pre></td></tr>';
+                });
+                this.resourceSamplesBody.html(sampleRows.join(''));
+                this._setHidden(this.resourceSamples, false);
+            } else {
+                this.resourceSamplesBody.empty();
+                this._setHidden(this.resourceSamples, true);
+            }
+        };
+
+        that._renderValidation = function () {
+            if (!this.templateCard.length) {
+                return;
+            }
+
+            var snapshot = this.state.snapshot || {};
+            var resources = snapshot.resources || {};
+            var resource = resources.watershed_geojson;
+            var manifest = snapshot || {};
+            var storedValidation = this._extractValidation(manifest);
+
+            if (!this.templateInitialised) {
+                var tpl = snapshot.runid_template || '';
+                if (tpl && !this.templateInput.is(':focus')) {
+                    this.templateInput.val(tpl);
+                }
+                this.templateInitialised = true;
+            }
+
+            if (!resource) {
+                this.templateStatus.text('Upload a GeoJSON resource to enable template validation.');
+                this._setHidden(this.validationSummary, true);
+                this._setHidden(this.validationIssues, true);
+                this._setHidden(this.validationPreview, true);
+                return;
+            }
+
+            var validation = this.state.validation || storedValidation;
+            this.state.validation = validation;
+
+            if (!validation) {
+                if (storedValidation && storedValidation.status === 'stale') {
+                    this.templateStatus.text('Previous validation is stale. Re-run validation after reviewing the new GeoJSON.');
+                } else {
+                    this.templateStatus.text('No validation recorded. Provide a template and validate.');
+                }
+                this._setHidden(this.validationSummary, true);
+                this._setHidden(this.validationIssues, true);
+                this._setHidden(this.validationPreview, true);
+                return;
+            }
+
+            var summary = validation.summary || {};
+            var summaryItems = [];
+            summaryItems.push('<li>Total features: ' + (summary.total_features != null ? summary.total_features : '—') + '</li>');
+            summaryItems.push('<li>Valid run IDs: ' + (summary.valid_run_ids != null ? summary.valid_run_ids : '—') + '</li>');
+            summaryItems.push('<li>Unique run IDs: ' + (summary.unique_run_ids != null ? summary.unique_run_ids : '—') + '</li>');
+            summaryItems.push('<li>Duplicate run IDs: ' + (summary.duplicate_run_ids != null ? summary.duplicate_run_ids : '—') + '</li>');
+            summaryItems.push('<li>Errors: ' + (summary.errors != null ? summary.errors : '—') + '</li>');
+
+            var statusText = summary.is_valid ? 'Template is valid.' : 'Template has issues. Review details below.';
+            if (validation.status === 'stale') {
+                statusText = 'Validation is stale. Re-run validation with the latest resource.';
+            }
+            this.templateStatus.text(statusText);
+
+            this.validationSummaryList.html(summaryItems.join(''));
+            this._setHidden(this.validationSummary, false);
+
+            var issues = [];
+            (validation.errors || []).forEach(function (err) {
+                issues.push('Feature #' + err.index + (err.feature_id ? ' [' + err.feature_id + ']' : '') + ': ' + err.error);
+            });
+            (validation.duplicates || []).forEach(function (dup) {
+                issues.push('Duplicate run ID ' + dup.run_id + ' found at indexes ' + dup.indexes.join(', '));
+            });
+
+            if (issues.length) {
+                this.validationIssuesList.html(issues.map(function (text) {
+                    return $('<div/>').text(text).html();
+                }).join('<br>'));
+                this._setHidden(this.validationIssues, false);
+            } else {
+                this.validationIssuesList.empty();
+                this._setHidden(this.validationIssues, true);
+            }
+
+            var previewRows = validation.preview || [];
+            if (!previewRows.length && validation.rows) {
+                previewRows = validation.rows.slice(0, 20);
+            }
+
+            if (previewRows.length) {
+                var previewHtml = previewRows.map(function (row) {
+                    var errorCell = row.error ? $('<span/>').text(row.error).html() : '';
+                    var runIdCell = row.run_id ? $('<span/>').text(row.run_id).html() : '';
+                    var featureId = row.feature_id != null ? row.feature_id : '—';
+                    return '<tr>' +
+                        '<td>' + row.index + '</td>' +
+                        '<td>' + $('<span/>').text(featureId).html() + '</td>' +
+                        '<td>' + runIdCell + '</td>' +
+                        '<td>' + errorCell + '</td>' +
+                        '</tr>';
+                }).join('');
+                this.previewBody.html(previewHtml);
+                this._setHidden(this.validationPreview, false);
+            } else {
+                this.previewBody.empty();
+                this._setHidden(this.validationPreview, true);
+            }
+        };
+
+        that._handleUpload = function () {
+            if (!this.state.enabled) {
+                return;
+            }
+            var fileInput = this.uploadInput.get(0);
+            if (!fileInput || !fileInput.files || !fileInput.files.length) {
+                this._setUploadStatus('Please choose a GeoJSON file to upload.', 'text-danger');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('geojson_file', fileInput.files[0]);
+
+            var self = this;
+            this._setUploadBusy(true, 'Uploading GeoJSON…');
+
+            fetch(this._apiUrl('upload-geojson'), {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+            })
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        data._httpStatus = response.status;
+                        return data;
+                    });
+                })
+                .then(function (payload) {
+                    if (!payload.success) {
+                        throw payload.error || 'Upload failed.';
+                    }
+
+                    if (payload.snapshot) {
+                        console.debug('[BatchRunner] Upload response snapshot', payload.snapshot);
+                        self.state.snapshot = payload.snapshot || {};
+                        self.state.validation = self._extractValidation(self.state.snapshot);
+                    } else {
+                        console.debug('[BatchRunner] Upload response metadata', payload);
+                        var snapshot = self.state.snapshot || {};
+                        snapshot.resources = snapshot.resources || {};
+                        var resource = payload.resource;
+                        if (!resource && payload.resource_metadata) {
+                            resource = Object.assign({}, payload.resource_metadata);
+                            var analysis = payload.template_validation || {};
+                            if (analysis && typeof analysis === 'object') {
+                                if (analysis.feature_count != null) {
+                                    resource.feature_count = analysis.feature_count;
+                                }
+                                if (analysis.bbox) {
+                                    resource.bbox = analysis.bbox;
+                                }
+                                if (analysis.epsg) {
+                                    resource.epsg = analysis.epsg;
+                                }
+                                if (analysis.epsg_source) {
+                                    resource.epsg_source = analysis.epsg_source;
+                                }
+                                if (analysis.checksum) {
+                                    resource.checksum = analysis.checksum;
+                                }
+                                if (analysis.size_bytes != null) {
+                                    resource.size_bytes = analysis.size_bytes;
+                                }
+                                if (analysis.attribute_schema) {
+                                    resource.attribute_schema = analysis.attribute_schema;
+                                }
+                                if (Array.isArray(analysis.properties)) {
+                                    resource.properties = analysis.properties;
+                                }
+                                if (Array.isArray(analysis.sample_properties)) {
+                                    resource.sample_properties = analysis.sample_properties;
+                                }
+                            }
+                        }
+                        if (resource) {
+                            console.debug('[BatchRunner] Merging resource into snapshot', resource);
+                            snapshot.resources.watershed_geojson = resource;
+                        } else {
+                            console.debug('[BatchRunner] No resource derived from payload.');
+                        }
+                        snapshot.metadata = snapshot.metadata || {};
+                        if (payload.template_validation && payload.template_validation.summary) {
+                            snapshot.metadata.template_validation = payload.template_validation;
+                            self.state.validation = payload.template_validation;
+                        } else if (snapshot.metadata.template_validation) {
+                            snapshot.metadata.template_validation.status = 'stale';
+                            self.state.validation = snapshot.metadata.template_validation;
+                        } else {
+                            self.state.validation = null;
+                        }
+                        self.state.snapshot = snapshot;
+                    }
+
+                    console.debug('[BatchRunner] Post-upload snapshot state', self.state.snapshot);
+                    self._setUploadStatus(payload.message || 'Upload complete.', 'text-success');
+                    fileInput.value = '';
+                    self.templateInitialised = false;
+                    self._applyResourceVisibility();
+                    self.render();
+                })
+                .catch(function (error) {
+                    var message = typeof error === 'string' ? error : (error && error.error) || 'Upload failed.';
+                    self._setUploadStatus(message, 'text-danger');
+                })
+                .finally(function () {
+                    self._setUploadBusy(false);
+                });
+        };
+
+        that._handleValidate = function () {
+            if (!this.state.enabled) {
+                return;
+            }
+            var template = (this.templateInput.val() || '').trim();
+            if (!template) {
+                this.templateStatus.text('Enter a template before validating.');
+                return;
+            }
+
+            var self = this;
+            this._setValidateBusy(true, 'Validating template…');
+
+            fetch(this._apiUrl('validate-template'), {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ template: template }),
+            })
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        data._httpStatus = response.status;
+                        return data;
+                    });
+                })
+                .then(function (payload) {
+                    if (!payload.validation) {
+                        throw payload.error || 'Template validation failed.';
+                    }
+
+                    self.state.validation = payload.validation;
+                    if (payload.snapshot) {
+                        self.state.snapshot = payload.snapshot || {};
+                    } else {
+                        var snapshot = self.state.snapshot || {};
+                        snapshot.metadata = snapshot.metadata || {};
+                        snapshot.metadata.template_validation = payload.stored;
+                        snapshot.runid_template = template;
+                        self.state.snapshot = snapshot;
+                    }
+                    self.templateInitialised = false;
+                    self.render();
+                })
+                .catch(function (error) {
+                    var message = typeof error === 'string' ? error : (error && error.error) || 'Template validation failed.';
+                    self.templateStatus.text(message);
+                })
+                .finally(function () {
+                    self._setValidateBusy(false);
+                });
+        };
+
+        that._setUploadBusy = function (busy, message) {
+            if (this.uploadButton.length) {
+                this.uploadButton.prop('disabled', busy || !this.state.enabled);
+            }
+            if (message != null) {
+                this._setUploadStatus(message, busy ? 'text-muted' : '');
+            }
+        };
+
+        that._setValidateBusy = function (busy, message) {
+            if (this.validateButton.length) {
+                this.validateButton.prop('disabled', busy || !this.state.enabled);
+            }
+            if (message != null) {
+                this.templateStatus.text(message);
+            }
+        };
+
+        that._setRunBatchBusy = function (busy, message, cssClass) {
+            if (this.runBatchButton && this.runBatchButton.length && busy) {
+                this.runBatchButton.prop('disabled', true);
+            }
+
+            if (this.runBatchLock && this.runBatchLock.length) {
+                if (busy) {
+                    this.runBatchLock.show();
+                } else if (!this.should_disable_command_button(this)) {
+                    this.runBatchLock.hide();
+                }
+            }
+
+            if (message != null) {
+                this._setRunBatchMessage(message, cssClass || 'text-muted');
+            }
+
+            if (!busy) {
+                this._renderRunControls({ preserveMessage: true });
+            }
+        };
+
+        var baseSetRqJobId = that.set_rq_job_id;
+        that.set_rq_job_id = function (self, job_id) {
+            baseSetRqJobId.call(this, self, job_id);
+            if (self === that) {
+                if (job_id) {
+                    var normalizedJobId = String(job_id).trim();
+                    if (that._jobInfoCompletedIds) {
+                        that._jobInfoCompletedIds.delete(normalizedJobId);
+                    }
+                    that._registerTrackedJobId(normalizedJobId);
+                }
+                if (job_id) {
+                    that.refreshJobInfo({ force: true });
+                } else if (that.infoPanel && that.infoPanel.length) {
+                    that.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
+                }
+            }
+        };
+
+        var baseHandleJobStatusResponse = that.handle_job_status_response;
+        that.handle_job_status_response = function (self, data) {
+            baseHandleJobStatusResponse.call(this, self, data);
+            if (self === that) {
+                that.refreshJobInfo();
+            }
+        };
+
+        that.uploadGeojson = function (evt) {
+            if (!this.state.enabled) {
+                this._setUploadStatus('Batch runner is disabled.', 'text-warning');
+                return false;
+            }
+
+            if (evt) {
+                evt.preventDefault();
+                if (typeof evt.stopImmediatePropagation === 'function') {
+                    evt.stopImmediatePropagation();
+                }
+            }
+
+            this._handleUpload();
+            return false;
+        };
+
+        that.validateTemplate = function (evt) {
+            if (!this.state.enabled) {
+                this.templateStatus.text('Batch runner is disabled.');
+                return false;
+            }
+
+            if (evt) {
+                evt.preventDefault();
+                if (typeof evt.stopImmediatePropagation === 'function') {
+                    evt.stopImmediatePropagation();
+                }
+            }
+
+            this._handleValidate();
+            return false;
+        };
+
+        that._setUploadStatus = function (message, cssClass) {
+            if (!this.uploadStatus.length) {
+                return;
+            }
+            this.uploadStatus.removeClass('text-danger text-success text-muted text-warning');
+            if (cssClass) {
+                this.uploadStatus.addClass(cssClass);
+            }
+            this.uploadStatus.text(message || '');
+        };
+
+        that._applyResourceVisibility = function () {
+            if (!this.resourceCard || !this.resourceCard.length) {
+                return;
+            }
+            var snapshot = this.state.snapshot || {};
+            var resources = snapshot.resources || {};
+            var resource = resources.watershed_geojson;
+            console.debug('[BatchRunner] _applyResourceVisibility resource present?', Boolean(resource), resource);
+            if (resource) {
+                this.resourceEmpty.hide();
+                this.resourceDetails.show();
+            }
+        };
+
+        that._escapeHtml = function (value) {
+            return $('<span/>').text(value != null ? value : '').html();
+        };
+
+        that._renderMetaRow = function (label, value) {
+            return '<dt class="col-sm-4">' + this._escapeHtml(label) + '</dt>' +
+                '<dd class="col-sm-8">' + this._escapeHtml(value != null ? value : '—') + '</dd>';
+        };
+
+        that._setHidden = function (element, hidden) {
+            if (!element || !element.length) {
+                return;
+            }
+            var domNode = element[0];
+            if (hidden) {
+                element.attr('hidden', 'hidden');
+                element.prop('hidden', true);
+                element.addClass('d-none');
+                if (typeof element.hide === 'function') {
+                    element.hide();
+                }
+                if (domNode && domNode.style) {
+                    domNode.style.setProperty('display', 'none', 'important');
+                }
+            } else {
+                element.removeAttr('hidden');
+                element.prop('hidden', false);
+                element.removeClass('d-none');
+                if (domNode && domNode.style) {
+                    domNode.style.removeProperty('display');
+                }
+                if (typeof element.show === 'function') {
+                    element.show();
+                }
+            }
+        };
+
+        that._formatBytes = function (bytes) {
+            if (bytes == null || isNaN(bytes)) {
+                return '—';
+            }
+            var size = Number(bytes);
+            if (size < 1024) {
+                return size + ' B';
+            }
+            if (size < 1024 * 1024) {
+                return (size / 1024).toFixed(1) + ' KB';
+            }
+            return (size / (1024 * 1024)).toFixed(1) + ' MB';
+        };
+
+        that._formatBBox = function (bbox) {
+            if (!bbox || bbox.length !== 4) {
+                return '—';
+            }
+            return bbox.map(function (val) {
+                return Number(val).toFixed(4);
+            }).join(', ');
+        };
+
+        that._formatTimestamp = function (timestamp) {
+            try {
+                var date = new Date(timestamp);
+                if (!isNaN(date.getTime())) {
+                    return date.toLocaleString();
+                }
+            } catch (err) {
+                // ignore
+            }
+            return timestamp || '—';
+        };
+
+        that.runBatch = function () {
+            if (!this.state.enabled) {
+                this._setRunBatchMessage('Batch runner is disabled.', 'text-warning');
+                return;
+            }
+
+            if (this.should_disable_command_button(this)) {
+                return;
+            }
+
+            var self = this;
+            if (self._jobInfoAbortController && typeof self._jobInfoAbortController.abort === 'function') {
+                try {
+                    self._jobInfoAbortController.abort();
+                } catch (abortError) {
+                    console.warn('Failed to abort in-flight job info request before submitting batch:', abortError);
+                }
+                self._jobInfoAbortController = null;
+            }
+            if (typeof self._cancelJobInfoTimer === 'function') {
+                self._cancelJobInfoTimer();
+            }
+            self._jobInfoFetchInFlight = false;
+            self._jobInfoRefreshPending = false;
+            self._jobInfoForceNextFetch = false;
+            self._jobInfoLastFetchStartedAt = 0;
+            if (self._jobInfoTrackedIds && typeof self._jobInfoTrackedIds.clear === 'function') {
+                self._jobInfoTrackedIds.clear();
+            }
+            if (self._jobInfoCompletedIds && typeof self._jobInfoCompletedIds.clear === 'function') {
+                self._jobInfoCompletedIds.clear();
+            }
+            self._jobInfoLastPayload = null;
+            
+            self._setRunBatchBusy(true, 'Submitting batch run…', 'text-muted');
+
+            if (self.ws_client && typeof self.ws_client.connect === 'function') {
+                self.ws_client.connect();
+            }
+
+            if (self.infoPanel && self.infoPanel.length) {
+                self.infoPanel.html('<span class="text-muted">Submitting batch job…</span>');
+            }
+
+            fetch(this._apiUrl('rq/api/run-batch'), {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        data._httpStatus = response.status;
+                        return data;
+                    });
+                })
+                .then(function (payload) {
+                    if (!payload.success) {
+                        throw payload.error || 'Failed to submit batch run.';
+                    }
+
+                    if (payload.job_id) {
+                        self.set_rq_job_id(self, payload.job_id);
+                    } else {
+                        self.update_command_button_state(self);
+                    }
+
+                    var successMessage = payload.message || 'Batch run submitted.';
+                    self._setRunBatchMessage(successMessage, 'text-success');
+                })
+                .catch(function (error) {
+                    var message;
+                    if (typeof error === 'string') {
+                        message = error;
+                    } else if (error && typeof error === 'object') {
+                        message = error.error || error.message;
+                    }
+                    self._setRunBatchMessage(message || 'Failed to submit batch run.', 'text-danger');
+                    if (self.infoPanel && self.infoPanel.length) {
+                        self.infoPanel.html('<span class="text-danger">' + self._escapeHtml(message || 'Failed to submit batch run.') + '</span>');
+                    }
+                    if (self.ws_client && typeof self.ws_client.disconnect === 'function') {
+                        self.ws_client.disconnect();
+                    }
+                })
+                .finally(function () {
+                    self._setRunBatchBusy(false);
+                });
+        };
+
+        var baseTriggerEvent = that.triggerEvent;
+        that.triggerEvent = function (eventName, payload) {
+            if (eventName === 'BATCH_RUN_COMPLETED' || eventName === 'END_BROADCAST') {
+                if (this.ws_client && typeof this.ws_client.disconnect === 'function') {
+                    this.ws_client.disconnect();
+                }
+                if (this.ws_client && typeof this.ws_client.resetSpinner === 'function') {
+                    this.ws_client.resetSpinner();
+                }
+                this.refreshJobInfo({ force: true });
+            } else if (eventName === 'BATCH_WATERSHED_TASK_COMPLETED') {
+                this.refreshJobInfo();
+            }
+
+            baseTriggerEvent.call(this, eventName, payload);
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function () {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+})();
+
+window.BatchRunner = BatchRunner;

@@ -359,18 +359,6 @@
         "children": {}
       }
     ],
-    "3": [
-      {
-        "id": "510fb477-ce25-4b11-acc2-736a446c583b",
-        "status": "finished",
-        "result": null,
-        "started_at": "2024-05-24 20:11:00.222629",
-        "ended_at": "2024-05-24 20:11:00.233699",
-        "description": "wepppy.rq.wepp_rq._post_unlock_wepp_rq('orphaned-dioxide')",
-        "exc_info": "",
-        "children": {}
-      }
-    ],
     "4": [
       {
         "id": "7f5fac0e-83bf-4df6-ad36-4cdfa916b4db",
