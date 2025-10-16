@@ -258,38 +258,6 @@ services:
     networks:
       - backend
 
-  rq-dashboard:
-    image: ${WEPPCLOUD_RQ_DASHBOARD_IMAGE:-wepppy-rq-dashboard:latest}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.rq-dashboard
-    restart: unless-stopped
-    environment:
-      RQ_DASHBOARD_REDIS_URL: redis://redis:6379/9
-      RQ_DASHBOARD_URL_PREFIX: /rq-dashboard
-      PIP_DISABLE_PIP_VERSION_CHECK: "1"
-    working_dir: /rq-dashboard
-    command:
-      - gunicorn
-      - --bind
-      - 0.0.0.0:9181
-      - --workers
-      - "2"
-      - --threads
-      - "2"
-      - --timeout
-      - "30"
-      - --log-level
-      - info
-      - rq_dashboard.app:create_app()
-    ports:
-      - "${RQ_DASHBOARD_PORT:-9181}:9181"
-    depends_on:
-      redis:
-        condition: service_started
-    networks:
-      - backend
-
   caddy:
     image: caddy:2
     restart: unless-stopped
@@ -308,8 +276,6 @@ services:
       browse:
         condition: service_started
       weppcloudr:
-        condition: service_started
-      rq-dashboard:
         condition: service_started
     networks:
       - backend
