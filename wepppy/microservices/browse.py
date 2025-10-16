@@ -793,17 +793,6 @@ def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
             except OSError:
                 _logger.warning('Unable to append to run exception log for %s', runid, exc_info=True)
 
-    try:
-        with open('/var/log/exceptions.log', 'a', encoding='utf-8') as fp:
-            fp.write(f'[{timestamp}] ')
-            if runid:
-                fp.write(f'{runid}\n')
-            fp.write(stacktrace_text)
-            fp.write('\n\n')
-    except OSError:
-        _logger.debug('Unable to append to /var/log/exceptions.log', exc_info=True)
-
-
 async def browse_exception_handler(request: StarletteRequest, exc: Exception):
     stacktrace_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
     stacktrace_text = ''.join(stacktrace_lines)
