@@ -63,6 +63,13 @@ volumes:
 - For dev environments that should mirror production data, use `external: true` and point to an existing host path or managed volume.
 - If an external Postgres is already provided (common in ops), drop the `postgres` service and set `POSTGRES_HOST` in `.env` accordingly.
 
+## Automated Postgres Backups
+- `docker-compose.dev.yml` and `docker-compose.prod.yml` now ship with a `postgres-backup` sidecar that runs `pg_dump -h postgres -U wepppy -d wepppy -Fc` once every 24 hours.
+- Dev backups are written to `./.docker-data/postgres-backups/` on the host; production uses the named volume `postgres-backups`.
+- Tune the schedule via `BACKUP_INTERVAL_SECONDS` (default `86400` seconds) and retention via `BACKUP_KEEP_DAYS` (default `7` days) directly in Compose.
+- Check the latest dumps with `docker compose exec postgres-backup ls -l /backups`.
+- Trigger an ad-hoc snapshot without waiting a day: `docker compose run --rm postgres-backup bash -lc 'pg_dump -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -Fc -f "/backups/wepppy-manual-$(date +%Y%m%d-%H%M%S).dump"'`.
+
 ## Startup Workflow
 1. Ensure `.env` is populated with Redis host, Postgres creds, and any feature flags.
 2. Run `docker compose build` (uses `uv` to install Python deps).

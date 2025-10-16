@@ -302,6 +302,39 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-backup:
+    image: postgres:16
+    container_name: wepppy-postgres-backup
+    restart: unless-stopped
+    environment:
+      PGHOST: postgres
+      PGUSER: wepppy
+      PGDATABASE: wepppy
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_DIR: /backups
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_INTERVAL_SECONDS: 86400
+    volumes:
+      - ../.docker-data/postgres-backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - bash
+      - -lc
+      - |
+        set -euo pipefail
+        mkdir -p "$${BACKUP_DIR:-/backups}"
+        while true; do
+          ts=$$(date +"%Y%m%d-%H%M%S")
+          target="$${BACKUP_DIR:-/backups}/wepppy-$${ts}.dump"
+          echo "[ $$(date --iso-8601=seconds) ] writing $$target"
+          pg_dump -h "$${PGHOST}" -U "$${PGUSER}" -d "$${PGDATABASE}" -Fc -f "$$target"
+          echo "[ $$(date --iso-8601=seconds) ] purge older than $${BACKUP_KEEP_DAYS:-7} days"
+          find "$${BACKUP_DIR:-/backups}" -type f -mtime +$${BACKUP_KEEP_DAYS:-7} -delete
+          sleep $${BACKUP_INTERVAL_SECONDS:-86400}
+        done
+
   rq-dashboard:
     build:
       context: ../..
