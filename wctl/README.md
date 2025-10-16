@@ -9,9 +9,9 @@ The primary purpose of this tool is to provide a global command that executes do
 
 The wctl script is a simple yet powerful Bash script that performs the following actions in sequence:
 
-1. **Sets Project Directory:** It contains a hardcoded variable for the project's root directory: /workdir/wepppy.  
-2. **Changes Directory:** It immediately changes its execution context to that project directory. This ensures that all relative paths within the docker-compose.dev.yml file are resolved correctly.  
-3. **Executes Docker Compose:** It runs the docker compose command, explicitly pointing to the development environment file (docker/.env) and the development compose file (docker/docker-compose.dev.yml).  
+1. **Sets Project Directory:** The script derives the project root dynamically based on the location of the wctl directory.  
+2. **Changes Directory:** It immediately changes its execution context to that project directory so that all relative paths within the compose file resolve correctly.  
+3. **Executes Docker Compose:** It runs docker compose, pointing to the shared env file (docker/.env) and the compose file selected during installation (dev or prod).  
 4. **Forwards Arguments:** Any arguments or commands you pass to wctl (e.g., up \-d, down, logs) are appended to the end of the docker compose command using the $@ shell parameter.
 
 This allows a command like wctl ps to be translated seamlessly into:
@@ -23,14 +23,20 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 
 ### **Installation**
 
-To install wctl and make it available system-wide, follow these three steps.
+1. **Configure the target compose file.**  
+   Run the installer (located in the wctl directory) from the project root to select the compose file that wctl should use.  
+   Ensure `python3` is on your PATH before running these commands.
+   ```Bash
+   cd /workdir/wepppy
+   ./wctl/install.sh dev    # use docker/docker-compose.dev.yml
+   ./wctl/install.sh prod   # use docker/docker-compose.prod.yml
+   ```
+   You can re-run the installer at any time to switch environments.
 
-#### Instanllation**
-
-To make the command available from any location, create a symbolic link (symlink) to it from a directory in your system's PATH, such as /usr/local/bin.
-
-```Bash
-sudo ln -s /workdir/wepppy/wctl/wctl.sh /usr/local/bin/wctl
-```
-
-You can verify the installation by running which wctl, which should return /usr/local/bin/wctl. You are now ready to use the command.
+2. **(Optional) Adjust the symlink location.**  
+   The installer ensures a symlink exists at `/usr/local/bin/wctl` (or at the path specified by the `WCTL_SYMLINK_PATH` environment variable).  
+   If the default location requires elevated privileges, re-run the installer with `sudo` or choose a writable directory:
+   ```Bash
+   WCTL_SYMLINK_PATH="$HOME/.local/bin/wctl" ./wctl/install.sh dev
+   ```
+   Verify the installation with `which wctl`; it should resolve to your chosen path.
