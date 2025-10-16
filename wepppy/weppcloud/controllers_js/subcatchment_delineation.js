@@ -57,6 +57,27 @@ var SubcatchmentDelineation = function () {
         that.cmapMode = 'default';     // active colour-map key
         that.topIds = [];
 
+        that._resolveWeppKey = function (feature) {
+            if (!feature || !feature.properties) {
+                return null;
+            }
+            var props = feature.properties;
+            var candidates = [
+                props.WeppID,
+                props.wepp_id,
+                props.weppId,
+                props.Hillslopes,
+                props.hillslope
+            ];
+            for (var i = 0; i < candidates.length; i += 1) {
+                var candidate = candidates[i];
+                if (candidate !== undefined && candidate !== null && candidate !== '') {
+                    return String(candidate);
+                }
+            }
+            return null;
+        };
+
         // various query-result dicts filled by cmap*() functions
         that.dataCover = null;
 
@@ -311,8 +332,12 @@ var SubcatchmentDelineation = function () {
 
                 case 'runoff':
                     return (feat) => {
-                        const id = feat.properties.TopazID;
-                        const v = parseFloat(self.dataRunoff[id].value); // mm
+                        const key = self._resolveWeppKey(feat);
+                        const record = key ? self.dataRunoff?.[key] : null;
+                        const v = record ? parseFloat(record.value) : NaN; // mm
+                        if (!record || Number.isNaN(v)) {
+                            return COLOR_DEFAULT;
+                        }
                         const linearValue = parseFloat(self.rangeRunoff.val()); // 0 - 100
                         const minLog = 0.1; // slider min
                         const maxLog = 1000;   // slider max
@@ -326,8 +351,12 @@ var SubcatchmentDelineation = function () {
 
                 case 'loss':
                     return (feat) => {
-                        const id = feat.properties.TopazID;
-                        const v = parseFloat(self.dataLoss[id].value); // mm
+                        const key = self._resolveWeppKey(feat);
+                        const record = key ? self.dataLoss?.[key] : null;
+                        const v = record ? parseFloat(record.value) : NaN; // mm
+                        if (!record || Number.isNaN(v)) {
+                            return COLOR_DEFAULT;
+                        }
                         const linearValue = parseFloat(self.rangeLoss.val()); // 0 - 100
                         const minLog = 1; // slider min
                         const maxLog = 10000;   // slider max
@@ -619,17 +648,13 @@ var SubcatchmentDelineation = function () {
 
             var payload = {
                 datasets: [
-                    { path: "wepp/output/interchange/loss_pw0.hill.parquet", alias: "loss" },
-                    { path: "watershed/hillslopes.parquet", alias: "hills" }
-                ],
-                joins: [
-                    { left: "loss", right: "hills", left_on: ["wepp_id"], right_on: ["wepp_id"], join_type: "left" }
+                    { path: "wepp/output/interchange/loss_pw0.hill.parquet", alias: "loss" }
                 ],
                 columns: [
-                    'hills.topaz_id AS topaz_id',
+                    'loss.wepp_id AS wepp_id',
                     expression + " AS value"
                 ],
-                order_by: ["topaz_id"]
+                order_by: ['loss.wepp_id']
             };
 
             return postQueryEngine(payload).then(function (response) {
@@ -639,12 +664,12 @@ var SubcatchmentDelineation = function () {
                     if (!row) {
                         return;
                     }
-                    var topazId = row.topaz_id;
-                    if (topazId === undefined || topazId === null) {
+                    var weppId = row.wepp_id;
+                    if (weppId === undefined || weppId === null) {
                         return;
                     }
-                    map[String(topazId)] = {
-                        topaz_id: topazId,
+                    map[String(weppId)] = {
+                        wepp_id: weppId,
                         value: row.value
                     };
                 });
