@@ -11,8 +11,8 @@
 3. Build and sync assets with the helper script (from anywhere):
    - `wctl build-static-assets` for readable output.
    - `wctl build-static-assets --prod` for the minified bundle (automatically implied when wctl is configured for prod).
-   - Script lives at `./wepppy/weppcloud/static-src/build-static-assets.sh` if you need to invoke it directly.
-   - Add `--force-install` if you need to refresh `node_modules`.
+   - Script lives at `./wepppy/weppcloud/static-src/build-static-assets.sh` if you need to invoke it directly (supports `--prod`, `--force-install`, and `--skip-controllers`).
+   - Controllers bundle (`controllers.js`) is rebuilt by default; pass `--skip-controllers` to bypass it.
    - The script automatically rsyncs into `wepppy/weppcloud/static/vendor/`, which is `.gitignore`d so dev builds stay local.
 
 ## Docker / Production
