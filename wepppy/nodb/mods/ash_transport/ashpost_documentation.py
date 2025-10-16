@@ -7,6 +7,8 @@ from typing import List, Tuple
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from .ashpost_versioning import ASHPOST_VERSION, read_version_manifest
+
 ASH_POST_DOC_ORDER: List[Tuple[str, str]] = [
     (
         "hillslope_annuals.parquet",
@@ -113,9 +115,20 @@ def generate_ashpost_documentation(ash_post_dir: Path | str, to_readme_md: bool 
     if not base.exists():
         raise FileNotFoundError(base)
 
+    try:
+        manifest_version = read_version_manifest(base)
+    except ValueError:
+        version_text = f"{ASHPOST_VERSION} (manifest invalid)"
+    else:
+        if manifest_version is None:
+            version_text = f"{ASHPOST_VERSION} (manifest missing)"
+        else:
+            version_text = str(manifest_version)
+
     sections: List[str] = [
         "# Ash Transport Post-Processing\n",
         "Derived parquet artifacts created by `AshPost` to summarise hillslope and watershed ash transport.\n",
+        f"_AshPost Version: {version_text}_\n",
     ]
 
     for filename, description in ASH_POST_DOC_ORDER:

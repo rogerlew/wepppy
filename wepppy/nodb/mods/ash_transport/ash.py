@@ -553,7 +553,7 @@ class Ash(NoDbBase):
                     self.logger.info(f"  Removing {fn}\n")
                     os.remove(fn)
 
-                for pattern in ('*.parquet', '*.pkl', '*.md'):
+                for pattern in ('*.parquet', '*.pkl', '*.md', 'ashpost_version.json'):
                     for fn in glob(_join(ash_dir, 'post', pattern)):
                         self.logger.info(f"  Removing {fn}\n")
                         os.remove(fn)

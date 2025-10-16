@@ -8,6 +8,7 @@
 
 
 import os
+from pathlib import Path
 from glob import glob
 from os.path import join as _join
 from os.path import split as _split
@@ -36,6 +37,12 @@ from wepppy.query_engine.activate import update_catalog_entry
 from wepppy.wepp.interchange.schema_utils import pa_field
 
 from .ashpost_documentation import generate_ashpost_documentation
+from .ashpost_versioning import (
+    ASHPOST_VERSION,
+    remove_incompatible_outputs,
+    schema_with_version,
+    write_version_manifest,
+)
 
 __all__ = [
     'AshPostNoDbLockedException',
@@ -165,7 +172,9 @@ def _add_per_area_columns(df: pd.DataFrame, source_columns: list[str], area_colu
 
 def _write_parquet(df: pd.DataFrame, path: str) -> None:
     if not len(df.columns):
-        pq.write_table(pa.table({}), path, compression='snappy')
+        empty_schema = schema_with_version(pa.schema([]))
+        table = pa.Table.from_arrays([], schema=empty_schema)
+        pq.write_table(table, path, compression='snappy')
         return
 
     table = pa.Table.from_pandas(df, preserve_index=False)
@@ -175,6 +184,7 @@ def _write_parquet(df: pd.DataFrame, path: str) -> None:
         description = _describe_column(field.name)
         schema_fields.append(pa_field(field.name, field.type, units=units, description=description))
     schema = pa.schema(schema_fields)
+    schema = schema_with_version(schema)
     table = table.cast(schema)
     pq.write_table(table, path, compression='snappy')
 
@@ -682,9 +692,12 @@ class AshPost(NoDbBase):
 
     def run_post(self, recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)):
         with self.locked():
+            ash_post_path = Path(self.ash_post_dir)
+            remove_incompatible_outputs(ash_post_path, version=ASHPOST_VERSION)
             res = watershed_daily_aggregated(self.wd, recurrence=recurrence)
             if res != None:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = res
+                write_version_manifest(ash_post_path, version=ASHPOST_VERSION)
                 generate_ashpost_documentation(self.ash_post_dir)
             else:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = None, None, None
