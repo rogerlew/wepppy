@@ -498,6 +498,9 @@ window.addEventListener('load', function () {
     setGlobalUnitizerPreference(pref);
     Project.getInstance().unitChangeEvent();
 
+    {% if 'ash' in ron.mods %}
+    ash.showHideControls();
+    {% endif %}
 });
 </script>
 <!-- End wepppy/weppcloud/templates/js/run_page_bootstrap.js.j2 -->

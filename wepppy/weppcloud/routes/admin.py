@@ -1,5 +1,6 @@
 """Admin-related routes blueprint extracted from app.py."""
 
+from datetime import datetime
 from glob import glob
 
 from os.path import exists as _exists
@@ -60,10 +61,10 @@ def usermod():
 @roles_required('Admin')
 @handle_with_exception_factory
 def allruns():
-    from wepppy.weppcloud.app import get_all_runs, current_user
+    from wepppy.weppcloud.app import get_all_runs
     user_runs = [run.meta for run in get_all_runs()]
     user_runs = [meta for meta in user_runs if meta is not None]
-    user_runs.sort(key=lambda meta: meta['last_modified'], reverse=True)
+    user_runs.sort(key=lambda meta: meta.get('last_modified') or datetime.min, reverse=True)
     return render_template('user/runs2.html', 
                             user=current_user, 
                             user_runs=user_runs, 
