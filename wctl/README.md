@@ -21,6 +21,12 @@ This allows a command like wctl ps to be translated seamlessly into:
 docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 ```
 
+### **Built-in Helpers**
+
+- `wctl build-static-assets`: runs the frontend build script (`static-src/build-static-assets.sh`) with the correct Compose profile baked into the arguments.
+- `sudo wctl restore-docker-data-permissions`: resets ownership and permissions for the directories under `.docker-data/`. Postgres data and backup paths are restored to `postgres:postgres` (UID/GID `999`), Redis gets `redis:redis` (also `999`), and the application log directory (`.docker-data/weppcloud/`) is aligned with the UID/GID specified in `docker/.env` (defaults to `33:993`). Use this whenever an accidental `chown` prevents the containers from writing to their bind mounts.
+- `wctl man` (or `man wctl` after installation): displays the wctl manual page. Additional arguments are passed through to `man`, so `wctl man --no-pager` works as expected.
+
 ### **Installation**
 
 1. **Configure the target compose file.**  
@@ -40,3 +46,5 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
    WCTL_SYMLINK_PATH="$HOME/.local/bin/wctl" ./wctl/install.sh dev
    ```
    Verify the installation with `which wctl`; it should resolve to your chosen path.
+
+   The installer also attempts to place the manual page at `/usr/local/share/man/man1/wctl.1`. If you lack permissions there, rerun with `sudo` or set `WCTL_MAN_PATH` to a writable location (for example `"$HOME/.local/share/man/man1/wctl.1"`), then refresh your `MANPATH`.

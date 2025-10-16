@@ -48,8 +48,8 @@ def _render_mcp_openapi_yaml() -> str | None:
         LOGGER.warning("Failed to parse MCP OpenAPI spec: %s", exc)
         return None
 
-    host = os.getenv("WEPP_MCP_HOST")
-    description = os.getenv("WEPP_MCP_HOST_DESCRIPTION")
+    host = os.getenv("EXTERNAL_HOST")
+    description = os.getenv("EXTERNAL_HOST_DESCRIPTION")
 
     if host:
         contact = spec_data.get("info", {}).get("contact")

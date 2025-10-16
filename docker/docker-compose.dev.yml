@@ -182,8 +182,8 @@ services:
     container_name: wepppy-query-engine
     environment:
       <<: *wepppy-env
-      WEPP_MCP_HOST: ${WEPP_MCP_HOST}
-      WEPP_MCP_HOST_DESCRIPTION: ${WEPP_MCP_HOST_DESCRIPTION}
+      EXTERNAL_HOST: ${EXTERNAL_HOST}
+      EXTERNAL_HOST_DESCRIPTION: ${EXTERNAL_HOST_DESCRIPTION}
       WEPP_MCP_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET}
     command:
       - uvicorn

@@ -119,8 +119,8 @@ pg_dump -h localhost -U wepppy -d wepppy -f /tmp/wepppy.sql
 sudo systemctl stop postgresql.service 
 docker cp /tmp/wepppy.sql wepppy-postgres:/tmp/wepppy.sql
 docker compose -f docker/docker-compose.dev.yml exec postgres \
-  psql -U wepppy -d wepppy -f /tmp/wepppy.sql
+psql -U wepppy -d wepppy -f /tmp/wepppy.sql
 docker compose -f docker/docker-compose.dev.yml exec postgres \
-  psql -U wepppy -d wepppy -c "ALTER USER wepppy WITH PASSWORD 'password';"
+psql -U wepppy -d wepppy -c "ALTER USER wepppy WITH PASSWORD 'password';"
 
-  docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up 
+docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up 

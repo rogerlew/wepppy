@@ -14,6 +14,7 @@ from starlette.responses import FileResponse, PlainTextResponse, Response
 from starlette.routing import Route
 
 import pandas as pd
+import pyarrow.parquet as pq
 
 from wepppy.weppcloud.routes._run_context import RunContext
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -56,7 +57,7 @@ async def download_response_file(path: str, query_params) -> Response:
     as_csv = query_params.get('as_csv') if query_params else False
 
     if as_csv and ext == '.parquet':
-        df = await asyncio.to_thread(pd.read_parquet, path)
+        df = await asyncio.to_thread(_parquet_to_dataframe_with_units, path)
         csv_bytes = await asyncio.to_thread(_df_to_csv_bytes, df)
         csv_name = os.path.splitext(filename)[0] + '.csv'
         headers = {
@@ -71,6 +72,33 @@ def _df_to_csv_bytes(df: pd.DataFrame) -> bytes:
     buf = BytesIO()
     df.to_csv(buf, index=False)
     return buf.getvalue()
+
+
+def _parquet_to_dataframe_with_units(path: str) -> pd.DataFrame:
+    table = pq.read_table(path)
+    schema = table.schema
+    column_names = [_field_label_with_units(field) for field in schema]
+    df = table.to_pandas()
+    df.columns = column_names
+    return df
+
+
+def _field_label_with_units(field) -> str:
+    label = field.name
+    metadata = getattr(field, "metadata", None)
+    if metadata is None:
+        return label
+    units_bytes = metadata.get(b"units")
+    if units_bytes:
+        try:
+            units = units_bytes.decode().strip()
+        except UnicodeDecodeError:
+            units = units_bytes.decode("utf-8", "ignore").strip()
+        if units:
+            suffix = f"({units})"
+            if suffix not in label:
+                return f"{label} {suffix}"
+    return label
 
 
 def _resolve_run_context(runid: str, config: str) -> RunContext:

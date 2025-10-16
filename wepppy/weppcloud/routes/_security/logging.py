@@ -2,12 +2,83 @@
 
 from __future__ import annotations
 
+import logging
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from flask import Blueprint, current_app, has_request_context, request, session
 import flask_security.signals as fs_signals
 
 security_bp = Blueprint('security_logging', __name__)
+
+_SECURITY_LOGGER_NAME = "weppcloud.security"
+_DEFAULT_LOG_PATH = Path(".docker-data/weppcloud/logs/security.log")
+_DEFAULT_MAX_BYTES = 5 * 1024 * 1024  # 5 MiB
+_DEFAULT_BACKUP_COUNT = 5
+
+
+def _get_security_logger():
+    return logging.getLogger(_SECURITY_LOGGER_NAME)
+
+
+def _resolve_log_path(app) -> Path:
+    configured = app.config.get("SECURITY_LOG_FILE")
+    if configured:
+        path = Path(configured)
+    else:
+        path = _DEFAULT_LOG_PATH
+
+    if not path.is_absolute():
+        try:
+            start = Path(app.root_path).resolve()
+        except Exception:
+            start = Path.cwd()
+
+        candidate_bases = [start] + list(start.parents)
+        base = start
+        for candidate in candidate_bases:
+            if any((candidate / marker).exists() for marker in ("docker", ".docker-data", "pyproject.toml")):
+                base = candidate
+                break
+
+        path = (base / path).resolve()
+
+    return path
+
+
+def _configure_security_file_logging(app) -> Optional[Path]:
+    """Attach a rotating file handler to the security logger."""
+    logger = _get_security_logger()
+    log_path = _resolve_log_path(app)
+
+    try:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        logging.getLogger("gunicorn.error").warning(
+            "Security logging: unable to create log directory %s: %s",
+            log_path.parent,
+            exc,
+        )
+        return None
+
+    for handler in logger.handlers:
+        if getattr(handler, "_security_log_path", None) == log_path:
+            break
+    else:
+        handler = RotatingFileHandler(
+            log_path,
+            maxBytes=app.config.get("SECURITY_LOG_MAX_BYTES", _DEFAULT_MAX_BYTES),
+            backupCount=app.config.get("SECURITY_LOG_BACKUP_COUNT", _DEFAULT_BACKUP_COUNT),
+            encoding="utf-8",
+        )
+        handler.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
+        )
+        handler._security_log_path = log_path
+        logger.addHandler(handler)
+
+    return log_path
 
 
 def _session_snapshot() -> Dict[str, Any]:
@@ -88,7 +159,7 @@ def _sanitize_extra(extra: Dict[str, Any]):
 
 def _log_event(event_name: str, *, user=None, login_form=None, extra: Optional[Dict[str, Any]] = None):
     extra = extra or {}
-    logger = current_app.logger
+    logger = _get_security_logger()
 
     if has_request_context():
         identity = _extract_identity(user, login_form, extra)
@@ -126,13 +197,14 @@ LOGOUT_ENDPOINTS = {'security.logout'}
 
 @security_bp.before_app_request
 def _log_login_request():
+    logger = _get_security_logger()
     if request.endpoint in LOGIN_ENDPOINTS and request.method == 'POST':
         sanitized_form = request.form.to_dict(flat=True)
         sanitized_form.pop('password', None)
         sanitized_form.pop('csrf_token', None)
         session_snapshot = _session_snapshot()
 
-        current_app.logger.info(
+        logger.info(
             "Security login POST received ip=%s forwarded_for=%s ua=%s referrer=%s next=%s has_session_cookie=%s session=%s form=%s",
             request.remote_addr,
             request.headers.get('X-Forwarded-For'),
@@ -145,7 +217,7 @@ def _log_login_request():
         )
     elif request.endpoint in LOGOUT_ENDPOINTS:
         session_snapshot = _session_snapshot()
-        current_app.logger.info(
+        logger.info(
             "Security logout request method=%s ip=%s forwarded_for=%s ua=%s referrer=%s has_session_cookie=%s session=%s",
             request.method,
             request.remote_addr,
@@ -165,9 +237,11 @@ def _log_login_response(response):
     except Exception:
         endpoint = None
 
+    logger = _get_security_logger()
+
     if endpoint in LOGIN_ENDPOINTS:
         set_cookie_present = any(header[0].lower() == 'set-cookie' for header in response.headers.items())
-        current_app.logger.info(
+        logger.info(
             "Security login response method=%s status=%s location=%s set_cookie=%s mimetype=%s",
             request.method,
             response.status,
@@ -177,7 +251,7 @@ def _log_login_response(response):
         )
     elif endpoint in LOGOUT_ENDPOINTS:
         set_cookie_present = any(header[0].lower() == 'set-cookie' for header in response.headers.items())
-        current_app.logger.info(
+        logger.info(
             "Security logout response method=%s status=%s location=%s set_cookie=%s mimetype=%s",
             request.method,
             response.status,
@@ -212,13 +286,16 @@ def _connect_security_signals(app):
             continue
         signal.connect(_make_handler(event_name), app)
 
-import logging
-error_logger = logging.getLogger("gunicorn.error")
-error_logger.setLevel(logging.DEBUG)
-error_logger.debug("Security logging initialized")
+_diagnostic_logger = logging.getLogger("gunicorn.error")
+_diagnostic_logger.debug("Security logging module imported")
+
 @security_bp.record_once
 def _on_register(state):
-    global error_logger
-    error_logger.debug("_on_register()")
+    _diagnostic_logger.debug("Security logging blueprint registering")
+    log_path = _configure_security_file_logging(state.app)
+    if log_path is not None:
+        _diagnostic_logger.debug("Security log file handler configured at %s", log_path)
+    else:
+        _diagnostic_logger.warning("Security log file handler setup skipped due to errors")
     _connect_security_signals(state.app)
-    error_logger.debug("_on_register:Security blueprint registered")
+    _diagnostic_logger.debug("Security blueprint registered")
