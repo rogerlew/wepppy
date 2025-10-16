@@ -7,6 +7,7 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const distDir = path.join(projectRoot, 'dist');
 const nodeModules = path.join(projectRoot, 'node_modules');
+const vendorSources = path.join(projectRoot, 'vendor-sources');
 const isProd = process.env.NODE_ENV === 'production';
 
 await fs.emptyDir(distDir);
@@ -55,12 +56,12 @@ const targets = [
   // Bootstrap TOC
   {
     kind: 'copyFile',
-    source: path.join(nodeModules, 'bootstrap-toc', 'dist', pick('bootstrap-toc.min.js', 'bootstrap-toc.js')),
+    source: path.join(vendorSources, 'bootstrap-toc', pick('bootstrap-toc.min.js', 'bootstrap-toc.js')),
     outfile: path.join(distDir, 'vendor', 'bootstrap-toc', 'bootstrap-toc.js'),
   },
   {
     kind: 'copyFile',
-    source: path.join(nodeModules, 'bootstrap-toc', 'dist', pick('bootstrap-toc.min.css', 'bootstrap-toc.css')),
+    source: path.join(vendorSources, 'bootstrap-toc', pick('bootstrap-toc.min.css', 'bootstrap-toc.css')),
     outfile: path.join(distDir, 'vendor', 'bootstrap-toc', 'bootstrap-toc.css'),
   },
   // DataTables core + Bootstrap integration

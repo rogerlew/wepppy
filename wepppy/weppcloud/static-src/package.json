@@ -10,9 +10,8 @@
   },
   "dependencies": {
     "bootstrap": "4.5.3",
-    "bootstrap-toc": "github:afeld/bootstrap-toc#v1.0.1",
-    "datatables.net": "1.10.16",
-    "datatables.net-bs4": "1.10.16",
+    "datatables.net": "1.13.11",
+    "datatables.net-bs4": "1.13.11",
     "jquery": "3.5.1",
     "leaflet": "1.7.1",
     "leaflet-ajax": "2.1.0",

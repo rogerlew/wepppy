@@ -30,6 +30,7 @@
 3. Run `npm run build` and sync to `static/vendor/` locally.
 4. Replace CDN references in templates with `{{ url_for('static', filename='vendor/<name>/<file>') }}`.
 5. Rebuild Docker images (`docker compose build weppcloud`) to bake the new assets.
+- If a library is not published on npm, drop its distribution files under `static-src/vendor-sources/<name>/` and reference them in `scripts/build.mjs` (see `bootstrap-toc` as an example).
 
 ## Remaining CDN References
 - Some secondary pages still reference CDN Bootstrap/jQuery assets. Track TODOs via `rg "cdn.jsdelivr.net/npm/bootstrap"` and replace as we touch those templates.
