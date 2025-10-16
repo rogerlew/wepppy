@@ -76,7 +76,7 @@ Flask-Session==0.4.0
 flask-wtf==1.2.1
 flexcache==0.3
 flexparser==0.4
-fonttools==4.29.1
+fonttools==4.43.0
 fs==2.4.12
 fsspec==2022.1.0
 gast==0.5.2
