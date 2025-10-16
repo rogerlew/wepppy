@@ -10,7 +10,7 @@ import difflib
 
 from .._common import *  # noqa: F401,F403
 
-from wepppy.weppcloud.utils.helpers import get_wd, htmltree, error_factory, url_for_run
+from wepppy.weppcloud.utils.helpers import get_wd, error_factory, url_for_run
 
 from .._run_context import load_run_context
 
