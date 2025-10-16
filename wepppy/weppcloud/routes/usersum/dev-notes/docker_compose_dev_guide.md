@@ -9,7 +9,7 @@ This guide walks through the local docker-compose stack (`docker/docker-compose.
 
 ```bash
 cat > docker/.env <<EOF
-UID=$(id -u)          # customise to match the user you want inside the containers
+UID=$(id -u)          # customize to match the user you want inside the containers
 GID=$(id -g)
 POSTGRES_PASSWORD=localdev
 EOF
@@ -33,7 +33,7 @@ e.g
 wctl logs weppcloud
 ```
 
-## Service Catalogue
+## Service Catalog
 
 | Service        | Purpose | Ports | Notes |
 |----------------|---------|-------|-------|

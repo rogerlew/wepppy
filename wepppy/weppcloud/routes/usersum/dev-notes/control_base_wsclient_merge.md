@@ -3,8 +3,8 @@
 ## Rationale
 - **Single source of truth for run-state plumbing**: `control_base.js` and `ws_client.js` both track job IDs, disable buttons, and surface stack traces. Merging them eliminates divergent state machines and reduces the chances of UI regressions when adding new telemetry.
 - **Path off jQuery**: A unified module makes it easier to move controllers to vanilla JavaScript. We can expose a small DOM helper layer while keeping the same API surface for existing controllers during the transition.
-- **Composable controls**: Controllers should hydrate server-rendered templates (Jinja macros + locale-driven dataclasses) without re-implementing status wiring. A merged base can accept hooks (`onStatus`, `onTrigger`, `onException`) so each controller focuses on its own behaviour.
-- **Consistent transport strategy**: RQ polling and WebSocket updates presently compete. Centralising the logic lets us fall back to polling when sockets are unavailable, and push common reconnect/backoff logic into one place.
+- **Composable controls**: Controllers should hydrate server-rendered templates (Jinja macros + locale-driven dataclasses) without re-implementing status wiring. A merged base can accept hooks (`onStatus`, `onTrigger`, `onException`) so each controller focuses on its own behavior.
+- **Consistent transport strategy**: RQ polling and WebSocket updates presently compete. Centralizing the logic lets us fall back to polling when sockets are unavailable, and push common reconnect/backoff logic into one place.
 
 ## Implementation Plan
 1. **Author a vanilla `ControlBase` module**
@@ -17,9 +17,9 @@
    - Route incoming messages through hook methods (`handleStatusFrame`, `handleCommandResult`, `handleTrigger`). Default hooks update the status element and spinner; controllers can override as needed.
    - Ensure the helper tears down cleanly on `disconnect()` or when a controller resets its job ID.
 
-3. **Harmonise RQ polling and telemetry**
+3. **Harmonize RQ polling and telemetry**
    - Refactor the existing polling timer (`fetch_job_status`, `stop_job_status_polling`) to live alongside the WebSocket helper. The base decides when to poll (e.g., when no channel is provided or after repeated socket failures).
-   - Normalise job status payloads so controllers see a predictable structure, regardless of whether updates originated from the REST endpoint or the WebSocket stream.
+   - Normalize job status payloads so controllers see a predictable structure, regardless of whether updates originated from the REST endpoint or the WebSocket stream.
 
 4. **Incrementally migrate controllers**
    - Pick one controller (suggested: `Map` or `Landuse`) to adopt the new base. Verify that command button disablement, stack traces, and spinner updates behave identically.

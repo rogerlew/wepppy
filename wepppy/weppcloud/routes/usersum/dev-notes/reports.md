@@ -1,10 +1,10 @@
 # Reports Refactor Notes
 
-This document summarises the reporting stack that now lives in
+This document summarizes the reporting stack that now lives in
 `wepppy.wepp.reports`: the `ReportBase` contract, shared helper classes,
-the recommended pattern for authoring new reports, and a catalogue of the
+the recommended pattern for authoring new reports, and a catalog of the
 current report implementations with their data dependencies and cache
-behaviour.
+behavior.
 
 ---
 
@@ -19,7 +19,7 @@ Implementations are expected to:
 * Optionally populate `self.units_d` (a mapping of label → units) when
   derived units are not handled automatically.
 * Use the base helpers `write()` and `to_dataframe()` for export /
-  serialisation; both rely on the iterator contract.
+  serialization; both rely on the iterator contract.
 
 `RowData` provides convenience iteration and lookup and still supports
 legacy column-name parsing (e.g. extracting units from `"Column (mm)"`)
@@ -52,7 +52,7 @@ frame = cache.read_parquet("key", version="1")
 cache.write_parquet("key", dataframe, version="1", index=False)
 ```
 
-Caches are standardised under `<run>/wepp/reports/cache/`. When a version
+Caches are standardized under `<run>/wepp/reports/cache/`. When a version
 is supplied, a `key.meta.json` sidecar stores the version string; cache
 misses occur automatically when the version differs.
 
@@ -104,18 +104,18 @@ tests.
 
 ---
 
-## Report catalogue
+## Report catalog
 
 | Report class | Purpose & aggregation | Input assets | Cache |
 | --- | --- | --- | --- |
-| `AverageAnnualsByLanduseReport` | Summarises runoff / flow / sediment metrics per landuse by joining loss, hillslope, and landuse tables; converts volumes to depths (mm) via area normalisation. | `wepp/output/interchange/loss_pw0.hill.parquet`, `watershed/hillslopes.parquet`, `landuse/landuse.parquet` | `wepp/reports/cache/average_annuals_by_landuse.parquet` (version `1`) |
+| `AverageAnnualsByLanduseReport` | Summarizes runoff / flow / sediment metrics per landuse by joining loss, hillslope, and landuse tables; converts volumes to depths (mm) via area normalization. | `wepp/output/interchange/loss_pw0.hill.parquet`, `watershed/hillslopes.parquet`, `landuse/landuse.parquet` | `wepp/reports/cache/average_annuals_by_landuse.parquet` (version `1`) |
 | `ChannelWatbalReport` | Aggregates channel water balance metrics (precipitation, streamflow, evapotranspiration, etc.) by `wepp_id` / water year and computes watershed averages weighted by channel area. | `wepp/output/interchange/chnwb.parquet` | None |
 | `HillslopeWatbalReport` | Builds per-hillslope water balance (precipitation, percolation, runoff, etc.) using `H.wat.parquet`; aggregates per `TopazID` and computes watershed-wide yearly means weighted by area. | `wepp/output/interchange/H.wat.parquet` | `wepp/reports/cache/hillslope_watbal_summary.parquet` (version `1`) |
-| `TotalWatbalReport` | Summarises watershed-level water balance totals and derived ratios across water years, including means, standard deviations, and percentage-of-precipitation ratios. | `wepp/output/interchange/totalwatsed3.parquet` | None |
+| `TotalWatbalReport` | Summarizes watershed-level water balance totals and derived ratios across water years, including means, standard deviations, and percentage-of-precipitation ratios. | `wepp/output/interchange/totalwatsed3.parquet` | None |
 | `FrqFloodReport` | Performs flood-frequency analysis of event maxima, computing mean / standard deviation and frequency factors for selected recurrence intervals; converts runoff volumes to depths using watershed area. | `wepp/output/interchange/ebe_pw0.parquet`, `wepp/output/interchange/totalwatsed3.parquet` | None |
 | `HillSummaryReport` | Produces per-hillslope sediment and hydrologic summaries enriched with landuse (and soils when available); converts volumes to depths and mass to densities per hectare. | `wepp/output/interchange/loss_pw0.hill.parquet`, `watershed/hillslopes.parquet`, `landuse/landuse.parquet`, optional `soils/soils.parquet` | None |
 | `ChannelSummaryReport` | Generates per-channel sediment / hydrologic summaries using loss output joined with channel metadata; derives discharge depths and per-area densities. | `wepp/output/interchange/loss_pw0.chn.parquet`, `watershed/channels.parquet` | None |
-| `OutletSummaryReport` | Summarises outlet delivery metrics, adds per-area conversions (mm or kg/ha), and exposes both primary and extended rows. | `wepp/output/interchange/loss_pw0.out.parquet` | None |
+| `OutletSummaryReport` | Summarizes outlet delivery metrics, adds per-area conversions (mm or kg/ha), and exposes both primary and extended rows. | `wepp/output/interchange/loss_pw0.out.parquet` | None |
 | `SedimentClassInfoReport` | Provides static class metadata (particle class characteristics and fractions). | `wepp/output/interchange/loss_pw0.class_data.parquet` (queried through `SedimentCharacteristics`) | None |
 | `ChannelClassFractionReport` / `ChannelParticleDistributionReport` | Derived sub-reports conveying outlet sediment discharge fractions by class and particle type. Built by `SedimentCharacteristics`. | `loss_pw0.class_data.parquet`, `loss_pw0.out.parquet` | None |
 | `HillslopeClassFractionReport` / `HillslopeParticleDistributionReport` | Mirrors the channel distributions but for hillslope delivery (based on pass file mass totals and class fractions). | `loss_pw0.class_data.parquet`, `H.pass.parquet`, `loss_pw0.all_years.hill.parquet` | None |

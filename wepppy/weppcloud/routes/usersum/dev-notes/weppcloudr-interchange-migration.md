@@ -48,7 +48,7 @@ choices for running R workloads.
      rather than Arc exports, with the old paths retained only as a
      final fallback.
    - Add DuckDB/Arrow accessors on the R side so we can query parquet
-     directly instead of materialising large tables via `data.table`.
+     directly instead of materializing large tables via `data.table`.
 
 3. **Route hardening**
    - Check `Popen.returncode` and bubble errors through
@@ -72,7 +72,7 @@ choices for running R workloads.
 - **Dedicated container**: keep R (Rscript, rmarkdown, Shiny) isolated
   from the Flask/WEPP Python image.
   - Base on `rocker/r-ver` (Debian + pre-compiled R) to avoid long build
-    times; layer R package installs with `renv` or `pak` to parallelise
+    times; layer R package installs with `renv` or `pak` to parallelize
     compilation.
   - Share the WEPP run workspace via a bind mount or Docker volume so
     the R container can read interchange parquet files.

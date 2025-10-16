@@ -2,7 +2,7 @@
 
 ## Overview
 - Extend `ManagementRotationSynth` so it supports both the existing “end-to-end” concatenation and a new “stack-and-merge” algorithm.
-- `build()` will become a dispatcher that calls either `_build_end_to_end()` (current behaviour) or `_build_stack_and_merge()`.
+- `build()` will become a dispatcher that calls either `_build_end_to_end()` (current behavior) or `_build_stack_and_merge()`.
 - The stack-and-merge mode enables combining 1–2 year management rotations such that the simulated timeline remains fixed-length while first-year fall operations in 2-year segments are merged into the prior year.
 
 ## Goals
@@ -22,7 +22,7 @@
 - **Year Loop**: Entries in `management.years`.
 - **Management Loop**: `Management.man.loops`, containing per-year schedules for each OFE.
 
-## Current Behaviour Summary
+## Current Behavior Summary
 - The sole `build()` method deep-copies each segment, optionally prefixes scenario names, concatenates every section, and rebuilds a single management loop covering the combined timeline.
 - Description headers always claim the rotation was “concatenated.”
 - Timeline validation only checks OFE counts and scenario existence.
@@ -67,7 +67,7 @@
   3. Append the remaining year (second year) to the output timeline as usual.
 
 ### Warning Accumulation
-- Maintain a list of structured warning messages (per OFE and year). Include them in the synthesiser description and expose via attribute for programmatic access.
+- Maintain a list of structured warning messages (per OFE and year). Include them in the synthesizer description and expose via attribute for programmatic access.
 - Warnings should advise users to fix management ordering when merges introduce out-of-sequence events.
 
 ### Timeline Assembly

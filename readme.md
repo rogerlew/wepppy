@@ -76,7 +76,7 @@ The repository ships with a multi-container development stack (`docker/docker-co
 SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
 SECURITY_PASSWORD_SALT=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
 cat > docker/.env <<EOF
-UID=$(id -u)          # customise as needed
+UID=$(id -u)          # customize as needed
 GID=$(id -g)
 POSTGRES_PASSWORD=localdev
 SECRET_KEY=$SECRET_KEY
@@ -96,7 +96,7 @@ UID=33            # www-data
 GID=993           # output of `getent group docker | cut -d: -f3`
 ```
 
-Make sure the group exists locally; Compose passes numeric ids straight through, so the host must recognise them to keep permissions tidy.
+Make sure the group exists locally; Compose passes numeric ids straight through, so the host must recognize them to keep permissions tidy.
 
 ### Common tasks
 - **Tail the main app logs**: `docker compose -f docker/docker-compose.dev.yml logs -f weppcloud`

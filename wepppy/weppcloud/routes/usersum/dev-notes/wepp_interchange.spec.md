@@ -15,12 +15,12 @@
 
 ## Schema Standardization
 - All interchange writers share a single helper (`schema_utils.pa_field`) so column units and descriptions are embedded as Arrow metadata instead of being encoded in column names. Downstream consumers can inspect these attributes directly (`field.metadata['units']`, `field.metadata['description']`).
-- Raw WEPP headers frequently duplicate names or include units (e.g. `Point`, `Point (m)_2`, `Precp (mm)`). Each module normalises the raw tokens to canonical column names for the parquet schema (see the alias tables in `hill_*_interchange.py` and `watershed_*_interchange.py`). Tests assert the canonical schema so that parquet readers never depend on legacy spellings.
+- Raw WEPP headers frequently duplicate names or include units (e.g. `Point`, `Point (m)_2`, `Precp (mm)`). Each module normalizes the raw tokens to canonical column names for the parquet schema (see the alias tables in `hill_*_interchange.py` and `watershed_*_interchange.py`). Tests assert the canonical schema so that parquet readers never depend on legacy spellings.
 - Redundant date fields printed in the flat files (`DD`, `MM`, `YYYY`, etc.) are removed once the calendar bundle (`year`, `month`, `day_of_month`, `julian`, `water_year`) is derived. This keeps tables compact and avoids ambiguous duplicate columns.
 
 ## Metadata Publishing
 - A helper (`generate_interchange_documentation` in `wepppy/wepp/interchange/documentation.py`) walks an interchange directory, collects each parquet schema, and emits a Markdown README. The README contains:
-  - a short product description (hillslopes first, then watershed artefacts),
+  - a short product description (hillslopes first, then watershed artifacts),
   - a schema table showing canonical column names, types, units, and descriptions sourced from the Arrow metadata, and
   - a preview table (header row + units row + first few records with integer-friendly formatting).
 - The README is written to `<interchange>/README.md` by default after generation, ensuring users browsing the directory get human-readable context without opening the parquet files.

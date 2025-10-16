@@ -2,7 +2,7 @@
 
 This document outlines the expectations for a utility that upgrades an existing
 WEPP `98.4` management file to the `2016.3`/`2017.1` layout while preserving the
-behaviour of the original scenario. The goal is to normalize legacy entries so
+behavior of the original scenario. The goal is to normalize legacy entries so
 that they can coexist with newer management libraries and participate in
 composite rotations without hand editing.
 
@@ -10,7 +10,7 @@ composite rotations without hand editing.
 
 1. Accept a parsed `Management` instance representing a 98.4 file and return a
    new 2016.3-compatible `Management` (or write one to disk).
-2. Keep agronomic behaviour unchanged—new parameters introduced in 2016.3 should
+2. Keep agronomic behavior unchanged—new parameters introduced in 2016.3 should
    be populated with neutral defaults (generally `0.0` or `0`).
 3. Produce text output that the existing parser, configured for `datver`
    `2016.3`/`2017.1`, will accept without additional intervention.
@@ -20,7 +20,7 @@ composite rotations without hand editing.
 1. **Version metadata**
    - Set `datver` to `"2016.3"` (or `"2017.1"` if we prefer the latest tag).
    - Update any cached numeric version (`datver_value`) to `2016.3` so helper
-     logic recognises the upgraded file as “new-format”.
+     logic recognizes the upgraded file as “new-format”.
 
 2. **Plant section (cropland loops)**
    - Ensure every cropland plant loop exposes an `rcc` attribute.
@@ -60,7 +60,7 @@ composite rotations without hand editing.
 
 - Work on a deep copy of the input `Management` to avoid mutating shared state
   when multiple callers reuse the same base management.
-- Helper functions that serialize loops already honour optional fields when the
+- Helper functions that serialize loops already honor optional fields when the
   attribute is present. Ensure the upgrade step sets the new attributes so the
   string formatter writes them automatically.
 - For traceability, the writer may insert a commented header explaining that the

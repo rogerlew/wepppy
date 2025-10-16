@@ -1,6 +1,6 @@
 # Reports Refactor Plan
 
-This note outlines a staged refactor to modernise the `wepppy.wepp.stats`
+This note outlines a staged refactor to modernize the `wepppy.wepp.stats`
 module by consolidating report logic under `wepppy.wepp.reports`, aligning
 class naming, and documenting the reporting interface.
 
@@ -45,10 +45,10 @@ class naming, and documenting the reporting interface.
 
 ---
 
-## Phase 3 – Cache Location & Standardisation
+## Phase 3 – Cache Location & Standardization
 
 1. **Consolidate cache storage**
-   - ✅ `ReportCacheManager` standardises caches at
+   - ✅ `ReportCacheManager` standardizes caches at
      `<run>/wepp/reports/cache/` with version metadata.
 
 2. **Cache invalidation strategy**
@@ -69,7 +69,7 @@ class naming, and documenting the reporting interface.
    - ✅ `reports/reportbase-guide.md` captures the shared helpers and
      expectations for `ReportBase` implementations.
 
-2. **Report catalogue**
+2. **Report catalog**
    - ✅ `reports/report-catalog.md` outlines purpose, datasets, caches and
      surfaces for each report class.
 

@@ -36,9 +36,9 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 | `/weppcloud/runs/{runid}/{config}/aria2c.spec` | Generates an aria2c manifest for pulling the entire run. | *(no additional options)* |
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/{subpath}` | Returns `gdalinfo -json` for a raster file. | *(no additional options)* |
 
-All routes honour the site prefix automatically (default `/weppcloud`). If the service is deployed behind another prefix, set `SITE_PREFIX` in the environment.
+All routes honor the site prefix automatically (default `/weppcloud`). If the service is deployed behind another prefix, set `SITE_PREFIX` in the environment.
 
-## Behaviour details
+## Behavior details
 - **Security**
   - Path traversal is blocked by comparing real paths against the resolved run directory.
   - Missing resources return 404/JSON errors rather than Flask responses.
@@ -80,4 +80,4 @@ All routes honour the site prefix automatically (default `/weppcloud`). If the s
 ## Future enhancements
 - Expand the `url_for` shim (or replace it) before migrating more Flask templates.
 - Consider caching popular directory listings or large file renders once LRU caching is revisited.
-- Centralise run-context resolution so `_download.py`, `_gdalinfo.py`, and future helpers reuse a single implementation.
+- Centralize run-context resolution so `_download.py`, `_gdalinfo.py`, and future helpers reuse a single implementation.

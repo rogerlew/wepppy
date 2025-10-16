@@ -16,13 +16,13 @@
 ## Loss Summary Reports
 
 - **OutletSummary** reads `wepp/output/interchange/loss_pw0.out.parquet` via the
-  query-engine, normalises volumes to watershed-average depths (mm/yr), and exposes
+  query-engine, normalizes volumes to watershed-average depths (mm/yr), and exposes
   both absolute and per-area metrics for precipitation, discharge, soil loss, and
   phosphorus. Extraneous rows (irrigation volumes, explicit per-area totals) are
   kept available for the “show extraneous parameters” toggle.
 - **HillSummary** joins `loss_pw0.hill.parquet` with `watershed/hillslopes.parquet`,
   `landuse/landuse.parquet`, and `soils/soils.parquet` (when present). It computes
-  area-normalised depths/densities in DuckDB and renders a tidy table with landuse,
+  area-normalized depths/densities in DuckDB and renders a tidy table with landuse,
   soil descriptions, and phosphorus metrics when available—no `totalwatsed.py`
   dependency.
 - **ChannelSummary** queries `loss_pw0.chn.parquet` and `watershed/channels.parquet`

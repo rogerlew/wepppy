@@ -16,18 +16,18 @@ Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud 
 - `run_query(run_context, QueryRequest)`: build and execute a DuckDB plan, returning a `QueryResult(records, schema, row_count)`.
 - Support utilities:
   - `DatasetCatalog` (`catalog.py`): lightweight manifest loader with lookup helpers.
-  - `DuckDBExecutor` (`executor.py`): runs parametrised SQL/Arrow queries with optional spatial extension loading.
+  - `DuckDBExecutor` (`executor.py`): runs parametrized SQL/Arrow queries with optional spatial extension loading.
   - `QueryRequest`/`QueryPlan` (`payload.py`): dataclasses defining the payload and compiled plan.
   - `format_table` (`formatter.py`): converts Arrow tables to Python records + optional schema metadata (unit conversion deferred to a final presentation step).
 - Starlette façade (`query_engine/app`): `create_app()` exposes routes for human/browser discovery (`GET /query/runs/{runid}`), catalog activation (`GET|POST /query/runs/{runid}/activate`), schema downloads (`GET /query/runs/{runid}/schema`), an interactive query console (`GET /query/runs/{runid}/query`), and JSON query execution (`POST /query/runs/{runid}/query`). Templates live under `query_engine/app/templates` and render catalog summaries as well as the in-browser console.
 
 ### Recent Enhancements (2025-10)
-- Added `_resolve_run_path` helper so all routes honour WEPPcloud storage conventions via `get_wd`.
+- Added `_resolve_run_path` helper so all routes honor WEPPcloud storage conventions via `get_wd`.
 - Introduced an interactive “query console” HTML view that allows users to paste/edit POST payloads, trigger queries, and view responses directly in the browser. The console renders example dataset paths, provides JSON formatting/reset helpers, and now offers a preset selector backed by `query_engine/app/query_presets.py`.
 - Updated `/query/runs/{runid}/query` POST handling to include defensive catalog checks, improved error status codes (422 for invalid payloads, 404 for missing datasets), and stack traces in JSON responses for debugging—mirroring the rich error feedback approach used by the browse microservice.
 - Activation endpoint now surfaces full stack traces on failure for easier diagnosis in web UIs.
 - Route table simplified so GET and POST handlers share the same path while ensuring the GET console is registered ahead of the POST handler.
-- `QueryRequest` now normalises dataset descriptors (path + alias), join definitions, aggregation specs, and flexible filter clauses. The planner can join multiple Parquet assets (e.g., `landuse` ↔ `soils` on `TopazID`), apply type-aware filters (supporting `=`, `IN`, `BETWEEN`, `IS NULL`, etc. with automatic casting like `'43'` → `INT64`), compute grouped aggregations (e.g., daily WEPP interchange sums across `wepp_id`), order results, and optionally echo the generated DuckDB SQL.
+- `QueryRequest` now normalizes dataset descriptors (path + alias), join definitions, aggregation specs, and flexible filter clauses. The planner can join multiple Parquet assets (e.g., `landuse` ↔ `soils` on `TopazID`), apply type-aware filters (supporting `=`, `IN`, `BETWEEN`, `IS NULL`, etc. with automatic casting like `'43'` → `INT64`), compute grouped aggregations (e.g., daily WEPP interchange sums across `wepp_id`), order results, and optionally echo the generated DuckDB SQL.
 - Added `update_catalog_entry(wd, rel_path)` helper for incremental catalog refreshes and a read-only sentinel check so activation fails fast when a run directory is locked.
 - Added unit coverage for join/aggregation planners (`tests/query_engine/test_core.py::test_run_query_join`, `test_run_query_aggregation`).
 
@@ -64,7 +64,7 @@ Client payload (QueryRequest)
 - JSON (default) via Arrow → Python records.
 - Parquet / Arrow IPC / CSV / GeoJSON to be layered onto the formatter.
 - Timeseries responses (e.g., for dashboards) can expose `{dates: [...], series: {...}}` shapes.
-- GIS exports (GPKG, FileGDB, KML, SHP) will stream through GDAL/OGR when requested, caching generated artifacts per normalised query hash.
+- GIS exports (GPKG, FileGDB, KML, SHP) will stream through GDAL/OGR when requested, caching generated artifacts per normalized query hash.
 
 ## Example Usage
 ```python
@@ -135,7 +135,7 @@ print(run_query(ctx, payload).records[:2])
 Located in `tests/query_engine/`:
 - `test_core.py`: unit smoke tests using synthetic Parquet assets (catalog round-trip, schema echo).
 - `test_benchmarks.py` (requires real run directories):
-  1. `test_landuse_dict_payload` replicates the `/runs/<runid>/query/landuse/subcatchments` behaviour by materialising a `{TopazID: row_dict}` map from `landuse/landuse.parquet`.
+  1. `test_landuse_dict_payload` replicates the `/runs/<runid>/query/landuse/subcatchments` behavior by materializing a `{TopazID: row_dict}` map from `landuse/landuse.parquet`.
   2. `test_totalwatsed_aggregate_cache` parses native `H*.wat.dat` files, joins with `interchange/H.pass.parquet`, aggregates daily totals, and writes `_query_engine/cache/totalwatsed3.parquet` for downstream reuse.
   These tests are marked `@pytest.mark.benchmark` and skipped automatically when the expected run directories are absent.
 
@@ -155,6 +155,6 @@ Located in `tests/query_engine/`:
    - Provide shorthand aggregators for common WEPP metrics (e.g., `total_runoff`, `sediment_mass`) and automate cache keys for expensive rollups.
    - Allow multiple aggregation levels in a single request (daily + monthly) via window functions.
 
-3. **Validation & optimisation**
+3. **Validation & optimization**
    - Enhance catalog validation with column existence/type checks before generating SQL, returning expressive error messages.
    - Surface estimated costs / row counts for large queries and optionally leverage DuckDB's persistent caches for repeated workloads.
