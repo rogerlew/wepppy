@@ -631,6 +631,9 @@ var SubcatchmentDelineation = function () {
             });
         }
 
+        const lossMetricCache = Object.create(null);
+        const lossMetricInflight = Object.create(null);
+
         function fetchLossMetric(metricKey) {
             var expression = WEPP_LOSS_METRIC_EXPRESSIONS[metricKey];
             if (!expression) {
@@ -646,6 +649,13 @@ var SubcatchmentDelineation = function () {
                 }).promise();
             }
 
+            if (lossMetricCache[metricKey]) {
+                return $.Deferred().resolve(lossMetricCache[metricKey]).promise();
+            }
+            if (lossMetricInflight[metricKey]) {
+                return lossMetricInflight[metricKey];
+            }
+
             var payload = {
                 datasets: [
                     { path: "wepp/output/interchange/loss_pw0.hill.parquet", alias: "loss" }
@@ -654,10 +664,10 @@ var SubcatchmentDelineation = function () {
                     'loss.wepp_id AS wepp_id',
                     expression + " AS value"
                 ],
-                order_by: ['loss.wepp_id']
+                order_by: ["wepp_id"]
             };
 
-            return postQueryEngine(payload).then(function (response) {
+            var request = postQueryEngine(payload).then(function (response) {
                 var map = {};
                 var records = Array.isArray(response && response.records) ? response.records : [];
                 records.forEach(function (row) {
@@ -673,8 +683,14 @@ var SubcatchmentDelineation = function () {
                         value: row.value
                     };
                 });
+                lossMetricCache[metricKey] = map;
                 return map;
+            }).always(function () {
+                delete lossMetricInflight[metricKey];
             });
+
+            lossMetricInflight[metricKey] = request;
+            return request;
         }
 
         /* ---------- runoff & variants --------------------------------------- */
@@ -714,6 +730,23 @@ var SubcatchmentDelineation = function () {
                     that._refreshGlLayer();
                 })
                 .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
+        };
+
+        that.prefetchLossMetrics = function () {
+            return $.when(
+                fetchLossMetric('runoff').done(function (data) {
+                    that.dataRunoff = data;
+                }),
+                fetchLossMetric('subrunoff').done(function (data) {
+                    if (!that.dataRunoff) {
+                        that.dataRunoff = data;
+                    }
+                }),
+                fetchLossMetric('baseflow'),
+                fetchLossMetric('loss').done(function (data) {
+                    that.dataLoss = data;
+                })
+            );
         };
 
 

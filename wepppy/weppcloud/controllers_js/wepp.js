@@ -170,6 +170,12 @@ var Wepp = function () {
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
+            try {
+                SubcatchmentDelineation.getInstance().prefetchLossMetrics();
+            } catch (err) {
+                console.warn('Unable to prefetch loss metrics:', err);
+            }
+
             $.get({
                 url: url_for_run("report/wepp/results/"),
                 cache: false,
