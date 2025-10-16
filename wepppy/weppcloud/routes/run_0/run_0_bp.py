@@ -246,11 +246,12 @@ def create_index():
             '</tr>'
         )
 
-    return '<!DOCTYPE html><html><body>'\
-        '<link rel="stylesheet" '\
-        'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
-        'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
-        '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(rows))
+    bootstrap_css = url_for('static', filename='vendor/bootstrap/bootstrap.css')
+    return (
+        '<!DOCTYPE html><html><body>'
+        f'<link rel="stylesheet" href="{bootstrap_css}">'
+        '\n<table class="table">{}</table>\n</body></html>'
+    ).format('\n'.join(rows))
 
 def create_run_dir(current_user):
     from wepppy.weppcloud.utils.archive import has_archive

@@ -18,5 +18,6 @@ wepppy/climates/cligen/_scripts/*.db
 wepppy/climates/daymet/test/*
 wepppy/weppcloud/static/js/controllers.js
 wepppy/commit_hash
+wepppy/weppcloud/static/vendor/
 _notes/*
 .docker-data

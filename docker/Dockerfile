@@ -1,5 +1,12 @@
 # syntax=docker/dockerfile:1
 
+FROM node:20-alpine AS static-builder
+WORKDIR /app
+COPY wepppy/weppcloud/static-src/package.json wepppy/weppcloud/static-src/package-lock.json ./
+RUN npm ci --legacy-peer-deps
+COPY wepppy/weppcloud/static-src/ ./
+RUN npm run build
+
 FROM python:3.10-slim AS base
 
 LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy"
@@ -102,6 +109,9 @@ RUN mkdir -p /workdir /opt/vendor /var/log/wepppy /var/lib/wepppy && \
 
 # Bring the application source into the image.
 COPY . /workdir/wepppy
+
+# Copy pre-built static vendor assets generated in the Node stage.
+COPY --from=static-builder /app/dist/vendor/ /workdir/wepppy/wepppy/weppcloud/static/vendor/
 
 # Seed sibling repositories that were previously mounted via .pth files.
 RUN set -euxo pipefail; \

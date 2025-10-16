@@ -46,6 +46,15 @@ x-wepppy-service: &wepppy-service
 services:
   weppcloud:
     <<: *wepppy-service
+    entrypoint: ./docker/weppcloud-entrypoint.sh
+    environment:
+      <<: *wepppy-env
+      CONTROLLERS_JS_EXTRA_OUTPUTS: /srv/weppcloud/static/js/controllers.js
+      STATIC_ASSET_SYNC_DIR: /srv/weppcloud/static
+    volumes:
+      - wc1-data:${WC1_DIR:-/srv/wc1}
+      - geodata-data:${GEODATA_DIR:-/srv/geodata}
+      - ../wepppy/weppcloud/static:/srv/weppcloud/static
     command:
       - gunicorn
       - --workers

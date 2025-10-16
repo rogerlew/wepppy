@@ -59,4 +59,24 @@ PY
 
 export WEPPPY_ENV_FILE="${TEMP_ENV}"
 
+STATIC_BUILDER="${PROJECT_DIR}/wepppy/weppcloud/static-src/build-static-assets.sh"
+
+if [[ $# -gt 0 ]]; then
+  case "$1" in
+    build-static-assets)
+      shift
+      if [[ ! -x "${STATIC_BUILDER}" ]]; then
+        echo "Static asset build script not found at ${STATIC_BUILDER}" >&2
+        exit 1
+      fi
+      STATIC_ARGS=()
+      if [[ "${COMPOSE_FILE_RELATIVE}" == "docker/docker-compose.prod.yml" ]]; then
+        STATIC_ARGS+=(--prod)
+      fi
+      "${STATIC_BUILDER}" "${STATIC_ARGS[@]}" "$@"
+      exit 0
+      ;;
+  esac
+fi
+
 docker compose --env-file "${TEMP_ENV}" -f "${COMPOSE_FILE}" "$@"

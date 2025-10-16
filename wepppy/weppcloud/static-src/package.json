@@ -1,0 +1,26 @@
+{
+  "name": "weppcloud-static",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "NODE_ENV=production node scripts/build.mjs",
+    "build:dev": "NODE_ENV=development node scripts/build.mjs",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "bootstrap": "4.5.3",
+    "bootstrap-toc": "github:afeld/bootstrap-toc#v1.0.1",
+    "datatables.net": "1.10.16",
+    "datatables.net-bs4": "1.10.16",
+    "jquery": "3.5.1",
+    "leaflet": "1.7.1",
+    "leaflet-ajax": "2.1.0",
+    "spin.js": "4.1.0"
+  },
+  "devDependencies": {
+    "fs-extra": "11.2.0",
+    "globby": "14.0.1",
+    "rimraf": "5.0.5"
+  }
+}
