@@ -219,7 +219,7 @@ tinycss2==1.2.1
 toml==0.10.2
 tomli==2.2.1
 toolz==0.11.2
-tornado==6.4.1
+tornado==6.5
 starlette==0.47.2
 traitlets==5.14.3
 typing-extensions==4.12.0
