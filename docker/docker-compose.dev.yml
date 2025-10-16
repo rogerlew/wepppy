@@ -127,7 +127,6 @@ services:
       - --log-level
       - info
       - wepppy.webservices.elevationquery:app
-    profiles: ["legacy"]
     ports:
       - "8002:8002"
 
@@ -143,7 +142,6 @@ services:
       - --log-level
       - info
       - wepppy.webservices.metquery:app
-    profiles: ["legacy"]
     ports:
       - "8004:8004"
 
@@ -159,7 +157,6 @@ services:
       - --log-level
       - info
       - wepppy.webservices.wmesque:app
-    profiles: ["legacy"]
     ports:
       - "8003:8003"
 
@@ -177,7 +174,6 @@ services:
       - -k
       - uvicorn.workers.UvicornWorker
       - wepppy.webservices.wmesque2:app
-    profiles: ["legacy"]
     ports:
       - "8030:8030"
 

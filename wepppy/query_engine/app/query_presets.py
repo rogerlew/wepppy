@@ -161,4 +161,50 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
             },
         },
     ],
+    "RAP Analytics": [
+        {
+            "id": "rap-topaz-23-history",
+            "name": "RAP history for Topaz 23",
+            "description": "Retrieve all RAP bands and yearly values for TopazID 23 with schema + SQL output.",
+            "payload": {
+                "datasets": [
+                    {"path": "rap/rap_ts.parquet", "alias": "rap"},
+                ],
+                "columns": [
+                    "rap.topaz_id AS topaz_id",
+                    "rap.year AS year",
+                    "rap.band AS band",
+                    "rap.value AS value",
+                ],
+                "filters": [
+                    {"column": "rap.topaz_id", "operator": "=", "value": 23},
+                ],
+                "order_by": ["rap.year", "rap.band"],
+                "include_schema": True,
+                "include_sql": True,
+            },
+        },
+        {
+            "id": "rap-topaz-value-map",
+            "name": "RAP TopazID→value map",
+            "description": "Filter to a single year and RAP band, then aggregate values into a TopazID→value map.",
+            "payload": {
+                "datasets": [
+                    {"path": "rap/rap_ts.parquet", "alias": "rap"},
+                ],
+                "filters": [
+                    {"column": "rap.year", "operator": "=", "value": 2020},
+                    {"column": "rap.band", "operator": "=", "value": 1},
+                ],
+                "aggregations": [
+                    {
+                        "alias": "topaz_value_map",
+                        "expression": "MAP_FROM_ENTRIES(LIST(STRUCT_PACK(key := rap.topaz_id, value := rap.value)))",
+                    },
+                ],
+                "include_schema": True,
+                "include_sql": True,
+            },
+        },
+    ],
 })
