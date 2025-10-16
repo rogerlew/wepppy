@@ -19,8 +19,8 @@ x-wepppy-env: &wepppy-env
   WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET:-change-me}
   WEPP_MCP_HOST: ${WEPP_MCP_HOST:-}
   WEPP_MCP_HOST_DESCRIPTION: ${WEPP_MCP_HOST_DESCRIPTION:-}
-  WC1_DIR: ${WC1_DIR:-/srv/wc1}
-  GEODATA_DIR: ${GEODATA_DIR:-/srv/geodata}
+  WC1_DIR: /wc1
+  GEODATA_DIR: /geodata
   OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
 
 x-wepppy-service: &wepppy-service
@@ -33,8 +33,8 @@ x-wepppy-service: &wepppy-service
   environment:
     <<: *wepppy-env
   volumes:
-    - wc1-data:${WC1_DIR:-/srv/wc1}
-    - geodata-data:${GEODATA_DIR:-/srv/geodata}
+    - /wc1:/wc1
+    - /geodata:/geodata
   depends_on:
     redis:
       condition: service_started
@@ -52,8 +52,8 @@ services:
       CONTROLLERS_JS_EXTRA_OUTPUTS: /srv/weppcloud/static/js/controllers.js
       STATIC_ASSET_SYNC_DIR: /srv/weppcloud/static
     volumes:
-      - wc1-data:${WC1_DIR:-/srv/wc1}
-      - geodata-data:${GEODATA_DIR:-/srv/geodata}
+      - /wc1:/wc1
+      - /geodata:/geodata
       - ../wepppy/weppcloud/static:/srv/weppcloud/static
     command:
       - gunicorn
@@ -182,8 +182,8 @@ services:
       TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
       DEVAL_TEMPLATE: /srv/weppcloudr/templates/scripts/users/chinmay/new_report.Rmd
     volumes:
-      - geodata-data:/geodata
-      - wc1-data:/wc1
+      - /geodata:/geodata
+      - /wc1:/wc1
       - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
     ports:
       - "${WEPPCLOUDR_PORT:-8050}:${WEPPCLOUDR_PORT:-8050}"
@@ -364,8 +364,6 @@ networks:
     driver: bridge
 
 volumes:
-  wc1-data:
-  geodata-data:
   redis-data:
   postgres-data:
   weppcloudr-renv-cache:
