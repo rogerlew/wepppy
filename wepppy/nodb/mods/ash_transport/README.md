@@ -31,9 +31,9 @@ drive downstream summaries and reports.
 4. **Post-Processing**  
    `AshPost.run_post` orchestrates the post-processing pass:
    - Removes incompatible parquet outputs based on the AshPost version manifest.
-   - Reads every `H{wepp_id}_ash.parquet`, enriches it with hillslope metadata, and converts per-area metrics to absolute tonnes and cubic metres.
+   - Reads every `H{wepp_id}_ash.parquet`, enriches it with hillslope metadata, and converts per-area metrics to absolute tonnes and cubic meters.
    - Generates parquet artifacts (see [Produced Artifacts](#produced-artifacts)) with embedded schema metadata and writes `ash/post/ashpost_version.json`.
-   - Creates a markdown README summarising the schema and sample values.
+   - Creates a markdown README summarizing the schema and sample values.
 
 5. **Catalog Update**  
    After successful post-processing, `update_catalog_entry` registers the ash products for query-engine discovery.
@@ -120,7 +120,7 @@ All parquet schemas embed units (`units` metadata) and column descriptions (`des
 
 ## Operational Notes
 
-- **Multiprocessing:** `Ash.run_ash` can parallelise hillslope simulations via the process-pool utilities in `NoDbBase` (subject to project configuration).
+- **Multiprocessing:** `Ash.run_ash` can parallelize hillslope simulations via the process-pool utilities in `NoDbBase` (subject to project configuration).
 - **Wind Transport:** Controlled by `ash.config` via `run_wind_transport`. When disabled, wind pathways are skipped entirely.
 - **Return Periods:** Default recurrence intervals mirror other WEPP outputs but can be overridden when calling `AshPost.run_post`.
 - **Version Bumping:** Increase `ASHPOST_VERSION` when schema-breaking changes occur; the next `run_post` automatically purges incompatible parquet outputs and regenerates everything.
