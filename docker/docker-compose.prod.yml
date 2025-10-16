@@ -46,7 +46,6 @@ x-wepppy-service: &wepppy-service
 services:
   weppcloud:
     <<: *wepppy-service
-    entrypoint: ./docker/weppcloud-entrypoint.sh
     command:
       - gunicorn
       - --workers

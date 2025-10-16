@@ -70,6 +70,24 @@ volumes:
 - Check the latest dumps with `docker compose exec postgres-backup ls -l /backups`.
 - Trigger an ad-hoc snapshot without waiting a day: `docker compose run --rm postgres-backup bash -lc 'pg_dump -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -Fc -f "/backups/wepppy-manual-$(date +%Y%m%d-%H%M%S).dump"'`.
 
+### Restoring Postgres from a Backup Dump
+1. Pick the dump to restore:
+   - Dev: look in `./.docker-data/postgres-backups/wepppy-YYYYMMDD-HHMMSS.dump`.
+   - Prod: list the named volume with `docker compose exec postgres-backup ls -l /backups` and copy the file out if needed.
+2. Quiesce writers (`docker compose stop weppcloud rq-worker ...`) so nothing modifies the database mid-restore.
+3. Copy the dump into the running Postgres container (example for dev):
+   ```bash
+   docker compose -f docker/docker-compose.dev.yml cp ./.docker-data/postgres-backups/wepppy-YYYYMMDD-HHMMSS.dump postgres:/tmp/restore.dump
+   ```
+4. Run `pg_restore` inside the container to replace the schema/data:
+   ```bash
+   docker compose -f docker/docker-compose.dev.yml exec postgres \
+     bash -lc 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB" /tmp/restore.dump'
+   ```
+   (`--clean --if-exists` drops prior objects before importing, matching typical snapshot semantics.)
+5. Optionally remove the temp file: `docker compose -f docker/docker-compose.dev.yml exec postgres rm /tmp/restore.dump`.
+6. Restart the services you stopped in step 2.
+
 ## Startup Workflow
 1. Ensure `.env` is populated with Redis host, Postgres creds, and any feature flags.
 2. Run `docker compose build` (uses `uv` to install Python deps).
@@ -85,7 +103,7 @@ volumes:
 ## References
 - `wepppy/weppcloud/routes/usersum/dev-notes/redis_config_refactor.md` for central Redis configuration.
 
-## postgres database restoration - DON'T DELETE
+## postgres database restoration from bare metal - DON'T DELETE
 base) roger@wepp1:~$ sudo -u postgres psql -c "SHOW data_directory;"
 [sudo] password for roger: 
 Sorry, try again.

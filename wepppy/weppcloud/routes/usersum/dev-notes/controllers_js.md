@@ -29,13 +29,16 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
 
 ## Build Script and Startup Integration
 - `wepppy/weppcloud/controllers_js/build_controllers_js.py` is the entry point for producing the bundle. It configures Jinja to treat the controller files as literal text (so existing `{{ }}` tokens meant for client-side templating survive), renders `controllers.js.j2`, and writes the output to `static/js/controllers.js`.
-- The Docker entrypoint (`docker/weppcloud-entrypoint.sh`) executes the builder before launching Gunicorn, logging stdout/stderr and aborting container start on failure. Bare-metal deployments can run the same command from systemd units or other pre-start hooks.
+- Production images call the builder during `docker build` (see `docker/Dockerfile`), so the resulting image always contains a current bundle even before the container starts.
+- Development containers (Compose using `Dockerfile.dev`) run `docker/weppcloud-entrypoint.sh` before Gunicorn boots. The entrypoint rebuilds the bundle on the live filesystem—handy when the source tree is bind-mounted in dev—and aborts the start-up if rendering fails.
+- Production deployments can optionally execute the entrypoint (or `build_controllers_js.py`) as a pre-start hook, but it's no longer invoked automatically once the image is built.
+- Bare-metal or Kubernetes deployments can execute the same script as a pre-start hook; the only requirement is that the Python environment in use has Jinja and the rest of the stack already installed.
 - You can run the same command manually inside the virtualenv: `python wepppy/weppcloud/controllers_js/build_controllers_js.py`. The generated file header includes a UTC build timestamp so you can confirm the rebuild in the browser.
 
 ## Working With Controllers
 - When adding a controller, create a new `controllers_js/<name>.js`, include it from `controllers.js.j2`, and add the matching template under `templates/controls/`. Reuse the `_base.htm` structure or extend it if you need additional UI elements.
 - Keep controller methods focused on DOM wiring and async orchestration. Shared logic should live in helper modules under `controllers_js/` so that other controllers can `include` them via the bundle template.
-- Because the bundle is rebuilt at Gunicorn start, remember to restart whenever you change controller source. `.vscode/settings.json` is configured to ignore the built
+- Because the bundle is rebuilt when the entrypoint runs (container start or explicit call), restart the container or rerun the script whenever you edit controller sources. `.vscode/settings.json` is configured to ignore the built
 `controllers.js` file.
 
 Keep this document updated when the bundling flow or controller contract changes.

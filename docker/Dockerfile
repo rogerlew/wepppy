@@ -147,6 +147,9 @@ RUN set -euxo pipefail; \
     printf "/workdir/f-esri/\n" > "${SITE_PACKAGES}/f_esri.pth"; \
     printf "/workdir/wepppyo3/release/linux/py310-wepppy310-env/\n" > "${SITE_PACKAGES}/wepppyo3.pth"
 
+# Pre-build controllers.js so the static bundle ships with the image.
+RUN /opt/venv/bin/python /workdir/wepppy/weppcloud/controllers_js/build_controllers_js.py
+
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PROJ_LIB=/usr/share/proj
