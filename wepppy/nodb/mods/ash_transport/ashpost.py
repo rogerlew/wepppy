@@ -22,6 +22,8 @@ import math
 import numpy as np
 import pandas as pd
 import dask.dataframe as dd
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.stats import probability_of_occurrence, weibull_series
@@ -31,6 +33,9 @@ from wepppy.nodb.base import NoDbBase
 from pprint import pprint
 
 from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.wepp.interchange.schema_utils import pa_field
+
+from .ashpost_documentation import generate_ashpost_documentation
 
 __all__ = [
     'AshPostNoDbLockedException',
@@ -42,6 +47,136 @@ common_cols =  ['area (ha)', 'topaz_id', 'year', 'mo', 'da', 'julian', 'days_fro
 out_cols = ['year0', 'year', 'julian', 'days_from_fire (days)',
             'wind_transport (tonne/ha)', 'water_transport (tonne/ha)', 'ash_transport (tonne/ha)',
             'ash_depth (mm)', 'transportable_ash (tonne/ha)']
+
+ASH_POST_FILES = {
+    'hillslope_annuals': 'hillslope_annuals.parquet',
+    'watershed_annuals': 'watershed_annuals.parquet',
+    'watershed_daily': 'watershed_daily.parquet',
+    'watershed_daily_by_burn_class': 'watershed_daily_by_burn_class.parquet',
+    'watershed_cumulatives': 'watershed_cumulatives.parquet',
+}
+
+COLUMN_DESCRIPTIONS = {
+    'topaz_id': 'TOPAZ hillslope identifier for the modeled subwatershed.',
+    'area': 'Surface area represented by the aggregation.',
+    'burn_class': 'Soil burn severity class assigned to the hillslope (1=unburned, 4=high).',
+    'year0': 'Calendar year containing the simulated fire ignition date.',
+    'year': 'Simulation calendar year for the record.',
+    'julian': 'Julian day of year for the record.',
+    'da': 'Day of month for the record.',
+    'mo': 'Month of year for the record.',
+    'days_from_fire': 'Number of days elapsed since the fire ignition.',
+    'fire_year': 'Zero-based index of the post-fire year (0 during fire year).',
+    'precip': 'Daily precipitation depth applied to the hillslope.',
+    'rainmelt': 'Daily rainfall plus snowmelt depth.',
+    'snow_water_equivalent': 'Snow water equivalent depth.',
+    'runoff': 'Daily surface runoff depth.',
+    'tot_soil_water': 'Total soil water content.',
+    'infiltration': 'Daily infiltration depth.',
+    'cum_infiltration': 'Cumulative infiltration depth since the fire.',
+    'cum_runoff': 'Cumulative surface runoff depth since the fire.',
+    'bulk_density': 'Modeled ash bulk density.',
+    'porosity': 'Modeled surface ash layer porosity.',
+    'remaining_ash': 'Ash mass remaining on the hillslope.',
+    'transportable_ash': 'Ash mass still available for transport.',
+    'ash_depth': 'Modeled ash layer depth or volume depending on units.',
+    'ash_runoff': 'Ash-laden runoff depth.',
+    'transport': 'Instantaneous transport capacity used in dynamic routing.',
+    'tau': 'Dynamic transport capacity coefficient τ.',
+    'k_r': 'Runoff transport depletion coefficient k_r.',
+    'M_0': 'Reference transport capacity M₀.',
+    'water_transport': 'Ash transported by water runoff for the interval.',
+    'wind_transport': 'Ash transported by wind for the interval.',
+    'ash_transport': 'Total ash transported by wind and water for the interval.',
+    'ash_decomp': 'Ash mass lost to decomposition for the interval.',
+    'cum_water_transport': 'Cumulative water-driven ash transport since the fire.',
+    'cum_wind_transport': 'Cumulative wind-driven ash transport since the fire.',
+    'cum_ash_transport': 'Cumulative total ash transport since the fire.',
+    'cum_ash_runoff': 'Cumulative ash-laden runoff depth since the fire.',
+    'cum_ash_decomp': 'Cumulative ash decomposition since the fire.',
+}
+
+UINT16_COLUMNS = {
+    'topaz_id',
+    'year0',
+    'year',
+    'julian',
+    'days_from_fire (days)',
+    'fire_year (yr)',
+    'da',
+    'mo',
+}
+
+UINT8_COLUMNS = {
+    'burn_class',
+}
+
+
+def _base_column_name(column: str) -> str:
+    return column.split(' (')[0]
+
+
+def _infer_units(column: str) -> str | None:
+    if '(' in column and column.endswith(')'):
+        return column[column.rfind('(') + 1:-1]
+    return None
+
+
+def _describe_column(column: str) -> str | None:
+    base = _base_column_name(column)
+    if base in COLUMN_DESCRIPTIONS:
+        return COLUMN_DESCRIPTIONS[base]
+    if base.startswith('cum_'):
+        origin = base[4:]
+        if origin in COLUMN_DESCRIPTIONS:
+            return f"Cumulative {COLUMN_DESCRIPTIONS[origin][0].lower() + COLUMN_DESCRIPTIONS[origin][1:]}"
+    return None
+
+
+def _cast_integral_columns(df: pd.DataFrame) -> None:
+    for column in UINT16_COLUMNS:
+        if column in df.columns:
+            df[column] = df[column].astype('uint16')
+    for column in UINT8_COLUMNS:
+        if column in df.columns:
+            df[column] = df[column].astype('uint8')
+
+
+def _add_per_area_columns(df: pd.DataFrame, source_columns: list[str], area_column: str = 'area (ha)') -> None:
+    if area_column not in df.columns:
+        return
+    area = df[area_column].to_numpy(dtype=np.float64)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        for col in source_columns:
+            if col not in df.columns:
+                continue
+            per_ha_col = col.replace(' (tonne)', ' (tonne/ha)').replace(' (m^3)', ' (mm)')
+            result = np.divide(
+                df[col].to_numpy(dtype=np.float64),
+                area,
+                out=np.zeros_like(area, dtype=np.float64),
+                where=area > 0,
+            )
+            if per_ha_col.endswith(' (mm)'):
+                # convert average depth from meters to millimeters
+                result *= 1000.0 / 10000.0
+            df[per_ha_col] = result
+
+
+def _write_parquet(df: pd.DataFrame, path: str) -> None:
+    if not len(df.columns):
+        pq.write_table(pa.table({}), path, compression='snappy')
+        return
+
+    table = pa.Table.from_pandas(df, preserve_index=False)
+    schema_fields = []
+    for field in table.schema:
+        units = _infer_units(field.name)
+        description = _describe_column(field.name)
+        schema_fields.append(pa_field(field.name, field.type, units=units, description=description))
+    schema = pa.schema(schema_fields)
+    table = table.cast(schema)
+    pq.write_table(table, path, compression='snappy')
 
 
 def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_extract):
@@ -115,7 +250,9 @@ def calculate_cumulative_transport(df, recurrence, ash_post_dir):
 
     # merge the aggregated data with the new dataframe
     cum_df = pd.merge(cum_df, df_agg, on='year0')
-    df.to_pickle(_join(ash_post_dir, 'watershed_cumulatives.pkl'))
+    cum_df.sort_values('year0', inplace=True)
+    _cast_integral_columns(cum_df)
+    _write_parquet(cum_df, _join(ash_post_dir, ASH_POST_FILES['watershed_cumulatives']))
 
     # calculate return intervals and probabilities for cumulative results
     num_fire_years = len(cum_df)
@@ -145,9 +282,18 @@ def calculate_hillslope_statistics(df, ash, ash_post_dir, first_year_only=False)
 #    print(len(df.index), 'rows in hillslope data frame')
 
     df_hillslope_annuals = df.groupby(['topaz_id', 'year']).agg(agg_d).reset_index()
-    df_hillslope_average_annuals = df_hillslope_annuals.groupby('topaz_id').mean().reset_index()
-    df_hillslope_average_annuals.drop('year', axis=1, inplace=True)
-    df_hillslope_average_annuals.to_pickle(_join(ash_post_dir, 'hillslope_annuals.pkl'))
+    df_hillslope_average_annuals = df_hillslope_annuals.groupby('topaz_id').mean(numeric_only=True).reset_index()
+    if 'year' in df_hillslope_average_annuals.columns:
+        df_hillslope_average_annuals.drop('year', axis=1, inplace=True)
+    _cast_integral_columns(df_hillslope_average_annuals)
+    ordered_cols = [
+        'topaz_id',
+        'wind_transport (tonne/ha)',
+        'water_transport (tonne/ha)',
+        'ash_transport (tonne/ha)',
+    ]
+    df_hillslope_average_annuals = df_hillslope_average_annuals[[col for col in ordered_cols if col in df_hillslope_average_annuals.columns]]
+    _write_parquet(df_hillslope_average_annuals, _join(ash_post_dir, ASH_POST_FILES['hillslope_annuals']))
 
 
 def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1, 2, 3], first_year_only=False):
@@ -167,6 +313,9 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
 
     agg_d = {}
     for col in df.columns:
+        if col == 'area (ha)':
+            agg_d[col] = 'sum'
+            continue
         if 'm^3' in col or 'tonne':
             agg_d[col] = 'sum'
         if col in common_cols:
@@ -175,14 +324,66 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
         if 'mm' in col or 'tonne/ha' in col or col.startswith('cum_'):
             ws_cols_to_drop.append(col)
 
-    df_annuals = df.groupby('year').agg(agg_d)
-    df_annuals.drop(ws_cols_to_drop, axis=1, inplace=True)
-    df_annuals.to_pickle(_join(ash_post_dir, 'watershed_annuals.pkl'))
+    df_annuals = df.groupby('year').agg(agg_d).reset_index()
+    df_annuals.drop(ws_cols_to_drop, axis=1, inplace=True, errors='ignore')
+    df_annuals.drop(columns=['burn_class'], inplace=True, errors='ignore')
+    _cast_integral_columns(df_annuals)
+    tonne_cols = [
+        'wind_transport (tonne)',
+        'water_transport (tonne)',
+        'ash_transport (tonne)',
+        'transportable_ash (tonne)',
+    ]
+    _add_per_area_columns(df_annuals, tonne_cols)
+    if 'ash_depth (m^3)' in df_annuals.columns:
+        _add_per_area_columns(df_annuals, ['ash_depth (m^3)'])
+    annual_cols = [
+        'year',
+        'year0',
+        'days_from_fire (days)',
+        'area (ha)',
+        'wind_transport (tonne)',
+        'wind_transport (tonne/ha)',
+        'water_transport (tonne)',
+        'water_transport (tonne/ha)',
+        'ash_transport (tonne)',
+        'ash_transport (tonne/ha)',
+        'transportable_ash (tonne)',
+        'transportable_ash (tonne/ha)',
+    ]
+    if 'ash_depth (m^3)' in df_annuals.columns:
+        annual_cols.extend(['ash_depth (m^3)', 'ash_depth (mm)'])
+    df_annuals = df_annuals[[col for col in annual_cols if col in df_annuals.columns]]
+    _write_parquet(df_annuals, _join(ash_post_dir, ASH_POST_FILES['watershed_annuals']))
 
-    del df_annuals
-
-    df_daily = df.groupby(['year0', 'year', 'julian']).agg(agg_d)
-    df_daily.to_pickle(_join(ash_post_dir, 'watershed_daily.pkl'))
+    df_daily = df.groupby(['year0', 'year', 'julian']).agg(agg_d).reset_index()
+    df_daily.drop(columns=['burn_class'], inplace=True, errors='ignore')
+    _cast_integral_columns(df_daily)
+    existing_density_cols = [col for col in df_daily.columns if '(tonne/ha)' in col or col.endswith(' (mm)')]
+    if existing_density_cols:
+        df_daily.drop(columns=existing_density_cols, inplace=True)
+    _add_per_area_columns(df_daily, tonne_cols)
+    if 'ash_depth (m^3)' in df_daily.columns:
+        _add_per_area_columns(df_daily, ['ash_depth (m^3)'])
+    daily_cols = [
+        'year0',
+        'year',
+        'julian',
+        'days_from_fire (days)',
+        'area (ha)',
+        'wind_transport (tonne)',
+        'wind_transport (tonne/ha)',
+        'water_transport (tonne)',
+        'water_transport (tonne/ha)',
+        'ash_transport (tonne)',
+        'ash_transport (tonne/ha)',
+        'transportable_ash (tonne)',
+        'transportable_ash (tonne/ha)',
+    ]
+    if 'ash_depth (m^3)' in df_daily.columns:
+        daily_cols.extend(['ash_depth (m^3)', 'ash_depth (mm)'])
+    df_daily = df_daily[[col for col in daily_cols if col in df_daily.columns]]
+    _write_parquet(df_daily, _join(ash_post_dir, ASH_POST_FILES['watershed_daily']))
 
     num_days = len(df_daily.julian)
     num_fire_years = num_days / 365.25
@@ -190,8 +391,34 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
     cols_to_extract = ['days_from_fire (days)', 'year0', 'year', 'julian']
 
     # Group the DataFrame by 'date_int' and 'burn_class' columns
-    grouped_df = df.groupby(['year0', 'year', 'julian', 'burn_class']).agg(agg_d)
-    grouped_df.to_pickle(_join(ash_post_dir, 'watershed_daily_by_burn_class.pkl'))
+    grouped_df = df.groupby(['year0', 'year', 'julian', 'burn_class']).agg(agg_d).reset_index()
+    _cast_integral_columns(grouped_df)
+    existing_density_cols = [col for col in grouped_df.columns if '(tonne/ha)' in col or col.endswith(' (mm)')]
+    if existing_density_cols:
+        grouped_df.drop(columns=existing_density_cols, inplace=True)
+    _add_per_area_columns(grouped_df, tonne_cols)
+    if 'ash_depth (m^3)' in grouped_df.columns:
+        _add_per_area_columns(grouped_df, ['ash_depth (m^3)'])
+    class_cols = [
+        'burn_class',
+        'year0',
+        'year',
+        'julian',
+        'days_from_fire (days)',
+        'area (ha)',
+        'wind_transport (tonne)',
+        'wind_transport (tonne/ha)',
+        'water_transport (tonne)',
+        'water_transport (tonne/ha)',
+        'ash_transport (tonne)',
+        'ash_transport (tonne/ha)',
+        'transportable_ash (tonne)',
+        'transportable_ash (tonne/ha)',
+    ]
+    if 'ash_depth (m^3)' in grouped_df.columns:
+        class_cols.extend(['ash_depth (m^3)', 'ash_depth (mm)'])
+    grouped_df = grouped_df[[col for col in class_cols if col in grouped_df.columns]]
+    _write_parquet(grouped_df, _join(ash_post_dir, ASH_POST_FILES['watershed_daily_by_burn_class']))
 
     # Initialize the return_periods dictionary
     burn_class_return_periods = {}
@@ -458,6 +685,7 @@ class AshPost(NoDbBase):
             res = watershed_daily_aggregated(self.wd, recurrence=recurrence)
             if res != None:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = res
+                generate_ashpost_documentation(self.ash_post_dir)
             else:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = None, None, None
 
@@ -482,7 +710,10 @@ class AshPost(NoDbBase):
 
     @property
     def hillslope_annuals(self):
-        df = pd.read_pickle(_join(self.ash_post_dir, 'hillslope_annuals.pkl'))
+        path = _join(self.ash_post_dir, ASH_POST_FILES['hillslope_annuals'])
+        if not _exists(path):
+            return {}
+        df = pd.read_parquet(path)
         d = {}
         for index, row in df.iterrows():
             row_dict = row.to_dict()
@@ -492,12 +723,21 @@ class AshPost(NoDbBase):
 
     @property
     def watershed_annuals(self):
-        df = pd.read_pickle(_join(self.ash_post_dir, 'watershed_annuals.pkl'))
+        path = _join(self.ash_post_dir, ASH_POST_FILES['watershed_annuals'])
+        if not _exists(path):
+            return {}
+        df = pd.read_parquet(path)
         d = {}
         for index, row in df.iterrows():
             row_dict = row.to_dict()
-            topaz_id = row_dict['topaz_id']
-            d[str(int(topaz_id))] = row_dict
+            key = None
+            for candidate in ('year', 'topaz_id'):
+                if candidate in row_dict and not pd.isna(row_dict[candidate]):
+                    key = row_dict[candidate]
+                    break
+            if key is None:
+                key = index
+            d[str(int(key))] = row_dict
         return d
 
     @property

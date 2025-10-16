@@ -346,7 +346,11 @@ class Ash(NoDbBase):
 
     @property
     def has_ash_results(self):
-        return len(glob(_join(self.ash_dir, 'post', '*.pkl'))) > 0
+        if glob(_join(self.ash_dir, 'post', '*.parquet')):
+            return True
+        if glob(_join(self.ash_dir, 'post', '*.pkl')):
+            return True
+        return False
 
     # These are setup this way for the html views
     @property
@@ -549,9 +553,10 @@ class Ash(NoDbBase):
                     self.logger.info(f"  Removing {fn}\n")
                     os.remove(fn)
 
-                for fn in glob(_join(ash_dir, 'post', '*.pkl')):
-                    self.logger.info(f"  Removing {fn}\n")
-                    os.remove(fn)
+                for pattern in ('*.parquet', '*.pkl', '*.md'):
+                    for fn in glob(_join(ash_dir, 'post', pattern)):
+                        self.logger.info(f"  Removing {fn}\n")
+                        os.remove(fn)
 
             if not _exists(ash_dir):
                 os.makedirs(ash_dir)
@@ -829,7 +834,10 @@ class Ash(NoDbBase):
 
     @property
     def has_watershed_summaries(self):
-        return len(glob(_join(self.ash_dir, 'post/watershed_annuals.pkl'))) > 0
+        for ext in ('parquet', 'pkl'):
+            if glob(_join(self.ash_dir, f'post/watershed_annuals.{ext}')):
+                return True
+        return False
 
     def hillslope_is_burned(self, topaz_id):
         watershed = Watershed.getInstance(self.wd)
