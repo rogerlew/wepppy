@@ -17,5 +17,6 @@ wepppy/locales/global/soils/isric/test
 wepppy/climates/cligen/_scripts/*.db
 wepppy/climates/daymet/test/*
 wepppy/weppcloud/static/js/controllers.js
+wepppy/commit_hash
 _notes/*
 .docker-data
