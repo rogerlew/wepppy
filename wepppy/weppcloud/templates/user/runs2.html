@@ -93,6 +93,7 @@ function delete_runs() {
     {% endfor %}
   </tbody>
 </table>
+{% if pagination is defined %}
 <nav aria-label="Runs pagination">
   <ul class="pagination">
     {% if pagination.has_prev %}
@@ -126,4 +127,5 @@ function delete_runs() {
     {% endif %}
   </ul>
 </nav>
+{% endif %}
 {% endblock %}
