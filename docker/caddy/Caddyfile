@@ -2,12 +2,17 @@
 	auto_https off
 }
 
+# add backend rule: http-request set-header X-Forwarded-Proto https if { ssl_fc }
+
 http://:8080 {
     encode gzip
 
     handle_path /health* {
         respond "OK"
     }
+
+    @plain_http not header X-Forwarded-Proto https
+    redir @plain_http https://{host}{uri} permanent
 
     handle_path /weppcloud-microservices/status* {
         reverse_proxy status:9002
