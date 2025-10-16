@@ -541,6 +541,117 @@ var SubcatchmentDelineation = function () {
                 .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         };
 
+        const WEPP_LOSS_METRIC_EXPRESSIONS = Object.freeze({
+            runoff: 'CAST(loss."Runoff Volume" / (NULLIF(loss."Hillslope Area", 0) * 10.0) AS DOUBLE)',
+            subrunoff: 'CAST(loss."Subrunoff Volume" / (NULLIF(loss."Hillslope Area", 0) * 10.0) AS DOUBLE)',
+            baseflow: 'CAST(loss."Baseflow Volume" / (NULLIF(loss."Hillslope Area", 0) * 10.0) AS DOUBLE)',
+            loss: 'CAST(loss."Soil Loss" / NULLIF(loss."Hillslope Area", 0) AS DOUBLE)'
+        });
+
+        function resolveRunSlugForQuery() {
+            var prefix = (typeof site_prefix === 'string') ? site_prefix : '';
+            if (prefix && prefix !== '/' && prefix.charAt(0) !== '/') {
+                prefix = '/' + prefix;
+            }
+            if (prefix === '/') {
+                prefix = '';
+            }
+
+            var path = window.location.pathname || '';
+            if (prefix && path.indexOf(prefix) === 0) {
+                path = path.slice(prefix.length);
+            }
+
+            var parts = path.split('/').filter(function (segment) {
+                return segment.length > 0;
+            });
+            var runsIndex = parts.indexOf('runs');
+            if (runsIndex === -1 || parts.length <= runsIndex + 1) {
+                return null;
+            }
+            return decodeURIComponent(parts[runsIndex + 1]);
+        }
+
+        function postQueryEngine(payload) {
+            var runSlug = resolveRunSlugForQuery();
+            if (!runSlug) {
+                return $.Deferred(function (defer) {
+                    var errorResponse = {
+                        status: 400,
+                        responseJSON: {
+                            Error: 'Unable to resolve run identifier from the current URL.'
+                        }
+                    };
+                    defer.reject(errorResponse, 'error', errorResponse.responseJSON.Error);
+                }).promise();
+            }
+
+            var path = "/query-engine/runs/" + encodeURIComponent(runSlug) + "/query";
+            if (path.charAt(0) !== '/') {
+                path = '/' + path;
+            }
+            var targetUrl = url_for_run(path);
+
+            return $.ajax({
+                url: targetUrl,
+                method: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                cache: false,
+                data: JSON.stringify(payload)
+            });
+        }
+
+        function fetchLossMetric(metricKey) {
+            var expression = WEPP_LOSS_METRIC_EXPRESSIONS[metricKey];
+            if (!expression) {
+                return $.Deferred(function (defer) {
+                    var message = 'Unknown WEPP loss metric: ' + metricKey;
+                    var errorResponse = {
+                        status: 400,
+                        responseJSON: {
+                            Error: message
+                        }
+                    };
+                    defer.reject(errorResponse, 'error', message);
+                }).promise();
+            }
+
+            var payload = {
+                datasets: [
+                    { path: "wepp/output/interchange/loss_pw0.hill.parquet", alias: "loss" },
+                    { path: "watershed/hillslopes.parquet", alias: "hills" }
+                ],
+                joins: [
+                    { left: "loss", right: "hills", left_on: ["wepp_id"], right_on: ["wepp_id"], join_type: "left" }
+                ],
+                columns: [
+                    'hills.topaz_id AS topaz_id',
+                    expression + " AS value"
+                ],
+                order_by: ["topaz_id"]
+            };
+
+            return postQueryEngine(payload).then(function (response) {
+                var map = {};
+                var records = Array.isArray(response && response.records) ? response.records : [];
+                records.forEach(function (row) {
+                    if (!row) {
+                        return;
+                    }
+                    var topazId = row.topaz_id;
+                    if (topazId === undefined || topazId === null) {
+                        return;
+                    }
+                    map[String(topazId)] = {
+                        topaz_id: topazId,
+                        value: row.value
+                    };
+                });
+                return map;
+            });
+        }
+
         /* ---------- runoff & variants --------------------------------------- */
 
         that.dataRunoff = null;
@@ -549,16 +660,15 @@ var SubcatchmentDelineation = function () {
         that.cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
         that.rangeRunoff = $('#wepp_sub_cmap_range_runoff');
 
-        that.renderRunoff = function () { _getRunoff('query/wepp/runoff/subcatchments/', 'runoff'); };
-        that.renderSubrunoff = function () { _getRunoff('query/wepp/subrunoff/subcatchments/', 'runoff'); };
-        that.renderBaseflow = function () { _getRunoff('query/wepp/baseflow/subcatchments/', 'runoff'); };
-        function _getRunoff(url, mode) {
-            $.get(url)
-                .done(data => {
+        that.renderRunoff = function () { _getRunoff('runoff', 'runoff'); };
+        that.renderSubrunoff = function () { _getRunoff('subrunoff', 'runoff'); };
+        that.renderBaseflow = function () { _getRunoff('baseflow', 'runoff'); };
+        function _getRunoff(metricKey, mode) {
+            fetchLossMetric(metricKey)
+                .done(function (data) {
                     that.dataRunoff = data;
                     that.cmapMode = mode;
                     that._refreshGlLayer();
-                    // legend / unitizer unchanged
                 })
                 .fail((jq, s, e) => that.pushErrorStacktrace(that, jq, s, e));
         }
@@ -572,8 +682,8 @@ var SubcatchmentDelineation = function () {
         that.rangeLoss = $('#wepp_sub_cmap_range_loss');
 
         that.renderLoss = function () {
-            $.get('query/wepp/loss/subcatchments/')
-                .done(data => {
+            fetchLossMetric('loss')
+                .done(function (data) {
                     that.dataLoss = data;
                     that.cmapMode = 'loss';
                     that._refreshGlLayer();

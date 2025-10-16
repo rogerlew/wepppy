@@ -510,45 +510,6 @@ def report_wepp_sediment_delivery(runid, config):
                             user=current_user)
 
 
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments')
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments/')
-@authorize_and_handle_with_exception_factory
-def query_wepp_sub_runoff(runid, config):
-    # blackwood http://wepp.cloud/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
-    wd = get_wd(runid)
-    wepp = Wepp.getInstance(wd)
-    return jsonify(wepp.query_sub_val('Runoff'))
-
-
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments')
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments/')
-@authorize_and_handle_with_exception_factory
-def query_wepp_sub_subrunoff(runid, config):
-    # blackwood http://wepp.cloud/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
-    wd = get_wd(runid)
-    wepp = Wepp.getInstance(wd)
-    return jsonify(wepp.query_sub_val('Subrunoff'))
-
-
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments')
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments/')
-@authorize_and_handle_with_exception_factory
-def query_wepp_sub_baseflow(runid, config):
-    # blackwood http://wepp.cloud/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
-    wd = get_wd(runid)
-    wepp = Wepp.getInstance(wd)
-    return jsonify(wepp.query_sub_val('Baseflow'))
-
-
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments')
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments/')
-@authorize_and_handle_with_exception_factory
-def query_wepp_sub_loss(runid, config):
-    wd = get_wd(runid)
-    wepp = Wepp.getInstance(wd)
-    return jsonify(wepp.query_sub_val('Soil Loss Density'))
-
-
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments/')
 @authorize_and_handle_with_exception_factory
