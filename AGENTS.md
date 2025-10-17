@@ -6,7 +6,7 @@
 
 ## Repository Overview
 
-wepppy is a DevOps-focused erosion modeling stack that fuses Python orchestration, Rust geospatial kernels, and Redis-first observability. The system automates Water Erosion Prediction Project (WEPP) runs, wildfire response analytics, and watershed-scale geospatial preprocessing by gluing together legacy Fortran executables, modern Python services, and Rust-accelerated tooling.
+wepppy is a DevOps-focused erosion modeling stack that fuses Python orchestration, Rust geospatial kernels, and Redis-first observability. The system automates Water Erosion Prediction Project (WEPP) runs, wildfire response analytics, and watershed-scale geospatial preprocessing by gluing together legacy Fortran executables, modern Python services, and Rust-accelerated tooling. The architechture as a whole strives for openness, flexibility, and observability.
 
 ## Core Architecture Patterns
 
@@ -17,6 +17,7 @@ Instead of a monolithic database, run state is serialized to disk, memoized in R
 - Instances are serialized to disk and mirrored into Redis DB 13 for 72 hours
 - Locking via Redis hashes in DB 0 (`locked:*.nodb`) prevents concurrent writers
 - Log verbosity controlled through Redis DB 15
+- Non-canonical pattern. It is a model, It is a view model. Mutable by design (with safeguards).
 
 ### Redis Database Allocation
 - **DB 0**: Run metadata and distributed locks
@@ -44,7 +45,7 @@ NoDb subclass logger
   - `base.py` - Core NoDb implementation with logging, caching, locking
   - `core/` - Primary controllers (Climate, Wepp, Watershed, Landuse, Soils, etc.)
   - `mods/` - Optional extensions and location-specific customizations
-  - `duckdb_agents.py` - Fast query agents for parquet summaries
+  - `duckdb_agents.py` - Fast query agents for parquet summaries (< 80 ms request)
   
 - **wepppy/weppcloud/** - Flask web application
   - `app.py` - Flask application factory
@@ -61,16 +62,31 @@ NoDb subclass logger
 - **wepppy/climates/** - Climate data modules (CLIGEN, Daymet, GridMET, PRISM)
 - **wepppy/soils/** - Soil database integrations
 - **wepppy/wepp/** - WEPP model file management and validation
-- **wepppy/topo/** - Watershed delineation (TOPAZ, Peridot/Rust, WhiteboxTools)
+- **wepppy/topo/** - Watershed delineation (TOPAZ, Peridot/Rust, WhiteboxTools; )
+
+#### Webservices
+Run on production server to provide access to large geospatial datasets
+- **wepppy/webservices/elevationquery** - point elevation data in US
+- **wepppy/webservices/metquery** - queries monthly data
+- **wepppy/webservices/wmesque** - raster server (deprecated)
+- **wepppy/webservices/wmesque2** - raster server (fastapi)
 
 ### Go Microservices
 - **services/preflight2** - Preflight checklist WebSocket streamer
 - **services/status2** - Log/status WebSocket proxy with heartbeat
 
 ### Rust Integration
-- **wepppyo3** - Python bindings for climate interpolation, raster lookups, soil loss grids
-- **peridot** - Watershed abstraction engine
-- **WhiteboxTools** - Hillslope delineation (custom TOPAZ implementation)
+- **/workdir/wepppyo3/wepppyo3** - Python bindings for climate interpolation, raster lookups, soil loss grids
+- **/workdir/peridot/peridot** - Watershed abstraction engine
+- **/workdir/whitebox-tools** - WhiteboxTools Hillslope delineation, FindOutlet, other tools
+
+### Fixed FORTRAN 77
+- **/workdir/wepp-forest** -  WEPP Watershed with baseflow model
+- **/workdir/wepp-forest-revegetation** -  WEPP Watershed with revegetation modeling and baseflow (Beta)
+
+### Other Stack Components
+- **/workdir/wepppy2** - Contains WEPP Runner (python wrapper) and WEPP binaries (separate to support FSWEPP2)
+- **/workdir/rosetta** - Soil Pedotransfer model with duckdb to avoid sqlite concurrency
 
 ## Module Organization Best Practices
 
@@ -111,6 +127,7 @@ SECURITY_PASSWORD_SALT=$(python -c 'import secrets; print(secrets.token_urlsafe(
 cat > docker/.env <<EOF
 UID=$(id -u)
 GID=$(id -g)
+EXTERNAL_HOST=wc.bearhive.duckdns.org
 POSTGRES_PASSWORD=localdev
 SECRET_KEY=$SECRET_KEY
 SECURITY_PASSWORD_SALT=$SECURITY_PASSWORD_SALT
@@ -119,32 +136,36 @@ EOF
 # 2. Bring up the stack
 docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build
 
+# or install and use wctl utility
+
 # 3. Visit http://localhost:8080/weppcloud
 ```
 
+Development Server and Test Production are behind pfSense/Haproxy with TLS termination
+
 Services include:
 - Flask app (weppcloud) with bind mounts for live reloads
-- Go microservices (status, preflight)
+- Go microservices (status2, preflight2)
 - Redis, PostgreSQL
-- RQ worker pool
+- RQ worker pool with custom worker `WepppyRqWorker(rq.Worker)`
 - Caddy reverse proxy serving static assets
 
 **Common Docker tasks**:
 ```bash
 # Tail logs
-docker compose -f docker/docker-compose.dev.yml logs -f weppcloud
+wctl logs -f weppcloud
 
 # Shell into container
-docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec weppcloud bash
+wctl exec weppcloud bash
 
-# Rebuild service
-docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build weppcloud
+# Full rebuild service
+wctl down && wctl build --no-cache && wctl up -d
 ```
 
 **Production Stack** (`docker/docker-compose.prod.yml`):
 - Vendors all dependencies directly into the image
 - Minimal bind mounts (only data volumes)
-- Non-root `wepp` user for security
+- Non-root `www-data` user for security
 - Health checks at `/health`
 
 ### File Structure Navigation
@@ -155,22 +176,24 @@ wepppy/
 ├── tests/                   # pytest test suite
 ├── wctl/                    # CLI utilities
 ├── wepppy/                  # Core Python package
-│   ├── nodb/               # NoDb controllers
-│   │   ├── base.py         # Core NoDb base class
-│   │   ├── core/           # Primary controllers
-│   │   ├── mods/           # Optional extensions
+│   ├── nodb/                # NoDb controllers
+│   │   ├── base.py          # Core NoDb base class
+│   │   ├── core/            # Primary controllers
+│   │   ├── mods/            # Optional extensions
 │   │   └── duckdb_agents.py # Parquet query utilities
-│   ├── weppcloud/          # Flask web application
-│   │   ├── app.py          # Application factory
-│   │   ├── controllers_js/ # Front-end modules
-│   │   ├── routes/         # Flask blueprints
-│   │   └── templates/      # Jinja templates
-│   ├── rq/                 # Background job modules
-│   ├── climates/           # Climate data integrations
-│   ├── soils/              # Soil databases
-│   ├── topo/               # Watershed delineation
-│   └── wepp/               # WEPP model interfaces
-└── readme.md               # Primary documentation
+│   ├── weppcloud/           # Flask web application
+│   │   ├── app.py           # Application factory
+│   │   ├── controllers_js/  # Front-end modules
+│   │   ├── controllers_js/  # Front-end modules
+│   │   ├── routes/          # Flask blueprints
+│   │   ├── templates/       # Jinja templates
+│   │   └── webservices/     # fastapi, flask services
+│   ├── rq/                  # Background job modules
+│   ├── climates/            # Climate data integrations
+│   ├── soils/               # Soil databases
+│   ├── topo/                # Watershed delineation
+│   └── wepp/                # WEPP model interfaces
+└── readme.md                # Primary documentation
 ```
 
 ## Working with NoDb Controllers
@@ -399,8 +422,7 @@ self._logger.info("Task completed", extra={
 When adding compute-intensive operations:
 1. Profile Python implementation first
 2. Consider adding to `wepppyo3` if hot path
-3. Implement fallback for missing Rust wheel
-4. Benchmark speedup with `pytest --benchmark`
+3. Benchmark speedup with `pytest --benchmark`
 
 ### Redis Caching Strategy
 - Use Redis DB 13 for hot NoDb payloads (72-hour TTL)
@@ -413,6 +435,10 @@ When adding compute-intensive operations:
 - Emit incremental status updates (every 5-10%)
 - Allow cancellation via RQ job signals
 - Store intermediate results for resumability
+
+## WEPPcloud Endpoints
+- Keep request times short to not tie up gunicorn workers
+- Offload long-running tasks to RQ or async services
 
 ## Integration with External Tools
 
@@ -547,6 +573,15 @@ Before submitting changes:
 - [ ] No breaking changes to serialization
 
 ---
+
+## Notes for Next Pass
+- Static assets now build via `wctl build-static-assets`; re-run before image rebuilds so `controllers.js` and vendor bundles stay current.
+- Kubernetes migration is still pending. When that work resumes, plan on duplicating the static build stage so the proxy image (or init container) ships with the same `/weppcloud/static` tree baked in—no shared volumes required.
+- ID standardization: landuse/soils/watershed parquet export lowercase `topaz_id`/`wepp_id` Int32. Ensure docker deployments run the migration CLIs (`migrate_landuse_parquet`, `migrate_soils_parquet`, `migrate_watersheds_peridot_tables`, `migrate_wbt_geojson_ids`, `migrate_ashpost_pickles`) after rolling out the images so production runs comply.
+- DuckDB/query-engine/report consumers now expect lowercase ids; DuckDB agents intentionally fail-fast if legacy columns remain. No auto-normalization—schema drift must be fixed via migrations.
+- Wepppy/test suites require optional modules (`wepppyo3`, Flask `abort`) not bundled in minimal docker images; integration testing should occur in the same environment as production builds or with those extras installed.
+- Strict naming philosophy: do not add helpers that coerce legacy casing; future contributions should honor the lowercase schema across parquet/GeoJSON assets. Document migrations in release notes before the next deploy.
+
 
 ## Credits
 University of Idaho 2015-Present, Swansea University 2019-Present (Wildfire Ash Transport And Risk estimation tool, WATAR).
