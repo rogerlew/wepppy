@@ -46,7 +46,6 @@ x-wepppy-service: &wepppy-service
 services:
   weppcloud:
     <<: *wepppy-service
-    entrypoint: ./docker/weppcloud-entrypoint.sh
     environment:
       <<: *wepppy-env
       CONTROLLERS_JS_EXTRA_OUTPUTS: /srv/weppcloud/static/js/controllers.js
