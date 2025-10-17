@@ -52,6 +52,7 @@ defusedxml==0.7.1
 deprecated==1.2.14
 distributed==2024.5.1
 distro==1.9.0
+dtale==3.18.2
 dnspython==2.6.1
 dotenv==0.9.9
 duckdb==1.1.1

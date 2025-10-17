@@ -18,7 +18,7 @@ import zipfile
 import pandas as pd
 from functools import partial
 from copy import deepcopy
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from enum import Enum, IntEnum
@@ -131,37 +131,65 @@ class AgFields(NoDbBase):
         return self._field_id_key
 
     def validate_field_boundary_geojson(self, fn):
-        geojson_path = _join(self.ag_fields_dir, fn)
-        if not _exists(geojson_path):
-            raise FileNotFoundError(f'Field boundary geojson file not found: {geojson_path}')
+        """
+        Validate a user-supplied field boundary GeoJSON and normalize it into the canonical
+        `ag_fields/fields.WGS.geojson` location for downstream tooling.
+        """
+        candidate = Path(fn)
+        search_paths = []
+        if candidate.is_absolute():
+            search_paths.append(candidate)
+        else:
+            search_paths.append(Path(self.ag_fields_dir) / candidate)
+            search_paths.append(Path(self.wd) / candidate)
+
+        source_path = next((p for p in search_paths if p.exists()), None)
+        if source_path is None:
+            raise FileNotFoundError(f'Field boundary geojson file not found: {search_paths[0]}')
+
+        canonical_name = "fields.WGS.geojson"
+        canonical_path = Path(self.ag_fields_dir) / canonical_name
+        canonical_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            if source_path.resolve() != canonical_path.resolve():
+                shutil.copy2(source_path, canonical_path)
+        except OSError as exc:
+            raise OSError(f"Failed to normalize field boundary GeoJSON: {exc}") from exc
 
         with self.locked():
-            self._field_boundaries_geojson = fn
+            self._field_boundaries_geojson = canonical_name
 
         import geopandas as gpd
-        df = gpd.read_file(geojson_path,  ignore_geometry=True)
+
+        df = gpd.read_file(canonical_path, ignore_geometry=True)
 
         # make sure df has field_id column
-        if 'field_id' not in df.columns:
-            raise ValueError(f'field_id column not found in field boundary GeoJSON: {geojson_path}')
+        if "field_id" not in df.columns:
+            raise ValueError(f'field_id column not found in field boundary GeoJSON: {canonical_path}')
 
-        # warn if field_id is not unique
-        if df['field_id'].duplicated().any():
-            duplicates = df[df['field_id'].duplicated()]['field_id'].tolist()
-            duplicates = set(duplicates)
-            self.logger.warn(f'Duplicate field_id values found in field boundary GeoJSON: {duplicates}')
+        duplicates: set[Any] = set()
+        if df["field_id"].duplicated().any():
+            duplicates = set(df[df["field_id"].duplicated()]["field_id"].tolist())
+            self.logger.warn(
+                "Duplicate field_id values found in field boundary GeoJSON: %s", sorted(duplicates)
+            )
 
         # dump attributes to parquet
         df.to_parquet(self.rotation_schedule_parquet, index=False)
 
+        geojson_hash = None
+        with open(canonical_path, "rb") as fp:
+            geojson_hash = hashlib.sha1(fp.read()).hexdigest()
+
         with self.locked():
             self._field_n = len(df)
-            self._geojson_hash = hashlib.sha1(open(geojson_path, 'rb').read()).hexdigest()
+            self._geojson_hash = geojson_hash
             self._geojson_timestamp = int(time.time())
             self._geojson_is_valid = True
-            self._field_columns = list([str(col) for col in df.columns])
+            self._field_columns = [str(col) for col in df.columns]
 
-        return dict(field_id_duplicates=duplicates)
+        return dict(field_id_duplicates=sorted(duplicates))
 
     def get_unique_crops(self) -> set:
         # get the set of unique crops in the rotation schedule

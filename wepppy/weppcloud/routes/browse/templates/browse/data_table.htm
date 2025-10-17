@@ -17,6 +17,9 @@
 </head>
 <body>
 <a href="?download">Download File</a>
+{% if dtale_url %}
+ | <a href="{{ dtale_url }}">Open in D-Tale</a>
+{% endif %}
 <hr>
 {{ table_html|safe }}
 </body>

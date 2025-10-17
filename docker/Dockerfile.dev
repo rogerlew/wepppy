@@ -65,7 +65,7 @@ RUN /opt/venv/bin/python -c "import duckdb; \
                con.close()"
 
 # Mirror historical conda .pth injections so sibling repos resolve in development.
-COPY install/conda/*.pth /tmp/pth/
+COPY docker/pth_files/*.pth /tmp/pth/
 RUN for f in /tmp/pth/*.pth; do \
         cp "$f" /opt/venv/lib/python3.10/site-packages/; \
     done

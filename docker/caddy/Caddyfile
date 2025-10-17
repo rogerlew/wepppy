@@ -75,7 +75,27 @@ http://:8080 {
         }
     }
 
-    @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|download(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
+    handle /dtale* {
+        reverse_proxy dtale:9010 {
+            transport http {
+                read_timeout 5m
+            }
+        }
+    }
+
+    handle /weppcloud/dtale* {
+        uri strip_prefix /weppcloud
+        reverse_proxy dtale:9010 {
+            header_up X-Forwarded-Prefix /weppcloud/dtale
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+            transport http {
+                read_timeout 5m
+            }
+        }
+    }
+
+    @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
     handle @browse_proxy {
         reverse_proxy browse:9009 {
             transport http {

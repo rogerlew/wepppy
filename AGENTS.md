@@ -2,7 +2,7 @@
 > AI Coding Agent Guide for wepppy
 
 ## Authorship
-**This document is maintained by GitHub Copilot (Codex agent) which retains full authorship rights for all AGENTS.md content revisions.**
+**This document is maintained by GitHub Copilot / Codex which retain full authorship rights for all AGENTS.md content revisions.**
 
 ## Repository Overview
 
@@ -70,6 +70,7 @@ Run on production server to provide access to large geospatial datasets
 - **wepppy/webservices/metquery** - queries monthly data
 - **wepppy/webservices/wmesque** - raster server (deprecated)
 - **wepppy/webservices/wmesque2** - raster server (fastapi)
+- **wepppy/webservices/dtale.py** - WEPP run-aware D-Tale wrapper for interactive tabular exploration
 
 ### Go Microservices
 - **services/preflight2** - Preflight checklist WebSocket streamer
@@ -78,7 +79,7 @@ Run on production server to provide access to large geospatial datasets
 ### Rust Integration
 - **/workdir/wepppyo3/wepppyo3** - Python bindings for climate interpolation, raster lookups, soil loss grids
 - **/workdir/peridot/peridot** - Watershed abstraction engine
-- **/workdir/whitebox-tools** - WhiteboxTools Hillslope delineation, FindOutlet, other tools
+- **/workdir/weppcloud-wbt** - WhiteboxTools Hillslope delineation, FindOutlet, other tools
 
 ### Fixed FORTRAN 77
 - **/workdir/wepp-forest** -  WEPP Watershed with baseflow model
@@ -148,6 +149,9 @@ Services include:
 - Go microservices (status2, preflight2)
 - Redis, PostgreSQL
 - RQ worker pool with custom worker `WepppyRqWorker(rq.Worker)`
+- D-Tale explorer (`dtale`) for large Parquet/CSV inspection at `/weppcloud/dtale`
+  - Runs as a single Gunicorn worker; D-Tale keeps state in-process and will misbehave with multiple workers
+  - Loader auto-registers watershed/AgField GeoJSON so Maps → Location Mode defaults to the current run's subcatchments (channels and ag fields stay one click away)
 - Caddy reverse proxy serving static assets
 
 **Common Docker tasks**:
@@ -366,6 +370,7 @@ Caddy serves `/weppcloud/static/*` directly in both dev and production.
 - Secrets go in `docker/.env` (gitignored)
 - Use environment variables for tokens, passwords
 - Regenerate `SECRET_KEY` and `SECURITY_PASSWORD_SALT` per deployment
+- Set `DTALE_INTERNAL_TOKEN` in stack environments; browse→D-Tale handshakes rely on it
 
 ### Input Validation
 - Sanitize all user inputs before file operations

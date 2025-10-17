@@ -51,6 +51,7 @@ from html import escape as html_escape
 import sqlite3
 
 from urllib.parse import urlencode
+from urllib.parse import quote
 
 from os.path import join as _join
 from os.path import split as _split
@@ -63,6 +64,7 @@ from pathlib import Path
 from datetime import datetime
 from http import HTTPStatus
 
+import httpx
 import pandas as pd
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -162,6 +164,23 @@ def _prefix_path(path: str) -> str:
     if not SITE_PREFIX:
         return path
     return SITE_PREFIX + path if path.startswith('/') else SITE_PREFIX + '/' + path
+
+
+_DTALE_SERVICE_URL = os.getenv('DTALE_SERVICE_URL', 'http://dtale:9010').rstrip('/')
+_DTALE_INTERNAL_TOKEN = os.getenv('DTALE_INTERNAL_TOKEN', '').strip()
+_DTALE_SUPPORTED_SUFFIXES = (
+    '.parquet',
+    '.pq',
+    '.feather',
+    '.arrow',
+    '.csv',
+    '.csv.gz',
+    '.tsv',
+    '.tsv.gz',
+    '.pkl',
+    '.pickle',
+)
+_DTALE_HTTP_TIMEOUT = httpx.Timeout(60.0, connect=5.0)
 
 
 MANIFEST_FILENAME = 'manifest.db'
@@ -1111,12 +1130,24 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff
                 gl_url = _join(request_path, _file).replace('/browse/', '/download/') + '?as_csv=1'
                 gl_link = f'  <a href="{gl_url}">.csv</a>'
             repr_link = '           '
+            dtale_link = '          '
             if file_lower.endswith('.man') or  file_lower.endswith('.sol'):
                 repr_url = _join(request_path, _file) + '?repr=1'
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
-            elif file_lower.endswith('.parquet') or file_lower.endswith('.csv') or file_lower.endswith('.tsv'):
-                repr_url = _join(request_path, _file).replace('/browse/', '/pivottable/')
-                repr_link = f'  <a href="{repr_url}">pivot</a>    '
+            if (
+                file_lower.endswith('.parquet')
+                or file_lower.endswith('.pq')
+                or file_lower.endswith('.feather')
+                or file_lower.endswith('.arrow')
+                or file_lower.endswith('.csv')
+                or file_lower.endswith('.csv.gz')
+                or file_lower.endswith('.tsv')
+                or file_lower.endswith('.tsv.gz')
+                or file_lower.endswith('.pkl')
+                or file_lower.endswith('.pickle')
+            ):
+                dtale_url = _join(request_path, _file).replace('/browse/', '/dtale/')
+                dtale_link = f'  <a href="{dtale_url}">d-tale</a>'
 
             diff_link = '    '
             if diff_wd and not file_lower.endswith(('.tif', '.parquet', '.gz', '.img')):
@@ -1124,7 +1155,7 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff
                 if _exists(diff_path):
                     diff_url = _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
                     diff_link = f'  <a href="{diff_url}">diff</a>'
-            s.append(_padding + f'{_tree_char} <a href="{file_link}">{_file}{ts_pad}</a>{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
+            s.append(_padding + f'{_tree_char} <a href="{file_link}">{_file}{ts_pad}</a>{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{dtale_link}{diff_link}{sym_target}\n')
         
         if i % 2:
             s[-1] = f'<span class="even-row">{s[-1]}</span>'
@@ -1382,11 +1413,16 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
         if html is not None:
             table_markup = Markup(html)
+            rel_url = os.path.relpath(path, wd).replace('\\', '/')
+            dtale_url = _prefix_path(
+                f'/runs/{runid}/{config}/dtale/{quote(rel_url, safe="/")}'
+            )
             return render_template(
                 'browse/data_table.htm',
                 filename=basename(path),
                 runid=runid,
                 table_html=table_markup,
+                dtale_url=dtale_url,
             )
 
         if contents is None:
@@ -1412,6 +1448,84 @@ async def _handle_browse_request(request: StarletteRequest, runid: str, config: 
     flask_request = FlaskRequestAdapter(request)
     result = await _browse_tree_helper(runid, subpath or '', wd, flask_request, config)
     return ensure_response(result)
+
+
+async def dtale_open(request: StarletteRequest):
+    if not _DTALE_SERVICE_URL:
+        raise HTTPException(
+            status_code=HTTPStatus.SERVICE_UNAVAILABLE,
+            detail="D-Tale integration is not configured.",
+        )
+
+    runid = request.path_params['runid']
+    config = request.path_params['config']
+    subpath = request.path_params.get('subpath') or ''
+    rel_path = subpath.lstrip('/')
+
+    wd = os.path.abspath(get_wd(runid))
+    target = os.path.abspath(os.path.join(wd, rel_path))
+
+    if not target.startswith(wd):
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Invalid path.")
+
+    if not os.path.isfile(target):
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="File not found.")
+
+    rel_lower = rel_path.lower()
+    if not any(rel_lower.endswith(ext) for ext in _DTALE_SUPPORTED_SUFFIXES):
+        raise HTTPException(
+            status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail="D-Tale currently supports parquet, csv/tsv, feather, and pickle files.",
+        )
+
+    payload = {
+        'runid': runid,
+        'config': config,
+        'path': rel_path.replace('\\', '/'),
+    }
+    headers = {}
+    if _DTALE_INTERNAL_TOKEN:
+        headers['X-DTALE-TOKEN'] = _DTALE_INTERNAL_TOKEN
+
+    endpoint = f'{_DTALE_SERVICE_URL}/internal/load'
+    try:
+        async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+            response = await client.post(endpoint, json=payload, headers=headers)
+    except httpx.HTTPError as exc:
+        _logger.error('Unable to reach D-Tale loader at %s', endpoint, exc_info=True)
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_GATEWAY,
+            detail="Unable to contact the D-Tale service.",
+        ) from exc
+
+    if response.status_code >= 400:
+        detail = None
+        try:
+            error_payload = response.json()
+            detail = error_payload.get('description') or error_payload.get('error')
+        except ValueError:
+            detail = response.text.strip()
+        detail = detail or 'D-Tale rejected the load request.'
+        raise HTTPException(status_code=response.status_code, detail=detail)
+
+    try:
+        data = response.json()
+    except ValueError as exc:
+        _logger.error('Invalid response from D-Tale: %s', response.text)
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_GATEWAY,
+            detail="Received malformed response from D-Tale.",
+        ) from exc
+
+    target_url = data.get('url')
+    if not target_url:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_GATEWAY,
+            detail="D-Tale response missing redirect URL.",
+        )
+
+    _logger.info('Forwarding %s to D-Tale at %s', rel_path, target_url)
+    return RedirectResponse(url=target_url, status_code=HTTPStatus.SEE_OTHER)
 
 
 async def browse_root(request: StarletteRequest):
@@ -1451,6 +1565,11 @@ def create_app():
         Route(
             '/weppcloud/runs/{runid}/{config}/browse/{subpath:path}',
             browse_subpath,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/runs/{runid}/{config}/dtale/{subpath:path}',
+            dtale_open,
             methods=['GET']
         ),
     ]

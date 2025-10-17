@@ -132,13 +132,13 @@ RUN set -euxo pipefail; \
     clone_repo "${WEPPPY2_REF}" "${WEPPPY2_REPO}" /opt/vendor/wepppy2; \
     clone_repo "${WEPPCLOUD2_REF}" "${WEPPCLOUD2_REPO}" /opt/vendor/weppcloud2; \
     clone_repo "${F_ESRI_REF}" "${F_ESRI_REPO}" /opt/vendor/f-esri; \
-    clone_repo "${WBT_REF}" "${WBT_REPO}" /opt/vendor/whitebox-tools; \
+    clone_repo "${WBT_REF}" "${WBT_REPO}" /opt/vendor/weppcloud-wbt; \
     clone_repo "${WEPPPYO3_REF}" "${WEPPPYO3_REPO}" /opt/vendor/wepppyo3; \
-    rm -rf /workdir/wepppy2 /workdir/weppcloud2 /workdir/f-esri /workdir/whitebox-tools /workdir/wepppyo3; \
+    rm -rf /workdir/wepppy2 /workdir/weppcloud2 /workdir/f-esri /workdir/weppcloud-wbt /workdir/wepppyo3; \
     ln -s /opt/vendor/wepppy2 /workdir/wepppy2; \
     ln -s /opt/vendor/weppcloud2 /workdir/weppcloud2; \
     ln -s /opt/vendor/f-esri /workdir/f-esri; \
-    ln -s /opt/vendor/whitebox-tools /workdir/whitebox-tools; \
+    ln -s /opt/vendor/weppcloud-wbt /workdir/weppcloud-wbt; \
     ln -s /opt/vendor/wepppyo3 /workdir/wepppyo3
 
 # Stage the prebuilt wepppyo3 release into site-packages for runtime imports.
@@ -153,7 +153,7 @@ RUN set -euxo pipefail; \
     printf "/workdir/wepppy/\n" > "${SITE_PACKAGES}/wepppy.pth"; \
     printf "/workdir/wepppy2/\n" > "${SITE_PACKAGES}/wepp_runner.pth"; \
     printf "/workdir/weppcloud2/\n" > "${SITE_PACKAGES}/weppcloud2.pth"; \
-    printf "/workdir/whitebox-tools/WBT/\n" > "${SITE_PACKAGES}/wbt.pth"; \
+    printf "/workdir/weppcloud-wbt/WBT/\n" > "${SITE_PACKAGES}/wbt.pth"; \
     printf "/workdir/f-esri/\n" > "${SITE_PACKAGES}/f_esri.pth"; \
     printf "/workdir/wepppyo3/release/linux/py310-wepppy310-env/\n" > "${SITE_PACKAGES}/wepppyo3.pth"
 

@@ -15,6 +15,8 @@ x-wepppy-service: &wepppy-service
     SITE_PREFIX: /weppcloud
     WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET}
     OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
+    DTALE_SERVICE_URL: ${DTALE_SERVICE_URL:-http://dtale:9010}
+    DTALE_INTERNAL_TOKEN: ${DTALE_INTERNAL_TOKEN:-dtale-dev}
   env_file:
     - ${WEPPPY_ENV_FILE:-docker/.env}
   volumes:
@@ -22,7 +24,7 @@ x-wepppy-service: &wepppy-service
     - ../../wepppy2:/workdir/wepppy2
     - ../../rosetta:/workdir/rosetta
     - ../../peridot:/workdir/peridot
-    - ../../whitebox-tools:/workdir/whitebox-tools
+    - ../../weppcloud-wbt:/workdir/weppcloud-wbt
     - ../../wepppyo3:/workdir/wepppyo3
     - ${WC1_DIR}:/wc1
     - ${GEODATA_DIR}:/geodata
@@ -114,6 +116,27 @@ services:
       - wepppy.microservices.browse:app
     ports:
       - "9009:9009"
+
+  dtale:
+    <<: *wepppy-service
+    container_name: wepppy-dtale
+    command:
+      - gunicorn
+      - --workers
+      - "1"
+      - --bind
+      - 0.0.0.0:9010
+      - --log-level
+      - info
+      - wepppy.webservices.dtale:app
+    environment:
+      <<: *wepppy-env
+      DTALE_BASE_URL: http://dtale:9010
+    ports:
+      - "9010:9010"
+    depends_on:
+      redis:
+        condition: service_started
 
   elevationquery:
     <<: *wepppy-service
@@ -271,7 +294,7 @@ services:
       - ../../wepppy2:/workdir/wepppy2
       - ../../rosetta:/workdir/rosetta
       - ../../peridot:/workdir/peridot
-      - ../../whitebox-tools:/workdir/whitebox-tools
+      - ../../weppcloud-wbt:/workdir/weppcloud-wbt
       - ../../wepppyo3:/workdir/wepppyo3
       - ${WC1_DIR}:/wc1
       - ${GEODATA_DIR}:/geodata
@@ -379,6 +402,7 @@ services:
       - status
       - preflight
       - browse
+      - dtale
       - weppcloudr
       - rq-dashboard
 

@@ -22,6 +22,8 @@ x-wepppy-env: &wepppy-env
   WC1_DIR: /wc1
   GEODATA_DIR: /geodata
   OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
+  DTALE_SERVICE_URL: ${DTALE_SERVICE_URL:-http://dtale:9010}
+  DTALE_INTERNAL_TOKEN: ${DTALE_INTERNAL_TOKEN:-change-me}
 
 x-wepppy-service: &wepppy-service
   <<: *wepppy-image
@@ -93,6 +95,23 @@ services:
       - wepppy.microservices.browse:app
     ports:
       - "${BROWSE_PORT:-9009}:9009"
+
+  dtale:
+    <<: *wepppy-service
+    environment:
+      <<: *wepppy-env
+      DTALE_BASE_URL: http://dtale:9010
+    command:
+      - gunicorn
+      - --workers
+      - "1"
+      - --bind
+      - 0.0.0.0:9010
+      - --log-level
+      - info
+      - wepppy.webservices.dtale:app
+    expose:
+      - "9010"
 
   elevationquery:
     <<: *wepppy-service
@@ -277,6 +296,8 @@ services:
       preflight:
         condition: service_started
       browse:
+        condition: service_started
+      dtale:
         condition: service_started
       weppcloudr:
         condition: service_started

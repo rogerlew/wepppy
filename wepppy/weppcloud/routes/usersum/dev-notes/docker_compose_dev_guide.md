@@ -61,7 +61,7 @@ wctl logs weppcloud
 - `/weppcloud-microservices/status` and `/weppcloud-microservices/preflight` to the Go microservices.
 
 ### Volumes & Bind Mounts
-- Source code (`../`) plus sibling repositories (`../../wepppy2`, `../../whitebox-tools`, etc.) are bind-mounted read-write into every Python container so code changes reflect instantly.
+- Source code (`../`) plus sibling repositories (`../../wepppy2`, `../../weppcloud-wbt`, etc.) are bind-mounted read-write into every Python container so code changes reflect instantly.
 - Redis and Postgres use dedicated host directories under `../.docker-data/` for persistence.
 - Caddy mounts the static assets read-only (`../wepppy/weppcloud/static:/srv/weppcloud/static:ro`).
 - The `weppcloudr` container binds the R service repo (`../weppcloudR`), the legacy template repo (`../WEPPcloudR`), run storage mounts (`${GEODATA_DIR}`, `${WC1_DIR}`), and a persistent `weppcloudr-renv-cache` volume for R package caches.
