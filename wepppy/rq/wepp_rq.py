@@ -343,11 +343,11 @@ def run_wepp_rq(runid):
                 jobs5_post.append(_job)
                 job.save()
 
-            if wepp.arc_export_on_run_completion:
-                _job = q.enqueue_call(_post_gpkg_export_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs4_post)
-                job.meta['jobs:5,func:_post_gpkg_export_rq'] = _job.id
-                jobs5_post.append(_job)
-                job.save()
+            # if wepp.arc_export_on_run_completion:
+            #     _job = q.enqueue_call(_post_gpkg_export_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs4_post)
+            #     job.meta['jobs:5,func:_post_gpkg_export_rq'] = _job.id
+            #     jobs5_post.append(_job)
+            #     job.save()
 
             if job2_hillslope_interchange is not None:
                 jobs5_post.append(job2_hillslope_interchange)

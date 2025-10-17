@@ -1,50 +1,73 @@
-{% macro render_field_with_errors(field) %}
-  <div class="form-group">
-    <label for="{{ field.name }}">{{ field.label }}</label>  {{ field(**kwargs)|safe }}
+{% macro render_aligned_field(field, label_text=None, help_text=None, input_class='pure-input-1', placeholder=None, autocomplete=None) %}
+  <div class="pure-control-group">
+    <label for="{{ field.id }}">
+      {{ label_text if label_text is not none else field.label.text }}
+    </label>
+    {% if placeholder is not none and autocomplete is not none %}
+      {{ field(class_=input_class, placeholder=placeholder, autocomplete=autocomplete) }}
+    {% elif placeholder is not none %}
+      {{ field(class_=input_class, placeholder=placeholder) }}
+    {% elif autocomplete is not none %}
+      {{ field(class_=input_class, autocomplete=autocomplete) }}
+    {% else %}
+      {{ field(class_=input_class) }}
+    {% endif %}
+    {% if help_text %}
+      <span class="pure-form-message-inline">{{ help_text }}</span>
+    {% endif %}
     {% if field.errors %}
-      <ul>
       {% for error in field.errors %}
-        <li>{{ error }}</li>
+        <span class="pure-form-message-inline" role="alert">{{ error }}</span>
       {% endfor %}
-      </ul>
     {% endif %}
   </div>
 {% endmacro %}
 
-{% macro render_checkbox_with_errors(field) %}
-  <div class="form-check">
-    <label class="form-check-label" for="{{ field.name }}">
-      {{ field(**kwargs) }}
-      {{ field.label.text | safe }}</label>
+{% macro render_aligned_password(field, toggle_id, input_class='pure-input-1', autocomplete=None) %}
+  <div class="pure-control-group">
+    <label for="{{ field.id }}">{{ field.label.text }}</label>
+    <div class="wc-auth-password">
+      {% if autocomplete is not none %}
+        {{ field(class_=input_class, autocomplete=autocomplete) }}
+      {% else %}
+        {{ field(class_=input_class) }}
+      {% endif %}
+      <button type="button" class="pure-button pure-button-secondary wc-password-toggle" data-target="{{ field.id }}" id="{{ toggle_id }}">Show</button>
+    </div>
+    {% if field.errors %}
+      {% for error in field.errors %}
+        <span class="pure-form-message-inline" role="alert">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
   </div>
 {% endmacro %}
 
-{% macro render_field(field) %}
-  <p>{{ field(**kwargs)|safe }}</p>
-{% endmacro %}
-
-{% macro render_field_errors(field) %}
-  <div class="form-group">
-    {% if field and field.errors %}
-      <ul>
+{% macro render_aligned_checkbox(field, label_text=None) %}
+  <div class="pure-controls wc-auth-checkbox">
+    <label for="{{ field.id }}" class="pure-checkbox">
+      {{ field() }}
+      {{ label_text if label_text is not none else field.label.text }}
+    </label>
+    {% if field.errors %}
       {% for error in field.errors %}
-        <li>{{ error }}</li>
+        <span class="pure-form-message-inline" role="alert">{{ error }}</span>
       {% endfor %}
-      </ul>
     {% endif %}
   </div>
 {% endmacro %}
 
 {% macro render_form_errors(form) %}
   {% if form.form_errors %}
-    <div class="form-group">
-      <ul>
+    <div class="wc-auth-messages">
       {% for error in form.form_errors %}
-        <li>{{ error }}</li>
+        <div class="wc-auth-message" data-category="error">{{ error }}</div>
       {% endfor %}
-      </ul>
     </div>
   {% endif %}
+{% endmacro %}
+
+{% macro render_message(category, message) %}
+  <div class="wc-auth-message" data-category="{{ category }}">{{ message|safe }}</div>
 {% endmacro %}
 
 {% macro prop_next() -%}

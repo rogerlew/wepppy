@@ -255,7 +255,7 @@ services:
       - "${STATUS_PORT:-9002}:9002"
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     networks:
       - backend
 
@@ -276,7 +276,7 @@ services:
       - "${PREFLIGHT_PORT:-9001}:9001"
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     networks:
       - backend
 
@@ -323,6 +323,12 @@ services:
       - redis-data:/data
     ports:
       - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "-p", "6379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     networks:
       - backend
 

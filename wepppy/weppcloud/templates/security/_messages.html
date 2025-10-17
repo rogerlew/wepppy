@@ -1,0 +1,10 @@
+{% from "security/_macros.html" import render_message %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="wc-auth-messages">
+      {% for category, message in messages %}
+        {{ render_message(category, message) }}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

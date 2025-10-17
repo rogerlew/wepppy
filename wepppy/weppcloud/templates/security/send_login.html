@@ -1,13 +1,19 @@
-{% extends "security/_layout.html"%}
-{% from "security/_macros.html" import render_field_with_errors, render_field %}
-{% block title %}
-Send Login Instructions
-{% endblock %}
+{% extends "security/_layout.html" %}
+{% from "security/_macros.html" import render_aligned_field, render_form_errors %}
+
+{% block title %}Send Login Instructions{% endblock %}
+{% block auth_heading %}Send Login Link{% endblock %}
+{% block auth_subheading %}<p>Request a one-time login link delivered to your email.</p>{% endblock %}
+
 {% block content %}
-  {% include "security/_messages.html" %}
-  <form action="{{ url_for_security('login') }}" method="POST" name="send_login_form">
-    {{ send_login_form.hidden_tag() }}
-    {{ render_field_with_errors(send_login_form.email) }}
-    {{ render_field(send_login_form.submit) }}
+  <form action="{{ url_for_security('login') }}" method="post" name="send_login_form" class="pure-form pure-form-aligned wc-auth-form">
+    <fieldset>
+      {{ send_login_form.hidden_tag() }}
+      {{ render_form_errors(send_login_form) }}
+      {{ render_aligned_field(send_login_form.email, input_class='pure-input-1', placeholder='you@example.com', autocomplete='email') }}
+      <div class="pure-controls">
+        {{ send_login_form.submit(class_='pure-button pure-button-primary') }}
+      </div>
+    </fieldset>
   </form>
 {% endblock %}

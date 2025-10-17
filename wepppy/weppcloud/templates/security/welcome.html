@@ -1,41 +1,20 @@
 {% set title = 'Welcome to WEPPcloud' %}
-{% extends "security/base.html" %}
+{% extends 'security/_layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block auth_heading %}Welcome to WEPPcloud{% endblock %}
+{% block auth_subheading %}<p>You're signed in as {{ user.first_name or user.email }}.</p>{% endblock %}
 
 {% block content %}
-  <div class="wc-auth-shell">
-    <header class="wc-auth-header">
-      <h1>Welcome to WEPPcloud</h1>
-      <p>You're signed in as {{ user.first_name or user.email }}.</p>
-    </header>
+  <p>Start exploring projects, run new simulations, or pick up where you left off.</p>
+  <ul class="wc-auth-links">
+    <li><a href="{{ site_prefix }}/">Open the WEPPcloud dashboard</a></li>
+    <li><a href="{{ url_for('user.profile') }}">View your profile</a></li>
+  </ul>
+{% endblock %}
 
-    {% include "security/_messages.html" %}
-
-    <div class="wc-auth-body">
-      <p>Start exploring projects, run new simulations, or pick up where you left off.</p>
-      <ul class="wc-welcome-links">
-        <li><a href="{{ site_prefix }}/">Open the WEPPcloud dashboard</a></li>
-        <li><a href="{{ url_for('user.profile') }}">View your profile</a></li>
-      </ul>
-    </div>
-
-    <div class="wc-auth-actions">
-      <a class="wc-auth-submit" href="{{ site_prefix }}/">Go to WEPPcloud</a>
-    </div>
+{% block auth_footer %}
+  <div class="wc-auth-footer">
+    <a class="pure-button pure-button-primary" href="{{ site_prefix }}/">Go to WEPPcloud</a>
   </div>
-
-  <style>
-    .wc-auth-shell { max-width: 520px; margin: 2.5rem auto; padding: 2.2rem; border-radius: 12px; background: #ffffff; box-shadow: 0 8px 26px rgba(15, 53, 87, 0.16); font-family: "Helvetica Neue", Arial, sans-serif; }
-    .wc-auth-header { text-align: center; margin-bottom: 1.5rem; }
-    .wc-auth-header h1 { margin: 0; font-size: 2.1rem; color: #154c79; }
-    .wc-auth-header p { margin: 0.75rem 0 0; color: #405263; font-size: 1.05rem; }
-    .wc-auth-body { margin-bottom: 1.75rem; color: #3c4b5a; line-height: 1.6; font-size: 1rem; }
-    .wc-welcome-links { margin: 1rem 0 0; padding: 0; list-style: none; }
-    .wc-welcome-links li { margin: 0.4rem 0; }
-    .wc-welcome-links a { color: #1d74b7; text-decoration: none; font-weight: 600; }
-    .wc-welcome-links a:hover { text-decoration: underline; }
-    .wc-auth-actions { text-align: center; }
-    .wc-auth-submit { display: inline-block; background: #1d74b7; color: #fff; border-radius: 8px; padding: 0.85rem 1.6rem; font-weight: 600; text-decoration: none; }
-    .wc-auth-submit:hover { background: #155a8b; }
-    @media (max-width: 560px) { .wc-auth-shell { margin: 2rem 1.5rem; padding: 2rem; } }
-  </style>
-{% endblock content %}
+{% endblock %}
