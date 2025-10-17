@@ -99,13 +99,13 @@ def test_run_query_join(tmp_path: Path) -> None:
 
     landuse_table = pa.table(
         {
-            "TopazID": [1, 2, 3],
+            "topaz_id": pa.array([1, 2, 3], type=pa.int32()),
             "landuse": ["Forest", "Pasture", "Urban"],
         }
     )
     soils_table = pa.table(
         {
-            "TopazID": [1, 2, 4],
+            "topaz_id": pa.array([1, 2, 4], type=pa.int32()),
             "soil_texture": ["Loam", "Sandy", "Clay"],
         }
     )
@@ -123,17 +123,17 @@ def test_run_query_join(tmp_path: Path) -> None:
             {"path": soils_rel, "alias": "soils"},
         ],
         joins=[
-            {"left": "landuse", "right": "soils", "on": ["TopazID"]},
+            {"left": "landuse", "right": "soils", "on": ["topaz_id"]},
         ],
         columns=[
-            "landuse.TopazID AS topaz_id",
+            "landuse.topaz_id AS topaz_id",
             "landuse.landuse AS landuse",
             "soils.soil_texture AS soil_texture",
         ],
     )
     result = run_query(run_context, payload)
 
-    assert result.row_count == 2  # TopazID 1 and 2 join successfully
+    assert result.row_count == 2  # topaz_id 1 and 2 join successfully
     assert result.records == [
         {"topaz_id": 1, "landuse": "Forest", "soil_texture": "Loam"},
         {"topaz_id": 2, "landuse": "Pasture", "soil_texture": "Sandy"},
@@ -247,12 +247,12 @@ def test_run_query_aggregation(tmp_path: Path) -> None:
 def test_filter_numeric_cast(tmp_path: Path) -> None:
     rel = "landuse/landuse.parquet"
     table = pa.table(
-            {
-                "TopazID": [1, 2, 3],
-                "key": pa.array([43, 44, 45], type=pa.int64()),
-                "cancov": pa.array([0.5, 0.8, 0.4], type=pa.float32()),
-            }
-        )
+        {
+            "topaz_id": pa.array([1, 2, 3], type=pa.int32()),
+            "key": pa.array([43, 44, 45], type=pa.int64()),
+            "cancov": pa.array([0.5, 0.8, 0.4], type=pa.float32()),
+        }
+    )
 
     _write_parquet(tmp_path / rel, table)
     _write_catalog_entries(tmp_path, [rel])
@@ -263,7 +263,7 @@ def test_filter_numeric_cast(tmp_path: Path) -> None:
     payload = QueryRequest(
         datasets=[{"path": rel, "alias": "landuse"}],
         columns=[
-            "landuse.TopazID AS topaz_id",
+            "landuse.topaz_id AS topaz_id",
             "landuse.key",
             "landuse.cancov",
         ],
@@ -337,7 +337,7 @@ def test_build_plan_for_geojson(tmp_path: Path) -> None:
 
     landuse_table = pa.table(
         {
-            "TopazID": [1, 2, 3],
+            "topaz_id": pa.array([1, 2, 3], type=pa.int32()),
             "desc": ["A", "B", "C"],
         }
     )
@@ -393,10 +393,10 @@ def test_build_plan_for_geojson(tmp_path: Path) -> None:
             {"path": geo_rel, "alias": "geo"},
         ],
         joins=[
-            {"left": "landuse", "right": "geo", "left_on": ["TopazID"], "right_on": ["topaz_id"]},
+            {"left": "landuse", "right": "geo", "left_on": ["topaz_id"], "right_on": ["topaz_id"]},
         ],
         columns=[
-            "landuse.TopazID AS topaz_id",
+            "landuse.topaz_id AS topaz_id",
             "geo.name",
             "ST_AsGeoJSON(geo.geometry) AS geometry_json",
         ],

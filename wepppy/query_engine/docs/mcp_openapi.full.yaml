@@ -1149,9 +1149,9 @@ components:
         joins:
           - left: landuse
             right: soils
-            on: TopazID
+            on: topaz_id
         columns:
-          - landuse.TopazID AS topaz_id
+          - landuse.topaz_id AS topaz_id
           - soils.simple_texture AS soil_texture
         filters:
           - column: landuse.key
@@ -1397,11 +1397,11 @@ components:
                 - name: soil_loss
                   type: double
               sql: |
-                SELECT landuse.TopazID AS topaz_id, soils.soil_loss
+                SELECT landuse.topaz_id AS topaz_id, soils.soil_loss
                 FROM landuse
-                JOIN soils ON landuse.TopazID = soils.TopazID
+                JOIN soils ON landuse.topaz_id = soils.topaz_id
                 WHERE landuse.key IN (105, 118)
-                ORDER BY landuse.TopazID
+                ORDER BY landuse.topaz_id
         meta:
           trace_id: c6f0c77e58f044f1b7c9e148abf8ff5e
           catalog:

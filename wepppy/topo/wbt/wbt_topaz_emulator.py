@@ -1294,16 +1294,23 @@ class WhiteboxToolsTopazEmulator:
 
         _features = []
         for f in js["features"]:
-            topaz_id = str(f["properties"]["TopazID"])
+            topaz_id_raw = f["properties"].get("TopazID")
+            topaz_id = int(topaz_id_raw)
+            f["properties"]["TopazID"] = topaz_id
 
-            if topaz_id[-1] != "4":
+            if str(topaz_id)[-1] != "4":
                 continue
 
-            wepp_id = translator.wepp(top=topaz_id)
+            wepp_id = int(translator.wepp(top=topaz_id))
             f["properties"]["WeppID"] = wepp_id
 
             # get order from somewhere and add it to the properties
-            f["properties"]["Order"] = chn_order_dict[str(topaz_id)]
+            order_val = chn_order_dict[str(topaz_id)]
+            try:
+                order_int = int(order_val)
+            except (TypeError, ValueError):
+                order_int = order_val
+            f["properties"]["Order"] = order_int
 
             _features.append(f)
 

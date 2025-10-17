@@ -71,6 +71,7 @@ def schema_with_version(schema: pa.Schema, *, version: Version = INTERCHANGE_VER
     metadata[b"dataset_version"] = str(version).encode("utf-8")
     metadata[b"dataset_version_major"] = str(version.major).encode("utf-8")
     metadata[b"dataset_version_minor"] = str(version.minor).encode("utf-8")
+    metadata[b"schema_version"] = str(version.major).encode("utf-8")
     return schema.with_metadata(metadata)
 
 

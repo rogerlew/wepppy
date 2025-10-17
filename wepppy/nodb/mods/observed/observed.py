@@ -24,13 +24,24 @@ from wepppy.all_your_base.hydro.objective_functions import calculate_all_functio
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.core.wepp import BaseflowOpts
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.wepp.interchange import (
-    run_totalwatsed3,
-    run_wepp_hillslope_pass_interchange,
-    run_wepp_hillslope_wat_interchange,
-    run_wepp_watershed_chanwb_interchange,
-    run_wepp_watershed_ebe_interchange,
-)
+from functools import lru_cache
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from wepppy.wepp.interchange import (
+        run_totalwatsed3 as _run_totalwatsed3,
+        run_wepp_hillslope_pass_interchange as _run_wepp_hillslope_pass_interchange,
+        run_wepp_hillslope_wat_interchange as _run_wepp_hillslope_wat_interchange,
+        run_wepp_watershed_chanwb_interchange as _run_wepp_watershed_chanwb_interchange,
+        run_wepp_watershed_ebe_interchange as _run_wepp_watershed_ebe_interchange,
+    )
+
+
+@lru_cache(maxsize=1)
+def _interchange_module():
+    from wepppy.wepp import interchange  # local import to avoid circular dependency
+
+    return interchange
 
 __all__ = [
     'validate',
@@ -205,8 +216,9 @@ class Observed(NoDbBase):
 
     def _load_hillslope_simulation(self):
         output_dir = Path(self.output_dir)
-        run_wepp_hillslope_pass_interchange(output_dir)
-        run_wepp_hillslope_wat_interchange(output_dir)
+        interchange = _interchange_module()
+        interchange.run_wepp_hillslope_pass_interchange(output_dir)
+        interchange.run_wepp_hillslope_wat_interchange(output_dir)
 
         interchange_dir = output_dir / 'interchange'
 
@@ -215,7 +227,7 @@ class Observed(NoDbBase):
         if baseflow_opts is None:
             baseflow_opts = BaseflowOpts()
 
-        tot_path = run_totalwatsed3(interchange_dir, baseflow_opts)
+        tot_path = interchange.run_totalwatsed3(interchange_dir, baseflow_opts)
         table = pq.read_table(tot_path)
         sim = table.to_pandas()
 
@@ -316,8 +328,9 @@ class Observed(NoDbBase):
 
     def _load_channel_simulation(self, wsarea_m2, first_year):
         output_dir = Path(self.output_dir)
-        ebe_path = run_wepp_watershed_ebe_interchange(output_dir)
-        chan_path = run_wepp_watershed_chanwb_interchange(output_dir)
+        interchange = _interchange_module()
+        ebe_path = interchange.run_wepp_watershed_ebe_interchange(output_dir)
+        chan_path = interchange.run_wepp_watershed_chanwb_interchange(output_dir)
 
         ebe_table = pq.read_table(ebe_path)
         ebe_df = ebe_table.to_pandas()

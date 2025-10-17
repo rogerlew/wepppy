@@ -602,7 +602,11 @@ def _rename_column(table: pa.Table, old: str, new: str) -> pa.Table:
     except ValueError:
         return table
     names[idx] = new
-    return table.rename_columns(names)
+    renamed = table.rename_columns(names)
+    metadata = table.schema.metadata
+    if metadata:
+        renamed = renamed.replace_schema_metadata(metadata)
+    return renamed
 
 
 def _enrich_loss_tables(tables: Dict[str, pa.Table]) -> Dict[str, pa.Table]:

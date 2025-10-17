@@ -1,0 +1,766 @@
+time=2025-10-17T02:38:33.627772+00:00 run=/wc1/runs/ad/addressable-projector status=missing duration_ms=0
+time=2025-10-17T02:38:35.770985+00:00 run=/wc1/runs/an/antibacterial-disenfranchisement status=migrated duration_ms=2142 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:35.771717+00:00 run=/wc1/runs/fi/fifty-seven-disarray status=missing duration_ms=0
+time=2025-10-17T02:38:35.772197+00:00 run=/wc1/runs/fi/fifteenth-corm status=missing duration_ms=0
+time=2025-10-17T02:38:35.772815+00:00 run=/wc1/runs/fi/fifty-two-triviality status=missing duration_ms=0
+time=2025-10-17T02:38:35.796270+00:00 run=/wc1/runs/fi/fixed-perch status=migrated duration_ms=22 rows=69 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:35.796818+00:00 run=/wc1/runs/fi/five-rioting status=missing duration_ms=0
+time=2025-10-17T02:38:35.797267+00:00 run=/wc1/runs/ot/otherwise-reservist status=missing duration_ms=0
+time=2025-10-17T02:38:35.834768+00:00 run=/wc1/runs/to/top-secret-honeymoon status=migrated duration_ms=37 rows=13 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:35.888095+00:00 run=/wc1/runs/ap/appropriate-eland status=migrated duration_ms=52 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:35.888757+00:00 run=/wc1/runs/hy/hydrostatic-expressionist status=missing duration_ms=0
+time=2025-10-17T02:38:35.923760+00:00 run=/wc1/runs/te/teary-shortbread status=migrated duration_ms=34 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:35.924192+00:00 run=/wc1/runs/te/ten-trifle status=missing duration_ms=0
+time=2025-10-17T02:38:35.924890+00:00 run=/wc1/runs/bl/bleak-inactivation status=missing duration_ms=0
+time=2025-10-17T02:38:35.964298+00:00 run=/wc1/runs/bl/blighted-boundary status=migrated duration_ms=39 rows=56 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:35.964859+00:00 run=/wc1/runs/bl/blowsy-espresso status=missing duration_ms=0
+time=2025-10-17T02:38:36.008871+00:00 run=/wc1/runs/bl/blasting-coreopsis status=migrated duration_ms=43 rows=171 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.009478+00:00 run=/wc1/runs/bl/bleary-cloverleaf status=missing duration_ms=0
+time=2025-10-17T02:38:36.075705+00:00 run=/wc1/runs/br/bronzed-incongruity status=migrated duration_ms=65 rows=783 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.076220+00:00 run=/wc1/runs/br/broken-down-fiver status=missing duration_ms=0
+time=2025-10-17T02:38:36.076745+00:00 run=/wc1/runs/id/idiosyncratic-weekend status=missing duration_ms=0
+time=2025-10-17T02:38:36.077210+00:00 run=/wc1/runs/ni/ninety-one-pang status=missing duration_ms=0
+time=2025-10-17T02:38:36.114072+00:00 run=/wc1/runs/ni/ninety-five-sacrifice status=migrated duration_ms=36 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.163064+00:00 run=/wc1/runs/ni/ninety-five-sacrifice/_pups/omni/scenarios/undisturbed status=migrated duration_ms=48 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.163811+00:00 run=/wc1/runs/in/incorporated-fermion status=missing duration_ms=0
+time=2025-10-17T02:38:36.208067+00:00 run=/wc1/runs/in/intravenous-fallow status=migrated duration_ms=43 rows=7 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.259109+00:00 run=/wc1/runs/in/intravenous-fallow/_pups/omni/scenarios/uniform_moderate status=migrated duration_ms=50 rows=7 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.305351+00:00 run=/wc1/runs/in/intravenous-fallow/_pups/omni/scenarios/undisturbed status=migrated duration_ms=45 rows=7 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.346990+00:00 run=/wc1/runs/in/intravenous-fallow/_pups/omni/scenarios/mulch_60_uniform_low status=migrated duration_ms=41 rows=7 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.377619+00:00 run=/wc1/runs/in/intravenous-fallow/_pups/omni/scenarios/mulch_30_uniform_low status=migrated duration_ms=29 rows=7 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.402410+00:00 run=/wc1/runs/in/intravenous-fallow/_pups/omni/scenarios/uniform_high status=migrated duration_ms=24 rows=7 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.426682+00:00 run=/wc1/runs/in/intravenous-fallow/_pups/omni/scenarios/uniform_low status=migrated duration_ms=23 rows=7 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.456087+00:00 run=/wc1/runs/in/intravenous-fallow/_pups/omni/scenarios/mulch_15_uniform_low status=migrated duration_ms=29 rows=7 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.456716+00:00 run=/wc1/runs/in/infinite-ebb status=missing duration_ms=0
+time=2025-10-17T02:38:36.457195+00:00 run=/wc1/runs/in/intestinal-institute status=missing duration_ms=0
+time=2025-10-17T02:38:36.494809+00:00 run=/wc1/runs/in/inanimate-bungalow status=migrated duration_ms=37 rows=76 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.532318+00:00 run=/wc1/runs/in/inanimate-bungalow/_pups/omni/scenarios/undisturbed status=migrated duration_ms=37 rows=76 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.579112+00:00 run=/wc1/runs/in/inguinal-bylaw status=migrated duration_ms=46 rows=525 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.626882+00:00 run=/wc1/runs/in/individualized-duplicity status=migrated duration_ms=47 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.674774+00:00 run=/wc1/runs/in/individualized-duplicity/omni/scenarios/uniform_high status=migrated duration_ms=47 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.712111+00:00 run=/wc1/runs/in/individualized-duplicity/omni/scenarios/uniform_low status=migrated duration_ms=36 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.768016+00:00 run=/wc1/runs/in/individualized-duplicity/omni/scenarios/mulch_15_sbs_map status=migrated duration_ms=55 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.826853+00:00 run=/wc1/runs/in/individualized-duplicity/omni/scenarios/thinning_40_93 status=migrated duration_ms=58 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.860042+00:00 run=/wc1/runs/in/individualized-duplicity/omni/scenarios/prescribed_fire status=migrated duration_ms=32 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.912042+00:00 run=/wc1/runs/in/individualized-duplicity/omni/scenarios/undisturbed status=migrated duration_ms=51 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:36.912912+00:00 run=/wc1/runs/in/inglorious-passport status=missing duration_ms=0
+time=2025-10-17T02:38:36.963247+00:00 run=/wc1/runs/in/indwelling-troika status=migrated duration_ms=49 rows=3 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.010767+00:00 run=/wc1/runs/in/indisputable-fan status=migrated duration_ms=46 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.050826+00:00 run=/wc1/runs/in/inconspicuous-chronicler status=migrated duration_ms=39 rows=343 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.096295+00:00 run=/wc1/runs/in/incurable-mortarboard status=migrated duration_ms=45 rows=3 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.143747+00:00 run=/wc1/runs/in/invisible-artist status=migrated duration_ms=46 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.174893+00:00 run=/wc1/runs/co/condemnable-humiliation status=migrated duration_ms=30 rows=69 topaz_id_column=1 wepp_id_nulls=69
+time=2025-10-17T02:38:37.175353+00:00 run=/wc1/runs/co/conterminous-diner status=missing duration_ms=0
+time=2025-10-17T02:38:37.239923+00:00 run=/wc1/runs/co/contingent-offertory status=migrated duration_ms=64 rows=2395 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.240356+00:00 run=/wc1/runs/co/coaxial-launderette status=missing duration_ms=0
+time=2025-10-17T02:38:37.240704+00:00 run=/wc1/runs/co/contemptible-doorway status=missing duration_ms=0
+time=2025-10-17T02:38:37.279796+00:00 run=/wc1/runs/co/compulsory-object status=migrated duration_ms=38 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.310186+00:00 run=/wc1/runs/co/compulsory-object/omni/scenarios/mulch_15_uniform_moderate status=migrated duration_ms=29 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.348904+00:00 run=/wc1/runs/co/compulsory-object/omni/scenarios/undisturbed status=migrated duration_ms=38 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.379088+00:00 run=/wc1/runs/co/compulsory-object/omni/scenarios/uniform_moderate status=migrated duration_ms=29 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.428262+00:00 run=/wc1/runs/co/compulsory-object/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm status=migrated duration_ms=48 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.486157+00:00 run=/wc1/runs/co/compulsory-object/omni/scenarios/thinning_40_93 status=migrated duration_ms=57 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.487054+00:00 run=/wc1/runs/co/communal-naysayer status=missing duration_ms=0
+time=2025-10-17T02:38:37.487899+00:00 run=/wc1/runs/co/collectible-homeostasis status=missing duration_ms=0
+time=2025-10-17T02:38:37.606211+00:00 run=/wc1/runs/co/copacetic-note status=migrated duration_ms=117 rows=5422 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.606791+00:00 run=/wc1/runs/co/conflicting-sashay status=missing duration_ms=0
+time=2025-10-17T02:38:37.607285+00:00 run=/wc1/runs/co/columned-tibialis status=missing duration_ms=0
+time=2025-10-17T02:38:37.645811+00:00 run=/wc1/runs/co/conscious-adoptee status=migrated duration_ms=38 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.685872+00:00 run=/wc1/runs/co/conscious-adoptee/_pups/omni/scenarios/undisturbed status=migrated duration_ms=39 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.686441+00:00 run=/wc1/runs/co/corporate-gratitude status=missing duration_ms=0
+time=2025-10-17T02:38:37.723657+00:00 run=/wc1/runs/co/considerable-imperative status=migrated duration_ms=36 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.745921+00:00 run=/wc1/runs/co/considerable-imperative/_pups/omni/scenarios/undisturbed status=migrated duration_ms=21 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.785801+00:00 run=/wc1/runs/co/considerable-imperative/_pups/omni/scenarios/mulch_30_sbs_map status=migrated duration_ms=39 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.824117+00:00 run=/wc1/runs/co/considerable-imperative/_pups/omni/scenarios/mulch_15_sbs_map status=migrated duration_ms=37 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.863879+00:00 run=/wc1/runs/co/considerable-imperative/_pups/omni/scenarios/mulch_60_sbs_map status=migrated duration_ms=39 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.864457+00:00 run=/wc1/runs/ma/matrilineal-gate status=missing duration_ms=0
+time=2025-10-17T02:38:37.864893+00:00 run=/wc1/runs/ma/macroeconomic-criminology status=missing duration_ms=0
+time=2025-10-17T02:38:37.911117+00:00 run=/wc1/runs/ma/mannered-songbook status=migrated duration_ms=45 rows=1335 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:37.966256+00:00 run=/wc1/runs/ma/mannered-songbook/omni/scenarios/undisturbed status=migrated duration_ms=54 rows=1335 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.002875+00:00 run=/wc1/runs/ma/maxillary-command status=migrated duration_ms=36 rows=152 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.034967+00:00 run=/wc1/runs/ma/man-to-man-gazette status=migrated duration_ms=31 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.035612+00:00 run=/wc1/runs/ma/manorial-mutiny status=missing duration_ms=0
+time=2025-10-17T02:38:38.082899+00:00 run=/wc1/runs/ce/centenarian-establishment status=migrated duration_ms=46 rows=3 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.131940+00:00 run=/wc1/runs/ce/celebrated-quackery status=migrated duration_ms=48 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.192501+00:00 run=/wc1/runs/ce/centenarian-dry status=migrated duration_ms=59 rows=293 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.193315+00:00 run=/wc1/runs/mu/multicultural-stegosaur status=missing duration_ms=0
+time=2025-10-17T02:38:38.194231+00:00 run=/wc1/runs/mu/mum-bookcase status=missing duration_ms=0
+time=2025-10-17T02:38:38.195050+00:00 run=/wc1/runs/mu/must-purposefulness status=missing duration_ms=0
+time=2025-10-17T02:38:38.195984+00:00 run=/wc1/runs/vi/virile-helm status=missing duration_ms=0
+time=2025-10-17T02:38:38.256319+00:00 run=/wc1/runs/vi/visible-bloodstream status=migrated duration_ms=59 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.291770+00:00 run=/wc1/runs/vi/vitreous-festschrift status=migrated duration_ms=34 rows=69 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.292231+00:00 run=/wc1/runs/ch/chubby-workshop status=missing duration_ms=0
+time=2025-10-17T02:38:38.292754+00:00 run=/wc1/runs/ch/churlish-metalhead status=missing duration_ms=0
+time=2025-10-17T02:38:38.327094+00:00 run=/wc1/runs/ch/cheerful-hotelier status=migrated duration_ms=33 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.327663+00:00 run=/wc1/runs/ch/chambered-forebrain status=missing duration_ms=0
+time=2025-10-17T02:38:38.328121+00:00 run=/wc1/runs/do/downtown-cornmeal status=missing duration_ms=0
+time=2025-10-17T02:38:38.328673+00:00 run=/wc1/runs/de/dense-tripling status=missing duration_ms=0
+time=2025-10-17T02:38:38.329160+00:00 run=/wc1/runs/de/despondent-shaking status=missing duration_ms=0
+time=2025-10-17T02:38:38.329707+00:00 run=/wc1/runs/de/demographic-occasion status=missing duration_ms=0
+time=2025-10-17T02:38:38.366194+00:00 run=/wc1/runs/gy/gymnastic-fumigation status=migrated duration_ms=36 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.417978+00:00 run=/wc1/runs/rl/rlew-minus-volley status=migrated duration_ms=51 rows=1328 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.462725+00:00 run=/wc1/runs/rl/rlew-minus-volley/omni/scenarios/mulch_15_sbs_map status=migrated duration_ms=44 rows=1328 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.509295+00:00 run=/wc1/runs/rl/rlew-minus-volley/omni/scenarios/mulch_60_sbs_map status=migrated duration_ms=46 rows=1328 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.553695+00:00 run=/wc1/runs/rl/rlew-minus-volley/omni/scenarios/mulch_30_sbs_map status=migrated duration_ms=44 rows=1328 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.554121+00:00 run=/wc1/runs/rl/rlew-thirty-seventh-thrombin status=missing duration_ms=0
+time=2025-10-17T02:38:38.554480+00:00 run=/wc1/runs/rl/rlew-demeaning-jackknife status=missing duration_ms=0
+time=2025-10-17T02:38:38.554826+00:00 run=/wc1/runs/rl/rlew-cyanobacterial-canvas status=missing duration_ms=0
+time=2025-10-17T02:38:38.589799+00:00 run=/wc1/runs/rl/rlew-landlocked-tenure status=migrated duration_ms=34 rows=3 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.633786+00:00 run=/wc1/runs/rl/rlew-unworldly-kachina status=migrated duration_ms=43 rows=613 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.634232+00:00 run=/wc1/runs/rl/rlew-lay-postulant status=missing duration_ms=0
+time=2025-10-17T02:38:38.634762+00:00 run=/wc1/runs/rl/rlew-thoughtful-spy status=missing duration_ms=0
+time=2025-10-17T02:38:38.635167+00:00 run=/wc1/runs/rl/rlew-dutiful-cuddle status=missing duration_ms=0
+time=2025-10-17T02:38:38.635796+00:00 run=/wc1/runs/rl/rlew-synergistic-hospice status=missing duration_ms=0
+time=2025-10-17T02:38:38.636296+00:00 run=/wc1/runs/rl/rlew-cretaceous-cow status=missing duration_ms=0
+time=2025-10-17T02:38:38.714221+00:00 run=/wc1/runs/rl/rlew-countable-heath status=migrated duration_ms=77 rows=2770 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.769379+00:00 run=/wc1/runs/rl/rlew-truculent-canticle status=migrated duration_ms=54 rows=81 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.770186+00:00 run=/wc1/runs/rl/rlew-atrial-saucer status=missing duration_ms=0
+time=2025-10-17T02:38:38.841363+00:00 run=/wc1/runs/rl/rlew-oratorical-arena status=migrated duration_ms=70 rows=769 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.842138+00:00 run=/wc1/runs/rl/rlew-upright-seaweed status=missing duration_ms=0
+time=2025-10-17T02:38:38.901245+00:00 run=/wc1/runs/rl/rlew-unchangeable-formula status=migrated duration_ms=58 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:38.902251+00:00 run=/wc1/runs/rl/rlew-sliced-unruliness status=missing duration_ms=0
+time=2025-10-17T02:38:38.903192+00:00 run=/wc1/runs/rl/rlew-submersible-apse status=missing duration_ms=0
+time=2025-10-17T02:38:38.904163+00:00 run=/wc1/runs/rl/rlew-scrawny-concertina status=missing duration_ms=0
+time=2025-10-17T02:38:39.082410+00:00 run=/wc1/runs/rl/rlew-unseeded-precipitate status=migrated duration_ms=177 rows=14500 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.123567+00:00 run=/wc1/runs/rl/rlew-valueless-protectorate status=migrated duration_ms=40 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.519754+00:00 run=/wc1/runs/rl/rlew-demoralizing-escutcheon status=migrated duration_ms=395 rows=2464 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.524279+00:00 run=/wc1/runs/rl/rlew-counterfeit-band status=missing duration_ms=0
+time=2025-10-17T02:38:39.524813+00:00 run=/wc1/runs/rl/rlew-reassuring-six-pack status=missing duration_ms=0
+time=2025-10-17T02:38:39.571849+00:00 run=/wc1/runs/rl/rlew-complaining-disgust status=migrated duration_ms=46 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.572311+00:00 run=/wc1/runs/rl/rlew-parapsychological-board status=missing duration_ms=0
+time=2025-10-17T02:38:39.615432+00:00 run=/wc1/runs/rl/rlew-oceanic-crucifix status=migrated duration_ms=42 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.653092+00:00 run=/wc1/runs/rl/rlew-well-made-brinkmanship status=migrated duration_ms=37 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.689757+00:00 run=/wc1/runs/rl/rlew-well-made-brinkmanship/omni/scenarios/mulch_60_sbs_map status=migrated duration_ms=36 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.724378+00:00 run=/wc1/runs/rl/rlew-well-made-brinkmanship/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=34 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.758613+00:00 run=/wc1/runs/rl/rlew-well-made-brinkmanship/omni/scenarios/mulch_30_uniform_high status=migrated duration_ms=33 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.788720+00:00 run=/wc1/runs/rl/rlew-well-made-brinkmanship/omni/scenarios/mulch_15_sbs_map status=migrated duration_ms=29 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.827234+00:00 run=/wc1/runs/rl/rlew-well-made-brinkmanship/omni/scenarios/mulch_15_uniform_high status=migrated duration_ms=37 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.862481+00:00 run=/wc1/runs/rl/rlew-well-made-brinkmanship/omni/scenarios/mulch_30_sbs_map status=migrated duration_ms=34 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.893755+00:00 run=/wc1/runs/rl/rlew-well-made-brinkmanship/omni/scenarios/uniform_high status=migrated duration_ms=30 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.894245+00:00 run=/wc1/runs/rl/rlew-well-connected-dominus status=missing duration_ms=0
+time=2025-10-17T02:38:39.894858+00:00 run=/wc1/runs/rl/rlew-devilish-hermitage status=missing duration_ms=0
+time=2025-10-17T02:38:39.895293+00:00 run=/wc1/runs/rl/rlew-equitable-fenugreek status=missing duration_ms=0
+time=2025-10-17T02:38:39.895826+00:00 run=/wc1/runs/rl/rlew-woolen-portal status=missing duration_ms=0
+time=2025-10-17T02:38:39.896269+00:00 run=/wc1/runs/rl/rlew-polite-goshawk status=missing duration_ms=0
+time=2025-10-17T02:38:39.896866+00:00 run=/wc1/runs/rl/rlew-historical-isotope status=missing duration_ms=0
+time=2025-10-17T02:38:39.897320+00:00 run=/wc1/runs/rl/rlew-rental-cross-reference status=missing duration_ms=0
+time=2025-10-17T02:38:39.940533+00:00 run=/wc1/runs/rl/rlew-like-tower status=migrated duration_ms=42 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:39.941161+00:00 run=/wc1/runs/rl/rlew-stock-convention status=missing duration_ms=0
+time=2025-10-17T02:38:39.997273+00:00 run=/wc1/runs/rl/rlew-adenoid-envoy status=migrated duration_ms=55 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.047011+00:00 run=/wc1/runs/rl/rlew-principled-illegibility status=migrated duration_ms=48 rows=76 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.103074+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity status=migrated duration_ms=55 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.167765+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/211 status=migrated duration_ms=63 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.209841+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/23 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.248559+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/54 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.288842+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/181 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.327455+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/118 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.368805+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/112 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.410974+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/165 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.450858+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/29 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.495327+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/223 status=migrated duration_ms=44 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.534874+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/229 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.585421+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/66 status=migrated duration_ms=50 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.638020+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/11 status=migrated duration_ms=52 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.689127+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/88 status=migrated duration_ms=50 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.743222+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/82 status=migrated duration_ms=53 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.800116+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/157 status=migrated duration_ms=56 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.847964+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/120 status=migrated duration_ms=47 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.888938+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/208 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.929933+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/202 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:40.968897+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/101 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.010072+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/176 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.046969+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/198 status=migrated duration_ms=36 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.084022+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/192 status=migrated duration_ms=36 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.124706+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/30 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.165306+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/47 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.221969+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/230 status=migrated duration_ms=56 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.285326+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/144 status=migrated duration_ms=62 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.350320+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/133 status=migrated duration_ms=64 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.418439+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/91 status=migrated duration_ms=67 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.456812+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/75 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.493449+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/139 status=migrated duration_ms=36 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.527259+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/134 status=migrated duration_ms=33 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.561993+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/143 status=migrated duration_ms=34 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.594335+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/78 status=migrated duration_ms=31 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.634357+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/96 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.665851+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/72 status=migrated duration_ms=30 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.703276+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/149 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.748440+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/240 status=migrated duration_ms=44 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.786085+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/237 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.830356+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/171 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.888713+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/106 status=migrated duration_ms=57 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:41.948037+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/195 status=migrated duration_ms=58 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.000518+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/40 status=migrated duration_ms=51 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.040929+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/37 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.084897+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/205 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.128474+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/16 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.171731+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/61 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.209826+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/85 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.253387+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/127 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.292053+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/150 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.332281+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/224 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.372635+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/53 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.413780+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/24 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.462332+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/168 status=migrated duration_ms=48 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.517066+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/186 status=migrated duration_ms=54 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.568904+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/162 status=migrated duration_ms=51 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.621646+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/115 status=migrated duration_ms=52 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.669430+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/59 status=migrated duration_ms=47 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.709678+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/216 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.749918+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/7 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.787749+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/188 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.825161+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/166 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.863829+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/111 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.901089+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/182 status=migrated duration_ms=36 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.940732+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/57 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:42.983762+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/20 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.025026+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/218 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.065995+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/9 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.123143+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/3 status=migrated duration_ms=56 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.177969+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/212 status=migrated duration_ms=54 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.218015+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/123 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.260106+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/154 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.303334+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/18 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.342698+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/81 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.386756+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/12 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.425764+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/65 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.465693+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/129 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.509834+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/220 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.553759+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/44 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.599853+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/33 status=migrated duration_ms=45 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.640594+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/108 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.679213+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/191 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.718385+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/175 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.775376+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/102 status=migrated duration_ms=56 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.839270+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/39 status=migrated duration_ms=63 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.894954+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/201 status=migrated duration_ms=54 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.956304+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/98 status=migrated duration_ms=60 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:43.996773+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/76 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.038913+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/92 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.078765+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/130 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.118315+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/147 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.176659+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/233 status=migrated duration_ms=57 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.235251+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/239 status=migrated duration_ms=58 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.365167+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/234 status=migrated duration_ms=129 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.444031+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/243 status=migrated duration_ms=78 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.519267+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/71 status=migrated duration_ms=74 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.580592+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/95 status=migrated duration_ms=60 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.617906+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/140 status=migrated duration_ms=36 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.654307+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/137 status=migrated duration_ms=35 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.696478+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/206 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.738834+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/34 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.778902+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/43 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.822072+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/196 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.864153+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/178 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.905143+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/105 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.941890+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/172 status=migrated duration_ms=36 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:44.984845+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/49 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.030910+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/227 status=migrated duration_ms=45 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.070914+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/153 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.120180+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/124 status=migrated duration_ms=48 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.173070+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/86 status=migrated duration_ms=52 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.223764+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/68 status=migrated duration_ms=49 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.264911+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/62 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.305804+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/15 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.345888+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/159 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.387883+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/4 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.428840+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/215 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.469009+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/116 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.514093+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/161 status=migrated duration_ms=44 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.555923+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/185 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.596979+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/27 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.648787+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/50 status=migrated duration_ms=51 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.699416+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/151 status=migrated duration_ms=50 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.756111+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/126 status=migrated duration_ms=55 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.811300+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/84 status=migrated duration_ms=54 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.858701+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/60 status=migrated duration_ms=46 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.897752+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/17 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.938901+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/225 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:45.978772+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/58 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.020842+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/114 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.059921+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/163 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.102251+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/169 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.142767+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/187 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.184899+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/25 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.228080+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/52 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.283277+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/6 status=migrated duration_ms=54 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.337997+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/217 status=migrated duration_ms=53 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.391257+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/148 status=migrated duration_ms=52 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.446743+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/73 status=migrated duration_ms=54 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.493793+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/79 status=migrated duration_ms=46 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.528277+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/97 status=migrated duration_ms=34 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.566764+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/142 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.603016+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/135 status=migrated duration_ms=35 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.641187+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/236 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.678861+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/241 status=migrated duration_ms=36 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.723716+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/36 status=migrated duration_ms=44 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.767118+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/41 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.810950+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/194 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.852827+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/107 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.893842+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/170 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.944417+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/204 status=migrated duration_ms=50 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:46.995834+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/203 status=migrated duration_ms=50 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.049969+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/209 status=migrated duration_ms=53 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.114062+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/46 status=migrated duration_ms=63 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.153652+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/31 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.194520+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/193 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.234892+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/177 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.276025+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/100 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.317873+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/199 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.354967+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/231 status=migrated duration_ms=36 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.397667+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/138 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.437037+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/74 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.476822+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/90 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.524263+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/132 status=migrated duration_ms=46 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.583074+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/145 status=migrated duration_ms=58 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.583936+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/1 status=missing duration_ms=0
+time=2025-10-17T02:38:47.664903+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/210 status=migrated duration_ms=80 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.738283+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/28 status=migrated duration_ms=72 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.780390+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/164 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.820148+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/113 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.859049+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/180 status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.894873+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/119 status=migrated duration_ms=35 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.939066+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/55 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:47.981129+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/22 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.024966+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/228 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.072092+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/222 status=migrated duration_ms=46 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.115802+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/121 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.163912+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/156 status=migrated duration_ms=47 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.212237+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/83 status=migrated duration_ms=47 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.262429+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/10 status=migrated duration_ms=49 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.304910+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/67 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.358954+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/89 status=migrated duration_ms=53 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.407874+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/226 status=migrated duration_ms=48 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.445892+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/158 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.487722+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/14 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.527917+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/63 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.567894+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/87 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.608817+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/69 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.649797+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/125 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.689343+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/152 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.726657+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/214 status=migrated duration_ms=36 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.767842+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/5 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.814019+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/51 status=migrated duration_ms=45 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.864984+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/26 status=migrated duration_ms=50 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.928337+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/184 status=migrated duration_ms=62 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:48.986889+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/160 status=migrated duration_ms=57 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.036348+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/117 status=migrated duration_ms=48 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.079891+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/242 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.109886+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/235 status=migrated duration_ms=29 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.150874+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/136 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.192052+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/141 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.236394+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/94 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.316850+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/70 status=migrated duration_ms=79 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.359818+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/207 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.539098+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/48 status=migrated duration_ms=178 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.603026+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/173 status=migrated duration_ms=61 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.659766+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/104 status=migrated duration_ms=55 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.697465+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/197 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.738274+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/179 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.780483+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/42 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.820539+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/35 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.858796+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/38 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.901430+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/103 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.943925+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/174 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:49.983854+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/109 status=migrated duration_ms=39 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.021248+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/190 status=migrated duration_ms=37 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.070972+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/32 status=migrated duration_ms=49 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.120967+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/45 status=migrated duration_ms=49 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.179132+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/200 status=migrated duration_ms=57 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.240454+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/146 status=migrated duration_ms=60 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.298768+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/131 status=migrated duration_ms=57 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.340896+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/93 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.381974+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/99 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.426875+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/77 status=migrated duration_ms=44 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.472026+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/238 status=migrated duration_ms=44 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.517824+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/232 status=migrated duration_ms=45 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.560087+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/21 status=migrated duration_ms=41 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.612472+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/56 status=migrated duration_ms=51 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.653417+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/183 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.696106+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/189 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.747385+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/110 status=migrated duration_ms=50 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.807848+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/167 status=migrated duration_ms=59 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.873269+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/213 status=migrated duration_ms=64 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.930922+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/2 status=migrated duration_ms=56 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:50.976638+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/8 status=migrated duration_ms=45 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.023856+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/219 status=migrated duration_ms=46 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.076888+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/128 status=migrated duration_ms=52 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.119866+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/64 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.169902+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/13 status=migrated duration_ms=49 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.214121+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/19 status=migrated duration_ms=43 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.256873+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/80 status=migrated duration_ms=42 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.298007+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/155 status=migrated duration_ms=40 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.356294+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/122 status=migrated duration_ms=57 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.410310+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/contrasts/221 status=migrated duration_ms=53 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.480274+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/scenarios/uniform_low status=migrated duration_ms=69 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.542853+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/scenarios/uniform_moderate status=migrated duration_ms=61 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.582314+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/scenarios/mulch_15_sbs_map status=migrated duration_ms=38 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.615993+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/scenarios/uniform_high status=migrated duration_ms=33 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.647000+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/scenarios/mulch_60_sbs_map status=migrated duration_ms=30 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.683173+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/scenarios/undisturbed status=migrated duration_ms=35 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.713494+00:00 run=/wc1/runs/rl/rlew-confirmed-complementarity/omni/scenarios/mulch_30_sbs_map status=migrated duration_ms=29 rows=304 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.772073+00:00 run=/wc1/runs/rl/rlew-teratogenic-draftsman status=migrated duration_ms=58 rows=2431 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.772635+00:00 run=/wc1/runs/rl/rlew-atrophic-strangulation status=missing duration_ms=0
+time=2025-10-17T02:38:51.773033+00:00 run=/wc1/runs/rl/rlew-parochial-governorship status=missing duration_ms=0
+time=2025-10-17T02:38:51.773495+00:00 run=/wc1/runs/rl/rlew-hourly-cap status=missing duration_ms=0
+time=2025-10-17T02:38:51.813295+00:00 run=/wc1/runs/rl/rlew-lymphocytic-tubule status=migrated duration_ms=39 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.849840+00:00 run=/wc1/runs/rl/rlew-womanly-surge status=migrated duration_ms=36 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.886699+00:00 run=/wc1/runs/rl/rlew-sublingual-gull status=migrated duration_ms=36 rows=33 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.926642+00:00 run=/wc1/runs/rl/rlew-furnished-moral status=migrated duration_ms=39 rows=87 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:51.927091+00:00 run=/wc1/runs/rl/rlew-helpful-ocelot status=missing duration_ms=0
+time=2025-10-17T02:38:51.927475+00:00 run=/wc1/runs/rl/rlew-halcyon-autoimmunity status=missing duration_ms=0
+time=2025-10-17T02:38:51.927866+00:00 run=/wc1/runs/rl/rlew-celebratory-bitmap status=missing duration_ms=0
+time=2025-10-17T02:38:51.928215+00:00 run=/wc1/runs/rl/rlew-superior-valuation status=missing duration_ms=0
+time=2025-10-17T02:38:51.973721+00:00 run=/wc1/runs/rl/rlew-purposeful-careerist status=migrated duration_ms=45 rows=414 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.037910+00:00 run=/wc1/runs/rl/rlew-creditable-moppet status=migrated duration_ms=63 rows=2455 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.038335+00:00 run=/wc1/runs/rl/rlew-secure-zucchini status=missing duration_ms=0
+time=2025-10-17T02:38:52.038828+00:00 run=/wc1/runs/rl/rlew-general-rioting status=missing duration_ms=0
+time=2025-10-17T02:38:52.039192+00:00 run=/wc1/runs/rl/rlew-unworldly-rollover status=missing duration_ms=0
+time=2025-10-17T02:38:52.039714+00:00 run=/wc1/runs/rl/rlew-unpersuasive-howdah status=missing duration_ms=0
+time=2025-10-17T02:38:52.040078+00:00 run=/wc1/runs/rl/rlew-radio-parasol status=missing duration_ms=0
+time=2025-10-17T02:38:52.078577+00:00 run=/wc1/runs/rl/rlew-barred-gymnasium status=migrated duration_ms=38 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.109985+00:00 run=/wc1/runs/rl/rlew-purifying-wolf status=migrated duration_ms=30 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.151890+00:00 run=/wc1/runs/rl/rlew-purifying-wolf/_pups/omni/scenarios/mulch_15_sbs_map status=migrated duration_ms=41 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.188415+00:00 run=/wc1/runs/rl/rlew-purifying-wolf/_pups/omni/scenarios/undisturbed status=migrated duration_ms=36 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.225702+00:00 run=/wc1/runs/rl/rlew-purifying-wolf/_pups/omni/scenarios/mulch_60_sbs_map status=migrated duration_ms=36 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.265768+00:00 run=/wc1/runs/rl/rlew-purifying-wolf/_pups/omni/scenarios/mulch_30_sbs_map status=migrated duration_ms=39 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.305177+00:00 run=/wc1/runs/rl/rlew-coarse-logic status=migrated duration_ms=38 rows=8 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.346711+00:00 run=/wc1/runs/rl/rlew-periodic-oblation status=migrated duration_ms=41 rows=244 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.347167+00:00 run=/wc1/runs/rl/rlew-exponential-dolphin status=missing duration_ms=0
+time=2025-10-17T02:38:52.479924+00:00 run=/wc1/runs/rl/rlew-pale-faced-override status=migrated duration_ms=132 rows=47 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.480620+00:00 run=/wc1/runs/rl/rlew-esophageal-mourning status=missing duration_ms=0
+time=2025-10-17T02:38:52.524226+00:00 run=/wc1/runs/rl/rlew-cometary-nettle status=migrated duration_ms=43 rows=220 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.524809+00:00 run=/wc1/runs/rl/rlew-endothelial-epiphany status=missing duration_ms=0
+time=2025-10-17T02:38:52.525330+00:00 run=/wc1/runs/rl/rlew-ninety-three-wimp status=missing duration_ms=0
+time=2025-10-17T02:38:52.564867+00:00 run=/wc1/runs/rl/rlew-doctoral-uptown status=migrated duration_ms=38 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.565336+00:00 run=/wc1/runs/rl/rlew-in-slate status=missing duration_ms=0
+time=2025-10-17T02:38:52.607125+00:00 run=/wc1/runs/ex/expeditionary-adenoidectomy status=migrated duration_ms=41 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.647891+00:00 run=/wc1/runs/ex/extreme-saw status=migrated duration_ms=40 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.685956+00:00 run=/wc1/runs/ex/excess-excellence status=migrated duration_ms=37 rows=156 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.686477+00:00 run=/wc1/runs/ex/extracurricular-nocturne status=missing duration_ms=0
+time=2025-10-17T02:38:52.755940+00:00 run=/wc1/runs/ex/expeditionary-recycling status=migrated duration_ms=69 rows=506 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.756487+00:00 run=/wc1/runs/ex/extroverted-repellent status=missing duration_ms=0
+time=2025-10-17T02:38:52.815852+00:00 run=/wc1/runs/bu/bucolic-bag status=migrated duration_ms=58 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.859848+00:00 run=/wc1/runs/bu/bucolic-bag/omni/scenarios/thinning_40_93 status=migrated duration_ms=43 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.892569+00:00 run=/wc1/runs/bu/bucolic-bag/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm status=migrated duration_ms=32 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.925561+00:00 run=/wc1/runs/bu/bucolic-bag/omni/scenarios/mulch_15_uniform_moderate status=migrated duration_ms=32 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.956189+00:00 run=/wc1/runs/bu/bucolic-bag/omni/scenarios/uniform_moderate status=migrated duration_ms=30 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:52.987135+00:00 run=/wc1/runs/bu/bucolic-bag/omni/scenarios/undisturbed status=migrated duration_ms=30 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.021111+00:00 run=/wc1/runs/ba/barrel-shaped-succinylcholine status=migrated duration_ms=33 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.061127+00:00 run=/wc1/runs/ba/barrel-shaped-succinylcholine/omni/scenarios/undisturbed status=migrated duration_ms=39 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.098768+00:00 run=/wc1/runs/ba/barrel-shaped-succinylcholine/omni/scenarios/thinning_40_93 status=migrated duration_ms=37 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.134811+00:00 run=/wc1/runs/ba/barrel-shaped-succinylcholine/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm status=migrated duration_ms=35 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.166822+00:00 run=/wc1/runs/ba/barrel-shaped-succinylcholine/omni/scenarios/mulch_15_uniform_moderate status=migrated duration_ms=31 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.196105+00:00 run=/wc1/runs/ba/barrel-shaped-succinylcholine/omni/scenarios/uniform_moderate status=migrated duration_ms=28 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.251194+00:00 run=/wc1/runs/ba/barbaric-superior status=migrated duration_ms=54 rows=165 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.307187+00:00 run=/wc1/runs/ba/balanced-penumbra status=migrated duration_ms=55 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.308089+00:00 run=/wc1/runs/ba/banned-disproportion status=missing duration_ms=0
+time=2025-10-17T02:38:53.373437+00:00 run=/wc1/runs/ba/baffled-ripening status=migrated duration_ms=64 rows=64 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.440179+00:00 run=/wc1/runs/ba/bandy-drake status=migrated duration_ms=65 rows=130 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.476942+00:00 run=/wc1/runs/ba/bald-rogue status=migrated duration_ms=35 rows=68 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.518842+00:00 run=/wc1/runs/lo/long-ago-readout status=migrated duration_ms=41 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.519341+00:00 run=/wc1/runs/lo/lossless-degeneration status=missing duration_ms=0
+time=2025-10-17T02:38:53.519900+00:00 run=/wc1/runs/le/lean-forelimb status=missing duration_ms=0
+time=2025-10-17T02:38:53.559872+00:00 run=/wc1/runs/th/theoretical-monad status=migrated duration_ms=39 rows=73 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.600464+00:00 run=/wc1/runs/th/throbbing-sylvan status=migrated duration_ms=40 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.643874+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/mulch_60_uniform_moderate status=migrated duration_ms=42 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.684797+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/mulch_30_uniform_high status=migrated duration_ms=40 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.723452+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=38 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.767496+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/mulch_15_uniform_moderate status=migrated duration_ms=43 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.807096+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/mulch_60_uniform_low status=migrated duration_ms=39 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.863353+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/uniform_high status=migrated duration_ms=55 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.907020+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/mulch_15_uniform_high status=migrated duration_ms=42 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:53.958848+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/mulch_30_uniform_low status=migrated duration_ms=51 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.011334+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/uniform_moderate status=migrated duration_ms=51 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.079305+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/uniform_low status=migrated duration_ms=67 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.115243+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/mulch_30_uniform_moderate status=migrated duration_ms=35 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.153999+00:00 run=/wc1/runs/th/throbbing-sylvan/_pups/omni/scenarios/mulch_15_uniform_low status=migrated duration_ms=38 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.154577+00:00 run=/wc1/runs/th/thirty-three-finality status=missing duration_ms=0
+time=2025-10-17T02:38:54.188559+00:00 run=/wc1/runs/th/three-pronged-fritter status=migrated duration_ms=33 rows=293 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.236850+00:00 run=/wc1/runs/so/southwest-plutocrat status=migrated duration_ms=47 rows=936 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.237262+00:00 run=/wc1/runs/se/self-comeback status=missing duration_ms=0
+time=2025-10-17T02:38:54.271505+00:00 run=/wc1/runs/se/self-appointed-upstairs status=migrated duration_ms=33 rows=64 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.296274+00:00 run=/wc1/runs/se/self-supporting-allowance status=migrated duration_ms=24 rows=345 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.332804+00:00 run=/wc1/runs/se/self-propelled-marabou status=migrated duration_ms=35 rows=76 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.369833+00:00 run=/wc1/runs/se/self-propelled-marabou/_pups/omni/scenarios/undisturbed status=migrated duration_ms=36 rows=76 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.494883+00:00 run=/wc1/runs/se/self-made-polyandry status=migrated duration_ms=124 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.540514+00:00 run=/wc1/runs/ac/accepted-maggot status=missing duration_ms=0
+time=2025-10-17T02:38:54.541338+00:00 run=/wc1/runs/ac/actuarial-wakefulness status=missing duration_ms=0
+time=2025-10-17T02:38:54.615532+00:00 run=/wc1/runs/as/assistive-elk status=migrated duration_ms=73 rows=257 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.616132+00:00 run=/wc1/runs/as/ashamed-affirmative status=missing duration_ms=0
+time=2025-10-17T02:38:54.720377+00:00 run=/wc1/runs/ow/owlish-futurism status=migrated duration_ms=103 rows=60 topaz_id_column=1 wepp_id_nulls=60
+time=2025-10-17T02:38:54.720934+00:00 run=/wc1/runs/am/amiss-polyhedron status=missing duration_ms=0
+time=2025-10-17T02:38:54.770413+00:00 run=/wc1/runs/su/sunset-belittling status=migrated duration_ms=48 rows=20 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.770976+00:00 run=/wc1/runs/su/supine-disputant status=missing duration_ms=0
+time=2025-10-17T02:38:54.827561+00:00 run=/wc1/runs/su/subservient-mortarboard status=migrated duration_ms=56 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.827969+00:00 run=/wc1/runs/su/subjective-pinch status=missing duration_ms=0
+time=2025-10-17T02:38:54.869655+00:00 run=/wc1/runs/su/subdural-sisal status=migrated duration_ms=41 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.870172+00:00 run=/wc1/runs/tr/transitional-obstetrics status=missing duration_ms=0
+time=2025-10-17T02:38:54.918861+00:00 run=/wc1/runs/tr/trustful-footnote status=migrated duration_ms=48 rows=148 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.919386+00:00 run=/wc1/runs/tr/true-false-paradox status=missing duration_ms=0
+time=2025-10-17T02:38:54.957758+00:00 run=/wc1/runs/tr/trumpet-shaped-inequality status=migrated duration_ms=37 rows=155 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:54.989090+00:00 run=/wc1/runs/tr/trumpet-shaped-inequality/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=30 rows=155 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.022299+00:00 run=/wc1/runs/tr/trumpet-shaped-inequality/omni/scenarios/uniform_high status=migrated duration_ms=32 rows=155 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.022896+00:00 run=/wc1/runs/tr/trillionth-flask status=missing duration_ms=0
+time=2025-10-17T02:38:55.023274+00:00 run=/wc1/runs/tr/true-blue-crackdown status=missing duration_ms=0
+time=2025-10-17T02:38:55.074510+00:00 run=/wc1/runs/ag/aground-thesis status=migrated duration_ms=50 rows=343 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.074913+00:00 run=/wc1/runs/pi/picaresque-snowman status=missing duration_ms=0
+time=2025-10-17T02:38:55.075262+00:00 run=/wc1/runs/pi/pineal-simony status=missing duration_ms=0
+time=2025-10-17T02:38:55.075593+00:00 run=/wc1/runs/pi/pigeon-toed-phonics status=missing duration_ms=0
+time=2025-10-17T02:38:55.113952+00:00 run=/wc1/runs/bo/boisterous-veil status=migrated duration_ms=38 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.156057+00:00 run=/wc1/runs/bo/boisterous-veil/omni/scenarios/mulch60 status=migrated duration_ms=41 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.156713+00:00 run=/wc1/runs/bo/bouncing-relaxant status=missing duration_ms=0
+time=2025-10-17T02:38:55.192774+00:00 run=/wc1/runs/be/beatable-public status=migrated duration_ms=35 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.244320+00:00 run=/wc1/runs/be/belted-coconut status=migrated duration_ms=51 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.245007+00:00 run=/wc1/runs/be/best-selling-leaflet status=missing duration_ms=0
+time=2025-10-17T02:38:55.245745+00:00 run=/wc1/runs/be/beautiful-farce status=missing duration_ms=0
+time=2025-10-17T02:38:55.246290+00:00 run=/wc1/runs/im/imponderable-matrix status=missing duration_ms=0
+time=2025-10-17T02:38:55.246921+00:00 run=/wc1/runs/im/immediate-dinette status=missing duration_ms=0
+time=2025-10-17T02:38:55.247643+00:00 run=/wc1/runs/ig/igneous-chunk status=missing duration_ms=0
+time=2025-10-17T02:38:55.374730+00:00 run=/wc1/runs/du/dumbfounded-patentee status=migrated duration_ms=126 rows=5426 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.415460+00:00 run=/wc1/runs/du/dusty-creeper status=migrated duration_ms=40 rows=60 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.453854+00:00 run=/wc1/runs/cr/crosswise-sorghum status=migrated duration_ms=37 rows=184 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.454311+00:00 run=/wc1/runs/cr/criminological-proposal status=missing duration_ms=0
+time=2025-10-17T02:38:55.493851+00:00 run=/wc1/runs/cr/creedal-forebear status=migrated duration_ms=39 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.494416+00:00 run=/wc1/runs/cr/cruciferous-liberalization status=missing duration_ms=0
+time=2025-10-17T02:38:55.494858+00:00 run=/wc1/runs/cl/clerical-carbonara status=missing duration_ms=0
+time=2025-10-17T02:38:55.495249+00:00 run=/wc1/runs/cl/client-server-monk status=missing duration_ms=0
+time=2025-10-17T02:38:55.532875+00:00 run=/wc1/runs/mo/monopolistic-hyphenation status=migrated duration_ms=37 rows=159 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.533285+00:00 run=/wc1/runs/mo/monistic-gulag status=missing duration_ms=0
+time=2025-10-17T02:38:55.533903+00:00 run=/wc1/runs/ca/caudal-scrape status=missing duration_ms=0
+time=2025-10-17T02:38:55.534311+00:00 run=/wc1/runs/ca/callable-oil status=missing duration_ms=0
+time=2025-10-17T02:38:55.565890+00:00 run=/wc1/runs/ca/calloused-tinderbox status=migrated duration_ms=31 rows=79 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.606023+00:00 run=/wc1/runs/ca/calculable-clang status=migrated duration_ms=39 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.647951+00:00 run=/wc1/runs/ca/calculable-clang/omni/scenarios/undisturbed status=migrated duration_ms=41 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.648606+00:00 run=/wc1/runs/me/metonymic-regalia status=missing duration_ms=0
+time=2025-10-17T02:38:55.649146+00:00 run=/wc1/runs/me/meritocratic-kudzu status=missing duration_ms=0
+time=2025-10-17T02:38:55.649775+00:00 run=/wc1/runs/re/resonant-perfectibility status=missing duration_ms=0
+time=2025-10-17T02:38:55.650299+00:00 run=/wc1/runs/re/reconcilable-sclerosis status=missing duration_ms=0
+time=2025-10-17T02:38:55.686939+00:00 run=/wc1/runs/re/relative-survivalist status=migrated duration_ms=36 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.687471+00:00 run=/wc1/runs/re/resentful-pampas status=missing duration_ms=0
+time=2025-10-17T02:38:55.727918+00:00 run=/wc1/runs/re/redoubtable-breadfruit status=migrated duration_ms=40 rows=343 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.782021+00:00 run=/wc1/runs/re/retroactive-dogleg status=migrated duration_ms=53 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.782892+00:00 run=/wc1/runs/re/recursive-coverlet status=missing duration_ms=0
+time=2025-10-17T02:38:55.833994+00:00 run=/wc1/runs/re/resonant-ogre status=migrated duration_ms=50 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.834866+00:00 run=/wc1/runs/re/recent-infamy status=missing duration_ms=0
+time=2025-10-17T02:38:55.835669+00:00 run=/wc1/runs/re/removable-resuscitation status=missing duration_ms=0
+time=2025-10-17T02:38:55.836307+00:00 run=/wc1/runs/eq/equal-pentagon status=missing duration_ms=0
+time=2025-10-17T02:38:55.837110+00:00 run=/wc1/runs/sr/srivas42-polymorphous-wok status=missing duration_ms=0
+time=2025-10-17T02:38:55.837961+00:00 run=/wc1/runs/hi/high-fidelity-clique status=missing duration_ms=0
+time=2025-10-17T02:38:55.903455+00:00 run=/wc1/runs/hi/high-voltage-technocrat status=migrated duration_ms=64 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.962328+00:00 run=/wc1/runs/hi/hidebound-philologist status=migrated duration_ms=58 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:55.963280+00:00 run=/wc1/runs/hi/histological-boatswain status=missing duration_ms=0
+time=2025-10-17T02:38:56.003721+00:00 run=/wc1/runs/at/atmospheric-hatchway status=migrated duration_ms=39 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.046789+00:00 run=/wc1/runs/sl/sluggish-lovage status=migrated duration_ms=42 rows=276 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.047297+00:00 run=/wc1/runs/sl/slashed-pachysandra status=missing duration_ms=0
+time=2025-10-17T02:38:56.077628+00:00 run=/wc1/runs/sl/slurred-sourness status=migrated duration_ms=29 rows=3 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.114526+00:00 run=/wc1/runs/sl/slurred-sourness/omni/scenarios/undisturbed status=migrated duration_ms=36 rows=3 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.150922+00:00 run=/wc1/runs/op/opportune-bleakness status=migrated duration_ms=35 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.183900+00:00 run=/wc1/runs/op/opportune-bleakness/_pups/omni/scenarios/uniform_low status=migrated duration_ms=32 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.223801+00:00 run=/wc1/runs/op/opportune-bleakness/_pups/omni/scenarios/mulch_15_uniform_low status=migrated duration_ms=39 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.273114+00:00 run=/wc1/runs/es/established-oracle status=migrated duration_ms=48 rows=185 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.319882+00:00 run=/wc1/runs/es/established-oracle/omni/scenarios/thinning_40_75 status=migrated duration_ms=46 rows=185 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.366914+00:00 run=/wc1/runs/es/established-oracle/omni/scenarios/prescribed_fire status=migrated duration_ms=46 rows=185 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.425239+00:00 run=/wc1/runs/es/established-oracle/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=57 rows=185 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.488137+00:00 run=/wc1/runs/es/established-oracle/omni/scenarios/undisturbed status=migrated duration_ms=62 rows=185 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.549285+00:00 run=/wc1/runs/es/established-oracle/omni/scenarios/uniform_high status=migrated duration_ms=60 rows=185 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.598347+00:00 run=/wc1/runs/es/established-oracle/omni/scenarios/mulch_60_sbs_map status=migrated duration_ms=48 rows=185 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.599085+00:00 run=/wc1/runs/es/especial-balk status=missing duration_ms=0
+time=2025-10-17T02:38:56.599923+00:00 run=/wc1/runs/pl/plundering-advisee status=missing duration_ms=0
+time=2025-10-17T02:38:56.647938+00:00 run=/wc1/runs/em/emergent-chiffon status=migrated duration_ms=47 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.648544+00:00 run=/wc1/runs/em/empowered-compatibility status=missing duration_ms=0
+time=2025-10-17T02:38:56.649017+00:00 run=/wc1/runs/pr/predatory-electrophoresis status=missing duration_ms=0
+time=2025-10-17T02:38:56.649533+00:00 run=/wc1/runs/pr/prepositional-aliyah status=missing duration_ms=0
+time=2025-10-17T02:38:56.696392+00:00 run=/wc1/runs/pr/predictable-flab status=migrated duration_ms=46 rows=70 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.696940+00:00 run=/wc1/runs/pr/proverbial-contention status=missing duration_ms=0
+time=2025-10-17T02:38:56.738418+00:00 run=/wc1/runs/pr/promising-e-commerce status=migrated duration_ms=41 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.783574+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/mulch_30_uniform_low status=migrated duration_ms=44 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.828462+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/uniform_moderate status=migrated duration_ms=44 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.870386+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/mulch_60_uniform_low status=migrated duration_ms=41 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.914064+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/uniform_low status=migrated duration_ms=43 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:56.959617+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/mulch_30_uniform_moderate status=migrated duration_ms=44 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.002482+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/mulch_15_uniform_low status=migrated duration_ms=42 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.052443+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/mulch_15_uniform_high status=migrated duration_ms=49 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.113273+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/uniform_high status=migrated duration_ms=60 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.185980+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/mulch_15_uniform_moderate status=migrated duration_ms=71 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.245443+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=58 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.286501+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/mulch_30_uniform_high status=migrated duration_ms=40 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.320907+00:00 run=/wc1/runs/pr/promising-e-commerce/_pups/omni/scenarios/undisturbed status=migrated duration_ms=33 rows=724 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.360581+00:00 run=/wc1/runs/pr/prompt-dowry status=migrated duration_ms=39 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.361064+00:00 run=/wc1/runs/ox/oxidative-jitters status=missing duration_ms=0
+time=2025-10-17T02:38:57.396808+00:00 run=/wc1/runs/av/average-consumer status=migrated duration_ms=35 rows=20 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.433985+00:00 run=/wc1/runs/or/orchestral-ringing status=migrated duration_ms=36 rows=118 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.488742+00:00 run=/wc1/runs/or/oratorical-repose status=migrated duration_ms=54 rows=588 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.536215+00:00 run=/wc1/runs/or/oratorical-repose/_pups/omni/scenarios/mulch_60_uniform_low status=migrated duration_ms=46 rows=588 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.583096+00:00 run=/wc1/runs/or/oratorical-repose/_pups/omni/scenarios/uniform_high status=migrated duration_ms=46 rows=588 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.625111+00:00 run=/wc1/runs/or/oratorical-repose/_pups/omni/scenarios/thinning_40_93 status=migrated duration_ms=41 rows=588 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.625742+00:00 run=/wc1/runs/or/orthomolecular-rumble status=missing duration_ms=0
+time=2025-10-17T02:38:57.626253+00:00 run=/wc1/runs/or/orgiastic-tau status=missing duration_ms=0
+time=2025-10-17T02:38:57.626807+00:00 run=/wc1/runs/ti/tiled-assertiveness status=missing duration_ms=0
+time=2025-10-17T02:38:57.668313+00:00 run=/wc1/runs/fo/four-year-old-pulse status=migrated duration_ms=41 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.717511+00:00 run=/wc1/runs/fo/formulated-dodder status=migrated duration_ms=48 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.718270+00:00 run=/wc1/runs/fo/fogged-stoop status=missing duration_ms=0
+time=2025-10-17T02:38:57.773382+00:00 run=/wc1/runs/fo/fond-toner status=migrated duration_ms=54 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.774301+00:00 run=/wc1/runs/ha/habitable-swiftlet status=missing duration_ms=0
+time=2025-10-17T02:38:57.833315+00:00 run=/wc1/runs/ha/harmful-swell status=migrated duration_ms=58 rows=65 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.896081+00:00 run=/wc1/runs/fe/feral-overindulgence status=migrated duration_ms=61 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.896706+00:00 run=/wc1/runs/fe/featured-reach status=missing duration_ms=0
+time=2025-10-17T02:38:57.938853+00:00 run=/wc1/runs/tw/twenty-nine-senior status=migrated duration_ms=41 rows=73 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:57.975811+00:00 run=/wc1/runs/ne/neglected-deathbed status=migrated duration_ms=36 rows=60 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.014715+00:00 run=/wc1/runs/ne/neuroendocrine-teleology status=migrated duration_ms=38 rows=75 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.057599+00:00 run=/wc1/runs/gl/glum-insensibility status=migrated duration_ms=42 rows=293 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.097294+00:00 run=/wc1/runs/gu/gutsy-abbess status=migrated duration_ms=39 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.097926+00:00 run=/wc1/runs/di/discordant-zebu status=missing duration_ms=0
+time=2025-10-17T02:38:58.133816+00:00 run=/wc1/runs/di/diagnostic-metropolitan status=migrated duration_ms=35 rows=64 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.134324+00:00 run=/wc1/runs/di/distinct-spirit status=missing duration_ms=0
+time=2025-10-17T02:38:58.134946+00:00 run=/wc1/runs/di/disorganized-malt status=missing duration_ms=0
+time=2025-10-17T02:38:58.170791+00:00 run=/wc1/runs/vo/volcanic-duress status=migrated duration_ms=35 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.204707+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/uniform_high status=migrated duration_ms=33 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.244788+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/mulch_15_uniform_low status=migrated duration_ms=39 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.273340+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/uniform_low status=migrated duration_ms=28 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.315281+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/uniform_moderate status=migrated duration_ms=41 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.363040+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/mulch_30_uniform_low status=migrated duration_ms=46 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.423470+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/mulch_60_uniform_low status=migrated duration_ms=59 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.475141+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=50 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.529223+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/mulch_30_uniform_high status=migrated duration_ms=53 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.559377+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/undisturbed status=migrated duration_ms=29 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.589706+00:00 run=/wc1/runs/vo/volcanic-duress/_pups/omni/scenarios/mulch_15_uniform_high status=migrated duration_ms=29 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.621109+00:00 run=/wc1/runs/ve/very-buster status=migrated duration_ms=31 rows=70 topaz_id_column=1 wepp_id_nulls=70
+time=2025-10-17T02:38:58.621690+00:00 run=/wc1/runs/ve/verifiable-potency status=missing duration_ms=0
+time=2025-10-17T02:38:58.622252+00:00 run=/wc1/runs/sc/scrawny-anthropology status=missing duration_ms=0
+time=2025-10-17T02:38:58.662384+00:00 run=/wc1/runs/si/sixty-seven-mustiness status=migrated duration_ms=39 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.705233+00:00 run=/wc1/runs/si/side-poisoning status=migrated duration_ms=42 rows=629 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.751148+00:00 run=/wc1/runs/si/side-poisoning/_pups/omni/scenarios/uniform_high status=migrated duration_ms=45 rows=629 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.794723+00:00 run=/wc1/runs/si/side-poisoning/_pups/omni/scenarios/mulch_15_uniform_low status=migrated duration_ms=42 rows=629 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.840861+00:00 run=/wc1/runs/si/side-poisoning/_pups/omni/scenarios/uniform_low status=migrated duration_ms=45 rows=629 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.883228+00:00 run=/wc1/runs/si/side-poisoning/_pups/omni/scenarios/uniform_moderate status=migrated duration_ms=41 rows=629 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.883831+00:00 run=/wc1/runs/li/life-size-disparagement status=missing duration_ms=0
+time=2025-10-17T02:38:58.928990+00:00 run=/wc1/runs/li/life-support-crowbar status=migrated duration_ms=44 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:58.987307+00:00 run=/wc1/runs/li/life-support-crowbar/omni/scenarios/uniform_moderate status=migrated duration_ms=57 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.052428+00:00 run=/wc1/runs/li/life-support-crowbar/omni/scenarios/thinning status=migrated duration_ms=64 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.118392+00:00 run=/wc1/runs/li/life-support-crowbar/omni/scenarios/uniform_high status=migrated duration_ms=65 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.172850+00:00 run=/wc1/runs/li/life-support-crowbar/omni/scenarios/uniform_low status=migrated duration_ms=53 rows=131 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.173277+00:00 run=/wc1/runs/li/liquid-skinny status=missing duration_ms=0
+time=2025-10-17T02:38:59.209827+00:00 run=/wc1/runs/li/liege-troposphere status=migrated duration_ms=36 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.250814+00:00 run=/wc1/runs/li/liege-troposphere/_pups/omni/scenarios/mulch_60_uniform_moderate status=migrated duration_ms=40 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.284427+00:00 run=/wc1/runs/li/liege-troposphere/_pups/omni/scenarios/uniform_high status=migrated duration_ms=33 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.319880+00:00 run=/wc1/runs/li/liege-troposphere/_pups/omni/scenarios/undisturbed status=migrated duration_ms=34 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.353958+00:00 run=/wc1/runs/li/liege-troposphere/_pups/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=33 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.386685+00:00 run=/wc1/runs/li/liege-troposphere/_pups/omni/scenarios/uniform_moderate status=migrated duration_ms=32 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.426175+00:00 run=/wc1/runs/li/liege-troposphere/_pups/omni/scenarios/mulch_15_uniform_high status=migrated duration_ms=38 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.465489+00:00 run=/wc1/runs/li/liege-troposphere/_pups/omni/scenarios/mulch_30_uniform_moderate status=migrated duration_ms=38 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.499388+00:00 run=/wc1/runs/pa/paid-emeritus status=migrated duration_ms=33 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.589740+00:00 run=/wc1/runs/pa/parotid-libel status=migrated duration_ms=46 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.725941+00:00 run=/wc1/runs/pa/parotid-libel/omni/scenarios/uniform_high status=migrated duration_ms=135 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.794339+00:00 run=/wc1/runs/pa/parotid-libel/omni/scenarios/thinning_40_93 status=migrated duration_ms=67 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.829809+00:00 run=/wc1/runs/pa/parotid-libel/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=34 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.866692+00:00 run=/wc1/runs/pa/parotid-libel/omni/scenarios/undisturbed status=migrated duration_ms=36 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.867151+00:00 run=/wc1/runs/ed/edible-fluidity status=missing duration_ms=0
+time=2025-10-17T02:38:59.867711+00:00 run=/wc1/runs/ed/edible-academy status=missing duration_ms=0
+time=2025-10-17T02:38:59.868297+00:00 run=/wc1/runs/bi/bimodal-occupation status=missing duration_ms=0
+time=2025-10-17T02:38:59.911826+00:00 run=/wc1/runs/en/enveloping-lime status=migrated duration_ms=43 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.947811+00:00 run=/wc1/runs/en/enveloping-lime/omni/scenarios/undisturbed status=migrated duration_ms=35 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.991860+00:00 run=/wc1/runs/en/enveloping-lime/omni/scenarios/uniform_low status=migrated duration_ms=43 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:38:59.992411+00:00 run=/wc1/runs/en/endometrial-maquiladora status=missing duration_ms=0
+time=2025-10-17T02:39:00.033680+00:00 run=/wc1/runs/en/encircling-acropolis status=migrated duration_ms=40 rows=61 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:00.034201+00:00 run=/wc1/runs/en/encircling-mode status=missing duration_ms=0
+time=2025-10-17T02:39:00.074830+00:00 run=/wc1/runs/po/portentous-cafeteria status=migrated duration_ms=40 rows=128 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:00.075340+00:00 run=/wc1/runs/pe/percussive-baffle status=missing duration_ms=0
+time=2025-10-17T02:39:00.115868+00:00 run=/wc1/runs/pe/petty-throes status=migrated duration_ms=39 rows=91 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:00.116293+00:00 run=/wc1/runs/fl/flamboyant-abortifacient status=missing duration_ms=0
+time=2025-10-17T02:39:00.168899+00:00 run=/wc1/runs/sm/small-scale-stretching status=migrated duration_ms=52 rows=1352 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:00.226367+00:00 run=/wc1/runs/sm/small-scale-stretching/omni/scenarios/uniform_low status=migrated duration_ms=57 rows=1352 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:00.274748+00:00 run=/wc1/runs/au/audible-parasitism status=migrated duration_ms=47 rows=76 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:00.275424+00:00 run=/wc1/runs/fr/fringy-while status=missing duration_ms=0
+time=2025-10-17T02:39:00.276179+00:00 run=/wc1/runs/fr/fraternal-experience status=missing duration_ms=0
+time=2025-10-17T02:39:00.397307+00:00 run=/wc1/runs/md/mdobre-arcane-conformation status=migrated duration_ms=120 rows=1913 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:00.397975+00:00 run=/wc1/runs/md/mdobre-accredited-gumdrop status=missing duration_ms=0
+time=2025-10-17T02:39:01.846162+00:00 run=/wc1/runs/md/mdobre-enfranchised-ordination status=migrated duration_ms=1447 rows=783 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:01.896416+00:00 run=/wc1/runs/ge/gestational-roper status=migrated duration_ms=49 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:01.945713+00:00 run=/wc1/runs/ge/geostrategic-equilibrium status=migrated duration_ms=48 rows=124 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:01.983877+00:00 run=/wc1/runs/ge/generative-matrimony status=migrated duration_ms=37 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.013928+00:00 run=/wc1/runs/ri/rigid-self-education status=migrated duration_ms=29 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.044972+00:00 run=/wc1/runs/ri/rigid-self-education/omni/scenarios/uniform_high status=migrated duration_ms=30 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.080973+00:00 run=/wc1/runs/ri/rigid-self-education/omni/scenarios/mulch_15_uniform_high status=migrated duration_ms=35 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.127889+00:00 run=/wc1/runs/ri/rigid-self-education/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=46 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.182041+00:00 run=/wc1/runs/ri/rigid-self-education/omni/scenarios/undisturbed status=migrated duration_ms=53 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.227959+00:00 run=/wc1/runs/ri/rigid-self-education/omni/scenarios/mulch_30_uniform_high status=migrated duration_ms=45 rows=66 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.269325+00:00 run=/wc1/runs/ri/rickety-rap status=migrated duration_ms=40 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.295675+00:00 run=/wc1/runs/ri/riddled-headmaster status=migrated duration_ms=25 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.330118+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_60_sbs_map status=migrated duration_ms=34 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.361083+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_30_uniform_moderate status=migrated duration_ms=30 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.391385+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/uniform_moderate status=migrated duration_ms=29 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.423990+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_15_sbs_map status=migrated duration_ms=31 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.455340+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/uniform_high status=migrated duration_ms=30 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.487355+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_15_uniform_low status=migrated duration_ms=31 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.520868+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_15_uniform_high status=migrated duration_ms=32 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.554960+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_30_sbs_map status=migrated duration_ms=33 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.585362+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=29 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.615776+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_60_uniform_moderate status=migrated duration_ms=29 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.646876+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_30_uniform_high status=migrated duration_ms=30 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.681147+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/uniform_low status=migrated duration_ms=33 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.714682+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_60_uniform_low status=migrated duration_ms=32 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.746803+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_30_uniform_low status=migrated duration_ms=31 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.782044+00:00 run=/wc1/runs/ri/riddled-headmaster/_pups/omni/scenarios/mulch_15_uniform_moderate status=migrated duration_ms=34 rows=586 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.782889+00:00 run=/wc1/runs/un/untraveled-dateline status=missing duration_ms=0
+time=2025-10-17T02:39:02.841115+00:00 run=/wc1/runs/un/unhelpful-obscurantist status=migrated duration_ms=57 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.842069+00:00 run=/wc1/runs/un/uncorrected-polymerization status=missing duration_ms=0
+time=2025-10-17T02:39:02.843011+00:00 run=/wc1/runs/un/unfinished-canvasser status=missing duration_ms=0
+time=2025-10-17T02:39:02.844004+00:00 run=/wc1/runs/un/unmeasured-like status=missing duration_ms=0
+time=2025-10-17T02:39:02.844938+00:00 run=/wc1/runs/un/unequivocal-spittoon status=missing duration_ms=0
+time=2025-10-17T02:39:02.845858+00:00 run=/wc1/runs/un/uncoordinated-front status=missing duration_ms=0
+time=2025-10-17T02:39:02.846678+00:00 run=/wc1/runs/un/ungracious-sleet status=missing duration_ms=0
+time=2025-10-17T02:39:02.929907+00:00 run=/wc1/runs/un/unbuttoned-saponin status=migrated duration_ms=82 rows=338 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.930541+00:00 run=/wc1/runs/un/uninviting-curb status=missing duration_ms=0
+time=2025-10-17T02:39:02.976446+00:00 run=/wc1/runs/un/unborn-pessimist status=migrated duration_ms=45 rows=86 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:02.977064+00:00 run=/wc1/runs/un/unchangeable-daybook status=missing duration_ms=0
+time=2025-10-17T02:39:02.977739+00:00 run=/wc1/runs/un/unbreakable-granddaughter status=missing duration_ms=0
+time=2025-10-17T02:39:02.978244+00:00 run=/wc1/runs/un/unaccented-baby status=missing duration_ms=0
+time=2025-10-17T02:39:03.024314+00:00 run=/wc1/runs/un/unobservant-salute status=migrated duration_ms=45 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.074792+00:00 run=/wc1/runs/un/uncorrected-dun status=migrated duration_ms=49 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.111391+00:00 run=/wc1/runs/un/uncorrected-dun/omni/scenarios/undisturbed status=migrated duration_ms=36 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.111999+00:00 run=/wc1/runs/un/undeveloped-lakeside status=missing duration_ms=0
+time=2025-10-17T02:39:03.163269+00:00 run=/wc1/runs/un/unprocessed-lupine status=migrated duration_ms=50 rows=412 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.207052+00:00 run=/wc1/runs/un/unprocessed-lupine/omni/scenarios/uniform_high status=migrated duration_ms=43 rows=412 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.255441+00:00 run=/wc1/runs/un/unprocessed-lupine/omni/scenarios/mulch_60_uniform_high status=migrated duration_ms=47 rows=412 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.324528+00:00 run=/wc1/runs/un/unprocessed-lupine/omni/scenarios/uniform_low status=migrated duration_ms=68 rows=412 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.403582+00:00 run=/wc1/runs/un/unprocessed-lupine/omni/scenarios/mulch_30_sbs_map status=migrated duration_ms=78 rows=412 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.460032+00:00 run=/wc1/runs/un/unprocessed-lupine/omni/scenarios/thinning_40_93 status=migrated duration_ms=55 rows=412 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.515054+00:00 run=/wc1/runs/un/unprocessed-lupine/omni/scenarios/prescribed_fire status=migrated duration_ms=54 rows=412 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.553960+00:00 run=/wc1/runs/un/unprocessed-lupine/omni/scenarios/undisturbed status=migrated duration_ms=38 rows=412 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.554422+00:00 run=/wc1/runs/un/unalike-quince status=missing duration_ms=0
+time=2025-10-17T02:39:03.601919+00:00 run=/wc1/runs/un/unable-ectoplasm status=migrated duration_ms=46 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.648536+00:00 run=/wc1/runs/un/unable-ectoplasm/omni/scenarios/mulch15 status=migrated duration_ms=46 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.681769+00:00 run=/wc1/runs/un/unable-ectoplasm/omni/scenarios/prescribed_fire status=migrated duration_ms=32 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.709080+00:00 run=/wc1/runs/un/unable-ectoplasm/omni/scenarios/uniform_low status=migrated duration_ms=27 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.740324+00:00 run=/wc1/runs/un/unable-ectoplasm/omni/scenarios/mulch30 status=migrated duration_ms=30 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.770401+00:00 run=/wc1/runs/un/unable-ectoplasm/omni/scenarios/uniform_high status=migrated duration_ms=29 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.808844+00:00 run=/wc1/runs/un/unable-ectoplasm/omni/scenarios/undisturbed status=migrated duration_ms=37 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.843632+00:00 run=/wc1/runs/un/unable-ectoplasm/omni/scenarios/uniform_moderate status=migrated duration_ms=34 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.877144+00:00 run=/wc1/runs/un/unable-ectoplasm/omni/scenarios/mulch60 status=migrated duration_ms=33 rows=71 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.926167+00:00 run=/wc1/runs/un/unmentionable-devourer status=migrated duration_ms=48 rows=147 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.972390+00:00 run=/wc1/runs/nu/numbing-flamingo status=migrated duration_ms=45 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:03.973248+00:00 run=/wc1/runs/il/iliac-appropriateness status=missing duration_ms=0
+time=2025-10-17T02:39:04.038148+00:00 run=/wc1/runs/cy/cybernetic-shuffle status=migrated duration_ms=64 rows=69 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:04.039066+00:00 run=/wc1/runs/mi/mild-mannered-reminiscence status=missing duration_ms=0
+time=2025-10-17T02:39:04.039969+00:00 run=/wc1/runs/mi/microscopic-dithering status=missing duration_ms=0
+time=2025-10-17T02:39:04.040965+00:00 run=/wc1/runs/mi/missing-modernist status=missing duration_ms=0
+time=2025-10-17T02:39:04.077302+00:00 run=/wc1/runs/ov/ovarian-timekeeping status=migrated duration_ms=35 rows=63 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:04.105747+00:00 run=/wc1/runs/ov/ovarian-timekeeping/_pups/omni/scenarios/uniform_low status=migrated duration_ms=27 rows=63 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:04.129420+00:00 run=/wc1/runs/ov/ovarian-timekeeping/_pups/omni/scenarios/undisturbed status=migrated duration_ms=23 rows=63 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:04.156267+00:00 run=/wc1/runs/ov/ovarian-timekeeping/_pups/omni/scenarios/mulch_15_uniform_low status=migrated duration_ms=26 rows=63 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:04.156838+00:00 run=/wc1/runs/fu/furred-slum status=missing duration_ms=0
+time=2025-10-17T02:39:04.188691+00:00 run=/wc1/runs/st/stimulative-chinchilla status=migrated duration_ms=31 rows=62 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:04.189182+00:00 run=/wc1/runs/st/stray-watch status=missing duration_ms=0
+time=2025-10-17T02:39:04.223113+00:00 run=/wc1/runs/st/strait-pedal status=migrated duration_ms=33 rows=67 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:04.223799+00:00 run=/wc1/runs/ho/hot-predestination status=missing duration_ms=0
+time=2025-10-17T02:39:04.224286+00:00 run=/wc1/runs/fa/fancy-viscosity status=missing duration_ms=0
+time=2025-10-17T02:39:04.224861+00:00 run=/wc1/runs/fa/favored-glamorization status=missing duration_ms=0
+time=2025-10-17T02:39:04.225289+00:00 run=/wc1/runs/he/headfirst-crystal status=missing duration_ms=0
+time=2025-10-17T02:39:04.225939+00:00 run=/wc1/runs/al/alternating-checkout status=missing duration_ms=0
+time=2025-10-17T02:39:04.263664+00:00 run=/wc1/runs/wo/wound-weekly status=migrated duration_ms=37 rows=92 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:04.302001+00:00 run=/wc1/runs/ya/yawning-septum status=migrated duration_ms=38 rows=301 topaz_id_column=1 wepp_id_nulls=0
+time=2025-10-17T02:39:04.302723+00:00 run=/wc1/runs/we/well-defined-sellout status=missing duration_ms=0
+time=2025-10-17T02:39:04.303212+00:00 run=/wc1/runs/ec/economic-apostasy status=missing duration_ms=0
+time=2025-10-17T02:39:04.303800+00:00 run=/wc1/runs/ei/eighty-six-stickpin status=missing duration_ms=0
+time=2025-10-17T02:39:04.304271+00:00 run=/wc1/runs/ei/eighth-proxy status=missing duration_ms=0

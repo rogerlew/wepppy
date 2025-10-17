@@ -539,12 +539,14 @@ def polygonize_subcatchments(subwta_fn, dst_fn, dst_fn2=None):
 
     _features = []
     for f in js['features']:
-        topaz_id = str(f['properties']['TopazID'])
+        topaz_raw = f['properties'].get('TopazID')
+        topaz_id = int(topaz_raw)
+        f['properties']['TopazID'] = topaz_id
 
-        if topaz_id[-1] in '04':
+        if str(topaz_id)[-1] in '04':
             continue
 
-        wepp_id = translator.wepp(top=topaz_id)
+        wepp_id = int(translator.wepp(top=topaz_id))
         f['properties']['WeppID'] = wepp_id
         _features.append(f)
 

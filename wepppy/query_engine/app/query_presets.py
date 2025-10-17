@@ -33,7 +33,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     }
                 ],
                 "columns": [
-                    "landuse.TopazID",
+                    "landuse.topaz_id",
                     "landuse.key",
                 ],
                 "limit": 25,
@@ -52,7 +52,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     }
                 ],
                 "columns": [
-                    "soils.TopazID",
+                    "soils.topaz_id",
                     "soils.mukey",
                     "soils.simple_texture",
                     "soils.soil_depth",
@@ -73,7 +73,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     }
                 ],
                 "columns": [
-                    "landuse.TopazID AS topaz_id",
+                    "landuse.topaz_id AS topaz_id",
                     "landuse.key AS landuse_key",
                     "landuse.cancov AS canopy_cover",
                 ],
@@ -81,7 +81,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     {"column": "landuse.key", "operator": "=", "value": 43},
                     {"column": "landuse.cancov", "operator": "<", "value": 0.6},
                 ],
-                "order_by": ["landuse.TopazID"],
+                "order_by": ["landuse.topaz_id"],
                 "limit": 50,
                 "include_schema": True,
                 "include_sql": True,
@@ -98,7 +98,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                 "filters": [
                     {"column": "landuse.key", "operator": "IN", "value": [105, 118]},
                 ],
-                "order_by": ["landuse.TopazID"],
+                "order_by": ["landuse.topaz_id"],
                 "limit": 100,
                 "include_schema": True,
                 "include_sql": True,
@@ -116,10 +116,10 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     {"path": "soils/soils.parquet", "alias": "soils"},
                 ],
                 "joins": [
-                    {"left": "landuse", "right": "soils", "on": ["TopazID"]},
+                    {"left": "landuse", "right": "soils", "on": ["topaz_id"]},
                 ],
                 "columns": [
-                    "landuse.TopazID AS topaz_id",
+                    "landuse.topaz_id AS topaz_id",
                     "landuse.desc AS landuse_desc",
                     "soils.simple_texture AS soil_texture",
                 ],

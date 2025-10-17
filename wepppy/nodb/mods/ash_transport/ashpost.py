@@ -334,7 +334,7 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
         if 'mm' in col or 'tonne/ha' in col or col.startswith('cum_'):
             ws_cols_to_drop.append(col)
 
-    df_annuals = df.groupby('year').agg(agg_d).reset_index()
+    df_annuals = df.groupby('year', as_index=False).agg(agg_d)
     df_annuals.drop(ws_cols_to_drop, axis=1, inplace=True, errors='ignore')
     df_annuals.drop(columns=['burn_class'], inplace=True, errors='ignore')
     _cast_integral_columns(df_annuals)
@@ -366,7 +366,7 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
     df_annuals = df_annuals[[col for col in annual_cols if col in df_annuals.columns]]
     _write_parquet(df_annuals, _join(ash_post_dir, ASH_POST_FILES['watershed_annuals']))
 
-    df_daily = df.groupby(['year0', 'year', 'julian']).agg(agg_d).reset_index()
+    df_daily = df.groupby(['year0', 'year', 'julian'], as_index=False).agg(agg_d)
     df_daily.drop(columns=['burn_class'], inplace=True, errors='ignore')
     _cast_integral_columns(df_daily)
     existing_density_cols = [col for col in df_daily.columns if '(tonne/ha)' in col or col.endswith(' (mm)')]
@@ -401,7 +401,7 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
     cols_to_extract = ['days_from_fire (days)', 'year0', 'year', 'julian']
 
     # Group the DataFrame by 'date_int' and 'burn_class' columns
-    grouped_df = df.groupby(['year0', 'year', 'julian', 'burn_class']).agg(agg_d).reset_index()
+    grouped_df = df.groupby(['year0', 'year', 'julian', 'burn_class'], as_index=False).agg(agg_d)
     _cast_integral_columns(grouped_df)
     existing_density_cols = [col for col in grouped_df.columns if '(tonne/ha)' in col or col.endswith(' (mm)')]
     if existing_density_cols:

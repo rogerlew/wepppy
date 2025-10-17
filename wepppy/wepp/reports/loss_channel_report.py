@@ -46,7 +46,7 @@ class ChannelSummaryReport(ReportBase):
                 'loss."Channels and Impoundments" AS loss_channel_id',
                 "chn.wepp_id AS channel_wepp_id",
                 "chn.chn_enum AS channel_enum",
-                "chn.TopazID AS topaz_id",
+                "chn.topaz_id AS topaz_id",
                 "chn.length AS length_m",
                 "chn.width AS width_m",
                 "chn.order AS channel_order",

@@ -48,12 +48,12 @@ class HillSummaryReport(ReportBase):
             {"path": self._LANDUSE_DATASET, "alias": "lu"},
         ]
         joins = [
-            {"left": "loss", "right": "hills", "left_on": ["Hillslopes"], "right_on": ["wepp_id"]},
-            {"left": "hills", "right": "lu", "left_on": ["TopazID"], "right_on": ["TopazID"], "join_type": "left"},
+            {"left": "loss", "right": "hills", "left_on": ["wepp_id"], "right_on": ["wepp_id"]},
+            {"left": "hills", "right": "lu", "left_on": ["topaz_id"], "right_on": ["topaz_id"], "join_type": "left"},
         ]
         columns: List[str] = [
-            'loss."Hillslopes" AS wepp_id',
-            "hills.TopazID AS topaz_id",
+            'loss.wepp_id AS wepp_id',
+            "hills.topaz_id AS topaz_id",
             "hills.length AS length_m",
             "hills.width AS width_m",
             "hills.slope_scalar AS slope",
@@ -74,7 +74,7 @@ class HillSummaryReport(ReportBase):
         if include_soils:
             datasets.append({"path": self._SOILS_DATASET, "alias": "soil"})
             joins.append(
-                {"left": "hills", "right": "soil", "left_on": ["TopazID"], "right_on": ["TopazID"], "join_type": "left"}
+                {"left": "hills", "right": "soil", "left_on": ["topaz_id"], "right_on": ["topaz_id"], "join_type": "left"}
             )
             columns.extend(
                 [
@@ -94,7 +94,7 @@ class HillSummaryReport(ReportBase):
             datasets=datasets,
             columns=columns,
             joins=joins,
-            order_by=['loss."Hillslopes"'],
+            order_by=['loss.wepp_id'],
         )
         result = context.query(payload)
         records = result.records or []

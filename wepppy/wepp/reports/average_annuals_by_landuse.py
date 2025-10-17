@@ -75,8 +75,8 @@ class AverageAnnualsByLanduseReport(ReportBase):
                 {
                     "left": "hills",
                     "right": "lu",
-                    "left_on": ["TopazID"],
-                    "right_on": ["TopazID"],
+                    "left_on": ["topaz_id"],
+                    "right_on": ["topaz_id"],
                 },
             ],
             aggregations=[

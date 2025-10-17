@@ -27,7 +27,7 @@ Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud 
 - Updated `/query/runs/{runid}/query` POST handling to include defensive catalog checks, improved error status codes (422 for invalid payloads, 404 for missing datasets), and stack traces in JSON responses for debugging—mirroring the rich error feedback approach used by the browse microservice.
 - Activation endpoint now surfaces full stack traces on failure for easier diagnosis in web UIs.
 - Route table simplified so GET and POST handlers share the same path while ensuring the GET console is registered ahead of the POST handler.
-- `QueryRequest` now normalizes dataset descriptors (path + alias), join definitions, aggregation specs, and flexible filter clauses. The planner can join multiple Parquet assets (e.g., `landuse` ↔ `soils` on `TopazID`), apply type-aware filters (supporting `=`, `IN`, `BETWEEN`, `IS NULL`, etc. with automatic casting like `'43'` → `INT64`), compute grouped aggregations (e.g., daily WEPP interchange sums across `wepp_id`), order results, and optionally echo the generated DuckDB SQL.
+- `QueryRequest` now normalizes dataset descriptors (path + alias), join definitions, aggregation specs, and flexible filter clauses. The planner can join multiple Parquet assets (e.g., `landuse` ↔ `soils` on `topaz_id`), apply type-aware filters (supporting `=`, `IN`, `BETWEEN`, `IS NULL`, etc. with automatic casting like `'43'` → `INT64`), compute grouped aggregations (e.g., daily WEPP interchange sums across `wepp_id`), order results, and optionally echo the generated DuckDB SQL.
 - Added `update_catalog_entry(wd, rel_path)` helper for incremental catalog refreshes and a read-only sentinel check so activation fails fast when a run directory is locked.
 - Added unit coverage for join/aggregation planners (`tests/query_engine/test_core.py::test_run_query_join`, `test_run_query_aggregation`).
 
@@ -39,8 +39,8 @@ Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud 
 5. Batch scenarios can reuse the same activation logic per child run.
 
 ## Dataset Inventory Highlights
-- `watershed/hillslopes.parquet`: hillslope geometry + slope metrics (`TopazID`, `wepp_id`, centroids, fp_longest*).
-- `watershed/channels.parquet`: channel summaries (`TopazID`, `chn_enum`, area, slope, aspect).
+- `watershed/hillslopes.parquet`: hillslope geometry + slope metrics (`topaz_id`, `wepp_id`, centroids, fp_longest*).
+- `watershed/channels.parquet`: channel summaries (`topaz_id`, `chn_enum`, area, slope, aspect).
 - `watershed/flowpaths.parquet`: individual flowpath metrics (`fp_id`, length, slope, aspect).
 - `landuse/landuse.parquet`: dominant management metadata per hillslope (`key`, `_map`, coverage, canopy fractions, disturbed_class).
 - `soils/soils.parquet`: dominant soil properties per hillslope (`mukey`, texture, hydraulic properties, coverage).
@@ -78,15 +78,15 @@ payload = QueryRequest(datasets=["landuse/landuse.parquet"], limit=5)
 result = run_query(ctx, payload)
 print(result.records[:2])
 
-# join soils on TopazID
+# join soils on topaz_id
 payload = QueryRequest(
     datasets=[
         {"path": "landuse/landuse.parquet", "alias": "landuse"},
         {"path": "soils/soils.parquet", "alias": "soils"},
     ],
-    joins=[{"left": "landuse", "right": "soils", "on": ["TopazID"]}],
+    joins=[{"left": "landuse", "right": "soils", "on": ["topaz_id"]}],
     columns=[
-        "landuse.TopazID AS topaz_id",
+        "landuse.topaz_id AS topaz_id",
         "landuse.landuse AS landuse_desc",
         "soils.texture AS soil_texture",
     ],
@@ -135,7 +135,7 @@ print(run_query(ctx, payload).records[:2])
 Located in `tests/query_engine/`:
 - `test_core.py`: unit smoke tests using synthetic Parquet assets (catalog round-trip, schema echo).
 - `test_benchmarks.py` (requires real run directories):
-  1. `test_landuse_dict_payload` replicates the `/runs/<runid>/query/landuse/subcatchments` behavior by materializing a `{TopazID: row_dict}` map from `landuse/landuse.parquet`.
+  1. `test_landuse_dict_payload` replicates the `/runs/<runid>/query/landuse/subcatchments` behavior by materializing a `{topaz_id: row_dict}` map from `landuse/landuse.parquet`.
   2. `test_totalwatsed_aggregate_cache` parses native `H*.wat.dat` files, joins with `interchange/H.pass.parquet`, aggregates daily totals, and writes `_query_engine/cache/totalwatsed3.parquet` for downstream reuse.
   These tests are marked `@pytest.mark.benchmark` and skipped automatically when the expected run directories are absent.
 

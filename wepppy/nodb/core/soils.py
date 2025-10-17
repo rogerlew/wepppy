@@ -1123,11 +1123,45 @@ class Soils(NoDbBase):
             return
         
         df = pd.DataFrame.from_dict(dict_result, orient='index')
-        df.index.name = 'TopazID'
+        df.index.name = 'topaz_id'
         df.reset_index(inplace=True)
-        df['TopazID'] = df['TopazID'].astype(str).astype('int64')
+
+        df['topaz_id'] = pd.to_numeric(df['topaz_id'], errors='raise').astype('Int32')
         df['mukey'] = df['mukey'].astype(str)
-        df.to_parquet(_join(self.soils_dir, 'soils.parquet'))
+
+        translator = None
+        try:
+            translator = self.watershed_instance.translator_factory()
+        except Exception:
+            translator = None
+
+        if 'wepp_id' in df.columns:
+            df['wepp_id'] = pd.to_numeric(df['wepp_id'], errors='coerce').astype('Int32')
+        else:
+            if translator is not None:
+                wepp_values = []
+                for top in df['topaz_id']:
+                    if pd.isna(top):
+                        wepp_values.append(pd.NA)
+                    else:
+                        try:
+                            value = translator.wepp(top=int(top))
+                        except Exception:
+                            value = None
+                        wepp_values.append(value if value is not None else pd.NA)
+                df['wepp_id'] = pd.Series(pd.array(wepp_values, dtype='Int32'))
+            else:
+                df['wepp_id'] = pd.Series(pd.array([pd.NA] * len(df), dtype='Int32'))
+
+        for legacy_col in ('TopazID', 'WeppID'):
+            if legacy_col in df.columns:
+                df.drop(columns=[legacy_col], inplace=True)
+
+        preferred = ['topaz_id', 'wepp_id']
+        remaining = [c for c in df.columns if c not in preferred]
+        df = df.loc[:, preferred + remaining]
+
+        df.to_parquet(_join(self.soils_dir, 'soils.parquet'), index=False)
         update_catalog_entry(self.wd, 'soils/soils.parquet')
         
     def _post_dump_and_unlock(self):
@@ -1144,11 +1178,32 @@ class Soils(NoDbBase):
         
         result_dict = self._subs_summary_gen()
         df = pd.DataFrame.from_dict(result_dict, orient='index')
-        df.index.name = 'TopazID'
+        df.index.name = 'topaz_id'
         df.reset_index(inplace=True)
-        df['TopazID'] = df['TopazID'].astype(str).astype('int64')
+        df['topaz_id'] = pd.to_numeric(df['topaz_id'], errors='raise').astype('Int32')
         df['mukey'] = df['mukey'].astype(str)
-        
+
+        translator = None
+        try:
+            translator = self.watershed_instance.translator_factory()
+        except Exception:
+            translator = None
+
+        if translator is not None:
+            wepp_values = []
+            for top in df['topaz_id']:
+                if pd.isna(top):
+                    wepp_values.append(pd.NA)
+                else:
+                    try:
+                        value = translator.wepp(top=int(top))
+                    except Exception:
+                        value = None
+                    wepp_values.append(value if value is not None else pd.NA)
+            df['wepp_id'] = pd.Series(pd.array(wepp_values, dtype='Int32'))
+        else:
+            df['wepp_id'] = pd.Series(pd.array([pd.NA] * len(df), dtype='Int32'))
+
         return df
 
     def sub_iter(self):

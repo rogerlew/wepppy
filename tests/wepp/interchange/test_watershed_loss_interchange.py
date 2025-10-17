@@ -32,6 +32,7 @@ def _load_module(full_name: str, relative_path: str):
 
 
 _load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
+_load_module("wepppy.wepp.interchange.versioning", "wepppy/wepp/interchange/versioning.py")
 _watershed_loss = _load_module(
     "wepppy.wepp.interchange.watershed_loss_interchange",
     "wepppy/wepp/interchange/watershed_loss_interchange.py",
@@ -73,7 +74,7 @@ def test_watershed_loss_interchange_outputs_expected_tables(tmp_path: Path) -> N
     avg_hill = _read(expected_paths["average_hill"])
     assert list(avg_hill.columns) == [
         "Type",
-        "Hillslopes",
+        "wepp_id",
         "Runoff Volume",
         "Subrunoff Volume",
         "Baseflow Volume",
@@ -86,7 +87,7 @@ def test_watershed_loss_interchange_outputs_expected_tables(tmp_path: Path) -> N
         "Total Pollutant",
     ]
     assert avg_hill.shape == (3, 12)
-    hill1 = avg_hill.loc[avg_hill["Hillslopes"] == 1].iloc[0]
+    hill1 = avg_hill.loc[avg_hill["wepp_id"] == 1].iloc[0]
     assert hill1["Subrunoff Volume"] == pytest.approx(22061.2)
     assert hill1["Hillslope Area"] == pytest.approx(10.5)
 
@@ -105,13 +106,13 @@ def test_watershed_loss_interchange_outputs_expected_tables(tmp_path: Path) -> N
     hill_all = _read(expected_paths["all_years_hill"])
     assert sorted(hill_all["year"].unique()) == [2000, 2001, 2002, 2003, 2004, 2005]
     assert hill_all.shape == (18, 12)
-    hill_2001_2 = hill_all[(hill_all["year"] == 2001) & (hill_all["Hillslopes"] == 2)].iloc[0]
+    hill_2001_2 = hill_all[(hill_all["year"] == 2001) & (hill_all["wepp_id"] == 2)].iloc[0]
     assert hill_2001_2["Baseflow Volume"] == pytest.approx(144.9)
 
     chn_all = _read(expected_paths["all_years_chn"])
-    assert chn_all.shape == (6, 11)
+    assert chn_all.shape == (6, 12)
     channel_2000 = chn_all[chn_all["year"] == 2000].iloc[0]
-    assert channel_2000["Channels and Impoundments"] == 1
+    assert channel_2000["chn_enum"] == 1
     assert channel_2000["Discharge Volume"] == pytest.approx(71409.1)
     assert channel_2000["Upland Charge"] == pytest.approx(71486.3)
 
