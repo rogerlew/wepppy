@@ -43,7 +43,7 @@ class ChannelSummaryReport(ReportBase):
                 {"path": self._CHANNEL_DATASET, "alias": "chn"},
             ],
             columns=[
-                'loss."Channels and Impoundments" AS loss_channel_id',
+                "loss.chn_enum AS loss_channel_id",
                 "chn.wepp_id AS channel_wepp_id",
                 "chn.chn_enum AS channel_enum",
                 "chn.topaz_id AS topaz_id",
@@ -66,11 +66,11 @@ class ChannelSummaryReport(ReportBase):
                 {
                     "left": "loss",
                     "right": "chn",
-                    "left_on": ["Channels and Impoundments"],
+                    "left_on": ["chn_enum"],
                     "right_on": ["chn_enum"],
                 }
             ],
-            order_by=['loss."Channels and Impoundments"'],
+            order_by=['loss.chn_enum'],
         )
         result = context.query(payload)
         records = result.records or []

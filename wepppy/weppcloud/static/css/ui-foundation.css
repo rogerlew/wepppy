@@ -526,6 +526,13 @@ button[disabled],
   background: var(--wc-color-surface);
 }
 
+.wc-table thead,
+.pure-table thead {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .wc-table th,
 .wc-table td,
 .pure-table th,
@@ -561,6 +568,78 @@ button[disabled],
 .wc-status[data-state="critical"] {
   border-color: var(--wc-color-critical);
   background: var(--wc-color-critical-soft);
+}
+
+.wc-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-space-sm);
+  padding: var(--wc-space-xs) var(--wc-space-md);
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--wc-color-border);
+  background: var(--wc-color-surface-alt);
+  color: var(--wc-color-text);
+}
+
+.wc-status-chip[data-state="finished"] {
+  border-color: var(--wc-color-positive);
+  background: var(--wc-color-positive-soft);
+  color: var(--wc-color-positive);
+}
+
+.wc-status-chip[data-state="failed"],
+.wc-status-chip[data-state="stopped"],
+.wc-status-chip[data-state="canceled"] {
+  border-color: var(--wc-color-critical);
+  background: var(--wc-color-critical-soft);
+  color: var(--wc-color-critical);
+}
+
+.wc-status-chip[data-state="unknown"] {
+  color: var(--wc-color-text-muted);
+}
+
+.wc-status-note {
+  margin-top: var(--wc-space-lg);
+  padding: var(--wc-space-md) var(--wc-space-lg);
+  border-radius: var(--wc-radius-none);
+  border: 1px solid var(--wc-color-border);
+  background: var(--wc-color-surface-alt);
+  display: flex;
+  align-items: center;
+  gap: var(--wc-space-md);
+  font-size: 0.95rem;
+}
+
+.wc-status-note p {
+  margin: 0;
+}
+
+.wc-status-note[data-state="active"] {
+  border-color: var(--wc-color-accent);
+  background: var(--wc-color-accent-soft);
+  color: var(--wc-color-accent);
+}
+
+.wc-status-note[data-state="error"] {
+  border-color: var(--wc-color-critical);
+  background: var(--wc-color-critical-soft);
+  color: var(--wc-color-critical);
+}
+
+.wc-spinner {
+  font-family: var(--wc-font-mono);
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.wc-meta-list {
+  display: grid;
+  gap: var(--wc-space-sm);
+  font-size: 0.95rem;
 }
 
 /* Utility clusters */
@@ -880,4 +959,9 @@ legend {
     margin-left: 0;
     text-align: left;
   }
+}
+
+.wc-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
 }

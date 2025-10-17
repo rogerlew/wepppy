@@ -69,7 +69,7 @@ class AverageAnnualsByLanduseReport(ReportBase):
                 {
                     "left": "loss",
                     "right": "hills",
-                    "left_on": ["Hillslopes"],
+                    "left_on": ["wepp_id"],
                     "right_on": ["wepp_id"],
                 },
                 {

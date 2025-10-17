@@ -56,6 +56,8 @@ from wepppy.wepp.reports.loss_outlet_report import OutletSummaryReport
 
 
 def _configure_query_engine_stubs(monkeypatch, tmp_path: Path, dataset_paths: set[str], records_map: dict[str, list[dict]]):
+    captured_payloads = []
+
     class StubQueryContext:
         def __init__(self, run_directory, *, run_interchange=False, auto_activate=True):
             assert Path(run_directory) == tmp_path
@@ -68,6 +70,7 @@ def _configure_query_engine_stubs(monkeypatch, tmp_path: Path, dataset_paths: se
                 raise FileNotFoundError(', '.join(sorted(missing)))
 
         def query(self, payload):
+            captured_payloads.append(payload)
             if isinstance(payload, dict):
                 path = next(item['path'] for item in payload["datasets"])
             else:
@@ -87,6 +90,8 @@ def _configure_query_engine_stubs(monkeypatch, tmp_path: Path, dataset_paths: se
         "wepppy.wepp.reports.loss_outlet_report.ReportQueryContext",
         StubQueryContext,
     )
+
+    return captured_payloads
 
 
 def test_hill_summary_builds_rows(monkeypatch, tmp_path):
@@ -125,7 +130,7 @@ def test_hill_summary_builds_rows(monkeypatch, tmp_path):
         "soils/soils.parquet": [],
     }
 
-    _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
+    _ = _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
 
     report = HillSummaryReport(tmp_path)
     df = pd.DataFrame([dict(row.row) for row in report])
@@ -167,7 +172,7 @@ def test_channel_summary_builds_rows(monkeypatch, tmp_path):
         ],
     }
 
-    _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
+    payloads = _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
 
     report = ChannelSummaryReport(tmp_path)
     df = pd.DataFrame([dict(row.row) for row in report])
@@ -175,6 +180,11 @@ def test_channel_summary_builds_rows(monkeypatch, tmp_path):
     expected_depth = 1000.0 * 1000.0 / (50.0 * 10000.0)
     assert abs(df.loc[0, "Discharge Depth (mm/yr)"] - expected_depth) < 1e-6
     assert abs(df.loc[0, "Channel Erosion Density (kg/ha/yr)"] - (600.0 / (5000.0 / 10000.0))) < 1e-6
+
+    payload = payloads[-1]
+    assert payload.columns[0] == "loss.chn_enum AS loss_channel_id"
+    assert payload.joins[0]["left_on"] == ["chn_enum"]
+    assert payload.joins[0]["right_on"] == ["chn_enum"]
 
 
 def test_outlet_summary_rows(monkeypatch, tmp_path):
@@ -192,7 +202,7 @@ def test_outlet_summary_rows(monkeypatch, tmp_path):
         ]
     }
 
-    _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
+    _ = _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
 
     report = OutletSummaryReport(tmp_path)
     rows = report.rows()

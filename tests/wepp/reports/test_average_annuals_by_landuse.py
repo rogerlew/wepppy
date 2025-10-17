@@ -97,6 +97,8 @@ def test_average_annuals_by_landuse_builds_dataframe(monkeypatch, tmp_path):
                 raise FileNotFoundError(', '.join(missing))
 
         def query(self, payload):
+            assert payload.joins[0]["left_on"] == ["wepp_id"]
+            assert payload.joins[0]["right_on"] == ["wepp_id"]
             return QueryResult(records=records, schema=None, row_count=len(records))
 
     monkeypatch.setattr(

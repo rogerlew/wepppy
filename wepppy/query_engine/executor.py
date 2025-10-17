@@ -27,5 +27,13 @@ class DuckDBExecutor:
                         self._logger.error("Failed to load DuckDB spatial extension", exc_info=True)
                         raise RuntimeError("DuckDB spatial extension unavailable") from exc
             conn.execute("SET home_directory = ?", [str(self._base_dir)])
-            cursor = conn.execute(sql, params or [])
+            try:
+                cursor = conn.execute(sql, params or [])
+            except duckdb.ParserException as err:
+                details = [str(err).rstrip(), "SQL:", sql]
+                if params:
+                    details.append(f"Parameters: {params!r}")
+                message = "\n".join(details)
+                self._logger.error("DuckDB parser error when executing query", exc_info=True)
+                raise duckdb.ParserException(message) from err
             return cursor.fetch_arrow_table()

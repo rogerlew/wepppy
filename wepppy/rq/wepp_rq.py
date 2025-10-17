@@ -370,7 +370,10 @@ def run_wepp_rq(runid):
             job.meta['jobs:6,func:_log_complete_rq'] = job6_finalfinal.id
             job.save()
          
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job6_finalfinal.id}',
+        )
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
