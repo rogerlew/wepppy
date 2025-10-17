@@ -1,0 +1,68 @@
+{% macro console_page(data_controller=None, include_command_bar=False, classes='') %}
+  {% if include_command_bar %}
+    {% include 'command-bar.htm' %}
+  {% endif %}
+  <section class="wc-stack{% if classes %} {{ classes }}{% endif %}"{% if data_controller %} data-controller="{{ data_controller }}"{% endif %}>
+    {{ caller() }}
+  </section>
+{% endmacro %}
+
+{% macro console_header(run_link=None, run_label=None, title='', subtitle=None, actions=None, run_target='_blank', run_rel='noopener') %}
+  <header class="wc-stack">
+    <div class="wc-console-header">
+      <div class="wc-console-header__primary">
+        <h1 class="wc-heading__title">
+          {% if run_label %}
+            {% if run_link %}
+              <a class="wc-heading__run" href="{{ run_link }}"{% if run_target %} target="{{ run_target }}"{% endif %}{% if run_rel %} rel="{{ run_rel }}"{% endif %}>{{ run_label }}</a>
+            {% else %}
+              <span class="wc-heading__run">{{ run_label }}</span>
+            {% endif %}
+          {% endif %}
+          {{ title }}
+        </h1>
+        {% if subtitle %}
+          <p class="wc-text-muted">{{ subtitle }}</p>
+        {% endif %}
+        {% if caller is defined %}
+          {% set extra = caller() %}
+          {% if extra %}
+            <div class="wc-console-header__meta">
+              {{ extra }}
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+      {% if actions %}
+        <div class="wc-console-actions">
+          {% for action in actions %}
+            {% set classes = 'pure-button' %}
+            {% if action.get('variant') %}
+              {% set classes = classes + ' ' + action.get('variant') %}
+            {% endif %}
+            {% set element = action.get('element', 'link') %}
+            {% if element == 'button' %}
+              <button class="{{ classes }}"{% if action.get('type') %} type="{{ action.get('type') }}"{% else %} type="button"{% endif %}{% if action.get('id') %} id="{{ action.get('id') }}"{% endif %}{% if action.get('disabled') %} disabled{% endif %}{% if action.get('title') %} title="{{ action.get('title') }}"{% endif %}>{{ action.get('label') }}</button>
+            {% else %}
+              <a class="{{ classes }}"{% if action.get('href') %} href="{{ action.get('href') }}"{% endif %}{% if action.get('target') %} target="{{ action.get('target') }}"{% endif %}{% if action.get('rel') %} rel="{{ action.get('rel') }}"{% endif %}{% if action.get('id') %} id="{{ action.get('id') }}"{% endif %}{% if action.get('title') %} title="{{ action.get('title') }}"{% endif %}>{{ action.get('label') }}</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </header>
+{% endmacro %}
+
+{% macro button_row(form_controls=False) %}
+  {% if form_controls %}
+    <div class="pure-controls wc-controls-left">
+      <div class="wc-button-row">
+        {{ caller() }}
+      </div>
+    </div>
+  {% else %}
+    <div class="wc-button-row">
+      {{ caller() }}
+    </div>
+  {% endif %}
+{% endmacro %}

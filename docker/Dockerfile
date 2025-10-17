@@ -66,6 +66,7 @@ RUN apt-get update && \
         libbz2-dev \
         liblzma-dev \
         zlib1g-dev \
+        rsync && \
         ca-certificates && \
     git lfs install --system && \
     rm -rf /var/lib/apt/lists/*

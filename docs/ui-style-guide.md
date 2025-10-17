@@ -112,32 +112,66 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 - Authentication views use the shared `.wc-auth-card` container and `.pure-form-aligned` layout; reuse the Jinja macros in `security/_macros.html` so labels, inline messages, and controls stay consistent.【F:wepppy/wepppy/weppcloud/templates/security/_layout.html†L5-L20】【F:wepppy/wepppy/weppcloud/templates/security/_macros.html†L1-L46】
 
 ### Tables
-- Apply `.pure-table` or `.wc-table` for full-width, borderless tables with alternating row backgrounds for scanability.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L426-L443】
-- Pair `.wc-pagination` underneath multi-page datasets to keep navigation consistent and accessible (ARIA current markers, hover state).【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L530-L557】
+- Apply `.pure-table` or `.wc-table` for full-width, borderless tables with alternating row backgrounds for scanability.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L521-L545】
+- Pair `.wc-pagination` underneath multi-page datasets to keep navigation consistent and accessible (ARIA current markers, hover state).【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L804-L831】
+- Wrap wide tables in `.wc-table-wrapper` so they scroll horizontally on narrow viewports instead of overflowing.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L1090-L1094】
 
 ### Panels & cards
-- Wrap feature areas inside `.wc-panel` or `.wc-card` to keep consistent padding and squared borders.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L228-L236】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L564-L568】
+- Wrap feature areas inside `.wc-panel` or `.wc-card` to keep consistent padding and squared borders.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L357-L364】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L838-L842】
 
 ### Status & alerts
-- `.wc-status` blocks provide consistent accenting for queued, success, and failure states without custom CSS per page. Pair them with iconography or concise labels so state isn’t communicated by color alone.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L449-L466】
+- `.wc-status` blocks provide consistent accenting for queued, success, and failure states without custom CSS per page. Pair them with iconography or concise labels so state isn’t communicated by color alone.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L551-L605】
+- Use `.wc-status-chip` and `.wc-status-note` for streaming job feedback; pair with `.wc-spinner` for polling UI and `.wc-log` for live logs.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L573-L663】
 
 ### Navigation & toolbars
-- Build inline action rows with `.wc-toolbar` and `.wc-inline` utilities to avoid bespoke flex snippets. Toolbars automatically stack on narrow screens for readability.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L472-L501】
+- Build inline action rows with `.wc-toolbar` and `.wc-inline` utilities to avoid bespoke flex snippets. Toolbars automatically stack on narrow screens for readability.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L772-L787】
 - For global navigation, drop Bootstrap’s `.navbar` in favor of the base header snippet to eliminate dependency on Bootstrap classes entirely.
-- Use `.wc-nav`, `.wc-nav__list`, and `.wc-nav__link` for primary navigation in the header—links inherit spacing, hover, and focus states tuned to the foundation palette.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L178-L225】
+- Use `.wc-nav`, `.wc-nav__list`, and `.wc-nav__link` for primary navigation in the header—links inherit spacing, hover, and focus states tuned to the foundation palette.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L214-L237】
+- Accent run headings with `.wc-heading__run` anchors inside `.wc-heading__title` to highlight critical identifiers without custom inline styles.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L214-L247】【F:wepppy/wepppy/weppcloud/routes/readme_md/templates/readme_view.htm†L8-L21】
+
+### Console layout macros
+- Centralize console-style scaffolding (archive dashboard, fork console, README tools, query console) with the shared macros in `templates/shared/console_macros.htm`; they keep headers, action rows, and button sizing aligned across routes.【F:wepppy/wepppy/weppcloud/templates/shared/console_macros.htm†L1-L68】
+- `console_page` wraps the page body with the standard `.wc-stack` container and optionally injects the command bar, while `console_header` renders the run link/title, optional subtitle, and action buttons inside the `.wc-console-header` flex shell. `button_row` standardizes button spacing inside or outside Pure form controls.
+- Typical usage:
+
+  ```jinja
+  {% from "shared/console_macros.htm" import console_page, console_header, button_row %}
+  {% call console_page(data_controller="archive-dashboard") %}
+    {% call console_header(run_link=run_url, run_label=runid, title="Archive Dashboard") %}
+      <p class="wc-text-muted">Create and manage project archives.</p>
+    {% endcall %}
+    <section class="wc-panel wc-stack">
+      <form class="pure-form pure-form-aligned">
+        {% call button_row(form_controls=True) %}
+          <button type="submit" class="pure-button">Create archive</button>
+          <button type="button" class="pure-button pure-button-secondary">Refresh list</button>
+        {% endcall %}
+      </form>
+    </section>
+  {% endcall %}
+  ```
+
+- Starlette surfaces that render these macros (e.g., the query engine) must extend their `Jinja2Templates` loader to include `weppcloud/templates` so the shared partials resolve next to app-local templates.【F:wepppy/wepppy/query_engine/app/server.py†L33-L40】
 
 ### Modal/dialog content
-- When Bootstrap modals are required, apply `.pure-modal` on the dialog content to keep typography, spacing, and squared edges in sync, benefiting from the shared medium elevation shadow.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L564-L577】
+- When Bootstrap modals are required, apply `.pure-modal` on the dialog content to keep typography, spacing, and squared edges in sync, benefiting from the shared medium elevation shadow.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L846-L850】
 
 ### Tooltip primitives
 - Use `.wc-tooltip` and `.wc-tooltip__bubble` to create accessible hover/focus descriptions without importing additional libraries. Anchor the bubble with `aria-describedby` IDs and toggle via CSS/JS as needed.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L617-L637】
 
+### Logs & consoles
+- Wrap console pages in `.wc-console` grids and use `.wc-panel` to frame tools, tables, and status messages.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L639-L663】
+- `.wc-log` provides a reusable monospace log surface with built-in overflow handling.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L645-L663】
+- Use `.wc-code-input` and `.wc-code-block` for JSON editors or stack traces so typography and spacing stay consistent.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L735-L760】
+
 ## 5. Content display patterns
-- **Reading views (Markdown, documentation):** wrap in `.wc-reading` to constrain width and rely on the markdown overrides already in the foundation file.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L146-L147】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L600-L616】
+- **Reading views (Markdown, documentation):** wrap in `.wc-reading` to constrain width and rely on the markdown overrides already in the foundation file.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L146-L147】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L876-L883】
+- **README editor:** use `.wc-editor-grid` with `.wc-editor-textarea` and `.wc-editor-preview` to keep the split view responsive; overlay locks reuse `.wc-overlay` helpers.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L672-L722】
 - **Data consoles (logs, monitors):** use `.wc-panel` with monospace text and `.wc-status` for live status chips; pair with `.wc-table` for job lists.
 - **Dashboards:** structure as stacked `.wc-panel` elements with `.wc-toolbar` headings, each focusing on a single job/action set.
 - **Paginated datasets:** combine `.wc-table` with `.wc-pagination` and ensure the current page link uses `aria-current="page"` so screen readers announce context.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L426-L443】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L530-L557】
 - **Contextual tips:** surface brief guidance using `.wc-tooltip` tied to icons or labels; ensure the tooltip content is duplicated inline for screen readers when the information is critical.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L617-L637】
+- **Logs & metrics:** use `.wc-log` alongside `.wc-status-chip` to stream job output; wrap supporting metadata in `.wc-meta-list`.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L573-L663】
 - **Static assets:** whenever you add or update third-party CSS/JS, update `static-src/scripts/build.mjs` and rerun `build-static-assets.sh` so production pulls from local files rather than CDNs.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64】【F:wepppy/wepppy/weppcloud/static-src/scripts/build.mjs†L17-L129】
 
 ## 6. Accessibility checklist

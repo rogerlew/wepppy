@@ -26,9 +26,11 @@
     </header>
     {% endblock %}
     <main class="wc-page__body">
-      <div class="wc-container">
+      {% block body_container %}
+      <div class="{% block body_container_class %}wc-container{% endblock %}">
         {% block body %}{% endblock %}
       </div>
+      {% endblock %}
     </main>
     {% block footer %}{% endblock %}
     {% block script_extras %}{% endblock %}

@@ -1,58 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>README{% if ron.name %} - {{ ron.name }}{% endif %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown-light.css" integrity="sha512-CxC9MO8FBaaq8vl9yaXHjgWd7uXqx3pWMSBP3daioTTI0gpXijlypuMV67NoE1bPYMzj7ZSNNS0o+jFFdFodgA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <style>
-      .markdown-body {
-        box-sizing: border-box;
-        min-width: 200px;
-        width: 100%;
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 45px;
-      }
+{% extends "base_pure.htm" %}
 
-      @media (max-width: 767.98px) {
-        .markdown-body {
-          padding: 15px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    {% include 'command-bar.htm' %}
-    <div class="container mt-4">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-3">
-        <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
-          <div>
-            <small class="text-muted text-md-right">Rendered {{ generated }}</small>
-          </div>
-          {% if can_edit %}
-          <div class="btn-group btn-group-toggle btn-group-lg" data-toggle="buttons" role="group" aria-label="README mode">
-            <label class="btn btn-secondary btn-lg active">
-              <input type="radio" name="readme-mode" autocomplete="off" checked> View
-            </label>
-            <label class="btn btn-secondary btn-lg">
-              <input type="radio" name="readme-mode" autocomplete="off" onclick="window.location.href='{{ url_for_run('readme.readme_editor', runid=runid, config=config) }}'"> Edit
-            </label>
-          </div>
-          {% endif %}
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-body p-0">
-          <article class="markdown-body" id="readme-content">
-            {{ readme_html | safe }}
-          </article>
-        </div>
-      </div>
-    </div>
-  </body>
-</html>
+{% block title %}{{ runid }}/README{% if ron.name %} - {{ ron.name }}{% endif %}{% endblock %}
+
+{% block head_extras %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/github-markdown-light.css') }}">
+{% endblock %}
+
+{% from "shared/console_macros.htm" import console_page, console_header %}
+
+{% block body %}
+{% call console_page(include_command_bar=True) %}
+  {% set header_actions = [
+    {
+      "element": "button",
+      "label": "View",
+      "type": "button",
+      "disabled": True
+    },
+    {
+      "href": url_for_run('readme.readme_editor', runid=runid, config=config),
+      "label": "Edit",
+      "variant": "pure-button-secondary"
+    }
+  ] %}
+  {% set subtitle = None %}
+  {% if ron.name %}
+    {% set subtitle = ron.name %}
+    {% if ron.scenario %}
+      {% set subtitle = subtitle ~ ' · ' ~ ron.scenario %}
+    {% endif %}
+  {% endif %}
+  {% call console_header(
+    run_link=url_for_run('run_0.runs0', runid=runid, config=config),
+    run_label=runid,
+    run_target='_self',
+    run_rel=None,
+    title="README.md",
+    subtitle=subtitle,
+    actions=header_actions
+  ) %}{% endcall %}
+
+  <section class="wc-panel">
+    <article class="markdown-body">
+      {{ readme_html | safe }}
+    </article>
+  </section>
+{% endcall %}
+{% endblock %}

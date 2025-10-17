@@ -1,324 +1,209 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en" class="wc-page">
   <head>
-    <meta charset="utf-8" />
-    <title>Query Console – {{ runid }}</title>
-    <style>
-      :root {
-        color-scheme: light;
-      }
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        margin: 2rem;
-        max-width: 1200px;
-      }
-      h1 {
-        margin-bottom: 0.5rem;
-      }
-      p {
-        line-height: 1.4;
-      }
-      textarea {
-        width: 100%;
-        min-height: 18rem;
-        font-family: "Fira Code", "Source Code Pro", monospace;
-        font-size: 0.95rem;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid #bbb;
-        resize: vertical;
-      }
-      textarea:focus {
-        outline: 2px solid #0b6efd;
-        outline-offset: 2px;
-      }
-      .controls {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-top: 0.75rem;
-      }
-      button {
-        padding: 0.55rem 1.5rem;
-        border: none;
-        border-radius: 0.4rem;
-        background-color: #0b6efd;
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      button.secondary {
-        background-color: #6c757d;
-      }
-      button:disabled {
-        cursor: progress;
-        opacity: 0.7;
-      }
-      select {
-        padding: 0.5rem 0.75rem;
-        border-radius: 0.4rem;
-        border: 1px solid #bbb;
-        background-color: rgba(0, 0, 0, 0.02);
-        font-family: inherit;
-        font-size: 0.95rem;
-      }
-      select:focus {
-        outline: 2px solid #0b6efd;
-        outline-offset: 1px;
-      }
-      code {
-        background: rgba(0, 0, 0, 0.05);
-        padding: 0 0.4rem;
-        border-radius: 0.3rem;
-      }
-      .status-block {
-        margin-top: 1.5rem;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid #bbb;
-        background-color: rgba(0, 0, 0, 0.02);
-      }
-      .status-line {
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-      }
-      pre {
-        white-space: pre-wrap;
-        word-break: break-word;
-        font-family: "Fira Code", "Source Code Pro", monospace;
-        font-size: 0.9rem;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        background-color: rgba(0, 0, 0, 0.04);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        max-height: 28rem;
-        overflow: auto;
-      }
-      details {
-        margin-top: 1rem;
-      }
-      .note {
-        margin-top: 1rem;
-        padding: 0.75rem 1rem;
-        border-left: 4px solid #ff8800;
-        background-color: rgba(255, 136, 0, 0.1);
-        border-radius: 0.4rem;
-      }
-      ul.dataset-preview {
-        list-style: none;
-        padding: 0;
-        margin: 0.5rem 0 0;
-      }
-      ul.dataset-preview li {
-        font-family: "Fira Code", "Source Code Pro", monospace;
-        font-size: 0.85rem;
-        padding: 0.15rem 0;
-      }
-      .preset-picker {
-        margin: 1rem 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-      }
-      .preset-description {
-        margin: 0;
-        font-size: 0.9rem;
-        color: rgba(0, 0, 0, 0.65);
-      }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Query Console – {{ run_name }}</title>
+    <link rel="stylesheet" href="/weppcloud/static/vendor/purecss/pure-min.css">
+    <link rel="stylesheet" href="/weppcloud/static/vendor/purecss/grids-responsive-min.css">
+    <link rel="stylesheet" href="/weppcloud/static/css/ui-foundation.css">
   </head>
-  <body>
-    <h1>Query Console</h1>
-    <p>
-      Target run: <code>{{ runid }}</code><br />
-      POST endpoint: <code>/query/runs/{{ runid_slug }}/query</code>
-    </p>
-    <p>
-      Paste or edit the query payload below, then click <strong>POST</strong> to execute it. The response body
-      and HTTP status will appear underneath. This is handy for testing payloads before wiring them into scripts
-      or dashboards.
-    </p>
-
-    {% if not catalog_ready %}
-      <div class="note">
-        Catalog metadata was not found. Visit
-        <a href="{{ activate_url }}">/query/runs/{{ runid_slug }}/activate</a>
-        to activate the run, then reload this page.
+  <body class="wc-page">
+    {% from "shared/console_macros.htm" import console_page, console_header, button_row %}
+    <header class="wc-header">
+      <div class="wc-header__inner wc-container">
+        <a class="wc-brand" href="/weppcloud"><span class="wc-brand__primary">wepp</span><span class="wc-brand__secondary">cloud</span></a>
       </div>
-    {% endif %}
+    </header>
+    <main class="wc-page__body">
+      <div class="wc-container wc-stack">
+        {% call console_page() %}
+          {% call console_header(
+            run_link=run_link,
+            run_label=run_name,
+            title="Query Console"
+          ) %}
+            <p class="wc-text-muted">
+              Config: <code>{{ config_name }}</code><br>
+              POST endpoint: <code>/query/runs/{{ run_slug }}/query</code>
+            </p>
+          {% endcall %}
 
-    {% if catalog_entries %}
-      <details>
-        <summary>Sample datasets (first {{ catalog_entries|length }})</summary>
-        <ul class="dataset-preview">
-          {% for entry in catalog_entries %}
-            <li>{{ entry.path }}</li>
-          {% endfor %}
-        </ul>
-      </details>
-    {% endif %}
+          <p>
+            Paste or edit the query payload below, then click <strong>POST</strong> to execute it. The response body
+            and HTTP status will appear underneath. This is handy for testing payloads before wiring them into scripts
+            or dashboards.
+          </p>
 
-    <form id="queryForm">
-      <label for="payload"><strong>Query payload (JSON)</strong></label>
-      <div class="preset-picker">
-        <label for="presetSelect">Example payloads</label>
-        <select id="presetSelect">
-          <option value="">Choose an example…</option>
-          {% for category, presets in query_presets.items() %}
-            <optgroup label="{{ category }}">
-              {% for preset in presets %}
-                <option value="{{ preset.id }}">{{ preset.name }}</option>
-              {% endfor %}
-            </optgroup>
-          {% endfor %}
-        </select>
-        <p id="presetDescription" class="preset-description"></p>
+          {% if not catalog_ready %}
+            <div class="wc-note">
+              Catalog metadata was not found. Visit
+              <a href="{{ activate_url }}">/query/runs/{{ run_slug }}/activate</a>
+              to activate the run, then reload this page.
+            </div>
+          {% endif %}
+
+          {% if catalog_entries %}
+            <details>
+              <summary>Sample datasets (first {{ catalog_entries|length }})</summary>
+              <ul class="wc-dataset-list">
+                {% for entry in catalog_entries %}
+                  <li>{{ entry.path }}</li>
+                {% endfor %}
+              </ul>
+            </details>
+          {% endif %}
+
+          <section class="wc-panel wc-stack">
+            <form id="queryForm" class="wc-stack" novalidate>
+              <label for="payload"><strong>Query payload (JSON)</strong></label>
+              <div class="wc-stack">
+                <label for="presetSelect">Example payloads</label>
+                <select id="presetSelect" class="pure-input-1">
+                  <option value="">Choose an example…</option>
+                  {% for category, presets in query_presets.items() %}
+                    <optgroup label="{{ category }}">
+                      {% for preset in presets %}
+                        <option value="{{ preset.id }}">{{ preset.name }}</option>
+                      {% endfor %}
+                    </optgroup>
+                  {% endfor %}
+                </select>
+                <p id="presetDescription" class="wc-text-muted"></p>
+              </div>
+              <textarea id="payload" name="payload" class="wc-code-input" spellcheck="false"></textarea>
+              {% call button_row() %}
+                <button type="submit" class="pure-button" id="submitBtn">POST Query</button>
+                <button type="button" class="pure-button pure-button-secondary" id="formatBtn">Format JSON</button>
+                <button type="button" class="pure-button pure-button-secondary" id="resetBtn">Reset</button>
+              {% endcall %}
+            </form>
+          </section>
+
+          <section class="wc-panel wc-stack">
+            <h2>Response</h2>
+            <div id="status" class="wc-status" data-state="attention">Waiting for request…</div>
+            <pre id="response" class="wc-code-block" aria-live="polite" aria-label="Response body"></pre>
+            <details id="stacktraceContainer" hidden>
+              <summary>Stack trace</summary>
+              <pre id="stacktrace" class="wc-code-block" aria-live="polite" aria-label="Stack trace"></pre>
+            </details>
+          </section>
+        {% endcall %}
       </div>
-      <textarea id="payload" name="payload" spellcheck="false"></textarea>
-      <div class="controls">
-        <button type="submit" id="submitBtn">POST Query</button>
-        <button type="button" class="secondary" id="formatBtn">Format JSON</button>
-        <button type="button" class="secondary" id="resetBtn">Reset</button>
-      </div>
-    </form>
+    </main>
+  <script>
+    const form = document.getElementById('queryForm');
+    const payloadInput = document.getElementById('payload');
+    const statusLine = document.getElementById('status');
+    const responseBlock = document.getElementById('response');
+    const stacktraceContainer = document.getElementById('stacktraceContainer');
+    const stacktraceBlock = document.getElementById('stacktrace');
+    const presetSelect = document.getElementById('presetSelect');
+    const presetDescription = document.getElementById('presetDescription');
+    const initialPayload = {{ default_payload|tojson }};
+    const presets = {{ query_presets|tojson }};
+    const postUrl = {{ post_url|tojson }};
 
-    <div class="status-block">
-      <div id="status" class="status-line">Waiting for request…</div>
-      <pre id="response" aria-live="polite" aria-label="Response body"></pre>
-      <details id="stacktraceContainer" style="display: none;">
-        <summary>Stack Trace</summary>
-        <pre id="stacktrace" aria-live="polite" aria-label="Stack trace"></pre>
-      </details>
-    </div>
+    const initialPayloadValue = JSON.stringify(initialPayload, null, 2);
+    payloadInput.value = initialPayloadValue;
 
-    <script>
-      const form = document.getElementById('queryForm');
-      const payloadInput = document.getElementById('payload');
-      const statusLine = document.getElementById('status');
-      const responseBlock = document.getElementById('response');
-      const stacktraceContainer = document.getElementById('stacktraceContainer');
-      const stacktraceBlock = document.getElementById('stacktrace');
-      const submitBtn = document.getElementById('submitBtn');
-      const formatBtn = document.getElementById('formatBtn');
-      const resetBtn = document.getElementById('resetBtn');
-      const presetSelect = document.getElementById('presetSelect');
-      const presetDescription = document.getElementById('presetDescription');
-      const postUrl = window.location.pathname;
+    function setStatus(message, state = 'attention') {
+      statusLine.dataset.state = state;
+      statusLine.textContent = message;
+    }
 
-      const defaultPayloadJson = {{ default_payload_json | tojson }};
-      const defaultPayload = JSON.parse(defaultPayloadJson);
-      const defaultPayloadString = JSON.stringify(defaultPayload, null, 2);
-      payloadInput.value = defaultPayloadString;
-      const presetCatalogJson = {{ query_presets_json | tojson }};
-      const presetCatalog = JSON.parse(presetCatalogJson);
-      const presetIndex = {};
-      Object.entries(presetCatalog).forEach(([category, presets]) => {
-        presets.forEach((preset) => {
-          presetIndex[preset.id] = {
-            ...preset,
-            category,
-          };
-        });
-      });
-
-      function setStatus(text) {
-        statusLine.textContent = text;
+    function applyPreset(presetId) {
+      if (!presetId) {
+        presetDescription.textContent = '';
+        return;
       }
-
-      function clearOutputs() {
-        responseBlock.textContent = '';
-        stacktraceBlock.textContent = '';
-        stacktraceContainer.style.display = 'none';
-      }
-
-      presetSelect.addEventListener('change', () => {
-        const presetId = presetSelect.value;
-        if (!presetId || !presetIndex[presetId]) {
-          presetDescription.textContent = '';
+      for (const category of Object.values(presets)) {
+        const preset = category.find((item) => item.id === presetId);
+        if (preset) {
+          payloadInput.value = JSON.stringify(preset.payload, null, 2);
+          presetDescription.textContent = preset.description || '';
           return;
         }
-        const preset = presetIndex[presetId];
-        payloadInput.value = JSON.stringify(preset.payload, null, 2);
-        presetDescription.textContent = preset.description;
-        clearOutputs();
-        setStatus(`Loaded example: ${preset.name}`);
-      });
+      }
+    }
 
-      formatBtn.addEventListener('click', () => {
-        try {
-          const parsed = JSON.parse(payloadInput.value);
-          payloadInput.value = JSON.stringify(parsed, null, 2);
-          setStatus('JSON formatted locally');
-        } catch (err) {
-          setStatus(`Format failed: ${err.message}`);
-        }
-      });
+    presetSelect.addEventListener('change', (event) => {
+      applyPreset(event.target.value);
+    });
 
-      resetBtn.addEventListener('click', () => {
-        payloadInput.value = defaultPayloadString;
-        clearOutputs();
-        setStatus('Reset to starter payload.');
-      });
+    document.getElementById('formatBtn').addEventListener('click', () => {
+      try {
+        const parsed = JSON.parse(payloadInput.value);
+        payloadInput.value = JSON.stringify(parsed, null, 2);
+      } catch (err) {
+        window.alert('Payload is not valid JSON.');
+      }
+    });
 
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      payloadInput.value = initialPayloadValue;
+      setStatus('Waiting for request…', 'attention');
+      responseBlock.textContent = '';
+      stacktraceContainer.hidden = true;
+      stacktraceBlock.textContent = '';
+      presetSelect.value = '';
+      presetDescription.textContent = '';
+    });
 
-        let payloadObject;
-        try {
-          payloadObject = JSON.parse(payloadInput.value);
-          payloadInput.value = JSON.stringify(payloadObject, null, 2);
-        } catch (err) {
-          setStatus(`Client-side JSON parsing error: ${err.message}`);
-          responseBlock.textContent = '';
-          return;
-        }
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      let payload;
+      try {
+        payload = JSON.stringify(JSON.parse(payloadInput.value));
+      } catch (err) {
+        window.alert('Payload is not valid JSON.');
+        return;
+      }
 
-        submitBtn.disabled = true;
-        setStatus('Sending request…');
-        clearOutputs();
+      setStatus('Posting query…', 'attention');
+      responseBlock.textContent = '';
+      stacktraceContainer.hidden = true;
 
-        try {
-          const response = await fetch(postUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payloadObject),
-          });
+      fetch(postUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload
+      })
+        .then(async (response) => {
+          const text = await response.text();
+          let formatted = text;
+          try {
+            formatted = JSON.stringify(JSON.parse(text), null, 2);
+          } catch (err) {
+            // Leave as text
+          }
+          responseBlock.textContent = formatted;
+          if (response.ok) {
+            setStatus(`Success (HTTP ${response.status})`, 'positive');
+          } else {
+            setStatus(`Error (HTTP ${response.status})`, 'critical');
+          }
 
-          const statusText = `HTTP ${response.status} ${response.statusText || ''}`.trim();
-          setStatus(statusText);
-
-          const contentType = response.headers.get('content-type') || '';
-          const bodyText = await response.text();
-          let parsedBody = null;
-
-          if (contentType.includes('application/json')) {
+          if (!response.ok) {
             try {
-              parsedBody = JSON.parse(bodyText);
-              responseBlock.textContent = JSON.stringify(parsedBody, null, 2);
+              const json = JSON.parse(text);
+              if (json && json.exc_info) {
+                stacktraceBlock.textContent = json.exc_info;
+                stacktraceContainer.hidden = false;
+              }
             } catch (err) {
-              responseBlock.textContent = bodyText;
+              // no-op
             }
           } else {
-            responseBlock.textContent = bodyText;
-          }
-
-          if (parsedBody && parsedBody.stacktrace) {
-            stacktraceBlock.textContent = parsedBody.stacktrace;
-            stacktraceContainer.style.display = 'block';
-          } else {
+            stacktraceContainer.hidden = true;
             stacktraceBlock.textContent = '';
-            stacktraceContainer.style.display = 'none';
           }
-        } catch (err) {
-          setStatus('Request failed');
-          responseBlock.textContent = err.message;
-          stacktraceContainer.style.display = 'none';
-        } finally {
-          submitBtn.disabled = false;
-        }
-      });
-    </script>
+        })
+        .catch((err) => {
+          setStatus(`Request failed: ${err.message}`, 'critical');
+        });
+    });
+  </script>
   </body>
 </html>

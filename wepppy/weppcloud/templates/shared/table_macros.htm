@@ -1,0 +1,28 @@
+{% import 'shared/console_macros.htm' as console_macros %}
+
+{% macro table_page(title='', subtitle=None, actions=None, include_command_bar=False, data_controller=None, classes='') %}
+  {% set page_classes = 'wc-table-page' %}
+  {% if classes %}
+    {% set page_classes = page_classes + ' ' + classes %}
+  {% endif %}
+  {% call console_macros.console_page(data_controller=data_controller, include_command_bar=include_command_bar, classes=page_classes) %}
+    {% call console_macros.console_header(title=title, subtitle=subtitle, actions=actions, run_target='_self', run_rel=None) %}{% endcall %}
+    {{ caller() }}
+  {% endcall %}
+{% endmacro %}
+
+{% macro table_panel(title=None, description=None) %}
+  <section class="wc-panel wc-stack">
+    {% if title %}
+      <header class="wc-stack">
+        <h2>{{ title }}</h2>
+        {% if description %}
+          <p class="wc-text-muted">{{ description }}</p>
+        {% endif %}
+      </header>
+    {% endif %}
+    <div class="wc-table-wrapper">
+      {{ caller() }}
+    </div>
+  </section>
+{% endmacro %}

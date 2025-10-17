@@ -22,6 +22,7 @@ from starlette.responses import (
 from starlette.exceptions import HTTPException
 from starlette.routing import Route, Mount
 from starlette.templating import Jinja2Templates
+from jinja2 import ChoiceLoader, FileSystemLoader
 
 
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
@@ -29,7 +30,14 @@ from wepppy.query_engine.payload import QueryRequest
 from .query_presets import QUERY_PRESETS
 from .helpers import resolve_run_path
 
-TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
+TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+SHARED_TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "weppcloud" / "templates"
+TEMPLATES = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+loaders = [FileSystemLoader(str(TEMPLATES_DIR))]
+if SHARED_TEMPLATES_DIR.exists():
+    loaders.append(FileSystemLoader(str(SHARED_TEMPLATES_DIR)))
+TEMPLATES.env.loader = ChoiceLoader(loaders)
 LOGGER = logging.getLogger(__name__)
 DOCS_ROOT = Path(__file__).resolve().parent.parent / "docs"
 MCP_OPENAPI_PATH = DOCS_ROOT / "mcp_openapi.yaml"
@@ -179,25 +187,28 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
         ("limit", 25),
         ("include_schema", True),
     ])
-    default_payload_json = json.dumps(default_payload, ensure_ascii=False, sort_keys=False)
-    query_presets_json = json.dumps(QUERY_PRESETS, ensure_ascii=False, sort_keys=False)
-
-    runid_str = str(run_path)
-    activate_url = f"/query/runs/{runid_str.lstrip('/')}/activate"
+    slug = runid_param.strip('/') or runid_param
+    slug_parts = [part for part in slug.split('/') if part]
+    run_name = slug_parts[0] if slug_parts else runid_param
+    config_name = slug_parts[1] if len(slug_parts) > 1 else 'cfg'
+    run_link = f"/weppcloud/runs/{run_name}/{config_name}"
+    post_url = f"/query/runs/{slug}/query"
+    activate_url = f"/query/runs/{slug}/activate"
 
     return TEMPLATES.TemplateResponse(
         "query_console.html",
         {
             "request": request,
-            "runid": runid_str,
-            "runid_slug": runid_str.lstrip("/"),
+            "run_name": run_name,
+            "config_name": config_name,
+            "run_slug": slug,
+            "run_link": run_link,
             "catalog_entries": catalog_entries[:20],
             "catalog_ready": catalog_ready,
             "default_payload": default_payload,
-            "default_payload_json": default_payload_json,
             "activate_url": activate_url,
             "query_presets": QUERY_PRESETS,
-            "query_presets_json": query_presets_json,
+            "post_url": post_url,
         },
     )
 
