@@ -14,6 +14,26 @@ await fs.emptyDir(distDir);
 
 const pick = (prodPath, devPath) => (isProd ? prodPath : devPath ?? prodPath);
 
+const resolveSource = async (candidates) => {
+  if (!candidates || candidates.length === 0) {
+    return null;
+  }
+  for (const candidate of candidates) {
+    if (await fs.pathExists(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+};
+
+const logSkip = (label, paths) => {
+  const formatted = paths.map((p) => `    - ${path.relative(projectRoot, p)}`).join('\n');
+  console.warn(
+    `!! Skipping ${label} because none of the expected sources were found.\n${formatted}\n` +
+      '   Run npm install in static-src or vendor the asset manually before retrying.'
+  );
+};
+
 const targets = [
   // Leaflet core
   {
@@ -39,6 +59,25 @@ const targets = [
     source: path.join(nodeModules, 'jquery', 'dist', pick('jquery.min.js', 'jquery.js')),
     outfile: path.join(distDir, 'vendor', 'jquery', 'jquery.js'),
     includeSourceMap: true,
+  },
+  // Pure.css core + responsive grid
+  {
+    kind: 'copyFile',
+    sourceCandidates: [
+      path.join(nodeModules, 'purecss', 'build', pick('pure-min.css', 'pure.css')),
+      path.join(vendorSources, 'purecss', pick('pure-min.css', 'pure.css')),
+    ],
+    outfile: path.join(distDir, 'vendor', 'purecss', 'pure-min.css'),
+    optional: true,
+  },
+  {
+    kind: 'copyFile',
+    sourceCandidates: [
+      path.join(nodeModules, 'purecss', 'build', pick('grids-responsive-min.css', 'grids-responsive.css')),
+      path.join(vendorSources, 'purecss', pick('grids-responsive-min.css', 'grids-responsive.css')),
+    ],
+    outfile: path.join(distDir, 'vendor', 'purecss', 'grids-responsive-min.css'),
+    optional: true,
   },
   // Bootstrap JS/CSS
   {
@@ -100,11 +139,22 @@ const ensureDir = async (filePath) => {
 };
 
 for (const target of targets) {
+  const candidateList = target.sourceCandidates ?? (target.source ? [target.source] : []);
+  const sourcePath = await resolveSource(candidateList);
+
+  if (!sourcePath) {
+    if (target.optional) {
+      logSkip(target.outfile, candidateList);
+      continue;
+    }
+    throw new Error(`Unable to locate source for ${target.outfile}`);
+  }
+
   if (target.kind === 'copyFile') {
     await ensureDir(target.outfile);
-    await fs.copyFile(target.source, target.outfile);
+    await fs.copyFile(sourcePath, target.outfile);
     if (target.includeSourceMap) {
-      const mapSource = `${target.source}.map`;
+      const mapSource = `${sourcePath}.map`;
       const mapDest = `${target.outfile}.map`;
       if (await fs.pathExists(mapSource)) {
         await ensureDir(mapDest);
@@ -118,7 +168,7 @@ for (const target of targets) {
       }
     }
   } else if (target.kind === 'copyDir') {
-    await fs.copy(target.source, target.outdir, { recursive: true });
+    await fs.copy(sourcePath, target.outdir, { recursive: true });
   } else {
     throw new Error(`Unknown target kind: ${target.kind}`);
   }

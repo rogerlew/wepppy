@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/stylelintrc",
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "color-named": "never",
+    "color-no-hex": null,
+    "declaration-no-important": true,
+    "length-zero-no-unit": true,
+    "max-nesting-depth": 3,
+    "selector-class-pattern": [
+      "^(pure-|wc-)[a-z0-9-]+$",
+      {
+        "message": "Class names should use the wc- namespace (or Pure defaults)."
+      }
+    ],
+    "property-disallowed-list": [
+      {
+        "property": "border-radius",
+        "message": "Use var(--wc-radius-none) or remove rounding."
+      }
+    ],
+    "value-keyword-case": ["lower", { "ignoreKeywords": ["currentColor"] }]
+  }
+}
