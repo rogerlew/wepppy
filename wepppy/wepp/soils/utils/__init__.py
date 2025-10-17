@@ -1,4 +1,4 @@
-from .yamlizer import WeppSoilUtil
+from .wepp_soil_util import WeppSoilUtil
 from .multi_ofe import SoilMultipleOfeSynth
 
 import csv

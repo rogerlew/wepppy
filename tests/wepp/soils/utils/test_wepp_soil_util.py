@@ -25,7 +25,9 @@ if "deprecated" not in sys.modules:
     sys.modules["deprecated"] = deprecated_stub
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-YAMLIZER_PATH = REPO_ROOT / "wepppy" / "wepp" / "soils" / "utils" / "yamlizer.py"
+WEPP_SOIL_UTIL_PATH = (
+    REPO_ROOT / "wepppy" / "wepp" / "soils" / "utils" / "wepp_soil_util.py"
+)
 
 
 def _ensure_package(name: str, path: Path):
@@ -82,21 +84,21 @@ all_your_base_stub.isfloat = _stub_isfloat
 sys.modules["wepppy.all_your_base"] = all_your_base_stub
 
 
-yamlizer_spec = importlib.util.spec_from_file_location(
-    "wepppy.wepp.soils.utils.yamlizer", YAMLIZER_PATH
+module_spec = importlib.util.spec_from_file_location(
+    "wepppy.wepp.soils.utils.wepp_soil_util", WEPP_SOIL_UTIL_PATH
 )
-yamlizer_module = importlib.util.module_from_spec(yamlizer_spec)
-sys.modules[yamlizer_spec.name] = yamlizer_module
-yamlizer_spec.loader.exec_module(yamlizer_module)
+module = importlib.util.module_from_spec(module_spec)
+sys.modules[module_spec.name] = module
+module_spec.loader.exec_module(module)
 
 import oyaml as yaml
 import pytest
 
-WeppSoilUtil = yamlizer_module.WeppSoilUtil
-_replace_parameter = yamlizer_module._replace_parameter
-_pars_to_string = yamlizer_module._pars_to_string
+WeppSoilUtil = module.WeppSoilUtil
+_replace_parameter = module._replace_parameter
+_pars_to_string = module._pars_to_string
 
-from wepppy.wepp.soils.utils.yamlizer import (
+from wepppy.wepp.soils.utils.wepp_soil_util import (
     WeppSoilUtil,
     _replace_parameter,
     _pars_to_string,

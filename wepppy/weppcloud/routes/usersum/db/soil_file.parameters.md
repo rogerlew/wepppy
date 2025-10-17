@@ -1,5 +1,5 @@
 # WEPP Soil File Parameters
-Derived from `soil-file.spec.md` and `wepppy/wepp/soils/utils/yamlizer.py`. The heading line is the default `usersum <parameter>` description; bullets expand on extended context or units.
+Derived from `soil-file.spec.md` and `wepppy/wepp/soils/utils/wepp_soil_util.py`. The heading line is the default `usersum <parameter>` description; bullets expand on extended context or units.
 
 ## Header
 #### `datver` — Soil file version code (real)
