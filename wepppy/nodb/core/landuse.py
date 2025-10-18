@@ -57,6 +57,7 @@ import os
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
+from typing import Optional, Dict, List, Any, Tuple
 import shutil
 from enum import IntEnum
 import time
@@ -116,7 +117,7 @@ class LanduseMode(IntEnum):
     SpatialAPI = 9
 
 
-def read_cover_defaults(fn):
+def read_cover_defaults(fn: str) -> Dict[str, Dict]:
     with open(fn) as fp:
         d = {}
         rdr = csv.DictReader(fp)
@@ -135,7 +136,13 @@ class Landuse(NoDbBase):
 
     filename = 'landuse.nodb'
     
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+    def __init__(
+        self, 
+        wd: str, 
+        cfg_fn: str, 
+        run_group: Optional[str] = None, 
+        group_name: Optional[str] = None
+    ) -> None:
         super(Landuse, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
@@ -177,7 +184,7 @@ class Landuse(NoDbBase):
             self._hillslope_mofe_cancovs = None
 
     @classmethod
-    def _post_instance_loaded(cls, instance):
+    def _post_instance_loaded(cls, instance: 'Landuse') -> 'Landuse':
         instance = super()._post_instance_loaded(instance)
 
         if hasattr(instance, 'domlc_mofe_d') and instance.domlc_mofe_d is not None:
@@ -191,7 +198,7 @@ class Landuse(NoDbBase):
         return instance
 
     @property
-    def mapping(self):
+    def mapping(self) -> Optional[str]:
         if hasattr(self, '_mapping'):
             return self._mapping
 
@@ -220,12 +227,12 @@ class Landuse(NoDbBase):
         return load_map(mapping)
 
     @property
-    def mode(self):
+    def mode(self) -> LanduseMode:
         return self._mode
     
     @mode.setter
     @nodb_setter
-    def mode(self, value):
+    def mode(self, value: Any) -> None:
         if isinstance(value, LanduseMode):
             self._mode = value
         elif isinstance(value, int):
@@ -234,7 +241,7 @@ class Landuse(NoDbBase):
             raise ValueError('most be LanduseMode or int')
 
     @property
-    def single_selection(self):
+    def single_selection(self) -> int:
         """
         id of the selected management
         """
@@ -242,20 +249,20 @@ class Landuse(NoDbBase):
 
     @single_selection.setter
     @nodb_setter
-    def single_selection(self, landuse_single_selection):
+    def single_selection(self, landuse_single_selection: int) -> None:
         k = landuse_single_selection
         self._single_selection = k
         self._single_man = get_management_summary(k)
 
     @property
-    def single_man(self):
+    def single_man(self) -> Optional[Any]:
         """
         management summary object
         """
         return self._single_man
 
     @property
-    def mofe_buffer_selection(self):
+    def mofe_buffer_selection(self) -> int:
         """
         id of the selected management
         """
@@ -263,19 +270,19 @@ class Landuse(NoDbBase):
 
     @mofe_buffer_selection.setter
     @nodb_setter
-    def mofe_buffer_selection(self, k):
+    def mofe_buffer_selection(self, k: int) -> None:
         self._mofe_buffer_selection = str(k)
         self._buffer_man = get_management_summary(k)
 
     @property
-    def buffer_man(self):
+    def buffer_man(self) -> Optional[Any]:
         """
         management summary object
         """
         return getattr(self, '_buffer_man', None)
 
     @property
-    def has_landuse(self):
+    def has_landuse(self) -> bool:
         mode = self._mode
 
         if mode == LanduseMode.Undefined:
@@ -288,14 +295,14 @@ class Landuse(NoDbBase):
     # build
     #
 
-    def clean(self):
+    def clean(self) -> None:
 
         lc_dir = self.lc_dir
         if _exists(lc_dir):
             shutil.rmtree(lc_dir)
         os.mkdir(lc_dir)
 
-    def _build_ESDAC(self):
+    def _build_ESDAC(self) -> None:
         from wepppy.eu.soils.esdac import ESDAC
         esd = ESDAC()
 
@@ -310,7 +317,7 @@ class Landuse(NoDbBase):
 
         self.domlc_d = domlc_d
 
-    def _build_lu10v5ua(self):
+    def _build_lu10v5ua(self) -> None:
         from wepppy.au.landuse_201011 import Lu10v5ua
         lu = Lu10v5ua()
 
@@ -324,24 +331,24 @@ class Landuse(NoDbBase):
         self.domlc_d = domlc_d
 
     @property
-    def fractionals(self):
+    def fractionals(self) -> Optional[List]:
         return getattr(self, '_fractionals', self.config_get_list('landuse', 'fractionals'))
 
     @fractionals.setter
     @nodb_setter
-    def fractionals(self, value):
+    def fractionals(self, value: List) -> None:
         self._fractionals = value
 
     @property
-    def nlcd_db(self):
+    def nlcd_db(self) -> Optional[str]:
         return getattr(self, '_nlcd_db', self.config_get_str('landuse', 'nlcd_db'))
 
     @nlcd_db.setter
     @nodb_setter
-    def nlcd_db(self, value):
+    def nlcd_db(self, value: str) -> None:
         self._nlcd_db = value
 
-    def _build_NLCD(self, retrieve_nlcd=True):
+    def _build_NLCD(self, retrieve_nlcd: bool = True) -> None:
         global wepppyo3
 
         _map = self.ron_instance.map
@@ -373,7 +380,7 @@ class Landuse(NoDbBase):
                 key_fn=subwta_fn, parameter_fn=lc_fn, ignore_channels=True, ignore_keys=set())
             self.domlc_d = {k: str(v) for k, v in domlc_d.items()}
 
-    def _build_single_selection(self):
+    def _build_single_selection(self) -> None:
         assert self.single_selection is not None
 
         domlc_d = {}
@@ -384,7 +391,7 @@ class Landuse(NoDbBase):
 
         self.domlc_d = domlc_d
 
-    def _build_spatial_api(self):
+    def _build_spatial_api(self) -> None:
         # fetch landcover map
 
         _map = self.ron_instance.map
@@ -413,7 +420,7 @@ class Landuse(NoDbBase):
         with self.locked():
             self._managements = managements
 
-    def build(self):
+    def build(self) -> None:
         assert not self.islocked()
         self.logger.info('Building landuse')
 
@@ -539,7 +546,7 @@ class Landuse(NoDbBase):
 
         self._build_fractionals()
 
-    def _build_fractionals(self):
+    def _build_fractionals(self) -> None:
         global wepppyo3
 
         fractionals = self.fractionals
@@ -581,7 +588,7 @@ class Landuse(NoDbBase):
         with open(_join(frac_dir, 'fractionals.json'), 'w') as fp:
             json.dump(frac_d, fp, indent=2)
 
-    def _build_multiple_ofe(self):
+    def _build_multiple_ofe(self) -> None:
         from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
         from wepppy.nodb.mods.disturbed import Disturbed
 
@@ -754,7 +761,11 @@ class Landuse(NoDbBase):
             self.domlc_mofe_d = domlc_d
             self.managements = managements
 
-    def identify_disturbed_class(self, topaz_id, mofe_id = None):
+    def identify_disturbed_class(
+        self, 
+        topaz_id: str, 
+        mofe_id: Optional[str] = None
+    ) -> Optional[str]:
 
         if mofe_id is None:
             dom = self.domlc_d[str(topaz_id)]
@@ -778,7 +789,11 @@ class Landuse(NoDbBase):
 
         return ''
 
-    def identify_burn_class(self, topaz_id, mofe_id = None):
+    def identify_burn_class(
+        self, 
+        topaz_id: str, 
+        mofe_id: Optional[str] = None
+    ) -> Optional[str]:
 
         if mofe_id is None:
             dom = self.domlc_d[str(topaz_id)]
@@ -805,7 +820,7 @@ class Landuse(NoDbBase):
 
         return 'Unburned'
 
-    def set_cover_defaults(self):
+    def set_cover_defaults(self) -> None:
 
         defaults = self.cover_defaults_d
 
@@ -819,7 +834,12 @@ class Landuse(NoDbBase):
                     for cover in ['cancov', 'inrcov', 'rilcov']:
                         self._modify_coverage(dom, cover, defaults[dom][cover])
 
-    def _modify_coverage(self, dom, cover, value):
+    def _modify_coverage(
+        self, 
+        dom: str, 
+        cover: str, 
+        value: float
+    ) -> None:
         if not self.islocked():
             raise Exception('must be locked to call _modify_coverage')
         
@@ -839,11 +859,16 @@ class Landuse(NoDbBase):
         elif cover == 'rilcov':
             self.managements[dom].rilcov_override = value
 
-    def modify_coverage(self, dom, cover, value):
+    def modify_coverage(
+        self, 
+        dom: str, 
+        cover: str, 
+        value: float
+    ) -> None:
         with self.locked():
             self._modify_coverage(dom, cover, value)
 
-    def modify_mapping(self, dom, newdom):
+    def modify_mapping(self, dom: str, newdom: str) -> None:
         with self.locked():
             dom = str(dom)
             newdom = str(newdom)
@@ -858,7 +883,7 @@ class Landuse(NoDbBase):
         self.build_managements()
 
     @property
-    def landuseoptions(self):
+    def landuseoptions(self) -> Dict:
         from wepppy.wepp import management
 
         _landuseoptions = management.load_map(self.mapping).values()
@@ -880,7 +905,7 @@ class Landuse(NoDbBase):
 
         return landuseoptions
 
-    def build_managements(self, _map=None):
+    def build_managements(self, _map: Optional[str] = None) -> None:
         if _map is None:
             _map = self.mapping
 
@@ -948,7 +973,7 @@ class Landuse(NoDbBase):
         self.trigger(TriggerEvents.LANDUSE_BUILD_COMPLETE)
 
     @property
-    def report(self):
+    def report(self) -> str:
         """
         returns a list of managements sorted by coverage in
         descending order
@@ -961,7 +986,7 @@ class Landuse(NoDbBase):
     #
     # modify
     #
-    def modify(self, topaz_ids, landuse):
+    def modify(self, topaz_ids: List[str], landuse: str) -> None:
         with self.locked():
             landuse = str(int(landuse))
             assert self.domlc_d is not None
@@ -999,7 +1024,7 @@ class Landuse(NoDbBase):
             return None
 
     @property
-    def legend(self):
+    def legend(self) -> List[str]:
         doms = sorted(set(self.domlc_d.values()))
         mans = [self.managements[dom] for dom in doms]
         descs = [man.desc for man in mans]
@@ -1010,11 +1035,11 @@ class Landuse(NoDbBase):
     def sub_summary(self, topaz_id: str):
         return self._x_summary(topaz_id)
 
-    def chn_summary(self, topaz_id: str):
+    def chn_summary(self, topaz_id: str) -> Optional[Dict]:
         return self._x_summary(topaz_id)
 
     @property
-    def hillslope_cancovs(self):
+    def hillslope_cancovs(self) -> Optional[List]:
         return getattr(self, '_hillslope_cancovs', None)
 
     @hillslope_cancovs.setter
@@ -1023,11 +1048,11 @@ class Landuse(NoDbBase):
         self._hillslope_cancovs = value
 
     @property
-    def hillslope_mofe_cancovs(self):
+    def hillslope_mofe_cancovs(self) -> Optional[List]:
         return getattr(self, '_hillslope_mofe_cancovs', None)
 
     @property
-    def subs_summary(self):
+    def subs_summary(self) -> Dict:
         """
         Returns a dictionary with topaz_id keys and dictionary soils values.
         """
@@ -1061,7 +1086,7 @@ class Landuse(NoDbBase):
 
         return summary
 
-    def dump_landuse_parquet(self):
+    def dump_landuse_parquet(self) -> None:
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
@@ -1111,7 +1136,7 @@ class Landuse(NoDbBase):
         update_catalog_entry(self.wd, 'landuse/landuse.parquet')
 
     @property
-    def hill_table(self):
+    def hill_table(self) -> List[Dict]:
         """
         Returns a pandas DataFrame with the hill table.
         """
@@ -1166,7 +1191,7 @@ class Landuse(NoDbBase):
                 yield topaz_id, mans[k]
 
     @property
-    def chns_summary(self):
+    def chns_summary(self) -> Dict:
         """
         returns a dictionary of topaz_id keys and jsonified
         managements values
