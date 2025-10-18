@@ -9,6 +9,7 @@
 import os
 from os.path import join as _join
 from os.path import exists as _exists
+from typing import Optional, Tuple
 
 import math
 import inspect
@@ -32,17 +33,19 @@ __all__ = [
 # wepppy.nodb.topaz.Outlet should be wepppy.nodb.watershed.Outlet
 # then it should be possible to remove this class
 class Outlet(object):
-    def __init__(self,
-                 requested_loc,
-                 actual_loc,
-                 distance_from_requested,
-                 pixel_coords):
+    def __init__(
+        self,
+        requested_loc: Tuple[float, float],
+        actual_loc: Tuple[float, float],
+        distance_from_requested: float,
+        pixel_coords: Tuple[int, int]
+    ) -> None:
         self.requested_loc = requested_loc
         self.actual_loc = actual_loc
         self.distance_from_requested = distance_from_requested
         self.pixel_coords = pixel_coords
 
-    def as_dict(self):
+    def as_dict(self) -> dict:
         return dict(lng=self.actual_loc[0],
                     lat=self.actual_loc[1])
 
@@ -56,64 +59,70 @@ class Topaz(NoDbBase):
 
     filename = 'topaz.nodb'
     
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+    def __init__(
+        self, 
+        wd: str, 
+        cfg_fn: str, 
+        run_group: Optional[str] = None, 
+        group_name: Optional[str] = None
+    ) -> None:
         super(Topaz, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
-            self.csa = self.config_get_float('topaz', 'csa')
-            self.mcl = self.config_get_float('topaz', 'mcl')
+            self.csa: float = self.config_get_float('topaz', 'csa')
+            self.mcl: float = self.config_get_float('topaz', 'mcl')
             # self.zoom_min = self.config_get_int('topaz', 'zoom_min')
 
-            self._outlet = None
+            self._outlet: Optional[Outlet] = None
 
-            self.wsarea = None
-            self.area_gt30 = None
-            self.ruggedness = None
-            self.minz = None
-            self.maxz = None
+            self.wsarea: Optional[float] = None
+            self.area_gt30: Optional[float] = None
+            self.ruggedness: Optional[float] = None
+            self.minz: Optional[float] = None
+            self.maxz: Optional[float] = None
 
             topaz_wd = self.topaz_wd
             if not _exists(topaz_wd):
                 os.mkdir(topaz_wd)
 
     @property
-    def subwta_arc(self):
+    def subwta_arc(self) -> str:
         return _join(self.topaz_wd, 'SUBWTA.ARC')
 
     @property
-    def bound_arc(self):
+    def bound_arc(self) -> str:
         return _join(self.topaz_wd, 'BOUND.ARC')
 
     @property
-    def chnjnt_arc(self):
+    def chnjnt_arc(self) -> str:
         return _join(self.topaz_wd, 'CHNJNT.ARC')
 
     @property
-    def netful_arc(self):
+    def netful_arc(self) -> str:
         return _join(self.topaz_wd, 'NETFUL.ARC')
 
     @property
-    def uparea_out(self):
+    def uparea_out(self) -> str:
         return _join(self.topaz_wd, 'UPAREA.ARC')
 
     @property
-    def discha_out(self):
+    def discha_out(self) -> str:
         return _join(self.topaz_wd, 'DISCHA.ARC')
 
     @property
-    def eldcha_out(self):
+    def eldcha_out(self) -> str:
         return _join(self.topaz_wd, 'ELDCHA.ARC')
 
     @property
-    def fvslop_arc(self):
+    def fvslop_arc(self) -> str:
         return _join(self.topaz_wd, 'FVSLOP.ARC')
 
     @property
-    def relief_arc(self):
+    def relief_arc(self) -> str:
         return _join(self.topaz_wd, 'RELIEF.ARC')
 
     @property
-    def topaz_pass(self):
+    def topaz_pass(self) -> int:
         if _exists(self.subwta_arc):
             return 2
 
@@ -129,7 +138,7 @@ class Topaz(NoDbBase):
     def has_channels(self) -> bool:
         return _exists(self.netful_arc)
 
-    def build_channels(self, csa=4, mcl=60):
+    def build_channels(self, csa: float = 4, mcl: float = 60) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(csa={csa}, mcl={mcl})')
 
@@ -164,14 +173,20 @@ class Topaz(NoDbBase):
     # outlet
     #
     @property
-    def outlet(self):
+    def outlet(self) -> Optional[Outlet]:
         return self._outlet
 
     @property
-    def has_outlet(self):
+    def has_outlet(self) -> bool:
         return self._outlet is not None
 
-    def set_outlet(self, lng, lat, pixelcoords=False, da=0.0):
+    def set_outlet(
+        self, 
+        lng: float, 
+        lat: float, 
+        pixelcoords: bool = False, 
+        da: float = 0.0
+    ) -> None:
         from wepppy.nodb.core.watershed import Outlet
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(lng={lng}, lat={lat}, pixelcoords={pixelcoords}, da={da})')
@@ -194,10 +209,10 @@ class Topaz(NoDbBase):
     # subcatchments
     #
     @property
-    def has_subcatchments(self):
+    def has_subcatchments(self) -> bool:
         return _exists(self.subwta_arc)
 
-    def build_subcatchments(self):
+    def build_subcatchments(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
         

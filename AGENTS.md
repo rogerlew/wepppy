@@ -120,6 +120,46 @@ If a refactor moves or renames a module, the redirect map updates automatically 
 - Treat anything underscored as private (stays out of `__all__`)
 - The `__getattr__` hook in `wepppy.nodb.mods` lazily imports mod packages, keeping optional dependencies truly optional
 
+### Type Hints
+Core NoDb modules use comprehensive type hints following Python 3.12+ conventions:
+- Import types from `typing` module: `Optional`, `Dict`, `List`, `Tuple`, `Any`
+- Add parameter type hints: `def method(self, value: str) -> None:`
+- Add return type hints to all methods and properties
+- Use `Optional[T]` for values that can be None
+- Properties should have return type annotations
+- `mypy.ini` provides configuration for type checking
+
+Example NoDb class with type hints:
+```python
+from typing import Optional, Dict, List
+from wepppy.nodb.base import NoDbBase
+
+class MyController(NoDbBase):
+    def __init__(
+        self, 
+        wd: str, 
+        cfg_fn: str, 
+        run_group: Optional[str] = None
+    ) -> None:
+        super().__init__(wd, cfg_fn, run_group=run_group)
+        self._data: Dict[str, Any] = {}
+    
+    @property
+    def data(self) -> Dict[str, Any]:
+        return self._data
+    
+    def process(self, items: List[str]) -> None:
+        # Implementation
+        pass
+```
+
+Run type checking with mypy:
+```bash
+python -m mypy wepppy/nodb/core/topaz.py
+# Or check all core modules:
+python -m mypy wepppy/nodb/core/
+```
+
 ## Development Workflow
 
 ### Docker Compose (Recommended)
