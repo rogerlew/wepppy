@@ -698,10 +698,11 @@ class Watershed(NoDbBase):
 
     @property
     def structure(self) -> Any:
-        if _exists(_join(self.wat_dir, "structure.pkl")):
+        structure_path = self._structure
+        if structure_path is not None and _exists(_join(self.wat_dir, "structure.pkl")):
             import pickle
 
-            with open(self._structure, "rb") as fp:
+            with open(structure_path, "rb") as fp:
                 return pickle.load(fp)
 
         return self._structure
@@ -747,7 +748,10 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_wbt and self.wbt is None:
             return False
 
-        return _exists(self.netful)
+        netful_path = self.netful
+        if netful_path is None:
+            return False
+        return _exists(netful_path)
 
     @property
     def has_subcatchments(self) -> bool:
@@ -835,19 +839,23 @@ class Watershed(NoDbBase):
 
     def find_outlet(self, watershed_feature: WatershedFeature) -> None:
         assert self.delineation_backend_is_wbt, "find_outlet only works with WBT delineation backend"
+        
+        wbt = self.wbt
+        if wbt is None:
+            raise ValueError("WBT instance is None")
 
         # build raster mask from watershed feature
         watershed_feature.build_raster_mask(
             template_filepath=self.dem_fn, dst_filepath=self.target_watershed_path)
     
-        self.wbt._wbt_runner.find_outlet(
-            d8_pntr=self.wbt.flovec,
-            streams=self.wbt.netful,
+        wbt._wbt_runner.find_outlet(
+            d8_pntr=wbt.flovec,
+            streams=wbt.netful,
             watershed=self.target_watershed_path,
-            output=self.wbt.outlet_geojson
+            output=wbt.outlet_geojson
         )
 
-        outlet = self.wbt.set_outlet_from_geojson(logger=self.logger)
+        outlet = wbt.set_outlet_from_geojson(logger=self.logger)
         self.outlet = outlet
 
         try:
@@ -877,6 +885,9 @@ class Watershed(NoDbBase):
         assert not self.islocked()
         self.logger.info("Setting Outlet")
 
+        if lng is None or lat is None:
+            raise ValueError("lng and lat must be provided")
+        
         assert float(lng), lng
         assert float(lat), lat
 
@@ -888,6 +899,8 @@ class Watershed(NoDbBase):
         elif self.delineation_backend_is_wbt:
             self.logger.info(f' delineation_backend_is_wbt')
             wbt = self.wbt
+            if wbt is None:
+                raise ValueError("WBT instance is None")
             self.outlet = wbt.set_outlet(lng=lng, lat=lat, logger=self.logger)
             self.wbt = wbt
         try:
@@ -917,6 +930,8 @@ class Watershed(NoDbBase):
         elif self.delineation_backend_is_wbt:
             self.logger.info(f' delineation_backend_is_wbt')
             wbt = self.wbt
+            if wbt is None:
+                raise ValueError("WBT instance is None")
             wbt.delineate_subcatchments(self.logger)
             self.identify_edge_hillslopes()
         else:
@@ -1031,19 +1046,19 @@ class Watershed(NoDbBase):
     def sub_area(self) -> float:
         sub_area = getattr(self, "_sub_area", None)
 
-        if sub_area is None:
+        if sub_area is None and self._subs_summary is not None:
             sub_area = sum(summary.area for summary in self._subs_summary.values())
 
-        return sub_area
+        return sub_area if sub_area is not None else 0.0
 
     @property
     def chn_area(self) -> float:
-        chn_area = getattr(self, "_chn_area")
+        chn_area = getattr(self, "_chn_area", None)
 
-        if chn_area is None:
+        if chn_area is None and self._chns_summary is not None:
             chn_area = sum(summary.area for summary in self._chns_summary.values())
 
-        return chn_area
+        return chn_area if chn_area is not None else 0.0
 
     @property
     def mofe_nsegments(self) -> Optional[Dict[str, int]]:
@@ -1094,8 +1109,11 @@ class Watershed(NoDbBase):
 
             if isinstance(wat_ss, HillSummary):
                 slp_fn = _join(self.wat_dir, wat_ss.fname)
-            else:
+            elif isinstance(wat_ss, PeridotHillslope):
                 slp_fn = _join(self.wat_dir, wat_ss.slp_rel_path)
+            else:
+                # Handle dict case
+                slp_fn = _join(self.wat_dir, wat_ss.get('slp_rel_path', wat_ss.get('fname', '')))
 
             slp = SlopeFile(slp_fn)
             _mofe_nsegments[topaz_id] = slp.segmented_multiple_ofe(
@@ -1118,7 +1136,10 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name  # type: ignore
         self.logger.info(f'{self.class_name}.{func_name}()')
         subwta, transform_s, proj_s = read_raster(self.subwta, dtype=np.int32)
-        discha, transform_d, proj_d = read_raster(self.discha, dtype=np.int32)
+        discha_path = self.discha
+        if discha_path is None:
+            raise ValueError("discha path is None")
+        discha, transform_d, proj_d = read_raster(discha_path, dtype=np.int32)
         mofe_nsegments = self.mofe_nsegments
 
         mofe_map = np.zeros(subwta.shape, np.int32)
@@ -1129,8 +1150,11 @@ class Watershed(NoDbBase):
 
             if isinstance(wat_ss, HillSummary):
                 slp_fn = _join(self.wat_dir, wat_ss.fname)
-            else:
+            elif isinstance(wat_ss, PeridotHillslope):
                 slp_fn = _join(self.wat_dir, wat_ss.slp_rel_path)
+            else:
+                # Handle dict case
+                slp_fn = _join(self.wat_dir, wat_ss.get('slp_rel_path', wat_ss.get('fname', '')))
 
             mofe_slp_fn = _join(self.wat_dir, slp_fn.replace(".slp", ".mofe.slp"))
             d_fractions = mofe_distance_fractions(mofe_slp_fn)
@@ -1174,7 +1198,7 @@ class Watershed(NoDbBase):
         num_cols, num_rows = mofe_map.shape
 
         driver = gdal.GetDriverByName("GTiff")
-        dst = driver.Create(self.mofe_map, num_cols, num_rows, 1, GDT_Byte)
+        dst = driver.Create(self.mofe_map, num_cols, num_rows, 1, GDT_Byte)  # type: ignore[name-defined]
 
         srs = osr.SpatialReference()
         srs.ImportFromProj4(proj_s)
@@ -1297,7 +1321,7 @@ class Watershed(NoDbBase):
         return dict(hillslope_n=self.sub_n, channel_n=self.chn_n, totalarea=self.wsarea)
 
     @property
-    def centroid(self) -> Tuple[float, float]:
+    def centroid(self) -> Optional[Tuple[float, float]]:
         return self._centroid
 
     def sub_summary(self, topaz_id: Union[str, int]) -> Union[PeridotHillslope, Dict[str, Any], None]:
@@ -1336,7 +1360,7 @@ class Watershed(NoDbBase):
             return None
 
     @property
-    def fps_summary(self) -> Dict[str, List[str]]:
+    def fps_summary(self) -> Optional[Dict[str, List[str]]]:
         if _exists(_join(self.wat_dir, "flowpaths.parquet")):
             import duckdb
 
@@ -1353,15 +1377,16 @@ class Watershed(NoDbBase):
                         fps_summary[topaz_id] = []
                     fps_summary[topaz_id].append(fp_id)
             return fps_summary
+        return None
 
     # gotcha: using __getitem__ breaks jinja's attribute lookup, so...
     def _(self, wepp_id: int) -> Union[HillSummary, ChannelSummary]:
         translator = self.translator_factory()
         topaz_id = str(translator.top(wepp=int(wepp_id)))
 
-        if topaz_id in self._subs_summary:
+        if self._subs_summary is not None and topaz_id in self._subs_summary:
             return self._subs_summary[topaz_id]
-        elif topaz_id in self._chns_summary:
+        elif self._chns_summary is not None and topaz_id in self._chns_summary:
             return self._chns_summary[topaz_id]
 
         raise IndexError
@@ -1424,7 +1449,8 @@ class Watershed(NoDbBase):
 
     def hillslope_area(self, topaz_id: Union[str, int]) -> float:
         if hasattr(self, "_sub_area_lookup"):
-            return self._sub_area_lookup[str(topaz_id)]
+            sub_area_lookup: Dict[str, float] = self._sub_area_lookup  # type: ignore[has-type]
+            return sub_area_lookup[str(topaz_id)]
 
         if _exists(_join(self.wat_dir, "hillslopes.parquet")):
             import duckdb
@@ -1435,14 +1461,15 @@ class Watershed(NoDbBase):
                 result = con.execute(
                     f"SELECT topaz_id, area FROM read_parquet('{parquet_fn}')"
                 ).fetchall()
-                self._sub_area_lookup = {str(row[0]): row[1] for row in result}
+                self._sub_area_lookup: Dict[str, float] = {str(row[0]): row[1] for row in result}  # type: ignore[misc]
                 return self._sub_area_lookup[str(topaz_id)]
 
         return self._deprecated_area_of(topaz_id)
 
     def hillslope_slope(self, topaz_id: Union[str, int]) -> float:
         if hasattr(self, "_sub_slope_lookup"):
-            return self._sub_slope_lookup[str(topaz_id)]
+            sub_slope_lookup: Dict[str, float] = self._sub_slope_lookup  # type: ignore[has-type]
+            return sub_slope_lookup[str(topaz_id)]
 
         if _exists(_join(self.wat_dir, "hillslopes.parquet")):
             import duckdb
@@ -1453,14 +1480,15 @@ class Watershed(NoDbBase):
                 result = con.execute(
                     f"SELECT topaz_id, slope_scalar FROM read_parquet('{parquet_fn}')"
                 ).fetchall()
-                self._sub_slope_lookup = {str(row[0]): row[1] for row in result}
+                self._sub_slope_lookup: Dict[str, float] = {str(row[0]): row[1] for row in result}  # type: ignore[misc]
                 return self._sub_slope_lookup[str(topaz_id)]
 
         raise Exception('Cannot find slope without hillslope.parquet file')
 
     def channel_area(self, topaz_id: Union[str, int]) -> float:
         if hasattr(self, "_chn_area_lookup"):
-            return self._chn_area_lookup[str(topaz_id)]
+            chn_area_lookup: Dict[str, float] = self._chn_area_lookup  # type: ignore[has-type]
+            return chn_area_lookup[str(topaz_id)]
 
         if _exists(_join(self.wat_dir, "channels.parquet")):
             import duckdb
@@ -1471,22 +1499,25 @@ class Watershed(NoDbBase):
                 result = con.execute(
                     f"SELECT topaz_id, area FROM read_parquet('{parquet_fn}')"
                 ).fetchall()
-                self._chn_area_lookup = {str(row[0]): row[1] for row in result}
+                self._chn_area_lookup: Dict[str, float] = {str(row[0]): row[1] for row in result}  # type: ignore[misc]
                 return self._chn_area_lookup[str(topaz_id)]
 
         return self._deprecated_area_of(topaz_id)
 
     @deprecated
     def _deprecated_area_of(self, topaz_id: Union[str, int]) -> float:
-        topaz_id = str(topaz_id)
-        if topaz_id.endswith("4"):
-            return self._chns_summary[topaz_id].area
+        topaz_id_str = str(topaz_id)
+        if self._chns_summary is None or self._subs_summary is None:
+            raise ValueError("Summary data is None")
+        if topaz_id_str.endswith("4"):
+            return self._chns_summary[topaz_id_str].area
         else:
-            return self._subs_summary[topaz_id].area
+            return self._subs_summary[topaz_id_str].area
 
     def hillslope_length(self, topaz_id: Union[str, int]) -> float:
         if hasattr(self, "_sub_length_lookup"):
-            return self._sub_length_lookup[str(topaz_id)]
+            sub_length_lookup: Dict[str, float] = self._sub_length_lookup  # type: ignore[has-type]
+            return sub_length_lookup[str(topaz_id)]
 
         if _exists(_join(self.wat_dir, "hillslopes.parquet")):
             import duckdb
@@ -1497,14 +1528,15 @@ class Watershed(NoDbBase):
                 result = con.execute(
                     f"SELECT topaz_id, length FROM read_parquet('{parquet_fn}')"
                 ).fetchall()
-                self._sub_length_lookup = {str(row[0]): row[1] for row in result}
+                self._sub_length_lookup: Dict[str, float] = {str(row[0]): row[1] for row in result}  # type: ignore[misc]
                 return self._sub_length_lookup[str(topaz_id)]
 
         return self._deprecated_length_of(topaz_id)
 
     def channel_length(self, topaz_id: Union[str, int]) -> float:
         if hasattr(self, "_chn_length_lookup"):
-            return self._chn_length_lookup[str(topaz_id)]
+            chn_length_lookup: Dict[str, float] = self._chn_length_lookup  # type: ignore[has-type]
+            return chn_length_lookup[str(topaz_id)]
 
         if _exists(_join(self.wat_dir, "channels.parquet")):
             import duckdb
@@ -1515,22 +1547,25 @@ class Watershed(NoDbBase):
                 result = con.execute(
                     f"SELECT topaz_id, length FROM read_parquet('{parquet_fn}')"
                 ).fetchall()
-                self._chn_length_lookup = {str(row[0]): row[1] for row in result}
+                self._chn_length_lookup: Dict[str, float] = {str(row[0]): row[1] for row in result}  # type: ignore[misc]
                 return self._chn_length_lookup[str(topaz_id)]
 
         return self._deprecated_length_of(topaz_id)
 
     @deprecated
     def _deprecated_length_of(self, topaz_id: Union[str, int]) -> float:
-        topaz_id = str(topaz_id)
-        if topaz_id.endswith("4"):
-            return self._chns_summary[topaz_id].length
+        topaz_id_str = str(topaz_id)
+        if self._chns_summary is None or self._subs_summary is None:
+            raise ValueError("Summary data is None")
+        if topaz_id_str.endswith("4"):
+            return self._chns_summary[topaz_id_str].length
         else:
-            return self._subs_summary[topaz_id].length
+            return self._subs_summary[topaz_id_str].length
 
     def hillslope_centroid_lnglat(self, topaz_id: Union[str, int]) -> Tuple[float, float]:
         if hasattr(self, "_sub_centroid_lookup"):
-            return self._sub_centroid_lookup[str(topaz_id)]
+            sub_centroid_lookup: Dict[str, Tuple[float, float]] = self._sub_centroid_lookup  # type: ignore[has-type]
+            return sub_centroid_lookup[str(topaz_id)]
 
         if _exists(_join(self.wat_dir, "hillslopes.parquet")):
             import duckdb
@@ -1541,12 +1576,14 @@ class Watershed(NoDbBase):
                 result = con.execute(
                     f"SELECT topaz_id, centroid_lon, centroid_lat FROM read_parquet('{parquet_fn}')"
                 ).fetchall()
-                self._sub_centroid_lookup = {
+                self._sub_centroid_lookup: Dict[str, Tuple[float, float]] = {  # type: ignore[misc]
                     str(row[0]): (row[1], row[2]) for row in result
                 }
                 return self._sub_centroid_lookup[str(topaz_id)]
 
-        wat_ss = self._subs_summary[topaz_id]
+        if self._subs_summary is None:
+            raise ValueError("subs_summary is None")
+        wat_ss = self._subs_summary[str(topaz_id)]
         lng, lat = wat_ss.centroid.lnglat
         return lng, lat
 
