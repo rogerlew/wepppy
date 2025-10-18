@@ -226,7 +226,7 @@ var SubcatchmentDelineation = function () {
 
             if (cmap_name === "default") {
                 self.render();
-                Map.getInstance().sub_legend.html("");
+                MapController.getInstance().sub_legend.html("");
             } else if (cmap_name === "slp_asp") {
                 self.renderSlpAsp();
             } else if (cmap_name === "dom_lc") {
@@ -424,7 +424,7 @@ var SubcatchmentDelineation = function () {
         //----------------------------------------------------------------------
         that._refreshGlLayer = function () {
             const self = instance;
-            const map = Map.getInstance();
+            const map = MapController.getInstance();
 
             if (self.glLayer) {
                 self.glLayer.remove(); // Dispose VBOs & canvas
@@ -501,7 +501,7 @@ var SubcatchmentDelineation = function () {
             self.data = fc;                      // GeoJSON FeatureCollection
             self._buildLabels();                 // hidden by default
 
-            const map = Map.getInstance();
+            const map = MapController.getInstance();
             self._refreshGlLayer();              // draw polygons
 
             map.ctrls.addOverlay(self.labels, 'Subcatchment Labels'); // off by default
@@ -534,7 +534,7 @@ var SubcatchmentDelineation = function () {
                     url: `resources/legends/${legendUrl}/`,
                     cache: false,
                     success: function (response) {
-                        var map = Map.getInstance();
+                        var map = MapController.getInstance();
                         map.sub_legend.html(response);
                     },
                     error: function (jqXHR) {
@@ -799,7 +799,7 @@ var SubcatchmentDelineation = function () {
 
         that.removeGrid = function () {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             if (self.grid !== undefined && self.grid !== null) {
                 map.ctrls.removeLayer(self.grid);
@@ -811,7 +811,7 @@ var SubcatchmentDelineation = function () {
             var self = instance;
 
             self.gridlabel = "Soil Deposition/Loss";
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             self.removeGrid();
 
@@ -973,7 +973,7 @@ var SubcatchmentDelineation = function () {
         //
         that.build = function () {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             var task_msg = "Building Subcatchments";
 

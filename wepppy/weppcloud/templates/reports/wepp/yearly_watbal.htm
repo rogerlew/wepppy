@@ -1,53 +1,133 @@
-{% extends "reports/_page_container.htm" %}
-{% block report_title %}Yearly Water Balance{% endblock %}
+{% extends "reports/_base_report.htm" %}
+{% block report_title %}Yearly water balance{% endblock %}
 {% block report_content %}
-<h2>Water Balance Yearly Summary
-    <a onclick="javascript:copytable('wat_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
- <table class="table table-condensed" id="wat_tbl">
-    <thead>
-      <tr>
-        {% for colname in rpt.hdr %}
-        <th>{{ colname }}</th>
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-    <tr>
-      {% for units in rpt.units %}
-        {% if units is none%}
-        <td>&nbsp;</td>
-        {% else %}
-        <td>{{ unitizer_units(units) | safe }}</td>
+{% macro render_units(units) -%}
+  {% if units %}
+    {{ unitizer_units(units) | safe }}
+  {% else %}
+    &nbsp;
+  {% endif %}
+{%- endmacro %}
+
+{% macro render_value(value, units) -%}
+  {% if value in (None, '') %}
+    &mdash;
+  {% elif units %}
+    {{ unitizer(value, units) | safe }}
+  {% else %}
+    {{ value }}
+  {% endif %}
+{%- endmacro %}
+
+{% set exclude_years_param = exclude_yr_indxs|join(',') if exclude_yr_indxs else None %}
+
+<header class="wc-stack">
+  <h1 class="wc-heading__title">Yearly water balance</h1>
+  <p class="wc-text-muted">
+    Year-by-year totals derived from the WEPP interchange dataset. Summary rows provide the multi-year mean,
+    standard deviation, and precipitation-normalized ratios.
+  </p>
+</header>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Configuration</h2>
+  </header>
+  <div class="wc-inline">
+    <label>
+      <span class="wc-text-muted">Exclude simulation years</span>
+      <select id="yearSelection">
+        <option value="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config) }}"{% if not exclude_yr_indxs %} selected{% endif %}>Include all years</option>
+        <option value="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config, exclude_yr_indxs='0') }}"{% if exclude_yr_indxs == [0] %} selected{% endif %}>
+          Exclude first year
+        </option>
+        <option value="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config, exclude_yr_indxs='0,1') }}"{% if exclude_yr_indxs == [0, 1] %} selected{% endif %}>
+          Exclude first two years
+        </option>
+        <option value="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config, exclude_yr_indxs='0,1,2,3,4') }}"{% if exclude_yr_indxs == [0, 1, 2, 3, 4] %} selected{% endif %}>
+          Exclude first five years
+        </option>
+        {% if exclude_yr_indxs and exclude_yr_indxs not in ([0], [0, 1], [0, 1, 2, 3, 4]) %}
+          <option value="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config, exclude_yr_indxs=exclude_yr_indxs|join(',')) }}" selected>
+            Custom: {{ exclude_yr_indxs|join(', ') }}
+          </option>
         {% endif %}
-      {% endfor %}
-    </tr>
-    {% for row in rpt %}
-    <tr>
-    {% for value, units in row %}
-       <td>{{ unitizer(value, units) | safe }}</td>
-    {% endfor %}
-    </tr>
-    {% endfor %}
-    <tr>
-    {% for value, units in rpt.means %}
-       <td>{{ unitizer(value, units) | safe }}</td>
-    {% endfor %}
-    </tr>
-    <tr>
-    {% for value, units in rpt.stdevs %}
-       <td>{{ unitizer(value, units) | safe }}</td>
-    {% endfor %}
-    </tr>
-    <tr>
-    {% for value, units in rpt.pratios %}
-       <td>
-       {% if value != '' %}
-       {{ unitizer(value, units) | safe }}%
-       {% endif %}
-       </td>
-    {% endfor %}
-    </tr>
-    </tbody>
-</table>
+      </select>
+    </label>
+  </div>
+</section>
+
+<section class="wc-panel wc-stack">
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--dense sortable" id="yearly_watbal_tbl">
+      <thead>
+        <tr>
+          {% for colname in rpt.hdr %}
+            <th scope="col">{{ colname }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-sort-position="top">
+          {% for units in rpt.units %}
+            <td>{{ render_units(units) }}</td>
+          {% endfor %}
+        </tr>
+        {% for row in rpt %}
+          <tr>
+            {% for value, units in row %}
+              <td sorttable_customkey="{{ value }}">{{ render_value(value, units) }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        <tr class="wc-table__row--summary" data-sort-position="bottom">
+          {% for value, units in rpt.means %}
+            {% if loop.first %}
+              <th scope="row">{{ value }}</th>
+            {% else %}
+              <td>{{ render_value(value, units) }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr class="wc-table__row--summary" data-sort-position="bottom">
+          {% for value, units in rpt.stdevs %}
+            {% if loop.first %}
+              <th scope="row">{{ value }}</th>
+            {% else %}
+              <td>{{ render_value(value, units) }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr class="wc-table__row--summary" data-sort-position="bottom">
+          {% for value, units in rpt.pratios %}
+            {% if loop.first %}
+              <th scope="row">{{ value }}</th>
+            {% else %}
+              <td>{{ render_value(value, units) }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="wc-table-actions">
+    <button type="button" class="pure-button pure-button-link"
+            data-report-csv="yearly_watbal_tbl"
+            data-report-url="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config, format='csv', exclude_yr_indxs=exclude_years_param) }}"
+            data-report-table="yearly">
+      Download CSV
+    </button>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sel = document.getElementById('yearSelection');
+    if (!sel) return;
+    sel.addEventListener('change', function () {
+      const url = new URL(this.value, window.location.href);
+      window.location.href = url.pathname + '?' + url.searchParams.toString();
+    });
+  });
+</script>
 {% endblock %}

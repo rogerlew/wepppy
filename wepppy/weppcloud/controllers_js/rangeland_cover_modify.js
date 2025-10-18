@@ -85,7 +85,7 @@ var RangelandCoverModify = function () {
 
         that.boxSelectionModeMouseMove = function (evt) {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             if (self.ll0 === null) {
                 if (self.selectedRect !== null) {
@@ -153,7 +153,7 @@ var RangelandCoverModify = function () {
         that.boxSelectionModeMouseUp = function (evt) {
             var self = instance;
 
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             var llend = evt.latlng;
 
@@ -235,7 +235,7 @@ var RangelandCoverModify = function () {
         that.showModifyMap = function () {
             var self = instance;
 
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
             map.boxZoom.disable();
 
             map.on('mousedown', self.boxSelectionModeMouseDown);
@@ -258,7 +258,7 @@ var RangelandCoverModify = function () {
 
         that.hideModifyMap = function () {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             map.boxZoom.enable();
             map.off('mousedown', self.boxSelectionModeMouseDown);
@@ -273,7 +273,7 @@ var RangelandCoverModify = function () {
 
         that.onShowSuccess = function (response) {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
             self.data = response;
             self.glLayer = L.geoJSON(self.data.features, {
                 style: self.style,
@@ -284,7 +284,7 @@ var RangelandCoverModify = function () {
 
         that.onEachFeature = function (feature, layer) {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             layer.on({
                 mouseover: function mouseover(e) {

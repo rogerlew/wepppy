@@ -74,7 +74,7 @@ var ChannelDelineation = function () {
 
         that.remove = function () {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             if (self.glLayer !== null) {
                 map.ctrls.removeLayer(self.glLayer);
@@ -153,7 +153,7 @@ var ChannelDelineation = function () {
 
         that.onMapChange = function () {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             var center = map.getCenter();
             var zoom = map.getZoom();
@@ -250,7 +250,7 @@ var ChannelDelineation = function () {
 
             $.getJSON("resources/netful.json")
                 .done(function (fc) {
-                    const map = Map.getInstance();
+                    const map = MapController.getInstance();
                     self.glLayer = L.glify.layer({
                         geojson: fc,
                         paneName: 'channelGlPane',
@@ -286,7 +286,7 @@ var ChannelDelineation = function () {
 
             $.getJSON("resources/channels.json")
                 .done(function (fc) {
-                    const map = Map.getInstance();
+                    const map = MapController.getInstance();
 
                     // ---------- WebGL polygons ----------
                     self.glLayer = L.glify.layer({
@@ -302,7 +302,7 @@ var ChannelDelineation = function () {
                                 return palette[order];     // palette[] == [{r,g,b,a}, …]
                             },
                             click: (e, feat) => {
-                                const map = Map.getInstance();
+                                const map = MapController.getInstance();
                                 map.chnQuery(feat.properties.TopazID); // same as before
                             }
                         }

@@ -759,6 +759,12 @@ button[disabled],
   font-weight: 600;
 }
 
+.wc-table__row--summary td,
+.wc-table__row--summary th {
+  background: var(--wc-color-surface-alt);
+  font-weight: 600;
+}
+
 /* Status blocks */
 .wc-status {
   border: 1px solid var(--wc-color-border);

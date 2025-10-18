@@ -52,7 +52,7 @@ var Outlet = function () {
 
         that.remove = function () {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
             self.info.html("");
             self.stacktrace.text("");
 
@@ -77,7 +77,7 @@ var Outlet = function () {
                 url: "query/outlet/",
                 cache: false,
                 success: function success(response) {
-                    var map = Map.getInstance();
+                    var map = MapController.getInstance();
 
                     var offset = cellsize * 5e-6;
 
@@ -124,7 +124,7 @@ var Outlet = function () {
 
         that.set_outlet = function (ev) {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             var task_msg = "Attempting to set outlet";
 

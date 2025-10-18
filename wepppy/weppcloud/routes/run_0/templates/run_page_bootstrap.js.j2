@@ -23,7 +23,7 @@ function window_resize() {
     mapElement.style.height = width + 'px';
     mapElement.style.width = width + 'px';
 
-    Map.getInstance().invalidateSize();
+    MapController.getInstance().invalidateSize();
 };
 
 function onReady() {
@@ -31,7 +31,7 @@ function onReady() {
 
     var project = Project.getInstance();
     var team = Team.getInstance();
-    var map = Map.getInstance();
+    var map = MapController.getInstance();
     var channel_ctrl = ChannelDelineation.getInstance();
     var outlet = Outlet.getInstance();
     var sub_ctrl = SubcatchmentDelineation.getInstance();

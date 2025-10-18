@@ -2,7 +2,7 @@
  * Map
  * ----------------------------------------------------------------------------
  */
-var Map = function () {
+var MapController = function () {
     var instance;
 
     function createInstance() {
@@ -437,3 +437,6 @@ var Map = function () {
         }
     };
 }();
+
+window.MapController = MapController;
+window.WeppMap = MapController;

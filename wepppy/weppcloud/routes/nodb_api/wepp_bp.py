@@ -578,10 +578,20 @@ def report_wepp_yearly_watbal(runid, config):
 
     unitizer = Unitizer.getInstance(wd)
 
+    if _wants_csv():
+        return _render_report_csv(
+            runid=runid,
+            report=totwatbal,
+            unitizer=unitizer,
+            slug="yearly_watbal",
+            table="yearly",
+        )
+
     return render_template('reports/wepp/yearly_watbal.htm', runid=runid, config=config,
                             unitizer_nodb=unitizer,
                             precisions=wepppy.nodb.unitizer.precisions,
                             rpt=totwatbal,
+                            exclude_yr_indxs=exclude_yr_indxs,
                             ron=ron,
                             user=current_user)
 
@@ -753,7 +763,8 @@ def plot_wepp_streamflow(runid, config):
         config=config,
         unitizer_nodb=unitizer,
         precisions=wepppy.nodb.unitizer.precisions,
-        exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
+        exclude_yr_indxs=exclude_yr_indxs,
+        exclude_yr_indxs_csv=','.join(str(yr) for yr in exclude_yr_indxs),
         streamflow_data_json=timeseries_json,
         streamflow_query_json=payload_json,
         streamflow_sql=result.sql,

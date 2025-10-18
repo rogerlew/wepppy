@@ -1,585 +1,842 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "reports/_base_report.htm" %}
+{% block report_title %}Daily streamflow{% endblock %}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>{% block report_title %}{% endblock %}{% if ron.name != '' %} - {{ ron.name }}{% endif %}</title>
-    <!-- Style Sheets -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
-    <link rel="icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"
-        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/d3.js') }}"></script>
-    <style>
-        body {
-            font: 16px sans-serif;
+{% block head_extras %}
+<script>
+  window.__nativeMap = window.__nativeMap || window.Map;
+</script>
+<script src="{{ url_for('static', filename='js/d3.js') }}" defer></script>
+{{ super() }}
+<style>
+  .wc-streamflow {
+    font: 16px sans-serif;
+  }
+
+  .wc-streamflow .axis path,
+  .wc-streamflow .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .wc-streamflow .brush .selection {
+    stroke: #fff;
+    fill-opacity: .15;
+    shape-rendering: crispEdges;
+  }
+
+  .wc-streamflow .brush .handle {
+    fill: var(--handle-fill, #999);
+    stroke: var(--handle-stroke, #515050);
+    stroke-width: var(--handle-stroke-width, 1);
+    opacity: var(--handle-opacity, 0.8);
+    rx: 2px;
+    ry: 2px;
+    transition: fill 0.2s ease;
+  }
+
+  .wc-streamflow .brush .handle:hover {
+    fill: var(--handle-fill-hover, #777);
+  }
+
+  .wc-streamflow .brush .handle--w,
+  .wc-streamflow .brush .handle--e {
+    cursor: ew-resize;
+    width: var(--handle-size, 4px);
+  }
+
+  .wc-streamflow .brush .handle--n,
+  .wc-streamflow .brush .handle--s {
+    cursor: ns-resize;
+    height: var(--handle-size, 4px);
+  }
+
+  .wc-streamflow .x.axis path {
+    display: none;
+  }
+
+  .wc-streamflow .line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+    clip-path: url(#clip);
+  }
+
+  .wc-streamflow .hover-line {
+    pointer-events: none;
+    stroke-dasharray: 3 3;
+  }
+
+  .wc-streamflow .legend-horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+    font: 12px sans-serif;
+  }
+
+  .wc-streamflow .legend-item {
+    display: flex;
+    align-items: center;
+    user-select: none;
+  }
+
+  .wc-streamflow .legend-swatch-group {
+    display: inline-flex;
+    margin: 0 4px 0 4px;
+  }
+
+  .wc-streamflow .legend-swatch {
+    width: 16px;
+    height: 12px;
+    border: 1px solid #444;
+    border-radius: 2px;
+    margin-right: 2px;
+  }
+
+  .wc-streamflow svg {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .wc-streamflow svg,
+  .wc-streamflow .focus,
+  .wc-streamflow .context {
+    user-select: none;
+  }
+
+  .wc-streamflow .axis text {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .wc-streamflow .axis-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+</style>
+{% endblock %}
+
+{% block report_content %}
+<header class="wc-stack">
+  <h1 class="wc-heading__title">Daily streamflow</h1>
+  <p class="wc-text-muted">
+    Interactive hydrograph of runoff, lateral flow, and baseflow derived from the interchange timeseries dataset.
+    Use the brush to zoom into specific periods or exclude early simulation years from the query.
+  </p>
+</header>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Configuration</h2>
+  </header>
+  <div class="wc-inline">
+    <label>
+      <span class="wc-text-muted">Exclude simulation years</span>
+      <select id="streamflowYearSelection">
+        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config) }}"{% if not exclude_yr_indxs %} selected{% endif %}>Include all years</option>
+        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs='0') }}"{% if exclude_yr_indxs == [0] %} selected{% endif %}>
+          Exclude first year
+        </option>
+        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs='0,1') }}"{% if exclude_yr_indxs == [0, 1] %} selected{% endif %}>
+          Exclude first two years
+        </option>
+        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs='0,1,2,3,4') }}"{% if exclude_yr_indxs == [0, 1, 2, 3, 4] %} selected{% endif %}>
+          Exclude first five years
+        </option>
+        {% if exclude_yr_indxs and exclude_yr_indxs not in ([0], [0, 1], [0, 1, 2, 3, 4]) %}
+          <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs=exclude_yr_indxs|join(',')) }}" selected>
+            Custom: {{ exclude_yr_indxs|join(', ') }}
+          </option>
+        {% endif %}
+      </select>
+    </label>
+  </div>
+</section>
+
+<section class="wc-panel wc-stack">
+  <div class="wc-streamflow">
+    <div id="legend" class="legend-horizontal"></div>
+    <div id="area1"></div>
+  </div>
+  <script id="streamflow-data" type="application/json">{{ streamflow_data_json|default('{}')|safe }}</script>
+  <script id="streamflow-query" type="application/json">{{ streamflow_query_json|default('{}')|safe }}</script>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const yearSelect = document.getElementById('streamflowYearSelection');
+    if (yearSelect) {
+      yearSelect.addEventListener('change', function () {
+        window.location.href = this.value;
+      });
+    }
+
+    if (typeof d3 === 'undefined') {
+      console.error('d3.js failed to load; streamflow plot unavailable.');
+      return;
+    }
+
+    const nativeMap = window.__nativeMap || window.Map;
+    window.Map = nativeMap;
+
+    const container = document.getElementById('area1');
+    const streamflowWrapper = container ? container.closest('.wc-streamflow') : null;
+    const legendContainer = document.getElementById('legend');
+    const widthMeasureHost = streamflowWrapper ? streamflowWrapper.closest('.wc-panel') : null;
+
+    const parseISODate = d3.utcParse("%Y-%m-%d");
+    const fmtDate = d3.utcFormat("%Y-%m-%d");
+
+    const FLOW_COLOR_DEFAULTS = {
+      Runoff: "#FF3B30",
+      runoff: "#FF3B30",
+      Baseflow: "#1e90ff",
+      baseflow: "#1e90ff",
+      "Lateral Flow": "#32cd32",
+      lateral_flow: "#32cd32",
+    };
+    const METEO_COLOR_DEFAULTS = {
+      Precipitation: "#FF6F30",
+      precipitation: "#FF6F30",
+      "Rain + Melt": "#00B2A9",
+      rain_melt: "#00B2A9",
+    };
+
+    const dataElement = document.getElementById("streamflow-data");
+    let timeseriesData = { index: { values: [] }, series: [] };
+    if (dataElement) {
+      try {
+        const parsed = JSON.parse(dataElement.textContent || "{}");
+        if (parsed && typeof parsed === "object") {
+          timeseriesData = parsed;
+        }
+      } catch (err) {
+        console.warn("Failed to parse embedded streamflow data", err);
+      }
+    }
+
+    const queryElement = document.getElementById("streamflow-query");
+    if (queryElement) {
+      try {
+        window.WEPP_STREAMFLOW_QUERY = JSON.parse(queryElement.textContent || "{}");
+      } catch (err) {
+        console.warn("Failed to parse embedded streamflow query payload", err);
+      }
+    }
+    {% if streamflow_sql %}
+    window.WEPP_STREAMFLOW_SQL = {{ streamflow_sql|tojson|safe }};
+    {% endif %}
+
+    const indexValues = (timeseriesData.index && Array.isArray(timeseriesData.index.values)) ? timeseriesData.index.values : [];
+    const seriesDefs = Array.isArray(timeseriesData.series) ? timeseriesData.series : [];
+    const flowSeries = seriesDefs.filter(series => (series.group || "flow") === "flow");
+    const meteoSeries = seriesDefs.filter(series => series.group === "meteo");
+    const rainMeltSeries = meteoSeries.find(series => series.role === "rain_melt") || meteoSeries[0];
+    const precipSeries = meteoSeries.find(series => series.role === "precip") || (meteoSeries.length > 1 ? meteoSeries[1] : meteoSeries[0]);
+
+    const flowColors = {};
+    flowSeries.forEach(series => {
+      const fallback = FLOW_COLOR_DEFAULTS[series.id] || FLOW_COLOR_DEFAULTS[series.label] || "#1e90ff";
+      flowColors[series.id] = series.color || fallback;
+    });
+
+    const meteoColors = {};
+    if (rainMeltSeries) {
+      const fallback = METEO_COLOR_DEFAULTS[rainMeltSeries.id] || METEO_COLOR_DEFAULTS[rainMeltSeries.label] || "#00B2A9";
+      meteoColors[rainMeltSeries.id] = rainMeltSeries.color || fallback;
+    }
+    if (precipSeries) {
+      const fallback = METEO_COLOR_DEFAULTS[precipSeries.id] || METEO_COLOR_DEFAULTS[precipSeries.label] || "#FF6F30";
+      meteoColors[precipSeries.id] = precipSeries.color || fallback;
+    }
+
+    const indexDates = indexValues.map(value => parseISODate(value) || new Date(value));
+    const rows = indexDates.map((date, idx) => {
+      const row = { date };
+      seriesDefs.forEach(series => {
+        const values = Array.isArray(series.values) ? series.values : [];
+        row[series.id] = values[idx] ?? null;
+      });
+      return row;
+    });
+
+    let flowUnitLabel = 'mm';
+    let precipUnitLabel = 'mm';
+
+    let tooltip = d3.select("body").select("div.d3-tooltip");
+    if (tooltip.empty()) {
+      tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "d3-tooltip")
+        .style("position", "fixed")
+        .style("pointer-events", "none")
+        .style("padding", "4px 8px")
+        .style("background", "rgba(0,0,0,0.8)")
+        .style("color", "#fff")
+        .style("font", "12px sans-serif")
+        .style("border-radius", "3px")
+        .style("opacity", 0);
+    }
+
+    let lastRenderedHostWidth = null;
+    let lastRenderedAvailableWidth = null;
+    let pendingFrame = null;
+
+    function getHostWidth() {
+      if (widthMeasureHost) {
+        const rect = widthMeasureHost.getBoundingClientRect();
+        return rect && rect.width ? rect.width : widthMeasureHost.clientWidth || 0;
+      }
+      if (streamflowWrapper) {
+        const rect = streamflowWrapper.getBoundingClientRect();
+        return rect && rect.width ? rect.width : streamflowWrapper.clientWidth || 0;
+      }
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        return rect && rect.width ? rect.width : container.clientWidth || 0;
+      }
+      return window.innerWidth || 0;
+    }
+
+    function getAvailableWidth() {
+      const hostWidth = getHostWidth();
+      const viewportWidth = document.documentElement ? document.documentElement.clientWidth : window.innerWidth;
+      const safeViewport = Math.max(0, viewportWidth || window.innerWidth || 0);
+      const viewportLimit = safeViewport ? Math.max(320, safeViewport - 32) : null;
+
+      let candidate = hostWidth || (window.innerWidth ? window.innerWidth * 0.95 : 0);
+
+      if (widthMeasureHost && hostWidth) {
+        const computed = window.getComputedStyle(widthMeasureHost);
+        const paddingLeft = parseFloat(computed.paddingLeft || '0');
+        const paddingRight = parseFloat(computed.paddingRight || '0');
+        candidate = Math.max(320, hostWidth - paddingLeft - paddingRight);
+      } else if (hostWidth) {
+        candidate = Math.max(320, hostWidth);
+      } else {
+        candidate = Math.max(320, candidate);
+      }
+
+      if (viewportLimit) {
+        candidate = Math.min(candidate, viewportLimit);
+      }
+
+      return candidate;
+    }
+
+    function scheduleBuild() {
+      if (pendingFrame !== null) {
+        cancelAnimationFrame(pendingFrame);
+      }
+      pendingFrame = requestAnimationFrame(() => {
+        pendingFrame = null;
+        const hostWidth = getHostWidth();
+        const availableWidth = getAvailableWidth();
+        const hostUnchanged = lastRenderedHostWidth !== null && Math.abs(hostWidth - lastRenderedHostWidth) <= 1;
+        const availableUnchanged = lastRenderedAvailableWidth !== null && Math.abs(availableWidth - lastRenderedAvailableWidth) <= 1;
+        if (hostUnchanged && availableUnchanged) {
+          return;
+        }
+        buildChart();
+      });
+    }
+
+    function getLegendState() {
+      const state = new Map();
+      if (!legendContainer) {
+        return state;
+      }
+      legendContainer.querySelectorAll('label.legend-item').forEach((label) => {
+        const data = d3.select(label).datum();
+        const checkbox = label.querySelector('input[type="checkbox"]');
+        if (data && data.id && checkbox) {
+          state.set(data.id, checkbox.checked);
+        }
+      });
+      return state;
+    }
+
+    function buildChart() {
+      if (!container) {
+        return;
+      }
+
+      const legendState = getLegendState();
+      const areaRoot = d3.select(container);
+      const legendRoot = legendContainer ? d3.select(legendContainer) : null;
+
+      areaRoot.selectAll("*").remove();
+      if (legendRoot) {
+        legendRoot.selectAll("*").remove();
+      }
+
+      if (!rows.length || !flowSeries.length) {
+        areaRoot.append("p")
+          .attr("class", "wc-text-muted")
+          .text("Streamflow data unavailable for the selected configuration.");
+        return;
+      }
+
+      const availableWidth = getAvailableWidth();
+
+      const rightMargin = 140;
+      const margin = { top: 10, right: rightMargin, bottom: (window.innerHeight - 80) * 0.2, left: 60 };
+      const margin2 = { top: (window.innerHeight - 80) * 0.80, right: rightMargin, bottom: 70, left: 60 };
+
+      const width = Math.max(160, availableWidth - margin.left - margin.right);
+      const rawHeight = window.innerHeight * 0.95 - 80 - margin.top - margin.bottom;
+      const rawHeight2 = window.innerHeight * 0.95 - 80 - margin2.top - margin2.bottom;
+      const height = Math.max(220, rawHeight);
+      const height2 = Math.max(80, rawHeight2);
+
+      lastRenderedHostWidth = getHostWidth();
+      lastRenderedAvailableWidth = availableWidth;
+
+      const totalWidth = width + margin.left + margin.right;
+      const totalHeight = height + margin.top + margin.bottom;
+
+      const x = d3.scaleTime().range([0, width]);
+      const xC = d3.scaleTime().range([0, width]);
+      const y = d3.scaleLinear().range([height, 0]);
+      const yC = d3.scaleLinear().range([height2, 0]);
+      const yP = d3.scaleLinear().range([0, height]);
+      const yHyeto = d3.scaleLinear().range([0, height]);
+      const yHyetoC = d3.scaleLinear().range([0, height2]);
+
+      const flows = flowSeries.map(series => ({
+        id: series.id,
+        label: series.label || series.id,
+        values: rows.map(row => ({
+          date: row.date,
+          value: row[series.id] ?? 0.0,
+        })),
+        units: series.units || 'mm',
+        color: flowColors[series.id],
+      }));
+      flowUnitLabel = flows[0]?.units || flowUnitLabel;
+      const flowUnit = flowUnitLabel;
+
+      let precip = [];
+      let rainMelt = [];
+      if (precipSeries) {
+        precip = rows.map(row => ({ date: row.date, value: row[precipSeries.id] ?? 0.0 }));
+        precipUnitLabel = precipSeries.units || precipUnitLabel;
+      }
+      if (rainMeltSeries) {
+        rainMelt = rows.map(row => ({ date: row.date, value: row[rainMeltSeries.id] ?? 0.0 }));
+      }
+
+      x.domain(d3.extent(rows, row => row.date));
+      xC.domain(x.domain());
+      y.domain([0, d3.max(flows, series => d3.max(series.values, d => d.value)) || 1]);
+      yC.domain(y.domain());
+
+      const yTick = d => `${d} ${flowUnitLabel}`;
+      const xAxis = d3.axisBottom(x);
+      const xAxisC = d3.axisBottom(xC);
+      const yAxis = d3.axisLeft(y).tickFormat(yTick);
+      const yAxisC = d3.axisLeft(yC).ticks(2).tickFormat(yTick);
+
+      const precipMax = d3.max([d3.max(precip, d => d.value) || 0, d3.max(rainMelt, d => d.value) || 0]) || 0;
+      const safePrecipMax = precipMax > 0 ? precipMax : 1;
+      yP.domain([0, safePrecipMax]);
+      yHyeto.domain([0, safePrecipMax]);
+      yHyetoC.domain([0, safePrecipMax]);
+
+      let hoverLine = null;
+      let redrawBars = null;
+      let redrawAreas = null;
+      let focus;
+      let context;
+
+      function brushed(event) {
+        const sel = event.selection;
+        x.domain(sel ? sel.map(xC.invert) : xC.domain());
+        if (focus) {
+          focus.select(".x.axis").call(xAxis);
+        }
+        if (hoverLine) {
+          hoverLine.style("opacity", 0);
+        }
+        redrawAreas && redrawAreas();
+        redrawBars && redrawBars();
+      }
+
+      const brush = d3.brushX()
+        .extent([[0, 0], [width, height2]])
+        .on("brush end", brushed);
+
+      const clipId = `clip-${Math.random().toString(36).slice(2, 10)}`;
+      const contextClipId = `clip-context-${Math.random().toString(36).slice(2, 10)}`;
+
+      const svg = areaRoot.append("svg")
+        .attr("viewBox", `0 0 ${totalWidth} ${totalHeight}`)
+        .attr("width", totalWidth)
+        .attr("height", totalHeight)
+        .style("width", "100%")
+        .style("height", "auto")
+        .style("display", "block");
+
+      svg.append("defs").append("clipPath")
+        .attr("id", clipId)
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", width)
+        .attr("height", height);
+
+      svg.append("defs").append("clipPath")
+        .attr("id", contextClipId)
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", width)
+        .attr("height", height2);
+
+      focus = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      context = svg.append("g")
+        .attr("class", "context")
+        .attr("transform", `translate(${margin2.left},${margin2.top})`);
+
+      const xBisect = d3.bisector(d => d.date).left;
+
+      const flowsG = focus.append("g")
+        .attr("class", "flows")
+        .attr("clip-path", `url(#${clipId})`);
+      flows.forEach(series => {
+        const area = d3.area()
+          .curve(d3.curveBasis)
+          .x(d => x(d.date))
+          .y0(height)
+          .y1(d => y(d.value));
+
+        flowsG.append("path")
+          .datum(series.values)
+          .attr("class", `area-${series.id.replace(/\s+/g, '-')}`)
+          .attr("fill", series.color)
+          .attr("fill-opacity", 0.35)
+          .attr("stroke", series.color)
+          .attr("stroke-width", 1)
+          .attr("d", area);
+      });
+
+      focus.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(xAxis);
+
+      focus.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+      if (rainMelt.length || precip.length) {
+        const precipAxis = focus.append("g")
+          .attr("class", "y axis precip-axis")
+          .attr("transform", `translate(${width},0)`)
+          .call(d3.axisRight(yP).tickFormat(d => `${d} ${precipUnitLabel}`));
+
+        precipAxis.append("text")
+          .attr("fill", "#000")
+          .attr("transform", "rotate(-90)")
+          .attr("x", -height / 2)
+          .attr("y", rightMargin - 28)
+          .attr("text-anchor", "middle")
+          .text(`Precipitation (${precipUnitLabel})`);
+      }
+
+      const hoverG = focus.append("g").attr("class", "hover-group");
+
+      hoverLine = hoverG.append("line")
+        .attr("class", "hover-line")
+        .attr("stroke", "#333")
+        .attr("y1", 0)
+        .attr("y2", height)
+        .style("opacity", 0);
+
+      hoverG.append("rect")
+        .attr("class", "overlay")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "transparent")
+        .on("mousemove", handleHover)
+        .on("mouseout", () => {
+          tooltip.transition().duration(200).style("opacity", 0);
+          hoverLine.style("opacity", 0);
+        });
+
+      function handleHover(event) {
+        const mouseX = d3.pointer(event)[0];
+        const date = x.invert(mouseX);
+        const idx = xBisect(rows, date);
+        const clamped = Math.max(0, Math.min(rows.length - 1, idx));
+        const row = rows[clamped];
+        if (!row) return;
+
+        hoverLine
+          .attr("x1", x(row.date))
+          .attr("x2", x(row.date))
+          .style("opacity", 1);
+
+        const tooltipLines = [`<strong>${fmtDate(row.date)}</strong>`, `Flow unit: ${flowUnit}`];
+        flows.forEach(series => {
+          const value = series.values[clamped]?.value ?? null;
+          tooltipLines.push(`${series.label}: ${value != null ? value.toFixed(3) : "—"} ${series.units || flowUnit}`);
+        });
+        if (precipSeries) {
+          tooltipLines.push(`${precipSeries.label || "Precipitation"}: ${(row[precipSeries.id] ?? 0).toFixed(3)} ${precipUnitLabel}`);
+        }
+        if (rainMeltSeries) {
+          tooltipLines.push(`${rainMeltSeries.label || "Rain + Melt"}: ${(row[rainMeltSeries.id] ?? 0).toFixed(3)} ${precipUnitLabel}`);
         }
 
-        .axis path,
-        .axis line {
-            fill: none;
-            stroke: #000;
-            shape-rendering: crispEdges;
+        tooltip.html(tooltipLines.join('<br>'))
+          .style("opacity", 0.95)
+          .style("left", `${event.clientX + 12}px`)
+          .style("top", `${event.clientY + 12}px`);
+      }
+
+      const barsG = focus.append("g")
+        .attr("class", "precip")
+        .attr("clip-path", `url(#${clipId})`);
+
+      function barWidth() {
+        const span = xC.domain()[1] - xC.domain()[0];
+        const days = span / (1000 * 60 * 60 * 24);
+        return Math.max(1, Math.min(10, width / Math.max(days, 1)));
+      }
+
+      function drawBars(selection, scaleX, heightAccessor, chartHeight) {
+        const w = barWidth() * 1.6;
+        selection
+          .attr("x", d => scaleX(d.date) - w / 2)
+          .attr("width", w)
+          .attr("y", 0)
+          .attr("height", d => {
+            const h = heightAccessor(d.value);
+            return Math.max(0, Math.min(chartHeight, h));
+          });
+      }
+
+      const barData = [];
+      if (rainMeltSeries) {
+        barData.push({ id: rainMeltSeries.id, values: rainMelt, color: meteoColors[rainMeltSeries.id] });
+      }
+      if (precipSeries) {
+        barData.push({ id: precipSeries.id, values: precip, color: meteoColors[precipSeries.id] });
+      }
+
+      barData.forEach(series => {
+        const group = barsG.append("g").attr("class", `bar-${series.id}`);
+        group.selectAll("rect")
+          .data(series.values)
+          .enter()
+          .append("rect")
+          .attr("fill", series.color)
+          .attr("fill-opacity", 0.35);
+        drawBars(
+          group.selectAll("rect"),
+          x,
+          value => yHyeto(Math.max(0, value)),
+          height
+        );
+      });
+
+      context.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0,${height2})`)
+        .call(xAxisC);
+
+      context.append("g")
+        .attr("class", "y axis")
+        .call(yAxisC);
+
+      const barsGC = context.append("g")
+        .attr("class", "context-flows")
+        .attr("clip-path", `url(#${contextClipId})`);
+
+      flows.forEach(series => {
+        const visible = series.values.some(d => d.value > 0);
+        if (!visible) {
+          return;
         }
+        const area = d3.area()
+          .curve(d3.curveBasis)
+          .x(d => xC(d.date))
+          .y0(height2)
+          .y1(d => yC(d.value));
 
-        .brush .selection {
-            stroke: #fff;
-            fill-opacity: .15;
-            shape-rendering: crispEdges;
+        barsGC.append("path")
+          .datum(series.values)
+          .attr("class", `area-${series.id.replace(/\s+/g, '-')}`)
+          .attr("fill", series.color)
+          .attr("fill-opacity", 0.2)
+          .attr("stroke", series.color)
+          .attr("stroke-width", 1)
+          .attr("d", area);
+      });
+
+      const barsGCPrecip = context.append("g")
+        .attr("class", "precipC")
+        .attr("clip-path", `url(#${contextClipId})`);
+
+      barData.forEach(series => {
+        const group = barsGCPrecip.append("g").attr("class", `bar-${series.id}`);
+        group.selectAll("rect")
+          .data(series.values)
+          .enter()
+          .append("rect")
+          .attr("fill", series.color)
+          .attr("opacity", series.id === (rainMeltSeries && rainMeltSeries.id) ? 0.5 : 0.35)
+          .attr("y", () => 0);
+        drawBars(
+          group.selectAll("rect"),
+          xC,
+          value => yHyetoC(Math.max(0, value)),
+          height2
+        );
+      });
+
+      context.append("g")
+        .attr("class", "x brush")
+        .call(brush)
+        .call(brush.move, x.range())
+        .selectAll(".handle").attr("display", null);
+
+      context.append("text")
+        .attr("class", "axis-label")
+        .attr("transform", `translate(${width / 2},${height2 + margin2.bottom - 12})`)
+        .style("text-anchor", "middle")
+        .text("Date");
+
+      const legendData = flowSeries.map(series => ({
+        id: series.id,
+        label: `${series.label || series.id} (${series.units || flowUnit})`,
+        colors: [flowColors[series.id] || "#1e90ff"],
+        type: "area",
+      }));
+      if (rainMeltSeries || precipSeries) {
+        legendData.push({
+          id: "Bars",
+          label: [
+            rainMeltSeries ? `${rainMeltSeries.label || "Rain + Melt"} (${rainMeltSeries.units || precipUnitLabel})` : null,
+            precipSeries ? `${precipSeries.label || "Precipitation"} (${precipSeries.units || precipUnitLabel})` : null,
+          ].filter(Boolean).join(" / "),
+          colors: [
+            rainMeltSeries ? (meteoColors[rainMeltSeries.id] || "#00B2A9") : null,
+            precipSeries ? (meteoColors[precipSeries.id] || "#FF6F30") : null,
+          ].filter(Boolean),
+          type: "bar",
+        });
+      }
+
+      buildLegend(legendData, legendState);
+
+      redrawBars = () => {
+        barData.forEach(series => {
+          const focusBars = barsG.select(`.bar-${series.id}`).selectAll("rect");
+          drawBars(focusBars, x, value => yHyeto(Math.max(0, value)), height);
+          const contextBars = barsGCPrecip.select(`.bar-${series.id}`).selectAll("rect");
+          drawBars(contextBars, xC, value => yHyetoC(Math.max(0, value)), height2);
+        });
+      };
+      redrawAreas = () => {
+        flows.forEach(series => {
+          const area = d3.area()
+            .curve(d3.curveBasis)
+            .x(d => x(d.date))
+            .y0(height)
+            .y1(d => y(d.value));
+          focus.select(`.area-${series.id.replace(/\s+/g, '-')}`)
+            .attr("d", area(series.values));
+        });
+      };
+    }
+
+    function buildLegend(legendData, prevState) {
+      if (!legendContainer) {
+        return;
+      }
+
+      const cont = d3.select(legendContainer);
+      cont.selectAll("*").remove();
+
+      const item = cont.selectAll("label.legend-item")
+        .data(legendData)
+        .enter().append("label")
+        .attr("class", "legend-item")
+        .on("pointerdown", e => { e.stopPropagation(); e.preventDefault(); });
+
+      const inputs = item.append("input")
+        .attr("type", "checkbox")
+        .each(function (d) {
+          const shouldCheck = prevState.has(d.id) ? prevState.get(d.id) : true;
+          this.checked = shouldCheck;
+        })
+        .on("change", (evt, d) => handleToggle(evt.currentTarget.checked, d));
+
+      const swatchGroup = item.append("span")
+        .attr("class", "legend-swatch-group")
+        .style("opacity", d => d.type === "area" ? 1 : 0.35);
+
+      swatchGroup.selectAll("span.swatch")
+        .data(d => d.colors)
+        .enter().append("span")
+        .attr("class", "legend-swatch")
+        .style("background", c => c);
+
+      item.append("span").text(d => d.label);
+
+      inputs.each(function (d) {
+        if (!this.checked) {
+          handleToggle(false, d);
         }
+      });
+    }
 
-        .brush .handle {
-            fill: var(--handle-fill, #999);
-            stroke: var(--handle-stroke, #515050);
-            stroke-width: var(--handle-stroke-width, 1);
-            opacity: var(--handle-opacity, 0.8);
-            rx: 2px;
-            ry: 2px;
-            transition: fill 0.2s ease;
+    function handleToggle(checked, d) {
+      if (d.id === "Bars") {
+        d3.selectAll(".precip,.precipC").style("display", checked ? null : "none");
+        d3.selectAll(".precip-axis").style("display", checked ? null : "none");
+      } else {
+        const cls = `.area-${d.id.replace(/\s+/g, '-')}`;
+        d3.selectAll(cls).style("display", checked ? null : "none");
+      }
+    }
+
+    buildChart();
+
+    window.addEventListener('resize', scheduleBuild);
+    window.addEventListener('orientationchange', scheduleBuild);
+
+    if (window.ResizeObserver && (widthMeasureHost || streamflowWrapper)) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        if (!entries || !entries.length) {
+          return;
         }
-
-        .brush .handle:hover {
-            fill: var(--handle-fill-hover, #777);
+        const entry = entries[0];
+        if (!entry.contentRect) {
+          scheduleBuild();
+          return;
         }
-
-        .brush .handle--w,
-        .brush .handle--e {
-            cursor: ew-resize;
-            width: var(--handle-size, 4px);
+        const availableWidth = getAvailableWidth();
+        if (
+          lastRenderedHostWidth === null ||
+          Math.abs(entry.contentRect.width - lastRenderedHostWidth) > 1 ||
+          lastRenderedAvailableWidth === null ||
+          Math.abs(availableWidth - lastRenderedAvailableWidth) > 1
+        ) {
+          scheduleBuild();
         }
-
-        .brush .handle--n,
-        .brush .handle--s {
-            cursor: ns-resize;
-            height: var(--handle-size, 4px);
-        }
-
-        .x.axis path {
-            display: none;
-        }
-
-        .line {
-            fill: none;
-            stroke: steelblue;
-            stroke-width: 1.5px;
-            clip-path: url(#clip);
-        }
-
-        .hover-line {
-            pointer-events: none;
-            stroke-dasharray: 3 3;
-        }
-
-        /* horizontal legend */
-        .legend-horizontal {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 6px;
-            font: 12px sans-serif;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            user-select: none;
-        }
-
-        .legend-swatch-group {
-            display: inline-flex;
-            margin: 0 4px 0 4px;
-            /* space before/after the squares */
-        }
-
-        .legend-swatch {
-            width: 16px;
-            height: 12px;
-            border: 1px solid #444;
-            border-radius: 2px;
-            margin-right: 2px;
-        }
-
-        svg,
-        .focus,
-        .context,
-        body {
-            user-select: none;
-        }
-    </style>
-</head>
-
-<body>
-    {% include 'header/header.htm'%}
-    <div role="main" class="container-full">
-        <h2>Daily Runoff/Lateral Flow/Baseflow for {{ ron.runid }}</h2>
-
-
-        <div id="legend" class="legend-horizontal"></div>
-        <div id="area1"></div>
-        <script id="streamflow-data" type="application/json">{{ streamflow_data_json|default('{}')|safe }}</script>
-        <script id="streamflow-query" type="application/json">{{ streamflow_query_json|default('{}')|safe }}</script>
-
-        <script>
-            /* ===== Layout / sizes ===== */
-            const margin = { top: 10, right: 100, bottom: (window.innerHeight - 80) * 0.2, left: 40 },
-                margin2 = { top: (window.innerHeight - 80) * 0.80, right: 100, bottom: 70, left: 40 },
-                width = window.innerWidth * 0.95 - margin.left - margin.right,
-                height = window.innerHeight * 0.95 - 80 - margin.top - margin.bottom,
-                height2 = window.innerHeight * 0.95 - 80 - margin2.top - margin2.bottom;
-
-            /* ===== Parsers / formatters ===== */
-            const parseISODate = d3.utcParse("%Y-%m-%d");
-            const fmtDate = d3.utcFormat("%Y-%m-%d");
-
-            /* ===== Scales ===== */
-            const x = d3.scaleTime().range([0, width]);
-            const xC = d3.scaleTime().range([0, width]);
-            const y = d3.scaleLinear().range([height, 0]);
-            const yC = d3.scaleLinear().range([height2, 0]);
-
-            /* ===== Axes ===== */
-            let flowUnitLabel = 'mm';
-            let precipUnitLabel = 'mm';
-            const yTick = d => `${d} ${flowUnitLabel}`;  // add units on ticks
-            const xAxis = d3.axisBottom(x);
-            const xAxisC = d3.axisBottom(xC);
-            const yAxis = d3.axisLeft(y).tickFormat(yTick);
-            const yAxisC = d3.axisLeft(yC).ticks(2).tickFormat(yTick);
-
-            /* ===== Brush ===== */
-            const brush = d3.brushX()
-                .extent([[0, 0], [width, height2]])
-                .on("brush end", brushed);
-
-            /* ===== SVG skeleton ===== */
-            const svg = d3.select("#area1").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom);
-
-            svg.append("defs").append("clipPath")
-                .attr("id", "clip")
-                .append("rect")
-                .attr("x", margin.left)
-                .attr("y", margin.top)
-                .attr("width", width)
-                .attr("height", height);
-
-            const focus = svg.append("g")
-                .attr("class", "focus")
-                .attr("transform", `translate(${margin.left},${margin.top})`);
-
-            const context = svg.append("g")
-                .attr("class", "context")
-                .attr("transform", `translate(${margin2.left},${margin2.top})`);
-
-            /* ===== Tooltip ===== */
-            const tooltip = d3.select("body")
-                .append("div")
-                .attr("class", "d3-tooltip")
-                .style("position", "fixed")
-                .style("pointer-events", "none")
-                .style("padding", "4px 8px")
-                .style("background", "rgba(0,0,0,0.8)")
-                .style("color", "#fff")
-                .style("font", "12px sans-serif")
-                .style("border-radius", "3px")
-                .style("opacity", 0);
-
-            /* ===== Globals ===== */
-            let flowsG, barsG, barsGC, hoverLine, redrawBars, redrawAreas, legendOverlay;
-            const FLOW_COLOR_DEFAULTS = {
-                Runoff: "#FF3B30",
-                runoff: "#FF3B30",
-                Baseflow: "#1e90ff",
-                baseflow: "#1e90ff",
-                "Lateral Flow": "#32cd32",
-                lateral_flow: "#32cd32",
-            };
-            const METEO_COLOR_DEFAULTS = {
-                Precipitation: "#FF6F30",
-                precipitation: "#FF6F30",
-                "Rain + Melt": "#00B2A9",
-                rain_melt: "#00B2A9",
-            };
-
-            /* ===== Load data ===== */
-            const dataElement = document.getElementById("streamflow-data");
-            let timeseriesData = { index: { values: [] }, series: [] };
-            if (dataElement) {
-                try {
-                    const parsed = JSON.parse(dataElement.textContent || "{}");
-                    if (parsed && typeof parsed === "object") {
-                        timeseriesData = parsed;
-                    }
-                } catch (err) {
-                    console.warn("Failed to parse embedded streamflow data", err);
-                }
-            }
-            const queryElement = document.getElementById("streamflow-query");
-            if (queryElement) {
-                try {
-                    window.WEPP_STREAMFLOW_QUERY = JSON.parse(queryElement.textContent || "{}");
-                } catch (err) {
-                    console.warn("Failed to parse embedded streamflow query payload", err);
-                }
-            }
-            {% if streamflow_sql %}
-            window.WEPP_STREAMFLOW_SQL = {{ streamflow_sql|tojson|safe }};
-            {% endif %}
-            const indexValues = (timeseriesData.index && Array.isArray(timeseriesData.index.values)) ? timeseriesData.index.values : [];
-            const seriesDefs = Array.isArray(timeseriesData.series) ? timeseriesData.series : [];
-            const flowSeries = seriesDefs.filter(series => (series.group || "flow") === "flow");
-            const meteoSeries = seriesDefs.filter(series => series.group === "meteo");
-            const rainMeltSeries = meteoSeries.find(series => series.role === "rain_melt") || meteoSeries[0];
-            const precipSeries = meteoSeries.find(series => series.role === "precip") || (meteoSeries.length > 1 ? meteoSeries[1] : meteoSeries[0]);
-            const flowColors = {};
-            flowSeries.forEach(series => {
-                const fallback = FLOW_COLOR_DEFAULTS[series.id] || FLOW_COLOR_DEFAULTS[series.label] || "#1e90ff";
-                flowColors[series.id] = series.color || fallback;
-            });
-            const meteoColors = {};
-            if (rainMeltSeries) {
-                const fallback = METEO_COLOR_DEFAULTS[rainMeltSeries.id] || METEO_COLOR_DEFAULTS[rainMeltSeries.label] || "#00B2A9";
-                meteoColors[rainMeltSeries.id] = rainMeltSeries.color || fallback;
-            }
-            if (precipSeries) {
-                const fallback = METEO_COLOR_DEFAULTS[precipSeries.id] || METEO_COLOR_DEFAULTS[precipSeries.label] || "#FF6F30";
-                meteoColors[precipSeries.id] = precipSeries.color || fallback;
-            }
-            const indexDates = indexValues.map(value => parseISODate(value) || new Date(value));
-            const rows = indexDates.map((date, idx) => {
-                const row = { date };
-                seriesDefs.forEach(series => {
-                    const values = Array.isArray(series.values) ? series.values : [];
-                    const raw = values[idx];
-                    row[series.id] = raw == null ? 0 : +raw;
-                });
-                return row;
-            });
-            const meteo = rows.map(row => ({
-                date: row.date,
-                rm: rainMeltSeries ? row[rainMeltSeries.id] : 0,
-                p: precipSeries ? row[precipSeries.id] : 0,
-            }));
-            const flowKeys = flowSeries.map(series => series.id);
-            const flowUnit = flowSeries.length ? (flowSeries[0].units || "mm") : "mm";
-            const precipUnit = (rainMeltSeries && rainMeltSeries.units) || (precipSeries && precipSeries.units) || "mm";
-            flowUnitLabel = flowUnit;
-            precipUnitLabel = precipUnit;
-
-            if (!rows.length) {
-                d3.select("#area1").append("p")
-                    .attr("class", "alert alert-warning mt-3")
-                    .text("No streamflow data available for the selected filters.");
-            } else {
-                /* --- Domains --- */
-                x.domain(d3.extent(rows, d => d.date));
-                xC.domain(x.domain());
-
-                const yMax = d3.max(rows, d => d3.max(flowKeys, k => d[k] ?? 0)) || 0;
-                y.domain([0, yMax]);
-                yC.domain(y.domain());
-
-                /* --- Meteo for bars --- */
-                const pMax = d3.max(meteo, d => Math.max(d.rm || 0, d.p || 0)) || 0;
-                const yPbar = d3.scaleLinear().domain([0, pMax]).range([0, height]);
-                const yPC = d3.scaleLinear().domain([0, pMax]).range([height2, 0]);
-                const yAxisRight = d3.axisRight(yPbar).ticks(3).tickFormat(d => `${d} ${precipUnitLabel}`);
-
-                /* --- Axes (focus) --- */
-                focus.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform", `translate(0,${height})`)
-                    .call(xAxis);
-
-                focus.append("g")
-                    .attr("class", "y axis")
-                    .call(yAxis)
-                    .append("text")
-                    .attr("transform", "rotate(-90)")
-                    .attr("y", 6).attr("dy", ".71em")
-                    .style("text-anchor", "end")
-                    .text(`Streamflow (${flowUnit})`);
-
-                const precipAxisG = focus.append("g")
-                    .attr("class", "y axis precip-axis")
-                    .attr("transform", `translate(${width},0)`)
-                    .call(yAxisRight);
-
-                const precipLabel = precipSeries ? (precipSeries.label || "Precipitation") : "Precipitation";
-                const rainLabel = rainMeltSeries ? (rainMeltSeries.label || "Rain + Melt") : "Rain + Melt";
-                precipAxisG.append("text")
-                    .attr("transform", "rotate(-90)")
-                    .attr("y", -12).attr("dy", ".71em")
-                    .style("text-anchor", "end")
-                    .text(`${precipLabel} / ${rainLabel} (${precipUnit})`);
-
-                /* --- Flow areas --- */
-                function areaGen(k, xS, yS) {
-                    return d3.area()
-                        .x(d => xS(d.date))
-                        .y0(yS(0))
-                        .y1(d => yS(d[k] ?? 0));
-                }
-
-                flowsG = focus.append("g")
-                    .attr("clip-path", "url(#clip)")
-                    .attr("class", "flows");
-
-                flowsG.selectAll("path")
-                    .data(flowKeys)
-                    .enter().append("path")
-                    .attr("class", d => `area area-${d.replace(/\s+/g, '-')}`)
-                    .attr("fill", d => flowColors[d] || "#1e90ff")
-                    .attr("opacity", 1.0)
-                    .attr("d", k => areaGen(k, x, y)(rows));
-
-                redrawAreas = () => flowsG.selectAll("path")
-                    .attr("d", k => areaGen(k, x, y)(rows));
-
-                /* --- Hover line / tooltip --- */
-                const bisect = d3.bisector(d => d.date).left;
-                hoverLine = focus.append("line")
-                    .attr("class", "hover-line")
-                    .attr("y1", 0).attr("y2", height)
-                    .style("stroke", "#333").style("stroke-width", 1)
-                    .style("pointer-events", "none").style("opacity", 0);
-
-                function moved(event) {
-                    const [mx] = d3.pointer(event, this),
-                        t = x.invert(mx),
-                        i = Math.min(bisect(rows, t), rows.length - 1),
-                        d0 = rows[Math.max(0, i - 1)], d1 = rows[i],
-                        d = (!d1 || (t - d0.date) < (d1.date - t)) ? d0 : d1;
-
-                    hoverLine.attr("x1", x(d.date)).attr("x2", x(d.date)).style("opacity", 1);
-
-                    const parts = [`${fmtDate(d.date)}`];
-                    if (precipSeries) {
-                        parts.push(`${precipLabel}: ${(d[precipSeries.id] ?? 0).toFixed(2)} ${precipUnitLabel}`);
-                    }
-                    if (rainMeltSeries) {
-                        parts.push(`${rainLabel}: ${(d[rainMeltSeries.id] ?? 0).toFixed(2)} ${precipUnitLabel}`);
-                    }
-                    flowSeries.forEach(series => {
-                        const label = series.label || series.id;
-                        parts.push(`${label}: ${(d[series.id] ?? 0).toFixed(2)} ${series.units || flowUnitLabel}`);
-                    });
-
-                    tooltip.style("opacity", 1)
-                        .html(parts.join("<br>"))
-                        .style("left", (event.clientX + 12) + "px")
-                        .style("top", (event.clientY - 28) + "px");
-                }
-                function left() { hoverLine.style("opacity", 0); tooltip.style("opacity", 0); }
-
-                focus.append("rect")
-                    .attr("class", "hover-capture")
-                    .attr("width", width).attr("height", height)
-                    .style("fill", "none").style("pointer-events", "all")
-                    .on("mousemove", moved).on("mouseleave", left);
-
-                /* --- Precip / Rain+Melt bars --- */
-                barsG = focus.append("g")
-                    .attr("class", "precip")
-                    .attr("clip-path", "url(#clip)");
-
-                const barWidth = () => {
-                    const domain = x.domain(),
-                        i0 = bisect(rows, domain[0]),
-                        i1 = Math.min(i0 + 1, rows.length - 1);
-                    if (i0 === i1) return 2;
-                    return Math.max(1, (x(rows[i1].date) - x(rows[i0].date)) * 0.8);
-                };
-
-                function drawBars(selection, xScale, yScale, clipToDomain = false) {
-                    const w = barWidth(),
-                        d0 = x.domain()[0], d1 = x.domain()[1];
-                    selection
-                        .attr("x", d => xScale(d.date) - w / 2)
-                        .attr("width", w)
-                        .attr("height", d => yScale(d.rm))
-                        .attr("display", d => clipToDomain && (d.date < d0 || d.date > d1) ? "none" : null);
-                }
-
-                barsG.selectAll("rect")
-                    .data(meteo, d => d.date)
-                    .enter().append("rect")
-                    .attr("y", 0)
-                    .attr("fill", d => d.rm > d.p
-                        ? (rainMeltSeries ? meteoColors[rainMeltSeries.id] : "#00B2A9")
-                        : (precipSeries ? meteoColors[precipSeries.id] : "#FF6F30"))
-                    .attr("opacity", 0.35)
-                    .on("mouseenter", function (event, d) {
-                        d3.select(this).attr("opacity", 0.8);
-                        tooltip.style("opacity", 1)
-                            .html(`${fmtDate(d.date)}<br>
-                 ${precipLabel}: ${d.p.toFixed(2)} ${precipUnitLabel}<br>
-                 ${rainLabel}: ${d.rm.toFixed(2)} ${precipUnitLabel}`);
-                    })
-                    .on("mousemove", e => tooltip.style("left", (e.clientX + 12) + "px").style("top", (e.clientY - 28) + "px"))
-                    .on("mouseleave", function () { d3.select(this).attr("opacity", 0.35); tooltip.style("opacity", 0); });
-
-                drawBars(barsG.selectAll("rect"), x, yPbar, true);
-
-                /* --- Context axes --- */
-                context.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform", `translate(0,${height2})`)
-                    .call(xAxisC);
-
-                context.append("g")
-                    .attr("class", "y axis")
-                    .call(yAxisC);
-
-                /* --- Context flow areas --- */
-                const flowsGC = context.append("g").attr("class", "flowsC");
-                flowsGC.selectAll("path")
-                    .data(flowKeys)
-                    .enter().append("path")
-                    .attr("fill", d => flowColors[d] || "#1e90ff").attr("opacity", 1.0)
-                    .attr("d", k => areaGen(k, xC, yC)(rows));
-
-                /* --- Context precip bars (no tooltip) --- */
-                barsGC = context.append("g").attr("class", "precipC");
-                barsGC.selectAll("rect")
-                    .data(meteo)
-                    .enter().append("rect")
-                    .attr("y", 0)
-                    .attr("fill", d => d.rm > d.p
-                        ? (rainMeltSeries ? meteoColors[rainMeltSeries.id] : "#00B2A9")
-                        : (precipSeries ? meteoColors[precipSeries.id] : "#FF6F30"))
-                    .attr("opacity", 0.25);
-
-                function drawBarsC() {
-                    const w = barWidth();
-                    barsGC.selectAll("rect")
-                        .attr("x", d => xC(d.date) - w / 2)
-                        .attr("width", w)
-                        .attr("height", d => height2 - yPC(d.rm));
-                }
-                drawBarsC();
-
-                /* --- Brush --- */
-                context.append("g")
-                    .attr("class", "x brush")
-                    .call(brush)
-                    .call(brush.move, x.range())
-                    .selectAll(".handle").attr("display", null);
-
-                context.append("text")
-                    .attr("transform", `translate(${width / 2},${height2 + margin2.bottom})`)
-                    .style("text-anchor", "middle")
-                    .text("Date");
-
-                const legendData = flowSeries.map(series => ({
-                    id: series.id,
-                    label: `${series.label || series.id} (${series.units || flowUnit})`,
-                    colors: [flowColors[series.id] || "#1e90ff"],
-                    type: "area",
-                }));
-                if (rainMeltSeries || precipSeries) {
-                    legendData.push({
-                        id: "Bars",
-                        label: [
-                            rainMeltSeries ? `${rainLabel} (${rainMeltSeries.units || precipUnit})` : null,
-                            precipSeries ? `${precipLabel} (${precipSeries.units || precipUnit})` : null,
-                        ].filter(Boolean).join(" / "),
-                        colors: [
-                            rainMeltSeries ? (meteoColors[rainMeltSeries.id] || "#00B2A9") : null,
-                            precipSeries ? (meteoColors[precipSeries.id] || "#FF6F30") : null,
-                        ].filter(Boolean),
-                        type: "bar",
-                    });
-                }
-
-                buildLegend(legendData);
-
-                /* === initial clipping === */
-                redrawBars = () => drawBars(barsG.selectAll("rect"), x, yPbar, true);
-            }
-
-            /* ===== Brush handler ===== */
-
-            function brushed(event) {
-                const sel = event.selection;
-                x.domain(sel ? sel.map(xC.invert) : xC.domain());
-                focus.select(".x.axis").call(xAxis);
-
-                redrawAreas && redrawAreas();      // cheap (3 paths)
-
-                hoverLine && hoverLine.style("opacity", 0);
-                redrawBars && redrawBars();
-            }
-            function buildLegend(legendData) {
-                const cont = d3.select("#legend");
-
-                const item = cont.selectAll("label.legend-item")
-                    .data(legendData)
-                    .enter().append("label")
-                    .attr("class", "legend-item")
-                    .on("pointerdown", e => { e.stopPropagation(); e.preventDefault(); });   // keeps brush drag working
-
-                /* checkbox */
-                item.append("input")
-                    .attr("type", "checkbox")
-                    .attr("checked", true)
-                    .on("change", (evt, d) => handleToggle(evt.currentTarget.checked, d));
-
-                /* colour swatches (1-N per item) */
-                const swatchGroup = item.append("span")
-                    .attr("class", "legend-swatch-group")              // groups multiple squares
-                    .style("opacity", d => d.type === "area" ? 1 : 0.35);  // bars = semi-transparent, areas = solid
-
-                swatchGroup.selectAll("span.swatch")
-                    .data(d => d.colors)                                // array of 1 or 2 colours
-                    .enter().append("span")
-                    .attr("class", "legend-swatch")
-                    .style("background", c => c);
-
-                /* text label */
-                item.append("span").text(d => d.label);
-            }
-
-            function handleToggle(checked, d) {
-                if (d.id === "Bars") {
-                    // toggle precip + rain/melt bars and their y-axis
-                    d3.selectAll(".precip,.precipC").style("display", checked ? null : "none");
-                    d3.selectAll(".precip-axis").style("display", checked ? null : "none");
-                } else {
-                    const cls = `.area-${d.id.replace(/\s+/g, '-')}`;
-                    d3.selectAll(cls).style("display", checked ? null : "none");
-                }
-            }
-
-            /* ===== Toggle bars ===== */
-            d3.select("#toggleBars").on("change", function () {
-                const show = this.checked;
-                d3.selectAll(".precip").style("display", show ? null : "none");
-                d3.selectAll(".precipC").style("display", show ? null : "none");
-                d3.selectAll(".precip-axis").style("display", show ? null : "none");
-            });
-        </script>
-
-        {% include 'controls/unitizer_modal.htm'%}
-        {% include 'controls/poweruser_panel.htm'%}
-    </div>
-
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/copytext.js') }}?20180904"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
-        crossorigin="anonymous"></script>
-</body>
-
-</html>
+      });
+      resizeObserver.observe(widthMeasureHost || streamflowWrapper);
+    }
+  });
+</script>
+{% endblock %}

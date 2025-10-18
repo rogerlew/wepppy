@@ -64,16 +64,55 @@ def _augment_hill_channel_frames(
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
 
+    hill_id_column = next((name for name in ("wepp_id", "WeppID", "weppId", "Hillslopes") if name in hill_df.columns), None)
+    if hill_id_column is None:
+        columns = ", ".join(hill_df.columns)
+        raise KeyError(
+            "Hillslope loss table missing WEPP identifier column (expected one of wepp_id, WeppID, weppId, Hillslopes); "
+            f"columns={columns}"
+        )
+
+    chn_id_column = next((name for name in ("chn_enum", "Channels and Impoundments") if name in chn_df.columns), None)
+    if chn_id_column is None:
+        columns = ", ".join(chn_df.columns)
+        raise KeyError(
+            "Channel loss table missing channel identifier column (expected one of chn_enum, Channels and Impoundments); "
+            f"columns={columns}"
+        )
+
+    hill_ids = pd.to_numeric(hill_df[hill_id_column], errors="coerce").astype("Int64")
+    chn_ids = pd.to_numeric(chn_df[chn_id_column], errors="coerce").astype("Int64")
+
+    hill_df["wepp_id"] = hill_ids
+    hill_df["WeppID"] = hill_ids
+    hill_df["Hillslopes"] = hill_ids
+
+    if "chn_enum" not in chn_df.columns:
+        chn_df["chn_enum"] = chn_ids
+    else:
+        chn_df["chn_enum"] = chn_ids
+    chn_df["Channels and Impoundments"] = chn_ids
+    if "wepp_id" not in chn_df.columns:
+        chn_df["wepp_id"] = pd.Series(pd.NA, index=chn_df.index, dtype="Int64")
+    else:
+        chn_df["wepp_id"] = pd.to_numeric(chn_df["wepp_id"], errors="coerce").astype("Int64")
+
     for idx, row in hill_df.iterrows():
-        wepp_id = int(row["Hillslopes"])
+        wepp_raw = hill_ids.iat[idx]
+        if pd.isna(wepp_raw):
+            continue
+        wepp_id = int(wepp_raw)
         topaz_id = translator.top(wepp=wepp_id)
 
         area = float(row.get("Hillslope Area", 0.0) or 0.0)
         if area == 0.0:
             area = watershed.hillslope_area(topaz_id) * 1e-4
 
+        hill_df.at[idx, "Hillslopes"] = wepp_id
         hill_df.at[idx, "WeppID"] = wepp_id
+        hill_df.at[idx, "wepp_id"] = wepp_id
         hill_df.at[idx, "TopazID"] = topaz_id
+        hill_df.at[idx, "topaz_id"] = topaz_id
         hill_df.at[idx, "Landuse"] = landuse.domlc_d.get(str(topaz_id))
         hill_df.at[idx, "Soil"] = soils.domsoil_d.get(str(topaz_id))
         hill_df.at[idx, "Length"] = watershed.hillslope_length(topaz_id)
@@ -117,7 +156,10 @@ def _augment_hill_channel_frames(
                 )
 
     for idx, row in chn_df.iterrows():
-        chn_id = int(row["Channels and Impoundments"])
+        chn_raw = chn_ids.iat[idx]
+        if pd.isna(chn_raw):
+            continue
+        chn_id = int(chn_raw)
         topaz_id = translator.top(chn_enum=chn_id)
         wepp_channel_id = translator.wepp(chn_enum=chn_id)
 
@@ -125,9 +167,14 @@ def _augment_hill_channel_frames(
         if area == 0.0:
             area = watershed.channel_area(topaz_id) / 10000.0
 
+        chn_df.at[idx, "Channels and Impoundments"] = chn_id
+        chn_df.at[idx, "chn_enum"] = chn_id
+        if pd.isna(row.get("wepp_id")):
+            chn_df.at[idx, "wepp_id"] = wepp_channel_id
         chn_df.at[idx, "WeppID"] = chn_id
         chn_df.at[idx, "WeppChnID"] = wepp_channel_id
         chn_df.at[idx, "TopazID"] = topaz_id
+        chn_df.at[idx, "topaz_id"] = topaz_id
         chn_df.at[idx, "Area"] = area
         chn_df.at[idx, "Length"] = watershed.channel_length(topaz_id)
 

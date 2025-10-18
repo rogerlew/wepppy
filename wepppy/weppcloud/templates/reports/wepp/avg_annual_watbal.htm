@@ -1,0 +1,84 @@
+{% extends "reports/_base_report.htm" %}
+{% block report_title %}Average annual water balance{% endblock %}
+{% block report_content %}
+{% macro render_units(units) -%}
+  {% if units %}
+    {{ unitizer_units(units) | safe }}
+  {% else %}
+    &nbsp;
+  {% endif %}
+{%- endmacro %}
+
+{% macro render_table(report, slug, title, description) -%}
+  {% set table_id = slug ~ '_watbal' %}
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack">
+      <h2 class="wc-heading__subtitle">{{ title }}</h2>
+      {% if description %}
+        <p class="wc-text-muted">{{ description }}</p>
+      {% endif %}
+    </header>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense sortable" id="{{ table_id }}">
+        <thead>
+          <tr>
+            {% for colname in report.avg_annual_header %}
+              <th scope="col">{{ colname }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-sort-position="top">
+            {% for units in report.avg_annual_units %}
+              <td>{{ render_units(units) }}</td>
+            {% endfor %}
+          </tr>
+          {% for row in report.avg_annual_iter() %}
+            <tr>
+              {% for value, units in row %}
+                {% if loop.first %}
+                  <td sorttable_customkey="{{ value }}">{{ value | round | int }}</td>
+                {% else %}
+                  <td sorttable_customkey="{{ value }}">{{ unitizer(value, units) | safe }}</td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="wc-table-actions">
+      <button type="button" class="pure-button pure-button-link"
+              data-report-csv="{{ table_id }}"
+              data-report-url="{{ url_for_run('wepp.report_wepp_avg_annual_watbal', runid=runid, config=config, format='csv', table=slug) }}"
+              data-report-table="{{ slug }}">
+        Download CSV
+      </button>
+    </div>
+  </section>
+{%- endmacro %}
+
+<header class="wc-stack">
+  <h1 class="wc-heading__title">Average annual water balance</h1>
+  <p class="wc-text-muted">
+    Average annual water balance components aggregated by water year. Values reflect the multi-year average for each
+    element of the watershed.
+  </p>
+</header>
+
+{{ render_table(
+    hill_rpt,
+    'hillslopes',
+    'Hillslope water balance',
+    'Calculated from aggregated hillslope water balance (.wat.dat) totals averaged across the simulation period.'
+) }}
+
+{% if chn_rpt %}
+  {{ render_table(
+      chn_rpt,
+      'channels',
+      'Channel water balance',
+      'Derived from channel OFE interchange parquet by aggregating daily depths to water-year totals for each channel.'
+  ) }}
+{% endif %}
+{% endblock %}

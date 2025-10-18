@@ -100,7 +100,7 @@ var Baer = function () {
 
         that.remove_sbs = function () {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
 
             $.post({
                 url: "tasks/remove_sbs",
@@ -265,7 +265,7 @@ var Baer = function () {
 
         that.show_sbs = function () {
             var self = instance;
-            var map = Map.getInstance();
+            var map = MapController.getInstance();
             var sub = SubcatchmentDelineation.getInstance();
 
 
@@ -327,7 +327,7 @@ var Baer = function () {
                     url: "resources/legends/sbs/",
                     cache: false,
                     success: function (response) {
-                        var map = Map.getInstance();
+                        var map = MapController.getInstance();
                         map.sbs_legend.html(response);
 
                         map.sbs_legend.append('<div id="slider-container"><p>SBS Map Opacity</p><input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="0.7"></div>');

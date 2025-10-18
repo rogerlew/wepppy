@@ -4,6 +4,10 @@
 ## Authorship
 **This document is maintained by GitHub Copilot / Codex which retain full authorship rights for all AGENTS.md content revisions.**
 
+## Core Directives
+- `??` in prompt is a directive to provide critical response and not to implement in code.
+- If you need clarification or additional debug information from a human, just ask.
+
 ## Repository Overview
 
 wepppy is a DevOps-focused erosion modeling stack that fuses Python orchestration, Rust geospatial kernels, and Redis-first observability. The system automates Water Erosion Prediction Project (WEPP) runs, wildfire response analytics, and watershed-scale geospatial preprocessing by gluing together legacy Fortran executables, modern Python services, and Rust-accelerated tooling. The architechture as a whole strives for openness, flexibility, and observability.

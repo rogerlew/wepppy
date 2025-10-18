@@ -2527,9 +2527,34 @@ class Wepp(NoDbBase):
 
         translator = self.watershed_instance.translator_factory()
 
+        def _resolve_identifier(row, *candidates):
+            for key in candidates:
+                if key not in row:
+                    continue
+                value = row.get(key)
+                if value is None:
+                    continue
+                invalid = False
+                try:
+                    if value != value:
+                        invalid = True
+                except TypeError:
+                    invalid = True
+                if invalid:
+                    continue
+                try:
+                    return int(value)
+                except (TypeError, ValueError):
+                    try:
+                        return int(float(value))
+                    except (TypeError, ValueError):
+                        continue
+            raise KeyError(f"Missing identifier columns {candidates} in loss hill record: {row}")
+
         d = {}
         for row in report.hill_tbl:
-            topaz_id = translator.top(wepp=row['Hillslopes'])
+            wepp_id = _resolve_identifier(row, "wepp_id", "WeppID", "weppId", "Hillslopes")
+            topaz_id = translator.top(wepp=wepp_id)
 
             v = row.get(measure, None)
             if isnan(v) or isinf(v):
@@ -2558,9 +2583,34 @@ class Wepp(NoDbBase):
 
         report = self._loss_report
 
+        def _resolve_identifier(row, *candidates):
+            for key in candidates:
+                if key not in row:
+                    continue
+                value = row.get(key)
+                if value is None:
+                    continue
+                invalid = False
+                try:
+                    if value != value:
+                        invalid = True
+                except TypeError:
+                    invalid = True
+                if invalid:
+                    continue
+                try:
+                    return int(value)
+                except (TypeError, ValueError):
+                    try:
+                        return int(float(value))
+                    except (TypeError, ValueError):
+                        continue
+            raise KeyError(f"Missing identifier columns {candidates} in loss channel record: {row}")
+
         d = {}
         for row in report.chn_tbl:
-            topaz_id = translator.top(chn_enum=row['Channels and Impoundments'])
+            chn_enum = _resolve_identifier(row, "chn_enum", "Channels and Impoundments")
+            topaz_id = translator.top(chn_enum=chn_enum)
 
             v = row.get(measure, None)
             if isnan(v) or isinf(v):

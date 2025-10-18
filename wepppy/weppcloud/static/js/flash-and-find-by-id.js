@@ -66,8 +66,8 @@
     }
 
     if (!map) {
-      map = global.Map && typeof global.Map.getInstance === 'function'
-        ? global.Map.getInstance()
+      map = global.MapController && typeof global.MapController.getInstance === 'function'
+        ? global.MapController.getInstance()
         : null;
     }
 
