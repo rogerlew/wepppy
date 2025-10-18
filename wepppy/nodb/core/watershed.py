@@ -6,6 +6,52 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""Watershed abstraction and subcatchment management.
+
+This module provides the Watershed NoDb controller for watershed delineation,
+abstraction, and management of subcatchments and channel networks. It integrates
+with multiple watershed delineation backends including TOPAZ, Peridot (Rust),
+and WhiteboxTools.
+
+Key Components:
+    Watershed: NoDb controller for watershed abstraction
+    Outlet: Watershed outlet point specification
+    DelineationBackend: Enum for watershed delineation method selection
+    
+Delineation Backends:
+    - TOPAZ: Legacy Fortran watershed delineation
+    - Peridot: Rust-based watershed abstraction engine
+    - WhiteboxTools: Custom TOPAZ implementation in Rust
+    
+Data Products:
+    - Subcatchment polygons (GeoJSON)
+    - Channel network topology (GeoJSON)
+    - Hillslope parameters (Parquet)
+    - Channel parameters (Parquet)
+    - WEPP input files (.slp, structure)
+
+Example:
+    >>> from wepppy.nodb.core import Watershed, Outlet
+    >>> watershed = Watershed.getInstance('/wc1/runs/my-run')
+    >>> watershed.outlet = Outlet(lat=46.8, lng=-116.8)
+    >>> watershed.abstract_watershed()
+    >>> print(f"Subcatchments: {watershed.num_subcatchments}")
+    
+See Also:
+    - wepppy.topo.watershed_abstraction: Watershed abstraction algorithms
+    - wepppy.topo.peridot: Rust watershed engine
+    - wepppy.topo.wbt: WhiteboxTools integration
+    - wepppy.nodb.core.topaz: TOPAZ controller (legacy)
+
+Note:
+    Watershed abstraction is a prerequisite for WEPP simulation.
+    All subcatchments are assigned unique topaz_id and wepp_id values.
+    
+Warning:
+    Watershed outlet must not touch DEM boundary edges. Use
+    WatershedBoundaryTouchesEdgeError handling for validation.
+"""
+
 from typing import Generator, Dict, Union, Tuple
 
 import time

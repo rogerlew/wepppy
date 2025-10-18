@@ -6,6 +6,64 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""WEPP model configuration, execution, and output processing.
+
+This module provides the Wepp NoDb controller for managing Water Erosion
+Prediction Project (WEPP) model configuration, input file generation, simulation
+execution, and result analysis.
+
+Key Components:
+    Wepp: NoDb controller for WEPP model management
+    PhosphorusOpts: Phosphorus transport modeling parameters
+    BaseflowOpts: Baseflow routing configuration
+    SnowOpts: Snow accumulation and melt parameters
+    TCROpts: Total carbon routing options
+    ChannelRoutingMethod: Enum for channel routing algorithms
+
+WEPP Model Components:
+    - Hillslope simulations (parallel execution)
+    - Channel routing (watershed-scale)
+    - Phosphorus transport (optional)
+    - Baseflow modeling (optional)
+    - Snow processes (optional)
+
+Input Files Generated:
+    - .man: Management/vegetation files
+    - .sol: Soil parameter files
+    - .slp: Slope profile files
+    - .cli: Climate files
+    - structure.txt: Watershed connectivity
+
+Output Files Processed:
+    - .wat: Water balance and runoff
+    - .soil_loss: Erosion and sediment yield
+    - .pass: Hillslope pass file
+    - .element: Channel element output
+
+Example:
+    >>> from wepppy.nodb.core import Wepp, PhosphorusOpts
+    >>> wepp = Wepp.getInstance('/wc1/runs/my-run')
+    >>> wepp.phosphorus_opts = PhosphorusOpts(surf_runoff=0.01)
+    >>> wepp.prep_hillslopes()
+    >>> wepp.run_hillslopes()  # Parallel execution
+    >>> wepp.run_watershed()
+    >>> print(f"Soil loss: {wepp.avg_soil_loss_tha:.2f} t/ha")
+
+See Also:
+    - wepppy.wepp: WEPP input/output file management
+    - wepppy.nodb.core.climate: Climate data for .cli files
+    - wepppy.nodb.core.soils: Soil data for .sol files
+    - wepppy.nodb.core.landuse: Management data for .man files
+
+Note:
+    WEPP simulations require completed watershed abstraction,
+    climate data, soil data, and management assignments.
+    
+Warning:
+    Hillslope runs must complete before watershed simulation.
+    Use wepp.run_hillslopes() before wepp.run_watershed().
+"""
+
 # standard library
 import os
 from enum import IntEnum
