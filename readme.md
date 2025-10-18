@@ -58,8 +58,8 @@ NoDb subclass logger
 - The HTML surface (`templates/controls/_base.htm`) provides canonical IDs for status panes, letting new controllers inherit the telemetry pipeline without bespoke wiring.
 
 ## DevOps Notes
-- Redis is mission control. DB 0 tracks run metadata, DB 2 streams status, DB 9 powers RQ, DB 11 stores Flask sessions, DB 13 caches NoDb JSON, DB 14 manages README editor locks, DB 15 holds log levels. See `wepppy/weppcloud/routes/usersum/dev-notes/redis_dev_notes.md` for ops drills.
-- Coding conventions live in `wepppy/weppcloud/routes/usersum/dev-notes/style-guide.md`; skim it before touching batch runners, NoDb modules, or microservices.
+- Redis is mission control. DB 0 tracks run metadata, DB 2 streams status, DB 9 powers RQ, DB 11 stores Flask sessions, DB 13 caches NoDb JSON, DB 14 manages README editor locks, DB 15 holds log levels. See `docs/dev-notes/redis_dev_notes.md` for ops drills.
+- Coding conventions live in `docs/dev-notes/style-guide.md`; skim it before touching batch runners, NoDb modules, or microservices.
 - The microservices are lightweight Go services (`services/preflight2`, `services/status2`) that boot via systemd or the dev scripts under `_scripts/`. They require Redis keyspace notifications (`notify-keyspace-events Kh`) for preflight streaming.
 - Workers scale horizontally. `wepppy/rq/*.py` modules provide CLI entry points, while `wepppy/weppcloud/routes/rq/api` exposes REST endpoints for job orchestration, cancellation, and status polling.
 - Structured logging is collected per run in the working directory (`<runid>/_logs/`). The queue handler replicates to console, file, and Redis so you get local artifacts plus live dashboards.
@@ -128,8 +128,8 @@ WEPPCLOUD_IMAGE=registry.example.com/wepppy:2025.02 docker compose -f docker/doc
 - Prefer the Docker stacks (`docker/docker-compose.*`) plus the `docker/weppcloud-entrypoint.sh` bootstrapper; legacy systemd snippets remain in `_scripts/` if you absolutely must run without containers.
 
 ## Further Reading
-- `wepppy/weppcloud/routes/usersum/dev-notes/redis_dev_notes.md` — deep dive into Redis usage, DB allocations, and debugging recipes.
-- `wepppy/weppcloud/routes/usersum/dev-notes/controllers_js.md` — controller bundling, singleton contracts, and WS client expectations.
+- `docs/dev-notes/redis_dev_notes.md` — deep dive into Redis usage, DB allocations, and debugging recipes.
+- `docs/dev-notes/controllers_js.md` — controller bundling, singleton contracts, and WS client expectations.
 - `wepppy/nodb/base.py` — the canonical NoDb implementation with logging, caching, and locking primitives.
 - `wepppy/topo/peridot/runner.py` — how Rust binaries integrate with WEPP abstractions.
 

@@ -101,7 +101,7 @@ volumes:
 - Document how to seed Postgres and Redis in dev (fixtures, sample data, etc.).
 
 ## References
-- `wepppy/weppcloud/routes/usersum/dev-notes/redis_config_refactor.md` for central Redis configuration.
+- `redis_config_refactor.md` for central Redis configuration.
 
 ## postgres database restoration from bare metal - DON'T DELETE
 base) roger@wepp1:~$ sudo -u postgres psql -c "SHOW data_directory;"
