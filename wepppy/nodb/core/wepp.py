@@ -70,7 +70,7 @@ from enum import IntEnum
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
-from typing import Optional, Dict, List, Tuple, Any, Set
+from typing import Optional, Dict, List, Tuple, Any, Set, TextIO
 
 import math
 
@@ -192,6 +192,10 @@ class ChannelRoutingMethod(IntEnum):
 
 
 class SnowOpts(object):
+    rst: float
+    newsnw: float
+    ssd: float
+    
     def __init__(self, rst: Optional[float] = None, newsnw: Optional[float] = None, ssd: Optional[float] = None) -> None:
         """
         Stores the coeffs that go into snow.txt
@@ -234,6 +238,11 @@ class SnowOpts(object):
 
 
 class BaseflowOpts(object):
+    gwstorage: float
+    bfcoeff: float
+    dscoeff: float
+    bfthreshold: float
+    
     def __init__(self, gwstorage: Optional[float] = None, bfcoeff: Optional[float] = None, 
                  dscoeff: Optional[float] = None, bfthreshold: Optional[float] = None) -> None:
         """
@@ -241,7 +250,7 @@ class BaseflowOpts(object):
         """
         # Initial groundwater storage (mm)
         if gwstorage is None:
-            self.gwstorage = 200
+            self.gwstorage = 200.0
         else:
             self.gwstorage = gwstorage
 
@@ -253,13 +262,13 @@ class BaseflowOpts(object):
 
         # Deep seepage coefficient (per day)
         if dscoeff is None:
-            self.dscoeff = 0
+            self.dscoeff = 0.0
         else:
             self.dscoeff = dscoeff
 
         # Watershed groundwater baseflow threshold area (ha)
         if bfthreshold is None:
-            self.bfthreshold = 1
+            self.bfthreshold = 1.0
         else:
             self.bfthreshold = bfthreshold
 
@@ -302,6 +311,11 @@ def validate_phosphorus_txt(fn: str) -> bool:
 
 
 class PhosphorusOpts(object):
+    surf_runoff: Optional[float]
+    lateral_flow: Optional[float]
+    baseflow: Optional[float]
+    sediment: Optional[float]
+    
     def __init__(self, surf_runoff: Optional[float] = None, lateral_flow: Optional[float] = None, 
                  baseflow: Optional[float] = None, sediment: Optional[float] = None) -> None:
         # Surface runoff concentration (mg/l)
@@ -351,6 +365,11 @@ class PhosphorusOpts(object):
 
 
 class TCROpts(object):
+    taumin: Optional[float]
+    taumax: Optional[float]
+    kch: Optional[float]
+    nch: Optional[float]
+    
     def __init__(self, taumin: Optional[float] = None, taumax: Optional[float] = None, 
                  kch: Optional[float] = None, nch: Optional[float] = None) -> None:
         """
@@ -409,7 +428,7 @@ class WeppNoDbLockedException(Exception):
 
 
 def extract_slps_fn(slps_fn: str, fp_runs_dir: str) -> None:
-    f = None
+    f: Optional[TextIO] = None
     with open(slps_fn) as fp:
         
         for line in fp:
@@ -420,7 +439,7 @@ def extract_slps_fn(slps_fn: str, fp_runs_dir: str) -> None:
 
                 f = open(_join(fp_runs_dir, fp_fn), 'w')
 
-            else:
+            elif f is not None:
                 f.write(line)
 
         if f is not None:
@@ -745,7 +764,7 @@ class Wepp(NoDbBase):
                         wepp_ui: Optional[bool] = None, pmet: Optional[bool] = None, snow: Optional[bool] = None,
                         man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '',
                         max_workers: Optional[int] = None) -> None:
-        func_name = inspect.currentframe().f_code.co_name
+        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
         self.logger.info(f'{self.class_name}.{func_name}(frost={frost}, baseflow={baseflow}, wepp_ui={wepp_ui}, pmet={pmet}, snow={snow}, man_relpath={man_relpath}, cli_relpath={cli_relpath}, slp_relpath={slp_relpath}, sol_relpath={sol_relpath})')
 
         # get translator
@@ -907,7 +926,7 @@ class Wepp(NoDbBase):
 
     @pmet_kcb.setter
     @nodb_setter
-    def pmet_kcb(self, value: float) -> None:
+    def pmet_kcb(self, value: float) -> None:  # type: ignore[no-redef]
         self._pmet_kcb = value
 
     @property
@@ -916,7 +935,7 @@ class Wepp(NoDbBase):
 
     @pmet_rawp.setter
     @nodb_setter
-    def pmet_rawp(self, value: float) -> None:
+    def pmet_rawp(self, value: float) -> None:  # type: ignore[no-redef]
         self._pmet_rawp = value
 
     def _prep_pmet(self, kcb: Optional[float] = None, rawp: Optional[float] = None) -> None:
@@ -1523,7 +1542,7 @@ class Wepp(NoDbBase):
             emapr_ts.analyze()
 
     def _prep_soils(self, translator, max_workers=None):
-        func_name = inspect.currentframe().f_code.co_name
+        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
         self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
     
         cpu_count = os.cpu_count() or 1
@@ -1696,7 +1715,7 @@ class Wepp(NoDbBase):
 
     @nodb_timed
     def _prep_climates(self, translator):
-        func_name = inspect.currentframe().f_code.co_name
+        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
         self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
 
         climate = self.climate_instance
@@ -1795,7 +1814,7 @@ class Wepp(NoDbBase):
     def run_hillslopes(self,
                   man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '',
                   max_workers: Optional[int] = None) -> None:
-        func_name = inspect.currentframe().f_code.co_name
+        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
         self.logger.info(f'{self.class_name}.{func_name}()')
 
         cpu_count = os.cpu_count() or 1
@@ -2673,5 +2692,5 @@ class Wepp(NoDbBase):
 
     @kslast.setter
     @nodb_setter
-    def kslast(self, value):
+    def kslast(self, value: Optional[float]) -> None:  # type: ignore[no-redef]
         self._kslast = value
