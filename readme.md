@@ -138,7 +138,7 @@ WEPPCLOUD_IMAGE=registry.example.com/wepppy:2025.02 docker compose -f docker/doc
 
 ## Further Reading
 - `docs/dev-notes/redis_dev_notes.md` — deep dive into Redis usage, DB allocations, and debugging recipes.
-- `docs/dev-notes/controllers_js.md` — controller bundling, singleton contracts, and WS client expectations.
+- `wepppy/weppcloud/controllers_js/README.md` — controller bundling, singleton contracts, and WS client expectations.
 - `wepppy/nodb/base.py` — the canonical NoDb implementation with logging, caching, and locking primitives.
 - `wepppy/topo/peridot/runner.py` — how Rust binaries integrate with WEPP abstractions.
 

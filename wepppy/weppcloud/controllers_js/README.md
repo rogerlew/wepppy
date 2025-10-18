@@ -1,6 +1,6 @@
 # Controllers JS Architecture
 
-> **See also:** [AGENTS.md](../../AGENTS.md) for Front-End Development section and controller bundling overview.
+> **See also:** [AGENTS.md](../../../AGENTS.md) for Front-End Development section and controller bundling overview.
 
 This note explains how the controller JavaScript in `wepppy/weppcloud` is organized, how individual controller modules cooperate with the shared infrastructure, and what needs to happen when you extend the system.
 

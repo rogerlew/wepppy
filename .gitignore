@@ -22,3 +22,4 @@ wepppy/weppcloud/static/vendor/
 _notes/*
 .docker-data
 wctl/wctl.sh
+out
