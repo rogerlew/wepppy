@@ -739,6 +739,21 @@ button[disabled],
   background: var(--wc-color-surface-alt);
 }
 
+.wc-table-wrapper--compact {
+  display: inline-block;
+  max-width: min(32rem, 100%);
+  width: 100%;
+}
+
+.wc-table--compact {
+  width: auto;
+  min-width: 0;
+}
+
+.wc-table--compact tbody tr:nth-child(even) {
+  background: transparent;
+}
+
 /* Status blocks */
 .wc-status {
   border: 1px solid var(--wc-color-border);

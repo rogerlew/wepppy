@@ -1,197 +1,329 @@
-{% extends "reports/_page_container.htm" %}
-{% block report_title %}Sediment Characteristics{% endblock %}
+{% extends "reports/_base_report.htm" %}
+{% block report_title %}Sediment characteristics{% endblock %}
 {% block report_content %}
 {% macro render_value(value, units) -%}
-    {% if units == 'ratio' %}
-        {{ '%.3f'|format(value|float) }}
-    {% elif units in ['m**2/g'] %}
-        {{ '%.3f'|format(value|float) }}
-    {% elif units %}
-        {{ unitizer(value, units) | safe }}
-    {% else %}
-        {{ value }}
-    {% endif %}
+  {% if units == 'ratio' %}
+    {{ '%.3f' | format(value | float) }}
+  {% elif units in ['m**2/g'] %}
+    {{ '%.3f' | format(value | float) }}
+  {% elif units %}
+    {{ unitizer(value, units) | safe }}
+  {% else %}
+    {{ value }}
+  {% endif %}
 {%- endmacro %}
 
 {% set class_report = sediment.class_info_report %}
-<h2>Sediment Characteristics</h2>
-<h5>Sediment Particle Class Information Leaving Channel
-    <a onclick="javascript:copytable('class_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
-<table class="table table-condensed" style="width: auto !important;" id="class_tbl">
-  <thead>
-    <tr>
-      {% for name in class_report.hdr %}
-        <th>{{ name }}</th>
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in class_report %}
-    <tr>
-      {% for value, units in row %}
-        <td class="text-right">{{ render_value(value, units) }}</td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<h4>Outlet</h4>
-<table class="table table-condensed" style="width: auto !important;">
-  <tbody>
-    <tr>
-      <td>Average Annual Sediment Discharge from Outlet</td>
-      <td style="width:10em;">{{ unitizer(sediment.channel.total_discharge_tonne, 'tonne/yr') | safe }}&nbsp;</td>
-      <td style="width:5em;">{{ unitizer_units('tonne/yr') | safe }}&nbsp;</td>
-    </tr>
-    <tr>
-      <td>Index of Specific Surface</td>
-      <td style="width:10em;">{{ render_value(sediment.specific_surface_index, 'm**2/g') }}</td>
-      <td style="width:5em;">m²/g&nbsp;</td>
-    </tr>
-    <tr>
-      <td>Enrichment Ratio of Specific Surface</td>
-      <td style="width:10em;">{{ render_value(sediment.enrichment_ratio_of_spec_surface, None) }}</td>
-      <td style="width:5em;">&nbsp;</td>
-    </tr>
-  </tbody>
-</table>
-
 {% set channel_class_report = sediment.channel.class_fraction_report %}
-<h5>Distribution by Sediment Class
-    <a onclick="javascript:copytable('class_fractions')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
-<table class="table table-condensed" style="width: auto !important;" id="class_fractions">
-  <thead>
-    <tr>
-      {% for name in channel_class_report.hdr %}
-        <th>{{ name }}<br>
-            {% set unit = channel_class_report.units[loop.index0] %}
-            {% if unit == 'ratio' %}
-              <span class="header-units">ratio</span>
-            {% elif unit %}
-              <span class="header-units">{{ unitizer_units(unit) | safe }}</span>
-            {% endif %}
-        </th>
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in channel_class_report %}
-    <tr>
-      {% for value, units in row %}
-        <td class="text-right">{{ render_value(value, units) }}</td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
 {% set channel_particle_report = sediment.channel.particle_distribution_report %}
-<h5>Distribution of Primary Particles and Organic Matter
-    <a onclick="javascript:copytable('part_dist')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
-<table class="table table-condensed" style="width: auto !important;" id="part_dist">
-  <thead>
-    <tr>
-      {% for name in channel_particle_report.hdr %}
-        <th>{{ name }}<br>
-            {% set unit = channel_particle_report.units[loop.index0] %}
-            {% if unit == 'ratio' %}
-              <span class="header-units">ratio</span>
-            {% elif unit %}
-              <span class="header-units">{{ unitizer_units(unit) | safe }}</span>
-            {% endif %}
-        </th>
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in channel_particle_report %}
-    <tr>
-      {% for value, units in row %}
-        <td class="text-right">{{ render_value(value, units) }}</td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<h4>Hillslopes</h4>
-<table class="table table-condensed" style="width: auto !important;">
-  <tbody>
-    <tr>
-      <td>Average Annual Sediment Delivery from Hillslopes</td>
-      <td style="width:10em;">{{ unitizer(sediment.hillslope.total_delivery_tonne, 'tonne/yr') | safe }}&nbsp;</td>
-      <td style="width:5em;">{{ unitizer_units('tonne/yr') | safe }}&nbsp;</td>
-    </tr>
-  </tbody>
-</table>
-
 {% set hill_class_report = sediment.hillslope.class_fraction_report %}
-<h5>Distribution by Sediment Class
-    <a onclick="javascript:copytable('hill_class_fractions')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
-<table class="table table-condensed" style="width: auto !important;" id="hill_class_fractions">
-  <thead>
-    <tr>
-      {% for name in hill_class_report.hdr %}
-        <th>{{ name }}<br>
-            {% set unit = hill_class_report.units[loop.index0] %}
-            {% if unit == 'ratio' %}
-              <span class="header-units">ratio</span>
-            {% elif unit %}
-              <span class="header-units">{{ unitizer_units(unit) | safe }}</span>
-            {% endif %}
-        </th>
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in hill_class_report %}
-    <tr>
-      {% for value, units in row %}
-        <td class="text-right">{{ render_value(value, units) }}</td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
 {% set hill_particle_report = sediment.hillslope.particle_distribution_report %}
-<h5>Distribution of Primary Particles and Organic Matter
-    <a onclick="javascript:copytable('hill_part_dist')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
-<table class="table table-condensed" style="width: auto !important;" id="hill_part_dist">
-  <thead>
-    <tr>
-      {% for name in hill_particle_report.hdr %}
-        <th>{{ name }}<br>
-            {% set unit = hill_particle_report.units[loop.index0] %}
-            {% if unit == 'ratio' %}
-              <span class="header-units">ratio</span>
-            {% elif unit %}
-              <span class="header-units">{{ unitizer_units(unit) | safe }}</span>
-            {% endif %}
-        </th>
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in hill_particle_report %}
-    <tr>
-      {% for value, units in row %}
-        <td class="text-right">{{ render_value(value, units) }}</td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
 
-<p>The sediment characteristics leverage the query-engine parquet assets:
-`loss_pw0.class_data.parquet` for channel particle information, `loss_pw0.out.parquet`
-for outlet totals, and `H.pass.parquet` for hillslope class distributions. All
-per-area conversions and unit normalisations are handled server-side before rendering
-these tables.</p>
+<header class="wc-stack">
+  <h1 class="wc-heading__title">Sediment characteristics</h1>
+  <p class="wc-text-muted">
+    Channel and hillslope sediment properties derived from the query-engine parquet exports.
+    Values honour the current unitizer preferences where applicable.
+  </p>
+</header>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Sediment particle class information</h2>
+    <p class="wc-text-muted">Properties for the sediment particle classes leaving the channel.</p>
+  </header>
+
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--dense sortable" id="sediment_class_info_tbl">
+      <thead>
+        <tr>
+          {% for name in class_report.hdr %}
+            <th scope="col">{{ name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-sort-position="top">
+          {% for units in class_report.units %}
+            {% if units %}
+              <td>
+                {% if units == 'ratio' %}
+                  ratio
+                {% elif units == '%' %}
+                  %
+                {% else %}
+                  {{ unitizer_units(units) | safe }}
+                {% endif %}
+              </td>
+            {% else %}
+              <td>&nbsp;</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% for row in class_report %}
+        <tr>
+          {% for value, units in row %}
+            <td>{{ render_value(value, units) }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wc-table-actions">
+    <button type="button" class="pure-button pure-button-link"
+            data-report-csv="sediment_class_info_tbl"
+            data-report-url="{{ url_for_run('wepp.report_wepp_sediment_delivery', runid=runid, config=config, format='csv') }}"
+            data-report-table="class-info">
+      Download CSV
+    </button>
+  </div>
+</section>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Channel outlet</h2>
+    <p class="wc-text-muted">
+      Annual sediment discharge and particle distributions calculated at the watershed outlet.
+    </p>
+  </header>
+
+  <div class="wc-table-wrapper wc-table-wrapper--compact">
+    <table class="wc-table wc-table--dense wc-table--compact">
+      <tbody>
+        <tr>
+          <th scope="row">Average annual sediment discharge</th>
+          <td>{{ unitizer(sediment.channel.total_discharge_tonne, 'tonne/yr') | safe }}</td>
+          <td>{{ unitizer_units('tonne/yr') | safe }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Index of specific surface</th>
+          <td>{{ render_value(sediment.specific_surface_index, 'm**2/g') }}</td>
+          <td>m²/g</td>
+        </tr>
+        <tr>
+          <th scope="row">Enrichment ratio of specific surface</th>
+          <td>{{ render_value(sediment.enrichment_ratio_of_spec_surface, None) }}</td>
+          <td>&nbsp;</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wc-stack">
+    <h3 class="wc-heading__subtitle">Distribution by sediment class</h3>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense sortable" id="channel_class_fractions_tbl">
+        <thead>
+          <tr>
+            {% for name in channel_class_report.hdr %}
+              <th scope="col">{{ name }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-sort-position="top">
+            {% for units in channel_class_report.units %}
+              {% if units %}
+                <td>
+                  {% if units == 'ratio' %}
+                    ratio
+                  {% else %}
+                    {{ unitizer_units(units) | safe }}
+                  {% endif %}
+                </td>
+              {% else %}
+                <td>&nbsp;</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          {% for row in channel_class_report %}
+          <tr>
+            {% for value, units in row %}
+              <td>{{ render_value(value, units) }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="wc-table-actions">
+      <button type="button" class="pure-button pure-button-link"
+              data-report-csv="channel_class_fractions_tbl"
+              data-report-url="{{ url_for_run('wepp.report_wepp_sediment_delivery', runid=runid, config=config, format='csv') }}"
+              data-report-table="channel-class-fractions">
+        Download CSV
+      </button>
+    </div>
+  </div>
+
+  <div class="wc-stack">
+    <h3 class="wc-heading__subtitle">Distribution of primary particles and organic matter</h3>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense sortable" id="channel_particle_distribution_tbl">
+        <thead>
+          <tr>
+            {% for name in channel_particle_report.hdr %}
+              <th scope="col">{{ name }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-sort-position="top">
+            {% for units in channel_particle_report.units %}
+              {% if units %}
+                <td>
+                  {% if units == 'ratio' %}
+                    ratio
+                  {% else %}
+                    {{ unitizer_units(units) | safe }}
+                  {% endif %}
+                </td>
+              {% else %}
+                <td>&nbsp;</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          {% for row in channel_particle_report %}
+          <tr>
+            {% for value, units in row %}
+              <td>{{ render_value(value, units) }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="wc-table-actions">
+      <button type="button" class="pure-button pure-button-link"
+              data-report-csv="channel_particle_distribution_tbl"
+              data-report-url="{{ url_for_run('wepp.report_wepp_sediment_delivery', runid=runid, config=config, format='csv') }}"
+              data-report-table="channel-particles">
+        Download CSV
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Hillslopes</h2>
+    <p class="wc-text-muted">
+      Sediment delivery by hillslope particle class, averaged across simulation years.
+    </p>
+  </header>
+
+  <div class="wc-table-wrapper wc-table-wrapper--compact">
+    <table class="wc-table wc-table--dense wc-table--compact">
+      <tbody>
+        <tr>
+          <th scope="row">Average annual sediment delivery</th>
+          <td>{{ unitizer(sediment.hillslope.total_delivery_tonne, 'tonne/yr') | safe }}</td>
+          <td>{{ unitizer_units('tonne/yr') | safe }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wc-stack">
+    <h3 class="wc-heading__subtitle">Distribution by sediment class</h3>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense sortable" id="hill_class_fractions_tbl">
+        <thead>
+          <tr>
+            {% for name in hill_class_report.hdr %}
+              <th scope="col">{{ name }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-sort-position="top">
+            {% for units in hill_class_report.units %}
+              {% if units %}
+                <td>
+                  {% if units == 'ratio' %}
+                    ratio
+                  {% else %}
+                    {{ unitizer_units(units) | safe }}
+                  {% endif %}
+                </td>
+              {% else %}
+                <td>&nbsp;</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          {% for row in hill_class_report %}
+          <tr>
+            {% for value, units in row %}
+              <td>{{ render_value(value, units) }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="wc-table-actions">
+      <button type="button" class="pure-button pure-button-link"
+              data-report-csv="hill_class_fractions_tbl"
+              data-report-url="{{ url_for_run('wepp.report_wepp_sediment_delivery', runid=runid, config=config, format='csv') }}"
+              data-report-table="hill-class-fractions">
+        Download CSV
+      </button>
+    </div>
+  </div>
+
+  <div class="wc-stack">
+    <h3 class="wc-heading__subtitle">Distribution of primary particles and organic matter</h3>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense sortable" id="hill_particle_distribution_tbl">
+        <thead>
+          <tr>
+            {% for name in hill_particle_report.hdr %}
+              <th scope="col">{{ name }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-sort-position="top">
+            {% for units in hill_particle_report.units %}
+              {% if units %}
+                <td>
+                  {% if units == 'ratio' %}
+                    ratio
+                  {% else %}
+                    {{ unitizer_units(units) | safe }}
+                  {% endif %}
+                </td>
+              {% else %}
+                <td>&nbsp;</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          {% for row in hill_particle_report %}
+          <tr>
+            {% for value, units in row %}
+              <td>{{ render_value(value, units) }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="wc-table-actions">
+      <button type="button" class="pure-button pure-button-link"
+              data-report-csv="hill_particle_distribution_tbl"
+              data-report-url="{{ url_for_run('wepp.report_wepp_sediment_delivery', runid=runid, config=config, format='csv') }}"
+              data-report-table="hill-particles">
+        Download CSV
+      </button>
+    </div>
+  </div>
+</section>
+
+<p class="wc-text-muted">
+  The sediment characteristics leverage the query-engine parquet assets: <code>loss_pw0.class_data.parquet</code> for
+  channel particle information, <code>loss_pw0.out.parquet</code> for outlet totals, and <code>H.pass.parquet</code> for
+  hillslope class distributions. All conversions are handled server-side before rendering these tables or CSV exports.
+</p>
 {% endblock %}

@@ -20,7 +20,7 @@ from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, pa
 import json
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
-from flask import Response
+from flask import Response, abort
 
 wepp_bp = Blueprint('wepp', __name__)
 
@@ -623,6 +623,27 @@ def report_wepp_sediment_delivery(runid, config):
     translator = Watershed.getInstance(wd).translator_factory()
 
     unitizer = Unitizer.getInstance(wd)
+
+    if _wants_csv():
+        table_key = request.args.get('table') or 'class-info'
+        reports = {
+            'class-info': sediment.class_info_report,
+            'channel-class-fractions': sediment.channel.class_fraction_report,
+            'channel-particles': sediment.channel.particle_distribution_report,
+            'hill-class-fractions': sediment.hillslope.class_fraction_report,
+            'hill-particles': sediment.hillslope.particle_distribution_report,
+        }
+        report = reports.get(table_key)
+        if report is None:
+            abort(400, description=f"Unknown sediment characteristics table '{table_key}'")
+
+        return _render_report_csv(
+            runid=runid,
+            report=report,
+            unitizer=unitizer,
+            slug="sediment_characteristics",
+            table=table_key,
+        )
 
     return render_template('reports/wepp/sediment_characteristics.htm', runid=runid, config=config,
                             unitizer_nodb=unitizer,
