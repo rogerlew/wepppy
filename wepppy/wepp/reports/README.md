@@ -1,3 +1,9 @@
+# Query Engine-Driven Reports
+
+> **See also:** [AGENTS.md](../../../AGENTS.md) for report architecture, DuckDB query patterns, and telemetry expectations.
+
+This guide captures the DuckDB-backed report pipelines that translate WEPP interchange parquet files into the summaries exposed through the Flask UI and API surfaces.
+
 ## Average Annuals by Landuse
 
 - Reads directly from `wepp/output/interchange/loss_pw0.hill.parquet` joined with

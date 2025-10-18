@@ -1,19 +1,20 @@
-from os.path import join as _join, split as _split
-import os
-import sys
-import rasterio
+from __future__ import annotations
 
-from collections import deque, defaultdict
+import inspect
+import json
+import logging
 import math
-from osgeo import gdal, osr
-import utm
-from os.path import exists as _exists
+import os
+from collections import defaultdict, deque
+from functools import wraps
+from os.path import exists as _exists, join as _join, split as _split
+from typing import Any, Callable, Dict, Optional, Tuple
+
 import numpy as np
 import pandas as pd
-import json
-import inspect
-from functools import wraps
-from typing import Callable, Optional
+import rasterio
+import utm
+from osgeo import gdal, osr
 
 from wepppy.all_your_base.geo import get_utm_zone, utm_srid
 
@@ -49,9 +50,15 @@ _point_template_geojson = """{{ "type": "Feature", "properties": {{ "Id": {id} }
    "geometry": {{ "type": "Point", "coordinates": [ {easting}, {northing} ] }} }}"""
 
 
-def isfloat(value):
-    """
-    Check if a value can be converted to a float.
+def isfloat(value: Any) -> bool:
+    """Return whether ``value`` can be losslessly converted to ``float``.
+
+    Args:
+        value: The candidate object to evaluate.
+
+    Returns:
+        True if ``value`` can be converted to ``float`` without raising
+        ``ValueError``; otherwise False.
     """
     try:
         float(value)
@@ -60,24 +67,32 @@ def isfloat(value):
         return False
 
 
-def remove_if_exists(fn):
+def remove_if_exists(path: str) -> None:
+    """Remove ``path`` if it already exists.
+
+    Args:
+        path: File system location to delete when present.
     """
-    Remove a file if it exists.
-    """
-    if _exists(fn):
-        os.remove(fn)
+    if _exists(path):
+        os.remove(path)
 
 
-def build_step(step_name=None):
-    """
-    Decorator for tagging build steps and invoking registered hooks.
+def build_step(step_name: Optional[str] = None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """Tag a method as a build step and notify registered hooks.
+
+    Args:
+        step_name: Optional name to register for the decorated step. When omitted,
+            the underlying function name is used.
+
+    Returns:
+        A decorator that wraps the target function and records the build step.
     """
 
-    def decorator(func):
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         name = step_name or func.__name__
 
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self, *args: Any, **kwargs: Any) -> Any:
             result = func(self, *args, **kwargs)
             execute_hooks = getattr(self, "_execute_build_hooks", None)
             if callable(execute_hooks):
@@ -96,7 +111,24 @@ def build_step(step_name=None):
 
 
 class WhiteboxToolsTopazEmulator:
-    def __init__(self, wbt_wd, dem_fn=None, verbose=True, raise_on_error=True, logger=None):
+    def __init__(
+        self,
+        wbt_wd: str,
+        dem_fn: Optional[str] = None,
+        verbose: bool = True,
+        raise_on_error: bool = True,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
+        """Initialize a new emulator workspace.
+
+        Args:
+            wbt_wd: Directory where WhiteboxTools intermediates and outputs are written.
+            dem_fn: Optional DEM to ingest immediately. When provided the DEM metadata
+                (grid transform, EPSG, cell size, etc.) are cached on the instance.
+            verbose: Forward to ``WhiteboxTools`` so individual commands emit console output.
+            raise_on_error: Forwarded to ``WhiteboxTools`` to raise on failure.
+            logger: Optional logger used for debug messages when hooks invoke operations.
+        """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             logger.info(
@@ -116,13 +148,13 @@ class WhiteboxToolsTopazEmulator:
 
         self.verbose = verbose
 
-        self.mcl = None  # Minimum Channel Length
-        self.csa = None  # Channel Source Area
-        self._wbt_runner = None  # WhiteboxTools instance 
-        self._raise_on_error = raise_on_error
+        self.mcl: Optional[float] = None  # Minimum Channel Length
+        self.csa: Optional[float] = None  # Channel Source Area
+        self._wbt_runner: Optional[WhiteboxTools] = None
+        self._raise_on_error: bool = raise_on_error
 
-        self._outlet = None  # Outlet object
-        self._build_hooks = defaultdict(list)
+        self._outlet: Optional['Outlet'] = None
+        self._build_hooks: defaultdict[str, list[Callable[..., None]]] = defaultdict(list)
 
     @property
     def raise_on_error(self):
@@ -141,16 +173,17 @@ class WhiteboxToolsTopazEmulator:
             raise ValueError("raise_on_error must be a boolean value")
         self._raise_on_error = value
 
-    def register_build_hook(self, step_name: str, hook: Callable[..., None]):
-        """
-        Register a callable to run after a build step completes.
+    def register_build_hook(
+        self, step_name: str, hook: Callable[..., None]
+    ) -> Callable[..., None]:
+        """Register a callable to execute after the given build step.
 
-        Parameters
-        ----------
-        step_name : str
-            Identifier supplied via the ``@build_step`` decorator.
-        hook : Callable
-            Invoked as ``hook(emulator, step_name, result, args, kwargs)``.
+        Args:
+            step_name: Identifier supplied via the ``@build_step`` decorator.
+            hook: Callable invoked as ``hook(emulator, step_name, result, args, kwargs)``.
+
+        Returns:
+            The registered hook.
         """
         if not callable(hook):
             raise TypeError("hook must be callable")
@@ -160,14 +193,11 @@ class WhiteboxToolsTopazEmulator:
         self._build_hooks[step].append(hook)
         return hook
 
-    def clear_build_hooks(self, step_name: Optional[str] = None):
-        """
-        Remove registered build hooks.
+    def clear_build_hooks(self, step_name: Optional[str] = None) -> None:
+        """Remove registered build hooks.
 
-        Parameters
-        ----------
-        step_name : str, optional
-            When provided, clears hooks for that step only; otherwise clears all hooks.
+        Args:
+            step_name: When provided, clears hooks for that step only; otherwise clears all hooks.
         """
         if step_name is None:
             self._build_hooks.clear()
@@ -176,8 +206,7 @@ class WhiteboxToolsTopazEmulator:
 
     @property
     def build_hooks(self) -> dict[str, tuple[Callable[..., None], ...]]:
-        """
-        Return a snapshot of registered hooks keyed by step name.
+        """Return a snapshot of registered hooks keyed by step name.
         """
         return {step: tuple(hooks) for step, hooks in self._build_hooks.items()}
 
@@ -185,12 +214,11 @@ class WhiteboxToolsTopazEmulator:
         self,
         step_name: str,
         *,
-        result=None,
-        args: tuple = (),
-        kwargs: Optional[dict] = None,
-    ):
-        """
-        Internal helper invoked by ``@build_step`` decorated methods.
+        result: Any = None,
+        args: tuple[Any, ...] = (),
+        kwargs: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        """Invoke registered hooks for the provided build step.
         """
         hooks = self._build_hooks.get(step_name)
         if not hooks:
@@ -358,7 +386,13 @@ class WhiteboxToolsTopazEmulator:
         """
         return _join(self.wbt_wd, "netw.tsv")
 
-    def _parse_dem(self, dem_fn, logger=None):
+    def _parse_dem(self, dem_fn: str, logger: Optional[logging.Logger] = None) -> None:
+        """Load the DEM and cache spatial metadata on the emulator.
+
+        Args:
+            dem_fn: Path to the DEM file on disk.
+            logger: Optional logger used for debug messages.
+        """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}({dem_fn})")
@@ -442,9 +476,19 @@ class WhiteboxToolsTopazEmulator:
         del ds
 
     @build_step("relief")
-    def _create_relief(self, fill_or_breach="fill", blc_dist=None, logger=None):
-        """
-        Create a relief file from the DEM using WBT using either fill or breach method.
+    def _create_relief(
+        self,
+        fill_or_breach: str = "fill",
+        blc_dist: Optional[int] = None,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
+        """Generate the hydrologically conditioned DEM.
+
+        Args:
+            fill_or_breach: Strategy to enforce drainage. Accepted values are
+                ``"fill"``, ``"breach"``, and ``"breach_least_cost"``.
+            blc_dist: Search distance used by ``breach_least_cost`` (meters).
+            logger: Optional logger used for debug messages.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -474,9 +518,11 @@ class WhiteboxToolsTopazEmulator:
             print(f"Relief file created successfully: {relief_fn}")
 
     @build_step("flow_vector")
-    def _create_flow_vector(self, logger=None):
-        """
-        Create a flow vector file from the relief file using WBT.
+    def _create_flow_vector(self, logger: Optional[logging.Logger] = None) -> None:
+        """Derive D8 flow directions from the relief grid.
+
+        Args:
+            logger: Optional logger used for debug messages.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -499,9 +545,11 @@ class WhiteboxToolsTopazEmulator:
             print(f"Flow vector file created successfully: {flovec_fn}")
 
     @build_step("flow_accumulation")
-    def _create_flow_accumulation(self, logger=None):
-        """
-        Create a flow accumulation file from the flow vector file using WBT.
+    def _create_flow_accumulation(self, logger: Optional[logging.Logger] = None) -> None:
+        """Compute contributing area counts from the flow direction grid.
+
+        Args:
+            logger: Optional logger used for debug messages.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -532,15 +580,14 @@ class WhiteboxToolsTopazEmulator:
             print(f"Flow accumulation file created successfully: {floaccum_fn}")
 
     @build_step("extract_streams")
-    def _extract_streams(self, logger=None):
-        """
-        Extract streams from the flow accumulation file using WBT.
+    def _extract_streams(self, logger: Optional[logging.Logger] = None) -> None:
+        """Derive the stream raster from the accumulation grid.
 
-        csa:
-            Channel Source Area threshold for stream extraction in ha
+        Requires :attr:`csa` (hectares) and :attr:`mcl` (meters) to be set prior
+        to invocation.
 
-        mcl:
-            Minimum Channel Length for stream extraction in m
+        Args:
+            logger: Optional logger used for debug messages.
         """
 
         if self.csa is None or self.mcl is None:
@@ -585,9 +632,11 @@ class WhiteboxToolsTopazEmulator:
         )
 
     @build_step("identify_stream_junctions")
-    def _identify_stream_junctions(self, logger=None):
-        """
-        Identify stream junctions from the stream network file using WBT.
+    def _identify_stream_junctions(self, logger: Optional[logging.Logger] = None) -> None:
+        """Identify stream junctions within the channel raster.
+
+        Args:
+            logger: Optional logger used for debug messages.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -612,9 +661,22 @@ class WhiteboxToolsTopazEmulator:
             print(f"Stream junction file created successfully: {chnjnt_fn}")
 
     @build_step("delineate_channels")
-    def delineate_channels(self, csa=5.0, mcl=60.0, fill_or_breach="fill", blc_dist=None, logger=None):
-        """
-        Delineate channels from the DEM using WBT.
+    def delineate_channels(
+        self,
+        csa: float = 5.0,
+        mcl: float = 60.0,
+        fill_or_breach: str = "fill",
+        blc_dist: Optional[int] = None,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
+        """Create the channel network using WhiteboxTools.
+
+        Args:
+            csa: Channel source area threshold expressed in hectares.
+            mcl: Minimum channel length in meters.
+            fill_or_breach: Conditioning strategy used when creating relief.
+            blc_dist: Optional distance parameter for ``breach_least_cost``.
+            logger: Optional logger used for debug messages.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -633,7 +695,27 @@ class WhiteboxToolsTopazEmulator:
         polygonize_netful(self.netful, self.netful_json)
         json_to_wgs(self.netful_json)
 
-    def _make_outlet_geojson(self, dst=None, easting=None, northing=None, logger=None):
+    def _make_outlet_geojson(
+        self,
+        dst: Optional[str] = None,
+        easting: Optional[float] = None,
+        northing: Optional[float] = None,
+        logger: Optional[logging.Logger] = None,
+    ) -> str:
+        """Write a single-outlet GeoJSON file.
+
+        Args:
+            dst: Destination path for the GeoJSON.
+            easting: UTM easting for the snapped outlet.
+            northing: UTM northing for the snapped outlet.
+            logger: Optional logger used for debug messages.
+
+        Returns:
+            The destination path that was written.
+
+        Raises:
+            AssertionError: If required coordinates are not provided.
+        """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             logger.info(
@@ -654,7 +736,22 @@ class WhiteboxToolsTopazEmulator:
         assert _exists(dst), dst
         return dst
 
-    def _make_multiple_outlets_geojson(self, dst, en_points_dict, logger=None):
+    def _make_multiple_outlets_geojson(
+        self,
+        dst: str,
+        en_points_dict: Dict[int, Tuple[float, float]],
+        logger: Optional[logging.Logger] = None,
+    ) -> str:
+        """Write a multi-outlet GeoJSON file.
+
+        Args:
+            dst: Destination path for the GeoJSON.
+            en_points_dict: Mapping of outlet IDs to ``(easting, northing)`` tuples.
+            logger: Optional logger used for debug messages.
+
+        Returns:
+            The destination path that was written.
+        """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             count = len(en_points_dict) if en_points_dict is not None else 0
@@ -680,7 +777,24 @@ class WhiteboxToolsTopazEmulator:
         return dst
 
     @build_step("find_outlet")
-    def set_outlet(self, lng, lat, pixelcoords=False, logger=None):
+    def set_outlet(
+        self,
+        lng: float,
+        lat: float,
+        pixelcoords: bool = False,
+        logger: Optional[logging.Logger] = None,
+    ) -> "Outlet":
+        """Snap the requested outlet to the channel network.
+
+        Args:
+            lng: Longitude or pixel column, depending on ``pixelcoords``.
+            lat: Latitude or pixel row, depending on ``pixelcoords``.
+            pixelcoords: When True, interpret ``lng``/``lat`` as column/row indices.
+            logger: Optional logger used for debug messages.
+
+        Returns:
+            The :class:`~wepppy.nodb.core.watershed.Outlet` describing the snapped location.
+        """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             logger.info(
@@ -713,15 +827,20 @@ class WhiteboxToolsTopazEmulator:
         outlet = self.set_outlet_from_geojson(logger=logger)
         return outlet
 
-    def set_outlet_from_geojson(self, geojson_path=None, logger=None):
-        """Populate ``self._outlet`` based on a GeoJSON file produced by ``find_outlet``.
+    def set_outlet_from_geojson(
+        self,
+        geojson_path: Optional[str] = None,
+        logger: Optional[logging.Logger] = None,
+    ) -> 'Outlet':
+        """Populate ``self._outlet`` from a GeoJSON feature collection.
 
-        Parameters
-        ----------
-        geojson_path : str, optional
-            Path to the GeoJSON file. Defaults to :attr:`outlet_geojson`.
-        logger : logging.Logger, optional
-            Logger used to record debug information.
+        Args:
+            geojson_path: Path to the GeoJSON file produced by WhiteboxTools.
+                Defaults to :attr:`outlet_geojson`.
+            logger: Optional logger used for debug messages.
+
+        Returns:
+            The parsed :class:`~wepppy.nodb.core.watershed.Outlet`.
         """
 
         from wepppy.nodb.core.watershed import Outlet
@@ -813,13 +932,24 @@ class WhiteboxToolsTopazEmulator:
         self._outlet = outlet
         return outlet
 
-    def find_closest_channel2(self, lng, lat, pixelcoords=False, logger=None):
-        """
-        Find the closest channel given a lng and lat or pixel coords (pixelcoords=True).
+    def find_closest_channel2(
+        self,
+        lng: float,
+        lat: float,
+        pixelcoords: bool = False,
+        logger: Optional[logging.Logger] = None,
+    ) -> Tuple[Optional[Tuple[int, int]], float]:
+        """Return the nearest channel pixel to a requested location.
 
-        Returns (x, y), distance
-        where (x, y) are pixel coords and distance is the distance from the
-        specified lng, lat in pixels.
+        Args:
+            lng: Longitude (degrees) or pixel column when ``pixelcoords`` is True.
+            lat: Latitude (degrees) or pixel row when ``pixelcoords`` is True.
+            pixelcoords: Interpret ``lng``/``lat`` as pixel coordinates when True.
+            logger: Optional logger used for debug messages.
+
+        Returns:
+            A tuple of ``((col, row), distance_pixels)`` where the coordinate may
+            be ``None`` when no channel is found inside the raster extent.
         """
 
         # Unpack variables for instance
@@ -878,9 +1008,21 @@ class WhiteboxToolsTopazEmulator:
 
         return None, math.inf
 
-    def lnglat_to_pixel(self, lng, lat, logger=None):
-        """
-        return the x,y pixel coords of lng, lat
+    def lnglat_to_pixel(
+        self,
+        lng: float,
+        lat: float,
+        logger: Optional[logging.Logger] = None,
+    ) -> Tuple[int, int]:
+        """Convert geographic coordinates to raster indices.
+
+        Args:
+            lng: Longitude in decimal degrees.
+            lat: Latitude in decimal degrees.
+            logger: Optional logger used for debug messages.
+
+        Returns:
+            The ``(column, row)`` pixel indices.
         """
 
         if logger is not None:
@@ -911,22 +1053,23 @@ class WhiteboxToolsTopazEmulator:
 
         return _x, _y
 
-    def pixel_to_utm(self, col, row, centre=True, logger=None):
-        """
-        Convert a raster (col,row) index to UTM easting / northing
-        using the GeoTransform stored in ``self.transform``.
+    def pixel_to_utm(
+        self,
+        col: int,
+        row: int,
+        centre: bool = True,
+        logger: Optional[logging.Logger] = None,
+    ) -> Tuple[float, float]:
+        """Convert raster indices to UTM easting/northing.
 
-        Parameters
-        ----------
-        col, row : int
-            Pixel indices (0-based).
-        centre : bool, default True
-            If True, returns the centre of the cell; if False, the
-            upper-left (GDAL) corner.
+        Args:
+            col: Zero-based column index.
+            row: Zero-based row index.
+            centre: Return the cell centre when True, otherwise the upper-left corner.
+            logger: Optional logger used for debug messages.
 
-        Returns
-        -------
-        (easting, northing) : tuple[float, float]
+        Returns:
+            A tuple ``(easting, northing)`` in meters.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -941,9 +1084,18 @@ class WhiteboxToolsTopazEmulator:
         northing = gt[3] + gt[4] * (col + off) + gt[5] * (row + off)
         return easting, northing
 
-    def pixel_to_lnglat(self, x, y, logger=None):
-        """
-        return the lng/lat (WGS84) coords from pixel coords
+    def pixel_to_lnglat(
+        self, x: int, y: int, logger: Optional[logging.Logger] = None
+    ) -> Tuple[float, float]:
+        """Convert raster indices to WGS84 coordinates.
+
+        Args:
+            x: Zero-based column index.
+            y: Zero-based row index.
+            logger: Optional logger used for debug messages.
+
+        Returns:
+            A tuple ``(longitude, latitude)`` in decimal degrees.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -1184,9 +1336,17 @@ class WhiteboxToolsTopazEmulator:
         self._polygonize_channels(logger=logger)
 
     @build_step("generate_documentation")
-    def generate_documentation(self, to_readme_md=True, logger=None):
-        """
-        Generate Markdown documentation for the current working directory.
+    def generate_documentation(
+        self, to_readme_md: bool = True, logger: Optional[logging.Logger] = None
+    ) -> str:
+        """Generate Markdown documentation for the current working directory.
+
+        Args:
+            to_readme_md: When True, write output to ``README.md`` in the workspace.
+            logger: Optional logger used for debug messages.
+
+        Returns:
+            The rendered Markdown content.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -1231,9 +1391,16 @@ class WhiteboxToolsTopazEmulator:
             to_readme_md=to_readme_md,
         )
 
-    def _read_chn_order_from_netw_tab(self, logger=None):
-        """
-        returns a dictionary of topaz ids strings and their order
+    def _read_chn_order_from_netw_tab(
+        self, logger: Optional[logging.Logger] = None
+    ) -> Dict[str, int]:
+        """Return derived channel order values indexed by Topaz ID.
+
+        Args:
+            logger: Optional logger used for debug messages.
+
+        Returns:
+            Mapping of Topaz identifiers to Strahler orders.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -1246,7 +1413,12 @@ class WhiteboxToolsTopazEmulator:
                         [int(v) for v in tbl["order"]]))
 
     @build_step("polygonize_channels")
-    def _polygonize_channels(self, logger=None):
+    def _polygonize_channels(self, logger: Optional[logging.Logger] = None) -> None:
+        """Generate channel GeoJSON artifacts using the watershed summary.
+
+        Args:
+            logger: Optional logger used for debug messages.
+        """
         from wepppy.topo.watershed_abstraction import WeppTopTranslator
 
         if logger is not None:

@@ -28,22 +28,18 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 - `wctl flask-db-upgrade`: executes `flask --app wepppy.weppcloud.app db upgrade` inside the running `weppcloud` container. Any additional arguments are forwarded, so `wctl flask-db-upgrade --tag current` works the same as the underlying Flask-Migrate command.
 - `wctl man` (or `man wctl` after installation): displays the wctl manual page. Additional arguments are passed through to `man`, so `wctl man --no-pager` works as expected.
 - `wctl update-stub-requirements`: runs `tools/update_stub_requirements.py` to analyse mypy output and refresh `docker/requirements-stubs-uv.txt`. Pass any script flags (for example `--no-verify`) after the command.
+- `wctl run-pytest`: executes `pytest` inside the `weppcloud` container (defaults to `pytest tests`). Pass extra arguments to forward them to pytest.
+- `wctl run-stubtest`: runs `stubtest` inside the container with the appropriate environment (defaults to `wepppy.nodb.core`). Provide module names to narrow the check.
+- `wctl run-stubgen`: regenerates the local `stubs/` tree via `python tools/sync_stubs.py`.
 
 ### **Running Type Checks / Stubtest**
 
-Because the development Docker image installs the stub wheels listed in `docker/requirements-stubs-uv.txt`, run static checks inside the container so the environment matches production. The bind-mounted workspace is read-only for the container user, so run checks from `/tmp`, add the project to `PYTHONPATH`, and redirect mypy’s cache to `/tmp`:
+Because the development Docker image installs the stub wheels listed in `docker/requirements-stubs-uv.txt`, run static checks inside the container so the environment matches production. The helpers above take care of the `/tmp` working directory, `PYTHONPATH`, and cache location for you:
 
 ```bash
-wctl exec weppcloud bash -lc \
-  "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/mypy -m wepppy.nodb.core"
-wctl exec weppcloud bash -lc \
-  "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.nodb.core.wepp"
-```
-
-Sync the standalone stub tree and `py.typed` marker with:
-
-```bash
-python tools/sync_stubs.py
+wctl run-pytest                      # pytest tests
+wctl run-stubtest wepppy.nodb.core   # stubtest target
+wctl run-stubgen                     # rebuild stubs/wepppy/
 ```
 
 Use `wctl update-stub-requirements` before rebuilding the image when new dependencies require additional stub packages.

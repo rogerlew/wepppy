@@ -82,27 +82,32 @@ to analyze mypy diagnostics and refresh
 .IR docker/requirements-stubs-uv.txt .
 Any options provided after the command (for example
 .BR --no-verify )
-are passed directly to the script. Use this alongside
-.B wctl exec weppcloud
-when running
-.B mypy
-or the
+are passed directly to the script.
+.TP
+.B wctl run-pytest
+Runs
+.B pytest
+inside the
+.I weppcloud
+container with the correct environment (defaults to
+.BR "pytest tests" ).
+Additional arguments are forwarded to pytest.
+.TP
+.B wctl run-stubtest
+Executes
 .B stubtest
-entry point inside the development container so the stub wheels are available.
-Run the commands from
-.I /tmp
-and set
+inside the container from
+.IR /tmp ,
+setting
 .B PYTHONPATH=/workdir/wepppy
 and
 .B MYPY_CACHE_DIR=/tmp/mypy_cache
-so cache files are written to a writable location, for example:
-.br
-.B wctl
-.B exec
-.B weppcloud
-.B bash
-.B "-lc"
-.B "\"cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.nodb.core\""
+so cache files are writable. Pass one or more module names (defaults to
+.BR wepppy.nodb.core ).
+.TP
+.B wctl run-stubgen
+Regenerates the local stub tree via
+.BR "python tools/sync_stubs.py" .
 .SH ENVIRONMENT
 .TP
 .B WEPPPY_ENV_FILE

@@ -242,7 +242,7 @@ Each connection includes:
 - Redis keyspace configuration unaffected (pure Pub/Sub).
 - Coordinate cutover with preflight2 to ensure both Go services run under same
   operational playbooks.
-- Update documentation (`docker_compose_dev_guide.md`, `wctl`) to point at
+- Update documentation (`docker/README.md`, `wctl`) to point at
   `status2`.
 - Retain Python service temporarily for rollback; remove once Go service proves
   stable.

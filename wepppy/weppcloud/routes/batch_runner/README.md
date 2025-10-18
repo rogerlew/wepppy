@@ -1,6 +1,6 @@
 # WEPPcloud Batch Runner (PoC Snapshot)
 
-> **See also:** [AGENTS.md](../../AGENTS.md) for Working with NoDb Controllers and RQ Background Tasks sections.
+> **See also:** [AGENTS.md](../../../../AGENTS.md) for Working with NoDb Controllers and RQ Background Tasks sections.
 
 The batch runner feature now lives as a proof-of-concept that stitches together existing NoDb primitives with a thin blueprint and controller shell. The goal is to stand up the end-to-end shape of the workflow before hardening it, with an emphasis on reusing the `_base` project controls and keeping the mental model familiar to power users.
 

@@ -1,6 +1,6 @@
 # Docker Compose Developer Guide
 
-> **See also:** [AGENTS.md](../../AGENTS.md) for Development Workflow, Docker Compose (Recommended), and Common Docker tasks sections.
+> **See also:** [AGENTS.md](../AGENTS.md) for Development Workflow, Docker Compose (Recommended), and Common Docker tasks sections.
 
 This guide walks through the local docker-compose stack (`docker/docker-compose.dev.yml`) that mirrors the WEPPcloud runtime. Use it as a map when onboarding new engineers or debugging environment issues.
 

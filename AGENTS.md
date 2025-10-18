@@ -158,21 +158,14 @@ class MyController(NoDbBase):
 - When modifying a source module, update its companion `.pyi` file in the same change so exported signatures stay in sync.
 - Use `stubtest` to validate stubs against the runtime implementation before finishing a change. The helper script `python tools/sync_stubs.py` keeps `stubs/wepppy/` in sync and ensures `wepppy/py.typed` exists.
 
-- Run `mypy`/`stubtest` inside the Docker dev container so stub-only wheels from `docker/requirements-stubs-uv.txt` are available. Execute the binaries from the virtual environment, set `PYTHONPATH` to the project root, and direct the cache to `/tmp` (the bind-mounted workspace is read-only inside the container):
+- Run `mypy`/`stubtest` inside the Docker dev container so stub-only wheels from `docker/requirements-stubs-uv.txt` are available. Use the `wctl` helpers instead of manually invoking `docker compose exec`:
 
 ```bash
-wctl exec weppcloud bash -lc \
-  "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/mypy -m wepppy.nodb.core"
-wctl exec weppcloud bash -lc \
-  "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.nodb.core"
+wctl run-pytest                      # pytest tests
+wctl run-stubtest wepppy.nodb.core    # stubtest target module/package
+wctl run-stubgen                      # sync stubs/wepppy/
 ```
 
-Run type checking with mypy:
-```bash
-python -m mypy wepppy/nodb/core/topaz.py
-# Or check all core modules:
-python -m mypy wepppy/nodb/core/
-```
 
 ## Development Workflow
 
@@ -554,7 +547,7 @@ When resuming Kubernetes work:
 - `wepppy/nodb/base.py` - NoDb implementation details
 - `docs/dev-notes/` - Developer notes:
   - `redis_dev_notes.md` - Redis usage patterns
-  - `controllers_js.md` - Controller bundling
+  - `wepppy/weppcloud/controllers_js/README.md` - Controller bundling
   - `style-guide.md` - Coding conventions
   - `kubernetes-deployment-strategy.md` - K8s planning
 

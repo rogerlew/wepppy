@@ -224,6 +224,23 @@ show_wctl_manual() {
   return 1
 }
 
+compose_exec_weppcloud() {
+  local exec_cmd="$1"
+  docker compose --env-file "${TEMP_ENV}" -f "${COMPOSE_FILE}" exec weppcloud bash -lc "${exec_cmd}"
+}
+
+quote_args() {
+  local first=1
+  for arg in "$@"; do
+    if [[ ${first} -eq 1 ]]; then
+      printf '%q' "$arg"
+      first=0
+    else
+      printf ' %q' "$arg"
+    fi
+  done
+}
+
 if [[ $# -gt 0 ]]; then
   case "$1" in
     build-static-assets)
@@ -252,6 +269,29 @@ if [[ $# -gt 0 ]]; then
     update-stub-requirements)
       shift
       python3 "${PROJECT_DIR}/tools/update_stub_requirements.py" "$@"
+      exit 0
+      ;;
+    run-pytest)
+      shift
+      if [[ $# -eq 0 ]]; then
+        set -- tests
+      fi
+      CMD_ARGS=$(quote_args "$@")
+      compose_exec_weppcloud "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest ${CMD_ARGS}"
+      exit 0
+      ;;
+    run-stubtest)
+      shift
+      if [[ $# -eq 0 ]]; then
+        set -- wepppy.nodb.core
+      fi
+      CMD_ARGS=$(quote_args "$@")
+      compose_exec_weppcloud "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest ${CMD_ARGS}"
+      exit 0
+      ;;
+    run-stubgen)
+      shift
+      python3 "${PROJECT_DIR}/tools/sync_stubs.py" "$@"
       exit 0
       ;;
   esac

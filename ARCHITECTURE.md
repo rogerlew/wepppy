@@ -574,7 +574,7 @@ wepppy/
 - **readme.md**: User-facing documentation
 - **docs/dev-notes/**: Component-specific deep dives
   - `redis_dev_notes.md`: Redis usage patterns
-  - `controllers_js.md`: Front-end architecture
+  - `wepppy/weppcloud/controllers_js/README.md`: Front-end architecture
   - `style-guide.md`: Coding conventions
 - **wepppy/nodb/base.py**: NoDb implementation reference
 - **wepppy/query_engine/README.md**: Query engine MCP API

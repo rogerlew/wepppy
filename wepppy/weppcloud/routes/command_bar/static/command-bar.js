@@ -1,6 +1,6 @@
 // wepppy/weppcloud/routes/command_bar/static/js/command-bar.js
 //
-// Developer notes live in `docs/dev-notes/command-bar.md`. See that document for quick-start
+// Developer notes live in `wepppy/weppcloud/routes/command_bar/README.md`. See that document for quick-start
 // guidance on registering commands, server routes, and hover previews.
 (() => {
     'use strict';

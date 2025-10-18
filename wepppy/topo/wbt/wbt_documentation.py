@@ -320,13 +320,14 @@ def _build_dependency_graph(existing_files: Dict[str, Path]):
                 label_to_node.setdefault(input_name, node_id)
                 node_keys.setdefault(node_id, input_name)
             elif input_name in existing:
-                node_id = label_to_node.get(input_name)
-                if node_id is None:
+                existing_id = label_to_node.get(input_name)
+                if existing_id is None:
                     node_id = _node_id(input_name)
                     nodes.setdefault(node_id, input_name)
                     label_to_node[input_name] = node_id
                     node_keys[node_id] = input_name
                 else:
+                    node_id = existing_id
                     node_keys.setdefault(node_id, input_name)
             else:
                 continue
@@ -340,9 +341,10 @@ def _build_dependency_graph(existing_files: Dict[str, Path]):
             if input_name in STATIC_INPUTS:
                 source_id = label_to_node[input_name]
             elif input_name in existing:
-                source_id = label_to_node.get(input_name)
-                if source_id is None:
+                existing_source = label_to_node.get(input_name)
+                if existing_source is None:
                     continue
+                source_id = existing_source
             else:
                 continue
 

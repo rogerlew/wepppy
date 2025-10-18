@@ -1,6 +1,6 @@
 """Compose controllers.js from controllers_js templates.
 
-See notes/controllers_js.md for architecture details.
+See README.md in this package for controller architecture details.
 """
 
 from __future__ import annotations

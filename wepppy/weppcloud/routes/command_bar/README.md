@@ -1,6 +1,6 @@
 # Command Bar Developer Notes
 
-> **See also:** [AGENTS.md](../../AGENTS.md) for Front-End Development section.
+> **See also:** [AGENTS.md](../../../../AGENTS.md) for Front-End Development section.
 
 The command bar provides a keyboard-driven palette for common actions on project pages. Press `:` to activate, type a command, and hit Enter to run it. The logic lives in `wepppy/weppcloud/routes/command_bar/static/command-bar.js` and the matching Flask blueprint is in `routes/command_bar/command_bar.py`.
 
