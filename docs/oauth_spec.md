@@ -21,6 +21,19 @@
 - Implement the Authorization Code Grant with PKCE for all providers. While confidential clients may omit PKCE, GitHub and Microsoft now recommend PKCE for additional protection.
 - Store provider metadata in configuration, grouped under `OAUTH_PROVIDERS` with keys for `github`, `google`, and `microsoft` (Azure AD v2). Each entry will hold `client_id`, `client_secret`, `authorize_url`, `token_url`, `userinfo_url`, and `scope` defaults. Provide environment overrides such as `OAUTH_GITHUB_CLIENT_ID`, `OAUTH_GITHUB_CLIENT_SECRET`, etc.
 
+### Phase 1: GitHub OAuth Rollout
+- Register a GitHub OAuth application per domain. Use `https://wc.bearhive.duckdns.org/weppcloud/github-auth-callback` for the development stack; production will mirror the hostname swap.
+- Align configuration with the existing docker `.env` entries: `GITHUB_OAUTH_CLIENTID`, `GITHUB_OAUTH_SECRET_KEY`, and `GITHUB_OAUTH_CALLBACK_URL` now ship with the dev compose file. The configuration loader should support these keys as well as the canonical `OAUTH_GITHUB_CLIENT_ID`/`SECRET`/`REDIRECT_URI` naming to keep backwards compatibility for local setups.
+- Redirect base URLs derive from `OAUTH_REDIRECT_SCHEME` (default `https`) and `OAUTH_REDIRECT_HOST` (falls back to `EXTERNAL_HOST`). Document both in environment samples so deployers know how to override callbacks per domain without editing code.
+- Seed the `OAUTH_PROVIDERS["github"]` definition with:
+  - `authorize_url`: `https://github.com/login/oauth/authorize`
+  - `token_url`: `https://github.com/login/oauth/access_token`
+  - `userinfo_url`: `https://api.github.com/user`
+  - `scope`: `["read:user", "user:email"]`
+- Implement `/oauth/github/login` and `/oauth/github/callback` endpoints first. The callback must verify `state`/PKCE, fetch the primary verified email via `https://api.github.com/user/emails`, and link or create accounts following the email-matching rules below.
+- Update the login template with a single "Continue with GitHub" button during this phase. Additional providers can be revealed once they are configured.
+- Emit audit events tagged with `provider="github"` so early telemetry isolates GitHub usage while the feature is rolled out.
+
 ### Data Model Changes
 Create a new table `oauth_account` with the following columns and constraints:
 - `id` (PK)
@@ -175,4 +188,3 @@ Add a uniqueness constraint on `(provider, provider_uid)` to prevent duplicate l
 - Provide user communication explaining new login options and how email matching works.
 - Maintain a fallback support process for users whose provider email differs from their WEPPcloud email (support can update the canonical email or link accounts manually).
 - Review legal/privacy requirements for storing provider tokens and user profile data, updating privacy policies accordingly.
-

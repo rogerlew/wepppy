@@ -9,6 +9,9 @@ wctl \- control helper for the WEPPcloud Docker Compose stacks
 .B wctl build-static-assets
 [options]
 .br
+.B wctl flask-db-upgrade
+[alembic arguments...]
+.br
 .B sudo\ wctl restore-docker-data-permissions
 .br
 .B wctl man
@@ -42,6 +45,17 @@ Runs the frontend build script at
 The script automatically adds
 .B --prod
 when the wctl installation targets the production compose file.
+.TP
+.B wctl flask-db-upgrade
+Runs
+.I flask\ --app\ wepppy.weppcloud.app\ db\ upgrade
+inside the running
+.I weppcloud
+service container. Any additional arguments are passed through to Flask-Migrate, allowing subcommands such as
+.B --tag
+or
+.B --sql
+to be used.
 .TP
 .B sudo\ wctl restore-docker-data-permissions
 Fixes ownership and permissions inside the
@@ -95,6 +109,9 @@ Start or rebuild the WEPPcloud development stack.
 .TP
 .B sudo\ wctl restore-docker-data-permissions
 Repair permissions for all persistent data directories.
+.TP
+.B wctl flask-db-upgrade
+Apply pending Alembic migrations inside the running application container.
 .TP
 .B wctl man --no-pager
 Read this manual without invoking the

@@ -33,7 +33,7 @@ RUN apt-get update && \
         libzip-dev \
         libbz2-dev \
         liblzma-dev \
-        zlib1g-dev && \
+        zlib1g-dev \
         rsync && \
     git lfs install --system && \
     rm -rf /var/lib/apt/lists/*

@@ -1,6 +1,6 @@
 import os
 from datetime import timedelta
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 import redis
 
@@ -24,6 +24,91 @@ def _build_session_redis(db_default: int = 11) -> redis.Redis:
     host = os.getenv("SESSION_REDIS_HOST", os.getenv("REDIS_HOST", "localhost"))
     port = int(os.getenv("SESSION_REDIS_PORT", os.getenv("REDIS_PORT", "6379")))
     return redis.Redis(host=host, port=port, db=db)
+
+
+def _get_env_any(names: List[str], default: Optional[str] = None) -> Optional[str]:
+    for name in names:
+        value = os.getenv(name)
+        if value is not None:
+            trimmed = value.strip()
+            if trimmed:
+                return trimmed
+    return default
+
+
+def _normalize_site_prefix(site_prefix: str) -> str:
+    if not site_prefix:
+        return ""
+    prefix = site_prefix.strip()
+    if not prefix:
+        return ""
+    if not prefix.startswith("/"):
+        prefix = f"/{prefix}"
+    if len(prefix) > 1 and prefix.endswith("/"):
+        prefix = prefix.rstrip("/")
+    return prefix
+
+
+def _build_oauth_redirect_uri(
+    scheme: str,
+    host: Optional[str],
+    site_prefix: str,
+    provider: str,
+    override: Optional[str] = None,
+) -> Optional[str]:
+    if override:
+        return override
+    if not host:
+        return None
+    normalized_prefix = _normalize_site_prefix(site_prefix)
+    callback_path = f"{normalized_prefix}/oauth/{provider}/callback"
+    if not callback_path.startswith("/"):
+        callback_path = f"/{callback_path}"
+    return f"{scheme}://{host}{callback_path}"
+
+
+def _load_oauth_providers(
+    redirect_scheme: str, redirect_host: Optional[str], site_prefix: str
+) -> Dict[str, Dict[str, Any]]:
+    providers: Dict[str, Dict[str, Any]] = {}
+
+    github_client_id = _get_env_any(
+        ["OAUTH_GITHUB_CLIENT_ID", "GITHUB_OAUTH_CLIENT_ID", "GITHUB_OAUTH_CLIENTID"]
+    )
+    github_client_secret = _get_env_any(
+        [
+            "OAUTH_GITHUB_CLIENT_SECRET",
+            "GITHUB_OAUTH_CLIENT_SECRET",
+            "GITHUB_OAUTH_SECRET_KEY",
+        ]
+    )
+    github_redirect_override = _get_env_any(
+        [
+            "OAUTH_GITHUB_REDIRECT_URI",
+            "GITHUB_OAUTH_REDIRECT_URI",
+            "GITHUB_OAUTH_CALLBACK_URL",
+        ]
+    )
+    github_redirect_uri = _build_oauth_redirect_uri(
+        redirect_scheme, redirect_host, site_prefix, "github", github_redirect_override
+    )
+
+    providers["github"] = {
+        "name": "GitHub",
+        "client_id": github_client_id,
+        "client_secret": github_client_secret,
+        "redirect_uri": github_redirect_uri,
+        "authorize_url": "https://github.com/login/oauth/authorize",
+        "token_url": "https://github.com/login/oauth/access_token",
+        "userinfo_url": "https://api.github.com/user",
+        "emails_url": "https://api.github.com/user/emails",
+        "scope": ["read:user", "user:email"],
+        "enabled": bool(
+            github_client_id and github_client_secret and github_redirect_uri
+        ),
+    }
+
+    return providers
 
 
 def config_app(app: Any):
@@ -77,5 +162,15 @@ def config_app(app: Any):
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=12)
     app.config["SESSION_COOKIE_SAMESITE"] = "None"
     app.config["SESSION_COOKIE_SECURE"] = True
+
+    redirect_scheme_raw = os.getenv("OAUTH_REDIRECT_SCHEME") or "https"
+    oauth_redirect_scheme = redirect_scheme_raw.strip() or "https"
+    oauth_redirect_host = _get_env_any(["OAUTH_REDIRECT_HOST", "EXTERNAL_HOST"])
+
+    app.config["OAUTH_REDIRECT_SCHEME"] = oauth_redirect_scheme
+    app.config["OAUTH_REDIRECT_HOST"] = oauth_redirect_host
+    app.config["OAUTH_PROVIDERS"] = _load_oauth_providers(
+        oauth_redirect_scheme, oauth_redirect_host, site_prefix
+    )
 
     return app

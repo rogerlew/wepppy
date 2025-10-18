@@ -36,7 +36,8 @@ class HillSummaryReport(ReportBase):
             self._wd = Path(wd).expanduser()
         if not self._wd.exists():
             raise FileNotFoundError(self._wd)
-  self._fraction_under = fraction_under
+        
+        self._fraction_under = fraction_under
 
         context = self._prepare_context()
         dataframe = self._build_dataframe(context)

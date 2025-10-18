@@ -10,6 +10,7 @@ def register_blueprints(app):
     app.register_blueprint(rq_api_bp)
     app.register_blueprint(rq_jobinfo_bp)
     app.register_blueprint(security_logging_bp)
+    app.register_blueprint(security_oauth_bp)
     app.register_blueprint(security_ui_bp)
     app.register_blueprint(unitizer_bp)
     app.register_blueprint(map_bp)

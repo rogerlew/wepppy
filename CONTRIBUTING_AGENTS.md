@@ -6,10 +6,14 @@
 
 ### 1. Understanding the Codebase
 Before making changes, consult these documents in order:
-1. **ARCHITECTURE.md** - System design and component interactions
-2. **AGENTS.md** - Agent-specific coding patterns and conventions
-3. **API_REFERENCE.md** - Quick reference for common APIs
-4. **readme.md** - User-facing documentation
+1. **ARCHITECTURE.md** ⭐ - System design and component interactions
+2. **AGENTS.md** ⭐⭐⭐ - Agent-specific coding patterns and conventions (START HERE)
+3. **API_REFERENCE.md** ⭐⭐ - Quick reference for common APIs
+4. **readme.md** ⭐ - User-facing documentation
+
+**For quick fixes**: Jump to relevant section in this doc  
+**For new features**: Read ARCHITECTURE.md first  
+**For refactoring**: Review AGENTS.md patterns
 
 ### 2. Key Principles
 - **Preserve existing patterns** - Match the style of surrounding code
@@ -19,7 +23,7 @@ Before making changes, consult these documents in order:
 - **Documentation** - Update docstrings and README files
 
 ### 3. Before You Code
-```python
+```bash
 # 1. Find similar implementations
 git grep -n "similar_function_name"
 
@@ -28,6 +32,72 @@ ls tests/**/test_*.py | grep relevant_module
 
 # 3. Understand dependencies
 grep -r "from.*import" wepppy/module_name/ | sort -u
+```
+
+## Decision Trees for Common Tasks
+
+### "Where should my code go?"
+
+```
+Need to add functionality?
+│
+├─ Modifying run data/state?
+│  └─ Add to relevant NoDb controller (Wepp, Climate, Watershed, etc.)
+│
+├─ Background processing task?
+│  └─ Create RQ job in wepppy/rq/
+│
+├─ HTTP endpoint?
+│  ├─ MCP query engine? → wepppy/query_engine/app/routes/
+│  └─ Main Flask app? → wepppy/weppcloud/routes/
+│
+├─ Data analysis/query?
+│  └─ wepppy/query_engine/ (DuckDB queries)
+│
+├─ File format conversion?
+│  └─ wepppy/export/ or wepppy/climates/
+│
+└─ Utility function?
+   └─ wepppy/all_your_base.py (if general) or relevant module
+```
+
+### "How should I test this?"
+
+```
+What are you testing?
+│
+├─ NoDb controller?
+│  └─ Unit test: tests/nodb/test_<controller>.py
+│     • Test initialization
+│     • Test serialization
+│     • Test locking
+│     • Test state transitions
+│
+├─ RQ background job?
+│  └─ Integration test: tests/rq/test_jobs.py
+│     • Mock Redis if possible
+│     • Test job queuing
+│     • Test job execution
+│     • Test error handling
+│
+├─ Flask route?
+│  └─ Route test: tests/weppcloud/test_routes.py
+│     • Use Flask test client
+│     • Test all HTTP methods
+│     • Test auth requirements
+│     • Test error responses
+│
+├─ Query engine?
+│  └─ Query test: tests/query_engine/test_queries.py
+│     • Test SQL generation
+│     • Test result formatting
+│     • Test query validation
+│
+└─ Utility function?
+   └─ Unit test: tests/test_utils.py
+      • Test happy path
+      • Test edge cases
+      • Test error conditions
 ```
 
 ## Code Organization Patterns
@@ -121,6 +191,34 @@ class MyClass(NoDbBase):
         pass
 ```
 
+### Managing `__all__` Exports
+
+Always update `__all__` when:
+- ✓ Adding new public classes
+- ✓ Adding new public functions  
+- ✓ Adding new exceptions
+
+Never add to `__all__`:
+- ✗ Private functions (prefixed with `_`)
+- ✗ Helper functions meant for internal use only
+- ✗ Imported dependencies
+
+Example:
+
+```python
+__all__ = [
+    # Classes (alphabetical)
+    'MyClass',
+    'MyOtherClass',
+    # Exceptions
+    'MyException',
+    'MyOtherException',
+    # Functions (alphabetical)
+    'helper_function',
+    'utility_function',
+]
+```
+
 ### Type Hints
 
 Add type hints to **all new code** and **refactored code**:
@@ -158,6 +256,52 @@ class MyController(NoDbBase):
         self.data = {}
         self.records = []
         self.config_path = None
+```
+
+### Common WEPPpy Type Patterns
+
+```python
+# File paths (prefer Path over str)
+from pathlib import Path
+from typing import Union
+
+PathLike = Union[str, Path]
+
+def load_config(path: PathLike) -> Dict[str, any]:
+    """Load configuration from file."""
+    path = Path(path)
+    ...
+
+# NoDb working directories (always str)
+def process_run(wd: str) -> None:
+    """Process run in working directory.
+    
+    Args:
+        wd: Working directory path (must be str for NoDb)
+    """
+    ...
+
+# Optional with None default
+def analyze(
+    data: List[float],
+    threshold: Optional[float] = None
+) -> Dict[str, float]:
+    """Analyze data with optional threshold."""
+    if threshold is None:
+        threshold = 0.0
+    ...
+
+# Multiple return types
+def parse_value(s: str) -> Union[int, float, str]:
+    """Parse string to appropriate type."""
+    ...
+
+# Type aliases for complex structures
+RunMetadata = Dict[str, Union[str, int, float, List[str]]]
+
+def get_metadata(runid: str) -> RunMetadata:
+    """Retrieve run metadata."""
+    ...
 ```
 
 ### Docstring Format
@@ -202,6 +346,114 @@ def complex_function(
         Warnings about dangerous usage patterns.
     """
     pass
+```
+
+### Extended Docstring Patterns
+
+```python
+# When to document private methods
+class MyController:
+    def _internal_helper(self, data: List[int]) -> bool:
+        """Internal helper for data validation.
+        
+        Note:
+            This is a private method and should not be called directly.
+            Use public API methods instead.
+        """
+        ...
+
+# Documenting complex return types
+def analyze_watershed() -> Dict[str, any]:
+    """Analyze watershed characteristics.
+    
+    Returns:
+        Dictionary with structure::
+        
+            {
+                'area_km2': float,
+                'channels': [
+                    {
+                        'id': int,
+                        'length_m': float,
+                        'slope_pct': float
+                    },
+                    ...
+                ],
+                'metadata': {
+                    'version': str,
+                    'timestamp': str
+                }
+            }
+    """
+    ...
+
+# Documenting side effects
+def generate_climate_data(wd: str) -> None:
+    """Generate climate input files.
+    
+    Side Effects:
+        - Creates climate/ directory in wd
+        - Writes multiple .cli files
+        - Updates run state in Redis
+        - Logs progress to wepppy.log
+    
+    Warning:
+        Overwrites existing climate files without backup.
+    """
+    ...
+```
+
+## Logging Patterns
+
+### When to Log
+
+```python
+import logging
+from wepppy.all_your_base import get_logger
+
+log = get_logger(__name__)
+
+# Log at appropriate levels
+log.debug('Detailed diagnostic info')  # Development only
+log.info('Normal operation milestone')  # User-visible progress
+log.warning('Recoverable issue')        # Something unexpected but handled
+log.error('Operation failed')           # Error that prevents completion
+log.critical('System-level failure')    # Requires immediate attention
+
+# Good logging examples
+class MyController:
+    def process(self):
+        """Process run data."""
+        log.info(f'Starting processing for run {self.run_id}')
+        
+        try:
+            self._validate_inputs()
+            log.debug(f'Inputs validated: {len(self.inputs)} items')
+            
+            results = self._compute()
+            log.info(f'Processing complete: {len(results)} results')
+            
+            return results
+            
+        except ValueError as e:
+            log.error(f'Validation failed: {e}')
+            raise
+        except Exception as e:
+            log.critical(f'Unexpected error in processing: {e}', exc_info=True)
+            raise
+```
+
+### Don't Over-Log
+
+```python
+# WRONG - too noisy
+for item in items:
+    log.debug(f'Processing item {item}')  # Logs every item!
+    
+# CORRECT - log summary
+log.debug(f'Processing {len(items)} items')
+# ... process items ...
+log.debug(f'Completed processing {len(results)} items')
 ```
 
 ## NoDb Controller Patterns
@@ -267,6 +519,61 @@ class MyController(NoDbBase):
             self.dump_and_unlock()
 ```
 
+### State Management in NoDb Controllers
+
+```python
+# Reading state (no lock needed)
+def get_summary(self) -> Dict[str, any]:
+    """Get summary without modifying state."""
+    return {
+        'status': self.status,
+        'progress': self.progress
+    }
+
+# Mutating state (lock required)
+def update_progress(self, value: float) -> None:
+    """Update progress value.
+    
+    Note:
+        Acquires lock automatically. Use context manager
+        for multiple updates in a transaction.
+    """
+    with self.locked():
+        self.progress = value
+        self.dump_and_unlock()
+
+# Bulk mutations (single lock)
+def initialize_run(self, config: Dict) -> None:
+    """Initialize run with configuration.
+    
+    Tip:
+        Group related mutations in a single lock context
+        for better performance and atomicity.
+    """
+    with self.locked():
+        self.config = config
+        self.status = 'initialized'
+        self.progress = 0.0
+        self.timestamp = datetime.now().isoformat()
+        self.dump_and_unlock()
+
+# Conditional mutations
+def try_update(self, new_value: any) -> bool:
+    """Attempt to update value.
+    
+    Returns:
+        True if update succeeded, False if preconditions not met.
+    """
+    with self.locked():
+        if self._can_update():
+            self.value = new_value
+            self.dump_and_unlock()
+            return True
+        else:
+            self.unlock()  # Release without dumping
+            return False
+```
+
 ### Adding Methods to Existing Controllers
 
 1. **Check existing patterns** in the controller
@@ -276,6 +583,8 @@ class MyController(NoDbBase):
 
 ```python
 # In wepppy/nodb/core/wepp.py
+
+# ...existing code...
 
 def new_analysis_method(self) -> Dict[str, float]:
     """Compute new analysis metric.
@@ -296,6 +605,8 @@ def new_analysis_method(self) -> Dict[str, float]:
         results[hillslope_id] = self._compute_metric(data)
     
     return results
+
+# ...existing code...
 ```
 
 ## Testing Patterns
@@ -351,6 +662,66 @@ def test_mycontroller_locking(tmp_path):
         pass
 ```
 
+### Test Coverage Guidelines
+
+**Minimum coverage for new code:**
+- Public methods: 100% coverage required
+- Private methods: Coverage encouraged but not required
+- Error paths: Must test at least one failure case
+
+**What to test:**
+- ✓ Happy path (normal operation)
+- ✓ Edge cases (empty lists, None values, boundary conditions)
+- ✓ Error cases (invalid input, missing files, lock conflicts)
+- ✓ State transitions (initialization → processing → completion)
+- ✓ Serialization roundtrip (save → load → verify)
+
+**Example: Comprehensive controller tests:**
+
+```python
+def test_controller_lifecycle(tmp_path):
+    """Test complete controller lifecycle."""
+    # Creation
+    controller = MyController.getInstance(str(tmp_path))
+    assert controller.status == 'new'
+    
+    # Configuration
+    with controller.locked():
+        controller.config = {'key': 'value'}
+        controller.dump_and_unlock()
+    
+    # Processing
+    controller.process()
+    assert controller.status == 'processing'
+    
+    # Completion
+    controller.finalize()
+    assert controller.status == 'complete'
+    
+    # Persistence
+    controller2 = MyController.getInstance(str(tmp_path))
+    assert controller2.status == 'complete'
+    assert controller2.config['key'] == 'value'
+
+def test_controller_error_handling(tmp_path):
+    """Test error scenarios."""
+    controller = MyController.getInstance(str(tmp_path))
+    
+    # Test invalid input
+    with pytest.raises(ValueError, match="Invalid configuration"):
+        controller.configure(None)
+    
+    # Test missing dependency
+    with pytest.raises(FileNotFoundError):
+        controller.process_missing_file()
+    
+    # Test lock conflict
+    controller.lock()
+    with pytest.raises(MyControllerNoDbLockedException):
+        with controller.locked():
+            pass
+```
+
 ### Integration Tests
 
 ```python
@@ -396,6 +767,7 @@ def test_full_simulation_workflow(tmp_path):
 
 from flask import Blueprint, jsonify, request
 from wepppy.nodb.core import MyController
+from os.path import join as _join
 
 bp = Blueprint('my_routes', __name__, url_prefix='/my-feature')
 
@@ -422,16 +794,16 @@ def perform_action(runid: str):
         }
     """
     try:
-        # Validate input
+        # Validate request
         data = request.get_json()
-        if not data or 'param1' not in data:
-            return jsonify({
-                'success': False,
-                'error': 'Missing required parameter'
-            }), 400
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        if 'param1' not in data:
+            return jsonify({'error': 'Missing required parameter'}), 400
         
         # Get controller
-        wd = _get_working_dir(runid)
+        wd = _join('/geodata/weppcloud_runs', runid)
         controller = MyController.getInstance(wd)
         
         # Perform action
@@ -442,13 +814,14 @@ def perform_action(runid: str):
         return jsonify({
             'success': True,
             'data': result
-        })
+        }), 200
         
+    except FileNotFoundError:
+        return jsonify({'error': 'Run not found'}), 404
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'error': 'Internal server error'}), 500
 ```
 
 ## Background Job Patterns
@@ -458,6 +831,8 @@ def perform_action(runid: str):
 ```python
 """Background task module."""
 
+import time
+from datetime import datetime
 from wepppy.rq import job
 from os.path import join as _join
 
@@ -487,8 +862,10 @@ def my_background_task(
     """
     from wepppy.nodb.core import MyController
     
+    start_time = time.time()
+    
     # Build working directory path
-    wd = _join('/wc1/runs', runid)
+    wd = _join('/geodata/weppcloud_runs', runid)
     
     # Get controller
     controller = MyController.getInstance(wd)
@@ -770,6 +1147,83 @@ def complex_function(a: float, b: float, c: float) -> float:
     return a + b * c
 ```
 
+### ❌ Don't: Mix sync and async code incorrectly
+
+```python
+# WRONG - blocking in async context
+async def process_run(runid: str):
+    time.sleep(10)  # Blocks event loop!
+
+# CORRECT
+async def process_run(runid: str):
+    await asyncio.sleep(10)
+
+# WRONG - async in sync context without await
+def sync_function():
+    result = async_function()  # Returns coroutine, doesn't run!
+
+# CORRECT
+import asyncio
+
+def sync_function():
+    result = asyncio.run(async_function())
+```
+
+### ❌ Don't: Hardcode file paths
+
+```python
+# WRONG
+config_path = '/home/user/wepppy/config.ini'
+data_dir = 'C:\\Users\\user\\data'
+
+# CORRECT
+from pathlib import Path
+import os
+
+config_path = Path(os.environ.get('WEPPPY_CONFIG', 'config.ini'))
+data_dir = Path(wd) / 'data'
+```
+
+### ❌ Don't: Ignore resource cleanup
+
+```python
+# WRONG
+def process_file(path: str):
+    f = open(path)
+    data = f.read()
+    return data  # File never closed!
+
+# CORRECT
+def process_file(path: str) -> str:
+    with open(path) as f:
+        data = f.read()
+    return data
+
+# Also correct for multiple resources
+from contextlib import ExitStack
+
+def process_multiple(paths: List[str]):
+    with ExitStack() as stack:
+        files = [stack.enter_context(open(p)) for p in paths]
+        # All files automatically closed
+```
+
+### ❌ Don't: Use mutable default arguments
+
+```python
+# WRONG - shared mutable default!
+def add_item(item: str, items: List[str] = []):
+    items.append(item)
+    return items
+
+# CORRECT
+def add_item(item: str, items: Optional[List[str]] = None) -> List[str]:
+    if items is None:
+        items = []
+    items.append(item)
+    return items
+```
+
 ## Quality Checklist
 
 Before submitting changes:
@@ -787,6 +1241,40 @@ Before submitting changes:
 - [ ] Locking patterns correct
 - [ ] No breaking changes to serialization
 - [ ] Commit messages follow conventions
+
+## Troubleshooting
+
+### "Where should I look first?"
+
+```bash
+# Find where something is defined
+git grep -n "class ClassName"
+git grep -n "def function_name"
+
+# Find where something is used
+git grep -n "ClassName\|function_name"
+
+# Check recent changes to a file
+git log -p --follow -- path/to/file.py
+
+# Find similar implementations
+git grep -n "similar_pattern" | head -20
+```
+
+### "Why is my NoDb controller not persisting?"
+
+Check these common issues:
+1. Did you call `dump_and_unlock()` after mutations?
+2. Did you use the `locked()` context manager?
+3. Is the working directory writable?
+4. Check logs for serialization errors
+
+### "Why are my tests failing?"
+
+1. Run tests with verbose output: `pytest -vv tests/`
+2. Check for Redis connection issues
+3. Verify temp directory cleanup: `pytest --capture=no`
+4. Review test isolation (clear singletons between tests)
 
 ## Resources
 
@@ -811,4 +1299,4 @@ git log -p -- path/to/file.py
 git grep -n "ClassName\|function_name"
 ```
 
-**Last Updated**: 2025-10-18
+**Last Updated**: 2025-10-17

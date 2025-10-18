@@ -132,6 +132,27 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
                     url_for_run=url_for_run)
 
     @app.context_processor
+    def oauth_provider_processor():
+        providers = app.config.get("OAUTH_PROVIDERS", {}) or {}
+        enabled = {
+            name: data
+            for name, data in providers.items()
+            if data and data.get("enabled")
+        }
+        return dict(
+            oauth_providers=providers,
+            enabled_oauth_providers=enabled,
+        )
+
+    @app.context_processor
+    def csrf_token_processor():
+        try:
+            from flask_wtf.csrf import generate_csrf
+        except Exception:
+            return {}
+        return dict(csrf_token=generate_csrf)
+
+    @app.context_processor
     def pup_context_processor():
         from flask import g
         return dict(pup_relpath=getattr(g, 'pup_relpath', None))

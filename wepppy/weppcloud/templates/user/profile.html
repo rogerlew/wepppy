@@ -16,6 +16,30 @@ User Profile
         {% endif %}
       {% endfor %}
     </dd>
+    <dt>Linked providers:</dt>
+    <dd>
+      {% set linked_accounts = user.oauth_accounts.all() %}
+      {% if linked_accounts %}
+        <ul class="wc-linked-oauth-list">
+          {% for account in linked_accounts|sort(attribute='provider') %}
+            <li>
+              <span class="wc-linked-oauth-provider">{{ account.provider|capitalize }}</span>
+              {% if account.email and account.email != user.email %}
+                <span class="wc-linked-oauth-email">({{ account.email }})</span>
+              {% endif %}
+              <form method="post"
+                    action="{{ url_for('security_oauth.disconnect', provider=account.provider) }}"
+                    class="wc-linked-oauth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="pure-button wc-linked-oauth-disconnect">Disconnect</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <em>No social providers linked.</em>
+      {% endif %}
+    </dd>
       <dd><a href='../change'>Change Password</a></dd>
   </dl>
 
@@ -59,4 +83,3 @@ $(document).ready(function() {
 </script>
   {% endif %}
 {% endblock %}
-
