@@ -8,6 +8,15 @@ wepppy is the core library behind WEPPcloud, automating Water Erosion Prediction
 
 At the heart of the system is a "NoDb" philosophy: instead of a monolithic database, run state is serialized to disk, memoized in Redis, and surfaced through microservices so every component can inspect, replay, or recover long-lived scenarios with minimal coupling.
 
+## Documentation
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System design, component diagrams, and data flow
+- **[API_REFERENCE.md](API_REFERENCE.md)** - Quick reference for key APIs and patterns
+- **[AGENTS.md](AGENTS.md)** - AI agent coding guide and conventions
+- **[CONTRIBUTING_AGENTS.md](CONTRIBUTING_AGENTS.md)** - Contributing guide for AI coding assistants
+- **[docs/schemas/](docs/schemas/)** - JSON schemas for data structures
+- **[docs/dev-notes/](docs/dev-notes/)** - Detailed developer notes on specific topics
+
 ## Nerdy Highlights
 - Redis-backed NoDb singletons hydrate run state on demand, cache hot JSON payloads, and enforce distributed locks without an RDBMS.
 - A queue-driven logging pipeline streams structured status updates from background workers to the browser in milliseconds.
