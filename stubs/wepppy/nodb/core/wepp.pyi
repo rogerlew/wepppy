@@ -1,16 +1,16 @@
-from osgeo.gdalconst import *
+from __future__ import annotations
+
 from _typeshed import Incomplete
 from enum import IntEnum
-from typing import Any, Dict, List, Set, Tuple
-from wepppy.all_your_base import isint
+from typing import Any, ClassVar, Dict, List, Set, Tuple, TYPE_CHECKING
 from wepppy.nodb.base import NoDbBase
 from wepppy.wepp.reports import ChannelWatbalReport, FrqFloodReport, HillslopeWatbalReport, ReturnPeriods, SedimentCharacteristics
 
 __all__ = ['ChannelRoutingMethod', 'SnowOpts', 'BaseflowOpts', 'PhosphorusOpts', 'TCROpts', 'WeppNoDbLockedException', 'Wepp']
 
 class ChannelRoutingMethod(IntEnum):
-    Creams: int
-    MuskingumCunge: int
+    Creams = 2
+    MuskingumCunge = 4
 
 class SnowOpts:
     rst: float
@@ -57,7 +57,8 @@ class TCROpts:
 class WeppNoDbLockedException(Exception): ...
 
 class Wepp(NoDbBase):
-    filename: str
+    __name__: ClassVar[str]
+    filename: ClassVar[str]
     phosphorus_opts: Incomplete
     p_surf_runoff_map: Incomplete
     p_lateral_flow_map: Incomplete
@@ -74,10 +75,13 @@ class Wepp(NoDbBase):
     run_flowpaths: bool
     loss_grid_d_path: Incomplete
     def __init__(self, wd: str, cfg_fn: str, run_group: str | None = None, group_name: str | None = None) -> None: ...
-    @property
-    def dss_export_mode(self) -> int: ...
-    @dss_export_mode.setter
-    def dss_export_mode(self, value: isint): ...
+    if TYPE_CHECKING:
+        dss_export_mode: int
+    else:
+        @property
+        def dss_export_mode(self) -> int: ...
+        @dss_export_mode.setter
+        def dss_export_mode(self, value: int) -> None: ...
     @property
     def dss_excluded_channel_orders(self) -> list: ...
     @dss_excluded_channel_orders.setter
@@ -138,16 +142,22 @@ class Wepp(NoDbBase):
     def prep_hillslopes(self, frost: bool | None = None, baseflow: bool | None = None, wepp_ui: bool | None = None, pmet: bool | None = None, snow: bool | None = None, man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '', max_workers: int | None = None) -> None: ...
     @property
     def sol_versions(self) -> Set[str]: ...
-    @property
-    def pmet_kcb(self) -> float | None: ...
+    if TYPE_CHECKING:
+        pmet_kcb: float | None
+    else:
+        @property
+        def pmet_kcb(self) -> float | None: ...
+        @pmet_kcb.setter
+        def pmet_kcb(self, value: float) -> None: ...
     @property
     def pmet_kcb_map(self) -> str | None: ...
-    @pmet_kcb.setter
-    def pmet_kcb(self, value: float) -> None: ...
-    @property
-    def pmet_rawp(self) -> float | None: ...
-    @pmet_rawp.setter
-    def pmet_rawp(self, value: float) -> None: ...
+    if TYPE_CHECKING:
+        pmet_rawp: float | None
+    else:
+        @property
+        def pmet_rawp(self) -> float | None: ...
+        @pmet_rawp.setter
+        def pmet_rawp(self, value: float) -> None: ...
     def clean(self) -> None: ...
     def prep_and_run_flowpaths(self, clean_after_run: bool = True) -> None: ...
     def run_hillslopes(self, man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '', max_workers: int | None = None) -> None: ...
@@ -182,9 +192,12 @@ class Wepp(NoDbBase):
     def query_sub_val(self, measure: str) -> Dict[str, Dict[str, Any]] | None: ...
     def query_chn_val(self, measure: str) -> Dict[str, Dict[str, Any]] | None: ...
     def make_loss_grid(self) -> None: ...
-    @property
-    def kslast(self) -> float | None: ...
+    if TYPE_CHECKING:
+        kslast: float | None
+    else:
+        @property
+        def kslast(self) -> float | None: ...
+        @kslast.setter
+        def kslast(self, value: float | None) -> None: ...
     @property
     def kslast_map(self) -> str | None: ...
-    @kslast.setter
-    def kslast(self, value: float | None) -> None: ...

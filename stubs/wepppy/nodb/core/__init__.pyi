@@ -2,7 +2,8 @@ from .climate import Climate as Climate, ClimateMode as ClimateMode, ClimateMode
 from .landuse import Landuse as Landuse, LanduseMode as LanduseMode
 from .ron import Ron as Ron
 from .soils import Soils as Soils, SoilsMode as SoilsMode
-from .topaz import MinimumChannelLengthTooShortError as MinimumChannelLengthTooShortError, Topaz as Topaz, WatershedBoundaryTouchesEdgeError as WatershedBoundaryTouchesEdgeError
+from .topaz import Topaz as Topaz
+from wepppy.topo.topaz import MinimumChannelLengthTooShortError as MinimumChannelLengthTooShortError, WatershedBoundaryTouchesEdgeError as WatershedBoundaryTouchesEdgeError
 from .watershed import Watershed as Watershed, WatershedNotAbstractedError as WatershedNotAbstractedError
 from .wepp import Wepp as Wepp
 

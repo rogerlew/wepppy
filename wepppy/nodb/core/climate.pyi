@@ -1,11 +1,44 @@
+from __future__ import annotations
+
 import numpy as np
+import numpy.typing as npt
 from _typeshed import Incomplete
 from enum import IntEnum
-from typing import Any, Dict, List, Tuple
+from typing import Any, ClassVar, Dict, List, Tuple, TYPE_CHECKING
 from wepppy.climates.cligen import Cligen
 from wepppy.nodb.base import NoDbBase
 
-__all__ = ['lng_lat_to_pixel_center', 'daymet_pixel_center', 'gridmet_pixel_center', 'prism4k_pixel_center', 'nexrad_pixel_center', 'download_file', 'breakpoint_file_fix', 'CLIMATE_MAX_YEARS', 'ClimateSummary', 'NoClimateStationSelectedError', 'ClimateModeIsUndefinedError', 'ClimateNoDbLockedException', 'ClimateStationMode', 'ClimateMode', 'ClimateSpatialMode', 'ClimatePrecipScalingMode', 'get_prism_p_annual_monthlies', 'build_observed_prism', 'get_daymet_p_annual_monthlies', 'build_observed_daymet', 'build_observed_daymet_interpolated', 'build_observed_snotel', 'get_gridmet_p_annual_monthlies', 'build_observed_gridmet', 'build_observed_gridmet_interpolated', 'build_future', 'get_monthlies', 'cli_revision', 'Climate']
+__all__ = [
+    'lng_lat_to_pixel_center',
+    'daymet_pixel_center',
+    'gridmet_pixel_center',
+    'prism4k_pixel_center',
+    'nexrad_pixel_center',
+    'download_file',
+    'breakpoint_file_fix',
+    'CLIMATE_MAX_YEARS',
+    'ClimateSummary',
+    'NoClimateStationSelectedError',
+    'ClimateModeIsUndefinedError',
+    'ClimateNoDbLockedException',
+    'ClimateStationMode',
+    'ClimateMode',
+    'ClimateSpatialMode',
+    'ClimatePrecipScalingMode',
+    'get_prism_p_annual_monthlies',
+    'build_observed_prism',
+    'get_daymet_p_annual_monthlies',
+    'build_observed_daymet',
+    'build_observed_daymet_interpolated',
+    'build_observed_snotel',
+    'get_gridmet_p_annual_monthlies',
+    'build_observed_gridmet',
+    'build_observed_gridmet_interpolated',
+    'build_future',
+    'get_monthlies',
+    'cli_revision',
+    'Climate',
+]
 
 def lng_lat_to_pixel_center(lng: float, lat: float, proj4: str, transform: Tuple[float, float, float, float, float, float], width: int, height: int) -> Tuple[float | None, float | None]: ...
 def daymet_pixel_center(lng: float, lat: float) -> Tuple[float | None, float | None]: ...
@@ -24,56 +57,59 @@ class ClimateSummary:
     def __init__(self) -> None: ...
 
 class NoClimateStationSelectedError(Exception):
+    __name__: ClassVar[str]
     def __init__(self) -> None: ...
 
 class ClimateModeIsUndefinedError(Exception):
+    __name__: ClassVar[str]
     def __init__(self) -> None: ...
 
 class ClimateNoDbLockedException(Exception): ...
 
 class ClimateStationMode(IntEnum):
-    Undefined: int
-    Closest: int
-    Heuristic: int
-    EUHeuristic: int
-    AUHeuristic: int
-    UserDefined: int
-    MesonetIA: int
+    Undefined = -1
+    Closest = 0
+    Heuristic = 1
+    EUHeuristic = 2
+    AUHeuristic = 3
+    UserDefined = 4
+    MesonetIA = 5
+
 
 class ClimateMode(IntEnum):
-    Undefined: int
-    Vanilla: int
-    Observed: int
-    ObservedPRISM: int
-    Future: int
-    SingleStorm: int
-    PRISM: int
-    ObservedDb: int
-    FutureDb: int
-    EOBS: int
-    AGDC: int
-    GridMetPRISM: int
-    UserDefined: int
-    DepNexrad: int
-    SingleStormBatch: int
-    UserDefinedSingleStorm: int
+    Undefined = -1
+    Vanilla = 0
+    Observed = 2
+    ObservedPRISM = 9
+    Future = 3
+    SingleStorm = 4
+    PRISM = 5
+    ObservedDb = 6
+    FutureDb = 7
+    EOBS = 8
+    AGDC = 10
+    GridMetPRISM = 11
+    UserDefined = 12
+    DepNexrad = 13
+    SingleStormBatch = 14
+    UserDefinedSingleStorm = 15
     @staticmethod
     def parse(x: str | None) -> ClimateMode: ...
 
 class ClimateSpatialMode(IntEnum):
-    Undefined: int
-    Single: int
-    Multiple: int
-    MultipleInterpolated: int
+    Undefined = -1
+    Single = 0
+    Multiple = 1
+    MultipleInterpolated = 2
     @staticmethod
     def parse(x: str | None) -> ClimateSpatialMode: ...
 
 class ClimatePrecipScalingMode(IntEnum):
-    NoScaling: int
-    Scalar: int
-    Monthlies: int
-    AnnualMonthlies: int
-    Spatial: int
+    NoScaling = 0
+    Scalar = 1
+    Monthlies = 2
+    AnnualMonthlies = 3
+    Spatial = 4
     @staticmethod
     def parse(x: str) -> ClimatePrecipScalingMode: ...
 
@@ -88,10 +124,11 @@ def build_observed_gridmet(cligen: Cligen, lng: float, lat: float, start_year: i
 def build_observed_gridmet_interpolated(cligen: Cligen, topaz_id: str, lng: float, lat: float, start_year: int, end_year: int, cli_dir: str, cli_fn: str, prn_fn: str) -> str: ...
 def build_future(cligen: Cligen, lng: float, lat: float, start_year: int, end_year: int, cli_dir: str, prn_fn: str, cli_fn: str) -> None: ...
 def get_monthlies(fn: str, lng: float, lat: float) -> List[float]: ...
-def cli_revision(cli_fn: str, is_breakpoint: bool, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmins: np.array, ppt_fn: str, tmin_fn: str, tmax_fn: str, hill_lng: float, hill_lat: float, new_cli_path: str): ...
+def cli_revision(cli_fn: str, is_breakpoint: bool, ws_ppts: npt.NDArray[np.float_], ws_tmaxs: npt.NDArray[np.float_], ws_tmins: npt.NDArray[np.float_], ppt_fn: str, tmin_fn: str, tmax_fn: str, hill_lng: float, hill_lat: float, new_cli_path: str) -> str: ...
 
 class Climate(NoDbBase):
-    filename: str
+    __name__: ClassVar[str]
+    filename: ClassVar[str]
     monthlies: Incomplete
     par_fn: Incomplete
     cli_fn: Incomplete
@@ -171,11 +208,14 @@ class Climate(NoDbBase):
     @daymet_version.setter
     def daymet_version(self, value: str) -> None: ...
     @property
-    def climatestation_mode(self) -> ClimateStationMode: ...
-    @property
     def has_climatestation_mode(self) -> bool: ...
-    @climatestation_mode.setter
-    def climatestation_mode(self, value: ClimateStationMode | int) -> None: ...
+    if TYPE_CHECKING:
+        climatestation_mode: ClimateStationMode
+    else:
+        @property
+        def climatestation_mode(self) -> ClimateStationMode: ...
+        @climatestation_mode.setter
+        def climatestation_mode(self, value: ClimateStationMode | int) -> None: ...
     @property
     def onLoad_refreshStationSelection(self) -> str: ...
     @property

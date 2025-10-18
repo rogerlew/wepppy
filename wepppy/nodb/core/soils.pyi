@@ -1,24 +1,30 @@
+from __future__ import annotations
+
 from _typeshed import Incomplete
 from collections.abc import Generator
 from enum import IntEnum
-from typing import Any, Dict, List
+from typing import Any, ClassVar, Dict, List
 from wepppy.nodb.base import NoDbBase
 
 __all__ = ['SoilsNoDbLockedException', 'SoilsMode', 'Soils']
 
+
 class SoilsNoDbLockedException(Exception): ...
 
+
 class SoilsMode(IntEnum):
-    Undefined: int
-    Gridded: int
-    Single: int
-    SingleDb: int
-    RRED_Unburned: int
-    RRED_Burned: int
-    SpatialAPI: int
+    Undefined = -1
+    Gridded = 0
+    Single = 1
+    SingleDb = 2
+    RRED_Unburned = 3
+    RRED_Burned = 4
+    SpatialAPI = 9
+
 
 class Soils(NoDbBase):
-    filename: str
+    __name__: ClassVar[str]
+    filename: ClassVar[str]
     domsoil_d: Incomplete
     ssurgo_domsoil_d: Incomplete
     soils: Incomplete
@@ -69,15 +75,15 @@ class Soils(NoDbBase):
     @property
     def bd_d(self) -> Dict: ...
     @property
-    def clay_d(self): ...
+    def clay_d(self) -> Dict: ...
     @property
-    def sand_d(self): ...
+    def sand_d(self) -> Dict: ...
     @property
-    def ll_d(self): ...
+    def ll_d(self) -> Dict: ...
     @property
-    def clay_pct(self): ...
+    def clay_pct(self) -> Dict: ...
     @property
-    def liquid_limit(self): ...
+    def liquid_limit(self) -> Dict: ...
     @property
     def report(self) -> str: ...
     def sub_summary(self, topaz_id: str, abbreviated: bool = False) -> Dict | None: ...
@@ -89,6 +95,6 @@ class Soils(NoDbBase):
     def hill_table(self) -> List[Dict]: ...
     def sub_iter(self) -> Generator[Incomplete, None, None]: ...
     @property
-    def chns_summary(self): ...
+    def chns_summary(self) -> Dict: ...
     def chn_iter(self) -> Generator[Incomplete, None, None]: ...
-    def _(self, wepp_id): ...
+    def _(self, wepp_id: int) -> Dict[str, str]: ...

@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 from _typeshed import Incomplete
-from typing import Tuple
+from typing import ClassVar, Dict, Tuple
+from wepppy.topo.topaz import MinimumChannelLengthTooShortError, WatershedBoundaryTouchesEdgeError
 from wepppy.nodb.base import NoDbBase
 
 __all__ = ['Outlet', 'TopazNoDbLockedException', 'Topaz']
+
 
 class Outlet:
     requested_loc: Incomplete
@@ -10,12 +14,15 @@ class Outlet:
     distance_from_requested: Incomplete
     pixel_coords: Incomplete
     def __init__(self, requested_loc: Tuple[float, float], actual_loc: Tuple[float, float], distance_from_requested: float, pixel_coords: Tuple[int, int]) -> None: ...
-    def as_dict(self) -> dict: ...
+    def as_dict(self) -> Dict[str, float | Tuple[int, int]]: ...
+
 
 class TopazNoDbLockedException(Exception): ...
 
+
 class Topaz(NoDbBase):
-    filename: str
+    __name__: ClassVar[str]
+    filename: ClassVar[str]
     csa: Incomplete
     mcl: Incomplete
     wsarea: Incomplete

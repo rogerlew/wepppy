@@ -1,7 +1,8 @@
-from osgeo.gdalconst import *
+from __future__ import annotations
+
 from _typeshed import Incomplete
 from enum import IntEnum
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, ClassVar, Dict, Generator, List, Tuple, Union
 from wepppy.all_your_base import NCPU as NCPU
 from wepppy.nodb.base import NoDbBase
 from wepppy.topo.peridot.flowpath import PeridotChannel, PeridotHillslope
@@ -10,25 +11,53 @@ from wepppy.topo.watershed_abstraction.support import ChannelSummary, HillSummar
 from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 
-__all__ = ['NCPU', 'DelineationBackend', 'WatershedNotAbstractedError', 'WatershedNoDbLockedException', 'process_channel', 'process_subcatchment', 'TRANSIENT_FIELDS', 'Watershed', 'Outlet']
+__all__ = [
+    'NCPU',
+    'DelineationBackend',
+    'WatershedNotAbstractedError',
+    'WatershedNoDbLockedException',
+    'process_channel',
+    'process_subcatchment',
+    'TRANSIENT_FIELDS',
+    'Watershed',
+    'Outlet',
+]
+
 
 class DelineationBackend(IntEnum):
-    TOPAZ: int
-    TauDEM: int
-    WBT: int
+    TOPAZ = 1
+    TauDEM = 2
+    WBT = 3
+
 
 class WatershedNotAbstractedError(Exception):
+    __name__: ClassVar[str]
     def __init__(self) -> None: ...
+
 
 class WatershedNoDbLockedException(Exception): ...
 
+
 def process_channel(args: Tuple[WatershedAbstraction, int]) -> Tuple[int, ChannelSummary, Any]: ...
+
 def process_subcatchment(args: Tuple[WatershedAbstraction, int, bool, float, int]) -> Tuple[int, HillSummary, Dict[str, Any]]: ...
 
-TRANSIENT_FIELDS: Incomplete
+
+TRANSIENT_FIELDS: List[str]
+
+
+class Outlet:
+    requested_loc: Incomplete
+    actual_loc: Incomplete
+    distance_from_requested: Incomplete
+    pixel_coords: Incomplete
+    def __init__(self, requested_loc: Tuple[float, float], actual_loc: Tuple[float, float], distance_from_requested: float, pixel_coords: Tuple[int, int]) -> None: ...
+    def as_dict(self) -> Dict[str, float]: ...
+
 
 class Watershed(NoDbBase):
-    filename: str
+    __name__: ClassVar[str]
+    filename: ClassVar[str]
     def __init__(self, wd: str, cfg_fn: str, run_group: str | None = None, group_name: str | None = None) -> None: ...
     @property
     def set_extent_mode(self) -> int: ...
@@ -195,19 +224,11 @@ class Watershed(NoDbBase):
     def chn_summary(self, topaz_id: str | int) -> PeridotChannel | Dict[str, Any] | None: ...
     @property
     def chns_summary(self) -> Dict[str, PeridotChannel | Dict[str, Any]]: ...
-    def hillslope_area(self, topaz_id: str | int) -> float: ...
-    def hillslope_slope(self, topaz_id: str | int) -> float: ...
-    def channel_area(self, topaz_id: str | int) -> float: ...
     def hillslope_length(self, topaz_id: str | int) -> float: ...
     def channel_length(self, topaz_id: str | int) -> float: ...
     def hillslope_centroid_lnglat(self, topaz_id: str | int) -> Tuple[float, float]: ...
     def hillslope_slp_fn(self, topaz_id: str | int) -> str: ...
-    def centroid_hillslope_iter(self) -> Generator[Tuple[str | int, Tuple[float, float]], None, None]: ...
-
-class Outlet:
-    requested_loc: Incomplete
-    actual_loc: Incomplete
-    distance_from_requested: Incomplete
-    pixel_coords: Incomplete
-    def __init__(self, requested_loc: Tuple[float, float], actual_loc: Tuple[float, float], distance_from_requested: float, pixel_coords: Tuple[int, int]) -> None: ...
-    def as_dict(self) -> Dict[str, float]: ...
+    def centroid_hillslope_iter(self) -> Generator[Tuple[Union[str, int], Tuple[float, float]], None, None]: ...
+    def hillslope_area(self, topaz_id: str | int) -> float: ...
+    def hillslope_slope(self, topaz_id: str | int) -> float: ...
+    def channel_area(self, topaz_id: str | int) -> float: ...

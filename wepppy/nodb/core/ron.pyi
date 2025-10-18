@@ -1,5 +1,5 @@
 from _typeshed import Incomplete
-from typing import Any, Dict, List, Tuple
+from typing import Any, ClassVar, Dict, List, Tuple
 from wepppy.nodb.base import NoDbBase
 
 __all__ = ['Map', 'RonNoDbLockedException', 'Ron', 'RonViewModel']
@@ -47,8 +47,9 @@ class Map:
 class RonNoDbLockedException(Exception): ...
 
 class Ron(NoDbBase):
-    __exclude__: Incomplete
-    filename: str
+    __name__: ClassVar[str]
+    __exclude__: ClassVar[Tuple[str, ...]]
+    filename: ClassVar[str]
     def __init__(self, wd: str, cfg_fn: str = '0.cfg', run_group: str | None = None, group_name: str | None = None) -> None: ...
     def clean_export_dir(self) -> None: ...
     def init_sbs_map(self, sbs_map: str, baer: Any) -> None: ...

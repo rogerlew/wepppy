@@ -1,26 +1,38 @@
+from __future__ import annotations
+
 from _typeshed import Incomplete
 from collections.abc import Generator
 from enum import IntEnum
-from typing import Any, Dict, List
+from typing import Any, ClassVar, Dict, List, Tuple
 from wepppy.nodb.base import NoDbBase
 
-__all__ = ['LanduseNoDbLockedException', 'LanduseMode', 'read_cover_defaults', 'Landuse']
+__all__ = [
+    'LanduseNoDbLockedException',
+    'LanduseMode',
+    'read_cover_defaults',
+    'Landuse',
+]
+
 
 class LanduseNoDbLockedException(Exception): ...
 
+
 class LanduseMode(IntEnum):
-    Undefined: int
-    Gridded: int
-    Single: int
-    RRED_Unburned: int
-    RRED_Burned: int
-    UserDefined: int
-    SpatialAPI: int
+    Undefined = -1
+    Gridded = 0
+    Single = 1
+    RRED_Unburned = 2
+    RRED_Burned = 3
+    UserDefined = 4
+    SpatialAPI = 9
+
 
 def read_cover_defaults(fn: str) -> Dict[str, Dict]: ...
 
+
 class Landuse(NoDbBase):
-    filename: str
+    __name__: ClassVar[str]
+    filename: ClassVar[str]
     domlc_d: Incomplete
     managements: Incomplete
     cover_defaults_d: Incomplete
@@ -29,8 +41,8 @@ class Landuse(NoDbBase):
     @property
     def mapping(self) -> str | None: ...
     @mapping.setter
-    def mapping(self, value: str): ...
-    def get_mapping_dict(self) -> dict[str, dict]: ...
+    def mapping(self, value: str) -> None: ...
+    def get_mapping_dict(self) -> Dict[str, Dict]: ...
     @property
     def mode(self) -> LanduseMode: ...
     @mode.setter
@@ -72,12 +84,12 @@ class Landuse(NoDbBase):
     def modify(self, topaz_ids: List[str], landuse: str) -> None: ...
     @property
     def legend(self) -> List[str]: ...
-    def sub_summary(self, topaz_id: str): ...
+    def sub_summary(self, topaz_id: str) -> Dict | None: ...
     def chn_summary(self, topaz_id: str) -> Dict | None: ...
     @property
     def hillslope_cancovs(self) -> List | None: ...
     @hillslope_cancovs.setter
-    def hillslope_cancovs(self, value) -> None: ...
+    def hillslope_cancovs(self, value: Any) -> None: ...
     @property
     def hillslope_mofe_cancovs(self) -> List | None: ...
     @property
@@ -89,4 +101,4 @@ class Landuse(NoDbBase):
     @property
     def chns_summary(self) -> Dict: ...
     def chn_iter(self) -> Generator[Incomplete, None, None]: ...
-    def _(self, wepp_id): ...
+    def _(self, wepp_id: Any) -> None: ...
