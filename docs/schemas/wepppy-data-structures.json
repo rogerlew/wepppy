@@ -1,0 +1,584 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WEPPpy Data Structures",
+  "description": "JSON schemas for key WEPPpy data structures used in NoDb serialization and API payloads",
+  "definitions": {
+    "NoDbBase": {
+      "type": "object",
+      "description": "Base structure for all NoDb controller serialization",
+      "properties": {
+        "py/object": {
+          "type": "string",
+          "description": "jsonpickle class identifier",
+          "pattern": "^wepppy\\.nodb\\."
+        },
+        "wd": {
+          "type": "string",
+          "description": "Working directory absolute path"
+        },
+        "_lock": {
+          "type": ["object", "null"],
+          "description": "Lock state (internal use)"
+        }
+      },
+      "required": ["py/object", "wd"]
+    },
+    
+    "ClimateController": {
+      "allOf": [
+        { "$ref": "#/definitions/NoDbBase" },
+        {
+          "properties": {
+            "mode": {
+              "type": "integer",
+              "description": "ClimateMode enum value",
+              "enum": [-1, 0, 1, 2, 3, 4, 5, 6],
+              "enumNames": ["UNDEFINED", "CLIGEN", "OBSERVED", "VANILLA", "FUTURE", "DAYMET", "GRIDMET", "PRISM"]
+            },
+            "station_id": {
+              "type": ["string", "null"],
+              "description": "Selected weather station identifier"
+            },
+            "climate_data": {
+              "type": ["object", "null"],
+              "description": "Downloaded climate records"
+            }
+          }
+        }
+      ]
+    },
+    
+    "WatershedController": {
+      "allOf": [
+        { "$ref": "#/definitions/NoDbBase" },
+        {
+          "properties": {
+            "outlet": {
+              "type": ["object", "null"],
+              "description": "Watershed outlet point",
+              "properties": {
+                "lat": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "lng": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180
+                }
+              }
+            },
+            "abstracted": {
+              "type": "boolean",
+              "description": "Whether watershed has been delineated"
+            },
+            "num_subcatchments": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of subcatchments"
+            }
+          }
+        }
+      ]
+    },
+    
+    "WeppController": {
+      "allOf": [
+        { "$ref": "#/definitions/NoDbBase" },
+        {
+          "properties": {
+            "phosphorus_opts": {
+              "type": ["object", "null"],
+              "description": "Phosphorus modeling options",
+              "properties": {
+                "surf_runoff": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Surface runoff coefficient"
+                },
+                "lateral_flow": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Lateral flow coefficient"
+                },
+                "baseflow": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Baseflow coefficient"
+                },
+                "sediment": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Sediment-attached coefficient"
+                }
+              }
+            },
+            "baseflow_opts": {
+              "type": ["object", "null"],
+              "description": "Baseflow routing options",
+              "properties": {
+                "gwstorage": {
+                  "type": "number",
+                  "description": "Groundwater storage (mm)"
+                },
+                "bfcoeff": {
+                  "type": "number",
+                  "description": "Baseflow coefficient"
+                },
+                "dscoeff": {
+                  "type": "number",
+                  "description": "Deep seepage coefficient"
+                },
+                "bfthreshold": {
+                  "type": "number",
+                  "description": "Baseflow threshold"
+                }
+              }
+            },
+            "run_results": {
+              "type": ["object", "null"],
+              "description": "Simulation output summary"
+            }
+          }
+        }
+      ]
+    },
+    
+    "QueryEnginePayload": {
+      "type": "object",
+      "description": "Query Engine MCP API request payload",
+      "properties": {
+        "datasets": {
+          "type": "array",
+          "description": "List of datasets to query",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Relative path to parquet file"
+              },
+              "alias": {
+                "type": "string",
+                "description": "SQL alias for dataset",
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+              }
+            },
+            "required": ["path"]
+          }
+        },
+        "columns": {
+          "type": "array",
+          "description": "Columns to select",
+          "items": {
+            "type": "string"
+          }
+        },
+        "filters": {
+          "type": "array",
+          "description": "Filter conditions",
+          "items": {
+            "type": "object",
+            "properties": {
+              "column": {
+                "type": "string",
+                "description": "Column name to filter"
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["=", "!=", "<", "<=", ">", ">=", "LIKE", "ILIKE", "IN", "NOT IN", "BETWEEN", "IS NULL", "IS NOT NULL"]
+              },
+              "value": {
+                "description": "Filter value (type depends on operator)"
+              }
+            },
+            "required": ["column", "operator"]
+          }
+        },
+        "aggregations": {
+          "type": "array",
+          "description": "Aggregation functions",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Shorthand SQL aggregation"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "fn": {
+                    "type": "string",
+                    "enum": ["AVG", "SUM", "MIN", "MAX", "COUNT", "STDDEV"]
+                  },
+                  "column": {
+                    "type": "string"
+                  },
+                  "alias": {
+                    "type": "string"
+                  }
+                },
+                "required": ["fn", "column"]
+              }
+            ]
+          }
+        },
+        "group_by": {
+          "type": "array",
+          "description": "Columns to group by",
+          "items": {
+            "type": "string"
+          }
+        },
+        "order_by": {
+          "type": "array",
+          "description": "Sort order",
+          "items": {
+            "type": "object",
+            "properties": {
+              "column": {
+                "type": "string"
+              },
+              "direction": {
+                "type": "string",
+                "enum": ["ASC", "DESC"]
+              }
+            },
+            "required": ["column"]
+          }
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "Maximum rows to return"
+        },
+        "include_schema": {
+          "type": "boolean",
+          "description": "Include schema in response"
+        }
+      },
+      "required": ["datasets"]
+    },
+    
+    "QueryEngineResponse": {
+      "type": "object",
+      "description": "Query Engine MCP API response",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["query_execute", "query_validation"]
+            },
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "normalized_payload": {
+                  "$ref": "#/definitions/QueryEnginePayload"
+                },
+                "warnings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "result": {
+                  "type": "object",
+                  "properties": {
+                    "records": {
+                      "type": "array",
+                      "description": "Query result rows"
+                    },
+                    "row_count": {
+                      "type": "integer"
+                    },
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "sql": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "catalog": {
+              "type": "object",
+              "properties": {
+                "generated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "dataset_count": {
+                  "type": "integer"
+                }
+              }
+            },
+            "execution": {
+              "type": "object",
+              "properties": {
+                "dry_run": {
+                  "type": "boolean"
+                },
+                "duration_ms": {
+                  "type": "number"
+                },
+                "row_count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    
+    "RQJobPayload": {
+      "type": "object",
+      "description": "Redis Queue job metadata",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["queued", "started", "finished", "failed", "canceled"]
+        },
+        "result": {
+          "description": "Job return value (available when finished)"
+        },
+        "exc_info": {
+          "type": ["string", "null"],
+          "description": "Exception traceback (if failed)"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Custom job metadata"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "started_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "ended_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    
+    "RedisLockPayload": {
+      "type": "object",
+      "description": "Redis distributed lock structure (DB 0)",
+      "properties": {
+        "token": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Lock ownership token"
+        },
+        "owner": {
+          "type": "string",
+          "description": "Lock owner identifier (hostname:pid)"
+        },
+        "acquired_at": {
+          "type": "number",
+          "description": "Unix timestamp when lock acquired"
+        }
+      },
+      "required": ["token", "owner", "acquired_at"]
+    },
+    
+    "RedisStatusMessage": {
+      "type": "object",
+      "description": "Status message published to Redis DB 2",
+      "properties": {
+        "channel": {
+          "type": "string",
+          "description": "Redis channel name (e.g., 'runid:wepp')"
+        },
+        "runid": {
+          "type": "string",
+          "description": "Run identifier"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+        },
+        "message": {
+          "type": "string",
+          "description": "Log message"
+        },
+        "extra": {
+          "type": "object",
+          "description": "Additional structured data"
+        }
+      },
+      "required": ["channel", "runid", "timestamp", "level", "message"]
+    },
+    
+    "WebSocketMessage": {
+      "type": "object",
+      "description": "WebSocket message from status2 service to browser",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["status", "heartbeat", "error"]
+        },
+        "data": {
+          "description": "Message payload (structure depends on type)"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["type", "timestamp"]
+    },
+    
+    "CatalogEntry": {
+      "type": "object",
+      "description": "Query Engine catalog dataset entry",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Relative path to parquet file"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "description": "File size in bytes"
+        },
+        "modified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "row_count": {
+          "type": "integer",
+          "description": "Number of rows (if available)"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Schema fields",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "description": "Arrow/Parquet type"
+              },
+              "nullable": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "required": ["path", "size_bytes"]
+    }
+  },
+  
+  "examples": [
+    {
+      "description": "Climate NoDb controller serialization",
+      "value": {
+        "py/object": "wepppy.nodb.core.climate.Climate",
+        "wd": "/wc1/runs/copacetic-note",
+        "mode": 0,
+        "station_id": "14826",
+        "climate_data": {
+          "start_date": "2020-01-01",
+          "end_date": "2020-12-31",
+          "records": []
+        }
+      }
+    },
+    {
+      "description": "Query Engine execute request",
+      "value": {
+        "datasets": [
+          {
+            "path": "datasets/hillslopes.parquet",
+            "alias": "h"
+          }
+        ],
+        "columns": ["wepp_id", "soil_loss", "area_ha"],
+        "filters": [
+          {
+            "column": "soil_loss",
+            "operator": ">",
+            "value": 10.0
+          }
+        ],
+        "aggregations": [
+          {
+            "fn": "AVG",
+            "column": "soil_loss",
+            "alias": "avg_loss"
+          }
+        ],
+        "order_by": [
+          {
+            "column": "soil_loss",
+            "direction": "DESC"
+          }
+        ],
+        "limit": 100
+      }
+    },
+    {
+      "description": "Redis lock payload",
+      "value": {
+        "token": "a7f3e9d2-1234-5678-9abc-def012345678",
+        "owner": "weppcloud-worker-1:12345",
+        "acquired_at": 1702123456.789
+      }
+    }
+  ]
+}

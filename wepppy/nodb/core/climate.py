@@ -6,6 +6,45 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""Climate data management and WEPP climate file generation.
+
+This module provides the Climate NoDb controller for managing climate data
+acquisition, processing, and WEPP .cli file generation. It supports multiple
+climate data sources including CLIGEN, Daymet, GridMET, PRISM, and observed data.
+
+Key Components:
+    Climate: NoDb controller for climate data management
+    ClimateMode: Enum defining climate data sources
+    ClimateSpatialMode: Enum for spatial climate data handling
+    ClimateStationMode: Enum for station selection methods
+    ClimateSummary: Data structure for climate statistics
+
+Climate Data Sources:
+    - CLIGEN: Statistical weather generator
+    - OBSERVED: Historical weather station data
+    - DAYMET: Gridded daily meteorology (1 km)
+    - GRIDMET: Gridded meteorology (4 km)
+    - PRISM: Parameter-elevation Regressions on Independent Slopes Model
+    - FUTURE: Climate projections (RCP scenarios)
+
+Example:
+    >>> from wepppy.nodb.core import Climate, ClimateMode
+    >>> climate = Climate.getInstance('/wc1/runs/my-run')
+    >>> climate.mode = ClimateMode.CLIGEN
+    >>> climate.download_climate_data('14826')
+    >>> climate.build_climate_files()
+
+See Also:
+    - wepppy.climates.cligen: CLIGEN climate generator
+    - wepppy.climates.daymet: Daymet data client
+    - wepppy.climates.gridmet: GridMET data client
+    - wepppy.climates.prism: PRISM data client
+
+Note:
+    Climate files are generated per hillslope as p{wepp_id}.cli
+    in the {wd}/wepp/runs/ directory.
+"""
+
 # standard library
 import csv
 import os

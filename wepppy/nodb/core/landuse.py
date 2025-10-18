@@ -6,6 +6,49 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""Land cover and management assignment for WEPP simulations.
+
+This module provides the Landuse NoDb controller for managing land cover data,
+vegetation classifications, and WEPP management file (.man) assignment to
+subcatchments. It supports multiple land cover data sources and management
+database systems.
+
+Key Components:
+    Landuse: NoDb controller for land cover management
+    LanduseMode: Enum defining land cover data sources
+    
+Land Cover Sources:
+    - NLCD: National Land Cover Database (US)
+    - RAP: Rangeland Analysis Platform
+    - TreeCanopy: Tree canopy cover data
+    - Single: Uniform management across watershed
+    - Gridded: Custom gridded land cover
+    
+Management Databases:
+    - Default WEPP management database
+    - Custom management rotations
+    - Disturbance scenarios (fire, logging, etc.)
+
+Example:
+    >>> from wepppy.nodb.core import Landuse, LanduseMode
+    >>> landuse = Landuse.getInstance('/wc1/runs/my-run')
+    >>> landuse.mode = LanduseMode.NLCD
+    >>> landuse.build_managements()
+    >>> print(landuse.domlc_d)  # Dominant land cover by subcatchment
+
+See Also:
+    - wepppy.landcover: Land cover classification and mapping
+    - wepppy.wepp.management: WEPP management file handling
+    - wepppy.nodb.mods.disturbed: Disturbance modeling
+
+Note:
+    Management files (.man) are generated per hillslope as p{wepp_id}.man
+    in the {wd}/wepp/runs/ directory.
+    
+Warning:
+    Land cover assignment requires completed watershed abstraction.
+"""
+
 # standard library
 import csv
 import json

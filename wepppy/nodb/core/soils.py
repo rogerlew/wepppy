@@ -6,6 +6,50 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""Soil data management and WEPP soil parameter file generation.
+
+This module provides the Soils NoDb controller for managing soil data acquisition,
+processing, and WEPP .sol file generation. It integrates with USDA soil databases
+(SSURGO, STATSGO) and the Rosetta pedotransfer function model.
+
+Key Components:
+    Soils: NoDb controller for soil data management
+    SoilsMode: Enum defining soil data sources
+    
+Soil Data Sources:
+    - SSURGO: Soil Survey Geographic Database (high resolution)
+    - STATSGO: State Soil Geographic Database (coarse resolution)
+    - Single: Uniform soil across watershed
+    - Gridded: Custom gridded soil data
+    
+Processing Pipeline:
+    1. Acquire spatial soil maps (raster or vector)
+    2. Extract dominant soil types per subcatchment
+    3. Query soil database for hydraulic properties
+    4. Apply Rosetta pedotransfer functions if needed
+    5. Generate WEPP .sol files per hillslope
+
+Example:
+    >>> from wepppy.nodb.core import Soils, SoilsMode
+    >>> soils = Soils.getInstance('/wc1/runs/my-run')
+    >>> soils.mode = SoilsMode.SSURGO
+    >>> soils.build_soils()
+    >>> print(soils.domsoil_d)  # Dominant soil by subcatchment
+
+See Also:
+    - wepppy.soils.ssurgo: SSURGO database integration
+    - wepppy.wepp.soils: WEPP soil file handling
+    - rosetta: Pedotransfer function model
+
+Note:
+    Soil files (.sol) are generated per hillslope as p{wepp_id}.sol
+    in the {wd}/wepp/runs/ directory.
+    
+Warning:
+    Soil assignment requires completed watershed abstraction.
+    SSURGO data availability varies by region.
+"""
+
 import os
 import inspect
 

@@ -6,6 +6,75 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""NoDb base implementation and distributed locking infrastructure.
+
+This module provides the foundational NoDbBase class and distributed locking
+mechanisms for WEPPpy's "NoDb" architecture. Instead of a traditional database,
+run state is serialized to JSON files on disk and cached in Redis with a 72-hour
+TTL.
+
+Core Philosophy:
+    - State persisted as human-readable JSON files
+    - Fast access via Redis cache (DB 13)
+    - Distributed locks via Redis (DB 0) for concurrent safety
+    - Singleton pattern per working directory
+    - Automatic telemetry pipeline integration
+
+Key Components:
+    NoDbBase: Base class for all NoDb controllers
+    TriggerEvents: Event registration system
+    LogLevel: Log level configuration
+    
+Redis Integration:
+    - DB 0: Distributed locks and run metadata
+    - DB 2: Status message pub/sub streaming
+    - DB 13: NoDb JSON cache (72-hour TTL)
+    - DB 15: Log level configuration
+
+Locking Mechanism:
+    - Atomic lock acquisition via Redis SET NX EX
+    - Lock ownership tokens (UUID)
+    - Configurable TTL (default 300s)
+    - Automatic lock release on context exit
+    - Lock ownership tracking (hostname:pid)
+
+Serialization:
+    - jsonpickle for Python object serialization
+    - Legacy module path redirects for backward compatibility
+    - Automatic `__all__` discovery for clean imports
+
+Example:
+    >>> from wepppy.nodb.base import NoDbBase
+    >>> 
+    >>> class MyController(NoDbBase):
+    ...     def __init__(self, wd):
+    ...         super().__init__(wd)
+    ...         self.data = {}
+    ... 
+    >>> controller = MyController.getInstance('/wc1/runs/my-run')
+    >>> with controller.locked():
+    ...     controller.data['key'] = 'value'
+    ...     controller.dump_and_unlock()
+
+See Also:
+    - wepppy.nodb.redis_prep: RedisPrep for working directory setup
+    - wepppy.nodb.status_messenger: StatusMessengerHandler for logging
+    - wepppy.nodb.core: Core NoDb controllers (Climate, Wepp, etc.)
+    - wepppy.nodb.mods: Optional NoDb extensions
+
+Note:
+    All NoDb controllers inherit from NoDbBase and must:
+    - Use getInstance() instead of direct __init__
+    - Acquire locks before mutations via with self.locked()
+    - Call dump_and_unlock() after state changes
+    - Update module __all__ exports
+
+Warning:
+    Never call __init__ directly - always use getInstance()
+    Never mutate state without acquiring lock first
+    Always call dump_and_unlock() before context exit
+"""
+
 import functools
 import importlib
 import inspect
