@@ -506,7 +506,10 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "SUBWTA.ARC")
         elif self.delineation_backend_is_wbt:
-            return self.wbt.subwta
+            wbt = self.wbt
+            if wbt is None:
+                raise ValueError("WBT instance is None")
+            return wbt.subwta
         else:
             return _join(self.taudem_wd, "subwta.tif")
 
@@ -1401,6 +1404,8 @@ class Watershed(NoDbBase):
                 for topaz_id, d in summaries.items()
             }
 
+        if self._subs_summary is None:
+            return {}
         return {str(k): v.as_dict() for k, v in self._subs_summary.items()}
 
     def chn_summary(self, topaz_id: Union[str, int]) -> Union[PeridotChannel, Dict[str, Any], None]:
@@ -1426,6 +1431,8 @@ class Watershed(NoDbBase):
 
     @deprecated
     def _deprecated_chn_summary(self, topaz_id: Union[str, int]) -> Union[Dict[str, Any], None]:
+        if self._chns_summary is None:
+            return None
         if str(topaz_id) in self._chns_summary:
             d = self._chns_summary[str(topaz_id)]
             if isinstance(d, dict):
@@ -1445,6 +1452,8 @@ class Watershed(NoDbBase):
                 for topaz_id, d in summaries.items()
             }
 
+        if self._chns_summary is None:
+            return {}
         return {k: v.as_dict() for k, v in self._chns_summary.items()}
 
     def hillslope_area(self, topaz_id: Union[str, int]) -> float:
@@ -1588,11 +1597,14 @@ class Watershed(NoDbBase):
         return lng, lat
 
     def hillslope_slp_fn(self, topaz_id: Union[str, int]) -> str:
-        wat_ss = self.subs_summary[topaz_id]
+        wat_ss = self.subs_summary[str(topaz_id)]
         if isinstance(wat_ss, HillSummary):  # deprecated
             slp_fn = _join(self.wat_dir, wat_ss.fname)
         elif isinstance(wat_ss, PeridotHillslope):
             slp_fn = _join(self.wat_dir, wat_ss.slp_rel_path)
+        else:
+            # Handle dict case
+            slp_fn = _join(self.wat_dir, wat_ss.get('slp_rel_path', wat_ss.get('fname', '')))
 
         return slp_fn
 
@@ -1614,6 +1626,8 @@ class Watershed(NoDbBase):
 
     @deprecated
     def _deprecated_centroid_hillslope_iter(self) -> Generator[Tuple[str, Tuple[float, float]], None, None]:
+        if self._subs_summary is None:
+            return
         i = 0
         for topaz_id, wat_ss in self._subs_summary.items():
             yield topaz_id, wat_ss.centroid.lnglat
