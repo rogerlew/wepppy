@@ -153,7 +153,12 @@ class MyController(NoDbBase):
         pass
 ```
 
-Run `python -m mypy wepppy/nodb/core/module.py` to validate type hints.
+Run type checking with mypy:
+```bash
+python -m mypy wepppy/nodb/core/topaz.py
+# Or check all core modules:
+python -m mypy wepppy/nodb/core/
+```
 
 ## Development Workflow
 

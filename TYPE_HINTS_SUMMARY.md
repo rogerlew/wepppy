@@ -5,7 +5,7 @@ This PR adds comprehensive type hints to core NoDb modules in the wepppy reposit
 
 ## Modules Updated
 
-### Completed (4 modules, 2,479 total lines)
+### Completed (4 modules, 3,619 total lines)
 
 1. **wepppy/nodb/core/topaz.py** (235 lines)
    - Added type hints to `Outlet` class
@@ -118,7 +118,7 @@ All modified modules have been validated to:
 ## Future Work
 
 ### Remaining Core Modules (3 modules, ~6,000 lines)
-- [ ] wepppy/nodb/core/watershed.py (1,596 lines) - Some hints already exist
+- [ ] wepppy/nodb/core/watershed.py (1,596 lines) - Partially complete, has some return type annotations
 - [ ] wepppy/nodb/core/climate.py (2,770 lines)
 - [ ] wepppy/nodb/core/wepp.py (2,670 lines)
 
@@ -155,7 +155,9 @@ When adding type hints to additional modules:
 
 5. **Test compilation**:
    ```bash
-   python -m py_compile wepppy/nodb/core/module.py
+   python -m py_compile wepppy/nodb/core/topaz.py
+   # Or validate all modified modules:
+   python -m py_compile wepppy/nodb/core/*.py
    ```
 
 6. **Update mypy.ini**:
