@@ -1,0 +1,192 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}{% block report_title %}{% endblock %}{% if ron.name %} - {{ ron.name }}{% endif %}{% endblock %}
+
+{% block body_container_class %}wc-container wc-container--fluid{% endblock %}
+{% block header_container_class %}wc-container wc-container--fluid{% endblock %}
+
+{% block site_header %}
+{% if current_ron %}
+<header class="wc-header wc-run-header">
+  <div class="wc-run-header__inner">
+    <div class="wc-run-header__brand">
+      <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
+      <div class="wc-run-header__meta">
+        <span class="wc-run-header__runid">{{ current_ron.runid }}</span>
+        <span class="wc-run-header__config">{{ current_ron.config_stem }}</span>
+      </div>
+    </div>
+    <div class="wc-run-header__fields">
+      <label class="wc-run-header__field">
+        <span>Project name</span>
+        <input id="input_name" name="name" type="text" class="wc-run-header__input disable-readonly"
+          placeholder="Name" value="{{ current_ron.name }}"
+          oninput="Project.getInstance().setNameFromInput()"
+          onblur="Project.getInstance().commitNameFromInput()">
+      </label>
+      <label class="wc-run-header__field">
+        <span>Scenario</span>
+        <input id="input_scenario" name="scenario" type="text" class="wc-run-header__input disable-readonly"
+          placeholder="Scenario" value="{{ current_ron.scenario }}"
+          oninput="Project.getInstance().setScenarioFromInput()"
+          onblur="Project.getInstance().commitScenarioFromInput()">
+      </label>
+    </div>
+    <div class="wc-run-header__actions">
+      <a class="pure-button pure-button-secondary" href="{{ url_for_run('run_0.runs0', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">Reload</a>
+      {% if not pup_relpath %}
+      <a class="pure-button pure-button-secondary" href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">Fork</a>
+      <a class="pure-button pure-button-secondary" href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">Archive</a>
+      {% endif %}
+      <a class="pure-button pure-button-secondary" href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">README</a>
+      <button type="button" class="pure-button" data-command="open-poweruser">PowerUser</button>
+      <button type="button" class="pure-button" data-command="open-unitizer">Unitizer</button>
+      <label class="wc-run-header__toggle">
+        <input id="checkbox_readonly" type="checkbox" {% if current_ron.readonly %}checked{% endif %}
+          onchange="Project.getInstance().set_readonly(this.checked);">
+        <span>Readonly</span>
+      </label>
+      <label class="wc-run-header__toggle">
+        <input id="checkbox_public" type="checkbox" {% if current_ron.public %}checked{% endif %}
+          onchange="Project.getInstance().set_public(this.checked);">
+        <span>Public</span>
+      </label>
+      {% if user.has_role('Admin') %}
+      <a class="pure-button pure-button-secondary" href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}" target="_blank" rel="noopener">Access log</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+{% else %}
+  {{ super() }}
+{% endif %}
+{% endblock %}
+
+{% block head_extras %}
+{{ super() }}
+<script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/controllers.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/report_csv.js') }}" defer></script>
+{% endblock %}
+
+{% block body %}
+{% include 'command-bar.htm' %}
+
+<section class="wc-stack">
+  {% block report_content %}{% endblock %}
+</section>
+
+{% include 'controls/unitizer_modal.htm' %}
+{% include 'controls/poweruser_panel.htm' %}
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/copytext.js') }}?20180904"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/sorttable.js') }}"></script>
+
+<script>
+(function () {
+  const site_prefix = {{ site_prefix | tojson }};
+  const runid = {{ ron.runid | tojson }};
+  const config = {{ ron.config_stem | tojson }};
+  window.site_prefix = site_prefix;
+  window.runid = runid;
+  window.config = config;
+  const project = window.Project ? window.Project.getInstance() : null;
+  const unitizerButton = document.querySelector('[data-command="open-unitizer"]');
+  const powerUserButton = document.querySelector('[data-command="open-poweruser"]');
+  const unitizerModal = document.getElementById('unitizerModal');
+  const powerUserModal = document.getElementById('puModal');
+  const pupRelPath = {{ current_ron.pup_relpath | tojson }};
+
+  function triggerUnitChange() {
+    if (project && typeof project.unitChangeEvent === 'function') {
+      project.unitChangeEvent();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (unitizerButton && unitizerModal) {
+      unitizerButton.addEventListener('click', () => {
+        const isHidden = unitizerModal.hasAttribute('hidden');
+        if (isHidden) {
+          unitizerModal.removeAttribute('hidden');
+          unitizerModal.dataset.open = 'true';
+          unitizerModal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          unitizerModal.setAttribute('hidden', 'hidden');
+          delete unitizerModal.dataset.open;
+        }
+      });
+    }
+
+    if (powerUserButton && powerUserModal) {
+      powerUserButton.addEventListener('click', () => {
+        const isHidden = powerUserModal.hasAttribute('hidden');
+        if (isHidden) {
+          powerUserModal.removeAttribute('hidden');
+          powerUserModal.dataset.open = 'true';
+          powerUserModal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          powerUserModal.setAttribute('hidden', 'hidden');
+          delete powerUserModal.dataset.open;
+        }
+      });
+    }
+
+    document.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-close');
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.setAttribute('hidden', 'hidden');
+          delete target.dataset.open;
+        }
+      });
+    });
+
+    document.querySelectorAll('[name^="unitizer_"]').forEach((el) => {
+      el.addEventListener('change', triggerUnitChange);
+    });
+
+    document.querySelectorAll('[name="uni_main_selector"]').forEach((el) => {
+      el.addEventListener('change', () => {
+        const pref = parseInt(document.querySelector('input[name="uni_main_selector"]:checked')?.value || '', 10);
+        if (!Number.isNaN(pref) && typeof window.setGlobalUnitizerPreference === 'function') {
+          window.setGlobalUnitizerPreference(pref);
+        }
+        triggerUnitChange();
+      });
+    });
+
+    triggerUnitChange();
+  });
+
+  if (pupRelPath) {
+    const appendPupParam = (url) => {
+      if (!url || /^https?:\/\//i.test(url) || url.startsWith('//') || url.includes('pup=')) {
+        return url;
+      }
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}pup=${encodeURIComponent(pupRelPath)}`;
+    };
+
+    const originalFetch = window.fetch;
+    window.fetch = function(input, init) {
+      if (typeof input === 'string') {
+        input = appendPupParam(input);
+      } else if (input instanceof Request) {
+        input = new Request(appendPupParam(input.url), input);
+      }
+      return originalFetch.call(this, input, init);
+    };
+
+    const originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+      return originalOpen.call(this, method, appendPupParam(url), async, user, password);
+    };
+  }
+})();
+</script>
+{% endblock %}

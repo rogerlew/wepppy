@@ -20,7 +20,6 @@ const config = "{{ config }}";
 </style>
 </head>
 <body>
-{% include 'header/header.htm' %}
 {% include 'command-bar.htm' %}
 <input type="text" value="{{ diff_runid|e }}" id="runIdInput" placeholder="runid">
 <button onclick="redirectToDiff()">Compare project</button>

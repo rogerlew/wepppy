@@ -1,40 +1,56 @@
-{% extends "reports/_page_container.htm" %}
-{% block report_title %}Average Annuals by Landuse{% endblock %}
+{% extends "reports/_base_report.htm" %}
+{% block report_title %}Average annuals by landuse{% endblock %}
 {% block report_content %}
-<h2>Average Annuals by Landuse (averaged by water year)</h2>
-<h5>
-  <a onclick="javascript:copytable('landuse_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
- <table class="table table-condensed" id="landuse_tbl">
-    <thead>
-      <tr>
-        {% for colname in report.hdr %}
-        <th>{{ colname }}</th>
+<header class="wc-stack">
+  <h1 class="wc-heading__title">Average annuals by landuse</h1>
+  <p class="wc-text-muted">Values are averaged by water year.</p>
+</header>
+
+<section class="wc-panel wc-stack">
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--dense sortable" id="landuse_tbl">
+      <thead>
+        <tr>
+          {% for colname in report.hdr %}
+            <th scope="col">{{ colname }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-sort-position="top">
+          {% for units in report.units %}
+            {% if units is none %}
+              <td>&nbsp;</td>
+            {% else %}
+              <td>{{ unitizer_units(units) | safe }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% for row in report %}
+          <tr>
+            {% for value, units in row %}
+              {% if loop.first %}
+                <td>{{ value }}</td>
+              {% else %}
+                <td>{{ unitizer(value, units) | safe }}</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
         {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-    <tr>
-      {% for units in report.units %}
-        {% if units is none%}
-        <td>&nbsp;</td>
-        {% else %}
-        <td>{{ unitizer_units(units) | safe }}</td>
-        {% endif %}
-      {% endfor %}
-    </tr>
-    {% for row in report %}
-    <tr>
-    {% for value, units in row %}
-        {% if loop.first %}
-        <td>{{ value }}</td>
-        {% else %}
-        <td>{{ unitizer(value, units) | safe }}</td>
-        {% endif %}
-    {% endfor %}
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
- <p>Landuse water balance measures are calculated for each landuse from the .wat.dat file by summing values within each water year and then dividing by the number of water years - 1.</p>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="wc-text-muted">
+    Landuse water balance measures are calculated for each landuse from the <code>.wat.dat</code> file by summing values
+    within each water year and then dividing by the number of water years minus one.
+  </p>
+  <div class="wc-table-actions">
+    <button type="button" class="pure-button pure-button-link" data-report-csv="landuse_tbl"
+      data-report-table="landuse"
+      data-report-url="{{ url_for_run('wepp.report_wepp_avg_annual_by_landuse', runid=runid, config=config, format='csv') }}">
+      Download CSV
+    </button>
+  </div>
+</section>
 {% endblock %}

@@ -97,6 +97,8 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 - `.wc-page`, `.wc-page__body`, `.wc-container`, and `.wc-reading` provide the basic shell, responsive gutters, and max widths.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L123-L147】
 - `.wc-header` and `.wc-header__inner` replace Bootstrap’s navbar with a Pure-compatible header strip, including a mobile breakpoint that stacks controls for narrow screens.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L151-L226】
 - `.wc-stack` is a single-column grid with `grid-template-columns: minmax(0, 1fr)` so nested panels, banners, or complex children never overflow the container while preserving consistent vertical rhythm.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L486-L493】
+- Use `.wc-container--fluid` when a page needs to span the full viewport (e.g., wide tables). Override both `body_container_class` and `header_container_class` in `base_pure.htm` so the masthead aligns with the content. Document when you do this; fluid layouts should be rare and deliberate.【F:wepppy/wepppy/weppcloud/templates/base_pure.htm†L17-L34】【F:wepppy/wepppy/weppcloud/templates/user/runs2.html†L5-L7】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L140-L148】
+- Report-specific layout, dependencies, and CSV/table guidance live in `docs/report-ui-conventions.md`. Review that note before modifying report templates so they stay aligned with the shared header, unitizer requirements, and download conventions.
 - All layout templates should import vendor CSS/JS via `url_for('static', ...)` paths so deployments never depend on external CDNs. If a new library is required, add it to the `static-src` pipeline instead of linking to third-party hosts.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64】【F:wepppy/wepppy/weppcloud/static-src/scripts/build.mjs†L17-L129】
 
 ## 4. Component guidance
@@ -153,8 +155,8 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 
 - Starlette surfaces that render these macros (e.g., the query engine) must extend their `Jinja2Templates` loader to include `weppcloud/templates` so the shared partials resolve next to app-local templates.【F:wepppy/wepppy/query_engine/app/server.py†L33-L40】
 
-### Modal/dialog content
-- When Bootstrap modals are required, apply `.pure-modal` on the dialog content to keep typography, spacing, and squared edges in sync, benefiting from the shared medium elevation shadow.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L846-L850】
+### Modal/dialogue content
+- When Bootstrap modals are required, apply `.pure-modal` on the dialogue content to keep typography, spacing, and squared edges in sync, benefiting from the shared medium elevation shadow.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L846-L850】
 
 ### Tooltip primitives
 - Use `.wc-tooltip` and `.wc-tooltip__bubble` to create accessible hover/focus descriptions without importing additional libraries. Anchor the bubble with `aria-describedby` IDs and toggle via CSS/JS as needed.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L617-L637】
@@ -203,7 +205,7 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 
 2. **Archive dashboard (`routes/archive_dashboard/templates/rq-archive-dashboard.htm`)**
    - *Current state:* Pulls full Bootstrap CSS/JS and jQuery for layout and modals; log panel mixes serif fonts and rounded boxes.【F:wepppy/wepppy/weppcloud/routes/archive_dashboard/templates/rq-archive-dashboard.htm†L5-L26】
-   - *Action:* Replace Bootstrap grid/buttons with Pure equivalents, restyle the log with `.wc-panel` + monospace, and limit Bootstrap to the modal markup (or reimplement modals with native `<dialog>` + `.pure-button`).
+   - *Action:* Replace Bootstrap grid/buttons with Pure equivalents, restyle the log with `.wc-panel` + monospace, and limit Bootstrap to the modal markup (or reimplement modals with native `<dialogue>` + `.pure-button`).
 
 3. **Deval loading screen (`templates/reports/deval_loading.htm`)**
    - *Current state:* Custom card UI with rounded corners, pill status chips, drop shadows, and accent colors that differ from the rest of the app.【F:wepppy/wepppy/weppcloud/templates/reports/deval_loading.htm†L21-L133】
@@ -230,7 +232,7 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 - After each cluster migration, remove unused Bootstrap imports and inline styles to keep the codebase lean.
 - Refresh this guide as new shared components emerge (e.g., pagination, diff viewers) so future contributions stay aligned with the cohesive visual language, and capture any updates to the static asset pipeline as libraries change versions.
 - Integrate the shared Stylelint ruleset (`.stylelintrc.json`) into CI so linting enforces the “no rounded corners” + token usage expectations automatically.【F:.stylelintrc.json†L1-L21】
-- Run a lightweight accessibility audit (Lighthouse or axe) after major migrations to confirm the light palette, focus outlines, and reduced-motion defaults behave as intended.
+- Run a lightweight accessibility audit (Lighthouse or ax) after major migrations to confirm the light palette, focus outlines, and reduced-motion defaults behave as intended.
 
 ## 10. Visual references & demos
 - Store screenshots or short GIFs that demonstrate core layouts under `docs/ui-reference/`. Capture at least: base layout shell, Pure form, table + pagination, status banner, tooltip example, and a dark-mode rendering.

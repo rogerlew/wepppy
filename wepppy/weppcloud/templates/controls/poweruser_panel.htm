@@ -62,7 +62,7 @@
     padding-bottom: 0.4rem;
   }
 </style>
-<div class="modal fade" id="puModal" role="dialog">
+<div class="modal fade" id="puModal" role="dialog" hidden>
   <script>
     // System Notifications
 
@@ -262,7 +262,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h4 data-toc-skip class="modal-title">PowerUser Panel</h4>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <button type="button" class="close" data-close="puModal">&times;</button>
       </div>
       <div class="modal-body">
         {% macro browse_url(path) -%}

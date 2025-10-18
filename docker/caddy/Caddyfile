@@ -22,10 +22,6 @@ http://:8080 {
         reverse_proxy preflight:9001
     }
 
-    handle_path /webservices/elevationquery* {
-        reverse_proxy elevationquery:8002
-    }
-
     handle_path /webservices/metquery* {
         reverse_proxy metquery:8004
     }
@@ -91,6 +87,15 @@ http://:8080 {
             header_up Host {host}
             transport http {
                 read_timeout 5m
+            }
+        }
+    }
+
+    @elevationquery path_regexp elevationquery ^/weppcloud/runs/[^/]+/[^/]+/elevationquery/?$
+    handle @elevationquery {
+        reverse_proxy elevationquery:8002 {
+            transport http {
+                read_timeout 3m
             }
         }
     }

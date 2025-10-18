@@ -1,22 +1,136 @@
 """Routes for wepp blueprint extracted from app.py."""
 
+import io
+from datetime import datetime
+
 import wepppy
 
 from .._common import *  # noqa: F401,F403
 
 from wepppy.all_your_base import isint
 from wepppy.nodb.core import Landuse, Ron, Climate, Watershed, Wepp
-from wepppy.nodb.unitizer import Unitizer
+from wepppy.nodb.unitizer import Unitizer, precisions, converters
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
 from wepppy.wepp.reports import ChannelSummaryReport, HillSummaryReport, OutletSummaryReport
 from wepppy.wepp.reports import TotalWatbalReport
+from wepppy.wepp.reports.report_base import ReportBase
+from wepppy.wepp.reports.row_data import parse_name, parse_units
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
 import json
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
+from flask import Response
 
 wepp_bp = Blueprint('wepp', __name__)
+
+
+def _wants_csv() -> bool:
+    fmt = (request.args.get('format') or '').lower()
+    if fmt == 'csv':
+        return True
+    accept = request.headers.get('Accept', '')
+    return 'text/csv' in accept.lower()
+
+
+def _render_report_csv(*, runid, report: ReportBase, unitizer, slug, table=None):
+    df = report.to_dataframe()
+    df = _apply_unitizer_preferences(df, unitizer)
+
+    buffer = io.StringIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)
+
+    timestamp = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    filename_parts = [runid, timestamp, slug]
+    if table:
+        filename_parts.append(table)
+    filename = '-'.join(filename_parts) + '.csv'
+
+    return Response(
+        buffer.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+    )
+
+
+def _apply_unitizer_preferences(df, unitizer):
+    try:
+        preferences = unitizer.preferences()
+    except TypeError:
+        preferences = unitizer.preferences
+    renames = {}
+
+    for column in list(df.columns):
+        name = parse_name(column)
+        base_units = parse_units(column)
+        if base_units:
+            unitclass = _determine_unitclass(base_units)
+            if unitclass:
+                base_key = _find_unit_key(unitclass, base_units)
+                pref_choice = preferences.get(unitclass, base_key)
+                pref_key = _find_unit_key(unitclass, pref_choice)
+                target_units = _display_units(pref_key)
+                converter = _get_converter(unitclass, base_key, pref_key)
+                if converter:
+                    df[column] = df[column].apply(lambda value: _convert_value(value, converter))
+                renames[column] = f"{name} ({target_units})"
+            else:
+                renames[column] = f"{name} ({base_units})"
+        else:
+            renames[column] = name
+
+    return df.rename(columns=renames)
+
+
+def _determine_unitclass(unit):
+    if not unit:
+        return None
+    target = unit.split(',')[0]
+    for unitclass, options in precisions.items():
+        for key in options.keys():
+            if key.split(',')[0] == target:
+                return unitclass
+    return None
+
+
+def _find_unit_key(unitclass, unit):
+    target = (unit or '').split(',')[0]
+    for key in precisions[unitclass].keys():
+        if key.split(',')[0] == target:
+            return key
+    return unit
+
+
+def _display_units(unit):
+    return (unit or '').split(',')[0]
+
+
+def _get_converter(unitclass, from_unit, to_unit):
+    mapping = converters.get(unitclass, {})
+    candidates = [
+        (from_unit, to_unit),
+        (from_unit.split(',')[0], to_unit),
+        (from_unit, to_unit.split(',')[0]),
+        (from_unit.split(',')[0], to_unit.split(',')[0]),
+    ]
+    for pair in candidates:
+        converter = mapping.get(pair)
+        if converter:
+            return converter
+    return None
+
+
+def _convert_value(value, converter):
+    if value in (None, ''):
+        return value
+    try:
+        return converter(float(value))
+    except Exception:
+        try:
+            return converter(value)
+        except Exception:
+            return value
 
 @wepp_bp.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>')
 @wepp_bp.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>/')
@@ -264,6 +378,15 @@ def report_wepp_avg_annual_by_landuse(runid, config):
     wepp = Wepp.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
     report = AverageAnnualsByLanduseReport(wd)
+
+    if _wants_csv():
+        return _render_report_csv(
+            runid=runid,
+            report=report,
+            unitizer=unitizer,
+            slug="avg_annuals_by_landuse",
+            table=request.args.get('table')
+        )
 
     return render_template('reports/wepp/avg_annuals_by_landuse.htm', runid=runid, config=config,
                         unitizer_nodb=unitizer,

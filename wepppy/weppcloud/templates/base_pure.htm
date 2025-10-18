@@ -14,7 +14,7 @@
   <body class="wc-page">
     {% block site_header %}
     <header class="wc-header">
-      <div class="wc-header__inner wc-container">
+      <div class="wc-header__inner {% block header_container_class %}wc-container{% endblock %}">
         <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
         <div class="wc-header__nav">
           {% block header_nav %}{% endblock %}

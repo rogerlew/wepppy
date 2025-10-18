@@ -7,7 +7,7 @@
   {% endif %}
   {% call console_macros.console_page(data_controller=data_controller, include_command_bar=include_command_bar, classes=page_classes) %}
     {% call console_macros.console_header(title=title, subtitle=subtitle, actions=actions, run_target='_self', run_rel=None) %}{% endcall %}
-    {{ caller() }}
+    {% if caller is defined %}{{ caller() }}{% endif %}
   {% endcall %}
 {% endmacro %}
 

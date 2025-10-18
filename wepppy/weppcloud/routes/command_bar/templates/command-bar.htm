@@ -1,7 +1,8 @@
 <style>
 .command-bar-container {
-  color: #ffffff;
-  background: #343a40;
+  color: var(--wc-color-text);
+  background: #f8f9fa;
+  border-top: 1px solid var(--wc-color-border);
   position: fixed;
   bottom: 0;
   left: 0;
@@ -13,8 +14,8 @@
   flex-direction: column;
   gap: 4px;
   padding: 6px 10px;
-  font-family: monospace;
-  font-size: x-small;
+  font-family: var(--wc-font-mono);
+  font-size: 0.75rem;
 }
 .command-bar-input-wrapper[hidden],
 .command-bar-result[hidden] {
@@ -26,24 +27,31 @@
 .command-bar-input-wrapper input {
   padding: 2px 6px;
   height: auto;
-  font-family: monospace;
-  font-size: x-small;
   width: 100%;
+  font-family: var(--wc-font-mono);
+  font-size: 0.8rem;
+  color: var(--wc-color-text);
+  background: var(--wc-color-page);
+  border: 1px solid var(--wc-color-border);
+}
+.command-bar-input-wrapper input:focus {
+  outline: 2px solid var(--wc-color-accent);
+  outline-offset: 2px;
 }
 .command-bar-result {
   padding: 4px 6px;
   background: #495057;
   border-radius: 3px;
-  font-family: monospace;
-  font-size: x-small;
+  font-family: var(--wc-font-mono);
+  font-size: 0.85rem;
 }
 .command-bar-result pre {
   color: #f8f9fa;
   margin: 0;
   white-space: break-spaces;
   overflow-wrap: break-word;
-  font-family: monospace;
-  font-size: x-small;
+  font-family: var(--wc-font-mono);
+  font-size: 0.85rem;
 }
 .command-bar-token-card {
   display: flex;

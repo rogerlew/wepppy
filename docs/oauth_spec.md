@@ -65,7 +65,7 @@ Add a uniqueness constraint on `(provider, provider_uid)` to prevent duplicate l
 - Add a new blueprint `security_oauth_bp` under `wepppy/weppcloud/routes/_security/oauth.py` with endpoints:
   - `GET /oauth/<provider>/login` – start authorization, build `redirect_uri` with `url_for('security_oauth.callback', provider=provider, _external=True, _scheme=OAUTH_REDIRECT_SCHEME)`.
   - `GET /oauth/<provider>/callback` – handle response, exchange code, call linking logic, and redirect to `SECURITY_POST_LOGIN_VIEW`.
-  - `POST /oauth/<provider>/disconnect` – allow authenticated users to unlink providers (optional, gated behind password re-entry for safety).
+  - `POST /oauth/<provider>/disconnect` – allow authenticated users to unlink providers (optional, gated behind password reentry for safety).
 - Register the blueprint alongside `security_ui_bp` during app bootstrap in `_blueprints_context.register_blueprints` so routes inherit the same `SITE_PREFIX` prefix.
 - Integrate with Flask-Security by:
   - Calling `login_user(user, remember=True)` once the OAuth identity is validated.

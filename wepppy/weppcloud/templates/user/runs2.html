@@ -1,131 +1,172 @@
-{% extends "security/_layout.html"%}
-{% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
-{% block title %}
-Runs
-{% endblock %}
-{% block content %}
+{% extends "base_pure.htm" %}
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"
-        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="  crossorigin="anonymous"></script>
+{% block title %}Runs{% endblock %}
+
+{% block body_container_class %}wc-container wc-container--fluid{% endblock %}
+{% block header_container_class %}wc-container wc-container--fluid{% endblock %}
+
+{% block body %}
+{% macro sortable_header(label, field) %}
+  {% set current_sort = sort | default('last_modified', true) %}
+  {% set current_direction = direction | default('desc', true) %}
+  {% set is_active = (current_sort == field) %}
+  {% set asc_active = is_active and current_direction == 'asc' %}
+  {% set desc_active = is_active and current_direction == 'desc' %}
+  {% set per_page_value = per_page | default(100, true) %}
+  <div class="wc-sortable-header">
+    <span class="wc-sortable-header__label">{{ label }}</span>
+    <span class="wc-sortable-header__controls" role="group" aria-label="Sort {{ label }}">
+      <a
+        class="wc-sortable-header__control {{ 'is-active' if asc_active }}"
+        href="{{ url_for('user.runs', page=1, sort=field, direction='asc', per_page=per_page_value) }}"
+        aria-label="Sort {{ label }} ascending"
+      >&#9650;</a>
+      <a
+        class="wc-sortable-header__control {{ 'is-active' if desc_active }}"
+        href="{{ url_for('user.runs', page=1, sort=field, direction='desc', per_page=per_page_value) }}"
+        aria-label="Sort {{ label }} descending"
+      >&#9660;</a>
+    </span>
+  </div>
+{% endmacro %}
+
+{% include 'command-bar.htm' %}
+
+<section class="wc-stack wc-table-page">
+  <header class="wc-stack">
+    <div class="wc-console-header">
+      <div class="wc-console-header__primary">
+        <h1 class="wc-heading__title">Runs</h1>
+      </div>
+    </div>
+  </header>
+
+  <section class="wc-panel wc-stack">
+    <div class="wc-toolbar wc-toolbar--end">
+      <button type="button" class="pure-button pure-button-secondary" id="delete_runs_button" onclick="deleteRuns()" disabled>Delete selected</button>
+    </div>
+
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense" id="runs_table">
+        <thead>
+          <tr>
+            {% if show_owner %}<th scope="col">Owner</th>{% endif %}
+            <th scope="col">{{ sortable_header('Project name', 'name') }}</th>
+            <th scope="col">{{ sortable_header('Scenario', 'scenario') }}</th>
+            <th scope="col">{{ sortable_header('Run ID', 'runid') }}</th>
+            <th scope="col">{{ sortable_header('Config', 'config') }}</th>
+            <th scope="col">Link</th>
+            <th scope="col">{{ sortable_header('Creation date', 'date_created') }}</th>
+            <th scope="col">{{ sortable_header('Last modified', 'last_modified') }}</th>
+            <th scope="col" class="wc-text-muted" title="Do not add columns that normalize casing in headers.">Select</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for meta in user_runs %}
+          <tr id="{{ meta.runid }}">
+            {% if show_owner %}<td>{{ meta.owner }}</td>{% endif %}
+            <td>{{ meta.name }}</td>
+            <td>{{ meta.scenario }}</td>
+            <td>{{ meta.runid }}</td>
+            <td>{{ meta.config }}</td>
+            <td>
+              <a class="pure-button pure-button-secondary" href="{{ site_prefix }}/runs/{{ meta.runid }}/{{ meta.config }}/" target="_blank" rel="noopener">Open</a>
+            </td>
+            <td>{{ meta.date_created }}</td>
+            <td>{{ meta.last_modified }}</td>
+            <td>
+              <input type="checkbox" value="{{ meta.runid }}" {% if meta.readonly %}disabled{% endif %} aria-label="Select {{ meta.runid }}">
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="10" class="wc-text-muted">No runs found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if pagination %}
+      {% set per_page_value = per_page | default(100, true) %}
+      {% set sort_value = sort | default('last_modified', true) %}
+      {% set direction_value = direction | default('desc', true) %}
+      <nav aria-label="Runs pagination" class="wc-pagination-nav">
+        <ul class="wc-pagination">
+          <li>
+            {% if pagination.has_prev %}
+              <a href="{{ url_for('user.runs', page=pagination.prev_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}" aria-label="Previous">&laquo;</a>
+            {% else %}
+              <span aria-hidden="true">&laquo;</span>
+            {% endif %}
+          </li>
+          {% for p in range(max(1, pagination.page - 2), min(pagination.pages, pagination.page + 2) + 1) %}
+            <li>
+              {% if p == pagination.page %}
+                <span aria-current="page">{{ p }}</span>
+              {% else %}
+                <a href="{{ url_for('user.runs', page=p, sort=sort_value, direction=direction_value, per_page=per_page_value) }}">{{ p }}</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+          <li>
+            {% if pagination.has_next %}
+              <a href="{{ url_for('user.runs', page=pagination.next_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}" aria-label="Next">&raquo;</a>
+            {% else %}
+              <span aria-hidden="true">&raquo;</span>
+            {% endif %}
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
+  </section>
+</section>
 
 <script>
+  const sitePrefix = {{ site_prefix | default('', true) | tojson }};
+  const deleteButton = document.getElementById('delete_runs_button');
+  const runsTable = document.getElementById('runs_table');
 
-$(document).ready(function(){
-});
-
-function delete_run(runid, res) {
-
-  if (res !== true) {
-      var res = confirm("Are you sure you want to delete '" + runid + "'?");
-  }
-
-  if (res === true)
-  {
-      $.post({
-          url: "/weppcloud/runs/" + runid + "/0/tasks/delete/",
-          success: function success(response) {
-              console.log("run has been deleted");
-              $("#" + runid).hide();
-          },
-          fail: function fail(error) {
-              console.log(error);
-          }
-      });
-
-  }
-  console.log(res);
-}
-
-function delete_runs() {
-  var checks = $('input[type=checkbox]:checked');
-  var runids = new Array();
-  for (var i=0; i < checks.length; i++ ) {
-    runids.push(checks[i].value);
-  }
-
-  var res = confirm("Are you sure you want to delete " + runids.join(", ") + "?");
-  if (res === true) {
-    for (var i=0; i < runids.length; i++) {
-      delete_run(runids[i], true);
+  async function deleteRun(runid) {
+    const response = await fetch(`${sitePrefix}/runs/${runid}/0/tasks/delete/`, { method: 'POST' });
+    if (response.ok) {
+      const row = document.getElementById(runid);
+      if (row) {
+        row.remove();
+      }
+    } else {
+      console.error('Failed to delete run', runid);
     }
   }
-}
 
+  function updateDeleteState() {
+    const checked = runsTable.querySelectorAll('input[type="checkbox"]:checked');
+    deleteButton.disabled = checked.length === 0;
+  }
+
+  function deleteRuns() {
+    const checks = Array.from(runsTable.querySelectorAll('input[type="checkbox"]:checked'));
+    if (!checks.length) {
+      return;
+    }
+    const runids = checks.map((el) => el.value);
+    const confirmed = window.confirm(`Delete ${runids.join(', ')}?`);
+    if (!confirmed) {
+      return;
+    }
+    runids.forEach(deleteRun);
+  }
+
+  if (!runsTable) {
+    console.warn('Runs table not found; skipping selection logic.');
+    if (deleteButton) {
+      deleteButton.disabled = true;
+    }
+  } else {
+    runsTable.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+      checkbox.addEventListener('change', updateDeleteState);
+    });
+    updateDeleteState();
+  }
 </script>
-
-<table class="table">
-  <thead>
-    <tr>
-      {% if show_owner %} <th>Owner</th> {% endif %}
-      <th>Project Name</th>
-      <th>Scenario</th>
-      <th>Run ID</th>
-      <th>Config</th>
-      <th>Location (What3Words)</th>
-      <th>Link</th>
-      <th>Creation Date</th>
-      <th>Last Modified</th>
-      <th><button type="button" class="btn btn-danger"  
-           onclick="delete_runs()">Delete</button>
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for meta in user_runs %}
-        <tr id="{{ meta.runid }}">
-          {% if show_owner %} <td> {{ meta.owner }} </td> {% endif %}
-          <td>{{ meta.name }}</td>
-          <td>{{ meta.scenario }}</td>
-          <td>{{ meta.runid }}</td>
-          <td>{{ meta.config }}</td>
-          <td>{{ meta.w3w }}</td>
-          <td>
-              <a class="btn btn-primary" 
-                 href="{{ url_for_run('run_0.runs0', runid=meta.runid, config=meta.config) }}"
-                 role="button" target="_blank">Open</a>
-          </td>
-          <td>{{ meta.date_created }}</td>
-          <td>{{ meta.last_modified }}</td>
-          <td>
-              <input type="checkbox" value="{{ meta.runid }}" {%if meta.readonly %} disabled {% endif %}>
-              <!--button type="button" class="btn btn-danger"  onclick="delete_run('{{ meta.runid }}')">Delete</button-->
-        </tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% if pagination is defined %}
-<nav aria-label="Runs pagination">
-  <ul class="pagination">
-    {% if pagination.has_prev %}
-      <li class="page-item">
-        <a class="page-link"
-           href="{{ url_for('user.runs', page=pagination.prev_num) }}"
-           aria-label="Previous">
-          &laquo;
-        </a>
-      </li>
-    {% else %}
-      <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
-    {% endif %}
-
-    {% for p in range(max(1, pagination.page-2), min(pagination.pages, pagination.page+2)+1) %}
-      <li class="page-item {{ 'active' if p == pagination.page }}">
-        <a class="page-link" href="{{ url_for('user.runs', page=p) }}">{{ p }}</a>
-      </li>
-    {% endfor %}
-
-    {% if pagination.has_next %}
-      <li class="page-item">
-        <a class="page-link"
-           href="{{ url_for('user.runs', page=pagination.next_num) }}"
-           aria-label="Next">
-          &raquo;
-        </a>
-      </li>
-    {% else %}
-      <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
-    {% endif %}
-  </ul>
-</nav>
-{% endif %}
 {% endblock %}

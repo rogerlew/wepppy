@@ -35,23 +35,44 @@ var Map = function () {
 
         that.fetchTimer;
         that.centerInput = $("#input_centerloc");
+        var encodedRunId = (typeof runid !== "undefined" && runid !== null) ? encodeURIComponent(runid) : null;
+        var encodedConfig = (typeof config !== "undefined" && config !== null) ? encodeURIComponent(config) : null;
+        var elevationEndpoint = null;
+        if (encodedRunId && encodedConfig) {
+            var prefix = (typeof site_prefix === "string") ? site_prefix : "";
+            elevationEndpoint = prefix + "/runs/" + encodedRunId + "/" + encodedConfig + "/elevationquery/";
+        }
+
         that.fetchElevation = function (ev) {
             var self = instance;
 
-            $.post({
-                url: "/webservices/elevationquery/",
+            if (!elevationEndpoint) {
+                self.isFetchingElevation = false;
+                return;
+            }
+
+            $.ajax({
+                method: "POST",
+                url: elevationEndpoint,
                 data: JSON.stringify({ lat: ev.latlng.lat, lng: ev.latlng.lng }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 cache: false,
                 success: function (response) {
+                    var cursorLng = coordRound(ev.latlng.lng);
+                    var cursorLat = coordRound(ev.latlng.lat);
+
+                    if (!response || typeof response.Elevation !== "number" || !isFinite(response.Elevation)) {
+                        var message = (response && response.Error) ? response.Error : "Elevation unavailable";
+                        self.mouseelev.show().text("| Elevation: " + message + " | Cursor: " + cursorLng + ", " + cursorLat);
+                        return;
+                    }
+
                     var elev = response.Elevation.toFixed(1);
-                    var lng = coordRound(ev.latlng.lng);
-                    var lat = coordRound(ev.latlng.lat);
-                    self.mouseelev.show().text("| Elevation: " + elev + " m | Cursor: " + lng + ", " + lat);
+                    self.mouseelev.show().text("| Elevation: " + elev + " m | Cursor: " + cursorLng + ", " + cursorLat);
                 },
                 error: function (jqXHR) {
-                    console.log(jqXHR.responseJSON);
+                    console.log(jqXHR.responseJSON || jqXHR.statusText || "Elevation request failed");
                 },
                 complete: function () {
                     // Reset the timer in the complete callback

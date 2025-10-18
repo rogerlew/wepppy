@@ -35,10 +35,20 @@
 </div>
 <script>
 
-function setGlobalUnitizerPreference(pref)
-{
+function setGlobalUnitizerPreference(pref) {
+    const index = Number(pref);
+    if (Number.isNaN(index)) {
+        return;
+    }
     {% for unitclass in precisions %}
-    $("[name^=unitizer_{{unitclass}}_radio]")[pref].checked = true;
+    (function () {
+        const radios = document.querySelectorAll('input[name="unitizer_{{unitclass}}_radio"]');
+        const target = radios[index];
+        if (!target) {
+            return;
+        }
+        target.checked = true;
+    })();
     {% endfor %}
 }
 </script>
