@@ -1,5 +1,7 @@
 # WEPPcloud App
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Flask web application structure and route organization patterns.
+
 ## Routes
 
 ### Organization

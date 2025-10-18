@@ -1,5 +1,7 @@
 # Reports Refactor Notes
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for WEPP model file management and validation sections.
+
 This document summarizes the reporting stack that now lives in
 `wepppy.wepp.reports`: the `ReportBase` contract, shared helper classes,
 the recommended pattern for authoring new reports, and a catalog of the

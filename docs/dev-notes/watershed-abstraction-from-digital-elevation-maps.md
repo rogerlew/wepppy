@@ -1,5 +1,7 @@
 # Watershed Abstraction from Digital Elevation Maps (DEM)
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Watershed delineation (TOPAZ, Peridot/Rust, WhiteboxTools) and WhiteboxTools Integration sections.
+
 The WEPP model requires an abstracted watershed model comprised of a channel or stream network and hillslopes or subcatchments flowing into the channel segments.
 
 Watershed abstraction begins by acquiring a Digital Elevation Map or DEM.

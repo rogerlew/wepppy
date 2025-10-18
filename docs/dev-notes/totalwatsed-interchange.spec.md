@@ -1,5 +1,7 @@
 # Daily combined output over hillslope `H.wat.parquet` and `H.pass.parquet` interchange outputs
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for WEPP model integration and [wepp_interchange.spec.md](wepp_interchange.spec.md) for overall interchange architecture.
+
 At after `run_wepp_hillslope_interchange` create `interchange/totalwatsed3.parquet`
 
 Kitchen sink of daily (`sim_day_index` is the 1-indexed simulation day) measures for watershed.

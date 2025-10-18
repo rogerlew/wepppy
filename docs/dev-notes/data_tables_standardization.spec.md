@@ -1,5 +1,7 @@
 # Data Table ID Standardization
 
+> **See also:** [AGENTS.md](../../AGENTS.md) Notes for Next Pass section regarding ID standardization and migrations.
+
 ## Why
 - Align all parquet assets on numeric join keys (`wepp_id`, `topaz_id`) using nullable `Int32`.  
 - Match interchange outputs and simplify analytics/query-engine joins.  

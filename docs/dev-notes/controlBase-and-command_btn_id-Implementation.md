@@ -1,5 +1,7 @@
 # controlBase and command_btn_id Implementation
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Front-End Development and Controller Bundling sections, and [controllers_js.md](controllers_js.md) for controller architecture overview.
+
 **Date:** September 24, 2025  
 **Author:** GitHub Copilot (Claude 4 Sonnet)  
 **Source:** `/workdir/wepppy/wepppy/weppcloud/static/js/controllers.js`
