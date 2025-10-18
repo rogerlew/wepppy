@@ -10,6 +10,7 @@ from flask import flash, session
 from flask_security import current_user
 from flask_security.utils import login_user
 from flask_wtf.csrf import validate_csrf
+from typing import TYPE_CHECKING
 from wtforms.validators import ValidationError
 
 from .._common import (
@@ -20,7 +21,6 @@ from .._common import (
     request,
     url_for,
 )
-from wepppy.weppcloud.app import OAuthAccount, User, user_datastore
 from wepppy.weppcloud.utils.oauth import (
     build_pkce_pair,
     ensure_oauth_client,
@@ -28,6 +28,9 @@ from wepppy.weppcloud.utils.oauth import (
     provider_enabled,
     utc_now,
 )
+
+if TYPE_CHECKING:
+    from wepppy.weppcloud.app import OAuthAccount, User
 
 
 logger = logging.getLogger("weppcloud.security.oauth")
@@ -41,6 +44,18 @@ _SESSION_NEXT_KEY = "oauth_next"
 def _get_provider_settings(provider: str) -> Optional[Dict[str, Any]]:
     providers = current_app.config.get("OAUTH_PROVIDERS", {}) or {}
     return providers.get(provider)
+
+
+def _get_user_datastore():
+    from wepppy.weppcloud.app import user_datastore
+
+    return user_datastore
+
+
+def _get_oauth_account_model():
+    from wepppy.weppcloud.app import OAuthAccount
+
+    return OAuthAccount
 
 
 def _store_session_value(bucket_key: str, provider: str, value: Optional[str]):
@@ -189,17 +204,19 @@ def _link_identity(
     email: str,
     profile: Dict[str, Any],
     token: Dict[str, Any],
-) -> User:
+) -> "User":
     """Link an OAuth identity to a user record (creating one if needed).
 
     Raises:
         ValueError: if the identity is already linked to a different user.
     """
-    account = user_datastore.find_oauth_account(provider, provider_uid)
-    user: Optional[User] = account.user if account else None
+    datastore = _get_user_datastore()
+
+    account = datastore.find_oauth_account(provider, provider_uid)
+    user = account.user if account else None
 
     if not user and email:
-        user = user_datastore.find_user(email=email)
+        user = datastore.find_user(email=email)
 
     if user and not user.active:
         abort(403, description="Account is inactive; contact support.")
@@ -207,19 +224,19 @@ def _link_identity(
     if not user:
         first_name, last_name = _extract_name_from_profile(profile)
         confirmed_at = utc_now()
-        user = user_datastore.create_user(
+        user = datastore.create_user(
             email=email,
             first_name=first_name,
             last_name=last_name,
             confirmed_at=confirmed_at.replace(tzinfo=None),
             active=True,
         )
-        user_datastore.commit()
+        datastore.commit()
 
     provider_config = _get_provider_settings(provider)
     scopes = normalize_token_scopes(token, provider_config)
 
-    user_datastore.link_oauth_account(
+    datastore.link_oauth_account(
         user,
         provider=provider,
         provider_uid=provider_uid,
@@ -354,6 +371,12 @@ def callback(provider: str):
     return redirect(url_for(post_login_view))
 
 
+@security_oauth_bp.route("/<provider>-auth-callback", methods=["GET"], strict_slashes=False)
+def callback_alias(provider: str):
+    provider_normalized = provider.strip().lower()
+    return callback(provider_normalized)
+
+
 @security_oauth_bp.route("/oauth/<provider>/disconnect", methods=["POST"], strict_slashes=False)
 def disconnect(provider: str):
     if not current_user.is_authenticated:
@@ -372,6 +395,9 @@ def disconnect(provider: str):
         flash("Your session expired. Please refresh the page and try again.", "warning")
         return redirect(url_for("user.profile"))
 
+    OAuthAccount = _get_oauth_account_model()
+    datastore = _get_user_datastore()
+
     account = OAuthAccount.query.filter_by(
         provider=provider,
         user_id=current_user.id,
@@ -384,7 +410,7 @@ def disconnect(provider: str):
         flash("Cannot remove the only linked sign-in method.", "warning")
         return redirect(url_for("user.profile"))
 
-    user_datastore.unlink_oauth_account(current_user, provider)
+    datastore.unlink_oauth_account(current_user, provider)
     flash(f"{provider.title()} account disconnected.", "success")
     return redirect(url_for("user.profile"))
 
