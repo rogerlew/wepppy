@@ -72,6 +72,7 @@ def ensure_oauth_client(
         api_base_url=_infer_api_base_url(provider_settings),
         client_kwargs=client_kwargs,
         userinfo_endpoint=provider_settings.get("userinfo_url"),
+        server_metadata_url=provider_settings.get("server_metadata_url"),
     )
 
     return oauth.create_client(provider)

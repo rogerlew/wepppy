@@ -594,7 +594,7 @@ input[type="button"],
   border-radius: var(--wc-radius-none);
   border: 1px solid var(--wc-color-accent);
   background: var(--wc-color-accent);
-  color: #fff;
+  color: var(--wc-button-text-color, #fff);
   padding: var(--wc-space-sm) var(--wc-space-lg);
   cursor: pointer;
   line-height: 1.2;
@@ -607,7 +607,7 @@ button:focus,
 .pure-button:focus {
   background: var(--wc-color-link-hover);
   border-color: var(--wc-color-link-hover);
-  color: #fff;
+  color: var(--wc-button-text-color, #fff);
 }
 
 button[disabled],
@@ -619,6 +619,7 @@ button[disabled],
 }
 
 .pure-button-secondary {
+  --wc-button-text-color: var(--wc-color-text);
   background: transparent;
   color: var(--wc-color-text);
   border-color: var(--wc-color-border-strong);
@@ -1392,6 +1393,94 @@ legend {
   text-decoration: underline;
 }
 
+.wc-oauth-container {
+  margin-bottom: var(--wc-space-xl);
+  width: 100%;
+}
+
+.wc-oauth-intro {
+  font-weight: 600;
+  margin-bottom: var(--wc-space-sm);
+}
+
+.wc-oauth-actions {
+  display: grid;
+  gap: var(--wc-space-sm);
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+}
+
+.wc-oauth-button {
+  --wc-button-text-color: var(--wc-color-text);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-space-sm);
+  padding: calc(var(--wc-space-sm) + var(--wc-space-xs)) var(--wc-space-xl);
+  font-weight: 600;
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-none);
+  background: var(--wc-color-surface-alt);
+  color: var(--wc-color-text);
+  box-shadow: var(--wc-shadow-sm);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  width: 100%;
+  max-width: 320px;
+  justify-content: center;
+}
+
+.wc-oauth-button:hover,
+.wc-oauth-button:focus {
+  background: var(--wc-color-surface);
+  border-color: var(--wc-color-border-strong);
+  text-decoration: none;
+}
+
+.wc-oauth-button:focus {
+  outline: 2px solid var(--wc-color-accent);
+  outline-offset: 2px;
+}
+
+.wc-oauth-button--secondary {
+  background: var(--wc-color-surface);
+  color: var(--wc-color-text);
+}
+
+.wc-oauth-button--secondary:hover,
+.wc-oauth-button--secondary:focus {
+  background: var(--wc-color-surface-alt);
+}
+
+.wc-oauth-button--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: var(--wc-color-surface-alt);
+  border-color: var(--wc-color-border);
+  box-shadow: none;
+  color: var(--wc-color-text-muted);
+}
+
+.wc-oauth-icon {
+  display: inline-flex;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--wc-color-text);
+}
+
+.wc-oauth-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.wc-oauth-label {
+  display: inline-block;
+}
+
 .wc-auth-separator {
   text-transform: uppercase;
   font-size: 0.75rem;
@@ -1400,6 +1489,14 @@ legend {
   letter-spacing: 0.08em;
   margin: calc(var(--wc-space-sm) * -1) 0 var(--wc-space-md);
   margin-left: calc(9rem + var(--wc-space-sm));
+}
+
+.wc-auth-separator--inline {
+  margin: var(--wc-space-sm) 0 0;
+  margin-left: 0;
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
 }
 
 .fs-menu {
@@ -1448,6 +1545,11 @@ legend {
   .wc-auth-separator {
     margin-left: 0;
     text-align: left;
+  }
+
+  .wc-oauth-actions {
+    justify-content: center;
+    justify-items: center;
   }
 }
 

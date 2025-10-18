@@ -8,17 +8,56 @@
 {% block auth_subheading %}<p>Enter your WEPPcloud credentials to access tools and projects.</p>{% endblock %}
 
 {% block content %}
-  {% if enabled_oauth_providers %}
+  {% if oauth_providers %}
     <div class="wc-oauth-container">
       <p class="wc-oauth-intro">Sign in with a connected account:</p>
-      {% set next_param = request.args.get('next') %}
-      {% for provider_id, provider in enabled_oauth_providers|dictsort %}
-        <a class="pure-button wc-oauth-button wc-oauth-{{ provider_id | replace('_', '-') }}"
-           href="{% if next_param %}{{ url_for('security_oauth.oauth_login', provider=provider_id, next=next_param) }}{% else %}{{ url_for('security_oauth.oauth_login', provider=provider_id) }}{% endif %}">
-          Continue with {{ provider.name or provider_id|capitalize }}
-        </a>
-      {% endfor %}
-      <div class="wc-auth-separator" aria-hidden="true">or use your password below</div>
+      <div class="wc-oauth-actions">
+        {% set next_param = request.args.get('next') %}
+        {% for provider_id, provider in oauth_providers|dictsort %}
+          {% set provider_slug = provider_id | replace('_', '-') %}
+          {% set provider_name = provider.name or provider_id|capitalize %}
+          {% set provider_lower = provider_id|lower %}
+          {% set is_github = provider_lower == 'github' %}
+          {% set is_google = provider_lower == 'google' %}
+          {% set enabled = provider.enabled %}
+          {% set base_classes = 'wc-oauth-button' %}
+          {% if is_github %}{% set base_classes = base_classes ~ ' wc-oauth-button--secondary' %}{% endif %}
+          {% set base_classes = base_classes ~ ' wc-oauth-' ~ provider_slug %}
+          {% set login_href = url_for('security_oauth.oauth_login', provider=provider_id, next=next_param) if next_param else url_for('security_oauth.oauth_login', provider=provider_id) %}
+          {% set icon %}
+            {% if is_github %}
+              <span class="wc-oauth-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                  <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 3.2C7.0275 3.2 3 7.2275 3 12.2C3 16.1825 5.57625 19.5463 9.15375 20.7388C9.60375 20.8175 9.7725 20.5475 9.7725 20.3113C9.7725 20.0975 9.76125 19.3888 9.76125 18.635C7.5 19.0513 6.915 18.0838 6.735 17.5775C6.63375 17.3188 6.195 16.52 5.8125 16.3063C5.4975 16.1375 5.0475 15.7213 5.80125 15.71C6.51 15.6988 7.01625 16.3625 7.185 16.6325C7.995 17.9938 9.28875 17.6113 9.80625 17.375C9.885 16.79 10.1213 16.3963 10.38 16.1713C8.3775 15.9463 6.285 15.17 6.285 11.7275C6.285 10.7488 6.63375 9.93875 7.2075 9.30875C7.1175 9.08375 6.8025 8.16125 7.2975 6.92375C7.2975 6.92375 8.05125 6.6875 9.7725 7.84625C10.4925 7.64375 11.2575 7.5425 12.0225 7.5425C12.7875 7.5425 13.5525 7.64375 14.2725 7.84625C15.9938 6.67625 16.7475 6.92375 16.7475 6.92375C17.2425 8.16125 16.9275 9.08375 16.8375 9.30875C17.4113 9.93875 17.76 10.7375 17.76 11.7275C17.76 15.1813 15.6563 15.9463 13.6538 16.1713C13.98 16.4525 14.2613 16.9925 14.2613 17.8363C14.2613 19.04 14.25 20.0075 14.25 20.3113C14.25 20.5475 14.4188 20.8288 14.8688 20.7388C18.4238 19.5463 21 16.1713 21 12.2C21 7.2275 16.9725 3.2 12 3.2Z"></path>
+                </svg>
+              </span>
+            {% elif is_google %}
+              <span class="wc-oauth-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+              </span>
+            {% endif %}
+          {% endset %}
+          {% if enabled %}
+            <a class="pure-button {{ base_classes }}"
+               href="{{ login_href }}">
+              {{ icon|trim|safe }}
+              <span class="wc-oauth-label">Continue with {{ provider_name }}</span>
+            </a>
+          {% else %}
+            <span class="pure-button {{ base_classes }} wc-oauth-button--disabled" role="button" aria-disabled="true">
+              {{ icon|trim|safe }}
+              <span class="wc-oauth-label">Continue with {{ provider_name }}</span>
+            </span>
+          {% endif %}
+        {% endfor %}
+        <div class="wc-auth-separator wc-auth-separator--inline" aria-hidden="true">or use your password below</div>
+      </div>
     </div>
   {% endif %}
 

@@ -108,6 +108,43 @@ def _load_oauth_providers(
         ),
     }
 
+    google_client_id = _get_env_any(
+        ["OAUTH_GOOGLE_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID"]
+    )
+    google_client_secret = _get_env_any(
+        ["OAUTH_GOOGLE_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET"]
+    )
+    google_redirect_override = _get_env_any(
+        [
+            "OAUTH_GOOGLE_REDIRECT_URI",
+            "GOOGLE_OAUTH_REDIRECT_URI",
+            "GOOGLE_OAUTH_CALLBACK_URL",
+        ]
+    )
+    google_redirect_uri = _build_oauth_redirect_uri(
+        redirect_scheme, redirect_host, site_prefix, "google", google_redirect_override
+    )
+
+    providers["google"] = {
+        "name": "Google",
+        "client_id": google_client_id,
+        "client_secret": google_client_secret,
+        "redirect_uri": google_redirect_uri,
+        "authorize_url": "https://accounts.google.com/o/oauth2/v2/auth",
+        "token_url": "https://oauth2.googleapis.com/token",
+        "userinfo_url": "https://openidconnect.googleapis.com/v1/userinfo",
+        "server_metadata_url": "https://accounts.google.com/.well-known/openid-configuration",
+        "scope": ["openid", "email", "profile"],
+        "client_kwargs": {
+            "access_type": "offline",
+            "prompt": "consent",
+            "include_granted_scopes": "true",
+        },
+        "enabled": bool(
+            google_client_id and google_client_secret and google_redirect_uri
+        ),
+    }
+
     return providers
 
 

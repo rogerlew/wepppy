@@ -34,6 +34,13 @@
 - Update the login template with a single "Continue with GitHub" button during this phase. Additional providers can be revealed once they are configured.
 - Emit audit events tagged with `provider="github"` so early telemetry isolates GitHub usage while the feature is rolled out.
 
+### Phase 2: Google OAuth Rollout
+- Configure a Google “Web application” OAuth client per domain. Authorized JavaScript origins should include `https://wc.bearhive.duckdns.org`, `https://wc-prod.bearhive.duckdns.org`, and `https://wepp.cloud`. Authorized redirect URIs map to `/weppcloud/oauth/google/callback` on each host.
+- Support both `OAUTH_GOOGLE_CLIENT_ID`/`OAUTH_GOOGLE_CLIENT_SECRET` and the legacy `GOOGLE_OAUTH_*` variables. The configuration loader uses `OAUTH_REDIRECT_SCHEME`/`HOST` to compute defaults when an explicit redirect URI is not provided.
+- Default scopes should be `['openid', 'email', 'profile']`, and the client should request `access_type=offline` with `prompt=consent` so refresh tokens are issued for background session renewal.
+- Register Authlib using Google’s OpenID configuration (`server_metadata_url=https://accounts.google.com/.well-known/openid-configuration`) so JWKS discovery and token verification happen automatically.
+- Surface a Google button beside GitHub in the login template; match Google’s brand colors/iconography so users recognize the flow at a glance.
+
 ### Data Model Changes
 Create a new table `oauth_account` with the following columns and constraints:
 - `id` (PK)
