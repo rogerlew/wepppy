@@ -5,7 +5,7 @@ This PR adds comprehensive type hints to core NoDb modules in the wepppy reposit
 
 ## Modules Updated
 
-### Completed (4 modules, 3,619 total lines)
+### Completed (5 modules, 6,474 total lines)
 
 1. **wepppy/nodb/core/topaz.py** (235 lines)
    - Added type hints to `Outlet` class
@@ -30,6 +30,16 @@ This PR adds comprehensive type hints to core NoDb modules in the wepppy reposit
    - All properties (clip_soils, ksflag, mode, etc.) have type annotations
    - All build methods have parameter and return type hints
    - Summary and report methods fully annotated
+
+5. **wepppy/nodb/core/climate.py** (2,855 lines)
+   - Added type hints to all 118 functions and methods
+   - Added type hints to `Climate` class (all properties, setters, and methods)
+   - Added type hints to data classes (`ClimateSummary`)
+   - Added type hints to exception classes (`NoClimateStationSelectedError`, `ClimateModeIsUndefinedError`)
+   - Added type hints to Enum classes with parse methods
+   - Added type hints to helper functions (pixel center calculations, download, etc.)
+   - Added type hints to module-level build functions (observed, future, gridmet, daymet, prism)
+   - All private build methods fully annotated
 
 ## Type Hint Patterns Used
 
@@ -117,9 +127,8 @@ All modified modules have been validated to:
 
 ## Future Work
 
-### Remaining Core Modules (3 modules, ~6,000 lines)
+### Remaining Core Modules (2 modules, ~4,266 lines)
 - [ ] wepppy/nodb/core/watershed.py (1,596 lines) - Partially complete, has some return type annotations
-- [ ] wepppy/nodb/core/climate.py (2,770 lines)
 - [ ] wepppy/nodb/core/wepp.py (2,670 lines)
 
 ### Additional Improvements
