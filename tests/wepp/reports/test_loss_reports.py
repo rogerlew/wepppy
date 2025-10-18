@@ -209,3 +209,147 @@ def test_outlet_summary_rows(monkeypatch, tmp_path):
     assert rows[0].label == "Total contributing area to outlet"
     precipitation_row = next(row for row in rows if row.label == "Precipitation")
     assert abs(precipitation_row.per_area_value - 500000.0 * 1000.0 / (100.0 * 10000.0)) < 1e-6
+
+
+def test_outlet_summary_accepts_loss_instance(monkeypatch, tmp_path):
+    def _raise_context(*args, **kwargs):
+        raise AssertionError("Query context should not be constructed for Loss inputs")
+
+    monkeypatch.setattr(
+        "wepppy.wepp.reports.loss_outlet_report.ReportQueryContext",
+        _raise_context,
+    )
+
+    loss_file = tmp_path / "run" / "wepp" / "output" / "loss_pw0.txt"
+    loss_file.parent.mkdir(parents=True, exist_ok=True)
+    loss_file.touch()
+
+    class StubLoss:
+        def __init__(self, fn, records):
+            self.fn = str(fn)
+            self._records = records
+
+        @property
+        def out_tbl(self):
+            return list(self._records)
+
+    records = [
+        {"key": "Total contributing area to outlet", "value": 100.0, "units": "ha"},
+        {"key": "Avg. Ann. Precipitation volume in contributing area", "value": 500000.0, "units": "m^3/yr"},
+        {"key": "Avg. Ann. water discharge from outlet", "value": 200000.0, "units": "m^3/yr"},
+        {"key": "Avg. Ann. total hillslope soil loss", "value": 5.0, "units": "tonne/yr"},
+        {"key": "Avg. Ann. sediment discharge from outlet", "value": 2.5, "units": "tonne/yr"},
+        ]
+
+    report = OutletSummaryReport(StubLoss(loss_file, records))
+    rows = report.rows()
+
+    assert any(row.label == "Stream discharge" for row in rows)
+    precipitation_row = next(row for row in rows if row.label == "Precipitation")
+    assert abs(precipitation_row.per_area_value - 500000.0 * 1000.0 / (100.0 * 10000.0)) < 1e-6
+
+
+def test_hill_summary_accepts_loss_instance(monkeypatch, tmp_path):
+    dataset_paths = {
+        "wepp/output/interchange/loss_pw0.hill.parquet",
+        "watershed/hillslopes.parquet",
+        "landuse/landuse.parquet",
+        "soils/soils.parquet",
+    }
+    records_map = {
+        "wepp/output/interchange/loss_pw0.hill.parquet": [
+            {
+                "wepp_id": 1,
+                "topaz_id": 101,
+                "length_m": 120.0,
+                "width_m": 25.0,
+                "slope": 0.12,
+                "area_ha": 2.0,
+                "runoff_m3": 10.0,
+                "lateral_m3": 6.0,
+                "baseflow_m3": 4.0,
+                "soil_loss_kg": 200.0,
+                "sediment_dep_kg": 50.0,
+                "sediment_yield_kg": 25.0,
+                "solub_react_kg": 1.5,
+                "particulate_kg": 0.8,
+                "total_kg": 2.3,
+                "landuse_key": 105,
+                "landuse_desc": "Forest",
+                "soil_key": "S1",
+                "soil_desc": "Soil One",
+            }
+        ],
+        "watershed/hillslopes.parquet": [],
+        "landuse/landuse.parquet": [],
+        "soils/soils.parquet": [],
+    }
+
+    _ = _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
+
+    loss_file = tmp_path / "wepp" / "output" / "loss_pw0.txt"
+    loss_file.parent.mkdir(parents=True, exist_ok=True)
+    loss_file.touch()
+
+    class StubLoss:
+        def __init__(self, fn):
+            self.fn = str(fn)
+
+        @property
+        def hill_tbl(self):
+            return []
+
+    report = HillSummaryReport(StubLoss(loss_file), class_fractions=True, fraction_under=0.2)
+    df = pd.DataFrame([dict(row.row) for row in report])
+
+    assert "Runoff Depth (mm/yr)" in df.columns
+    assert abs(df.loc[0, "Runoff Depth (mm/yr)"] - 0.5) < 1e-6
+
+
+def test_channel_summary_accepts_loss_instance(monkeypatch, tmp_path):
+    dataset_paths = {
+        "wepp/output/interchange/loss_pw0.chn.parquet",
+        "watershed/channels.parquet",
+    }
+    records_map = {
+        "wepp/output/interchange/loss_pw0.chn.parquet": [
+            {
+                "loss_channel_id": 1,
+                "channel_wepp_id": 10,
+                "channel_enum": 10,
+                "topaz_id": 501,
+                "length_m": 300.0,
+                "width_m": 15.0,
+                "channel_order": 2,
+                "slope": 0.02,
+                "channel_area_m2": 5000.0,
+                "contributing_area_ha": 50.0,
+                "discharge_m3": 1000.0,
+                "lateral_m3": 500.0,
+                "upland_m3": 100.0,
+                "sediment_yield_tonne": 2.0,
+                "soil_loss_kg": 600.0,
+                "solub_react_kg": 0.0,
+                "particulate_kg": 0.0,
+                "total_kg": 0.0,
+            }
+        ],
+    }
+
+    _ = _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
+
+    loss_file = tmp_path / "wepp" / "output" / "loss_pw0.txt"
+    loss_file.parent.mkdir(parents=True, exist_ok=True)
+    loss_file.touch()
+
+    class StubLoss:
+        def __init__(self, fn):
+            self.fn = str(fn)
+
+        @property
+        def chn_tbl(self):
+            return []
+
+    report = ChannelSummaryReport(StubLoss(loss_file))
+    df = pd.DataFrame([dict(row.row) for row in report])
+    assert "Discharge Depth (mm/yr)" in df.columns

@@ -256,7 +256,6 @@ def report_ash_by_hillslope(runid, config):
         out_rpt = OutletSummaryReport(loss)
         hill_rpt = HillSummaryReport(loss, class_fractions=class_fractions, fraction_under=fraction_under)
         chn_rpt = ChannelSummaryReport(loss)
-        avg_annual_years = loss.avg_annual_years
         translator = Watershed.getInstance(wd).translator_factory()
         unitizer = Unitizer.getInstance(wd)
 
@@ -271,7 +270,6 @@ def report_ash_by_hillslope(runid, config):
                                out_rpt=out_rpt,
                                hill_rpt=hill_rpt,
                                chn_rpt=chn_rpt,
-                               avg_annual_years=avg_annual_years,
                                translator=translator,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, List
+from typing import Any, Iterable, List
 
 import pandas as pd
 
@@ -20,8 +20,12 @@ class ChannelSummaryReport(ReportBase):
     _LOSS_DATASET = "wepp/output/interchange/loss_pw0.chn.parquet"
     _CHANNEL_DATASET = "watershed/channels.parquet"
 
-    def __init__(self, wd: str | Path):
-        self._wd = Path(wd).expanduser()
+    def __init__(self, wd: str | Path | Any):
+        loss = wd if self._is_loss_like(wd) else None
+        if loss is not None:
+            self._wd = self._infer_wd_from_loss(loss)
+        else:
+            self._wd = Path(wd).expanduser()
         if not self._wd.exists():
             raise FileNotFoundError(self._wd)
 
@@ -179,6 +183,18 @@ class ChannelSummaryReport(ReportBase):
         frame = frame[columns]
 
         return frame
+
+    @staticmethod
+    def _is_loss_like(value) -> bool:
+        return hasattr(value, "fn") and hasattr(value, "chn_tbl")
+
+    @staticmethod
+    def _infer_wd_from_loss(loss) -> Path:
+        fn_path = Path(loss.fn).expanduser()
+        try:
+            return fn_path.parents[2]
+        except IndexError:
+            return fn_path.parent
     def _column_order(self, *, include_phosphorus: bool) -> List[str]:
         columns = [
             "Channel ID",

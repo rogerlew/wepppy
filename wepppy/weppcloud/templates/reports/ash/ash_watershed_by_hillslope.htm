@@ -1,6 +1,25 @@
 {% extends "reports/_page_container.htm" %}
 {% block report_title %}Loss Summary{% endblock %}
 {% block report_content %}
+{% macro render_value(value, units) -%}
+  {% if value in (None, '') %}
+    &mdash;
+  {% elif units %}
+    {{ unitizer(value, units) | safe }}
+  {% else %}
+    {{ value }}
+  {% endif %}
+{%- endmacro %}
+
+{% macro render_units(units) -%}
+  {% if units %}
+    {{ unitizer_units(units) | safe }}
+  {% else %}
+    &nbsp;
+  {% endif %}
+{%- endmacro %}
+
+{% set outlet_rows = out_rpt.rows() %}
 <h2>WEPP Results Summary</h2>
 <h5>Average Annual Delivery From Channel Outlet for Years {{ avg_annual_years }}
     <a onclick="javascript:copytable('out_tbl')">
@@ -17,13 +36,13 @@
     </tr>
   </thead>
   <tbody>
-    {% for name, value, units, v_normed, units_normed in out_rpt %}
+    {% for row in outlet_rows %}
       <tr>
-        <td>{{ name }}</td>
-        <td class="text-right">{{ unitizer(value, units) | safe }}</td>
-        <td>{{ unitizer_units(units) | safe }}</td>
-        <td class="text-right">{{ unitizer(v_normed, units_normed) | safe }}</td>
-        <td>{{ unitizer_units(units_normed) | safe }}</td>
+        <td>{{ row.label }}</td>
+        <td class="text-right">{{ render_value(row.value, row.units) }}</td>
+        <td>{{ render_units(row.units) }}</td>
+        <td class="text-right">{{ render_value(row.per_area_value, row.per_area_units) }}</td>
+        <td>{{ render_units(row.per_area_units) }}</td>
       </tr>
     {% endfor %}
   </tbody>

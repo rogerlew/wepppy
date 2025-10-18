@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import pandas as pd
 
@@ -27,13 +27,22 @@ class OutletSummaryReport:
 
     _DATASET_PATH = "wepp/output/interchange/loss_pw0.out.parquet"
 
-    def __init__(self, wd: str | Path):
-        self._wd = Path(wd).expanduser()
+    def __init__(self, wd: str | Path | Any):
+        table = self._resolve_table(wd)
+        self._rows = self._build_rows(table)
+
+    def _resolve_table(self, wd_or_loss) -> pd.DataFrame:
+        if self._is_loss_like(wd_or_loss):
+            loss = wd_or_loss
+            self._wd = self._infer_wd_from_loss(loss)
+            return self._table_from_loss(loss)
+
+        self._wd = Path(wd_or_loss).expanduser()
         if not self._wd.exists():
             raise FileNotFoundError(self._wd)
 
         context = self._prepare_context()
-        self._rows = self._build_rows(context)
+        return self._load_table(context)
 
     def _prepare_context(self):
         context = ReportQueryContext(self._wd, run_interchange=False)
@@ -57,8 +66,33 @@ class OutletSummaryReport:
         frame["units"] = frame["units"].fillna("")
         return frame.set_index("key")
 
-    def _build_rows(self, context) -> List[OutletRow]:
-        table = self._load_table(context)
+    @staticmethod
+    def _is_loss_like(value) -> bool:
+        return hasattr(value, "out_tbl") and hasattr(value, "fn")
+
+    @staticmethod
+    def _infer_wd_from_loss(loss) -> Path:
+        fn_path = Path(loss.fn).expanduser()
+        try:
+            return fn_path.parents[2]
+        except IndexError:
+            return fn_path.parent
+
+    def _table_from_loss(self, loss) -> pd.DataFrame:
+        records_attr = getattr(loss, "out_tbl")
+        records = records_attr() if callable(records_attr) else records_attr
+        frame = pd.DataFrame(records or [], columns=["key", "value", "units"])
+        if frame.empty:
+            raise ValueError(f"{self._DATASET_PATH} did not return any rows")
+        if "key" not in frame.columns or "value" not in frame.columns:
+            raise KeyError("Loss out_tbl must provide 'key' and 'value' columns")
+        if "units" not in frame.columns:
+            frame["units"] = ""
+        frame["value"] = pd.to_numeric(frame["value"], errors="coerce")
+        frame["units"] = frame["units"].fillna("")
+        return frame.set_index("key")
+
+    def _build_rows(self, table: pd.DataFrame) -> List[OutletRow]:
 
         def value_for(key: str) -> Optional[float]:
             return float(table.value.get(key)) if key in table.index else None

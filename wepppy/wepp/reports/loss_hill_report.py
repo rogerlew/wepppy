@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, List
+from typing import Any, Iterable, List
 
 import pandas as pd
 
@@ -22,10 +22,27 @@ class HillSummaryReport(ReportBase):
     _LANDUSE_DATASET = "landuse/landuse.parquet"
     _SOILS_DATASET = "soils/soils.parquet"
 
-    def __init__(self, wd: str | Path):
-        self._wd = Path(wd).expanduser()
+    def __init__(
+        self,
+        wd: str | Path | Any,
+        *,
+        class_fractions: bool | None = None,
+        fraction_under: float | None = None,
+        **_unused_kwargs,
+    ):
+        loss = wd if self._is_loss_like(wd) else None
+        if loss is not None:
+            self._wd = self._infer_wd_from_loss(loss)
+        else:
+            self._wd = Path(wd).expanduser()
         if not self._wd.exists():
             raise FileNotFoundError(self._wd)
+
+        # Arguments retained for backward compatibility with callers that used the
+        # legacy signature. They do not affect the report contents because the
+        # underlying data are driven entirely by the interchange parquet tables.
+        self._include_class_fractions = bool(class_fractions) if class_fractions is not None else False
+        self._fraction_under = fraction_under
 
         context = self._prepare_context()
         dataframe = self._build_dataframe(context)
@@ -206,6 +223,18 @@ class HillSummaryReport(ReportBase):
         frame = frame.fillna("")
         frame = frame[columns_order]
         return frame
+
+    @staticmethod
+    def _is_loss_like(value) -> bool:
+        return hasattr(value, "fn") and hasattr(value, "hill_tbl")
+
+    @staticmethod
+    def _infer_wd_from_loss(loss) -> Path:
+        fn_path = Path(loss.fn).expanduser()
+        try:
+            return fn_path.parents[2]
+        except IndexError:
+            return fn_path.parent
 
     def _default_columns(self, include_soils: bool) -> List[str]:
         base_columns = [
