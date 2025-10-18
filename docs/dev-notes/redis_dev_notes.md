@@ -3,6 +3,8 @@
 - Date: 9-22-2025
 - Author: Roger (outline) CODEX gpt-5-codex (high) content
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for architecture overview and Redis Database Allocation section.
+
 Prompt:
 ```
 Let's work on developer documentation. 

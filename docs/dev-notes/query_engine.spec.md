@@ -1,5 +1,7 @@
 # Query Engine Specification
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Python Stack and duckdb_agents.py section.
+
 Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud run directories using a common query engine that can power API routes, batch jobs, dashboards, and developer tooling.
 
 ## High-Level Objectives

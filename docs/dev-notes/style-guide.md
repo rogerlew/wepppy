@@ -1,5 +1,7 @@
 # Developer Style Guide
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Code Style and Conventions section.
+
 ## Core Principles
 - **Clarity First**: Prefer direct, in-place logic over indirection. Inline simple expressions instead of hiding them behind helpers when there is only one call site.
 - **Avoid Phantom Flexibility**: Do not add optional parameters or extension points until there is a proven need. Dead code paths mislead reviewers and future maintainers.
