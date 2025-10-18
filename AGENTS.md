@@ -493,7 +493,7 @@ When resuming Kubernetes work:
 ### Essential Documentation
 - `readme.md` - Comprehensive architecture overview
 - `wepppy/nodb/base.py` - NoDb implementation details
-- `wepppy/weppcloud/routes/usersum/dev-notes/` - Developer notes:
+- `docs/dev-notes/` - Developer notes:
   - `redis_dev_notes.md` - Redis usage patterns
   - `controllers_js.md` - Controller bundling
   - `style-guide.md` - Coding conventions
@@ -516,7 +516,7 @@ When resuming Kubernetes work:
 
 ### When Stuck
 1. Check `readme.md` for high-level architecture
-2. Review relevant dev-notes in `wepppy/weppcloud/routes/usersum/dev-notes/`
+2. Review relevant dev-notes in `docs/dev-notes/`
 3. Examine existing implementations for patterns
 4. Use `git log` to understand change history
 5. Search codebase for similar functionality: `git grep "pattern"`

@@ -1,5 +1,7 @@
 # WEPP Interchange
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for WEPP Model Integration and Modifying WEPP Model Integration sections.
+
 ## Motivation
 - Replace ad-hoc parsing of WEPP flat files with durable, columnar interchange artifacts that downstream analytics can query uniformly.
 - Reduce filesystem load by allowing post-processing tools to depend on a compact `wepp/interchange` directory instead of the raw `wepp/output` tree.

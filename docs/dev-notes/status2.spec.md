@@ -1,5 +1,7 @@
 # Status2 Microservice Specification
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Go Microservices section and High Performance Telemetry Pipeline overview.
+
 Date: 2025-10-11  
 Owner: Roger  
 Developer: codex

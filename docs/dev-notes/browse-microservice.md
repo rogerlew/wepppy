@@ -1,5 +1,7 @@
 # Browse Microservice
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Flask web application and microservices architecture.
+
 ## Why this exists
 - This service offloads all filesystem browsing and metadata endpoints from the Flask monolith onto a Starlette app that can be scaled and rate-limited independently.
 - It protects the main site from aggressive crawlers that were hammering directory listings while keeping the familiar `/browse`, `/download`, and `gdalinfo` features intact.

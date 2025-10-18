@@ -1,5 +1,7 @@
 # Endpoint Security Notes
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Security Considerations and Input Validation sections.
+
 ## High-Risk Endpoints (no @login_required / @roles_required and no authorize)
 - `wepppy/weppcloud/routes/rq/api/api.py:237,265,287,384,476,540,570,599,660,797,867,936,1026,1046,1065,1084,1164` – run/RQ management POST routes (fetch_dem…, set_outlet, build_landuse/soils/climate, run_wepp/omni/ash/debris/rhem, fork, archive, etc.) enqueue jobs or mutate run files for any caller who knows a run id, including anonymous runs.
 - `wepppy/weppcloud/routes/rq/api/jobinfo.py:51` – `/rq/api/canceljob/<job_id>` lets unauthenticated users cancel arbitrary RQ jobs.

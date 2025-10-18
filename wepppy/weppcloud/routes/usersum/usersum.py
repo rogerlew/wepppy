@@ -13,7 +13,8 @@ usersum_bp = Blueprint('usersum', __name__, template_folder='templates')
 _BASE_DIR = Path(__file__).resolve().parent
 _DB_DIR = _BASE_DIR / 'db'
 _SPEC_DIR = _BASE_DIR / 'input-file-specifications'
-_DEV_NOTES_DIR = _BASE_DIR / 'dev-notes'
+_DOCS_ROOT = Path(__file__).resolve().parents[4] / 'docs'
+_DEV_NOTES_DIR = _DOCS_ROOT / 'dev-notes'
 _WEPPCLOUD_DIR = _BASE_DIR / 'weppcloud'
 
 _PARAM_HEADER_RE = re.compile(r'^#### `([^`]+)` —\s*(.+)$')

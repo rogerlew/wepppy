@@ -1,5 +1,7 @@
 ### **1\. Development Environment: Docker Compose (The Local Stack) 🐳**
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Development Workflow and Docker Compose (Recommended) sections.
+
 This layer is for developers. It prioritizes speed, simplicity, and a fast iteration loop.
 
 * **Rationale**: The existing Docker Compose file is well-suited for a consistent, isolated local development environment. It avoids the complexity of a local Kubernetes cluster and allows for real-time code changes via host-mounted volumes.  

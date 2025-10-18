@@ -1,5 +1,7 @@
 ## Omni is functionality for running scenarios inside of a parent weppcloud project
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for NoDb mods section and scenario management patterns.
+
 
 ### Omni scenarios
 

@@ -1,5 +1,7 @@
 # Static Asset Build Pipeline
 
+> **See also:** [AGENTS.md](../../AGENTS.md) for Static Assets section and build command reference.
+
 ## Overview
 - All third-party browser libraries (Leaflet, Bootstrap, DataTables, jQuery, etc.) are now pulled in via `npm` from `wepppy/weppcloud/static-src`.
 - `npm run build:dev` produces readable development assets under `static-src/dist/`; `npm run build` produces minified production assets.
