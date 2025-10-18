@@ -919,7 +919,7 @@ class Wepp(NoDbBase):
     def pmet_rawp(self, value: float) -> None:
         self._pmet_rawp = value
 
-    def _prep_pmet(self, kcb=None, rawp=None):
+    def _prep_pmet(self, kcb: Optional[float] = None, rawp: Optional[float] = None) -> None:
 
         if kcb is not None and rawp is not None:
             self.logger.info(f'nodb.Wepp._prep_pmet::kwargs routine')
@@ -963,12 +963,12 @@ class Wepp(NoDbBase):
         assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
 
 
-    def _remove_pmet(self):
+    def _remove_pmet(self) -> None:
         fn = _join(self.runs_dir, 'pmet.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def _check_and_set_phosphorus_map(self):
+    def _check_and_set_phosphorus_map(self) -> None:
 
         # noinspection PyMethodFirstArgAssignment
         self = self.getInstance(self.wd)
@@ -1014,7 +1014,7 @@ class Wepp(NoDbBase):
         with self.locked():
             self.phosphorus_opts = phos_opts
 
-    def _prep_phosphorus(self):
+    def _prep_phosphorus(self) -> None:
         phos_opts = self.phosphorus_opts
 
         # create the phosphorus.txt file
@@ -1028,22 +1028,22 @@ class Wepp(NoDbBase):
             if not validate_phosphorus_txt(fn):
                 os.remove(fn)
 
-    def _remove_phosphorus(self):
+    def _remove_phosphorus(self) -> None:
         fn = _join(self.runs_dir, 'phosphorus.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def _prep_snow(self):
+    def _prep_snow(self) -> None:
         fn = _join(self.runs_dir, 'snow.txt')
         with open(fn, 'w') as fp:
             fp.write(self.snow_opts.contents)
 
-    def _remove_snow(self):
+    def _remove_snow(self) -> None:
         fn = _join(self.runs_dir, 'snow.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def _check_and_set_baseflow_map(self):
+    def _check_and_set_baseflow_map(self) -> None:
         baseflow_opts = self.baseflow_opts
 
         gwstorage_map = getattr(self, 'baseflow_gwstorage_map', None)
@@ -1082,7 +1082,7 @@ class Wepp(NoDbBase):
         with self.locked():
             self.baseflow_opts = baseflow_opts
 
-    def _prep_baseflow(self):
+    def _prep_baseflow(self) -> None:
         climate = self.climate_instance
         if climate.is_single_storm:
             baseflow_opts = BaseflowOpts(gwstorage=0.0, bfcoeff=0.0)
@@ -1093,12 +1093,12 @@ class Wepp(NoDbBase):
         with open(fn, 'w') as fp:
             fp.write(baseflow_opts.contents)
 
-    def _remove_baseflow(self):
+    def _remove_baseflow(self) -> None:
         fn = _join(self.runs_dir, 'gwcoeff.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def clean(self):
+    def clean(self) -> None:
         for _dir in (self.runs_dir, self.output_dir, self.plot_dir,
                      self.stats_dir, self.fp_runs_dir, self.fp_output_dir):
             if _exists(_dir):
@@ -1127,7 +1127,7 @@ class Wepp(NoDbBase):
                 if not _exists(ss_batch_dir):
                     os.makedirs(ss_batch_dir)
 
-    def prep_and_run_flowpaths(self, clean_after_run=True):
+    def prep_and_run_flowpaths(self, clean_after_run: bool = True) -> None:
         self.logger.info('  Prepping _prep_flowpaths... ')
         wat_dir = self.wat_dir
 
@@ -1793,8 +1793,8 @@ class Wepp(NoDbBase):
                                    sol_relpath=sol_relpath)
 
     def run_hillslopes(self,
-                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
-                  max_workers=None):
+                  man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '',
+                  max_workers: Optional[int] = None) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -1904,10 +1904,10 @@ class Wepp(NoDbBase):
     #
     # watershed
     #
-    def prep_watershed(self, erodibility=None, critical_shear=None,
-                       tcr=None, avke=None,
-                       channel_manning_roughness_coefficient_bare=None,
-                       channel_manning_roughness_coefficient_veg=None):
+    def prep_watershed(self, erodibility: Optional[float] = None, critical_shear: Optional[float] = None,
+                       tcr: Optional[bool] = None, avke: Optional[float] = None,
+                       channel_manning_roughness_coefficient_bare: Optional[float] = None,
+                       channel_manning_roughness_coefficient_veg: Optional[float] = None) -> None:
         self.logger.info('Prepping Watershed... ')
 
         watershed = self.watershed_instance
@@ -2261,7 +2261,7 @@ class Wepp(NoDbBase):
         else:
             make_watershed_run(years, wepp_ids, runs_dir)
 
-    def run_watershed(self):
+    def run_watershed(self) -> None:
         from wepppy.export.prep_details import (
             export_channels_prep_details,
             export_hillslopes_prep_details
@@ -2379,18 +2379,18 @@ class Wepp(NoDbBase):
         from wepppy.wepp.interchange import totalwatsed_partitioned_dss_export
         totalwatsed_partitioned_dss_export(self.wd)
 
-    def report_loss(self):
+    def report_loss(self) -> Any:
         from wepppy.wepp.interchange.watershed_loss import Loss
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return Loss(loss_pw0, self.has_phosphorus, self.wd)
 
-    def report_return_periods(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
-                              exclude_yr_indxs=None, 
-                              method='cta', gringorten_correction=True, 
-                              meoization=True,
-                              exclude_months=None,
-                              chn_topaz_id_of_interest=None):
+    def report_return_periods(self, rec_intervals: Tuple[int, ...] = (50, 25, 20, 10, 5, 2), 
+                              exclude_yr_indxs: Optional[List[int]] = None, 
+                              method: str = 'cta', gringorten_correction: bool = True, 
+                              meoization: bool = True,
+                              exclude_months: Optional[List[int]] = None,
+                              chn_topaz_id_of_interest: Optional[int] = None) -> ReturnPeriods:
 
         output_dir = self.output_dir
 
@@ -2440,12 +2440,12 @@ class Wepp(NoDbBase):
 
         return return_periods
 
-    def export_return_periods_tsv_summary(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
-                           exclude_yr_indxs=None, 
-                           method='cta', 
-                           gringorten_correction=True, 
-                           meoization=True,
-                           extraneous=False):
+    def export_return_periods_tsv_summary(self, rec_intervals: Tuple[int, ...] = (50, 25, 20, 10, 5, 2), 
+                           exclude_yr_indxs: Optional[List[int]] = None, 
+                           method: str = 'cta', 
+                           gringorten_correction: bool = True, 
+                           meoization: bool = True,
+                           extraneous: bool = False) -> None:
 
         return_periods = self.report_return_periods(
             rec_intervals=rec_intervals, 
@@ -2465,55 +2465,55 @@ class Wepp(NoDbBase):
 
         return_periods.export_tsv_summary(_join(self.export_dir, fn), extraneous=extraneous)
 
-    def report_frq_flood(self):
+    def report_frq_flood(self) -> FrqFloodReport:
         return FrqFloodReport(self.wd)
 
-    def report_sediment_delivery(self):
+    def report_sediment_delivery(self) -> SedimentCharacteristics:
         return SedimentCharacteristics(self.wd)
 
-    def report_hill_watbal(self):
+    def report_hill_watbal(self) -> HillslopeWatbalReport:
         return HillslopeWatbalReport(self.wd)
 
-    def report_chn_watbal(self):
+    def report_chn_watbal(self) -> ChannelWatbalReport:
         return ChannelWatbalReport(self.wd)
 
-    def set_run_flowpaths(self, state):
+    def set_run_flowpaths(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self.run_flowpaths = state
 
-    def set_run_wepp_ui(self, state):
+    def set_run_wepp_ui(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_wepp_ui = state
 
-    def set_run_pmet(self, state):
+    def set_run_pmet(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_pmet = state
 
-    def set_run_frost(self, state):
+    def set_run_frost(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_frost = state
 
-    def set_run_snow(self, state):
+    def set_run_snow(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_snow = state
 
-    def set_run_tcr(self, state):
+    def set_run_tcr(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_tcr = state
 
-    def set_run_baseflow(self, state):
+    def set_run_baseflow(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_baseflow = state
 
     @property
-    def loss_report(self):
+    def loss_report(self) -> Optional[Any]:
         from wepppy.wepp.interchange.watershed_loss import Loss
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
@@ -2526,7 +2526,7 @@ class Wepp(NoDbBase):
 
         return self._loss_report
 
-    def query_sub_val(self, measure):
+    def query_sub_val(self, measure: str) -> Optional[Dict[str, Dict[str, Any]]]:
         wd = self.wd
         report = self.loss_report
         if report is None:
@@ -2574,7 +2574,7 @@ class Wepp(NoDbBase):
 
         return d
 
-    def query_chn_val(self, measure):
+    def query_chn_val(self, measure: str) -> Optional[Dict[str, Dict[str, Any]]]:
         from wepppy.wepp.interchange.watershed_loss import Loss
         wd = self.wd
 
@@ -2630,7 +2630,7 @@ class Wepp(NoDbBase):
 
         return d
 
-    def make_loss_grid(self):
+    def make_loss_grid(self) -> None:
         watershed = self.watershed_instance
         loss_grid_path = _join(self.plot_dir, 'loss.tif')
         print(watershed.subwta, watershed.discha, self.output_dir, loss_grid_path)
@@ -2658,14 +2658,14 @@ class Wepp(NoDbBase):
         assert _exists(loss_grid_wgs)
 
     @property
-    def kslast(self):
+    def kslast(self) -> Optional[float]:
         if not hasattr(self, '_kslast'):
             return None
 
         return self._kslast
 
     @property
-    def kslast_map(self):
+    def kslast_map(self) -> Optional[str]:
         if not hasattr(self, '_kslast_map'):
             return None
 
