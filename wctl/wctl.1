@@ -85,8 +85,24 @@ Any options provided after the command (for example
 are passed directly to the script. Use this alongside
 .B wctl exec weppcloud
 when running
-.BR mypy " or " stubtest
-inside the development container so that stub wheels are available.
+.B mypy
+or the
+.B stubtest
+entry point inside the development container so the stub wheels are available.
+Run the commands from
+.I /tmp
+and set
+.B PYTHONPATH=/workdir/wepppy
+and
+.B MYPY_CACHE_DIR=/tmp/mypy_cache
+so cache files are written to a writable location, for example:
+.br
+.B wctl
+.B exec
+.B weppcloud
+.B bash
+.B "-lc"
+.B "\"cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.nodb.core\""
 .SH ENVIRONMENT
 .TP
 .B WEPPPY_ENV_FILE

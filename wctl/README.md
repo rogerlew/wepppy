@@ -31,12 +31,19 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 
 ### **Running Type Checks / Stubtest**
 
-Because the development Docker image installs the stub wheels listed in `docker/requirements-stubs-uv.txt`, run static checks inside the container so the environment matches production:
+Because the development Docker image installs the stub wheels listed in `docker/requirements-stubs-uv.txt`, run static checks inside the container so the environment matches production. The bind-mounted workspace is read-only for the container user, so run checks from `/tmp`, add the project to `PYTHONPATH`, and redirect mypy’s cache to `/tmp`:
 
 ```bash
-# Run mypy or stubtest inside the app container
-wctl exec weppcloud bash -lc "python -m mypy wepppy"
-wctl exec weppcloud bash -lc "python -m mypy.stubtest wepppy.nodb.core.wepp"
+wctl exec weppcloud bash -lc \
+  "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/mypy -m wepppy.nodb.core"
+wctl exec weppcloud bash -lc \
+  "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.nodb.core.wepp"
+```
+
+Sync the standalone stub tree and `py.typed` marker with:
+
+```bash
+python tools/sync_stubs.py
 ```
 
 Use `wctl update-stub-requirements` before rebuilding the image when new dependencies require additional stub packages.

@@ -156,16 +156,15 @@ class MyController(NoDbBase):
 ### Type Stub Management
 - Build, review, and install missing `.pyi` files with `stubgen`, keeping outputs under the matching package directory (for example `wepppy/nodb/core/`).
 - When modifying a source module, update its companion `.pyi` file in the same change so exported signatures stay in sync.
-- Use `stubtest` to validate stubs against the runtime implementation before finishing a change.
+- Use `stubtest` to validate stubs against the runtime implementation before finishing a change. The helper script `python tools/sync_stubs.py` keeps `stubs/wepppy/` in sync and ensures `wepppy/py.typed` exists.
+
+- Run `mypy`/`stubtest` inside the Docker dev container so stub-only wheels from `docker/requirements-stubs-uv.txt` are available. Execute the binaries from the virtual environment, set `PYTHONPATH` to the project root, and direct the cache to `/tmp` (the bind-mounted workspace is read-only inside the container):
 
 ```bash
-python -m mypy.stubtest wepppy.nodb.core.climate
-```
-
-- Run `mypy`/`stubtest` inside the Docker dev container to ensure the stub-only wheels from `docker/requirements-stubs-uv.txt` are present:
-
-```bash
-wctl exec weppcloud bash -lc "python -m mypy.stubtest wepppy.nodb.core"
+wctl exec weppcloud bash -lc \
+  "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/mypy -m wepppy.nodb.core"
+wctl exec weppcloud bash -lc \
+  "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.nodb.core"
 ```
 
 Run type checking with mypy:
