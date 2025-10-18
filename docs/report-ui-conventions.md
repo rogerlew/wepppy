@@ -20,6 +20,7 @@ This note captures the patterns we just introduced while modernizing the WEPP re
 - All sortable tables should add the `sortable` class and rely on `static/js/sorttable.js`. The new sorter honors `sorttable_customkey`, `data-sort-type`, and `data-sort-default` without Bootstrap dependencies.
 - Use `data-sort-position="top"` or `"bottom"` on rows you need to keep anchored (e.g., the unit row).
 - Table markup uses the shared `.wc-table` classes; units belong in `unitizer_units()` rows rather than bespoke spans.
+- When a column needs to stay visually associated with the highlighted metric (e.g., return period tables), add `.wc-return-period__measure` to the `<th>` and `<td>` cells so styling stays consistent. See `wepppy/weppcloud/templates/reports/wepp/return_periods.htm` for the reference.
 
 ### Scalar metrics
 - Render scalar callouts (e.g., outlet totals) using `.wc-table-wrapper--compact` with a nested `.wc-table.wc-table--dense.wc-table--compact`. The wrapper constrains width while the compact modifier disables zebra striping.

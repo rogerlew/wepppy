@@ -32,6 +32,7 @@ import json
 import logging
 import math
 import os
+from http import HTTPStatus
 from functools import partial
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -41,6 +42,7 @@ import rasterio
 from pyproj import CRS, Transformer
 from rasterio.errors import RasterioIOError
 from starlette.applications import Starlette
+from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.routing import Route
@@ -81,6 +83,13 @@ class InputValidationError(ElevationQueryError):
 WGS84 = CRS.from_epsg(4326)
 
 _json_dumps = partial(json.dumps, ensure_ascii=False)
+
+
+class JSONResponseCompat(JSONResponse):
+    """Starlette JSON response that forces UTF-8 rendering without ASCII escapes."""
+
+    def render(self, content: Any) -> bytes:
+        return _json_dumps(content).encode("utf-8")
 
 
 def _normalize_prefix(prefix: Optional[str]) -> str:
@@ -259,7 +268,7 @@ def _build_response(
     if error:
         payload['Error'] = error
 
-    return JSONResponse(payload, status_code=status_code, dumps=_json_dumps)
+    return JSONResponseCompat(payload, status_code=status_code)
 
 
 async def elevationquery_endpoint(request: Request) -> JSONResponse:
@@ -314,6 +323,67 @@ def health(_: Request) -> PlainTextResponse:
     return PlainTextResponse('OK')
 
 
+def _guess_request_coordinates(request: Request) -> Tuple[Optional[float], Optional[float]]:
+    def _coerce(value: Any) -> Optional[float]:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    return _coerce(request.query_params.get('lat')), _coerce(request.query_params.get('lng'))
+
+
+def _format_exception_message(exc: BaseException) -> str:
+    try:
+        detail = str(exc)
+    except Exception:
+        detail = repr(exc)
+
+    if detail and detail != exc.__class__.__name__:
+        return f'{exc.__class__.__name__}: {detail}'
+    return exc.__class__.__name__
+
+
+async def elevation_http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    lat, lng = _guess_request_coordinates(request)
+    detail = exc.detail
+    if isinstance(detail, (dict, list)):
+        error_text = json.dumps(detail, ensure_ascii=False)
+    else:
+        error_text = detail or ''
+        if not error_text:
+            try:
+                error_text = HTTPStatus(exc.status_code).phrase
+            except ValueError:
+                error_text = 'Error'
+
+    response = _build_response(
+        elevation=None,
+        lat=lat,
+        lng=lng,
+        error=error_text,
+        status_code=exc.status_code,
+    )
+
+    if exc.headers:
+        response.headers.update(exc.headers)
+
+    return response
+
+
+async def elevation_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.exception("Unhandled exception for %s", request.url)
+    lat, lng = _guess_request_coordinates(request)
+    message = _format_exception_message(exc)
+    return _build_response(
+        elevation=None,
+        lat=lat,
+        lng=lng,
+        error=message,
+        status_code=500,
+    )
+
+
 def create_app() -> Starlette:
     routes = [
         Route('/health', health, methods=['GET']),
@@ -328,7 +398,11 @@ def create_app() -> Starlette:
             methods=['GET', 'POST'],
         ),
     ]
-    return Starlette(routes=routes)
+    exception_handlers = {
+        HTTPException: elevation_http_exception_handler,
+        Exception: elevation_exception_handler,
+    }
+    return Starlette(routes=routes, exception_handlers=exception_handlers)
 
 
 app = create_app()

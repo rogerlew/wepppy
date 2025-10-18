@@ -1,8 +1,10 @@
 """Routes for wepp blueprint extracted from app.py."""
 
 import io
+import re
 from datetime import datetime
 
+import pandas as pd
 import wepppy
 
 from .._common import *  # noqa: F401,F403
@@ -52,6 +54,194 @@ def _render_report_csv(*, runid, report: ReportBase, unitizer, slug, table=None)
         mimetype='text/csv',
         headers={'Content-Disposition': f'attachment; filename="{filename}"'}
     )
+
+
+def _render_dataframe_csv(*, runid, df: pd.DataFrame, slug: str, table: str | None = None):
+    buffer = io.StringIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)
+
+    timestamp = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    parts = [runid, timestamp, slug]
+    if table:
+        parts.append(table)
+    filename = '-'.join(parts) + '.csv'
+
+    return Response(
+        buffer.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+    )
+
+
+def _unitizer_preferences(unitizer):
+    try:
+        return unitizer.preferences()
+    except TypeError:
+        return unitizer.preferences
+
+
+def _convert_scalar_to_preference(value, units, preferences):
+    if value in (None, ''):
+        return value, units or ''
+    if not units:
+        return value, ''
+
+    unitclass = _determine_unitclass(units)
+    if not unitclass:
+        return value, _display_units(units)
+
+    base_key = _find_unit_key(unitclass, units)
+    pref_choice = preferences.get(unitclass, base_key)
+    pref_key = _find_unit_key(unitclass, pref_choice)
+    converter = _get_converter(unitclass, base_key, pref_key)
+    converted = value
+    if converter:
+        converted = _convert_value(value, converter)
+
+    precision = precisions[unitclass].get(pref_key, precisions[unitclass].get(base_key, 3))
+    try:
+        converted = round(float(converted), precision)
+    except Exception:
+        pass
+
+    return converted, _display_units(pref_key)
+
+
+def _build_outlet_summary_dataframe(report, unitizer, include_extraneous=False):
+    preferences = _unitizer_preferences(unitizer)
+    rows = []
+    for row in report.rows(include_extraneous=include_extraneous):
+        value, value_units = _convert_scalar_to_preference(row.value, row.units, preferences)
+        per_area_value, per_area_units = _convert_scalar_to_preference(
+            row.per_area_value, row.per_area_units, preferences
+        )
+        rows.append(
+            {
+                "Metric": row.label,
+                "Value": value,
+                "Value Units": value_units,
+                "Per Unit Area": per_area_value,
+                "Per Unit Area Units": per_area_units,
+            }
+        )
+    return pd.DataFrame(rows, columns=["Metric", "Value", "Value Units", "Per Unit Area", "Per Unit Area Units"])
+
+
+_RETURN_PERIOD_METRIC_ORDER = [
+    "Precipitation Depth",
+    "Runoff",
+    "Peak Discharge",
+    "10-min Peak Rainfall Intensity",
+    "15-min Peak Rainfall Intensity",
+    "30-min Peak Rainfall Intensity",
+    "Storm Duration",
+    "Sediment Yield",
+    "Hill Sed Del",
+    "Hill Streamflow",
+    "Soluble Reactive P",
+    "Particulate P",
+    "Total P",
+]
+
+_RETURN_PERIOD_DISPLAY_LABELS = {
+    "Precipitation Depth": "Precipitation",
+    "Runoff": "Runoff",
+    "Peak Discharge": "Peak Discharge",
+    "10-min Peak Rainfall Intensity": "10-min Peak Rainfall Intensity",
+    "15-min Peak Rainfall Intensity": "15-min Peak Rainfall Intensity",
+    "30-min Peak Rainfall Intensity": "30-min Peak Rainfall Intensity",
+    "Storm Duration": "Storm Duration",
+    "Sediment Yield": "Sediment Yield",
+    "Hill Sed Del": "Hill Sed Del",
+    "Hill Streamflow": "Hill Streamflow",
+    "Soluble Reactive P": "Soluble Reactive P",
+    "Particulate P": "Particulate P",
+    "Total P": "Total P",
+}
+
+
+def _slugify_return_period_key(key: str) -> str:
+    slug = key.lower()
+    slug = slug.replace("+", " plus ")
+    slug = re.sub(r"[^a-z0-9]+", "-", slug)
+    slug = slug.strip("-")
+    return slug or "return-period"
+
+
+def _format_return_period_date(entry, base_year: int) -> str:
+    try:
+        month = int(entry.get("mo", 0))
+        day = int(entry.get("da", 0))
+        year = int(entry.get("year", 0))
+        computed_year = int(base_year) - 1 + year
+        return f"{month:02d}/{day:02d}/{computed_year:04d}"
+    except Exception:
+        return ""
+
+
+def _return_period_column_label(metric_key: str, units: str | None) -> str:
+    label = _RETURN_PERIOD_DISPLAY_LABELS.get(metric_key, metric_key)
+    if units:
+        return f"{label} ({units})"
+    return label
+
+
+def _build_return_period_simple_dataframe(report, metric_key, unitizer):
+    dataset = report.return_periods.get(metric_key, {})
+    if not dataset:
+        return pd.DataFrame()
+
+    units = report.units_d.get(metric_key)
+    column_label = _return_period_column_label(metric_key, units)
+
+    rows = []
+    for interval_key, entry in sorted(dataset.items(), key=lambda kv: float(kv[0]), reverse=True):
+        value = entry.get(metric_key)
+        rows.append(
+            {
+                "Recurrence Interval (years)": float(interval_key),
+                "Date": _format_return_period_date(entry, report.y0),
+                column_label: value,
+            }
+        )
+
+    df = pd.DataFrame(rows)
+    if df.empty:
+        return df
+    return _apply_unitizer_preferences(df, unitizer)
+
+
+def _build_return_period_extraneous_dataframe(report, metric_key, unitizer):
+    dataset = report.return_periods.get(metric_key, {})
+    if not dataset:
+        return pd.DataFrame()
+
+    first_entry = next(iter(dataset.values()), {})
+    available_metrics = [
+        key for key in _RETURN_PERIOD_METRIC_ORDER if key in first_entry
+    ]
+
+    rows = []
+    for interval_key, entry in sorted(dataset.items(), key=lambda kv: float(kv[0]), reverse=True):
+        row = {
+            "Recurrence Interval (years)": float(interval_key),
+            "Date": _format_return_period_date(entry, report.y0),
+        }
+        for metric in available_metrics:
+            units = report.units_d.get(metric)
+            label = _return_period_column_label(metric, units)
+            row[label] = entry.get(metric)
+        if "weibull_rank" in entry:
+            row["Rank"] = entry.get("weibull_rank")
+        if "weibull_T" in entry:
+            row["Weibull T"] = entry.get("weibull_T")
+        rows.append(row)
+
+    df = pd.DataFrame(rows)
+    if df.empty:
+        return df
+    return _apply_unitizer_preferences(df, unitizer)
 
 
 def _apply_unitizer_preferences(df, unitizer):
@@ -326,6 +516,35 @@ def report_wepp_loss(runid, config):
     unitizer = Unitizer.getInstance(wd)
     ron = Ron.getInstance(wd)
 
+    if _wants_csv():
+        table_key = (request.args.get('table') or 'outlet').lower()
+        if table_key == 'outlet':
+            df = _build_outlet_summary_dataframe(out_rpt, unitizer, include_extraneous=extraneous)
+            return _render_dataframe_csv(
+                runid=runid,
+                df=df,
+                slug="summary",
+                table=table_key,
+            )
+        elif table_key == 'hillslopes':
+            return _render_report_csv(
+                runid=runid,
+                report=hill_rpt,
+                unitizer=unitizer,
+                slug="summary",
+                table=table_key,
+            )
+        elif table_key == 'channels':
+            return _render_report_csv(
+                runid=runid,
+                report=chn_rpt,
+                unitizer=unitizer,
+                slug="summary",
+                table=table_key,
+            )
+        else:
+            abort(400, description=f"Unknown summary table '{table_key}'")
+
     return render_template('reports/wepp/summary.htm', runid=runid, config=config,
                         ron=ron,
                         extraneous=extraneous,
@@ -411,6 +630,24 @@ def report_wepp_avg_annual_watbal(runid, config):
         chn_rpt = None
 
     unitizer = Unitizer.getInstance(wd)
+
+    if _wants_csv():
+        table_key = (request.args.get('table') or 'hillslopes').lower()
+        reports = {
+            'hillslopes': hill_rpt,
+        }
+        if chn_rpt is not None:
+            reports['channels'] = chn_rpt
+        report_obj = reports.get(table_key)
+        if report_obj is None:
+            abort(400, description=f"Unknown water balance table '{table_key}'")
+        return _render_report_csv(
+            runid=runid,
+            report=report_obj,
+            unitizer=unitizer,
+            slug="avg_annual_watbal",
+            table=table_key,
+        )
 
     return render_template('reports/wepp/avg_annual_watbal.htm', runid=runid, config=config,
                             unitizer_nodb=unitizer,
@@ -580,6 +817,38 @@ def report_wepp_return_periods(runid, config):
     translator = Watershed.getInstance(wd).translator_factory()
     unitizer = Unitizer.getInstance(wd)
 
+    measure_order = [key for key in _RETURN_PERIOD_METRIC_ORDER if key in report.return_periods]
+    for key in report.return_periods.keys():
+        if key not in measure_order:
+            measure_order.append(key)
+
+    slug_map = { _slugify_return_period_key(key): key for key in measure_order }
+
+    if _wants_csv():
+        if not slug_map:
+            abort(404, description="No return period data available")
+        table_slug = (request.args.get('table') or '').lower()
+        if not table_slug:
+            table_slug = next(iter(slug_map.keys()), None)
+        metric_key = slug_map.get(table_slug)
+        if metric_key is None:
+            abort(400, description=f"Unknown return period table '{table_slug}'")
+
+        if extraneous:
+            df = _build_return_period_extraneous_dataframe(report, metric_key, unitizer)
+        else:
+            df = _build_return_period_simple_dataframe(report, metric_key, unitizer)
+
+        if df.empty:
+            abort(404, description="No return period data available for requested table")
+
+        return _render_dataframe_csv(
+            runid=runid,
+            df=df,
+            slug="return_periods",
+            table=table_slug,
+        )
+
     return render_template('reports/wepp/return_periods.htm', runid=runid, config=config,
                             extraneous=extraneous,
                             chn_topaz_id_of_interest=chn_topaz_id_of_interest,
@@ -590,7 +859,11 @@ def report_wepp_return_periods(runid, config):
                             report=report,
                             translator=translator,
                             ron=ron,
-                            user=current_user)
+                            user=current_user,
+                            measure_order=measure_order,
+                            method=method,
+                            exclude_yr_indxs=exclude_yr_indxs,
+                            exclude_months=exclude_months)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/frq_flood')

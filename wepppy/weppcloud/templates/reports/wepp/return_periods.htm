@@ -1,184 +1,425 @@
-{% extends "reports/_page_container.htm" %}
-{% block report_title %}Return Periods{% endblock %}
+{% extends "reports/_base_report.htm" %}
+{% block report_title %}Return periods{% endblock %}
 {% block report_content %}
-<h3>WEPPcloud Return Period Analysis</h3>
+{% macro slugify_key(value) -%}
+  {{ value|lower
+          |replace('+', ' plus ')
+          |replace('/', ' ')
+          |replace('.', '')
+          |replace('(', '')
+          |replace(')', '')
+          |replace(',', '')
+          |replace('&', ' and ')
+          |replace(' ', '-') }}
+{%- endmacro %}
 
-<div class="mt-2">
-  <label for="yearSelection">Year Selection:</label>
-  <select id="yearSelection" class="form-control" style="width: 200px;">
-    <option value="./?extraneous={{ extraneous | tojson }}" {{ 'selected' if report.exclude_yr_indxs is none }}>
-      All years included
-    </option>
-    <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0" {{ 'selected' if
-      report.exclude_yr_indxs==[0] }}>
-      Exclude first year
-    </option>
-    <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0,1" {{ 'selected' if
-      report.exclude_yr_indxs==[0, 1] }}>
-      Exclude first two years
-    </option>
-    <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0,1,2,3,4" {{ 'selected' if
-      report.exclude_yr_indxs==[0, 1, 2, 3, 4] }}>
-      Exclude first five years
-    </option>
-    {% if report.exclude_yr_indxs and report.exclude_yr_indxs not in ([], [0], [0,1], [0,1,2,3,4]) %}
-    <option value="./?exclude_yr_indxs={{ report.exclude_yr_indxs|join(',') }}" selected>
-      Custom: {{ report.exclude_yr_indxs|join(', ') }}
-    </option>
+{% macro display_label(metric) -%}
+  {%- set mapping = {
+      'Precipitation Depth': 'Precipitation',
+      'Runoff': 'Runoff',
+      'Peak Discharge': 'Peak Discharge',
+      '10-min Peak Rainfall Intensity': '10-min Peak Rainfall Intensity',
+      '15-min Peak Rainfall Intensity': '15-min Peak Rainfall Intensity',
+      '30-min Peak Rainfall Intensity': '30-min Peak Rainfall Intensity',
+      'Storm Duration': 'Storm Duration',
+      'Sediment Yield': 'Sediment Yield',
+      'Hill Sed Del': 'Hill Sed Del',
+      'Hill Streamflow': 'Hill Streamflow',
+      'Soluble Reactive P': 'Soluble Reactive P',
+      'Particulate P': 'Particulate P',
+      'Total P': 'Total P'
+    } -%}
+  {{ mapping.get(metric, metric) }}
+{%- endmacro %}
+
+{% macro format_date(entry) -%}
+  {%- set month = entry.mo | int -%}
+  {%- set day = entry.da | int -%}
+  {%- set year = entry.year | int + report.y0 - 1 -%}
+  {{ "%02d/%02d/%04d"|format(month, day, year) }}
+{%- endmacro %}
+
+{% macro render_units(units) -%}
+  {% if units %}
+    {% if units == 'ratio' %}
+      ratio
+    {% else %}
+      {{ unitizer_units(units) | safe }}
     {% endif %}
-  </select>
-</div>
+  {% else %}
+    &nbsp;
+  {% endif %}
+{%- endmacro %}
 
-<br />
+{% macro render_value(value, units) -%}
+  {% if value in (None, '') %}
+    &mdash;
+  {% elif units %}
+    {{ unitizer(value, units) | safe }}
+  {% else %}
+    {{ value }}
+  {% endif %}
+{%- endmacro %}
 
-<!-- Channel of interest -->
-<div class="mt-2" {% if chn_topaz_id_options|length < 2 %} style="display: none;" {% endif %}>
-  <label for="chnTopazSelect">Channel of Interest:</label>
-  <select id="chnTopazSelect" class="form-control" style="width: 200px;">
-    {% for topaz_id in (chn_topaz_id_options|sort) %}
-    <option value="{{ topaz_id }}" {{ 'selected' if chn_topaz_id_of_interest==topaz_id }}>
-      {% if topaz_id == 24 %}
-      Outlet (24)
-      {% else %}
-      Channel {{ topaz_id }}
-      {% endif %}
-    </option>
-    {% endfor %}
-  </select>
-</div>
+{% macro render_extraneous_value(metric, value, units) -%}
+  {% set dash_metrics = [
+    'Precipitation Depth',
+    '10-min Peak Rainfall Intensity',
+    '15-min Peak Rainfall Intensity',
+    '30-min Peak Rainfall Intensity',
+    'Storm Duration',
+    'Hill Sed Del',
+    'Hill Streamflow'
+  ] %}
+  {% if value in (None, '') %}
+    &mdash;
+  {% elif metric in dash_metrics and (value | float) == 0.0 %}
+    &mdash;
+  {% else %}
+    {{ render_value(value, units) }}
+  {% endif %}
+{%- endmacro %}
 
-<!-- Advanced Options -->
-<div class="mt-3">
-  <a href="#climate_advanced_opts_con" data-toggle="collapse" class aria-expanded="true">Advanced Options</a>
-</div>
+{% set extraneous_value = 'true' if extraneous else 'false' %}
+{% set extraneous_toggle_value = 'false' if extraneous else 'true' %}
+{% set exclude_years_param = exclude_yr_indxs|join(',') if exclude_yr_indxs else None %}
+{% set exclude_months_param = exclude_months|join(',') if exclude_months else None %}
 
-<div class="collapse mt-2" id="climate_advanced_opts_con">
-  <div class="card card-body">
-    <form id="excludeMonthsForm" onsubmit="return submitAdvancedOpts(event)">
-      <!-- Gringorten correction -->
-      <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" id="gringortenCheckbox" {% if gringorten_correction %}checked{%
-          endif %}>
-        <label class="form-check-label" for="gringortenCheckbox">
-          Apply Gringorten correction
-        </label>
-        <div class="small text-muted">
-          Uses plotting position <code>T = (N + 0.12) / (m − 0.44)</code> to slightly
-          bias-correct ranks and improve tail behavior vs. Weibull’s <code>(N + 1)/m</code>.
-        </div>
-      </div>
+{% macro build_csv_url(slug) -%}
+  {{ url_for_run('wepp.report_wepp_return_periods',
+                 runid=runid,
+                 config=config,
+                 format='csv',
+                 table=slug,
+                 extraneous=extraneous_value,
+                 gringorten_correction='true' if gringorten_correction else 'false',
+                 method=method,
+                 exclude_yr_indxs=exclude_years_param,
+                 exclude_months=exclude_months_param,
+                 chn_topaz_id_of_interest=chn_topaz_id_of_interest if chn_topaz_id_of_interest is not none else None) }}
+{%- endmacro %}
 
-      <!-- Exclude months -->
-      <label class="mb-2 d-block">Exclude months from analysis</label>
-      <div class="d-flex flex-wrap">
-        {% set months = [
-        (1,'Jan'),(2,'Feb'),(3,'Mar'),(4,'Apr'),
-        (5,'May'),(6,'Jun'),(7,'Jul'),(8,'Aug'),
-        (9,'Sep'),(10,'Oct'),(11,'Nov'),(12,'Dec')
-        ] %}
-        {% for num,abbr in months %}
-        <div class="form-check form-check-inline mb-2 mr-3">
-          <input class="form-check-input" type="checkbox" id="m{{ num }}" value="{{ num }}">
-          <label class="form-check-label" for="m{{ num }}">{{ abbr }}</label>
-        </div>
+{% macro simple_table(key) -%}
+  {% set slug = slugify_key(key) %}
+  {% set label = display_label(key) %}
+  {% set units = report.units_d.get(key) %}
+  {% set table_id = slug ~ '_tbl' %}
+  {% set intervals = report.intervals | sort_numeric(reverse=True) %}
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack">
+      <h2 class="wc-heading__subtitle">{{ label }}</h2>
+    </header>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense sortable" id="{{ table_id }}">
+        <thead>
+          <tr>
+            <th scope="col">Recurrence interval</th>
+            <th scope="col">Date</th>
+            <th scope="col">{{ label }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-sort-position="top">
+            <td>years</td>
+            <td>mm/dd/yyyy</td>
+            <td>{{ render_units(units) }}</td>
+          </tr>
+          {% for rec_interval in intervals %}
+            {% if rec_interval in report.return_periods[key] %}
+              {% set entry = report.return_periods[key][rec_interval] %}
+              <tr>
+                <td>{{ rec_interval }}</td>
+                <td>{{ format_date(entry) }}</td>
+                <td>{{ render_value(entry.get(key), units) }}</td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="wc-table-actions">
+      <button type="button" class="pure-button pure-button-link"
+              data-report-csv="{{ table_id }}"
+              data-report-url="{{ build_csv_url(slug) }}"
+              data-report-table="{{ slug }}">
+        Download CSV
+      </button>
+    </div>
+  </section>
+{%- endmacro %}
+
+{% macro extraneous_table(key) -%}
+  {% set slug = slugify_key(key) %}
+  {% set label = display_label(key) %}
+  {% set table_id = slug ~ '_tbl' %}
+  {% set dataset_items = report.return_periods[key].items() | list %}
+  {% if dataset_items %}
+    {% set sample_entry = dataset_items[0][1] %}
+  {% else %}
+    {% set sample_entry = {} %}
+  {% endif %}
+  {% set metric_order = [
+    'Precipitation Depth',
+    'Runoff',
+    'Peak Discharge',
+    '10-min Peak Rainfall Intensity',
+    '15-min Peak Rainfall Intensity',
+    '30-min Peak Rainfall Intensity',
+    'Storm Duration',
+    'Sediment Yield',
+    'Hill Sed Del',
+    'Hill Streamflow',
+    'Soluble Reactive P',
+    'Particulate P',
+    'Total P'
+  ] %}
+  {% set ns = namespace(metrics=[]) %}
+  {% for metric in metric_order %}
+    {% if sample_entry.get(metric) is not none %}
+      {% set _ = ns.metrics.append(metric) %}
+    {% endif %}
+  {% endfor %}
+  {% set metrics = ns.metrics %}
+  {% set show_rank = sample_entry.get('weibull_rank') is not none %}
+  {% set show_weibull_t = sample_entry.get('weibull_T') is not none %}
+  {% set intervals = report.intervals | sort_numeric(reverse=True) %}
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack">
+      <h2 class="wc-heading__subtitle">{{ label }}</h2>
+    </header>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense sortable" id="{{ table_id }}">
+        <thead>
+          <tr>
+            <th scope="col">Recurrence interval</th>
+            <th scope="col">Date</th>
+            {% for metric in metrics %}
+              {% set highlight = 'wc-return-period__measure' if metric == key else '' %}
+              <th scope="col" class="{{ highlight }}">{{ display_label(metric) }}</th>
+            {% endfor %}
+            {% if show_rank %}
+              <th scope="col">Rank</th>
+            {% endif %}
+            {% if show_weibull_t %}
+              <th scope="col">Weibull T</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-sort-position="top">
+            <td>years</td>
+            <td>mm/dd/yyyy</td>
+            {% for metric in metrics %}
+              {% set highlight = 'wc-return-period__measure' if metric == key else '' %}
+              <td class="{{ highlight }}">{{ render_units(report.units_d.get(metric)) }}</td>
+            {% endfor %}
+            {% if show_rank %}
+              <td>&nbsp;</td>
+            {% endif %}
+            {% if show_weibull_t %}
+              <td>&nbsp;</td>
+            {% endif %}
+          </tr>
+          {% for rec_interval in intervals %}
+            {% if rec_interval in report.return_periods[key] %}
+              {% set entry = report.return_periods[key][rec_interval] %}
+              <tr>
+                <td>{{ rec_interval }}</td>
+                <td>{{ format_date(entry) }}</td>
+                {% for metric in metrics %}
+                  {% set highlight = 'wc-return-period__measure' if metric == key else '' %}
+                  <td class="{{ highlight }}">
+                    {{ render_extraneous_value(metric, entry.get(metric), report.units_d.get(metric)) }}
+                  </td>
+                {% endfor %}
+                {% if show_rank %}
+                  <td>{{ entry.get('weibull_rank') or '&mdash;' }}</td>
+                {% endif %}
+                {% if show_weibull_t %}
+                  <td>{{ entry.get('weibull_T') if entry.get('weibull_T') is not none else '&mdash;' }}</td>
+                {% endif %}
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="wc-table-actions">
+      <button type="button" class="pure-button pure-button-link"
+              data-report-csv="{{ table_id }}"
+              data-report-url="{{ build_csv_url(slug) }}"
+              data-report-table="{{ slug }}">
+        Download CSV
+      </button>
+    </div>
+  </section>
+{%- endmacro %}
+
+{% set method_label = 'Gringorten' if gringorten_correction else 'Weibull' %}
+
+<header class="wc-stack">
+  <h1 class="wc-heading__title">Return periods</h1>
+  <p class="wc-text-muted">
+    Frequency analysis of watershed metrics using {{ method_label }} plotting positions.
+    Configure the simulation years, channel of interest, and optional exclusions below.
+  </p>
+</header>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Configuration</h2>
+  </header>
+  <div class="wc-stack">
+    <label>
+      <span class="wc-text-muted">Year selection</span>
+      <select id="yearSelection">
+        <option value="./?extraneous={{ extraneous_value }}"{% if report.exclude_yr_indxs is none %} selected{% endif %}>
+          All years included
+        </option>
+        <option value="./?extraneous={{ extraneous_value }}&exclude_yr_indxs=0"{% if report.exclude_yr_indxs == [0] %} selected{% endif %}>
+          Exclude first year
+        </option>
+        <option value="./?extraneous={{ extraneous_value }}&exclude_yr_indxs=0,1"{% if report.exclude_yr_indxs == [0, 1] %} selected{% endif %}>
+          Exclude first two years
+        </option>
+        <option value="./?extraneous={{ extraneous_value }}&exclude_yr_indxs=0,1,2,3,4"{% if report.exclude_yr_indxs == [0, 1, 2, 3, 4] %} selected{% endif %}>
+          Exclude first five years
+        </option>
+        {% if report.exclude_yr_indxs and report.exclude_yr_indxs not in ([], [0], [0,1], [0,1,2,3,4]) %}
+        <option value="./?exclude_yr_indxs={{ report.exclude_yr_indxs|join(',') }}" selected>
+          Custom: {{ report.exclude_yr_indxs|join(', ') }}
+        </option>
+        {% endif %}
+      </select>
+    </label>
+
+    {% if chn_topaz_id_options|length > 1 %}
+    <label>
+      <span class="wc-text-muted">Channel of interest</span>
+      <select id="chnTopazSelect">
+        {% for topaz_id in chn_topaz_id_options | sort %}
+          <option value="{{ topaz_id }}"{% if chn_topaz_id_of_interest == topaz_id %} selected{% endif %}>
+            {% if topaz_id == 24 %}
+              Outlet (24)
+            {% else %}
+              Channel {{ topaz_id }}
+            {% endif %}
+          </option>
         {% endfor %}
-      </div>
+      </select>
+    </label>
+    {% endif %}
 
-      <div class="mt-3">
-        <button type="submit" class="btn btn-primary btn-sm">Run report</button>
-        <button type="button" class="btn btn-link btn-sm" id="clearMonths">Clear all</button>
-        <button type="button" class="btn btn-link btn-sm" id="selectAllMonths">Select all</button>
+    <button type="button" class="pure-button pure-button-secondary" id="advancedOptionsToggle" data-open="false">
+      Show advanced options
+    </button>
+  </div>
+
+  <div class="wc-stack" id="advancedOptionsSection" hidden>
+    <form id="excludeMonthsForm" class="wc-stack">
+      <label class="wc-inline">
+        <input type="checkbox" id="gringortenCheckbox"{% if gringorten_correction %} checked{% endif %}>
+        <span>Apply Gringorten correction</span>
+      </label>
+      <p class="wc-text-muted">
+        Uses plotting position <code>T = (N + 0.12) / (m − 0.44)</code> to bias-correct ranks and improve tail behavior.
+      </p>
+
+      <fieldset class="wc-stack">
+        <legend class="wc-text-muted">Exclude months from analysis</legend>
+        <div class="wc-inline" style="flex-wrap: wrap;">
+          {% set months = [
+            (1,'Jan'),(2,'Feb'),(3,'Mar'),(4,'Apr'),
+            (5,'May'),(6,'Jun'),(7,'Jul'),(8,'Aug'),
+            (9,'Sep'),(10,'Oct'),(11,'Nov'),(12,'Dec')
+          ] %}
+          {% for num,abbr in months %}
+            <label class="wc-inline" style="gap: var(--wc-space-2xs);">
+              <input type="checkbox" id="m{{ num }}" value="{{ num }}">
+              <span>{{ abbr }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <div class="wc-inline" style="flex-wrap: wrap;">
+        <button type="submit" class="pure-button pure-button-secondary">Run report</button>
+        <button type="button" class="pure-button pure-button-link" id="clearMonths">Clear all</button>
+        <button type="button" class="pure-button pure-button-link" id="selectAllMonths">Select all</button>
       </div>
     </form>
   </div>
-</div>
+</section>
 
-<p>
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">{{ method_label }} plotting position</h2>
+  </header>
   {% if gringorten_correction %}
-  <br>Return periods are estimated using the <strong>Gringorten</strong> plotting position on the annual maxima
-  series:</br>
-<div style="margin-left: 50px">
-  <i>T</i> = (<i>N</i> + 0.12) / (<i>m</i> - 0.44),</br>
-  where <i>T</i> is the return period, <i>N</i> is the number of simulated daily values, and <i>m</i> is the rank of the
-  daily events.
-</div>
-<small class="text-muted" style="margin-left: 50px">
-  Gringorten applies a small bias correction and is often preferred for hydrologic frequency analysis at distribution
-  tails.
-</small>
-{% else %}
-<br>The return period of the events is estimated using the <strong>Weibull</strong> plotting position on the annual
-maxima series:</br>
-<div style="margin-left: 50px">
-  <i>T</i> = (<i>N</i> + 1)/<i>m</i>,</br>
-  where <i>T</i> is the return period, <i>N</i> is the number of simulated daily values, and <i>m</i> is the rank of the
-  daily events.
-</div>
-<small class="text-muted" style="margin-left: 50px">
-  Weibull’s <code>(N+1)/m</code> is simple and widely used.
-</small>
-{% endif %}
-</p>
-
-<br />
-<dl class="dl-horizontal">
-  <dt>Years in Simulation</dt>
-  <dd>{{ report.years }}</dd>
-  <dt>Events in Simulation</dt>
-  <dd>{{ report.num_events }}</dd>
-</dl>
-<br />
-<p>
-  For post-disturbance model runs (e.g. prescribed fire, wildfire, thinning, etc.) results represent recurrences for
-  specific parameters given the first year post-disturbance only. For example, if the peak discharge for a 20-year
-  return
-  interval is 5 m³/s, specific parameters given the first year post-disturbance only. For example, if the peak discharge
-  for a 20-year return interval is 5 m³/s, this means that there is a 1/20, or 5%, chance that the peak discharge will
-  reach or exceed 5 m³/s on any given year. This probability is
-  based on statistical analysis of historical data and does not imply that such an event will occur exactly once in
-  20 years, but rather that it could occur more or less frequently based on random variation.</p>
+    <p class="wc-text-muted">
+      Return periods are estimated using the <strong>Gringorten</strong> plotting position on the annual maxima series:
+      <code>T = (N + 0.12) / (m − 0.44)</code>, where <em>T</em> is the return period, <em>N</em> is the number of
+      simulated daily values, and <em>m</em> is the event rank.
+    </p>
+  {% else %}
+    <p class="wc-text-muted">
+      Return periods are estimated using the <strong>Weibull</strong> plotting position on the annual maxima series:
+      <code>T = (N + 1) / m</code>, where <em>T</em> is the return period, <em>N</em> is the number of simulated daily
+      values, and <em>m</em> is the event rank.
+    </p>
+  {% endif %}
+  <dl class="wc-inline" style="flex-wrap: wrap;">
+    <div>
+      <dt class="wc-text-muted">Years in simulation</dt>
+      <dd>{{ report.years }}</dd>
+    </div>
+    <div>
+      <dt class="wc-text-muted">Events in simulation</dt>
+      <dd>{{ report.num_events }}</dd>
+    </div>
+  </dl>
+  <p class="wc-text-muted">
+    Post-disturbance runs (e.g., prescribed fire, wildfire, thinning) represent recurrences for the first year
+    following the disturbance. A 20-year peak discharge of 5&nbsp;m³/s denotes a 5&nbsp;% probability that peak
+    discharge meets or exceeds 5&nbsp;m³/s in any given year.
+  </p>
+</section>
 
 {% if extraneous %}
-<div class="alert alert-info"><strong>Note:</strong>
-  The gray column denotes the recurrence for the parameter.
-  The white columns provide corresponding information for each event.
-</div>
-<a href="#" id="toggleExtraneous" data-target-state="false">Hide extraneous parameters in tables.</a>
-{% else %}
-<a href="#" id="toggleExtraneous" data-target-state="true">Show extraneous parameters in tables.</a>
+  <div class="wc-status" data-state="attention">
+    <strong>Note:</strong>
+    Columns highlighted with <span class="wc-return-period__measure">this shading</span> show the recurrence results for
+    the selected measure. Adjacent columns provide the corresponding values for each event.
+  </div>
 {% endif %}
 
-<br />
-<br />
-{% for key in ['Precipitation Depth', 'Runoff', 'Peak Discharge',
-'10-min Peak Rainfall Intensity',
-'15-min Peak Rainfall Intensity',
-'30-min Peak Rainfall Intensity',
-'Sediment Yield',
-'Hill Sed Del',
-'Hill Streamflow'] %}
-{% if key in report.return_periods %}
-{% if extraneous %}
-{% include("reports/wepp/_return_period_extraneous_table.htm") %}
-{% else %}
-{% include("reports/wepp/_return_period_simple_table.htm") %}
-{% endif %}
-{% endif %}
+<div class="wc-inline">
+  <button type="button" class="pure-button pure-button-secondary" id="toggleExtraneous"
+          data-target-state="{{ extraneous_toggle_value }}">
+    {% if extraneous %}Hide{% else %}Show{% endif %} extraneous parameters
+  </button>
+</div>
+
+{% for key in measure_order %}
+  {% if key in report.return_periods %}
+    {% if extraneous %}
+      {{ extraneous_table(key) }}
+    {% else %}
+      {{ simple_table(key) }}
+    {% endif %}
+  {% endif %}
 {% endfor %}
 
-{% if report.has_phosphorus %}
-{% for key in ['Soluble Reactive P', 'Particulate P', 'Total P'] %}
-{% if extraneous %}
-{% include("reports/wepp/_return_period_extraneous_table.htm") %}
-{% else %}
-{% include("reports/wepp/_return_period_simple_table.htm") %}
-{% endif %}
-{% endfor %}
-{% endif %}
-<h4>Additional Resources</h4>
-<h5>Culvert Diameter Size Spreadsheet</h5>
-<a href="{{ url_for('static', filename='resources/1403_Culvert_Dia_Math.xlsx') }}">Download Spreadsheet (.xlsx)</a>
-Courtesy of William J. Elliot
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Additional resources</h2>
+  </header>
+  <p class="wc-text-muted">
+    Culvert diameter sizing spreadsheet courtesy of William J. Elliot.
+    <a href="{{ url_for('static', filename='resources/1403_Culvert_Dia_Math.xlsx') }}">Download spreadsheet (.xlsx)</a>
+  </p>
+</section>
+
 <script>
   function parseExcludeMonthsFromURL() {
     const sp = new URLSearchParams(window.location.search);
@@ -195,69 +436,52 @@ Courtesy of William J. Elliot
   }
 
   function setAdvancedVisibility(showIt) {
-    const con = document.getElementById('climate_advanced_opts_con');
-    const tog = document.querySelector('a[href="#climate_advanced_opts_con"][data-toggle="collapse"]');
-    if (!con || !tog) return;
+    const section = document.getElementById('advancedOptionsSection');
+    const toggle = document.getElementById('advancedOptionsToggle');
+    if (!section || !toggle) return;
     if (showIt) {
-      con.classList.add('show');
-      tog.setAttribute('aria-expanded', 'true');
+      section.removeAttribute('hidden');
+      toggle.dataset.open = 'true';
+      toggle.textContent = 'Hide advanced options';
     } else {
-      con.classList.remove('show');
-      tog.setAttribute('aria-expanded', 'false');
+      section.setAttribute('hidden', 'hidden');
+      toggle.dataset.open = 'false';
+      toggle.textContent = 'Show advanced options';
     }
   }
 
   function submitAdvancedOpts(e) {
     e.preventDefault();
-
-    // Selected months (1..12)
     const checkedMonths = Array.from(
       document.querySelectorAll('#excludeMonthsForm input[type="checkbox"][id^="m"]:checked')
     ).map(cb => parseInt(cb.value, 10)).sort((a, b) => a - b);
-
-    // Gringorten toggle
     const gring = !!document.getElementById('gringortenCheckbox')?.checked;
-
-    // Start from the yearSelection target URL (so year exclusion choice sticks)
     const yearSel = document.getElementById('yearSelection');
     const base = new URL(yearSel ? yearSel.value : window.location.pathname, window.location.href);
-
-    // Merge with current params to preserve extras
     const current = new URL(window.location.href);
     const params = new URLSearchParams(base.search);
     current.searchParams.forEach((v, k) => { if (!params.has(k)) params.set(k, v); });
-
-    // Set months
     if (checkedMonths.length) params.set('exclude_months', checkedMonths.join(','));
     else params.delete('exclude_months');
-
-    // Set gringorten explicitly for consistency
     params.set('gringorten_correction', gring ? 'true' : 'false');
-
-    // Navigate
     window.location.href = current.pathname + '?' + params.toString();
     return false;
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    // Init from URL
     const months = parseExcludeMonthsFromURL();
     const gring = parseGringortenFromURL();
 
-    // Check months from URL
     months.forEach(m => {
       const el = document.getElementById('m' + m);
       if (el) el.checked = true;
     });
 
-    // Check gringorten from URL (overrides server default if user typed URL)
     const grChk = document.getElementById('gringortenCheckbox');
     if (grChk) grChk.checked = gring;
 
-    // Open advanced if user has any months selected OR gringorten is true
     setAdvancedVisibility(months.length > 0 || gring);
 
-    // Quick actions for months
     const form = document.getElementById('excludeMonthsForm');
     if (form) {
       const boxes = () => Array.from(form.querySelectorAll('input[type="checkbox"][id^="m"]'));
@@ -265,26 +489,31 @@ Courtesy of William J. Elliot
       const allBtn = document.getElementById('selectAllMonths');
       if (clearBtn) clearBtn.addEventListener('click', () => boxes().forEach(cb => cb.checked = false));
       if (allBtn) allBtn.addEventListener('click', () => boxes().forEach(cb => cb.checked = true));
+      form.addEventListener('submit', submitAdvancedOpts);
     }
 
-    // yearSelection: preserve extraneous + other advanced params
+    const toggleAdvanced = document.getElementById('advancedOptionsToggle');
+    if (toggleAdvanced) {
+      toggleAdvanced.addEventListener('click', () => {
+        const isOpen = toggleAdvanced.dataset.open === 'true';
+        setAdvancedVisibility(!isOpen);
+      });
+    }
+
     const sel = document.getElementById('yearSelection');
     if (sel) {
       sel.addEventListener('change', function () {
         const target = new URL(this.value, window.location.href);
         const cur = new URL(window.location.href);
-
-        ['gringorten_correction', 'exclude_months', 'extraneous', 'chn_topaz_id_of_interest']
+        ['gringorten_correction', 'exclude_months', 'extraneous', 'chn_topaz_id_of_interest', 'method']
           .forEach(k => {
             if (cur.searchParams.has(k)) target.searchParams.set(k, cur.searchParams.get(k));
             else target.searchParams.delete(k);
           });
-
         window.location.href = target.pathname + '?' + target.searchParams.toString();
       });
     }
 
-    // Channel select: set/remove chn_topaz_id_of_interest, preserve others
     const chnSel = document.getElementById('chnTopazSelect');
     if (chnSel) {
       chnSel.addEventListener('change', function () {
@@ -296,19 +525,16 @@ Courtesy of William J. Elliot
       });
     }
 
-    // Extraneous toggle: flip extraneous, preserve everything else
-    const toggle = document.getElementById('toggleExtraneous');
-    if (toggle) {
-      toggle.addEventListener('click', function (e) {
+    const toggleExtraneous = document.getElementById('toggleExtraneous');
+    if (toggleExtraneous) {
+      toggleExtraneous.addEventListener('click', function (e) {
         e.preventDefault();
         const desired = this.getAttribute('data-target-state') || 'false';
         const url = new URL(window.location.href);
         url.searchParams.set('extraneous', desired);
-        // leave all other params as-is (exclude_yr_indxs, exclude_months, gringorten_correction, etc.)
         window.location.href = url.pathname + '?' + url.searchParams.toString();
       });
     }
   });
-
 </script>
 {% endblock %}

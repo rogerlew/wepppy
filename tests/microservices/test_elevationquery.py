@@ -106,3 +106,25 @@ def test_returns_error_for_out_of_bounds_query(tmp_path: Path, monkeypatch, load
     payload = response.json()
     assert payload["Elevation"] is None
     assert "outside" in payload["Error"].lower()
+
+
+def test_unhandled_exception_returns_transparent_payload(tmp_path: Path, monkeypatch, load_service):
+    module = load_service(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(module, "get_wd", lambda runid, prefer_active=False: str(tmp_path))
+
+    def explode(active_root):
+        raise RuntimeError("DEM exploded")
+
+    monkeypatch.setattr(module, "_locate_dem", explode)
+
+    app = module.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/weppcloud/runs/demo/default/elevationquery/?lat=45.0&lng=-116.0",
+        )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["Elevation"] is None
+    assert "DEM exploded" in payload["Error"]

@@ -66,7 +66,8 @@ NoDb subclass logger
 
 #### Webservices
 Run on production server to provide access to large geospatial datasets
-- **wepppy/webservices/elevationquery** - point elevation data in US
+- **wepppy/microservices/elevationquery** - run-scoped elevation service powered by Starlette
+  - Mirrors legacy payloads and surfaces descriptive JSON errors via custom exception handlers for transparency.
 - **wepppy/webservices/metquery** - queries monthly data
 - **wepppy/webservices/wmesque** - raster server (deprecated)
 - **wepppy/webservices/wmesque2** - raster server (fastapi)

@@ -38,6 +38,7 @@ var Map = function () {
         var encodedRunId = (typeof runid !== "undefined" && runid !== null) ? encodeURIComponent(runid) : null;
         var encodedConfig = (typeof config !== "undefined" && config !== null) ? encodeURIComponent(config) : null;
         var elevationEndpoint = null;
+        var elevationCooldownMs = 400;
         if (encodedRunId && encodedConfig) {
             var prefix = (typeof site_prefix === "string") ? site_prefix : "";
             elevationEndpoint = prefix + "/runs/" + encodedRunId + "/" + encodedConfig + "/elevationquery/";
@@ -79,7 +80,7 @@ var Map = function () {
                     clearTimeout(self.fetchTimer);
                     self.fetchTimer = setTimeout(function () {
                         self.isFetchingElevation = false;
-                    }, 1000); // Wait for 1 seconds before allowing another request
+                    }, elevationCooldownMs);
                 }
             });
         };

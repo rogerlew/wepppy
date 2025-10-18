@@ -754,6 +754,11 @@ button[disabled],
   background: transparent;
 }
 
+.wc-return-period__measure {
+  background: var(--wc-color-accent-soft);
+  font-weight: 600;
+}
+
 /* Status blocks */
 .wc-status {
   border: 1px solid var(--wc-color-border);

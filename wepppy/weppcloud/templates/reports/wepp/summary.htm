@@ -1,132 +1,199 @@
-{% extends "reports/_page_container.htm" %}
-{% block report_title %}Loss Summary{% endblock %}
+{% extends "reports/_base_report.htm" %}
+{% block report_title %}Loss summary{% endblock %}
 {% block report_content %}
+{% macro render_scalar(value, units) -%}
+  {% if value in (None, '') %}
+    &mdash;
+  {% elif units %}
+    {{ unitizer(value, units) | safe }}
+  {% elif value is number %}
+    {{ '%.3f' | format(value | float) }}
+  {% else %}
+    {{ value }}
+  {% endif %}
+{%- endmacro %}
 
-<h2>WEPP Results Summary</h2>
-<h5>{% if not is_singlestorm %}Average Annual Delivery From Channel Outlet for Years {% else %}Delivery from Channel Outlet from Storm{% endif %}
-    <a onclick="javascript:copytable('out_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
+{% macro render_units(units) -%}
+  {% if units %}
+    {% if units == 'ratio' %}
+      ratio
+    {% else %}
+      {{ unitizer_units(units) | safe }}
+    {% endif %}
+  {% else %}
+    &nbsp;
+  {% endif %}
+{%- endmacro %}
 
-{% if extraneous %}
-<a href="./?extraneous=false">Hide extraneous parameters in tables.</a>
-{% else %}
-<a href="./?extraneous=true">Show extraneous parameters in tables.</a>
-{% endif %}
-
+{% macro render_table_value(value, units) -%}
+  {% if value in (None, '') %}
+    &mdash;
+  {% elif units %}
+    {{ unitizer(value, units) | safe }}
+  {% else %}
+    {{ value }}
+  {% endif %}
+{%- endmacro %}
 
 {% set outlet_rows = out_rpt.rows(include_extraneous=extraneous) %}
-<table class="table table-condensed" style="width: auto !important;" id="out_tbl">
-  <thead>
-    <tr>
-      <th>&nbsp;</th>
-      <th>from outlet</th>
-      <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-      <th>per unit area of watershed</th>
-      <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in outlet_rows %}
-      <tr>
-        <td>{{ row.label }}&nbsp;</td>
-        <td class="text-right">{{ unitizer(row.value, row.units) | safe }}</td>
-        <td>
-          {% if row.units %}
-            {{ unitizer_units(row.units) | safe }}&nbsp;
-          {% else %}
-            &nbsp;
-          {% endif %}
-        </td>
-        <td class="text-right">
-          {% if row.per_area_value is not none %}
-            {{ unitizer(row.per_area_value, row.per_area_units) | safe }}
-          {% else %}
-            &mdash;
-          {% endif %}
-        </td>
-        <td>
-          {% if row.per_area_units %}
-            {{ unitizer_units(row.per_area_units) | safe }}
-          {% else %}
-            &nbsp;
-          {% endif %}
-        </td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% set extraneous_value = 'true' if extraneous else 'false' %}
+{% set extraneous_toggle_value = 'false' if extraneous else 'true' %}
 
-<br/>
+<header class="wc-stack">
+  <h1 class="wc-heading__title">Loss summary</h1>
+  <p class="wc-text-muted">
+    Aggregate outlet, hillslope, and channel metrics derived from the WEPP loss reports.
+    {% if is_singlestorm %}
+      Values reflect the current single-storm simulation.
+    {% else %}
+      Values represent average annual results over the simulated period.
+    {% endif %}
+  </p>
+</header>
 
+<div class="wc-inline">
+  {% if extraneous %}
+    <a class="pure-button pure-button-link"
+       href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, extraneous=extraneous_toggle_value) }}">
+      Hide extraneous parameters
+    </a>
+  {% else %}
+    <a class="pure-button pure-button-link"
+       href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, extraneous=extraneous_toggle_value) }}">
+      Show extraneous parameters
+    </a>
+  {% endif %}
+</div>
 
-<h5>{% if not is_singlestorm %} Average Annual Summary for Subcatchments for All Years{% else %} Summary for Subcatchments for Storm {% endif %}
-    <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Outlet summary</h2>
+    <p class="wc-text-muted">
+      Watershed-scale delivery metrics at the channel outlet. Toggle extraneous parameters to include
+      per-area derivatives derived from the interchange parquet exports.
+    </p>
+  </header>
 
-<table class="table table-condensed sortable" id="hill_tbl">
-    <thead>
+  <div class="wc-table-wrapper wc-table-wrapper--compact">
+    <table class="wc-table wc-table--dense wc-table--compact" id="outlet_summary_tbl">
+      <thead>
         <tr>
-        {% for name, units in hill_rpt.hdr_units_zip %}
-            <th class="align-top">
-                {{ name }}
-                {% if name == "WeppID" %}
-                <a data-toggle="tooltip" data-placement="top" title="ID Assigned by WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                {% endif %}
-                {% if name == "TopazID" %}
-                <a data-toggle="tooltip" data-placement="top" title="ID Assigned by TOPAZ"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                {% endif %}
-                {% if name == "Landuse" %}
-                <a data-toggle="tooltip" data-placement="top" title="Landuse key from landuse map"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                {% endif %}
-                {% if name == "Soil" %}
-                <a data-toggle="tooltip" data-placement="top" title="Soil file name"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                {% endif %}
-                <br><span class="header-units">{{ unitizer_units(units) | safe }} &nbsp;</span>
-            </th>
-        {% endfor %}
+          <th scope="col">Metric</th>
+          <th scope="col">Value</th>
+          <th scope="col">Value units</th>
+          <th scope="col">Per unit area</th>
+          <th scope="col">Per unit area units</th>
         </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
+        {% for row in outlet_rows %}
+        <tr>
+          <th scope="row">{{ row.label }}</th>
+          <td>{{ render_scalar(row.value, row.units) }}</td>
+          <td>{{ render_units(row.units) }}</td>
+          <td>{{ render_scalar(row.per_area_value, row.per_area_units) }}</td>
+          <td>{{ render_units(row.per_area_units) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wc-table-actions">
+    <button type="button" class="pure-button pure-button-link"
+            data-report-csv="outlet_summary_tbl"
+            data-report-url="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, format='csv', extraneous=extraneous_value) }}"
+            data-report-table="outlet">
+      Download CSV
+    </button>
+  </div>
+</section>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Hillslope summary</h2>
+    <p class="wc-text-muted">Per-hillslope metrics joined with landuse and soils metadata.</p>
+  </header>
+
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--dense sortable" id="hill_summary_tbl">
+      <thead>
+        <tr>
+          {% for name in hill_rpt.hdr %}
+            <th scope="col">{{ name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-sort-position="top">
+          {% for units in hill_rpt.units %}
+            <td>{{ render_units(units) }}</td>
+          {% endfor %}
+        </tr>
         {% for row in hill_rpt %}
         <tr>
-            {% for value, units in row %}
-            <td sorttable_customkey="{{ value }}">{{ unitizer(value, units) | safe }}</td>
-            {% endfor %}
+          {% for value, units in row %}
+            <td sorttable_customkey="{{ '' if value in (None, '') else value }}">
+              {{ render_table_value(value, units) }}
+            </td>
+          {% endfor %}
         </tr>
         {% endfor %}
-    </tbody>
-</table>
+      </tbody>
+    </table>
+  </div>
 
-<h5>{% if not is_singlestorm %} Average Annual Summary for Channels for Years for All Years{% else %} Summary for Channels for Storm {% endif %}
-    <a onclick="javascript:copytable('chn_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
-</h5>
-<table class="table table-condensed sortable" id="chn_tbl">
-  <thead>
-    <tr>
-    {% for name, units in chn_rpt.hdr_units_zip %}
-      <th>{{ name }}
-      {% if name == "WeppID" %}
-      <a data-toggle="tooltip" data-placement="top" title="ID Assigned by WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
-      {% endif %}
-      {% if name == "WeppChnID" %}
-      <a data-toggle="tooltip" data-placement="top" title="Channel ID Assigned by WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
-      {% endif %}
-      {% if name == "TopazID" %}
-      <a data-toggle="tooltip" data-placement="top" title="ID Assigned by TOPAZ"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
-      {% endif %}
-      <br><span class="header-units">{{ unitizer_units(units) | safe }} &nbsp;</span>
-      </th>
-    {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in chn_rpt %}
-    <tr>
-      {% for value, units in row %}
-        <td sorttable_customkey="{{ value }}">{{ unitizer(value, units) | safe }}</td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  <div class="wc-table-actions">
+    <button type="button" class="pure-button pure-button-link"
+            data-report-csv="hill_summary_tbl"
+            data-report-url="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, format='csv', extraneous=extraneous_value) }}"
+            data-report-table="hillslopes">
+      Download CSV
+    </button>
+  </div>
+</section>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Channel summary</h2>
+    <p class="wc-text-muted">Per-channel metrics derived from the loss report and watershed channel geometry.</p>
+  </header>
+
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--dense sortable" id="channel_summary_tbl">
+      <thead>
+        <tr>
+          {% for name in chn_rpt.hdr %}
+            <th scope="col">{{ name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-sort-position="top">
+          {% for units in chn_rpt.units %}
+            <td>{{ render_units(units) }}</td>
+          {% endfor %}
+        </tr>
+        {% for row in chn_rpt %}
+        <tr>
+          {% for value, units in row %}
+            <td sorttable_customkey="{{ '' if value in (None, '') else value }}">
+              {{ render_table_value(value, units) }}
+            </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wc-table-actions">
+    <button type="button" class="pure-button pure-button-link"
+            data-report-csv="channel_summary_tbl"
+            data-report-url="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, format='csv', extraneous=extraneous_value) }}"
+            data-report-table="channels">
+      Download CSV
+    </button>
+  </div>
+</section>
 {% endblock %}
