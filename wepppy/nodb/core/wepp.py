@@ -70,6 +70,7 @@ from enum import IntEnum
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
+from typing import Optional, Dict, List, Tuple, Any, Set, TextIO
 
 import math
 
@@ -175,7 +176,7 @@ from wepppy.nodb.core.climate import ClimateMode
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 
-def _copyfile(src_fn, dst_fn):
+def _copyfile(src_fn: str, dst_fn: str) -> None:
     if _exists(dst_fn):
         os.remove(dst_fn)
 
@@ -191,7 +192,11 @@ class ChannelRoutingMethod(IntEnum):
 
 
 class SnowOpts(object):
-    def __init__(self, rst=None, newsnw=None, ssd=None):
+    rst: float
+    newsnw: float
+    ssd: float
+    
+    def __init__(self, rst: Optional[float] = None, newsnw: Optional[float] = None, ssd: Optional[float] = None) -> None:
         """
         Stores the coeffs that go into snow.txt
         """
@@ -214,7 +219,7 @@ class SnowOpts(object):
         else:
             self.ssd = ssd
 
-    def parse_inputs(self, kwds):
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         for var in ('rst', 'newsnw', 'ssd'):
             _var = f'snow_opts_{var}'
             if var in kwds:
@@ -223,7 +228,7 @@ class SnowOpts(object):
                 setattr(self, var, try_parse_float(kwds[_var], None))
 
     @property
-    def contents(self):
+    def contents(self) -> str:
         return (
             '{0.rst}  # rain-snow threshold\n'
             '{0.newsnw}  # density of new snow\n'
@@ -233,13 +238,19 @@ class SnowOpts(object):
 
 
 class BaseflowOpts(object):
-    def __init__(self, gwstorage=None, bfcoeff=None, dscoeff=None, bfthreshold=None):
+    gwstorage: float
+    bfcoeff: float
+    dscoeff: float
+    bfthreshold: float
+    
+    def __init__(self, gwstorage: Optional[float] = None, bfcoeff: Optional[float] = None, 
+                 dscoeff: Optional[float] = None, bfthreshold: Optional[float] = None) -> None:
         """
         Stores the coeffs that go into gwcoeff.txt
         """
         # Initial groundwater storage (mm)
         if gwstorage is None:
-            self.gwstorage = 200
+            self.gwstorage = 200.0
         else:
             self.gwstorage = gwstorage
 
@@ -251,17 +262,17 @@ class BaseflowOpts(object):
 
         # Deep seepage coefficient (per day)
         if dscoeff is None:
-            self.dscoeff = 0
+            self.dscoeff = 0.0
         else:
             self.dscoeff = dscoeff
 
         # Watershed groundwater baseflow threshold area (ha)
         if bfthreshold is None:
-            self.bfthreshold = 1
+            self.bfthreshold = 1.0
         else:
             self.bfthreshold = bfthreshold
 
-    def parse_inputs(self, kwds):
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         for var in ('gwstorage', 'bfcoeff', 'dscoeff', 'bfthreshold'):
             _var = f'baseflow_opts_{var}'
 
@@ -271,7 +282,7 @@ class BaseflowOpts(object):
                 setattr(self, var, try_parse_float(kwds[_var], None))
 
     @property
-    def contents(self):
+    def contents(self) -> str:
         return (
             '{0.gwstorage}\tInitial groundwater storage (mm)\n'
             '{0.bfcoeff}\tBaseflow coefficient (per day)\n'
@@ -281,7 +292,7 @@ class BaseflowOpts(object):
         )
 
 
-def validate_phosphorus_txt(fn):
+def validate_phosphorus_txt(fn: str) -> bool:
 
     with open(fn) as fp:
         lines = fp.readlines()
@@ -300,7 +311,13 @@ def validate_phosphorus_txt(fn):
 
 
 class PhosphorusOpts(object):
-    def __init__(self, surf_runoff=None, lateral_flow=None, baseflow=None, sediment=None):
+    surf_runoff: Optional[float]
+    lateral_flow: Optional[float]
+    baseflow: Optional[float]
+    sediment: Optional[float]
+    
+    def __init__(self, surf_runoff: Optional[float] = None, lateral_flow: Optional[float] = None, 
+                 baseflow: Optional[float] = None, sediment: Optional[float] = None) -> None:
         # Surface runoff concentration (mg/l)
         self.surf_runoff = surf_runoff
 
@@ -313,7 +330,7 @@ class PhosphorusOpts(object):
         # Sediment concentration (mg/kg)
         self.sediment = sediment
 
-    def parse_inputs(self, kwds):
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         for var in ('surf_runoff', 'lateral_flow', 'baseflow', 'sediment'):
             _var = f'phosphorus_opts_{var}'
 
@@ -323,14 +340,14 @@ class PhosphorusOpts(object):
                 setattr(self, var, try_parse_float(kwds[_var], None))
 
     @property
-    def isvalid(self):
+    def isvalid(self) -> bool:
         return isfloat(self.surf_runoff) and \
                isfloat(self.lateral_flow) and \
                isfloat(self.baseflow) and \
                isfloat(self.sediment)
 
     @property
-    def contents(self):
+    def contents(self) -> str:
         return (
             'Phosphorus concentration\n'
             '{0.surf_runoff}\tSurface runoff concentration (mg/l)\n'
@@ -340,7 +357,7 @@ class PhosphorusOpts(object):
             .format(self)
         )
 
-    def asdict(self):
+    def asdict(self) -> Dict[str, Optional[float]]:
         return dict(surf_runoff=self.surf_runoff,
                     lateral_flow=self.lateral_flow,
                     baseflow=self.baseflow,
@@ -348,7 +365,13 @@ class PhosphorusOpts(object):
 
 
 class TCROpts(object):
-    def __init__(self, taumin=None, taumax=None, kch=None, nch=None):
+    taumin: Optional[float]
+    taumax: Optional[float]
+    kch: Optional[float]
+    nch: Optional[float]
+    
+    def __init__(self, taumin: Optional[float] = None, taumax: Optional[float] = None, 
+                 kch: Optional[float] = None, nch: Optional[float] = None) -> None:
         """
         Stores the coeffs that go into tcr.txt
         """
@@ -357,7 +380,7 @@ class TCROpts(object):
         self.kch = kch
         self.nch = nch
 
-    def parse_inputs(self, kwds):
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         for var in ('taumin', 'taumax', 'kch', 'nch'):
             _var = f'tcr_opts_{var}'
 
@@ -367,7 +390,7 @@ class TCROpts(object):
                 setattr(self, var, try_parse_float(kwds[_var], None))
 
     @property
-    def contents(self):
+    def contents(self) -> str:
         if isfloat(self.taumax) and \
            isfloat(self.taumin) and \
            isfloat(self.kch) and \
@@ -383,7 +406,7 @@ class TCROpts(object):
             return '\n'
 
 
-def prep_soil(args):
+def prep_soil(args: Tuple[str, str, str, Optional[float], bool, float, bool, float]) -> Tuple[str, float]:
     t0 = time.time()
     # str,    str,    str,    float,  bool,               float,       bool,       float
     topaz_id, src_fn, dst_fn, kslast, modify_kslast_pars, initial_sat, clip_soils, clip_soils_depth = args
@@ -404,8 +427,8 @@ class WeppNoDbLockedException(Exception):
     pass
 
 
-def extract_slps_fn(slps_fn, fp_runs_dir):
-    f = None
+def extract_slps_fn(slps_fn: str, fp_runs_dir: str) -> None:
+    f: Optional[TextIO] = None
     with open(slps_fn) as fp:
         
         for line in fp:
@@ -416,7 +439,7 @@ def extract_slps_fn(slps_fn, fp_runs_dir):
 
                 f = open(_join(fp_runs_dir, fp_fn), 'w')
 
-            else:
+            elif f is not None:
                 f.write(line)
 
         if f is not None:
@@ -428,7 +451,7 @@ class Wepp(NoDbBase):
 
     filename = 'wepp.nodb'
     
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+    def __init__(self, wd: str, cfg_fn: str, run_group: Optional[str] = None, group_name: Optional[str] = None) -> None:
         super(Wepp, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
@@ -524,33 +547,33 @@ class Wepp(NoDbBase):
 
     @dss_excluded_channel_orders.setter
     @nodb_setter
-    def dss_excluded_channel_orders(self, value):
+    def dss_excluded_channel_orders(self, value: List[int]) -> None:
         self._dss_excluded_channel_orders = value
 
     @property
-    def dss_export_channel_ids(self) -> list:
+    def dss_export_channel_ids(self) -> List[int]:
         return getattr(self, '_dss_export_channel_ids', [])
 
     @dss_export_channel_ids.setter
     @nodb_setter
-    def dss_export_channel_ids(self, value):
+    def dss_export_channel_ids(self, value: List[int]) -> None:
         self._dss_export_channel_ids = value
 
     @property
-    def has_dss_zip(self):
+    def has_dss_zip(self) -> bool:
         return _exists(_join(self.export_dir, 'dss.zip'))
 
     @property
-    def multi_ofe(self):
+    def multi_ofe(self) -> bool:
         return getattr(self, "_multi_ofe", False)
 
     @multi_ofe.setter
     @nodb_setter
-    def multi_ofe(self, value):
+    def multi_ofe(self, value: bool) -> None:
         self._multi_ofe = value
 
     @property
-    def wepp_bin(self):
+    def wepp_bin(self) -> Optional[str]:
         if not hasattr(self, "_wepp_bin"):
             return None
 
@@ -558,80 +581,81 @@ class Wepp(NoDbBase):
 
     @wepp_bin.setter
     @nodb_setter
-    def wepp_bin(self, value):
+    def wepp_bin(self, value: str) -> None:
         self._wepp_bin = value
 
 
     @property
-    def prep_details_on_run_completion(self):
+    def prep_details_on_run_completion(self) -> bool:
         return getattr(self, '_prep_details_on_run_completion',
                        self.config_get_bool('wepp', 'prep_details_on_run_completion', False))
 
     @property
-    def arc_export_on_run_completion(self):
+    def arc_export_on_run_completion(self) -> bool:
         return getattr(self, '_arc_export_on_run_completion',
                        self.config_get_bool('wepp', 'arc_export_on_run_completion', False))
 
     @property
-    def legacy_arc_export_on_run_completion(self):
+    def legacy_arc_export_on_run_completion(self) -> bool:
         return getattr(self, '_legacy_arc_export_on_run_completion',
                        self.config_get_bool('wepp', 'legacy_arc_export_on_run_completion', False))
 
     @property
-    def dss_export_on_run_completion(self):
+    def dss_export_on_run_completion(self) -> bool:
         return getattr(self, '_dss_export_on_run_completion',
                        self.config_get_bool('wepp', 'dss_export_on_run_completion', False))
 
     @property
-    def run_tcr(self):
+    def run_tcr(self) -> bool:
         return getattr(self, '_run_tcr', self.config_get_bool('wepp', 'tcr'))
 
     @property
-    def run_wepp_ui(self):
+    def run_wepp_ui(self) -> bool:
         return getattr(self, '_run_wepp_ui', self.config_get_bool('wepp', 'wepp_ui'))
 
     @property
-    def run_pmet(self):
+    def run_pmet(self) -> bool:
         return getattr(self, '_run_pmet', self.config_get_bool('wepp', 'pmet'))
 
     @property
-    def run_frost(self):
+    def run_frost(self) -> bool:
         return getattr(self, '_run_frost', self.config_get_bool('wepp', 'frost'))
 
     @property
-    def run_baseflow(self):
+    def run_baseflow(self) -> bool:
         return getattr(self, '_run_baseflow', self.config_get_bool('wepp', 'baseflow'))
 
     @property
-    def run_snow(self):
+    def run_snow(self) -> bool:
         return getattr(self, '_run_snow', self.config_get_bool('wepp', 'snow'))
 
     @property
-    def channel_erodibility(self):
+    def channel_erodibility(self) -> Optional[float]:
         return getattr(self, '_channel_erodibility', self.config_get_float('wepp', 'channel_erodibility'))
 
     @property
-    def channel_critical_shear(self):
+    def channel_critical_shear(self) -> Optional[float]:
         return getattr(self, '_channel_critical_shear', self.config_get_float('wepp', 'channel_critical_shear'))
 
     @property
-    def channel_manning_roughness_coefficient_bare(self):
+    def channel_manning_roughness_coefficient_bare(self) -> Optional[float]:
         return getattr(self, '_channel_manning_roughness_coefficient_bare', self.config_get_float('wepp', 'channel_manning_roughness_coefficient_bare'))
 
     @property
-    def channel_manning_roughness_coefficient_veg(self):
+    def channel_manning_roughness_coefficient_veg(self) -> Optional[float]:
         return getattr(self, '_channel_manning_roughness_coefficient_veg', self.config_get_float('wepp', 'channel_manning_roughness_coefficient_veg'))
 
     @property
-    def channel_2006_avke(self):
+    def channel_2006_avke(self) -> Optional[float]:
         return getattr(self, '_channel_2006_avke', self.config_get_float('wepp', 'channel_2006_avke'))
 
     @property
-    def is_omni_contrasts_run(self):
+    def is_omni_contrasts_run(self) -> bool:
         run_dir = os.path.abspath(self.runs_dir)
         return 'omni/contrasts' in run_dir
 
-    def set_baseflow_opts(self, gwstorage=None, bfcoeff=None, dscoeff=None, bfthreshold=None):
+    def set_baseflow_opts(self, gwstorage: Optional[float] = None, bfcoeff: Optional[float] = None, 
+                          dscoeff: Optional[float] = None, bfthreshold: Optional[float] = None) -> None:
         with self.locked():
             self.baseflow_opts = BaseflowOpts(
                 gwstorage=gwstorage,
@@ -639,7 +663,8 @@ class Wepp(NoDbBase):
                 dscoeff=dscoeff,
                 bfthreshold=bfthreshold)
 
-    def set_phosphorus_opts(self, surf_runoff=None, lateral_flow=None, baseflow=None, sediment=None):
+    def set_phosphorus_opts(self, surf_runoff: Optional[float] = None, lateral_flow: Optional[float] = None, 
+                            baseflow: Optional[float] = None, sediment: Optional[float] = None) -> None:
         with self.locked():
             self.phosphorus_opts = PhosphorusOpts(
                 surf_runoff=surf_runoff,
@@ -647,7 +672,7 @@ class Wepp(NoDbBase):
                 baseflow=baseflow,
                 sediment=sediment)
 
-    def parse_inputs(self, kwds):
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         with self.locked():
             self.baseflow_opts.parse_inputs(kwds)
             self.phosphorus_opts.parse_inputs(kwds)
@@ -711,7 +736,7 @@ class Wepp(NoDbBase):
 
 
     @property
-    def has_run(self):
+    def has_run(self) -> bool:
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         if _exists(loss_pw0) and not self.islocked():
@@ -727,7 +752,7 @@ class Wepp(NoDbBase):
         return False
 
     @property
-    def has_phosphorus(self):
+    def has_phosphorus(self) -> bool:
         return self.has_run and \
                self.phosphorus_opts.isvalid and \
                _exists(_join(self.runs_dir, 'phosphorus.txt'))
@@ -735,10 +760,11 @@ class Wepp(NoDbBase):
     #
     # hillslopes
     #
-    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None,
-                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
-                  max_workers=None):
-        func_name = inspect.currentframe().f_code.co_name
+    def prep_hillslopes(self, frost: Optional[bool] = None, baseflow: Optional[bool] = None, 
+                        wepp_ui: Optional[bool] = None, pmet: Optional[bool] = None, snow: Optional[bool] = None,
+                        man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '',
+                        max_workers: Optional[int] = None) -> None:
+        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
         self.logger.info(f'{self.class_name}.{func_name}(frost={frost}, baseflow={baseflow}, wepp_ui={wepp_ui}, pmet={pmet}, snow={snow}, man_relpath={man_relpath}, cli_relpath={cli_relpath}, slp_relpath={slp_relpath}, sol_relpath={sol_relpath})')
 
         # get translator
@@ -801,7 +827,7 @@ class Wepp(NoDbBase):
             self._prep_revegetation()
 
 
-    def _prep_revegetation(self):
+    def _prep_revegetation(self) -> None:
         self.logger.info('    _prep_revegetation... ')
 
         self.logger.info('      prep pw0.cov... ')
@@ -816,7 +842,7 @@ class Wepp(NoDbBase):
         rap_ts.prep_cover(self.runs_dir)
         self._prep_firedate()
 
-    def _prep_firedate(self):
+    def _prep_firedate(self) -> None:
 
         self.logger.info('    prep firedate.txt... ')
         disturbed = Disturbed.getInstance(self.wd)
@@ -830,7 +856,7 @@ class Wepp(NoDbBase):
                 fp.write(firedate)
 
     @property
-    def sol_versions(self):
+    def sol_versions(self) -> Set[str]:
         sol_versions = set()
 
         sol_fns = glob(_join(self.runs_dir, '*.sol'))
@@ -852,7 +878,7 @@ class Wepp(NoDbBase):
 
         return sol_versions
 
-    def _prep_wepp_ui(self):
+    def _prep_wepp_ui(self) -> None:
         for sol_version in self.sol_versions:
             if '2006' in sol_version:
                 return
@@ -861,23 +887,23 @@ class Wepp(NoDbBase):
         with open(fn, 'w') as fp:
             fp.write('')
 
-    def _remove_wepp_ui(self):
+    def _remove_wepp_ui(self) -> None:
         fn = _join(self.runs_dir, 'wepp_ui.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def _prep_frost(self):
+    def _prep_frost(self) -> None:
         fn = _join(self.runs_dir, 'frost.txt')
         with open(fn, 'w') as fp:
             fp.write('1  1  1\n')
             fp.write('1.0   1.0  1.0   0.5\n\n')
 
-    def _remove_frost(self):
+    def _remove_frost(self) -> None:
         fn = _join(self.runs_dir, 'frost.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def _prep_tcr(self):
+    def _prep_tcr(self) -> None:
         fn = _join(self.runs_dir, 'tcr.txt')
         with open(fn, 'w') as fp:
             if hasattr(self, 'tcr_opts'):
@@ -885,34 +911,34 @@ class Wepp(NoDbBase):
             else:
                 fp.write('\n')
 
-    def _remove_tcr(self):
+    def _remove_tcr(self) -> None:
         fn = _join(self.runs_dir, 'tcr.txt')
         if _exists(fn):
             os.remove(fn)
 
     @property
-    def pmet_kcb(self):
+    def pmet_kcb(self) -> Optional[float]:
         return getattr(self, '_pmet_kcb', self.config_get_float('wepp', 'pmet_kcb'))
 
     @property
-    def pmet_kcb_map(self):
+    def pmet_kcb_map(self) -> Optional[str]:
         return getattr(self, '_pmet_kcb_map', None)
 
     @pmet_kcb.setter
     @nodb_setter
-    def pmet_kcb(self, value):
+    def pmet_kcb(self, value: float) -> None:  # type: ignore[no-redef]
         self._pmet_kcb = value
 
     @property
-    def pmet_rawp(self):
+    def pmet_rawp(self) -> Optional[float]:
         return getattr(self, '_pmet_rawp', self.config_get_float('wepp', 'pmet_rawp'))
 
     @pmet_rawp.setter
     @nodb_setter
-    def pmet_rawp(self, value):
+    def pmet_rawp(self, value: float) -> None:  # type: ignore[no-redef]
         self._pmet_rawp = value
 
-    def _prep_pmet(self, kcb=None, rawp=None):
+    def _prep_pmet(self, kcb: Optional[float] = None, rawp: Optional[float] = None) -> None:
 
         if kcb is not None and rawp is not None:
             self.logger.info(f'nodb.Wepp._prep_pmet::kwargs routine')
@@ -956,12 +982,12 @@ class Wepp(NoDbBase):
         assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
 
 
-    def _remove_pmet(self):
+    def _remove_pmet(self) -> None:
         fn = _join(self.runs_dir, 'pmet.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def _check_and_set_phosphorus_map(self):
+    def _check_and_set_phosphorus_map(self) -> None:
 
         # noinspection PyMethodFirstArgAssignment
         self = self.getInstance(self.wd)
@@ -1007,7 +1033,7 @@ class Wepp(NoDbBase):
         with self.locked():
             self.phosphorus_opts = phos_opts
 
-    def _prep_phosphorus(self):
+    def _prep_phosphorus(self) -> None:
         phos_opts = self.phosphorus_opts
 
         # create the phosphorus.txt file
@@ -1021,22 +1047,22 @@ class Wepp(NoDbBase):
             if not validate_phosphorus_txt(fn):
                 os.remove(fn)
 
-    def _remove_phosphorus(self):
+    def _remove_phosphorus(self) -> None:
         fn = _join(self.runs_dir, 'phosphorus.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def _prep_snow(self):
+    def _prep_snow(self) -> None:
         fn = _join(self.runs_dir, 'snow.txt')
         with open(fn, 'w') as fp:
             fp.write(self.snow_opts.contents)
 
-    def _remove_snow(self):
+    def _remove_snow(self) -> None:
         fn = _join(self.runs_dir, 'snow.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def _check_and_set_baseflow_map(self):
+    def _check_and_set_baseflow_map(self) -> None:
         baseflow_opts = self.baseflow_opts
 
         gwstorage_map = getattr(self, 'baseflow_gwstorage_map', None)
@@ -1075,7 +1101,7 @@ class Wepp(NoDbBase):
         with self.locked():
             self.baseflow_opts = baseflow_opts
 
-    def _prep_baseflow(self):
+    def _prep_baseflow(self) -> None:
         climate = self.climate_instance
         if climate.is_single_storm:
             baseflow_opts = BaseflowOpts(gwstorage=0.0, bfcoeff=0.0)
@@ -1086,12 +1112,12 @@ class Wepp(NoDbBase):
         with open(fn, 'w') as fp:
             fp.write(baseflow_opts.contents)
 
-    def _remove_baseflow(self):
+    def _remove_baseflow(self) -> None:
         fn = _join(self.runs_dir, 'gwcoeff.txt')
         if _exists(fn):
             os.remove(fn)
 
-    def clean(self):
+    def clean(self) -> None:
         for _dir in (self.runs_dir, self.output_dir, self.plot_dir,
                      self.stats_dir, self.fp_runs_dir, self.fp_output_dir):
             if _exists(_dir):
@@ -1120,7 +1146,7 @@ class Wepp(NoDbBase):
                 if not _exists(ss_batch_dir):
                     os.makedirs(ss_batch_dir)
 
-    def prep_and_run_flowpaths(self, clean_after_run=True):
+    def prep_and_run_flowpaths(self, clean_after_run: bool = True) -> None:
         self.logger.info('  Prepping _prep_flowpaths... ')
         wat_dir = self.wat_dir
 
@@ -1516,7 +1542,7 @@ class Wepp(NoDbBase):
             emapr_ts.analyze()
 
     def _prep_soils(self, translator, max_workers=None):
-        func_name = inspect.currentframe().f_code.co_name
+        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
         self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
     
         cpu_count = os.cpu_count() or 1
@@ -1689,7 +1715,7 @@ class Wepp(NoDbBase):
 
     @nodb_timed
     def _prep_climates(self, translator):
-        func_name = inspect.currentframe().f_code.co_name
+        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
         self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
 
         climate = self.climate_instance
@@ -1786,9 +1812,9 @@ class Wepp(NoDbBase):
                                    sol_relpath=sol_relpath)
 
     def run_hillslopes(self,
-                  man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
-                  max_workers=None):
-        func_name = inspect.currentframe().f_code.co_name
+                  man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '',
+                  max_workers: Optional[int] = None) -> None:
+        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
         self.logger.info(f'{self.class_name}.{func_name}()')
 
         cpu_count = os.cpu_count() or 1
@@ -1897,10 +1923,10 @@ class Wepp(NoDbBase):
     #
     # watershed
     #
-    def prep_watershed(self, erodibility=None, critical_shear=None,
-                       tcr=None, avke=None,
-                       channel_manning_roughness_coefficient_bare=None,
-                       channel_manning_roughness_coefficient_veg=None):
+    def prep_watershed(self, erodibility: Optional[float] = None, critical_shear: Optional[float] = None,
+                       tcr: Optional[bool] = None, avke: Optional[float] = None,
+                       channel_manning_roughness_coefficient_bare: Optional[float] = None,
+                       channel_manning_roughness_coefficient_veg: Optional[float] = None) -> None:
         self.logger.info('Prepping Watershed... ')
 
         watershed = self.watershed_instance
@@ -2254,7 +2280,7 @@ class Wepp(NoDbBase):
         else:
             make_watershed_run(years, wepp_ids, runs_dir)
 
-    def run_watershed(self):
+    def run_watershed(self) -> None:
         from wepppy.export.prep_details import (
             export_channels_prep_details,
             export_hillslopes_prep_details
@@ -2372,18 +2398,18 @@ class Wepp(NoDbBase):
         from wepppy.wepp.interchange import totalwatsed_partitioned_dss_export
         totalwatsed_partitioned_dss_export(self.wd)
 
-    def report_loss(self):
+    def report_loss(self) -> Any:
         from wepppy.wepp.interchange.watershed_loss import Loss
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return Loss(loss_pw0, self.has_phosphorus, self.wd)
 
-    def report_return_periods(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
-                              exclude_yr_indxs=None, 
-                              method='cta', gringorten_correction=True, 
-                              meoization=True,
-                              exclude_months=None,
-                              chn_topaz_id_of_interest=None):
+    def report_return_periods(self, rec_intervals: Tuple[int, ...] = (50, 25, 20, 10, 5, 2), 
+                              exclude_yr_indxs: Optional[List[int]] = None, 
+                              method: str = 'cta', gringorten_correction: bool = True, 
+                              meoization: bool = True,
+                              exclude_months: Optional[List[int]] = None,
+                              chn_topaz_id_of_interest: Optional[int] = None) -> ReturnPeriods:
 
         output_dir = self.output_dir
 
@@ -2433,12 +2459,12 @@ class Wepp(NoDbBase):
 
         return return_periods
 
-    def export_return_periods_tsv_summary(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
-                           exclude_yr_indxs=None, 
-                           method='cta', 
-                           gringorten_correction=True, 
-                           meoization=True,
-                           extraneous=False):
+    def export_return_periods_tsv_summary(self, rec_intervals: Tuple[int, ...] = (50, 25, 20, 10, 5, 2), 
+                           exclude_yr_indxs: Optional[List[int]] = None, 
+                           method: str = 'cta', 
+                           gringorten_correction: bool = True, 
+                           meoization: bool = True,
+                           extraneous: bool = False) -> None:
 
         return_periods = self.report_return_periods(
             rec_intervals=rec_intervals, 
@@ -2458,55 +2484,55 @@ class Wepp(NoDbBase):
 
         return_periods.export_tsv_summary(_join(self.export_dir, fn), extraneous=extraneous)
 
-    def report_frq_flood(self):
+    def report_frq_flood(self) -> FrqFloodReport:
         return FrqFloodReport(self.wd)
 
-    def report_sediment_delivery(self):
+    def report_sediment_delivery(self) -> SedimentCharacteristics:
         return SedimentCharacteristics(self.wd)
 
-    def report_hill_watbal(self):
+    def report_hill_watbal(self) -> HillslopeWatbalReport:
         return HillslopeWatbalReport(self.wd)
 
-    def report_chn_watbal(self):
+    def report_chn_watbal(self) -> ChannelWatbalReport:
         return ChannelWatbalReport(self.wd)
 
-    def set_run_flowpaths(self, state):
+    def set_run_flowpaths(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self.run_flowpaths = state
 
-    def set_run_wepp_ui(self, state):
+    def set_run_wepp_ui(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_wepp_ui = state
 
-    def set_run_pmet(self, state):
+    def set_run_pmet(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_pmet = state
 
-    def set_run_frost(self, state):
+    def set_run_frost(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_frost = state
 
-    def set_run_snow(self, state):
+    def set_run_snow(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_snow = state
 
-    def set_run_tcr(self, state):
+    def set_run_tcr(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_tcr = state
 
-    def set_run_baseflow(self, state):
+    def set_run_baseflow(self, state: bool) -> None:
         assert state in [True, False]
         with self.locked():
             self._run_baseflow = state
 
     @property
-    def loss_report(self):
+    def loss_report(self) -> Optional[Any]:
         from wepppy.wepp.interchange.watershed_loss import Loss
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
@@ -2519,7 +2545,7 @@ class Wepp(NoDbBase):
 
         return self._loss_report
 
-    def query_sub_val(self, measure):
+    def query_sub_val(self, measure: str) -> Optional[Dict[str, Dict[str, Any]]]:
         wd = self.wd
         report = self.loss_report
         if report is None:
@@ -2567,7 +2593,7 @@ class Wepp(NoDbBase):
 
         return d
 
-    def query_chn_val(self, measure):
+    def query_chn_val(self, measure: str) -> Optional[Dict[str, Dict[str, Any]]]:
         from wepppy.wepp.interchange.watershed_loss import Loss
         wd = self.wd
 
@@ -2623,7 +2649,7 @@ class Wepp(NoDbBase):
 
         return d
 
-    def make_loss_grid(self):
+    def make_loss_grid(self) -> None:
         watershed = self.watershed_instance
         loss_grid_path = _join(self.plot_dir, 'loss.tif')
         print(watershed.subwta, watershed.discha, self.output_dir, loss_grid_path)
@@ -2651,14 +2677,14 @@ class Wepp(NoDbBase):
         assert _exists(loss_grid_wgs)
 
     @property
-    def kslast(self):
+    def kslast(self) -> Optional[float]:
         if not hasattr(self, '_kslast'):
             return None
 
         return self._kslast
 
     @property
-    def kslast_map(self):
+    def kslast_map(self) -> Optional[str]:
         if not hasattr(self, '_kslast_map'):
             return None
 
@@ -2666,5 +2692,5 @@ class Wepp(NoDbBase):
 
     @kslast.setter
     @nodb_setter
-    def kslast(self, value):
+    def kslast(self, value: Optional[float]) -> None:  # type: ignore[no-redef]
         self._kslast = value
