@@ -6,20 +6,19 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-from typing import Any, Iterable, Iterator, NamedTuple, Tuple
+"""Miscellaneous utilities shared across the all_your_base package."""
 
-from collections.abc import Iterable as IterableABC
+from __future__ import annotations
 
-import sys
+from collections.abc import Iterable, Iterator, Mapping
+from typing import Any, NamedTuple, Optional, TypeAlias, Union
+
 import os
 from os.path import exists as _exists
-from os.path import split as _split
-from os.path import join as _join
 from operator import itemgetter
 from itertools import groupby
 import shutil
 import math
-import time
 import random
 import multiprocessing
 
@@ -27,13 +26,50 @@ import json
 import numpy as np
 
 try:
-    NCPU = int(os.environ['WEPPPY_NCPU'])
+    NCPU: int = int(os.environ['WEPPPY_NCPU'])
 except KeyError:
     NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
     if NCPU < 1:
         NCPU = 1
 
-geodata_dir = '/geodata/'
+geodata_dir: str = '/geodata/'
+SCRATCH: str = '/media/ramdisk'
+
+if not _exists(SCRATCH):
+    SCRATCH = '/Users/roger/Downloads'
+
+if not _exists(SCRATCH):
+    SCRATCH = '/workdir/scratch'
+
+IS_WINDOWS: bool = os.name == 'nt'
+
+__all__ = [
+    'NCPU',
+    'geodata_dir',
+    'SCRATCH',
+    'IS_WINDOWS',
+    'RGBA',
+    'NumpyEncoder',
+    'cmyk_to_rgb',
+    'flatten',
+    'find_ranges',
+    'clamp',
+    'clamp01',
+    'cp_chmod',
+    'splitall',
+    'isint',
+    'isfloat',
+    'isbool',
+    'isnan',
+    'isinf',
+    'try_parse',
+    'try_parse_float',
+    'parse_name',
+    'parse_units',
+    'RowData',
+    'c_to_f',
+    'f_to_c',
+]
 
 
 class RGBA(NamedTuple):
@@ -45,12 +81,12 @@ class RGBA(NamedTuple):
     alpha: int = 255
 
     def tohex(self) -> str:
-        """Return the hex colour representation."""
+        """Return the color encoded as ``#RRGGBBAA``."""
         return '#' + ''.join(f'{component:02X}' for component in self)
 
     @classmethod
-    def random(cls) -> 'RGBA':
-        """Generate a random opaque RGBA colour."""
+    def random(cls) -> RGBA:
+        """Generate a random opaque RGBA color."""
         return cls(
             random.randint(0, 255),
             random.randint(0, 255),
@@ -58,58 +94,32 @@ class RGBA(NamedTuple):
             255,
         )
 
-SCRATCH = '/media/ramdisk'
-
-if not _exists(SCRATCH):
-    SCRATCH = '/Users/roger/Downloads'
-
-if not _exists(SCRATCH):
-    SCRATCH = '/workdir/scratch'
-
-IS_WINDOWS = os.name == 'nt'
-
 
 class NumpyEncoder(json.JSONEncoder):
-    """
-    Custom JSONEncoder subclass that knows how to serialize numpy data types.
+    """JSON encoder that serializes numpy scalars and arrays."""
 
-    Numpy's int64 and float64 types are not natively serializable by Python's json module.
-    This class overrides the `default` method of `json.JSONEncoder` to enable serializing
-    these numpy data types.
-
-    It also converts numpy arrays to lists to ensure they are serializable.
-
-    Usage:
-
-    data = {"array": np.array([1, 2, 3]), "int": np.int64(4), "float": np.float64(5.0)}
-
-    # Use NumpyEncoder while dumping json
-    json_str = json.dumps(data, cls=NumpyEncoder)
-
-    Example:
-
-    >>> import numpy as np
-    >>> import json
-    >>> from your_module import NumpyEncoder
-    >>> data = {"array": np.array([1, 2, 3]), "int": np.int64(4), "float": np.float64(5.0)}
-    >>> json_str = json.dumps(data, cls=NumpyEncoder)
-    >>> print(json_str)
-    {"array": [1, 2, 3], "int": 4, "float": 5.0}
-    """
-
-    def default(self, obj):
+    def default(self, obj: Any) -> Any:
+        """Return a JSON-serializable representation of ``obj``."""
         if isinstance(obj, np.integer):
             return int(obj)
-        elif isinstance(obj, np.floating):
+        if isinstance(obj, np.floating):
             return float(obj)
-        elif isinstance(obj, np.ndarray):
+        if isinstance(obj, np.ndarray):
             return obj.tolist()
-        else:
-            return super(NumpyEncoder, self).default(obj)
+        return super().default(obj)
 
 
-def cmyk_to_rgb(c, m, y, k):
-    """
+def cmyk_to_rgb(c: float, m: float, y: float, k: float) -> tuple[float, float, float]:
+    """Convert CMYK color components into their RGB equivalents.
+
+    Args:
+        c: Cyan component in the range ``[0.0, 1.0]``.
+        m: Magenta component in the range ``[0.0, 1.0]``.
+        y: Yellow component in the range ``[0.0, 1.0]``.
+        k: Key (black) component in the range ``[0.0, 1.0]``.
+
+    Returns:
+        Normalized red, green, and blue components.
     """
     r = (1.0 - c) * (1.0 - k)
     g = (1.0 - m) * (1.0 - k)
@@ -118,22 +128,40 @@ def cmyk_to_rgb(c, m, y, k):
 
 
 def flatten(iterable: Iterable[Any]) -> Iterator[Any]:
-    """Yield a flat iterator from arbitrarily nested iterables."""
+    """Yield each scalar item from ``iterable``, flattening nested iterables.
+
+    Args:
+        iterable: Arbitrarily nested iterable containing scalar values.
+
+    Yields:
+        Each scalar element in depth-first order.
+    """
     for item in iterable:
-        if isinstance(item, IterableABC) and not isinstance(item, (str, bytes)):
+        if isinstance(item, Iterable) and not isinstance(item, (str, bytes)):
             yield from flatten(item)
         else:
             yield item
 
 
-def find_ranges(iterable, as_str=False):
-    """Yield range of consecutive numbers."""
+RangeType: TypeAlias = Union[int, tuple[int, int]]
 
-    def func(args):
+
+def find_ranges(iterable: Iterable[int], as_str: bool = False) -> Union[list[RangeType], str]:
+    """Collapse consecutive integers into ranges.
+
+    Args:
+        iterable: A sorted collection of integers.
+        as_str: When True, return a comma-separated string representation.
+
+    Returns:
+        Either a list describing each range, or a formatted string when ``as_str`` is True.
+    """
+
+    def func(args: tuple[int, int]) -> int:
         index, item = args
         return index - item
 
-    ranges = []
+    ranges: list[RangeType] = []
     for key, group in groupby(enumerate(iterable), func):
         group = list(map(itemgetter(1), group))
         if len(group) > 1:
@@ -151,11 +179,20 @@ def find_ranges(iterable, as_str=False):
             s.append(str(arg))
         else:
             s.append('{}-{}'.format(*arg))
-
     return ', '.join(s)
 
 
 def clamp(x: float, minimum: float, maximum: float) -> float:
+    """Clamp ``x`` to the inclusive range defined by ``minimum`` and ``maximum``.
+
+    Args:
+        x: Value to clamp.
+        minimum: Lower bound of the permitted range.
+        maximum: Upper bound of the permitted range.
+
+    Returns:
+        The clamped float.
+    """
     x = float(x)
     if x < minimum:
         return minimum
@@ -165,6 +202,14 @@ def clamp(x: float, minimum: float, maximum: float) -> float:
 
 
 def clamp01(x: float) -> float:
+    """Clamp ``x`` between ``0.0`` and ``1.0``.
+
+    Args:
+        x: Value to clamp.
+
+    Returns:
+        The clamped float.
+    """
     x = float(x)
     if x < 0.0:
         return 0.0
@@ -173,17 +218,29 @@ def clamp01(x: float) -> float:
     return x
 
 
-def cp_chmod(src, dst, mode):
-    """
-    helper function to copy a file and set chmod
+def cp_chmod(src: str, dst: str, mode: int) -> None:
+    """Copy ``src`` to ``dst`` and apply the requested file mode.
+
+    Args:
+        src: Source path.
+        dst: Destination path.
+        mode: Permission bits passed to :func:`os.chmod`.
     """
     shutil.copyfile(src, dst)
     os.chmod(dst, mode)
 
 
-def splitall(path):
-    allparts = []
-    while 1:
+def splitall(path: str) -> list[str]:
+    """Split a file system path into all of its components.
+
+    Args:
+        path: Path to split.
+
+    Returns:
+        A list of path components including the root.
+    """
+    allparts: list[str] = []
+    while True:
         parts = os.path.split(path)
         if parts[0] == path:   # sentinel for absolute paths
             allparts.insert(0, parts[0])
@@ -197,7 +254,15 @@ def splitall(path):
     return allparts
 
 
-def isint(x):
+def isint(x: Any) -> bool:
+    """Return whether ``x`` can be losslessly converted to an integer.
+
+    Args:
+        x: Value to inspect.
+
+    Returns:
+        True when ``x`` coerces to an integer without changing magnitude.
+    """
     # noinspection PyBroadException
     try:
         return float(int(x)) == float(x)
@@ -205,7 +270,15 @@ def isint(x):
         return False
 
 
-def isfloat(f):
+def isfloat(f: Any) -> bool:
+    """Return whether ``f`` can be converted to a float.
+
+    Args:
+        f: Value to inspect.
+
+    Returns:
+        True when ``f`` coerces to :class:`float`.
+    """
     # noinspection PyBroadException
     try:
         float(f)
@@ -214,24 +287,56 @@ def isfloat(f):
         return False
 
 
-def isbool(x):
+def isbool(x: Any) -> bool:
+    """Return whether ``x`` behaves like a boolean value.
+
+    Args:
+        x: Value to inspect.
+
+    Returns:
+        True when ``x`` is 0/1 or an explicit boolean.
+    """
     # noinspection PyBroadException
     return x in (0, 1, True, False)
 
 
-def isnan(f):
+def isnan(f: Any) -> bool:
+    """Return whether ``f`` is a NaN value.
+
+    Args:
+        f: Value to inspect.
+
+    Returns:
+        True when ``f`` represents ``math.nan``.
+    """
     if not isfloat(f):
         return False
     return math.isnan(float(f))
 
 
-def isinf(f):
+def isinf(f: Any) -> bool:
+    """Return whether ``f`` represents positive or negative infinity.
+
+    Args:
+        f: Value to inspect.
+
+    Returns:
+        True when ``f`` represents positive or negative infinity.
+    """
     if not isfloat(f):
         return False
     return math.isinf(float(f))
 
 
-def try_parse(f):
+def try_parse(f: Any) -> Any:
+    """Best-effort conversion of ``f`` to int or float.
+
+    Args:
+        f: Value to attempt to coerce.
+
+    Returns:
+        A numeric conversion of ``f`` when possible, otherwise ``f`` unchanged.
+    """
     if isinstance(f, (int, float)):
         return f
 
@@ -248,7 +353,16 @@ def try_parse(f):
         return f
 
 
-def try_parse_float(f, default=0.0):
+def try_parse_float(f: Any, default: float = 0.0) -> float:
+    """Attempt to convert ``f`` to a float.
+
+    Args:
+        f: Value to attempt to convert.
+        default: Value returned when conversion fails.
+
+    Returns:
+        The converted float value or ``default``.
+    """
     # noinspection PyBroadException
     try:
         return float(f)
@@ -256,7 +370,15 @@ def try_parse_float(f, default=0.0):
         return default
 
 
-def parse_name(colname):
+def parse_name(colname: str) -> str:
+    """Return the column name without any trailing unit specification.
+
+    Args:
+        colname: Column label that may contain unit metadata.
+
+    Returns:
+        The column label stripped of ``(<units>)`` suffixes.
+    """
     units = parse_units(colname)
     if units is None:
         return colname
@@ -264,7 +386,15 @@ def parse_name(colname):
     return colname.replace('({})'.format(units), '').strip()
 
 
-def parse_units(colname):
+def parse_units(colname: str) -> Optional[str]:
+    """Extract unit metadata from ``colname`` if present.
+
+    Args:
+        colname: Column label that may contain a unit suffix.
+
+    Returns:
+        The unit string or ``None`` when no units are detected.
+    """
     try:
         colsplit = colname.strip().split()
         if len(colsplit) < 2:
@@ -279,27 +409,64 @@ def parse_units(colname):
 
 
 class RowData:
-    def __init__(self, row):
+    """Helper wrapper that exposes dict-like row objects with unit parsing.
 
+    Args:
+        row: Mapping of column headings to values.
+    """
+
+    def __init__(self, row: Mapping[str, Any]) -> None:
         self.row = row
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Any:
+        """Return the value for the first column that starts with ``item``.
+
+        Args:
+            item: Column prefix to match.
+
+        Returns:
+            The column value whose heading begins with ``item``.
+
+        Raises:
+            KeyError: When no column heading matches the prefix.
+        """
         for colname in self.row:
             if colname.startswith(item):
                 return self.row[colname]
 
         raise KeyError
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[tuple[Any, Optional[str]]]:
+        """Iterate over column values paired with their parsed units.
+
+        Yields:
+            Two-tuples of ``(value, units)``.
+        """
         for colname in self.row:
             value = self.row[colname]
             units = parse_units(colname)
             yield value, units
 
 
-def c_to_f(x):
+def c_to_f(x: float) -> float:
+    """Convert Celsius to Fahrenheit.
+
+    Args:
+        x: Temperature in degrees Celsius.
+
+    Returns:
+        The corresponding Fahrenheit value.
+    """
     return 9.0/5.0 * x + 32.0
 
 
-def f_to_c(x):
+def f_to_c(x: float) -> float:
+    """Convert Fahrenheit to Celsius.
+
+    Args:
+        x: Temperature in degrees Fahrenheit.
+
+    Returns:
+        The corresponding Celsius value.
+    """
     return (x - 32.0) * 5.0 / 9.0
