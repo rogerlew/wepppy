@@ -56,6 +56,7 @@ import inspect
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
+from typing import Optional, Dict, List, Any, Tuple
 from datetime import datetime
 import shutil
 from enum import IntEnum
@@ -148,7 +149,13 @@ class Soils(NoDbBase):
 
     filename = 'soils.nodb'
     
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+    def __init__(
+        self, 
+        wd: str, 
+        cfg_fn: str, 
+        run_group: Optional[str] = None, 
+        group_name: Optional[str] = None
+    ) -> None:
         super(Soils, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
@@ -177,34 +184,34 @@ class Soils(NoDbBase):
             self._soils_map = self.config_get_path('soils', 'soils_map', None)
 
     @property
-    def clip_soils(self):
+    def clip_soils(self) -> bool:
         return getattr(self, '_clip_soils', False)
 
     @clip_soils.setter
     @nodb_setter
-    def clip_soils(self, value: bool):
+    def clip_soils(self, value: bool) -> None:
         self._clip_soils = value
 
     @property
-    def clip_soils_depth(self):
+    def clip_soils_depth(self) -> float:
         return getattr(self, '_clip_soils_depth', 1000)
 
     @clip_soils_depth.setter
     @nodb_setter
-    def clip_soils_depth(self, value):
+    def clip_soils_depth(self, value: float) -> None:
         self._clip_soils_depth = value
 
     @property
-    def initial_sat(self):
+    def initial_sat(self) -> float:
         return getattr(self, '_initial_sat', 0.75)
 
     @initial_sat.setter
     @nodb_setter
-    def initial_sat(self, value):
+    def initial_sat(self, value: float) -> None:
         self._initial_sat = value
 
     @property
-    def ksflag(self):
+    def ksflag(self) -> bool:
         if not hasattr(self, '_ksflag'):
             return True
 
@@ -212,17 +219,17 @@ class Soils(NoDbBase):
 
     @ksflag.setter
     @nodb_setter
-    def ksflag(self, value):
+    def ksflag(self, value: bool) -> None:
         assert value in (True, False)
         self._ksflag = value
 
     @property
-    def mode(self):
+    def mode(self) -> SoilsMode:
         return self._mode
 
     @mode.setter
     @nodb_setter
-    def mode(self, value):
+    def mode(self, value: Any) -> None:
         if isinstance(value, SoilsMode):
             self._mode = value
         elif isinstance(value, int):
@@ -231,29 +238,29 @@ class Soils(NoDbBase):
             raise ValueError('most be SoilsMode or int')
         
     @property
-    def soils_map(self):
+    def soils_map(self) -> Optional[str]:
         return getattr(self, '_soils_map', None)
 
     @property
-    def single_selection(self):
+    def single_selection(self) -> int:
         return self._single_selection
 
     @single_selection.setter
     @nodb_setter
-    def single_selection(self, mukey):
+    def single_selection(self, mukey: int) -> None:
         self._single_selection = mukey
 
     @property
-    def single_dbselection(self):
+    def single_dbselection(self) -> Optional[str]:
         return getattr(self, '_single_dbselection', None)
 
     @single_dbselection.setter
     @nodb_setter
-    def single_dbselection(self, sol):
+    def single_dbselection(self, sol: str) -> None:
         self._single_dbselection = sol
         
     @property
-    def has_soils(self):
+    def has_soils(self) -> bool:
         mode = self.mode
         assert isinstance(mode, SoilsMode)
 
@@ -263,7 +270,7 @@ class Soils(NoDbBase):
             return self.domsoil_d is not None
 
     @property
-    def legend(self):
+    def legend(self) -> List[str]:
         mukeys = sorted(set(self.domsoil_d.values()))
         soils = [self.soils[mukey] for mukey in mukeys]
         descs = [soil.desc for soil in soils]
@@ -274,7 +281,7 @@ class Soils(NoDbBase):
     #
     # build
     #
-    def clean(self):
+    def clean(self) -> None:
 
         soils_dir = self.soils_dir
         if _exists(soils_dir):
@@ -282,15 +289,19 @@ class Soils(NoDbBase):
         os.mkdir(soils_dir)
 
     @property
-    def ssurgo_db(self):
+    def ssurgo_db(self) -> Optional[str]:
         return getattr(self, '_ssurgo_db', self.config_get_str('soils', 'ssurgo_db')).replace('gNATSGO', 'gNATSGSO')
 
     @ssurgo_db.setter
     @nodb_setter
-    def ssurgo_db(self, value):
+    def ssurgo_db(self, value: str) -> None:
         self._ssurgo_db = value
 
-    def build_chile(self, initial_sat=None, ksflag=None):
+    def build_chile(
+        self, 
+        initial_sat: Optional[float] = None, 
+        ksflag: Optional[bool] = None
+    ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
 
@@ -365,8 +376,12 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def build_isric(self, initial_sat=None, ksflag=None,
-                    max_workers=16):
+    def build_isric(
+        self, 
+        initial_sat: Optional[float] = None, 
+        ksflag: Optional[bool] = None,
+        max_workers: int = 16
+    ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
         from wepppy.locales.earth.soils.isric import ISRICSoilData
@@ -470,7 +485,11 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def build_statsgo(self, initial_sat=None, ksflag=None):
+    def build_statsgo(
+        self, 
+        initial_sat: Optional[float] = None, 
+        ksflag: Optional[bool] = None
+    ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
 
@@ -534,7 +553,7 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def _build_by_identify(self, build_func):
+    def _build_by_identify(self, build_func: Any) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(build_func={build_func})')
 
@@ -564,7 +583,7 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def _build_from_map_db(self):
+    def _build_from_map_db(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -626,7 +645,7 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def _build_spatial_api(self):
+    def _build_spatial_api(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -674,7 +693,12 @@ class Soils(NoDbBase):
         with self.locked():
             self._soils = soils
 
-    def build(self, initial_sat=None, ksflag=None, max_workers=None):
+    def build(
+        self, 
+        initial_sat: Optional[float] = None, 
+        ksflag: Optional[bool] = None, 
+        max_workers: Optional[int] = None
+    ) -> None:
         self.logger.info(f'='*100)
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
@@ -735,7 +759,7 @@ class Soils(NoDbBase):
             pass
 
     @property
-    def bd_d(self):
+    def bd_d(self) -> Dict:
         parquet_fn = _join(self.wd, 'soils.parquet')
         if _exists(parquet_fn):
             with duckdb.connect() as con:
@@ -864,7 +888,7 @@ class Soils(NoDbBase):
 
         return ll_pct
 
-    def _build_ak(self):
+    def _build_ak(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -897,7 +921,11 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def _build_single(self, initial_sat=None, ksflag=True):
+    def _build_single(
+        self, 
+        initial_sat: Optional[float] = None, 
+        ksflag: bool = True
+    ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
         
@@ -942,7 +970,7 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def _build_singledb(self):
+    def _build_singledb(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
         
@@ -993,7 +1021,12 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def _build_gridded(self, initial_sat=None, ksflag=None, max_workers=None):
+    def _build_gridded(
+        self, 
+        initial_sat: Optional[float] = None, 
+        ksflag: Optional[bool] = None, 
+        max_workers: Optional[int] = None
+    ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag}, max_workers={max_workers})')
 
@@ -1091,7 +1124,7 @@ class Soils(NoDbBase):
             self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
     @property
-    def report(self):
+    def report(self) -> str:
         """
         returns a list of managements sorted by coverage in
         descending order
@@ -1117,14 +1150,22 @@ class Soils(NoDbBase):
         else:
             return None
 
-    def sub_summary(self, topaz_id, abbreviated=False):
+    def sub_summary(
+        self, 
+        topaz_id: str, 
+        abbreviated: bool = False
+    ) -> Optional[Dict]:
         return self._x_summary(topaz_id, abbreviated=abbreviated)
 
-    def chn_summary(self, topaz_id, abbreviated=False):
+    def chn_summary(
+        self, 
+        topaz_id: str, 
+        abbreviated: bool = False
+    ) -> Optional[Dict]:
         return self._x_summary(topaz_id, abbreviated=abbreviated)
 
     @property
-    def subs_summary(self):
+    def subs_summary(self) -> Dict:
         """
         Returns a dictionary with topaz_id keys and dictionary soils values.
         """
@@ -1155,7 +1196,7 @@ class Soils(NoDbBase):
 
         return summary
 
-    def dump_soils_parquet(self):
+    def dump_soils_parquet(self) -> None:
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
@@ -1213,7 +1254,7 @@ class Soils(NoDbBase):
         return self
 
     @property
-    def hill_table(self):
+    def hill_table(self) -> List[Dict]:
         """
         Returns a pandas DataFrame with the hill table.
         """
