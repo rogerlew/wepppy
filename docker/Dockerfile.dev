@@ -52,10 +52,11 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
     ln -s /root/.local/bin/uv /usr/local/bin/uv
 
 # Resolve Python dependencies with uv inside a dedicated virtual environment.
-COPY docker/requirements-uv.txt ./requirements-uv.txt
+COPY docker/requirements-uv.txt docker/requirements-stubs-uv.txt ./
 RUN uv venv /opt/venv && \
     . /opt/venv/bin/activate && \
-    uv pip install --requirement requirements-uv.txt
+    uv pip install --requirement requirements-uv.txt && \
+    uv pip install --requirement requirements-stubs-uv.txt
 
 # Install and load DuckDB's spatial extension using the venv's python.
 RUN /opt/venv/bin/python -c "import duckdb; \

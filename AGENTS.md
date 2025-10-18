@@ -153,6 +153,15 @@ class MyController(NoDbBase):
         pass
 ```
 
+### Type Stub Management
+- Build, review, and install missing `.pyi` files with `stubgen`, keeping outputs under the matching package directory (for example `wepppy/nodb/core/`).
+- When modifying a source module, update its companion `.pyi` file in the same change so exported signatures stay in sync.
+- Use `stubtest` to validate stubs against the runtime implementation before finishing a change.
+
+```bash
+python -m mypy.stubtest wepppy.nodb.core.climate
+```
+
 Run type checking with mypy:
 ```bash
 python -m mypy wepppy/nodb/core/topaz.py

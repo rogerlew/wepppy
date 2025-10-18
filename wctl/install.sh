@@ -249,6 +249,11 @@ if [[ $# -gt 0 ]]; then
       show_wctl_manual "$@"
       exit 0
       ;;
+    update-stub-requirements)
+      shift
+      python3 "${PROJECT_DIR}/tools/update_stub_requirements.py" "$@"
+      exit 0
+      ;;
   esac
 fi
 
