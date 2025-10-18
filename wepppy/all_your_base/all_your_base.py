@@ -6,10 +6,11 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-from typing import Tuple
+from typing import Any, Iterable, Iterator, NamedTuple, Tuple
+
+from collections.abc import Iterable as IterableABC
 
 import sys
-import collections
 import os
 from os.path import exists as _exists
 from os.path import split as _split
@@ -17,7 +18,6 @@ from os.path import join as _join
 from operator import itemgetter
 from itertools import groupby
 import shutil
-from collections import namedtuple
 import math
 import time
 import random
@@ -25,11 +25,6 @@ import multiprocessing
 
 import json
 import numpy as np
-
-try:
-    import win32com.shell.shell as shell
-except:
-    pass
 
 try:
     NCPU = int(os.environ['WEPPPY_NCPU'])
@@ -40,11 +35,28 @@ except KeyError:
 
 geodata_dir = '/geodata/'
 
-RGBA = namedtuple('RGBA', list('RGBA'))
-RGBA.tohex = lambda this: '#' + ''.join('{:02X}'.format(a) for a in this)
-RGBA.random = lambda: RGBA(random.randint(0, 255),
-                           random.randint(0, 255), 
-                           random.randint(0, 255), 255)
+
+class RGBA(NamedTuple):
+    """Simple representation of a colour with alpha channel."""
+
+    red: int
+    green: int
+    blue: int
+    alpha: int = 255
+
+    def tohex(self) -> str:
+        """Return the hex colour representation."""
+        return '#' + ''.join(f'{component:02X}' for component in self)
+
+    @classmethod
+    def random(cls) -> 'RGBA':
+        """Generate a random opaque RGBA colour."""
+        return cls(
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255),
+            255,
+        )
 
 SCRATCH = '/media/ramdisk'
 
@@ -96,16 +108,6 @@ class NumpyEncoder(json.JSONEncoder):
             return super(NumpyEncoder, self).default(obj)
 
 
-def make_symlink(src, dst):
-    if IS_WINDOWS:
-        if _exists(dst):
-            os.remove(dst)
-        params = ' '.join(['mklink', dst, src])
-        shell.ShellExecuteEx(lpVerb='runas', lpFile=sys.executable, lpParameters=params)
-    else:
-        os.symlink(src, dst)
-
-
 def cmyk_to_rgb(c, m, y, k):
     """
     """
@@ -115,12 +117,13 @@ def cmyk_to_rgb(c, m, y, k):
     return r, g, b
 
 
-def flatten(l):
-    for el in l:
-        if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):
-            yield from flatten(el)
+def flatten(iterable: Iterable[Any]) -> Iterator[Any]:
+    """Yield a flat iterator from arbitrarily nested iterables."""
+    for item in iterable:
+        if isinstance(item, IterableABC) and not isinstance(item, (str, bytes)):
+            yield from flatten(item)
         else:
-            yield el
+            yield item
 
 
 def find_ranges(iterable, as_str=False):

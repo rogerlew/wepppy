@@ -3,10 +3,10 @@ from __future__ import annotations
 import re
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, List, Tuple, TypedDict, Set
 
-from flask import Blueprint, abort, jsonify, render_template, request, url_for
-from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html
+from flask import Blueprint, abort, jsonify, render_template, request, url_for  # type: ignore[import-not-found]
+from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # type: ignore[import-not-found]
 
 usersum_bp = Blueprint('usersum', __name__, template_folder='templates')
 
@@ -20,6 +20,21 @@ _WEPPCLOUD_DIR = _BASE_DIR / 'weppcloud'
 _PARAM_HEADER_RE = re.compile(r'^#### `([^`]+)` —\s*(.+)$')
 _DETAIL_RE = re.compile(r'^- \*\*([^*]+)\*\*: ?(.*)$')
 _WHITESPACE_RE = re.compile(r'\s+')
+
+
+class ParameterDetail(TypedDict):
+    label: str
+    text: str
+
+
+class ParameterEntry(TypedDict):
+    parameter: str
+    summary: str
+    details: List[ParameterDetail]
+    section: str | None
+    group: str | None
+    file: str
+    search_blob: str
 
 
 def _friendly_display_name(filename: str) -> str:
@@ -67,7 +82,7 @@ def usersum_index():
 
 
 def _resolve_markdown_path(category: str, filename: str) -> Path:
-    allowed = {
+    allowed: Dict[str, Path] = {
         'db': _DB_DIR,
         'dev-notes': _DEV_NOTES_DIR,
         'input-file-specifications': _SPEC_DIR,
@@ -76,6 +91,7 @@ def _resolve_markdown_path(category: str, filename: str) -> Path:
     root = allowed.get(category)
     if root is None:
         abort(404)
+        raise RuntimeError('unreachable')
 
     candidate = (root / filename).resolve()
     if not candidate.is_file() or root.resolve() not in candidate.parents:
@@ -107,10 +123,10 @@ def _coerce_bool(value: str | None) -> bool:
     return lowered in {'1', 'true', 'yes', 'on', 'extended', '-e', '--extended'}
 
 
-def _parse_parameter_file(path: Path) -> List[Dict[str, object]]:
-    section = None
-    group = None
-    entries: List[Dict[str, object]] = []
+def _parse_parameter_file(path: Path) -> List[ParameterEntry]:
+    section: str | None = None
+    group: str | None = None
+    entries: List[ParameterEntry] = []
 
     lines = path.read_text(encoding='utf-8').splitlines()
     index = 0
@@ -129,7 +145,7 @@ def _parse_parameter_file(path: Path) -> List[Dict[str, object]]:
         if header_match:
             parameter = header_match.group(1).strip()
             summary = header_match.group(2).strip()
-            details: List[Dict[str, str]] = []
+            details: List[ParameterDetail] = []
 
             next_index = index + 1
             while next_index < len(lines):
@@ -172,9 +188,9 @@ def _parse_parameter_file(path: Path) -> List[Dict[str, object]]:
 
 
 @lru_cache(maxsize=1)
-def _load_parameter_catalog() -> Tuple[Dict[str, List[Dict[str, object]]], List[Dict[str, object]]]:
-    by_name: Dict[str, List[Dict[str, object]]] = {}
-    all_entries: List[Dict[str, object]] = []
+def _load_parameter_catalog() -> Tuple[Dict[str, List[ParameterEntry]], List[ParameterEntry]]:
+    by_name: Dict[str, List[ParameterEntry]] = {}
+    all_entries: List[ParameterEntry] = []
 
     if not _DB_DIR.exists():
         return by_name, all_entries
@@ -189,14 +205,14 @@ def _load_parameter_catalog() -> Tuple[Dict[str, List[Dict[str, object]]], List[
     return by_name, all_entries
 
 
-def _format_parameter_entry(entry: Dict[str, object], include_extended: bool) -> List[str]:
+def _format_parameter_entry(entry: ParameterEntry, include_extended: bool) -> List[str]:
     lines: List[str] = []
     lines.append(f"{entry['parameter']} — {entry['summary']}")
 
-    context_parts = []
-    if entry.get('section'):
+    context_parts: List[str] = []
+    if entry['section']:
         context_parts.append(entry['section'])
-    if entry.get('group'):
+    if entry['group']:
         context_parts.append(entry['group'])
     context_label = ' › '.join(context_parts)
     if context_label:
@@ -204,7 +220,7 @@ def _format_parameter_entry(entry: Dict[str, object], include_extended: bool) ->
     else:
         lines.append(f"Source: {entry['file']}")
 
-    for detail in entry.get('details', []):
+    for detail in entry['details']:
         label = detail['label']
         if not include_extended and label.lower() == 'extended':
             continue
@@ -248,12 +264,12 @@ def usersum_api_keyword():
         return jsonify({'success': False, 'error': 'Keyword is required.'}), 400
 
     _, entries = _load_parameter_catalog()
-    matches: List[Dict[str, object]] = []
-    seen = set()
+    matches: List[ParameterEntry] = []
+    seen: Set[Tuple[str, str, str | None, str | None, str]] = set()
 
     for entry in entries:
         if term in entry['search_blob']:
-            identity = (entry['parameter'], entry['summary'], entry.get('section'), entry.get('group'), entry['file'])
+            identity = (entry['parameter'], entry['summary'], entry['section'], entry['group'], entry['file'])
             if identity in seen:
                 continue
             seen.add(identity)
@@ -264,12 +280,12 @@ def usersum_api_keyword():
     if not matches:
         return jsonify({'success': True, 'lines': [f'No matches found for "{keyword}".']}), 200
 
-    lines = []
+    lines: List[str] = []
     for entry in matches:
-        context_parts = []
-        if entry.get('section'):
+        context_parts: List[str] = []
+        if entry['section']:
             context_parts.append(entry['section'])
-        if entry.get('group'):
+        if entry['group']:
             context_parts.append(entry['group'])
         context_label = ' › '.join(context_parts)
         if context_label:

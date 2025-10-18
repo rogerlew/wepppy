@@ -2100,7 +2100,7 @@ class Management(object):
         self._parse()
 
     def dump_to_json(self, fn):
-        import jsonpickle
+        import jsonpickle  # type: ignore[import-untyped]
 
         json_str = jsonpickle.encode(self, indent=2)
         with open(fn, 'w') as fp:
@@ -2769,7 +2769,7 @@ def get_management(dom, _map=None) -> Management:
     d = load_map(_map=_map)
     k = str(dom)
     if k not in d:
-        raise InvalidManagementKey
+        raise InvalidManagementKey(k)
 
     return Management(**d[k])
 

@@ -1,10 +1,12 @@
+"""Parse WEPP watershed loss outputs and export Arrow interchange tables."""
+
 from __future__ import annotations
 
 import math
 import re
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple, TypedDict
 
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -24,6 +26,20 @@ except ModuleNotFoundError:
     loader.exec_module(module)
     pa_field = module.pa_field
 from .versioning import schema_with_version
+
+
+class ParsedLossData(TypedDict):
+    """Structured representation of loss_pw0.txt content."""
+
+    yearly_hill: List[Dict[str, object]]
+    yearly_chn: List[Dict[str, object]]
+    yearly_out: List[Dict[str, object]]
+    yearly_class: List[Dict[str, object]]
+    average_hill: List[Dict[str, object]]
+    average_chn: List[Dict[str, object]]
+    average_out: List[Dict[str, object]]
+    average_class: List[Dict[str, object]]
+    average_years: Optional[int]
 
 LOSS_FILENAME = "loss_pw0.txt"
 
@@ -276,6 +292,15 @@ CLASS_AVERAGE_SCHEMA = schema_with_version(
 
 
 def _coerce_value(value: object, field: pa.Field) -> object:
+    """Convert a raw token into the type required by the Arrow field.
+
+    Args:
+        value: Raw token extracted from the WEPP loss output.
+        field: Target Arrow field describing the expected data type.
+
+    Returns:
+        A value coerced to the field type or ``None`` for empty tokens.
+    """
     if value is None:
         return None
     target_type = field.type
@@ -318,6 +343,15 @@ def _coerce_value(value: object, field: pa.Field) -> object:
 
 
 def _rows_to_table(rows: Iterable[Dict[str, object]], schema: pa.Schema) -> pa.Table:
+    """Build an Arrow table from parsed rows using the provided schema.
+
+    Args:
+        rows: Iterable of dictionaries keyed by schema field names.
+        schema: Target Arrow schema describing column order and types.
+
+    Returns:
+        Arrow table constructed from the parsed rows.
+    """
     column_store: Dict[str, List[object]] = {field.name: [] for field in schema}
     fields = list(schema)
     for row in rows:
@@ -327,6 +361,19 @@ def _rows_to_table(rows: Iterable[Dict[str, object]], schema: pa.Schema) -> pa.T
 
 
 def _find_tbl_starts(section_index: int, lines: List[str]) -> Tuple[int, int, int]:
+    """Locate the starting indices for hillslope, channel, and outlet tables.
+
+    Args:
+        section_index: Index pointing at the section header within ``lines``.
+        lines: Tokenised loss file content.
+
+    Returns:
+        Tuple of indices referencing the first row of the hill, channel,
+        and outlet tables respectively.
+
+    Raises:
+        ValueError: If the expected table separators cannot be located.
+    """
     header_indx: List[int] = []
     for i, line in enumerate(lines[section_index + 2 :]):
         if line.startswith("----"):
@@ -345,6 +392,18 @@ def _find_tbl_starts(section_index: int, lines: List[str]) -> Tuple[int, int, in
 
 
 def _parse_tbl(lines: Iterable[str], header: Tuple[str, ...]) -> List[OrderedDict]:
+    """Parse a fixed-width WEPP table section into ordered dictionaries.
+
+    Args:
+        lines: Raw line iterator positioned at the start of the table.
+        header: Expected header names used to map token positions.
+
+    Returns:
+        List of ordered dictionaries preserving column order.
+
+    Raises:
+        ValueError: If a row yields an unexpected number of columns.
+    """
     data: List[OrderedDict] = []
     for line in lines:
         if not line:
@@ -397,6 +456,14 @@ def _parse_tbl(lines: Iterable[str], header: Tuple[str, ...]) -> List[OrderedDic
 
 
 def _parse_out(lines: Iterable[str]) -> List[Dict[str, object]]:
+    """Parse the key/value outlet summary block.
+
+    Args:
+        lines: Raw line iterator positioned at the outlet summary.
+
+    Returns:
+        List of dictionaries containing ``key``, ``value``, and ``units``.
+    """
     data: List[Dict[str, object]] = []
     for line in lines:
         if not line:
@@ -437,6 +504,14 @@ def _parse_out(lines: Iterable[str]) -> List[Dict[str, object]]:
 
 
 def _extract_class_data(lines: List[str]) -> List[OrderedDict]:
+    """Extract the particle class distribution block if present.
+
+    Args:
+        lines: Section of the loss file containing class table text.
+
+    Returns:
+        List of ordered dictionaries describing particle class metrics.
+    """
     class_lines: List[str] = []
     for line in lines:
         if not line:
@@ -456,6 +531,16 @@ def _extract_class_data(lines: List[str]) -> List[OrderedDict]:
 
 
 def _collect_class_block(lines: List[str], start: int, end: int) -> List[OrderedDict]:
+    """Locate and parse the particle class block within a section range.
+
+    Args:
+        lines: Complete loss file content.
+        start: Index to begin searching for the class block.
+        end: Index where the search should stop.
+
+    Returns:
+        List of ordered dictionaries representing particle classes.
+    """
     target_line = None
     for idx in range(start, end):
         if "sediment particle information leaving" in lines[idx].lower():
@@ -468,7 +553,18 @@ def _collect_class_block(lines: List[str], start: int, end: int) -> List[Ordered
     return _extract_class_data(data_lines)
 
 
-def _parse_loss_file(path: Path) -> Dict[str, List[Dict[str, object]]]:
+def _parse_loss_file(path: Path) -> ParsedLossData:
+    """Parse ``loss_pw0.txt`` into structured lists.
+
+    Args:
+        path: Path to the ``loss_pw0.txt`` file.
+
+    Returns:
+        Parsed loss data separated into yearly and average sections.
+
+    Raises:
+        ValueError: If yearly or average section boundaries cannot be located.
+    """
     with path.open("r") as stream:
         raw_lines = stream.readlines()
 
@@ -571,7 +667,15 @@ def _parse_loss_file(path: Path) -> Dict[str, List[Dict[str, object]]]:
     }
 
 
-def _build_tables(parsed: Dict[str, List[Dict[str, object]]]) -> Dict[str, pa.Table]:
+def _build_tables(parsed: ParsedLossData) -> Dict[str, pa.Table]:
+    """Convert parsed loss data into Arrow tables keyed by section.
+
+    Args:
+        parsed: Parsed loss data.
+
+    Returns:
+        Mapping of table aliases to Arrow tables.
+    """
     tables: Dict[str, pa.Table] = {}
 
     tables["all_years_hill"] = _rows_to_table(parsed["yearly_hill"], HILL_ALL_YEARS_SCHEMA)
@@ -596,6 +700,14 @@ def _build_tables(parsed: Dict[str, List[Dict[str, object]]]) -> Dict[str, pa.Ta
 
 
 def _enrich_loss_tables(tables: Dict[str, pa.Table]) -> Dict[str, pa.Table]:
+    """Denormalize channel tables with derived identifiers.
+
+    Args:
+        tables: Mapping of table aliases to Arrow tables.
+
+    Returns:
+        Updated mapping including derived ``wepp_id`` columns where possible.
+    """
     enriched = dict(tables)
 
     hill_count: Optional[int] = None
@@ -632,6 +744,17 @@ def _enrich_loss_tables(tables: Dict[str, pa.Table]) -> Dict[str, pa.Table]:
 
 
 def run_wepp_watershed_loss_interchange(wepp_output_dir: Path | str) -> Dict[str, Path]:
+    """Generate Parquet interchange tables from a WEPP watershed run.
+
+    Args:
+        wepp_output_dir: Path to the WEPP run directory containing ``loss_pw0.txt``.
+
+    Returns:
+        Mapping of table identifiers to generated Parquet paths.
+
+    Raises:
+        FileNotFoundError: If required inputs are missing.
+    """
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
