@@ -19,6 +19,7 @@ from os.path import exists as _exists
 from os.path import split as _split
 from copy import deepcopy
 from collections import Counter
+from typing import Optional, Dict, List, Tuple, Any, Union
 
 import rasterio
 from rasterio.warp import reproject, Resampling
@@ -57,14 +58,14 @@ _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
 
-disturbed_class_aliases = {
+disturbed_class_aliases: Dict[str, str] = {
     'forest prescribed fire': 'prescribed fire',
     'forest high sev fire': 'high sev fire',
     'forest moderate sev fire': 'moderate sev fire',
     'forest low sev fire': 'low sev fire',
 }
 
-def read_disturbed_land_soil_lookup(fname):
+def read_disturbed_land_soil_lookup(fname: str) -> Dict[Tuple[str, str], Dict[str, Any]]:
     d = {}
 
     with open(fname) as fp:
@@ -102,7 +103,12 @@ def read_disturbed_land_soil_lookup(fname):
                     d[(texid, alias)] = row
     return d
 
-def migrate_land_soil_lookup(src_fn, target_fn, pars, defaults):
+def migrate_land_soil_lookup(
+    src_fn: str, 
+    target_fn: str, 
+    pars: List[str], 
+    defaults: Dict[str, Any]
+) -> None:
     src = read_disturbed_land_soil_lookup(src_fn)
     target = read_disturbed_land_soil_lookup(target_fn)
 
@@ -128,7 +134,7 @@ def migrate_land_soil_lookup(src_fn, target_fn, pars, defaults):
             wtr.writerow(row)
 
 
-def write_disturbed_land_soil_lookup(fname, data):
+def write_disturbed_land_soil_lookup(fname: str, data: List[List[Any]]) -> None:
     with open(fname) as fp:
         rdr = csv.DictReader(fp)
         fieldnames = rdr.fieldnames
@@ -158,7 +164,13 @@ class Disturbed(NoDbBase):
 
     filename = 'disturbed.nodb'
 
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+    def __init__(
+        self, 
+        wd: str, 
+        cfg_fn: str, 
+        run_group: Optional[str] = None, 
+        group_name: Optional[str] = None
+    ) -> None:
         super(Disturbed, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
@@ -183,40 +195,40 @@ class Disturbed(NoDbBase):
             self._burn_grass = self.config_get_bool('disturbed', 'burn_grass', False)
 
     @property
-    def burn_shrubs(self):
+    def burn_shrubs(self) -> bool:
         return getattr(self, '_burn_shrubs', True)
     
     @burn_shrubs.setter
     @nodb_setter
-    def burn_shrubs(self, value):
+    def burn_shrubs(self, value: bool) -> None:
         self._burn_shrubs = bool(value)
 
     @property
-    def burn_grass(self):
+    def burn_grass(self) -> bool:
         return getattr(self, '_burn_grass', False)
     
     @burn_grass.setter
     @nodb_setter
-    def burn_grass(self, value):
+    def burn_grass(self, value: bool) -> None:
         self._burn_grass = bool(value)
 
     @property
-    def fire_date(self):
+    def fire_date(self) -> Optional[str]:
         return getattr(self, "_fire_date", None)
 
     @fire_date.setter
     @nodb_setter
-    def fire_date(self, value):
+    def fire_date(self, value: str) -> None:
         self._fire_date = value
 
     @property
-    def default_land_soil_lookup_fn(self):
+    def default_land_soil_lookup_fn(self) -> str:
         _lookup_path = self.config_get_path('disturbed', 'land_soil_lookup', None)
         if _lookup_path is None:
             _lookup_path = _join(_data_dir, 'disturbed_land_soil_lookup.csv')
         return _lookup_path
 
-    def reset_land_soil_lookup(self):
+    def reset_land_soil_lookup(self) -> None:
         _lookup = _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
 
         if _exists(_lookup):
@@ -225,71 +237,71 @@ class Disturbed(NoDbBase):
         shutil.copyfile(self.default_land_soil_lookup_fn, _lookup)
 
     @property
-    def disturbed_dir(self):
+    def disturbed_dir(self) -> str:
         return _join(self.wd, 'disturbed')
 
     baer_dir = disturbed_dir
 
     @property
-    def disturbed_soils_dir(self):
+    def disturbed_soils_dir(self) -> str:
         return _join(_data_dir, 'soils')
 
     @property
-    def disturbed_fn(self):
+    def disturbed_fn(self) -> Optional[str]:
         return self._disturbed_fn
 
     @property
-    def has_map(self):
+    def has_map(self) -> bool:
         return self._disturbed_fn is not None
 
     @property
-    def is256(self):
+    def is256(self) -> bool:
         return self._is256 is not None
 
     @property
-    def ct(self):
+    def ct(self) -> Optional[Any]:
         return getattr(self, '_ct', None)
 
     @property
-    def bounds(self):
+    def bounds(self) -> Optional[List[List[float]]]:
         return self._bounds
 
     @property
-    def classes(self):
+    def classes(self) -> Optional[List[int]]:
         return self._classes
 
     @property
-    def breaks(self):
+    def breaks(self) -> Optional[List[int]]:
         return self._breaks
 
     @property
-    def h0_max_om(self):
+    def h0_max_om(self) -> Optional[float]:
         return getattr(self, '_h0_max_om', None)
 
     @property
-    def sol_ver(self):
+    def sol_ver(self) -> float:
         return getattr(self, '_sol_ver', 7778.0)
 
     @sol_ver.setter
     @nodb_setter
-    def sol_ver(self, value):
+    def sol_ver(self, value: float) -> None:
         self._sol_ver = float(value)
 
     @property
-    def nodata_vals(self):
+    def nodata_vals(self) -> str:
         if self._nodata_vals is None:
             return ''
 
         return ', '.join(str(v) for v in self._nodata_vals)
 
     @property
-    def disturbed_path(self):
+    def disturbed_path(self) -> Optional[str]:
         if self._disturbed_fn is None:
             return None
 
         return _join(self.disturbed_dir, self._disturbed_fn)
 
-    def build_uniform_sbs(self, value=4):
+    def build_uniform_sbs(self, value: int = 4) -> str:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}({value})')
 
@@ -328,30 +340,30 @@ class Disturbed(NoDbBase):
             return sbs_fn
 
     @property
-    def sbs_4class_path(self):
+    def sbs_4class_path(self) -> str:
         return _join(self.disturbed_dir, 'sbs_4class.tif')
 
     @property
-    def disturbed_wgs(self):
+    def disturbed_wgs(self) -> str:
         disturbed_path = self.disturbed_path
         return disturbed_path[:-4] + '.wgs.tif'
 
     @property
-    def disturbed_rgb(self):
+    def disturbed_rgb(self) -> str:
         return self.disturbed_wgs[:-4] + '.rgb.vrt'
 
     @property
-    def disturbed_rgb_png(self):
+    def disturbed_rgb_png(self) -> str:
         return _join(self.disturbed_dir, 'baer.wgs.rgba.png')
 
     baer_rgb_png = disturbed_rgb_png
 
     @property
-    def disturbed_cropped(self):
+    def disturbed_cropped(self) -> str:
         return _join(self.disturbed_dir, 'baer.cropped.tif')
 
     @property
-    def legend(self):
+    def legend(self) -> List[Tuple[int, str, str]]:
         keys = [130, 131, 132, 133]
 
         descs = ['No Burn',
@@ -364,14 +376,14 @@ class Disturbed(NoDbBase):
         return list(zip(keys, descs, colors))
 
     @property
-    def sbs_wgs_n(self):
+    def sbs_wgs_n(self) -> int:
         """
         number of pixels in the WGS projected SBS
         """
         return sum(self._counts.values())
 
     @property
-    def sbs_wgs_area_ha(self):
+    def sbs_wgs_area_ha(self) -> float:
         """
         area of the WGS projected SBS in ha
         """
@@ -383,7 +395,7 @@ class Disturbed(NoDbBase):
         return width * height * 0.0001
 
     @property
-    def sbs_class_pcts(self):
+    def sbs_class_pcts(self) -> Dict[str, float]:
         """
         dictionary with burn class keys percentages of cover of the WGS projected SBS
         """
@@ -402,7 +414,7 @@ class Disturbed(NoDbBase):
         return pcts
 
     @property
-    def sbs_class_areas(self):
+    def sbs_class_areas(self) -> Dict[str, float]:
         """
         dictionary with burn class keys and areas (ha) of the WGS projected SBS
         """
@@ -416,11 +428,15 @@ class Disturbed(NoDbBase):
         return areas
 
     @property
-    def class_map(self):
+    def class_map(self) -> Dict[str, str]:
         sbs = SoilBurnSeverityMap(self.disturbed_path, breaks=self.breaks, nodata_vals=self._nodata_vals, color_map=self.color_to_severity_map)
         return sbs.class_map
 
-    def modify_burn_class(self, breaks, nodata_vals):
+    def modify_burn_class(
+        self, 
+        breaks: List[int], 
+        nodata_vals: Optional[Union[str, List[int]]]
+    ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(breaks={breaks}, nodata_vals={nodata_vals})')
 
@@ -443,7 +459,7 @@ class Disturbed(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def modify_color_map(self, color_map):
+    def modify_color_map(self, color_map: Dict[str, str]) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(color_map={color_map})')
 
@@ -457,7 +473,7 @@ class Disturbed(NoDbBase):
             pass
 
     @property
-    def color_to_severity_map(self):
+    def color_to_severity_map(self) -> Optional[Dict[Tuple[int, int, int], str]]:
         if getattr(self, '_ct', None) is None:
             return None
 
@@ -469,7 +485,7 @@ class Disturbed(NoDbBase):
 
         return {tuple(map(int, rgb.split('_'))): v for rgb, v in color_map.items()}
 
-    def remove_sbs(self):
+    def remove_sbs(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -495,7 +511,13 @@ class Disturbed(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def validate(self, fn, breaks=None, nodata_vals=None, color_map=None):
+    def validate(
+        self, 
+        fn: str, 
+        breaks: Optional[List[int]] = None, 
+        nodata_vals: Optional[Union[List[int], Tuple[int, ...]]] = None, 
+        color_map: Optional[Dict[str, str]] = None
+    ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(fn={fn}, breaks={breaks}, nodata_vals={nodata_vals}, color_map={color_map})')
 
@@ -535,7 +557,7 @@ class Disturbed(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def on(self, evt):
+    def on(self, evt: TriggerEvents) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}({evt})')
 
@@ -571,7 +593,7 @@ class Disturbed(NoDbBase):
                     soils.logger.info(f'  Disturbed::Modifying soils')
                     self.modify_soils()
 
-    def spatialize_treecanopy(self):
+    def spatialize_treecanopy(self) -> int:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -606,7 +628,7 @@ class Disturbed(NoDbBase):
 
         return 1
 
-    def get_sbs(self):
+    def get_sbs(self) -> Optional[SoilBurnSeverityMap]:
         wd = self.wd
         if not self.has_map:
             return
@@ -621,12 +643,12 @@ class Disturbed(NoDbBase):
         return SoilBurnSeverityMap(
             disturbed_cropped, breaks=self.breaks, nodata_vals=self._nodata_vals, color_map=self.color_to_severity_map)
 
-    def get_sbs_4class(self):
+    def get_sbs_4class(self) -> SoilBurnSeverityMap:
         sbs = self.get_sbs()
         sbs.export_4class_map(self.sbs_4class_path)
         return SoilBurnSeverityMap(self.sbs_4class_path)
     
-    def get_disturbed_key_lookup(self):
+    def get_disturbed_key_lookup(self) -> Dict[str, str]:
         mapping_dict = self.landuse_instance.get_mapping_dict()
         d = {}
         for key in mapping_dict:
@@ -650,7 +672,7 @@ class Disturbed(NoDbBase):
 
         return d
 
-    def remap_landuse(self):
+    def remap_landuse(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -724,13 +746,13 @@ class Disturbed(NoDbBase):
         landuse.build_managements()
 
     @property
-    def meta(self):
+    def meta(self) -> Dict[str, Dict[str, str]]:
         if not hasattr(self, '_meta'):
             self.remap_landuse()
 
         return self._meta
     
-    def build_extended_land_soil_lookup(self):
+    def build_extended_land_soil_lookup(self) -> None:
         import csv
         from wepppy.wepp.management import load_map, get_management, IniLoopCropland
         from wepppy.nodb.mods.disturbed import read_disturbed_land_soil_lookup
@@ -830,7 +852,7 @@ class Disturbed(NoDbBase):
 
         shutil.move(extended_landsoil_lookup, self.lookup_fn)
 
-    def remap_mofe_landuse(self):
+    def remap_mofe_landuse(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -871,7 +893,7 @@ class Disturbed(NoDbBase):
         landuse.build_managements()
 
     @property
-    def lookup_fn(self):
+    def lookup_fn(self) -> str:
         _lookup = _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
 
         if not _exists(_lookup):
@@ -880,7 +902,7 @@ class Disturbed(NoDbBase):
         return _lookup
 
     @property
-    def land_soil_replacements_d(self):
+    def land_soil_replacements_d(self) -> Dict[Tuple[str, str], Dict[str, Any]]:
         default_fn = self.default_land_soil_lookup_fn
         _lookup_fn = self.lookup_fn
 
@@ -913,7 +935,7 @@ class Disturbed(NoDbBase):
 
         return lookup
 
-    def pmetpara_prep(self):
+    def pmetpara_prep(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -973,7 +995,7 @@ class Disturbed(NoDbBase):
                 plant_name = man.plants[0].name
                 fp.write(f'{plant_name},{kcb},{rawb},{i+1},{description}\n')
 
-    def modify_mofe_soils(self):
+    def modify_mofe_soils(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -1091,7 +1113,13 @@ class Disturbed(NoDbBase):
                     coverage = 100.0 * soils.soils[k].area / total_area
                     soils.soils[k].pct_coverage = coverage
 
-    def modify_soil(self, topaz_id: str, landuse_instance: Landuse, soils_instance: Soils, _land_soil_replacements_d) -> str:
+    def modify_soil(
+        self, 
+        topaz_id: str, 
+        landuse_instance: 'Landuse', 
+        soils_instance: 'Soils', 
+        _land_soil_replacements_d: Dict[Tuple[str, str], Dict[str, Any]]
+    ) -> str:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(topaz_id={topaz_id})')
 
@@ -1170,7 +1198,7 @@ class Disturbed(NoDbBase):
         assert disturbed_mukey is not None, (topaz_id, mukey, dom)
         return disturbed_mukey
 
-    def modify_soils(self):
+    def modify_soils(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -1207,7 +1235,7 @@ class Disturbed(NoDbBase):
                 coverage = 100.0 * soils.soils[k].area / total_area
                 soils.soils[k].pct_coverage = coverage
 
-    def _calc_sbs_coverage(self, sbs):
+    def _calc_sbs_coverage(self, sbs: Optional[SoilBurnSeverityMap]) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(sbs={sbs})')
 
