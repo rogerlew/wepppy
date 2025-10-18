@@ -13,6 +13,7 @@ from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 from os.path import isdir
+from typing import Optional, Tuple, List, Any, Dict
 
 import shutil
 import inspect
@@ -51,7 +52,13 @@ _thisdir = os.path.dirname(__file__)
 
 
 class Map(object):
-    def __init__(self, extent, center, zoom, cellsize=30.0):
+    def __init__(
+        self, 
+        extent: List[float], 
+        center: List[float], 
+        zoom: int, 
+        cellsize: float = 30.0
+    ) -> None:
         assert len(extent) == 4
 
         _extent = [float(v) for v in extent]
@@ -59,44 +66,44 @@ class Map(object):
         assert l < r
         assert b < t
 
-        self.extent = [float(v) for v in _extent]  # in decimal degrees
-        self.center = [float(v) for v in center]
-        self.zoom = int(zoom)
-        self.cellsize = cellsize
+        self.extent: List[float] = [float(v) for v in _extent]  # in decimal degrees
+        self.center: List[float] = [float(v) for v in center]
+        self.zoom: int = int(zoom)
+        self.cellsize: float = cellsize
 
         # e.g. (395201.3103811303, 5673135.241182375, 32, 'U')
         ul_x, ul_y, zone_number, zone_letter = utm.from_latlon(latitude=t, longitude=l)
         ul_x = float(ul_x)
         ul_y = float(ul_y)
-        self.utm = ul_x, ul_y, zone_number, zone_letter
+        self.utm: Tuple[float, float, int, str] = ul_x, ul_y, zone_number, zone_letter
 
         lr_x, lr_y, _, _ = utm.from_latlon(longitude=r, latitude=b, force_zone_number=zone_number)
-        self._ul_x = float(ul_x)  # in utm
-        self._ul_y = float(ul_y)
-        self._lr_x = float(lr_x)
-        self._lr_y = float(lr_y)
+        self._ul_x: float = float(ul_x)  # in utm
+        self._ul_y: float = float(ul_y)
+        self._lr_x: float = float(lr_x)
+        self._lr_y: float = float(lr_y)
 
-        self._num_cols = int(round((lr_x - ul_x) / cellsize))
-        self._num_rows = int(round((ul_y - lr_y) / cellsize))
+        self._num_cols: int = int(round((lr_x - ul_x) / cellsize))
+        self._num_rows: int = int(round((ul_y - lr_y) / cellsize))
 
     @property
-    def utm_zone(self):
+    def utm_zone(self) -> int:
         return self.utm[2]
 
     @property
-    def zone_letter(self):
+    def zone_letter(self) -> str:
         return self.utm[3]
 
     @property
-    def srid(self):
+    def srid(self) -> int:
         return utm_srid(self.utm_zone, self.northern)
 
     @property
-    def northern(self):
+    def northern(self) -> bool:
         return self.extent[3] > 0.0
 
     @property
-    def ul_x(self):
+    def ul_x(self) -> float:
         if hasattr(self, '_ul_x'):
             return self._ul_x
 
@@ -108,7 +115,7 @@ class Map(object):
         return ul_x
 
     @property
-    def ul_y(self):
+    def ul_y(self) -> float:
         if hasattr(self, '_ul_y'):
             return self._ul_y
 
@@ -120,7 +127,7 @@ class Map(object):
         return ul_y
 
     @property
-    def lr_x(self):
+    def lr_x(self) -> float:
         if hasattr(self, '_lr_x'):
             return self._lr_x
 
@@ -132,7 +139,7 @@ class Map(object):
         return lr_x
 
     @property
-    def lr_y(self):
+    def lr_y(self) -> float:
         if hasattr(self, '_lr_y'):
             return self._lr_y
 
@@ -144,11 +151,11 @@ class Map(object):
         return lr_y
 
     @property
-    def utm_extent(self):
+    def utm_extent(self) -> Tuple[float, float, float, float]:
         return self.ul_x, self.lr_y, self.lr_x, self.ul_y
 
     @property
-    def num_cols(self):
+    def num_cols(self) -> int:
         if hasattr(self, '_num_cols'):
             return self._num_cols
 
@@ -156,7 +163,7 @@ class Map(object):
         return self._num_cols
 
     @property
-    def num_rows(self):
+    def num_rows(self) -> int:
         if hasattr(self, '_num_rows'):
             return self._num_rows
             
@@ -164,14 +171,14 @@ class Map(object):
         return self._num_rows
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, int]:
         l, b, r, t = self.extent
         px_w = int(haversine((l, b), (l, t)) * 1000 / self.cellsize)
         px_h = int(haversine((l, b), (r, b)) * 1000 / self.cellsize)
         return px_w, px_h
 
     @property
-    def bounds_str(self):
+    def bounds_str(self) -> str:
         """
         returns extent formatted leaflet
         """
@@ -180,7 +187,7 @@ class Map(object):
         ne = [t, r]
         return str([sw, ne])
 
-    def utm_to_px(self, easting, northing):
+    def utm_to_px(self, easting: float, northing: float) -> Tuple[int, int]:
         """
         return the utm coords from pixel coords
         """
@@ -197,7 +204,7 @@ class Map(object):
 
         return x, y
 
-    def lnglat_to_px(self, lng, lat):
+    def lnglat_to_px(self, lng: float, lat: float) -> Tuple[int, int]:
         """
         return the x,y pixel coords of long, lat
         """
@@ -225,7 +232,7 @@ class Map(object):
 
         return _x, _y
 
-    def px_to_utm(self, x, y):
+    def px_to_utm(self, x: int, y: int) -> Tuple[float, float]:
         """
         return the utm coords from pixel coords
         """
@@ -242,14 +249,14 @@ class Map(object):
 
         return easting, northing
 
-    def lnglat_to_utm(self, lng, lat):
+    def lnglat_to_utm(self, lng: float, lat: float) -> Tuple[float, float]:
         """
         return the utm coords from lnglat coords
         """
         x, y, _, _ = utm.from_latlon(latitude=lat, longitude=lng, force_zone_number=self.utm_zone)
         return float(x), float(y)
 
-    def px_to_lnglat(self, x, y):
+    def px_to_lnglat(self, x: int, y: int) -> Tuple[float, float]:
         """
         return the long/lat (WGS84) coords from pixel coords
         """
@@ -259,7 +266,12 @@ class Map(object):
                                        zone_number=self.utm_zone, northern=self.northern)
         return float(lng), float(lat)
 
-    def raster_intersection(self, extent, raster_fn, discard=None):
+    def raster_intersection(
+        self, 
+        extent: List[float], 
+        raster_fn: str, 
+        discard: Optional[Any] = None
+    ) -> List:
         """
         returns the subset of pixel values of raster_fn that are within the extent
         :param extent: l, b, r, t in decimal degrees
@@ -308,7 +320,13 @@ class Ron(NoDbBase):
 
     filename = 'ron.nodb'
 
-    def __init__(self, wd, cfg_fn='0.cfg', run_group=None, group_name=None):
+    def __init__(
+        self, 
+        wd: str, 
+        cfg_fn: str = '0.cfg', 
+        run_group: Optional[str] = None, 
+        group_name: Optional[str] = None
+    ) -> None:
         from wepppy.nodb.base import iter_nodb_mods_subclasses
         from wepppy.nodb.core.watershed import DelineationBackend
         from wepppy.nodb.core.watershed import Watershed
@@ -403,7 +421,7 @@ class Ron(NoDbBase):
         activate_query_engine(self.wd, run_interchange=False)
         self.trigger(TriggerEvents.ON_INIT_FINISH)
 
-    def clean_export_dir(self):
+    def clean_export_dir(self) -> None:
         with self.timed("Cleaning export directory"):
             export_dir = self.export_dir
             if _exists(export_dir):
@@ -413,7 +431,7 @@ class Ron(NoDbBase):
 
     # this is here because it makes it agnostic to the modules
     # that use it. e.g. it doesn't depend on Disturbed or Baer, or ...
-    def init_sbs_map(self, sbs_map, baer):
+    def init_sbs_map(self, sbs_map: str, baer: Any) -> None:
         with self.timed("Initializing SBS map"):
             sbs_name = _split(sbs_map)[1]
             sbs_path = _join(baer.baer_dir, sbs_name)
@@ -452,7 +470,7 @@ class Ron(NoDbBase):
     def enable_landuse_change(self) -> bool:
         return self._enable_landuse_change
 
-    def remove_mod(self, mod_name):
+    def remove_mod(self, mod_name: str) -> None:
         from wepppy.nodb.base import iter_nodb_mods_subclasses, clear_locks, clear_nodb_file_cache
 
         clear_locks(self.runid)
@@ -477,41 +495,46 @@ class Ron(NoDbBase):
     # map
     #
     @property
-    def center0(self):
+    def center0(self) -> List[float]:
         if self.map is None:
             return self._center0
         else:
             return self.map.center[::-1]
 
     @property
-    def zoom0(self):
+    def zoom0(self) -> int:
         if self.map is None:
             return self._zoom0
         else:
             return self.map.zoom
 
     @property
-    def cellsize(self):
+    def cellsize(self) -> float:
         return self._cellsize
 
     @property
-    def boundary(self):  # url to a geojson file
+    def boundary(self) -> Optional[str]:  # url to a geojson file
         return self._boundary
     
     @property
-    def boundary_color(self):
+    def boundary_color(self) -> str:
         return getattr(self, '_boundary_color', '#FF0000')
 
     @property
-    def boundary_name(self):
+    def boundary_name(self) -> str:
         return getattr(self, '_boundary_name', 'boundary')
 
     
     @property
-    def map(self):
+    def map(self) -> Optional[Map]:
         return self._map
 
-    def set_map(self, extent, center, zoom):
+    def set_map(
+        self, 
+        extent: List[float], 
+        center: List[float], 
+        zoom: int
+    ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(extent={extent}, center={center}, zoom={zoom}')
 
@@ -521,7 +544,7 @@ class Ron(NoDbBase):
             self._w3w = None
 
     @property
-    def w3w(self):
+    def w3w(self) -> str:
         if hasattr(self, '_w3w'):
             if self._w3w is not None:
                 return self._w3w.get('words', '')
@@ -529,7 +552,7 @@ class Ron(NoDbBase):
         return ''
 
     @property
-    def location_hash(self):
+    def location_hash(self) -> str:
         wd = self.wd
         watershed = self.watershed_instance
         w3w = self.w3w
@@ -538,7 +561,7 @@ class Ron(NoDbBase):
         return f'{w3w}_{is_topaz}_{sub_n}'
        
     @property
-    def extent(self):
+    def extent(self) -> Optional[List[float]]:
         if self.map is None:
             return None
 
@@ -548,28 +571,28 @@ class Ron(NoDbBase):
     # name
     #
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
     @nodb_setter
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     #
     # scenario
     #
     @property
-    def scenario(self):
+    def scenario(self) -> str:
         return getattr(self, '_scenario', '')
 
     @scenario.setter
     @nodb_setter
-    def scenario(self, value):
+    def scenario(self, value: str) -> None:
         self._scenario = value
 
     @property
-    def has_ash_results(self):
+    def has_ash_results(self) -> bool:
         if 'ash' not in self.mods:
             return False
 
@@ -578,16 +601,16 @@ class Ron(NoDbBase):
         return ash.has_ash_results
 
     @property
-    def dem_db(self):
+    def dem_db(self) -> str:
         return getattr(self, '_dem_db', self.config_get_str('general', 'dem_db'))
 
     @dem_db.setter
     @nodb_setter
-    def dem_db(self, value):
+    def dem_db(self, value: str) -> None:
         self._dem_db = value
 
     @property
-    def dem_map(self):
+    def dem_map(self) -> Optional[str]:
         if not hasattr(self, '_dem_map'):
             return None
 
@@ -595,13 +618,13 @@ class Ron(NoDbBase):
 
     @dem_map.setter
     @nodb_setter
-    def dem_map(self, value):
+    def dem_map(self, value: str) -> None:
         self._dem_map = value
 
     #
     # dem
     #
-    def fetch_dem(self):
+    def fetch_dem(self) -> None:
         assert self.map is not None
 
         if self.dem_db.startswith('opentopo://'):
@@ -623,13 +646,13 @@ class Ron(NoDbBase):
 
 
     @property
-    def has_dem(self):
+    def has_dem(self) -> bool:
         return _exists(self.dem_fn)
 
     #
     # summary
     #
-    def subs_summary(self, abbreviated=False):
+    def subs_summary(self, abbreviated: bool = False) -> Dict:
         wd = self.wd
         climate = self.climate_instance
 
@@ -679,7 +702,11 @@ class Ron(NoDbBase):
 
         return summaries
 
-    def sub_summary(self, topaz_id=None, wepp_id=None):
+    def sub_summary(
+        self, 
+        topaz_id: Optional[str] = None, 
+        wepp_id: Optional[str] = None
+    ) -> Dict:
 
         wd = self.wd
 
@@ -745,7 +772,7 @@ class Ron(NoDbBase):
             landuse=_landuse
         )
 
-    def chns_summary(self, abbreviated=False):
+    def chns_summary(self, abbreviated: bool = False) -> List[Dict]:
         wd = self.wd
 
         # use parquet if available, they are faster and have topaz_id and wepp_id
@@ -787,7 +814,11 @@ class Ron(NoDbBase):
 
         return summaries
 
-    def chn_summary(self, topaz_id=None, wepp_id=None):
+    def chn_summary(
+        self, 
+        topaz_id: Optional[str] = None, 
+        wepp_id: Optional[str] = None
+    ) -> Dict:
         wd = self.wd
         _watershed = None
         if _exists(_join(wd, 'watershed/channels.parquet')):
@@ -828,13 +859,13 @@ class Ron(NoDbBase):
             climate=None)
         
 
-def _try_str(x):
+def _try_str(x: Any) -> str:
     try:
         return str(x)
     except:
         return ''
 
-def _try_bool(x):
+def _try_bool(x: Any) -> bool:
     try:
         return bool(int(x))
     except:
@@ -842,7 +873,7 @@ def _try_bool(x):
 
 # for jinja views
 class RonViewModel(object):
-    def __init__(self, ron: Ron):
+    def __init__(self, ron: Ron) -> None:
         self.runid = _try_str(ron.runid)
         self.name = _try_str(ron.name)
         self.scenario = _try_str(ron.scenario)
@@ -852,6 +883,6 @@ class RonViewModel(object):
         self.pup_relpath = ron.pup_relpath
 
     @classmethod
-    def getInstanceFromRunID(cls, runid):
+    def getInstanceFromRunID(cls, runid: str) -> 'RonViewModel':
         ron = Ron.getInstanceFromRunID(runid)
         return cls(ron)
