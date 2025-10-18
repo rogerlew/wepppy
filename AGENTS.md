@@ -162,6 +162,12 @@ class MyController(NoDbBase):
 python -m mypy.stubtest wepppy.nodb.core.climate
 ```
 
+- Run `mypy`/`stubtest` inside the Docker dev container to ensure the stub-only wheels from `docker/requirements-stubs-uv.txt` are present:
+
+```bash
+wctl exec weppcloud bash -lc "python -m mypy.stubtest wepppy.nodb.core"
+```
+
 Run type checking with mypy:
 ```bash
 python -m mypy wepppy/nodb/core/topaz.py

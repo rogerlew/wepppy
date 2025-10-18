@@ -29,6 +29,18 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 - `wctl man` (or `man wctl` after installation): displays the wctl manual page. Additional arguments are passed through to `man`, so `wctl man --no-pager` works as expected.
 - `wctl update-stub-requirements`: runs `tools/update_stub_requirements.py` to analyse mypy output and refresh `docker/requirements-stubs-uv.txt`. Pass any script flags (for example `--no-verify`) after the command.
 
+### **Running Type Checks / Stubtest**
+
+Because the development Docker image installs the stub wheels listed in `docker/requirements-stubs-uv.txt`, run static checks inside the container so the environment matches production:
+
+```bash
+# Run mypy or stubtest inside the app container
+wctl exec weppcloud bash -lc "python -m mypy wepppy"
+wctl exec weppcloud bash -lc "python -m mypy.stubtest wepppy.nodb.core.wepp"
+```
+
+Use `wctl update-stub-requirements` before rebuilding the image when new dependencies require additional stub packages.
+
 ### **Installation**
 
 1. **Configure the target compose file.**  

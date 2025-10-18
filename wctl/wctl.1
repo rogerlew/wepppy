@@ -82,7 +82,11 @@ to analyze mypy diagnostics and refresh
 .IR docker/requirements-stubs-uv.txt .
 Any options provided after the command (for example
 .BR --no-verify )
-are passed directly to the script.
+are passed directly to the script. Use this alongside
+.B wctl exec weppcloud
+when running
+.BR mypy " or " stubtest
+inside the development container so that stub wheels are available.
 .SH ENVIRONMENT
 .TP
 .B WEPPPY_ENV_FILE

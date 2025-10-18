@@ -28,15 +28,27 @@ STUB_PACKAGE_MAP = {
     "authlib": "types-Authlib",
     "deprecated": "types-Deprecated",
     "flask": "types-Flask",
-    "matplotlib": "types-matplotlib",
-    "matplotlib.pyplot": "types-matplotlib",
-    "pandas": "types-pandas",
-    "pyproj": "pyproj-stubs",
+    "matplotlib": "matplotlib-stubs",
+    "matplotlib.pyplot": "matplotlib-stubs",
+    "pandas": "pandas-stubs",
+    "pyproj": "",
     "requests": "types-requests",
     "redis": "types-redis",
     "shapely": "types-shapely",
     "yaml": "types-PyYAML",
     "pyyaml": "types-PyYAML",
+}
+
+BASE_STUB_PACKAGES: Set[str] = {
+    "types-Authlib",
+    "types-Deprecated",
+    "types-Flask",
+    "matplotlib-stubs",
+    "types-redis",
+    "types-requests",
+    "types-shapely",
+    "types-PyYAML",
+    "pandas-stubs",
 }
 
 FALLBACK_TYPES_MODULES = {
@@ -181,7 +193,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     result = run_command(command)
     output = f"{result.stdout}\n{result.stderr}"
 
-    packages = candidate_stub_packages(output)
+    packages = candidate_stub_packages(output) | BASE_STUB_PACKAGES
     if not packages:
         print("No stub packages detected; requirements file unchanged.", file=sys.stderr)
         return result.returncode
