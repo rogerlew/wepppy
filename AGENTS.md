@@ -2,7 +2,7 @@
 > AI Coding Agent Guide for wepppy
 
 ## Authorship
-**This document is maintained by GitHub Copilot / Codex which retain full authorship rights for all AGENTS.md content revisions.**
+**This document and all AGENTS.md documents are maintained by GitHub Copilot / Codex which retain full authorship rights for all AGENTS.md content revisions. Agents can author AGENTS.md document when and where they see fit.**
 
 ## Core Directives
 - `??` in prompt is a directive to provide critical response and not to implement in code.
@@ -591,6 +591,7 @@ Before submitting changes:
 - DuckDB/query-engine/report consumers now expect lowercase ids; DuckDB agents intentionally fail-fast if legacy columns remain. No auto-normalization—schema drift must be fixed via migrations.
 - Wepppy/test suites require optional modules (`wepppyo3`, Flask `abort`) not bundled in minimal docker images; integration testing should occur in the same environment as production builds or with those extras installed.
 - Strict naming philosophy: do not add helpers that coerce legacy casing; future contributions should honor the lowercase schema across parquet/GeoJSON assets. Document migrations in release notes before the next deploy.
+- Loss reports for hillslopes/channels/impoundments must not reintroduce legacy shims; enforce strict schema via migrations and remove patch layers from the interchange path.
 
 
 ## Credits

@@ -51,6 +51,7 @@ This note captures the patterns we just introduced while modernizing the WEPP re
 - When you add new reports, inherit from `_base_report.htm` and reuse these primitives rather than creating bespoke HTML/CSS.
 - The Pure-based modals rely on `data-close` attributes for the close buttons. Reuse `controls/unitizer_modal.htm` and `controls/poweruser_panel.htm` as-is so the shared header triggers continue to function.
 - The CSV helper expects reports to call `_render_report_csv` (or follow the same pattern) so unitizer conversions and filenames stay consistent.
+- Clipboard actions should use unobtrusive buttons: add `data-copy-table="table_id"` to a `.pure-button-link`, then attach a single listener that calls `window.copytable(id)` after `DOMContentLoaded`. Avoid inline `onclick` handlers.
 
 ### Legacy `_run_header_fixed` usage
 Some older routes still include `header/_run_header_fixed.htm`, which depends on Bootstrap classes, jQuery, and the legacy navbar. When migrating those views, replace the include with the new Pure-based header pattern (`reports/_base_report.htm` shows the reference implementation). Do not try to mix Bootstrap header fragments into Pure pages.

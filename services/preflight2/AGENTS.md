@@ -1,5 +1,8 @@
 # preflight2 Service Guide
 
+## Authorship
+**This document and all AGENTS.md documents are maintained by GitHub Copilot / Codex which retain full authorship rights for all AGENTS.md content revisions. Agents can author AGENTS.md document when and where they see fit.**
+
 ## Purpose
 `preflight2` streams run “preflight” validation results (checklist payloads) to browsers via WebSockets. Clients subscribe to `/weppcloud-microservices/preflight/<runid>` and receive realtime status updates sourced from Redis keyspace notifications.
 
@@ -39,4 +42,3 @@ All environment variables use the `PREFLIGHT_` prefix:
 - **Clients see 502s / reconnect loops:** Ensure the container is running and `docker compose ps preflight` reports “healthy”. Review Caddy logs for upstream errors.
 - **No checklist updates:** Check that Redis keyspace notifications remain enabled and that the run ID matches the regex `^[A-Za-z0-9_-]+$`.
 - **High latency:** The worker uses a single goroutine per websocket; if latency rises with load, consider vertical scaling or sharding readers across Redis channels.
-

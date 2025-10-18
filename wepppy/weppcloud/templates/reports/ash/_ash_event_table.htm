@@ -1,31 +1,35 @@
-<h5>{{ measure_name }} recurrence intervals</h5>
-<table class="table">
-    <thead>
-    <tr>
-        <th>{{ measure_name }}</th>
-        <th>Probability</th>
-        <th>Recurrence Interval</th>
-        <th>Days From Fire</th>
-    </tr>
-    <tr>
-        <th>{{ unitizer_units(units) | safe }}&nbsp; </th>
-        <th>{{ unitizer_units('%') | safe }}&nbsp;</th>
-        <th>years</th>
-        <th>&nbsp;</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for rec_interval, row in return_periods[measure] | sort_numeric_keys(reverse=True) %}
-        {% if row is not none %}
-            {% if row[measure] > 0.0 %}
-                <tr>
-                <td>{{ unitizer(row[measure], units) | safe }}</td>
-                <td>{{ unitizer(row['probability'], '%') | safe  }}</td>
-                <td>{{ rec_interval }}</td>
-                <td>{{ row['days_from_fire (days)'] }}</td>
-                </tr>
-            {% endif %}
-        {% endif %}
-    {% endfor %}
-    </tbody>
-</table>
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h3 class="wc-heading__subtitle">{{ measure_name }} recurrence intervals</h3>
+  </header>
+  <div class="wc-table-wrapper wc-table-wrapper--compact">
+    <table class="wc-table wc-table--dense">
+      <thead>
+        <tr>
+          <th scope="col">{{ measure_name }}</th>
+          <th scope="col">Probability</th>
+          <th scope="col">Recurrence Interval</th>
+          <th scope="col">Days From Fire</th>
+        </tr>
+        <tr>
+          <th scope="col">{{ unitizer_units(units) | safe }}</th>
+          <th scope="col">{{ unitizer_units('%') | safe }}</th>
+          <th scope="col">years</th>
+          <th scope="col" aria-hidden="true">&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec_interval, row in return_periods[measure] | sort_numeric_keys(reverse=True) %}
+          {% if row is not none and row[measure] > 0.0 %}
+            <tr>
+              <td>{{ unitizer(row[measure], units) | safe }}</td>
+              <td>{{ unitizer(row['probability'], '%') | safe }}</td>
+              <td>{{ rec_interval }}</td>
+              <td>{{ row['days_from_fire (days)'] }}</td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

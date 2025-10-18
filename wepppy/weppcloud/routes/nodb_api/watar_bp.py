@@ -233,59 +233,6 @@ def query_ash_out(runid, config):
         return exception_factory(runid=runid)
 
 
-@watar_bp.route('/runs/<string:runid>/<config>/report/ash_by_hillslope')
-@watar_bp.route('/runs/<string:runid>/<config>/report/ash_by_hillslope/')
-def report_ash_by_hillslope(runid, config):
-    class_fractions = request.args.get('class_fractions', False)
-    class_fractions = str(class_fractions).lower() == 'true'
-
-    fraction_under = request.args.get('fraction_under', None)
-    if fraction_under is not None:
-        try:
-            fraction_under = float(fraction_under)
-        except:
-            fraction_under = None
-
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        loss = Wepp.getInstance(wd).report_loss()
-        ash = Ash.getInstance(wd)
-        ashpost = AshPost.getInstance(wd)
-
-        out_rpt = OutletSummaryReport(loss)
-        hill_rpt = HillSummaryReport(loss, class_fractions=class_fractions, fraction_under=fraction_under)
-        chn_rpt = ChannelSummaryReport(loss)
-        translator = Watershed.getInstance(wd).translator_factory()
-        unitizer = Unitizer.getInstance(wd)
-
-        fire_date = ash.fire_date
-        ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
-        ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
-
-        burn_class_summary = ash.burn_class_summary()
-        ash_out = ashpost.ash_out
-
-        return render_template('reports/ash/ash_watershed_by_hillslope.htm', runid=runid, config=config,
-                               out_rpt=out_rpt,
-                               hill_rpt=hill_rpt,
-                               chn_rpt=chn_rpt,
-                               translator=translator,
-                               unitizer_nodb=unitizer,
-                               precisions=wepppy.nodb.unitizer.precisions,
-                               fire_date=fire_date,
-                               burn_class_summary=burn_class_summary,
-                               ini_black_ash_depth_mm=ini_black_ash_depth_mm,
-                               ini_white_ash_depth_mm=ini_white_ash_depth_mm,
-                               ash_out=ash_out,
-                               ash=ash,
-                               ron=ron,
-                               user=current_user)
-
-    except Exception:
-        return exception_factory('Error', runid=runid)
-
-
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])
 def report_contaminant(runid, config):

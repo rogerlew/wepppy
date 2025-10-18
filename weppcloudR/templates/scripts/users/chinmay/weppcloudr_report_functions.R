@@ -508,7 +508,7 @@ read_subcatchments = function(runid) {
     loss_raw <- arrow::read_parquet(loss_path) %>%
       dplyr::as_tibble()
 
-    wepp_col <- first_present(names(loss_raw), c("Hillslopes", "wepp_id", "WeppID"))
+    wepp_col <- first_present(names(loss_raw), c("wepp_id", "WeppID"))
     area_col <- first_present(names(loss_raw), c("Hillslope Area", "area_ha", "Area_ha"))
     runoff_col <- first_present(names(loss_raw), c("Runoff Volume", "runoff_volume"))
     lateral_col <- first_present(names(loss_raw), c("Subrunoff Volume", "subrunoff_volume"))

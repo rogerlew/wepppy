@@ -146,7 +146,7 @@ def test_run_query_join_with_spaces(tmp_path: Path) -> None:
 
     loss_table = pa.table(
         {
-            "Channels and Impoundments": [1, 2, 3],
+            "Loss Channel": [1, 2, 3],
             "Value": ["a", "b", "c"],
         }
     )
@@ -173,12 +173,12 @@ def test_run_query_join_with_spaces(tmp_path: Path) -> None:
             {
                 "left": "loss",
                 "right": "chn",
-                "left_on": ["Channels and Impoundments"],
+                "left_on": ["Loss Channel"],
                 "right_on": ["Channel Number"],
             },
         ],
         columns=[
-            'loss."Channels and Impoundments" AS loss_channel',
+            'loss."Loss Channel" AS loss_channel',
             'chn."Channel Number" AS chn_channel',
             "chn.Name AS name",
         ],

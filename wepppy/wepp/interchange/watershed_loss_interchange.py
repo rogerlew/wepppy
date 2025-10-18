@@ -52,7 +52,7 @@ unit_consistency_map = {
 
 HILL_HEADER = (
     "Type",
-    "Hillslopes",
+    "wepp_id",
     "Runoff Volume",
     "Subrunoff Volume",
     "Baseflow Volume",
@@ -66,7 +66,7 @@ HILL_HEADER = (
 
 HILL_AVG_HEADER = (
     "Type",
-    "Hillslopes",
+    "wepp_id",
     "Runoff Volume",
     "Subrunoff Volume",
     "Baseflow Volume",
@@ -110,7 +110,7 @@ HILL_AVG_UNITS = (
 
 CHN_HEADER = (
     "Type",
-    "Channels and Impoundments",
+    "chn_enum",
     "Discharge Volume",
     "Sediment Yield",
     "Soil Loss",
@@ -123,7 +123,7 @@ CHN_HEADER = (
 
 CHN_AVG_HEADER = (
     "Type",
-    "Channels and Impoundments",
+    "chn_enum",
     "Discharge Volume",
     "Sediment Yield",
     "Soil Loss",
@@ -595,27 +595,8 @@ def _build_tables(parsed: Dict[str, List[Dict[str, object]]]) -> Dict[str, pa.Ta
     return tables
 
 
-def _rename_column(table: pa.Table, old: str, new: str) -> pa.Table:
-    names = list(table.schema.names)
-    try:
-        idx = names.index(old)
-    except ValueError:
-        return table
-    names[idx] = new
-    renamed = table.rename_columns(names)
-    metadata = table.schema.metadata
-    if metadata:
-        renamed = renamed.replace_schema_metadata(metadata)
-    return renamed
-
-
 def _enrich_loss_tables(tables: Dict[str, pa.Table]) -> Dict[str, pa.Table]:
     enriched = dict(tables)
-
-    # Rename hillslope identifier to wepp_id
-    for key in ("average_hill", "all_years_hill"):
-        if key in enriched:
-            enriched[key] = _rename_column(enriched[key], "Hillslopes", "wepp_id")
 
     hill_count: Optional[int] = None
     hill_table = enriched.get("average_hill")
@@ -632,7 +613,7 @@ def _enrich_loss_tables(tables: Dict[str, pa.Table]) -> Dict[str, pa.Table]:
         for key in ("average_chn", "all_years_chn"):
             if key not in enriched:
                 continue
-            table = _rename_column(enriched[key], "Channels and Impoundments", "chn_enum")
+            table = enriched[key]
             if "chn_enum" not in table.schema.names:
                 enriched[key] = table
                 continue
@@ -646,10 +627,6 @@ def _enrich_loss_tables(tables: Dict[str, pa.Table]) -> Dict[str, pa.Table]:
             else:
                 table = table.append_column(pa.field("wepp_id", pa.int32()), wepp_array)
             enriched[key] = table
-    else:
-        for key in ("average_chn", "all_years_chn"):
-            if key in enriched:
-                enriched[key] = _rename_column(enriched[key], "Channels and Impoundments", "chn_enum")
 
     return enriched
 

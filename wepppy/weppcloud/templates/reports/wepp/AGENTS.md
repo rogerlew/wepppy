@@ -1,5 +1,8 @@
 # Daily Streamflow Report Agent Notes
 
+## Authorship
+**This document and all AGENTS.md documents are maintained by GitHub Copilot / Codex which retain full authorship rights for all AGENTS.md content revisions. Agents can author AGENTS.md document when and where they see fit.**
+
 ## Context
 - The daily streamflow report renders a D3-backed focus + context chart inside `daily_streamflow_graph.htm`.
 - The chart now measures width from the nearest `.wc-panel` container to avoid overflow and clamps to the viewport width.

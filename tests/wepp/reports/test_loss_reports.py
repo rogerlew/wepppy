@@ -299,7 +299,7 @@ def test_hill_summary_accepts_loss_instance(monkeypatch, tmp_path):
         def hill_tbl(self):
             return []
 
-    report = HillSummaryReport(StubLoss(loss_file), class_fractions=True, fraction_under=0.2)
+    report = HillSummaryReport(StubLoss(loss_file), fraction_under=0.2)
     df = pd.DataFrame([dict(row.row) for row in report])
 
     assert "Runoff Depth (mm/yr)" in df.columns

@@ -1,66 +1,66 @@
-{% extends "reports/_page_container.htm" %}
+{% extends "reports/_base_report.htm" %}
 {% block report_title %}Ash Transport Model (Experimental){% endblock %}
 {% block report_content %}
-<script>
-function rerun_ash() {
-    console.log('run ash transport');
-    var fire_date = $('#fire_date').val();
-    var ini_ash_depth= $('#ini_ash_depth').val();
-    var ash_type = $('#ash_type_selection').val();
-    window.location = '?fire_date=' + fire_date + '&ini_ash_depth=' + ini_ash_depth+ '&ash_type=' + ash_type;
-}
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Model Parameters</h2>
+  </header>
+  <form class="pure-form pure-form-stacked" method="get">
+    <div class="wc-table-wrapper wc-table-wrapper--compact">
+      <table class="wc-table wc-table--dense">
+        <thead>
+          <tr>
+            <th scope="col">Parameter</th>
+            <th scope="col">Value</th>
+            <th scope="col">Units</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Hillslope Area</th>
+            <td>{{ unitizer(sub.area, 'm^2') | safe }}</td>
+            <td>{{ unitizer_units('m^2') | safe }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Fire Date</th>
+            <td>
+              <input type="text" id="fire_date" name="fire_date" value="{{ fire_date }}" aria-label="Fire date (month/day)">
+            </td>
+            <td>month/day</td>
+          </tr>
+          <tr>
+            <th scope="row">Initial Ash Depth</th>
+            <td>
+              <input type="number" id="ini_ash_depth" name="ini_ash_depth" value="{{ ini_ash_depth | round(2) }}"
+                     step="0.01" aria-label="Initial ash depth">
+            </td>
+            <td>mm</td>
+          </tr>
+          <tr>
+            <th scope="row">Ash Type</th>
+            <td>
+              <select id="ash_type_selection" name="ash_type">
+                <option value="black" {% if ash_type == "black" %}selected{% endif %}>
+                  Black ash / Low or moderate burn severity
+                </option>
+                <option value="white" {% if ash_type == "white" %}selected{% endif %}>
+                  White ash / High burn severity
+                </option>
+              </select>
+            </td>
+            <td aria-hidden="true">&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <button type="submit" class="pure-button">
+        Rerun Ash Transport Model
+      </button>
+    </div>
+  </form>
+</section>
 
-</script>
-<h2>Ash Transport Model (Experimental)</h2>
-<form name="ash_parameters">
-<h3>Model Parameters</h3>
-<table class="table table-nonfluid">
-<thead>
-<tr>
-    <th>Parameter</th>
-    <th>Value</th>
-    <th>Units</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-    <td>Hillslope Area</td>
-    <td>{{unitizer(sub.area, 'm^2') | safe }}</td>
-    <td>{{ unitizer_units('m^2') | safe }}</td>
-</tr>
-    <td>Fire Date</td>
-    <td><input type="text" id="fire_date" value="{{ fire_date }}"></td>
-    <td>month/day</td>
-</tr>
-<tr>
-    <td>Initial Ash Depth</td>
-    <td><input type="text" id="ini_ash_depth" value="{{ ini_ash_depth | round(2) }}"></td>
-    <td>mm</td>
-</tr>
-<tr>
-    <td>Ash Type</td>
-    <td>
-        <select class="form-control disable-readonly" id="ash_type_selection">
-           <option value="black" {% if ash_type == "black" %}selected{% endif %}>Black ash / Low or moderate burn severity</option>
-           <option value="white" {% if ash_type == "white" %}selected{% endif %}>White ash / High burn severity</option>
-        </select>
-    </td>
-</tr>
-</tbody>
-</table>
-<div class="form-group">
-    <div class="col-sm-4">
-        <button id="run_ash"
-                class="btn btn-outline my-2 my-sm-0 col-sm-12"
-                type="button"
-                onclick="rerun_ash()">Rerun Ash Transport Model</button>
-    </div>
-    <div class="col-sm-5">
-        <small></small>
-    </div>
-</div>
-</form>
-<h3>Return Period Results</h3>
 {% set measure = "ash_transport (tonne/ha)" %}
 {% set measure_name = "Ash Delivery by Wind/Water" %}
 {% set units = "tonne/ha" %}
@@ -74,8 +74,6 @@ function rerun_ash() {
 {% set measure_name = "Ash Delivery by Water" %}
 {% include("reports/ash/_ash_event_table.htm") %}
 
-
-<h3>Cumulative Annual Results</h3>
 {% set measure = "cum_ash_transport (tonne/ha)" %}
 {% set measure_name = "Ash Delivery by Wind/Water" %}
 {% include("reports/ash/_ash_annual_table.htm") %}
@@ -88,7 +86,14 @@ function rerun_ash() {
 {% set measure_name = "Ash Delivery by Water" %}
 {% include("reports/ash/_ash_annual_table.htm") %}
 
-<h3>Download Output Files</h3>
-<p><a href='{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='_ash/') }}' target='_blank'>Browse Hillslope Ash Transport Output Directory</a></p>
-
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Download Output Files</h2>
+  </header>
+  <p class="wc-text-muted">
+    <a class="pure-button pure-button-link" href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='_ash/') }}" target="_blank" rel="noopener">
+      Browse Hillslope Ash Transport Output Directory
+    </a>
+  </p>
+</section>
 {% endblock %}

@@ -1,344 +1,390 @@
-{% extends "reports/_page_container.htm" %}
+{% extends "reports/_base_report.htm" %}
 {% block report_title %}Ash Contaminant Analysis{% endblock %}
 {% block report_content %}
-<script>
-</script>
-
-{# Dynamically generate the list of all contaminants for the link #}
 {% set all_contaminants = [] %}
 {% for contaminant, _, _, _, _ in ash.contaminants_iter() %}
   {% set _ = all_contaminants.append(contaminant) %}
 {% endfor %}
 
-{% if contaminants | length < all_contaminants | length %}
-<a href="./?contaminants={{ all_contaminants | join(',') }}">Show extended contaminant tables ({{ all_contaminants | join(', ') }})</a>
-{% else %}
-<a href="./?">Show simple contaminant tables ({{ contaminants | join(', ') }})</a>
-<br/>
-<br/>
-{% endif %}
-
-<h2>Ash Contaminant Analysis Results</h2>
-
-<form action="" method="post">
-<h3>Contaminant Concentrations</h3>
-<table class="table table-nonfluid">
-<tbody>
-<tr>
-    <th>Contaminant</th>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
-      {% endif %}
-    {% endfor %}
-</tr>
-
-<tr>
-    <th>Units</th>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <td>{{ units }}</td>
-      {% endif %}
-    {% endfor %}
-</tr>
-<tr>
-    <th>High</th>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <td><input style="width:100px;" type="text" name="high_{{ contaminant }}" value="{{ high }}"></td>
-      {% endif %}
-    {% endfor %}
-</tr>
-<tr>
-    <th>Moderate</th>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <td><input style="width:100px;" type="text" name="mod_{{ contaminant }}" value="{{ mod }}"></td>
-      {% endif %}
-    {% endfor %}
-</tr>
-<tr>
-    <th>Low</th>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <td><input style="width:100px;" type="text" name="low_{{ contaminant }}" value="{{ low }}"></td>
-      {% endif %}
-    {% endfor %}
-</tr>
-</tbody>
-</table>
-<input style="width: 300px" class="form-control" type="submit" value="Save Contaminant Concentrations">
-<div style="height: 2em;">  </div>
-
-<h3>Average Annual Delivery by Burn Severity</h3>
-<p><a onclick="javascript:copytable('annual_by_sev_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a></p>
-<table class="table table-nonfluid" id="annual_by_sev_tbl">
-<tbody>
-<tr>
-    <th>Severity</th>
-    <th>Area</th>
-    <th>Ash Delivery by Water</th>
-{% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-  {% if contaminant in contaminants %}
-    <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
-  {% endif %}
-{% endfor %}
-</tr>
-
-
-<tr>
-    <td> &nbsp;</td>
-    <td>{{ unitizer_units('ha') | safe }} </td>
-    <td>{{ unitizer_units('tonne') | safe }} </td>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <td style="width:100px; text-align: right;" >{{ unitizer_units('kg') | safe }} </td>
-      {% endif %}
-    {% endfor %}
-</tr>
-
-{% set burn_class_summary = ash.burn_class_summary() %}
-{% set high_ash = pw0_stats['3']['cum_water_transport (tonne)'] %}
-{% set mod_ash = pw0_stats['2']['cum_water_transport (tonne)'] %}
-{% set low_ash = pw0_stats['1']['cum_water_transport (tonne)']  %}
-
-<tr>
-    <td>High</td>
-    <td>{{ unitizer(burn_class_summary[3], 'ha') | safe }}</td>
-    <td>{{ unitizer(high_ash, 'kg') | safe }}</td>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        {% if high_ash is not none%}
-            {% if units == 'g/kg' %}
-                <td style="width:100px; text-align: right;" >{{ unitizer(1000 * high_ash * high / 1000, 'kg') | safe }}</td>
-            {% elif units == 'mg/kg' %}
-                <td style="width:100px; text-align: right;" >{{ unitizer(1000 * high_ash * high / 1000000, 'kg') | safe }}</td>
-            {% else %}
-                <td style="width:100px; text-align: right;" >{{ unitizer(1000 * high_ash * high / 1000000000, 'kg') | safe }}</td>
-            {% endif %}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-</tr>
-
-<tr>
-    <td>Moderate</td>
-    <td>{{ unitizer(burn_class_summary[2], 'ha') | safe }}</td>
-    <td>{{ unitizer(mod_ash, 'kg') | safe }}</td>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        {% if mod_ash is not none%}
-            {% if units == 'g/kg' %}
-                <td style="width:100px; text-align: right;" >{{ unitizer(1000 * mod_ash * mod / 1000, 'kg') | safe }}</td>
-            {% elif units == 'mg/kg' %}
-                <td style="width:100px; text-align: right;" >{{ unitizer(1000 * mod_ash * mod / 1000000, 'kg') | safe }}</td>
-            {% else %}
-                <td style="width:100px; text-align: right;" >{{ unitizer(1000 * mod_ash * mod / 1000000000, 'kg') | safe }}</td>
-            {% endif %}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-</tr>
-
-<tr>
-    <td>Low</td>
-    <td>{{ unitizer(burn_class_summary[1], 'ha') | safe }}</td>
-    <td>{{ unitizer(low_ash, 'kg') | safe }}</td>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        {% if low_ash is not none%}
-            {% if units == 'g/kg' %}
-                <td style="width:100px; text-align: right;" >{{ unitizer(1000 * low_ash * low / 1000, 'kg') | safe }}</td>
-            {% elif units == 'mg/kg' %}
-                <td style="width:100px; text-align: right;" >{{ unitizer(1000 * low_ash * low / 1000000, 'kg') | safe }}</td>
-            {% else %}
-                <td style="width:100px; text-align: right;" >{{ unitizer(1000 * low_ash * low / 1000000000, 'kg') | safe }}</td>
-            {% endif %}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-</tr>
-</tbody>
-</table>
-
-<h2>Recurrence Intervals</h2>
-<p>Ash delivery is the sum of low, moderate, and high RI (differ from RI calculated from daily events). This is necessary to treat contaminant concentrations separately for each burn severity.</p>
-<p><a onclick="javascript:copytable('rec_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a></p>
-<table class="table table-nonfluid" id="rec_tbl">
-<tbody>
-<tr>
-    <th>Recurrence Interval</th>
-    <th>Ash Delivery</th>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
-      {% endif %}
-    {% endfor %}
-</tr>
-<tr>
-    <td>years</td>
-    <td style="width:100px; text-align: right;" >{{ unitizer_units('kg') | safe }} </td>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <td style="width:100px; text-align: right;" >
-                {{ unitizer_units('kg') | safe }}
-        </td>
-      {% endif %}
-    {% endfor %}
-</tr>
-{% for rec in rec_intervals | sort_numeric(reverse=True) %}
-    {% set _rec = rec | string %}
-    {% set _delivery_low = rec_results['1']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
-    {% set _delivery_mod = rec_results['2']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
-    {% set _delivery_high = rec_results['3']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
-    {% set _delivery = _delivery_low + _delivery_mod + _delivery_high %}
-    {% if _delivery > 0.0 %}
-    <tr>
-        <td>{{ rec }}</td>
-        <td style="width:100px; text-align: right;" >{{ unitizer(_delivery, 'kg') | safe }} </td>
-        {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-          {% if contaminant in contaminants %}
-            <td style="width:100px; text-align: right;" >
-                {% set contaminant_load_low = _delivery_low * 1000 * low %}
-                {% set contaminant_load_mod = _delivery_mod * 1000 * mod %}
-                {% set contaminant_load_high = _delivery_high * 1000 * high %}
-                {% set contaminant_load = contaminant_load_low + contaminant_load_mod + contaminant_load_high %}
-
-                {% if units == 'g/kg' %}
-                    {{ unitizer(contaminant_load / 1E3, 'kg') | safe }}
-                {% elif units == 'mg/kg' %}
-                    {{ unitizer(contaminant_load / 1E6, 'kg') | safe }}
-                {% else %}
-                    {{ unitizer(contaminant_load / 1E9, 'kg') | safe }}
-                {% endif %}
-            </td>
-          {% endif %}
-        {% endfor %}
-    </tr>
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Ash Contaminant Analysis Results</h2>
+  </header>
+  <p>
+    {% if contaminants | length < all_contaminants | length %}
+      <a class="pure-button pure-button-link" href="./?contaminants={{ all_contaminants | join(',') }}">
+        Show extended contaminant tables ({{ all_contaminants | join(', ') }})
+      </a>
+    {% else %}
+      <a class="pure-button pure-button-link" href="./?">
+        Show simple contaminant tables ({{ contaminants | join(', ') }})
+      </a>
     {% endif %}
-{% endfor %}
-</tbody>
-</table>
+  </p>
+</section>
 
-<h2>Reservoir/Lake Loading Analysis</h2>
+<form action="" method="post" class="pure-form pure-form-stacked wc-stack">
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack">
+      <h2 class="wc-heading__subtitle">Contaminant Concentrations</h2>
+    </header>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense">
+        <thead>
+          <tr>
+            <th scope="col">Contaminant</th>
+            {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+              {% if contaminant in contaminants %}
+                <th scope="col">{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          <tr>
+            <th scope="col">Units</th>
+            {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+              {% if contaminant in contaminants %}
+                <th scope="col">{{ units }}</th>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">High</th>
+            {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+              {% if contaminant in contaminants %}
+                <td>
+                  <input type="number" name="high_{{ contaminant }}" value="{{ high }}" step="any" size="6"
+                         aria-label="{{ contaminant }} high concentration">
+                </td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">Moderate</th>
+            {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+              {% if contaminant in contaminants %}
+                <td>
+                  <input type="number" name="mod_{{ contaminant }}" value="{{ mod }}" step="any" size="6"
+                         aria-label="{{ contaminant }} moderate concentration">
+                </td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">Low</th>
+            {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+              {% if contaminant in contaminants %}
+                <td>
+                  <input type="number" name="low_{{ contaminant }}" value="{{ low }}" step="any" size="6"
+                         aria-label="{{ contaminant }} low concentration">
+                </td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="wc-table-actions">
+      <button type="submit" class="pure-button" name="action" value="save_concentrations">
+        Save Contaminant Concentrations
+      </button>
+    </div>
+  </section>
+
+  {% set burn_class_summary = ash.burn_class_summary() %}
+  {% set high_ash = pw0_stats['3']['cum_water_transport (tonne)'] %}
+  {% set mod_ash = pw0_stats['2']['cum_water_transport (tonne)'] %}
+  {% set low_ash = pw0_stats['1']['cum_water_transport (tonne)'] %}
+
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack">
+      <h2 class="wc-heading__subtitle">Reservoir / Lake Loading Analysis</h2>
+    </header>
     {% set reservoir_current_volume_m3 = ash.reservoir_capacity_m3 * ash.reservoir_storage * 0.01 %}
-
-    <div style="height:38px;" class="unitizer-wrapper">
- <div class="unitizer units-m">
-    <div class="form-group row">
-        <div class="col-sm-2">
-            <label for="input_mcl">Capacity
-            </label>
-        </div>
-        <div class="col-sm-2">
-            <input type="text" name="reservoir_capacity" class="form-control mr-sm-3 disable-readonly" value="{{ ash.reservoir_capacity_m3  }}">
-        </div>
-        <div class="col-sm-2">m<sup>3</sup></div>
-    </div>
- </div>
-
- <div class="unitizer units-ft">
-    <div class="form-group row">
-        <div class="col-sm-2">
-            <label for="input_mcl">Capacity
-        </div>
-        <div class="col-sm-2">
-            <input type="text" name="reservoir_capacity_ft3" class="form-control mr-sm-3 disable-readonly" value="{{ ash.reservoir_capacity_ft3  }}">
-        </div>
-        <div class="col-sm-2">ft<sup>3</sup></div>
-    </div>
- </div>
-    </div>
-
-<div class="form-group row">
-    <div class="col-sm-2">
-        <label for="input_mcl">Current Storage
-        </label>
-    </div>
-    <div class="col-sm-2">
-        <input type="text" name="reservoir_storage" class="form-control mr-sm-3 disable-readonly"
-         value="{{ ash.reservoir_storage | round(2) }}">
-    </div>
-        <div class="col-sm-2">%</div>
-</div>
-
-
-<div class="form-group row">
-    <div class="col-sm-2">
-        <label for="input_mcl">Current Volume
-        </label>
-    </div>
-    <div class="col-sm-2">
-        {{ unitizer(reservoir_current_volume_m3, 'm^3') | safe  }}
-    </div>
-    <div class="col-sm-2">{{ unitizer_units('m^3') | safe  }}</div>
-</div>
-
-<div class="form-group hide-readonly">
-    <input style="width: 300px" class="form-control"  type="submit" value="Save Reservoir Parameters">
-</div>
-
-
-<p><a onclick="javascript:copytable('res_loading_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a></p>
-
-<table class="table table-nonfluid" id="res_loading_tbl">
-<tbody>
-<tr>
-    <th>Recurrence Interval</th>
-    <th>Ash Delivery by Water</th>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
-      {% endif %}
-    {% endfor %}
-</tr>
-<tr>
-    <td>years</td>
-    <td style="width:100px; text-align: right;" >{{ unitizer_units('g/L') | safe }} </td>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-      {% if contaminant in contaminants %}
-        <td style="width:100px; text-align: right;" >{{ unitizer_units(units | replace('kg','L')) | safe }} </td>
-      {% endif %}
-    {% endfor %}
-</tr>
-{% for rec in rec_intervals | sort_numeric(reverse=True) %}
-    {% set _rec = rec | string %}
-    {% set _delivery_low = rec_results['1']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
-    {% set _delivery_mod = rec_results['2']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
-    {% set _delivery_high = rec_results['3']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
-    {% set _delivery = _delivery_low + _delivery_mod + _delivery_high %}
-    {% if _delivery > 0.0 %}
-    <tr>
-        <td>{{ rec }}</td>
-        <td style="width:100px; text-align: right;" >{{ unitizer(_delivery * 1000.0 / reservoir_current_volume_m3, 'g/L') | safe }} </td>
-        {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-          {% if contaminant in contaminants %}
-            <td style="width:100px; text-align: right;" >
-                {% set reservoir_current_volume_l = reservoir_current_volume_m3 * 1000.0 %}
-                {% set contaminant_load_low = _delivery_low * 1000 * low %}
-                {% set contaminant_load_mod = _delivery_mod * 1000 * mod %}
-                {% set contaminant_load_high = _delivery_high * 1000 * high %}
-                {% set contaminant_load = contaminant_load_low + contaminant_load_mod + contaminant_load_high %}
-
-                {% set concentration = contaminant_load / reservoir_current_volume_l %}
-
-                {% if units == 'g/kg' %}
-                    {{ unitizer(concentration, 'g/L') | safe }}
-                {% elif units == 'mg/kg' %}
-                    {{ unitizer(concentration, 'mg/L') | safe }}
-                {% else %}
-                    {{ unitizer(concentration, 'µg/L') | safe }}
-                {% endif %}
-
+    <div class="wc-table-wrapper wc-table-wrapper--compact">
+      <table class="wc-table wc-table--dense">
+        <tbody>
+          <tr>
+            <th scope="row">Capacity (m³)</th>
+            <td>
+              <input type="number" name="reservoir_capacity" value="{{ ash.reservoir_capacity_m3 }}" step="any"
+                     aria-label="Reservoir capacity in cubic meters">
             </td>
+          </tr>
+          <tr>
+            <th scope="row">Capacity (ft³)</th>
+            <td>
+              <input type="number" name="reservoir_capacity_ft3" value="{{ ash.reservoir_capacity_ft3 }}" step="any"
+                     aria-label="Reservoir capacity in cubic feet">
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Current Storage (%)</th>
+            <td>
+              <input type="number" name="reservoir_storage" value="{{ ash.reservoir_storage | round(2) }}"
+                     step="0.01" aria-label="Reservoir storage percentage">
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Current Volume</th>
+            <td>
+              {{ unitizer(reservoir_current_volume_m3, 'm^3') | safe }}
+              <span class="wc-text-muted">{{ unitizer_units('m^3') | safe }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="wc-table-actions">
+      <button type="submit" class="pure-button" name="action" value="save_reservoir">
+        Save Reservoir Parameters
+      </button>
+    </div>
+  </section>
+</form>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Average Annual Delivery by Burn Severity</h2>
+  </header>
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--dense" id="annual_by_sev_tbl">
+      <thead>
+        <tr>
+          <th scope="col">Severity</th>
+          <th scope="col">Area</th>
+          <th scope="col">Ash Delivery by Water</th>
+          {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+            {% if contaminant in contaminants %}
+              <th scope="col">{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col" aria-hidden="true">&nbsp;</th>
+          <th scope="col">{{ unitizer_units('ha') | safe }}</th>
+          <th scope="col">{{ unitizer_units('tonne') | safe }}</th>
+          {% for contaminant, _, _, _, _ in ash.contaminants_iter() %}
+            {% if contaminant in contaminants %}
+              <th scope="col">{{ unitizer_units('kg') | safe }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">High</th>
+          <td>{{ unitizer(burn_class_summary[3], 'ha') | safe }}</td>
+          <td>{{ unitizer(high_ash, 'kg') | safe }}</td>
+          {% for contaminant, high, _, _, units in ash.contaminants_iter() %}
+            {% if contaminant in contaminants %}
+              {% if high_ash is not none %}
+                {% if units == 'g/kg' %}
+                  <td>{{ unitizer(1000 * high_ash * high / 1000, 'kg') | safe }}</td>
+                {% elif units == 'mg/kg' %}
+                  <td>{{ unitizer(1000 * high_ash * high / 1000000, 'kg') | safe }}</td>
+                {% else %}
+                  <td>{{ unitizer(1000 * high_ash * high / 1000000000, 'kg') | safe }}</td>
+                {% endif %}
+              {% else %}
+                <td>&mdash;</td>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="row">Moderate</th>
+          <td>{{ unitizer(burn_class_summary[2], 'ha') | safe }}</td>
+          <td>{{ unitizer(mod_ash, 'kg') | safe }}</td>
+          {% for contaminant, _, mod, _, units in ash.contaminants_iter() %}
+            {% if contaminant in contaminants %}
+              {% if mod_ash is not none %}
+                {% if units == 'g/kg' %}
+                  <td>{{ unitizer(1000 * mod_ash * mod / 1000, 'kg') | safe }}</td>
+                {% elif units == 'mg/kg' %}
+                  <td>{{ unitizer(1000 * mod_ash * mod / 1000000, 'kg') | safe }}</td>
+                {% else %}
+                  <td>{{ unitizer(1000 * mod_ash * mod / 1000000000, 'kg') | safe }}</td>
+                {% endif %}
+              {% else %}
+                <td>&mdash;</td>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="row">Low</th>
+          <td>{{ unitizer(burn_class_summary[1], 'ha') | safe }}</td>
+          <td>{{ unitizer(low_ash, 'kg') | safe }}</td>
+          {% for contaminant, _, _, low, units in ash.contaminants_iter() %}
+            {% if contaminant in contaminants %}
+              {% if low_ash is not none %}
+                {% if units == 'g/kg' %}
+                  <td>{{ unitizer(1000 * low_ash * low / 1000, 'kg') | safe }}</td>
+                {% elif units == 'mg/kg' %}
+                  <td>{{ unitizer(1000 * low_ash * low / 1000000, 'kg') | safe }}</td>
+                {% else %}
+                  <td>{{ unitizer(1000 * low_ash * low / 1000000000, 'kg') | safe }}</td>
+                {% endif %}
+              {% else %}
+                <td>&mdash;</td>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="wc-table-actions">
+    <button type="button" class="pure-button pure-button-link" data-copy-table="annual_by_sev_tbl">
+      Copy table to clipboard
+    </button>
+  </div>
+</section>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Recurrence Intervals</h2>
+  </header>
+  <p class="wc-text-muted">
+    Ash delivery is the sum of low, moderate, and high recurrence interval results so contaminant concentrations remain severity-specific.
+  </p>
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--dense" id="rec_tbl">
+      <thead>
+        <tr>
+          <th scope="col">Recurrence Interval</th>
+          <th scope="col">Ash Delivery</th>
+          {% for contaminant, _, _, _, _ in ash.contaminants_iter() %}
+            {% if contaminant in contaminants %}
+              <th scope="col">{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">years</th>
+          <th scope="col">{{ unitizer_units('kg') | safe }}</th>
+          {% for contaminant, _, _, _, _ in ash.contaminants_iter() %}
+            {% if contaminant in contaminants %}
+              <th scope="col">{{ unitizer_units('kg') | safe }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in rec_intervals | sort_numeric(reverse=True) %}
+          {% set _rec = rec | string %}
+          {% set _delivery_low = rec_results['1']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
+          {% set _delivery_mod = rec_results['2']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
+          {% set _delivery_high = rec_results['3']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
+          {% set _delivery = _delivery_low + _delivery_mod + _delivery_high %}
+          {% if _delivery > 0.0 %}
+            <tr>
+              <td>{{ rec }}</td>
+              <td>{{ unitizer(_delivery, 'kg') | safe }}</td>
+              {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+                {% if contaminant in contaminants %}
+                  {% set _conc = (_delivery_low * 1000 * low) + (_delivery_mod * 1000 * mod) + (_delivery_high * 1000 * high) %}
+                  {% if units == 'g/kg' %}
+                    <td>{{ unitizer(_conc / 1e3, 'kg') | safe }}</td>
+                  {% elif units == 'mg/kg' %}
+                    <td>{{ unitizer(_conc / 1e6, 'kg') | safe }}</td>
+                  {% else %}
+                    <td>{{ unitizer(_conc / 1e9, 'kg') | safe }}</td>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            </tr>
           {% endif %}
         {% endfor %}
-    </tr>
-    {% endif %}
-{% endfor %}
-</tbody>
-</table>
+      </tbody>
+    </table>
+  </div>
+  <div class="wc-table-actions">
+    <button type="button" class="pure-button pure-button-link" data-copy-table="rec_tbl">
+      Copy table to clipboard
+    </button>
+  </div>
+</section>
 
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Reservoir / Lake Concentration</h2>
+  </header>
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--dense" id="res_loading_tbl">
+      <thead>
+        <tr>
+          <th scope="col">Recurrence Interval</th>
+          <th scope="col">Ash Delivery by Water</th>
+          {% for contaminant, _, _, _, _ in ash.contaminants_iter() %}
+            {% if contaminant in contaminants %}
+              <th scope="col">{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">years</th>
+          <th scope="col">{{ unitizer_units('g/L') | safe }}</th>
+          {% for contaminant, _, _, _, units in ash.contaminants_iter() %}
+            {% if contaminant in contaminants %}
+              <th scope="col">{{ unitizer_units(units | replace('kg', 'L')) | safe }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% set reservoir_current_volume_l = (ash.reservoir_capacity_m3 * ash.reservoir_storage * 0.01) * 1000.0 %}
+        {% for rec in rec_intervals | sort_numeric(reverse=True) %}
+          {% set _rec = rec | string %}
+          {% set _delivery_low = rec_results['1']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
+          {% set _delivery_mod = rec_results['2']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
+          {% set _delivery_high = rec_results['3']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
+          {% set _delivery = _delivery_low + _delivery_mod + _delivery_high %}
+          {% if _delivery > 0.0 %}
+            <tr>
+              <td>{{ rec }}</td>
+              <td>{{ unitizer(_delivery * 1000.0 / reservoir_current_volume_m3, 'g/L') | safe }}</td>
+              {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+                {% if contaminant in contaminants %}
+                  {% set contaminant_load_low = _delivery_low * 1000 * low %}
+                  {% set contaminant_load_mod = _delivery_mod * 1000 * mod %}
+                  {% set contaminant_load_high = _delivery_high * 1000 * high %}
+                  {% set contaminant_load = contaminant_load_low + contaminant_load_mod + contaminant_load_high %}
+                  {% set concentration = contaminant_load / reservoir_current_volume_l %}
+                  {% if units == 'g/kg' %}
+                    <td>{{ unitizer(concentration, 'g/L') | safe }}</td>
+                  {% elif units == 'mg/kg' %}
+                    <td>{{ unitizer(concentration, 'mg/L') | safe }}</td>
+                  {% else %}
+                    <td>{{ unitizer(concentration, 'µg/L') | safe }}</td>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="wc-table-actions">
+    <button type="button" class="pure-button pure-button-link" data-copy-table="res_loading_tbl">
+      Copy table to clipboard
+    </button>
+  </div>
+</section>
 
-</form>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-copy-table]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        const tableId = button.getAttribute('data-copy-table');
+        if (tableId && typeof window.copytable === 'function') {
+          window.copytable(tableId);
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

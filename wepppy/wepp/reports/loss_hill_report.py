@@ -26,7 +26,6 @@ class HillSummaryReport(ReportBase):
         self,
         wd: str | Path | Any,
         *,
-        class_fractions: bool | None = None,
         fraction_under: float | None = None,
         **_unused_kwargs,
     ):
@@ -37,12 +36,7 @@ class HillSummaryReport(ReportBase):
             self._wd = Path(wd).expanduser()
         if not self._wd.exists():
             raise FileNotFoundError(self._wd)
-
-        # Arguments retained for backward compatibility with callers that used the
-        # legacy signature. They do not affect the report contents because the
-        # underlying data are driven entirely by the interchange parquet tables.
-        self._include_class_fractions = bool(class_fractions) if class_fractions is not None else False
-        self._fraction_under = fraction_under
+  self._fraction_under = fraction_under
 
         context = self._prepare_context()
         dataframe = self._build_dataframe(context)

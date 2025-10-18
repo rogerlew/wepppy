@@ -6,6 +6,7 @@
 - **Zero-maintenance defaults.** Consolidate colors, type, spacing, and component rules inside the shared foundation stylesheet so individual pages do not need inline CSS. Prefer semantic HTML and Pure utility classes before hand-written overrides.
 - **Consistent framing.** Every screen should share a header, generous breathing room, and predictable spacing rhythm so tool-to-tool navigation feels seamless.
 - **Accessibility as baseline.** Follow WCAG AA contrast, ensure focus outlines remain visible, and keep interactive controls keyboard reachable without JavaScript dependencies.
+- **Consistent, unstyled, unpretentious, simple, maintenable** Keep things simple and use patterns known to render in predictable manner.
 
 ## 2. Technology stack
 | Layer | Purpose | Notes |

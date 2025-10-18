@@ -166,7 +166,7 @@ def gpkg_export(wd: str):
     if _exists(hill_loss_fn):
         hill_df = pd.read_parquet(hill_loss_fn)
         # filter single storm
-        columns_to_drop = [c for c in ('Type', 'Hillslopes', 'Length', 'Landuse', 'WeppID') if c in hill_df.columns]
+        columns_to_drop = [c for c in ('Type', 'Length', 'Landuse', 'WeppID') if c in hill_df.columns]
         columns_to_drop.extend([c for c in hill_df.columns if 'Density' in c])
         hill_df.drop(columns=columns_to_drop, inplace=True)
         hill_df = esri_compatible_colnames(hill_df)
@@ -233,7 +233,7 @@ def gpkg_export(wd: str):
     chn_loss_fn = _join(wd, 'wepp/output/loss_pw0.chn.parquet')
     if _exists(chn_loss_fn):
         chn_df = pd.read_parquet(chn_loss_fn)
-        columns_to_drop = ['Channels and Impoundments', 'Length', 'Area', 'WeppID']
+        columns_to_drop = ['Length', 'Area', 'WeppID']
         columns_to_drop.extend([c for c in chn_df.columns if 'Density' in c])
         columns_to_drop = [c for c in columns_to_drop if c in chn_df.columns]
         chn_df.drop(columns=columns_to_drop, inplace=True)

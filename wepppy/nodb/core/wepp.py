@@ -2553,7 +2553,7 @@ class Wepp(NoDbBase):
 
         d = {}
         for row in report.hill_tbl:
-            wepp_id = _resolve_identifier(row, "wepp_id", "WeppID", "weppId", "Hillslopes")
+            wepp_id = _resolve_identifier(row, "wepp_id")
             topaz_id = translator.top(wepp=wepp_id)
 
             v = row.get(measure, None)
@@ -2609,7 +2609,7 @@ class Wepp(NoDbBase):
 
         d = {}
         for row in report.chn_tbl:
-            chn_enum = _resolve_identifier(row, "chn_enum", "Channels and Impoundments")
+            chn_enum = _resolve_identifier(row, "chn_enum")
             topaz_id = translator.top(chn_enum=chn_enum)
 
             v = row.get(measure, None)

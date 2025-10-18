@@ -1,6 +1,16 @@
-{% if ash.has_watershed_summaries %}
-<p><a href='{{ url_for_run('watar.report_ash', runid=runid, config=config) }}' target='_blank'>View Watershed Ash Transport Model Results</a></p>
-<p><a href='{{ url_for_run('watar.report_contaminant', runid=runid, config=config) }}' target='_blank'>Contaminant and Reservoir Loading Analysis</a></p>
-{% else %}
-<p>Watershed does not have burned hillslopes</p>
-{% endif %}
+<section class="wc-panel wc-stack">
+  {% if ash.has_watershed_summaries %}
+    <p>
+      <a class="pure-button pure-button-link" href="{{ url_for_run('watar.report_ash', runid=runid, config=config) }}" target="_blank" rel="noopener">
+        View Watershed Ash Transport Model Results
+      </a>
+    </p>
+    <p>
+      <a class="pure-button pure-button-link" href="{{ url_for_run('watar.report_contaminant', runid=runid, config=config) }}" target="_blank" rel="noopener">
+        Contaminant and Reservoir Loading Analysis
+      </a>
+    </p>
+  {% else %}
+    <p class="wc-text-muted">Watershed does not have burned hillslopes.</p>
+  {% endif %}
+</section>

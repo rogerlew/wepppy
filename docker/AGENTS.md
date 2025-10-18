@@ -1,3 +1,6 @@
+## Authorship
+**This document and all AGENTS.md documents are maintained by GitHub Copilot / Codex which retain full authorship rights for all AGENTS.md content revisions. Agents can author AGENTS.md document when and where they see fit.**
+
 There are 3 deployments of this docker app.
 
 ## development

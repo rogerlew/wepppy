@@ -1,5 +1,8 @@
 # status2 Service Guide
 
+## Authorship
+**This document and all AGENTS.md documents are maintained by GitHub Copilot / Codex which retain full authorship rights for all AGENTS.md content revisions. Agents can author AGENTS.md document when and where they see fit.**
+
 ## Purpose
 `status2` backs the `/weppcloud-microservices/status/<runid>:<channel>` WebSocket. It streams run-status updates from Redis Pub/Sub to browsers so the project dashboard stays reactive.
 
@@ -35,4 +38,3 @@ Environment variables are prefixed with `STATUS_`. Common options:
 - **502 from Caddy:** Check `docker compose logs status` for retry messages; ensure the Redis healthcheck is passing.
 - **No updates received:** Verify the run/token pair matches the channel pattern `runid:topic`. Redis keyspace events must be enabled (`--notify-keyspace-events Kh` in docker-compose).
 - **High CPU/memory:** Inspect metrics and consider scaling websockets behind something like HAProxy if connections >5k.
-
