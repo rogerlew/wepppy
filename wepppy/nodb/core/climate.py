@@ -52,6 +52,7 @@ import inspect
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
+from typing import Optional, Dict, List, Tuple, Any, Union
 
 from functools import partial
 
@@ -151,7 +152,14 @@ __all__ = [
 ]
 
 
-def lng_lat_to_pixel_center(lng, lat, proj4, transform, width, height):
+def lng_lat_to_pixel_center(
+    lng: float, 
+    lat: float, 
+    proj4: str, 
+    transform: Tuple[float, float, float, float, float, float], 
+    width: int, 
+    height: int
+) -> Tuple[Optional[float], Optional[float]]:
     # Create a projection object for the raster
     raster_proj = Proj(proj4)
 
@@ -180,7 +188,7 @@ def lng_lat_to_pixel_center(lng, lat, proj4, transform, width, height):
         return None, None
 
 
-def daymet_pixel_center(lng, lat):
+def daymet_pixel_center(lng: float, lat: float) -> Tuple[Optional[float], Optional[float]]:
     width, height = (7814, 8075)
     proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs'
     transform = (-4560750.0, 1000.0, 0.0, 4984500.0, 0.0, -1000.0)
@@ -188,7 +196,7 @@ def daymet_pixel_center(lng, lat):
     return lng_lat_to_pixel_center(lng, lat, proj4, transform, width, height)
     
     
-def gridmet_pixel_center(lng, lat):
+def gridmet_pixel_center(lng: float, lat: float) -> Tuple[Optional[float], Optional[float]]:
     width, height = (1386, 585)
     proj4 = '+proj=longlat +datum=WGS84 +no_defs'
     transform = (-124.79299639760372, 0.04166601298087771, 0.0, 49.41685580390774, 0.0, -0.041666014553749395)
@@ -196,7 +204,7 @@ def gridmet_pixel_center(lng, lat):
     return lng_lat_to_pixel_center(lng, lat, proj4, transform, width, height)
 
 
-def prism4k_pixel_center(lng, lat):
+def prism4k_pixel_center(lng: float, lat: float) -> Tuple[Optional[float], Optional[float]]:
     width, height = (1405, 621)
     proj4 = '+proj=longlat +datum=NAD83 +no_defs'
     transform = (-125.02083333333336, 0.0416666666667, 0.0, 49.93749999999975, 0.0, -0.0416666666667)
@@ -204,12 +212,12 @@ def prism4k_pixel_center(lng, lat):
     return lng_lat_to_pixel_center(lng, lat, proj4, transform, width, height)
 
 
-def nexrad_pixel_center(lng, lat):
+def nexrad_pixel_center(lng: float, lat: float) -> Tuple[float, float]:
     return round(lng * 4.0) / 4.0, round(lat * 4.0) / 4.0
 
 
 
-def download_file(url, dst):
+def download_file(url: str, dst: str) -> None:
     response = requests.get(url)
     if response.status_code == 200:
         with open(dst, 'wb') as file:
@@ -218,7 +226,7 @@ def download_file(url, dst):
         raise Exception(f'Error retrieving file from {url}')
 
 
-def breakpoint_file_fix(fn):
+def breakpoint_file_fix(fn: str) -> None:
     with open(fn) as fp:
         lines = fp.readlines()
 
@@ -235,11 +243,11 @@ if NCPU > 24:
     NCPU = 24
 
 class ClimateSummary(object):
-    def __init__(self):
-        self.par_fn = None
-        self.description = None
-        self.climatestation = None
-        self._cli_fn = None
+    def __init__(self) -> None:
+        self.par_fn: Optional[str] = None
+        self.description: Optional[str] = None
+        self.climatestation: Optional[str] = None
+        self._cli_fn: Optional[str] = None
 
 class NoClimateStationSelectedError(Exception):
     """
@@ -248,7 +256,7 @@ class NoClimateStationSelectedError(Exception):
 
     __name__ = 'NoClimateStationSelectedError'
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
 
@@ -259,7 +267,7 @@ class ClimateModeIsUndefinedError(Exception):
 
     __name__ = 'ClimateModeIsUndefinedError'
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
 class ClimateNoDbLockedException(Exception):
@@ -295,7 +303,7 @@ class ClimateMode(IntEnum):
     UserDefinedSingleStorm = 15 # Single Only
 
     @staticmethod
-    def parse(x):
+    def parse(x: Optional[str]) -> 'ClimateMode':
         if x == None:
             return ClimateMode.Undefined
         elif x == 'vanilla':
@@ -336,7 +344,7 @@ class ClimateSpatialMode(IntEnum):
     MultipleInterpolated = 2
 
     @staticmethod
-    def parse(x):
+    def parse(x: Optional[str]) -> 'ClimateSpatialMode':
         if x == None:
             return ClimateSpatialMode.Undefined
         elif x == 'single':
@@ -356,7 +364,7 @@ class ClimatePrecipScalingMode(IntEnum):
     Spatial = 4
 
     @staticmethod
-    def parse(x):
+    def parse(x: str) -> 'ClimatePrecipScalingMode':
         if   x == 'no_scaling':
             return ClimatePrecipScalingMode.NoScaling
         elif x == 'scalar':
@@ -370,14 +378,24 @@ class ClimatePrecipScalingMode(IntEnum):
         raise KeyError
 
 
-def get_prism_p_annual_monthlies(lng, lat, start_year, end_year):
+def get_prism_p_annual_monthlies(lng: float, lat: float, start_year: int, end_year: int) -> List[float]:
     df = prism_retrieve_historical_timeseries(lng, lat, start_year, end_year)
     months = df.index.month
     precip = df['ppt(mm)'].values
     return pyo3_cli_calculate_annual_monthlies(months=months, ppts=precip)
 
 
-def build_observed_prism(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_wind=True):
+def build_observed_prism(
+    cligen: 'Cligen', 
+    lng: float, 
+    lat: float, 
+    start_year: int, 
+    end_year: int, 
+    cli_dir: str, 
+    prn_fn: str, 
+    cli_fn: str, 
+    gridmet_wind: bool = True
+) -> None:
     df = prism_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=gridmet_wind)
     df_to_prn(df, _join(cli_dir, prn_fn), 'ppt(mm)', 'tmax(degc)', 'tmin(degc)')
     
@@ -408,7 +426,7 @@ def build_observed_prism(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn
     climate.write(cli_path)
 
 
-def get_daymet_p_annual_monthlies(lng, lat, start_year, end_year):
+def get_daymet_p_annual_monthlies(lng: float, lat: float, start_year: int, end_year: int) -> List[float]:
     from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
 
     df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=False)
@@ -417,7 +435,17 @@ def get_daymet_p_annual_monthlies(lng, lat, start_year, end_year):
     return pyo3_cli_calculate_annual_monthlies(months=months, ppts=precip)
 
 
-def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_wind=True):
+def build_observed_daymet(
+    cligen: 'Cligen', 
+    lng: float, 
+    lat: float, 
+    start_year: int, 
+    end_year: int, 
+    cli_dir: str, 
+    prn_fn: str, 
+    cli_fn: str, 
+    gridmet_wind: bool = True
+) -> None:
     from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
 
     df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=gridmet_wind)
@@ -452,7 +480,19 @@ def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_f
     climate.write(cli_path)
 
 
-def build_observed_daymet_interpolated(cligen, topaz_id, lng, lat, start_year, end_year, cli_dir, cli_fn, prn_fn, wind_vs=None, wind_dir=None):
+def build_observed_daymet_interpolated(
+    cligen: 'Cligen', 
+    topaz_id: str, 
+    lng: float, 
+    lat: float, 
+    start_year: int, 
+    end_year: int, 
+    cli_dir: str, 
+    cli_fn: str, 
+    prn_fn: str, 
+    wind_vs: Optional[Any] = None, 
+    wind_dir: Optional[Any] = None
+) -> str:
     # uses .prn files generated by wepppy.climates.daymet.daily_interpolated
 
     _parquet_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.parquet'
@@ -486,7 +526,18 @@ def build_observed_daymet_interpolated(cligen, topaz_id, lng, lat, start_year, e
     return topaz_id
 
 
-def build_observed_snotel(cligen, lng, lat, snotel_id, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_supplement=True):
+def build_observed_snotel(
+    cligen: 'Cligen', 
+    lng: float, 
+    lat: float, 
+    snotel_id: str, 
+    start_year: int, 
+    end_year: int, 
+    cli_dir: str, 
+    prn_fn: str, 
+    cli_fn: str, 
+    gridmet_supplement: bool = True
+) -> None:
     import pandas as pd
     snotel_data_dir = '/workdir/wepppy/wepppy/climates/snotel/processed'
 
@@ -537,14 +588,23 @@ def build_observed_snotel(cligen, lng, lat, snotel_id, start_year, end_year, cli
     climate.write(cli_path)
 
 
-def get_gridmet_p_annual_monthlies(lng, lat, start_year, end_year):
+def get_gridmet_p_annual_monthlies(lng: float, lat: float, start_year: int, end_year: int) -> List[float]:
     df = gridmet_retrieve_historical_precip(lng, lat, start_year, end_year)
     months = df.index.month
     precip = df['pr(mm/day)'].values
     return pyo3_cli_calculate_annual_monthlies(months=months, ppts=precip)
 
 
-def build_observed_gridmet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn):
+def build_observed_gridmet(
+    cligen: 'Cligen', 
+    lng: float, 
+    lat: float, 
+    start_year: int, 
+    end_year: int, 
+    cli_dir: str, 
+    prn_fn: str, 
+    cli_fn: str
+) -> None:
     df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
     df.to_parquet(_join(cli_dir, f'gridmet_{start_year}-{end_year}.parquet'))
     df_to_prn(df, _join(cli_dir, prn_fn), 'pr(mm/day)', 'tmmx(degc)', 'tmmn(degc)')
@@ -573,7 +633,17 @@ def build_observed_gridmet(cligen, lng, lat, start_year, end_year, cli_dir, prn_
     climate.write(cli_path)
 
 
-def build_observed_gridmet_interpolated(cligen, topaz_id, lng, lat, start_year, end_year, cli_dir, cli_fn, prn_fn):
+def build_observed_gridmet_interpolated(
+    cligen: 'Cligen', 
+    topaz_id: str, 
+    lng: float, 
+    lat: float, 
+    start_year: int, 
+    end_year: int, 
+    cli_dir: str, 
+    cli_fn: str, 
+    prn_fn: str
+) -> str:
     # uses .prn files generated by wepppy.climates.daymet.daily_interpolated
 
     _parquet_fn = f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.parquet'
@@ -596,7 +666,16 @@ def build_observed_gridmet_interpolated(cligen, topaz_id, lng, lat, start_year, 
     return topaz_id
 
 
-def build_future(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn):
+def build_future(
+    cligen: 'Cligen', 
+    lng: float, 
+    lat: float, 
+    start_year: int, 
+    end_year: int, 
+    cli_dir: str, 
+    prn_fn: str, 
+    cli_fn: str
+) -> None:
     df = retrieve_rcp85_timeseries(lng, lat,
                                    datetime(start_year, 1, 1),
                                    datetime(end_year, 12, 31))
@@ -611,7 +690,7 @@ def build_future(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn
     climate.write(cli_path)
 
 
-def get_monthlies(fn, lng, lat):
+def get_monthlies(fn: str, lng: float, lat: float) -> List[float]:
     cmd = ['gdallocationinfo', '-wgs84', '-valonly', fn, str(lng), str(lat)]
     p = Popen(cmd, stdout=PIPE)
     p.wait()
@@ -688,7 +767,13 @@ class Climate(NoDbBase):
 
     filename = 'climate.nodb'
     
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+    def __init__(
+        self, 
+        wd: str, 
+        cfg_fn: str, 
+        run_group: Optional[str] = None, 
+        group_name: Optional[str] = None
+    ) -> None:
         super(Climate, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
@@ -793,82 +878,82 @@ class Climate(NoDbBase):
             self._use_gridmet_wind_when_applicable = self.config_get_bool('climate', 'use_gridmet_wind_when_applicable')
 
     @property
-    def daymet_last_available_year(self):
+    def daymet_last_available_year(self) -> int:
         return 2023
 
     @property
-    def use_gridmet_wind_when_applicable(self):
+    def use_gridmet_wind_when_applicable(self) -> bool:
         return getattr(self, '_use_gridmet_wind_when_applicable', True)
     
     @use_gridmet_wind_when_applicable.setter
     @nodb_setter
-    def use_gridmet_wind_when_applicable(self, value: bool):
+    def use_gridmet_wind_when_applicable(self, value: bool) -> None:
         self._use_gridmet_wind_when_applicable = value
 
     @property
-    def precip_scale_reference(self):
+    def precip_scale_reference(self) -> Optional[str]:
         return getattr(self, '_precip_scale_reference', None)
     
     @precip_scale_reference.setter
     @nodb_setter
-    def precip_scale_reference(self, value):
+    def precip_scale_reference(self, value: Optional[str]) -> None:
         assert value is None or value in ['prism', 'daymet', 'gridmet']
         self._precip_scale_reference = value
 
     @property
-    def precip_monthly_scale_factors(self):
+    def precip_monthly_scale_factors(self) -> List[float]:
         return getattr(self, '_precip_monthly_scale_factors', [1 for i in range(12)])
     
     @precip_monthly_scale_factors.setter
     @nodb_setter
-    def precip_monthly_scale_factors(self, value):
+    def precip_monthly_scale_factors(self, value: Optional[List[float]]) -> None:
         assert value is None or len(value) == 12
         self._precip_monthly_scale_factors = value
 
     @property
-    def precip_scale_factor(self):
+    def precip_scale_factor(self) -> Optional[float]:
         return getattr(self, '_precip_scale_factor', None)
 
     @precip_scale_factor.setter
     @nodb_setter
-    def precip_scale_factor(self, value):
+    def precip_scale_factor(self, value: Optional[float]) -> None:
         self._precip_scale_factor = value
 
     @property
-    def precip_scale_factor_map(self):
+    def precip_scale_factor_map(self) -> Optional[str]:
         return getattr(self, '_precip_scale_factor_map', None)
 
     @property
-    def gridmet_precip_scale_factor(self):
+    def gridmet_precip_scale_factor(self) -> Optional[float]:
         return getattr(self, '_gridmet_precip_scale_factor', None)
 
     @property
-    def gridmet_precip_scale_factor_map(self):
+    def gridmet_precip_scale_factor_map(self) -> Optional[str]:
         return getattr(self, '_gridmet_precip_scale_factor_map', None)
 
     @property
-    def daymet_precip_scale_factor(self):
+    def daymet_precip_scale_factor(self) -> Optional[float]:
         return getattr(self, '_daymet_precip_scale_factor', None)
 
     @property
-    def daymet_precip_scale_factor_map(self):
+    def daymet_precip_scale_factor_map(self) -> Optional[str]:
         return getattr(self, '_daymet_precip_scale_factor_map', None)
 
     @property
-    def cligen_db(self):
+    def cligen_db(self) -> str:
         return getattr(self, '_cligen_db', self.config_get_str('climate', 'cligen_db'))
 
     @property
-    def cli_path(self):
+    def cli_path(self) -> str:
         return _join(self.cli_dir, self.cli_fn)
 
     @property
-    def is_breakpoint(self):
+    def is_breakpoint(self) -> bool:
         cli = ClimateFile(self.cli_path)
         return cli.breakpoint
 
     @property
-    def observed_clis(self):
+    def observed_clis(self) -> Optional[List[str]]:
         wc = getattr(self, '_observed_clis_wc', None)
         if wc is None:
             return None
@@ -876,7 +961,7 @@ class Climate(NoDbBase):
         return glob(_join(wc, '*.cli'))
 
     @property
-    def future_clis(self):
+    def future_clis(self) -> Optional[List[str]]:
         wc = getattr(self, '_future_clis_wc', None)
         if wc is None:
             return None
@@ -884,93 +969,93 @@ class Climate(NoDbBase):
         return glob(_join(wc, '*.cli'))
 
     @property
-    def years(self):
+    def years(self) -> int:
         return self._input_years
 
     @property
-    def observed_start_year(self):
+    def observed_start_year(self) -> Union[str, int]:
         return self._observed_start_year
 
     @property
-    def observed_end_year(self):
+    def observed_end_year(self) -> Union[str, int]:
         return self._observed_end_year
 
     @property
-    def future_start_year(self):
+    def future_start_year(self) -> Union[str, int]:
         return self._future_start_year
 
     @property
-    def future_end_year(self):
+    def future_end_year(self) -> Union[str, int]:
         return self._future_end_year
 
     @property
-    def ss_storm_date(self):
+    def ss_storm_date(self) -> str:
         return self._ss_storm_date
 
     @property
-    def ss_design_storm_amount_inches(self):
+    def ss_design_storm_amount_inches(self) -> float:
         return self._ss_design_storm_amount_inches
 
     @property
-    def ss_duration_of_storm_in_hours(self):
+    def ss_duration_of_storm_in_hours(self) -> float:
         return self._ss_duration_of_storm_in_hours
 
     @property
-    def ss_time_to_peak_intensity_pct(self):
+    def ss_time_to_peak_intensity_pct(self) -> float:
         return self._ss_time_to_peak_intensity_pct
 
     @property
-    def ss_max_intensity_inches_per_hour(self):
+    def ss_max_intensity_inches_per_hour(self) -> float:
         return self._ss_max_intensity_inches_per_hour
 
     @property
-    def ss_batch_storms(self):
+    def ss_batch_storms(self) -> Optional[List[Dict[str, Any]]]:
         return getattr(self, '_ss_batch_storms', None)
 
     @property
-    def ss_batch(self):
+    def ss_batch(self) -> str:
         return getattr(self, '_ss_batch', '')
 
 
     @ss_batch.setter
     @nodb_setter
-    def ss_batch(self, value):
+    def ss_batch(self, value: str) -> None:
         self._ss_batch = value
 
     @property
-    def climate_daily_temp_ds(self):
+    def climate_daily_temp_ds(self) -> str:
         return getattr(self, '_climate_daily_temp_ds', 'null')
 
     @climate_daily_temp_ds.setter
     @nodb_setter
-    def climate_daily_temp_ds(self, value):
+    def climate_daily_temp_ds(self, value: str) -> None:
         self._climate_daily_temp_ds = value
 
     @property
-    def daymet_version(self):
+    def daymet_version(self) -> str:
         return getattr(self, '_daymet_version', 'v4')
 
 
     @daymet_version.setter
     @nodb_setter
-    def daymet_version(self, value):
+    def daymet_version(self, value: str) -> None:
         self._daymet_version = value
 
     #
     # climatestation_mode
     #
     @property
-    def climatestation_mode(self):
+    def climatestation_mode(self) -> ClimateStationMode:
         return self._climatestation_mode
 
     @property
-    def has_climatestation_mode(self):
+    def has_climatestation_mode(self) -> bool:
         return self._climatestation_mode \
                is not ClimateStationMode.Undefined
 
     @climatestation_mode.setter
     @nodb_setter
-    def climatestation_mode(self, value):
+    def climatestation_mode(self, value: Union[ClimateStationMode, int]) -> None:
         if isinstance(value, ClimateStationMode):
             self._climatestation_mode = value
         elif isinstance(value, int):
@@ -980,11 +1065,11 @@ class Climate(NoDbBase):
 
     # noinspection PyPep8Naming
     @property
-    def onLoad_refreshStationSelection(self):
+    def onLoad_refreshStationSelection(self) -> str:
         return json.dumps(self.climatestation_mode is not ClimateStationMode.Undefined)
 
     @property
-    def year0(self):
+    def year0(self) -> Optional[int]:
         try:
             cli_fn = self.cli_fn
 
@@ -1000,7 +1085,7 @@ class Climate(NoDbBase):
             return None
 
     @property
-    def has_observed(self):
+    def has_observed(self) -> Optional[bool]:
         try:
             cli_fn = self.cli_fn
 
@@ -1019,16 +1104,16 @@ class Climate(NoDbBase):
     # climatestation
     #
     @property
-    def climatestation(self):
+    def climatestation(self) -> Optional[str]:
         return self._climatestation
 
     @climatestation.setter
     @nodb_setter
-    def climatestation(self, value):
+    def climatestation(self, value: Optional[str]) -> None:
         self._climatestation = value
 
     @property
-    def climatestation_meta(self):
+    def climatestation_meta(self) -> Any:
         climatestation = self.climatestation
 
         if climatestation is None:
@@ -1041,7 +1126,7 @@ class Climate(NoDbBase):
         return station_meta
 
     @property
-    def climatestation_par_contents(self):
+    def climatestation_par_contents(self) -> str:
         par_fn = self.climatestation_meta.parpath
         with open(par_fn) as fp:
             return fp.read()
@@ -1050,12 +1135,12 @@ class Climate(NoDbBase):
     # climate_mode
     #
     @property
-    def climate_mode(self):
+    def climate_mode(self) -> ClimateMode:
         return self._climate_mode
 
     @climate_mode.setter
     @nodb_setter
-    def climate_mode(self, value):
+    def climate_mode(self, value: Union[ClimateMode, int, str]) -> None:
         if isinstance(value, ClimateMode):
             self._climate_mode = value
         elif isint(value):
@@ -1064,7 +1149,7 @@ class Climate(NoDbBase):
             self._climate_mode = ClimateMode.parse(value)
 
     @property
-    def is_single_storm(self):
+    def is_single_storm(self) -> bool:
         return self._climate_mode in (
     ClimateMode.SingleStorm,
     ClimateMode.SingleStormBatch,
@@ -1075,7 +1160,7 @@ class Climate(NoDbBase):
     # precip_scaling_mode
     #
     @property
-    def precip_scaling_mode(self):
+    def precip_scaling_mode(self) -> ClimatePrecipScalingMode:
         if not hasattr(self, '_precip_scaling_mode'):
             return ClimatePrecipScalingMode.NoScaling
         
@@ -1083,7 +1168,7 @@ class Climate(NoDbBase):
 
     @precip_scaling_mode.setter
     @nodb_setter
-    def precip_scaling_mode(self, value):
+    def precip_scaling_mode(self, value: Union[ClimatePrecipScalingMode, int, str]) -> None:
         if isinstance(value, ClimatePrecipScalingMode):
             self._precip_scaling_mode = value
         elif isinstance(value, int):
@@ -1095,7 +1180,7 @@ class Climate(NoDbBase):
     # precip_scaling_reference
     #
     @property
-    def precip_scaling_reference(self):
+    def precip_scaling_reference(self) -> Optional[str]:
         if not hasattr(self, '_precip_scaling_reference'):
             return None
         
@@ -1103,19 +1188,19 @@ class Climate(NoDbBase):
 
     @precip_scaling_reference.setter
     @nodb_setter
-    def precip_scaling_reference(self, value):
+    def precip_scaling_reference(self, value: Optional[str]) -> None:
         self._precip_scaling_reference = value
 
     #
     # climate_spatial mode
     #
     @property
-    def climate_spatialmode(self):
+    def climate_spatialmode(self) -> ClimateSpatialMode:
         return self._climate_spatialmode
 
     @climate_spatialmode.setter
     @nodb_setter
-    def climate_spatialmode(self, value):
+    def climate_spatialmode(self, value: Union[ClimateSpatialMode, int, str]) -> None:
         if isinstance(value, ClimateSpatialMode):
             self._climate_spatialmode = value
         elif isinstance(value, int):
@@ -1126,7 +1211,7 @@ class Climate(NoDbBase):
     #
     # station search
     #
-    def find_closest_stations(self, num_stations=10):
+    def find_closest_stations(self, num_stations: int = 10) -> Optional[List[Dict[str, Any]]]:
 
         if self.islocked() and self._closest_stations is not None:
             return self.closest_stations
@@ -1143,7 +1228,7 @@ class Climate(NoDbBase):
             return self.closest_stations
         
     @property
-    def closest_stations(self):
+    def closest_stations(self) -> Optional[List[Dict[str, Any]]]:
         """
         returns heuristic_stations as jsonifyable dicts
         """
@@ -1152,7 +1237,7 @@ class Climate(NoDbBase):
 
         return [s.as_dict() for s in self._closest_stations]
 
-    def find_heuristic_stations(self, num_stations=10):
+    def find_heuristic_stations(self, num_stations: int = 10) -> Optional[List[Dict[str, Any]]]:
 
         if self.islocked() and self._heuristic_stations is not None:
             return self.heuristic_stations
@@ -1172,7 +1257,7 @@ class Climate(NoDbBase):
             self._climatestation = results[0].id
             return self.heuristic_stations
 
-    def find_eu_heuristic_stations(self, num_stations=10):
+    def find_eu_heuristic_stations(self, num_stations: int = 10) -> Optional[List[Dict[str, Any]]]:
         with self.locked():
             watershed = self.watershed_instance
             lng, lat = watershed.centroid
@@ -1188,7 +1273,7 @@ class Climate(NoDbBase):
             self._climatestation = results[0].id
             return self.heuristic_stations
 
-    def find_au_heuristic_stations(self, num_stations=None):
+    def find_au_heuristic_stations(self, num_stations: Optional[int] = None) -> Optional[List[Dict[str, Any]]]:
         with self.locked():
             watershed = self.watershed_instance
             lng, lat = watershed.centroid
@@ -1205,7 +1290,7 @@ class Climate(NoDbBase):
             return self.heuristic_stations
         
     @property
-    def heuristic_stations(self):
+    def heuristic_stations(self) -> Optional[List[Dict[str, Any]]]:
         """
         returns heuristic_stations as dicts
         """
@@ -1215,32 +1300,32 @@ class Climate(NoDbBase):
         return [s.as_dict() for s in self._heuristic_stations]
 
     @property
-    def orig_cli_fn(self):
+    def orig_cli_fn(self) -> Optional[str]:
         return self._orig_cli_fn
 
     @orig_cli_fn.setter
     @nodb_setter
-    def orig_cli_fn(self, value):
+    def orig_cli_fn(self, value: Optional[str]) -> None:
         self._orig_cli_fn = value
 
     @property
-    def input_years(self):
+    def input_years(self) -> int:
         return self._input_years
 
     @input_years.setter
     @nodb_setter
-    def input_years(self, value):
+    def input_years(self, value: int) -> None:
         self._input_years = int(value)
 
     @property
-    def has_station(self):
+    def has_station(self) -> bool:
         return self.climatestation is not None
 
     #
     # has_climate
     #
     @property
-    def has_climate(self):
+    def has_climate(self) -> bool:
         if self.climate_spatialmode == ClimateSpatialMode.Multiple:
             return self.sub_par_fns is not None and \
                    self.sub_cli_fns is not None and \
@@ -1248,7 +1333,7 @@ class Climate(NoDbBase):
         else:
             return self.cli_fn is not None
 
-    def parse_inputs(self, kwds):
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         with self.locked():
             climate_mode = kwds['climate_mode']
             climate_mode = ClimateMode(int(climate_mode))
@@ -1325,7 +1410,7 @@ class Climate(NoDbBase):
         # mode 4: single storm
         self.set_single_storm_pars(**kwds)
 
-    def set_observed_pars(self, **kwds):
+    def set_observed_pars(self, **kwds: Any) -> None:
         with self.locked():
             start_year = kwds['start_year']
             end_year = kwds['end_year']
@@ -1352,7 +1437,7 @@ class Climate(NoDbBase):
             self._observed_start_year = start_year
             self._observed_end_year = end_year
 
-    def set_future_pars(self,  **kwds):
+    def set_future_pars(self,  **kwds: Any) -> None:
         with self.locked():
             start_year = kwds['start_year']
             end_year = kwds['end_year']
@@ -1379,7 +1464,7 @@ class Climate(NoDbBase):
             self._future_start_year = start_year
             self._future_end_year = end_year
 
-    def set_single_storm_pars(self, **kwds):
+    def set_single_storm_pars(self, **kwds: Any) -> None:
         with self.locked():
             ss_storm_date = kwds['ss_storm_date']
             ss_design_storm_amount_inches = \
@@ -1452,7 +1537,7 @@ class Climate(NoDbBase):
                 ss_time_to_peak_intensity_pct
             self._ss_batch = ss_batch
 
-    def build(self, verbose=False, attrs=None):
+    def build(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         self.logger.info('Build Climates')
         self.logger.info('  assert not self.islocked()')
         assert not self.islocked()
@@ -1694,7 +1779,7 @@ class Climate(NoDbBase):
         self.logger.info('Climate Build Successful.')
         self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
         
-    def _scale_precip(self, scale_factor):
+    def _scale_precip(self, scale_factor: float) -> None:
         """
         scalar scaling of precipitation
         """
@@ -1721,7 +1806,7 @@ class Climate(NoDbBase):
                     
                 self.sub_cli_fns = sub_cli_fns
 
-    def _scale_precip_monthlies(self, monthly_scale_factors, scale_func):
+    def _scale_precip_monthlies(self, monthly_scale_factors: List[float], scale_func: Any) -> None:
         """
         monthly scaling of precipitation
         """
@@ -1749,7 +1834,7 @@ class Climate(NoDbBase):
                     
                 self.sub_cli_fns = sub_cli_fns
 
-    def _spatial_scale_precip(self, scale_factor_map):
+    def _spatial_scale_precip(self, scale_factor_map: str) -> None:
         self.logger.info(f'  running _spatial_scale_precip with {scale_factor_map} ')
 
         with self.locked():
@@ -1803,7 +1888,7 @@ class Climate(NoDbBase):
 
                 self.sub_cli_fns = sub_cli_fns
 
-    def _build_climate_depnexrad(self, verbose=False, attrs=None):
+    def _build_climate_depnexrad(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         self.logger.info('  running _build_climate_depnexrad... ')
 
         with self.locked():
@@ -1912,7 +1997,7 @@ class Climate(NoDbBase):
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
 
-    def _build_climate_prism(self, verbose=False, attrs=None):
+    def _build_climate_prism(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         self.logger.info('  running _build_climate_prism... ')
 
         with self.locked():
@@ -2046,7 +2131,7 @@ class Climate(NoDbBase):
 
             update_catalog_entry(wd, 'climate')
 
-    def _post_defined_climate(self, verbose=False, attrs=None):
+    def _post_defined_climate(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         with self.locked():
             self.set_attrs(attrs)
 
@@ -2075,7 +2160,7 @@ class Climate(NoDbBase):
                 cli = ClimateFile(_join(cli_dir, cli_fn))
                 self.monthlies = cli.calc_monthlies()
 
-    def _build_climate_mod(self, mod_function, verbose=False, attrs=None):
+    def _build_climate_mod(self, mod_function: Any, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         self.logger.info('  running _build_climate_mod{}... \n'.format(mod_function.__name__))
 
         with self.locked():
@@ -2158,7 +2243,7 @@ class Climate(NoDbBase):
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
 
-    def set_user_defined_cli(self, cli_fn, verbose=False):
+    def set_user_defined_cli(self, cli_fn: str, verbose: bool = False) -> None:
         with self.locked():
             self.logger.info('  running set_userdefined_cli... ')
             self._orig_cli_fn = _join(self.cli_dir, cli_fn)
@@ -2182,7 +2267,7 @@ class Climate(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def _build_climate_vanilla(self, verbose=False, attrs=None):
+    def _build_climate_vanilla(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         with self.locked():
             self.set_attrs(attrs)
 
@@ -2206,7 +2291,7 @@ class Climate(NoDbBase):
             self.par_fn = par_fn
             self.cli_fn = cli_fn
 
-    def _build_climate_observed_daymet(self, verbose=False, attrs=None):
+    def _build_climate_observed_daymet(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_daymet')
@@ -2240,7 +2325,7 @@ class Climate(NoDbBase):
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
-    def _build_climate_observed_gridmet_multiple(self, verbose=False, attrs=None):
+    def _build_climate_observed_gridmet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         from wepppy.climates.gridmet.client import (
             GridMetVariable,
             retrieve_nc,
@@ -2472,7 +2557,7 @@ class Climate(NoDbBase):
             self.sub_par_fns = sub_par_fns
             self.sub_cli_fns = sub_cli_fns
 
-    def _build_climate_observed_daymet_multiple(self, verbose=False, attrs=None):
+    def _build_climate_observed_daymet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         from wepppy.climates.daymet.daily_interpolation import identify_pixel_coords
         from wepppy.climates.daymet.daymet_singlelocation_client import interpolate_daily_timeseries
 
@@ -2574,7 +2659,7 @@ class Climate(NoDbBase):
             self.sub_par_fns = sub_par_fns
             self.sub_cli_fns = sub_cli_fns
 
-    def _build_climate_observed_gridmet(self, verbose=False, attrs=None):
+    def _build_climate_observed_gridmet(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_gridmet')
@@ -2605,7 +2690,7 @@ class Climate(NoDbBase):
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
-    def _build_climate_future(self, verbose=False, attrs=None):
+    def _build_climate_future(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_future')
@@ -2636,7 +2721,7 @@ class Climate(NoDbBase):
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
-    def _build_climate_single_storm_batch(self, verbose=False, attrs=None):
+    def _build_climate_single_storm_batch(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         """
         single storm
         """
@@ -2693,7 +2778,7 @@ class Climate(NoDbBase):
             self.par_fn = par_fn
             self.cli_fn = cli_fn
 
-    def _build_climate_single_storm(self, verbose=False, attrs=None):
+    def _build_climate_single_storm(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         """
         single storm
         """
@@ -2723,7 +2808,7 @@ class Climate(NoDbBase):
             self.par_fn = par_fn
             self.cli_fn = cli_fn
 
-    def sub_summary(self, topaz_id):
+    def sub_summary(self, topaz_id: str) -> Optional[Dict[str, str]]:
         if not self.has_climate:
             return None
 
@@ -2740,7 +2825,7 @@ class Climate(NoDbBase):
 
         return dict(cli_fn=cli_fn, par_fn=par_fn)
 
-    def chn_summary(self, topaz_id):
+    def chn_summary(self, topaz_id: str) -> Optional[Dict[str, str]]:
         if not is_channel(topaz_id):
             raise ValueError('topaz_id is not channel')
 
@@ -2750,7 +2835,7 @@ class Climate(NoDbBase):
         return dict(cli_fn=self.cli_fn, par_fn=self.par_fn)
 
     # gotcha: using __getitem__ breaks jinja's attribute lookup, so...
-    def _(self, wepp_id):
+    def _(self, wepp_id: int) -> Dict[str, str]:
         if not self.has_climate:
             raise IndexError
 
