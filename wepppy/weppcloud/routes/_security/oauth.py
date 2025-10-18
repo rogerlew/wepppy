@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta, timezone
+import secrets
 from typing import Any, Dict, Optional, Tuple
+
+import re
 
 from flask import flash, session
 from flask_security import current_user
-from flask_security.utils import login_user
+from flask_security.utils import login_user, hash_password
 from flask_wtf.csrf import validate_csrf
 from typing import TYPE_CHECKING
 from wtforms.validators import ValidationError
@@ -39,6 +42,7 @@ security_oauth_bp = Blueprint("security_oauth", __name__)
 
 _SESSION_PKCE_KEY = "oauth_pkce_verifier"
 _SESSION_NEXT_KEY = "oauth_next"
+_ORCID_ID_PATTERN = re.compile(r"^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9Xx]$")
 
 
 def _get_provider_settings(provider: str) -> Optional[Dict[str, Any]]:
@@ -107,10 +111,21 @@ def _build_redirect_uri(provider: str, provider_settings: Dict) -> str:
     )
 
 
-def _extract_name_from_profile(profile: Dict) -> Tuple[Optional[str], Optional[str]]:
+def _extract_name_from_profile(profile: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
     given_name = profile.get("given_name")
     family_name = profile.get("family_name")
     display_name = profile.get("name") or profile.get("display_name")
+
+    # ORCID nests names under 'name' with sub-keys like 'given-names'
+    if isinstance(profile.get("name"), dict):
+        name_block = profile["name"]
+        given_name = given_name or name_block.get("given-names", {}).get("value")
+        family_name = family_name or name_block.get("family-name", {}).get("value")
+        display_name = (
+            display_name
+            or name_block.get("credit-name", {}).get("value")
+            or name_block.get("name", {}).get("value")
+        )
 
     if given_name or family_name:
         return given_name, family_name
@@ -139,6 +154,34 @@ def _fetch_primary_verified_email(client, provider_settings: Dict, profile: Dict
 
     provider = provider_settings.get("name", "").lower()
     emails_endpoint = provider_settings.get("emails_url")
+
+    logger.debug(
+        "OAuth email extraction seed provider=%s email=%s verified=%s",
+        provider,
+        email,
+        verified,
+    )
+
+    if provider == "orcid":
+        emails_section = profile.get("emails")
+        if isinstance(emails_section, dict):
+            records = emails_section.get("email")
+            if isinstance(records, list):
+                for record in records:
+                    if record.get("primary") and record.get("verified"):
+                        return _normalize_email(record.get("email")), True
+                for record in records:
+                    if record.get("verified"):
+                        return _normalize_email(record.get("email")), True
+                for record in records:
+                    if record.get("email"):
+                        return _normalize_email(record.get("email")), bool(record.get("verified"))
+
+        logger.debug(
+            "OAuth email extraction orcid fallback profile keys=%s",
+            list(profile.keys()) if isinstance(profile, dict) else type(profile),
+        )
+
     if provider == "github" or emails_endpoint:
         endpoint = emails_endpoint or "user/emails"
         try:
@@ -169,14 +212,26 @@ def _fetch_primary_verified_email(client, provider_settings: Dict, profile: Dict
             if record.get("verified"):
                 return _normalize_email(record.get("email")), True
 
-    return _normalize_email(email), bool(email and verified)
+    normalized = _normalize_email(email)
+    return normalized, bool(normalized and verified)
 
 
-def _extract_provider_uid(profile: Dict[str, Any]) -> Optional[str]:
+def _extract_provider_uid(profile: Dict[str, Any], token: Optional[Dict[str, Any]] = None) -> Optional[str]:
     for key in ("sub", "id", "user_id", "uid"):
         value = profile.get(key)
         if value:
             return str(value)
+    if token:
+        for key in ("orcid", "id", "sub"):
+            if token.get(key):
+                return str(token[key])
+    if "orcid" in profile:
+        return str(profile["orcid"])
+    identifier = profile.get("orcid-identifier")
+    if isinstance(identifier, dict):
+        path = identifier.get("path")
+        if path:
+            return str(path)
     return None
 
 
@@ -224,12 +279,14 @@ def _link_identity(
     if not user:
         first_name, last_name = _extract_name_from_profile(profile)
         confirmed_at = utc_now()
+        temp_password = hash_password(secrets.token_urlsafe(32))
         user = datastore.create_user(
             email=email,
             first_name=first_name,
             last_name=last_name,
             confirmed_at=confirmed_at.replace(tzinfo=None),
             active=True,
+            password=temp_password,
         )
         datastore.commit()
 
@@ -316,7 +373,10 @@ def callback(provider: str):
 
     try:
         userinfo_endpoint = provider_settings.get("userinfo_url") or "user"
-        response = client.get(userinfo_endpoint)
+        headers = {}
+        if provider.lower() == "orcid":
+            headers["Accept"] = "application/json"
+        response = client.get(userinfo_endpoint, headers=headers)
     except Exception as exc:
         logger.warning("OAuth userinfo request failed for provider=%s: %s", provider, exc)
         flash("Login failed while retrieving profile information.", "error")
@@ -338,12 +398,28 @@ def callback(provider: str):
         flash("Unexpected response from the identity provider.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
 
-    provider_uid = _extract_provider_uid(profile)
+    provider_uid = _extract_provider_uid(profile, token)
     if not provider_uid:
         flash("The identity provider did not return a stable identifier.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
 
+    provider_lower = provider.lower()
     email, verified = _fetch_primary_verified_email(client, provider_settings, profile)
+    if provider_lower == "orcid":
+        normalized_uid = provider_uid
+        if isinstance(normalized_uid, str) and normalized_uid.startswith("https://orcid.org/"):
+            normalized_uid = normalized_uid.split("/", 3)[-1]
+        normalized_uid = (normalized_uid or "").strip()
+        if not _ORCID_ID_PATTERN.match(normalized_uid):
+            normalized_uid = normalized_uid.replace("/", "-")
+        if not normalized_uid:
+            normalized_uid = secrets.token_hex(8)
+        synthetic_email = _normalize_email(f"{normalized_uid}@orcid.null")
+        if not email:
+            email = synthetic_email
+        verified = True
+    email = _normalize_email(email)
+
     if not email:
         flash(
             "We could not determine your verified email address from the identity provider.",
@@ -351,7 +427,7 @@ def callback(provider: str):
         )
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
 
-    if not verified:
+    if not verified and provider_lower != "orcid":
         flash("Please verify your email address with the identity provider before continuing.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
 

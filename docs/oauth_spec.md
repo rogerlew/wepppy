@@ -41,6 +41,12 @@
 - Register Authlib using Google’s OpenID configuration (`server_metadata_url=https://accounts.google.com/.well-known/openid-configuration`) so JWKS discovery and token verification happen automatically.
 - Surface a Google button beside GitHub in the login template; match Google’s brand colors/iconography so users recognize the flow at a glance.
 
+### Phase 3: ORCID OAuth Rollout
+- Create separate ORCID developer applications (production + homelab) and capture `ORCID_OAUTH_CLIENTID`, `ORCID_OAUTH_SECRET_KEY`, and `ORCID_OAUTH_CALLBACK_URL` for each environment. The configuration layer also honors `OAUTH_ORCID_CLIENT_ID`/`OAUTH_ORCID_CLIENT_SECRET` overrides.
+- ORCID requires the `/authenticate` scope to fetch the ORCID iD. Add the userinfo request header `Accept: application/json` so public profile data is returned in JSON.
+- Parse email addresses from `emails.email[]`, preferring verified + primary entries. If ORCID does not expose an email, synthesize one as `<orcid-id>@orcid.null` so accounts can still be created. The ORCID iD remains the canonical identity and the synthetic address is only used to satisfy uniqueness constraints.
+- Render a branded “Sign in with ORCID” button (green circle icon) alongside GitHub/Google. Disabled buttons remain visible so operators can spot misconfigurations quickly.
+
 ### Data Model Changes
 Create a new table `oauth_account` with the following columns and constraints:
 - `id` (PK)
@@ -195,3 +201,13 @@ Add a uniqueness constraint on `(provider, provider_uid)` to prevent duplicate l
 - Provide user communication explaining new login options and how email matching works.
 - Maintain a fallback support process for users whose provider email differs from their WEPPcloud email (support can update the canonical email or link accounts manually).
 - Review legal/privacy requirements for storing provider tokens and user profile data, updating privacy policies accordingly.
+
+
+## Registration
+- **Github** Settings -> Developer Settings https://github.com/settings/developers
+- **Google** hopes and prays https://console.cloud.google.com/auth/overview?project=dev-weppcloud
+- **ORCID** Developer Tools https://orcid.org/developer-tools
+
+### env test 
+- wctl exec weppcloud env | grep -i OAUTH_GOOGLE
+- wctl exec weppcloud env | grep -i ORCID_OAUTH

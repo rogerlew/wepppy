@@ -145,6 +145,41 @@ def _load_oauth_providers(
         ),
     }
 
+    orcid_client_id = _get_env_any(
+        ["OAUTH_ORCID_CLIENT_ID", "ORCID_OAUTH_CLIENT_ID", "ORCID_OAUTH_CLIENTID"]
+    )
+    orcid_client_secret = _get_env_any(
+        ["OAUTH_ORCID_CLIENT_SECRET", "ORCID_OAUTH_CLIENT_SECRET", "ORCID_OAUTH_SECRET_KEY"]
+    )
+    orcid_redirect_override = _get_env_any(
+        [
+            "OAUTH_ORCID_REDIRECT_URI",
+            "ORCID_OAUTH_REDIRECT_URI",
+            "ORCID_OAUTH_CALLBACK_URL",
+        ]
+    )
+    orcid_redirect_uri = _build_oauth_redirect_uri(
+        redirect_scheme, redirect_host, site_prefix, "orcid", orcid_redirect_override
+    )
+
+    providers["orcid"] = {
+        "name": "ORCID",
+        "client_id": orcid_client_id,
+        "client_secret": orcid_client_secret,
+        "redirect_uri": orcid_redirect_uri,
+        "authorize_url": "https://orcid.org/oauth/authorize",
+        "token_url": "https://orcid.org/oauth/token",
+        "userinfo_url": "https://pub.orcid.org/v3.0/~/person",
+        "scope": ["/authenticate"],
+        "client_kwargs": {
+            "token_endpoint_auth_method": "client_secret_post",
+            "headers": {"Accept": "application/json"},
+        },
+        "enabled": bool(
+            orcid_client_id and orcid_client_secret and orcid_redirect_uri
+        ),
+    }
+
     return providers
 
 
