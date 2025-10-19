@@ -28,11 +28,11 @@
       <section class="wc-control__inputs">
         {{ caller() }}
       </section>
-      <aside class="wc-control__sidebar">
+      <section class="wc-control__panels">
         {{ status_panel() }}
         {{ summary_panel() }}
         {{ stacktrace_panel() }}
-      </aside>
+      </section>
     </div>
   </form>
 </div>
@@ -75,9 +75,40 @@
 </fieldset>
 {%- endmacro %}
 
-{% macro text_field(field_id, label, value='', help=None, type='text', placeholder=None, attrs=None) -%}
-{% set attrs = attrs or {} %}
-<div class="wc-field">
+{% macro collapsible_card(title, description=None, expanded=False) -%}
+<details class="wc-collapse"{% if expanded %} open{% endif %}>
+  <summary class="wc-collapse__summary">
+    <span class="wc-collapse__title">{{ title }}</span>
+    <span class="wc-collapse__icon" aria-hidden="true"></span>
+  </summary>
+  {% if description %}
+  <p class="wc-collapse__description">{{ description }}</p>
+  {% endif %}
+  <div class="wc-collapse__content">
+    {{ caller() }}
+  </div>
+</details>
+{%- endmacro %}
+
+{% macro text_field(field_id, label, value='', help=None, type='text', placeholder=None, attrs=None, error=None) -%}
+{% set attrs = attrs.copy() if attrs else {} %}
+{% set help_id = field_id ~ "_help" %}
+{% set error_id = field_id ~ "_error" %}
+{% set describedby = [] %}
+{% if attrs.get('aria-describedby') %}
+  {% set describedby = describedby + [attrs.pop('aria-describedby')] %}
+{% endif %}
+{% if help %}
+  {% set describedby = describedby + [help_id] %}
+{% endif %}
+{% if error %}
+  {% set describedby = describedby + [error_id] %}
+{% endif %}
+{% set field_classes = ['wc-field'] %}
+{% if error %}
+  {% set field_classes = field_classes + ['wc-field--error'] %}
+{% endif %}
+<div class="{{ ' '.join(field_classes) }}">
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <input class="wc-field__control"
          id="{{ field_id }}"
@@ -85,22 +116,45 @@
          type="{{ type }}"
          value="{{ value }}"
          {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+         {% if error %}aria-invalid="true"{% endif %}
+         {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
          {% for attr_key, attr_val in attrs.items() %}
            {{ attr_key }}="{{ attr_val }}"
          {% endfor %}>
   {% if help %}
-  <p class="wc-field__help">{{ help }}</p>
+  <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
+  {% endif %}
+  {% if error %}
+  <p id="{{ error_id }}" class="wc-field__message wc-field__message--error" role="alert">{{ error }}</p>
   {% endif %}
 </div>
 {%- endmacro %}
 
-{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None) -%}
-{% set attrs = attrs or {} %}
-<div class="wc-field">
+{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None, error=None) -%}
+{% set attrs = attrs.copy() if attrs else {} %}
+{% set help_id = field_id ~ "_help" %}
+{% set error_id = field_id ~ "_error" %}
+{% set describedby = [] %}
+{% if attrs.get('aria-describedby') %}
+  {% set describedby = describedby + [attrs.pop('aria-describedby')] %}
+{% endif %}
+{% if help %}
+  {% set describedby = describedby + [help_id] %}
+{% endif %}
+{% if error %}
+  {% set describedby = describedby + [error_id] %}
+{% endif %}
+{% set field_classes = ['wc-field'] %}
+{% if error %}
+  {% set field_classes = field_classes + ['wc-field--error'] %}
+{% endif %}
+<div class="{{ ' '.join(field_classes) }}">
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <select class="wc-field__control"
           id="{{ field_id }}"
           name="{{ field_id }}"
+          {% if error %}aria-invalid="true"{% endif %}
+          {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
           {% for attr_key, attr_val in attrs.items() %}
             {{ attr_key }}="{{ attr_val }}"
           {% endfor %}>
@@ -109,7 +163,351 @@
     {% endfor %}
   </select>
   {% if help %}
-  <p class="wc-field__help">{{ help }}</p>
+  <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
+  {% endif %}
+  {% if error %}
+  <p id="{{ error_id }}" class="wc-field__message wc-field__message--error" role="alert">{{ error }}</p>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro header_text_field(field_id, label, value='', help=None, placeholder=None, attrs=None) -%}
+{% set attrs = attrs or {} %}
+<label class="wc-run-header__field">
+  <span>{{ label }}</span>
+  <input class="wc-run-header__input"
+         id="{{ field_id }}"
+         name="{{ field_id }}"
+         type="text"
+         value="{{ value }}"
+         {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+         {% for attr_key, attr_val in attrs.items() %}
+           {{ attr_key }}="{{ attr_val }}"
+         {% endfor %}>
+  {% if help %}
+  <small class="wc-field__help">{{ help }}</small>
+  {% endif %}
+</label>
+{%- endmacro %}
+
+{% macro numeric_field(field_id, label, value='', unit_label=None, help=None, precision=None, min=None, max=None, required=False, nullable=False, attrs=None, error=None) -%}
+{% set attrs = attrs.copy() if attrs else {} %}
+{% set help_id = field_id ~ "_help" %}
+{% set error_id = field_id ~ "_error" %}
+{% set describedby = [] %}
+{% if attrs.get('aria-describedby') %}
+  {% set describedby = describedby + [attrs.pop('aria-describedby')] %}
+{% endif %}
+{% if help %}
+  {% set describedby = describedby + [help_id] %}
+{% endif %}
+{% if error %}
+  {% set describedby = describedby + [error_id] %}
+{% endif %}
+{% set field_classes = ['wc-field'] %}
+{% if error %}
+  {% set field_classes = field_classes + ['wc-field--error'] %}
+{% endif %}
+<div class="{{ ' '.join(field_classes) }}">
+  <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
+  <div class="wc-field__input-row">
+    <input class="wc-field__control wc-field__control--number"
+           id="{{ field_id }}"
+           name="{{ field_id }}"
+           type="number"
+           value="{{ value }}"
+           {% if precision is not none %}step="{{ precision }}"{% endif %}
+           {% if precision is not none %}data-precision="{{ precision }}"{% endif %}
+           {% if min is not none %}min="{{ min }}"{% endif %}
+           {% if max is not none %}max="{{ max }}"{% endif %}
+           {% if required %}required{% endif %}
+           {% if nullable %}data-nullable="true"{% endif %}
+           {% if error %}aria-invalid="true"{% endif %}
+           {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
+           {% for attr_key, attr_val in attrs.items() %}
+             {{ attr_key }}="{{ attr_val }}"
+           {% endfor %}>
+    {% if unit_label %}
+    <span class="wc-field__unit" data-unit-label>{{ unit_label }}</span>
+    {% endif %}
+  </div>
+  {% if help %}
+  <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
+  {% endif %}
+  {% if error %}
+  <p id="{{ error_id }}" class="wc-field__message wc-field__message--error" role="alert">{{ error }}</p>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None) -%}
+{% set attrs = attrs.copy() if attrs else {} %}
+{% set help_id = field_id ~ "_help" %}
+{% set error_id = field_id ~ "_error" %}
+{% set describedby = [] %}
+{% if attrs.get('aria-describedby') %}
+  {% set describedby = describedby + [attrs.pop('aria-describedby')] %}
+{% endif %}
+{% if help %}
+  {% set describedby = describedby + [help_id] %}
+{% endif %}
+{% if error %}
+  {% set describedby = describedby + [error_id] %}
+{% endif %}
+{% set field_classes = ['wc-field'] %}
+{% if error %}
+  {% set field_classes = field_classes + ['wc-field--error'] %}
+{% endif %}
+<div class="{{ ' '.join(field_classes) }}">
+  <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
+  <input class="wc-field__control"
+         id="{{ field_id }}"
+         name="{{ field_id }}"
+         type="file"
+         {% if accept %}accept="{{ accept }}"{% endif %}
+         {% if error %}aria-invalid="true"{% endif %}
+         {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
+         {% for attr_key, attr_val in attrs.items() %}
+           {{ attr_key }}="{{ attr_val }}"
+         {% endfor %}>
+  {% if current_filename %}
+  <p class="wc-field__meta">Current file: <code>{{ current_filename }}</code></p>
+  {% endif %}
+  {% if help %}
+  <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
+  {% endif %}
+  {% if error %}
+  <p id="{{ error_id }}" class="wc-field__message wc-field__message--error" role="alert">{{ error }}</p>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro radio_group(name, label=None, layout='vertical', options=None, help=None, mode_help=None, attrs=None, error=None) -%}
+{% set options = options or [] %}
+{% set attrs = attrs.copy() if attrs else {} %}
+{% set help_id = name ~ "_help" %}
+{% set error_id = name ~ "_error" %}
+{% set label_id = name ~ "_label" %}
+{% set describedby = [] %}
+{% if attrs.get('aria-describedby') %}
+  {% set describedby = describedby + [attrs.pop('aria-describedby')] %}
+{% endif %}
+{% if help %}
+  {% set describedby = describedby + [help_id] %}
+{% endif %}
+{% if error %}
+  {% set describedby = describedby + [error_id] %}
+{% endif %}
+{% set field_classes = ['wc-field'] %}
+{% if error %}
+  {% set field_classes = field_classes + ['wc-field--error'] %}
+{% endif %}
+<div class="{{ ' '.join(field_classes) }}">
+  {% if label %}
+  <span class="wc-field__label" id="{{ label_id }}">{{ label }}</span>
+  {% endif %}
+  <div class="wc-choice-group wc-choice-group--{{ layout }}"
+       role="radiogroup"
+       {% if label %}aria-labelledby="{{ label_id }}"{% endif %}
+       {% if error %}aria-invalid="true"{% endif %}
+       {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
+       {% for attr_key, attr_val in attrs.items() %}
+         {{ attr_key }}="{{ attr_val }}"
+       {% endfor %}>
+    {% for option in options %}
+    {% set option_attrs = option.get('attrs', {}).copy() if option.get('attrs') else {} %}
+    {% set option_id = option.get('id', name ~ '_' ~ loop.index) %}
+    <label class="wc-choice{% if option.disabled %} is-disabled{% endif %}">
+      <input type="radio"
+             id="{{ option_id }}"
+             name="{{ name }}"
+             value="{{ option.value }}"
+             {% if option.selected %}checked{% endif %}
+             {% if option.disabled %}disabled aria-disabled="true"{% endif %}
+             data-choice-value="{{ option.value }}"
+             {% for attr_key, attr_val in option_attrs.items() %}
+               {{ attr_key }}="{{ attr_val }}"
+             {% endfor %}>
+      <span class="wc-choice__body">
+        <span class="wc-choice__label">{{ option.label }}</span>
+        {% if option.description %}
+        <span class="wc-choice__description">{{ option.description|safe }}</span>
+        {% endif %}
+      </span>
+    </label>
+    {% endfor %}
+  </div>
+  {% if help %}
+  <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
+  {% endif %}
+  {% if error %}
+  <p id="{{ error_id }}" class="wc-field__message wc-field__message--error" role="alert">{{ error }}</p>
+  {% endif %}
+  {% if mode_help %}
+  <div class="wc-choice-help" data-choice-help-root="{{ name }}" aria-live="polite">
+    {% for value, content in mode_help.items() %}
+    <div class="wc-choice-help__panel" data-choice-help-target="{{ value }}">
+      {{ content|safe }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro checkbox_field(field_id, label, checked=False, help=None, attrs=None, error=None) -%}
+{% set attrs = attrs.copy() if attrs else {} %}
+{% set help_id = field_id ~ "_help" %}
+{% set error_id = field_id ~ "_error" %}
+{% set describedby = [] %}
+{% if attrs.get('aria-describedby') %}
+  {% set describedby = describedby + [attrs.pop('aria-describedby')] %}
+{% endif %}
+{% if help %}
+  {% set describedby = describedby + [help_id] %}
+{% endif %}
+{% if error %}
+  {% set describedby = describedby + [error_id] %}
+{% endif %}
+{% set field_classes = ['wc-field', 'wc-field--checkbox'] %}
+{% if error %}
+  {% set field_classes = field_classes + ['wc-field--error'] %}
+{% endif %}
+<div class="{{ ' '.join(field_classes) }}">
+  <label class="wc-choice wc-choice--checkbox">
+    <input type="checkbox"
+           id="{{ field_id }}"
+           name="{{ field_id }}"
+           {% if checked %}checked{% endif %}
+           {% if error %}aria-invalid="true"{% endif %}
+           {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
+           {% for attr_key, attr_val in attrs.items() %}
+             {{ attr_key }}="{{ attr_val }}"
+           {% endfor %}>
+    <span class="wc-choice__body">
+      <span class="wc-choice__label">{{ label }}</span>
+    </span>
+  </label>
+  {% if help %}
+  <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
+  {% endif %}
+  {% if error %}
+  <p id="{{ error_id }}" class="wc-field__message wc-field__message--error" role="alert">{{ error }}</p>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro textarea_field(field_id, label, value='', rows=4, help=None, placeholder=None, attrs=None, error=None) -%}
+{% set attrs = attrs.copy() if attrs else {} %}
+{% set help_id = field_id ~ "_help" %}
+{% set error_id = field_id ~ "_error" %}
+{% set describedby = [] %}
+{% if attrs.get('aria-describedby') %}
+  {% set describedby = describedby + [attrs.pop('aria-describedby')] %}
+{% endif %}
+{% if help %}
+  {% set describedby = describedby + [help_id] %}
+{% endif %}
+{% if error %}
+  {% set describedby = describedby + [error_id] %}
+{% endif %}
+{% set field_classes = ['wc-field'] %}
+{% if error %}
+  {% set field_classes = field_classes + ['wc-field--error'] %}
+{% endif %}
+<div class="{{ ' '.join(field_classes) }}">
+  <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
+  <textarea class="wc-field__control"
+            id="{{ field_id }}"
+            name="{{ field_id }}"
+            rows="{{ rows }}"
+            {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+            {% if error %}aria-invalid="true"{% endif %}
+            {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
+            {% for attr_key, attr_val in attrs.items() %}
+              {{ attr_key }}="{{ attr_val }}"
+            {% endfor %}>{{ value }}</textarea>
+  {% if help %}
+  <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
+  {% endif %}
+  {% if error %}
+  <p id="{{ error_id }}" class="wc-field__message wc-field__message--error" role="alert">{{ error }}</p>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro text_display(label=None, content='', variant=None, actions=None) -%}
+{% set actions = actions or [] %}
+<div class="wc-field wc-field--display">
+  {% if label %}
+  <span class="wc-field__label">{{ label }}</span>
+  {% endif %}
+  <div class="wc-text-display{% if variant %} wc-text-display--{{ variant }}{% endif %}">
+    {{ content|safe }}
+  </div>
+  {% if actions %}
+  <div class="wc-text-display__actions">
+    {% for action in actions %}
+    {{ action|safe }}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro table_block(columns, rows, caption=None, empty_message="No records available.") -%}
+<div class="wc-table-wrapper">
+  <table class="wc-table">
+    {% if caption %}
+    <caption>{{ caption }}</caption>
+    {% endif %}
+    <thead>
+      <tr>
+        {% for column in columns %}
+        <th scope="col">{{ column.label }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% if rows %}
+        {% for row in rows %}
+        <tr>
+          {% for column in columns %}
+          <td>
+            {% if row is mapping %}
+              {% set cell = row.get(column.key) %}
+            {% else %}
+              {% set cell = attribute(row, column.key) %}
+            {% endif %}
+            {{ cell|default("&mdash;", true)|safe }}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="{{ columns|length }}">
+            <em>{{ empty_message }}</em>
+          </td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{%- endmacro %}
+
+{% macro dynamic_slot(slot_id, help=None, attrs=None) -%}
+{% set attrs = attrs or {} %}
+{% set help_id = slot_id ~ "_help" %}
+<div class="wc-field wc-field--dynamic">
+  <div id="{{ slot_id }}"
+       class="wc-dynamic-slot"
+       {% if help %}aria-describedby="{{ help_id }}"{% endif %}
+       {% for attr_key, attr_val in attrs.items() %}
+         {{ attr_key }}="{{ attr_val }}"
+       {% endfor %}></div>
+  {% if help %}
+  <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
   {% endif %}
 </div>
 {%- endmacro %}

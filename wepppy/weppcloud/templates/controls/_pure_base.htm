@@ -23,8 +23,8 @@
       <section class="wc-control__inputs">
         {% block control_inputs %}{% endblock %}
       </section>
-      <aside class="wc-control__sidebar">
-        {% block control_sidebar %}
+      {% block control_panels %}
+      <section class="wc-control__panels">
         <section class="wc-control__panel">
           <h3 class="wc-control__panel-title">Status</h3>
           <div id="rq_job" class="wc-control__job"></div>
@@ -41,8 +41,8 @@
           <h3 class="wc-control__panel-title">Details</h3>
           <div id="stacktrace" class="wc-control__stacktrace"></div>
         </section>
-        {% endblock %}
-      </aside>
+      </section>
+      {% endblock %}
     </div>
     {% endblock %}
   </form>

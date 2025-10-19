@@ -1,3 +1,4 @@
+from markupsafe import Markup
 from flask import Blueprint, render_template
 
 
@@ -22,8 +23,46 @@ def component_gallery() -> str:
         ("thinned", "Thinning Treatment"),
         ("mulch", "Mulching Treatment"),
     ]
+    radio_options = [
+        {
+            "label": "Baseline",
+            "value": "baseline",
+            "description": "Use observed climate and current vegetation.",
+            "selected": True,
+        },
+        {
+            "label": "Mitigation",
+            "value": "mitigation",
+            "description": "Blend mulching and road hardening strategies.",
+        },
+        {
+            "label": "Scenario Workspace",
+            "value": "workspace",
+            "description": "Switch to an offline draft using experimental inputs.",
+            "disabled": True,
+        },
+    ]
+    radio_mode_help = {
+        "baseline": Markup(
+            "<p>Ideal for quick analyses where the run aligns with current observations.</p>"
+        ),
+        "mitigation": Markup(
+            "<p>Highlights mitigation levers; pairs well with the unitizer for real-time conversions.</p>"
+        ),
+        "workspace": Markup(
+            "<p>Currently gated to editors while we stabilise the experimental workflow.</p>"
+        ),
+    }
+    summary_rows = [
+        {"parameter": "Slope Length", "value": "112", "units": "m"},
+        {"parameter": "Average Gradient", "value": "18", "units": "%"},
+        {"parameter": "Soil Texture", "value": "Sandy Loam", "units": "-"},
+    ]
     return render_template(
         "ui_showcase/component_gallery.htm",
         sample=sample,
         select_options=select_options,
+        radio_options=radio_options,
+        radio_mode_help=radio_mode_help,
+        summary_rows=summary_rows,
     )

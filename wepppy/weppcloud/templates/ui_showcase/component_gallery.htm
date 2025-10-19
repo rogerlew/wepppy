@@ -12,6 +12,35 @@
     </p>
   </header>
 
+  <section class="wc-stack">
+    <h2>Run Header Fields</h2>
+    <p class="wc-text-muted">
+      Header macros match the live run header; use them when a control needs inline editing for name/scenario.
+    </p>
+    <div class="wc-run-header__fields">
+      {{ ui.header_text_field(
+        "input_name",
+        "Project name",
+        value=sample.project_name,
+        placeholder="Name",
+        attrs={
+          "oninput": "Project.getInstance().setNameFromInput()",
+          "onblur": "Project.getInstance().commitNameFromInput()"
+        }
+      ) }}
+      {{ ui.header_text_field(
+        "input_scenario",
+        "Scenario",
+        value=sample.scenario,
+        placeholder="Scenario",
+        attrs={
+          "oninput": "Project.getInstance().setScenarioFromInput()",
+          "onblur": "Project.getInstance().commitScenarioFromInput()"
+        }
+      ) }}
+    </div>
+  </section>
+
   {% call ui.control_shell(
         form_id="ui_showcase_form",
         title="Sample Control",
@@ -21,19 +50,103 @@
       ) %}
     {{ ui.text_field("project_name", "Project Name", value=sample.project_name, help="Editable text input example.") }}
 
-    {{ ui.text_field("scenario", "Scenario Label", value=sample.scenario, help="Debounced inputs can hook into Project JS.") }}
+    {{ ui.text_field("scenario", "Scenario Label", value=sample.scenario, help="Debounced inputs can hook into Project JS.", error="Scenario label must be unique per project.") }}
 
-    {{ ui.text_field("location", "Location", value=sample.location, help="Demonstrates standard field layout.") }}
+    {{ ui.numeric_field(
+         "precipitation_mm",
+         "Average Annual Precipitation",
+         value="812",
+         unit_label="mm",
+         precision="0.1",
+         min="0",
+         help="Unit-aware numeric field; precision feeds the unitizer hook.",
+         error="Provide a value between 0 and 5000 mm."
+       ) }}
 
-    {{ ui.select_field("treatment", "Treatment Mode", select_options, selected="baseline", help="Select macro with helper text.") }}
+    {{ ui.text_field("location", "Location", value=sample.location, help="Standard text field layout remains responsive.") }}
+
+    {{ ui.radio_group(
+         "treatment_mode",
+         label="Treatment Mode",
+         layout="horizontal",
+         options=radio_options,
+         help="Toggle between production-ready and experimental scenarios.",
+         mode_help=radio_mode_help,
+         attrs={"data-choice-group": "treatment"},
+         error="Select a treatment strategy before launching the run."
+       ) }}
+
+    {{ ui.select_field("treatment", "Treatment Mode (Legacy Select)", select_options, selected="baseline", help="Select macro with helper text.") }}
+
+    {{ ui.checkbox_field(
+         "readonly_flag",
+         "Readonly mode",
+         checked=True,
+         help="When enabled, backend writes are skipped and inputs display as disabled."
+       ) }}
+
+    {{ ui.file_upload(
+         "watershed_upload",
+         "Watershed GeoJSON",
+         accept=".json,.geojson",
+         current_filename="south-fork.geojson",
+         help="Uploads replace the current watershed shapefile once validated.",
+         error="The last upload failed checksum validation."
+       ) }}
+
+    {{ ui.textarea_field(
+         "notes",
+         "Notes",
+         rows=4,
+         placeholder="Document expected behavior, constraints, and open questions.",
+         help="Textarea macro mirrors the text field spacing while supporting helper copy.",
+         error="Add at least one sentence so collaborators have context."
+       ) }}
 
     {% call ui.fieldset("Notes", "Use fieldsets for longer free-form content.") %}
-      <div class="wc-field">
-        <label class="wc-field__label" for="notes">Additional Notes</label>
-        <textarea id="notes" name="notes" class="wc-field__control" rows="4"
-                  placeholder="Document expected behavior, constraints, and open questions."></textarea>
-        <p class="wc-field__help">Textarea shares the same helper styling.</p>
-      </div>
+      {% set summary_columns = [
+        {"key": "parameter", "label": "Parameter"},
+        {"key": "value", "label": "Value"},
+        {"key": "units", "label": "Units"}
+      ] %}
+      {{ ui.table_block(summary_columns, summary_rows, caption="Watershed summary metrics") }}
+
+      {{ ui.text_display(
+           label="Hydrology Summary",
+           content="<p>Peak runoff decreased by <strong>12%</strong> under the mitigation scenario.</p>",
+           variant="info",
+           actions=[
+             '<button type="button" class="pure-button">Download CSV</button>',
+             '<button type="button" class="pure-button pure-button-secondary">Copy Link</button>'
+           ]
+         ) }}
     {% endcall %}
+
+    {% call ui.collapsible_card(
+         "Advanced Options",
+         description="Optional tuning controls stay tucked away until power users need them."
+       ) %}
+      {{ ui.numeric_field(
+           "precipitation_threshold",
+           "Precipitation Threshold",
+           value="2.5",
+           unit_label="mm/hr",
+           precision="0.1",
+           help="Minimum hourly precipitation to trigger runoff calculations."
+         ) }}
+      {{ ui.text_field(
+           "comment_token",
+           "Comment Tag",
+           value="ADV-1001",
+           help="Optional marker inserted into run logs for traceability."
+         ) }}
+      {{ ui.checkbox_field(
+           "enable_telemetry",
+           "Enable verbose telemetry",
+           help="Writes extended metrics to Redis for downstream analytics."
+         ) }}
+    {% endcall %}
+
+    {{ ui.dynamic_slot("map_slot", help="Controllers inject interactive maps or charts into slots so cards stay balanced.", attrs={"data-slot": "map-preview"}) }}
   {% endcall %}
 {% endblock %}
