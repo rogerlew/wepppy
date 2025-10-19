@@ -1,24 +1,32 @@
-import json
-import shutil
-from glob import glob
+from __future__ import annotations
 
-import socket
-import os
-from os.path import join as _join
-from os.path import split as _split
-from os.path import exists as _exists
+"""
+RQ tasks that manage project-level preparation, execution, and archival flows.
+
+Each helper wraps a discrete step in the WEPP project lifecycle - from DEM
+ingest and landuse building through run forking and archive restoration -
+emitting status updates for the front-end while coordinating NoDb controllers.
+"""
+
 import inspect
-import time
+import json
+import os
 import queue
+import shutil
+import socket
 import stat
 import threading
-from queue import Queue
-from functools import wraps
-from subprocess import Popen, PIPE, call
+import time
 import zipfile
-from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from glob import glob
+from pathlib import Path
+from subprocess import PIPE, Popen, call
+from typing import Optional, Sequence, TextIO
+
+from os.path import exists as _exists
+from os.path import join as _join
+from os.path import split as _split
 
 import redis
 from rq import Queue, get_current_job
@@ -49,16 +57,30 @@ _thisdir = os.path.dirname(__file__)
 
 load_dotenv(_join(_thisdir, '.env'))
 
-REDIS_HOST = redis_host()
-RQ_DB = int(RedisDB.RQ)
+REDIS_HOST: str = redis_host()
+RQ_DB: int = int(RedisDB.RQ)
 
-TIMEOUT = 43_200
-DEFAULT_ZOOM = 12
+TIMEOUT: int = 43_200
+DEFAULT_ZOOM: int = 12
 
 
-def test_run_rq(runid: str):
-    """
-    assumes a runid has been assigned and an empty wd has been created.
+def test_run_rq(runid: str) -> tuple[str, ...]:
+    """Execute the full preparation pipeline inline as a smoke-test.
+
+    This helper clones a base project into a `-latest` working directory,
+    clears locks, and runs through DEM/landuse/climate prep before invoking
+    the WEPP runners. It mirrors the asynchronous orchestration but keeps the
+    work local so developers can validate pipelines without RQ dependencies.
+
+    Args:
+        runid: The project identifier already provisioned on disk.
+
+    Returns:
+        Tuple of cleared lock identifiers from `clear_locks`. Empty when no
+        locks were cleared.
+
+    Raises:
+        Exception: Any failure in controller prep or WEPP execution is surfaced.
     """
     try:
         job = get_current_job()
@@ -87,8 +109,8 @@ def test_run_rq(runid: str):
             init_required = True
         
         StatusMessenger.publish(status_channel, f'init_required: {init_required}')
-        prep = None
-        locks_cleared = None
+        prep: RedisPrep | None = None
+        locks_cleared: list[str] | None = None
         if init_required:
             StatusMessenger.publish(status_channel, f'copying base project to runid_wd: {runid_wd}')
             shutil.copytree(base_wd, runid_wd)
@@ -212,7 +234,16 @@ def test_run_rq(runid: str):
         raise
 
 
-def set_run_readonly_rq(runid: str, readonly: bool):
+def set_run_readonly_rq(runid: str, readonly: bool) -> None:
+    """Toggle read-only state for a run and manage browse manifests.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        readonly: Flag indicating whether the run should become read-only.
+
+    Raises:
+        Exception: Any error during manifest creation/removal or NoDb updates.
+    """
     from wepppy.microservices.browse import create_manifest, remove_manifest, MANIFEST_FILENAME
 
     job = get_current_job()
@@ -290,7 +321,16 @@ def set_run_readonly_rq(runid: str, readonly: bool):
         raise
 
 
-def init_sbs_map_rq(runid: str, sbs_map: str):
+def init_sbs_map_rq(runid: str, sbs_map: str) -> None:
+    """Persist an SBS map selection and timestamp the prep step.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        sbs_map: Serialized SBS map payload selected by the user.
+
+    Raises:
+        Exception: Propagates failures while mutating NoDb state.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -309,7 +349,23 @@ def init_sbs_map_rq(runid: str, sbs_map: str):
         raise
 
 
-def fetch_dem_rq(runid: str, extent, center, zoom):
+def fetch_dem_rq(
+    runid: str,
+    extent: Sequence[float],
+    center: Optional[Sequence[float]],
+    zoom: Optional[int],
+) -> None:
+    """Fetch a DEM for the current map extent.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        extent: Bounding box `[minx, miny, maxx, maxy]` in projected coords.
+        center: Optional map center override; derived from extent when omitted.
+        zoom: Optional zoom level; falls back to `DEFAULT_ZOOM` when missing.
+
+    Raises:
+        Exception: Propagates size validation and DEM acquisition failures.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -336,7 +392,25 @@ def fetch_dem_rq(runid: str, extent, center, zoom):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def build_channels_rq(runid: str, csa: float, mcl: float, wbt_fill_or_breach: None|str, wbt_blc_dist: None|int):
+def build_channels_rq(
+    runid: str,
+    csa: float,
+    mcl: float,
+    wbt_fill_or_breach: Optional[str],
+    wbt_blc_dist: Optional[int],
+) -> None:
+    """Delineate channels for the watershed using configured thresholds.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        csa: Contributing source area threshold.
+        mcl: Minimum channel length threshold.
+        wbt_fill_or_breach: Optional override for Whitebox fill/breach strategy.
+        wbt_blc_dist: Optional breaching distance when Whitebox backend is used.
+
+    Raises:
+        Exception: Propagates errors from watershed delineation.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -363,7 +437,35 @@ def build_channels_rq(runid: str, csa: float, mcl: float, wbt_fill_or_breach: No
         raise
 
 
-def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text):
+def fetch_dem_and_build_channels_rq(
+    runid: str,
+    extent: Sequence[float],
+    center: Optional[Sequence[float]],
+    zoom: Optional[int],
+    csa: float,
+    mcl: float,
+    wbt_fill_or_breach: Optional[str],
+    wbt_blc_dist: Optional[int],
+    set_extent_mode: str,
+    map_bounds_text: str,
+) -> None:
+    """Chain DEM acquisition and channel building via dependent RQ jobs.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        extent: Bounding box `[minx, miny, maxx, maxy]` in projected coords.
+        center: Optional map center override.
+        zoom: Optional zoom level.
+        csa: Contributing source area threshold.
+        mcl: Minimum channel length threshold.
+        wbt_fill_or_breach: Optional Whitebox fill/breach directive.
+        wbt_blc_dist: Optional breaching distance for Whitebox runs.
+        set_extent_mode: Serialized extent mode persisted on the watershed.
+        map_bounds_text: User-facing bounds description stored with the run.
+
+    Raises:
+        Exception: Propagates errors from job enqueueing or delineation.
+    """
     try:
         job = get_current_job()
         func_name = inspect.currentframe().f_code.co_name
@@ -392,7 +494,17 @@ def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl, 
         raise
 
 
-def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float):
+def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None:
+    """Persist the watershed outlet coordinates.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        outlet_lng: Longitude of the outlet point.
+        outlet_lat: Latitude of the outlet point.
+
+    Raises:
+        Exception: Propagates failures from watershed controller updates.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -411,7 +523,15 @@ def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def build_subcatchments_rq(runid: str):
+def build_subcatchments_rq(runid: str) -> None:
+    """Delineate subcatchments after channel extraction is complete.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates failures from watershed delineation.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -428,7 +548,15 @@ def build_subcatchments_rq(runid: str):
         raise
 
 
-def abstract_watershed_rq(runid: str):
+def abstract_watershed_rq(runid: str) -> None:
+    """Run the watershed abstraction step after subcatchments exist.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates failures from watershed abstraction routines.
+    """
     try:
         time.sleep(0.05)  # race condition where SUBWTA.ARC is not yet written
         job = get_current_job()
@@ -448,7 +576,15 @@ def abstract_watershed_rq(runid: str):
         raise
 
 
-def build_subcatchments_and_abstract_watershed_rq(runid: str):
+def build_subcatchments_and_abstract_watershed_rq(runid: str) -> None:
+    """Enqueue subcatchment building followed by watershed abstraction.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors while enqueueing dependent jobs.
+    """
     try:
         job = get_current_job()
         func_name = inspect.currentframe().f_code.co_name
@@ -473,7 +609,15 @@ def build_subcatchments_and_abstract_watershed_rq(runid: str):
         raise
 
 
-def build_landuse_rq(runid: str):
+def build_landuse_rq(runid: str) -> None:
+    """Construct landuse layers for the watershed.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from landuse controller build routines.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -492,7 +636,15 @@ def build_landuse_rq(runid: str):
         raise
 
 
-def build_soils_rq(runid: str):
+def build_soils_rq(runid: str) -> None:
+    """Build soil layers for the watershed.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from soil controller build routines.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -511,7 +663,15 @@ def build_soils_rq(runid: str):
         raise
 
     
-def build_climate_rq(runid: str):
+def build_climate_rq(runid: str) -> None:
+    """Generate climate inputs for the watershed.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from climate controller build routines.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -530,7 +690,23 @@ def build_climate_rq(runid: str):
         raise
 
 
-def run_ash_rq(runid: str, fire_date: str, ini_white_ash_depth_mm: float, ini_black_ash_depth_mm: float):
+def run_ash_rq(
+    runid: str,
+    fire_date: str,
+    ini_white_ash_depth_mm: float,
+    ini_black_ash_depth_mm: float,
+) -> None:
+    """Execute the ash transport model for the given scenario parameters.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        fire_date: ISO date string representing the fire event.
+        ini_white_ash_depth_mm: Initial white ash depth in millimeters.
+        ini_black_ash_depth_mm: Initial black ash depth in millimeters.
+
+    Raises:
+        Exception: Propagates errors from ash model execution.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -552,7 +728,15 @@ def run_ash_rq(runid: str, fire_date: str, ini_white_ash_depth_mm: float, ini_bl
         raise
 
 
-def run_debris_flow_rq(runid: str):
+def run_debris_flow_rq(runid: str) -> None:
+    """Run the debris flow model for the current watershed configuration.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from debris flow computations.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -573,7 +757,15 @@ def run_debris_flow_rq(runid: str):
         raise
 
 
-def run_rhem_rq(runid: str):
+def run_rhem_rq(runid: str) -> None:
+    """Execute the rangeland hydrology and erosion model (RHEM).
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from RHEM preprocessing or execution.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -598,7 +790,8 @@ def run_rhem_rq(runid: str):
 
 # Fork Functions
 
-def _finish_fork_rq(runid):
+def _finish_fork_rq(runid: str) -> None:
+    """Emit fork completion messages once dependent jobs finish."""
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -612,7 +805,8 @@ def _finish_fork_rq(runid):
         raise
 
 
-def _clean_env_for_system_tools():
+def _clean_env_for_system_tools() -> dict[str, str]:
+    """Return a sanitized environment for invoking system binaries."""
     env = {
         "PATH": "/usr/sbin:/usr/bin:/bin",
         "LANG": os.environ.get("LANG", "C.UTF-8"),
@@ -622,18 +816,28 @@ def _clean_env_for_system_tools():
     return env
 
 
-def fork_rq(runid: str, new_runid: str, undisturbify=False):
+def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
+    """Fork an existing run directory and optionally rebuild assets.
+
+    Args:
+        runid: Source run identifier.
+        new_runid: Destination run identifier.
+        undisturbify: When ``True``, remove disturbed assets and rerun WEPP.
+
+    Raises:
+        Exception: Propagates any rsync, NoDb, or post-processing failure.
+    """
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
     status_channel = f'{runid}:fork'
 
     # DEBUG HELPER: This function will run in a thread to read a stream
     # line-by-line and put the lines into a queue.
-    def stream_reader(stream, queue):
-        """Reads lines from a stream and puts them into a queue."""
+    def stream_reader(stream: TextIO, output_queue: queue.Queue[str]) -> None:
+        """Read a subprocess stream line-by-line and fan out to a queue."""
         try:
             for line in iter(stream.readline, ''):
-                queue.put(line)
+                output_queue.put(line)
         finally:
             stream.close()
 
@@ -697,8 +901,8 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         )
 
         # Create queues and threads to handle stdout and stderr
-        stdout_q = queue.Queue()
-        stderr_q = queue.Queue()
+        stdout_q: queue.Queue[str] = queue.Queue()
+        stderr_q: queue.Queue[str] = queue.Queue()
         stdout_thread = threading.Thread(
             target=stream_reader, args=(p.stdout, stdout_q)
         )
@@ -708,8 +912,8 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         stdout_thread.start()
         stderr_thread.start()
 
-        stdout_output = []
-        stderr_output = []
+        stdout_output: list[str] = []
+        stderr_output: list[str] = []
 
         # Process output until the command finishes
         while p.poll() is None:
@@ -830,7 +1034,16 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
 
 # Archive Backend Functions
 # see docs/dev-notes/weppcloud-project-archiving.md for archive architecture
-def archive_rq(runid: str, comment: Optional[str] = None):
+def archive_rq(runid: str, comment: Optional[str] = None) -> None:
+    """Create a zip archive of the run directory.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        comment: Optional archive comment persisted in the zip metadata.
+
+    Raises:
+        Exception: Propagates filesystem or zip errors.
+    """
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
     status_channel = f'{runid}:archive'
@@ -910,7 +1123,16 @@ def archive_rq(runid: str, comment: Optional[str] = None):
                 pass
 
 
-def restore_archive_rq(runid: str, archive_name: str):
+def restore_archive_rq(runid: str, archive_name: str) -> None:
+    """Restore a run directory from a previously generated archive.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        archive_name: Zip filename inside the run's archives directory.
+
+    Raises:
+        Exception: Propagates validation or extraction errors.
+    """
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
     status_channel = f'{runid}:archive'
@@ -1017,7 +1239,15 @@ def restore_archive_rq(runid: str, archive_name: str):
 
 # RAP_TS Functions
 
-def fetch_and_analyze_rap_ts_rq(runid: str):
+def fetch_and_analyze_rap_ts_rq(runid: str) -> None:
+    """Download and analyze RAP time series rasters for the scenario.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates RAP acquisition or analysis errors.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
