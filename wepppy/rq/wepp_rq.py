@@ -1,20 +1,26 @@
-import shutil
-from glob import glob
+from __future__ import annotations
 
-import socket
+"""
+RQ task entry points for orchestrating WEPP model runs and post-processing steps.
+
+The helpers enqueue work onto Redis-backed queues, orchestrate NoDb controller prep,
+and publish progress updates so the UI can reflect job status in real time.
+"""
+
+import inspect
 import os
+import shutil
+import socket
+import time
+from glob import glob
+from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
-from os.path import exists as _exists
-import inspect
-import time
-import shutil
+from subprocess import call
 
-from functools import wraps
-from subprocess import Popen, PIPE, call
-import time
 import redis
 from rq import Queue, get_current_job
+from rq.job import Job
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -55,19 +61,47 @@ except:
 
 _hostname = socket.gethostname()
 
-REDIS_HOST = redis_host()
-RQ_DB = int(RedisDB.RQ)
+REDIS_HOST: str = redis_host()
+RQ_DB: int = int(RedisDB.RQ)
 
-TIMEOUT = 43_200
+TIMEOUT: int = 43_200
 
-def compress_fn(fn):
+
+def compress_fn(fn: str) -> None:
+    """Force gzip compression in place for the provided file path.
+
+    Args:
+        fn: Absolute path to the file to compress.
+
+    Raises:
+        AssertionError: If gzip does not create the expected `.gz` file.
+    """
     if _exists(fn):
-        p = call('gzip %s -f' % fn, shell=True)
-        assert _exists(fn + '.gz')
+        call(f'gzip {fn} -f', shell=True)
+        assert _exists(f'{fn}.gz')
 
 # turtles, turtles all the way down...
 
-def run_ss_batch_hillslope_rq(runid, wepp_id, wepp_bin=None, ss_batch_id=None):
+def run_ss_batch_hillslope_rq(
+    runid: str,
+    wepp_id: int,
+    wepp_bin: str | None = None,
+    ss_batch_id: int | None = None,
+) -> tuple[bool, float]:
+    """Execute a batch single-storm hillslope WEPP run within an RQ worker.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        wepp_id: Hillslope identifier corresponding to the prepared input files.
+        wepp_bin: Optional override for the WEPP executable name.
+        ss_batch_id: Single-storm batch identifier supplied by the climate controller.
+
+    Returns:
+        Tuple with the runner success flag and the runtime in seconds.
+
+    Raises:
+        Exception: Propagates any failure produced by the underlying WEPP runner.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -75,14 +109,27 @@ def run_ss_batch_hillslope_rq(runid, wepp_id, wepp_bin=None, ss_batch_id=None):
         runs_dir = _join(wd, 'wepp/runs')
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})')
-        status, wepp_id, time = run_ss_batch_hillslope(wepp_id, runs_dir, wepp_bin=wepp_bin, ss_batch_id=ss_batch_id, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id}) -> ({status}, {time})')
-        return status, time
+        status, _, duration = run_ss_batch_hillslope(wepp_id, runs_dir, wepp_bin=wepp_bin, ss_batch_id=ss_batch_id, status_channel=status_channel)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id}) -> ({status}, {duration})')
+        return status, duration
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})')
         raise
 
-def run_hillslope_rq(runid, wepp_id, wepp_bin=None):
+def run_hillslope_rq(runid: str, wepp_id: int, wepp_bin: str | None = None) -> tuple[bool, float]:
+    """Execute a continuous hillslope WEPP run within an RQ worker.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        wepp_id: Hillslope identifier corresponding to the prepared input files.
+        wepp_bin: Optional override for the WEPP executable name.
+
+    Returns:
+        Tuple with the runner success flag and the runtime in seconds.
+
+    Raises:
+        Exception: Propagates any failure produced by the underlying WEPP runner.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -90,14 +137,27 @@ def run_hillslope_rq(runid, wepp_id, wepp_bin=None):
         runs_dir = _join(wd, 'wepp/runs')
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin})')
-        status, wepp_id, time = run_hillslope(wepp_id, runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}) -> ({status}, {time})')
-        return status, time
+        status, _, duration = run_hillslope(wepp_id, runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}) -> ({status}, {duration})')
+        return status, duration
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin})')
         raise
 
-def run_flowpath_rq(runid, flowpath, wepp_bin=None):
+def run_flowpath_rq(runid: str, flowpath: str, wepp_bin: str | None = None) -> tuple[bool, float]:
+    """Run a flowpath WEPP simulation within an RQ worker.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        flowpath: Flowpath identifier that maps to prepared input artifacts.
+        wepp_bin: Optional override for the WEPP executable name.
+
+    Returns:
+        Tuple with the runner success flag and the runtime in seconds.
+
+    Raises:
+        Exception: Propagates any failure produced by the underlying WEPP runner.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -105,14 +165,26 @@ def run_flowpath_rq(runid, flowpath, wepp_bin=None):
         runs_dir = _join(wd, 'wepp/runs')
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, flowpath={flowpath}, wepp_bin={wepp_bin})')
-        status, flowpath, time = run_flowpath(flowpath, runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, flowpath={flowpath}, wepp_bin={wepp_bin}) -> ({status}, {time})')
-        return status, time
+        status, _, duration = run_flowpath(flowpath, runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, flowpath={flowpath}, wepp_bin={wepp_bin}) -> ({status}, {duration})')
+        return status, duration
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, flowpath={flowpath}, wepp_bin={wepp_bin})')
         raise
 
-def run_watershed_rq(runid, wepp_bin=None):
+def run_watershed_rq(runid: str, wepp_bin: str | None = None) -> tuple[bool, float]:
+    """Run a watershed WEPP simulation within an RQ worker.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        wepp_bin: Optional override for the WEPP executable name.
+
+    Returns:
+        Tuple with the runner success flag and the runtime in seconds.
+
+    Raises:
+        Exception: Propagates any failure produced by the underlying WEPP runner.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -120,14 +192,31 @@ def run_watershed_rq(runid, wepp_bin=None):
         runs_dir = _join(wd, 'wepp/runs')
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, wepp_bin={wepp_bin})')
-        status, time = run_watershed(runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_bin={wepp_bin}) -> ({status}, {time})')
-        return status, time
+        status, duration = run_watershed(runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_bin={wepp_bin}) -> ({status}, {duration})')
+        return status, duration
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_bin={wepp_bin})')
         raise
 
-def run_ss_batch_watershed_rq(runid, wepp_bin=None, ss_batch_id=None):
+def run_ss_batch_watershed_rq(
+    runid: str,
+    wepp_bin: str | None = None,
+    ss_batch_id: int | None = None,
+) -> tuple[bool, float]:
+    """Run a batch single-storm watershed WEPP simulation within an RQ worker.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        wepp_bin: Optional override for the WEPP executable name.
+        ss_batch_id: Single-storm batch identifier supplied by the climate controller.
+
+    Returns:
+        Tuple with the runner success flag and the runtime in seconds.
+
+    Raises:
+        Exception: Propagates any failure produced by the underlying WEPP runner.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -135,9 +224,9 @@ def run_ss_batch_watershed_rq(runid, wepp_bin=None, ss_batch_id=None):
         runs_dir = _join(wd, 'wepp/runs')
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})')
-        status, time = run_ss_batch_watershed(runs_dir, wepp_bin=wepp_bin, ss_batch_id=ss_batch_id, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id}) -> ({status}, {time})')
-        return status, time
+        status, duration = run_ss_batch_watershed(runs_dir, wepp_bin=wepp_bin, ss_batch_id=ss_batch_id, status_channel=status_channel)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id}) -> ({status}, {duration})')
+        return status, duration
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})')
         raise
@@ -145,7 +234,23 @@ def run_ss_batch_watershed_rq(runid, wepp_bin=None, ss_batch_id=None):
 
 # the main turtle
 
-def run_wepp_rq(runid):
+def run_wepp_rq(runid: str) -> Job:
+    """Enqueue the full multi-stage WEPP workflow for a run directory.
+
+    The orchestrator performs initial synchronous setup (locking checks,
+    controller priming), then enqueues the staged RQ tasks that prepare
+    inputs, execute WEPP, and fan out the post-processing jobs. Each stage
+    updates Redis-backed status channels so the UI can visualize progress.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Returns:
+        The final RQ job that logs completion once all dependencies finish.
+
+    Raises:
+        Exception: If the run is currently locked or any prep step fails.
+    """
     try:
         job = get_current_job()
         func_name = inspect.currentframe().f_code.co_name
@@ -173,18 +278,17 @@ def run_wepp_rq(runid):
         translator = watershed.translator_factory()
         climate = Climate.getInstance(wd)
         runs_dir = os.path.abspath(wepp.runs_dir)
-        fp_runs_dir = wepp.fp_runs_dir
         wepp_bin = wepp.wepp_bin
 
         wepp.logger.info('    wepp_bin:{}'.format(wepp_bin))
 
-        # everything below here is asyncronous performed by workers
+        # everything below here is asynchronous, performed by workers
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
 
             # jobs:0
-            jobs0_hillslopes_prep = []
+            jobs0_hillslopes_prep: list[Job] = []
 
             if wepp.multi_ofe:
                 job_prep_soils = q.enqueue_call(_prep_multi_ofe_rq, (runid,), timeout='4h')
@@ -229,9 +333,9 @@ def run_wepp_rq(runid):
                                   depends_on=jobs1_hillslopes)
             job.meta[f'jobs:2,func:_prep_watershed_rq'] = job2_watershed_prep.id
 
-            job2_totalwatsed2 = None
-            job2_hillslope_interchange = None
-            job2_post_dss_export = None
+            job2_totalwatsed2: Job | None = None
+            job2_hillslope_interchange: Job | None = None
+            job2_post_dss_export: Job | None = None
             if not climate.is_single_storm:
                 job2_hillslope_interchange = q.enqueue_call(_build_hillslope_interchange_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
                 job.meta['jobs:2,func:_build_hillslope_interchange_rq'] = job2_hillslope_interchange.id
@@ -247,7 +351,7 @@ def run_wepp_rq(runid):
                     job.save()
 
 
-            jobs2_flowpaths = None
+            jobs2_flowpaths: Job | None = None
             if wepp.run_flowpaths:
                 jobs2_flowpaths = q.enqueue_call(_run_flowpaths_rq, (runid,), timeout=TIMEOUT, depends_on=job_prep_remaining)
                 job.meta['jobs:2,func:run_flowpaths_rq'] = jobs2_flowpaths.id
@@ -258,7 +362,7 @@ def run_wepp_rq(runid):
             wepp.logger.info(f'Running Watershed wepp_bin:{wepp_bin}... ')
 
             # jobs:3
-            jobs3_watersheds = []
+            jobs3_watersheds: list[Job] = []
             if climate.climate_mode == ClimateMode.SingleStormBatch:
 
                 for d in climate.ss_batch_storms:
@@ -289,7 +393,7 @@ def run_wepp_rq(runid):
             post_dependencies = jobs3_watersheds or [job2_watershed_prep]
 
             # jobs:4
-            jobs4_post = []
+            jobs4_post: list[Job] = []
 
             _job = q.enqueue_call(_post_run_cleanup_out_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
             job.meta['jobs:4,func:_post_run_cleanup_out_rq'] = _job.id
@@ -336,7 +440,7 @@ def run_wepp_rq(runid):
                 jobs4_post.append(_job)
                 job.save()
 
-            jobs5_post = []
+            jobs5_post: list[Job] = []
             if wepp.legacy_arc_export_on_run_completion:
                 _job = q.enqueue_call(_post_legacy_arc_export_rq, (runid,), timeout=TIMEOUT, depends_on=jobs4_post)
                 job.meta['jobs:5,func:_post_legacy_arc_export_rq'] = _job.id
@@ -362,6 +466,7 @@ def run_wepp_rq(runid):
                 jobs5_post.append(jobs2_flowpaths)
 
             # jobs:6
+            job6_finalfinal: Job
             if len(jobs5_post) > 0:
                 job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=jobs5_post)
             else:
@@ -381,7 +486,15 @@ def run_wepp_rq(runid):
 
     return job6_finalfinal
 
-def _prep_multi_ofe_rq(runid):
+def _prep_multi_ofe_rq(runid: str) -> None:
+    """Prepare multi-OFE slope inputs prior to hillslope execution.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates controller or filesystem failures encountered during prep.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -398,7 +511,15 @@ def _prep_multi_ofe_rq(runid):
         raise
 
 
-def _prep_slopes_rq(runid):
+def _prep_slopes_rq(runid: str) -> None:
+    """Export slope files for each hillslope in preparation for WEPP runs.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates controller failures encountered during prep.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -415,7 +536,15 @@ def _prep_slopes_rq(runid):
         raise
 
 
-def _run_hillslopes_rq(runid):
+def _run_hillslopes_rq(runid: str) -> None:
+    """Execute all queued hillslope WEPP runs for the scenario.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates failures surfaced by the hillslope runner.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -430,7 +559,15 @@ def _run_hillslopes_rq(runid):
         raise
 
 
-def _run_flowpaths_rq(runid):
+def _run_flowpaths_rq(runid: str) -> None:
+    """Prepare inputs and execute flowpath WEPP runs for the scenario.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates failures surfaced by the flowpath runner.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -445,7 +582,15 @@ def _run_flowpaths_rq(runid):
         raise
 
 
-def _prep_managements_rq(runid):
+def _prep_managements_rq(runid: str) -> None:
+    """Export management files required for upcoming hillslope runs.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates controller failures encountered during prep.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -462,7 +607,15 @@ def _prep_managements_rq(runid):
         raise
 
 
-def _prep_soils_rq(runid):
+def _prep_soils_rq(runid: str) -> None:
+    """Export soil files required for upcoming hillslope runs.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates controller failures encountered during prep.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -479,7 +632,15 @@ def _prep_soils_rq(runid):
         raise
 
 
-def _prep_climates_rq(runid):
+def _prep_climates_rq(runid: str) -> None:
+    """Copy climate artifacts into the run directory for hillslope prep.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates controller failures encountered during prep.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -496,7 +657,15 @@ def _prep_climates_rq(runid):
         raise
 
 
-def _prep_remaining_rq(runid):
+def _prep_remaining_rq(runid: str) -> None:
+    """Finalize hillslope preparation, including optional frost/baseflow assets.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates controller failures encountered during prep.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -551,7 +720,15 @@ def _prep_remaining_rq(runid):
         raise
 
 
-def _prep_watershed_rq(runid):
+def _prep_watershed_rq(runid: str) -> None:
+    """Generate watershed-scale WEPP inputs after hillslopes complete.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates controller failures encountered during prep.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -565,7 +742,15 @@ def _prep_watershed_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def _post_run_cleanup_out_rq(runid):
+def _post_run_cleanup_out_rq(runid: str) -> None:
+    """Move WEPP .out files into output directories once runs finish.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates filesystem errors encountered during cleanup.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -596,7 +781,15 @@ def _post_run_cleanup_out_rq(runid):
         raise
 
 
-def _analyze_return_periods_rq(runid):
+def _analyze_return_periods_rq(runid: str) -> None:
+    """Generate return period summaries for the completed hillslope runs.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates controller failures encountered during analysis.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -611,7 +804,15 @@ def _analyze_return_periods_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def _build_hillslope_interchange_rq(runid):
+def _build_hillslope_interchange_rq(runid: str) -> None:
+    """Create hillslope interchange parquet artifacts for downstream tools.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from interchange builders.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -628,7 +829,15 @@ def _build_hillslope_interchange_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def _build_totalwatsed3_rq(runid):
+def _build_totalwatsed3_rq(runid: str) -> None:
+    """Generate the aggregate watershed TotWatSed interchange dataset.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from interchange builders.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -643,7 +852,15 @@ def _build_totalwatsed3_rq(runid):
         raise
 
 
-def _run_hillslope_watbal_rq(runid):
+def _run_hillslope_watbal_rq(runid: str) -> None:
+    """Compute water balance metrics once hillslope interchange data exists.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates controller failures encountered during analysis.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -661,7 +878,15 @@ def _run_hillslope_watbal_rq(runid):
         raise
 
 
-def _post_prep_details_rq(runid):
+def _post_prep_details_rq(runid: str) -> None:
+    """Export prep detail CSVs/Parquets after runs complete.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates export failures.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -675,7 +900,15 @@ def _post_prep_details_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def _post_watershed_interchange_rq(runid):
+def _post_watershed_interchange_rq(runid: str) -> None:
+    """Generate watershed interchange artifacts and documentation.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from interchange builders.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -694,7 +927,15 @@ def _post_watershed_interchange_rq(runid):
         raise
 
 
-def _post_legacy_arc_export_rq(runid):
+def _post_legacy_arc_export_rq(runid: str) -> None:
+    """Rebuild the legacy Arc-compatible export bundle when requested.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from the export pipeline.
+    """
     try:
         from wepppy.export import  legacy_arc_export
         job = get_current_job()
@@ -709,7 +950,15 @@ def _post_legacy_arc_export_rq(runid):
         raise
 
 
-def _post_gpkg_export_rq(runid):
+def _post_gpkg_export_rq(runid: str) -> None:
+    """Rebuild the GeoPackage export bundle when requested.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from the export pipeline.
+    """
     try:
         from wepppy.export.gpkg_export import gpkg_export
         job = get_current_job()
@@ -723,7 +972,15 @@ def _post_gpkg_export_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def post_dss_export_rq(runid):
+def post_dss_export_rq(runid: str) -> None:
+    """Build DSS exports once hillslope interchange data is ready.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates errors from the export pipeline.
+    """
     try:
         from wepppy.wepp.interchange import (
             totalwatsed_partitioned_dss_export,
@@ -772,7 +1029,15 @@ def post_dss_export_rq(runid):
 
 
 
-def _post_make_loss_grid_rq(runid):
+def _post_make_loss_grid_rq(runid: str) -> None:
+    """Generate raster loss grids once watershed outputs are available.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates raster generation errors.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -787,7 +1052,15 @@ def _post_make_loss_grid_rq(runid):
         raise
 
 
-def _log_complete_rq(runid):
+def _log_complete_rq(runid: str) -> None:
+    """Record final completion metadata and emit notifications for the run.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Raises:
+        Exception: Propagates failures encountered while emitting metadata.
+    """
     try:
         job = get_current_job()
         wd = get_wd(runid)
