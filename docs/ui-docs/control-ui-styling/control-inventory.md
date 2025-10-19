@@ -153,7 +153,7 @@ To prepare for macro-driven rendering, the tables below document the primary for
 
 ### Rangeland Cover Modify Panel
 | Field ID | Input Type | Label / Purpose | Backend Binding | Visibility / Notes |
-| --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | `checkbox_modify_rangeland_cover` | checkbox | Enable interactive map selection | JS toggles Leaflet selection & collects Topaz IDs | Works alongside `textarea_modify_rangeland_cover`; macros should provide instructions |
 | `textarea_modify_rangeland_cover` | textarea | Manual Topaz ID list | Posted via `RangelandCoverModify.modify()` to `/runs/<runid>/<config>/tasks/modify_rangeland_cover/` | IDs feed NoDb adjustments; ensure placeholder text preserved |
 | Cover inputs (`bunchgrass_cover`, `forbs_cover`, `sodgrass_cover`, `shrub_cover`, `basal_cover`, `rock_cover`, `litter_cover`, `cryptogams_cover`) | numeric text | Override selected hillslopes | Sent with modify payload | `loadCovers` helper can prefill values; macros should enable compact layout |
