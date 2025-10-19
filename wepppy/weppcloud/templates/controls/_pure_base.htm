@@ -1,0 +1,49 @@
+<div class="wc-control">
+  <form id="{% block form_id %}{% endblock %}"
+        class="wc-control__form pure-form"
+        action="javascript:void(0);"
+        enctype="multipart/form-data">
+    <header class="wc-control__header">
+      <div class="wc-control__title-row">
+        <h2 class="wc-control__title">{% block form_title %}{% endblock %}</h2>
+        <div class="wc-control__toolbar">
+          {% block form_toolbar %}{% endblock %}
+        </div>
+      </div>
+      <div class="wc-control__description">
+        {% block form_description %}{% endblock %}
+      </div>
+      <div class="wc-control__meta">
+        {% block form_meta %}{% endblock %}
+      </div>
+    </header>
+
+    {% block control_body %}
+    <div class="wc-control__grid">
+      <section class="wc-control__inputs">
+        {% block control_inputs %}{% endblock %}
+      </section>
+      <aside class="wc-control__sidebar">
+        {% block control_sidebar %}
+        <section class="wc-control__panel">
+          <h3 class="wc-control__panel-title">Status</h3>
+          <div id="rq_job" class="wc-control__job"></div>
+          <div class="wc-control__status-text">
+            <small id="braille" class="wc-control__status-braille"></small>
+            <small id="status" class="wc-control__status-message"></small>
+          </div>
+        </section>
+        <section class="wc-control__panel">
+          <h3 class="wc-control__panel-title">Summary</h3>
+          <div id="info" class="wc-control__summary"></div>
+        </section>
+        <section class="wc-control__panel">
+          <h3 class="wc-control__panel-title">Details</h3>
+          <div id="stacktrace" class="wc-control__stacktrace"></div>
+        </section>
+        {% endblock %}
+      </aside>
+    </div>
+    {% endblock %}
+  </form>
+</div>

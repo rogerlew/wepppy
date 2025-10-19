@@ -1,0 +1,39 @@
+{% extends "base_pure.htm" %}
+{% import "controls/_pure_macros.html" as ui %}
+
+{% block title %}UI Components Showcase{% endblock %}
+
+{% block body %}
+  <header class="wc-stack">
+    <h1 class="wc-heading__title">UI Component Showcase</h1>
+    <p class="wc-text-muted">
+      This sandbox illustrates the new Pure.css-aware control shell and field macros.
+      Iterate here, then port stable patterns into production controls.
+    </p>
+  </header>
+
+  {% call ui.control_shell(
+        form_id="ui_showcase_form",
+        title="Sample Control",
+        toolbar='<button type="button" class="pure-button pure-button-primary">Primary Action</button>',
+        description=sample.description,
+        meta='<span aria-label="Project name">Project: <strong>{}</strong></span>'.format(sample.project_name)
+      ) %}
+    {{ ui.text_field("project_name", "Project Name", value=sample.project_name, help="Editable text input example.") }}
+
+    {{ ui.text_field("scenario", "Scenario Label", value=sample.scenario, help="Debounced inputs can hook into Project JS.") }}
+
+    {{ ui.text_field("location", "Location", value=sample.location, help="Demonstrates standard field layout.") }}
+
+    {{ ui.select_field("treatment", "Treatment Mode", select_options, selected="baseline", help="Select macro with helper text.") }}
+
+    {% call ui.fieldset("Notes", "Use fieldsets for longer free-form content.") %}
+      <div class="wc-field">
+        <label class="wc-field__label" for="notes">Additional Notes</label>
+        <textarea id="notes" name="notes" class="wc-field__control" rows="4"
+                  placeholder="Document expected behavior, constraints, and open questions."></textarea>
+        <p class="wc-field__help">Textarea shares the same helper styling.</p>
+      </div>
+    {% endcall %}
+  {% endcall %}
+{% endblock %}

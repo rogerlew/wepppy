@@ -1,0 +1,115 @@
+{% macro control_shell(form_id, title, toolbar=None, description=None, meta=None) -%}
+<div class="wc-control">
+  <form id="{{ form_id }}"
+        class="wc-control__form pure-form"
+        action="javascript:void(0);"
+        enctype="multipart/form-data">
+    <header class="wc-control__header">
+      <div class="wc-control__title-row">
+        <h2 class="wc-control__title">{{ title }}</h2>
+        {% if toolbar %}
+        <div class="wc-control__toolbar">
+          {{ toolbar|safe }}
+        </div>
+        {% endif %}
+      </div>
+      {% if description %}
+      <div class="wc-control__description">
+        {{ description|safe }}
+      </div>
+      {% endif %}
+      {% if meta %}
+      <div class="wc-control__meta">
+        {{ meta|safe }}
+      </div>
+      {% endif %}
+    </header>
+    <div class="wc-control__grid">
+      <section class="wc-control__inputs">
+        {{ caller() }}
+      </section>
+      <aside class="wc-control__sidebar">
+        {{ status_panel() }}
+        {{ summary_panel() }}
+        {{ stacktrace_panel() }}
+      </aside>
+    </div>
+  </form>
+</div>
+{%- endmacro %}
+
+{% macro status_panel() -%}
+<section class="wc-control__panel">
+  <h3 class="wc-control__panel-title">Status</h3>
+  <div id="rq_job" class="wc-control__job"></div>
+  <div class="wc-control__status-text">
+    <small id="braille" class="wc-control__status-braille"></small>
+    <small id="status" class="wc-control__status-message"></small>
+  </div>
+</section>
+{%- endmacro %}
+
+{% macro summary_panel() -%}
+<section class="wc-control__panel">
+  <h3 class="wc-control__panel-title">Summary</h3>
+  <div id="info" class="wc-control__summary"></div>
+</section>
+{%- endmacro %}
+
+{% macro stacktrace_panel() -%}
+<section class="wc-control__panel">
+  <h3 class="wc-control__panel-title">Details</h3>
+  <div id="stacktrace" class="wc-control__stacktrace"></div>
+</section>
+{%- endmacro %}
+
+{% macro fieldset(legend=None, description=None) -%}
+<fieldset class="wc-fieldset">
+  {% if legend %}
+  <legend class="wc-fieldset__legend">{{ legend }}</legend>
+  {% endif %}
+  {% if description %}
+  <p class="wc-fieldset__description">{{ description }}</p>
+  {% endif %}
+  {{ caller() }}
+</fieldset>
+{%- endmacro %}
+
+{% macro text_field(field_id, label, value='', help=None, type='text', placeholder=None, attrs=None) -%}
+{% set attrs = attrs or {} %}
+<div class="wc-field">
+  <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
+  <input class="wc-field__control"
+         id="{{ field_id }}"
+         name="{{ field_id }}"
+         type="{{ type }}"
+         value="{{ value }}"
+         {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+         {% for attr_key, attr_val in attrs.items() %}
+           {{ attr_key }}="{{ attr_val }}"
+         {% endfor %}>
+  {% if help %}
+  <p class="wc-field__help">{{ help }}</p>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None) -%}
+{% set attrs = attrs or {} %}
+<div class="wc-field">
+  <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
+  <select class="wc-field__control"
+          id="{{ field_id }}"
+          name="{{ field_id }}"
+          {% for attr_key, attr_val in attrs.items() %}
+            {{ attr_key }}="{{ attr_val }}"
+          {% endfor %}>
+    {% for value, text in options %}
+    <option value="{{ value }}"{% if value == selected %} selected{% endif %}>{{ text }}</option>
+    {% endfor %}
+  </select>
+  {% if help %}
+  <p class="wc-field__help">{{ help }}</p>
+  {% endif %}
+</div>
+{%- endmacro %}
