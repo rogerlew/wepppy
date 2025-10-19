@@ -35,8 +35,8 @@ Goal: define a consistent, minimal component set that we can apply to existing c
 
 ## 2. Runs Page Layout (context)
 - **Header**: fixed Pure header (run-specific variant includes name/scenario inputs, power user tools, readonly/public toggles).
-- **Navigation**: left column Table of Contents (roughly 1/5 width) controlling tabs/anchors.
-- **Main content**: right column (≈4/5 width) containing controls stacked vertically; controls scroll.
+- **Navigation**: left column Table of Contents (roughly 1/5 width) controlling tabs/anchors (`wc-run-layout__toc`, sticky on large screens).
+- **Main content**: right column (≈4/5 width) containing controls stacked vertically inside `wc-run-layout__content`.
 - **Footer**: command bar anchored to the bottom (full width).
 - The new control shell must coexist with this layout; when embedded in other pages (e.g. batch runner) the same shell creates consistent styling.
 
@@ -57,9 +57,10 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 ### 4.1 `header_text_field`
 - **Purpose**: Run header inputs (Name, Scenario).
 - **Layout**: `wc-run-header__field` – label and input stacked vertically on narrow screens, two-column on wide.
-- **Args**: `field_id`, `label`, `value`, `placeholder`, optional `help`, `attrs`.
+- **Args**: `field_id`, `label`, `value`, `placeholder`, optional `help`, `attrs`, optional `extra_class` for additional input classes.
 - **Notes**: Debounced updates still handled by `Project` JS; macro simply renders markup/class names.
 - **Status**: Implemented; see “Run Header Fields” section of the showcase.
+- Secondary actions (Unitizer, PowerUser, Readonly/Public toggles, Access Log) live inside the `wc-run-header__menu` dropdown so the primary row stays compact.
 
 ### 4.2 `text_field`
 - **Purpose**: Generic text input inside a card.

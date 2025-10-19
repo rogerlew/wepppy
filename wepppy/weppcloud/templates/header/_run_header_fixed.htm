@@ -1,119 +1,128 @@
-{% extends "header/_layout_fixed.htm" %}
-{% block nav_content %}
-<!-- _run_header_fixed.htm -->
-<script src="{{ url_for('static', filename='js/input-unit-converters.js') }}"></script>
-<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-  aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-  <span class="navbar-toggler-icon"></span>
-</button>
-<div class="collapse navbar-collapse" id="navbarCollapse">
-  <form class="form-inline my-2 my-lg-0" id="setname_form" action="javascript:void(0);">
-    <input class="form-control mr-sm-1 disable-readonly" id="input_name" name="name" type="text" placeholder="Name"
-      value="{{ current_ron.name }}" aria-label="Name"
-      oninput="Project.getInstance().setNameFromInput()"
-      onblur="Project.getInstance().commitNameFromInput()">
-  </form>
-  <form class="form-inline my-2 my-lg-0" id="setscenario_form" action="javascript:void(0);">
-    <input class="form-control mr-sm-1 disable-readonly" id="input_scenario" name="scenario" type="text"
-      placeholder="Scenario" value="{{ current_ron.scenario }}" aria-label="Scenario"
-      oninput="Project.getInstance().setScenarioFromInput()"
-      onblur="Project.getInstance().commitScenarioFromInput()">
-  </form>
-  <ul class="navbar-nav mr-auto">
-    <li class="nav-item">
-      <a href="{{ url_for_run('run_0.runs0', runid=current_ron.runid, config=current_ron.config_stem) }}" class="nav-link"
-        data-toggle="tooltip" title="Reload Page" aria-label="Reload page">
-        <img src="{{ url_for('static', filename='open-iconic/png/reload-2x-wh.png') }}" /></a>
-    </li>
-    {% if not pup_relpath %}
-    <li class="nav-item">
-      <a href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
-        class="nav-link" target="_blank" data-toggle="tooltip" title="Fork Project" rel="nofollow"
-        aria-label="Fork project">
-        <img src="{{ url_for('static', filename='open-iconic/png/fork-2x-wh.png') }}" /></a>
-    </li>
-    <li class="nav-item">
-      <a href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
-        class="nav-link" target="_blank" data-toggle="tooltip" title="Archive Project" rel="nofollow"
-        aria-label="Archive project">
-        <img src="{{ url_for('static', filename='open-iconic/png/cloud-download-2x-wh.png') }}" /></a>
-    </li>
-    {% endif %}
-    <li class="nav-item">
-      <a href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
-        class="nav-link" data-toggle="tooltip" title="Project README" rel="nofollow"
-        aria-label="Open project README">
-        <img src="{{ url_for('static', filename='open-iconic/png/book-2x-wh.png') }}" /></a>
-    </li>
-    <li class="nav-item">
-      <a href="#" class="nav-link" id="btnPuModal" data-toggle="modal" data-target="#puModal" title="Poweruser Panel"
-        rel="nofollow" aria-label="Open poweruser panel">
-        <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}" />
-      </a>
-    </li>
-    <li class="nav-item">
-      <a href="#" class="nav-link" id="btnUnitizerModal" data-toggle="modal" data-target="#unitizerModal"
-        aria-label="Open unitizer modal">
-        <img src="{{ url_for('static', filename='open-iconic/png/cog-2x-wh.png') }}" />
-      </a>
-    </li>
-    {% if user.has_role('Admin') %}
-    <li>
-      <a href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}"
-        class="nav-link" target="_blank" data-toggle="tooltip" title="Access Log"
-        aria-label="Open access log">
-        <img src="{{ url_for('static', filename='open-iconic/png/monitor-2x-wh.png') }}" /></a>
-    </li>
-    {% endif %}
-  </ul>
-  {% if user.is_authenticated %}
-  <ul class="navbar-nav navbar-right">
-    <li class="nav-item">
-      <div class="custom-control custom-checkbox">
-        <input id="checkbox_readonly" type="checkbox" class="form-check-input"
-          onchange="Project.getInstance().set_readonly(this.checked);" {% if current_ron.readonly %}checked{% endif %}>
-        <label class="form-check-label" for="checkbox_readonly"><span style="color: white;">Readonly</span></label>
+{% from "controls/_pure_macros.html" import header_text_field %}
+<header class="wc-header wc-run-header">
+  <div class="wc-container wc-container--fluid">
+    <div class="wc-run-header__inner">
+      <div class="wc-run-header__title-row">
+        <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
+        <span class="wc-run-header__descriptor">
+          {{ current_ron.runid }} {{ current_ron.config_stem }}
+        </span>
       </div>
-    </li>
-    <li class="nav-item">
-      <div class="custom-control custom-checkbox">
-        <input id="checkbox_public" type="checkbox" class="form-check-input"
-          onchange="Project.getInstance().set_public(this.checked);" {% if current_ron.public %}checked{% endif %}>
-        <label class="form-check-label" for="checkbox_public"><span style="color: white;">Public</span></label>
+      <div class="wc-run-header__content">
+        <div class="wc-run-header__fields">
+          {{ header_text_field(
+            "input_name",
+            "Project name",
+            value=current_ron.name,
+            placeholder="Name",
+            attrs={
+              "oninput": "Project.getInstance().setNameFromInput()",
+              "onblur": "Project.getInstance().commitNameFromInput()"
+            },
+            extra_class="disable-readonly"
+          ) }}
+          {{ header_text_field(
+            "input_scenario",
+            "Scenario",
+            value=current_ron.scenario,
+            placeholder="Scenario",
+            attrs={
+              "oninput": "Project.getInstance().setScenarioFromInput()",
+              "onblur": "Project.getInstance().commitScenarioFromInput()"
+            },
+            extra_class="disable-readonly"
+          ) }}
+        </div>
+        <div class="wc-run-header__right">
+          <div class="wc-run-header__actions">
+            <a class="pure-button pure-button-secondary"
+               href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
+               target="_blank"
+               rel="noopener">
+              README
+            </a>
+            {% if not pup_relpath %}
+            <a class="pure-button pure-button-secondary"
+               href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
+               target="_blank"
+               rel="noopener">
+              FORK
+            </a>
+            <a class="pure-button pure-button-secondary"
+               href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
+               target="_blank"
+               rel="noopener">
+              ARCHIVE
+            </a>
+            {% endif %}
+          </div>
+          <details class="wc-run-header__menu">
+            <summary class="wc-run-header__menu-button pure-button pure-button-secondary">
+              More
+            </summary>
+            <div class="wc-run-header__menu-content">
+              <button type="button"
+                      class="pure-button"
+                      data-toggle="modal"
+                      data-target="#puModal">
+                PowerUser
+              </button>
+              <button type="button"
+                      class="pure-button"
+                      data-toggle="modal"
+                      data-target="#unitizerModal">
+                Unitizer
+              </button>
+              <label class="wc-run-header__toggle">
+                <input id="checkbox_readonly"
+                       type="checkbox"
+                       onchange="Project.getInstance().set_readonly(this.checked);"
+                       {% if current_ron.readonly %}checked{% endif %}>
+                <span>Readonly</span>
+              </label>
+              <label class="wc-run-header__toggle">
+                <input id="checkbox_public"
+                       type="checkbox"
+                       onchange="Project.getInstance().set_public(this.checked);"
+                       {% if current_ron.public %}checked{% endif %}>
+                <span>Public</span>
+              </label>
+              {% if user.has_role('Admin') %}
+              <a class="pure-button pure-button-secondary"
+                 href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem) }}"
+                 target="_blank"
+                 rel="noopener">
+                Access log
+              </a>
+              {% endif %}
+            </div>
+          </details>
+        </div>
       </div>
-    </li>
-  </ul>
-  {% endif %}
-</div>
+    </div>
+  </div>
+</header>
 <script>
   "use strict";
-  // This part would be populated by your server-side templating engine
-  var pup_relpath = {{current_ron.pup_relpath | tojson}};
-
-  // Do this on document ready
+  var pup_relpath = {{ current_ron.pup_relpath | tojson }};
   $(function () {
-    if (pup_relpath) {
-      $.ajaxPrefilter(function (options) {
-        if (!options.url) {
-          return;
-        }
-
-        var url = options.url;
-
-        // Check if it's an absolute URL or already contains 'pup='
-        if (
-          /^https?:\/\//i.test(url) ||
-          url.startsWith("//") ||
-          url.indexOf("pup=") !== -1
-        ) {
-          return;
-        }
-
-        var separator = url.indexOf("?") !== -1 ? "&" : "?";
-        options.url = url + separator + "pup=" + encodeURIComponent(pup_relpath);
-      });
+    if (!pup_relpath) {
+      return;
     }
+    $.ajaxPrefilter(function (options) {
+      if (!options.url) {
+        return;
+      }
+      var url = options.url;
+      if (
+        /^https?:\/\//i.test(url) ||
+        url.startsWith("//") ||
+        url.indexOf("pup=") !== -1
+      ) {
+        return;
+      }
+      var separator = url.indexOf("?") !== -1 ? "&" : "?";
+      options.url = url + separator + "pup=" + encodeURIComponent(pup_relpath);
+    });
   });
 </script>
-<!--/ _run_header_fixed.htm -->
-{% endblock %}

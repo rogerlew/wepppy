@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from markupsafe import Markup
 from flask import Blueprint, render_template
 
@@ -58,6 +59,23 @@ def component_gallery() -> str:
         {"parameter": "Average Gradient", "value": "18", "units": "%"},
         {"parameter": "Soil Texture", "value": "Sandy Loam", "units": "-"},
     ]
+    sample_run = SimpleNamespace(
+        runid="RX-2025-Preview",
+        config_stem="cfg",
+        name=sample["project_name"],
+        scenario=sample["scenario"],
+        readonly=False,
+        public=True,
+        pup_relpath=None,
+    )
+
+    class SampleUser:
+        is_authenticated = True
+
+        @staticmethod
+        def has_role(role: str) -> bool:
+            return role == "Admin"
+
     return render_template(
         "ui_showcase/component_gallery.htm",
         sample=sample,
@@ -65,4 +83,6 @@ def component_gallery() -> str:
         radio_options=radio_options,
         radio_mode_help=radio_mode_help,
         summary_rows=summary_rows,
+        current_ron=sample_run,
+        user=SampleUser(),
     )

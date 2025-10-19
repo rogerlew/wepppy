@@ -8,52 +8,95 @@
 {% block site_header %}
 {% if current_ron %}
 <header class="wc-header wc-run-header">
-  <div class="wc-run-header__inner">
-    <div class="wc-run-header__brand">
-      <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
-      <div class="wc-run-header__meta">
-        <span class="wc-run-header__runid">{{ current_ron.runid }}</span>
-        <span class="wc-run-header__config">{{ current_ron.config_stem }}</span>
+  <div class="wc-container wc-container--fluid">
+    <div class="wc-run-header__inner">
+      <div class="wc-run-header__title-row">
+        <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
+        <span class="wc-run-header__descriptor">
+          {{ current_ron.runid }} {{ current_ron.config_stem }}
+        </span>
       </div>
-    </div>
-    <div class="wc-run-header__fields">
-      <label class="wc-run-header__field">
-        <span>Project name</span>
-        <input id="input_name" name="name" type="text" class="wc-run-header__input disable-readonly"
-          placeholder="Name" value="{{ current_ron.name }}"
-          oninput="Project.getInstance().setNameFromInput()"
-          onblur="Project.getInstance().commitNameFromInput()">
-      </label>
-      <label class="wc-run-header__field">
-        <span>Scenario</span>
-        <input id="input_scenario" name="scenario" type="text" class="wc-run-header__input disable-readonly"
-          placeholder="Scenario" value="{{ current_ron.scenario }}"
-          oninput="Project.getInstance().setScenarioFromInput()"
-          onblur="Project.getInstance().commitScenarioFromInput()">
-      </label>
-    </div>
-    <div class="wc-run-header__actions">
-      <a class="pure-button pure-button-secondary" href="{{ url_for_run('run_0.runs0', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">Reload</a>
-      {% if not pup_relpath %}
-      <a class="pure-button pure-button-secondary" href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">Fork</a>
-      <a class="pure-button pure-button-secondary" href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">Archive</a>
-      {% endif %}
-      <a class="pure-button pure-button-secondary" href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">README</a>
-      <button type="button" class="pure-button" data-command="open-poweruser">PowerUser</button>
-      <button type="button" class="pure-button" data-command="open-unitizer">Unitizer</button>
-      <label class="wc-run-header__toggle">
-        <input id="checkbox_readonly" type="checkbox" {% if current_ron.readonly %}checked{% endif %}
-          onchange="Project.getInstance().set_readonly(this.checked);">
-        <span>Readonly</span>
-      </label>
-      <label class="wc-run-header__toggle">
-        <input id="checkbox_public" type="checkbox" {% if current_ron.public %}checked{% endif %}
-          onchange="Project.getInstance().set_public(this.checked);">
-        <span>Public</span>
-      </label>
-      {% if user.has_role('Admin') %}
-      <a class="pure-button pure-button-secondary" href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}" target="_blank" rel="noopener">Access log</a>
-      {% endif %}
+      <div class="wc-run-header__content">
+        <div class="wc-run-header__fields">
+          <label class="wc-run-header__field">
+            <span>Project name</span>
+            <input id="input_name"
+                   name="name"
+                   type="text"
+                   class="wc-run-header__input disable-readonly"
+                   placeholder="Name"
+                   value="{{ current_ron.name }}"
+                   oninput="Project.getInstance().setNameFromInput()"
+                   onblur="Project.getInstance().commitNameFromInput()">
+          </label>
+          <label class="wc-run-header__field">
+            <span>Scenario</span>
+            <input id="input_scenario"
+                   name="scenario"
+                   type="text"
+                   class="wc-run-header__input disable-readonly"
+                   placeholder="Scenario"
+                   value="{{ current_ron.scenario }}"
+                   oninput="Project.getInstance().setScenarioFromInput()"
+                   onblur="Project.getInstance().commitScenarioFromInput()">
+          </label>
+        </div>
+        <div class="wc-run-header__right">
+          <div class="wc-run-header__actions">
+            <a class="pure-button pure-button-secondary"
+               href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
+               target="_blank"
+               rel="noopener">
+              README
+            </a>
+            {% if not pup_relpath %}
+            <a class="pure-button pure-button-secondary"
+               href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
+               target="_blank"
+               rel="noopener">
+              FORK
+            </a>
+            <a class="pure-button pure-button-secondary"
+               href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
+               target="_blank"
+               rel="noopener">
+              ARCHIVE
+            </a>
+            {% endif %}
+          </div>
+          <details class="wc-run-header__menu">
+            <summary class="wc-run-header__menu-button pure-button pure-button-secondary">
+              More
+            </summary>
+            <div class="wc-run-header__menu-content">
+              <button type="button" class="pure-button" data-command="open-poweruser">PowerUser</button>
+              <button type="button" class="pure-button" data-command="open-unitizer">Unitizer</button>
+              <label class="wc-run-header__toggle">
+                <input id="checkbox_readonly"
+                       type="checkbox"
+                       {% if current_ron.readonly %}checked{% endif %}
+                       onchange="Project.getInstance().set_readonly(this.checked);">
+                <span>Readonly</span>
+              </label>
+              <label class="wc-run-header__toggle">
+                <input id="checkbox_public"
+                       type="checkbox"
+                       {% if current_ron.public %}checked{% endif %}
+                       onchange="Project.getInstance().set_public(this.checked);">
+                <span>Public</span>
+              </label>
+              {% if user.has_role('Admin') %}
+              <a class="pure-button pure-button-secondary"
+                 href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}"
+                 target="_blank"
+                 rel="noopener">
+                Access log
+              </a>
+              {% endif %}
+            </div>
+          </details>
+        </div>
+      </div>
     </div>
   </div>
 </header>

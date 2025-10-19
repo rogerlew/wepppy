@@ -75,7 +75,7 @@
 {% macro summary_panel() -%}
 <section class="wc-control__panel">
   <h3 class="wc-control__panel-title">Summary</h3>
-  <div id="info" class="wc-control__summary"></div>
+  <div id="info" class="wc-control__panel-summary"></div>
 </section>
 {%- endmacro %}
 
@@ -194,11 +194,11 @@
 </div>
 {%- endmacro %}
 
-{% macro header_text_field(field_id, label, value='', help=None, placeholder=None, attrs=None) -%}
+{% macro header_text_field(field_id, label, value='', help=None, placeholder=None, attrs=None, extra_class=None) -%}
 {% set attrs = attrs or {} %}
 <label class="wc-run-header__field">
   <span>{{ label }}</span>
-  <input class="wc-run-header__input"
+  <input class="wc-run-header__input{% if extra_class %} {{ extra_class }}{% endif %}"
          id="{{ field_id }}"
          name="{{ field_id }}"
          type="text"
