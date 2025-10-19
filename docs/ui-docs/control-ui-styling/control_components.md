@@ -12,13 +12,14 @@ Goal: define a consistent, minimal component set that we can apply to existing c
 ## 1. Control Architecture
 
 ### 1.1 Shell (`controls/_pure_base.htm`)
-- Wraps an entire control (title, optional toolbar, inputs, status panels).
-- Renders a two-column grid on wide screens: left for form content, right for status/summary/stacktrace panels. On small screens it collapses to single column.
-- Default sidebar:
+- Wraps an entire control (title, optional toolbar, inputs, status panels) inside a `<details>` element so the whole block can collapse/expand.
+- Summary row (`<summary>`) shows the title and optional meta; the chevron auto-rotates when open.
+- When expanded, the form body renders inputs first and stacks default panels beneath:
   - **Status panel** (`#rq_job`, `#status`, `#braille`).
   - **Summary panel** (`#info`).
   - **Details panel** (`#stacktrace`, hidden until populated).
-- Controls can override sidebar sections by redefining `control_sidebar` block.
+- Controls can override the panel stack via the `control_panels` block.
+- Optional toolbars render inside the expanded header so interactive buttons never live inside the `<summary>` element.
 - Macros in `_pure_macros.html` emit the same structure when a block-based approach is more convenient.
 
 ### 1.2 Card Layout

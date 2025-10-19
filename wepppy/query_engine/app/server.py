@@ -1,16 +1,16 @@
 from __future__ import annotations
 
+import os
 import json
 import logging
 import traceback
 from collections import OrderedDict
 from dataclasses import asdict
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import yaml
-import os
-
 from starlette.applications import Starlette
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import (
@@ -97,14 +97,53 @@ async def query_engine_http_exception_handler(request: StarletteRequest, exc: HT
 
 
 async def query_engine_exception_handler(request: StarletteRequest, exc: Exception) -> JSONResponse:
-    stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+    stacktrace_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+    stacktrace_text = "".join(stacktrace_lines)
+    stacktrace_clean = stacktrace_text.strip("\n")
+    message = _format_exception_message(exc)
+    runid = request.path_params.get("runid")
+
     LOGGER.exception("Unhandled exception for %s", request.url)
+    _log_exception_details(stacktrace_text, runid)
 
     payload = {
-        "error": str(exc) or exc.__class__.__name__,
-        "stacktrace": stacktrace,
+        "error": message,
+        "stacktrace": stacktrace_text,
+        "stacktrace_lines": stacktrace_clean.splitlines(),
+        "exc_info": stacktrace_text,
+        "status_code": 500,
     }
     return JSONResponse(payload, status_code=500)
+
+
+def _format_exception_message(exc: BaseException) -> str:
+    try:
+        detail = str(exc)
+    except Exception:
+        detail = repr(exc)
+
+    if detail and detail != exc.__class__.__name__:
+        return f"{exc.__class__.__name__}: {detail}"
+    return exc.__class__.__name__
+
+
+def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
+    if not runid:
+        return
+
+    try:
+        run_path = resolve_run_path(runid)
+    except Exception:
+        return
+
+    log_path = run_path / "exceptions.log"
+    try:
+        with log_path.open("a", encoding="utf-8") as handle:
+            handle.write(f"[{datetime.now().isoformat()}]\n")
+            handle.write(stacktrace_text)
+            handle.write("\n\n")
+    except OSError:
+        LOGGER.warning("Unable to append to query engine exception log for %s", runid, exc_info=True)
 
 
 async def homepage(request: StarletteRequest) -> Response:
@@ -234,43 +273,65 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     try:
         payload = QueryRequest(**body)
     except Exception as exc:  # pragma: no cover - simple validation error reporting
-        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         LOGGER.debug("Invalid query payload for %s: %s", run_path, exc, exc_info=True)
-        return JSONResponse({"error": f"Invalid query payload: {exc}", "stacktrace": stacktrace}, status_code=422)
+        return JSONResponse(
+            {
+                "error": f"Invalid query payload: {exc}",
+                "stacktrace": stacktrace_text,
+                "exc_info": stacktrace_text,
+                "status_code": 422,
+            },
+            status_code=422,
+        )
 
     missing = [spec.path for spec in payload.dataset_specs if not context.catalog.has(spec.path)]
     if missing:
         message = f"Dataset(s) not found: {', '.join(missing)}"
-        stacktrace = "".join(traceback.format_stack())
+        stacktrace_text = "".join(traceback.format_stack())
         LOGGER.warning("Query referenced missing datasets for %s: %s", run_path, missing)
-        return JSONResponse({"error": message, "stacktrace": stacktrace}, status_code=404)
+        return JSONResponse(
+            {
+                "error": message,
+                "stacktrace": stacktrace_text,
+                "exc_info": stacktrace_text,
+                "status_code": 404,
+            },
+            status_code=404,
+        )
 
     try:
         result = run_query(context, payload)
     except FileNotFoundError as exc:
-        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         LOGGER.warning("Query dataset missing for %s", run_path, exc_info=True)
         return JSONResponse(
-            {"error": str(exc), "stacktrace": stacktrace},
+            {"error": str(exc), "stacktrace": stacktrace_text, "exc_info": stacktrace_text, "status_code": 404},
             status_code=404,
         )
     except ValueError as exc:
-        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         LOGGER.debug("Query validation error for %s: %s", run_path, exc, exc_info=True)
         return JSONResponse(
             {
                 "error": str(exc),
-                "stacktrace": stacktrace,
+                "stacktrace": stacktrace_text,
+                "exc_info": stacktrace_text,
+                "status_code": 422,
             },
             status_code=422,
         )
     except Exception as exc:  # pragma: no cover - defensive error reporting
-        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         LOGGER.exception("Query execution failed for %s", run_path)
+        _log_exception_details(stacktrace_text, runid_param)
         return JSONResponse(
             {
                 "error": f"Query execution failed: {exc}",
-                "stacktrace": stacktrace,
+                "stacktrace": stacktrace_text,
+                "stacktrace_lines": stacktrace_text.strip("\n").splitlines(),
+                "exc_info": stacktrace_text,
+                "status_code": 500,
             },
             status_code=500,
         )

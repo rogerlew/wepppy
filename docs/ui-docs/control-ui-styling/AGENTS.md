@@ -18,7 +18,7 @@ _Last updated: 2025-10-18_
 | Component spec | `docs/ui-docs/control-ui-styling/control_components.md` | Macro contracts, layout hierarchy, run-header guidance. |
 | Blueprint | `wepppy/weppcloud/routes/ui_showcase/` | Flask blueprint for `/ui/components/` showcase. |
 | Prototype template | `wepppy/weppcloud/templates/ui_showcase/component_gallery.htm` | Demonstrates shell + example fields. Expand with every new macro. |
-| Pure shell | `wepppy/weppcloud/templates/controls/_pure_base.htm` | Block-based control structure (header, body grid, sidebar). |
+| Pure shell | `wepppy/weppcloud/templates/controls/_pure_base.htm` | Collapsible control shell with summary row and stacked status panels. |
 | Macros | `wepppy/weppcloud/templates/controls/_pure_macros.html` | Early helper macros (`control_shell`, `text_field`, etc.). |
 | CSS | `wepppy/weppcloud/static/css/ui-foundation.css` | Holds design tokens and new `.wc-control` styles. Extend here, not inline. |
 

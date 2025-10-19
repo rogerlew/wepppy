@@ -1,29 +1,48 @@
-{% macro control_shell(form_id, title, toolbar=None, description=None, meta=None) -%}
-<div class="wc-control">
-  <form id="{{ form_id }}"
-        class="wc-control__form pure-form"
-        action="javascript:void(0);"
-        enctype="multipart/form-data">
-    <header class="wc-control__header">
-      <div class="wc-control__title-row">
-        <h2 class="wc-control__title">{{ title }}</h2>
-        {% if toolbar %}
-        <div class="wc-control__toolbar">
-          {{ toolbar|safe }}
-        </div>
-        {% endif %}
-      </div>
-      {% if description %}
-      <div class="wc-control__description">
-        {{ description|safe }}
-      </div>
-      {% endif %}
+{% macro control_shell(form_id, title, toolbar=None, description=None, meta=None, collapsible=True, open=True) -%}
+{% if collapsible %}
+<details class="wc-control wc-control--collapsible"{% if open %} open{% endif %}>
+  <summary class="wc-control__summary">
+    <div class="wc-control__summary-text">
+      <h2 class="wc-control__title">{{ title }}</h2>
       {% if meta %}
       <div class="wc-control__meta">
         {{ meta|safe }}
       </div>
       {% endif %}
+    </div>
+    <span class="wc-control__summary-icon" aria-hidden="true"></span>
+  </summary>
+{% else %}
+<div class="wc-control">
+  <div class="wc-control__summary wc-control__summary--static">
+    <div class="wc-control__summary-text">
+      <h2 class="wc-control__title">{{ title }}</h2>
+      {% if meta %}
+      <div class="wc-control__meta">
+        {{ meta|safe }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+  <form id="{{ form_id }}"
+        class="wc-control__form pure-form"
+        action="javascript:void(0);"
+        enctype="multipart/form-data">
+    {% if description or toolbar %}
+    <header class="wc-control__header">
+      {% if description %}
+      <div class="wc-control__description">
+        {{ description|safe }}
+      </div>
+      {% endif %}
+      {% if toolbar %}
+      <div class="wc-control__toolbar">
+        {{ toolbar|safe }}
+      </div>
+      {% endif %}
     </header>
+    {% endif %}
     <div class="wc-control__grid">
       <section class="wc-control__inputs">
         {{ caller() }}
@@ -35,7 +54,11 @@
       </section>
     </div>
   </form>
+{% if collapsible %}
+</details>
+{% else %}
 </div>
+{% endif %}
 {%- endmacro %}
 
 {% macro status_panel() -%}

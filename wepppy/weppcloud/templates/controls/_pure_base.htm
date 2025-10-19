@@ -1,22 +1,37 @@
-<div class="wc-control">
+{% set _form_title %}{% block form_title %}{% endblock %}{% endset %}
+{% set _form_description %}{% block form_description %}{% endblock %}{% endset %}
+{% set _form_toolbar %}{% block form_toolbar %}{% endblock %}{% endset %}
+{% set _form_meta %}{% block form_meta %}{% endblock %}{% endset %}
+<details class="wc-control wc-control--collapsible" open>
+  <summary class="wc-control__summary">
+    <div class="wc-control__summary-text">
+      <h2 class="wc-control__title">{{ _form_title|trim }}</h2>
+      {% if _form_meta|trim %}
+      <div class="wc-control__meta">
+        {{ _form_meta|trim|safe }}
+      </div>
+      {% endif %}
+    </div>
+    <span class="wc-control__summary-icon" aria-hidden="true"></span>
+  </summary>
   <form id="{% block form_id %}{% endblock %}"
         class="wc-control__form pure-form"
         action="javascript:void(0);"
         enctype="multipart/form-data">
+    {% if _form_description|trim or _form_toolbar|trim %}
     <header class="wc-control__header">
-      <div class="wc-control__title-row">
-        <h2 class="wc-control__title">{% block form_title %}{% endblock %}</h2>
-        <div class="wc-control__toolbar">
-          {% block form_toolbar %}{% endblock %}
-        </div>
-      </div>
+      {% if _form_description|trim %}
       <div class="wc-control__description">
-        {% block form_description %}{% endblock %}
+        {{ _form_description|trim|safe }}
       </div>
-      <div class="wc-control__meta">
-        {% block form_meta %}{% endblock %}
+      {% endif %}
+      {% if _form_toolbar|trim %}
+      <div class="wc-control__toolbar">
+        {{ _form_toolbar|trim|safe }}
       </div>
+      {% endif %}
     </header>
+    {% endif %}
 
     {% block control_body %}
     <div class="wc-control__grid">
@@ -46,4 +61,4 @@
     </div>
     {% endblock %}
   </form>
-</div>
+</details>
