@@ -168,6 +168,12 @@ wctl run-stubgen                      # sync stubs/wepppy/
 
 ### American English Normalization
 - When you modify files, run the `uk2us` tool to normalize any British spellings (for example, `colour` → `color`).
+  - **Always preview changes first** using diff to avoid breaking code blocks or making nonsensical substitutions:
+    ```bash
+    diff -u path/to/file.py <(uk2us path/to/file.py)
+    ```
+  - Review the diff output carefully to ensure changes are appropriate for prose, comments, and docstrings
+  - Avoid applying uk2us if changes would affect code identifiers, string literals, or technical terms
   - Targeted update: `uk2us -i path/to/file.py`
   - Batch update: `find wepppy/all_your_base -type f -name '*.py' -print0 | xargs -0 uk2us -i`
 - If you encounter incorrect or missing substitutions, adjust `/workdir/uk2us/config/uk2us_rules.json`.

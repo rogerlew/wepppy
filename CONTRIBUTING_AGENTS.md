@@ -102,6 +102,12 @@ What are you testing?
 
 ### American English Normalization
 - Run `uk2us` on touched files to translate British spellings to American spellings.
+  - **Preview changes first with diff** to ensure no code blocks or nonsensical changes:
+    ```bash
+    diff -u path/to/file.py <(uk2us path/to/file.py)
+    ```
+  - Verify changes are appropriate for comments, docstrings, and documentation only
+  - Do not apply if changes would affect variable names, function identifiers, or string literals
   - Single file: `uk2us -i path/to/file.py`
   - Batch example: `find wepppy -type f -name '*.py' -print0 | xargs -0 uk2us -i`
 - Agents have write access to `/workdir/uk2us/config/uk2us_rules.json` to correct odd replacements.

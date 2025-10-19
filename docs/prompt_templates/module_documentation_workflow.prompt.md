@@ -8,6 +8,10 @@ Background references:
 
 When asked to document or modernize a module (or when planning the work yourself), follow this sequence:
 
+When asked to document, limit code changes to those strictly necessary to clarify behavior, add type hints, and ensure stub consistency. Avoid refactoring or altering logic unless absolutely required for correctness or clarity.
+
+The goal of documentation is to increase code understandability and maintainability without changing its external behavior. Focus on clear docstrings, accurate type hints, and consistent stubs to support developers and tooling.
+
 1. **Survey & plan**
    - Read the existing `.py` module and any related tests or dev-notes.
    - Check `AGENTS.md` for project-wide expectations (type hints, docstrings, stubs).
@@ -47,6 +51,15 @@ When asked to document or modernize a module (or when planning the work yourself
 7. **Final review**
    - Confirm `git status` shows the expected `.py` and `.pyi` edits plus any regenerated prompt/README changes.
    - Keep generated `stubs/` tree in sync by running `python tools/sync_stubs.py` before committing.
+   - Normalize spellings with `uk2us` on the touched files:
+     - **Always preview changes first** to avoid breaking code blocks or making nonsensical substitutions:
+       ```bash
+       diff -u path/to/file.py <(uk2us path/to/file.py)
+       ```
+     - Review the diff carefully—changes should only affect comments, docstrings, and documentation
+     - Do not apply if changes would modify code identifiers, string literals, or technical terms
+     - Apply after verification: `uk2us -i path/to/file.py`
+     - Adjust `/workdir/uk2us/config/uk2us_rules.json` if the defaults misfire
    - Summarize the changes in PR/commit messages, referencing docstrings, typings, stubs, and validation commands used.
 
 This prompt should be read as instructions to yourself (or to another contributor) whenever a task involves documenting or typing a module. Copy/paste it into your working notes or agent prompt to stay aligned with the project workflow.
