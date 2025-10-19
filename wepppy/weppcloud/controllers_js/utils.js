@@ -76,50 +76,38 @@ function unlockButton(buttonId, lockImageId) {
 
 
 const updateRangeMaxLabel_mm = function (r, labelMax) {
-    const in_units = 'mm';
-    const mmValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
-    const inValue = (r * 0.0393701).toFixed(1); // Convert mm to inches
-
-    const currentUnits = $("input[name='unitizer_xs-distance_radio']:checked").val(); // mm or in
-
-    const mmClass = currentUnits === 'mm' ? '' : 'invisible';
-    const inClass = currentUnits === 'in' ? '' : 'invisible';
-
-    labelMax.html(
-        `<div class="unitizer-wrapper"><div class="unitizer units-mm ${mmClass}">${mmValue} mm</div><div class="unitizer units-in ${inClass}">${inValue} in</div></div>`
-    );
+    UnitizerClient.ready()
+        .then(function (client) {
+            var html = client.renderValue(r, 'mm', { includeUnits: true });
+            labelMax.html(html);
+        })
+        .catch(function (error) {
+            console.error("Failed to update unitizer label (mm)", error);
+        });
 };
 
 
 const updateRangeMaxLabel_kgha = function (r, labelMax) {
-    const in_units = 'kg/ha';
-    const kgHaValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
-    const lbAcValue = (r * 0.892857).toFixed(1); // Convert kg/ha to lb/ac
-
-    const currentUnits = $("input[name='unitizer_xs-surface-density_radio']:checked").val(); // kg/ha or lb/acre
-
-    const kgHaClass = currentUnits === 'kg_ha-_3' ? '' : 'invisible';
-    const lbAcClass = currentUnits === 'lb_acre-_3' ? '' : 'invisible';
-
-    labelMax.html(
-        `<div class="unitizer-wrapper"><div class="unitizer units-kg-ha ${kgHaClass}">${kgHaValue} kg/ha</div><div class="unitizer units-lb-ac ${lbAcClass}">${lbAcValue} lb/ac</div></div>`
-    );
+    UnitizerClient.ready()
+        .then(function (client) {
+            var html = client.renderValue(r, 'kg/ha', { includeUnits: true });
+            labelMax.html(html);
+        })
+        .catch(function (error) {
+            console.error("Failed to update unitizer label (kg/ha)", error);
+        });
 };
 
 
 const updateRangeMaxLabel_tonneha = function (r, labelMax) {
-    const in_units = 'tonne/ha';
-    const tonneHaValue = parseFloat(r).toFixed(1); // Keep 1 decimal place for consistency
-    const tonAcValue = (r * 0.44609).toFixed(1); // Convert tonne/ha to ton/ac
-
-    const currentUnits = $("input[name='unitizer_surface-density_radio']:checked").val(); // tonne/ha or ton/acre
-
-    const tonneHaClass = currentUnits === 'tonne_ha-_3' ? '' : 'invisible';
-    const tonAcClass = currentUnits === 'ton_acre-_3' ? '' : 'invisible';
-
-    labelMax.html(
-        `<div class="unitizer-wrapper"><div class="unitizer units-kg-ha ${tonneHaClass}">${tonneHaValue} tonne/ha</div><div class="unitizer units-lb-ac ${tonAcClass}">${tonAcValue} ton/ac</div></div>`
-    );
+    UnitizerClient.ready()
+        .then(function (client) {
+            var html = client.renderValue(r, 'tonne/ha', { includeUnits: true });
+            labelMax.html(html);
+        })
+        .catch(function (error) {
+            console.error("Failed to update unitizer label (tonne/ha)", error);
+        });
 };
 
 

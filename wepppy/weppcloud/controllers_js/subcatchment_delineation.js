@@ -841,53 +841,24 @@ var SubcatchmentDelineation = function () {
                 self.grid.setDisplayRange(-1.0 * v, v);
             }
 
-            $.get({
-                url: "unitizer/",
-                data: { value: v, in_units: 'kg/m^2' },
-                cache: false,
-                success: function success(response) {
-                    self.labelGriddedLossMax.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+            UnitizerClient.ready()
+                .then(function (client) {
+                    var maxHtml = client.renderValue(v, 'kg/m^2', { includeUnits: true });
+                    var minHtml = client.renderValue(-1.0 * v, 'kg/m^2', { includeUnits: true });
+                    var unitsHtml = client.renderUnits('kg/m^2');
 
-            $.get({
-                url: "unitizer/",
-                data: { value: -1.0 * v, in_units: 'kg/m^2' },
-                cache: false,
-                success: function success(response) {
-                    self.labelGriddedLossMin.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+                    self.labelGriddedLossMax.html(maxHtml);
+                    self.labelGriddedLossMin.html(minHtml);
+                    self.labelGriddedLossUnits.html(unitsHtml);
 
-            $.get({
-                url: "unitizer_units/",
-                data: { in_units: 'kg/m^2' },
-                cache: false,
-                success: function success(response) {
-                    self.labelGriddedLossUnits.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+                    var project = Project.getInstance();
+                    if (project && typeof project.set_preferred_units === 'function') {
+                        project.set_preferred_units();
+                    }
+                })
+                .catch(function (error) {
+                    self.pushErrorStacktrace(self, error);
+                });
         };
 
         // Rhem Visualizations

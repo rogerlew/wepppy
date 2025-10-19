@@ -16,6 +16,36 @@ var Project = function () {
         that._scenarioDebounceTimer = null;
         that._notifyTimer = null;
 
+        var applyUnitizerPreferences = function (client, root) {
+            var scope = root || document;
+            var tokens = client.getPreferenceTokens();
+            Object.keys(tokens).forEach(function (categoryKey) {
+                var groupName = "unitizer_" + categoryKey + "_radio";
+                var radios = document.querySelectorAll("input[name='" + groupName + "']");
+                radios.forEach(function (radio) {
+                    var value = radio.value;
+                    var elements = document.querySelectorAll(".units-" + value);
+                    elements.forEach(function (el) {
+                        el.classList.add("invisible");
+                    });
+                });
+
+                var preferredToken = tokens[categoryKey];
+                if (!preferredToken) {
+                    return;
+                }
+                var preferredElements = document.querySelectorAll(".units-" + preferredToken);
+                preferredElements.forEach(function (el) {
+                    el.classList.remove("invisible");
+                });
+            });
+
+            client.updateUnitLabels(scope);
+            client.registerNumericInputs(scope);
+            client.updateNumericFields(scope);
+            client.dispatchPreferenceChange();
+        };
+
         that._notifyCommandBar = function (message, options) {
             options = options || {};
             var duration = options.duration;
@@ -163,16 +193,39 @@ var Project = function () {
             that.setScenario(value, options);
         };
 
+        UnitizerClient.ready()
+            .then(function (client) {
+                client.syncPreferencesFromDom(document);
+                console.log("[Unitizer] Initial preferences", client.getPreferencePayload());
+                applyUnitizerPreferences(client, document);
+            })
+            .catch(function (error) {
+                console.error("Failed to initialize unit preferences", error);
+            });
+
         that.handleGlobalUnitPreference = function (pref) {
             var numericPref = Number(pref);
-            if (typeof window.setGlobalUnitizerPreference === 'function') {
-                window.setGlobalUnitizerPreference(numericPref);
+            console.log("[Unitizer] handleGlobalUnitPreference invoked with", pref);
+            if (Number.isNaN(numericPref)) {
+                return Promise.resolve();
             }
-            that.unitChangeEvent();
+            return UnitizerClient.ready()
+                .then(function (client) {
+                    client.setGlobalPreference(numericPref);
+                    client.applyPreferenceRadios(document);
+                    client.applyGlobalRadio(numericPref, document);
+                    applyUnitizerPreferences(client, document);
+                    console.log("[Unitizer] Global preference applied", client.getPreferencePayload());
+                    return that.unitChangeEvent({ syncFromDom: false, client: client });
+                })
+                .catch(function (error) {
+                    console.error("Error applying global unit preference", error);
+                });
         };
 
         that.handleUnitPreferenceChange = function () {
-            that.unitChangeEvent();
+            console.log("[Unitizer] handleUnitPreferenceChange triggered");
+            return that.unitChangeEvent();
         };
 
         that.clear_locks = function () {
@@ -361,60 +414,49 @@ var Project = function () {
             return request;
         };
 
-        function replaceAll(str, find, replace) {
-            return str.replace(new RegExp(find, 'g'), replace);
-        }
+        that.unitChangeEvent = function (options) {
+            options = options || {};
+            console.log("[Unitizer] unitChangeEvent", options);
+            return UnitizerClient.ready()
+                .then(function (client) {
+                    if (options.syncFromDom !== false) {
+                        client.syncPreferencesFromDom(document);
+                    }
+                    console.log("[Unitizer] Preferences before apply", client.getPreferencePayload());
+                    applyUnitizerPreferences(client, document);
+                    var unitPreferences = client.getPreferencePayload();
 
-        that.unitChangeEvent = function () {
-            var self = instance;
-
-            var prefs = $("[name^=unitizer_]");
-
-            var unit_preferences = {};
-            for (var i = 0; i < prefs.length; i++) {
-                var name = prefs[i].name;
-
-                var units = $("input[name='" + name + "']:checked").val();
-
-                name = name.replace('unitizer_', '').replace('_radio', '');
-
-                units = replaceAll(units, '_', '/');
-                units = replaceAll(units, '-sqr', '^2');
-                units = replaceAll(units, '-cube', '^3');
-
-                unit_preferences[name] = units;
-            }
-
-            $.post({
-                url: site_prefix + "/runs/" + runid + "/" + config + "/tasks/set_unit_preferences/",
-                data: unit_preferences,
-                success: function success(response) {
-                    if (response.Success === true) { } else { }
-                },
-                error: function error(jqXHR) {
-                    console.log(jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    console.log(error);
-                }
-            });
-
-            self.set_preferred_units();
+                    return $.post({
+                        url: site_prefix + "/runs/" + runid + "/" + config + "/tasks/set_unit_preferences/",
+                        data: unitPreferences,
+                        success: function success(response) {
+                            if (response.Success !== true) {
+                                console.warn("Unit preference update did not succeed", response);
+                            }
+                        },
+                        error: function error(jqXHR) {
+                            console.log(jqXHR.responseJSON);
+                        },
+                        fail: function fail(error) {
+                            console.log(error);
+                        }
+                    });
+                })
+                .catch(function (error) {
+                    console.error("Failed to persist unit preferences", error);
+                });
         };
 
-        that.set_preferred_units = function () {
-            var units = undefined;
-            var prefs = $("[name^=unitizer_]");
-            for (var i = 0; i < prefs.length; i++) {
-                var name = prefs[i].name;
-                var radios = $("input[name='" + name + "']");
-                for (var j = 0; j < radios.length; j++) {
-                    units = radios[j].value;
-                    $(".units-" + units).addClass("invisible");
-                }
-                units = $("input[name='" + name + "']:checked").val();
-                $(".units-" + units).removeClass("invisible");
-            }
+        that.set_preferred_units = function (root) {
+            return UnitizerClient.ready()
+                .then(function (client) {
+                    client.syncPreferencesFromDom(root || document);
+                    applyUnitizerPreferences(client, root || document);
+                    return client;
+                })
+                .catch(function (error) {
+                    console.error("Failed to apply unit preferences", error);
+                });
         };
 
         return that;

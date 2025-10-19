@@ -46,7 +46,22 @@ _Last updated: 2025-10-18_
 - Keep legacy `_base.htm` untouched until a new macro pattern is proven in the showcase and documented.
 - When a control is migrated, update both `control-inventory.md` and this AGENTS file with progress/notes.
 - Pure shell styling lives in `ui-foundation.css`; no inline styles in templates.
+- Checkbox/radio styling: reuse shared classes (`.wc-choice`, `.wc-choice--checkbox`, `.wc-run-header__toggle`) so accent colors and spacing stay consistent; blue system toggles mean the class is missing.
 - Dark mode is explicitly out-of-scope for this iteration; stay focused on polishing the light theme tokens and contrast ratios.
+
+## Near-Term Focus
+- **Unitizer modal polish:** restyle the modal with Pure tokens and align the toggle controls with the shared checkbox/radio pattern.
+- **Numeric unit switching:** wire the unitizer controls into `numeric_field` so unit changes propagate across paired inputs.
+- **Status panel refresh:** parameterize the height, keep content pushing upward, and adopt the shared pattern in `rq-fork-console` and `rq-archive-dashboard`.
+- **Stack trace macro:** extract and reuse a macro for rendering stack traces for consistency across controls.
+- **Controller metadata contract:** formalize the schema (labels, units, validation states) so macros can rely on consistent inputs.
+- **Error/warning messaging:** standardise copy and iconography for validation states before wider macro adoption.
+
+
+### Coordination Notes
+- Keep run-time behaviour intact: preference saves still post through `Project` routes; new JS must merely hydrate from the static map.
+- Guard against stale data by hashing the generated map or versioning it alongside the controllers bundle timestamp.
+- Avoid introducing a new build dependency if possible—prefer extending the existing `wctl build-static-assets` / controllers build flow.
 
 ## Open Questions
 - Final macro signatures for table-oriented panels (landuse/soils summaries) and how to wrap dynamic controller-managed sections; defer decision until we port the first legacy control.

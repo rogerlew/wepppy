@@ -41,7 +41,34 @@
                    onblur="Project.getInstance().commitScenarioFromInput()">
           </label>
         </div>
-        <div class="wc-run-header__right">
+        <div class="wc-run-header__actions">
+          <a class="pure-button pure-button-secondary" href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">README</a>
+          {% if not pup_relpath %}
+          <a class="pure-button pure-button-secondary" href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">FORK</a>
+          <a class="pure-button pure-button-secondary" href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">ARCHIVE</a>
+          {% endif %}
+        </div>
+        <details class="wc-run-header__menu">
+          <summary class="wc-run-header__menu-button pure-button pure-button-secondary">More</summary>
+          <div class="wc-run-header__menu-content">
+            <button type="button" class="pure-button" data-command="open-poweruser">PowerUser</button>
+            <button type="button" class="pure-button" data-command="open-unitizer">Unitizer</button>
+            <label class="wc-run-header__toggle">
+              <input id="checkbox_readonly" type="checkbox" {% if current_ron.readonly %}checked{% endif %}
+                onchange="Project.getInstance().set_readonly(this.checked);">
+              <span>Readonly</span>
+            </label>
+            <label class="wc-run-header__toggle">
+              <input id="checkbox_public" type="checkbox" {% if current_ron.public %}checked{% endif %}
+                onchange="Project.getInstance().set_public(this.checked);">
+              <span>Public</span>
+            </label>
+            {% if user.has_role('Admin') %}
+            <a class="pure-button pure-button-secondary" href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}" target="_blank" rel="noopener">Access log</a>
+            {% endif %}
+          </div>
+        </details>
+          </details>
           <div class="wc-run-header__actions">
             <a class="pure-button pure-button-secondary"
                href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
@@ -64,37 +91,6 @@
             </a>
             {% endif %}
           </div>
-          <details class="wc-run-header__menu">
-            <summary class="wc-run-header__menu-button pure-button pure-button-secondary">
-              More
-            </summary>
-            <div class="wc-run-header__menu-content">
-              <button type="button" class="pure-button" data-command="open-poweruser">PowerUser</button>
-              <button type="button" class="pure-button" data-command="open-unitizer">Unitizer</button>
-              <label class="wc-run-header__toggle">
-                <input id="checkbox_readonly"
-                       type="checkbox"
-                       {% if current_ron.readonly %}checked{% endif %}
-                       onchange="Project.getInstance().set_readonly(this.checked);">
-                <span>Readonly</span>
-              </label>
-              <label class="wc-run-header__toggle">
-                <input id="checkbox_public"
-                       type="checkbox"
-                       {% if current_ron.public %}checked{% endif %}
-                       onchange="Project.getInstance().set_public(this.checked);">
-                <span>Public</span>
-              </label>
-              {% if user.has_role('Admin') %}
-              <a class="pure-button pure-button-secondary"
-                 href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}"
-                 target="_blank"
-                 rel="noopener">
-                Access log
-              </a>
-              {% endif %}
-            </div>
-          </details>
         </div>
       </div>
     </div>
@@ -152,14 +148,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     if (unitizerButton && unitizerModal) {
       unitizerButton.addEventListener('click', () => {
-        const isHidden = unitizerModal.hasAttribute('hidden');
-        if (isHidden) {
-          unitizerModal.removeAttribute('hidden');
-          unitizerModal.dataset.open = 'true';
-          unitizerModal.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          unitizerModal.setAttribute('hidden', 'hidden');
-          delete unitizerModal.dataset.open;
+        if (window.ModalManager && typeof window.ModalManager.open === 'function') {
+          window.ModalManager.open(unitizerModal);
         }
       });
     }

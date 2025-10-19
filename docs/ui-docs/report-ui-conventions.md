@@ -8,13 +8,13 @@ This note captures the patterns we just introduced while modernizing the WEPP re
 - The command bar is included at the base template level; individual reports do not add it themselves.
 
 ## Script dependencies
-- Until the unitizer is rewritten, we still need jQuery on report pages. `_base_report.htm` loads the vendored `vendor/jquery/jquery.js` before `controllers.js`. Keep this ordering.
+- Reports still rely on jQuery for legacy controllers. `_base_report.htm` loads the vendored `vendor/jquery/jquery.js` before `controllers.js`; keep this ordering until the controllers are converted.
 - `report_csv.js` is the only bespoke JS each report needs to add the “Download CSV” behavior. It is already pulled in by `_base_report.htm`.
 
 ## Report templating
 - Render reports via Jinja and `ReportBase` implementations. Reports should pass `report` (or multiple reports) to the template and iterate over `report.header`, `report.units`, and the row iterator. Avoid duplicating query logic in the template.
 - Template context should include the unitizer instance (`unitizer_nodb`) and `wepppy.nodb.unitizer.precisions` so the modal controls render. `_base_report.htm` already passes these through for shared modals.
-- Use the standard modal partials (`controls/unitizer_modal.htm`, `controls/poweruser_panel.htm`). The new JS expects their close buttons to set `data-close` attributes.
+- Use the standard modal partials (`controls/unitizer_modal.htm`, `controls/poweruser_panel.htm`). `ModalManager` binds any button with `data-modal-open`/`data-modal-dismiss` so the shared header triggers continue to function without Bootstrap.
 
 ## Tables
 - All sortable tables should add the `sortable` class and rely on `static/js/sorttable.js`. The new sorter honors `sorttable_customkey`, `data-sort-type`, and `data-sort-default` without Bootstrap dependencies.
@@ -49,7 +49,7 @@ This note captures the patterns we just introduced while modernizing the WEPP re
 - Stick with the new “Download CSV” CTA below the table – no wide buttons in the header.
 - Sorting indicators are handled by CSS (`.sortable-indicator`); no extra markup required beyond the `sortable` class.
 - When you add new reports, inherit from `_base_report.htm` and reuse these primitives rather than creating bespoke HTML/CSS.
-- The Pure-based modals rely on `data-close` attributes for the close buttons. Reuse `controls/unitizer_modal.htm` and `controls/poweruser_panel.htm` as-is so the shared header triggers continue to function.
+- Pure-based modals now rely on `ModalManager`; trigger them with `data-modal-open="modalId"` and add `data-modal-dismiss` to close controls. Reuse `controls/unitizer_modal.htm` for the unitizer so button wiring stays consistent, and migrate the PowerUser modal separately when its redesign lands.
 - The CSV helper expects reports to call `_render_report_csv` (or follow the same pattern) so unitizer conversions and filenames stay consistent.
 - Clipboard actions should use unobtrusive buttons: add `data-copy-table="table_id"` to a `.pure-button-link`, then attach a single listener that calls `window.copytable(id)` after `DOMContentLoaded`. Avoid inline `onclick` handlers.
 

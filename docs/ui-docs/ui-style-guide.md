@@ -25,6 +25,18 @@
 5. Swap Bootstrap buttons for `.pure-button` + `.pure-button-secondary`/`.pure-button-link` to reuse the accent palette and disabled states.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L362-L421】
 6. Wrap data lists with `.wc-table` and `.wc-pagination` for consistent chrome on desktop and mobile without custom CSS.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L426-L443】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L530-L557】
 
+++ Form controls → checkboxes & radios
+When adding or updating checkboxes/radio buttons, follow these conventions so spacing, colors, and accessibility stay predictable:
+
+| Pattern | Guidance |
+| --- | --- |
+| Standalone checkbox | Wrap the `<input>` in `.wc-run-header__toggle` (for header placements) or `.wc-choice--checkbox` (general forms). Both enforce a 1rem square, `accent-color: var(--wc-color-accent)`, and label spacing. |
+| Radio/checkbox groups | Use `.wc-choice` wrappers inside `.wc-choice-group`. Horizontal groups set `data-choice-group` or `.wc-choice-group--horizontal` to flip layout without inline CSS. |
+| Dropdown/tucked controls | In dropdown menus (e.g., run header “More” menu), keep toggles inside `.wc-run-header__menu-content` so spacing and accent colors match other contexts. |
+| Accessibility | Always pair inputs with visible labels (`<label>` or `.wc-choice__label`). Checkbox/radio macros already add `aria-describedby` hooks—mirror that pattern if hand-coding markup. |
+
+Daily reminder: browsers default to blue checkboxes unless the relevant class sets `accent-color`. If you see blue, ensure `.wc-run-header__toggle`, `.wc-choice--checkbox`, or `.wc-choice` is applied.
+
 ### Base layout snippet
 Embed the shared assets in a Jinja base template that other pages extend:
 

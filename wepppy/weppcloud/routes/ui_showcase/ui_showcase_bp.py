@@ -1,14 +1,54 @@
+from collections import OrderedDict
 from types import SimpleNamespace
 from markupsafe import Markup
 from flask import Blueprint, render_template
 
+from wepppy.weppcloud.controllers_js import unitizer_map_builder
 
 ui_showcase_bp = Blueprint("ui_showcase", __name__, url_prefix="/ui/components")
+
+
+def _build_unitizer_demo():
+    map_data = unitizer_map_builder.build_unitizer_map_data()
+    precisions = OrderedDict()
+    for category in map_data["categories"]:
+        units = OrderedDict()
+        for unit in category["units"]:
+            units[unit["key"]] = unit["precision"]
+        precisions[category["key"]] = units
+
+    preferences = {}
+    for category_key, units in precisions.items():
+        keys = list(units.keys())
+        preferences[category_key] = keys[1] if len(keys) > 1 else keys[0]
+
+    unitizer_stub = SimpleNamespace(preferences=preferences, is_english=True)
+
+    def cls_units(value):
+        return (
+            str(value)
+            .replace("/", "_")
+            .replace("^2", "-sqr")
+            .replace("^3", "-cube")
+            .replace(",", "-_")
+        )
+
+    def str_units(value):
+        return (
+            str(value)
+            .split(",")[0]
+            .replace("^2", "<sup>2</sup>")
+            .replace("^3", "<sup>3</sup>")
+        )
+
+    return map_data, precisions, unitizer_stub, cls_units, str_units
 
 
 @ui_showcase_bp.route("/", methods=["GET"])
 def component_gallery() -> str:
     """Render the UI component showcase gallery."""
+    map_data, precisions, unitizer_stub, cls_units, str_units = _build_unitizer_demo()
+
     sample = {
         "project_name": "South Fork Demo",
         "scenario": "baseline",
@@ -85,4 +125,9 @@ def component_gallery() -> str:
         summary_rows=summary_rows,
         current_ron=sample_run,
         user=SampleUser(),
+        precisions=precisions,
+        unitizer_nodb=unitizer_stub,
+        cls_units=cls_units,
+        str_units=str_units,
+        unitizer_map=map_data,
     )

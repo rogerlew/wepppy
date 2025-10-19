@@ -63,7 +63,9 @@
          precision="0.1",
          min="0",
          help="Unit-aware numeric field; precision feeds the unitizer hook.",
-         error="Provide a value between 0 and 5000 mm."
+         error="Provide a value between 0 and 5000 mm.",
+         unit_category="xs-distance",
+         unit_name="mm"
        ) }}
 
     {{ ui.text_field("location", "Location", value=sample.location, help="Standard text field layout remains responsive.") }}
@@ -135,7 +137,9 @@
            value="2.5",
            unit_label="mm/hr",
            precision="0.1",
-           help="Minimum hourly precipitation to trigger runoff calculations."
+           help="Minimum hourly precipitation to trigger runoff calculations.",
+           unit_category="xs-distance-rate",
+           unit_name="mm/hour"
          ) }}
       {{ ui.text_field(
            "comment_token",
@@ -152,4 +156,270 @@
 
     {{ ui.dynamic_slot("map_slot", help="Controllers inject interactive maps or charts into slots so cards stay balanced.", attrs={"data-slot": "map-preview"}) }}
   {% endcall %}
+
+  <section class="wc-stack">
+    <h2>Unitizer Modal</h2>
+    <p class="wc-text-muted">
+      Preview the Pure-styled unitizer. Adjust global defaults or override unit selections per category
+      without leaving the gallery.
+    </p>
+    <div>
+      <button type="button"
+              class="pure-button pure-button-primary"
+              data-modal-open="unitizerModalDemo">
+        Open Unitizer
+      </button>
+    </div>
+  </section>
+
+  {% with modal_id="unitizerModalDemo", modal_title="Unitizer Preferences (Demo)" %}
+    {% include "controls/unitizer_modal.htm" %}
+  {% endwith %}
+{% endblock %}
+
+{% block script_extras %}
+  {{ super() }}
+  <script>
+    window.__unitizerMap = {{ unitizer_map | tojson }};
+    window.site_prefix = window.site_prefix || "";
+    window.runid = window.runid || "ui-demo";
+    window.config = window.config || "cfg";
+  </script>
+  <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      if (window.ModalManager) {
+        return;
+      }
+
+      var ACTIVE_CLASS = "is-visible";
+      var BODY_ACTIVE_CLASS = "wc-modal-open";
+      var focusableSelectors = [
+        "a[href]",
+        "button:not([disabled])",
+        "input:not([disabled])",
+        "select:not([disabled])",
+        "textarea:not([disabled])",
+        "[tabindex]:not([tabindex='-1'])"
+      ].join(",");
+
+      var activeModal = null;
+      var previouslyFocused = null;
+
+      function toElement(target) {
+        if (!target) {
+          return null;
+        }
+        if (typeof target === "string") {
+          return document.getElementById(target);
+        }
+        return target;
+      }
+
+      function getFocusable(modal) {
+        var dialog = modal.querySelector(".wc-modal__dialog") || modal;
+        return Array.prototype.slice.call(dialog.querySelectorAll(focusableSelectors));
+      }
+
+      function trapFocus(event) {
+        if (!activeModal || event.key !== "Tab") {
+          return;
+        }
+
+        var focusable = getFocusable(activeModal);
+        if (focusable.length === 0) {
+          event.preventDefault();
+          return;
+        }
+
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        var current = document.activeElement;
+
+        if (event.shiftKey) {
+          if (current === first || !activeModal.contains(current)) {
+            event.preventDefault();
+            last.focus();
+          }
+        } else if (current === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+
+      function onKeyDown(event) {
+        if (!activeModal) {
+          return;
+        }
+        if (event.key === "Escape") {
+          closeModal(activeModal);
+          return;
+        }
+        trapFocus(event);
+      }
+
+      function activateModal(modal) {
+        if (activeModal === modal) {
+          return;
+        }
+        if (activeModal) {
+          closeModal(activeModal);
+        }
+
+        previouslyFocused = document.activeElement;
+        activeModal = modal;
+
+        modal.removeAttribute("hidden");
+        modal.setAttribute("data-modal-open", "true");
+        modal.classList.add(ACTIVE_CLASS);
+        document.body.classList.add(BODY_ACTIVE_CLASS);
+
+        var focusable = getFocusable(modal);
+        if (focusable.length > 0) {
+          focusable[0].focus();
+        } else {
+          modal.focus({ preventScroll: true });
+        }
+
+        document.addEventListener("keydown", onKeyDown, true);
+      }
+
+      function deactivateModal(modal) {
+        modal.classList.remove(ACTIVE_CLASS);
+        modal.removeAttribute("data-modal-open");
+        modal.setAttribute("hidden", "hidden");
+      }
+
+      function closeModal(modal) {
+        var element = toElement(modal);
+        if (!element) {
+          return;
+        }
+
+        deactivateModal(element);
+
+        if (activeModal === element) {
+          activeModal = null;
+          document.body.classList.remove(BODY_ACTIVE_CLASS);
+          document.removeEventListener("keydown", onKeyDown, true);
+          if (previouslyFocused && typeof previouslyFocused.focus === "function") {
+            previouslyFocused.focus({ preventScroll: true });
+          }
+          previouslyFocused = null;
+        }
+      }
+
+      function openModal(modal) {
+        var element = toElement(modal);
+        if (!element) {
+          return;
+        }
+        activateModal(element);
+      }
+
+      function toggleModal(modal) {
+        var element = toElement(modal);
+        if (!element) {
+          return;
+        }
+        if (element.hasAttribute("data-modal-open")) {
+          closeModal(element);
+        } else {
+          openModal(element);
+        }
+      }
+
+      function handleOpenClick(event) {
+        var trigger = event.target.closest("[data-modal-open]");
+        if (!trigger) {
+          return;
+        }
+        event.preventDefault();
+        var targetId = trigger.getAttribute("data-modal-open");
+        if (targetId) {
+          openModal(targetId);
+        }
+      }
+
+      function handleDismissClick(event) {
+        var dismiss = event.target.closest("[data-modal-dismiss]");
+        if (!dismiss) {
+          return;
+        }
+        event.preventDefault();
+        var modal = dismiss.closest("[data-modal]");
+        if (modal) {
+          closeModal(modal);
+        }
+      }
+
+      function handleOverlayClick(event) {
+        if (!activeModal) {
+          return;
+        }
+        if (event.target === activeModal) {
+          closeModal(activeModal);
+        }
+      }
+
+      document.addEventListener("click", handleOpenClick);
+      document.addEventListener("click", handleDismissClick);
+      document.addEventListener("mousedown", handleOverlayClick);
+
+      window.ModalManager = {
+        open: function (target) {
+          openModal(target);
+        },
+        close: function (target) {
+          closeModal(target);
+        },
+        toggle: function (target) {
+          toggleModal(target);
+        },
+        get activeModal() {
+          return activeModal;
+        },
+      };
+    })();
+  </script>
+  <script>
+    (function () {
+      "use strict";
+
+      var originalPost = $.post;
+      $.post = function () {
+        var args = Array.prototype.slice.call(arguments);
+        var options = args[0];
+        var url = typeof options === "string" ? options : options && options.url;
+        if (url && url.indexOf("set_unit_preferences") !== -1) {
+          var deferred = $.Deferred();
+          var response = { Success: true };
+          if (typeof options === "object" && typeof options.success === "function") {
+            options.success(response);
+          } else if (typeof args[2] === "function") {
+            args[2](response);
+          }
+          console.log("[UI Showcase] Simulated POST", url, options && options.data ? options.data : args[1]);
+          deferred.resolve(response);
+          return deferred.promise();
+        }
+        return originalPost.apply($, args);
+      };
+
+      document.addEventListener('DOMContentLoaded', function () {
+        UnitizerClient.ready()
+          .then(function () {
+            var project = Project.getInstance();
+            console.log('[UI Showcase] Project ready', project);
+            project.set_preferred_units(document);
+          })
+          .catch(function (error) {
+            console.error('Unitizer demo failed to initialise', error);
+          });
+      });
+    })();
+  </script>
 {% endblock %}

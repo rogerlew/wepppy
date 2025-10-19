@@ -213,7 +213,7 @@
 </label>
 {%- endmacro %}
 
-{% macro numeric_field(field_id, label, value='', unit_label=None, help=None, precision=None, min=None, max=None, required=False, nullable=False, attrs=None, error=None) -%}
+{% macro numeric_field(field_id, label, value='', unit_label=None, help=None, precision=None, min=None, max=None, required=False, nullable=False, attrs=None, error=None, unit_category=None, unit_name=None) -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -231,7 +231,8 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}">
+<div class="{{ ' '.join(field_classes) }}"
+     {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}>
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <div class="wc-field__input-row">
     <input class="wc-field__control wc-field__control--number"
@@ -247,11 +248,18 @@
            {% if nullable %}data-nullable="true"{% endif %}
            {% if error %}aria-invalid="true"{% endif %}
            {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
+           {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}
+           {% if unit_name %}data-unitizer-unit="{{ unit_name }}"{% endif %}
            {% for attr_key, attr_val in attrs.items() %}
              {{ attr_key }}="{{ attr_val }}"
            {% endfor %}>
     {% if unit_label %}
-    <span class="wc-field__unit" data-unit-label>{{ unit_label }}</span>
+    <span class="wc-field__unit"
+          data-unitizer-label
+          {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}
+          {% if unit_name %}data-unitizer-unit="{{ unit_name }}"{% endif %}>
+      {{ unit_label }}
+    </span>
     {% endif %}
   </div>
   {% if help %}

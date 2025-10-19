@@ -33,71 +33,68 @@
             extra_class="disable-readonly"
           ) }}
         </div>
-        <div class="wc-run-header__right">
-          <div class="wc-run-header__actions">
+        <div class="wc-run-header__actions">
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
+             target="_blank"
+             rel="noopener">
+            README
+          </a>
+          {% if not pup_relpath %}
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
+             target="_blank"
+             rel="noopener">
+            FORK
+          </a>
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stем) }}"
+             target="_blank"
+             rel="noopener">
+            ARCHIVE
+          </a>
+          {% endif %}
+        </div>
+        <details class="wc-run-header__menu">
+          <summary class="wc-run-header__menu-button pure-button pure-button-secondary">
+            More
+          </summary>
+          <div class="wc-run-header__menu-content">
+            <button type="button"
+                    class="pure-button"
+                    data-toggle="modal"
+                    data-target="#puModal">
+              PowerUser
+            </button>
+            <button type="button"
+                    class="pure-button"
+                    data-modal-open="unitizerModal">
+              Unitizer
+            </button>
+            <label class="wc-run-header__toggle">
+              <input id="checkbox_readonly"
+                     type="checkbox"
+                     onchange="Project.getInstance().set_readonly(this.checked);"
+                     {% if current_ron.readonly %}checked{% endif %}>
+              <span>Readonly</span>
+            </label>
+            <label class="wc-run-header__toggle">
+              <input id="checkbox_public"
+                     type="checkbox"
+                     onchange="Project.getInstance().set_public(this.checked);"
+                     {% if current_ron.public %}checked{% endif %}>
+              <span>Public</span>
+            </label>
+            {% if user.has_role('Admin') %}
             <a class="pure-button pure-button-secondary"
-               href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
+               href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem) }}"
                target="_blank"
                rel="noopener">
-              README
-            </a>
-            {% if not pup_relpath %}
-            <a class="pure-button pure-button-secondary"
-               href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
-               target="_blank"
-               rel="noopener">
-              FORK
-            </a>
-            <a class="pure-button pure-button-secondary"
-               href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
-               target="_blank"
-               rel="noopener">
-              ARCHIVE
+              Access log
             </a>
             {% endif %}
           </div>
-          <details class="wc-run-header__menu">
-            <summary class="wc-run-header__menu-button pure-button pure-button-secondary">
-              More
-            </summary>
-            <div class="wc-run-header__menu-content">
-              <button type="button"
-                      class="pure-button"
-                      data-toggle="modal"
-                      data-target="#puModal">
-                PowerUser
-              </button>
-              <button type="button"
-                      class="pure-button"
-                      data-toggle="modal"
-                      data-target="#unitizerModal">
-                Unitizer
-              </button>
-              <label class="wc-run-header__toggle">
-                <input id="checkbox_readonly"
-                       type="checkbox"
-                       onchange="Project.getInstance().set_readonly(this.checked);"
-                       {% if current_ron.readonly %}checked{% endif %}>
-                <span>Readonly</span>
-              </label>
-              <label class="wc-run-header__toggle">
-                <input id="checkbox_public"
-                       type="checkbox"
-                       onchange="Project.getInstance().set_public(this.checked);"
-                       {% if current_ron.public %}checked{% endif %}>
-                <span>Public</span>
-              </label>
-              {% if user.has_role('Admin') %}
-              <a class="pure-button pure-button-secondary"
-                 href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem) }}"
-                 target="_blank"
-                 rel="noopener">
-                Access log
-              </a>
-              {% endif %}
-            </div>
-          </details>
-        </div>
+        </details>
       </div>
     </div>
   </div>
@@ -105,24 +102,144 @@
 <script>
   "use strict";
   var pup_relpath = {{ current_ron.pup_relpath | tojson }};
-  $(function () {
+  (function () {
     if (!pup_relpath) {
       return;
     }
-    $.ajaxPrefilter(function (options) {
-      if (!options.url) {
-        return;
-      }
-      var url = options.url;
-      if (
+
+    function shouldBypass(url) {
+      return (
+        !url ||
         /^https?:\/\//i.test(url) ||
         url.startsWith("//") ||
         url.indexOf("pup=") !== -1
-      ) {
-        return;
+      );
+    }
+
+    function appendPup(url) {
+      if (shouldBypass(url)) {
+        return url;
       }
       var separator = url.indexOf("?") !== -1 ? "&" : "?";
-      options.url = url + separator + "pup=" + encodeURIComponent(pup_relpath);
+      return url + separator + "pup=" + encodeURIComponent(pup_relpath);
+    }
+
+    if (typeof window.fetch === "function") {
+      var originalFetch = window.fetch;
+      window.fetch = function patchedFetch(input, init) {
+        if (typeof input === "string") {
+          return originalFetch.call(this, appendPup(input), init);
+        }
+        if (typeof Request === "function" && input instanceof Request) {
+          var adjusted = appendPup(input.url);
+          if (adjusted === input.url) {
+            return originalFetch.call(this, input, init);
+          }
+          return originalFetch.call(this, new Request(adjusted, input), init);
+        }
+        return originalFetch.call(this, input, init);
+      };
+    }
+
+    if (typeof XMLHttpRequest !== "undefined") {
+      var originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function patchedOpen(method, url) {
+        var rest = Array.prototype.slice.call(arguments, 2);
+        return originalOpen.apply(this, [method, appendPup(url)].concat(rest));
+      };
+    }
+
+    ensureUnitizerModalHandlers();
+  })();
+
+  var __unitizerModalRetryCount = 0;
+
+  function ensureUnitizerModalHandlers() {
+    var modal = document.getElementById('unitizerModal');
+    var openButtons = document.querySelectorAll('[data-modal-open="unitizerModal"]');
+
+    if (!modal) {
+      if (__unitizerModalRetryCount < 20) {
+        __unitizerModalRetryCount += 1;
+        setTimeout(ensureUnitizerModalHandlers, 50);
+      }
+      return;
+    }
+
+    if (modal.__unitizerHandlersBound) {
+      return;
+    }
+
+    modal.__unitizerHandlersBound = true;
+
+    if (openButtons.length === 0) {
+      return;
+    }
+
+    var manager = window.ModalManager;
+
+    function fallbackOpen(targetModal) {
+      if (!targetModal.hasAttribute('hidden')) {
+        return;
+      }
+      targetModal.removeAttribute('hidden');
+      targetModal.setAttribute('data-modal-open', 'true');
+      targetModal.style.display = 'flex';
+      document.body.classList.add('wc-modal-open');
+      if (!targetModal.classList.contains('is-visible')) {
+        targetModal.classList.add('is-visible');
+      }
+    }
+
+    function fallbackClose(targetModal) {
+      if (targetModal.hasAttribute('hidden')) {
+        return;
+      }
+      targetModal.classList.remove('is-visible');
+      targetModal.removeAttribute('data-modal-open');
+      targetModal.setAttribute('hidden', 'hidden');
+      targetModal.style.display = '';
+      document.body.classList.remove('wc-modal-open');
+    }
+
+    openButtons.forEach(function (button) {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        if (manager && typeof manager.open === 'function') {
+          manager.open(modal);
+        } else {
+          fallbackOpen(modal);
+        }
+      });
     });
-  });
+
+    var dismissButtons = modal.querySelectorAll('[data-modal-dismiss]');
+    dismissButtons.forEach(function (button) {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        if (manager && typeof manager.close === 'function') {
+          manager.close(modal);
+        } else {
+          fallbackClose(modal);
+        }
+      });
+    });
+
+    modal.addEventListener('mousedown', function (event) {
+      if (event.target !== modal) {
+        return;
+      }
+      if (manager && typeof manager.close === 'function') {
+        manager.close(modal);
+      } else {
+        fallbackClose(modal);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ensureUnitizerModalHandlers);
+  } else {
+    ensureUnitizerModalHandlers();
+  }
 </script>

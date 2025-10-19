@@ -223,7 +223,7 @@ To prepare for macro-driven rendering, the tables below document the primary for
 ### Modal Utilities & Editors
 | Component | Template / Asset | Purpose | Notes for Migration |
 | --- | --- | --- | --- |
-| Unitizer Preferences | `controls/unitizer_modal.htm` (includes `unitizer.htm`) | Modal to adjust unit system & per-measure preferences | Controlled by `Project` JS (`handleGlobalUnitPreference`, etc.); macros must ensure modal markup integrates (likely separate from `_pure_base.htm`) |
+| Unitizer Preferences | `controls/unitizer_modal.htm` (includes `unitizer.htm`) | Modal to adjust unit system & per-measure preferences | Pure modal (`wc-modal`) managed by `ModalManager`; `UnitizerClient` reads the static `unitizer_map.js` export to keep labels/values in sync. Global + per-category radios emit `data-unitizer-*` attributes and reuse `Project` handlers. |
 | Edit CSV Utility | `controls/edit_csv.htm` | CSV editor (jspreadsheet) used for disturbed land/soil lookup | Standalone HTML page (not `_base.htm`); reference in `disturbed_bp.modify_disturbed` routes—document structure for redesign |
 | Power User Modal | `controls/poweruser_panel.htm` | Push notification & resource hub | Inline service-worker logic; treat as modal-managed component when migrating |
 

@@ -71,9 +71,9 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 ### 4.3 `numeric_field`
 - **Purpose**: Number input with optional unit display.
 - **Layout**: Label, number input, optional unit suffix (e.g. `mm`, `mg/L`).
-- **Args**: `field_id`, `label`, `value`, `unit_label`, optional `precision`, `min`, `max`, `required`, `nullable`.
-- **Notes**: Macro should include a slot/hook for unitizer integration (data attributes).
-- **Status**: Implemented with `data-precision` + `data-nullable`; unit label renders inside `.wc-field__unit`.
+- **Args**: `field_id`, `label`, `value`, `unit_label`, optional `precision`, `min`, `max`, `required`, `nullable`, optional `unit_category`, optional `unit_name` (canonical unit string, e.g. `kg/ha`).
+- **Notes**: When `unit_category` is provided the macro emits `data-unitizer-*` attributes (`data-unitizer-category`, `data-unitizer-unit`, `data-unitizer-label`) so `UnitizerClient` can keep labels in sync with user preferences.
+- **Status**: Implemented with `data-precision` + `data-nullable`; unit label renders inside `.wc-field__unit` and now auto-updates via the static unitizer map.
 
 ### 4.4 `file_upload`
 - **Purpose**: Upload control with help text and existing filename.
