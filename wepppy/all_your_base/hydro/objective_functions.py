@@ -49,7 +49,7 @@ def bias(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Mean bias between observed and simulated values."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     return float(np.nanmean(obs - sim))
 
@@ -58,11 +58,11 @@ def pbias(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Percent bias."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     denominator = np.nansum(obs)
     if denominator == 0:
-        return float('naan')
+        return float('nan')
     return float(100.0 * np.nansum(sim - obs) / denominator)
 
 
@@ -70,7 +70,7 @@ def nashsutcliffe(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Nash–Sutcliffe model efficiency coefficient."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     mean_obs = np.nanmean(obs)
     numerator = np.nansum((obs - sim) ** 2)
@@ -86,7 +86,7 @@ def lognashsutcliffe(
     """Log-transformed Nash–Sutcliffe efficiency."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     obs = np.asarray(obs, dtype=float) + epsilon
     sim = np.asarray(sim, dtype=float) + epsilon
@@ -99,7 +99,7 @@ def log_p(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Logarithmic probability distribution."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     scale = max(np.nanmean(obs) / 10.0, 0.01)
     residual = (obs - sim) / scale
@@ -111,7 +111,7 @@ def correlationcoefficient(evaluation: ArrayLike, simulation: ArrayLike) -> floa
     """Pearson correlation coefficient."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     return float(np.corrcoef(obs, sim)[0, 1])
 
@@ -126,7 +126,7 @@ def mse(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Mean squared error."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     return float(np.nanmean((obs - sim) ** 2))
 
@@ -141,7 +141,7 @@ def mae(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Mean absolute error."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     return float(np.nanmean(np.abs(sim - obs)))
 
@@ -150,7 +150,7 @@ def rrmse(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Relative root mean squared error."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, _ = arrays
     rmse_value = rmse(evaluation, simulation)
     mean_obs = np.nanmean(obs)
@@ -161,7 +161,7 @@ def agreementindex(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Willmott agreement index."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     numerator = np.nansum((obs - sim) ** 2)
     denominator = np.nansum((np.abs(sim - np.nanmean(obs)) + np.abs(obs - np.nanmean(obs))) ** 2)
@@ -172,7 +172,7 @@ def covariance(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Sample covariance between observed and simulated series."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     obs_mean = np.nanmean(obs)
     sim_mean = np.nanmean(sim)
@@ -183,7 +183,7 @@ def decomposed_mse(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Kobayashi and Salam decomposed mean squared error."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     bias_sq = bias(obs, sim) ** 2
     obs_std = float(np.nanstd(obs))
@@ -201,7 +201,7 @@ def kge(
     """Kling–Gupta efficiency."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     cc = float(np.corrcoef(obs, sim)[0, 1])
     alpha = float(np.nanstd(sim) / np.nanstd(obs))
@@ -232,7 +232,7 @@ def kge_non_parametric(
     """Non-parametric Kling–Gupta efficiency."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     cc = _spearmann_corr(obs, sim)
     fdc_sim = np.sort(sim / (np.nanmean(sim) * len(sim)))
@@ -249,7 +249,7 @@ def rsr(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """RMSE-observations standard deviation ratio."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, _ = arrays
     return float(rmse(evaluation, simulation) / np.nanstd(obs))
 
@@ -258,11 +258,11 @@ def volume_error(evaluation: ArrayLike, simulation: ArrayLike) -> float:
     """Volume error between the observed and simulated series."""
     arrays = _ensure_arrays(evaluation, simulation)
     if arrays is None:
-        return float('naan')
+        return float('nan')
     obs, sim = arrays
     denominator = np.nansum(obs)
     if denominator == 0:
-        return float('naan')
+        return float('nan')
     return float(np.nansum(sim - obs) / denominator)
 
 
@@ -297,6 +297,6 @@ def calculate_all_functions(
         try:
             value = func(evaluation, simulation)
         except Exception:  # pragma: no cover - guard against unexpected errors
-            value = float('naan')
+            value = float('nan')
         results.append((func.__name__, float(value)))
     return results

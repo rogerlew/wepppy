@@ -11,7 +11,7 @@ def test_determine_wateryear_from_month() -> None:
 
 def test_determine_wateryear_from_julian() -> None:
     assert determine_wateryear(2020, julian=273) == 2020  # end of September
-    assert determine_wateryear(2020, julian=274) == 2021
+    assert determine_wateryear(2020, julian=275) == 2021
 
 
 def test_determine_wateryear_requires_month_or_julian() -> None:

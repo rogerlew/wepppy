@@ -75,8 +75,10 @@ class TestYearlessDate:
             YearlessDate.from_string("not-a-date")
 
     def test_yesterday_rolls_back_across_boundaries(self) -> None:
-        assert YearlessDate(3, 1).yesterday == YearlessDate(2, 28)
-        assert YearlessDate(1, 1).yesterday == YearlessDate(12, 31)
+        prev = YearlessDate(3, 1).yesterday
+        assert (prev.month, prev.day) == (2, 28)
+        prev = YearlessDate(1, 1).yesterday
+        assert (prev.month, prev.day) == (12, 31)
 
     def test_julian_property_matches_month_day(self) -> None:
         assert YearlessDate(2, 1).julian == 32
