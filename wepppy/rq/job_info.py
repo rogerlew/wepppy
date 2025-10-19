@@ -1,13 +1,16 @@
-import os
-from typing import Sequence
+from __future__ import annotations
 
-from rq import Queue, Worker
-from rq.job import Job
-from rq.utils import get_version, utcnow
-from rq.exceptions import NoSuchJobError
+"""Helpers for introspecting RQ job trees and reporting aggregated status."""
+
+from datetime import datetime
+from typing import Any, Dict, List, MutableMapping, Sequence, Tuple
+
 import redis
-import json
 from dotenv import load_dotenv
+from rq.exceptions import NoSuchJobError
+from rq.job import Job
+from rq.utils import utcnow
+
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -16,11 +19,11 @@ from wepppy.config.redis_settings import (
 
 load_dotenv()
 
-REDIS_HOST = redis_host()
-RQ_DB = int(RedisDB.RQ)
+REDIS_HOST: str = redis_host()
+RQ_DB: int = int(RedisDB.RQ)
 
 
-def recursive_get_job_details(job, redis_conn, now):
+def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) -> Dict[str, Any]:
     """Recursively fetch job details including any children jobs."""
     elapsed_s = None
     if job.started_at:
@@ -29,7 +32,7 @@ def recursive_get_job_details(job, redis_conn, now):
         else:
             elapsed_s = (now - job.started_at).total_seconds()
 
-    job_info = {
+    job_info: Dict[str, Any] = {
         "id": job.id,
         "runid": job.meta.get('runid'),
         "status": job.get_status(),
@@ -50,11 +53,11 @@ def recursive_get_job_details(job, redis_conn, now):
                 child_job_info = recursive_get_job_details(child_job, redis_conn, now) if child_job else None
             except NoSuchJobError:
                 child_job_info = None
-            job_info["children"].setdefault(job_order, []).append(child_job_info)
+            job_info.setdefault("children", {}).setdefault(job_order, []).append(child_job_info)
 
     return job_info
 
-def get_wepppy_rq_job_info(job_id: str) -> dict:
+def get_wepppy_rq_job_info(job_id: str) -> Dict[str, Any]:
     now = utcnow()
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:
@@ -69,7 +72,7 @@ def get_wepppy_rq_job_info(job_id: str) -> dict:
         return recursive_get_job_details(job, redis_conn, now)
 
 
-def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> dict[str, dict]:
+def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]:
     """Fetch job information for multiple job IDs in a single Redis session."""
 
     if not job_ids:
@@ -90,7 +93,7 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> dict[str, dict]:
         return {}
 
     now = utcnow()
-    results: dict[str, dict] = {}
+    results: Dict[str, Dict[str, Any]] = {}
 
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:
@@ -124,12 +127,10 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> dict[str, dict]:
     return results
 
 
-def _flatten_job_tree(job_info: dict) -> tuple[list, list]:
-    """
-    Recursively traverses the job tree to collect all statuses and end times.
-    """
-    statuses = [job_info['status']]
-    end_times = [job_info['ended_at']]
+def _flatten_job_tree(job_info: MutableMapping[str, Any]) -> Tuple[List[Any], List[Any]]:
+    """Recursively traverse the job tree to collect statuses and end times."""
+    statuses: List[Any] = [job_info['status']]
+    end_times: List[Any] = [job_info['ended_at']]
 
     # Recursively process children
     for order_key in job_info.get('children', {}):
@@ -142,7 +143,7 @@ def _flatten_job_tree(job_info: dict) -> tuple[list, list]:
     return statuses, end_times
 
 
-def get_wepppy_rq_job_status(job_id: str) -> dict:
+def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
     now = utcnow()
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:

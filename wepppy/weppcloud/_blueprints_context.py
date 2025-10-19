@@ -50,3 +50,4 @@ def register_blueprints(app):
     app.register_blueprint(combined_watershed_viewer_bp)
     app.register_blueprint(batch_runner_bp)
     app.register_blueprint(interchange_bp)
+    app.register_blueprint(ui_showcase_bp)

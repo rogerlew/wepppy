@@ -1,110 +1,119 @@
-import shutil
-from glob import glob
+"""Ad-hoc RQ task that builds landuse/soils extracts for arbitrary extents."""
 
-import socket
-import os
-from os.path import join as _join
-from os.path import split as _split
-from os.path import exists as _exists
+from __future__ import annotations
+
 import inspect
+import os
+import shutil
 import time
+from pathlib import Path
+from subprocess import PIPE, Popen
+from typing import Optional, Sequence, Tuple
 
-from functools import wraps
-from subprocess import Popen, PIPE, call
-
-from rq import Queue, get_current_job
+from rq import get_current_job
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_host,
 )
 
-from wepppy.weppcloud.utils.helpers import get_wd
-
-from wepppy.nodb.core import Landuse, Soils, Ron, LanduseMode, SoilsMode
-from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-
+from wepppy.nodb.core import Landuse, LanduseMode, Ron, Soils, SoilsMode
 from wepppy.nodb.status_messenger import StatusMessenger
 
-from uuid import uuid4
 
-try:
-    from weppcloud2.discord_bot.discord_client import send_discord_message
-except:
-    send_discord_message = None
+REDIS_HOST: str = redis_host()
+RQ_DB: int = int(RedisDB.RQ)
+
+TIMEOUT: int = 43_200
 
 
-_hostname = socket.gethostname()
+def land_and_soil_rq(
+    runid: Optional[str],
+    extent: Sequence[float],
+    cfg: Optional[str],
+    nlcd_db: Optional[str],
+    ssurgo_db: Optional[str],
+) -> Tuple[str, float]:
+    """Build landuse and soil extracts for the provided extent.
 
-REDIS_HOST = redis_host()
-RQ_DB = int(RedisDB.RQ)
+    Args:
+        runid: Run identifier (unused but retained for worker parity).
+        extent: Bounding box ``[minx, miny, maxx, maxy]`` in projected coords.
+        cfg: Configuration stem to initialize (defaults to ``disturbed9002``).
+        nlcd_db: Optional NLCD database override.
+        ssurgo_db: Optional SSURGO database override.
 
-TIMEOUT = 43_200
+    Returns:
+        Tuple containing the tarball path and elapsed time in seconds.
+    """
 
-def land_and_soil_rq(runid, extent, cfg, nlcd_db, ssurgo_db):
-    print(f'land_and_soil_rq(extent={extent}, cfg={cfg}, nlcd_db={nlcd_db}, ssurgo_db={ssurgo_db})')
+    print(
+        f"land_and_soil_rq(extent={extent}, cfg={cfg}, nlcd_db={nlcd_db}, ssurgo_db={ssurgo_db})"
+    )
 
-    status_channel = 'land_and_soil_rq:-'
     func_name = inspect.currentframe().f_code.co_name
     job = get_current_job()
-    uuid = job.id
+    job_id = getattr(job, "id", "sync")
+    status_channel = f"land_and_soil_rq:{job_id}"
 
     try:
-
-        if cfg is None:
-            cfg = 'disturbed9002'
-        
-        config = f'{cfg}.cfg'
+        cfg_stem = (cfg or "disturbed9002").strip()
+        config = f"{cfg_stem}.cfg"
         center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2]
-        status_channel = f'land_and_soil_rq:{job.id}'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({uuid})')
-        t0 = time.time()
 
-        if _exists('/wc1/land_and_soil_rq/'):
-            wd = f'/wc1/land_and_soil_rq/{uuid}'
-        else:
-            wd = f'/geodata/wc1/land_and_soil_rq/{uuid}'
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {func_name}({job_id})")
+        start_ts = time.time()
 
-        StatusMessenger.publish(status_channel, f'Creating wd {wd}')
-        if not _exists(wd):
-            os.makedirs(wd)
-        else:
+        base_dir = Path("/wc1/land_and_soil_rq")
+        if not base_dir.exists():
+            base_dir = Path("/geodata/wc1/land_and_soil_rq")
+
+        wd = base_dir / job_id
+        StatusMessenger.publish(status_channel, f"Preparing workspace {wd}")
+        if wd.exists():
             shutil.rmtree(wd)
-            os.makedirs(wd)
+        wd.mkdir(parents=True, exist_ok=True)
 
-        StatusMessenger.publish(status_channel, f'Initializing project')
-        ron = Ron(wd, config)
+        StatusMessenger.publish(status_channel, "Initializing project")
+        ron = Ron(str(wd), config)
         ron.set_map(extent, center, zoom=12)
 
-        StatusMessenger.publish(status_channel, f'Building Landuse')
-        landuse = Landuse.getInstance(wd)
+        StatusMessenger.publish(status_channel, "Building landuse")
+        landuse = Landuse.getInstance(str(wd))
         landuse.mode = LanduseMode.SpatialAPI
         if nlcd_db is not None:
             landuse.nlcd_db = nlcd_db
         landuse.build()
 
-        StatusMessenger.publish(status_channel, f'Building Soils')
-        soils = Soils.getInstance(wd)
+        StatusMessenger.publish(status_channel, "Building soils")
+        soils = Soils.getInstance(str(wd))
         soils.mode = SoilsMode.SpatialAPI
         if ssurgo_db is not None:
             soils.ssurgo_db = ssurgo_db
         soils.build()
 
-        # tar the wd
-        tarfile = f'{wd}.tar.gz'
-        if _exists(tarfile):
-            os.remove(tarfile)
-        
-        cmd = ["tar", "-I", "pigz", "-cf", tarfile, "."]
-        StatusMessenger.publish(status_channel, f'Creating tar archive')
-        p = Popen(cmd, cwd=wd, stdout=PIPE, stderr=PIPE)
-        out, err = p.communicate()
-        if p.returncode != 0:
-            raise RuntimeError(f'Error creating tar file: {tarfile}, {p.returncode}: {err.decode()}')
+        tar_path = wd.with_suffix(".tar.gz")
+        if tar_path.exists():
+            tar_path.unlink()
 
-        status = True
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({uuid}) -> ({status}, {time})')
-        return tarfile, time.time() - t0
-    
+        cmd = ["tar", "-I", "pigz", "-cf", str(tar_path), "."]
+        StatusMessenger.publish(status_channel, "Creating tar archive")
+        process = Popen(cmd, cwd=str(wd), stdout=PIPE, stderr=PIPE)
+        _, stderr = process.communicate()
+        if process.returncode != 0:
+            raise RuntimeError(
+                f"Error creating tar file: {tar_path}, {process.returncode}: {stderr.decode()}"
+            )
+
+        elapsed = time.time() - start_ts
+        StatusMessenger.publish(
+            status_channel,
+            f"rq:{job_id} COMPLETED {func_name}({job_id}) -> ({True}, {elapsed:.3f})",
+        )
+        return str(tar_path), elapsed
+
     except Exception:
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({uuid})')
+        StatusMessenger.publish(
+            status_channel,
+            f"rq:{job_id} EXCEPTION {func_name}({job_id})",
+        )
         raise

@@ -1,48 +1,59 @@
-import os
-import rq
-from rq import Queue, Worker
-from rq.job import Job
-from rq.utils import get_version
-import redis
+from __future__ import annotations
+
+"""Utilities for canceling RQ jobs (and their dependency tree) from workers or CLIs."""
+
 import json
+from typing import Dict
+
+import redis
+from dotenv import load_dotenv
+from rq.command import send_stop_job_command
+from rq.exceptions import InvalidJobOperation, NoSuchJobError
+from rq.job import Job
+
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
     redis_host,
 )
 
-from dotenv import load_dotenv
-from datetime import datetime
-
-from rq.command import send_stop_job_command
-from rq.exceptions import NoSuchJobError, InvalidJobOperation
-
 load_dotenv()
 
-REDIS_HOST = redis_host()
-RQ_DB = int(RedisDB.RQ)
+REDIS_HOST: str = redis_host()
+RQ_DB: int = int(RedisDB.RQ)
 
 
-def cancel_job(job, redis_conn):
-    """Recursively cancel jobs including any children jobs. Now handles stopping running jobs."""
+def _cancel_job_recursive(job: Job, redis_conn: redis.Redis) -> None:
+    """Cancel a job and its children, stopping running jobs when necessary."""
 
     try:
-        if job.get_status() == 'started':
-            send_stop_job_command(redis_conn, job.id)  # Stop running job
+        if job.get_status() == "started":
+            send_stop_job_command(redis_conn, job.id)
         else:
-            job.cancel()  # Cancel non-started job
+            job.cancel()
     except (NoSuchJobError, InvalidJobOperation):
-        pass  # Job doesn't exist, isn't stoppable, or already handled
+        return
 
-    # Recurse into children
     for key, child_job_id in job.meta.items():
-        if key.startswith('jobs:'):
+        if not key.startswith("jobs:"):
+            continue
+        try:
             child_job = Job.fetch(child_job_id, connection=redis_conn)
-            if child_job:
-                cancel_job(child_job, redis_conn)
+        except NoSuchJobError:
+            continue
+        _cancel_job_recursive(child_job, redis_conn)
 
 
-def cancel_jobs(job_id: str) -> dict:
+def cancel_jobs(job_id: str) -> Dict[str, str]:
+    """Cancel a job tree rooted at ``job_id``.
+
+    Args:
+        job_id: Identifier of the job to cancel.
+
+    Returns:
+        Status dictionary reporting success or any lookup error.
+    """
+
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:
         try:
@@ -50,7 +61,7 @@ def cancel_jobs(job_id: str) -> dict:
         except NoSuchJobError:
             return {"error": "Job not found"}
 
-        cancel_job(job, redis_conn)
+        _cancel_job_recursive(job, redis_conn)
         return {"status": "ok"}
     
     

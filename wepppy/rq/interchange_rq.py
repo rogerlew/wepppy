@@ -18,7 +18,7 @@ from wepppy.wepp.interchange import (
     generate_interchange_documentation,
 )
 
-TIMEOUT = 43_200  # 12 hours, matches long-running WEPP tasks
+TIMEOUT: int = 43_200  # 12 hours, matches long-running WEPP tasks
 
 _REQUIRED_WATERSHED_OUTPUTS: tuple[str, ...] = (
     "pass_pw0.txt",
@@ -32,12 +32,14 @@ _REQUIRED_WATERSHED_OUTPUTS: tuple[str, ...] = (
 
 
 def _with_gzip(path: Path) -> Path:
+    """Return a path with a `.gz` suffix appended."""
     if path.suffix:
         return path.with_suffix(path.suffix + ".gz")
     return Path(f"{path}.gz")
 
 
 def _missing_wepp_outputs(base: Path, filenames: Iterable[str]) -> list[str]:
+    """Collect missing WEPP output filenames, accounting for optional gzip archives."""
     missing: list[str] = []
     for name in filenames:
         candidate = base / name
@@ -53,18 +55,12 @@ def _missing_wepp_outputs(base: Path, filenames: Iterable[str]) -> list[str]:
 def run_interchange_migration(runid: str, wepp_output_subpath: Optional[str] = None) -> bool:
     """Execute the full interchange migration workflow for a run.
 
-    Parameters
-    ----------
-    runid : str
-        Unique identifier for the project run.
-    wepp_output_subpath : Optional[str]
-        Optional subdirectory under ``wepp/`` whose ``output`` folder should
-        be migrated (e.g., ``ag_field``). When omitted, defaults to
-        ``wepp/output``.
+    Args:
+        runid: Unique identifier for the project run.
+        wepp_output_subpath: Optional subdirectory under ``wepp/`` whose
+            ``output`` folder should be migrated (for example ``ag_field``).
 
-    Returns
-    -------
-    bool
+    Returns:
         ``True`` when the migration ran, ``False`` when skipped because the
         required WEPP outputs were not present.
     """

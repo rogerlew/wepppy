@@ -1,13 +1,18 @@
+from __future__ import annotations
+
+"""RQ orchestration for Omni scenario execution and dependent post-processing."""
+
 import inspect
 import os
 import socket
 import time
 from copy import deepcopy
-from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import redis
 from rq import Queue, get_current_job
+from rq.job import Job
+
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -16,7 +21,6 @@ from wepppy.config.redis_settings import (
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.mods.omni.omni import (
     _hash_file_sha1,
@@ -33,14 +37,14 @@ except Exception:
 
 _hostname = socket.gethostname()
 
-REDIS_HOST = redis_host()
-RQ_DB = int(RedisDB.RQ)
+REDIS_HOST: str = redis_host()
+RQ_DB: int = int(RedisDB.RQ)
 
-TIMEOUT = 43_200
+TIMEOUT: int = 43_200
 
 
 def _scenario_payload_for_job(scenario_def: Dict[str, Any]) -> Dict[str, Any]:
-    """Return a deepcopy with the ``type`` coerced to ``OmniScenario`` so workers match expectations."""
+    """Return a deepcopy with the ``type`` coerced to ``OmniScenario`` for workers."""
     payload = deepcopy(scenario_def)
     scenario_type = payload.get('type')
 
@@ -59,7 +63,7 @@ def _scenario_payload_for_job(scenario_def: Dict[str, Any]) -> Dict[str, Any]:
 
 
 class OmniLockTimeout(Exception):
-    pass
+    """Raised when Omni lock acquisition exceeds retry attempts."""
 
 
 def _update_dependency_state(
@@ -68,6 +72,7 @@ def _update_dependency_state(
     dependency_entry: Dict[str, Any],
     run_state_entry: Dict[str, Any],
 ) -> None:
+    """Persist dependency and run state metadata with retry semantics."""
     
     max_tries = 5
     for attempt in range(max_tries):
@@ -93,7 +98,8 @@ def run_omni_scenario_rq(
     dependency_path: Optional[str] = None,
     signature: Optional[str] = None,
     run_state_reason: str = 'dependency_changed',
-):
+) -> Tuple[bool, float]:
+    """Run a single Omni scenario, updating dependency metadata upon completion."""
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -158,7 +164,8 @@ def run_omni_scenario_rq(
         raise
 
 
-def run_omni_scenarios_rq(runid: str):
+def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
+    """Coordinate Omni scenario execution, optionally leveraging worker concurrency."""
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -190,8 +197,8 @@ def run_omni_scenarios_rq(runid: str):
         run_states: List[Dict[str, Any]] = []
         omni.scenario_run_state = run_states
 
-        active_scenarios: set[str] = set()
-        processed_scenarios: set[str] = set()
+        active_scenarios: Set[str] = set()
+        processed_scenarios: Set[str] = set()
 
         stage1_tasks: List[Dict[str, Any]] = []
         stage2_tasks: List[Dict[str, Any]] = []
@@ -333,8 +340,8 @@ def run_omni_scenarios_rq(runid: str):
             dependency_tree.pop(scenario_name, None)
         omni.scenario_dependency_tree = dependency_tree
 
-        stage1_jobs = []
-        stage2_jobs = []
+        stage1_jobs: List[Job] = []
+        stage2_jobs: List[Job] = []
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
@@ -372,7 +379,7 @@ def run_omni_scenarios_rq(runid: str):
                 stage2_jobs.append(child_job)
                 job.save()
 
-            compile_depends = stage2_jobs or stage1_jobs
+            compile_depends: List[Job] = stage2_jobs or stage1_jobs
             compile_job = q.enqueue_call(
                 func=_compile_hillslope_summaries_rq,
                 args=[runid],
@@ -382,7 +389,7 @@ def run_omni_scenarios_rq(runid: str):
             job.meta['jobs:2,func:_compile_hillslope_summaries_rq'] = compile_job.id
             job.save()
 
-            final_depends: List[Any] = [compile_job]
+            final_depends: List[Job] = [compile_job]
             final_job = q.enqueue_call(
                 func=_finalize_omni_scenarios_rq,
                 args=[runid],
@@ -400,7 +407,8 @@ def run_omni_scenarios_rq(runid: str):
         raise
 
 
-def _compile_hillslope_summaries_rq(runid: str):
+def _compile_hillslope_summaries_rq(runid: str) -> None:
+    """Compile Omni hillslope summaries after scenario execution."""
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -417,7 +425,8 @@ def _compile_hillslope_summaries_rq(runid: str):
         raise
 
 
-def _finalize_omni_scenarios_rq(runid: str):
+def _finalize_omni_scenarios_rq(runid: str) -> None:
+    """Finalize Omni processing, stamping Redis prep state and notifying subscribers."""
     try:
         job = get_current_job()
         wd = get_wd(runid)

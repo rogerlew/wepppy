@@ -44,6 +44,7 @@ from .rq.job_dashboard.routes import rq_job_dashboard_bp
 from .stats import stats_bp
 from .run_0 import run_0_bp
 from ._security import security_logging_bp, security_oauth_bp, security_ui_bp
+from .ui_showcase import ui_showcase_bp
 
 _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     admin_bp,
@@ -130,4 +131,5 @@ __all__ = [
     'security_logging_bp',
     'security_ui_bp',
     'security_oauth_bp',
+    'ui_showcase_bp',
 ]
