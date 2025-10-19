@@ -1,13 +1,20 @@
+from __future__ import annotations
+
+"""
+RQ tasks that orchestrate batch WEPP runs across a watershed collection.
+
+The helpers enqueue per-watershed jobs, monitor their progress, and emit
+summary events when an entire batch completes so the UI can react in real time.
+"""
+
 import inspect
-import os
 import socket
 import time
-from copy import deepcopy
-from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from typing import Tuple, List
 
 import redis
 from rq import Queue, get_current_job
+from rq.job import Job
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -28,12 +35,23 @@ except Exception:
 
 _hostname = socket.gethostname()
 
-REDIS_HOST = redis_host()
-RQ_DB = int(RedisDB.RQ)
+REDIS_HOST: str = redis_host()
+RQ_DB: int = int(RedisDB.RQ)
 
-TIMEOUT = 43_200
+TIMEOUT: int = 43_200
 
-def run_batch_rq(batch_name: str):
+def run_batch_rq(batch_name: str) -> Job:
+    """Enqueue a batch run for each watershed feature and a finalizer task.
+
+    Args:
+        batch_name: Identifier of the batch runner workspace.
+
+    Returns:
+        The final RQ job that marks the batch as complete.
+
+    Raises:
+        Exception: Any failure encountered while preparing or enqueuing tasks.
+    """
     try:
         job = get_current_job()
         job_id = job.id if job is not None else 'N/A'
@@ -57,8 +75,7 @@ def run_batch_rq(batch_name: str):
         watershed_features = list(watershed_collection)
         if not watershed_features:
             raise ValueError('No watershed features available to enqueue.')
-
-        watershed_jobs = []
+        watershed_jobs: List[Job] = []
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
@@ -100,7 +117,19 @@ def run_batch_rq(batch_name: str):
 def run_batch_watershed_rq(
     batch_name: str,
     watershed_feature: WatershedFeature,
-):
+) -> Tuple[bool, float]:
+    """Execute the batch workflow for a single watershed feature.
+
+    Args:
+        batch_name: Identifier of the batch runner workspace.
+        watershed_feature: Feature metadata describing the watershed run.
+
+    Returns:
+        Tuple containing the success flag and the runtime in seconds.
+
+    Raises:
+        Exception: Propagates errors surfaced by the batch runner.
+    """
     try:
         job = get_current_job()
         _runid = watershed_feature.runid
@@ -132,7 +161,8 @@ def run_batch_watershed_rq(
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def _final_batch_complete_rq(batch_name: str):
+def _final_batch_complete_rq(batch_name: str) -> None:
+    """Emit completion notifications once all batch jobs finish."""
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
     status_channel = f'{batch_name}:batch'
