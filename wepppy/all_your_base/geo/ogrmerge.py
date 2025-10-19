@@ -560,26 +560,26 @@ def process(argv, progress=None, progress_arg=None):
 
     gdal.VSIFCloseL(f)
 
-    ret = 0
+    ert = 0
     if not EQUAL(output_format, 'VRT'):
         accessMode = None
         if append:
             accessMode = 'append'
         elif overwrite_layer:
             accessMode = 'overwrite'
-        ret = gdal.VectorTranslate(dst_ds, vrt_filename,
+        ert = gdal.VectorTranslate(dst_ds, vrt_filename,
                                    accessMode=accessMode,
                                    layerCreationOptions=lco,
                                    skipFailures=skip_failures,
                                    callback=progress,
                                    callback_data=progress_arg)
-        if ret == 1:
-            ret = 0
+        if ert == 1:
+            ert = 0
         else:
-            ret = 1
+            ert = 1
         gdal.Unlink(vrt_filename)
 
-    return ret
+    return ert
 
 ###############################################################
 # Entry point

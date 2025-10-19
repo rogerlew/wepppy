@@ -1,0 +1,43 @@
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any, Dict, Tuple
+
+__all__: list[str]
+
+
+class Julian:
+    julian: int
+    month: int
+    day: int
+
+    def __init__(self, *args: int, **kwargs: int) -> None: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+
+
+def parse_datetime(value: str) -> datetime: ...
+
+
+def parse_date(value: datetime | str) -> datetime: ...
+
+
+def _julian_to_md(julian: int) -> Tuple[int, int]: ...
+
+
+def _md_to_julian(month: int, day: int) -> int: ...
+
+
+class YearlessDate:
+    month: int
+    day: int
+
+    def __init__(self, month: int, day: int) -> None: ...
+    @staticmethod
+    def from_string(value: str) -> YearlessDate: ...
+    @property
+    def yesterday(self) -> YearlessDate: ...
+    @property
+    def julian(self) -> int: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...

@@ -1,76 +1,56 @@
+"""Statistical helpers shared across WEPP analytics."""
+
+from __future__ import annotations
+
+from typing import Dict, Sequence
+
 import numpy as np
 
+__all__ = ['probability_of_occurrence', 'weibull_series']
 
-def probability_of_occurrence(return_interval, period_of_interest, pct=True):
+
+def probability_of_occurrence(
+    return_interval: float,
+    period_of_interest: float,
+    pct: bool = True,
+) -> float:
+    """Probability that an event with the given return interval occurs."""
     prob = 1.0 - (1.0 - 1.0 / return_interval) ** period_of_interest
-    if prob < 0.0:
-        prob = 0.0
-    elif prob > 1.0:
-        prob = 1.0
-
-    if pct:
-        prob *= 100.0
-    return prob
+    prob = min(max(prob, 0.0), 1.0)
+    return prob * 100.0 if pct else prob
 
 
-def weibull_series(recurrence, years, method='cta', gringorten_correction=False):
-    """
-    Generates a Weibull distribution for return periods based on a given number of years and recurrence intervals.
-    
-    Args:
-        recurrence (list): A list of recurrence intervals (in years) for which to find corresponding ranks.
-        years (float): The total number of years for the time series.
-        method (str): The method used to calculate the return periods. Options are 'cta' (default) complete time series analysis or 'am' or annual maxima.
-        gringorten_correction (bool): If True, applies the Gringorten correction to the Weibull formula.
-
-    Returns:
-        dict: A dictionary where keys are the recurrence intervals and values are the ranks in the time series 
-              that correspond to the given recurrence intervals.
-              
-    Explanation:
-        The function calculates the recurrence times (return periods) using the Weibull formula, which can be corrected 
-        using the Gringorten correction if specified. It then identifies and returns the ranks that correspond to 
-        the provided recurrence intervals.
-    """
-    
-    if int(years) <= 0:
-        raise ValueError('The number of years must be greater than zero.')
+def weibull_series(
+    recurrence: Sequence[float],
+    years: float,
+    method: str = 'cta',
+    gringorten_correction: bool = False,
+) -> Dict[float, int]:
+    """Return order statistic ranks for a set of recurrence intervals."""
+    if years <= 0:
+        raise ValueError('years must be greater than zero.')
 
     if method == 'cta':
-        # Calculate the total number of days based on the number of years
-        n = int(round(years * 365.25))  # 365.25 accounts for leap years
+        count = int(round(years * 365.25))
     elif method == 'am':
-        n = int(years)
+        count = int(round(years))
     else:
-        raise ValueError('Invalid method. Use "cta" or "am".')
+        raise ValueError('method must be either "cta" or "am".')
 
-    # Create an array of ranks from 1 to the total number of days
-    ranks = np.array(list(range(1, n + 1)))
-
-    # Apply the Weibull formula with or without Gringorten correction
+    ranks = np.arange(1, count + 1, dtype=float)
     if gringorten_correction:
-        Ts = (n + 1) / (ranks - 0.44)  # Gringorten correction applied
+        periods = (count + 1.0) / (ranks - 0.44)
     else:
-        Ts = (n + 1) / ranks  # Standard Weibull formula without correction
+        periods = (count + 1.0) / ranks
 
     if method == 'cta':
-        # Convert return periods (Ts) to years by dividing by the number of days in a year
-        yearTs = Ts / 365.25
-    elif method == 'am':
-        yearTs = Ts
+        periods /= 365.25
 
-    # Initialize a dictionary to store recurrence intervals and their corresponding rank indices
-    rec = {}
-
-    # Loop through the sorted recurrence intervals to find corresponding rank indices
-    for rec_interval in sorted(recurrence):
-        # Reverse the ranks and yearTs arrays to start from the highest values
-        for _rank, _yearTs in zip(ranks[::-1], yearTs[::-1]):
-            _rank_indx = _rank - 1  # Adjust rank to 0-based index
-            # Check if the current return period is greater than or equal to the recurrence interval
-            # and if the rank index is not already assigned
-            if _yearTs >= rec_interval and _rank_indx not in rec.values():
-                rec[rec_interval] = _rank_indx  # Assign the rank index to the recurrence interval
-                break  # Move on to the next recurrence interval
-
-    return rec
+    result: Dict[float, int] = {}
+    for target in sorted(recurrence):
+        for rank, period in zip(ranks[::-1], periods[::-1]):
+            index = int(rank - 1)
+            if period >= target and index not in result.values():
+                result[float(target)] = index
+                break
+    return result

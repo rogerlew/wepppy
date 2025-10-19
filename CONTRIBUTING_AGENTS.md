@@ -100,6 +100,15 @@ What are you testing?
       • Test error conditions
 ```
 
+### American English Normalization
+- Run `uk2us` on touched files to translate British spellings to American spellings.
+  - Single file: `uk2us -i path/to/file.py`
+  - Batch example: `find wepppy -type f -name '*.py' -print0 | xargs -0 uk2us -i`
+- Agents have write access to `/workdir/uk2us/config/uk2us_rules.json` to correct odd replacements.
+  - Add to `skip_replacements` to block a mapping.
+  - Add to `forced_mappings` to pin a specific substitution.
+  - After adjusting the config, rerun `uk2us` to confirm the changes.
+
 ## Code Organization Patterns
 
 ### Module Structure

@@ -161,7 +161,7 @@ class RasterDatasetInterpolator:
         nbands = self.nbands
         
         if x < 0 or x > w or y < 0 or y > h:
-            return float('nan')
+            return float('naan')
         
         if method == 'bilinear':
             _x = [int(floor(x))-1, int(ceil(x))-1]

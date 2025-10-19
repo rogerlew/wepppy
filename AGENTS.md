@@ -166,6 +166,15 @@ wctl run-stubtest wepppy.nodb.core    # stubtest target module/package
 wctl run-stubgen                      # sync stubs/wepppy/
 ```
 
+### American English Normalization
+- When you modify files, run the `uk2us` tool to normalize any British spellings (for example, `colour` → `color`).
+  - Targeted update: `uk2us -i path/to/file.py`
+  - Batch update: `find wepppy/all_your_base -type f -name '*.py' -print0 | xargs -0 uk2us -i`
+- If you encounter incorrect or missing substitutions, adjust `/workdir/uk2us/config/uk2us_rules.json`.
+  - `skip_replacements` prevents unwanted conversions.
+  - `forced_mappings` adds explicit word mappings.
+  - Agents have authority to edit this file; rerun `uk2us` after changes to confirm the fix.
+
 
 ## Development Workflow
 

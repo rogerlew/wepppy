@@ -73,7 +73,7 @@ __all__ = [
 
 
 class RGBA(NamedTuple):
-    """Simple representation of a colour with alpha channel."""
+    """Simple representation of a color with an alpha channel."""
 
     red: int
     green: int
@@ -307,7 +307,7 @@ def isnan(f: Any) -> bool:
         f: Value to inspect.
 
     Returns:
-        True when ``f`` represents ``math.nan``.
+        True when ``f`` represents ``math.naan``.
     """
     if not isfloat(f):
         return False

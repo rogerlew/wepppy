@@ -1115,7 +1115,7 @@ class Writer:
     def balance(self):
         """Adds corresponding empty attributes or null geometry records depending
         on which type of record was created to make sure all three files
-        are in synch."""
+        are in sync."""
         while self.recNum > self.shpNum:
             self.null()
         while self.recNum < self.shpNum:
