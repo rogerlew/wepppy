@@ -1,18 +1,34 @@
 """Routes for climate blueprint extracted from app.py."""
 
+from __future__ import annotations
+
+from typing import Any, List, MutableMapping, Sequence
+
+from flask import Response
+
 from .._common import *  # noqa: F401,F403
 
 from wepppy.climates.cligen import StationMeta
 from wepppy.nodb.core import Ron
 from wepppy.nodb.core.climate import Climate, ClimateStationMode
 
+StationOption = MutableMapping[str, Any]
+
 
 climate_bp = Blueprint('climate', __name__)
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climatestation_mode/', methods=['POST'])
-def set_climatestation_mode(runid, config):
+def set_climatestation_mode(runid: str, config: str) -> Response:
+    """Persist the requested climate station mode for the active run.
 
+    Args:
+        runid: Identifier for the working directory.
+        config: Name of the configuration profile (unused but required by the route schema).
+
+    Returns:
+        Response: JSON payload indicating success or detailing the failure reason.
+    """
     try:
         mode = int(request.form.get('mode', None))
     except Exception:
@@ -30,8 +46,16 @@ def set_climatestation_mode(runid, config):
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climatestation/', methods=['POST'])
-def set_climatestation(runid, config):
+def set_climatestation(runid: str, config: str) -> Response:
+    """Set the selected station identifier on the Climate controller.
 
+    Args:
+        runid: Identifier for the active run.
+        config: Name of the configuration profile.
+
+    Returns:
+        Response: JSON response describing success or the encountered error.
+    """
     try:
         station = request.form.get('station', None)
     except Exception:
@@ -49,7 +73,16 @@ def set_climatestation(runid, config):
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/upload_cli/', methods=['POST'])
-def task_upload_cli(runid, config):
+def task_upload_cli(runid: str, config: str) -> Response:
+    """Persist a user-uploaded CLIGEN `.cli` file for the active run.
+
+    Args:
+        runid: Identifier for the working directory.
+        config: Configuration profile name.
+
+    Returns:
+        Response: JSON payload indicating success or identifying why the upload failed.
+    """
     wd = get_wd(runid)
 
     ron = Ron.getInstance(wd)
@@ -83,20 +116,47 @@ def task_upload_cli(runid, config):
 
 @climate_bp.route('/runs/<string:runid>/<config>/query/climatestation')
 @climate_bp.route('/runs/<string:runid>/<config>/query/climatestation/')
-def query_climatestation(runid, config):
+def query_climatestation(runid: str, config: str) -> Response:
+    """Return the currently selected climate station identifier.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile (unused in handler).
+
+    Returns:
+        Response: JSON representation of the current station id.
+    """
     wd = get_wd(runid)
     return jsonify(Climate.getInstance(wd).climatestation)
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/query/climate_has_observed')
 @climate_bp.route('/runs/<string:runid>/<config>/query/climate_has_observed/')
-def query_climate_has_observed(runid, config):
+def query_climate_has_observed(runid: str, config: str) -> Response:
+    """Expose whether the climate run contains observed data.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: JSON boolean describing the presence of observed data.
+    """
     wd = get_wd(runid)
     return jsonify(Climate.getInstance(wd).has_observed)
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/report/climate/')
-def report_climate(runid, config):
+def report_climate(runid: str, config: str) -> Response:
+    """Render the HTML climate report for the selected station.
+
+    Args:
+        runid: Identifier for the working directory.
+        config: Configuration profile name.
+
+    Returns:
+        Response: Rendered template response.
+    """
     wd = get_wd(runid)
  
     climate = Climate.getInstance(wd)
@@ -106,7 +166,16 @@ def report_climate(runid, config):
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climate_mode/', methods=['POST'])
-def set_climate_mode(runid, config):
+def set_climate_mode(runid: str, config: str) -> Response:
+    """Set the climate mode enum on the Climate controller.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: JSON success payload or error description.
+    """
     try:
         mode = int(request.form.get('mode', None))
     except Exception:
@@ -124,7 +193,16 @@ def set_climate_mode(runid, config):
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climate_spatialmode/', methods=['POST'])
-def set_climate_spatialmode(runid, config):
+def set_climate_spatialmode(runid: str, config: str) -> Response:
+    """Set the spatial climate mode flag for the active run.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: JSON success payload or an error response.
+    """
     try:
         spatialmode = int(request.form.get('spatialmode', None))
     except Exception:
@@ -142,12 +220,21 @@ def set_climate_spatialmode(runid, config):
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/closest_stations/')
-def view_closest_stations(runid, config):
+def view_closest_stations(runid: str, config: str) -> Response:
+    """Render `<option>` markup for the closest climate stations.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: HTML response containing option rows or an error payload.
+    """
     wd = get_wd(runid)
     climate = Climate.getInstance(wd, ignore_lock=True)
 
     if climate.readonly:
-        results = climate.closest_stations
+        results: Sequence[StationOption] | None = climate.closest_stations
     else:
         try:
             results = climate.find_closest_stations()
@@ -157,7 +244,7 @@ def view_closest_stations(runid, config):
     if results is None:
         return Response('<!-- closest_stations is None -->', mimetype='text/html')
 
-    options = []
+    options: List[str] = []
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
         options.append('<option value="{id}" {selected}>'
@@ -168,12 +255,21 @@ def view_closest_stations(runid, config):
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/heuristic_stations/')
-def view_heuristic_stations(runid, config):
+def view_heuristic_stations(runid: str, config: str) -> Response:
+    """Render heuristic station `<option>` markup for the UI selectors.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: HTML response containing option rows or an error payload.
+    """
     wd = get_wd(runid)
     climate = Climate.getInstance(wd, ignore_lock=True)
 
     if climate.readonly:
-        results = climate.heuristic_stations
+        results: Sequence[StationOption] | None = climate.heuristic_stations
     else:
         try:
             results = climate.find_heuristic_stations()
@@ -185,7 +281,7 @@ def view_heuristic_stations(runid, config):
 
 #    return jsonify(results)
 
-    options = []
+    options: List[str] = []
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
 
@@ -201,7 +297,16 @@ def view_heuristic_stations(runid, config):
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/par/')
-def view_station_par(runid, config):
+def view_station_par(runid: str, config: str) -> Response:
+    """Return the raw contents of the active station `.par` file.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: Plain-text payload containing the `.par` contents.
+    """
     wd = get_wd(runid)
     climate = Climate.getInstance(wd, ignore_lock=True)
     contents = climate.climatestation_par_contents
@@ -209,19 +314,28 @@ def view_station_par(runid, config):
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/eu_heuristic_stations/')
-def view_eu_heuristic_stations(runid, config):
+def view_eu_heuristic_stations(runid: str, config: str) -> Response:
+    """Render EU heuristic station options.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: HTML option list understood by the UI select component.
+    """
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
 
     try:
-        results = climate.find_eu_heuristic_stations()
+        results: Sequence[StationOption] | None = climate.find_eu_heuristic_stations()
     except Exception:
         return exception_factory('Error finding heuristic stations', runid=runid)
 
     if results is None:
         return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
 
-    options = []
+    options: List[str] = []
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
         options.append('<option value="{id}" {selected}>'
@@ -232,19 +346,28 @@ def view_eu_heuristic_stations(runid, config):
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/au_heuristic_stations/')
-def view_au_heuristic_stations(runid, config):
+def view_au_heuristic_stations(runid: str, config: str) -> Response:
+    """Render AU heuristic station options.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: HTML option list understood by the UI select component.
+    """
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
 
     try:
-        results = climate.find_au_heuristic_stations()
+        results: Sequence[StationOption] | None = climate.find_au_heuristic_stations()
     except Exception:
         return exception_factory('Error finding heuristic stations', runid=runid)
 
     if results is None:
         return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
 
-    options = []
+    options: List[str] = []
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
         options.append('<option value="{id}" {selected}>'
@@ -256,12 +379,24 @@ def view_au_heuristic_stations(runid, config):
 
 @climate_bp.route('/runs/<string:runid>/<config>/view/climate_monthlies')
 @climate_bp.route('/runs/<string:runid>/<config>/view/climate_monthlies/')
-def view_climate_monthlies(runid, config):
+def view_climate_monthlies(runid: str, config: str) -> Response:
+    """Render the monthly climate summary for the active station.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: HTML response with station monthly metadata.
+
+    Raises:
+        AssertionError: If the stored metadata is not a `StationMeta` instance.
+    """
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
 
     try:
-        station_meta = climate.climatestation_meta
+        station_meta: StationMeta | None = climate.climatestation_meta
     except Exception:
         return exception_factory('Could not find climatestation_meta', runid=runid)
 
@@ -276,7 +411,16 @@ def view_climate_monthlies(runid, config):
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable', methods=['POST'])
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable/', methods=['POST'])
-def task_set_use_gridmet_wind_when_applicable(runid, config):
+def task_set_use_gridmet_wind_when_applicable(runid: str, config: str) -> Response:
+    """Toggle the GridMET wind fallback for the climate controller.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: JSON success payload or error description.
+    """
 
     try:
         state = request.json.get('state', None)
