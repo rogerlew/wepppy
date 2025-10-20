@@ -1,62 +1,51 @@
-<h6>RHEM Results</h6>
-<p class="title">Hillslope Visualizations</p>
-<div class="radio radio-primary">
-    <input type="radio" name="rhem_sub_cmap_radio" id="rhem_sub_cmap_radio_runoff" value="sub_rhem_runoff">
-    <label for="rhem_sub_cmap_radio_runoff">
-        Runoff
-    </label>
-    <br/>
-    <input type="range" id="rhem_sub_cmap_range_runoff" min="0.0001" max="20" value="5" step="0.1">
-    <span id="rhem_sub_cmap_canvas_runoff_units"></span><br/>
-    <div style='width:240px;height:60px'>
-        <canvas id="rhem_sub_cmap_canvas_runoff" width=200 height=20
-                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-        <div class="row">
-            <div class="col-md-4"><span id="rhem_sub_cmap_canvas_runoff_min"></span></div>
-            <div class="col-md-4" style="text-align: center;">0</div>
-            <div class="col-md-4" style="text-align: right;">
-                <span id="rhem_sub_cmap_canvas_runoff_max"></span>
-            </div>
-        </div>
-    </div>
+{% import "controls/_pure_macros.html" as ui %}
+
+<h3 class="wc-map-panel__title">RHEM Results</h3>
+<p class="wc-text-muted">Adjust the legend sliders to refine color breaks for each visualization.</p>
+
+{{ ui.radio_group(
+     "rhem_sub_cmap_radio",
+     label="Color map",
+     layout="vertical",
+     options=[
+       {"id": "rhem_sub_cmap_radio_runoff", "label": "Runoff", "value": "sub_rhem_runoff"},
+       {"id": "rhem_sub_cmap_radio_sed_yield", "label": "Sediment Yield", "value": "sub_rhem_sed_yield"},
+       {"id": "rhem_sub_cmap_radio_soil_loss", "label": "Soil Loss", "value": "sub_rhem_soil_loss"}
+     ]
+   ) }}
+
+<div class="wc-map-scale" data-map-scale="sub_rhem_runoff">
+  {{ ui.color_scale(
+       "rhem_sub_cmap_range_runoff",
+       "rhem_sub_cmap_canvas_runoff",
+       "rhem_sub_cmap_canvas_runoff_min",
+       "rhem_sub_cmap_canvas_runoff_max",
+       label="Runoff legend",
+       range_attrs={"min": "0.0001", "max": "20", "value": "5", "step": "0.1"},
+       units_id="rhem_sub_cmap_canvas_runoff_units"
+     ) }}
 </div>
-<div class="radio radio-primary">
-    <input type="radio" name="rhem_sub_cmap_radio" id="rhem_sub_cmap_radio_sed_yield" value="sub_rhem_sed_yield">
-    <label for="rhem_sub_cmap_radio_sed_yield">
-        Sediment Yield
-    </label>
-    <br/>
-    <input type="range" id="rhem_sub_cmap_range_sed_yield" min="0.0001" max="5" value="0.5" step=".01">
-    <span id="rhem_sub_cmap_canvas_sed_yield_units"></span><br/>
-    <div style='width:240px;height:60px'>
-        <canvas id="rhem_sub_cmap_canvas_sed_yield" width=200 height=20
-                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-        <div class="row">
-            <div class="col-md-4"><span id="rhem_sub_cmap_canvas_sed_yield_min"></span></div>
-            <div class="col-md-4" style="text-align: center;">0</div>
-            <div class="col-md-4" style="text-align: right;">
-                <span id="rhem_sub_cmap_canvas_sed_yield_max"></span>
-            </div>
-        </div>
-    </div>
+
+<div class="wc-map-scale" data-map-scale="sub_rhem_sed_yield">
+  {{ ui.color_scale(
+       "rhem_sub_cmap_range_sed_yield",
+       "rhem_sub_cmap_canvas_sed_yield",
+       "rhem_sub_cmap_canvas_sed_yield_min",
+       "rhem_sub_cmap_canvas_sed_yield_max",
+       label="Sediment yield legend",
+       range_attrs={"min": "0.0001", "max": "5", "value": "0.5", "step": "0.01"},
+       units_id="rhem_sub_cmap_canvas_sed_yield_units"
+     ) }}
 </div>
-<div class="radio radio-primary">
-    <input type="radio" name="rhem_sub_cmap_radio" id="rhem_sub_cmap_radio_soil_loss" value="sub_rhem_soil_loss">
-    <label for="rhem_sub_cmap_radio_soil_loss">
-        Soil Loss
-    </label>
-    <br/>
-    <input type="range" id="rhem_sub_cmap_range_soil_loss" min="0.0001" max="5" value="0.5" step=".01">
-    <span id="rhem_sub_cmap_canvas_soil_loss_units"></span><br/>
-    <div style='width:240px;height:60px'>
-        <canvas id="rhem_sub_cmap_canvas_soil_loss" width=200 height=20
-                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-        <div class="row">
-            <div class="col-md-4"><span id="rhem_sub_cmap_canvas_soil_loss_min"></span></div>
-            <div class="col-md-4" style="text-align: center;">0</div>
-            <div class="col-md-4" style="text-align: right;">
-                <span id="rhem_sub_cmap_canvas_soil_loss_max"></span>
-            </div>
-        </div>
-    </div>
+
+<div class="wc-map-scale" data-map-scale="sub_rhem_soil_loss">
+  {{ ui.color_scale(
+       "rhem_sub_cmap_range_soil_loss",
+       "rhem_sub_cmap_canvas_soil_loss",
+       "rhem_sub_cmap_canvas_soil_loss_min",
+       "rhem_sub_cmap_canvas_soil_loss_max",
+       label="Soil loss legend",
+       range_attrs={"min": "0.0001", "max": "5", "value": "0.5", "step": "0.01"},
+       units_id="rhem_sub_cmap_canvas_soil_loss_units"
+     ) }}
 </div>

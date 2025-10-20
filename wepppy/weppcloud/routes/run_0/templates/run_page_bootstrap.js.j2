@@ -18,11 +18,12 @@ function window_resize() {
     if (!mapElement || !mapElement.parentElement) {
         return;
     }
-    var width = mapElement.parentElement.clientWidth;
-    mapElement.style.minHeight = width + 'px';
-    mapElement.style.height = width + 'px';
-    mapElement.style.width = width + 'px';
 
+    var width = mapElement.parentElement.clientWidth;
+    mapElement.style.width = width + 'px';
+    mapElement.style.height = width + 'px';
+    mapElement.style.minHeight = width + 'px';
+    mapElement.style.maxHeight = '';
     MapController.getInstance().invalidateSize();
 };
 
@@ -75,7 +76,7 @@ function onReady() {
 
 
     {% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
-    /*
+/*
      * Baer mod
      * ======================
      */
@@ -103,44 +104,46 @@ function onReady() {
     baer.showHideControls(0);
     {% endif %}
 
-    /*
-     * Channel
-     * ======================
-     */
+    if (channel_ctrl && outlet) {
+        /*
+         * Channel
+         * ======================
+         */
 
-    // load the hidden inputs on channel form
-    channel_ctrl.onMapChange();
+        // load the hidden inputs on channel form
+        channel_ctrl.onMapChange();
 
-    channel_ctrl.set_rq_job_id(channel_ctrl, {{ rq_job_ids.get("fetch_dem_and_build_channels_rq") | tojson }});
+        channel_ctrl.set_rq_job_id(channel_ctrl, {{ rq_job_ids.get("fetch_dem_and_build_channels_rq") | tojson }});
 
-    channel_ctrl.zoom_min = 11;
-    if ({{ watershed.has_channels | tojson }}) {
-        channel_ctrl.report();
+        channel_ctrl.zoom_min = 11;
+        if ({{ watershed.has_channels | tojson }}) {
+            channel_ctrl.report();
+        }
+        if ({{ watershed.has_channels | tojson }} && !({{ watershed.has_subcatchments | tojson }})) {
+            channel_ctrl.show();
+        }
+
+        /*
+         * Outlet
+         * =====================
+         */
+        outlet.set_rq_job_id(outlet, {{ rq_job_ids.get("set_outlet_rq") | tojson }});
+
+        // Load outlet from server
+        if ({{ watershed.has_outlet | tojson }}) {
+            outlet.triggerEvent('SET_OUTLET_TASK_COMPLETED');
+        }
+
+        var initialOutletModeElement = document.querySelector("input[name='set_outlet_mode']:checked");
+        var initialOutletMode = initialOutletModeElement ? initialOutletModeElement.value : undefined;
+        if (initialOutletMode !== undefined) {
+            outlet.handleModeChange(initialOutletMode);
+        }
+
+        map.on("click", function (ev) {
+            outlet.setClickHandler(ev);
+        });
     }
-    if ({{ watershed.has_channels | tojson }} && !({{ watershed.has_subcatchments | tojson }})) {
-        channel_ctrl.show();
-    }
-
-    /*
-     * Outlet
-     * =====================
-     */
-    outlet.set_rq_job_id(outlet, {{ rq_job_ids.get("set_outlet_rq") | tojson }});
-
-    // Load outlet from server
-    if ({{ watershed.has_outlet | tojson }}) {
-        outlet.triggerEvent('SET_OUTLET_TASK_COMPLETED');
-    }
-
-    var initialOutletModeElement = document.querySelector("input[name='set_outlet_mode']:checked");
-    var initialOutletMode = initialOutletModeElement ? initialOutletModeElement.value : undefined;
-    if (initialOutletMode !== undefined) {
-        outlet.handleModeChange(initialOutletMode);
-    }
-
-    map.on("click", function (ev) {
-        outlet.setClickHandler(ev);
-    });
 
     /*
      * Subcatchment
@@ -412,8 +415,10 @@ function onReady() {
     $(function () {
         var navSelector = "#toc";
         var $myNav = $(navSelector);
-        Toc.init($myNav);
-        registerTocEmojiMetadata($myNav.get(0), tocTaskEmojis);
+        if (typeof Toc !== 'undefined' && typeof Toc.init === 'function') {
+            Toc.init($myNav);
+            registerTocEmojiMetadata($myNav.get(0), tocTaskEmojis);
+        }
         if (typeof updateUI === 'function' && typeof lastPreflightChecklist !== 'undefined' && lastPreflightChecklist) {
             updateUI(lastPreflightChecklist);
         }
@@ -473,16 +478,13 @@ document.addEventListener('DOMContentLoaded', onReady);
 
 window.addEventListener('load', function () {
     window.addEventListener('resize', window_resize);
-    setTimeout(function () {
-        window_resize();
-    }, 100);
+    setTimeout(window_resize, 100);
 
     initPreflight("{{run_id}}");
 
     {% if 'dss_export' not in ron.mods %}
     // Ensure this runs after all other initialization
     setTimeout(function () {
-        // Check if DssExport instance exists before trying to hide it
         var dssExport = DssExport.getInstance();
         if (dssExport && typeof dssExport.hide === 'function') {
             dssExport.hide();
@@ -491,13 +493,10 @@ window.addEventListener('load', function () {
     }, 300);
     {% endif %}
 
-    // get the preferred units and set the unitizer preference
     var unitPreferenceElement = document.querySelector("input[name='uni_main_selector']:checked");
-    var pref = unitPreferenceElement ? unitPreferenceElement.value : undefined;
-    pref = parseInt(pref, 10);
+    var pref = unitPreferenceElement ? parseInt(unitPreferenceElement.value, 10) : undefined;
     setGlobalUnitizerPreference(pref);
-    Project.getInstance().unitChangeEvent();
-
+    
     {% if 'ash' in ron.mods %}
     ash.showHideControls();
     {% endif %}

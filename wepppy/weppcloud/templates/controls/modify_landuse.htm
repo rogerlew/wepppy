@@ -1,41 +1,59 @@
-<form  id="modify_landuse_form" action="javascript:void(0);" style="margin-left: 1em;"">
-  <div class="hide-readonly">
-    <h6>Modify Landuse</h6>
-    <div class="form-check">
-        <label class="form-check-label">
-            <input id="checkbox_modify_landuse" type="checkbox" class="form-check-input"
-                   onchange="LanduseModify.getInstance().toggle()">
-            Click subcatchments to select/deselect.<br/>Hold shift and click and drag for box selection.
-        </label>
-    </div>
-    <div class="form-group row">
-        <textarea id="textarea_modify_landuse" class="form-control" rows="3" placeholder="Topaz Ids" required ></textarea>
-    </div>
-    <div class="form-group row">
-        <label for="selection_modify_landuse">Select landuse:</label>
-        <select class="form-control" id="selection_modify_landuse">
-            {% for opt in landuseoptions %}
-            <option value="{{ opt["Key"] }}">{{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-6">
-            <button id="btn_modify_landuse"
-                    class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-                    type="button"
-                    onclick="LanduseModify.getInstance().modify()">
-                Modify Landuse
-            </button>
-        </div>
-    </div>
-    <div class="form-group-row">
-        <p>Rebuild the soils after changing landuse.</p>
-    </div>
-    <div class="alert alert-info" style="line-height: 30px; height: 30px; padding-top: 0;">
-        <pre><small id="status" class="text-muted"></small></pre>
-    </div>
-    <div id="stacktrace" class="alert alert-warning">
-    </div>
-  </div>
-</form>
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set landuse_select_options = namespace(values=[]) %}
+{% for opt in landuseoptions %}
+  {% set label = opt["Key"] ~ " — " ~ opt["Description"] %}
+  {% set landuse_select_options.values = landuse_select_options.values + [(opt["Key"], label)] %}
+{% endfor %}
+
+<div id="modify_landuse_form" class="wc-map-form hide-readonly">
+  <h3 class="wc-map-panel__title">Modify Landuse</h3>
+  {{ ui.checkbox_field(
+       "checkbox_modify_landuse",
+       "Enable selection mode",
+       help="Click subcatchments to select or deselect them. Hold Shift and drag to draw a selection box.",
+       attrs={"data-role": "toggle-selection"}
+     ) }}
+
+  {{ ui.textarea_field(
+       "textarea_modify_landuse",
+       "Topaz IDs",
+       rows=3,
+       placeholder="Topaz IDs",
+       attrs={"required": "required"}
+     ) }}
+
+  {{ ui.select_field(
+       "selection_modify_landuse",
+       "Select landuse",
+       landuse_select_options.values
+     ) }}
+
+  {% call button_row() %}
+    <button
+      id="btn_modify_landuse"
+      type="button"
+      class="pure-button pure-button-primary">
+      Modify Landuse
+    </button>
+  {% endcall %}
+
+  <p class="wc-text-muted">Rebuild soils after completing landuse changes.</p>
+
+  {{ ui.status_panel(
+       id="modify_landuse_status_panel",
+       title="Status",
+       variant="compact",
+       log_id="status",
+       height="3.25rem"
+     ) }}
+
+  {{ ui.stacktrace_panel(
+       id="modify_landuse_stacktrace_panel",
+       summary="Details",
+       collapsed=True,
+       body_id="stacktrace",
+       empty_state="No stack trace captured."
+     ) }}
+</div>

@@ -12,6 +12,7 @@
 | Layer | Purpose | Notes |
 | --- | --- | --- |
 | Pure.css `pure-min.css`, `grids-responsive-min.css` | Baseline grid, buttons, and form styling | Vendor locally under `static/vendor/purecss/` using `static-src/build-static-assets.sh`—do **not** link to the CDN in templates.【F:wepppy/wepppy/weppcloud/static-src/scripts/build.mjs†L17-L129】|
+| Avoid `.pure-form-aligned` control wrappers | They shift `.pure-controls` content 11em to the right; prefer our macros (`button_row`, `wc-stack`) to align buttons and helper text. | Built-in Pure alignment margins conflict with our layout tokens. |
 | `static/css/ui-foundation.css` | Tokens & default element rules | Defines fonts, colors, spacing, table, form, status, pagination, tooltip, and accessibility patterns with zero rounded corners.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L10-L637】|
 | Optional Bootstrap fragment | Specialized UI (modals, collapse, ToC) | Lazy-load per-page when Pure patterns are insufficient. |
 | Minimal Alpine/Vanilla JS | Interactivity | Keep behavior isolated and framework-agnostic. |

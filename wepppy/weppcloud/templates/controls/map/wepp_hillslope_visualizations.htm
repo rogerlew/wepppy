@@ -1,146 +1,94 @@
-<h6>WEPP Results</h6>
-<p class="title">Hillslope Visualizations</p>
-<div class="radio radio-primary">
-    <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_runoff" value="sub_runoff" >
-    <label for="wepp_sub_cmap_radio_runoff">
-        Runoff
-    </label>&nbsp;&nbsp;
-    <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_subrunoff" value="sub_subrunoff" >
-    <label for="wepp_sub_cmap_radio_subrunoff">
-        Lateral Flow
-    </label>&nbsp;&nbsp;
-    <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_baseflow" value="sub_baseflow" >
-    <label for="wepp_sub_cmap_radio_baseflow">
-        Baseflow
-    </label>
-    <br/>
-    <input type="range" id="wepp_sub_cmap_range_runoff" min="0.0001" max="100" value="5" step="0.1">
-    <div style='width:240px;height:60px'>
-        <canvas id="wepp_sub_cmap_canvas_runoff" width=200 height=20
-                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-        <div class="row">
-            <div class="col-md-4"><span id="wepp_sub_cmap_canvas_runoff_min"></span></div>
-            <div class="col-md-4" style="text-align: center;"></div>
-            <div class="col-md-4" style="text-align: right;">
-                <span id="wepp_sub_cmap_canvas_runoff_max"></span>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="radio radio-primary">
-    <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_loss" value="sub_loss">
-    <label for="wepp_sub_cmap_radio_loss">
-        Sediment Yield
-    </label>
-    <br/>
-    <input type="range" id="wepp_sub_cmap_range_loss" min="0.0001" max="100" value="5" step="0.1">
-    <div style='width:240px;height:60px'>
-        <canvas id="wepp_sub_cmap_canvas_loss" width=200 height=20
-                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-        <div class="row">
-            <div class="col-md-4"><span id="wepp_sub_cmap_canvas_loss_min"></span></div>
-            <div class="col-md-4" style="text-align: center;"></div>
-            <div class="col-md-4" style="text-align: right;">
-                <span id="wepp_sub_cmap_canvas_loss_max"></span>
-            </div>
-        </div>
-    </div>
-</div>
+{% import "controls/_pure_macros.html" as ui %}
+
+{% set wepp_radio_options = namespace(values=[
+  {"id": "wepp_sub_cmap_radio_runoff", "label": "Runoff", "value": "sub_runoff"},
+  {"id": "wepp_sub_cmap_radio_subrunoff", "label": "Lateral Flow", "value": "sub_subrunoff"},
+  {"id": "wepp_sub_cmap_radio_baseflow", "label": "Baseflow", "value": "sub_baseflow"},
+  {"id": "wepp_sub_cmap_radio_loss", "label": "Sediment Yield", "value": "sub_loss"}
+]) %}
+
 {% if wepp.has_phosphorus %}
-<div class="radio radio-primary">
-    <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_phosphorus" value="sub_phosphorus" >
-    <label for="wepp_sub_cmap_radio_phosphorus">
-        Total Phosphorus
-    </label>
-    <br/>
-    <input type="range" id="wepp_sub_cmap_range_phosphorus" min="0.0001" max="100" value="5" step="0.1">
-    <span id="wepp_sub_cmap_canvas_phosphorus_units"></span><br/>
-    <div style='width:240px;height:60px'>
-        <canvas id="wepp_sub_cmap_canvas_phosphorus" width=200 height=20
-                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-        <div class="row">
-            <div class="col-md-4"><span id="wepp_sub_cmap_canvas_phosphorus_min"></span></div>
-            <div class="col-md-4" style="text-align: center;"></div>
-            <div class="col-md-4" style="text-align: right;">
-                <span id="wepp_sub_cmap_canvas_phosphorus_max">
-                </span></div>
-        </div>
-    </div>
-</div>
+  {% set wepp_radio_options.values = wepp_radio_options.values + [
+    {"id": "wepp_sub_cmap_radio_phosphorus", "label": "Total Phosphorus", "value": "sub_phosphorus"}
+  ] %}
 {% endif %}
-<!--
-<p class="title">Gridded Visualizations (for flowpath runs)</p>
-<div class="radio radio-primary">
-    <input type="radio" name="wepp_sub_cmap_radio" id="wepp_grd_cmap_radio_loss" value="grd_loss" >
-    <label for="wepp_grd_cmap_radio_loss">
-        Soil Deposition/Loss
-    </label>
-    <br/>
-    <input type="range" id="wepp_grd_cmap_range_loss" min="0.0001" max="0.04" value="0.02" step="0.00001">
-    <span id="wepp_grd_cmap_range_loss_units"></span><br/>
-    <div style='width:240px;height:60px'>
-        <canvas id="wepp_grd_cmap_canvas_loss" width=200 height=20
-                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-        <div class="row">
-            <div class="col-md-4"><span id="wepp_grd_cmap_range_loss_min"></span></div>
-            <div class="col-md-4" style="text-align: center;">0</div>
-            <div class="col-md-4" style="text-align: right;">
-                <span id="wepp_grd_cmap_range_loss_max"></span>
-            </div>
-        </div>
-    </div>
-</div>-->
 
 {% if 'ash' in ron.mods %}
-<p class="title">Ash Transport Visualizations</p>
-
-<div class="radio radio-primary">
-    <input type="radio" name="wepp_sub_cmap_radio" id="ash_sub_cmap_radio_load" value="ash_load">
-    <label for="ash_sub_cmap_radio_load">
-        Ash Load
-    </label>
-    <br/>
-    <input type="range" id="ash_sub_cmap_range_load" min="0.0001" max="100" value="5" step="0.1">
-    <div style='width:240px;height:60px'>
-        <canvas id="ash_sub_cmap_canvas_load" width=200 height=20
-                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-        <div class="row">
-            <div class="col-md-4"><span id="ash_sub_cmap_canvas_load_min"></span></div>
-            <div class="col-md-4" style="text-align: center;">0</div>
-            <div class="col-md-4" style="text-align: right;">
-                <span id="ash_sub_cmap_canvas_load_max"></span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="radio radio-primary">
-    <input type="radio" name="wepp_sub_cmap_radio" id="ash_sub_cmap_radio_wind" value="wind_transport (kg/ha)" >
-    <label for="ash_sub_cmap_radio_wind">
-        Wind
-    </label>&nbsp;&nbsp;
-    <input type="radio" name="wepp_sub_cmap_radio" id="ash_sub_cmap_radio_water" value="water_transport (kg/ha)" >
-    <label for="ash_sub_cmap_radio_water">
-        Water
-    </label>&nbsp;&nbsp;
-    <input type="radio" name="wepp_sub_cmap_radio" id="ash_sub_cmap_radio_windwater" value="ash_transport (kg/ha)" >
-    <label for="ash_sub_cmap_radio_windwater">
-        Wind/Water
-    </label>
-    <br/>
-    <input type="range" id="ash_sub_cmap_range_transport" min="0.0001" max="20" value="2" step="0.05">
-    <span id="ash_sub_cmap_canvas_transport_units"></span><br/>
-    <div style='width:240px;height:60px'>
-        <canvas id="ash_sub_cmap_canvas_transport" width=200 height=20
-                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-        <div class="row">
-            <div class="col-md-4"><span id="ash_sub_cmap_canvas_transport_min"></span></div>
-            <div class="col-md-4" style="text-align: center;"></div>
-            <div class="col-md-4" style="text-align: right;">
-                <span id="ash_sub_cmap_canvas_transport_max"></span>
-            </div>
-        </div>
-    </div>
-</div>
+  {% set wepp_radio_options.values = wepp_radio_options.values + [
+    {"id": "ash_sub_cmap_radio_load", "label": "Ash Load", "value": "ash_load"},
+    {"id": "ash_sub_cmap_radio_wind", "label": "Wind", "value": "wind_transport (kg/ha)"},
+    {"id": "ash_sub_cmap_radio_water", "label": "Water", "value": "water_transport (kg/ha)"},
+    {"id": "ash_sub_cmap_radio_windwater", "label": "Wind/Water", "value": "ash_transport (kg/ha)"}
+  ] %}
 {% endif %}
 
+<h3 class="wc-map-panel__title">WEPP Results</h3>
+<p class="wc-text-muted">Choose a metric to recolor the subcatchment map and adjust the legend scale as needed.</p>
+
+{{ ui.radio_group(
+     "wepp_sub_cmap_radio",
+     label="Color map",
+     layout="vertical",
+     options=wepp_radio_options.values
+   ) }}
+
+<div class="wc-map-scale" data-map-scale="sub_runoff">
+  {{ ui.color_scale(
+       "wepp_sub_cmap_range_runoff",
+       "wepp_sub_cmap_canvas_runoff",
+       "wepp_sub_cmap_canvas_runoff_min",
+       "wepp_sub_cmap_canvas_runoff_max",
+       label="Runoff legend",
+       range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1"}
+     ) }}
+</div>
+
+<div class="wc-map-scale" data-map-scale="sub_loss">
+  {{ ui.color_scale(
+       "wepp_sub_cmap_range_loss",
+       "wepp_sub_cmap_canvas_loss",
+       "wepp_sub_cmap_canvas_loss_min",
+       "wepp_sub_cmap_canvas_loss_max",
+       label="Sediment yield legend",
+       range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1"}
+     ) }}
+</div>
+
+{% if wepp.has_phosphorus %}
+  <div class="wc-map-scale" data-map-scale="sub_phosphorus">
+    {{ ui.color_scale(
+         "wepp_sub_cmap_range_phosphorus",
+         "wepp_sub_cmap_canvas_phosphorus",
+         "wepp_sub_cmap_canvas_phosphorus_min",
+         "wepp_sub_cmap_canvas_phosphorus_max",
+         label="Total phosphorus legend",
+         range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1"},
+         units_id="wepp_sub_cmap_canvas_phosphorus_units"
+       ) }}
+  </div>
+{% endif %}
+
+{% if 'ash' in ron.mods %}
+  <h4 class="wc-map-panel__subtitle">Ash Transport Visualizations</h4>
+  <div class="wc-map-scale" data-map-scale="ash_load">
+    {{ ui.color_scale(
+         "ash_sub_cmap_range_load",
+         "ash_sub_cmap_canvas_load",
+         "ash_sub_cmap_canvas_load_min",
+         "ash_sub_cmap_canvas_load_max",
+         label="Ash load legend",
+         range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1"}
+       ) }}
+  </div>
+  <div class="wc-map-scale" data-map-scale="ash_transport (kg/ha)">
+    {{ ui.color_scale(
+         "ash_sub_cmap_range_transport",
+         "ash_sub_cmap_canvas_transport",
+         "ash_sub_cmap_canvas_transport_min",
+         "ash_sub_cmap_canvas_transport_max",
+         label="Ash transport legend",
+         range_attrs={"min": "0.0001", "max": "20", "value": "2", "step": "0.05"},
+         units_id="ash_sub_cmap_canvas_transport_units"
+       ) }}
+  </div>
+{% endif %}

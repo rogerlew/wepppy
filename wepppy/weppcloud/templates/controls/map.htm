@@ -1,168 +1,195 @@
-<div class="col-md-11 px-1 controller-section">
-  <form id="setloc_form" action="javascript:void(0);">
-    <div class="form-group row">
-      <h3 style="margin-left: 0.5em;">Map</h3>
-    </div>
-    <div class="form-group row align-items-center">
-      <div class="col-sm-5">
-        <input id="input_centerloc" name="centerloc" class="form-control" type="text"
-          placeholder="Lon, Lat, [Zoom] | Topaz | Wepp" aria-label="Lon, Lat, [Zoom] | TopazID | WeppID"
-          onkeydown="MapController.getInstance().handleCenterInputKey(event)">
-      </div>
-      <div class="col-auto">
-        <button id="btn_setloc" name="setloc" class="btn btn-outline-success" type="button"
-          onclick="MapController.getInstance().goToEnteredLocation()">Go</button>
-      </div>
-      <div class="col-auto">
-        <button id="btn_find_topaz_id" name="find_topaz_id" class="btn btn-outline-success" type="button"
-          onclick="MapController.getInstance().findByTopazId()">🔍
-          TopazID</button>
-      </div>
-      <div class="col-auto">
-        <button id="btn_find_wepp_id" name="find_wepp_id" class="btn btn-outline-success" type="button"
-          onclick="MapController.getInstance().findByWeppId()">🔍
-          WeppID</button>
-      </div>
-    </div>
-  </form>
-  <div class="controller-section__inner">
-    <div class="row">
-      <div class="col-md-7 col-lg-7 pr-lg-3 mb-3 mb-md-0">
-        <div id="mapid"></div>
-        <div class="row">
-          <div class="col-xs-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-          <div class="col-xs-6"><span id="mapstatus" class="text-muted"></span></div>
-          <div class="col-xs-2"><span>&nbsp;</span><span id="mouseelev" class="text-muted"></span></div>
-        </div>
-      </div>
-      <div class="col-md-5 col-lg-5 pl-lg-3">
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs" role="tablist">
-      <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" href="#sub_layer_selection" role="tab">
-          <img src="{{ url_for('static', filename='open-iconic/png/layers-2x.png') }}" />
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#drilldown" role="tab">
-          <img src="{{ url_for('static', filename='open-iconic/png/magnifying-glass-2x.png') }}" />
-        </a>
-      </li>
-      {% if ron.enable_landuse_change %}
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#modify" role="tab">
-          <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}" />
-        </a>
-      </li>
-      {% endif %}
-      {% if 'rangeland_cover' in ron.mods %}
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#modify_rangeland_cover" role="tab">
-          <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}" />
-        </a>
-      </li>
-      {% endif %}
-      {% if false %}
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#spatialclimate" role="tab">
-          <img src="{{ url_for('static', filename='open-iconic/png/rain-2x.png') }}" />
-        </a>
-      </li>
-      {% endif %}
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#results" role="tab">
-          <img src="{{ url_for('static', filename='open-iconic/png/pie-chart-2x.png') }}" />
-        </a>
-      </li>
-    </ul>
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
 
-    <!-- Tab panes -->
-    <div class="tab-content">
-      <div class="tab-pane active" id="sub_layer_selection" role="tabpanel">
-        <h6>Subcatchment Colormapping</h6>
-        <div class="radio radio-primary">
-          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_default" value="default" checked>
-          <label for="sub_cmap_radio_default">
-            Default
-          </label>
-        </div>
-        <div class="radio radio-primary">
-          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_slp_asp" value="slp_asp" disabled>
-          <label for="sub_cmap_radio_slp_asp">
-            Slope/Aspect
-          </label>
-        </div>
-        <div class="radio radio-primary">
-          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_lc" value="dom_lc" disabled>
-          <label for="sub_cmap_radio_dom_lc">
-            Dominant Landcover
-          </label>
-        </div>
-        {% if 'rangeland_cover' in ron.mods %}
-        <div class="radio radio-primary">
-          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_rangeland_cover" value="rangeland_cover"
-            disabled>
-          <label for="sub_cmap_radio_rangeland_cover">
-            Rangeland Cover
-          </label>
-        </div>
-        {% endif %}
-        {% if 'rap' in ron.mods %}
-        <div class="radio radio-primary">
-          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_landuse_cover" value="landuse_cover">
-          <label for="sub_cmap_radio_landuse_cover">
-            Vegetation Cover (%)
-          </label>
-          <br />
-          <span id="landuse_sub_cmap_canvas_cover_units"></span><br />
-          <div style='width:240px;height:40px'>
-            <canvas id="landuse_sub_cmap_canvas_cover" width=200 height=20
-              style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-            <div class="row">
-              <div class="col-md-4"><span id="landuse_sub_cmap_canvas_cover_min"></span></div>
-              <div class="col-md-4" style="text-align: center;"></div>
-              <div class="col-md-4" style="text-align: right;">
-                <span id="landuse_sub_cmap_canvas_cover_max">
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        {% endif %}
-        <div class="radio radio-primary">
-          <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_soil" value="dom_soil" disabled>
-          <label for="sub_cmap_radio_dom_soil">
-            Dominant Soil
-          </label>
-        </div><br />
-        <div id="sbs_legend"></div>
-        <div id="sub_legend"></div>
+{% set show_landuse_modify = ron.enable_landuse_change %}
+{% set show_rangeland_modify = 'rangeland_cover' in ron.mods %}
+{% set show_rap = 'rap' in ron.mods %}
+
+{% set sub_cmap_options = [
+  {
+    "id": "sub_cmap_radio_default",
+    "label": "Default",
+    "value": "default",
+    "selected": True
+  },
+  {
+    "id": "sub_cmap_radio_slp_asp",
+    "label": "Slope/Aspect",
+    "value": "slp_asp",
+    "disabled": True
+  },
+  {
+    "id": "sub_cmap_radio_dom_lc",
+    "label": "Dominant Landcover",
+    "value": "dom_lc",
+    "disabled": True
+  },
+  {
+    "id": "sub_cmap_radio_dom_soil",
+    "label": "Dominant Soil",
+    "value": "dom_soil",
+    "disabled": True
+  }
+] %}
+{% if show_rangeland_modify %}
+  {% set sub_cmap_options = sub_cmap_options + [
+    {
+      "id": "sub_cmap_radio_rangeland_cover",
+      "label": "Rangeland Cover",
+      "value": "rangeland_cover",
+      "disabled": True
+    }
+  ] %}
+{% endif %}
+{% if show_rap %}
+  {% set sub_cmap_options = sub_cmap_options + [
+    {
+      "id": "sub_cmap_radio_landuse_cover",
+      "label": "Vegetation Cover (%)",
+      "value": "landuse_cover"
+    }
+  ] %}
+{% endif %}
+
+{% set sub_layer_selection_content %}
+  <h3 class="wc-map-panel__title">Subcatchment Colormapping</h3>
+  {{ ui.radio_group(
+       "sub_cmap_radio",
+       label="Subcatchment color map",
+       layout="vertical",
+       options=sub_cmap_options
+     ) }}
+  {% if show_rap %}
+    <div class="wc-map-legend">
+      <span id="landuse_sub_cmap_canvas_cover_units" class="wc-color-scale__units"></span>
+      <div class="wc-color-scale__bar">
+        <canvas
+          id="landuse_sub_cmap_canvas_cover"
+          class="wc-color-scale__canvas"
+          width="200"
+          height="20"></canvas>
       </div>
-      <div class="tab-pane" id="drilldown" role="tabpanel">
-        <i>Select a channel or hillslope to view information</i>
-      </div>
-      <!-- div class="tab-pane" id="spatialclimate" role="tabpanel">
-            <h6>Spatial Climate</h6>
-          </div -->
-      {% if ron.enable_landuse_change %}
-      <div class="tab-pane" id="modify" role="tabpanel">
-        {% include 'controls/modify_landuse.htm' %}
-      </div>
-      {% endif %}
-      {% if 'rangeland_cover' in ron.mods %}
-      <div class="tab-pane" id="modify_rangeland_cover" role="tabpanel">
-        {% include 'controls/modify_rangeland_cover.htm' %}
-      </div>
-      {% endif %}
-      <div class="tab-pane" id="results" role="tabpanel">
-        {% if 'rhem' not in ron.mods %}
-        {% include("controls/map/wepp_hillslope_visualizations.htm") %}
-        {% else %}
-        {% include("controls/map/rhem_hillslope_visualizations.htm") %}
-        {% endif %}
+      <div class="wc-color-scale__labels">
+        <span id="landuse_sub_cmap_canvas_cover_min"></span>
+        <span id="landuse_sub_cmap_canvas_cover_max"></span>
       </div>
     </div>
-      </div>
+  {% endif %}
+  <div id="sbs_legend" class="wc-map-legend" aria-live="polite"></div>
+  <div id="sub_legend" class="wc-map-legend" aria-live="polite"></div>
+{% endset %}
+
+{% set drilldown_content %}
+  <p class="wc-text-muted">Select a channel or hillslope to view information.</p>
+{% endset %}
+
+{% set results_content %}
+  {% if 'rhem' not in ron.mods %}
+    {% include "controls/map/wepp_hillslope_visualizations.htm" %}
+  {% else %}
+    {% include "controls/map/rhem_hillslope_visualizations.htm" %}
+  {% endif %}
+{% endset %}
+
+{% if show_landuse_modify %}
+  {% set modify_landuse_content %}
+    {% include "controls/modify_landuse.htm" %}
+  {% endset %}
+{% endif %}
+
+{% if show_rangeland_modify %}
+  {% set modify_rangeland_content %}
+    {% include "controls/modify_rangeland_cover.htm" %}
+  {% endset %}
+{% endif %}
+
+{% set map_tabs = [
+  {
+    "id": "sub_layer_selection",
+    "label": "Layers",
+    "icon": '<span aria-hidden="true">🗺️</span>',
+    "active": True,
+    "content": sub_layer_selection_content
+  },
+  {
+    "id": "drilldown",
+    "label": "Drilldown",
+    "icon": '<span aria-hidden="true">🔎</span>',
+    "content": drilldown_content
+  }
+] %}
+
+{% if show_landuse_modify %}
+  {% set map_tabs = map_tabs + [
+    {
+      "id": "modify",
+      "label": "Modify Landuse",
+      "icon": '<span aria-hidden="true">🛠️</span>',
+      "content": modify_landuse_content
+    }
+  ] %}
+{% endif %}
+
+{% if show_rangeland_modify %}
+  {% set map_tabs = map_tabs + [
+    {
+      "id": "modify_rangeland_cover",
+      "label": "Rangeland Cover",
+      "icon": '<span aria-hidden="true">🌾</span>',
+      "content": modify_rangeland_content
+    }
+  ] %}
+{% endif %}
+
+{% set map_tabs = map_tabs + [
+  {
+    "id": "results",
+    "label": "Results",
+    "icon": '<span aria-hidden="true">📊</span>',
+    "content": results_content
+  }
+] %}
+
+{% call ui.control_shell(
+     form_id="setloc_form",
+     title="Map",
+     collapsible=False,
+     status_panel_override='',
+     summary_panel_override='',
+     stacktrace_panel_override=''
+   ) %}
+  <div class="wc-map-controls">
+    <div class="wc-map-controls__input">
+      {{ ui.text_field(
+           "input_centerloc",
+           "Center or ID search",
+           placeholder="Lon, Lat, [Zoom] | TopazID | WeppID",
+           attrs={"autocomplete": "off", "inputmode": "text"},
+           help="Enter coordinates (lon, lat, optional zoom) or a Topaz/Wepp ID."
+         ) }}
+    </div>
+    <div class="wc-map-controls__actions">
+      {% call button_row() %}
+        <button type="button" class="pure-button pure-button-primary" id="btn_setloc">Go</button>
+        <button type="button" class="pure-button pure-button-secondary" id="btn_find_topaz_id">Find Topaz ID</button>
+        <button type="button" class="pure-button pure-button-secondary" id="btn_find_wepp_id">Find WEPP ID</button>
+      {% endcall %}
     </div>
   </div>
-</div>
+
+  <div class="wc-map-layout">
+    <div class="wc-map-layout__canvas">
+      <div class="wc-map">
+        <div id="mapid" class="wc-map__canvas" role="application" aria-label="Watershed map viewport"></div>
+      </div>
+      <div class="wc-map-status" aria-live="polite">
+        <span id="mapstatus"></span>
+        <span class="wc-map-status__spacer" aria-hidden="true"></span>
+        <span id="mouseelev"></span>
+      </div>
+    </div>
+    <div class="wc-map-layout__inspector">
+      {{ ui.tabset(map_tabs) }}
+    </div>
+  </div>
+{% endcall %}

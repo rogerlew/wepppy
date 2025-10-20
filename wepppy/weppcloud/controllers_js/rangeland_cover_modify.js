@@ -21,7 +21,16 @@ var RangelandCoverModify = function () {
                 if (subCtrl.getCmapMode && subCtrl.getCmapMode() === 'rangeland_cover') {
                     subCtrl.setColorMap('rangeland_cover');
                 }
-                RangelandCover.getInstance().report();
+                try {
+                    if (typeof RangelandCover !== 'undefined' && RangelandCover !== null) {
+                        var rangelandController = RangelandCover.getInstance();
+                        if (rangelandController && typeof rangelandController.report === 'function') {
+                            rangelandController.report();
+                        }
+                    }
+                } catch (err) {
+                    console.warn('RangelandCover report unavailable in current view', err);
+                }
                 if (typeof subCtrl.cmapRangelandCover === 'function') {
                     subCtrl.cmapRangelandCover();
                 }
@@ -48,6 +57,14 @@ var RangelandCoverModify = function () {
         that.input_rock = $('#input_rock_cover');
         that.input_litter = $('#input_litter_cover');
         that.input_cryptogams = $('#input_cryptogams_cover');
+
+        $('#btn_modify_rangeland_cover').on('click', function () {
+            instance.modify();
+        });
+
+        that.checkbox.on('change', function () {
+            instance.toggle();
+        });
 
         that.data = null; // Leaflet geoJSON layer
         that.polys = null; // Leaflet geoJSON layer

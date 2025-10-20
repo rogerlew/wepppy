@@ -15,6 +15,7 @@
     "jquery": "3.5.1",
     "leaflet": "1.7.1",
     "leaflet-ajax": "2.1.0",
+    "purecss": "^3.0.0",
     "spin.js": "4.1.0"
   },
   "devDependencies": {

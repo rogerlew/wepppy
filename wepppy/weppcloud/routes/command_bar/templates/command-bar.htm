@@ -24,7 +24,8 @@
 .command-bar-input-wrapper {
   width: 100%;
 }
-.command-bar-input-wrapper input {
+.command-bar-input-wrapper input,
+.command-bar-input {
   padding: 2px 6px;
   height: auto;
   width: 100%;
@@ -34,7 +35,8 @@
   background: var(--wc-color-page);
   border: 1px solid var(--wc-color-border);
 }
-.command-bar-input-wrapper input:focus {
+.command-bar-input-wrapper input:focus,
+.command-bar-input:focus {
   outline: 2px solid var(--wc-color-accent);
   outline-offset: 2px;
 }
@@ -127,7 +129,7 @@
 <div class="command-bar-container" data-command-bar>
   <div data-command-tip>Tip: Press ':' to activate the command bar, type ':help' for help</div>
   <div class="command-bar-input-wrapper" data-command-input-wrapper hidden>
-    <input type="text" class="form-control form-control-sm" placeholder="Enter command..." data-command-input autocomplete="off">
+    <input type="text" class="command-bar-input" placeholder="Enter command..." data-command-input autocomplete="off">
   </div>
   <div class="command-bar-result" data-command-result hidden></div>
 </div>

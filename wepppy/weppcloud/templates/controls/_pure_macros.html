@@ -65,27 +65,33 @@
       {% endif %}
     </header>
     {% endif %}
+    {% set panel_blocks = [] %}
+    {% if status_panel_override is not none %}
+      {% set panel_blocks = panel_blocks + [status_panel_override|safe] %}
+    {% else %}
+      {% set panel_blocks = panel_blocks + [legacy_status_panel()] %}
+    {% endif %}
+    {% if summary_panel_override is not none %}
+      {% set panel_blocks = panel_blocks + [summary_panel_override|safe] %}
+    {% else %}
+      {% set panel_blocks = panel_blocks + [legacy_summary_panel()] %}
+    {% endif %}
+    {% if stacktrace_panel_override is not none %}
+      {% set panel_blocks = panel_blocks + [stacktrace_panel_override|safe] %}
+    {% else %}
+      {% set panel_blocks = panel_blocks + [legacy_stacktrace_panel()] %}
+    {% endif %}
+    {% set joined_panels = ''.join(panel_blocks) %}
+    {% set has_panels = joined_panels|trim|length > 0 %}
     <div class="wc-control__grid">
       <section class="wc-control__inputs">
         {{ caller() }}
       </section>
+      {% if has_panels %}
       <section class="wc-control__panels">
-        {% if status_panel_override is not none %}
-          {{ status_panel_override|safe }}
-        {% else %}
-          {{ legacy_status_panel() }}
-        {% endif %}
-        {% if summary_panel_override is not none %}
-          {{ summary_panel_override|safe }}
-        {% else %}
-          {{ legacy_summary_panel() }}
-        {% endif %}
-        {% if stacktrace_panel_override is not none %}
-          {{ stacktrace_panel_override|safe }}
-        {% else %}
-          {{ legacy_stacktrace_panel() }}
-        {% endif %}
+        {{ joined_panels | safe }}
       </section>
+      {% endif %}
     </div>
   </form>
 {% if collapsible %}
@@ -248,7 +254,57 @@
 </details>
 {%- endmacro %}
 
-{% macro text_field(field_id, label, value='', help=None, type='text', placeholder=None, attrs=None, error=None) -%}
+{% macro tabset(tabs) -%}
+{% set tabs = tabs or [] %}
+{% if tabs %}
+  {% set active_candidates = tabs | selectattr('active') | list %}
+  {% if active_candidates %}
+    {% set active_tab = active_candidates[0].id %}
+  {% else %}
+    {% set active_tab = tabs[0].id %}
+  {% endif %}
+  <div class="wc-tabs" data-tabset>
+    <div class="wc-tabs__nav" role="tablist">
+      {% for tab in tabs %}
+        {% set is_active = (tab.id == active_tab) %}
+        {% set panel_id = tab.id %}
+        {% set tab_id = tab.id ~ "_tab" %}
+        <button
+          id="{{ tab_id }}"
+          class="wc-tabs__tab{% if is_active %} is-active{% endif %}"
+          type="button"
+          role="tab"
+          data-tab-target="{{ panel_id }}"
+          aria-controls="{{ panel_id }}"
+          aria-selected="{{ 'true' if is_active else 'false' }}"
+          tabindex="{{ '0' if is_active else '-1' }}">
+          {% if tab.icon %}
+          <span class="wc-tabs__icon" aria-hidden="true">{{ tab.icon|safe }}</span>
+          {% endif %}
+          {% if tab.label %}
+          <span class="wc-tabs__label">{{ tab.label }}</span>
+          {% endif %}
+        </button>
+      {% endfor %}
+    </div>
+    <div class="wc-tabs__panels">
+      {% for tab in tabs %}
+        {% set is_active = (tab.id == active_tab) %}
+        <section
+          id="{{ tab.id }}"
+          class="wc-tabs__panel{% if is_active %} is-active{% endif %}"
+          role="tabpanel"
+          aria-labelledby="{{ tab.id ~ '_tab' }}"
+          {% if not is_active %}hidden{% endif %}>
+          {{ tab.content|default('', true)|safe }}
+        </section>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+{%- endmacro %}
+
+{% macro text_field(field_id, label, value='', help=None, type='text', placeholder=None, attrs=None, error=None, extra_control_class=None) -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -266,9 +322,13 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
+{% set control_classes = ['wc-field__control'] %}
+{% if extra_control_class %}
+  {% set control_classes = control_classes + [extra_control_class] %}
+{% endif %}
 <div class="{{ ' '.join(field_classes) }}">
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
-  <input class="wc-field__control"
+  <input class="{{ ' '.join(control_classes) }}"
          id="{{ field_id }}"
          name="{{ field_id }}"
          type="{{ type }}"
@@ -563,7 +623,7 @@
 </div>
 {%- endmacro %}
 
-{% macro textarea_field(field_id, label, value='', rows=4, help=None, placeholder=None, attrs=None, error=None) -%}
+{% macro textarea_field(field_id, label, value='', rows=4, help=None, placeholder=None, attrs=None, error=None, extra_control_class=None) -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -581,9 +641,13 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
+{% set control_classes = ['wc-field__control'] %}
+{% if extra_control_class %}
+  {% set control_classes = control_classes + [extra_control_class] %}
+{% endif %}
 <div class="{{ ' '.join(field_classes) }}">
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
-  <textarea class="wc-field__control"
+  <textarea class="{{ ' '.join(control_classes) }}"
             id="{{ field_id }}"
             name="{{ field_id }}"
             rows="{{ rows }}"
@@ -674,6 +738,51 @@
        {% endfor %}></div>
   {% if help %}
   <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{%- macro color_scale(
+      range_id,
+      canvas_id,
+      min_id,
+      max_id,
+      label=None,
+      range_attrs=None,
+      canvas_attrs=None,
+      units_id=None,
+      help=None
+    ) -%}
+{% set range_attrs = range_attrs or {} %}
+{% set canvas_attrs = canvas_attrs or {} %}
+<div class="wc-color-scale">
+  {% if label %}
+  <label class="wc-color-scale__label" for="{{ range_id }}">{{ label }}</label>
+  {% endif %}
+  <input
+    type="range"
+    id="{{ range_id }}"
+    class="wc-color-scale__range"
+    {% for attr_key, attr_val in range_attrs.items() %}
+      {{ attr_key }}="{{ attr_val }}"
+    {% endfor %}>
+  {% if units_id %}
+  <span id="{{ units_id }}" class="wc-color-scale__units"></span>
+  {% endif %}
+  <div class="wc-color-scale__bar">
+    <canvas
+      id="{{ canvas_id }}"
+      class="wc-color-scale__canvas"
+      {% for attr_key, attr_val in canvas_attrs.items() %}
+        {{ attr_key }}="{{ attr_val }}"
+      {% endfor %}></canvas>
+  </div>
+  <div class="wc-color-scale__labels">
+    <span id="{{ min_id }}" class="wc-color-scale__value"></span>
+    <span id="{{ max_id }}" class="wc-color-scale__value" data-align="end"></span>
+  </div>
+  {% if help %}
+  <p class="wc-color-scale__help">{{ help }}</p>
   {% endif %}
 </div>
 {%- endmacro %}

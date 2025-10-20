@@ -1,0 +1,53 @@
+{% from "shared/console_macros.htm" import button_row %}
+{% import "controls/_pure_macros.html" as ui %}
+
+{% set wrap = fork_console_wrap if fork_console_wrap is defined else True %}
+{% if wrap %}
+<section class="wc-stack"
+         data-controller="fork-console"
+         data-runid="{{ runid }}"
+         data-config="{{ config }}"
+         data-undisturbify="{{ undisturbify | string }}">
+{% endif %}
+  {% call ui.control_shell(
+       form_id="fork_form",
+       title="Fork Project",
+       collapsible=False,
+       form_class="pure-form-aligned",
+       form_attrs={'novalidate': True},
+       status_panel_override=ui.status_panel(
+         id="fork_status_panel",
+         title="Console",
+         variant="console",
+         meta='<div id="the_console" class="wc-status" data-state="attention">Waiting for submission...</div>',
+         log_id="fork_status_log"
+       ),
+       summary_panel_override='',
+       stacktrace_panel_override=ui.stacktrace_panel(
+         id="fork_stacktrace_panel",
+         summary="Stack trace",
+         description="Exceptions from fork jobs appear here.",
+         empty_state="No stack trace captured."
+       )
+     ) %}
+    <fieldset>
+      {{ ui.text_field(
+           'runid_input',
+           'Source run ID',
+           value=runid,
+           attrs={'readonly': 'readonly'}
+         ) }}
+      {{ ui.checkbox_field(
+           'undisturbify_checkbox',
+           'Undisturbify output (optional)',
+           checked=undisturbify == 'true'
+         ) }}
+      {% call button_row() %}
+        <button type="submit" class="pure-button" id="submit_button">Fork project</button>
+        <button type="button" class="pure-button pure-button-secondary" id="cancel_button" hidden>Cancel job</button>
+      {% endcall %}
+    </fieldset>
+  {% endcall %}
+{% if wrap %}
+</section>
+{% endif %}

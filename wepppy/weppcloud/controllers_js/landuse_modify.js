@@ -21,7 +21,16 @@ var LanduseModify = function () {
                 if (subCtrl.getCmapMode && subCtrl.getCmapMode() === 'dom_lc') {
                     subCtrl.setColorMap('dom_lc');
                 }
-                Landuse.getInstance().report();
+                try {
+                    if (typeof Landuse !== 'undefined' && Landuse !== null) {
+                        var landuseController = Landuse.getInstance();
+                        if (landuseController && typeof landuseController.report === 'function') {
+                            landuseController.report();
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Landuse report unavailable in current view', err);
+                }
             }
 
             baseTriggerEvent(eventName, payload);
@@ -33,6 +42,14 @@ var LanduseModify = function () {
         that.data = null; // Leaflet geoJSON layer
         that.polys = null; // Leaflet geoJSON layer
         that.selected = null;
+
+        $('#btn_modify_landuse').on('click', function () {
+            instance.modify();
+        });
+
+        that.checkbox.on('change', function () {
+            instance.toggle();
+        });
 
         that.style = {
             color: "white",

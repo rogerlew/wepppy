@@ -2,6 +2,92 @@
  * Map
  * ----------------------------------------------------------------------------
  */
+
+function createTabset(root) {
+    if (!root) {
+        return null;
+    }
+
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+    var panels = Array.prototype.slice.call(root.querySelectorAll('[role="tabpanel"]'));
+
+    if (tabs.length === 0 || panels.length === 0) {
+        return null;
+    }
+
+    function getTarget(tab) {
+        return tab ? tab.getAttribute('data-tab-target') : null;
+    }
+
+    function setActive(panelId, focusTab) {
+        tabs.forEach(function (tab) {
+            var target = getTarget(tab);
+            var isActive = target === panelId;
+            tab.classList.toggle('is-active', isActive);
+            tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            tab.setAttribute('tabindex', isActive ? '0' : '-1');
+            if (isActive && focusTab) {
+                tab.focus();
+            }
+        });
+
+        panels.forEach(function (panel) {
+            var isActive = panel.id === panelId;
+            panel.classList.toggle('is-active', isActive);
+            if (isActive) {
+                panel.removeAttribute('hidden');
+            } else {
+                panel.setAttribute('hidden', '');
+            }
+        });
+
+        root.dispatchEvent(new CustomEvent('wc-tabset:change', {
+            detail: { panelId: panelId },
+            bubbles: true
+        }));
+    }
+
+    var current = tabs.find(function (tab) {
+        return tab.getAttribute('aria-selected') === 'true' || tab.classList.contains('is-active');
+    });
+    var initialPanel = getTarget(current) || getTarget(tabs[0]);
+    setActive(initialPanel, false);
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            setActive(getTarget(tab), false);
+        });
+
+        tab.addEventListener('keydown', function (event) {
+            var key = event.key;
+            if (key !== 'ArrowLeft' && key !== 'ArrowRight' && key !== 'Home' && key !== 'End') {
+                return;
+            }
+
+            event.preventDefault();
+            var currentIndex = tabs.indexOf(tab);
+            if (key === 'ArrowLeft' || key === 'ArrowRight') {
+                var offset = key === 'ArrowRight' ? 1 : -1;
+                var nextIndex = (currentIndex + offset + tabs.length) % tabs.length;
+                setActive(getTarget(tabs[nextIndex]), true);
+            } else if (key === 'Home') {
+                setActive(getTarget(tabs[0]), true);
+            } else if (key === 'End') {
+                setActive(getTarget(tabs[tabs.length - 1]), true);
+            }
+        });
+    });
+
+    return {
+        activate: function (panelId, focusTab) {
+            if (!panelId) {
+                return;
+            }
+            setActive(panelId, focusTab === true);
+        }
+    };
+}
+
 var MapController = function () {
     var instance;
 
@@ -35,6 +121,32 @@ var MapController = function () {
 
         that.fetchTimer;
         that.centerInput = $("#input_centerloc");
+        that.tabset = createTabset(document.querySelector('#setloc_form [data-tabset]'));
+
+        if (that.centerInput && that.centerInput.length) {
+            that.centerInput.on('keydown', function (event) {
+                that.handleCenterInputKey(event);
+            });
+        }
+
+        $('#btn_setloc').on('click', function () {
+            that.goToEnteredLocation();
+        });
+
+        $('#btn_find_topaz_id').on('click', function () {
+            that.findByTopazId();
+        });
+
+        $('#btn_find_wepp_id').on('click', function () {
+            that.findByWeppId();
+        });
+
+        setTimeout(function () {
+            if (typeof that.invalidateSize === 'function') {
+                that.invalidateSize();
+            }
+        }, 0);
+
         var encodedRunId = (typeof runid !== "undefined" && runid !== null) ? encodeURIComponent(runid) : null;
         var encodedConfig = (typeof config !== "undefined" && config !== null) ? encodeURIComponent(config) : null;
         var elevationEndpoint = null;
@@ -348,10 +460,9 @@ var MapController = function () {
         };
 
         that.hillQuery = function (query_url) {
-            // show the drilldown tab
-            const drilldownTabTrigger = document.querySelector('a[href="#drilldown"]');
-            const tab = new bootstrap.Tab(drilldownTabTrigger);
-            tab.show();
+            if (that.tabset && typeof that.tabset.activate === 'function') {
+                that.tabset.activate('drilldown', true);
+            }
 
             var self = instance;
             $.get({

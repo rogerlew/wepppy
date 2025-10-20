@@ -1,0 +1,88 @@
+{% from "shared/console_macros.htm" import button_row %}
+{% import "controls/_pure_macros.html" as ui %}
+
+{% set wrap = archive_console_wrap if archive_console_wrap is defined else True %}
+{% if wrap %}
+<section class="wc-stack"
+         data-controller="archive-dashboard"
+         data-runid="{{ runid }}"
+         data-config="{{ config }}"
+         data-archives-url="{{ url_for_run('archive.rq_archive_list', runid=runid, config=config) }}"
+         data-archive-api-url="{{ url_for_run('rq_api.api_archive', runid=runid, config=config) }}"
+         data-restore-api-url="{{ url_for_run('rq_api.api_restore_archive', runid=runid, config=config) }}"
+         data-delete-api-url="{{ url_for_run('rq_api.api_delete_archive', runid=runid, config=config) }}"
+         data-project-path="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}"
+         data-user-anonymous="{{ 'true' if user.is_anonymous else 'false' }}">
+{% endif %}
+  <div class="wc-stack">
+    {% call ui.control_shell(
+         form_id="archive_form",
+         title="Create Archive",
+         collapsible=False,
+         form_attrs={'novalidate': True},
+         status_panel_override=ui.status_panel(
+           id="archive_status_panel",
+           title="Archive status",
+           variant="console",
+           description="Live updates for archive and restore jobs.",
+           log_id="archive_status_log",
+           initial="Waiting for activity..."
+         ),
+         summary_panel_override='',
+         stacktrace_panel_override=ui.stacktrace_panel(
+           id="archive_stacktrace_panel",
+           summary="Stack trace",
+           description="Latest exception details from archive jobs.",
+           empty_state="No stack trace recorded."
+         )
+       ) %}
+      <fieldset>
+        {{ ui.text_field(
+             'archive_comment',
+             'Archive comment',
+             help='Optional note stored with the archive.',
+             attrs={
+               'maxlength': '40',
+               'placeholder': 'Optional note stored with the archive'
+             }
+           ) }}
+        {% call button_row() %}
+          <button type="button" class="pure-button" id="archive_button">Create archive</button>
+          <button type="button" class="pure-button pure-button-secondary" id="refresh_button">Refresh list</button>
+        {% endcall %}
+      </fieldset>
+    {% endcall %}
+  </div>
+
+  <div class="wc-stack">
+    {% call ui.control_shell(
+         form_id="archive_list",
+         title="Existing Archives",
+         collapsible=False,
+         status_panel_override='',
+         stacktrace_panel_override='',
+         summary_panel_override=''
+       ) %}
+      <p id="archive_empty" class="wc-text-muted" hidden>No archives available.</p>
+      <div class="wc-table-wrapper">
+        <table class="wc-table" id="archives_table" aria-describedby="archive_empty">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Comment</th>
+              <th scope="col">Size</th>
+              <th scope="col">Created</th>
+              <th scope="col">Download</th>
+              <th scope="col">Restore</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="restore_link" class="wc-inline"></div>
+    {% endcall %}
+  </div>
+{% if wrap %}
+</section>
+{% endif %}

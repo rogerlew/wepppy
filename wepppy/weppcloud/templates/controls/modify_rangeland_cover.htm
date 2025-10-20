@@ -1,122 +1,95 @@
-<form  id="modify_rangeland_cover_form" action="javascript:void(0);">
-  <div class="hide-readonly">
-    <h6>Modify Rangeland Cover</h6>
-    <div class="form-check">
-        <label class="form-check-label">
-            <input id="checkbox_modify_rangeland_cover" type="checkbox" class="form-check-input"
-                   onchange="RangelandCoverModify.getInstance().toggle()">
-            Click subcatchments to select/deselect.<br/>Hold shift and click and drag for box selection.
-        </label>
-    </div>
-    <div class="form-group row">
-        <textarea id="textarea_modify_rangeland_cover" class="form-control" rows="3" placeholder="Topaz Ids" required ></textarea>
-    </div><h5>Foliar Cover (%)</h5>
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_bunchgrass_cover">Bunch Grass</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_bunchgrass_cover"
-                   name="bunchgrass_cover"
-                   class="form-control mr-sm-3 disable-readonly"
-                   type="text">
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_forbs_cover">Forbs/Annuals</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_forbs_cover"
-                   name="forbs_cover"
-                   class="form-control mr-sm-3 disable-readonly"
-                   type="text">
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_sodgrass_cover">Sod Grass</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_sodgrass_cover"
-                   name="sodgrass_cover"
-                   class="form-control mr-sm-3 disable-readonly"
-                   type="text">
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_shrub_cover">Shrub</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_shrub_cover"
-                   name="shrub_cover"
-                   class="form-control mr-sm-3 disable-readonly"
-                   type="text">
-        </div>
-    </div>
-    <h5>Ground Cover (%)</h5>
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_basal_cover">Basal Plant Cover</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_basal_cover"
-                   name="basal_cover"
-                   class="form-control mr-sm-3 disable-readonly"
-                   type="text">
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_rock_cover">Rock</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_rock_cover"
-                   name="rock_cover"
-                   class="form-control mr-sm-3 disable-readonly"
-                   type="text">
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_litter_cover">Litter</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_litter_cover"
-                   name="litter_cover"
-                   class="form-control mr-sm-3 disable-readonly"
-                   type="text">
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_cryptogams_cover">Biological Crusts Cover</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_cryptogams_cover"
-                   name="cryptogams_cover"
-                   class="form-control mr-sm-3 disable-readonly"
-                   type="text">
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-6">
-            <button id="btn_modify_rangeland_cover"
-                    class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-                    type="button"
-                    onclick="RangelandCoverModify.getInstance().modify()">
-                Modify Rangeland Cover
-            </button>
-        </div>
-    </div>
-    <div class="form-group-row">
-        <p>Rebuild the soils after changing managements.</p>
-    </div>
-    <div class="alert alert-info" style="line-height: 30px; height: 30px; padding-top: 0;">
-        <pre><small id="status" class="text-muted"></small></pre>
-    </div>
-    <div id="stacktrace" class="alert alert-warning">
-    </div>
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+<div id="modify_rangeland_cover_form" class="wc-map-form hide-readonly">
+  <h3 class="wc-map-panel__title">Modify Rangeland Cover</h3>
+  {{ ui.checkbox_field(
+       "checkbox_modify_rangeland_cover",
+       "Enable selection mode",
+       help="Click subcatchments to select or deselect them. Hold Shift and drag to draw a selection box.",
+       attrs={"data-role": "toggle-selection"}
+     ) }}
+
+  {{ ui.textarea_field(
+       "textarea_modify_rangeland_cover",
+       "Topaz IDs",
+       rows=3,
+       placeholder="Topaz IDs",
+       attrs={"required": "required"}
+     ) }}
+
+  <h4 class="wc-map-panel__subtitle">Foliar Cover (%)</h4>
+  <div class="wc-map-grid wc-map-grid--split">
+    {{ ui.text_field(
+         "input_bunchgrass_cover",
+         "Bunch Grass",
+         extra_control_class="disable-readonly"
+       ) }}
+    {{ ui.text_field(
+         "input_forbs_cover",
+         "Forbs/Annuals",
+         extra_control_class="disable-readonly"
+       ) }}
+    {{ ui.text_field(
+         "input_sodgrass_cover",
+         "Sod Grass",
+         extra_control_class="disable-readonly"
+       ) }}
+    {{ ui.text_field(
+         "input_shrub_cover",
+         "Shrub",
+         extra_control_class="disable-readonly"
+       ) }}
   </div>
-</form>
+
+  <h4 class="wc-map-panel__subtitle">Ground Cover (%)</h4>
+  <div class="wc-map-grid wc-map-grid--split">
+    {{ ui.text_field(
+         "input_basal_cover",
+         "Basal Plant Cover",
+         extra_control_class="disable-readonly"
+       ) }}
+    {{ ui.text_field(
+         "input_rock_cover",
+         "Rock",
+         extra_control_class="disable-readonly"
+       ) }}
+    {{ ui.text_field(
+         "input_litter_cover",
+         "Litter",
+         extra_control_class="disable-readonly"
+       ) }}
+    {{ ui.text_field(
+         "input_cryptogams_cover",
+         "Biological Crusts Cover",
+         extra_control_class="disable-readonly"
+       ) }}
+  </div>
+
+  {% call button_row() %}
+    <button
+      id="btn_modify_rangeland_cover"
+      type="button"
+      class="pure-button pure-button-primary">
+      Modify Rangeland Cover
+    </button>
+  {% endcall %}
+
+  <p class="wc-text-muted">Rebuild soils after changing managements.</p>
+
+  {{ ui.status_panel(
+       id="modify_rangeland_status_panel",
+       title="Status",
+       variant="compact",
+       log_id="status",
+       height="3.25rem"
+     ) }}
+
+  {{ ui.stacktrace_panel(
+       id="modify_rangeland_stacktrace_panel",
+       summary="Details",
+       collapsed=True,
+       body_id="stacktrace",
+       empty_state="No stack trace captured."
+     ) }}
+</div>

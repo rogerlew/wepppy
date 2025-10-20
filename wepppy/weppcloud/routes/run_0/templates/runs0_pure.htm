@@ -1,0 +1,87 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}{{ ron.configname }}{% if ron.name %} - {{ ron.name }}{% endif %}{% endblock %}
+
+{% block head_extras %}
+{{ super() }}
+<script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
+<script src="{{ url_for('static', filename='js/glify-browser.js') }}"></script>
+<script src="{{ url_for('static', filename='js/leaflet-glify-layer.js') }}"></script>
+<script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+<script src="{{ url_for('static', filename='js/preflight.js') }}"></script>
+<script src="{{ url_for('static', filename='js/flash-and-find-by-id.js') }}"></script>
+<script src="{{ url_for('static', filename='js/input-unit-converters.js') }}"></script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}">
+{% include 'run_page_bootstrap.js.j2' %}
+{% endblock %}
+
+{% block site_header %}
+  {% include 'header/_run_header_fixed.htm' %}
+{% endblock %}
+
+{% block body_container %}
+{% include 'command-bar.htm' %}
+{% include 'controls/poweruser_panel.htm' %}
+{% include 'controls/unitizer_modal.htm' %}
+
+<div class="wc-container wc-container--fluid">
+  <div class="wc-run-layout">
+    <nav id="toc"
+         class="wc-run-layout__toc"
+         aria-label="Run controls navigation">
+      <h2>Controls</h2>
+      <ol>
+        <li><a href="#map">Map &amp; Analysis</a></li>
+        <li><a href="#channel-delineation">Channel Delineation</a></li>
+        <li><a href="#subcatchments-delineation">Subcatchments Delineation</a></li>
+        <li><a href="#legacy-climate">Legacy climate control</a></li>
+        <li><a href="#legacy-soils">Legacy soils control</a></li>
+        <li><a href="#legacy-wepp">Legacy WEPP control</a></li>
+      </ol>
+    </nav>
+
+    <section class="wc-run-layout__content">
+      <section id="map">
+        {% include 'controls/map.htm' %}
+      </section>
+
+      <section id="channel-delineation">
+        {% include 'controls/channel_delineation.htm' %}
+      </section>
+
+      <section id="subcatchments-delineation">
+        {% include 'controls/subcatchments.htm' %}
+      </section>
+
+      <section id="legacy-climate" class="wc-stack">
+        <h2>Legacy Climate Control</h2>
+        <p class="wc-text-muted">Legacy climate control placeholder — still rendered via Bootstrap layout. Conversion pending in upcoming phases.</p>
+      </section>
+
+      <section id="legacy-soils" class="wc-stack">
+        <h2>Legacy Soils Control</h2>
+        <p class="wc-text-muted">Legacy soils control placeholder. This section continues to render through the legacy template until its Pure migration lands.</p>
+      </section>
+
+      <section id="legacy-wepp" class="wc-stack">
+        <h2>Legacy WEPP Control</h2>
+        <p class="wc-text-muted">Legacy WEPP execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
+      </section>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block script_extras %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
+<script src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
+<script src="{{ url_for('static', filename='js/underscore.js') }}"></script>
+<script src="{{ url_for('static', filename='js/colormap.js') }}"></script>
+<script src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
+<script src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
+<script src="{{ url_for('static', filename='js/plotty.js') }}"></script>
+<script src="{{ url_for('static', filename='js/leaflet-ajax.js') }}"></script>
+{% endblock %}

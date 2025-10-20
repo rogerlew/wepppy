@@ -158,6 +158,71 @@
   {% endcall %}
 
   <section class="wc-stack">
+    <h2>Tabs &amp; Legends</h2>
+    <p class="wc-text-muted">
+      The tabset macro replaces Bootstrap nav-tabs, and the color scale helper keeps range + legend markup consistent across map controls.
+    </p>
+    {% set demo_tabset = [
+      {
+        "id": "demo_layers_tab",
+        "label": "Layers",
+        "icon": '<span aria-hidden="true">🗺️</span>',
+        "active": True,
+        "content": "<p class='wc-text-muted'>Toggle base layers, overlay tiles, and watershed boundaries.</p>"
+      },
+      {
+        "id": "demo_drilldown_tab",
+        "label": "Drilldown",
+        "icon": '<span aria-hidden=\"true\">🔎</span>',
+        "content": "<p class='wc-text-muted'>Inspect channel or hillslope stats pulled from the latest run.</p>"
+      },
+      {
+        "id": "demo_results_tab",
+        "label": "Results",
+        "icon": '<span aria-hidden=\"true\">📊</span>',
+        "content": "<p class='wc-text-muted'>Switch between runoff, sediment yield, and ash transport symbology.</p>"
+      }
+    ] %}
+    <div id="demo_tabset_root">
+      {{ ui.tabset(demo_tabset) }}
+    </div>
+
+    {{ ui.color_scale(
+         "demo_cmap_range",
+         "demo_cmap_canvas",
+         "demo_cmap_min",
+         "demo_cmap_max",
+         label="Demo color scale",
+         range_attrs={"min": "0", "max": "100", "value": "50", "step": "5"},
+         canvas_attrs={"width": "240", "height": "32"},
+         units_id="demo_cmap_units",
+         help="Macro supplies consistent layout; JS shims update the gradient and labels."
+       ) }}
+    <script>
+      (function () {
+        const demoTabset = document.querySelector('#demo_tabset_root [data-tabset]');
+        if (demoTabset && typeof window.createTabset === 'function') {
+          window.createTabset(demoTabset);
+        }
+        const canvas = document.getElementById("demo_cmap_canvas");
+        const ctx = canvas && canvas.getContext ? canvas.getContext("2d") : null;
+        if (!ctx) {
+          return;
+        }
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        gradient.addColorStop(0, "#1d4ed8");
+        gradient.addColorStop(0.5, "#22c55e");
+        gradient.addColorStop(1, "#f59e0b");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        document.getElementById("demo_cmap_min").textContent = "0";
+        document.getElementById("demo_cmap_max").textContent = "100";
+        document.getElementById("demo_cmap_units").textContent = "kg/ha";
+      }());
+    </script>
+  </section>
+
+  <section class="wc-stack">
     <h2>Status &amp; Stacktrace Panels</h2>
     <p class="wc-text-muted">
       Status panels scale from compact control-side logs to tall console views. Stacktrace panels share disclosure styling for error payloads.
