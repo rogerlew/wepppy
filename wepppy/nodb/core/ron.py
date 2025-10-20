@@ -33,6 +33,10 @@ from wepppy.nodb.base import (
 )
 
 from wepppy.nodb.duckdb_agents import (
+    get_landuse_sub_summary,
+    get_soil_sub_summary,
+    get_watershed_chn_summary,
+    get_watershed_chns_summary,
     get_watershed_sub_summary,
     get_watershed_subs_summary, 
     get_soil_subs_summary, 
@@ -715,7 +719,6 @@ class Ron(NoDbBase):
         if _exists(_join(wd, 'watershed/hillslopes.parquet')): 
             _watershed = get_watershed_sub_summary(wd, topaz_id=topaz_id)
 
-            topaz_id = str(_watershed['TopazID'])
             wepp_id = str(_watershed['wepp_id'])
         else:
             # get Watershed instance
