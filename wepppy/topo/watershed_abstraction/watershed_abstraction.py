@@ -550,11 +550,13 @@ class WatershedAbstraction:
 
     @property
     def chn_ids(self):
+        """Return sorted Topaz channel identifiers present in the watershed."""
         # extract the subcatchment and channel ids from the subwta map
         # subwta contains 0 values outside the watershed
         return self.translator._chn_ids
 
-    def abstract_channels(self, wepp_chn_type='Default', verbose=False):
+    def abstract_channels(self, wepp_chn_type: str = 'Default', verbose: bool = False) -> None:
+        """Populate channel summaries by walking each channel flowpath."""
         chn_ids = self.chn_ids
 
         n = len(chn_ids)
@@ -717,10 +719,18 @@ class WatershedAbstraction:
 
     @property
     def sub_ids(self):
+        """Return Topaz subcatchment identifiers encountered in the DEM."""
         return self.translator._sub_ids
 
-    def abstract_subcatchments(self, verbose=False, warn=False,
-                               clip_hillslopes=False, clip_hillslope_length=300.0):
+    def abstract_subcatchments(
+        self,
+        verbose: bool = False,
+        warn: bool = False,
+        clip_hillslopes: bool = False,
+        clip_hillslope_length: float = 300.0,
+    ) -> None:
+        """Summarise hillslope properties for each subcatchment polygon."""
+        """Derive WEPP hillslope summaries for each subcatchment."""
         sub_ids = self.sub_ids
 
         n = len(sub_ids)
@@ -769,7 +779,8 @@ class WatershedAbstraction:
         # return to abstract_subcatchment
         return flowpaths, slopes, distances, indx, indy
 
-    def abstract_flowpath(self, flowpath, slope, distance) -> FlowpathSummary:
+    def abstract_flowpath(self, flowpath: np.ndarray, slope: np.ndarray, distance: np.ndarray) -> FlowpathSummary:
+        """Build a :class:`FlowpathSummary` from raw flowpath arrays."""
         cellsize = self.cellsize
         cellsize2 = self.cellsize2
 
@@ -819,9 +830,14 @@ class WatershedAbstraction:
             )
         )
 
-    def abstract_flowpaths(self, sub_id: int, flowpaths: List[np.array],
-                           slopes: List[np.array], distances: List[np.array]) -> \
-            Tuple[Dict[str, FlowpathSummary], List[List[int]]]:
+    def abstract_flowpaths(
+        self,
+        sub_id: int,
+        flowpaths: List[np.ndarray],
+        slopes: List[np.ndarray],
+        distances: List[np.ndarray],
+    ) -> Tuple[Dict[str, FlowpathSummary], List[List[int]]]:
+        """Aggregate unique flowpaths for ``sub_id`` into WEPP summaries."""
 
         # returns a list of lists
         # each list contains indices corresponding to the flowpaths that
@@ -954,7 +970,8 @@ class WatershedAbstraction:
 
         return d, fp_d
 
-    def abstract_structure(self, verbose=False):
+    def abstract_structure(self, verbose: bool = False) -> None:
+        """Derive WEPP channel structure arrays mapping hillslopes to channels."""
         self._read_netw_tab()
         network = self.network
         translator = self.translator
