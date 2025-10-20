@@ -1,0 +1,33 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+<section class="wc-stack" id="wepp_baseflow_options">
+  <h4 class="wc-heading wc-heading--sm">Baseflow Processing</h4>
+  <p class="wc-text-muted">
+    Baseflow is not implemented for single-storm climates.
+    <a href="https://github.com/rogerlew/wepppy/issues/312" target="_blank" rel="noopener noreferrer">Discussion</a>
+  </p>
+  {{ ui.text_field(
+       "gwstorage",
+       "Initial groundwater storage (mm)",
+       value=wepp.baseflow_opts.gwstorage,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "bfcoeff",
+       "Baseflow coefficient (per day)",
+       value=wepp.baseflow_opts.bfcoeff,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "dscoeff",
+       "Deep seepage coefficient (per day)",
+       value=wepp.baseflow_opts.dscoeff,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "bfthreshold",
+       "Watershed groundwater baseflow threshold area (ha)",
+       value=wepp.baseflow_opts.bfthreshold,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+</section>

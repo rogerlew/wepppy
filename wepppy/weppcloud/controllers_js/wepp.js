@@ -11,16 +11,54 @@ var Wepp = function () {
         that.info = $("#wepp_form #info");
         that.status = $("#wepp_form  #status");
         that.stacktrace = $("#wepp_form #stacktrace");
-        that.ws_client = new WSClient('wepp_form', 'wepp');
-        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#wepp_form #rq_job");
         that.command_btn_id = 'btn_run_wepp';
 
+        that.statusPanelEl = document.getElementById("wepp_status_panel");
+        that.stacktracePanelEl = document.getElementById("wepp_stacktrace_panel");
+        that.statusStream = null;
+        that.ws_client = null;
+
+        that.appendStatus = function (message, meta) {
+            if (!message) {
+                return;
+            }
+            if (that.statusStream && typeof that.statusStream.append === "function") {
+                that.statusStream.append(message, meta || null);
+            } else if (that.status && that.status.length) {
+                that.status.text(message);
+            }
+        };
+
+        if (typeof StatusStream !== "undefined" && that.statusPanelEl) {
+            var stacktraceConfig = null;
+            if (that.stacktracePanelEl) {
+                stacktraceConfig = { element: that.stacktracePanelEl };
+            }
+            that.statusStream = StatusStream.attach({
+                element: that.statusPanelEl,
+                channel: "wepp",
+                runId: window.runid || window.runId || null,
+                logLimit: 400,
+                stacktrace: stacktraceConfig,
+                onTrigger: function (detail) {
+                    if (detail && detail.event) {
+                        that.triggerEvent(detail.event, detail);
+                    }
+                }
+            });
+        } else {
+            that.ws_client = new WSClient('wepp_form', 'wepp');
+            that.ws_client.attachControl(that);
+        }
+
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
             if (eventName === 'WEPP_RUN_TASK_COMPLETED') {
-                that.ws_client.disconnect();
+                if (that.ws_client) {
+                    that.ws_client.disconnect();
+                }
                 that.report();
                 Observed.getInstance().onWeppRunCompleted();
             }
@@ -63,6 +101,8 @@ var Wepp = function () {
 
                     if (response.sediment !== null)
                         self.sediment.val(response.sediment.toFixed(0));
+
+                    self.appendStatus("Phosphorus defaults loaded from configuration.");
                 },
                 error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -79,6 +119,7 @@ var Wepp = function () {
 
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.appendStatus(task_msg + "...");
 
             $.post({
                 url: "tasks/set_run_wepp_routine/",
@@ -87,7 +128,9 @@ var Wepp = function () {
                 dataType: "json",
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
+                        var message = task_msg + "... Success";
+                        self.status.html(message);
+                        self.appendStatus(message);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -95,13 +138,14 @@ var Wepp = function () {
                 error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
-                fail: function fail(error) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
 
         that.handleCoverTransformUpload = function (input) {
+            var self = instance;
             if (!input || !input.files || input.files.length === 0) {
                 return false;
             }
@@ -137,7 +181,10 @@ var Wepp = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
-            self.ws_client.connect();
+            self.appendStatus(task_msg + "...");
+            if (self.ws_client) {
+                self.ws_client.connect();
+            }
 
             var data = self.form.serialize();
 
@@ -146,7 +193,9 @@ var Wepp = function () {
                 data: data,
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`run_wepp_rq job submitted: ${response.job_id}`);
+                        var message = `run_wepp_rq job submitted: ${response.job_id}`;
+                        self.status.html(message);
+                        self.appendStatus(message, { job_id: response.job_id });
                         self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);

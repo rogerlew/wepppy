@@ -90,3 +90,7 @@ base_pure.htm
 - Migrated channel and subcatchment delineation controls to Pure macros (`control_shell`, `radio_group`, `button_row`), preserving existing IDs so the legacy controllers keep working while eliminating Bootstrap rows/cols.
 - Migrated the outlet control to Pure macros (`set_outlet.htm`), reusing `control_shell`, `status_panel`, and `stacktrace_panel` while keeping ControlBase IDs for `outlet.js`. Legacy markup lives in `set_outlet_legacy.htm` so the classic runs0 page remains unchanged.
 - Converted `reports/landuse.htm` to Pure table/collapse patterns with event delegation in `landuse.js`; dataset options now come from the new `wepppy.nodb.locales.landuse_catalog` helper.
+
+## 12. Implementation Notes (2025-10-20)
+- Climate control now renders via `controls/climate_pure.htm` with catalog-driven sections, StatusStream logging, and the steady-state architecture documented in `docs/dev-notes/climate-control.md`. Legacy markup stays in `controls/climate.htm` for the classic runs page.
+- WEPP control migrated to `controls/wepp_pure.htm` with Pure advanced-option partials, StatusStream support in `wepp.js`, and catalog-driven cover-transform options supplied by `run_0_bp`. The classic `_base.htm` control remains in place for `0.htm`.

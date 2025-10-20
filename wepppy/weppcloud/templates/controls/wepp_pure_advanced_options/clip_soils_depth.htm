@@ -1,0 +1,27 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+<section class="wc-stack" id="wepp_soil_options">
+  <h4 class="wc-heading wc-heading--sm">Soil Options</h4>
+  <p class="wc-text-muted">
+    Deep soils can store excessive water and limit runoff. Clip depths to moderate soil storage.
+  </p>
+  {{ ui.checkbox_field(
+       "clip_soils",
+       "Clip soils",
+       checked=soils.clip_soils,
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.text_field(
+       "clip_soils_depth",
+       "Soil clip depth (mm)",
+       value=soils.clip_soils_depth | round | int,
+       attrs={"class": "disable-readonly", "inputmode": "numeric"}
+     ) }}
+  <h5 class="wc-heading wc-heading--xs">Initial Soil Saturation</h5>
+  {{ ui.text_field(
+       "initial_sat",
+       "Initial soil saturation (fraction)",
+       value=soils.initial_sat,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+</section>

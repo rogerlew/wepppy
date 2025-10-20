@@ -214,7 +214,9 @@ function onReady() {
      * ======================
      */
 
-    climate.handlePrecipScalingModeChange($("input[name='precip_scaling_mode']:checked").val());
+    if (typeof climate.handlePrecipScalingModeChange === "function") {
+        climate.handlePrecipScalingModeChange($("input[name='precip_scaling_mode']:checked").val());
+    }
     climate.set_rq_job_id(climate, {{ rq_job_ids.get("build_climate_rq") | tojson }});
 
     observed.hideControl();
@@ -240,17 +242,19 @@ function onReady() {
     */
 
     var weppModeInputs = document.querySelectorAll("[name='wepp_mode']");
-    Array.prototype.forEach.call(weppModeInputs, function (input) {
-        input.addEventListener('change', function () {
-            wepp.setMode();
+    if (wepp && typeof wepp.setMode === 'function') {
+        Array.prototype.forEach.call(weppModeInputs, function (input) {
+            input.addEventListener('change', function () {
+                wepp.setMode();
+            });
         });
-    });
 
-    var weppSingleSelection = document.getElementById('wepp_single_selection');
-    if (weppSingleSelection) {
-        weppSingleSelection.addEventListener('change', function () {
-            wepp.setMode();
-        });
+        var weppSingleSelection = document.getElementById('wepp_single_selection');
+        if (weppSingleSelection) {
+            weppSingleSelection.addEventListener('change', function () {
+                wepp.setMode();
+            });
+        }
     }
 
     wepp.set_rq_job_id(wepp, {{ rq_job_ids.get("run_wepp_rq") | tojson }});

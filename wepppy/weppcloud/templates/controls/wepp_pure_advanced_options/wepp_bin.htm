@@ -1,0 +1,12 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+<section class="wc-stack" id="wepp_binary_selection">
+  <h4 class="wc-heading wc-heading--sm">WEPP Version</h4>
+  {{ ui.select_field(
+       "wepp_bin",
+       "WEPP binary version",
+       wepp_bin_options,
+       selected=wepp.wepp_bin,
+       extra_control_class="disable-readonly"
+     ) }}
+</section>

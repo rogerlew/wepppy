@@ -12,8 +12,7 @@
         <input type="radio"
                name="uni_main_selector"
                value="0"
-               {% if is_english is defined and not is_english %}checked{% endif %}
-               onchange="Project.getInstance().handleGlobalUnitPreference(this.value)">
+               {% if is_english is defined and not is_english %}checked{% endif %}>
         <span class="wc-choice__body">
           <span class="wc-choice__label">SI</span>
           <span class="wc-choice__description">Metric defaults</span>
@@ -23,8 +22,7 @@
         <input type="radio"
                name="uni_main_selector"
                value="1"
-               {% if is_english %}checked{% endif %}
-               onchange="Project.getInstance().handleGlobalUnitPreference(this.value)">
+               {% if is_english %}checked{% endif %}>
         <span class="wc-choice__body">
           <span class="wc-choice__label">English</span>
           <span class="wc-choice__description">US customary defaults</span>
@@ -87,4 +85,26 @@ function setGlobalUnitizerPreference(pref) {
   }
   project.handleGlobalUnitPreference(pref);
 }
+
+(function bindGlobalUnitizerPreferenceRadios() {
+  var radios = document.querySelectorAll("input[name='uni_main_selector']");
+  if (!radios || typeof radios.forEach !== "function") {
+    return;
+  }
+  radios.forEach(function (el) {
+    if (el.dataset.unitizerGlobalBound === "true") {
+      return;
+    }
+    el.addEventListener("change", function (event) {
+      var project = (window.Project && typeof window.Project.getInstance === "function")
+        ? window.Project.getInstance()
+        : null;
+      if (!project || typeof project.handleGlobalUnitPreference !== "function") {
+        return;
+      }
+      project.handleGlobalUnitPreference(event.target.value);
+    });
+    el.dataset.unitizerGlobalBound = "true";
+  });
+})();
 </script>

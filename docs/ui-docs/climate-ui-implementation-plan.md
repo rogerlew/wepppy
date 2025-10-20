@@ -163,6 +163,7 @@ Create a structured dataset (JSON/YAML or DuckDB table) that mirrors the landuse
 - Replace the placeholder section with the Pure climate control in all runs₀ pages—no runtime toggle. Once merged, new deployments should always include the Pure climate UI.
 - Stage catalog rollout in non-production environments first; back up existing `.nodb` files in case serialization needs migration.
 - Coordinate with landuse Pure migration to reuse components/macros (avoid diverging design systems).
+- Track follow-up documentation in `docs/dev-notes/climate-control.md` (steady-state architecture) so future contributors do not rely on migration notes.
 
 ### 5.4 Dependencies & coordination
 - **Unitizer** – ensure macros use the new unitizer hooks and JS re-applies conversions after AJAX pulls.

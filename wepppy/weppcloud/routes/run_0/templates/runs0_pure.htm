@@ -40,6 +40,7 @@
         <li><a href="#landuse">Landuse</a></li>
         <li><a href="#soils">Soils</a></li>
         <li><a href="#climate">Climate</a></li>
+        <li><a href="#wepp">WEPP</a></li>
         <li><a href="#legacy-wepp">Legacy WEPP control</a></li>
       </ol>
     </nav>
@@ -66,16 +67,20 @@
       </section>
 
       <section id="climate" class="wc-stack">
-        {% include 'controls/climate.htm' %}
+        {% include 'controls/climate_pure.htm' %}
       </section>
 
       <section id="soils" class="wc-stack">
         {% include 'controls/soil.htm' %}
       </section>
 
+      <section id="wepp" class="wc-stack">
+        {% include 'controls/wepp_pure.htm' %}
+      </section>
+
       <section id="legacy-wepp" class="wc-stack">
         <h2>Legacy WEPP Control</h2>
-        <p class="wc-text-muted">Legacy WEPP execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
+        <p class="wc-text-muted">Legacy WEPP execution panel placeholder. The existing `_base.htm` version remains available on classic runs pages.</p>
       </section>
 
       <section id="legacy-debris-flow" class="wc-stack">

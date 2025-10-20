@@ -1,0 +1,33 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+<section class="wc-stack" id="wepp_pmet_options">
+  <h4 class="wc-heading wc-heading--sm">PMET</h4>
+  <p class="wc-text-muted">
+    Computes evaporation and transpiration (ET) using the Penman–Monteith equation. WEPP defaults to Penman’s equation.
+  </p>
+  <p class="wc-text-muted">
+    Parameter guidance: <a href="https://www.fao.org/3/x0490e/x0490e00.htm" target="_blank" rel="noopener noreferrer">FAO Irrigation and Drainage Paper 56</a>.
+  </p>
+  {% if 'disturbed' not in ron.mods %}
+    {% set kcb_val = wepp.pmet_kcb if isfloat(wepp.pmet_kcb) else None %}
+    {% set rawp_val = wepp.pmet_rawp if isfloat(wepp.pmet_rawp) else None %}
+    {{ ui.text_field(
+         "pmet_kcb",
+         "Basal crop coefficient ratio (kcb)",
+         value="{:.4f}".format(kcb_val) if kcb_val is not none else '',
+         attrs={"class": "disable-readonly", "placeholder": "e.g. 0.95", "inputmode": "decimal"}
+       ) }}
+    {{ ui.text_field(
+         "pmet_rawp",
+         "Readily available water fraction (rawp)",
+         value="{:.4f}".format(rawp_val) if rawp_val is not none else '',
+         attrs={"class": "disable-readonly", "placeholder": "e.g. 0.80", "inputmode": "decimal"}
+       ) }}
+  {% endif %}
+  {{ ui.checkbox_field(
+       "checkbox_wepp_pmet",
+       "Run PMET (pmetpara.txt)",
+       checked=wepp.run_pmet,
+       attrs={"class": "disable-readonly", "onchange": "Wepp.getInstance().set_run_wepp_routine('pmet', this.checked);"}
+     ) }}
+</section>

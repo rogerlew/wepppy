@@ -1,0 +1,38 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+<section class="wc-stack" id="wepp_phosphorus_options">
+  {% if "lt" in ron.mods %}
+  <h4 class="wc-heading wc-heading--sm">Phosphorus Processing</h4>
+  <p class="wc-text-muted">Phosphorus coefficients are determined by the Lake Tahoe module.</p>
+  {% else %}
+  <h4 class="wc-heading wc-heading--sm">Pollutant Processing (Optional)</h4>
+  {% endif %}
+  {% set surf_val = wepp.phosphorus_opts.surf_runoff if isfloat(wepp.phosphorus_opts.surf_runoff) else None %}
+  {% set lat_val = wepp.phosphorus_opts.lateral_flow if isfloat(wepp.phosphorus_opts.lateral_flow) else None %}
+  {% set base_val = wepp.phosphorus_opts.baseflow if isfloat(wepp.phosphorus_opts.baseflow) else None %}
+  {% set sed_val = wepp.phosphorus_opts.sediment if isfloat(wepp.phosphorus_opts.sediment) else None %}
+  {{ ui.text_field(
+       "surf_runoff",
+       "Surface runoff concentration (mg/L)",
+       value="{:.4f}".format(surf_val) if surf_val is not none else '',
+       attrs={"class": "disable-readonly", "placeholder": "e.g. 0.004", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "lateral_flow",
+       "Subsurface lateral flow concentration (mg/L)",
+       value="{:.4f}".format(lat_val) if lat_val is not none else '',
+       attrs={"class": "disable-readonly", "placeholder": "e.g. 0.005", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "baseflow",
+       "Baseflow concentration (mg/L)",
+       value="{:.4f}".format(base_val) if base_val is not none else '',
+       attrs={"class": "disable-readonly", "placeholder": "e.g. 0.006", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "sediment",
+       "Sediment concentration (mg/kg)",
+       value="{:.0f}".format(sed_val) if sed_val is not none else '',
+       attrs={"class": "disable-readonly", "placeholder": "e.g. 800", "inputmode": "numeric"}
+     ) }}
+</section>

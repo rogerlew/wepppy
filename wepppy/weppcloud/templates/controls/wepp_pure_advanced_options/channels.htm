@@ -1,0 +1,86 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+<section class="wc-stack" id="wepp_channel_parameters">
+  <h4 class="wc-heading wc-heading--sm">Channel Parameters</h4>
+  {{ ui.checkbox_field(
+       "checkbox_wepp_tcr",
+       "Use variable channel critical shear as a function of channel slope (tcr.txt)",
+       checked=wepp.run_tcr,
+       attrs={
+         "class": "disable-readonly",
+         "onchange": "Wepp.getInstance().set_run_wepp_routine('tcr', this.checked);"
+       }
+     ) }}
+
+  <h5 class="wc-heading wc-heading--xs">Constant CS parameters</h5>
+  {% set cs_options = [(wepp.channel_critical_shear, 'CS = ' ~ wepp.channel_critical_shear)] %}
+  {% for opt in critical_shear_options %}
+    {% set label = opt["particle_class"] ~ ' (' ~ opt["particle_diameter_range"] ~ ' mm) CS = ' ~ opt["cs"] %}
+    {% set cs_options = cs_options + [(opt["cs"], label)] %}
+  {% endfor %}
+  {{ ui.select_field(
+       "channel_critical_shear",
+       "Critical shear (N/m²) based on median channel bed particle size (mm)",
+       cs_options,
+       selected=wepp.channel_critical_shear,
+       extra_control_class="disable-readonly"
+     ) }}
+  {{ ui.text_field(
+       "channel_erodibility",
+       "Channel erodibility (s/m; default 1e-6)",
+       value=wepp.channel_erodibility,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+
+  <h5 class="wc-heading wc-heading--xs">Manning Roughness Coefficient</h5>
+  <p class="wc-text-muted">
+    WEPP is more sensitive to <i>chnn</i>. <i>chnn</i> must be greater than <i>chnnbr</i> for WEPP.
+    Refer to the
+    <a href="https://www.fsl.orst.edu/geowater/FX3/help/8_Hydraulic_Reference/Mannings_n_Tables.htm" target="_blank" rel="noopener noreferrer">Manning roughness reference</a>
+    to set appropriate values.
+  </p>
+  {{ ui.text_field(
+       "channel_manning_roughness_coefficient_veg",
+       "Total Manning roughness coefficient allowing for vegetation (chnn)",
+       value=wepp.channel_manning_roughness_coefficient_veg,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "channel_manning_roughness_coefficient_bare",
+       "Manning roughness coefficient for bare soil in the channel (chnnbr)",
+       value=wepp.channel_manning_roughness_coefficient_bare,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+
+  {% if hasattr(wepp, "tcr_opts") %}
+  <h5 class="wc-heading wc-heading--xs">Variable CS parameters</h5>
+  <p class="wc-text-muted">Download the
+    <a href="https://github.com/rogerlew/wepppy/raw/master/wepppy/wepp/soils/resources/ChannelCriticalShear_Vs_ChannelSlope.xlsx" target="_blank" rel="noopener noreferrer">channel critical shear spreadsheet</a>
+    to derive values.
+  </p>
+  {{ ui.text_field(
+       "tcr_opts_taumin",
+       "Minimum channel critical shear limit (taumin, N/m²)",
+       value=wepp.tcr_opts.taumin,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "tcr_opts_taumax",
+       "Maximum channel critical shear limit (taumax, N/m²)",
+       value=wepp.tcr_opts.taumax,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "tcr_opts_kch",
+       "Curve parameter k",
+       value=wepp.tcr_opts.kch,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.text_field(
+       "tcr_opts_nch",
+       "Curve parameter n",
+       value=wepp.tcr_opts.nch,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {% endif %}
+</section>

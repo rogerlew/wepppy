@@ -1,0 +1,20 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+<section class="wc-stack" id="wepp_clip_hillslopes">
+  <h4 class="wc-heading wc-heading--sm">Clip Hillslopes</h4>
+  <p class="wc-text-muted">
+    WEPP can overpredict erosion on long hillslopes. Clipping restricts length and preserves area by increasing width.
+  </p>
+  {{ ui.checkbox_field(
+       "clip_hillslopes",
+       "Clip hillslopes",
+       checked=watershed.clip_hillslopes,
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.text_field(
+       "hillslope_clip_length",
+       "Hillslope clip length (m)",
+       value=watershed.clip_hillslope_length | round | int,
+       attrs={"class": "disable-readonly", "inputmode": "numeric"}
+     ) }}
+</section>

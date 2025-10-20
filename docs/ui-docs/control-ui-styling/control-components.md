@@ -219,6 +219,16 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **Args**: `field_id`, `label`, `value`, `rows`, optional `help`, `placeholder`, optional `extra_control_class` to append additional textarea classes.
 - **Status**: Implemented.
 
+### 3.9 `wepp_pure` composite
+- **Purpose**: Pure implementation of the WEPP control embedded on the runs₀ page.
+- **Layout**: `control_shell` (non-collapsible) with `status_panel` + `stacktrace_panel`, primary run button, and an `advanced_options` card containing reusable partials (`wepp_pure_advanced_options/*`).
+- **Key components**:
+  - Checkboxes (`ui.checkbox_field`) tied to `Wepp.set_run_wepp_routine` for hourly seepage, PMET, snow, frost, baseflow, flowpaths, etc.
+  - Numeric inputs (`ui.text_field`) for channel hydraulics, snow parameters, phosphorus concentrations, and soil clipping depths.
+  - Select controls for channel critical shear / WEPP binary version / revegetation scenarios.
+  - Inline script toggles the cover transform upload block when “User-Defined Transform” is chosen.
+- **Status**: Implemented (`controls/wepp_pure.htm`) with legacy markup preserved under `controls/wepp.htm` until the classic runs page is retired.
+
 ### 3.9 `text_display`
 - **Purpose**: Read-only block within a card (summaries, inline reports).
 - **Layout**: Label in bold, content stacked below; may include HTML.

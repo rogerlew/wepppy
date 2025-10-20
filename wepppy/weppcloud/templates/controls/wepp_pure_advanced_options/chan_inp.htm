@@ -1,0 +1,29 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+<section class="wc-stack" id="wepp_chan_inp_options">
+  <h4 class="wc-heading wc-heading--sm">Channel Input (chan.inp)</h4>
+  {{ ui.text_field(
+       "dtchr_override",
+       "Output interval override (dtchr_override, seconds)",
+       value=wepp.dtchr_override | default('', true),
+       help="≥ 60. Leave blank to use the model default (600 or 60 for single-storm runs).",
+       attrs={
+         "class": "disable-readonly",
+         "type": "number",
+         "inputmode": "numeric",
+         "min": "60",
+         "step": "1"
+       }
+     ) }}
+  {{ ui.text_field(
+       "chn_topaz_ids_of_interest",
+       "Channel TOPAZ IDs of interest (chn_topaz_ids_of_interest)",
+       value=(wepp.chn_topaz_ids_of_interest | join(',')) if wepp.chn_topaz_ids_of_interest else '',
+       help="Space or comma-separated list of TOPAZ channel IDs (each must end with “4”). Example: 24 34 44",
+       attrs={
+         "class": "disable-readonly",
+         "pattern": "^\\s*\\d+4(?:[,\\s]+\\d+4)*\\s*$",
+         "title": "Enter IDs separated by spaces or commas; each ID must end with the digit 4."
+       }
+     ) }}
+</section>

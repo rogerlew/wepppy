@@ -189,6 +189,13 @@ def runs0(runid, config):
     soildboptions = soilsdb.load_db()
 
     critical_shear_options = management.load_channel_d50_cs()
+    reveg_cover_transform_options = [
+        ("", "Observed"),
+        ("20-yr_Recovery.csv", "20-Year Recovery"),
+        ("20-yr_PartialRecovery.csv", "20-Year Partial Recovery"),
+        ("user_cover_transform", "User-Defined Transform")
+    ]
+    wepp_bin_options = [(opt, opt) for opt in linux_wepp_bin_opts]
 
 
     _log_access(base_wd, current_user, request.remote_addr)
@@ -205,7 +212,7 @@ def runs0(runid, config):
                             landuse=landuse,
                             climate=climate,
                             wepp=wepp,
-                            wepp_bin_opts=linux_wepp_bin_opts,
+                            wepp_bin_options=wepp_bin_options,
                             rhem=rhem,
                             disturbed=disturbed,
                             ash=ash,
@@ -227,6 +234,7 @@ def runs0(runid, config):
                             landuse_management_mapping_options=landuse_management_mapping_options,
                             soildboptions=soildboptions,
                             critical_shear_options=critical_shear_options,
+                            reveg_cover_transform_options=reveg_cover_transform_options,
                             climate_catalog=climate.catalog_datasets_payload(include_hidden=True),
                             precisions=wepppy.nodb.unitizer.precisions,
                             run_id=runid,

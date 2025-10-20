@@ -1,0 +1,15 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+<section class="wc-stack" id="wepp_frost_options">
+  <h4 class="wc-heading wc-heading--sm">Frost</h4>
+  <p class="wc-text-muted">Adjust effective hydraulic and thermal conductivity for snow, frozen residue, and frozen soil.</p>
+  {{ ui.checkbox_field(
+       "checkbox_wepp_frost",
+       "Write frost inputs (frost.txt)",
+       checked=wepp.run_frost,
+       attrs={
+         "class": "disable-readonly",
+         "onchange": "Wepp.getInstance().set_run_wepp_routine('frost', this.checked);"
+       }
+     ) }}
+</section>
