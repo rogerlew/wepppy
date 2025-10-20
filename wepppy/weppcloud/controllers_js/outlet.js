@@ -251,20 +251,42 @@ var Outlet = function () {
 function render_legend(cmap, canvasID) {
     var canvas = $("#" + canvasID);
 
-    var width = canvas.outerWidth();
-    var height = canvas.outerHeight();
-    var data = new Float32Array(height * width);
+    if (!canvas.length) {
+        return;
+    }
 
-    for (var y = 0; y <= height; y++) {
-        for (var x = 0; x <= width; x++) {
-            data[(y * width) + x] = x / (width - 1.0);
+    var width = Math.round(canvas.outerWidth());
+    var height = Math.round(canvas.outerHeight());
+
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+
+    var element = canvas[0];
+    if (element.width !== width) {
+        element.width = width;
+    }
+    if (element.height !== height) {
+        element.height = height;
+    }
+
+    var data = new Float32Array(width * height);
+    var denom = width > 1 ? width - 1 : 1;
+
+    for (var y = 0; y < height; y++) {
+        var rowOffset = y * width;
+        for (var x = 0; x < width; x++) {
+            data[rowOffset + x] = x / denom;
         }
     }
 
     var plot = new plotty.plot({
-        canvas: canvas["0"],
-        data: data, width: width, height: height,
-        domain: [0, 1], colorScale: cmap
+        canvas: element,
+        data: data,
+        width: width,
+        height: height,
+        domain: [0, 1],
+        colorScale: cmap
     });
     plot.render();
 }

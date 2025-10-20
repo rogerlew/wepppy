@@ -14,17 +14,10 @@ var cellsize = {{ ron.cellsize }};
 var readonly = {{ ron.readonly | tojson }};
 
 function window_resize() {
-    var mapElement = document.getElementById('mapid');
-    if (!mapElement || !mapElement.parentElement) {
-        return;
+    var map = MapController.getInstance();
+    if (map && typeof map.invalidateSize === 'function') {
+        map.invalidateSize();
     }
-
-    var width = mapElement.parentElement.clientWidth;
-    mapElement.style.width = width + 'px';
-    mapElement.style.height = width + 'px';
-    mapElement.style.minHeight = width + 'px';
-    mapElement.style.maxHeight = '';
-    MapController.getInstance().invalidateSize();
 };
 
 function onReady() {
@@ -59,6 +52,14 @@ function onReady() {
 
     // call map.onMapChange to update mapStatus
     map.onMapChange();
+
+    var mapWrapper = document.querySelector('.wc-map');
+    if (mapWrapper && window.ResizeObserver) {
+        var ro = new ResizeObserver(function () {
+            map.invalidateSize();
+        });
+        ro.observe(mapWrapper);
+    }
 
     if ({{ (ron.boundary != None) | tojson }}) {
         map.addGeoJsonOverlay({
