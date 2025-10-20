@@ -27,7 +27,7 @@ _Last updated: 2025-10-19_
 3. **Integration plumbing**
    - Ensure macros (`numeric_field`, future unit-aware controls) can read the static map by adding predictable `data-unit-key` attributes or a shared `UnitizerClient` helper inside `controllers.js`.
    - Confirm the modal writes preference changes back via existing endpoints while also updating the imported map consumer in real time.
-   - Document the contract in `control_components.md` (inputs exposed, events fired) and drop a short usage note in `control-inventory.md` under the Unitizer section.
+   - Document the contract in `control-components.md` (inputs exposed, events fired) and drop a short usage note in `control-inventory.md` under the Unitizer section.
 
 ### Acceptance Checklist
 - [ ] `/ui/components/` showcases the refreshed modal with Pure tokens and accessible markup.
@@ -35,4 +35,4 @@ _Last updated: 2025-10-19_
 - [ ] Controllers build emits `static/js/unitizer_map.js` (or equivalent) and the bundle consumes it without eval hacks.
 - [ ] `numeric_field` + other unit-aware macros can toggle units using the static map without hitting Python endpoints.
 - [ ] Tests or scripts validate the generated map against `Unitizer` definitions (checksum or structural diff).
-- [ ] Docs updated (`control_components.md`, `control-inventory.md`) to reflect new attributes/events.
+- [ ] Docs updated (`control-components.md`, `control-inventory.md`) to reflect new attributes/events.

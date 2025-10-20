@@ -3,6 +3,7 @@
 {% block title %}Archive Dashboard – {{ runid }}{% endblock %}
 
 {% from "shared/console_macros.htm" import console_page, console_header, button_row %}
+{% import "controls/_pure_macros.html" as ui %}
 
 {% block body %}
 {% call console_page(data_controller="archive-dashboard") %}
@@ -14,53 +15,82 @@
     <p id="project_label" class="wc-text-muted">Create and manage project archives.</p>
   {% endcall %}
 
-  <section class="wc-panel wc-stack">
-    <h2>Create Archive</h2>
-    <form class="pure-form pure-form-aligned" id="archive_form" novalidate>
+  <section class="wc-stack">
+    {% call ui.control_shell(
+         form_id="archive_form",
+         title="Create Archive",
+         collapsible=False,
+         form_attrs={'novalidate': True},
+         status_panel_override=ui.status_panel(
+           id="archive_status_panel",
+           title="Archive status",
+           variant="console",
+           description="Live updates for archive and restore jobs.",
+           log_id="archive_status_log",
+           initial="Waiting for activity..."
+         ),
+         summary_panel_override='',
+         stacktrace_panel_override=ui.stacktrace_panel(
+           id="archive_stacktrace_panel",
+           summary="Stack trace",
+           description="Latest exception details from archive jobs.",
+           empty_state="No stack trace recorded."
+         )
+       ) %}
       <fieldset>
-        <div class="pure-control-group">
-          <label for="archive_comment">Archive comment</label>
-          <input id="archive_comment" type="text" class="pure-input-1" maxlength="40"
-                 placeholder="Optional note stored with the archive">
-        </div>
-        {% call button_row(form_controls=True) %}
+        {{ ui.text_field(
+             'archive_comment',
+             'Archive comment',
+             help='Optional note stored with the archive.',
+             attrs={
+               'maxlength': '40',
+               'placeholder': 'Optional note stored with the archive'
+             }
+           ) }}
+        {% call button_row() %}
           <button type="button" class="pure-button" id="archive_button">Create archive</button>
           <button type="button" class="pure-button pure-button-secondary" id="refresh_button">Refresh list</button>
         {% endcall %}
       </fieldset>
-    </form>
+    {% endcall %}
   </section>
 
-  <section class="wc-panel wc-stack">
-    <h2>Status</h2>
-    <div id="status_log" class="wc-log" aria-live="polite"></div>
-  </section>
-
-  <section class="wc-panel wc-stack">
-    <h2>Existing Archives</h2>
-    <p id="archive_empty" class="wc-text-muted" hidden>No archives available.</p>
-    <div class="wc-table-wrapper">
-      <table class="wc-table" id="archives_table" aria-describedby="archive_empty">
-        <thead>
-          <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Comment</th>
-            <th scope="col">Size</th>
-            <th scope="col">Created</th>
-            <th scope="col">Download</th>
-            <th scope="col">Restore</th>
-            <th scope="col">Delete</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div id="restore_link" class="wc-inline"></div>
+  <section class="wc-stack">
+    {% call ui.control_shell(
+         form_id="archive_list",
+         title="Existing Archives",
+         collapsible=False,
+         status_panel_override='',
+         stacktrace_panel_override='',
+         summary_panel_override='',
+       ) %}
+      <p id="archive_empty" class="wc-text-muted" hidden>No archives available.</p>
+      <div class="wc-table-wrapper">
+        <table class="wc-table" id="archives_table" aria-describedby="archive_empty">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Comment</th>
+              <th scope="col">Size</th>
+              <th scope="col">Created</th>
+              <th scope="col">Download</th>
+              <th scope="col">Restore</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="restore_link" class="wc-inline"></div>
+    {% endcall %}
   </section>
 {% endcall %}
 {% endblock %}
 
+
 {% block script_extras %}
+<script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
 <script>
 (function () {
   const runid = {{ runid | tojson }};
@@ -74,99 +104,55 @@
   const MAX_STATUS_MESSAGES = 3000;
 
   let currentJobId = null;
-  let statusLogMessages = [];
+  let statusStream = null;
 
-  const statusLog = document.getElementById('status_log');
-  const archiveEmpty = document.getElementById('archive_empty');
-  const archiveButton = document.getElementById('archive_button');
-  const refreshButton = document.getElementById('refresh_button');
-  const commentInput = document.getElementById('archive_comment');
-  const restoreLink = document.getElementById('restore_link');
-  const tableBody = document.querySelector('#archives_table tbody');
+  const pendingStatusMessages = [];
 
-  class WSClient {
-    constructor(runid, channel) {
-      this.channel = channel;
-      this.wsUrl = `wss://${window.location.host}/weppcloud-microservices/status/${runid}:${channel}`;
-      this.ws = null;
-      this.shouldReconnect = true;
+  let statusLog;
+  let archiveEmpty;
+  let archiveButton;
+  let refreshButton;
+  let commentInput;
+  let restoreLink;
+  let tableBody;
+  let stacktracePanel;
+
+  function appendStatus(message) {
+    if (message === undefined || message === null) {
+      return;
     }
-
-    connect() {
-      if (this.ws) {
-        return;
+    const text = typeof message === 'string' ? message : String(message);
+    if (statusStream) {
+      statusStream.append(text);
+    } else {
+      pendingStatusMessages.push(text);
+      if (pendingStatusMessages.length > MAX_STATUS_MESSAGES) {
+        pendingStatusMessages.splice(0, pendingStatusMessages.length - MAX_STATUS_MESSAGES);
       }
-      this.shouldReconnect = true;
-      this.ws = new WebSocket(this.wsUrl);
-      this.ws.onopen = () => {
-        if (this.ws.readyState === WebSocket.OPEN) {
-          this.ws.send(JSON.stringify({ type: 'init' }));
-        }
-      };
-      this.ws.onmessage = (event) => {
-        try {
-          const payload = JSON.parse(event.data);
-          if (payload.type === 'ping') {
-            this.ws.send(JSON.stringify({ type: 'pong' }));
-            return;
-          }
-          if (payload.type === 'status') {
-            const data = payload.data;
-            appendStatus(data);
-            if (typeof data === 'string' && data.includes('TRIGGER')) {
-              const parts = data.trim().split(/\s+/);
-              const controller = parts[parts.length - 2];
-              const eventName = parts[parts.length - 1];
-              if (controller === this.channel) {
-                if (eventName === 'ARCHIVE_COMPLETE') {
-                  archiveFinished();
-                } else if (eventName === 'RESTORE_COMPLETE') {
-                  restoreFinished();
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.error('WS message error', err);
-        }
-      };
-      this.ws.onerror = (err) => {
-        console.error('WebSocket error', err);
-      };
-      this.ws.onclose = () => {
-        this.ws = null;
-        if (this.shouldReconnect) {
-          window.setTimeout(() => this.connect(), 5000);
-        }
-      };
-    }
-
-    disconnect() {
-      if (this.ws) {
-        this.shouldReconnect = false;
-        this.ws.close();
-        this.ws = null;
+      if (statusLog) {
+        statusLog.textContent = `${pendingStatusMessages.join('\n')}\n`;
+        statusLog.scrollTop = statusLog.scrollHeight;
       }
     }
   }
 
-  function appendStatus(message) {
-    if (!message || !statusLog) {
+  function flushPendingStatus() {
+    if (!statusStream || pendingStatusMessages.length === 0) {
       return;
     }
-    if (!statusLogMessages.length && statusLog.textContent) {
-      statusLogMessages = statusLog.textContent.split('\n');
-      if (statusLogMessages[statusLogMessages.length - 1] === '') {
-        statusLogMessages.pop();
-      }
+    pendingStatusMessages.splice(0).forEach((msg) => statusStream.append(msg));
+  }
+
+  function handleTrigger(detail) {
+    if (!detail || !detail.event) {
+      return;
     }
-    const text = typeof message === 'string' ? message : String(message);
-    statusLogMessages.push(text);
-    if (statusLogMessages.length > MAX_STATUS_MESSAGES) {
-      statusLogMessages.splice(0, statusLogMessages.length - MAX_STATUS_MESSAGES);
+    const eventName = String(detail.event).toUpperCase();
+    if (eventName === 'ARCHIVE_COMPLETE') {
+      archiveFinished();
+    } else if (eventName === 'RESTORE_COMPLETE') {
+      restoreFinished();
     }
-    statusLog.textContent = statusLogMessages.length ? `${statusLogMessages.join('\n')}\n` : '';
-    statusLog.scrollTop = statusLog.scrollHeight;
   }
 
   function formatBytes(bytes) {
@@ -231,24 +217,35 @@
   }
 
   function populateArchiveTable(data) {
+    if (!tableBody) {
+      return;
+    }
     tableBody.innerHTML = '';
     const archives = (data && data.archives) || [];
     if (!archives.length) {
-      archiveEmpty.hidden = false;
+      if (archiveEmpty) {
+        archiveEmpty.hidden = false;
+      }
     } else {
-      archiveEmpty.hidden = true;
+      if (archiveEmpty) {
+        archiveEmpty.hidden = true;
+      }
       archives.forEach((item) => {
         tableBody.appendChild(renderArchiveRow(item));
       });
     }
 
     if (data && data.in_progress) {
-      archiveButton.disabled = true;
+      if (archiveButton) {
+        archiveButton.disabled = true;
+      }
       currentJobId = data.job_id || null;
       setRestoreButtonsDisabled(true);
       setDeleteButtonsDisabled(true);
     } else if (!currentJobId) {
-      archiveButton.disabled = false;
+      if (archiveButton) {
+        archiveButton.disabled = false;
+      }
       setRestoreButtonsDisabled(false);
       setDeleteButtonsDisabled(false);
     }
@@ -266,17 +263,22 @@
 
   function archiveFinished() {
     currentJobId = null;
-    archiveButton.disabled = false;
+    if (archiveButton) {
+      archiveButton.disabled = false;
+    }
     setRestoreButtonsDisabled(false);
     setDeleteButtonsDisabled(false);
     if (commentInput) {
       commentInput.value = '';
     }
+    appendStatus('Archive job completed.');
     fetchArchives();
   }
 
   function startArchive() {
-    archiveButton.disabled = true;
+    if (archiveButton) {
+      archiveButton.disabled = true;
+    }
     setRestoreButtonsDisabled(true);
     setDeleteButtonsDisabled(true);
     let comment = '';
@@ -303,7 +305,9 @@
       })
       .catch((err) => {
         appendStatus(`ERROR: ${err.message || err}`);
-        archiveButton.disabled = false;
+        if (archiveButton) {
+          archiveButton.disabled = false;
+        }
         setRestoreButtonsDisabled(false);
         setDeleteButtonsDisabled(false);
       });
@@ -313,7 +317,8 @@
     if (!name) {
       return;
     }
-    const confirmed = window.confirm(`Restore archive "${name}"?\nThis replaces current project files.`);
+    const confirmed = window.confirm(`Restore archive "${name}"?
+This replaces current project files.`);
     if (!confirmed) {
       return;
     }
@@ -321,11 +326,15 @@
   }
 
   function startRestore(name) {
-    archiveButton.disabled = true;
+    if (archiveButton) {
+      archiveButton.disabled = true;
+    }
     setRestoreButtonsDisabled(true);
     setDeleteButtonsDisabled(true);
     appendStatus(`Submitting restore job for ${name}...`);
-    restoreLink.innerHTML = '';
+    if (restoreLink) {
+      restoreLink.innerHTML = '';
+    }
     fetch(restoreApiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -341,26 +350,31 @@
       })
       .catch((err) => {
         appendStatus(`ERROR: ${err.message || err}`);
-        if (!currentJobId) {
+        if (!currentJobId && archiveButton) {
           archiveButton.disabled = false;
-          setRestoreButtonsDisabled(false);
-          setDeleteButtonsDisabled(false);
         }
+        setRestoreButtonsDisabled(false);
+        setDeleteButtonsDisabled(false);
       });
   }
 
   function restoreFinished() {
     currentJobId = null;
-    archiveButton.disabled = false;
+    if (archiveButton) {
+      archiveButton.disabled = false;
+    }
     setRestoreButtonsDisabled(false);
     setDeleteButtonsDisabled(false);
     fetchArchives();
-    restoreLink.innerHTML = '';
-    const link = document.createElement('a');
-    link.href = projectPath;
-    link.textContent = `Load ${runid} Project`;
-    link.className = 'pure-button pure-button-secondary';
-    restoreLink.appendChild(link);
+    appendStatus('Restore job completed.');
+    if (restoreLink) {
+      restoreLink.innerHTML = '';
+      const link = document.createElement('a');
+      link.href = projectPath;
+      link.textContent = `Load ${runid} Project`;
+      link.className = 'pure-button pure-button-secondary';
+      restoreLink.appendChild(link);
+    }
   }
 
   function requestDelete(name) {
@@ -420,16 +434,61 @@
     });
   }
 
+  function initStatusStream() {
+    if (typeof StatusStream === 'undefined') {
+      console.error('StatusStream module is unavailable.');
+      return;
+    }
+    const panel = document.getElementById('archive_status_panel');
+    if (!panel) {
+      return;
+    }
+    const stacktrace = stacktracePanel ? { element: stacktracePanel } : null;
+    if (statusStream) {
+      statusStream.disconnect();
+    }
+    statusStream = StatusStream.attach({
+      element: panel,
+      channel: 'archive',
+      runId: runid,
+      logLimit: MAX_STATUS_MESSAGES,
+      stacktrace,
+      onTrigger: handleTrigger
+    });
+    panel.addEventListener('status:error', (event) => {
+      if (event && event.detail && event.detail.error) {
+        console.error('Archive status stream error:', event.detail.error);
+      }
+    });
+    flushPendingStatus();
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const projectLabel = document.getElementById('project_label');
     if (projectLabel) {
       projectLabel.textContent = 'Create and manage project archives.';
     }
-    archiveButton.addEventListener('click', startArchive);
-    refreshButton.addEventListener('click', fetchArchives);
+    archiveEmpty = document.getElementById('archive_empty');
+    archiveButton = document.getElementById('archive_button');
+    refreshButton = document.getElementById('refresh_button');
+    commentInput = document.getElementById('archive_comment');
+    restoreLink = document.getElementById('restore_link');
+    tableBody = document.querySelector('#archives_table tbody');
+    stacktracePanel = document.getElementById('archive_stacktrace_panel');
+    if (stacktracePanel) {
+      stacktracePanel.hidden = true;
+    }
+    statusLog = document.getElementById('archive_status_log');
+
+    if (archiveButton) {
+      archiveButton.addEventListener('click', startArchive);
+    }
+    if (refreshButton) {
+      refreshButton.addEventListener('click', fetchArchives);
+    }
+
+    initStatusStream();
     fetchArchives();
-    const wsClient = new WSClient(runid, 'archive');
-    wsClient.connect();
   });
 })();
 </script>

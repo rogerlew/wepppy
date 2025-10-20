@@ -7,15 +7,16 @@ _Last updated: 2025-10-18_
 
 ## Current Status
 - **Inventory complete.** `control-inventory.md` now catalogs every runs0 control, including inputs, backend bindings, and conditional behavior.
-- **Macro surface ready.** `_pure_macros.html` covers the common control patterns (header, text, numeric, radio, select, checkbox, textarea, upload, display, table, dynamic slot, collapsible card) with accessible help + error wiring documented in `control_components.md`.
+- **Macro surface ready.** `_pure_macros.html` covers the common control patterns (header, text, numeric, radio, select, checkbox, textarea, upload, display, table, dynamic slot, collapsible card) with accessible help + error wiring documented in `control-components.md`.
 - **Prototype live.** `/ui/components/` renders the Pure-aware control shell (see `ui_showcase/component_gallery.htm`) powered by `_pure_base.htm`, `_pure_macros.html`, and updated tokens in `static/css/ui-foundation.css`.
+- **Status streaming baseline.** `status_panel` / `stacktrace_panel` macros plus `status_stream.js` power the fork console and archive dashboard; ControlBase still points at legacy IDs until run controls migrate.
 - **Legacy `_base.htm` untouched (yet).** Existing controls still rely on Bootstrap-era templates; migration will start after the component API stabilizes.
 
 ## Key Files
 | Area | Path | Notes |
 | --- | --- | --- |
 | Inventory | `docs/ui-docs/control-ui-styling/control-inventory.md` | Source of truth for control inputs, routes, and JS wiring. Update in sync with code changes. |
-| Component spec | `docs/ui-docs/control-ui-styling/control_components.md` | Macro contracts, layout hierarchy, run-header guidance. |
+| Component spec | `docs/ui-docs/control-ui-styling/control-components.md` | Macro contracts, layout hierarchy, run-header guidance. |
 | Blueprint | `wepppy/weppcloud/routes/ui_showcase/` | Flask blueprint for `/ui/components/` showcase. |
 | Prototype template | `wepppy/weppcloud/templates/ui_showcase/component_gallery.htm` | Demonstrates shell + example fields. Expand with every new macro. |
 | Pure shell | `wepppy/weppcloud/templates/controls/_pure_base.htm` | Collapsible control shell with summary row and stacked status panels. |
@@ -28,7 +29,7 @@ _Last updated: 2025-10-18_
    - Capture lessons learned in `control-inventory.md` and update this AGENT guide.
 2. **Define metadata contract**  
    - Decide which attributes controllers must expose (labels, unit hints, validation rules).  
-   - Document the contract in `control_components.md` and retrofit NoDb controllers once agreed.
+   - Document the contract in `control-components.md` and retrofit NoDb controllers once agreed.
 3. **Validation patterns**  
    - Align staking on error/warning states (copy, iconography, colour usage) and add guidance once consensus lands.  
    - Ensure macros remain lightweight; expand CSS tokens instead of control-specific overrides.
@@ -52,8 +53,8 @@ _Last updated: 2025-10-18_
 ## Near-Term Focus
 - **Unitizer modal polish:** restyle the modal with Pure tokens and align the toggle controls with the shared checkbox/radio pattern.
 - **Numeric unit switching:** wire the unitizer controls into `numeric_field` so unit changes propagate across paired inputs.
-- **Status panel refresh:** parameterize the height, keep content pushing upward, and adopt the shared pattern in `rq-fork-console` and `rq-archive-dashboard`.
-- **Stack trace macro:** extract and reuse a macro for rendering stack traces for consistency across controls.
+- **ControlBase migration plan:** refactor run controls to render `status_panel` / `stacktrace_panel` and switch the shared JS from `WSClient` to `StatusStream`.
+- **Console follow-through:** monitor fork/archive consoles for regressions (autoscroll, trigger handling, stacktrace enrichment) and fold lessons into the broader migration.
 - **Controller metadata contract:** formalize the schema (labels, units, validation states) so macros can rely on consistent inputs.
 - **Error/warning messaging:** standardise copy and iconography for validation states before wider macro adoption.
 
@@ -68,7 +69,7 @@ _Last updated: 2025-10-18_
 - Whether to expose additional global CSS variables for spacing/width adjustments beyond the current token set.
 
 ## Contact / Escalation
-- Architectural questions: reference the Pure UI spec (`control_components.md`) first; if unclear, tag UI maintainers in GitHub issues.
+- Architectural questions: reference the Pure UI spec (`control-components.md`) first; if unclear, tag UI maintainers in GitHub issues.
 - Showcase bugs or missing macros: open a ticket in the UI Components board and assign to the styling working group.
 
 Stay within this doc for the latest guidance; update it whenever workflows or priorities shift.

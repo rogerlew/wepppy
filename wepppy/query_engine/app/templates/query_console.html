@@ -10,6 +10,7 @@
   </head>
   <body class="wc-page">
     {% from "shared/console_macros.htm" import console_page, console_header, button_row %}
+    {% import "controls/_pure_macros.html" as ui %}
     <header class="wc-header">
       <div class="wc-header__inner wc-container">
         <a class="wc-brand" href="/weppcloud"><span class="wc-brand__primary">wepp</span><span class="wc-brand__secondary">cloud</span></a>
@@ -29,65 +30,97 @@
             </p>
           {% endcall %}
 
-          <p>
-            Paste or edit the query payload below, then click <strong>POST</strong> to execute it. The response body
-            and HTTP status will appear underneath. This is handy for testing payloads before wiring them into scripts
-            or dashboards.
-          </p>
+          <section class="wc-stack">
+            {% call ui.control_shell(
+                 form_id="queryForm",
+                 title="Query payload (JSON)",
+                 collapsible=False,
+                 form_class="wc-stack",
+                 form_attrs={'novalidate': True},
+                 status_panel_override='',
+                 summary_panel_override='',
+                 stacktrace_panel_override=''
+               ) %}
+              <p>
+                Paste or edit the query payload below, then click <strong>POST</strong> to execute it.
+                The response body and HTTP status will appear underneath. This is handy for testing payloads
+                before wiring them into scripts or dashboards.
+              </p>
+              {% if not catalog_ready %}
+                <div class="wc-note">
+                  Catalog metadata was not found. Visit
+                  <a href="{{ activate_url }}">/query/runs/{{ run_slug }}/activate</a>
+                  to activate the run, then reload this page.
+                </div>
+              {% endif %}
 
-          {% if not catalog_ready %}
-            <div class="wc-note">
-              Catalog metadata was not found. Visit
-              <a href="{{ activate_url }}">/query/runs/{{ run_slug }}/activate</a>
-              to activate the run, then reload this page.
-            </div>
-          {% endif %}
+              {% if catalog_entries %}
+                <details>
+                  <summary>Sample datasets (first {{ catalog_entries|length }})</summary>
+                  <ul class="wc-dataset-list">
+                    {% for entry in catalog_entries %}
+                      <li>{{ entry.path }}</li>
+                    {% endfor %}
+                  </ul>
+                </details>
+              {% endif %}
 
-          {% if catalog_entries %}
-            <details>
-              <summary>Sample datasets (first {{ catalog_entries|length }})</summary>
-              <ul class="wc-dataset-list">
-                {% for entry in catalog_entries %}
-                  <li>{{ entry.path }}</li>
-                {% endfor %}
-              </ul>
-            </details>
-          {% endif %}
-
-          <section class="wc-panel wc-stack">
-            <form id="queryForm" class="wc-stack" novalidate>
-              <label for="payload"><strong>Query payload (JSON)</strong></label>
-              <div class="wc-stack">
-                <label for="presetSelect">Example payloads</label>
-                <select id="presetSelect" class="pure-input-1">
-                  <option value="">Choose an example…</option>
-                  {% for category, presets in query_presets.items() %}
-                    <optgroup label="{{ category }}">
-                      {% for preset in presets %}
-                        <option value="{{ preset.id }}">{{ preset.name }}</option>
-                      {% endfor %}
-                    </optgroup>
-                  {% endfor %}
-                </select>
-                <p id="presetDescription" class="wc-text-muted"></p>
-              </div>
-              <textarea id="payload" name="payload" class="wc-code-input" spellcheck="false"></textarea>
-              {% call button_row() %}
-                <button type="submit" class="pure-button" id="submitBtn">POST Query</button>
-                <button type="button" class="pure-button pure-button-secondary" id="formatBtn">Format JSON</button>
-                <button type="button" class="pure-button pure-button-secondary" id="resetBtn">Reset</button>
-              {% endcall %}
-            </form>
+              <fieldset class="wc-stack">
+                <div class="wc-field">
+                  <label class="wc-field__label" for="presetSelect">Example payloads</label>
+                  <select id="presetSelect" class="wc-field__control">
+                    <option value="">Choose an example…</option>
+                    {% for category, presets in query_presets.items() %}
+                      <optgroup label="{{ category }}">
+                        {% for preset in presets %}
+                          <option value="{{ preset.id }}">{{ preset.name }}</option>
+                        {% endfor %}
+                      </optgroup>
+                    {% endfor %}
+                  </select>
+                  <p id="presetDescription" class="wc-field__help wc-text-muted"></p>
+                </div>
+                <div class="wc-field">
+                  <label class="wc-field__label" for="payload">Query payload</label>
+                  <textarea id="payload"
+                            name="payload"
+                            class="wc-field__control wc-code-input"
+                            spellcheck="false"
+                            rows="16"></textarea>
+                </div>
+                {% call button_row() %}
+                  <button type="submit" class="pure-button" id="submitBtn">POST Query</button>
+                  <button type="button" class="pure-button pure-button-secondary" id="formatBtn">Format JSON</button>
+                  <button type="button" class="pure-button pure-button-secondary" id="resetBtn">Reset</button>
+                {% endcall %}
+              </fieldset>
+            {% endcall %}
           </section>
 
-          <section class="wc-panel wc-stack">
-            <h2>Response</h2>
-            <div id="status" class="wc-status" data-state="attention">Waiting for request…</div>
-            <pre id="response" class="wc-code-block" aria-live="polite" aria-label="Response body"></pre>
-            <details id="stacktraceContainer" hidden>
-              <summary>Stack trace</summary>
-              <pre id="stacktrace" class="wc-code-block" aria-live="polite" aria-label="Stack trace"></pre>
-            </details>
+          <section class="wc-stack">
+            {% call ui.control_shell(
+                 form_id="query_response_shell",
+                 title="Response",
+                 collapsible=False,
+                 status_panel_override=ui.status_panel(
+                   id="status_panel",
+                   title="Status",
+                   variant="compact",
+                   log_id="status",
+                   height="3.25rem",
+                   initial="Waiting for request…"
+                 ),
+                 summary_panel_override='',
+                 stacktrace_panel_override=ui.stacktrace_panel(
+                   id="stacktraceContainer",
+                   summary="Stack trace",
+                   body_id="stacktrace",
+                   description="Displays backend exceptions when a query fails.",
+                   empty_state="No stack trace captured."
+                 )
+               ) %}
+              <pre id="response" class="wc-code-block" aria-live="polite" aria-label="Response body"></pre>
+            {% endcall %}
           </section>
         {% endcall %}
       </div>

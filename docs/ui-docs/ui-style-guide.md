@@ -26,6 +26,17 @@
 6. Wrap data lists with `.wc-table` and `.wc-pagination` for consistent chrome on desktop and mobile without custom CSS.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L426-L443】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L530-L557】
 
 ++ Form controls → checkboxes & radios
+
+## 3. Control components
+- Use the shared macros in `templates/controls/_pure_macros.html` for any run control, console form, or reusable UI chunk. They ship keyboard/ARIA wiring and consistent spacing so individual templates stay lean.
+- Treat `docs/ui-docs/control-ui-styling/control-components.md` as the contract source. Update that document (and the `/ui/components/` showcase) when you add args, adjust markup, or introduce a new pattern.
+- Always render long-form controls with `ui.control_shell`. Set `collapsible=False` for console dashboards, add `form_class`/`form_attrs` for Pure form variants, and override panels via `status_panel_override`, `summary_panel_override`, or `stacktrace_panel_override` when needed.
+- Prefer `status_panel(height=...)` instead of bespoke `<div>` logs. Use a small height (~`3.25rem`) for single-line run status and taller values (e.g., `300px`) for consoles. Pair every status panel with `StatusStream.attach` rather than duplicating WebSocket code.
+- `stacktrace_panel` handles disclosure, focus, and monospace styling for exception payloads—reuse it anywhere you surface tracebacks.
+- When you need to hide a side panel, pass "" (empty string) to the relevant override hook so the shell skips rendering it.
+- Inputs inside controls should use the field macros (`text_field`, `numeric_field`, `select_field`, `checkbox_field`, `radio_group`, `textarea_field`, `file_upload`) to keep labelling, helper text, and error state semantics aligned.
+- When a macro cannot express a layout detail (for example `<select>` elements with dynamic `<optgroup>` blocks), keep the markup minimal but wrap it in `.wc-field`, mirror the macro’s label/help pattern, and preserve IDs so the existing JavaScript bindings still resolve.
+
 When adding or updating checkboxes/radio buttons, follow these conventions so spacing, colors, and accessibility stay predictable:
 
 | Pattern | Guidance |
@@ -179,7 +190,7 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 - `.wc-log` provides a reusable monospace log surface with built-in overflow handling.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L645-L663】
 - Use `.wc-code-input` and `.wc-code-block` for JSON editors or stack traces so typography and spacing stay consistent.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L735-L760】
 
-## 5. Content display patterns
+## 4. Content display patterns
 - **Reading views (Markdown, documentation):** wrap in `.wc-reading` to constrain width and rely on the markdown overrides already in the foundation file.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L146-L147】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L876-L883】
 - **README editor:** use `.wc-editor-grid` with `.wc-editor-textarea` and `.wc-editor-preview` to keep the split view responsive; overlay locks reuse `.wc-overlay` helpers.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L672-L722】
 - **Data consoles (logs, monitors):** use `.wc-panel` with monospace text and `.wc-status` for live status chips; pair with `.wc-table` for job lists.
@@ -189,13 +200,13 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 - **Logs & metrics:** use `.wc-log` alongside `.wc-status-chip` to stream job output; wrap supporting metadata in `.wc-meta-list`.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L573-L663】
 - **Static assets:** whenever you add or update third-party CSS/JS, update `static-src/scripts/build.mjs` and rerun `build-static-assets.sh` so production pulls from local files rather than CDNs.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64】【F:wepppy/wepppy/weppcloud/static-src/scripts/build.mjs†L17-L129】
 
-## 6. Accessibility checklist
+## 5. Accessibility checklist
 - Maintain the default focus outline supplied by the foundation CSS (solid 2px accent) to keep keyboard navigation visible, including `:focus-visible` states.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L342-L355】
 - Ensure icon-only buttons include `aria-label` attributes and at least the `.wc-inline` spacing utility so hit targets remain comfortable.
 - Keep content inside 70–80 character line lengths (`.wc-reading`) for long-form copy and docs.
 - Honor user preferences: do not reintroduce animations or transitions beyond the shared defaults so the global reduced-motion override can do its job.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L102-L111】
 
-## 7. Implementation playbook
+## 6. Implementation playbook
 1. **Create/extend a Pure base template.** Migrate templates to extend a common layout that loads Pure + the foundation stylesheet. Replace Bootstrap header includes (`header/_layout_fixed.htm`) with the new header block.
 2. **Extract inline CSS.** Move inline styles from templates (home page banners, security forms, Deval loading state) into component-specific partials or reuse `.wc-panel`, `.wc-status`, and `.wc-toolbar` primitives.
 3. **Refactor page clusters.** Update one feature cluster at a time (browse, archive dashboard, authentication, run controls) to use Pure grids and the foundation tokens, verifying there are no rounded corners or drop shadows beyond the shared defaults.
@@ -203,7 +214,7 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 5. **Document patterns.** As layouts are migrated, note reusable snippets in this guide so new routes stay aligned.
 6. **Capture references.** Update the shared visual reference folder with new screenshots whenever you land a significant template refactor so future contributors can see expected results.
 
-## 8. Site-wide assessment & unification plan
+## 7. Site-wide assessment & unification plan
 
 ### Global observations
 - **Split frameworks:** Many templates rely on Bootstrap’s navbar and grid (e.g., `_layout_fixed.htm`), while others are hand-styled or framework-free, causing inconsistent spacing and typography.【F:wepppy/wepppy/weppcloud/templates/header/_layout_fixed.htm†L1-L8】
@@ -240,24 +251,24 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
    - *Current state:* Imports GitHub’s markdown stylesheet and applies generous padding via inline CSS; visually close to the target but lacks the shared header and palette.【F:wepppy/wepppy/weppcloud/routes/usersum/templates/usersum/layout.j2†L1-L28】
    - *Action:* Drop the GitHub CSS in favor of `.wc-reading` + markdown overrides already present in the foundation file to reduce external dependencies.
 
-## 9. Next steps & tracking
+## 8. Next steps & tracking
 - Stand up an “interface audit” checklist in issue tracking using the sections above as milestones (browse, archive, auth, home, controls, reports).
 - After each cluster migration, remove unused Bootstrap imports and inline styles to keep the codebase lean.
 - Refresh this guide as new shared components emerge (e.g., pagination, diff viewers) so future contributions stay aligned with the cohesive visual language, and capture any updates to the static asset pipeline as libraries change versions.
 - Integrate the shared Stylelint ruleset (`.stylelintrc.json`) into CI so linting enforces the “no rounded corners” + token usage expectations automatically.【F:.stylelintrc.json†L1-L21】
 - Run a lightweight accessibility audit (Lighthouse or ax) after major migrations to confirm the light palette, focus outlines, and reduced-motion defaults behave as intended.
 
-## 10. Visual references & demos
+## 9. Visual references & demos
 - Store screenshots or short GIFs that demonstrate core layouts under `docs/ui-reference/`. Capture at least: base layout shell, Pure form, table + pagination, status banner, tooltip example, and a dark-mode rendering.
 - Regenerate assets after significant CSS updates to keep the visuals synchronized with the written guidelines.
 - Use descriptive filenames (e.g., `header-light.png`, `table-dark.png`) and embed them in this guide or related documentation as needed.
 
-## 11. JavaScript interaction principles
+## 10. JavaScript interaction principles
 - Favor progressive enhancement: ensure modals, tooltips, and accordions render helpful content even when JavaScript is unavailable.
 - Keep interactions framework-agnostic. Lightweight Alpine.js sprinkles are acceptable, but they should operate on semantic HTML and classes defined here.
 - When introducing new JS-driven UI, pair it with CSS hooks inside `ui-foundation.css` (e.g., data attributes) so behavior and presentation remain decoupled.
 
-## 12. Validation & automation
+## 11. Validation & automation
 - Use Stylelint with the shared config to block forbidden patterns such as `border-radius` values other than `var(--wc-radius-none)` and to require the `wc-` namespace for shared utilities.【F:.stylelintrc.json†L1-L21】
 - Prettier (or an equivalent formatter) can be pointed at template directories to enforce indentation and whitespace consistency; avoid inline styles so linting remains effective.
 - During review, spot-check new CSS against the token tables—if a new color is required, add it as a token rather than embedding raw hex codes.

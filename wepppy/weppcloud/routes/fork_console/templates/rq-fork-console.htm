@@ -3,6 +3,7 @@
 {% block title %}Fork Project Console – {{ runid }}{% endblock %}
 
 {% from "shared/console_macros.htm" import console_page, console_header, button_row %}
+{% import "controls/_pure_macros.html" as ui %}
 
 {% block body %}
 {% call console_page(data_controller="fork-console") %}
@@ -13,47 +14,65 @@
     subtitle="Submit a fork job for this run."
   ) %}{% endcall %}
 
-  <section class="wc-panel wc-stack">
-    <form id="fork_form" class="pure-form pure-form-aligned" novalidate>
+  <section class="wc-stack">
+    {% call ui.control_shell(
+         form_id="fork_form",
+         title="Fork Project",
+         collapsible=False,
+         form_class="pure-form-aligned",
+         form_attrs={'novalidate': True},
+         status_panel_override=ui.status_panel(
+           id="fork_status_panel",
+           title="Console",
+           variant="console",
+           meta='<div id="the_console" class="wc-status" data-state="attention">Waiting for submission...</div>',
+           log_id="fork_status_log"
+         ),
+         summary_panel_override='',
+         stacktrace_panel_override=ui.stacktrace_panel(
+           id="fork_stacktrace_panel",
+           summary="Stack trace",
+           description="Exceptions from fork jobs appear here.",
+           empty_state="No stack trace captured."
+         )
+       ) %}
       <fieldset>
-        <div class="pure-control-group">
-          <label for="runid_input">Source run ID</label>
-          <input id="runid_input" type="text" class="pure-input-1" value="{{ runid }}" required>
-        </div>
-        <div class="pure-controls wc-controls-left">
-          <label class="pure-checkbox" for="undisturbify_checkbox">
-            <input id="undisturbify_checkbox" type="checkbox" {% if undisturbify == 'true' %}checked{% endif %}>
-            Undisturbify output (optional)
-          </label>
-        </div>
-        {% call button_row(form_controls=True) %}
+        {{ ui.text_field(
+             'runid_input',
+             'Source run ID',
+             value=runid,
+             attrs={'readonly': 'readonly'}
+           ) }}
+        {{ ui.checkbox_field(
+             'undisturbify_checkbox',
+             'Undisturbify output (optional)',
+             checked=undisturbify == 'true'
+           ) }}
+        {% call button_row() %}
           <button type="submit" class="pure-button" id="submit_button">Fork project</button>
           <button type="button" class="pure-button pure-button-secondary" id="cancel_button" hidden>Cancel job</button>
         {% endcall %}
       </fieldset>
-    </form>
-  </section>
-
-  <section class="wc-panel wc-stack">
-    <h2>Console</h2>
-    <div id="the_console" class="wc-status" data-state="attention">Waiting for submission…</div>
-    <div id="status" class="wc-log" aria-live="polite"></div>
-    <details id="stacktrace_container" hidden>
-      <summary>Stack trace</summary>
-      <pre id="stacktrace"></pre>
-    </details>
+    {% endcall %}
   </section>
 {% endcall %}
 {% endblock %}
 
 {% block script_extras %}
+<script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
 <script>
 (function () {
   const origin = window.location.origin;
   let runid = {{ runid | tojson }};
   const initialUndisturbify = {{ undisturbify | tojson }} === 'true';
+  const MAX_STATUS_MESSAGES = 3000;
+
   let jobId = '';
   let newRunId = '';
+  let statusStream = null;
+
+  const pendingStatusMessages = [];
 
   const form = document.getElementById('fork_form');
   const runIdInput = document.getElementById('runid_input');
@@ -61,152 +80,154 @@
   const submitButton = document.getElementById('submit_button');
   const cancelButton = document.getElementById('cancel_button');
   const consoleBlock = document.getElementById('the_console');
-  const statusLog = document.getElementById('status');
-  const stacktraceContainer = document.getElementById('stacktrace_container');
-  const stacktraceBlock = document.getElementById('stacktrace');
-
-  let wsClient = null;
-  let statusMessages = [];
-  const MAX_STATUS_MESSAGES = 3000;
-
-  class WSClient {
-    constructor(runid, channel) {
-      this.channel = channel;
-      this.wsUrl = `wss://${window.location.host}/weppcloud-microservices/status/${runid}:${channel}`;
-      this.ws = null;
-      this.shouldReconnect = true;
-    }
-
-    connect() {
-      if (this.ws) {
-        return;
-      }
-      this.shouldReconnect = true;
-      this.ws = new WebSocket(this.wsUrl);
-      this.ws.onopen = () => {
-        if (this.ws.readyState === WebSocket.OPEN) {
-          this.ws.send(JSON.stringify({ type: 'init' }));
-        }
-      };
-      this.ws.onmessage = (event) => this.handleMessage(event);
-      this.ws.onerror = (err) => {
-        console.error('WebSocket error', err);
-        this.ws = null;
-      };
-      this.ws.onclose = () => {
-        this.ws = null;
-        if (this.shouldReconnect) {
-          window.setTimeout(() => this.connect(), 5000);
-        }
-      };
-    }
-
-    disconnect() {
-      if (this.ws) {
-        this.shouldReconnect = false;
-        this.ws.close();
-        this.ws = null;
-      }
-    }
-
-    handleMessage(event) {
-      try {
-        const payload = JSON.parse(event.data);
-        if (payload.type === 'ping') {
-          this.ws?.send(JSON.stringify({ type: 'pong' }));
-          return;
-        }
-        if (payload.type !== 'status') {
-          return;
-        }
-        const data = payload.data || '';
-        appendStatus(data);
-        if (typeof data === 'string' && data.includes('EXCEPTION')) {
-          showStacktrace(data);
-        }
-        if (typeof data === 'string' && data.includes('TRIGGER')) {
-          const parts = data.trim().split(/\s+/);
-          const controller = parts[parts.length - 2];
-          const eventName = parts[parts.length - 1];
-          if (controller === this.channel && eventName === 'FORK_COMPLETE') {
-            handleForkComplete();
-          }
-        }
-      } catch (err) {
-        console.error('WS payload error', err);
-      }
-    }
-  }
+  const statusPanel = document.getElementById('fork_status_panel');
+  const statusLog = document.getElementById('fork_status_log');
+  const stacktracePanel = document.getElementById('fork_stacktrace_panel');
 
   function appendStatus(message) {
-    if (!message || !statusLog) {
+    if (message === undefined || message === null) {
       return;
     }
-    if (!statusMessages.length && statusLog.textContent) {
-      statusMessages = statusLog.textContent.split('\n');
-      if (statusMessages[statusMessages.length - 1] === '') {
-        statusMessages.pop();
-      }
+    const text = typeof message === 'string' ? message : String(message);
+    if (statusStream) {
+      statusStream.append(text);
+      return;
     }
-    statusMessages.push(String(message));
-    if (statusMessages.length > MAX_STATUS_MESSAGES) {
-      statusMessages.splice(0, statusMessages.length - MAX_STATUS_MESSAGES);
+    pendingStatusMessages.push(text);
+    if (pendingStatusMessages.length > MAX_STATUS_MESSAGES) {
+      pendingStatusMessages.splice(0, pendingStatusMessages.length - MAX_STATUS_MESSAGES);
     }
-    statusLog.textContent = statusMessages.length ? `${statusMessages.join('\n')}\n` : '';
-    statusLog.scrollTop = statusLog.scrollHeight;
+    if (statusLog) {
+      statusLog.textContent = `${pendingStatusMessages.join('\n')}\n`;
+      statusLog.scrollTop = statusLog.scrollHeight;
+    }
   }
 
-  function showStacktrace(message) {
-    if (!stacktraceBlock || !stacktraceContainer) {
+  function flushPendingStatus() {
+    if (!statusStream || pendingStatusMessages.length === 0) {
       return;
     }
-    stacktraceContainer.hidden = false;
-    stacktraceBlock.textContent = message;
-    const parts = message.split(' ');
-    if (parts.length) {
-      const jobToken = parts[0];
-      const jobIdExtracted = jobToken.startsWith('JID') ? jobToken.slice(3) : jobToken;
-      const jobUrl = `${origin}/weppcloud/rq/api/jobinfo/${jobIdExtracted}`;
-      window.setTimeout(() => {
-        fetch(jobUrl)
-          .then((resp) => resp.json())
-          .then((body) => {
-            if (body && body.exc_info) {
-              stacktraceBlock.textContent = body.exc_info;
-            }
-          })
-          .catch((err) => console.error('Failed to fetch job info', err));
-      }, 500);
+    pendingStatusMessages.splice(0).forEach((msg) => statusStream.append(msg));
+  }
+
+  function resetStatusLog() {
+    pendingStatusMessages.length = 0;
+    if (statusStream) {
+      statusStream.disconnect();
+      statusStream = null;
     }
+    if (statusLog) {
+      statusLog.textContent = '';
+    }
+  }
+
+  function handleTrigger(detail) {
+    if (!detail || !detail.event) {
+      return;
+    }
+    const eventName = String(detail.event).toUpperCase();
+    if (eventName === 'FORK_COMPLETE') {
+      handleForkComplete();
+    } else if (eventName === 'FORK_FAILED') {
+      handleForkFailed();
+    }
+  }
+
+  function connectStatusStreamForRun(runId) {
+    if (typeof StatusStream === 'undefined') {
+      console.error('StatusStream module is unavailable.');
+      return;
+    }
+    if (!statusPanel) {
+      return;
+    }
+    if (statusStream) {
+      statusStream.disconnect();
+    }
+    const stacktrace = stacktracePanel ? { element: stacktracePanel } : null;
+    statusStream = StatusStream.attach({
+      element: statusPanel,
+      channel: 'fork',
+      runId,
+      logLimit: MAX_STATUS_MESSAGES,
+      stacktrace,
+      onTrigger: handleTrigger
+    });
+    flushPendingStatus();
   }
 
   function handleForkComplete() {
-    cancelButton.hidden = true;
-    submitButton.hidden = false;
-    submitButton.disabled = false;
-    consoleBlock.dataset.state = 'positive';
-    if (newRunId) {
-      const link = document.createElement('a');
-      link.href = `${origin}/weppcloud/runs/${newRunId}/cfg`;
-      link.target = '_blank';
-      link.rel = 'noopener';
-      link.textContent = `Load ${newRunId} project`;
-      link.className = 'pure-button pure-button-secondary';
-      consoleBlock.innerHTML = '';
-      consoleBlock.appendChild(link);
+    jobId = '';
+    if (cancelButton) {
+      cancelButton.hidden = true;
+      cancelButton.disabled = false;
     }
+    if (submitButton) {
+      submitButton.hidden = false;
+      submitButton.disabled = false;
+    }
+    if (consoleBlock) {
+      consoleBlock.dataset.state = 'positive';
+      if (newRunId) {
+        const link = document.createElement('a');
+        link.href = `${origin}/weppcloud/runs/${newRunId}/cfg`;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = `Load ${newRunId} project`;
+        link.className = 'pure-button pure-button-secondary';
+        consoleBlock.innerHTML = '';
+        consoleBlock.appendChild(link);
+      } else {
+        consoleBlock.textContent = 'Fork job completed.';
+      }
+    }
+    appendStatus('Fork job completed.');
+  }
+
+  function handleForkFailed() {
+    jobId = '';
+    if (cancelButton) {
+      cancelButton.hidden = true;
+      cancelButton.disabled = false;
+    }
+    if (submitButton) {
+      submitButton.hidden = false;
+      submitButton.disabled = false;
+    }
+    if (consoleBlock) {
+      consoleBlock.dataset.state = 'critical';
+      consoleBlock.textContent = 'Fork job failed. Review the status log for details.';
+    }
+    appendStatus('Fork job failed.');
   }
 
   function forkProject(event) {
     event.preventDefault();
-    runid = runIdInput.value.trim();
-    if (!runid) {
-      runIdInput.focus();
+    if (!form) {
       return;
     }
-    const undisturbify = undisturbifyCheckbox.checked;
-    submitButton.disabled = true;
-    consoleBlock.dataset.state = 'attention';
+    const submittedRunId = runIdInput ? runIdInput.value.trim() : '';
+    if (!submittedRunId) {
+      if (runIdInput) {
+        runIdInput.focus();
+      }
+      return;
+    }
+
+    runid = submittedRunId;
+    const undisturbify = undisturbifyCheckbox ? undisturbifyCheckbox.checked : false;
+
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
+    if (consoleBlock) {
+      consoleBlock.dataset.state = 'attention';
+      consoleBlock.textContent = 'Submitting fork job...';
+    }
+
+    resetStatusLog();
+    appendStatus('Submitting fork job...');
+
     const forkUrl = `${origin}/weppcloud/runs/${runid}/cfg/rq/api/fork`;
     const payload = new URLSearchParams({ undisturbify: undisturbify ? 'true' : 'false' });
 
@@ -220,21 +241,43 @@
         if (!body.Success) {
           throw new Error(body.Error || 'Fork submission failed');
         }
-        newRunId = body.new_runid;
-        jobId = body.job_id;
+        newRunId = body.new_runid || '';
+        jobId = body.job_id || '';
         const undisturbifyFlag = body.undisturbify;
-        consoleBlock.dataset.state = 'attention';
-        consoleBlock.innerHTML = `Fork job submitted: <a href="${origin}/weppcloud/rq/job-dashboard/${jobId}" target="_blank" rel="noopener">${jobId}</a><br>New runid: <a href="${origin}/weppcloud/runs/${newRunId}/cfg" target="_blank" rel="noopener">${newRunId}</a><br>Undisturbify: ${undisturbifyFlag}`;
-        submitButton.hidden = true;
-        cancelButton.hidden = false;
-        cancelButton.disabled = false;
-        wsClient = new WSClient(runid, 'fork');
-        wsClient.connect();
+
+        appendStatus(`Fork job submitted: ${jobId}`);
+
+        if (consoleBlock) {
+          const jobDashboard = `${origin}/weppcloud/rq/job-dashboard/${jobId}`;
+          const newRunLink = `${origin}/weppcloud/runs/${newRunId}/cfg`;
+          consoleBlock.dataset.state = 'attention';
+          consoleBlock.innerHTML = [
+            `Fork job submitted: <a href="${jobDashboard}" target="_blank" rel="noopener">${jobId}</a>`,
+            `New runid: <a href="${newRunLink}" target="_blank" rel="noopener">${newRunId}</a>`,
+            `Undisturbify: ${undisturbifyFlag}`
+          ].join('<br>');
+        }
+
+        if (submitButton) {
+          submitButton.hidden = true;
+        }
+        if (cancelButton) {
+          cancelButton.hidden = false;
+          cancelButton.disabled = false;
+        }
+
+        connectStatusStreamForRun(runid);
       })
       .catch((err) => {
-        consoleBlock.dataset.state = 'critical';
-        consoleBlock.textContent = `Error: ${err.message || err}`;
-        submitButton.disabled = false;
+        if (consoleBlock) {
+          consoleBlock.dataset.state = 'critical';
+          consoleBlock.textContent = `Error: ${err.message || err}`;
+        }
+        appendStatus(`Error submitting fork job: ${err.message || err}`);
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.hidden = false;
+        }
       });
   }
 
@@ -242,26 +285,51 @@
     if (!jobId) {
       return;
     }
-    cancelButton.disabled = true;
+    if (cancelButton) {
+      cancelButton.disabled = true;
+    }
+    appendStatus(`Cancelling job ${jobId}...`);
     const cancelUrl = `${origin}/weppcloud/rq/canceljob/${jobId}`;
     fetch(cancelUrl, { method: 'GET' })
       .then((resp) => {
-        if (!resp.ok) throw new Error('Cancel job failed');
+        if (!resp.ok) {
+          throw new Error('Cancel job failed');
+        }
+        appendStatus(`Cancel request acknowledged for ${jobId}.`);
         alert('Job cancelled');
       })
       .catch((err) => {
         console.error(err);
+        appendStatus(`Cancel request failed: ${err.message || err}`);
         alert('Unable to cancel job.');
       })
       .finally(() => {
-        cancelButton.disabled = false;
+        if (cancelButton) {
+          cancelButton.disabled = false;
+        }
       });
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    undisturbifyCheckbox.checked = initialUndisturbify;
-    form.addEventListener('submit', forkProject);
-    cancelButton.addEventListener('click', cancelJob);
+    if (stacktracePanel) {
+      stacktracePanel.hidden = true;
+    }
+    if (undisturbifyCheckbox) {
+      undisturbifyCheckbox.checked = initialUndisturbify;
+    }
+    if (form) {
+      form.addEventListener('submit', forkProject);
+    }
+    if (cancelButton) {
+      cancelButton.addEventListener('click', cancelJob);
+    }
+    if (statusPanel) {
+      statusPanel.addEventListener('status:error', (event) => {
+        if (event && event.detail && event.detail.error) {
+          console.error('Fork status stream error:', event.detail.error);
+        }
+      });
+    }
   });
 })();
 </script>

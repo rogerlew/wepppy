@@ -158,6 +158,78 @@
   {% endcall %}
 
   <section class="wc-stack">
+    <h2>Status &amp; Stacktrace Panels</h2>
+    <p class="wc-text-muted">
+      Status panels scale from compact control-side logs to tall console views. Stacktrace panels share disclosure styling for error payloads.
+    </p>
+    <div class="wc-stack">
+      {{ ui.status_panel(
+           id="status_panel_demo",
+           title="Status (compact)",
+           meta='<strong>Job</strong>: <span id="status_panel_demo_job">Pending</span>',
+           initial="Waiting for updates..."
+         ) }}
+      {{ ui.status_panel(
+           id="status_panel_console",
+           title="Status (console)",
+           variant="console",
+           description="Taller viewport for streaming console pages.",
+           actions='<button type="button" class="pure-button pure-button-secondary">Download log</button>',
+           footer='<span class="wc-text-muted">Streaming 1,024 messages</span>',
+           height="18rem",
+           initial="17:03:12 Connected to status channel\n17:03:13 Awaiting first event..."
+         ) }}
+      {{ ui.stacktrace_panel(
+           id="stacktrace_panel_demo",
+           summary="Stack trace",
+           description="Populated when back-end jobs raise exceptions.",
+           empty_state="No stack trace captured."
+         ) }}
+    </div>
+  </section>
+
+  <section class="wc-stack">
+    <h2>Control Shell Overrides</h2>
+    <p class="wc-text-muted">
+      Swap in custom status/stacktrace panels or suppress the summary panel while keeping the shared control layout.
+    </p>
+    {% call ui.control_shell(
+         form_id="override_demo_form",
+         title="Console-style Control",
+         collapsible=False,
+         form_class="pure-form-aligned",
+         form_attrs={'novalidate': True},
+         status_panel_override=ui.status_panel(
+           id="override_status_panel",
+           title="Console",
+           variant="console",
+           description="Status stream with fixed height.",
+           log_id="override_status_log",
+           height="16rem",
+           initial="12:00:00 Connected to demo channel\n12:00:01 Waiting for updates..."
+         ),
+         summary_panel_override='',
+         stacktrace_panel_override=ui.stacktrace_panel(
+           id="override_stacktrace_panel",
+           summary="Stack trace",
+           description="Appears when an exception occurs.",
+           empty_state="No stack trace captured."
+         )
+       ) %}
+      <fieldset>
+        <div class="pure-control-group">
+          <label for="override_input">Job label</label>
+          <input id="override_input" type="text" class="pure-input-1" value="Demo job">
+        </div>
+        <div class="pure-controls">
+          <button type="button" class="pure-button pure-button-primary">Submit job</button>
+          <button type="button" class="pure-button pure-button-secondary">Reset</button>
+        </div>
+      </fieldset>
+    {% endcall %}
+  </section>
+
+  <section class="wc-stack">
     <h2>Unitizer Modal</h2>
     <p class="wc-text-muted">
       Preview the Pure-styled unitizer. Adjust global defaults or override unit selections per category

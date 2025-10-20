@@ -5,7 +5,7 @@
 This note explains how the controller JavaScript in `wepppy/weppcloud` is organized, how individual controller modules cooperate with the shared infrastructure, and what needs to happen when you extend the system.
 
 ## Layout and Bundling
-- Authoring happens in `wepppy/weppcloud/controllers_js/*.js` (one file per controller plus shared helpers such as `control_base.js` and `ws_client.js`).
+- Authoring happens in `wepppy/weppcloud/controllers_js/*.js` (one file per controller plus shared helpers such as `control_base.js`, `ws_client.js`, and `status_stream.js`).
 - The browser still downloads a single bundle, `wepppy/weppcloud/static/js/controllers.js`. The bundle is rendered from `controllers_js/templates/controllers.js.j2`, which includes each controller file in the desired order.
 - The `build_controllers_js.py` helper (same directory) renders the template with Jinja, stamps a build date, and writes the bundle just before Gunicorn starts.
 
@@ -20,7 +20,8 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
   - Managing the command button UI (disabling while a job is active, restoring afterwards).
   - Writing stack traces and error messages to the standard output areas.
   - Polling for job status and stopping when work reaches a terminal state.
-- `WSClient` (in `ws_client.js`) is the companion that listens for WebSocket broadcasts. Messages are passed through NoDbBase subclass loggers through redis and status microservice. Controllers assign `that.ws_client = new WSClient(formId, channel)` and `controlBase.manage_ws_client` will connect whenever a job is running so live status text, trigger events, and exception information stream into the panel.
+- `WSClient` (in `ws_client.js`) is the legacy companion that listens for WebSocket broadcasts. Messages are passed through NoDbBase subclass loggers through redis and status microservice. Controllers assign `that.ws_client = new WSClient(formId, channel)` and `controlBase.manage_ws_client` will connect whenever a job is running so live status text, trigger events, and exception information stream into the panel.
+- `StatusStream` (in `status_stream.js`) is the new lightweight alternative used by console dashboards and upcoming control migrations. It renders against `[data-status-panel]`/`[data-status-log]` markup, manages reconnection/backoff, emits `status:*` custom events, and hydrates stack traces through optional fetchers. ControlBase will move to `StatusStream` once run controls adopt the new macros.
 - Together, these two components are the contract for any control that launches asynchronous work: provide the DOM IDs, call `set_rq_job_id`, and the infrastructure handles the rest.
 - The Project controller applies the same contract when readonly toggles queue `set_run_readonly_rq`; the worker now pushes human-readable updates to `<runid>:command`, which the command bar consumes directly to surface messages such as `manifest.db creation finished` without extra wiring.
 

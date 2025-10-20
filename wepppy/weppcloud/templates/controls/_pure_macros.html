@@ -1,4 +1,17 @@
-{% macro control_shell(form_id, title, toolbar=None, description=None, meta=None, collapsible=True, open=True) -%}
+{% macro control_shell(
+      form_id,
+      title,
+      toolbar=None,
+      description=None,
+      meta=None,
+      collapsible=True,
+      open=True,
+      form_class=None,
+      form_attrs=None,
+      status_panel_override=None,
+      summary_panel_override=None,
+      stacktrace_panel_override=None
+    ) -%}
 {% if collapsible %}
 <details class="wc-control wc-control--collapsible"{% if open %} open{% endif %}>
   <summary class="wc-control__summary">
@@ -26,9 +39,18 @@
   </div>
 {% endif %}
   <form id="{{ form_id }}"
-        class="wc-control__form pure-form"
+        class="wc-control__form pure-form{% if form_class %} {{ form_class }}{% endif %}"
         action="javascript:void(0);"
-        enctype="multipart/form-data">
+        enctype="multipart/form-data"
+        {% if form_attrs %}
+          {% for attr_key, attr_val in form_attrs.items() %}
+            {% if attr_val is true or attr_val is none or attr_val == '' %}
+              {{ attr_key }}
+            {% else %}
+              {{ attr_key }}="{{ attr_val }}"
+            {% endif %}
+          {% endfor %}
+        {% endif %}>
     {% if description or toolbar %}
     <header class="wc-control__header">
       {% if description %}
@@ -48,9 +70,21 @@
         {{ caller() }}
       </section>
       <section class="wc-control__panels">
-        {{ status_panel() }}
-        {{ summary_panel() }}
-        {{ stacktrace_panel() }}
+        {% if status_panel_override is not none %}
+          {{ status_panel_override|safe }}
+        {% else %}
+          {{ legacy_status_panel() }}
+        {% endif %}
+        {% if summary_panel_override is not none %}
+          {{ summary_panel_override|safe }}
+        {% else %}
+          {{ legacy_summary_panel() }}
+        {% endif %}
+        {% if stacktrace_panel_override is not none %}
+          {{ stacktrace_panel_override|safe }}
+        {% else %}
+          {{ legacy_stacktrace_panel() }}
+        {% endif %}
       </section>
     </div>
   </form>
@@ -61,7 +95,108 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro status_panel() -%}
+{%- macro status_panel(
+      id=None,
+      title="Status",
+      variant="compact",
+      meta=None,
+      description=None,
+      actions=None,
+      footer=None,
+      log_id=None,
+      aria_live="polite",
+      initial=None,
+      height=None
+    ) -%}
+{% set panel_id = id %}
+{% set resolved_log_id = log_id if log_id is not none else (id ~ "_log" if id else None) %}
+{% set style_tokens = [] %}
+{% if height %}
+  {% set style_tokens = style_tokens + ['--wc-status-height: ' ~ height ~ ';', '--wc-status-min-height: ' ~ height ~ ';'] %}
+{% endif %}
+<section class="wc-status-panel"
+         data-status-panel
+         data-variant="{{ variant }}"
+         {% if panel_id %}id="{{ panel_id }}"{% endif %}
+         {% if resolved_log_id %}data-status-target="{{ resolved_log_id }}"{% endif %}
+         {% if style_tokens %}style="{{ ' '.join(style_tokens) }}"{% endif %}>
+  {% if title or actions %}
+  <header class="wc-status-panel__header">
+    {% if title %}
+    <h3 class="wc-status-panel__title">{{ title }}</h3>
+    {% endif %}
+    {% if actions %}
+    <div class="wc-status-panel__actions">
+      {{ actions|safe }}
+    </div>
+    {% endif %}
+  </header>
+  {% endif %}
+  {% if description %}
+  <p class="wc-status-panel__description">{{ description|safe }}</p>
+  {% endif %}
+  {% if meta %}
+  <div class="wc-status-panel__meta">
+    {{ meta|safe }}
+  </div>
+  {% endif %}
+  {% if caller is defined %}
+  <div class="wc-status-panel__slot">
+    {{ caller() }}
+  </div>
+  {% endif %}
+  <div class="wc-status-panel__log"
+       {% if resolved_log_id %}id="{{ resolved_log_id }}"{% endif %}
+       data-status-log
+       role="log"
+       aria-live="{{ aria_live }}"
+       aria-atomic="false">
+    {% if initial %}
+      {{ initial }}
+    {% endif %}
+  </div>
+  {% if footer %}
+  <footer class="wc-status-panel__footer">
+    {{ footer|safe }}
+  </footer>
+  {% endif %}
+</section>
+{%- endmacro %}
+
+{%- macro stacktrace_panel(
+      id=None,
+      summary="Stack trace",
+      collapsed=True,
+      description=None,
+      actions=None,
+      body_id=None,
+      empty_state=None
+    ) -%}
+<details class="wc-stacktrace"
+         data-stacktrace-panel
+         {% if id %}id="{{ id }}"{% endif %}
+         {% if not collapsed %} open{% endif %}>
+  <summary class="wc-stacktrace__summary">
+    <span class="wc-stacktrace__summary-text">{{ summary }}</span>
+    {% if actions %}
+    <span class="wc-stacktrace__actions">
+      {{ actions|safe }}
+    </span>
+    {% endif %}
+  </summary>
+  {% if description %}
+  <p class="wc-stacktrace__description">
+    {{ description|safe }}
+  </p>
+  {% endif %}
+  <pre class="wc-stacktrace__body"
+       data-stacktrace-body
+       tabindex="0"
+       {% if body_id %}id="{{ body_id }}"{% endif %}>{{ (empty_state or '') | trim }}</pre>
+</details>
+{%- endmacro %}
+
+{% macro legacy_status_panel() -%}
 <section class="wc-control__panel">
   <h3 class="wc-control__panel-title">Status</h3>
   <div id="rq_job" class="wc-control__job"></div>
@@ -72,14 +207,14 @@
 </section>
 {%- endmacro %}
 
-{% macro summary_panel() -%}
+{% macro legacy_summary_panel() -%}
 <section class="wc-control__panel">
   <h3 class="wc-control__panel-title">Summary</h3>
   <div id="info" class="wc-control__panel-summary"></div>
 </section>
 {%- endmacro %}
 
-{% macro stacktrace_panel() -%}
+{% macro legacy_stacktrace_panel() -%}
 <section class="wc-control__panel">
   <h3 class="wc-control__panel-title">Details</h3>
   <div id="stacktrace" class="wc-control__stacktrace"></div>
