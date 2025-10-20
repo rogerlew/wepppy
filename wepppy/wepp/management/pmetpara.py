@@ -1,43 +1,47 @@
-import csv
+"""Generate ``pmetpara.txt`` files for PMET post-processing."""
+
+from __future__ import annotations
+
 import os
-from os.path import join as _join
-from os.path import split as _split
 from os.path import exists as _exists
-from glob import glob
+from os.path import join as _join
+from typing import Dict, Iterable, Mapping, Sequence
 
 from .managements import get_plant_loop_names
 
+__all__ = ["pmetpara_prep"]
 
-def pmetpara_prep(runs_dir, kcb, rawp):
+
+def pmetpara_prep(
+    runs_dir: str,
+    kcb: float | Mapping[str, float],
+    rawp: float | Mapping[str, float],
+) -> None:
+    """Write ``pmetpara.txt`` using canopy coefficients for each plant loop."""
+
     plant_loops = get_plant_loop_names(runs_dir)
 
-    n = len(plant_loops)
-
-    if not isinstance(kcb, dict):
-        _kcb = kcb
-
-    if not isinstance(rawp, dict):
-        _rawp = rawp
+    if isinstance(kcb, Mapping):
+        missing = [name for name in plant_loops if name not in kcb]
+        if missing:
+            raise KeyError(f"kcb mapping missing plant loops: {missing}")
+    if isinstance(rawp, Mapping):
+        missing = [name for name in plant_loops if name not in rawp]
+        if missing:
+            raise KeyError(f"rawp mapping missing plant loops: {missing}")
 
     description = '-'
-    with open(_join(runs_dir, 'pmetpara.txt'), 'w') as fp:
-        fp.write('{n}\n'.format(n=n))
+    path = _join(runs_dir, 'pmetpara.txt')
+    with open(path, 'w', encoding='utf-8', newline='\n') as fp:
+        fp.write(f"{len(plant_loops)}\n")
 
-        for i, plant in enumerate(plant_loops):
-            if isinstance(kcb, dict):
-                _kcb = kcb[plant]
+        for index, plant in enumerate(plant_loops, start=1):
+            kcb_value = kcb[plant] if isinstance(kcb, Mapping) else kcb
+            rawp_value = rawp[plant] if isinstance(rawp, Mapping) else rawp
+            fp.write(f"{plant},{kcb_value},{rawp_value},{index},{description}\n")
 
-            if isinstance(rawp, dict):
-                _rawp = rawp[plant]
+        fp.flush()
+        os.fsync(fp.fileno())
 
-            fp.write(f'{plant},{kcb},{rawp},{i+1},{description}\n')
-
-        fp.flush()                 # flush Python’s userspace buffer
-        os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
-
-    # validate file exists
-    if not _exists(_join(runs_dir, 'pmetpara.txt')):
-        raise FileNotFoundError(
-            f'Error: pmetpara.txt not found in {runs_dir}'
-        )
-
+    if not _exists(path):
+        raise FileNotFoundError(f"Error: pmetpara.txt not found in {runs_dir}")

@@ -1,10 +1,14 @@
+"""Generate Markdown documentation for WhiteboxTools workspace outputs."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Mapping, Optional
+from typing import Dict, Iterable, List, Mapping, Optional, Tuple
 import re
+
+__all__ = ["ResourceDefinition", "generate_wbt_documentation"]
 
 
 @dataclass(frozen=True)
@@ -238,11 +242,13 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
 
 
 def _format_timestamp(path: Path) -> str:
+    """Return the file modification time formatted as an ISO-8601 string."""
     ts = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
     return ts.isoformat().replace("+00:00", "Z")
 
 
 def _format_context(context: Mapping[str, object]) -> List[str]:
+    """Render context key/value pairs as Markdown bullet points."""
     lines: List[str] = []
     for key in sorted(context):
         value = context[key]
@@ -257,6 +263,7 @@ def _format_context(context: Mapping[str, object]) -> List[str]:
 
 
 def _format_resource(defn: ResourceDefinition, path: Path) -> str:
+    """Produce a Markdown section documenting the specified resource."""
     lines = [
         f"### `{defn.filename}`",
         defn.summary,
@@ -274,6 +281,7 @@ def _format_resource(defn: ResourceDefinition, path: Path) -> str:
 
 
 def _tool_label(tool: str) -> str:
+    """Summarise the WhiteboxTools command names used to generate an artifact."""
     codes = re.findall(r"`([^`]*)`", tool)
     if codes:
         label = " / ".join(codes)
@@ -286,13 +294,21 @@ def _tool_label(tool: str) -> str:
 
 
 def _node_id(name: str) -> str:
+    """Generate a stable GraphViz node identifier from a filename."""
     identifier = re.sub(r"[^0-9a-zA-Z]+", "_", name).strip("_")
     if not identifier:
         identifier = "node"
     return f"node_{identifier}"
 
 
-def _build_dependency_graph(existing_files: Dict[str, Path]):
+def _build_dependency_graph(existing_files: Dict[str, Path]) -> Tuple[
+    Dict[str, str],
+    Dict[str, List[tuple[str, str]]],
+    Dict[str, int],
+    Dict[str, tuple[str, ...]],
+    Dict[str, str],
+]:
+    """Construct dependency graph structures for the available resources."""
     existing = set(existing_files)
     nodes: Dict[str, str] = {}
     label_to_node: Dict[str, str] = {}
@@ -356,6 +372,7 @@ def _build_dependency_graph(existing_files: Dict[str, Path]):
 
 
 def _ascii_dependency_tree(existing_files: Dict[str, Path]) -> str:
+    """Render an ASCII tree describing resource dependencies."""
     nodes, adjacency, indegree, resource_inputs, node_keys = _build_dependency_graph(existing_files)
 
     if not any(adjacency.values()):

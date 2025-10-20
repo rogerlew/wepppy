@@ -1,32 +1,46 @@
+"""Inspect and manipulate watershed definitions stored in GeoJSON collections."""
+
+from __future__ import annotations
+
 import hashlib
 import json
 import re
-from pathlib import Path
 from copy import deepcopy
-from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable
+from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+__all__ = ["WatershedFeature", "WatershedCollection"]
 
 
 class WatershedFeature(object):
+    """Representation of a single watershed feature within a GeoJSON collection.
+
+    Parameters
+    ----------
+    feature:
+        GeoJSON feature dictionary containing ``geometry`` and ``properties``.
+    runid:
+        Run identifier derived from the collection's template.
+    index:
+        Zero-based index of the feature within the source FeatureCollection.
     """
-    Represents a single watershed feature from a GeoJSON file.
-    """
+
     def __init__(self, feature: Dict[str, Any], runid: str, *, index: int):
-        self.feature = feature
-        self.id = feature.get("id")
-        self.properties = feature.get("properties") or {}
-        self.geometry = feature.get("geometry") or {}
-        self.type = self.geometry.get("type")
-        self.coordinates = self.geometry.get("coordinates")
-        self.runid = runid
-        self.index = index
+        self.feature: Dict[str, Any] = feature
+        self.id: Any = feature.get("id")
+        self.properties: Dict[str, Any] = feature.get("properties") or {}
+        self.geometry: Dict[str, Any] = feature.get("geometry") or {}
+        self.type: Optional[str] = self.geometry.get("type")
+        self.coordinates: Any = self.geometry.get("coordinates")
+        self.runid: str = runid
+        self.index: int = index
         if not self.is_valid():
             raise ValueError("Invalid GeoJSON feature structure")
         
-        self.bbox = self._calculate_bbox()
+        self.bbox: List[float] = self._calculate_bbox()
 
     def save_geojson(self, filepath: str) -> None:
-        """Save this feature as a standalone GeoJSON file."""
-        features = deepcopy(self.feature)
+        """Persist the feature to ``filepath`` as a standalone GeoJSON file."""
+        features: Dict[str, Any] = deepcopy(self.feature)
         features['properties']['runid'] = self.runid
         features['properties']['index'] = self.index
         
@@ -50,6 +64,7 @@ class WatershedFeature(object):
             print(f"Error: Could not write to file {filepath}. Reason: {e}")
 
     def is_valid(self) -> bool:
+        """Return True when the underlying GeoJSON feature contains required keys."""
         if not isinstance(self.feature, dict):
             return False
         if not isinstance(self.properties, dict):
@@ -63,6 +78,7 @@ class WatershedFeature(object):
         return True
     
     def get_padded_bbox(self, pad: float) -> List[float]:
+        """Return the feature's bounding box expanded by ``pad`` (degrees)."""
         if pad < 0:
             raise ValueError("Padding must be non-negative")
         min_x, min_y, max_x, max_y = self.bbox
@@ -73,13 +89,8 @@ class WatershedFeature(object):
             max_y + pad,
         ]
     
-    def build_raster_mask(self, template_filepath, dst_filepath):
-        """
-        Build a raster mask for this watershed feature.
-        The raster mask will have the same dimensions and geotransform as the template raster.
-        This method is robust to different projections by reprojecting the feature's geometry
-        to match the template raster's CRS.
-        """
+    def build_raster_mask(self, template_filepath: str, dst_filepath: str) -> None:
+        """Rasterise the feature geometry using the template raster's spatial metadata."""
         import geopandas as gpd
         import rasterio
         from rasterio.features import rasterize
@@ -123,6 +134,7 @@ class WatershedFeature(object):
                 dst.write(mask, 1)
 
     def _calculate_bbox(self) -> List[float]:
+        """Compute the feature's bounding box as [min_x, min_y, max_x, max_y]."""
         min_x: Optional[float] = None
         min_y: Optional[float] = None
         max_x: Optional[float] = None
@@ -145,21 +157,23 @@ class WatershedFeature(object):
 
 
 class WatershedCollection(object):
-    """
-    Represents a collection of watersheds defined in a GeoJSON file.
-    """
+    """Manage a GeoJSON FeatureCollection of watersheds and derive WEPP run IDs."""
+
     def __init__(self, geojson_filepath: str):
-        self._geojson_filepath = geojson_filepath
-        self._analysis_results = None
+        self._geojson_filepath: str = geojson_filepath
+        self._analysis_results: Optional[Dict[str, Any]] = None
         self._runid_template: Optional[str] = None
         self._runid_template_hash: Optional[str] = None
         self._runid_validation_hash: Optional[str] = None
         self._runid_resource_checksum: Optional[str] = None
         self._cached_runids: Optional[List[Optional[str]]] = None
         self._allowed_template_functions_cache: Optional[Dict[str, Any]] = None
+        self.geojson_features: List[Dict[str, Any]]
+        self.data: Dict[str, Any]
         self._load_geojson()
 
     def _load_geojson(self) -> None:
+        """Load and validate the source GeoJSON FeatureCollection."""
         with open(self._geojson_filepath, "r", encoding="utf-8") as handle:
             payload = json.load(handle)
         if not isinstance(payload, dict) or payload.get("type") != "FeatureCollection":
@@ -171,6 +185,7 @@ class WatershedCollection(object):
         self.data = payload
 
     def __iter__(self) -> Iterable[WatershedFeature]:
+        """Yield :class:`WatershedFeature` instances with evaluated run IDs."""
         template = self.runid_template
         features = self.geojson_features
         allowed_functions = self._get_allowed_template_functions() if template else None
@@ -185,10 +200,12 @@ class WatershedCollection(object):
 
     @property
     def runid_template(self) -> Optional[str]:
+        """Return the template string used to derive run identifiers."""
         return self._runid_template
 
     @runid_template.setter
     def runid_template(self, value: Optional[str]) -> None:
+        """Assign a Jinja-style template for producing run identifiers."""
         template = (value or '').strip() if value is not None else ''
         if template != (self._runid_template or ''):
             self._cached_runids = None
@@ -204,6 +221,7 @@ class WatershedCollection(object):
             self._runid_resource_checksum = None
 
     def _get_allowed_template_functions(self) -> Dict[str, Any]:
+        """Return the cached set of template helper functions."""
         cache = self._allowed_template_functions_cache
         if cache is None:
             cache = self.default_template_functions()
@@ -212,6 +230,7 @@ class WatershedCollection(object):
 
     @property
     def geojson_filepath(self) -> str:
+        """Return the absolute path to the source GeoJSON resource."""
         return self._geojson_filepath
 
     def _analyze_geojson(self) -> Dict[str, Any]:
@@ -261,8 +280,12 @@ class WatershedCollection(object):
         return getattr(self, '_runid_template_is_valid', False)
 
     @classmethod
-    def load_from_analysis_results(cls, analysis_state: Dict[str, Any], runid_template_state) -> None:
-        """Load analysis results from a previously saved dictionary."""
+    def load_from_analysis_results(
+        cls,
+        analysis_state: Dict[str, Any],
+        runid_template_state: Optional[Dict[str, Any]],
+    ) -> "WatershedCollection":
+        """Load analysis results from serialized dictionaries and return the instance."""
         geojson_filepath = analysis_state.get("_geojson_filepath")
         if not geojson_filepath or not isinstance(geojson_filepath, str):
             raise ValueError("Invalid analysis results: missing or invalid '_geojson_filepath'")
@@ -428,6 +451,7 @@ class WatershedCollection(object):
 
     @staticmethod
     def _extract_expression(template: str, start: int) -> Tuple[str, int]:
+        """Return the expression substring beginning at ``start`` and the next index."""
         depth = 1
         i = start
         while i < len(template) and depth:
@@ -443,6 +467,7 @@ class WatershedCollection(object):
 
     @staticmethod
     def _render_expression(expr: str, context: Dict[str, Any], allowed_functions: Dict[str, Any]) -> str:
+        """Evaluate ``expr`` with ``context`` and apply optional format specifiers."""
         expression, format_spec = WatershedCollection._split_format(expr)
         value = WatershedCollection._safe_eval(expression, context, allowed_functions)
         if format_spec:
@@ -451,6 +476,7 @@ class WatershedCollection(object):
 
     @staticmethod
     def _split_format(expr: str) -> Tuple[str, Optional[str]]:
+        """Split an expression of the form ``value:format_spec`` into components."""
         depth = 0
         in_single = False
         in_double = False
@@ -469,6 +495,7 @@ class WatershedCollection(object):
 
     @staticmethod
     def _safe_eval(expr: str, context: Dict[str, Any], allowed_functions: Dict[str, Any]) -> Any:
+        """Evaluate ``expr`` using a whitelisted subset of the Python AST."""
         import ast
 
         allowed_names = set(context.keys()) | set(allowed_functions.keys())
@@ -566,6 +593,7 @@ class WatershedCollection(object):
 
     @staticmethod
     def default_template_functions() -> Dict[str, Any]:
+        """Return built-in helpers exposed to run ID templates."""
         def slug(value: Any, *, separator: str = "-") -> str:
             text = str(value or "")
             text = text.strip()
@@ -598,6 +626,7 @@ class WatershedCollection(object):
         }
 
     def template_feature_context(self, index: int) -> Dict[str, Any]:
+        """Build the template evaluation context for ``index``."""
         feature = self.geojson_features[index]
         properties = feature.get("properties")
         if not isinstance(properties, dict):
@@ -610,7 +639,8 @@ class WatershedCollection(object):
         }
 
     @property
-    def checksum(self): 
+    def checksum(self) -> Optional[str]:
+        """Return the SHA-256 checksum for the underlying GeoJSON payload."""
         return self.analysis_results.get("checksum")
 
     def validate_template(
@@ -618,6 +648,7 @@ class WatershedCollection(object):
         template: str,
         preview_limit: int = 20,
     ) -> Dict[str, Any]:
+        """Validate ``template`` against each feature and report duplicates/errors."""
         resource_checksum = self.checksum
 
         features = self.geojson_features

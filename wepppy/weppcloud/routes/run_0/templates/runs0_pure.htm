@@ -38,9 +38,8 @@
         <li><a href="#set-outlet">Outlet</a></li>
         <li><a href="#subcatchments-delineation">Subcatchments Delineation</a></li>
         <li><a href="#landuse">Landuse</a></li>
-        <li><a href="#landuse-report">Landuse Report</a></li>
-        <li><a href="#legacy-climate">Legacy Climate Control</a></li>
         <li><a href="#soils">Soils</a></li>
+        <li><a href="#climate">Climate</a></li>
         <li><a href="#legacy-wepp">Legacy WEPP control</a></li>
       </ol>
     </nav>
@@ -66,13 +65,12 @@
         {% include 'controls/landuse.htm' %}
       </section>
 
-      <section id="soils" class="wc-stack">
-        {% include 'controls/soil.htm' %}
+      <section id="climate" class="wc-stack">
+        {% include 'controls/climate.htm' %}
       </section>
 
-      <section id="legacy-climate" class="wc-stack">
-        <h2>Legacy Climate Control</h2>
-        <p class="wc-text-muted">Legacy climate control placeholder — still rendered via Bootstrap layout. Conversion pending in upcoming phases.</p>
+      <section id="soils" class="wc-stack">
+        {% include 'controls/soil.htm' %}
       </section>
 
       <section id="legacy-wepp" class="wc-stack">

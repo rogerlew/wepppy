@@ -1,42 +1,35 @@
+"""Utilities for synthesizing multi-OFE WEPP management files."""
+
+from __future__ import annotations
+
 import os
+from copy import deepcopy
+from typing import Iterable, List, Optional
 
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 
-from copy import deepcopy
+if False:  # pragma: no cover - typing only
+    from wepppy.wepp.management.managements import Management
 
 
 class ManagementMultipleOfeSynth(object):
-    """
-    Synthesizes a single WEPP management file for a simulation with multiple
-    Overland Flow Elements (OFEs) from a stack of individual management objects.
+    """Compose a single management file from several single-OFE managements."""
 
-    This class systematically merges scenarios from multiple management files,
-    ensuring that all cross-references between sections (e.g., from a Yearly
-    scenario to a Plant scenario) remain valid in the final composite file.
-
-    The merging strategy involves:
-    1.  Using the first management file in the stack as the base.
-    2.  For each subsequent management file:
-        a. Prepending a unique prefix (e.g., 'OFE2_') to every scenario name
-           to prevent naming collisions.
-        b. Updating all internal `ScenarioReference` objects to point to these
-           new, unique names.
-        c. Appending the uniquely named and correctly referenced scenarios to
-           the base management file.
-    3.  Updating the main 'Management Section' to reflect the total number of
-        OFEs and correctly link each OFE to its respective Initial Condition
-        and Yearly scenarios.
-    """
-    def __init__(self, stack=None):
-        if stack is None:
-            self.stack = []
-        else:
-            self.stack = stack
+    def __init__(self, stack: Optional[Iterable['Management']] = None) -> None:
+        """
+        Parameters
+        ----------
+        stack:
+            Sequence of ``Management`` objects (one per OFE) that will be
+            merged into a single multi-OFE management definition.  The first
+            entry is treated as the base file.
+        """
+        self.stack: List['Management'] = list(stack or [])
 
     @property
-    def description(self):
+    def description(self) -> str:
         s = ["<wepppy.wepp.management.ManagementMultipleOfeSynth>",
              "This file was synthesized from multiple management files.",
              f"Number of OFEs: {self.num_ofes}",
@@ -45,14 +38,11 @@ class ManagementMultipleOfeSynth(object):
         return '\n'.join(s)
 
     @property
-    def num_ofes(self):
+    def num_ofes(self) -> int:
         return len(self.stack)
 
-    def write(self, dst_fn):
-        """
-        Performs the merge operation and writes the resulting synthesized
-        management file to the specified destination path.
-        """
+    def write(self, dst_fn: str) -> None:
+        """Merge the stack and write the synthesized management to ``dst_fn``."""
         # We need access to the ScenarioReference class for type checking
         from wepppy.wepp.management import ScenarioReference
 

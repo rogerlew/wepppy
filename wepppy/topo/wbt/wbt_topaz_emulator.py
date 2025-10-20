@@ -1,3 +1,5 @@
+"""Emulate TOPAZ watershed delineation workflows using WhiteboxTools."""
+
 from __future__ import annotations
 
 import inspect

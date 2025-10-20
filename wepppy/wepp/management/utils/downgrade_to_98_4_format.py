@@ -1,12 +1,22 @@
+"""Helpers for exporting modern WEPP management files to 98.4-compatible format."""
+
+from __future__ import annotations
+
 from copy import deepcopy
+from pathlib import Path
+from typing import Iterable, List, Optional
+
+if False:  # pragma: no cover - import for typing only
+    from wepppy.wepp.management.managements import Management
+
 
 def downgrade_to_98_4_format(
-    management,
-    filepath,
-    resurfacing_fraction_mode='fallback',
-    unsupported_operation_mode='fallback',
-    first_year_only=False,
-):
+    management: 'Management',
+    filepath: str | Path,
+    resurfacing_fraction_mode: str = 'fallback',
+    unsupported_operation_mode: str = 'fallback',
+    first_year_only: bool = False,
+) -> Path:
     """Downgrade a 2016.3+ management to 98.4 and write it to disk.
 
     Parameters
@@ -49,8 +59,6 @@ def downgrade_to_98_4_format(
         chosen downgrade mode.
     """
 
-    from pathlib import Path
-
     if resurfacing_fraction_mode not in ('strict', 'fallback'):
         raise ValueError(
             "resurfacing_fraction_mode must be 'strict' or 'fallback'"
@@ -61,14 +69,14 @@ def downgrade_to_98_4_format(
             "unsupported_operation_mode must be 'strict' or 'fallback'"
         )
 
-    def _has_meaningful_value(val):
+    def _has_meaningful_value(val: object) -> bool:
         if val in ('', None):
             return False
         if isinstance(val, (int, float)):
             return abs(val) > 1e-9
         return True
 
-    def _apply_first_year_only(mf_obj):
+    def _apply_first_year_only(mf_obj: 'Management') -> bool:
         """Trim management rotations down to a single exported year."""
 
         man_section = getattr(mf_obj, 'man', None)

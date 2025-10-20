@@ -1,37 +1,49 @@
+"""Utilities for synthesizing multi-OFE WEPP soil files."""
+
+from __future__ import annotations
+
 import os
+from typing import Iterable, List, Optional
+
+from os.path import exists as exists
 from os.path import join as _join
 from os.path import split as _split
-from os.path import exists as exists
 
 
-def read_soil_lines(fn):
+def read_soil_lines(fn: str) -> List[str]:
     with open(fn) as fp:
         return fp.readlines()
 
 
 class SoilMultipleOfeSynth(object):
-    def __init__(self, stack=None):
-        if stack is None:
-            self.stack = []
-        else:
-            self.stack = stack
+    """Compose a multi-OFE WEPP soil file from single-OFE soil definitions."""
+
+    def __init__(self, stack: Optional[Iterable[str]] = None) -> None:
+        """
+        Parameters
+        ----------
+        stack:
+            Iterable of absolute soil file paths (one per OFE) to combine.
+        """
+        self.stack: List[str] = list(stack or [])
 
     @property
-    def description(self):
+    def description(self) -> str:
         s = ["<wepppy.wepp.soils.utils.SoilMultipleOfe>", 
              "Current Working Directory", os.getcwd(), "Stack:"] + self.stack
         s = [f"# {L}" for L in s]
         return '\n'.join(s)
 
     @property
-    def num_ofes(self):
+    def num_ofes(self) -> int:
         return len(self.stack)
 
     @property
-    def stack_of_fns(self):
+    def stack_of_fns(self) -> bool:
         return all(exists(fn) for fn in self.stack)
 
-    def write(self, dst_fn, ksflag=0):
+    def write(self, dst_fn: str, ksflag: int = 0) -> None:
+        """Write the merged soil definition to ``dst_fn``."""
         assert len(self.stack) > 0
 
         versions = set()
@@ -59,4 +71,3 @@ class SoilMultipleOfeSynth(object):
 
         with open(dst_fn, 'w') as pf:
             pf.write(''.join(s))
-
