@@ -1,0 +1,525 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set catalog = climate_catalog or [] %}
+{% set ns = namespace(selected=climate.catalog_id, selected_dataset=None, options=[]) %}
+
+{% for dataset in catalog %}
+  {% if ns.selected is none and dataset.ui_exposed %}
+    {% set ns.selected = dataset.catalog_id %}
+  {% endif %}
+{% endfor %}
+{% if ns.selected is none and catalog %}
+  {% set ns.selected = catalog[0]['catalog_id'] %}
+{% endif %}
+
+{% for dataset in catalog %}
+  {% set is_visible = dataset.ui_exposed or dataset.catalog_id == ns.selected %}
+  {% if is_visible %}
+    {% set ns.options = ns.options + [{
+      "id": "climate_dataset_" ~ dataset.catalog_id,
+      "label": dataset.label,
+      "value": dataset.catalog_id,
+      "selected": dataset.catalog_id == ns.selected,
+      "description": dataset.description,
+      "disabled": (not dataset.ui_exposed) and (dataset.catalog_id != ns.selected)
+    }] %}
+  {% endif %}
+  {% if dataset.catalog_id == ns.selected %}
+    {% set ns.selected_dataset = dataset %}
+  {% endif %}
+{% endfor %}
+
+{% set selected_dataset = ns.selected_dataset %}
+{% set selected_catalog_id = ns.selected or '' %}
+{% set selected_mode = climate.climate_mode.value %}
+{% set selected_station_mode = climate.climatestation_mode.value if climate.has_climatestation_mode else 0 %}
+{% set spatial_mode = climate.climate_spatialmode.value %}
+
+{% set month_names = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+] %}
+{% set monthly_scale_factors = climate.precip_monthly_scale_factors if climate.precip_monthly_scale_factors else [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] %}
+
+{% set status_panel_override %}
+  {% call ui.status_panel(
+       id="climate_status_panel",
+       title="Status",
+       variant="compact",
+       log_id="status",
+       height="6rem"
+     ) %}
+    <div id="rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
+    <span id="braille" class="wc-status-panel__meta" aria-hidden="true"></span>
+  {% endcall %}
+{% endset %}
+
+{% set stacktrace_panel_override = ui.stacktrace_panel(
+     id="climate_stacktrace_panel",
+     summary="Details",
+     collapsed=True,
+     body_id="stacktrace",
+     empty_state="No stack trace recorded."
+   ) %}
+
+{% call ui.control_shell(
+     form_id="climate_form",
+     title="Climate Options",
+     collapsible=False,
+     status_panel_override=status_panel_override,
+     stacktrace_panel_override=stacktrace_panel_override
+   ) %}
+
+  <script type="application/json" id="climate_catalog_data">{{ catalog | tojson }}</script>
+
+  <input type="hidden" id="climate_catalog_id" name="climate_catalog_id" value="{{ selected_catalog_id }}">
+  <input type="hidden" id="climate_mode" name="climate_mode" value="{{ selected_mode }}">
+
+  <section class="wc-stack" id="climate_dataset_section" data-climate-element="dataset">
+    {{ ui.radio_group(
+         "climate_dataset_choice",
+         label="Climate dataset",
+         layout="vertical",
+         options=ns.options,
+         help="Choose the climate dataset to configure for this run.",
+         attrs={"data-climate-dataset-group": "true"}
+       ) }}
+
+    <div id="climate_dataset_message" class="wc-alert wc-alert--info" role="status" aria-live="polite">
+      {% if selected_dataset %}
+        <p class="wc-alert__body">{{ selected_dataset.help_text or selected_dataset.description }}</p>
+      {% else %}
+        <p class="wc-alert__body">Select a dataset to view configuration guidance.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  {% set station_mode_options = [
+    {
+      "id": "climatestation_mode0",
+      "label": "Closest station",
+      "value": "0",
+      "selected": selected_station_mode == 0,
+      "attrs": {"class": "disable-readonly", "data-mode-value": "0"}
+    },
+    {
+      "id": "climatestation_mode1",
+      "label": "Multi-factor ranking",
+      "value": "1",
+      "selected": selected_station_mode == 1,
+      "attrs": {"class": "disable-readonly", "data-mode-value": "1"}
+    },
+    {
+      "id": "climatestation_mode2",
+      "label": "EU heuristic",
+      "value": "2",
+      "selected": selected_station_mode == 2,
+      "attrs": {"class": "disable-readonly", "data-mode-value": "2"}
+    },
+    {
+      "id": "climatestation_mode3",
+      "label": "AU heuristic",
+      "value": "3",
+      "selected": selected_station_mode == 3,
+      "attrs": {"class": "disable-readonly", "data-mode-value": "3"}
+    },
+    {
+      "id": "climatestation_mode4",
+      "label": "User-defined",
+      "value": "4",
+      "selected": selected_station_mode == 4,
+      "attrs": {"class": "disable-readonly", "data-mode-value": "4"}
+    }
+  ] %}
+
+  <section class="wc-stack" id="climate_station_section" data-climate-element="station">
+    {{ ui.radio_group(
+         "climatestation_mode",
+         label="Station selection mode",
+         layout="horizontal",
+         options=station_mode_options,
+         help="Select how stations should be filtered for this dataset."
+       ) }}
+
+    <div class="wc-stack">
+      <div class="wc-field">
+        <label class="wc-field__label" for="climate_station_selection">Station</label>
+        <select
+          id="climate_station_selection"
+          name="climate_station_selection"
+          class="wc-field__control disable-readonly"
+          aria-describedby="climate_station_hint">
+        </select>
+        <p id="climate_station_hint" class="wc-field__help">Station list updates when the selection mode changes.</p>
+      </div>
+      <div class="wc-field">
+        <a href="view/par/" target="_blank" class="pure-button pure-button-secondary disable-readonly">View PAR</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="wc-stack" id="climate_monthlies_section">
+    <h3 class="wc-heading wc-heading--sm">Monthly summary</h3>
+    <div id="climate_monthlies" class="wc-card wc-card--muted"></div>
+  </section>
+
+  {% set spatial_mode_options = [
+    {
+      "id": "climate_spatialmode0",
+      "label": "Single climate",
+      "value": "0",
+      "selected": spatial_mode == 0,
+      "attrs": {"class": "disable-readonly", "data-spatial-value": "0"}
+    },
+    {
+      "id": "climate_spatialmode1",
+      "label": "Multiple climates (PRISM revision)",
+      "value": "1",
+      "selected": spatial_mode == 1,
+      "attrs": {"class": "disable-readonly", "data-spatial-value": "1"}
+    },
+    {
+      "id": "climate_spatialmode2",
+      "label": "Multiple climates (Interpolated)",
+      "value": "2",
+      "selected": spatial_mode == 2,
+      "attrs": {"class": "disable-readonly", "data-spatial-value": "2"}
+    }
+  ] %}
+
+  <section class="wc-stack" id="climate_spatialmode_controls" data-climate-section="spatial_mode">
+    {{ ui.radio_group(
+         "climate_spatialmode",
+         label="Spatial mode",
+         layout="horizontal",
+         options=spatial_mode_options,
+         help="Define how climates are distributed across hillslopes."
+       ) }}
+  </section>
+
+  <section class="wc-stack" id="input_years_container" data-climate-section="stochastic_years">
+    {{ ui.text_field(
+         "input_years",
+         "Number of years to simulate",
+         value=climate.input_years,
+         help="Maximum of 1000 years.",
+         attrs={"class": "disable-readonly", "inputmode": "numeric"},
+         extra_control_class="disable-readonly"
+       ) }}
+  </section>
+
+  <section class="wc-stack" id="observed_years_container" data-climate-section="observed_years">
+    {{ ui.text_field(
+         "observed_start_year",
+         "Observed start year",
+         value=climate.observed_start_year,
+         attrs={"class": "disable-readonly", "inputmode": "numeric"},
+         extra_control_class="disable-readonly"
+       ) }}
+    {{ ui.text_field(
+         "observed_end_year",
+         "Observed end year",
+         value=climate.observed_end_year,
+         attrs={"class": "disable-readonly", "inputmode": "numeric"},
+         extra_control_class="disable-readonly"
+       ) }}
+  </section>
+
+  <section class="wc-stack" id="future_years_container" data-climate-section="future_years">
+    {{ ui.text_field(
+         "future_start_year",
+         "Future start year",
+         value=climate.future_start_year,
+         attrs={"class": "disable-readonly", "inputmode": "numeric"},
+         extra_control_class="disable-readonly"
+       ) }}
+    {{ ui.text_field(
+         "future_end_year",
+         "Future end year",
+         value=climate.future_end_year,
+         attrs={"class": "disable-readonly", "inputmode": "numeric"},
+         extra_control_class="disable-readonly"
+       ) }}
+  </section>
+
+  <section class="wc-stack" id="climate_mode4_controls" data-climate-section="single_storm">
+    <div class="wc-stack">
+      {{ ui.text_field(
+           "ss_storm_date",
+           "Storm date (month day year)",
+           value=climate.ss_storm_date,
+           help="Example: 4 15 01",
+           attrs={"class": "disable-readonly", "placeholder": "M D Y"}
+         ) }}
+      {{ ui.text_field(
+           "ss_design_storm_amount_inches",
+           "Design storm amount (inches)",
+           value=climate.ss_design_storm_amount_inches,
+           attrs={
+             "class": "disable-readonly",
+             "data-convert-target": "#ss_design_storm_amount_mm",
+             "data-convert-func": "in_to_mm",
+             "data-convert-decimals": "2"
+           }
+         ) }}
+      {{ ui.text_field(
+           "ss_duration_of_storm_in_hours",
+           "Storm duration (hours)",
+           value=climate.ss_duration_of_storm_in_hours,
+           attrs={"class": "disable-readonly"}
+         ) }}
+      {{ ui.text_field(
+           "ss_time_to_peak_intensity_pct",
+           "Time to peak intensity (%)",
+           value=climate.ss_time_to_peak_intensity_pct,
+           attrs={"class": "disable-readonly"}
+         ) }}
+    </div>
+    <div class="unitizer-wrapper">
+      <div class="unitizer units-m">
+        <div class="wc-field">
+          <label class="wc-field__label" for="ss_design_storm_amount_mm">Design storm amount (mm)</label>
+          <input
+            id="ss_design_storm_amount_mm"
+            class="wc-field__control disable-readonly"
+            type="text"
+            value="{{ (climate.ss_design_storm_amount_inches * 25.4) | round(2) }}"
+            data-convert-target="#ss_design_storm_amount_inches"
+            data-convert-func="mm_to_in"
+            data-convert-decimals="2">
+        </div>
+        <div class="wc-field">
+          <label class="wc-field__label" for="ss_max_intensity_mm_per_hour">Maximum intensity (mm/hour)</label>
+          <input
+            id="ss_max_intensity_mm_per_hour"
+            class="wc-field__control disable-readonly"
+            type="text"
+            value="{{ (climate.ss_max_intensity_inches_per_hour * 25.4) | round(2) }}"
+            data-convert-target="#ss_max_intensity_inches_per_hour"
+            data-convert-func="mm_to_in"
+            data-convert-decimals="2">
+        </div>
+      </div>
+      <div class="unitizer units-ft">
+        <div class="wc-field">
+          <label class="wc-field__label" for="ss_design_storm_amount_inches">Design storm amount (inches)</label>
+          <input
+            id="ss_design_storm_amount_inches"
+            name="ss_design_storm_amount_inches"
+            class="wc-field__control disable-readonly"
+            type="text"
+            value="{{ climate.ss_design_storm_amount_inches }}"
+            data-convert-target="#ss_design_storm_amount_mm"
+            data-convert-func="in_to_mm"
+            data-convert-decimals="2">
+        </div>
+        <div class="wc-field">
+          <label class="wc-field__label" for="ss_max_intensity_inches_per_hour">Maximum intensity (inches/hour)</label>
+          <input
+            id="ss_max_intensity_inches_per_hour"
+            name="ss_max_intensity_inches_per_hour"
+            class="wc-field__control disable-readonly"
+            type="text"
+            value="{{ climate.ss_max_intensity_inches_per_hour }}"
+            data-convert-target="#ss_max_intensity_mm_per_hour"
+            data-convert-func="in_to_mm"
+            data-convert-decimals="2">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wc-stack" id="climate_mode14_controls" data-climate-section="single_storm_batch">
+    {{ ui.textarea_field(
+         "ss_batch",
+         "Single storms (one per line: mo da yr prcp duration tp intensity)",
+         value=climate.ss_batch,
+         rows=10,
+         attrs={"class": "disable-readonly", "placeholder": "mo da year prcp dur tp ip"}
+       ) }}
+  </section>
+
+  <section class="wc-stack" id="climate_upload_section" data-climate-section="upload">
+    <div class="wc-field">
+      <label class="wc-field__label" for="input_upload_cli">Upload CLIGEN `.cli` file</label>
+      <input
+        id="input_upload_cli"
+        name="input_upload_cli"
+        type="file"
+        class="wc-field__control file disable-readonly">
+    </div>
+    <div class="wc-field">
+      <button
+        id="btn_upload_cli"
+        class="pure-button pure-button-secondary disable-readonly"
+        type="button">
+        Upload .cli
+      </button>
+      <p id="hint_upload_cli" class="wc-field__help" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="wc-stack" id="climate_mode13_controls" data-climate-section="nexrad_overrides">
+    {{ ui.radio_group(
+         "climate_daily_temp_ds",
+         label="Daily temperature dataset",
+         layout="vertical",
+         options=[
+           {
+             "id": "climate_daily_temp_ds_null",
+             "label": "Keep original breakpoint values",
+             "value": "null",
+             "selected": climate.climate_daily_temp_ds == 'null',
+             "attrs": {"class": "disable-readonly"}
+           },
+           {
+             "id": "climate_daily_temp_ds_prism",
+             "label": "PRISM (tmax, tmin, tdew)",
+             "value": "prism",
+             "selected": climate.climate_daily_temp_ds == 'prism',
+             "attrs": {"class": "disable-readonly"}
+           },
+           {
+             "id": "climate_daily_temp_ds_gridmet",
+             "label": "GRIDMET (temperature, radiation, wind)",
+             "value": "gridmet",
+             "selected": climate.climate_daily_temp_ds == 'gridmet',
+             "attrs": {"class": "disable-readonly"}
+           },
+           {
+             "id": "climate_daily_temp_ds_daymet",
+             "label": "DAYMET (temperature, radiation)",
+             "value": "daymet",
+             "selected": climate.climate_daily_temp_ds == 'daymet',
+             "attrs": {"class": "disable-readonly"}
+           }
+         ]
+       ) }}
+  </section>
+
+  {% call ui.collapsible_card(title="Advanced options", expanded=False, card_id="climate_advanced_options") %}
+    <section class="wc-stack">
+      {{ ui.checkbox_field(
+           "checkbox_use_gridmet_wind_when_applicable",
+           "Use GRIDMET wind when applicable",
+           checked=climate.use_gridmet_wind_when_applicable,
+           help="Applies GRIDMET wind fields for observed datasets that require wind data.",
+           attrs={"class": "disable-readonly"}
+         ) }}
+    </section>
+
+    {% set precip_mode = climate.precip_scaling_mode.value %}
+    {% set precip_options = [
+      {
+        "id": "climate_precipscaling_mode0",
+        "label": "No scaling",
+        "value": "0",
+        "selected": precip_mode == 0,
+        "attrs": {"class": "disable-readonly"}
+      },
+      {
+        "id": "climate_precipscaling_mode1",
+        "label": "Scalar scaling",
+        "value": "1",
+        "selected": precip_mode == 1,
+        "attrs": {"class": "disable-readonly"}
+      },
+      {
+        "id": "climate_precipscaling_mode2",
+        "label": "Monthly scaling",
+        "value": "2",
+        "selected": precip_mode == 2,
+        "attrs": {"class": "disable-readonly"}
+      },
+      {
+        "id": "climate_precipscaling_mode3",
+        "label": "Reference scaling",
+        "value": "3",
+        "selected": precip_mode == 3,
+        "attrs": {"class": "disable-readonly"}
+      },
+      {
+        "id": "climate_precipscaling_mode4",
+        "label": "Spatial scaling from map",
+        "value": "4",
+        "selected": precip_mode == 4,
+        "attrs": {"class": "disable-readonly", "disabled": True}
+      }
+    ] %}
+
+    <section class="wc-stack">
+      {{ ui.radio_group(
+           "precip_scaling_mode",
+           label="Post-CLIGEN precipitation scaling",
+           layout="vertical",
+           options=precip_options
+         ) }}
+
+      <div id="climate_precipscaling_mode1_controls" data-precip-section="1" class="wc-stack" {% if precip_mode != 1 %}hidden{% endif %}>
+      {{ ui.text_field(
+           "precip_scale_factor",
+           "Scalar multiplier",
+           value=climate.precip_scale_factor if climate.precip_scale_factor is not none else '',
+           help="Example: 1.1 increases precipitation by 10%.",
+           attrs={"class": "disable-readonly"}
+         ) }}
+      </div>
+
+      <div id="climate_precipscaling_mode2_controls" data-precip-section="2" class="wc-stack" {% if precip_mode != 2 %}hidden{% endif %}>
+        {% for month in range(12) %}
+          {{ ui.text_field(
+               "precip_monthly_scale_factors_" ~ month,
+               month_names[month],
+               value=monthly_scale_factors[month],
+               attrs={"class": "disable-readonly"}
+             ) }}
+        {% endfor %}
+      </div>
+
+      <div id="climate_precipscaling_mode3_controls" data-precip-section="3" class="wc-stack" {% if precip_mode != 3 %}hidden{% endif %}>
+        {{ ui.select_field(
+             "precip_scale_reference",
+             "Reference dataset",
+             [
+               ("prism", "PRISM (1981-2024)"),
+               ("daymet", "DAYMET"),
+               ("gridmet", "GRIDMET")
+             ],
+             selected=climate.precip_scale_reference or 'prism',
+             extra_control_class="disable-readonly"
+           ) }}
+      </div>
+
+      <div id="climate_precipscaling_mode4_controls" data-precip-section="4" class="wc-stack" hidden>
+        {{ ui.text_field(
+             "precip_scale_factor_map",
+             "Scale factor map",
+             value=climate.precip_scale_factor_map or '',
+             help="Configured via run configuration; read-only.",
+             attrs={"readonly": True, "class": "disable-readonly"}
+           ) }}
+      </div>
+    </section>
+  {% endcall %}
+
+{% call button_row() %}
+    <button
+      onclick="Climate.getInstance().build();"
+      id="btn_build_climate"
+      class="pure-button pure-button-primary disable-readonly"
+      type="button">
+      Build Climate
+    </button>
+  {% endcall %}
+  <p id="hint_build_climate" class="wc-text-muted" aria-live="polite"></p>
+
+{% endcall %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Climate !== "undefined" && Climate && typeof Climate.getInstance === "function") {
+      Climate.getInstance();
+    }
+  });
+</script>

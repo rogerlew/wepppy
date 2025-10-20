@@ -177,9 +177,18 @@ Create a structured dataset (JSON/YAML or DuckDB table) that mirrors the landuse
 ---
 
 ## Sequencing Summary
-1. **Catalog foundation** – finalize schema, populate entries per locale, build loader.
-2. **Backend validation** – wire catalog into `Climate` + `climate_bp` and add tests.
-3. **Pure template + macros** – implement new layout using catalog data.
-4. **JS rebuild** – refactor controller to consume catalog JSON, integrate StatusStream.
-5. **Upload/telemetry normalization** – ensure all flows report through shared pipeline.
-6. **Testing & rollout** – add automated coverage, QA across locales, and promote the Pure runs₀ template (climate included) through environments.
+### Phase 1 – Catalog & Data Plumbing
+- Define the climate catalog under `wepppy/nodb/locales/`, populate locale-aware entries, and expose a loader that filters by run context.
+- Update `Climate`/`climate_bp` to consume catalog IDs and enforce validation; add unit tests around catalog filtering and `parse_inputs`.
+- Ensure the catalog JSON is available to templates/JS (even if the UI still renders legacy markup).
+
+### Phase 2 – Pure UI & Controller Refactor
+- Replace the legacy climate template with Pure macros backed by the catalog, build new components (mode selector, station panel, scaling panels).
+- Rewrite `controllers_js/climate.js` to use catalog-driven configuration, StatusStream integration, and updated fetch helpers.
+- Adjust unitizer hooks and status messaging to match the new layout; add integration tests/snapshots covering primary modes.
+
+### Phase 3 – Backend Parity & Rollout
+- Normalize telemetry for uploads, finalize RedisPrep triggers, and clean up any legacy mode shims.
+- QA across locales (including Vanilla-only markets), confirm RAP warnings, and coordinate documentation updates.
+- Promote the Pure runs₀ template through staging → production and retire references to the old climate control.
+- Integrate StatusStream logging for the Pure climate control so build/upload progress flows through the shared telemetry pipeline.

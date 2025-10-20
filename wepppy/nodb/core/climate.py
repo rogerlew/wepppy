@@ -876,6 +876,7 @@ class Climate(NoDbBase):
             self._future_clis_wc = _future_clis_wc
 
             self._use_gridmet_wind_when_applicable = self.config_get_bool('climate', 'use_gridmet_wind_when_applicable')
+            self._catalog_id = None
 
     @property
     def daymet_last_available_year(self) -> int:
@@ -884,7 +885,16 @@ class Climate(NoDbBase):
     @property
     def use_gridmet_wind_when_applicable(self) -> bool:
         return getattr(self, '_use_gridmet_wind_when_applicable', True)
-    
+
+    @property
+    def catalog_id(self) -> Optional[str]:
+        return getattr(self, '_catalog_id', None)
+
+    @catalog_id.setter
+    @nodb_setter
+    def catalog_id(self, value: Optional[str]) -> None:
+        self._catalog_id = value
+
     @use_gridmet_wind_when_applicable.setter
     @nodb_setter
     def use_gridmet_wind_when_applicable(self, value: bool) -> None:
@@ -1067,6 +1077,34 @@ class Climate(NoDbBase):
     @property
     def onLoad_refreshStationSelection(self) -> str:
         return json.dumps(self.climatestation_mode is not ClimateStationMode.Undefined)
+
+    def available_catalog_datasets(self, include_hidden: bool = False) -> List[Any]:
+        from wepppy.nodb.locales import available_climate_datasets
+
+        locales = self.locales or ()
+        mods = self.ron_instance.mods or []
+        datasets = available_climate_datasets(locales, mods, include_hidden=include_hidden)
+        return datasets
+
+    def catalog_datasets_payload(self, include_hidden: bool = False) -> List[Dict[str, Any]]:
+        return [dataset.to_mapping() for dataset in self.available_catalog_datasets(include_hidden=include_hidden)]
+
+    def _resolve_catalog_dataset(self, catalog_id: str, include_hidden: bool = False) -> Optional[Any]:
+        from wepppy.nodb.locales import get_climate_dataset
+
+        if catalog_id is None:
+            return None
+
+        dataset = get_climate_dataset(catalog_id)
+        if dataset is None:
+            return None
+
+        locales = self.locales or ()
+        mods = self.ron_instance.mods or []
+        if not dataset.is_allowed_for(locales, mods, include_hidden=include_hidden):
+            return None
+
+        return dataset
 
     @property
     def year0(self) -> Optional[int]:
@@ -1335,11 +1373,31 @@ class Climate(NoDbBase):
 
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         with self.locked():
-            climate_mode = kwds['climate_mode']
-            climate_mode = ClimateMode(int(climate_mode))
+            raw_climate_mode = kwds.get('climate_mode')
+            catalog_id = kwds.get('climate_catalog_id') or kwds.get('catalog_id')
+            catalog_dataset = None
+            if catalog_id:
+                catalog_dataset = self._resolve_catalog_dataset(str(catalog_id))
+                if catalog_dataset is None:
+                    raise ValueError(f'Unknown or unavailable climate catalog id: {catalog_id}')
+                climate_mode = ClimateMode(int(catalog_dataset.climate_mode))
+                self._catalog_id = catalog_dataset.catalog_id
+            else:
+                if raw_climate_mode is None:
+                    raise ValueError('climate_mode not provided')
+                climate_mode = ClimateMode(int(raw_climate_mode))
+                self._catalog_id = None
 
             climate_spatialmode = kwds.get('climate_spatialmode', ClimateSpatialMode.Single)
-            climate_spatialmode = ClimateSpatialMode(int(climate_spatialmode))
+            if catalog_dataset is not None:
+                if climate_spatialmode in (None, '', 'None'):
+                    climate_spatialmode = catalog_dataset.default_spatial_mode
+                spatialmode_value = int(climate_spatialmode)
+                if catalog_dataset.spatial_modes and spatialmode_value not in catalog_dataset.spatial_modes:
+                    raise ValueError(f'Unsupported spatial mode {spatialmode_value} for catalog dataset {catalog_dataset.catalog_id}')
+                climate_spatialmode = ClimateSpatialMode(spatialmode_value)
+            else:
+                climate_spatialmode = ClimateSpatialMode(int(climate_spatialmode))
 
             if climate_mode == ClimateMode.SingleStorm:
                 climate_spatialmode = ClimateSpatialMode.Single
@@ -2255,6 +2313,7 @@ class Climate(NoDbBase):
 
             self._input_years = cli.input_years
             self.monthlies = cli.calc_monthlies()
+            self.catalog_id = 'user_defined_cli'
             
         self._post_defined_climate(verbose=verbose)
 

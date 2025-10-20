@@ -19,6 +19,30 @@ from wepppy.all_your_base.geo import get_utm_zone, utm_srid
 
 from .wepp_top_translator import WeppTopTranslator
 
+__all__ = [
+    "is_channel",
+    "garbrecht_length",
+    "cummnorm_distance",
+    "representative_normalized_elevations",
+    "read_geojson",
+    "interpolate_slp",
+    "write_slp",
+    "identify_subflows",
+    "weighted_slope_average",
+    "compute_direction",
+    "slp_asp_color",
+    "rect_to_polar",
+    "json_to_wgs",
+    "polygonize_netful",
+    "polygonize_bound",
+    "polygonize_subcatchments",
+    "identify_edge_hillslopes",
+    "CentroidSummary",
+    "HillSummary",
+    "ChannelSummary",
+    "FlowpathSummary",
+]
+
 
 gdal.UseExceptions()
 
@@ -562,12 +586,16 @@ def polygonize_subcatchments(subwta_fn, dst_fn, dst_fn2=None):
 
 
 class CentroidSummary(object):
+    """Store centroid pixel and geographic coordinates for a watershed component."""
+
     def __init__(self, **kwds):
         self.px = tuple(int(v) for v in kwds['px'])
         self.lnglat = tuple(float(v) for v in kwds['lnglat'])
 
 
 class SummaryBase(object):
+    """Shared attributes for hillslope, channel, and flowpath summaries."""
+
     def __init__(self, **kwds):
         topaz_id = kwds['topaz_id']
         if topaz_id is not None:
@@ -673,6 +701,8 @@ class SummaryBase(object):
 
 
 class HillSummary(SummaryBase):
+    """Derived metrics for a hillslope contributing to a channel."""
+
     def __init__(self, **kwds):
         super(HillSummary, self).__init__(**kwds)
         self.w_slopes = tuple(kwds['w_slopes'])
@@ -693,6 +723,7 @@ class HillSummary(SummaryBase):
 
 
 class ChannelSummary(SummaryBase):
+    """Summary metrics describing a channel reach."""
     def __init__(self, **kwds):
         super(ChannelSummary, self).__init__(**kwds)
         self.slopes = tuple(kwds['slopes'])
@@ -741,6 +772,7 @@ class ChannelSummary(SummaryBase):
 
 
 class FlowpathSummary(SummaryBase):
+    """Characterise an individual flowpath within a subcatchment."""
     def __init__(self, **kwds):
         super(FlowpathSummary, self).__init__(**kwds)
         self.slopes = tuple(kwds['slopes'])

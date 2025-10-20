@@ -214,16 +214,10 @@ function onReady() {
      * ======================
      */
 
-    var buildModeElement = document.querySelector("input[name='climate_build_mode']:checked");
-    var buildMode = buildModeElement ? buildModeElement.value : undefined;
-    if (buildMode !== undefined) {
-        climate.handleBuildModeChange(buildMode);
-    }
-    climate.handlePrecipScalingModeChange();
+    climate.handlePrecipScalingModeChange($("input[name='precip_scaling_mode']:checked").val());
     climate.set_rq_job_id(climate, {{ rq_job_ids.get("build_climate_rq") | tojson }});
 
     observed.hideControl();
-    climate.showHideControls({{ climate.climate_mode | int }});
 
     // load climate
     if ({{ climate.has_station | tojson }} ) {
@@ -238,11 +232,6 @@ function onReady() {
     if ({{ climate.has_observed | tojson }} ||
         {{ observed.results is not none | tojson }}) {
         observed.showControl();
-    }
-
-    var selectedClimateBuildMode = document.querySelector("input[name='climate_build_mode']:checked");
-    if (selectedClimateBuildMode) {
-        climate.setBuildMode(parseInt(selectedClimateBuildMode.value, 10));
     }
 
     /*

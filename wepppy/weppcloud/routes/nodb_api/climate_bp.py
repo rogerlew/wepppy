@@ -146,6 +146,19 @@ def query_climate_has_observed(runid: str, config: str) -> Response:
     return jsonify(Climate.getInstance(wd).has_observed)
 
 
+@climate_bp.route('/runs/<string:runid>/<config>/query/climate_catalog')
+@climate_bp.route('/runs/<string:runid>/<config>/query/climate_catalog/')
+def query_climate_catalog(runid: str, config: str) -> Response:
+    """Return the catalogued climate datasets for the active run."""
+    wd = get_wd(runid)
+    climate = Climate.getInstance(wd)
+    try:
+        payload = climate.catalog_datasets_payload()
+    except Exception:
+        return exception_factory('Error loading climate catalog', runid=runid)
+    return jsonify(payload)
+
+
 @climate_bp.route('/runs/<string:runid>/<config>/report/climate/')
 def report_climate(runid: str, config: str) -> Response:
     """Render the HTML climate report for the selected station.
@@ -183,9 +196,15 @@ def set_climate_mode(runid: str, config: str) -> Response:
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
+    catalog_id = request.form.get('catalog_id') or request.form.get('climate_catalog_id')
 
     try:
         climate.climate_mode = mode
+        if catalog_id:
+            dataset = climate._resolve_catalog_dataset(str(catalog_id), include_hidden=True)
+            if dataset is None:
+                return exception_factory('Unknown climate catalog id', runid=runid)
+            climate.catalog_id = dataset.catalog_id
     except Exception:
         return exception_factory('Building setting climate mode', runid=runid)
 
