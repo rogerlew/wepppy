@@ -646,6 +646,133 @@ Before submitting changes:
 
 ---
 
+## README Documentation Standards
+
+Comprehensive README files are essential for module discoverability, developer onboarding, and AI agent effectiveness. All submodules and significant components should have well-structured README files following the project template.
+
+### README Template and Guide
+
+- **Template:** `docs/templates/README_TEMPLATE.md` — Standard structure for all README files
+- **Authoring Guide:** `docs/README_AUTHORING_GUIDE.md` — Comprehensive documentation on creating and maintaining READMEs
+- **Audit Tool:** `tools/audit_readmes.py` — Script to analyze README quality across the repository
+
+### Core README Sections
+
+Every README should include:
+
+1. **Header** — Module name, one-line description, and "See also" link to relevant AGENTS.md sections
+2. **Overview** — What the module does, why it exists, and how it fits into wepppy
+3. **Quick Start** — Minimal working example for the most common use case
+4. **Components** — Table listing key classes/functions with brief descriptions
+5. **Usage/API** — Document primary classes, methods, and configuration options
+
+Optional but recommended sections:
+
+- **Architecture/Design** — Key patterns, data flow, and integration points
+- **Common Workflows** — Step-by-step guides for typical tasks
+- **Testing** — Commands to run tests and coverage expectations
+- **Troubleshooting** — Common issues with symptoms and solutions
+- **File Structure** — Directory tree showing module organization
+
+### README Quality Standards
+
+**Required elements:**
+- Clear module name and purpose statement
+- Link to relevant AGENTS.md sections using format: `> **See also:** [AGENTS.md](../../AGENTS.md) for [section names]`
+- At least one working code example
+- Description of key classes/functions
+- Integration points with other wepppy components
+
+**Writing style:**
+- Concise and scannable (use headings, tables, lists)
+- Technical but accessible
+- Example-driven (show, don't just tell)
+- Current and accurate (keep in sync with code)
+- Link to other docs instead of duplicating content
+
+### Creating a New README
+
+1. Copy the template: `cp docs/templates/README_TEMPLATE.md your/module/README.md`
+2. Fill in header with module name and one-line description
+3. Add "See also" reference to relevant AGENTS.md sections
+4. Write overview explaining what, why, and how
+5. Include at least one working code example
+6. Document key APIs and integration points
+7. Remove sections that don't apply
+8. Normalize spelling with `uk2us` (always preview with `diff` first)
+9. Test all code examples
+
+### Auditing README Quality
+
+Run the audit script to evaluate all README files:
+
+```bash
+cd /workdir/wepppy
+python tools/audit_readmes.py --verbose
+```
+
+The audit generates `docs/README_AUDIT_REPORT.md` with:
+- Quality scores (0-100) for each README
+- Categorization (Excellent, Good, Needs Improvement, Critical)
+- Specific recommendations for improvement
+- List of missing elements
+
+### README Integration with Documentation
+
+READMEs should complement, not duplicate, other documentation:
+
+| README Focus | AGENTS.md Focus |
+| --- | --- |
+| Module-specific details | Repository-wide patterns |
+| API usage examples | Architectural principles |
+| File locations and structure | Development workflows |
+| Troubleshooting specifics | General best practices |
+
+Always include cross-references:
+- READMEs link to AGENTS.md sections via "See also" at the top
+- AGENTS.md references READMEs for detailed module documentation
+- Both link to ARCHITECTURE.md and API_REFERENCE.md for system-level context
+
+### When to Update README
+
+Update the README when you:
+- Add or remove public APIs
+- Change module architecture
+- Introduce breaking changes
+- Add new dependencies
+- Discover common issues/gotchas
+- Add significant features
+
+Commit README updates with the related code changes to keep documentation in sync.
+
+### Tools and Commands
+
+```bash
+# Find all README files
+find . -name "README.md" -o -name "readme.md"
+
+# Audit README quality
+python tools/audit_readmes.py --output docs/README_AUDIT_REPORT.md
+
+# Normalize spelling (preview first!)
+diff -u path/to/README.md <(uk2us path/to/README.md)
+uk2us -i path/to/README.md
+
+# Search for READMEs missing sections
+grep -L "## Overview" **/README.md
+```
+
+### Examples of Well-Documented Modules
+
+Reference these as patterns:
+- `wepppy/nodb/README.md` — Comprehensive NoDb architecture guide
+- `services/status2/README.md` — Microservice specification with design rationale
+- `docker/README.md` — Operational guide with troubleshooting
+- `wepppy/weppcloud/controllers_js/README.md` — Frontend architecture explanation
+- `wepppy/nodb/mods/ash_transport/README.md` — Complete module workflow documentation
+
+---
+
 ## Notes for Next Pass
 - Static assets now build via `wctl build-static-assets`; re-run before image rebuilds so `controllers.js` and vendor bundles stay current.
 - Kubernetes migration is still pending. When that work resumes, plan on duplicating the static build stage so the proxy image (or init container) ships with the same `/weppcloud/static` tree baked in—no shared volumes required.
