@@ -73,7 +73,7 @@ README files are scored on a 100-point scale:
 
 | Path | Score | Lines | Has Title | Has Example | Has Overview | Has See Also |
 | --- | --- | --- | --- | --- | --- | --- |
-| `readme.md` | 60 | 116 | ✗ | ✓ | ✓ | ✗ |
+| `readme.md` | 60 | 118 | ✗ | ✓ | ✓ | ✗ |
 | `wepppy/nodb/README.md` | 60 | 197 | ✓ | ✓ | ✓ | ✓ |
 | `docker/README.md` | 70 | 90 | ✓ | ✓ | ✓ | ✓ |
 

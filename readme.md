@@ -14,6 +14,8 @@ At the heart of the system is a "NoDb" philosophy: instead of a monolithic datab
 - **[API_REFERENCE.md](API_REFERENCE.md)** - Quick reference for key APIs and patterns
 - **[AGENTS.md](AGENTS.md)** - AI agent coding guide and conventions
 - **[CONTRIBUTING_AGENTS.md](CONTRIBUTING_AGENTS.md)** - Contributing guide for AI coding assistants
+- **[docs/README_AUTHORING_GUIDE.md](docs/README_AUTHORING_GUIDE.md)** - Standards for creating and maintaining README files
+- **[docs/README_QUICK_REFERENCE.md](docs/README_QUICK_REFERENCE.md)** - Quick reference for README documentation
 - **[docs/schemas/](docs/schemas/)** - JSON schemas for data structures
 - **[docs/dev-notes/](docs/dev-notes/)** - Detailed developer notes on specific topics
 
