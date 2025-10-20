@@ -92,6 +92,8 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.landcover.rap import RAP_Band
 
+from wepppy.nodb.locales import LanduseDataset, available_landuse_datasets
+
 __all__ = [
     'LanduseNoDbLockedException',
     'LanduseMode',
@@ -115,6 +117,9 @@ class LanduseMode(IntEnum):
     RRED_Burned = 3
     UserDefined = 4
     SpatialAPI = 9
+
+
+_COVERAGE_PERCENTAGES: Tuple[float, ...] = tuple(i / 100.0 for i in range(0, 103))
 
 
 def read_cover_defaults(fn: str) -> Dict[str, Dict]:
@@ -884,26 +889,23 @@ class Landuse(NoDbBase):
 
     @property
     def landuseoptions(self) -> Dict:
-        from wepppy.wepp import management
+        return [
+            dataset.to_mapping()
+            for dataset in self.available_datasets
+            if dataset.kind == "mapping"
+        ]
 
-        _landuseoptions = management.load_map(self.mapping).values()
+    @property
+    def available_datasets(self) -> List[LanduseDataset]:
+        return available_landuse_datasets(self.mapping, self.mods, self.locales)
 
-        landuseoptions = []  
-        for opt in _landuseoptions:
-            if opt.get('IsTreatment', False):
-                continue
+    @property
+    def landcover_datasets(self) -> List[LanduseDataset]:
+        return [dataset for dataset in self.available_datasets if dataset.kind == "landcover"]
 
-            landuseoptions.append(opt)
-
-        landuseoptions = sorted(landuseoptions, key=lambda d: str(d['Key']))
-
-        if 'baer' in self.mods:
-            landuseoptions = [opt for opt in landuseoptions if 'Agriculture' not in opt['ManagementFile']]
-
-        if "lt" in self.mods or "portland" in self.mods or "seattle" in self.mods:
-            landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
-
-        return landuseoptions
+    @property
+    def coverage_percentages(self) -> Tuple[float, ...]:
+        return _COVERAGE_PERCENTAGES
 
     def build_managements(self, _map: Optional[str] = None) -> None:
         if _map is None:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, List, Mapping, MutableMapping, Sequence
+from typing import Dict, Iterable, List, Mapping, MutableMapping, Sequence, Tuple
 
 from flask import Response
 
@@ -13,6 +13,42 @@ from wepppy.nodb.core import Landuse, LanduseMode, Ron
 
 
 landuse_bp = Blueprint('landuse', __name__)
+
+
+def build_landuse_report_context(landuse: Landuse) -> Dict[str, object]:
+    """Prepare dataset options and report rows for landuse summaries."""
+    datasets = [
+        dataset for dataset in landuse.available_datasets if dataset.kind == "mapping"
+    ]
+
+    dataset_options: List[Tuple[str, str]] = []
+    for dataset in datasets:
+        label = dataset.label
+        if dataset.description and dataset.management_file:
+            label = f"{dataset.description} ({dataset.management_file})"
+        dataset_options.append((dataset.key, label))
+
+    prefix_order = sorted(datasets, key=lambda ds: len(ds.key), reverse=True)
+    report_rows: List[Dict[str, object]] = []
+
+    try:
+        report_entries = list(landuse.report)
+    except AttributeError:
+        report_entries = []
+
+    for entry in report_entries:
+        row = dict(entry)
+        key_str = str(row.get('key', ''))
+        selected_dataset = next((ds for ds in prefix_order if key_str.startswith(ds.key)), None)
+        row['_dataset'] = selected_dataset
+        row['_dataset_key'] = selected_dataset.key if selected_dataset else None
+        report_rows.append(row)
+
+    return {
+        'dataset_options': dataset_options,
+        'coverage_percentages': landuse.coverage_percentages,
+        'report_rows': report_rows,
+    }
 
 
 @landuse_bp.route('/runs/<string:runid>/<config>/tasks/set_landuse_mode/', methods=['POST'])
@@ -123,11 +159,18 @@ def report_landuse(runid: str, config: str) -> Response:
     try:
         landuse = Landuse.getInstance(wd)
         landuseoptions = landuse.landuseoptions
+        report_context = build_landuse_report_context(landuse)
 
-        return render_template('reports/landuse.htm', runid=runid, config=config,
-                               landuse=landuse,
-                               landuseoptions=landuseoptions,
-                               report=landuse.report)
+        return render_template(
+            'reports/landuse.htm',
+            runid=runid,
+            config=config,
+            landuse=landuse,
+            landuseoptions=landuseoptions,
+            dataset_options=report_context['dataset_options'],
+            coverage_percentages=report_context['coverage_percentages'],
+            report=report_context['report_rows'],
+        )
 
     except Exception:
         return exception_factory('Reporting landuse failed', runid=runid)

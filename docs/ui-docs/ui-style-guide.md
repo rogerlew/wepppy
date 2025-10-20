@@ -180,6 +180,16 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 
 - Starlette surfaces that render these macros (e.g., the query engine) must extend their `Jinja2Templates` loader to include `weppcloud/templates` so the shared partials resolve next to app-local templates.【F:wepppy/wepppy/query_engine/app/server.py†L33-L40】
 
+### Tabular controls inside `control_shell`
+- Wrap any tabular data in `<div class="wc-table-wrapper">` + `<table class="wc-table">` to inherit the shared spacing, border, and responsive rules. Avoid Bootstrap’s `.table` classes—Pure + our foundation utilities already deliver the chrome and mobile collapse behavior.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L426-L443】
+- Keep the table markup semantic (thead/tbody/th/td). Apply additional layout tokens to cells rather than rows; e.g., `.wc-table__numeric` or custom helpers like `.wc-landuse-report__cell--numeric` ensure the padding survives display differences across browsers.
+- For inline form controls inside tables, stick with raw `<select>`/`<input>` elements and add `disable-readonly` (so the global read-only toggle still works) plus small utility classes (`.wc-inline`, `.wc-landuse-report__select`) to control width. Avoid the `select_field` macro inside tight cells—it wraps extra grid markup that can break table layouts.
+- Use `<details>` for collapsible rows rather than Bootstrap’s collapse. Pair it with a table row that toggles `is-open` so the detail row stays visually tied to the summary. The landuse report pattern (`.wc-landuse-report__summary`, `.wc-landuse-report__details-row`, `.wc-landuse-report__collapse`) demonstrates this approach: the summary row carries the action button and inline selects, and the detail row contains extended controls with additional spacing tokens.
+- When tables appear inside a `control_shell`, keep consistent vertical rhythm by:
+  * adding bottom padding on each summary row (`.wc-landuse-report__summary > td { padding-bottom: var(--wc-space-lg); }`), and
+  * resetting the padding on the last summary row so the table footer aligns with surrounding panels.
+- Always ensure interactive elements within tables have proper aria attributes (`aria-controls`, `aria-expanded`, `aria-describedby`) so keyboard users understand the relationship between the action button and the collapsible content.
+
 ### Modal/dialogue content
 - When Bootstrap modals are required, apply `.pure-modal` on the dialogue content to keep typography, spacing, and squared edges in sync, benefiting from the shared medium elevation shadow.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L846-L850】
 

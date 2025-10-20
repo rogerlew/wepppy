@@ -37,6 +37,8 @@
         <li><a href="#channel-delineation">Channel Delineation</a></li>
         <li><a href="#set-outlet">Outlet</a></li>
         <li><a href="#subcatchments-delineation">Subcatchments Delineation</a></li>
+        <li><a href="#landuse">Landuse</a></li>
+        <li><a href="#landuse-report">Landuse Report</a></li>
         <li><a href="#legacy-climate">Legacy Climate Control</a></li>
         <li><a href="#legacy-soils">Legacy soils control</a></li>
         <li><a href="#legacy-wepp">Legacy WEPP control</a></li>
@@ -60,9 +62,8 @@
         {% include 'controls/subcatchments.htm' %}
       </section>
 
-      <section id="legacy-landuse" class="wc-stack">
-        <h2>Legacy Landuse Control</h2>
-        <p class="wc-text-muted">Legacy landuse control placeholder. This section continues to render through the legacy template until its Pure migration lands.</p>
+      <section id="landuse" class="wc-stack">
+        {% include 'controls/landuse.htm' %}
       </section>
 
       <section id="legacy-soils" class="wc-stack">
@@ -79,6 +80,27 @@
         <h2>Legacy WEPP Control</h2>
         <p class="wc-text-muted">Legacy WEPP execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
       </section>
+
+      <section id="legacy-debris-flow" class="wc-stack">
+        <h2>Legacy Debris Flow Control</h2>
+        <p class="wc-text-muted">Legacy Debris Flow execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
+      </section>
+      
+      <section id="legacy-observed" class="wc-stack">
+        <h2>Legacy Observed Control</h2>
+        <p class="wc-text-muted">Legacy Observed execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
+      </section>
+
+      <section id="legacy-watar" class="wc-stack">
+        <h2>Legacy WATAR Control (ash)</h2>
+        <p class="wc-text-muted">Legacy WATAR execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
+      </section>
+
+      <section id="legacy-dss-export" class="wc-stack">
+        <h2>Legacy DSS Export Control</h2>
+        <p class="wc-text-muted">Legacy DSS Export execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
+      </section>
+
     </section>
   </div>
 </div>

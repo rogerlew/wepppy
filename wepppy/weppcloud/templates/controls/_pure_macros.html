@@ -239,8 +239,14 @@
 </fieldset>
 {%- endmacro %}
 
-{% macro collapsible_card(title, description=None, expanded=False) -%}
-<details class="wc-collapse"{% if expanded %} open{% endif %}>
+{% macro collapsible_card(title, description=None, expanded=False, card_id=None, attrs=None) -%}
+{% set attrs = attrs.copy() if attrs else {} %}
+<details class="wc-collapse"
+         {% if card_id %}id="{{ card_id }}"{% endif %}
+         {% for attr_key, attr_val in attrs.items() %}
+           {{ attr_key }}="{{ attr_val }}"
+         {% endfor %}
+         {% if expanded %} open{% endif %}>
   <summary class="wc-collapse__summary">
     <span class="wc-collapse__title">{{ title }}</span>
     <span class="wc-collapse__icon" aria-hidden="true"></span>
@@ -348,7 +354,7 @@
 </div>
 {%- endmacro %}
 
-{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None, error=None) -%}
+{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None, error=None, extra_control_class=None) -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -366,9 +372,13 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
+{% set control_classes = ['wc-field__control'] %}
+{% if extra_control_class %}
+  {% set control_classes = control_classes + [extra_control_class] %}
+{% endif %}
 <div class="{{ ' '.join(field_classes) }}">
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
-  <select class="wc-field__control"
+  <select class="{{ ' '.join(control_classes) }}"
           id="{{ field_id }}"
           name="{{ field_id }}"
           {% if error %}aria-invalid="true"{% endif %}
@@ -466,7 +476,7 @@
 </div>
 {%- endmacro %}
 
-{% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None) -%}
+{% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None, extra_control_class=None) -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -484,9 +494,13 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
+{% set control_classes = ['wc-field__control'] %}
+{% if extra_control_class %}
+  {% set control_classes = control_classes + [extra_control_class] %}
+{% endif %}
 <div class="{{ ' '.join(field_classes) }}">
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
-  <input class="wc-field__control"
+  <input class="{{ ' '.join(control_classes) }}"
          id="{{ field_id }}"
          name="{{ field_id }}"
          type="file"

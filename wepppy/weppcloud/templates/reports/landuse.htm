@@ -1,72 +1,120 @@
- <table class="table">
+{% set coverage_values = coverage_percentages if coverage_percentages is defined else [] %}
+
+<div class="wc-landuse-report">
+  <table class="wc-table wc-landuse-report__table">
     <thead>
       <tr>
-        <th style="width:5%">Key</th>
-        <th style="width:5%"></th>
-        <th style="width:80%">Description (Management File)</th>
-        <th style="width:10%">Coverage %</th>
+        <th scope="col" class="wc-landuse-report__col wc-landuse-report__col--key">Key</th>
+        <th scope="col" class="wc-landuse-report__col wc-landuse-report__col--actions" aria-label="Adjust"></th>
+        <th scope="col" class="wc-landuse-report__col wc-landuse-report__col--mapping">Description (Management File)</th>
+        <th scope="col" class="wc-landuse-report__col wc-landuse-report__col--coverage">Coverage %</th>
       </tr>
     </thead>
     <tbody>
-  {% for row in report %}
-      <tr>
-        <td><a href="view/management/{{ row.key }}"  target="_blank">{{ row.key }}</a></td>
-        <td>
-          <button type="button" class="btn" data-toggle="collapse" data-target="#modify_landuse_{{ row.key }}">
-            <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}"/>
+    {% for row in report %}
+      {% set panel_id = 'landuse_panel_' ~ row.key %}
+      <tr class="wc-landuse-report__summary" data-landuse-row="{{ row.key }}">
+        <td class="wc-landuse-report__cell">
+          <a href="view/management/{{ row.key }}" target="_blank" rel="noopener">{{ row.key }}</a>
+        </td>
+        <td class="wc-landuse-report__cell">
+          <button
+            type="button"
+            class="pure-button wc-landuse-report__toggle"
+            data-landuse-toggle="{{ panel_id }}"
+            aria-controls="{{ panel_id }}"
+            aria-expanded="false">
+            <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}" alt="Adjust coverage for {{ row.key }}">
           </button>
         </td>
-        <td>
-            <select class="form-control disable-readonly" id="landuse_selection_{{ row.key }}"
-                onchange="Landuse.getInstance().modify_mapping({{ row.key }}, this.value)">
-                {% for opt in landuseoptions %}
-                <option value="{{ opt["Key"] }}" {% if startswith(row.key, opt["Key"]) %}selected{% endif %}>{{ opt["Description"] }} ({{ opt["ManagementFile"] }})</option>
-                {% endfor %}
-            </select>
-        </td>
-        <td class="text-right">{{ '%0.1f' % row.pct_coverage }}</td>
-      </tr>
-      <tr id="modify_landuse_{{ row.key }}" class="collapse out">
-        <td></td>
-        <td></td>
-        <td colspan="2">
-          Canopy Vegetation (Tree/Shrub/Grass) Cover
-          {% if 'rap' not in landuse.mods %}
-          :
-          <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'cancov', this.value)">
-            <option value="" {% if row.cancov_override is none %}selected{% endif %}>{{ (row.cancov * 100) | round | int }}% default</option>
-            {% for pct in range(0, 103, 1) %}
-            <option value="{{ pct / 100.0 }}" {% if row.cancov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
-            {% endfor %}
-          </select>
-          {% else %}
-            from RAP:
-            {% if row.cancov_override is none %}
-            <input type="text" value="-" readonly style="width: 50px; background-color: lightgray;">
-            {% else %}
-            <input type="text" value="{{ (row.cancov_override * 100) | round | int }}%" readonly style="width: 50px; background-color: lightgray;">
-            {% endif %}
-          {% endif %}
-          Interrill Ground Cover:
-          <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'inrcov', this.value)">
-            <option value="" {% if row.inrcov_override is none %}selected{% endif %}>{{ (row.inrcov * 100) | round | int }}% default</option>
-            {% for pct in range(0, 103, 1) %}
-            <option value="{{ pct / 100.0 }}" {% if row.inrcov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
-            {% endfor %}
-          </select>
-          Rill Ground Cover:
-          <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'rilcov', this.value)">
-            <option value="" {% if row.rilcov_override is none %}selected{% endif %}>{{ (row.rilcov * 100) | round | int }}% default</option>
-            {% for pct in range(0, 103, 1) %}
-            <option value="{{ pct / 100.0 }}" {% if row.rilcov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
+        <td class="wc-landuse-report__cell">
+          <select
+            id="landuse_selection_{{ row.key }}"
+            class="wc-landuse-report__select disable-readonly"
+            data-landuse-role="mapping-select"
+            data-landuse-dom="{{ row.key }}">
+            {% for opt in landuseoptions %}
+            <option value="{{ opt['Key'] }}" {% if startswith(row.key, opt['Key']) %}selected{% endif %}>
+              {{ opt["Description"] }} ({{ opt["ManagementFile"] }})
+            </option>
             {% endfor %}
           </select>
         </td>
-        <td></td>
+        <td class="wc-landuse-report__cell wc-landuse-report__cell--numeric">{{ '%0.1f' % row.pct_coverage }}</td>
       </tr>
-  {% endfor %}
+      <tr class="wc-landuse-report__details-row">
+        <td colspan="4" class="wc-landuse-report__details-cell">
+          <details id="{{ panel_id }}" class="wc-landuse-report__collapse">
+            <summary class="wc-sr-only">Adjust coverage overrides for {{ row.key }}</summary>
+            <div class="wc-landuse-report__controls">
+              <div class="wc-landuse-report__control">
+                <span class="wc-landuse-report__control-label">Canopy vegetation cover</span>
+                {% if 'rap' not in landuse.mods %}
+                  <select
+                    class="wc-landuse-report__select disable-readonly"
+                    data-landuse-role="coverage-select"
+                    data-landuse-dom="{{ row.key }}"
+                    data-landuse-cover="cancov">
+                    <option value="" {% if row.cancov_override is none %}selected{% endif %}>
+                      {{ (row.cancov * 100) | round | int }}% default
+                    </option>
+                    {% for pct in coverage_values %}
+                    <option value="{{ pct }}" {% if row.cancov_override == pct %}selected{% endif %}>
+                      {{ (pct * 100) | round | int }}%
+                    </option>
+                    {% endfor %}
+                  </select>
+                {% else %}
+                  <span class="wc-landuse-report__value">
+                    {% if row.cancov_override is none %}
+                      <span class="wc-text-muted">from RAP: —</span>
+                    {% else %}
+                      from RAP: {{ (row.cancov_override * 100) | round | int }}%
+                    {% endif %}
+                  </span>
+                {% endif %}
+              </div>
+
+              <div class="wc-landuse-report__control">
+                <span class="wc-landuse-report__control-label">Interrill ground cover</span>
+                <select
+                  class="wc-landuse-report__select disable-readonly"
+                  data-landuse-role="coverage-select"
+                  data-landuse-dom="{{ row.key }}"
+                  data-landuse-cover="inrcov">
+                  <option value="" {% if row.inrcov_override is none %}selected{% endif %}>
+                    {{ (row.inrcov * 100) | round | int }}% default
+                  </option>
+                  {% for pct in coverage_values %}
+                  <option value="{{ pct }}" {% if row.inrcov_override == pct %}selected{% endif %}>
+                    {{ (pct * 100) | round | int }}%
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="wc-landuse-report__control">
+                <span class="wc-landuse-report__control-label">Rill ground cover</span>
+                <select
+                  class="wc-landuse-report__select disable-readonly"
+                  data-landuse-role="coverage-select"
+                  data-landuse-dom="{{ row.key }}"
+                  data-landuse-cover="rilcov">
+                  <option value="" {% if row.rilcov_override is none %}selected{% endif %}>
+                    {{ (row.rilcov * 100) | round | int }}% default
+                  </option>
+                  {% for pct in coverage_values %}
+                  <option value="{{ pct }}" {% if row.rilcov_override == pct %}selected{% endif %}>
+                    {{ (pct * 100) | round | int }}%
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </details>
+        </td>
+      </tr>
+    {% endfor %}
     </tbody>
   </table>
-
-<tr>
-
+</div>

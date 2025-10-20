@@ -17,6 +17,28 @@ var Landuse = function () {
         that.rq_job = $("#landuse_form #rq_job");
         that.command_btn_id = 'btn_build_landuse';
 
+        if (that.form && that.form.length) {
+            that.form.off('change.landuseMode', 'input[name="landuse_mode"]')
+                .on('change.landuseMode', 'input[name="landuse_mode"]', function () {
+                    that.handleModeChange(this.value);
+                });
+
+            that.form.off('change.landuseSingle', '#landuse_single_selection')
+                .on('change.landuseSingle', '#landuse_single_selection', function () {
+                    that.handleSingleSelectionChange();
+                });
+
+            that.form.off('change.landuseDb', '#landuse_db')
+                .on('change.landuseDb', '#landuse_db', function () {
+                    that.setLanduseDb(this.value);
+                });
+
+            that.form.off('click.landuseBuild', '#btn_build_landuse')
+                .on('click.landuseBuild', '#btn_build_landuse', function () {
+                    that.build();
+                });
+        }
+
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
             if (eventName === 'LANDUSE_BUILD_TASK_COMPLETED') {
@@ -123,6 +145,7 @@ var Landuse = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
+                    self.bindReportEvents();
                 },
                 error: function error(jqXHR) {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -130,6 +153,57 @@ var Landuse = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            });
+        };
+
+        that.bindReportEvents = function () {
+            var self = instance;
+            if (!self.info || !self.info.length) {
+                return;
+            }
+
+            var root = self.info;
+
+            root.find('[data-landuse-toggle]').off('click.landuse').on('click.landuse', function (event) {
+                event.preventDefault();
+                var targetId = $(this).attr('data-landuse-toggle');
+                if (!targetId) {
+                    return;
+                }
+                var panel = document.getElementById(targetId);
+                if (!panel) {
+                    return;
+                }
+                if (panel.tagName && panel.tagName.toLowerCase() === 'details') {
+                    panel.open = !panel.open;
+                    $(this).attr('aria-expanded', panel.open ? 'true' : 'false');
+                    var row = $(panel).closest('tr');
+                    if (row.length) {
+                        row.toggleClass('is-open', panel.open);
+                    }
+                    if (panel.open && panel.scrollIntoView) {
+                        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                }
+            });
+
+            root.find('[data-landuse-role="mapping-select"]').off('change.landuse').on('change.landuse', function () {
+                var dom = $(this).data('landuseDom');
+                var value = $(this).val();
+                if (dom === undefined || value === undefined) {
+                    return;
+                }
+                self.modify_mapping(String(dom), value);
+            });
+
+            root.find('[data-landuse-role="coverage-select"]').off('change.landuse').on('change.landuse', function () {
+                var dom = $(this).data('landuseDom');
+                var cover = $(this).data('landuseCover');
+                var value = $(this).val();
+                if (dom === undefined || cover === undefined) {
+                    return;
+                }
+                self.modify_coverage(String(dom), String(cover), value);
             });
         };
 
@@ -164,6 +238,7 @@ var Landuse = function () {
             }
             mode = parseInt(mode, 10);
             var landuse_single_selection = $("#landuse_single_selection").val();
+            self.mode = mode;
 
             var task_msg = "Setting Mode to " + mode + " (" + landuse_single_selection + ")";
 
@@ -197,7 +272,12 @@ var Landuse = function () {
             // mode is an optional parameter
             // if it isn't provided then we get the checked value
             if (db === undefined) {
-                db = $("input[name='landuse_db']:checked").val();
+                var select = $("#landuse_db");
+                if (select.length) {
+                    db = select.val();
+                } else {
+                    db = $("input[name='landuse_db']:checked").val();
+                }
             }
 
             var task_msg = "Setting Landuse Db to " + db;

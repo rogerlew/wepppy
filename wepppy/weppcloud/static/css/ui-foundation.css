@@ -429,7 +429,6 @@ code * {
 .wc-control__panel {
   padding: var(--wc-space-md);
   border: 1px solid var(--wc-color-border);
-  background: var(--wc-color-surface-alt);
   box-shadow: var(--wc-shadow-sm);
 }
 
@@ -1085,6 +1084,127 @@ code * {
   .wc-map-grid--split {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.wc-landuse-report {
+  display: block;
+  width: 100%;
+}
+
+.wc-landuse-report__table {
+  width: 100%;
+}
+
+.wc-landuse-report__col--actions {
+  width: 3.75rem;
+  text-align: center;
+}
+
+.wc-landuse-report__col--mapping {
+  width: 55%;
+}
+
+.wc-landuse-report__col--coverage {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.wc-landuse-report__cell {
+  vertical-align: middle;
+}
+
+.wc-landuse-report__cell--numeric {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.wc-landuse-report__summary > td {
+  padding-bottom: var(--wc-space-lg);
+}
+
+.wc-landuse-report__summary {
+  background: var(--wc-color-surface);
+}
+
+.wc-landuse-report__summary:last-of-type > td {
+  padding-bottom: 0;
+}
+
+.wc-landuse-report__toggle {
+  padding: var(--wc-space-2xs) var(--wc-space-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--wc-radius-pill);
+}
+
+.wc-landuse-report__select {
+  min-width: 12rem;
+  max-width: 100%;
+}
+
+.wc-landuse-report__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-space-sm);
+  padding: var(--wc-space-sm) var(--wc-space-md);
+  background: inherit;
+}
+
+.wc-landuse-report__details-row {
+  display: none;
+  background: inherit;
+}
+
+.wc-landuse-report__details-row.is-open {
+  display: table-row;
+}
+
+.wc-landuse-report__details-cell {
+  padding: 0;
+  border-top: none;
+  background: inherit;
+  border-bottom: 1px solid var(--wc-color-border);
+}
+
+.wc-landuse-report__collapse {
+  border: none;
+  box-shadow: none;
+  display: block;
+  margin: 0;
+  background: inherit;
+}
+.wc-landuse-report__collapse > .wc-collapse__summary,
+.wc-landuse-report__collapse::before,
+.wc-landuse-report__collapse::after {
+  display: none !important;
+}
+
+.wc-landuse-report__control {
+  display: flex;
+  align-items: center;
+  gap: var(--wc-space-xs);
+  flex-wrap: wrap;
+  margin-right: var(--wc-space-lg);
+}
+
+.wc-landuse-report__control-label {
+  font-weight: 600;
+}
+
+.wc-landuse-report__value {
+  font-weight: 500;
+}
+
+.wc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 
 .wc-fieldset {

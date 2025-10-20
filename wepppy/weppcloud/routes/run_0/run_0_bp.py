@@ -22,6 +22,7 @@ from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.weppcloud.routes.nodb_api.landuse_bp import build_landuse_report_context
 from wepppy.weppcloud.utils.helpers import (
     get_wd, authorize, get_run_owners_lazy, 
     authorize_and_handle_with_exception_factory,
@@ -47,6 +48,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#outlet': TaskEnum.set_outlet,
     '#subcatchments-delineation': TaskEnum.build_subcatchments,
     '#landuse-options': TaskEnum.build_landuse,
+    '#landuse-report': TaskEnum.build_landuse,
     '#soil-options': TaskEnum.build_soils,
     '#climate-options': TaskEnum.build_climate,
     '#rap-time-series-acquisition': TaskEnum.fetch_rap_ts,
@@ -183,6 +185,7 @@ def runs0(runid, config):
         rq_job_ids = {}
 
     landuseoptions = landuse.landuseoptions
+    landuse_report_context = build_landuse_report_context(landuse)
     soildboptions = soilsdb.load_db()
 
     critical_shear_options = management.load_channel_d50_cs()
@@ -217,6 +220,10 @@ def runs0(runid, config):
                             treatments=treatments,
                             rq_job_ids=rq_job_ids,
                             landuseoptions=landuseoptions,
+                            landcover_datasets=landuse.landcover_datasets,
+                            landuse_report_rows=landuse_report_context['report_rows'],
+                            landuse_dataset_options=landuse_report_context['dataset_options'],
+                            landuse_coverage_percentages=landuse_report_context['coverage_percentages'],
                             landuse_management_mapping_options=landuse_management_mapping_options,
                             soildboptions=soildboptions,
                             critical_shear_options=critical_shear_options,

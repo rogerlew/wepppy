@@ -192,9 +192,9 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 ### 3.4 `file_upload`
 - **Purpose**: Upload control with help text and existing filename.
 - **Layout**: Label above `<input type="file">`, help below, optional “current file” display.
-- **Args**: `field_id`, `label`, `accept`, optional `help`, `current_filename`, `attrs`.
+- **Args**: `field_id`, `label`, `accept`, optional `help`, `current_filename`, `attrs`, optional `extra_control_class` for additional CSS tokens (e.g., `disable-readonly`).
 - **Notes**: Macro should include accessible description linking input to help text.
-- **Status**: Implemented with `.wc-field__meta` for current filename display.
+- **Status**: Implemented with `.wc-field__meta` for current filename display; extra control class landed during landuse conversion to support read-only toggling.
 
 ### 3.5 `radio_group`
 - **Purpose**: Mode selectors (e.g. landuse mode, climate mode). Supports horizontal/vertical layouts.
@@ -205,8 +205,8 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 
 ### 3.6 `select_field`
 - **Purpose**: Standard `<select>` element with label/help.
-- **Args**: `field_id`, `label`, `options` (list of `(value, text)`), `selected`, optional `help`, `attrs`.
-- **Status**: Implemented and wired into the gallery as a legacy select comparison.
+- **Args**: `field_id`, `label`, `options` (list of `(value, text)`), `selected`, optional `help`, `attrs`, optional `extra_control_class` for additional CSS tokens (e.g., `disable-readonly`).
+- **Status**: Implemented and wired into the gallery as a legacy select comparison; landuse report uses the new `extra_control_class` hook.
 
 ### 3.7 `checkbox_field`
 - **Purpose**: Single checkbox with help text (e.g. `readonly`/`public`, `clip hillslopes`).
@@ -229,7 +229,7 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **Purpose**: Render tabular data (landuse, soils summaries).
 - **Plan**: Macro will accept column definitions + rows, emit a Pure table with optional caption.
 - **Next steps**: Prototype in showcase before migrating real tables.
-- **Status**: First pass implemented using `wc-table`; still refine sortable/hybrid tables after we migrate landuse/soils panels.
+- **Status**: First pass implemented using `wc-table`; landuse report now consumes the macro. Follow-up: refine sortable/hybrid tables after soils panels migrate.
 
 ### 3.11 `dynamic_slot`
 - **Purpose**: Placeholder `<div>` for controller-managed DOM (e.g. map overlays, JS builders).
@@ -241,8 +241,8 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 ### 3.12 `collapsible_card`
 - **Purpose**: Hide advanced/optional sections (filters, expert settings) behind an accessible toggle.
 - **Layout**: `<details>` + styled `<summary>` header with rotating chevron and optional description; content area stacks children with standard spacing.
-- **Args**: `title`, optional `description`, optional `expanded` (default false).
-- **Status**: Implemented; `/ui/components/` demo wraps advanced options in the new card.
+- **Args**: `title`, optional `description`, optional `expanded` (default false), optional `card_id` for external toggles, optional `attrs` dict for extra attributes.
+- **Status**: Implemented; `/ui/components/` demo wraps advanced options in the new card. Landuse report uses `card_id` so table buttons can toggle coverage overrides.
 
 ### 3.13 `status_panel`
 - **Purpose**: Standard log surface for controls and console dashboards.
@@ -269,6 +269,23 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **Args**: Required `range_id`, `canvas_id`, `min_id`, `max_id`; optional `label`, `range_attrs`, `canvas_attrs`, `units_id`, and `help`.
 - **Notes**: IDs must match the JS contract used by `SubcatchmentDelineation`. Range attrs support `min`, `max`, `step`, `value` without inline styles. Canvas width/height handled via CSS.
 - **Status**: Implemented; map/rangeland partials now use the macro instead of bespoke Bootstrap grids.
+
+### Landuse Control (`controls/landuse.htm`)
+- **Structure**: `ui.control_shell` with `collapsible=False` so status/stacktrace panels sit beside the inputs. Mode selection uses `ui.radio_group`, while dataset/time-series selects stay as raw `<select class="disable-readonly">` to keep the table layout predictable inside the control.
+- **Catalog integration**: Dataset options come from `landuse.available_datasets` (management + landcover entries). The template builds three option lists:
+  * `landcover_ns.options` (per-hillslope dataset select),
+  * `single_ns.options` (single-landuse mode), and
+  * `mapping_ns.options` (upload mode mapping select).
+  Filtering/ordering is performed in Python so the template is a simple loop.
+- **Advanced options**: Wrapped with `ui.collapsible_card` (animated `<details>`). Buffer select and disturbed toggles reuse `select_field`/`checkbox_field` with `extra_control_class="disable-readonly"` so project read-only mode can disable the inputs.
+- **Status wiring**: Uses `ui.status_panel` (`height="4rem"`) plus `ui.stacktrace_panel`. `landuse.js` delegates form events (mode radio change, dataset select, build button) instead of inline `onchange` attributes.
+- **Upload block**: `ui.file_upload(..., extra_control_class="disable-readonly")` provides the file input; the mapping select and helper text live beneath it.
+
+### Landuse Report (`reports/landuse.htm`)
+- **Layout**: Plain `<table class="wc-table wc-landuse-report__table">` wrapped in `.wc-landuse-report`. Summary rows carry inline selects; detail rows use `<details>` for collapsible overrides so the extra controls stay associated with their summary.
+- **Selectors**: `.wc-landuse-report__summary`, `.wc-landuse-report__toggle`, `.wc-landuse-report__select`, `.wc-landuse-report__details-row`, `.wc-landuse-report__collapse`, and `.wc-landuse-report__controls` live in `ui-foundation.css`. These helpers enforce spacing, background inheritance, and the responsive flex layout for the three coverage selects.
+- **Interactions**: `landuse.js` toggles the `<details>` element and adds/removes `.is-open` on the detail `<tr>` so CSS can collapse/expand the row. Buttons set `aria-expanded`, and coverage/mapping selects retain `data-landuse-role` hooks for the existing AJAX handlers.
+- **Design notes**: Summary cells receive extra padding via `.wc-landuse-report__summary > td { padding-bottom: var(--wc-space-lg); }` for visual separation. Detail rows inherit table colors (no Bootstrap collapse) and gain a subtle divider when open.
 
 ---
 

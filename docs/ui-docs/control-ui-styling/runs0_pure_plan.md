@@ -7,6 +7,9 @@
 
 ## 2. Current Progress Snapshot _(2025-10-19)_
 - Pure controls in production: map, fork console, archive console, rangeland/landuse modify panels (embedded inside the map tabset), outlet control.
+- Landuse report now renders via Pure components and the shared dataset catalog (`Landuse.available_datasets`).
+- Landuse control migrated to Pure macros (`control_shell`, `radio_group`, `select_field`, `collapsible_card`) and now consumes catalog metadata for both landcover and management selections.
+- Landcover dataset options (NLCD, CORINE, locale overrides) now live in `wepppy.nodb.locales.landuse_catalog` so both the legacy control and Pure views can consume the same metadata.
 - Shared infrastructure: `control_shell` overrides, `status_panel` / `stacktrace_panel`, `tabset`, `color_scale`, `StatusStream`.
 - Remaining legacy controls: climate, soils, treatments, WEPP main form, debris flow, Omni, etc. All still rely on `_base.htm`.
 
@@ -85,3 +88,4 @@ base_pure.htm
 - Updated `run_page_bootstrap.js.j2`, `landuse_modify.js`, and `rangeland_cover_modify.js` so the bootstrap logic gracefully short-circuits when the Pure layout is active.
 - Migrated channel and subcatchment delineation controls to Pure macros (`control_shell`, `radio_group`, `button_row`), preserving existing IDs so the legacy controllers keep working while eliminating Bootstrap rows/cols.
 - Migrated the outlet control to Pure macros (`set_outlet.htm`), reusing `control_shell`, `status_panel`, and `stacktrace_panel` while keeping ControlBase IDs for `outlet.js`. Legacy markup lives in `set_outlet_legacy.htm` so the classic runs0 page remains unchanged.
+- Converted `reports/landuse.htm` to Pure table/collapse patterns with event delegation in `landuse.js`; dataset options now come from the new `wepppy.nodb.locales.landuse_catalog` helper.
