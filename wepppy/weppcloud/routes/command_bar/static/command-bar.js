@@ -9,6 +9,7 @@
     const TIP_DEFAULT = "Tip: Press ':' to activate the command bar. :help for commands.";
     const TIP_ACTIVE = 'Command mode - press Enter to run, Esc to cancel';
     const INSTANCE_DATA_KEY = '__commandBarInstance';
+    const GLOBAL_INSTANCE_KEY = '__wepppyCommandBarInstance';
     const STAY_ACTIVE_COMMANDS = new Set(['help', 'status']);
     const SET_HELP_LINES = [
         "set units <si|english>    - Switch global unit preferences",
@@ -32,6 +33,10 @@
             this.resultEl = container.querySelector('[data-command-result]');
             this.inputWrapperEl = container.querySelector('[data-command-input-wrapper]');
             this.inputEl = container.querySelector('[data-command-input]');
+            this.handleBeforeUnload = null;
+            this.handlePageHide = null;
+            this.handlePageShow = null;
+            this.handleVisibilityChange = null;
 
             this.active = false;
             this.commandHistory = [];
@@ -46,6 +51,7 @@
             this.commandChannelReconnectDelayMs = 2000;
             this.commandChannelUrl = this.getCommandChannelUrl();
             this.commandChannelShouldReconnect = false;
+            this.destroyed = false;
 
             this.handleDocumentKeyDown = this.handleDocumentKeyDown.bind(this);
             this.handleInputKeyDown = this.handleInputKeyDown.bind(this);
@@ -53,6 +59,10 @@
             this.handleCommandChannelMessage = this.handleCommandChannelMessage.bind(this);
             this.handleCommandChannelClose = this.handleCommandChannelClose.bind(this);
             this.handleCommandChannelError = this.handleCommandChannelError.bind(this);
+            this.onBeforeUnload = this.onBeforeUnload.bind(this);
+            this.onPageHide = this.onPageHide.bind(this);
+            this.onPageShow = this.onPageShow.bind(this);
+            this.onVisibilityChange = this.onVisibilityChange.bind(this);
         }
 
         init() {
@@ -69,7 +79,92 @@
             this.inputEl.addEventListener('keydown', this.handleInputKeyDown);
 
             this.connectCommandChannel();
-            window.addEventListener('beforeunload', () => this.disconnectCommandChannel(), { once: true });
+            this.handleBeforeUnload = this.onBeforeUnload;
+            window.addEventListener('beforeunload', this.handleBeforeUnload, { once: true });
+
+            this.handlePageHide = this.onPageHide;
+            this.handlePageShow = this.onPageShow;
+            window.addEventListener('pagehide', this.handlePageHide);
+            window.addEventListener('pageshow', this.handlePageShow);
+
+            this.handleVisibilityChange = this.onVisibilityChange;
+            document.addEventListener('visibilitychange', this.handleVisibilityChange);
+        }
+
+        destroy() {
+            if (this.destroyed) {
+                return;
+            }
+            this.destroyed = true;
+
+            document.removeEventListener('keydown', this.handleDocumentKeyDown);
+            if (this.inputEl) {
+                this.inputEl.removeEventListener('keydown', this.handleInputKeyDown);
+            }
+
+            if (this.handleBeforeUnload) {
+                window.removeEventListener('beforeunload', this.handleBeforeUnload);
+                this.handleBeforeUnload = null;
+            }
+
+            if (this.handlePageHide) {
+                window.removeEventListener('pagehide', this.handlePageHide);
+                this.handlePageHide = null;
+            }
+
+            if (this.handlePageShow) {
+                window.removeEventListener('pageshow', this.handlePageShow);
+                this.handlePageShow = null;
+            }
+
+            if (this.handleVisibilityChange) {
+                document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+                this.handleVisibilityChange = null;
+            }
+
+            this.commandChannelShouldReconnect = false;
+            this.clearCommandChannelReconnect();
+            this.disconnectCommandChannel();
+
+            if (this.container && this.container[INSTANCE_DATA_KEY] === this) {
+                delete this.container[INSTANCE_DATA_KEY];
+            }
+
+            if (window[GLOBAL_INSTANCE_KEY] === this) {
+                delete window[GLOBAL_INSTANCE_KEY];
+            }
+
+            this.container = null;
+            this.tipEl = null;
+            this.resultEl = null;
+            this.inputWrapperEl = null;
+            this.inputEl = null;
+        }
+
+        onBeforeUnload() {
+            this.disconnectCommandChannel();
+        }
+
+        onPageHide() {
+            this.disconnectCommandChannel();
+        }
+
+        onPageShow(event) {
+            if (event && event.persisted) {
+                window.requestAnimationFrame(() => this.connectCommandChannel());
+                return;
+            }
+            this.connectCommandChannel();
+        }
+
+        onVisibilityChange() {
+            if (document.visibilityState === 'hidden') {
+                this.disconnectCommandChannel();
+                return;
+            }
+            if (document.visibilityState === 'visible') {
+                this.connectCommandChannel();
+            }
         }
 
         focusInput(selectAll = false) {
@@ -587,6 +682,13 @@
 
         handleCommandChannelOpen() {
             this.commandChannelReconnectDelayMs = 2000;
+            if (this.commandChannelSocket && this.commandChannelSocket.readyState === WebSocket.OPEN) {
+                try {
+                    this.commandChannelSocket.send(JSON.stringify({ type: 'init' }));
+                } catch (error) {
+                    console.warn('CommandBar: Unable to send init message on command channel:', error);
+                }
+            }
         }
 
         handleCommandChannelMessage(event) {
@@ -676,6 +778,17 @@
             const type = typeof payload.type === 'string' ? payload.type.toLowerCase() : '';
             if (!type) {
                 return null;
+            }
+
+            if (type === 'ping') {
+                if (this.commandChannelSocket && this.commandChannelSocket.readyState === WebSocket.OPEN) {
+                    try {
+                        this.commandChannelSocket.send(JSON.stringify({ type: 'pong' }));
+                    } catch (error) {
+                        console.warn('CommandBar: Unable to send pong response:', error);
+                    }
+                }
+                return { message: '' };
             }
 
             if (type === 'status') {
@@ -1757,17 +1870,38 @@
 
     function initializeCommandBar(root = document) {
         const container = root.querySelector('[data-command-bar]');
+        const existing = window[GLOBAL_INSTANCE_KEY];
+
         if (!container) {
+            if (existing && typeof existing.destroy === 'function') {
+                existing.destroy();
+            }
+            delete window[GLOBAL_INSTANCE_KEY];
             return null;
         }
 
+        if (existing) {
+            if (existing.container === container) {
+                if (!container[INSTANCE_DATA_KEY]) {
+                    container[INSTANCE_DATA_KEY] = existing;
+                }
+                return existing;
+            }
+            if (typeof existing.destroy === 'function') {
+                existing.destroy();
+            }
+            delete window[GLOBAL_INSTANCE_KEY];
+        }
+
         if (container[INSTANCE_DATA_KEY]) {
+            window[GLOBAL_INSTANCE_KEY] = container[INSTANCE_DATA_KEY];
             return container[INSTANCE_DATA_KEY];
         }
 
         const commandBar = new CommandBar(container);
         commandBar.init();
         container[INSTANCE_DATA_KEY] = commandBar;
+        window[GLOBAL_INSTANCE_KEY] = commandBar;
         attachUsersumHover(root, commandBar);
         return commandBar;
     }

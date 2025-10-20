@@ -177,21 +177,21 @@ func (c *connection) run(ctx context.Context) error {
 	group.Go(func() error {
 		err := c.readLoop(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {
-			c.logger.Debug("read loop exited", "error", err)
+			c.logger.Info("read loop exited", "error", err)
 		}
 		return err
 	})
 	group.Go(func() error {
 		err := c.pingLoop(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {
-			c.logger.Debug("ping loop exited", "error", err)
+			c.logger.Info("ping loop exited", "error", err)
 		}
 		return err
 	})
 	group.Go(func() error {
 		err := c.redisLoop(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {
-			c.logger.Debug("redis loop exited", "error", err)
+			c.logger.Info("redis loop exited", "error", err)
 		}
 		return err
 	})
@@ -235,6 +235,7 @@ func (c *connection) pingLoop(ctx context.Context) error {
 			if err := c.writeRaw(ctx, pingPayload); err != nil {
 				return err
 			}
+			c.logger.Debug("sent ping to client")
 			if time.Since(time.Unix(0, c.lastSeen.Load())) > c.srv.cfg.PongTimeout {
 				return errors.New("pong timeout exceeded")
 			}
@@ -244,7 +245,7 @@ func (c *connection) pingLoop(ctx context.Context) error {
 
 func (c *connection) redisLoop(ctx context.Context) error {
 	attempt := 0
-	channel := c.srv.keyspaceChannel(c.runID)
+	pattern := c.srv.keyspaceChannel(c.runID)
 	base := c.srv.cfg.RedisRetryBase
 	if base <= 0 {
 		base = time.Second
@@ -255,10 +256,38 @@ outer:
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
-		pubsub := c.srv.redis.PSubscribe(ctx, channel)
+
+		pubsub := c.srv.redis.PSubscribe(ctx, pattern)
 		c.srv.metrics.incrRedisReconnects()
+
+		var closeOnce sync.Once
+		closePubsub := func(reason string) {
+			closeOnce.Do(func() {
+				if err := pubsub.Close(); err != nil {
+					c.logger.Debug("pubsub close error", "reason", reason, "error", err)
+				}
+			})
+		}
+
+		cancelCh := make(chan struct{})
+		var cancelOnce sync.Once
+		cancelWatcher := func() {
+			cancelOnce.Do(func() {
+				close(cancelCh)
+			})
+		}
+
+		go func() {
+			select {
+			case <-ctx.Done():
+				closePubsub("context canceled")
+			case <-cancelCh:
+			}
+		}()
+
 		if _, err := pubsub.Receive(ctx); err != nil {
-			pubsub.Close()
+			cancelWatcher()
+			closePubsub("subscribe ack failed")
 			attempt++
 			wait := c.redisBackoff(attempt, base)
 			c.logger.Warn("redis subscription failed", "attempt", attempt, "error", err, "backoff", wait)
@@ -272,11 +301,13 @@ outer:
 				return ctx.Err()
 			}
 		}
+
 		attempt = 0
 		for {
 			msg, err := pubsub.ReceiveMessage(ctx)
 			if err != nil {
-				pubsub.Close()
+				cancelWatcher()
+				closePubsub("receive message failed")
 				if ctx.Err() != nil {
 					return ctx.Err()
 				}
@@ -297,7 +328,8 @@ outer:
 			c.logger.Debug("redis notification", "channel", msg.Channel, "payload", msg.Payload)
 			if err := c.pushUpdate(ctx); err != nil {
 				if errors.Is(err, context.Canceled) {
-					pubsub.Close()
+					cancelWatcher()
+					closePubsub("forward canceled")
 					return err
 				}
 				c.logger.Warn("failed to broadcast update", "error", err)
@@ -380,6 +412,7 @@ func (c *connection) writeRaw(ctx context.Context, data []byte) error {
 func (c *connection) sendHangup() {
 	ctx, cancel := context.WithTimeout(context.Background(), c.srv.cfg.WriteTimeout)
 	defer cancel()
+	c.logger.Debug("sending hangup to client")
 	_ = c.writeRaw(ctx, hangupPayload)
 }
 

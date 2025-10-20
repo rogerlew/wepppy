@@ -29,8 +29,8 @@ const (
 	envPrefix                 = "STATUS_"
 	defaultListenAddr         = ":9002"
 	defaultRedisURL           = "redis://localhost:6379/2"
-	defaultPingInterval       = 30 * time.Second
-	defaultPongTimeout        = 65 * time.Second
+	defaultPingInterval       = 5 * time.Second
+	defaultPongTimeout        = 15 * time.Second
 	defaultWriteTimeout       = 2 * time.Second
 	defaultRedisRequestTimout = time.Second
 	defaultRedisRetryBase     = time.Second

@@ -51,7 +51,7 @@ function initPreflight(runid) {
             if (payload.type === "ping") {
                 preflight_ws.send(JSON.stringify({"type": "pong"}));
             } else if (payload.type === "hangup") {
-                preflight_ws.close();
+                preflight_ws.close(1000, "server hangup");
                 preflight_ws = null;
             } else if (payload.type === "preflight") {
                 updateUI(payload.checklist);
@@ -64,7 +64,14 @@ function initPreflight(runid) {
             }
         };
 
-        preflight_ws.onclose = function() {
+        preflight_ws.onclose = function(event) {
+            console.log(
+                "Preflight websocket closed",
+                "code:", event && event.code,
+                "reason:", event && event.reason,
+                "wasClean:", event && event.wasClean
+            );
+            preflight_ws = null;
             if (!document.hidden) { // Only reconnect if the page is visible
                 $("#preflight_status").html("Preflight Connection Closed");
                 setTimeout(connectWebSocket, 5000); // Try to reconnect every 5 seconds.
@@ -78,7 +85,8 @@ function initPreflight(runid) {
     document.addEventListener('visibilitychange', function() {
         if (document.hidden) {
             if (preflight_ws) {
-                preflight_ws.close();
+                preflight_ws.close(1000, "document hidden");
+                preflight_ws = null;
             }
         } else {
             connectWebSocket(); // Reconnect WebSocket when page is visible

@@ -70,7 +70,7 @@ timers are reliable, fatal errors are avoided, and instrumentation is built in.
    - Each connection maintains its own Redis `PubSub` listener.
    - On receiving messages, forward text payload to browser without mutation.
 3. **Heartbeat**:
-   - Server emits `ping` every N seconds (default 30s).
+   - Server emits `ping` every N seconds (default 5s).
    - Connection closes if no `pong` within configured timeout (>60s).
 4. **Health & metrics**:
    - `GET /health` returns `OK` when serving requests.
@@ -142,7 +142,7 @@ Each connection includes:
 |---------|---------|-------------|
 | `STATUS_REDIS_URL` | `redis://localhost:6379/2` | Target Redis DB. |
 | `STATUS_LISTEN_ADDR` | `:9002` | Bind address. |
-| `STATUS_PING_INTERVAL` | `30s` | Heartbeat cadence. |
+| `STATUS_PING_INTERVAL` | `5s` | Heartbeat cadence. |
 | `STATUS_PONG_TIMEOUT` | `65s` | Idle cutoff. |
 | `STATUS_LOG_LEVEL` | `info` | Log level for slog handler. |
 | `STATUS_METRICS_ENABLED` | `false` | Whether to serve `/metrics`. |

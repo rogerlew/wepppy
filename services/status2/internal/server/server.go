@@ -202,6 +202,7 @@ func (c *connection) pingLoop(ctx context.Context) error {
 			if err := c.writeRaw(ctx, payload.PingMessage); err != nil {
 				return err
 			}
+			c.logger.Debug("sent ping to client")
 			if time.Since(time.Unix(0, c.lastSeen.Load())) > c.srv.cfg.PongTimeout {
 				return errors.New("pong timeout exceeded")
 			}
@@ -222,10 +223,38 @@ outer:
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
+
 		pubsub := c.srv.redis.Subscribe(ctx, channel)
 		c.srv.metric.incrRedisReconnects()
+
+		var closeOnce sync.Once
+		closePubsub := func(reason string) {
+			closeOnce.Do(func() {
+				if err := pubsub.Close(); err != nil {
+					c.logger.Debug("pubsub close error", "reason", reason, "error", err)
+				}
+			})
+		}
+
+		cancelCh := make(chan struct{})
+		var cancelOnce sync.Once
+		cancelWatcher := func() {
+			cancelOnce.Do(func() {
+				close(cancelCh)
+			})
+		}
+
+		go func() {
+			select {
+			case <-ctx.Done():
+				closePubsub("context canceled")
+			case <-cancelCh:
+			}
+		}()
+
 		if _, err := pubsub.Receive(ctx); err != nil {
-			pubsub.Close()
+			cancelWatcher()
+			closePubsub("subscribe ack failed")
 			attempt++
 			wait := c.redisBackoff(attempt, base)
 			c.logger.Warn("redis subscribe failed", "attempt", attempt, "error", err, "backoff", wait)
@@ -239,11 +268,13 @@ outer:
 				return ctx.Err()
 			}
 		}
+
 		attempt = 0
 		for {
 			msg, err := pubsub.ReceiveMessage(ctx)
 			if err != nil {
-				pubsub.Close()
+				cancelWatcher()
+				closePubsub("receive message failed")
 				if ctx.Err() != nil {
 					return ctx.Err()
 				}
@@ -251,6 +282,7 @@ outer:
 				wait := c.redisBackoff(attempt, base)
 				c.logger.Warn("redis stream interrupted", "attempt", attempt, "error", err, "backoff", wait)
 				if c.shouldAbort(attempt) {
+					closePubsub("stream aborted")
 					return fmt.Errorf("redis stream interrupted after %d attempts: %w", attempt, err)
 				}
 				select {
@@ -263,7 +295,8 @@ outer:
 			attempt = 0
 			if err := c.forward(ctx, msg.Payload); err != nil {
 				if errors.Is(err, context.Canceled) {
-					pubsub.Close()
+					cancelWatcher()
+					closePubsub("forward canceled")
 					return err
 				}
 				c.logger.Warn("failed to forward message", "error", err)
@@ -300,6 +333,7 @@ func (c *connection) writeRaw(ctx context.Context, data []byte) error {
 func (c *connection) sendHangup() {
 	ctx, cancel := context.WithTimeout(context.Background(), c.srv.cfg.WriteTimeout)
 	defer cancel()
+	c.logger.Debug("sending hangup to client")
 	_ = c.writeRaw(ctx, payload.HangupMessage)
 }
 
