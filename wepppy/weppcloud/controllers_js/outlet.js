@@ -26,6 +26,7 @@ var Outlet = function () {
         that.rq_job_id = null;
         that.rq_job = $("#set_outlet_form #rq_job");
         that.command_btn_id = ['btn_set_outlet_cursor', 'btn_set_outlet_entry'];
+        that.modeInputs = $("input[name='set_outlet_mode']");
 
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
@@ -112,8 +113,27 @@ var Outlet = function () {
         that.cursorButton = $("#btn_set_outlet_cursor");
         that.cursorHint = $("#hint_set_outlet_cursor");
         that.entryInput = $("#input_set_outlet_entry");
+        that.entryButton = $("#btn_set_outlet_entry");
         that.popup = L.popup();
         that.cursorSelectionOn = false;
+
+        if (that.modeInputs && that.modeInputs.length) {
+            that.modeInputs.off('change.setoutlet').on('change.setoutlet', function () {
+                that.handleModeChange(this.value);
+            });
+        }
+
+        if (that.cursorButton && that.cursorButton.length) {
+            that.cursorButton.off('click.setoutlet').on('click.setoutlet', function () {
+                that.handleCursorToggle();
+            });
+        }
+
+        if (that.entryButton && that.entryButton.length) {
+            that.entryButton.off('click.setoutlet').on('click.setoutlet', function () {
+                that.handleEntrySubmit();
+            });
+        }
 
         that.setClickHandler = function (ev) {
             var self = instance;

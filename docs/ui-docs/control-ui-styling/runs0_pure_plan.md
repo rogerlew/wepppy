@@ -6,7 +6,7 @@
 - Keep runs0 functional throughout the transition via feature flags/toggles and exhaustive JS compatibility checks (StatusStream, ControlBase, map integrations, etc.).
 
 ## 2. Current Progress Snapshot _(2025-10-19)_
-- Pure controls in production: map, fork console, archive console, rangeland/landuse modify panels (embedded inside the map tabset).
+- Pure controls in production: map, fork console, archive console, rangeland/landuse modify panels (embedded inside the map tabset), outlet control.
 - Shared infrastructure: `control_shell` overrides, `status_panel` / `stacktrace_panel`, `tabset`, `color_scale`, `StatusStream`.
 - Remaining legacy controls: climate, soils, treatments, WEPP main form, debris flow, Omni, etc. All still rely on `_base.htm`.
 
@@ -84,3 +84,4 @@ base_pure.htm
 - Added query-parameter/config toggle (`?view=pure` or `RUNS0_USE_PURE`) to switch between `0.htm` and the Pure skeleton without disrupting production requests.
 - Updated `run_page_bootstrap.js.j2`, `landuse_modify.js`, and `rangeland_cover_modify.js` so the bootstrap logic gracefully short-circuits when the Pure layout is active.
 - Migrated channel and subcatchment delineation controls to Pure macros (`control_shell`, `radio_group`, `button_row`), preserving existing IDs so the legacy controllers keep working while eliminating Bootstrap rows/cols.
+- Migrated the outlet control to Pure macros (`set_outlet.htm`), reusing `control_shell`, `status_panel`, and `stacktrace_panel` while keeping ControlBase IDs for `outlet.js`. Legacy markup lives in `set_outlet_legacy.htm` so the classic runs0 page remains unchanged.

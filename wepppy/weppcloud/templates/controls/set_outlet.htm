@@ -1,39 +1,95 @@
-{% extends "controls/_base.htm" %}
-{% block form_id %}set_outlet_form{% endblock %}
-{% block form_title %}Outlet{% endblock %}
-{% block inputs %}
-  <div class="hide-readonly">
-    <div class="form-group row">
-        <div class="col-sm-4">
-            <label class="radio-inline">
-                <input type="radio" value="0" name="set_outlet_mode" checked
-                  onchange="Outlet.getInstance().handleModeChange(this.value)"> Use Cursor</label>
-        </div>
-        <div class="col-sm-6">
-            <label class="radio-inline">
-                <input type="radio" value="1"  name="set_outlet_mode"
-                  onchange="Outlet.getInstance().handleModeChange(this.value)"> Specify Lon/Lat</label>
-        </div>
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set status_panel %}
+  {% call ui.status_panel(
+       id="set_outlet_status_panel",
+       title="Status",
+       variant="compact",
+       description="Live updates while the outlet job runs.",
+       log_id="status",
+       height="3.25rem"
+     ) %}
+    <div id="rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
+    <div class="wc-status-panel__meta" aria-hidden="true">
+      <span id="braille"></span>
     </div>
-    <div id="set_outlet_mode1_controls" class="form-group row">
-        <div class="col-sm-5">
-            <input id="input_set_outlet_entry" name="set_outlet" class="form-control mr-sm-3" type="text" placeholder="Lon, Lat" aria-label="Lon, Lat">
-        </div>
-        <div class="col-sm-3">
-            <button id="btn_set_outlet_entry" name="setloc" class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-              type="button" onclick="Outlet.getInstance().handleEntrySubmit()">Specify Lon/Lat</button>
-        </div>
+  {% endcall %}
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="set_outlet_form",
+     title="Outlet",
+     collapsible=False,
+     status_panel_override=status_panel,
+     stacktrace_panel_override=ui.stacktrace_panel(
+       id="set_outlet_stacktrace_panel",
+       summary="Details",
+       collapsed=True,
+       description="Exceptions and debug information streamed from the outlet worker.",
+       body_id="stacktrace",
+       empty_state="No stack trace recorded."
+     )
+   ) %}
+
+  <div class="hide-readonly wc-stack">
+    {{ ui.radio_group(
+         "set_outlet_mode",
+         label="Outlet selection mode",
+         layout="horizontal",
+         options=[
+           {
+             "id": "set_outlet_mode_cursor",
+             "label": "Use cursor",
+             "value": "0",
+             "selected": True,
+             "attrs": {"class": "disable-readonly"}
+           },
+           {
+             "id": "set_outlet_mode_entry",
+             "label": "Specify lon/lat",
+             "value": "1",
+             "attrs": {"class": "disable-readonly"}
+           }
+         ],
+         help="Use the map cursor for interactive selection or enter coordinates manually."
+       ) }}
+
+    <div id="set_outlet_mode0_controls" class="wc-stack" data-mode="cursor">
+      {% call button_row() %}
+        <button
+          id="btn_set_outlet_cursor"
+          type="button"
+          class="pure-button pure-button-primary disable-readonly">
+          Use Cursor
+        </button>
+      {% endcall %}
+      <p id="hint_set_outlet_cursor" class="wc-text-muted" aria-live="polite"></p>
     </div>
-    <div id="set_outlet_mode0_controls" class="form-group row">
-        <div class="col-sm-4">
-            <button id="btn_set_outlet_cursor" name="setloc" class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-              type="button" onclick="Outlet.getInstance().handleCursorToggle()">
-              Use Cursor (Don't Select a Confluence)
-            </button>
-        </div>
-        <div class="col-sm-5">
-            <small id="hint_set_outlet_cursor"></small>
-        </div>
+
+    <div id="set_outlet_mode1_controls" class="wc-stack" data-mode="entry" style="display: none;">
+      {{ ui.text_field(
+           "input_set_outlet_entry",
+           "Coordinates",
+           placeholder="Lon, Lat",
+           help="Provide longitude then latitude (decimal degrees).",
+           extra_control_class="disable-readonly",
+           attrs={
+             "autocomplete": "off",
+             "spellcheck": "false",
+             "inputmode": "text",
+             "aria-label": "Longitude, Latitude"
+           }
+         ) }}
+      {% call button_row() %}
+        <button
+          id="btn_set_outlet_entry"
+          type="button"
+          class="pure-button pure-button-secondary disable-readonly">
+          Specify Lon/Lat
+        </button>
+      {% endcall %}
     </div>
   </div>
-{% endblock %}
+
+{% endcall %}

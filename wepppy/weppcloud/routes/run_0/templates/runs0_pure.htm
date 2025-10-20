@@ -35,8 +35,9 @@
       <ol>
         <li><a href="#map">Map &amp; Analysis</a></li>
         <li><a href="#channel-delineation">Channel Delineation</a></li>
+        <li><a href="#set-outlet">Outlet</a></li>
         <li><a href="#subcatchments-delineation">Subcatchments Delineation</a></li>
-        <li><a href="#legacy-climate">Legacy climate control</a></li>
+        <li><a href="#legacy-climate">Legacy Climate Control</a></li>
         <li><a href="#legacy-soils">Legacy soils control</a></li>
         <li><a href="#legacy-wepp">Legacy WEPP control</a></li>
       </ol>
@@ -51,18 +52,27 @@
         {% include 'controls/channel_delineation.htm' %}
       </section>
 
+      <section id="set-outlet">
+        {% include 'controls/set_outlet.htm' %}
+      </section>
+
       <section id="subcatchments-delineation">
         {% include 'controls/subcatchments.htm' %}
       </section>
 
-      <section id="legacy-climate" class="wc-stack">
-        <h2>Legacy Climate Control</h2>
-        <p class="wc-text-muted">Legacy climate control placeholder — still rendered via Bootstrap layout. Conversion pending in upcoming phases.</p>
+      <section id="legacy-landuse" class="wc-stack">
+        <h2>Legacy Landuse Control</h2>
+        <p class="wc-text-muted">Legacy landuse control placeholder. This section continues to render through the legacy template until its Pure migration lands.</p>
       </section>
 
       <section id="legacy-soils" class="wc-stack">
         <h2>Legacy Soils Control</h2>
         <p class="wc-text-muted">Legacy soils control placeholder. This section continues to render through the legacy template until its Pure migration lands.</p>
+      </section>
+
+      <section id="legacy-climate" class="wc-stack">
+        <h2>Legacy Climate Control</h2>
+        <p class="wc-text-muted">Legacy climate control placeholder — still rendered via Bootstrap layout. Conversion pending in upcoming phases.</p>
       </section>
 
       <section id="legacy-wepp" class="wc-stack">
