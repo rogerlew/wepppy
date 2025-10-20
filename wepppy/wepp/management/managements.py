@@ -24,6 +24,8 @@ in the db.
 detailed description of the management/plant files.
 """
 
+from __future__ import annotations
+
 from glob import glob
 import os
 from os.path import join as _join
@@ -35,6 +37,7 @@ from copy import deepcopy
 from enum import Enum
 import inspect
 import random
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, cast
 
 from wepppy.all_your_base import RGBA, isfloat
 from wepppy.all_your_base.dateutils import Julian
@@ -1960,7 +1963,14 @@ loops:{loops}
 """.format(self, ofeindx=pad(self.ofeindx, 2), loops=repr(self.loops))
 
 
-def get_disturbed_classes():
+def get_disturbed_classes() -> Set[Optional[str]]:
+    """
+    Return the set of disturbed class identifiers referenced by management maps.
+
+    Empty strings in the source JSON are normalized to ``None`` for ease of
+    comparison when downstream callers need to distinguish between unset and
+    explicit class assignments.
+    """
     with open(_join(_thisdir, 'data', 'disturbed.json')) as fp:
         js = json.load(fp)
 
@@ -1975,14 +1985,22 @@ def get_disturbed_classes():
 
 
 class ManagementSummary(object):
+    """
+    Lightweight descriptor for the management and soil files associated with a
+    land-cover key.
+
+    The summary mirrors the serialized map entry and provides convenience
+    helpers to retrieve the underlying :class:`Management` instance while
+    applying optional canopy coverage overrides.
+    """
     def __init__(self, **kwargs):
-        self.key = kwargs["Key"]
-        self._map = kwargs.get("_map", None)
-        self.man_fn = kwargs["ManagementFile"]
-        self.sol_fn = kwargs.get("SoilFile", None)
-        self.man_dir = kwargs.get("ManagementDir", _management_dir)
-        self.desc = kwargs.get("Description", '')
-        self.color = RGBA(*(kwargs["Color"])).tohex().lower()[:-2]
+        self.key: int = kwargs["Key"]
+        self._map: Optional[str] = kwargs.get("_map", None)
+        self.man_fn: str = kwargs["ManagementFile"]
+        self.sol_fn: Optional[str] = kwargs.get("SoilFile", None)
+        self.man_dir: str = kwargs.get("ManagementDir", _management_dir)
+        self.desc: str = kwargs.get("Description", '')
+        self.color: str = RGBA(*(kwargs["Color"])).tohex().lower()[:-2]
 
         if "DisturbedClass" in kwargs:
             disturbed_class = kwargs["DisturbedClass"]
@@ -1994,42 +2012,45 @@ class ManagementSummary(object):
                         f"Valid classes are: {get_disturbed_classes()}"
                     )
 
-            self.disturbed_class = disturbed_class
+            self.disturbed_class: Optional[str] = disturbed_class
         else:
             self.disturbed_class = ''
 
-        self.area = None
+        self.area: Optional[float] = None
 
-        self.pct_coverage = None
+        self.pct_coverage: Optional[float] = None
 
         m = Management.load(key=self.key, man_fn=self.man_fn, man_dir=self.man_dir, desc=self.desc, color=self.color)
         assert len(m.inis) >= 1, m.inis
         assert m.inis[0].landuse == 1
         assert isinstance(m.inis[0].data, IniLoopCropland)
 
-        self.cancov = m.inis[0].data.cancov
-        self.inrcov = m.inis[0].data.inrcov
-        self.rilcov = m.inis[0].data.rilcov
+        self.cancov: float = m.inis[0].data.cancov
+        self.inrcov: float = m.inis[0].data.inrcov
+        self.rilcov: float = m.inis[0].data.rilcov
 
-        self.cancov_override = None
-        self.inrcov_override = None
-        self.rilcov_override = None
+        self.cancov_override: Optional[float] = None
+        self.inrcov_override: Optional[float] = None
+        self.rilcov_override: Optional[float] = None
 
     @property
-    def man_path(self):
+    def man_path(self) -> str:
+        """Return the absolute path to the management file."""
         return _join(self.man_dir, self.man_fn)
 
     @property
-    def sol_path(self):
+    def sol_path(self) -> Optional[str]:
+        """Return the absolute path to the soil file, if one is referenced."""
         if self.sol_fn is None:
             return None
         return _join(self.man_dir, self.sol_fn)
 
-    def get_management(self):
-        _map = None
-        if hasattr(self, "_map"):
-            _map = self._map
-
+    def get_management(self) -> 'Management':
+        """
+        Load the concrete :class:`Management` instance represented by this
+        summary, applying any canopy coverage overrides before returning the
+        hydrated object.
+        """
         m = Management.load(key=self.key, man_fn=self.man_fn, man_dir=self.man_dir, desc=self.desc, color=self.color)
         assert len(m.inis) >= 1
 
@@ -2055,7 +2076,8 @@ class ManagementSummary(object):
 
         return m
 
-    def as_dict(self):
+    def as_dict(self) -> Dict[str, Any]:
+        """Return a JSON-serializable dictionary mirroring the summary state."""
         _map = None
         if hasattr(self, "_map"):
             _map = self._map
@@ -2076,22 +2098,41 @@ class ManagementSummary(object):
 
 
 class Management(object):
-    """
-    Represents the .man files
+    """Runtime representation of a WEPP management (``.man``) file."""
 
-    Landcover types are mapped to
-    """
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
+        self.key: Optional[int] = kwargs["Key"]
+        self.man_fn: str = kwargs["ManagementFile"]
+        self.man_dir: str = kwargs.get("ManagementDir", _management_dir)
+        self.desc: Optional[str] = kwargs.get("Description")
+        color = kwargs.get(
+            "Color",
+            [
+                random.randint(0, 255),
+                random.randint(0, 255),
+                random.randint(0, 255),
+                255,
+            ],
+        )
+        if isinstance(color, str):
+            hex_value = color.lstrip('#')
+            if len(hex_value) == 6:
+                components = [int(hex_value[i:i + 2], 16) for i in range(0, 6, 2)]
+                components.append(255)
+            elif len(hex_value) == 8:
+                components = [int(hex_value[i:i + 2], 16) for i in range(0, 8, 2)]
+            else:
+                raise ValueError(
+                    "Hex color strings must be in #RRGGBB or #RRGGBBAA format."
+                )
+        else:
+            components = [int(component) for component in color]
 
-        self.key = kwargs["Key"]
-        self.man_fn = kwargs["ManagementFile"]
-        self.man_dir = kwargs.get("ManagementDir", _management_dir)
-        self.desc = kwargs.get("Description")
-        self.color = tuple(kwargs.get("Color",
-            [random.randint(0,255),
-             random.randint(0,255),
-             random.randint(0,255), 255]))
-        self.nofe = None
+        if len(components) != 4:
+            raise ValueError("Color must contain four RGBA components.")
+
+        self.color = cast(tuple[int, int, int, int], tuple(components))
+        self.nofe: Optional[int] = None
 
         if not _exists(_join(self.man_dir, self.man_fn)):
             raise Exception("management file '%s' does not exist"
@@ -2099,7 +2140,8 @@ class Management(object):
 
         self._parse()
 
-    def dump_to_json(self, fn):
+    def dump_to_json(self, fn: str) -> None:
+        """Serialize the management structure to ``fn`` using jsonpickle."""
         import jsonpickle  # type: ignore[import-untyped]
 
         json_str = jsonpickle.encode(self, indent=2)
@@ -2107,7 +2149,19 @@ class Management(object):
             fp.write(json_str)
 
     @staticmethod
-    def load(key, man_fn, man_dir, desc, color=None):
+    def load(
+        key: Optional[int],
+        man_fn: str,
+        man_dir: str,
+        desc: Optional[str],
+        color: Optional[Iterable[int]] = None,
+    ) -> 'Management':
+        """
+        Instantiate a :class:`Management` from the provided metadata.
+
+        This helper mirrors the structure used by the map JSON entries and is
+        primarily consumed by :class:`ManagementSummary`.
+        """
         
         kwargs = {
             "Key": key,
@@ -2203,7 +2257,7 @@ class Management(object):
     def nscen(self):
         return len(self.years)
 
-    def setroot(self):
+    def setroot(self) -> None:
         self.plants.setroot(self)
         self.ops.setroot(self)
         self.inis.setroot(self)
@@ -2213,27 +2267,27 @@ class Management(object):
         self.years.setroot(self)
         self.man.setroot(self)
 
-    def set_bdtill(self, value):
+    def set_bdtill(self, value: float) -> None:
         assert isfloat(value), value
         for i in range(len(self.inis)):
             self.inis[i].data.bdtill = value
 
-    def set_cancov(self, value):
+    def set_cancov(self, value: float) -> None:
         assert isfloat(value), value
         for i in range(len(self.inis)):
             self.inis[i].data.cancov = value
 
-    def set_rdmax(self, value):
+    def set_rdmax(self, value: float) -> None:
         assert isfloat(value), value
         for i in range(len(self.plants)):
             self.plants[i].data.rdmax = value
 
-    def set_xmxlai(self, value):
+    def set_xmxlai(self, value: float) -> None:
         assert isfloat(value), value
         for i in range(len(self.plants)):
             self.plants[i].data.xmxlai = value
 
-    def __setitem__(self, attr, value):
+    def __setitem__(self, attr: str, value: float | int) -> int:
         """
         This is a helper function to set attributes on the Management object.
         It is used to set attributes like bdtill, cancov, rdmax, and xmxlai.
@@ -2263,7 +2317,7 @@ class Management(object):
             f"Setting attribute '{attr}' is not implemented."
         )
 
-    def make_multiple_ofe(self, nofe):
+    def make_multiple_ofe(self, nofe: int) -> None:
         assert self.nofe == 1
         assert nofe >= 2
         self.nofe = nofe
@@ -2279,10 +2333,14 @@ class Management(object):
                 for m in range(nofe-1):
                     self.man.loops[j].years[k].append(mlml)
 
-    def build_multiple_year_man(self, sim_years):
+    def build_multiple_year_man(self, sim_years: int) -> 'Management':
         """
-        returns a copy of Management with ManagementLoop
-        set for the specified number of sim_years
+        Return a copy of the management with its rotation expanded to ``sim_years``.
+
+        Parameters
+        ----------
+        sim_years:
+            The desired number of simulation years in the returned management.
         """
 
         # first we build the ManagementLoop
@@ -2426,7 +2484,7 @@ man:{man}
     man=repr(self.man)
 )
 
-    def operations_report(self):
+    def operations_report(self) -> List[Dict[str, Any]]:
         """Return a chronological list of operations applied in this management."""
 
         def _resolve(reference):
@@ -2569,7 +2627,7 @@ man:{man}
         return report
 
 
-    def operations_report_cli(self):
+    def operations_report_cli(self) -> str:
         """Return a simplified text table of key operation details."""
 
         rows = self.operations_report()
@@ -2629,7 +2687,9 @@ man:{man}
         return '\n'.join([header_line, separator_line, *data_lines])
 
 
-def merge_managements(mans):
+def merge_managements(mans: Sequence['Management']) -> 'Management':
+    """Merge multiple managements by chaining their loop definitions."""
+
     assert len(mans) > 1
     assert all([isinstance(man, Management) for man in mans])
 
@@ -2654,10 +2714,8 @@ landuse_management_mapping_options = [
     dict(Key='revegetation', Description='Revegetation')
 ]
 
-def load_map(_map=None) -> dict[str, dict]:
-    """
-    json.load the management map file and return
-    """
+def load_map(_map: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
+    """Load the management mapping table identified by ``_map``."""
 
     if _map is None:
         with open(_map_fn) as fp:
@@ -2712,35 +2770,24 @@ def load_map(_map=None) -> dict[str, dict]:
 
 
 class InvalidManagementKey(Exception):
-    """
-    This Key is Unknown and should be defined in the
-    wepppy/wepp/management/data/map.json file
-    """
+    """Raised when a land-cover key is missing from the management map."""
 
     __name__ = 'InvalidManagementKey'
 
-    def __init__(self, key):
+    def __init__(self, key: str) -> None:
         self.key = key
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.key} is an invalid key"
 
 
-def get_management_summary(dom, _map=None) -> ManagementSummary:
-    """
-    Parameters
-    ----------
-    dom : int
-        dominant landcover code
+def get_management_summary(dom: int, _map: Optional[str] = None) -> ManagementSummary:
+    """Return the summary for ``dom`` using the specified management map.
 
-    _map: string or None
-        mapfile to use
-
-    Returns
-    -------
-    ManagementSummary
-        The object is built from the .man file cooresponding to dom in the
-        weppy/wepp/management/data/map.json
+    Raises
+    ------
+    InvalidManagementKey
+        If the land-cover code is not present in the chosen mapping table.
     """
     d = load_map(_map=_map)
     k = str(dom)
@@ -2750,21 +2797,13 @@ def get_management_summary(dom, _map=None) -> ManagementSummary:
     return ManagementSummary(**d[k], _map=_map)
 
 
-def get_management(dom, _map=None) -> Management:
-    """
-    Parameters
-    ----------
-    dom : int
-        dominant landcover code
+def get_management(dom: int, _map: Optional[str] = None) -> Management:
+    """Return the concrete management for ``dom`` using the selected map.
 
-    _map : str
-        specifies the .json map to load
-
-    Returns
-    -------
-    Management
-        The object is built from the .man file cooresponding to dom in the
-        weppy/wepp/management/data/map.json
+    Raises
+    ------
+    InvalidManagementKey
+        If the land-cover code is not present in the chosen mapping table.
     """
     d = load_map(_map=_map)
     k = str(dom)
@@ -2774,7 +2813,8 @@ def get_management(dom, _map=None) -> Management:
     return Management(**d[k])
 
 
-def get_channel_management():
+def get_channel_management() -> Management:
+    """Return the canonical channel management definition."""
     return Management(**dict(Key=0,
                              ManagementFile='channel.man',
                              ManagementDir=_join(_thisdir, 'data'),
@@ -2782,7 +2822,8 @@ def get_channel_management():
                              Color=[0, 0, 255, 255]))
 
 
-def read_management(man_path):
+def read_management(man_path: str) -> Management:
+    """Load a management file directly from ``man_path`` without map lookup."""
     _dir, _fn = _split(man_path)
     return Management(Key=None,
                       ManagementFile=_fn,
@@ -2790,7 +2831,12 @@ def read_management(man_path):
                       Description='-',
                       Color=(0, 0, 0, 0))
 
-def get_plant_loop_names(runs_dir):
+def get_plant_loop_names(runs_dir: str) -> List[str]:
+    """List the plant loop names present in ``runs_dir`` management files.
+
+    Files containing ``pw0`` in their filename are ignored because they store
+    auto-generated warm-up runs that should not influence user selections.
+    """
     plant_loops = set()
     man_fns = glob(_join(runs_dir, '*.man'))
 
