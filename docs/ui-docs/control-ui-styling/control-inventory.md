@@ -19,7 +19,7 @@ _Date: 2025-10-18 (initial catalogue aligned with the Control UI Final Implement
 | Subcatchments | `_base.htm` | `subcatchment_delineation.js` | `watershed_bp` (`tasks/build_subcatchments`, `tasks/clear_subcatchments`) | Advanced options (TauDEM/Peridot), RQ-triggering buttons | Publishes legend overlays; heavy DOM manipulation ahead of macro migration |
 | Rangeland Cover | `_base.htm` | `rangeland_cover.js`, `rangeland_cover_modify.js` | `rangeland_cover_bp` (`tasks/set_rangeland_cover_mode`) & `rangeland_bp` (`tasks/build_rangeland_cover`, `tasks/modify_rangeland_cover`) | Mode toggles, RAP year select, optional uploads | Shares patterns with landuse but duplicates markup; map-driven editing |
 | Landuse | Pure macros (`control_shell`) | `landuse.js`, `landuse_modify.js` | `landuse_bp` (`tasks/set_landuse_mode`, `tasks/modify_landuse`, `query/*`) | Multi-selects, locale-controlled lists, advanced modify forms | Dataset options supplied by `available_landuse_datasets`; JS bindings handle mode, upload, and coverage tweaks |
-| Soil | `_base.htm` | `soil.js` | `soils_bp` (`tasks/set_soil_mode`, `query/*`, `tasks/set_soils_ksflag`) | Dropdowns, mode selectors, optional DB toggles | Tightly coupled to NoDb Soils singleton; triggers summary refreshes |
+| Soil | Pure macros (`control_shell`) | `soil.js` | `soils_bp` (`tasks/set_soil_mode`, `query/*`, `tasks/set_soils_ksflag`) | Mode radios (per hillslope, Mukey, database), optional ksflag/determined sol_ver selects | Uses delegated events in `soil.js`; dataset options supplied via context (`soildboptions`) with `disable-readonly` classes |
 | Climate | `_base.htm` | `climate.js` | `climate_bp` (`tasks/update_climate`, `tasks/upload_cli`, `query/*`) | Radio groups, select inputs, `.cli` upload | Supports multiple climate sources; uses `FormData` and locale-dependent datasets |
 | RAP Timeseries | `_base.htm` | `rap_ts.js` | `climate_bp` (`tasks/run_rap_ts`) | Action buttons for rap TS generation | Secondary reporting control; relies on shared status widgets |
 | WEPP | `_base.htm` | `wepp.js` | `wepp_bp` (`tasks/run_wepp`, `tasks/download_results`), `/rq/api` job endpoints | Run/queue buttons, advanced options include stack | Core model execution; uses RQ polling and advanced option includes |
@@ -95,6 +95,7 @@ To prepare for macro-driven rendering, the tables below document the primary for
 | View | Template | Notes |
 | --- | --- | --- |
 | Landuse coverage summary | `reports/landuse.htm` | Pure table + collapsible overrides fed by `Landuse.available_datasets`; JS hooks use data attributes instead of inline handlers; coverage selects source options from controller-provided percentages. |
+| Soil coverage summary | `reports/soils.htm` | Pure table (`wc-table`) with numeric alignment helper; read-only links to soil files and coverage percentages. |
 | `burn_shrubs`, `burn_grass` | checkbox | Opt-in SBS-driven vegetation adjustments | Boolean toggles (`on/off`) | Parsed in `rq/api/build_landuse` and written to `Disturbed.burn_shrubs` / `Disturbed.burn_grass` | Only present when `'disturbed' in ron.mods`; tie into SBS map availability |
 | `btn_build_landuse` | button | Submit landuse build job | N/A | Triggers `POST /runs/<runid>/<config>/rq/api/build_landuse` (enqueues RQ job) | ControlBase disables/enables button; ensure macros tag `data-command` for HTMX replacement |
 

@@ -40,7 +40,7 @@
         <li><a href="#landuse">Landuse</a></li>
         <li><a href="#landuse-report">Landuse Report</a></li>
         <li><a href="#legacy-climate">Legacy Climate Control</a></li>
-        <li><a href="#legacy-soils">Legacy soils control</a></li>
+        <li><a href="#soils">Soils</a></li>
         <li><a href="#legacy-wepp">Legacy WEPP control</a></li>
       </ol>
     </nav>
@@ -66,9 +66,8 @@
         {% include 'controls/landuse.htm' %}
       </section>
 
-      <section id="legacy-soils" class="wc-stack">
-        <h2>Legacy Soils Control</h2>
-        <p class="wc-text-muted">Legacy soils control placeholder. This section continues to render through the legacy template until its Pure migration lands.</p>
+      <section id="soils" class="wc-stack">
+        {% include 'controls/soil.htm' %}
       </section>
 
       <section id="legacy-climate" class="wc-stack">

@@ -1207,6 +1207,35 @@ code * {
   border: 0;
 }
 
+.wc-soil-report__table {
+  width: 100%;
+}
+
+.wc-soil-report__cell--numeric {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.wc-soil-report__table tbody tr > td {
+  padding-bottom: var(--wc-space-lg);
+}
+
+.wc-soil-report__table tbody tr:last-of-type > td {
+  padding-bottom: 0;
+}
+
+.wc-link--file {
+  color: var(--wc-color-primary);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.wc-link--file:hover,
+.wc-link--file:focus {
+  color: var(--wc-color-primary-dark);
+  text-decoration: none;
+}
+
 .wc-fieldset {
   border: 1px solid var(--wc-color-border);
   padding: var(--wc-space-md);

@@ -1,125 +1,156 @@
-{% extends "controls/_base.htm" %}
-{% block form_id %}soil_form{% endblock %}
-{% block form_title %}Soil Options{% endblock %}
-{% block inputs %}
-    <div class="form-group row">
-        <div class="col-sm-12">
-            <label class="radio-inline">
-            <input type="radio" value="0" class="disable-readonly" id="soil_mode0" name="soil_mode"
-              onchange="Soil.getInstance().handleModeChange(this.value)"> Determine Per Hillslope</label>
-        </div>
-        <div class="col-sm-12">
-            <label class="radio-inline">
-            <input type="radio" value="1" class="disable-readonly" id="soil_mode1" name="soil_mode"
-              onchange="Soil.getInstance().handleModeChange(this.value)"> Single Soil for Watershed (MUKEY)</label>
-        </div>
-        <div class="col-sm-12">
-            <label class="radio-inline">
-            <input type="radio" value="2" class="disable-readonly" id="soil_mode2" name="soil_mode"
-              onchange="Soil.getInstance().handleModeChange(this.value)"> Single Soil for Watershed (Database)</label>
-        </div>
-        {% if 'rred' in ron.mods %}
-            <div class="d-none">
-                <div class="d-none">
-                    <label class="radio-inline">
-                    <input type="radio" value="3" class="disable-readonly" id="soil_mode3" name="soil_mode"
-                      onchange="Soil.getInstance().handleModeChange(this.value)"> RRED Unburned</label>
-                </div>
-                <div class="d-none">
-                    <label class="radio-inline">
-                    <input type="radio" value="4" class="disable-readonly" id="soil_mode4" name="soil_mode"
-                      onchange="Soil.getInstance().handleModeChange(this.value)"> RRED Burned</label>
-                </div>
-            </div>
-        {% endif %}
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set current_mode = soils.mode.value if soils.mode is not none else 0 %}
+{% set mode_options = [
+  {
+    "id": "soil_mode0",
+    "label": "Determine per hillslope",
+    "value": "0",
+    "selected": current_mode == 0,
+    "attrs": {"class": "disable-readonly"}
+  },
+  {
+    "id": "soil_mode1",
+    "label": "Single soil for watershed (Mukey)",
+    "value": "1",
+    "selected": current_mode == 1,
+    "attrs": {"class": "disable-readonly"}
+  },
+  {
+    "id": "soil_mode2",
+    "label": "Single soil for watershed (Database)",
+    "value": "2",
+    "selected": current_mode == 2,
+    "attrs": {"class": "disable-readonly"}
+  }
+] %}
+
+{% set db_options = namespace(values=[]) %}
+{% for opt in soildboptions %}
+  {% set db_options.values = db_options.values + [(opt, opt)] %}
+{% endfor %}
+
+{% set sol_ver_default = '7778.0' %}
+{% if disturbed and disturbed.sol_ver is not none %}
+  {% set sol_ver_default = disturbed.sol_ver | string %}
+{% endif %}
+
+{% set status_panel_override %}
+  {% call ui.status_panel(
+       id="soil_status_panel",
+       title="Status",
+       variant="compact",
+       log_id="status",
+       height="4rem"
+     ) %}
+    <div id="rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
+    <span id="braille" class="wc-status-panel__meta" aria-hidden="true"></span>
+  {% endcall %}
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="soil_form",
+     title="Soil Options",
+     collapsible=False,
+     status_panel_override=status_panel_override,
+     summary_panel_override=ui.legacy_summary_panel(),
+     stacktrace_panel_override=ui.stacktrace_panel(
+       id="soil_stacktrace_panel",
+       summary="Details",
+       collapsed=True,
+       body_id="stacktrace",
+       empty_state="No stack trace recorded."
+     )
+   ) %}
+
+  {{ ui.radio_group(
+       "soil_mode",
+       label="Soil mode",
+       layout="vertical",
+       options=mode_options
+     ) }}
+
+  {% if 'rred' in ron.mods %}
+    <input type="radio" id="soil_mode3" name="soil_mode" value="3" class="disable-readonly" hidden>
+    <input type="radio" id="soil_mode4" name="soil_mode" value="4" class="disable-readonly" hidden>
+  {% endif %}
+
+  {% set mode0_style = '' if current_mode == 0 else 'display: none;' %}
+  <div id="soil_mode0_controls" class="wc-stack hide-readonly"{% if mode0_style %} style="{{ mode0_style }}"{% endif %}>
+    <input id="initial_sat" name="initial_sat" type="hidden" value="{{ soils.initial_sat }}">
+  </div>
+
+  {% set mode1_style = '' if current_mode == 1 else 'display: none;' %}
+  <div id="soil_mode1_controls" class="wc-stack hide-readonly"{% if mode1_style %} style="{{ mode1_style }}"{% endif %}>
+    {{ ui.text_field(
+         "soil_single_selection",
+         "Mukey for single soil",
+         value=soils.single_selection,
+         help="Enter the Mukey that should be applied to every hillslope.",
+         attrs={"autocomplete": "off"},
+         extra_control_class="disable-readonly"
+       ) }}
+  </div>
+
+  {% set mode2_style = '' if current_mode == 2 else 'display: none;' %}
+  <div id="soil_mode2_controls" class="wc-stack hide-readonly"{% if mode2_style %} style="{{ mode2_style }}"{% endif %}>
+    {{ ui.select_field(
+         "soil_single_dbselection",
+         "Select soil",
+         db_options.values,
+         selected=soils.single_dbselection,
+         extra_control_class="disable-readonly"
+       ) }}
+  </div>
+
+  <div id="soil_mode3_controls" class="wc-stack hide-readonly" style="display: none;"></div>
+  <div id="soil_mode4_controls" class="wc-stack hide-readonly" style="display: none;"></div>
+
+  {% if 'lt' in ron.mods or 'baer' in ron.mods or 'disturbed' in ron.mods %}
+    <p class="wc-text-muted">Hillslopes with burn severity landuses will have soils altered to model burn severity.</p>
+  {% endif %}
+
+  {% call ui.collapsible_card(title="Advanced options") %}
+    <div class="wc-stack">
+      <h4 class="wc-heading wc-heading--sm">Use internal hydraulic conductivity adjustments (ksflag)</h4>
+      <p class="wc-text-muted">Should be off for 7778 datasets. Does not affect 9001 and 9002 soils. Experimental option primarily for agriculture runs.</p>
+      {{ ui.checkbox_field(
+           "checkbox_run_flowpaths",
+           "Enable ksflag",
+           checked=soils.ksflag,
+           attrs={"class": "disable-readonly"}
+         ) }}
     </div>
-    <div id="soil_mode0_controls" class="form-group row">
-        <div class="col-sm-3">
-            <input id="initial_sat" name="initial_sat" class="form-control mr-sm-3" type="hidden"
-             value="{{ soils.initial_sat }}" aria-label="Soils Initial ksat">
-        </div>
-    </div>
-    <div id="soil_mode1_controls" class="form-group row">
-        <div class="col-sm-5">
-            <label for="soil_single_selection">Mukey for single soil:</label>
-            <input type="text" class="form-control disable-readonly" id="soil_single_selection" value="{{ soils.single_selection }}"
-              oninput="Soil.getInstance().handleSingleSelectionInput()"/>
-        </div>
-    </div>
-    <div id="soil_mode2_controls" class="form-group row">
-        <div class="col-sm-5">
-            <label for="soil_single_dbselection">Select soil:</label>
-            <select class="form-control disable-readonly" id="soil_single_dbselection"
-              onchange="Soil.getInstance().handleDbSelectionChange()">
-                {% for opt in soildboptions %}
-                <option value="{{ opt }}">{{ opt }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
-    <div id="soil_mode3_controls" class="form-group row">
-    </div>
-    <div id="soil_mode4_controls" class="form-group row">
-    </div>
-    {% if "lt" in ron.mods or "baer" in ron.mods or "disturbed" in ron.mods %}
-    <div>
-    <p><i>Hillslopes with burn severity landuses will have soils altered to model burn severity.</i></p>
+
+    {% if disturbed %}
+    <div class="wc-stack">
+      <h4 class="wc-heading wc-heading--sm">Specify disturbed soil version (sol_ver)</h4>
+      <p class="wc-text-muted">9002.0 soils fix WEPP surface runoff and sediment yield predictions for areas with high burn severity.</p>
+      {{ ui.select_field(
+           "sol_ver",
+           "sol_ver",
+           [
+             ("7778.0", "7778.0"),
+             ("9002.0", "9002.0"),
+             ("9003.0", "9003.0"),
+             ("9005.0", "9005.0")
+           ],
+           selected=sol_ver_default,
+           extra_control_class="disable-readonly"
+         ) }}
     </div>
     {% endif %}
+  {% endcall %}
 
-    <div><a href="#sol_advanced_opts_con" data-toggle="collapse">Advanced Options</a>
-        <div id="sol_advanced_opts_con" style="padding-left: 2em;" class="collapse">
+  {% call button_row() %}
+    <button
+      type="button"
+      class="pure-button pure-button-primary disable-readonly"
+      id="btn_build_soil">
+      Build Soils
+    </button>
+  {% endcall %}
+  <p id="hint_build_soil" class="wc-text-muted" aria-live="polite"></p>
 
-    <h5>Use internal hydraulic conductivity adjustments (ksflag)</h5>
-    <p>Should be off 7778. Does not affect 9001 and 9002 soils. (Experimental use for Agriculture Only.)</p>
-    <div style="padding-left:3em;">
-    <label class="form-check-label">
-        <input id="checkbox_run_flowpaths" type="checkbox" class="form-check-input disable-readonly"
-          onchange="Soil.getInstance().set_ksflag(this.checked);"
-          {% if soils.ksflag %}checked{% endif %}>
-        ksflag
-    </label>
-    </div>
-
-    <br/><br/>
-
-    {% if 'disturbed' in ron.mods%}
-    <h5>Specify un/disturbed soil version (sol_ver)</h5>
-    <div style="padding-left:3em;">
-        <div class="col-sm-5">
-            <label for="sol_ver">sol_ver</label>
-        </div>
-        <div>9002.0 soils fix wepp model surface runoff and sediment yield predictions for areas with high burn severity.</div>
-        <div class="col-sm-3">
-           <select class="form-control disable-readonly"
-             id="sol_ver" name="sol_ver">
-             <option value="7778.0" {% if disturbed.sol_ver == 7778.0 %} selected {% endif %}>7778.0</option>
-             <option value="9002.0" {% if disturbed.sol_ver == 9002.0 %} selected {% endif %}>9002.0</option>
-             <option value="9003.0" {% if disturbed.sol_ver == 9003.0 %} selected {% endif %}>9003.0</option>
-             <option value="9005.0" {% if disturbed.sol_ver == 9005.0 %} selected {% endif %}>9005.0</option>
-           </select>
-        </div>
-    </div>
-    <br/><br/>
-    {% endif %}
-
-        </div>
-    </div>
-
-    <div style="height:1em;"> </div>
-
-    <div class="form-group row hide-readonly">
-        <div class="col-sm-4">
-          <button id="btn_build_soil"
-              onclick="Soil.getInstance().build();"
-              class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-              type="button">
-            <img  id="build_soil_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
-            Build Soils
-          </button>
-        </div>
-        <div class="col-sm-5">
-            <small id="hint_build_soil"></small>
-        </div>
-    </div>
-{% endblock %}
+{% endcall %}

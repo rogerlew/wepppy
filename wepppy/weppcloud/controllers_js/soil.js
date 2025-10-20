@@ -17,6 +17,28 @@ var Soil = function () {
         that.rq_job = $("#soil_form #rq_job");
         that.command_btn_id = 'btn_build_soil';
 
+        if (that.form && that.form.length) {
+            that.form.off('change.soilMode', 'input[name="soil_mode"]').on('change.soilMode', 'input[name="soil_mode"]', function () {
+                that.handleModeChange(this.value);
+            });
+
+            that.form.off('input.soilSingle', '#soil_single_selection').on('input.soilSingle', '#soil_single_selection', function () {
+                that.handleSingleSelectionInput();
+            });
+
+            that.form.off('change.soilDb', '#soil_single_dbselection').on('change.soilDb', '#soil_single_dbselection', function () {
+                that.handleDbSelectionChange();
+            });
+
+            that.form.off('change.soilKsflag', '#checkbox_run_flowpaths').on('change.soilKsflag', '#checkbox_run_flowpaths', function () {
+                that.set_ksflag(this.checked);
+            });
+
+            that.form.off('click.soilBuild', '#btn_build_soil').on('click.soilBuild', '#btn_build_soil', function () {
+                that.build();
+            });
+        }
+
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
             if (eventName === 'SOILS_BUILD_TASK_COMPLETED') {

@@ -10,6 +10,7 @@
 - Landuse report now renders via Pure components and the shared dataset catalog (`Landuse.available_datasets`).
 - Landuse control migrated to Pure macros (`control_shell`, `radio_group`, `select_field`, `collapsible_card`) and now consumes catalog metadata for both landcover and management selections.
 - Landcover dataset options (NLCD, CORINE, locale overrides) now live in `wepppy.nodb.locales.landuse_catalog` so both the legacy control and Pure views can consume the same metadata.
+- Soils control migrated to Pure macros (`control_shell`) with delegated events in `soil.js`; soils report now leverages `wc-table` styling.
 - Shared infrastructure: `control_shell` overrides, `status_panel` / `stacktrace_panel`, `tabset`, `color_scale`, `StatusStream`.
 - Remaining legacy controls: climate, soils, treatments, WEPP main form, debris flow, Omni, etc. All still rely on `_base.htm`.
 
