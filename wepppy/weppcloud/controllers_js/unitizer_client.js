@@ -521,10 +521,13 @@
         function applyGlobalRadio(index, root) {
             var context = root || document;
             var selector = "input[name='uni_main_selector'][value='" + index + "']";
-            var radio = context.querySelector(selector);
-            if (radio) {
-                radio.checked = true;
+            var radios = context.querySelectorAll(selector);
+            if (!radios || radios.length === 0) {
+                return;
             }
+            Array.prototype.forEach.call(radios, function (radio) {
+                radio.checked = true;
+            });
         }
 
         function updateUnitLabels(root) {

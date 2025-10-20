@@ -297,6 +297,12 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **Interactions**: `landuse.js` toggles the `<details>` element and adds/removes `.is-open` on the detail `<tr>` so CSS can collapse/expand the row. Buttons set `aria-expanded`, and coverage/mapping selects retain `data-landuse-role` hooks for the existing AJAX handlers.
 - **Design notes**: Summary cells receive extra padding via `.wc-landuse-report__summary > td { padding-bottom: var(--wc-space-lg); }` for visual separation. Detail rows inherit table colors (no Bootstrap collapse) and gain a subtle divider when open.
 
+### Soil Burn Severity Control (`controls/disturbed_sbs_pure.htm`)
+- **Structure**: `ui.control_shell` keeps the SBS workflow inside a non-collapsible console. Mode selection uses `ui.radio_group`; upload view relies on `ui.file_upload` and `ui.text_display` for the current raster; uniform builders are rendered as `button_row()` actions with Pure buttons.
+- **JS contract**: Buttons expose `data-sbs-action` (`upload`, `remove`, `set-firedate`) and `data-sbs-uniform` for low/moderate/high presets. `baer.js` delegates events off the form and initialises visibility via `showHideControls` so both legacy and Pure markup stay in sync.
+- **Compatibility**: Legacy IDs (`#sbs_upload_form`, `#sbs_mode{0,1}_controls`, `hint_*`) are preserved to keep ControlBase logging and StatusStream wiring unchanged. The classic Bootstrap template remains at `controls/baer_upload.htm` for the legacy runs page until the toggle flips.
+- **Status**: Implemented; TOC entry appears when `baer` or `disturbed` mods are active and `lt` is not present.
+
 ---
 
 ## 4. Showcase Expectations

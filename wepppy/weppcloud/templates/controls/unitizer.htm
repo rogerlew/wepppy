@@ -77,10 +77,18 @@ function setGlobalUnitizerPreference(pref) {
   var project = (window.Project && typeof window.Project.getInstance === "function")
     ? window.Project.getInstance()
     : null;
+  var handlerType = project && project.handleGlobalUnitPreference;
   if (typeof console !== "undefined" && typeof console.log === "function") {
-    console.log('[Unitizer Template] setGlobalUnitizerPreference called with', pref, project);
+    console.log('[Unitizer Template] setGlobalUnitizerPreference called with', pref, project, typeof handlerType);
   }
-  if (!project || typeof project.handleGlobalUnitPreference !== "function") {
+  var targetValue = String(pref);
+  var radios = document.querySelectorAll("input[name='uni_main_selector']");
+  if (radios && radios.length) {
+    Array.prototype.forEach.call(radios, function (radio) {
+      radio.checked = (radio.value === targetValue);
+    });
+  }
+  if (!project || typeof handlerType !== "function") {
     return;
   }
   project.handleGlobalUnitPreference(pref);
@@ -88,23 +96,30 @@ function setGlobalUnitizerPreference(pref) {
 
 (function bindGlobalUnitizerPreferenceRadios() {
   var radios = document.querySelectorAll("input[name='uni_main_selector']");
-  if (!radios || typeof radios.forEach !== "function") {
+  if (!radios || radios.length === 0) {
     return;
   }
-  radios.forEach(function (el) {
-    if (el.dataset.unitizerGlobalBound === "true") {
+  if (typeof console !== "undefined" && typeof console.log === "function") {
+    console.log("[Unitizer Template] binding global unit preference radios", radios.length);
+  }
+  Array.prototype.forEach.call(radios, function (el) {
+    if (el.dataset && el.dataset.unitizerGlobalBound === "true") {
       return;
     }
-    el.addEventListener("change", function (event) {
-      var project = (window.Project && typeof window.Project.getInstance === "function")
-        ? window.Project.getInstance()
-        : null;
-      if (!project || typeof project.handleGlobalUnitPreference !== "function") {
-        return;
+    var handler = function (event) {
+      if (typeof console !== "undefined" && typeof console.log === "function") {
+        console.log("[Unitizer Template] global unit preference change", event.type, event.target.value);
       }
-      project.handleGlobalUnitPreference(event.target.value);
-    });
-    el.dataset.unitizerGlobalBound = "true";
+      if (typeof window.setGlobalUnitizerPreference === "function") {
+        window.setGlobalUnitizerPreference(event.target.value);
+      }
+    };
+    el.addEventListener("change", handler);
+    el.addEventListener("input", handler);
+    el.addEventListener("click", handler);
+    if (el.dataset) {
+      el.dataset.unitizerGlobalBound = "true";
+    }
   });
 })();
 </script>

@@ -25,6 +25,12 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed, write_disturbed_land_soil_lookup
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
+from wepppy.weppcloud.utils.uploads import (
+    UploadError,
+    save_run_file,
+    upload_failure,
+    upload_success,
+)
 
 disturbed_bp = Blueprint('disturbed', __name__)
 
@@ -238,11 +244,26 @@ def task_upload_cover_transform(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     reveg = Revegetation.getInstance(wd)
-    file = request.files['input_upload_cover_transform']
-    filename = secure_filename(file.filename)
-    file.save(_join(reveg.revegetation_dir, filename))
-    res = reveg.validate_user_defined_cover_transform(filename)
-    return success_factory(res)
+    try:
+        saved_path = save_run_file(
+            runid=runid,
+            config=config,
+            form_field='input_upload_cover_transform',
+            allowed_extensions=('csv',),
+            dest_subdir='revegetation',
+            run_root=wd,
+            filename_transform=lambda value: value,
+            overwrite=True,
+        )
+    except UploadError as exc:
+        return upload_failure(str(exc))
+
+    try:
+        res = reveg.validate_user_defined_cover_transform(saved_path.name)
+    except UploadError as exc:
+        return upload_failure(str(exc))
+
+    return upload_success(content=res)
 
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/remove_sbs', methods=['POST'])

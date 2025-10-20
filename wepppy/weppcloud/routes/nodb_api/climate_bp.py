@@ -11,6 +11,12 @@ from .._common import *  # noqa: F401,F403
 from wepppy.climates.cligen import StationMeta
 from wepppy.nodb.core import Ron
 from wepppy.nodb.core.climate import Climate, ClimateStationMode
+from wepppy.weppcloud.utils.uploads import (
+    UploadError,
+    save_run_file,
+    upload_failure,
+    upload_success,
+)
 
 StationOption = MutableMapping[str, Any]
 
@@ -89,29 +95,29 @@ def task_upload_cli(runid: str, config: str) -> Response:
     climate = Climate.getInstance(wd)
 
     try:
-        file = request.files['input_upload_cli']
-    except Exception:
-        return exception_factory('Could not find file', runid=runid)
-
-    try:
-        if file.filename == '':
-            return error_factory('no filename specified')
-
-        filename = secure_filename(file.filename)
-    except Exception:
-        return exception_factory('Could not obtain filename', runid=runid)
-
-    try:
-        file.save(_join(climate.cli_dir, filename))
+        saved_path = save_run_file(
+            runid=runid,
+            config=config,
+            form_field='input_upload_cli',
+            allowed_extensions=('cli',),
+            dest_subdir='climate',
+            run_root=wd,
+            filename_transform=lambda value: value,
+            overwrite=True,
+        )
+    except UploadError as exc:
+        return upload_failure(str(exc))
     except Exception:
         return exception_factory('Could not save file', runid=runid)
 
     try:
-        res = climate.set_user_defined_cli(filename)
+        climate.set_user_defined_cli(saved_path.name)
+    except UploadError as exc:
+        return upload_failure(str(exc))
     except Exception:
         return exception_factory('Failed validating file', runid=runid)
 
-    return success_factory()
+    return upload_success()
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/query/climatestation')

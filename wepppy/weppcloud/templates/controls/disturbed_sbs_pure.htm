@@ -1,0 +1,158 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set has_disturbed = disturbed is not none %}
+{% set mode_options = [
+  {
+    "id": "sbs_mode0",
+    "label": "Upload SBS Map",
+    "value": "0",
+    "selected": True,
+    "attrs": {"class": "disable-readonly", "data-sbs-mode": "0"}
+  },
+  {
+    "id": "sbs_mode1",
+    "label": "Specify Uniform SBS (requires channel delineation)",
+    "value": "1",
+    "selected": False,
+    "attrs": {"class": "disable-readonly", "data-sbs-mode": "1"}
+  }
+] %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Upload a Soil Burn Severity raster (<code>.img</code> or <code>.tif</code>) or generate a uniform severity map.
+    Raster uploads should use <abbr title="unsigned 8-bit integer">uint8</abbr> or short integer values, preferably in UTM projection.
+    Maps with colour tables automatically adopt their colour scale for severity classes.
+  </p>
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="sbs_upload_form",
+     title="Soil Burn Severity",
+     collapsible=False,
+     description=description
+   ) %}
+
+  {{ ui.radio_group(
+       "sbs_mode",
+       label="Mode",
+       layout="vertical",
+       options=mode_options
+     ) }}
+
+  <div id="sbs_mode0_controls" class="wc-stack hide-readonly">
+    {{ ui.file_upload(
+         "input_upload_sbs",
+         "Upload SBS raster",
+         accept=".tif,.img",
+         extra_control_class="disable-readonly"
+       ) }}
+
+    {% if has_disturbed and disturbed.has_map %}
+      {{ ui.text_display(
+           label="Current SBS map",
+           content="<code>" ~ disturbed.disturbed_fn ~ "</code>"
+         ) }}
+    {% endif %}
+
+    {% call button_row() %}
+      <button
+        id="btn_upload_sbs"
+        type="button"
+        class="pure-button pure-button-primary disable-readonly"
+        data-sbs-action="upload">
+        Upload SBS
+      </button>
+      {% if 'disturbed' in ron.mods %}
+        <button
+          id="btn_remove_sbs"
+          type="button"
+          class="pure-button pure-button-secondary disable-readonly"
+          data-sbs-action="remove">
+          Remove SBS
+        </button>
+      {% endif %}
+    {% endcall %}
+    <p id="hint_upload_sbs" class="wc-field__help" aria-live="polite"></p>
+    {% if 'disturbed' in ron.mods %}
+      <p id="hint_remove_sbs" class="wc-field__help" aria-live="polite"></p>
+    {% endif %}
+  </div>
+
+  <div id="sbs_mode1_controls" class="wc-stack hide-readonly" style="display: none;">
+    <p class="wc-text-muted">
+      Generate a uniform SBS raster for preliminary analysis when a detailed map is unavailable.
+    </p>
+    {% call button_row() %}
+      <button
+        id="btn_uniform_low_sbs"
+        type="button"
+        class="pure-button pure-button-secondary disable-readonly"
+        data-sbs-uniform="1">
+        Use Uniform Low SBS
+      </button>
+    {% endcall %}
+    <p id="hint_low_sbs" class="wc-field__help" aria-live="polite"></p>
+
+    {% call button_row() %}
+      <button
+        id="btn_uniform_moderate_sbs"
+        type="button"
+        class="pure-button pure-button-secondary disable-readonly"
+        data-sbs-uniform="2">
+        Use Uniform Moderate SBS
+      </button>
+    {% endcall %}
+    <p id="hint_moderate_sbs" class="wc-field__help" aria-live="polite"></p>
+
+    {% call button_row() %}
+      <button
+        id="btn_uniform_high_sbs"
+        type="button"
+        class="pure-button pure-button-secondary disable-readonly"
+        data-sbs-uniform="3">
+        Use Uniform High SBS
+      </button>
+    {% endcall %}
+    <p id="hint_high_sbs" class="wc-field__help" aria-live="polite"></p>
+
+    {% call button_row() %}
+      <button
+        id="btn_remove_sbs_uniform"
+        type="button"
+        class="pure-button pure-button-secondary disable-readonly"
+        data-sbs-action="remove">
+        Remove SBS
+      </button>
+    {% endcall %}
+  </div>
+
+  {% if 'rap_ts' in climate.mods %}
+    <div id="firedate_container" class="wc-stack hide-readonly">
+      {{ ui.text_field(
+           "firedate",
+           "Fire date (mm dd yy)",
+           value=disturbed.fire_date if has_disturbed and disturbed.fire_date else '',
+           extra_control_class="disable-readonly",
+           attrs={
+             "autocomplete": "off",
+             "spellcheck": "false",
+             "inputmode": "text",
+             "aria-label": "Fire date month day year"
+           },
+           help="Used for revegetation modelling with 9005 soils."
+         ) }}
+      {% call button_row() %}
+        <button
+          id="btn_set_firedate"
+          type="button"
+          class="pure-button pure-button-secondary disable-readonly"
+          data-sbs-action="set-firedate">
+          Set Fire Date
+        </button>
+      {% endcall %}
+    </div>
+  {% endif %}
+
+{% endcall %}

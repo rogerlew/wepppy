@@ -22,6 +22,70 @@ var Baer = function () {
         };
         that.baer_map = null;
 
+        that.bindHandlers = function () {
+            var form = that.form;
+
+            if (!form || !form.length) {
+                return;
+            }
+            if (form.data('baerHandlersBound')) {
+                return;
+            }
+            form.data('baerHandlersBound', true);
+
+            form.on("change", "input[name='sbs_mode']", function (event) {
+                var value = parseInt(event.target.value, 10);
+                if (isNaN(value)) {
+                    return;
+                }
+                that.showHideControls(value);
+            });
+
+            form.on("click", "[data-sbs-action='upload']", function (event) {
+                event.preventDefault();
+                that.upload_sbs();
+            });
+
+            form.on("click", "[data-sbs-action='remove']", function (event) {
+                event.preventDefault();
+                that.remove_sbs();
+            });
+
+            form.on("click", "[data-sbs-uniform]", function (event) {
+                event.preventDefault();
+                var target = $(event.currentTarget);
+                var uniformValue = parseInt(target.attr("data-sbs-uniform"), 10);
+                if (!isNaN(uniformValue)) {
+                    that.build_uniform_sbs(uniformValue);
+                }
+            });
+
+            form.on("click", "[data-sbs-action='set-firedate']", function (event) {
+                event.preventDefault();
+                var value = form.find("#firedate").val();
+                that.set_firedate(value);
+            });
+        };
+
+        that.initializeMode = function () {
+            if (!that.form || !that.form.length) {
+                that.showHideControls(-1);
+                return;
+            }
+            var selected = that.form.find("input[name='sbs_mode']:checked");
+            if (!selected.length) {
+                selected = that.form.find("input[name='sbs_mode']").first();
+                if (selected.length) {
+                    selected.prop("checked", true);
+                }
+            }
+            var modeValue = parseInt(selected.val(), 10);
+            if (isNaN(modeValue)) {
+                modeValue = 0;
+            }
+            that.showHideControls(modeValue);
+        };
+
 
         that.showHideControls = function (mode) {
             // show the appropriate controls
@@ -101,6 +165,7 @@ var Baer = function () {
         that.remove_sbs = function () {
             var self = instance;
             var map = MapController.getInstance();
+            var task_msg = "Removing SBS";
 
             $.post({
                 url: "tasks/remove_sbs",
@@ -345,6 +410,9 @@ var Baer = function () {
                 });
             });
         };
+
+        that.bindHandlers();
+        that.initializeMode();
 
         return that;
     }

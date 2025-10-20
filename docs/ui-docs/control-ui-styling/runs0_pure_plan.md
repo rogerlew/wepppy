@@ -11,6 +11,7 @@
 - Landuse control migrated to Pure macros (`control_shell`, `radio_group`, `select_field`, `collapsible_card`) and now consumes catalog metadata for both landcover and management selections.
 - Landcover dataset options (NLCD, CORINE, locale overrides) now live in `wepppy.nodb.locales.landuse_catalog` so both the legacy control and Pure views can consume the same metadata.
 - Soils control migrated to Pure macros (`control_shell`) with delegated events in `soil.js`; soils report now leverages `wc-table` styling.
+- Soil Burn Severity (SBS) control rebuilt as `controls/disturbed_sbs_pure.htm`; `baer.js` now delegates mode toggles, upload/remove actions, and fire-date updates via `data-sbs-*` hooks while legacy markup remains available for the classic runs page.
 - Shared infrastructure: `control_shell` overrides, `status_panel` / `stacktrace_panel`, `tabset`, `color_scale`, `StatusStream`.
 - Remaining legacy controls: climate, soils, treatments, WEPP main form, debris flow, Omni, etc. All still rely on `_base.htm`.
 
@@ -94,3 +95,4 @@ base_pure.htm
 ## 12. Implementation Notes (2025-10-20)
 - Climate control now renders via `controls/climate_pure.htm` with catalog-driven sections, StatusStream logging, and the steady-state architecture documented in `docs/dev-notes/climate-control.md`. Legacy markup stays in `controls/climate.htm` for the classic runs page.
 - WEPP control migrated to `controls/wepp_pure.htm` with Pure advanced-option partials, StatusStream support in `wepp.js`, and catalog-driven cover-transform options supplied by `run_0_bp`. The classic `_base.htm` control remains in place for `0.htm`.
+- Soil Burn Severity upload panel converted to `controls/disturbed_sbs_pure.htm`, wired into the Pure TOC, and backed by delegated handlers in `baer.js`. The legacy Bootstrap panel stays at `baer_upload.htm` so the classic runs page is unaffected.

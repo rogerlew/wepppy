@@ -34,6 +34,9 @@
       <h4>Preflight and Navigation</h4>
       <ol>
         <li><a href="#map">Map &amp; Analysis</a></li>
+        {% if ('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods %}
+        <li><a href="#disturbed-sbs">Soil Burn Severity</a></li>
+        {% endif %}
         <li><a href="#channel-delineation">Channel Delineation</a></li>
         <li><a href="#set-outlet">Outlet</a></li>
         <li><a href="#subcatchments-delineation">Subcatchments Delineation</a></li>
@@ -49,6 +52,12 @@
       <section id="map">
         {% include 'controls/map.htm' %}
       </section>
+
+      {% if ('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods %}
+      <section id="disturbed-sbs" class="wc-stack">
+        {% include 'controls/disturbed_sbs_pure.htm' %}
+      </section>
+      {% endif %}
 
       <section id="channel-delineation">
         {% include 'controls/channel_delineation.htm' %}

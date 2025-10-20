@@ -12,7 +12,7 @@ _Date: 2025-10-18 (initial catalogue aligned with the Control UI Final Implement
 | Control / Panel | Template Extends | JS Controller | Primary Backend / Routes | Inputs & Uploads | Behaviour Notes & Dependencies |
 | --- | --- | --- | --- | --- | --- |
 | Map | Standalone (`map.htm`) | `map.js` | `map_bp` (`routes/map.py`), geodata services, `elevationquery` microservice | Text input for center, tabbed map controls, Leaflet events | Leaflet hub that broadcasts events to other panels; still anchored in Bootstrap grid and inline CSS |
-| BAER Upload | `_base.htm` | `baer.js` | `disturbed_bp` (`tasks/upload_sbs`, `tasks/remove_sbs`, `tasks/set_firedate`) | SBS raster upload, radio-mode switches, uniform builders | Uses `FormData`, refreshes map overlays, conditional content by `ron.mods` |
+| BAER Upload | Pure macros (`disturbed_sbs_pure.htm`) · legacy `_base.htm` | `baer.js` | `disturbed_bp` (`tasks/upload_sbs`, `tasks/remove_sbs`, `tasks/set_firedate`) | SBS raster upload, radio-mode switches, uniform builders | Uses `FormData`, refreshes map overlays, conditional content by `ron.mods`; JS now delegates via `data-sbs-*` hooks so both layouts stay functional |
 | Road Upload | `_base.htm` | Inline wiring via `run_page_bootstrap.js` (no dedicated module) | _TBD_ – legacy `disturbed` tasks (`/tasks/upload_road/`, `/tasks/remove_road/`) require confirmation | `.geojson` upload, upload/remove buttons | Needs explicit JS controller + active route check before standardisation |
 | Channel Delineation | `_base.htm` | `channel_delineation.js` | `watershed_bp` (`tasks/build_channels`, `tasks/update_extent`) | Map extent fields, numeric inputs, unitizer bindings | Drives TOPAZ/WBT delineation; mixes metric/imperial via data-convert attributes |
 | Set Outlet | Pure macros (`control_shell`) | `outlet.js` | `watershed_bp` (`tasks/set_outlet`, `tasks/clear_outlet`) | Mode radio group, coordinate text input, command buttons | Converted to Pure control shell with StatusStream panels; legacy markup retained as `set_outlet_legacy.htm` for classic runs0 |
@@ -171,9 +171,9 @@ To prepare for macro-driven rendering, the tables below document the primary for
 | --- | --- | --- | --- | --- |
 | `sbs_mode` | radio group | Toggle between map upload and uniform severity presets | `Baer.showHideControls` toggles sections | Mode `0` enables file upload; mode `1` enables uniform buttons |
 | `input_upload_sbs` | file (.tif/.img) | Upload Soil Burn Severity raster | `POST /runs/<runid>/<config>/tasks/upload_sbs/` → map saved/validated via `Baer.validate` | Accepts uint8/short thematic rasters; macros must note projection expectations |
-| Upload/Remove buttons (`upload_sbs`, `remove_sbs`) | button | Manage SBS map | `Baer.upload_sbs()` / `remove_sbs()` call `tasks/upload_sbs` and `tasks/remove_sbs` | Buttons hidden in readonly mode; summary hints update via `hint_*` elements |
-| Uniform build buttons (`build_uniform_sbs`) | button | Generate uniform SBS by severity | `Baer.build_uniform_sbs()` hits `tasks/build_uniform_sbs` (via disturbed NoDb) | Buttons populate hints and update map |
-| `firedate` input + set button | text + button | Store fire date for vegetation logic | `Baer.set_firedate()` posts to `/tasks/set_firedate/` updating `Disturbed.fire_date` | Visible when `rap_ts` in climate mods; macros should show required format mm dd yy |
+| Upload/Remove buttons (`upload_sbs`, `remove_sbs`) | button | Manage SBS map | `Baer.upload_sbs()` / `remove_sbs()` call `tasks/upload_sbs` and `tasks/remove_sbs` | Buttons hidden in readonly mode; expose `data-sbs-action="upload/remove"` so delegated handlers work in both legacy and Pure layouts |
+| Uniform build buttons (`build_uniform_sbs`) | button | Generate uniform SBS by severity | `Baer.build_uniform_sbs()` hits `tasks/build_uniform_sbs` (via disturbed NoDb) | Buttons carry `data-sbs-uniform` severities; populate hints and update map |
+| `firedate` input + set button | text + button | Store fire date for vegetation logic | `Baer.set_firedate()` posts to `/tasks/set_firedate/` updating `Disturbed.fire_date` | Visible when `rap_ts` in climate mods; set button uses `data-sbs-action="set-firedate"`; macros should show required format mm dd yy |
 
 ### Road Upload Panel (Salvage Mod)
 | Field ID | Input Type | Label / Purpose | Backend Binding | Notes |
