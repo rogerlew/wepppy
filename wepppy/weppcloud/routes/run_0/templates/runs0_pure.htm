@@ -69,7 +69,7 @@
 
     <section class="wc-run-layout__content">
       <section id="map">
-        {% include 'controls/map.htm' %}
+        {% include 'controls/map_pure.htm' %}
       </section>
 
       {% if ('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods %}
@@ -79,15 +79,15 @@
       {% endif %}
 
       <section id="channel-delineation">
-        {% include 'controls/channel_delineation.htm' %}
+        {% include 'controls/channel_delineation_pure.htm' %}
       </section>
 
       <section id="set-outlet">
-        {% include 'controls/set_outlet.htm' %}
+        {% include 'controls/set_outlet_pure.htm' %}
       </section>
 
       <section id="subcatchments-delineation">
-        {% include 'controls/subcatchments.htm' %}
+        {% include 'controls/subcatchments_pure.htm' %}
       </section>
 
       {% if 'rangeland_cover' in ron.mods %}
@@ -97,7 +97,7 @@
       {% endif %}
 
       <section id="landuse" class="wc-stack">
-        {% include 'controls/landuse.htm' %}
+        {% include 'controls/landuse_pure.htm' %}
       </section>
 
       <section id="climate" class="wc-stack">
@@ -111,7 +111,7 @@
       {% endif %}
 
       <section id="soils" class="wc-stack">
-        {% include 'controls/soil.htm' %}
+        {% include 'controls/soil_pure.htm' %}
       </section>
 
       <section id="wepp" class="wc-stack">

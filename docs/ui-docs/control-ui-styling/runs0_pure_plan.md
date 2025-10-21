@@ -5,15 +5,11 @@
 - Provide a migration scaffold so we can drop in Pure-ready controls as they land while leaving legacy templates untouched until their turn.
 - Keep runs0 functional throughout the transition via feature flags/toggles and exhaustive JS compatibility checks (StatusStream, ControlBase, map integrations, etc.).
 
-## 2. Current Progress Snapshot _(2025-10-19)_
-- Pure controls in production: map, fork console, archive console, rangeland/landuse modify panels (embedded inside the map tabset), outlet control.
-- Landuse report now renders via Pure components and the shared dataset catalog (`Landuse.available_datasets`).
-- Landuse control migrated to Pure macros (`control_shell`, `radio_group`, `select_field`, `collapsible_card`) and now consumes catalog metadata for both landcover and management selections.
-- Landcover dataset options (NLCD, CORINE, locale overrides) now live in `wepppy.nodb.locales.landuse_catalog` so both the legacy control and Pure views can consume the same metadata.
-- Soils control migrated to Pure macros (`control_shell`) with delegated events in `soil.js`; soils report now leverages `wc-table` styling.
-- Soil Burn Severity (SBS) control rebuilt as `controls/disturbed_sbs_pure.htm`; `baer.js` now delegates mode toggles, upload/remove actions, and fire-date updates via `data-sbs-*` hooks while legacy markup remains available for the classic runs page.
-- Shared infrastructure: `control_shell` overrides, `status_panel` / `stacktrace_panel`, `tabset`, `color_scale`, `StatusStream`.
-- Remaining legacy controls: climate, soils, treatments, WEPP main form, debris flow, Omni, etc. All still rely on `_base.htm`.
+## 2. Current Progress Snapshot _(2025-10-22)_
+- Pure controls embedded on `runs0_pure.htm`: Soil Burn Severity (`disturbed_sbs_pure.htm`), Climate (`climate_pure.htm`), WEPP (`wepp_pure.htm`), Landuse (`landuse_pure.htm`), Soil (`soil_pure.htm`), RAP Time Series (`rap_ts_pure.htm`), Debris Flow (`debris_flow_pure.htm`), Observed Data (`observed_pure.htm`), DSS Export (`dss_export_pure.htm`), Ash/WATAR (`ash_pure.htm`), Power User modal, plus fork/archive consoles and the rangeland modify panels.
+- Legacy controls still rendered inside the Pure skeleton: map (`controls/map.htm`), channel delineation (`channel_delineation.htm`), subcatchments (`subcatchments.htm`), treatments (`treatments.htm` when enabled), Omni (`controls/omni/*.htm`), and RHEM (`controls/rhem.htm`).
+- Shared infrastructure in place: `control_shell`, `status_panel` / `stacktrace_panel`, tabset utilities, StatusStream bindings, command bar, and the Pure TOC layout.
+- Remaining migrations (high priority): map cleanup + delineation bundle, treatments suite, Omni scenario/contrast controls (including report wiring), and RHEM control.
 
 ## 3. Proposed Page Skeleton (`runs0_pure.htm`)
 ```
@@ -41,6 +37,8 @@ base_pure.htm
      - Update companion JS (StatusStream, event bindings).
      - Swap placeholder include → real control in `runs0_pure.htm`.
      - Update `control-inventory.md`.
+   - Completed to date: SBS, Climate, WEPP, Landuse, Soil, RAP TS, Debris Flow, Observed, DSS Export, Ash, Power User modal.
+   - Remaining: map + channel/subcatchment bundle, treatments, Omni, RHEM.
 3. **Full Adoption (Phase Final)**
    - When all controls migrated, replace references to `0.htm` with `runs0_pure.htm`.
    - Remove legacy route toggles and unused CSS/JS shims.
@@ -53,10 +51,10 @@ base_pure.htm
 - Bootstrap script (`run_page_bootstrap.js.j2`) must detect which template is active and initialise controls accordingly (e.g., skip legacy-only selectors when `runs0_pure` is active).
 
 ## 6. Dependencies & Outstanding Work
-- Status streaming: convert remaining controls to `StatusStream` before they move into the Pure page.
-- Global assets: ensure `controllers.js` bundle ships modal manager, StatusStream, tabset helper.
-- Styling: extend `ui-foundation.css` with TOC + layout utilities (`wc-run-layout`, sticky list) referenced in the plan but not yet implemented.
-- Documentation: after skeleton lands, update `control_components.md` with any new layout macros and add migration status to `control-inventory.md`.
+- Status streaming: convert landuse, soils, map/delineation, treatments, and Omni controllers to the StatusStream pattern prior to swapping templates.
+- Global assets: ensure `controllers.js` bundle ships modal manager, StatusStream, tabset helper (done); map-related utilities will need review during the map conversion.
+- Styling: extend `ui-foundation.css` with map-panel, delineation, and Omni-specific layout tokens once those controls migrate.
+- Documentation: continue updating `control_components.md`, `ash-control-plan.md`, and other module docs as controls move; keep `control-inventory.md` aligned with actual runtime status.
 
 ## 7. Testing Plan
 - Manual smoke:
@@ -80,9 +78,13 @@ base_pure.htm
 - `docs/ui-docs/control-ui-styling/control-inventory.md`
 
 ## 10. Next Actions
-1. Implement `runs0_pure.htm` skeleton with toggled route (Phase 0).
-2. Track migration status in `runs0_pure_plan.md` (append dated notes per control as they go Pure).
-3. Continue converting controls in priority order (climate → soils → WEPP core → Omni, etc.) referencing this plan for integration steps.
+1. Finalise migration of high-impact legacy controls:
+   - Map cleanup + channel/subcatchment delineation bundle
+   - Treatments workflow (if retained)
+   - Omni scenarios & contrasts
+   - RHEM control
+2. Track migration status in this document (append dated notes per control as they go Pure) and update `control-inventory.md` concurrently.
+3. Once remaining controls ship, flip the feature flag so `runs0_pure.htm` becomes the default and retire the legacy placeholders.
 
 ## 11. Implementation Notes (2025-10-19)
 - Implemented `runs0_pure.htm` skeleton with Pure header, TOC scaffold, converted map control, and embedded channel/subcatchment delineation controls. Legacy sections remain placeholders until their migrations land.
@@ -104,3 +106,5 @@ base_pure.htm
 - RAP Time Series control moved to `controls/rap_ts_pure.htm` with a compact Pure shell, StatusStream wiring, and delegated button handling in `rap_ts.js`. The Pure runs page now surfaces the acquisition button when the mod is enabled; the legacy `_base.htm` template remains for `0.htm`.
 - Debris Flow control converted to `controls/debris_flow_pure.htm`, reusing StatusStream panels and delegated events in `debris_flow.js`. The section now renders on the Pure runs page for PowerUsers when the mod is enabled, while the legacy template continues to serve the classic layout.
 - DSS Export control now lives in `controls/dss_export_pure.htm`, replacing Bootstrap rows with radio/checkbox macros and delegated handlers in `dss_export.js`. The Pure runs page includes the control (with TOC entry) while the legacy `_base.htm` version continues to power `0.htm`.
+- Ash/WATAR control rebuilt as `controls/ash_pure.htm`; `ash.js` now hydrates Pure markup, caches per-model edits, and performs client-side validation. Legacy template remains available for the classic runs page but no longer carries inline scripts.
+- Backend upload endpoints for Ash now use the shared `save_run_file` helper, aligning validation with the Pure control.
