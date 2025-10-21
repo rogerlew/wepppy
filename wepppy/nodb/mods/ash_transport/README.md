@@ -1,129 +1,126 @@
-# Ash Transport Module
+# Ash Transport NoDb Mod
 
-This module provides the post-fire ash transport workflow used by `wepppy`. It manages
-model setup, executes one of the supported ash transport simulators for every
-hillslope in a watershed, and aggregates results into curated parquet products that
-drive downstream summaries and reports.
+> Post-fire ash transport modeling, post-processing, and catalog registration for WEPPcloud runs.
 
-## Components At A Glance
+> **See also:** [AGENTS.md](../../../../AGENTS.md) for Working with NoDb Controllers and Module Organization best practices.
 
-| Component | Role |
-| --- | --- |
-| `Ash` | Per-project manager responsible for configuration, model execution, and coordination with other NoDB modules. |
-| `AshModel` / `AshModelAlex` | Core simulators that compute day-by-day ash depletion and transport for a single hillslope. Each wraps one published model calibration. |
-| `AshPost` | Post-processor that consumes raw hillslope outputs and produces watershed-level datasets, return-period statistics, and documentation. |
+## Overview
 
-## Execution Workflow
+The ash transport mod drives WEPPcloud wildfire response analytics by simulating how burned hillslopes lose ash to runoff, wind, and decomposition following a fire. It coordinates model calibration, gridded inputs, and hydrologic drivers to deliver reproducible time series for every TOPAZ hillslope in a watershed-scale project.
 
-1. **Configuration**  
-   `Ash.__init__` reads the project configuration and loads required inputs such as burn severity, ash load, and ash type rasters. It prepares model parameter sets for both supported calibrations.
+`Ash` is a NoDb controller that combines climate data, WEPP hydrology, burn severity maps, and optional raster overrides before executing calibrated transport models for each hillslope. Completed simulations feed directly into the `AshPost` pipeline, which produces versioned parquet datasets with embedded metadata so dashboards, query-engine clients, and incident teams can interrogate watershed-scale ash impacts with confidence.
 
-2. **Cleanup / Versioning**  
-   Each run of `Ash.run_ash` clears prior artifacts in `ash_dir`, including stale ashpost outputs and manifests. This guarantees that a fresh run only exposes version-compatible results.
+Primary consumers include incident hydrologists, Burned Area Emergency Response (BAER) specialists, and developers integrating ash transport with contaminant routing or decision-support tooling. Outputs also drive automated reports, return-period summaries, and Redis-backed observability channels that surface run progress within the control UI.
 
-3. **Per-Hillslope Simulation**  
-   `Ash.run_ash` iterates through every TOPAZ hillslope:
-   - Builds metadata (area, slope, burn class, ash depth) and selects the requested model (`multi` or `alex`).
-   - Loads climate (`cli_df`) and water balance (`hill_wat_df`) data frames.
-   - Calls `AshModel.run_model`, which locates each fire anniversary within the multi-year time series, dispatches `_run_ash_model_until_gone`, and collects the day-by-day records for that fire year.
-   - The concatenated dataframe (`pd.concat(dfs)`) is written to `ash/H{wepp_id}_ash.parquet`; the same run produces PNG plots for diagnostics.
+## Workflow
 
-4. **Post-Processing**  
-   `AshPost.run_post` orchestrates the post-processing pass:
-   - Removes incompatible parquet outputs based on the AshPost version manifest.
-   - Reads every `H{wepp_id}_ash.parquet`, enriches it with hillslope metadata, and converts per-area metrics to absolute tonnes and cubic meters.
-   - Generates parquet artifacts (see [Produced Artifacts](#produced-artifacts)) with embedded schema metadata and writes `ash/post/ashpost_version.json`.
-   - Creates a markdown README summarizing the schema and sample values.
+### 1. Initialization and Input Harvesting
+- `Ash.__init__` loads per-project configuration (the `[ash]` section), resolves raster paths for ash load, bulk density, and ash type, and loads contaminant defaults for low/moderate/high burn classes. Contaminant dictionaries fall back to `get_cc_default` when the config omits values.
+- Existing artifacts in `ash_dir` are purged so reruns never mix schema versions or stale plots. The directory is recreated immediately after cleanup.
+- Calibration parameters for both supported models (`multi` / Srivastava 2023 and `alex` / Watanabe 2025) are seeded so callers can switch calibrations without rebuilding NoDb state.
 
-5. **Catalog Update**  
-   After successful post-processing, `update_catalog_entry` registers the ash products for query-engine discovery.
+### 2. Hillslope Simulation
+- `Ash.run_ash` iterates over watershed TOPAZ hillslopes, computes metadata (burn class, area, slope, ash type), and pulls inputs such as CLIGEN climate series (`ClimateFile.as_dataframe`) and WEPP hill water balance parquet (`load_hill_wat_dataframe`).
+- Depending on `ash.model`, hillslope simulations use `ash_multi_year_model.White/BlackAshModel` (exponential decay controlled by bulk density and runoff) or `ash_multi_year_model_alex.White/BlackAshModel` (dynamic transport capacity sensitive to slope and organic matter).
+- Simulations run in parallel through `createProcessPoolExecutor` when multiple CPUs are available. Each task writes `H{wepp_id}_ash.parquet` plus diagnostic PNGs into `ash_dir`.
+- Runtime metadata (initial depths, loads, ash types) is cached on the NoDb instance for downstream inspection and post-processing.
 
-## Supported Models
+### 3. Post-Processing and Documentation
+- After hillslope simulations finish, `Ash` ensures an `AshPost` controller exists and invokes `AshPost.run_post`.
+- `AshPost` removes incompatible outputs when the schema version changes (`ASHPOST_VERSION`), converts hillslope outputs into watershed-scale annual, daily, burn-class, and cumulative parquet tables, and stores semantic metadata (units, descriptions) in Arrow schemas via `pa_field`.
+- Markdown documentation (`ash/post/README.md`) is regenerated from actual parquet schemas using `generate_ashpost_documentation`, keeping analysts aligned with the precise column definitions.
 
-Two calibrated models are bundled. Both inherit from `AshModelAlex` or `AshModel` and share the same high-level algorithm:
+### 4. Catalog and Telemetry
+- Successful runs call `update_catalog_entry(wd, "ash")`, registering artifacts with the Redis-backed query engine catalog so downstream consumers discover ash products automatically.
+- `RedisPrep.timestamp(TaskEnum.run_watar)` marks ash completion in Redis DB 2, driving control-panel status indicators and historical telemetry.
 
-### Srivastava 2023 (`AshModel`)
+## Installation / Setup
 
-*Key idea:* Exponential decay of ash transport capacity tied to evolving ash bulk density and runoff depth.
+- No extra installation is required beyond the standard WEPPcloud development stack. Ensure CLIGEN inputs, WEPP hillslope outputs, and burn severity rasters are present in the working directory.
+- Populate the `[ash]` section of the run configuration (`*.cfg`) with raster paths and model options before instantiating `Ash`.
+- Optional contaminant thresholds live under `[ash.contaminants.low|moderate|high]` and override baked-in defaults when provided.
+- When running outside Docker, confirm `wepppyo3` shared libraries are available so `identify_median_single_raster_key` can summarize rasters.
 
-**Parameters**
+## Quick Start / Examples
 
-| Attribute | Description |
-| --- | --- |
-| `ini_bulk_den` / `fin_bulk_den` | Initial and final ash bulk densities (gm/cm³); density transitions via exponential decay driven by cumulative infiltration. |
-| `bulk_den_fac` | Controls the time constant for the bulk-density transition. |
-| `par_den` | Particle density (gm/cm³). |
-| `decomp_fac` | Ash decomposition coefficient (per day). |
-| `ini_erod` / `fin_erod` | Initial and asymptotic transport capacities (t/ha); blended as density increases. |
-| `roughness_limit` | Minimum ash depth retained on the surface (mm). |
-| `run_wind_transport` | Enables optional wind-driven removal based on peak daily wind speed. |
+```python
+from pathlib import Path
+from wepppy.nodb.mods.ash_transport import Ash, AshPost
 
-### Watanabe 2025 (`AshModelAlex`)
+wd = Path("/path/to/workdir")
 
-*Key idea:* Dynamic transport capacity involving organic matter, slope, and fitted coefficients (β₀–β₃) with depletion driven by cumulative ash runoff.
+# Upstream controllers (Watershed, Wepp, Climate, Landuse) must already be populated.
+ash = Ash.getInstance(wd, "project.cfg")
+ash.model = "alex"  # choose between "multi" (Srivastava2023) and "alex" (Watanabe2025)
+ash.run_ash(fire_date="8/4", ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0)
 
-**Additional Parameters**
+# Post-processing can be rerun independently to regenerate parquet outputs and documentation.
+ash_post = AshPost.getInstance(wd)
+ash_post.run_post()
+```
 
-| Attribute | Description |
-| --- | --- |
-| `org_mat` | Fraction of surface organic matter (unitless). |
-| `beta0` – `beta3` | Calibrated coefficients for the dynamic transport-capacity equation. |
-| `transport_mode` | Currently `dynamic`; allows future toggles. |
-| `initranscap` (`A`) | Initial transport capacity (t ha⁻¹ mm⁻¹). |
-| `depletcoeff` (`B`) | Depletion coefficient applied to cumulative ash runoff (mm⁻¹). |
+After execution, inspect `wd/ash` for per-hillslope parquet files and `wd/ash/post` for aggregated datasets, version manifests, and the generated documentation.
 
-Both models compute the following for each daily timestep until transportable ash is exhausted:
+## Configuration
 
-- Water-driven transport when runoff exceeds ash storage.
-- Wind-driven transport when enabled and wind thresholds are exceeded.
-- Ash decomposition proportional to infiltration.
-- Cumulative tallies (`cum_*` columns) enforcing mass balance checks.
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `ash.fire_date` | `8/4` | Default ignition date (`YearlessDate`) applied when `run_ash` is first invoked. |
+| `ash.ini_white_ash_depth_mm` | `5.0` | Initial white ash depth (mm) set on controller initialization; per-run overrides accepted via `run_ash`. |
+| `ash.ini_black_ash_depth_mm` | `5.0` | Initial black ash depth (mm) set on controller initialization; per-run overrides accepted via `run_ash`. |
+| `ash.model` | `multi` | Selects the calibration: `multi` (Srivastava 2023) or `alex` (Watanabe 2025). |
+| `ash.run_wind_transport` | `false` | Enables wind-driven removal using thresholds from `wind_transport_thresholds.py`. |
+| `ash.ash_load_fn` | `None` | Raster (kg m⁻²) providing initial ash load per hillslope; cropped to the watershed DEM when loaded. |
+| `ash.ash_bulk_density_fn` | `None` | Raster (g cm⁻³) that overrides bulk density per hillslope before calibration. |
+| `ash.ash_type_map_fn` | `None` | Raster (0 = black, 1 = white) mapped to `AshType`; burn class mapping is used when absent. |
+| `ash.black_ash_bulkdensity` | `0.22` | Modeled bulk density (g cm⁻³) used during simulation for black ash. |
+| `ash.white_ash_bulkdensity` | `0.31` | Modeled bulk density (g cm⁻³) used during simulation for white ash. |
+| `ash.field_black_ash_bulkdensity` | `0.22` | Field-measured bulk density (g cm⁻³) applied when converting depths to loads. |
+| `ash.field_white_ash_bulkdensity` | `0.31` | Field-measured bulk density (g cm⁻³) applied when converting depths to loads. |
+| `ash.reservoir_capacity_m3` | `1_000_000` | Capacity gate for routing ash to a reservoir; adjust when modeling retention structures. |
+| `ash.reservoir_storage` | `80` | Initial reservoir storage percent; setter enforces numeric input. |
+| `ash.contaminants.<severity>.<name>` | Built-in defaults | Optional contaminant concentration lookup (mg kg⁻¹ or μg kg⁻¹) per burn severity. |
 
-## AshPost Data Pipeline
+Configuration values are cached inside the NoDb instance; wrap overrides within `with ash.locked():` and rely on property setters (for example, `ash.black_ash_bulkdensity = 0.28`) so changes persist to disk and Redis.
 
-`AshPost` consumes the raw hillslope parquet files and produces higher-level tables:
+## Key Concepts / Domain Model
 
-1. **Hillslope Daily Aggregation**  
-   `read_hillslope_out_fn` ingests each `H{wepp_id}_ash.parquet`, attaches metadata (`topaz_id`, `area`, `burn_class`), and converts per-area measures to totals. When `cumulative=True`, rows are filtered to the final day of each fire-year run.
+| Concept | Description |
+|---------|-------------|
+| `Ash` | NoDb controller (`ash.py`) that aggregates inputs, schedules hillslope simulations, and coordinates with Redis telemetry. |
+| `AshPost` | Post-processing controller (`ashpost.py`) that validates artifacts, writes parquet summaries, and documents schema versions. |
+| `AshType` | IntEnum (`ash_type.py`) distinguishing black vs. white ash; drives parameter selection and raster decoding. |
+| `AshSpatialMode` | Mode flag controlling whether ash depth inputs are single values or gridded rasters; stored on the controller for UI toggles. |
+| `ash_multi_year_model` | Srivastava 2023 calibration focused on exponential decay of transport capacity governed by bulk density and runoff. |
+| `ash_multi_year_model_alex` | Watanabe 2025 calibration with dynamic transport capacity, slope sensitivity, and organic matter feedbacks. |
+| `AshPost` artifacts | `ash/post/*.parquet`, `ash/post/ashpost_version.json`, and `ash/post/README.md` are versioned deliverables consumed by dashboards and analytics. |
+| `contaminants_iter` | Generator yielding per-severity contaminant concentrations and units for ash chemistry reporting. |
 
-2. **Statistics & Grouping**  
-   - `calculate_hillslope_statistics` computes first-year averages per hillslope (tonne/ha).
-   - `calculate_watershed_statisics` aggregates daily and annual watershed totals, builds burn-class drilldowns, and calculates Weibull-based return periods.
-   - `calculate_cumulative_transport` captures cumulative metrics at the point ash is depleted for each fire year.
+## Developer Notes
 
-3. **Return Periods**  
-   `calculate_return_periods` ranks events for specified recurrence intervals (default: 1000–2 years) and packages probability, rank, and return interval metadata for both watershed-wide and burn-class-specific perspectives.
-
-4. **Versioned Output**  
-   `_write_parquet` casts every table to a schema augmented with units, descriptions, and dataset version metadata (major/minor). `write_version_manifest` records the schema version in `ash/post/ashpost_version.json`.
-
-5. **Documentation**  
-   `generate_ashpost_documentation` reads each parquet file, renders a markdown section with schema and preview rows, and writes `ash/post/README.md`. The header lists the manifest version so consumers can detect mismatches.
-
-## Produced Artifacts
-
-All outputs reside under `ash_dir` (per project):
-
-| Path | Description |
-| --- | --- |
-| `H{wepp_id}_ash.parquet` | Per-hillslope daily ash transport, remaining mass, and hydrology for all simulated fire years. |
-| `H{wepp_id}_ash.png` / `_ash_scatter.png` | Diagnostic plots (cumulative transport vs. time, scatter vs. runoff). |
-| `post/hillslope_annuals.parquet` | First-year average transport per hillslope (tonne/ha). |
-| `post/watershed_daily.parquet` | Daily watershed totals (tonne and tonne/ha) for ash transport and remaining ash. |
-| `post/watershed_daily_by_burn_class.parquet` | Daily totals segmented by burn class. |
-| `post/watershed_annuals.parquet` | Annual watershed totals and per-area metrics. |
-| `post/watershed_cumulatives.parquet` | One row per fire-year capturing cumulative metrics at ash exhaustion. |
-| `post/ashpost_version.json` | Semantic version manifest (major/minor). |
-| `post/README.md` | Auto-generated documentation with schemas and sample rows. |
-
-All parquet schemas embed units (`units` metadata) and column descriptions (`description` metadata), making them self-describing for analytics tools that understand Arrow metadata.
+- **Code layout:** Core controllers live in `ash.py` and `ashpost.py`. Calibrations reside in `ash_multi_year_model.py` (Srivastava 2023) and `ash_multi_year_model_alex.py` (Watanabe 2025); auxiliary utilities include `wind_transport_thresholds.py`, `ashpost_versioning.py`, and `ashpost_documentation.py`.
+- **Concurrency:** Hillslope simulations parallelize through `createProcessPoolExecutor`. Set `ash.MULTIPROCESSING = False` when debugging to run serially.
+- **Calibration data:** Default parameter tables ship in `data/`, while provenance artifacts (spreadsheets, notebooks) live under `dev/`.
+- **Versioning:** Bump `ASHPOST_VERSION` alongside schema changes. `remove_incompatible_outputs` clears stale parquet files before regeneration, and `write_version_manifest` records the active version.
+- **Serialization:** Add new public attributes or helpers to `__all__` in `__init__.py` so legacy NoDb payloads hydrate cleanly. Use `nodb_setter` on mutating properties to persist changes.
+- **Testing:** Integration-heavy tests live in `wepppy/nodb/mods/ash_transport/tests/` (for example `multi_year_test.py`, `annuals_test.py`). Run `pytest wepppy/nodb/mods/ash_transport/tests` from the repository root; tests expect WEPP outputs and sample rasters stored in `tests/data/`.
 
 ## Operational Notes
 
-- **Multiprocessing:** `Ash.run_ash` can parallelize hillslope simulations via the process-pool utilities in `NoDbBase` (subject to project configuration).
-- **Wind Transport:** Controlled by `ash.config` via `run_wind_transport`. When disabled, wind pathways are skipped entirely.
-- **Return Periods:** Default recurrence intervals mirror other WEPP outputs but can be overridden when calling `AshPost.run_post`.
-- **Version Bumping:** Increase `ASHPOST_VERSION` when schema-breaking changes occur; the next `run_post` automatically purges incompatible parquet outputs and regenerates everything.
+- Invoke `Ash.run_ash` only after upstream controllers (`Watershed`, `Wepp`, `Climate`, `Landuse`) have populated their outputs. Missing CLIGEN or hill water balance data triggers runtime assertions.
+- Raster overrides rely on `wepppyo3.raster_characteristics.identify_median_single_raster_key`; ensure the shared library is available in the execution environment.
+- `AshPost` regenerates watershed aggregates and documentation idempotently, allowing post-processing reruns without re-simulating hillslopes.
+- All mutations must occur inside `with ash.locked():` or `with ash_post.locked():` blocks to respect Redis-backed locking. Avoid mutating state while multiprocessing tasks execute.
+- Telemetry signals (catalog updates and Redis timestamps) fire only after successful runs; failed hillslope tasks are cancelled and raised back to the caller for troubleshooting.
 
-This README is intended as a maintenance guide: it captures the end-to-end flow so future updates can be scoped confidently even though ash transport is rarely touched.
+## Further Reading
 
+- `docs/ui-docs/ash-control-plan.md` — Control UI workflow for configuring ash transport runs.
+- `docs/ui-docs/control-ui-styling/control-inventory.md` — Catalog of UI controls, including ash transport toggles.
+- `wepppy/nodb/mods/ash_transport/ashpost_documentation.py` — Markdown documentation generator implementation details.
+- `wepppy/nodb/mods/ash_transport/dev/README.md` — Research notes and calibration references for the ash models.
+- `wepppy/readme.md` — Repository-wide architecture overview with NoDb and Redis integration notes.
+
+## Credits / License
+
+Ash transport calibrations originate from Srivastava et al. (2023) and Watanabe et al. (2025) wildfire ash transport studies. The module ships under the University of Idaho BSD‑3 Clause license, and authorship follows the policy outlined in `AGENTS.md`; retain research citations within calibration notebooks under `dev/`.
