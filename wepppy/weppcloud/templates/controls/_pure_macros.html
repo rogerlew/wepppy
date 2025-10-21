@@ -1,3 +1,11 @@
+{# NOTE:
+   - control_shell, status_panel, and stacktrace_panel all rely on Jinja's
+     `caller` to inject child content. When invoking these macros, prefer the
+     `{% call ... %}{% endcall %}` pattern and avoid nesting them inside other
+     macros that also consume `caller` (doing so will raise a double-caller
+     TypeError at render time).
+#}
+
 {% macro control_shell(
       form_id,
       title,

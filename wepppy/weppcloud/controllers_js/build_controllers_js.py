@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import importlib.util
 import sys
-from typing import Final
+from typing import Final, List
 
 MODULE_DIR: Final[Path] = Path(__file__).resolve().parent
 ROOT: Final[Path] = MODULE_DIR.parent
@@ -34,6 +34,34 @@ write_unitizer_module = _builder_module.write_unitizer_module
 
 TEMPLATES_DIR: Final[Path] = MODULE_DIR / "templates"
 OUTPUT_PATH: Final[Path] = ROOT / "static" / "js" / "controllers.js"
+PRIORITY_MODULES: Final[List[str]] = [
+    "utils.js",
+    "modal.js",
+    "unitizer_client.js",
+    "ws_client.js",
+    "status_stream.js",
+    "control_base.js",
+    "project.js",
+]
+
+
+def _collect_controller_modules() -> List[str]:
+    """
+    Discover controller source modules (.js files) and return an ordered list.
+
+    Priority modules are emitted first to preserve dependencies (utilities,
+    control base, project). Remaining modules are appended alphabetically.
+    """
+    module_names = sorted(path.name for path in MODULE_DIR.glob("*.js"))
+
+    ordered: List[str] = []
+    for name in PRIORITY_MODULES:
+        if name in module_names:
+            ordered.append(name)
+            module_names.remove(name)
+
+    ordered.extend(module_names)
+    return ordered
 
 
 def render_controllers() -> str:
@@ -46,7 +74,8 @@ def render_controllers() -> str:
     )
     template = env.get_template("controllers.js.j2")
     build_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    return template.render(build_date=build_date)
+    modules = _collect_controller_modules()
+    return template.render(build_date=build_date, modules=modules)
 
 
 def write_output(contents: str, *, output_path: Path = OUTPUT_PATH) -> None:

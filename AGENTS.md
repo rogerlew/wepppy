@@ -241,6 +241,14 @@ Every module, service, and significant package should have a README.md that serv
 - AI agents have authority to create and revise README.md files per authorship policy
 
 
+## Development Environment Assumptions
+
+- Agents should assume a Linux host with Docker and Docker Compose available.
+- The `wctl` utility (Docker command wrapper) is installed on the host and should be used to manage containers, execute commands (e.g., `wctl exec weppcloud bash`), and run tests (`wctl run-pytest …`). This keeps workflows aligned with the team’s tooling.
+- The host filesystem mirrors the dev container layout under `/workdir/<repo>`, so relative paths such as `/workdir/wepppy/...` are safe to reference.
+- The repository includes `docker/docker-compose.dev.yml`; expect it to exist and be the primary entry point for local orchestration.
+
+
 ## Development Workflow
 
 ### Docker Compose (Recommended)
@@ -435,16 +443,18 @@ class MyController {
 }
 ```
 
-Controllers are bundled via `build_controllers_js.py` which runs during Gunicorn's `on_starting` hook. The bundle is generated from `controllers.js.j2` with an ISO timestamp header.
+Controllers are bundled via `build_controllers_js.py`; the Docker entrypoint runs this script automatically whenever `wctl up weppcloud` (or a container restart) occurs. New `.js` files dropped under `controllers_js/` are detected automatically—manual edits to `controllers.js.j2` are no longer required. Because static assets are served through Caddy from a bind-mounted volume, you generally do **not** need to restart the app container after rebuilding; reloading the browser is enough once the bundle has been regenerated.
 
-**After modifying controllers**:
+If you need to force a rebuild without bouncing the container, run:
 ```bash
-# Rebuild bundle
-python wepppy/weppcloud/_scripts/build_controllers_js.py
-
-# Or restart Gunicorn (auto-rebuilds)
-docker compose --env-file docker/.env -f docker/docker-compose.dev.yml restart weppcloud
+wctl exec weppcloud bash -lc "python wepppy/weppcloud/controllers_js/build_controllers_js.py"
 ```
+
+After creating or significantly editing a Pure control template, run the render smoke test to catch Jinja macro issues early:
+```bash
+wctl run "pytest tests/weppcloud/routes/test_pure_controls_render.py"
+```
+The fixture stubs required globals so most templates render without additional setup.
 
 ### Static Assets
 - Source: `wepppy/weppcloud/static-src/`
