@@ -1,666 +1,435 @@
-<!-- Modal -->
-<style>
-  /* Keep the PowerUser modal sizing/positioning self-contained */
-  #puModal .modal-dialog {
-    max-width: 1100px;
-    width: calc(100vw - 32px);
-    margin: 80px auto 32px;
-  }
+{% macro browse_url(path) -%}
+  {{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath=path) }}
+{%- endmacro %}
 
-  #puModal .modal-content {
-    display: flex;
-    flex-direction: column;
-    max-height: calc(100vh - 144px);
-  }
-
-  #puModal .modal-body {
-    overflow-y: auto;
-  }
-
-  @media (max-width: 768px) {
-    #puModal .modal-dialog {
-      margin: 72px auto 24px;
-      width: calc(100vw - 24px);
-    }
-  }
-
-  #puModal .resource-group {
-    margin-bottom: 1.5rem;
-  }
-
-  #puModal .resource-group:last-child {
-    margin-bottom: 0;
-  }
-
-  #puModal .resource-buttons {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    min-height: 32px;
-  }
-
-  #puModal .resource-lock-slot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 32px;
-    min-width: 32px;
-    min-height: 32px;
-  }
-
-  #puModal .resource-lock-icon {
-    max-width: 24px;
-    max-height: 24px;
-    object-fit: contain;
-  }
-
-  #puModal .resource-buttons .btn {
-    flex: 1 1 120px;
-    border: 1px solid rgba(0, 0, 0, 0.125);
-    padding-top: 0.4rem;
-    padding-bottom: 0.4rem;
-  }
-</style>
-<div class="modal fade" id="puModal" role="dialog" hidden>
-  <script>
-    // System Notifications
-
-    // ---- constants ----
-    const WEBPUSH_BASE = "/weppcloud-microservices/webpush";
-    const SW_URL = "{{ site_prefix }}/sw.js";
-    const SW_SCOPE = "{{ site_prefix }}/";
-    const RUN_ID = (typeof runid !== "undefined") ? runid : null;
-
-    const SUB_ID_KEY = "wepppush.sub.id";
-    const VAPID_PK_KEY = "{{ VAPID_PUBLIC_KEY }}";
-
-    // base64url -> Uint8Array
-    function urlB64ToUint8Array(s) {
-      const base64 = (s + "=".repeat((4 - (s.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
-      const raw = atob(base64), out = new Uint8Array(raw.length);
-      for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-      return out;
-    }
-
-    // ---- core helpers ----
-    async function ensureRegistration() {
-      const reg = await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE });
-      await navigator.serviceWorker.ready;
-      return reg;
-    }
-
-    async function ensureSubscription(reg) {
-      // Only attempt subscribe if permission is already granted
-      if (Notification.permission !== "granted") return null;
-
-      let sub = await reg.pushManager.getSubscription();
-      if (!sub) {
-        sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlB64ToUint8Array(VAPID_PK_KEY)
-        });
-      }
-      return sub;
-    }
-
-    async function upsertSubscriptionOnServer(sub) {
-      const payload = { subscription: sub.toJSON ? sub.toJSON() : { endpoint: sub.endpoint, keys: sub.keys || {} }, run_id: RUN_ID };
-      const res = await fetch(`${WEBPUSH_BASE}/subscriptions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) throw new Error(`subscriptions POST failed: ${res.status} ${await res.text()}`);
-      const data = await res.json();
-      if (!data?.id) throw new Error("subscriptions POST missing id");
-      localStorage.setItem(SUB_ID_KEY, data.id);
-      return data.id;
-    }
-
-    // Registers SW and (if allowed) ensures a subscription exists + is upserted.
-    // Safe to call on page load; it will no-op until permission is granted.
-    async function initPush() {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        console.warn("[wepppush] Push API not supported in this browser");
-        return;
-      }
-
-      // Request permission if not already granted
-      if (Notification.permission !== "granted") {
-        console.log("[wepppush] Requesting notification permission...");
-        const perm = await Notification.requestPermission();
-        if (perm !== "granted") return;
-      }
-
-      const reg = await ensureRegistration();
-      console.log("[wepppush] Service Worker registered:", reg);
-
-      const sub = await ensureSubscription(reg);
-      console.log("[wepppush] Subscription ensured:", sub);
-
-      if (sub) await upsertSubscriptionOnServer(sub);
-    }
-
-    // ---- per-run enable/disable ----
-    async function enableForRun(runId, subId) {
-      if (!runId || !subId) return;
-      const r = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ run_id: runId, enabled: true, ttl_days: 7 })
-      });
-      if (!r.ok && r.status !== 204) throw new Error(`runs enable failed: ${r.status} ${await r.text()}`);
-    }
-
-    async function disableForRun(runId, subId) {
-      if (!runId || !subId) return;
-      const r = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ run_id: runId, enabled: false })
-      });
-      if (!r.ok && r.status !== 204) throw new Error(`runs disable failed: ${r.status} ${await r.text()}`);
-    }
-
-    // ---- public entry points for your toggle ----
-    async function enableNotifications() {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-      if (!RUN_ID) return;
-
-      await initPush();
-
-      const subId = localStorage.getItem(SUB_ID_KEY);
-      await enableForRun(RUN_ID, subId);
-    }
-
-    async function disableNotifications() {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-      if (!RUN_ID) return;
-
-      await initPush();
-
-      const subId = localStorage.getItem(SUB_ID_KEY);
-      await disableForRun(RUN_ID, subId);
-    }
-
-    // ---- wire up your toggle ----
-    document.addEventListener("DOMContentLoaded", async () => {
-      // Kick off SW registration and (if permitted) backend upsert
-      try { await initPush(); } catch (e) { console.warn("[wepppush] initPush:", e); }
-
-      const toggle = document.getElementById("notificationToggle");
-      const toggleLabel = document.getElementById("notificationToggleLabel");
-
-      if (!toggle || !toggleLabel) {
-        console.warn("[wepppush] Notification toggle elements not present; skipping toggle wiring");
-        return;
-      }
-
-      const subId = localStorage.getItem(SUB_ID_KEY);
-      if (!subId || !RUN_ID) {
-        console.warn("[wepppush] Missing subId or runId, toggle left off");
-        toggle.checked = false;
-        toggleLabel.textContent = "Disabled";
-        return;
-      }
-
-      try {
-        const res = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs/${encodeURIComponent(RUN_ID)}`, {
-          method: "GET",
-          credentials: "same-origin"
-        });
-
-        if (!res.ok) {
-          console.error("[wepppush] GET runs failed:", res.status, await res.text());
-          toggle.checked = false;
-          toggleLabel.textContent = "Disabled";
-          return;
-        }
-
-        const data = await res.json();
-        toggle.checked = !!data.enabled;
-        toggleLabel.textContent = data.enabled ? "Enabled" : "Disabled";
-
-      } catch (err) {
-        console.error("[wepppush] Error checking run state:", err);
-        toggle.checked = false;
-        toggleLabel.textContent = "Disabled";
-      }
-
-      // Handle toggle changes
-      toggle.addEventListener("change", async () => {
-        if (toggle.checked) {
-          toggleLabel.textContent = "Enabling...";
-          try {
-            await enableNotifications();
-            toggleLabel.textContent = "Enabled";
-          } catch (err) {
-            console.error("[wepppush] Enable error:", err);
-            toggle.checked = false;
-            toggleLabel.textContent = "Failed to enable";
-          }
-        } else {
-          toggleLabel.textContent = "Disabling...";
-          try {
-            await disableNotifications();
-            toggleLabel.textContent = "Disabled";
-          } catch (err) {
-            console.error("[wepppush] Disable error:", err);
-            toggle.checked = true;
-            toggleLabel.textContent = "Failed to disable";
-          }
-        }
-      });
-    });
-  </script>
-  <div class="modal-dialog">
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 data-toc-skip class="modal-title">PowerUser Panel</h4>
-        <button type="button" class="close" data-close="puModal">&times;</button>
+{% macro resource_block(prefix, label, nodb_path, log_path, enabled=True) -%}
+  {% if enabled %}
+    <article class="pu-resource" data-resource="{{ prefix }}">
+      <div class="wc-run-header__field">
+        <span>{{ label }}</span>
       </div>
-      <div class="modal-body">
-        {% macro browse_url(path) -%}
-          {{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath=path) }}
-        {%- endmacro %}
-        <div class="row">
-          <div class="col-md-6">
-            {% if False %}
-            <h5>System Notifications</h5>
-            <div class="list-group" style="margin-bottom: 5px;">
-              <div class="list-group-item">
-                <div class="custom-control custom-switch">
-                  <input type="checkbox" class="custom-control-input" id="notificationToggle">
-                  <label class="custom-control-label" for="notificationToggle" id="notificationToggleLabel">Enable
-                    System Notifications</label>
-                </div>
-              </div>
-            </div>
+      <div class="pu-resource__actions">
+        <span class="pu-resource__lock" aria-hidden="true">
+          <img
+            id="pu_{{ prefix }}_lock"
+            class="pu-resource__lock-icon"
+            src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}"
+            alt="{{ label }} locked"
+            style="display:none;" />
+        </span>
+        <a class="pure-button pure-button-secondary"
+           href="{{ browse_url(nodb_path) }}"
+           target="_blank"
+           rel="noopener">
+          NODB
+        </a>
+        <a class="pure-button pure-button-secondary"
+           href="{{ browse_url(log_path) }}"
+           target="_blank"
+           rel="noopener">
+          LOG
+        </a>
+      </div>
+    </article>
+  {% endif %}
+{%- endmacro %}
+
+<div class="wc-modal" id="puModal" data-modal hidden>
+  <style>
+    .pu-modal__dialog {
+      width: 90vw;
+      max-width: 90%;
+      height: 90vh;
+      max-height: 90vh;
+    }
+
+    .pu-modal__grid {
+      display: grid;
+      gap: var(--wc-space-lg);
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 48rem) {
+      .pu-modal__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 80rem) {
+      .pu-modal__grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .pu-modal__column {
+      display: flex;
+      flex-direction: column;
+      gap: var(--wc-space-md);
+    }
+
+    .pu-modal__section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--wc-color-text-muted);
+    }
+
+    .pu-resource {
+      display: flex;
+      flex-direction: column;
+      gap: var(--wc-space-xs);
+      padding: var(--wc-space-xs) var(--wc-space-sm);
+    }
+
+    .pu-resource__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--wc-space-xs);
+    }
+
+    .pu-resource__lock {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      min-width: 32px;
+      min-height: 32px;
+    }
+
+    .pu-resource__lock-icon {
+      max-width: 24px;
+      max-height: 24px;
+      object-fit: contain;
+    }
+
+    .pu-link-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--wc-space-sm);
+    }
+
+    .pu-action-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--wc-space-sm);
+    }
+
+    .pu-modal__dialog .wc-modal__footer {
+      height: 3rem;
+    }
+  </style>
+  <div class="wc-modal__overlay" data-modal-dismiss></div>
+  <div class="wc-modal__dialog pu-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="puModalTitle">
+    <header class="wc-modal__header">
+      <h2 class="wc-modal__title" id="puModalTitle">PowerUser Panel</h2>
+      <button type="button"
+              class="wc-modal__close"
+              data-modal-dismiss
+              aria-label="Close PowerUser Panel">
+        &times;
+      </button>
+    </header>
+    <div class="wc-modal__body">
+      <div class="pu-modal__grid">
+        <section class="pu-modal__column" aria-labelledby="puResourcesColumnA">
+          <h3 class="pu-modal__section-title" id="puResourcesColumnA">Core resources</h3>
+          {{ resource_block('ron', 'Ron', 'ron.nodb', 'ron.log') }}
+          {{ resource_block('topaz', 'Topaz', 'topaz.nodb', 'topaz.log') }}
+          {{ resource_block('watershed', 'Watershed', 'watershed.nodb', 'watershed.log') }}
+          {{ resource_block('landuse', 'Landuse', 'landuse.nodb', 'landuse.log', 'rhem' not in ron.mods) }}
+          {{ resource_block('shrubland', 'Shrubland', 'shrubland.nodb', 'shrubland.log', 'shrubland' in ron.mods) }}
+          {{ resource_block('rangeland_cover', 'Rangeland Cover', 'rangeland_cover.nodb', 'rangeland_cover.log', 'rangeland_cover' in ron.mods) }}
+          {{ resource_block('soils', 'Soils', 'soils.nodb', 'soils.log') }}
+          {{ resource_block('climate', 'Climate', 'climate.nodb', 'climate.log') }}
+        </section>
+
+        <section class="pu-modal__column" aria-labelledby="puResourcesColumnB">
+          <h3 class="pu-modal__section-title" id="puResourcesColumnB">Extended resources</h3>
+          {{ resource_block('rhem', 'RHEM', 'rhem.nodb', 'rhem.log', 'rhem' in ron.mods) }}
+          {{ resource_block('rhempost', 'RHEM Post', 'rhempost.nodb', 'rhempost.log', 'rhem' in ron.mods) }}
+          {{ resource_block('wepp', 'WEPP', 'wepp.nodb', 'wepp.log') }}
+          {{ resource_block('wepppost', 'WEPP Post', 'wepppost.nodb', 'wepppost.log') }}
+          {{ resource_block('observed', 'Observed', 'observed.nodb', 'observed.log') }}
+          {{ resource_block('unitizer', 'Unitizer', 'unitizer.nodb', 'unitizer.log') }}
+          {{ resource_block('baer', 'BAER', 'baer.nodb', 'baer.log', 'baer' in ron.mods) }}
+          {{ resource_block('disturbed', 'Disturbed', 'disturbed.nodb', 'disturbed.log', 'disturbed' in ron.mods) }}
+          {{ resource_block('rred', 'RRED', 'rred.nodb', 'rred.log', 'rred' in ron.mods) }}
+          {{ resource_block('lt', 'Long Term', 'lt.nodb', 'lt.log', 'lt' in ron.mods) }}
+          {{ resource_block('ash', 'Ash', 'ash.nodb', 'ash.log', 'ash' in ron.mods) }}
+          {{ resource_block('ashpost', 'Ash Post', 'ashpost.nodb', 'ashpost.log', 'ash' in ron.mods) }}
+          {{ resource_block('debris_flow', 'Debris Flow', 'debris_flow.nodb', 'debris_flow.log', 'debris_flow' in ron.mods) }}
+          {{ resource_block('omni', 'Omni', 'omni.nodb', 'omni.log', 'omni' in ron.mods) }}
+        </section>
+
+        <section class="pu-modal__column" aria-labelledby="puBrowseColumn">
+          <h3 class="pu-modal__section-title" id="puBrowseColumn">Browse &amp; data</h3>
+          <ul class="pu-link-list">
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('') }}">/</a></li>
+            {% if 'rred' in ron.mods %}
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('rred/') }}">rred/</a></li>
             {% endif %}
-            <h5>Components</h5>
-            <div>
-              <!-- Dev note: lock icons in this panel are toggled via preflight.js updateLocks -->
-              <div class="resource-group">
-                <h6>Ron</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_ron_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Ron locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('ron.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('ron.log') }}">log</a>
-                </div>
-              </div>
-              <div class="resource-group">
-                <h6>Topaz</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_topaz_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Topaz locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('topaz.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('topaz.log') }}">log</a>
-                </div>
-              </div>
-              <div class="resource-group">
-                <h6>Watershed</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_watershed_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Watershed locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('watershed.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('watershed.log') }}">log</a>
-                </div>
-              </div>
-              {% if 'rhem' not in ron.mods %}
-              <div class="resource-group">
-                <h6>Landuse</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_landuse_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Landuse locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('landuse.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('landuse.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
+            {% if 'rhem' not in ron.mods %}
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('wepp/runs/') }}">wepp/runs/</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('wepp/output/') }}">wepp/output/</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ site_prefix }}/usersum/">usersum</a></li>
+            {% else %}
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('rhem/runs/') }}">rhem/runs/</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('rhem/output/') }}">rhem/output/</a></li>
+            {% endif %}
+            {% if 'ash' in ron.mods %}
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('ash/') }}">ash/</a></li>
+            {% endif %}
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('watershed/hillslopes.parquet/') }}">hillslopes table</a></li>
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('watershed/channels.parquet') }}">channels table</a></li>
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('landuse/landuse.parquet/') }}">landuse table</a></li>
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('soils/soils.parquet/') }}">soils table</a></li>
+          </ul>
+        </section>
 
-              {% if 'shrubland' in ron.mods %}
-              <div class="resource-group">
-                <h6>Shrubland</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_shrubland_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Shrubland locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('shrubland.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('shrubland.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-
-              {% if 'rangeland_cover' in ron.mods %}
-              <div class="resource-group">
-                <h6>Rangeland Cover</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_rangeland_cover_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Rangeland Cover locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('rangeland_cover.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('rangeland_cover.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-
-              <div class="resource-group">
-                <h6>Soils</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_soils_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Soils locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('soils.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('soils.log') }}">log</a>
-                </div>
-              </div>
-
-              <div class="resource-group">
-                <h6>Climate</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_climate_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Climate locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('climate.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('climate.log') }}">log</a>
-                </div>
-              </div>
-
-              {% if 'rhem' in ron.mods %}
-              <div class="resource-group">
-                <h6>RHEM</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_rhem_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="RHEM locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('rhem.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('rhem.log') }}">log</a>
-                </div>
-              </div>
-              <div class="resource-group">
-                <h6>RHEM Post</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_rhempost_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="RHEM Post locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('rhempost.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('rhempost.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-
-              <div class="resource-group">
-                <h6>WEPP</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_wepp_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="WEPP locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('wepp.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('wepp.log') }}">log</a>
-                </div>
-              </div>
-
-              <div class="resource-group">
-                <h6>WEPP Post</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_wepppost_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="WEPP Post locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('wepppost.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('wepppost.log') }}">log</a>
-                </div>
-              </div>
-
-              <div class="resource-group">
-                <h6>Observed</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_observed_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Observed locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('observed.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('observed.log') }}">log</a>
-                </div>
-              </div>
-
-              <div class="resource-group">
-                <h6>Unitizer</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_unitizer_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Unitizer locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('unitizer.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('unitizer.log') }}">log</a>
-                </div>
-              </div>
-
-              {% if 'baer' in ron.mods %}
-              <div class="resource-group">
-                <h6>BAER</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_baer_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="BAER locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('baer.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('baer.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-
-              {% if 'disturbed' in ron.mods %}
-              <div class="resource-group">
-                <h6>Disturbed</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_disturbed_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Disturbed locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('disturbed.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('disturbed.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-
-              {% if 'rred' in ron.mods %}
-              <div class="resource-group">
-                <h6>RRED</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_rred_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="RRED locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('rred.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('rred.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-
-              {% if 'lt' in ron.mods %}
-              <div class="resource-group">
-                <h6>LT</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_lt_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="LT locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('lt.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('lt.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-
-              {% if 'ash' in ron.mods %}
-              <div class="resource-group">
-                <h6>Ash</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_ash_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Ash locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('ash.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('ash.log') }}">log</a>
-                </div>
-              </div>
-              <div class="resource-group">
-                <h6>Ash Post</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_ashpost_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Ash Post locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('ashpost.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('ashpost.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-
-              {% if 'debris_flow' in ron.mods %}
-              <div class="resource-group">
-                <h6>Debris Flow</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_debris_flow_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Debris Flow locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('debris_flow.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('debris_flow.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-
-              {% if 'omni' in ron.mods %}
-              <div class="resource-group">
-                <h6>Omni</h6>
-                <div class="resource-buttons">
-                  <span class="resource-lock-slot">
-                    <img class="resource-lock-icon" id="pu_omni_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Omni locked" />
-                  </span>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('omni.nodb') }}">nodb</a>
-                  <a class="btn btn-outline-secondary btn-sm" target="_blank"
-                    href="{{ browse_url('omni.log') }}">log</a>
-                </div>
-              </div>
-              {% endif %}
-            </div>
-            <br>
-            <div class="list-group">
-              <a class="list-group-item list-group-item-action text-danger" onclick="Project.getInstance().clear_locks()" href="#">Clear
-                Locks</a>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <h5>Directory Views</h5>
-            <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('') }}">/</a>
-              {% if 'rred' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('rred/') }}">rred/</a>
-              {% endif %}
-              {% if 'rhem' not in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('wepp/runs/') }}">wepp/runs/</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('wepp/output/') }}">wepp/output/</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="/usersum">usersum</a>
-              {% else %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('rhem/runs/') }}">rhem/runs/</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('rhem/output/') }}">rhem/output/</a>
-              {% endif %}
-              {% if 'ash' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('ash/') }}">ash/</a>
-              {% endif %}
-            </div>
-            <br>
-            <h5>Data Tables</h5>
-            <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('watershed/hillslopes.parquet/') }}">Hillslope</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('watershed/channels.parquet') }}">Channels</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('landuse/landuse.parquet/') }}">Landuse</a>
-              <a class="list-group-item list-group-item-action" target="_blank"
-                href="{{ browse_url('soils/soils.parquet/') }}">Soils</a>
-            </div>
-            <br>
+        <section class="pu-modal__column" aria-labelledby="puActionsColumn">
+          <h3 class="pu-modal__section-title" id="puActionsColumn">Actions</h3>
+          <div class="pu-action-list">
+            <button type="button"
+                    class="pure-button pure-button-secondary"
+                    onclick="Project.getInstance().clear_locks()">
+              Clear Locks
+            </button>
             {% if 'disturbed' in ron.mods %}
-            <h5>Disturbed</h5>
-            <div class="list-group">
-              <a class="list-group-item list-group-item-action"
-                href="{{ url_for_run('disturbed.modify_disturbed', runid=runid, config=config) }}"
-                target="_blank">Modify Disturbed Parameters</a>
-              <a class="list-group-item list-group-item-action"
-                onclick="Disturbed.getInstance().reset_land_soil_lookup()" href="#">Reset Disturbed Parameters</a>
-              <a class="list-group-item list-group-item-action"
-                onclick="Disturbed.getInstance().load_extended_land_soil_lookup()" href="#">Load Extended Disturbed
-                Parameters</a>
-              <a class="list-group-item list-group-item-action"
-                href="https://doc.wepp.cloud/disturbed_land_soil_lookup_doc.html" target="_blank">Disturbed Parameters
-                Documentation</a>
-            </div>
+              <a class="pure-button pure-button-secondary"
+                 href="{{ url_for_run('disturbed.modify_disturbed', runid=runid, config=config) }}"
+                 target="_blank"
+                 rel="noopener">
+                Modify Disturbed Parameters
+              </a>
+              <button type="button"
+                      class="pure-button pure-button-secondary"
+                      onclick="Disturbed.getInstance().reset_land_soil_lookup()">
+                Reset Disturbed Parameters
+              </button>
+              <button type="button"
+                      class="pure-button pure-button-secondary"
+                      onclick="Disturbed.getInstance().load_extended_land_soil_lookup()">
+                Load Extended Disturbed Parameters
+              </button>
+              <a class="pure-button pure-button-secondary"
+                 href="https://doc.wepp.cloud/disturbed_land_soil_lookup_doc.html"
+                 target="_blank"
+                 rel="noopener">
+                Disturbed Parameters Doc
+              </a>
             {% endif %}
             {% if 'omni' not in ron.mods %}
-            <br>
-            <h5>Omni (Experimental)</h5>
-            <div class="list-group">
-              <a class="list-group-item list-group-item-action"
-                onclick="Project.getInstance().migrate_to_omni()" href="#">Migrate Project to Omni</a>
-            </div>
+              <button type="button"
+                      class="pure-button pure-button-secondary"
+                      onclick="Project.getInstance().migrate_to_omni()">
+                Omni Migration
+              </button>
             {% endif %}
           </div>
-        </div>
+        </section>
       </div>
     </div>
+    <footer class="wc-modal__footer">
+      <button type="button" class="pure-button pure-button-secondary" data-modal-dismiss>Close</button>
+    </footer>
   </div>
 </div>
+
+<script>
+  // System Notifications
+
+  // ---- constants ----
+  const WEBPUSH_BASE = "/weppcloud-microservices/webpush";
+  const SW_URL = "{{ site_prefix }}/sw.js";
+  const SW_SCOPE = "{{ site_prefix }}/";
+  const RUN_ID = (typeof runid !== "undefined") ? runid : null;
+
+  const SUB_ID_KEY = "wepppush.sub.id";
+  const VAPID_PK_KEY = "{{ VAPID_PUBLIC_KEY }}";
+
+  // base64url -> Uint8Array
+  function urlB64ToUint8Array(s) {
+    const base64 = (s + "=".repeat((4 - (s.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
+    const raw = atob(base64), out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+
+  // ---- core helpers ----
+  async function ensureRegistration() {
+    const reg = await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE });
+    await navigator.serviceWorker.ready;
+    return reg;
+  }
+
+  async function ensureSubscription(reg) {
+    // Only attempt subscribe if permission is already granted
+    if (Notification.permission !== "granted") return null;
+
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8Array(VAPID_PK_KEY)
+      });
+    }
+    return sub;
+  }
+
+  async function upsertSubscriptionOnServer(sub) {
+    const payload = { subscription: sub.toJSON ? sub.toJSON() : { endpoint: sub.endpoint, keys: sub.keys || {} }, run_id: RUN_ID };
+    const res = await fetch(`${WEBPUSH_BASE}/subscriptions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`subscriptions POST failed: ${res.status} ${await res.text()}`);
+    const data = await res.json();
+    if (!data?.id) throw new Error("subscriptions POST missing id");
+    localStorage.setItem(SUB_ID_KEY, data.id);
+    return data.id;
+  }
+
+  // Registers SW and (if allowed) ensures a subscription exists + is upserted.
+  // Safe to call on page load; it will no-op until permission is granted.
+  async function initPush() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      console.warn("[wepppush] Push API not supported in this browser");
+      return;
+    }
+
+    // Request permission if not already granted
+    if (Notification.permission !== "granted") {
+      console.log("[wepppush] Requesting notification permission...");
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") return;
+    }
+
+    const reg = await ensureRegistration();
+    console.log("[wepppush] Service Worker registered:", reg);
+
+    const sub = await ensureSubscription(reg);
+    console.log("[wepppush] Subscription ensured:", sub);
+
+    if (sub) await upsertSubscriptionOnServer(sub);
+  }
+
+  // ---- per-run enable/disable ----
+  async function enableForRun(runId, subId) {
+    if (!runId || !subId) return;
+    const r = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ run_id: runId, enabled: true, ttl_days: 7 })
+    });
+    if (!r.ok && r.status !== 204) throw new Error(`runs enable failed: ${r.status} ${await r.text()}`);
+  }
+
+  async function disableForRun(runId, subId) {
+    if (!runId || !subId) return;
+    const r = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ run_id: runId, enabled: false })
+    });
+    if (!r.ok && r.status !== 204) throw new Error(`runs disable failed: ${r.status} ${await r.text()}`);
+  }
+
+  // ---- public entry points for your toggle ----
+  async function enableNotifications() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    if (!RUN_ID) return;
+
+    await initPush();
+
+    const subId = localStorage.getItem(SUB_ID_KEY);
+    await enableForRun(RUN_ID, subId);
+  }
+
+  async function disableNotifications() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    if (!RUN_ID) return;
+
+    await initPush();
+
+    const subId = localStorage.getItem(SUB_ID_KEY);
+    await disableForRun(RUN_ID, subId);
+  }
+
+  // ---- wire up your toggle ----
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Kick off SW registration and (if permitted) backend upsert
+    try { await initPush(); } catch (e) { console.warn("[wepppush] initPush:", e); }
+
+    const toggle = document.getElementById("notificationToggle");
+    const toggleLabel = document.getElementById("notificationToggleLabel");
+
+    if (!toggle || !toggleLabel) {
+      console.warn("[wepppush] Notification toggle elements not present; skipping toggle wiring");
+      return;
+    }
+
+    const subId = localStorage.getItem(SUB_ID_KEY);
+    if (!subId || !RUN_ID) {
+      console.warn("[wepppush] Missing subId or runId, toggle left off");
+      toggle.checked = false;
+      toggleLabel.textContent = "Disabled";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs/${encodeURIComponent(RUN_ID)}`, {
+        method: "GET",
+        credentials: "same-origin"
+      });
+
+      if (!res.ok) {
+        console.error("[wepppush] GET runs failed:", res.status, await res.text());
+        toggle.checked = false;
+        toggleLabel.textContent = "Disabled";
+        return;
+      }
+
+      const data = await res.json();
+      toggle.checked = !!data.enabled;
+      toggleLabel.textContent = data.enabled ? "Enabled" : "Disabled";
+
+    } catch (err) {
+      console.error("[wepppush] Error checking run state:", err);
+      toggle.checked = false;
+      toggleLabel.textContent = "Disabled";
+    }
+
+    // Handle toggle changes
+    toggle.addEventListener("change", async () => {
+      if (toggle.checked) {
+        toggleLabel.textContent = "Enabling...";
+        try {
+          await enableNotifications();
+          toggleLabel.textContent = "Enabled";
+        } catch (err) {
+          console.error("[wepppush] Enable error:", err);
+          toggle.checked = false;
+          toggleLabel.textContent = "Failed to enable";
+        }
+      } else {
+        toggleLabel.textContent = "Disabling...";
+        try {
+          await disableNotifications();
+          toggleLabel.textContent = "Disabled";
+        } catch (err) {
+          console.error("[wepppush] Disable error:", err);
+          toggle.checked = true;
+          toggleLabel.textContent = "Failed to disable";
+        }
+      }
+    });
+  });
+</script>

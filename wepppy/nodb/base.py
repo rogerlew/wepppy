@@ -814,7 +814,30 @@ class NoDbBase(object):
 
         # validate and return
         if not isinstance(db, cls):
-            raise TypeError(f"Decoded object type {type(db)} does not match expected {cls}")
+            decoded_type = type(db)
+            types_match_by_name = (
+                decoded_type.__module__ == cls.__module__
+                and decoded_type.__name__ == cls.__name__
+            )
+
+            if types_match_by_name:
+                try:
+                    db.__class__ = cls
+                    logging.getLogger(__name__).debug(
+                        "Rebound decoded NoDb instance from %r to %r for %s",
+                        decoded_type,
+                        cls,
+                        filepath,
+                    )
+                except TypeError:
+                    pass
+
+        if not isinstance(db, cls):
+            raise TypeError(
+                "Decoded object type "
+                f"{type(db)} (id={id(type(db))}) does not match expected "
+                f"{cls} (id={id(cls)})"
+            )
 
         db = cls._post_instance_loaded(db)
 

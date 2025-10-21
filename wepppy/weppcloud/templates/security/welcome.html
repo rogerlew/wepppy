@@ -8,7 +8,7 @@
 {% block content %}
   <p>Start exploring projects, run new simulations, or pick up where you left off.</p>
   <ul class="wc-auth-links">
-    <li><a href="{{ site_prefix }}/">Open the WEPPcloud dashboard</a></li>
+    <li><a href="{{ url_for('user.runs') }}">View your runs</a></li>
     <li><a href="{{ url_for('user.profile') }}">View your profile</a></li>
   </ul>
 {% endblock %}

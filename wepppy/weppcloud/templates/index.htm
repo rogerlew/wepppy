@@ -4,25 +4,44 @@
 
 {% block header_nav %}
 <nav class="wc-nav" aria-label="Primary">
-  <ul class="wc-nav__list">
-    <li><a class="wc-nav__link" href="{{ url_for('weppcloud_site.about') }}">About</a></li>
-    {% if current_user.is_authenticated %}
-      <li><a class="wc-nav__link" href="{{ url_for('user.runs') }}">Runs</a></li>
-      {% if current_user.has_role('Admin') %}
-        <li><a class="wc-nav__link" href="{{ url_for('admin.allruns') }}">All Runs</a></li>
-      {% endif %}
-      <li><a class="wc-nav__link" href="{{ url_for('user.profile') }}">Profile</a></li>
-      <li><a class="wc-nav__link" href="{{ url_for('security.logout') }}">Logout</a></li>
-      {% if current_user.has_role('Root') %}
-        <li><a class="wc-nav__link" href="{{ url_for('admin.usermod') }}">Usermod</a></li>
-      {% endif %}
-      {% if current_user.has_role('Root') or current_user.has_role('Admin') or current_user.has_role('Dev') %}
-        <li><a class="wc-nav__link" href="{{ url_for('admin.runid_query') }}">Runid Query</a></li>
-      {% endif %}
-    {% else %}
-      <li><a class="wc-nav__link" href="{{ url_for('security.login') }}">Login</a></li>
-    {% endif %}
-  </ul>
+  <a class="wc-nav__link" href="{{ url_for('weppcloud_site.about') }}">About</a>
+  {% if current_user.is_authenticated %}
+    <a class="wc-nav__link" href="{{ url_for('user.runs') }}">Runs</a>
+    <a class="wc-nav__link" href="{{ url_for('user.profile') }}">Profile</a>
+    <details class="wc-nav__menu">
+      <summary class="wc-nav__menu-button">More</summary>
+      <div class="wc-nav__menu-content">
+        {% if current_user.has_role('Admin') %}
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for('admin.allruns') }}"
+             rel="noopener">
+            All Runs
+          </a>
+        {% endif %}
+        {% if current_user.has_role('Root') %}
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for('admin.usermod') }}"
+             rel="noopener">
+            Usermod
+          </a>
+        {% endif %}
+        {% if current_user.has_role('Root') or current_user.has_role('Admin') or current_user.has_role('Dev') %}
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for('admin.runid_query') }}"
+             rel="noopener">
+            Runid Query
+          </a>
+        {% endif %}
+        <a class="pure-button pure-button-secondary"
+           href="{{ url_for('security.logout') }}"
+           rel="noopener">
+          Logout
+        </a>
+      </div>
+    </details>
+  {% else %}
+    <a class="wc-nav__link" href="{{ url_for('security.login') }}">Login</a>
+  {% endif %}
 </nav>
 {% endblock %}
 
