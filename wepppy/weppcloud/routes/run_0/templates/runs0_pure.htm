@@ -50,6 +50,9 @@
         {% endif %}
         <li><a href="#soils">Soils</a></li>
         <li><a href="#wepp">WEPP</a></li>
+        {% if 'ash' in ron.mods %}
+        <li><a href="#ash">Ash Transport</a></li>
+        {% endif %}
         {% if observed is not none %}
         <li><a href="#observed">Observed Data</a></li>
         {% endif %}
@@ -111,6 +114,12 @@
         {% include 'controls/wepp_pure.htm' %}
       </section>
 
+      {% if 'ash' in ron.mods %}
+      <section id="ash" class="wc-stack">
+        {% include 'controls/ash_pure.htm' %}
+      </section>
+      {% endif %}
+
       {% if observed is not none %}
       <section id="observed" class="wc-stack">
         {% include 'controls/observed_pure.htm' %}
@@ -130,11 +139,6 @@
       <section id="legacy-wepp" class="wc-stack">
         <h2>Legacy WEPP Control</h2>
         <p class="wc-text-muted">Legacy WEPP execution panel placeholder. The existing `_base.htm` version remains available on classic runs pages.</p>
-      </section>
-
-      <section id="legacy-watar" class="wc-stack">
-        <h2>Legacy WATAR Control (ash)</h2>
-        <p class="wc-text-muted">Legacy WATAR execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
       </section>
 
     </section>

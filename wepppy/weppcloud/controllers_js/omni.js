@@ -16,6 +16,8 @@ var Omni = function () {
         that.rq_job_id = null;
         that.rq_job = $("#omni_form #rq_job");
         that.command_btn_id = 'btn_run_omni';
+        const MAX_SBS_FILE_BYTES = 100 * 1024 * 1024;
+        const ALLOWED_SBS_FILE_EXTENSIONS = new Set(['tif', 'tiff', 'img']);
 
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
@@ -38,15 +40,26 @@ var Omni = function () {
                 const scenarioSelect = item.querySelector('select[name="scenario"]');
                 if (!scenarioSelect || !scenarioSelect.value) return;
 
+                const scenarioType = scenarioSelect.value;
                 const scenario = {
-                    type: scenarioSelect.value
+                    type: scenarioType
                 };
 
                 const controls = item.querySelectorAll('.scenario-controls [name]');
                 controls.forEach(control => {
                     if (control.type === 'file' && control.files.length > 0) {
-                        formData.append(`scenarios[${index}][${control.name}]`, control.files[0]);
-                        scenario[control.name] = control.files[0].name;
+                        const file = control.files[0];
+                        if (scenarioType === 'sbs_map') {
+                            const extension = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
+                            if (!ALLOWED_SBS_FILE_EXTENSIONS.has(extension)) {
+                                throw new Error("SBS maps must be .tif, .tiff, or .img files.");
+                            }
+                            if (file.size > MAX_SBS_FILE_BYTES) {
+                                throw new Error("SBS maps must be 100 MB or smaller.");
+                            }
+                        }
+                        formData.append(`scenarios[${index}][${control.name}]`, file);
+                        scenario[control.name] = file.name;
                     } else if (control.value) {
                         scenario[control.name] = control.value;
                     }
@@ -65,11 +78,19 @@ var Omni = function () {
             var task_msg = "Submitting omni run";
 
             self.info.text("");
-            self.status.html(task_msg + "...");
             self.stacktrace.text("");
-            self.ws_client.connect();
 
-            const data = self.serializeScenarios();
+            let data;
+            try {
+                data = self.serializeScenarios();
+            } catch (err) {
+                const message = (err && err.message) ? err.message : "Validation failed. Check SBS uploads.";
+                self.status.html(message);
+                return;
+            }
+
+            self.status.html(task_msg + "...");
+            self.ws_client.connect();
 
             $.post({
                 url: "rq/api/run_omni",

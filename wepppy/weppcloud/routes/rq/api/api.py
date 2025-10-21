@@ -18,6 +18,7 @@ from flask_security import current_user
 from werkzeug.utils import secure_filename
 
 from wepppy.weppcloud.utils.helpers import get_wd, success_factory, error_factory, exception_factory
+from wepppy.weppcloud.utils.uploads import save_run_file, UploadError
 
 import redis
 from rq import Queue, Callback
@@ -87,6 +88,8 @@ def _redis_conn():
 
 
 TIMEOUT = 216_000
+SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
+SBS_MAX_BYTES = 100 * 1024 * 1024
 
 rq_api_bp = Blueprint('rq_api', __name__)
 
@@ -837,17 +840,31 @@ def api_run_wepp(runid, config):
     return jsonify({'Success': True, 'job_id': job.id})
 
 
-def _task_upload_ash_map(wd, request, file_input_id):
+def _task_upload_ash_map(runid, config, file_input_id, *, required=True, overwrite=True):
+    wd = get_wd(runid)
     ash = Ash.getInstance(wd)
 
-    file = request.files[file_input_id]
-    if file.filename == '':
+    storage = request.files.get(file_input_id)
+    if storage is None or storage.filename == '':
+        if required:
+            raise ValueError(f"Missing file for {file_input_id}")
         return None
 
-    filename = secure_filename(file.filename)
-    file.save(_join(ash.ash_dir, filename))
+    try:
+        saved_path = save_run_file(
+            runid=runid,
+            config=config,
+            form_field=file_input_id,
+            allowed_extensions=("tif", "tiff", "img"),
+            dest_subdir=_join("ash"),
+            run_root=wd,
+            overwrite=overwrite,
+            max_bytes=100 * 1024 * 1024,
+        )
+    except UploadError as exc:
+        raise ValueError(str(exc)) from exc
 
-    return filename
+    return saved_path.name
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_omni', methods=['POST'])
@@ -884,19 +901,21 @@ def api_run_omni(runid, config):
                 if file_key not in request.files:
                     return exception_factory(f'Missing SBS file for scenario {idx}', runid=runid)
 
-                file = request.files[file_key]
-                if file.filename == '':
-                    return error_factory('No filename specified for SBS file')
+                try:
+                    upload_path = save_run_file(
+                        runid=runid,
+                        config=config,
+                        form_field=file_key,
+                        allowed_extensions=SBS_ALLOWED_EXTENSIONS,
+                        dest_subdir=f"omni/_limbo/{idx:02d}",
+                        run_root=wd,
+                        overwrite=True,
+                        max_bytes=SBS_MAX_BYTES,
+                    )
+                except UploadError as exc:
+                    return error_factory(f'Invalid SBS file for scenario {idx}: {exc}')
 
-                # Securely save the file to wd/omni/.limbo/SBSmap
-                filename = secure_filename(file.filename)
-                scenario_dir = os.path.join(limbo_dir, f'{idx:02d}')
-                os.makedirs(scenario_dir, exist_ok=True)
-                file_path = os.path.join(scenario_dir, filename)
-                file.save(file_path)
-
-                # Update scenario params with the file path
-                scenario_params['sbs_file_path'] = file_path
+                scenario_params['sbs_file_path'] = str(upload_path)
 
             parsed_inputs.append((scenario_enum, scenario_params))
 
@@ -954,19 +973,21 @@ def run_omni_contrasts(runid, config):
                 if file_key not in request.files:
                     return exception_factory(f'Missing SBS file for scenario {idx}', runid=runid)
 
-                file = request.files[file_key]
-                if file.filename == '':
-                    return error_factory('No filename specified for SBS file')
+                try:
+                    upload_path = save_run_file(
+                        runid=runid,
+                        config=config,
+                        form_field=file_key,
+                        allowed_extensions=SBS_ALLOWED_EXTENSIONS,
+                        dest_subdir=f"omni/_limbo/{idx:02d}",
+                        run_root=wd,
+                        overwrite=True,
+                        max_bytes=SBS_MAX_BYTES,
+                    )
+                except UploadError as exc:
+                    return error_factory(f'Invalid SBS file for scenario {idx}: {exc}')
 
-                # Securely save the file to wd/omni/.limbo/SBSmap
-                filename = secure_filename(file.filename)
-                scenario_dir = os.path.join(limbo_dir, f'{idx:02d}')
-                os.makedirs(scenario_dir, exist_ok=True)
-                file_path = os.path.join(scenario_dir, filename)
-                file.save(file_path)
-
-                # Update scenario params with the file path
-                scenario_params['sbs_file_path'] = file_path
+                scenario_params['sbs_file_path'] = str(upload_path)
 
             parsed_inputs.append((scenario_enum, scenario_params))
 
@@ -1049,12 +1070,19 @@ def api_run_ash(runid, config):
 
         if ash_depth_mode == 2:
             with ash.locked():
-                ash._spatial_mode = AshSpatialMode.Gridded
-                ash._ash_load_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_load')
-                ash._ash_type_map_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_type_map')
-                
-            if ash.ash_load_fn is None:
-                return exception_factory('Expecting ashload map"', runid=runid)
+        ash._spatial_mode = AshSpatialMode.Gridded
+        try:
+            ash._ash_load_fn = _task_upload_ash_map(runid, config, 'input_upload_ash_load', required=True)
+        except ValueError as exc:
+            return exception_factory(str(exc), runid=runid)
+
+        try:
+            ash._ash_type_map_fn = _task_upload_ash_map(runid, config, 'input_upload_ash_type_map', required=False)
+        except ValueError as exc:
+            return exception_factory(str(exc), runid=runid)
+
+        if ash.ash_load_fn is None:
+            return exception_factory('Expecting ashload map"', runid=runid)
         
         # remember mode for the view
         ash.ash_depth_mode = ash_depth_mode

@@ -3,84 +3,6 @@
 {% block form_title %}Wildfire Ash Transport And Risk (WATAR){% endblock %}
 {% block inputs %}
 
-<script>
-    // Embed all model parameters from Python/Jinja2 into a JS object
-    const modelParams = {
-        multi: { // Corresponds to Srivastava2023
-            white: {{ ash.anu_white_ash_model_pars.to_dict() | tojson | safe }},
-            black: {{ ash.anu_black_ash_model_pars.to_dict() | tojson | safe }}
-        },
-        alex: { // Corresponds to Watanabe2025
-            white: {{ ash.alex_white_ash_model_pars.to_dict() | tojson | safe }},
-            black: {{ ash.alex_black_ash_model_pars.to_dict() | tojson | safe }}
-        }
-    };
-
-    function updateAshModelForm() {
-        const modelSelector = document.getElementById('ash_model_select');
-        if (!modelSelector) return;
-
-        const selectedModel = modelSelector.value;
-        const params = modelParams[selectedModel];
-
-        // 1. Update visibility based on the selected model (ANU vs Alex)
-        const anuOnlyParams = document.querySelectorAll('.anu-only-param');
-        const alexOnlyParams = document.querySelectorAll('.alex-only-param');
-
-        if (selectedModel === 'alex') {
-            anuOnlyParams.forEach(el => el.style.display = 'none');
-            alexOnlyParams.forEach(el => el.style.display = 'flex');
-
-            // Handle transport mode visibility for parameters AND descriptions
-            const transportModeSelector = document.getElementById('ash_transport_mode_select');
-            const selectedTransportMode = transportModeSelector.value;
-
-            const dynamicParams = document.querySelectorAll('.alex-dynamic-param');
-            const staticParams = document.querySelectorAll('.alex-static-param');
-            const dynamicDesc = document.getElementById('dynamic_description');
-            const staticDesc = document.getElementById('static_description');
-
-            if (selectedTransportMode === 'static') {
-                // Show static elements
-                staticParams.forEach(el => el.style.display = 'flex');
-                staticDesc.style.display = 'block';
-
-                // Hide dynamic elements
-                dynamicParams.forEach(el => el.style.display = 'none');
-                dynamicDesc.style.display = 'none';
-            } else { // 'dynamic'
-                // Show dynamic elements
-                dynamicParams.forEach(el => el.style.display = 'flex');
-                dynamicDesc.style.display = 'block';
-
-                // Hide static elements
-                staticParams.forEach(el => el.style.display = 'none');
-                staticDesc.style.display = 'none';
-            }
-
-        } else { // 'multi' (ANU model)
-            anuOnlyParams.forEach(el => el.style.display = 'flex');
-            alexOnlyParams.forEach(el => el.style.display = 'none');
-        }
-
-        // 2. Update all input values based on the selected model's parameters
-        for (const color of ['white', 'black']) {
-            for (const key in params[color]) {
-                const inputId = `${color}_${key}`;
-                const inputElement = document.getElementById(inputId);
-                if (inputElement) {
-                    inputElement.value = params[color][key];
-                }
-            }
-        }
-    }
-
-    // Run the function on page load to set the correct initial state
-    window.addEventListener('DOMContentLoaded', (event) => {
-        updateAshModelForm();
-    });
-</script>
-
 <p>
     The ash transport analysis is available for continuous climates (no single storm).
     A climate with at least 100 years is recommended. The ash transport relies on WEPP outputs.
@@ -102,23 +24,20 @@
 <div class="form-group row">
     <div class="col-sm-3">
         <label class="radio-inline">
-            <input type="radio" value="1" class="disable-readonly" id="ash_depth_mode" name="ash_depth_mode" {{
-                ('', 'checked' )[ash.ash_depth_mode==1] }}
-                onchange="Ash.getInstance().handleDepthModeChange(this.value)">
+            <input type="radio" value="1" class="disable-readonly" id="ash_depth_mode_depth" name="ash_depth_mode" {{
+                ('', 'checked' )[ash.ash_depth_mode==1] }} data-ash-depth-mode="1">
             Specify Depth</label>
     </div>
     <div class="col-sm-3">
         <label class="radio-inline">
-            <input type="radio" value="0" class="disable-readonly" id="ash_depth_mode" name="ash_depth_mode" {{
-                ('', 'checked' )[ash.ash_depth_mode==0] }}
-                onchange="Ash.getInstance().handleDepthModeChange(this.value)">
+            <input type="radio" value="0" class="disable-readonly" id="ash_depth_mode_load" name="ash_depth_mode" {{
+                ('', 'checked' )[ash.ash_depth_mode==0] }} data-ash-depth-mode="0">
             Specify Load</label>
     </div>
     <div class="col-sm-3">
         <label class="radio-inline">
-            <input type="radio" value="2" class="disable-readonly" id="ash_depth_mode" name="ash_depth_mode" {{
-                ('', 'checked' )[ash.ash_depth_mode==2] }}
-                onchange="Ash.getInstance().handleDepthModeChange(this.value)">
+            <input type="radio" value="2" class="disable-readonly" id="ash_depth_mode_map" name="ash_depth_mode" {{
+                ('', 'checked' )[ash.ash_depth_mode==2] }} data-ash-depth-mode="2">
             Upload Maps</label>
     </div>
 </div>
@@ -175,7 +94,7 @@
     <p>Upload a raster load map (.img or .tif). The map should contain ash loads in tonne / ha.</p>
     <div class="form-group row hide-readonly">
         <div class="col-md-6">
-            <input id="input_upload_ash_load" name="input_upload_ash_load" type="file" class="file">
+            <input id="input_upload_ash_load" name="input_upload_ash_load" type="file" class="file" data-ash-upload="load">
         </div>
     </div>
 
@@ -184,7 +103,7 @@
         2.</p>
     <div class="form-group row hide-readonly">
         <div class="col-md-6">
-            <input id="input_upload_ash_type_map" name="input_upload_ash_type_map" type="file" class="file">
+            <input id="input_upload_ash_type_map" name="input_upload_ash_type_map" type="file" class="file" data-ash-upload="type">
         </div>
     </div>
 </div>
@@ -220,7 +139,7 @@
             <div class="col-sm-4" style="padding-left: 3em;">
                 <label class="form-check-label">
                     <input id="checkbox_run_wind_transport" type="checkbox" class="form-check-input disable-readonly"
-                        onchange="Ash.getInstance().set_wind_transport(this.checked);" {% if ash.run_wind_transport
+                        {% if ash.run_wind_transport
                         %}checked{% endif %}>
                     Run Wind Transport
                 </label>
@@ -234,7 +153,7 @@
                 <label for="ash_model_select">Ash Model</label>
             </div>
             <div class="col-sm-6">
-                <select id="ash_model_select" name="ash_model" class="form-control" onchange="updateAshModelForm()">
+                <select id="ash_model_select" name="ash_model" class="form-control">
                     {% for value, text in ash.available_models %}
                     <option value="{{ value }}" {% if value==ash.model %}selected{% endif %}>{{ text }}</option>
                     {% endfor %}
@@ -247,8 +166,7 @@
                 <label for="ash_transport_mode_select">Transport Mode:</label>
             </div>
             <div class="col-sm-6">
-                <select id="ash_transport_mode_select" name="transport_mode" class="form-control"
-                    onchange="updateAshModelForm()">
+                <select id="ash_transport_mode_select" name="transport_mode" class="form-control">
                     <option value="dynamic" {% if ash.transport_mode=='dynamic' %}selected{% endif %}>Dynamic</option>
                     <option value="static" {% if ash.transport_mode=='static' %}selected{% endif %}>Static</option>
                 </select>
@@ -445,8 +363,7 @@
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
         <button id="btn_run_ash" class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-            onclick="Ash.getInstance().run();"
-            type="button">
+            type="button" data-ash-action="run">
             <img id="run_ash_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
             Run Model
         </button>
@@ -455,4 +372,16 @@
         <small id="hint_run_ash"></small>
     </div>
 </div>
+<script type="application/json" id="ash-model-params-data">
+  {{ {
+        'multi': {
+            'white': ash.anu_white_ash_model_pars.to_dict(),
+            'black': ash.anu_black_ash_model_pars.to_dict()
+        },
+        'alex': {
+            'white': ash.alex_white_ash_model_pars.to_dict(),
+            'black': ash.alex_black_ash_model_pars.to_dict()
+        }
+    } | tojson | safe }}
+</script>
 {% endblock %}
