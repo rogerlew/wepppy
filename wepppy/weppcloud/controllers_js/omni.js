@@ -121,20 +121,22 @@ var Omni = function () {
                     if (!Array.isArray(data)) throw new Error("Invalid scenario format");
 
                     data.forEach(scenario => {
-                        addScenario();
-                        const container = document.querySelectorAll('#scenario-container .scenario-item');
-                        const latestItem = container[container.length - 1];
-                        const scenarioSelect = latestItem.querySelector('select[name="scenario"]');
-                        scenarioSelect.value = scenario.type;
+                        const scenarioItem = addScenario(scenario);
+                        if (!scenarioItem) {
+                            return;
+                        }
+                        const scenarioSelect = scenarioItem.querySelector('select[name="scenario"]');
+                        if (scenarioSelect && scenario.type && scenarioSelect.value !== scenario.type) {
+                            scenarioSelect.value = scenario.type;
+                            updateControls(scenarioSelect, scenario);
+                        }
 
-                        // Trigger controls to be rendered
-                        updateControls(scenarioSelect);
-
-                        // Populate the controls with values
                         Object.entries(scenario).forEach(([key, value]) => {
-                            if (key === "type") return;
-                            const input = latestItem.querySelector(`[name="${key}"]`);
-                            if (input) {
+                            if (key === "type") {
+                                return;
+                            }
+                            const input = scenarioItem.querySelector(`[name="${key}"]`);
+                            if (input && input.type !== 'file') {
                                 input.value = value;
                             }
                         });

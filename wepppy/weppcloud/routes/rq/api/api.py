@@ -1070,16 +1070,16 @@ def api_run_ash(runid, config):
 
         if ash_depth_mode == 2:
             with ash.locked():
-        ash._spatial_mode = AshSpatialMode.Gridded
-        try:
-            ash._ash_load_fn = _task_upload_ash_map(runid, config, 'input_upload_ash_load', required=True)
-        except ValueError as exc:
-            return exception_factory(str(exc), runid=runid)
+                ash._spatial_mode = AshSpatialMode.Gridded
+                try:
+                    ash._ash_load_fn = _task_upload_ash_map(runid, config, 'input_upload_ash_load', required=True)
+                except ValueError as exc:
+                    return exception_factory(str(exc), runid=runid)
 
-        try:
-            ash._ash_type_map_fn = _task_upload_ash_map(runid, config, 'input_upload_ash_type_map', required=False)
-        except ValueError as exc:
-            return exception_factory(str(exc), runid=runid)
+                try:
+                    ash._ash_type_map_fn = _task_upload_ash_map(runid, config, 'input_upload_ash_type_map', required=False)
+                except ValueError as exc:
+                    return exception_factory(str(exc), runid=runid)
 
         if ash.ash_load_fn is None:
             return exception_factory('Expecting ashload map"', runid=runid)

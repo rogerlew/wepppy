@@ -338,14 +338,14 @@
           {{ ui.numeric_field(
                "white_org_mat",
                "Organic matter (white ash, fraction)",
-               value="%.6f"|format(white_pars.org_mat),
+               value="%.6f"|format(white_pars.org_mat if using_alex and white_pars.org_mat is not none else 0.0),
                precision="0.0001",
                attrs={"data-disable-readonly": "true"}
              ) }}
           {{ ui.numeric_field(
                "black_org_mat",
                "Organic matter (black ash, fraction)",
-               value="%.6f"|format(black_pars.org_mat),
+               value="%.6f"|format(black_pars.org_mat if using_alex and black_pars.org_mat is not none else 0.0),
                precision="0.0001",
                attrs={"data-disable-readonly": "true"}
              ) }}
@@ -356,14 +356,14 @@
           {{ ui.numeric_field(
                "white_initranscap",
                "Initial transport capacity (white ash, t ha^-1 mm^-1)",
-               value="%.6f"|format(getattr(white_pars, 'initranscap', 0.0) or 0.0),
+               value="%.6f"|format(white_pars.initranscap if using_alex and white_pars.initranscap is not none else 0.0),
                precision="0.0001",
                attrs={"data-disable-readonly": "true"}
              ) }}
           {{ ui.numeric_field(
                "black_initranscap",
                "Initial transport capacity (black ash, t ha^-1 mm^-1)",
-               value="%.6f"|format(getattr(black_pars, 'initranscap', 0.0) or 0.0),
+               value="%.6f"|format(black_pars.initranscap if using_alex and black_pars.initranscap is not none else 0.0),
                precision="0.0001",
                attrs={"data-disable-readonly": "true"}
              ) }}
@@ -371,14 +371,14 @@
           {{ ui.numeric_field(
                "white_depletcoeff",
                "Depletion coefficient (white ash, mm^-1)",
-               value="%.6f"|format(getattr(white_pars, 'depletcoeff', 0.0) or 0.0),
+               value="%.6f"|format(white_pars.depletcoeff if using_alex and white_pars.depletcoeff is not none else 0.0),
                precision="0.0001",
                attrs={"data-disable-readonly": "true"}
              ) }}
           {{ ui.numeric_field(
                "black_depletcoeff",
                "Depletion coefficient (black ash, mm^-1)",
-               value="%.6f"|format(getattr(black_pars, 'depletcoeff', 0.0) or 0.0),
+               value="%.6f"|format(black_pars.depletcoeff if using_alex and black_pars.depletcoeff is not none else 0.0),
                precision="0.0001",
                attrs={"data-disable-readonly": "true"}
              ) }}

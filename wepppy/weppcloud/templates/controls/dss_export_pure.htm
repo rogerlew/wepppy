@@ -91,7 +91,7 @@
                "dss_export_exclude_order_" ~ order,
                order|string,
                checked=(order in wepp.dss_excluded_channel_orders),
-               extra_control_class="disable-readonly"
+               attrs={"class": "disable-readonly"}
              ) }}
         {% endfor %}
       </div>

@@ -14,6 +14,15 @@
 - Identify coupling points (scenario builder, contrast definitions, uploads, status streaming) that must survive migration to the Pure component model.
 - Produce a phased migration plan—with testing strategy and open questions—to guide the conversion from the Bootstrap-era control to a Pure-first implementation.
 
+## Phase 0 – Discovery Closeout
+
+- **Scenario catalog**: Runtime code (`OmniScenario.parse`, template `scenarios` map) supports eight scenario types—`uniform_low`, `uniform_moderate`, `uniform_high`, `sbs_map`, `undisturbed`, `prescribed_fire`, `thinning`, and `mulch`. Legacy labels such as `mulching30` resolve to `mulch` with `ground_cover_increase` parameters; no additional scenario enums exist.
+- **Upload pipeline**: Only the `sbs_map` scenario accepts files. Client validation will enforce raster uploads (`.tif`, `.tiff`, `.img`) capped at 100 MB per file. Files are staged under `wd/omni/_limbo/{idx:02d}/{filename}`, copied into the cloned scenario’s `disturbed/` directory, and then deleted from `_limbo`.
+- **Telemetry**: RQ workers publish status through `StatusMessenger` on the `"{runid}:omni"` channel and register timestamps/job ids via `RedisPrep` tasks `run_omni_scenarios` and `run_omni_contrasts`. The `/api/omni/get_scenario_run_state` endpoint exposes the append-only `scenario_run_state` list for UI progress.
+- **Controller dependencies**: Scenario execution clones the base run and drives `Disturbed`, `Landuse`, `Soils`, `Treatments`, and `Wepp` controllers; contrasts require the resulting scenario outputs at `_pups/omni/scenarios/<scenario_name>/wepp/output/`. This coupling confirms contrasts cannot be defined without running the referenced scenarios.
+- **Units & locale**: All numeric outputs and thresholds are metric (mm, tonne/ha, m³). There is no locale or unit switching; Pure migration can assume metric-first copy.
+- **Retention**: After a successful run the canonical SBS rasters live inside each scenario clone; `_limbo` retains its directory structure so Omni can keep staging resources on subsequent runs, but individual files are removed once processed. No additional archival copy is maintained.
+
 ## UI Inventory
 
 ### Scenario Runner (`wepppy/weppcloud/templates/controls/omni/omni_scenarios.htm`)
@@ -142,11 +151,15 @@
 
 ## Open Questions / Assumptions
 
-- Do analysts require additional scenario types (e.g., `mulching30`, `mulching60`) beyond the current `mulch` with parameters, or can we deprecate legacy naming?
-- Should the contrast workflow remain coupled to scenario definitions, or can contrasts be defined independently after runs complete?
-- What is the desired retention policy for uploaded SBS rasters—should they live alongside run artifacts or be purged post-run?
-- Does the team expect real-time progress per scenario (job pool concurrency) in the UI, implying additional status endpoints?
-- Are there non-default locale or unit requirements (metric vs imperial) that should be addressed during the Pure migration?
+- **Resolved in Phase 0**
+  - Additional scenario types: The system only recognises the eight enums listed above; `mulching30/60` are parameter presets, so no catalog expansion is needed.
+  - Contrast coupling: `build_contrasts` depends on existing scenario outputs (`_pups/omni/scenarios/...`), so contrasts must remain tied to executed scenarios.
+  - SBS retention: Post-run copies live inside each scenario’s `disturbed/` folder; `_limbo` files are deleted once moved.
+  - Progress telemetry: `scenario_run_state` already serialises per-scenario status; the Pure UI should surface it but no backend additions are required.
+  - Locale/units: Metric-only; no evidence of locale toggles.
+
+- **Outstanding**
+- None; Phase 0 discovery items are complete.
 
 ## Summary
 

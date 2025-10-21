@@ -1,0 +1,316 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Configure Omni mitigation scenarios to run after WEPP finishes. The builder lets you mix uniform burn
+    severities, treatments, mulching, and uploaded SBS rasters. Scenarios execute in the order listed.
+  </p>
+  <p class="wc-text-muted">
+    SBS map uploads must be GeoTIFF/IMG files 100&nbsp;MB or smaller and should align with the project DEM.
+  </p>
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="omni_form",
+     title="Omni Scenario Runner",
+     collapsible=False,
+     description=description
+   ) %}
+
+  <div class="wc-stack">
+    <div class="wc-card">
+      <div class="wc-card__body wc-stack">
+        <div id="scenario-container" class="wc-stack"></div>
+        <div>
+          <button id="add-omni-scenario"
+                  type="button"
+                  class="pure-button pure-button-secondary disable-readonly">
+            Add scenario
+          </button>
+        </div>
+      </div>
+    </div>
+    <p class="wc-text-muted">
+      Mulching and thinning scenarios depend on their base scenario outputs. Place base scenarios ahead of
+      derived treatments so Omni can reuse results efficiently.
+    </p>
+  </div>
+
+  {% call button_row() %}
+    <button id="btn_run_omni"
+            class="pure-button pure-button-primary disable-readonly"
+            type="button"
+            onclick="Omni.getInstance().run_omni_scenarios()">
+      Run Omni
+    </button>
+  {% endcall %}
+  <p id="hint_run_omni" class="wc-field__help" aria-live="polite"></p>
+
+{% endcall %}
+
+<script>
+(function () {
+  const scenarios = {
+    uniform_low: {
+      label: "Uniform Low Severity Fire",
+      controls: []
+    },
+    uniform_moderate: {
+      label: "Uniform Moderate Severity Fire",
+      controls: []
+    },
+    uniform_high: {
+      label: "Uniform High Severity Fire",
+      controls: []
+    },
+    sbs_map: {
+      label: "SBS Map",
+      controls: [
+        { type: "file", name: "sbs_file", label: "Upload SBS File" }
+      ]
+    },
+    undisturbed: {
+      label: "Undisturbed",
+      controls: [],
+      condition: () => (Disturbed.getInstance()?.has_sbs?.() ?? false)
+    },
+    prescribed_fire: {
+      label: "Prescribed Fire",
+      controls: [],
+      condition: () => {
+        const disturbed = Disturbed.getInstance();
+        const hasSbs = disturbed ? disturbed.has_sbs?.() : false;
+        return hasSbs === false || hasUndisturbedScenario();
+      }
+    },
+    thinning: {
+      label: "Thinning",
+      controls: [
+        {
+          type: "select",
+          name: "canopy_cover",
+          label: "Canopy cover reduction to",
+          options: ["40%", "65%"]
+        },
+        {
+          type: "select",
+          name: "ground_cover",
+          label: "Ground cover",
+          options: ["93%", "90%", "85%", "75%"],
+          optionLabels: {
+            "93%": "93% – Cable",
+            "90%": "90% – Forward",
+            "85%": "85% – Skidder",
+            "75%": "75%"
+          }
+        }
+      ]
+    },
+    mulch: {
+      label: "Mulching",
+      controls: [
+        {
+          type: "select",
+          name: "ground_cover_increase",
+          label: "Ground cover increase",
+          options: ["15%", "30%", "60%"],
+          optionLabels: {
+            "15%": "15% – ½ tons/acre",
+            "30%": "30% – 1 ton/acre",
+            "60%": "60% – 2 tons/acre"
+          }
+        },
+        {
+          type: "select",
+          name: "base_scenario",
+          label: "Base scenario",
+          options: ["uniform_low", "uniform_moderate", "uniform_high", "sbs_map"],
+          optionLabels: {
+            uniform_low: "Uniform Low Severity Fire",
+            uniform_moderate: "Uniform Moderate Severity Fire",
+            uniform_high: "Uniform High Severity Fire",
+            sbs_map: "SBS Map"
+          }
+        }
+      ]
+    }
+  };
+
+  let scenarioCounter = 0;
+
+  function hasUndisturbedScenario() {
+    return Array.from(document.querySelectorAll('#scenario-container select[name="scenario"]'))
+      .some((select) => select.value === 'undisturbed');
+  }
+
+  function scenarioIsAvailable(config) {
+    if (typeof config.condition === 'function') {
+      try {
+        return !!config.condition();
+      } catch (err) {
+        console.warn('Omni scenario condition failed', err);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function populateScenarioSelect(selectElement) {
+    const currentValue = selectElement.value;
+    selectElement.innerHTML = '<option value="">Select scenario</option>';
+
+    Object.entries(scenarios).forEach(([key, config]) => {
+      if (!scenarioIsAvailable(config)) {
+        return;
+      }
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = config.label;
+      selectElement.appendChild(option);
+    });
+
+    if (currentValue) {
+      const optionExists = Array.from(selectElement.options).some((opt) => opt.value === currentValue);
+      if (optionExists) {
+        selectElement.value = currentValue;
+      }
+    }
+  }
+
+  function refreshScenarioOptions() {
+    const selects = document.querySelectorAll('#scenario-container select[name="scenario"]');
+    selects.forEach(populateScenarioSelect);
+  }
+
+  function createFieldWrapper(labelText, control) {
+    const field = document.createElement('div');
+    field.className = 'wc-field';
+
+    const label = document.createElement('label');
+    label.className = 'wc-field__label';
+    label.textContent = labelText;
+
+    const controlWrapper = document.createElement('div');
+    controlWrapper.className = 'wc-field__input-row';
+
+    field.appendChild(label);
+    field.appendChild(controlWrapper);
+    return { field, controlWrapper };
+  }
+
+  function updateControls(selectElement, values) {
+    const scenarioKey = selectElement.value;
+    const scenarioItem = selectElement.closest('.scenario-item');
+    const controlsDiv = scenarioItem.querySelector('.scenario-controls');
+    controlsDiv.innerHTML = '';
+
+    if (!scenarioKey || !scenarios[scenarioKey]) {
+      return;
+    }
+
+    const scenarioIndex = scenarioItem.dataset.index;
+    const config = scenarios[scenarioKey];
+
+    config.controls.forEach((control) => {
+      const { field, controlWrapper } = createFieldWrapper(control.label, control);
+      const controlId = `${control.name}_${scenarioIndex}`;
+
+      if (control.type === 'select') {
+        const select = document.createElement('select');
+        select.id = controlId;
+        select.name = control.name;
+        select.className = 'wc-field__control';
+        (control.options || []).forEach((optionValue) => {
+          const option = document.createElement('option');
+          option.value = optionValue;
+          option.textContent = control.optionLabels?.[optionValue] || optionValue;
+          select.appendChild(option);
+        });
+
+        if (values && values[control.name]) {
+          select.value = values[control.name];
+        }
+
+        controlWrapper.appendChild(select);
+      } else if (control.type === 'file') {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.id = controlId;
+        input.name = control.name;
+        input.className = 'wc-field__control';
+        input.accept = '.tif,.tiff,.img';
+        input.setAttribute('data-omni-sbs-upload', 'true');
+        controlWrapper.appendChild(input);
+
+        const hint = document.createElement('p');
+        hint.className = 'wc-field__help';
+        hint.textContent = 'GeoTIFF/IMG, 100 MB maximum.';
+        field.appendChild(hint);
+      }
+
+      controlsDiv.appendChild(field);
+    });
+  }
+
+  function addScenario(prefill) {
+    const container = document.getElementById('scenario-container');
+    const scenarioItem = document.createElement('div');
+    scenarioItem.className = 'scenario-item wc-card wc-card--subtle';
+    const scenarioIndex = scenarioCounter++;
+    scenarioItem.dataset.index = scenarioIndex;
+
+    scenarioItem.innerHTML = `
+      <div class="wc-card__body wc-stack">
+        <div class="wc-field">
+          <label class="wc-field__label" for="omni_scenario_${scenarioIndex}">Scenario</label>
+          <select class="wc-field__control"
+                  id="omni_scenario_${scenarioIndex}"
+                  name="scenario">
+            <option value="">Select scenario</option>
+          </select>
+        </div>
+        <div class="scenario-controls wc-stack"></div>
+      </div>
+      <footer class="wc-card__footer">
+        <button type="button" class="pure-button button-error disable-readonly" data-role="remove-scenario">
+          Remove
+        </button>
+      </footer>
+    `;
+
+    container.appendChild(scenarioItem);
+
+    const scenarioSelect = scenarioItem.querySelector('select[name="scenario"]');
+    populateScenarioSelect(scenarioSelect);
+
+    scenarioSelect.addEventListener('change', () => {
+      updateControls(scenarioSelect);
+      refreshScenarioOptions();
+    });
+
+    scenarioItem.querySelector('[data-role="remove-scenario"]').addEventListener('click', () => {
+      scenarioItem.remove();
+      refreshScenarioOptions();
+    });
+
+    if (prefill && prefill.type) {
+      scenarioSelect.value = prefill.type;
+      updateControls(scenarioSelect, prefill);
+    }
+
+    refreshScenarioOptions();
+    return scenarioItem;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const addButton = document.getElementById('add-omni-scenario');
+    if (addButton) {
+      addButton.addEventListener('click', () => addScenario());
+    }
+  });
+
+  window.addScenario = addScenario;
+  window.updateControls = updateControls;
+})();
+</script>

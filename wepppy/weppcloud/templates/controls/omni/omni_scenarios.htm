@@ -159,7 +159,8 @@
                         </select>
                     `;
                 } else if (control.type === 'file') {
-                    html += `<input type="file" class="form-control-file" id="${control.name}" name="${control.name}" accept=".tif,.img">`;
+                    html += `<input type="file" class="form-control-file" id="${control.name}" name="${control.name}" accept=".tif,.tiff,.img">`;
+                    html += `<small class="form-text text-muted">Upload GeoTIFF/IMG files up to 100&nbsp;MB.</small>`;
                 }
                 html += `</div>`;
                 controlsDiv.insertAdjacentHTML('beforeend', html);

@@ -273,47 +273,47 @@
             </div>
         </div>
 
-        <div class="form-group row alex-only-param alex-dynamic-param">
-            <div class="col-sm-4">
-                <label for="white_org_mat">Organic Matter (fraction): </label>
-            </div>
-            <div class="col-sm-3">
+       <div class="form-group row alex-only-param alex-dynamic-param">
+           <div class="col-sm-4">
+               <label for="white_org_mat">Organic Matter (fraction): </label>
+           </div>
+           <div class="col-sm-3">
                 <input id="white_org_mat" name="white_org_mat" class="form-control mr-sm-3" type="text"
-                    value="{{ white_pars.org_mat }}" aria-label="White Ash Organic Matter">
-            </div>
-            <div class="col-sm-3">
+                    value="{{ '%.6f'|format(white_pars.org_mat if using_alex else 0.0) }}" aria-label="White Ash Organic Matter">
+           </div>
+           <div class="col-sm-3">
                 <input id="black_org_mat" name="black_org_mat" class="form-control mr-sm-3" type="text"
-                    value="{{ black_pars.org_mat }}" aria-label="Black Ash Organic Matter">
-            </div>
-        </div>
+                    value="{{ '%.6f'|format(black_pars.org_mat if using_alex else 0.0) }}" aria-label="Black Ash Organic Matter">
+           </div>
+       </div>
 
-        <div class="form-group row alex-only-param alex-static-param">
-            <div class="col-sm-4">
-                <label for="white_initranscap">Initial Transport Capacity (t ha<sup>-1</sup> mm<sup>-1</sup>):</label>
-            </div>
-            <div class="col-sm-3">
+       <div class="form-group row alex-only-param alex-static-param">
+           <div class="col-sm-4">
+               <label for="white_initranscap">Initial Transport Capacity (t ha<sup>-1</sup> mm<sup>-1</sup>):</label>
+           </div>
+           <div class="col-sm-3">
                 <input id="white_initranscap" name="white_initranscap" class="form-control mr-sm-3" type="text"
-                    value="{{ white_pars.initranscap }}" aria-label="White Ash Initial Transport Capacity">
-            </div>
-            <div class="col-sm-3">
+                    value="{{ '%.6f'|format(white_pars.initranscap if using_alex else 0.0) }}" aria-label="White Ash Initial Transport Capacity">
+           </div>
+           <div class="col-sm-3">
                 <input id="black_initranscap" name="black_initranscap" class="form-control mr-sm-3" type="text"
-                    value="{{ black_pars.initranscap }}" aria-label="Black Ash Initial Transport Capacity">
-            </div>
-        </div>
+                    value="{{ '%.6f'|format(black_pars.initranscap if using_alex else 0.0) }}" aria-label="Black Ash Initial Transport Capacity">
+           </div>
+       </div>
 
-        <div class="form-group row alex-only-param alex-static-param">
-            <div class="col-sm-4">
+       <div class="form-group row alex-only-param alex-static-param">
+           <div class="col-sm-4">
                 <label for="white_depletcoeff">Depletion Coefficient (mm<sup>-1</sup>):</label>
-            </div>
-            <div class="col-sm-3">
+           </div>
+           <div class="col-sm-3">
                 <input id="white_depletcoeff" name="white_depletcoeff" class="form-control mr-sm-3" type="text"
-                    value="{{ white_pars.depletcoeff }}" aria-label="White Ash Depletion Coefficient">
-            </div>
-            <div class="col-sm-3">
+                    value="{{ '%.6f'|format(white_pars.depletcoeff if using_alex else 0.0) }}" aria-label="White Ash Depletion Coefficient">
+           </div>
+           <div class="col-sm-3">
                 <input id="black_depletcoeff" name="black_depletcoeff" class="form-control mr-sm-3" type="text"
-                    value="{{ black_pars.depletcoeff }}" aria-label="Black Ash Depletion Coefficient">
-            </div>
-        </div>
+                    value="{{ '%.6f'|format(black_pars.depletcoeff if using_alex else 0.0) }}" aria-label="Black Ash Depletion Coefficient">
+           </div>
+       </div>
 
         <div class="form-group row anu-only-param">
             <div class="col-sm-4">

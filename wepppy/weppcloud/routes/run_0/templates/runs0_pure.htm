@@ -53,6 +53,10 @@
         {% if 'ash' in ron.mods %}
         <li><a href="#ash">Ash Transport</a></li>
         {% endif %}
+        {% if 'omni' in ron.mods %}
+        <li><a href="#omni-scenarios">Omni Scenarios</a></li>
+        <li><a href="#omni-contrasts">Omni Contrasts</a></li>
+        {% endif %}
         {% if observed is not none %}
         <li><a href="#observed">Observed Data</a></li>
         {% endif %}
@@ -117,6 +121,15 @@
       {% if 'ash' in ron.mods %}
       <section id="ash" class="wc-stack">
         {% include 'controls/ash_pure.htm' %}
+      </section>
+      {% endif %}
+
+      {% if 'omni' in ron.mods %}
+      <section id="omni-scenarios" class="wc-stack">
+        {% include 'controls/omni_scenarios_pure.htm' %}
+      </section>
+      <section id="omni-contrasts" class="wc-stack">
+        {% include 'controls/omni_contrasts_pure.htm' %}
       </section>
       {% endif %}
 
