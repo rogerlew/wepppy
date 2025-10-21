@@ -229,6 +229,13 @@
                 Omni Migration
               </button>
             {% endif %}
+            {% if 'path_ce' not in ron.mods %}
+              <button type="button"
+                      class="pure-button pure-button-secondary"
+                      onclick="Project.getInstance().enable_path_cost_effective()">
+                Enable PATH Cost-Effective
+              </button>
+            {% endif %}
           </div>
         </section>
       </div>

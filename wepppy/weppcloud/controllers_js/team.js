@@ -8,9 +8,53 @@ var Team = function () {
     function createInstance() {
         var that = controlBase();
         that.form = $("#team_form");
-        that.info = $("#team_form #info");
+        that.info = $("#team_form #info, #team_form #team-info");
         that.status = $("#team_form  #status");
         that.stacktrace = $("#team_form #stacktrace");
+        that.statusPanelEl = document.getElementById("team_status_panel");
+        that.stacktracePanelEl = document.getElementById("team_stacktrace_panel");
+        that.statusStream = null;
+        that.ws_client = null;
+
+        that.appendStatus = function (message, meta) {
+            if (!message) {
+                return;
+            }
+            if (that.statusStream && typeof that.statusStream.append === "function") {
+                that.statusStream.append(message, meta || null);
+            }
+            if (that.status && that.status.length) {
+                that.status.html(message);
+            }
+        };
+
+        if (typeof StatusStream !== "undefined" && that.statusPanelEl) {
+            var stacktraceConfig = null;
+            if (that.stacktracePanelEl) {
+                stacktraceConfig = { element: that.stacktracePanelEl };
+            }
+            that.statusStream = StatusStream.attach({
+                element: that.statusPanelEl,
+                channel: "team",
+                runId: window.runid || window.runId || null,
+                logLimit: 200,
+                stacktrace: stacktraceConfig,
+                onTrigger: function (detail) {
+                    if (detail && detail.event) {
+                        that.triggerEvent(detail.event, detail);
+                    }
+                }
+            });
+        that.hideStacktrace = function () {
+            var self = instance;
+            if (self.stacktrace && self.stacktrace.length) {
+                self.stacktrace.hide();
+            }
+        };
+        } else {
+            that.ws_client = new WSClient('team_form', 'team');
+            that.ws_client.attachControl(that);
+        }
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -31,7 +75,8 @@ var Team = function () {
                 data: data,
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("TEAM_ADDUSER_TASK_COMPLETED");
+                        self.appendStatus("Collaborator invited.");
+                        that.triggerEvent("TEAM_ADDUSER_TASK_COMPLETED", { email: email });
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -54,7 +99,8 @@ var Team = function () {
                 dataType: "json",
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("TEAM_REMOVEUSER_TASK_COMPLETED");
+                        self.appendStatus("Collaborator removed.");
+                        that.triggerEvent("TEAM_REMOVEUSER_TASK_COMPLETED", { user_id: user_id });
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }

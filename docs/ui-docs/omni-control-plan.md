@@ -36,9 +36,10 @@
 ### Inline Scenario Builder Script (same template)
 
 - Declares a global `const scenarios` map describing available scenario types, labels, and control metadata. Options include `uniform_*`, `sbs_map`, `undisturbed`, `prescribed_fire`, `thinning`, and `mulch`.
-- Conditional availability leverages global controllers: e.g., `condition: () => Disturbed.getInstance()?.has_sbs() || false`. This assumes `Disturbed` has already been bootstrapped and introduces tight coupling.
-- `addScenario()` creates a `.scenario-item` with a repeated `id="scenario-select"` and a `<select name="scenario">`. Options are filtered using the `condition` callbacks at render time.
-- `updateControls(select)` populates `.scenario-controls` with `<select>` or `<input type="file">` elements according to the scenario metadata. Generated controls reuse `id` values equal to the `name`, so duplicates appear across items.
+      - Conditional availability leverages global controllers: e.g., `condition: () => Disturbed.getInstance()?.has_sbs() || false`. This assumes `Disturbed` has already been bootstrapped and introduces tight coupling. Caching the SBS flag inside the `Disturbed` controller (seeded by run bootstrap and updated via `disturbed:has_sbs_changed` events) now prevents the UI from hammering `/api/disturbed/has_sbs/`.
+      - `addScenario()` creates a `.scenario-item` with a repeated `id="scenario-select"` and a `<select name="scenario">`. Options are filtered using the `condition` callbacks at render time.
+      - `updateControls(select)` populates `.scenario-controls` with `<select>` or `<input type="file">` elements according to the scenario metadata. Generated controls reuse `id` values equal to the `name`, so duplicates appear across items.
+      - `refreshScenarioOptions()` now batches list hydration (one pass after `load_scenarios_from_backend()` finishes) and exposes a global helper that listeners invoke when SBS availability changes, eliminating the previous O(N²) refresh loop.
 - The script exposes `addScenario` and `updateControls` as globals referenced by inline attributes (`onclick`, `onchange`). There is no module encapsulation and no hook for restoring server-saved state other than direct DOM manipulation.
 
 ### Contrast Definition Panel (`wepppy/weppcloud/templates/controls/omni/omni_contrasts_definition.htm`)

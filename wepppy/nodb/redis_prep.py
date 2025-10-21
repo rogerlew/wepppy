@@ -39,6 +39,7 @@ class TaskEnum(Enum):
     run_omni_contrasts = 'run_omni_contrasts'
     dss_export = 'dss_export'
     set_readonly = 'set_readonly'
+    run_path_cost_effective = 'run_path_ce'
 
     def __str__(self):
         return self.value.replace('TaskEnum.', '')
@@ -69,6 +70,7 @@ class TaskEnum(Enum):
             TaskEnum.run_omni_contrasts: 'Run OMNI Contrasts',
             TaskEnum.dss_export: 'Export DSS',
             TaskEnum.set_readonly: 'Set Readonly',
+            TaskEnum.run_path_cost_effective: 'Run PATH Cost-Effective',
         }.get(self, self.value)
     
     def emoji(self):
@@ -97,6 +99,7 @@ class TaskEnum(Enum):
             TaskEnum.run_omni_contrasts: '⚖️',
             TaskEnum.dss_export: '📤',
             TaskEnum.set_readonly: '🔒',
+            TaskEnum.run_path_cost_effective: '🧮',
         }.get(self, self.value)
 
     def __getstate__(self):

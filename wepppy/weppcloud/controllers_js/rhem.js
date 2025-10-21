@@ -11,8 +11,44 @@ var Rhem = function () {
         that.info = $("#rhem_form #info");
         that.status = $("#rhem_form  #status");
         that.stacktrace = $("#rhem_form #stacktrace");
-        that.ws_client = new WSClient('rhem_form', 'rhem');
-        that.ws_client.attachControl(that);
+        that.statusPanelEl = document.getElementById("rhem_status_panel");
+        that.stacktracePanelEl = document.getElementById("rhem_stacktrace_panel");
+        that.statusStream = null;
+        that.ws_client = null;
+
+        that.appendStatus = function (message, meta) {
+            if (!message) {
+                return;
+            }
+            if (that.statusStream && typeof that.statusStream.append === "function") {
+                that.statusStream.append(message, meta || null);
+            }
+            if (that.status && that.status.length) {
+                that.status.html(message);
+            }
+        };
+
+        if (typeof StatusStream !== "undefined" && that.statusPanelEl) {
+            var stacktraceConfig = null;
+            if (that.stacktracePanelEl) {
+                stacktraceConfig = { element: that.stacktracePanelEl };
+            }
+            that.statusStream = StatusStream.attach({
+                element: that.statusPanelEl,
+                channel: "rhem",
+                runId: window.runid || window.runId || null,
+                logLimit: 200,
+                stacktrace: stacktraceConfig,
+                onTrigger: function (detail) {
+                    if (detail && detail.event) {
+                        that.triggerEvent(detail.event, detail);
+                    }
+                }
+            });
+        } else {
+            that.ws_client = new WSClient('rhem_form', 'rhem');
+            that.ws_client.attachControl(that);
+        }
         that.rq_job_id = null;
         that.rq_job = $("#rhem_form #rq_job");
         that.command_btn_id = 'btn_run_rhem';
@@ -20,7 +56,9 @@ var Rhem = function () {
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
             if (eventName === 'RHEM_RUN_TASK_COMPLETED') {
-                that.ws_client.disconnect();
+                if (that.ws_client) {
+                    that.ws_client.disconnect();
+                }
                 that.report();
             }
 
@@ -37,16 +75,18 @@ var Rhem = function () {
             var task_msg = "Submitting rhem run";
 
             self.info.text("");
-            self.status.html(task_msg + "...");
+            self.appendStatus(task_msg + "...");
             self.stacktrace.text("");
-            self.ws_client.connect();
+            if (self.ws_client) {
+                self.ws_client.connect();
+            }
 
             $.post({
                 url: "rq_api/run_rhem/",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`run_rhem_rq job submitted: ${response.job_id}`);
+                        self.appendStatus(`run_rhem_rq job submitted: ${response.job_id}`);
                         self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
@@ -67,7 +107,7 @@ var Rhem = function () {
             var task_msg = "Fetching Summary";
 
             self.info.text("");
-            self.status.html(task_msg + "...");
+            self.appendStatus(task_msg + "...");
             self.stacktrace.text("");
 
             $.get({
@@ -89,7 +129,7 @@ var Rhem = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
-                    self.status.html(task_msg + "... Success");
+                    self.appendStatus(task_msg + "... Success");
                     project.set_preferred_units();
                 },
                 error: function error(jqXHR) {

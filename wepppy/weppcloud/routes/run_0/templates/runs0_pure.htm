@@ -49,9 +49,15 @@
         <li><a href="#rap-ts">RAP Time Series</a></li>
         {% endif %}
         <li><a href="#soils">Soils</a></li>
+        {% if 'treatments' in ron.mods %}
+        <li><a href="#treatments">Treatments</a></li>
+        {% endif %}
         <li><a href="#wepp">WEPP</a></li>
         {% if 'ash' in ron.mods %}
         <li><a href="#ash">Ash Transport</a></li>
+        {% endif %}
+        {% if 'rhem' in ron.mods %}
+        <li><a href="#rhem">RHEM</a></li>
         {% endif %}
         {% if 'omni' in ron.mods %}
         <li><a href="#omni-scenarios">Omni Scenarios</a></li>
@@ -64,6 +70,7 @@
         <li><a href="#debris-flow">Debris Flow</a></li>
         {% endif %}
         <li><a href="#dss-export">DSS Export</a></li>
+        <li><a href="#team">Project Collaborators</a></li>
       </ol>
     </nav>
 
@@ -114,6 +121,12 @@
         {% include 'controls/soil_pure.htm' %}
       </section>
 
+      {% if 'treatments' in ron.mods %}
+      <section id="treatments" class="wc-stack">
+        {% include 'controls/treatments_pure.htm' %}
+      </section>
+      {% endif %}
+
       <section id="wepp" class="wc-stack">
         {% include 'controls/wepp_pure.htm' %}
       </section>
@@ -124,10 +137,19 @@
       </section>
       {% endif %}
 
-      {% if 'omni' in ron.mods %}
-      <section id="omni-scenarios" class="wc-stack">
-        {% include 'controls/omni_scenarios_pure.htm' %}
+      {% if 'rhem' in ron.mods %}
+      <section id="rhem" class="wc-stack">
+        {% include 'controls/rhem_pure.htm' %}
       </section>
+      {% endif %}
+
+      {% if 'path_ce' in ron.mods %}
+      <section id="path-cost-effective" class="wc-stack">
+        {% include 'controls/path_cost_effective_pure.htm' %}
+      </section>
+      {% endif %}
+
+      {% if 'omni' in ron.mods %}
       <section id="omni-contrasts" class="wc-stack">
         {% include 'controls/omni_contrasts_pure.htm' %}
       </section>
@@ -147,6 +169,10 @@
 
       <section id="dss-export" class="wc-stack">
         {% include 'controls/dss_export_pure.htm' %}
+      </section>
+
+      <section id="team" class="wc-stack">
+        {% include 'controls/team_pure.htm' %}
       </section>
 
       <section id="legacy-wepp" class="wc-stack">

@@ -197,7 +197,7 @@ class Treatments(NoDbBase):
         """
         Returns a dictionary of treatment disturbed_classes (e.g. mulch15, mulch30, mulch60, prescribed_fire and their valid treatment keys).
 
-        for viewmodel templates/controls/treatments.htm
+        for viewmodel templates/controls/treatments_pure.htm
         """
         landuse = Landuse.getInstance(self.wd)
         mapping = landuse.get_mapping_dict()

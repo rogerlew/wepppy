@@ -178,9 +178,33 @@
     }
   }
 
-  function refreshScenarioOptions() {
-    const selects = document.querySelectorAll('#scenario-container select[name="scenario"]');
-    selects.forEach(populateScenarioSelect);
+  function normalizeSelectCollection(selects) {
+    if (!selects) {
+      return Array.from(document.querySelectorAll('#scenario-container select[name="scenario"]'));
+    }
+
+    if (Array.isArray(selects)) {
+      return selects;
+    }
+
+    if (typeof selects.length === 'number') {
+      try {
+        return Array.prototype.slice.call(selects);
+      } catch (err) {
+        const normalized = [];
+        for (let i = 0; i < selects.length; i += 1) {
+          normalized.push(selects[i]);
+        }
+        return normalized;
+      }
+    }
+
+    return [selects];
+  }
+
+  function refreshScenarioOptions(selects) {
+    const targetSelects = normalizeSelectCollection(selects);
+    targetSelects.forEach(populateScenarioSelect);
   }
 
   function createFieldWrapper(labelText, control) {
@@ -253,7 +277,9 @@
     });
   }
 
-  function addScenario(prefill) {
+  function addScenario(prefill, options) {
+    const opts = options || {};
+    const deferRefresh = opts.deferRefresh === true;
     const container = document.getElementById('scenario-container');
     const scenarioItem = document.createElement('div');
     scenarioItem.className = 'scenario-item wc-card wc-card--subtle';
@@ -299,7 +325,9 @@
       updateControls(scenarioSelect, prefill);
     }
 
-    refreshScenarioOptions();
+    if (!deferRefresh) {
+      refreshScenarioOptions();
+    }
     return scenarioItem;
   }
 
@@ -312,5 +340,10 @@
 
   window.addScenario = addScenario;
   window.updateControls = updateControls;
+  window.refreshScenarioOptions = refreshScenarioOptions;
+
+  document.addEventListener('disturbed:has_sbs_changed', () => {
+    refreshScenarioOptions();
+  });
 })();
 </script>

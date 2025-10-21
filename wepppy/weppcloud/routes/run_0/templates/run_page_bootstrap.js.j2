@@ -12,6 +12,7 @@ var error = null;
 
 var cellsize = {{ ron.cellsize }};
 var readonly = {{ ron.readonly | tojson }};
+var initialHasSbs = {{ ron.has_sbs | tojson }};
 
 function window_resize() {
     var map = MapController.getInstance();
@@ -41,6 +42,10 @@ function onReady() {
     var disturbed = Disturbed.getInstance();
     var omni = Omni.getInstance();
     var dss_export = DssExport.getInstance();
+
+    if (disturbed && typeof disturbed.set_has_sbs_cached === 'function') {
+        disturbed.set_has_sbs_cached(initialHasSbs);
+    }
 
     initUnitConverters(document);
     
@@ -87,9 +92,17 @@ function onReady() {
     baer.form.on("SBS_UPLOAD_TASK_COMPLETE", function () {
         setTimeout(baer.show_sbs, 100);
         setTimeout(baer.load_modify_class, 100);
+        if (disturbed && typeof disturbed.set_has_sbs_cached === 'function') {
+            disturbed.set_has_sbs_cached(true);
+            initialHasSbs = true;
+        }
     });
 
     baer.form.on("SBS_REMOVE_TASK_COMPLETE", function () {
+        if (disturbed && typeof disturbed.set_has_sbs_cached === 'function') {
+            disturbed.set_has_sbs_cached(false);
+            initialHasSbs = false;
+        }
     });
 
     baer.form.on("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {

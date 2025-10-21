@@ -314,6 +314,29 @@ var Project = function () {
             });
         };
 
+        that.enable_path_cost_effective = function () {
+            $.get({
+                url: "tasks/path_cost_effective_enable",
+                cache: false,
+                success: function success(response) {
+                    if (response.Success === true) {
+                        alert("PATH Cost-Effective module enabled. Page will now refresh.");
+                        window.location.reload();
+                    } else {
+                        var message = response.Message || "Error enabling PATH Cost-Effective module";
+                        alert(message);
+                    }
+                },
+                error: function error(jqXHR) {
+                    console.log(jqXHR.responseJSON);
+                    alert("Error enabling PATH Cost-Effective module");
+                },
+                fail: function fail(error) {
+                    alert("Error enabling PATH Cost-Effective module");
+                }
+            });
+        };
+
         that.set_readonly = function (state, options) {
             var self = instance;
             options = options || {};

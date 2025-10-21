@@ -8,6 +8,7 @@ from .nodb_api.landuse_bp import landuse_bp
 from .nodb_api.interchange_bp import interchange_bp
 from .nodb_api.observed_bp import observed_bp
 from .nodb_api.omni_bp import omni_bp
+from .nodb_api.path_ce_bp import path_ce_bp
 from .nodb_api.project_bp import project_bp
 from .nodb_api.rangeland_bp import rangeland_bp
 from .nodb_api.rangeland_cover_bp import rangeland_cover_bp
@@ -63,6 +64,7 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     map_bp,
     observed_bp,
     omni_bp,
+    path_ce_bp,
     pivottable_bp,
     project_bp,
     rangeland_bp,
@@ -105,6 +107,7 @@ __all__ = [
     'map_bp',
     'observed_bp',
     'omni_bp',
+    'path_ce_bp',
     'pivottable_bp',
     'project_bp',
     'jsoncrack_bp',

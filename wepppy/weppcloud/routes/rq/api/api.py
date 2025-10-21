@@ -544,25 +544,23 @@ def api_build_treatments(runid, config):
                 return error_factory('landuse_management_mapping_selection must be provided')
             else:
                 landuse.mapping = mapping
-            
-            try:
-                file = request.files['input_upload_landuse']
-            except Exception:
-                return exception_factory('Could not find file', runid=runid)
 
             try:
-                if file.filename == '':
-                    return error_factory('no filename specified')
+                saved_path = save_run_file(
+                    runid=runid,
+                    config=config,
+                    form_field='input_upload_landuse',
+                    allowed_extensions=('tif', 'img'),
+                    dest_subdir='',
+                    run_root=landuse.lc_dir,
+                    filename_transform=lambda name: '_' + name.lower(),
+                    overwrite=True,
+                    max_bytes=100 * 1024 * 1024,
+                )
+            except UploadError as exc:
+                return exception_factory(str(exc), runid=runid)
 
-                filename = secure_filename(file.filename)
-            except Exception:
-                return exception_factory('Could not obtain filename', runid=runid)
-
-            user_defined_fn = _join(landuse.lc_dir, f'_{filename}')
-            try:
-                file.save(_join(landuse.lc_dir, f'_{filename}'))
-            except Exception:
-                return exception_factory('Could not save file', runid=runid)
+            user_defined_fn = str(saved_path)
 
             try:
                 raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)

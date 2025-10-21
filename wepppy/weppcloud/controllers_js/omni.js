@@ -121,7 +121,7 @@ var Omni = function () {
                     if (!Array.isArray(data)) throw new Error("Invalid scenario format");
 
                     data.forEach(scenario => {
-                        const scenarioItem = addScenario(scenario);
+                        const scenarioItem = addScenario(scenario, { deferRefresh: true });
                         if (!scenarioItem) {
                             return;
                         }
@@ -141,6 +141,9 @@ var Omni = function () {
                             }
                         });
                     });
+                    if (typeof refreshScenarioOptions === 'function') {
+                        refreshScenarioOptions();
+                    }
                 })
                 .catch(err => {
                     console.error("Error loading scenarios:", err);

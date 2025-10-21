@@ -6,10 +6,10 @@
 - Keep runs0 functional throughout the transition via feature flags/toggles and exhaustive JS compatibility checks (StatusStream, ControlBase, map integrations, etc.).
 
 ## 2. Current Progress Snapshot _(2025-10-22)_
-- Pure controls embedded on `runs0_pure.htm`: Soil Burn Severity (`disturbed_sbs_pure.htm`), Climate (`climate_pure.htm`), WEPP (`wepp_pure.htm`), Landuse (`landuse_pure.htm`), Soil (`soil_pure.htm`), RAP Time Series (`rap_ts_pure.htm`), Debris Flow (`debris_flow_pure.htm`), Observed Data (`observed_pure.htm`), DSS Export (`dss_export_pure.htm`), Ash/WATAR (`ash_pure.htm`), Power User modal, plus fork/archive consoles and the rangeland modify panels.
-- Legacy controls still rendered inside the Pure skeleton: map (`controls/map.htm`), channel delineation (`channel_delineation.htm`), subcatchments (`subcatchments.htm`), treatments (`treatments.htm` when enabled), Omni (`controls/omni/*.htm`), and RHEM (`controls/rhem.htm`).
+- Pure controls embedded on `runs0_pure.htm`: Soil Burn Severity (`disturbed_sbs_pure.htm`), Climate (`climate_pure.htm`), WEPP (`wepp_pure.htm`), Landuse (`landuse_pure.htm`), Soil (`soil_pure.htm`), RAP Time Series (`rap_ts_pure.htm`), RHEM (`rhem_pure.htm`), Debris Flow (`debris_flow_pure.htm`), Observed Data (`observed_pure.htm`), DSS Export (`dss_export_pure.htm`), Ash/WATAR (`ash_pure.htm`), Team/Collaborators (`team_pure.htm`), Omni Scenarios/Contrasts (`omni_scenarios_pure.htm` / `omni_contrasts_pure.htm`), Power User modal, plus fork/archive consoles and the rangeland modify panels.
+- Controls still slated for cleanup: map + delineation bundle (`map_pure.htm`, `channel_delineation_pure.htm`, `subcatchments_pure.htm`) require a follow-up UX pass; treatments remain on the legacy scaffold until their conversion lands.
 - Shared infrastructure in place: `control_shell`, `status_panel` / `stacktrace_panel`, tabset utilities, StatusStream bindings, command bar, and the Pure TOC layout.
-- Remaining migrations (high priority): map cleanup + delineation bundle, treatments suite, Omni scenario/contrast controls (including report wiring), and RHEM control.
+- Remaining migrations (high priority): map/delineation cleanup and treatments suite; Omni reporting polish continues in parallel.
 
 ## 3. Proposed Page Skeleton (`runs0_pure.htm`)
 ```
@@ -37,8 +37,8 @@ base_pure.htm
      - Update companion JS (StatusStream, event bindings).
      - Swap placeholder include → real control in `runs0_pure.htm`.
      - Update `control-inventory.md`.
-   - Completed to date: SBS, Climate, WEPP, Landuse, Soil, RAP TS, Debris Flow, Observed, DSS Export, Ash, Power User modal.
-   - Remaining: map + channel/subcatchment bundle, treatments, Omni, RHEM.
+   - Completed to date: SBS, Climate, WEPP, Landuse, Soil, RAP TS, RHEM, Debris Flow, Observed, DSS Export, Ash, Team, Omni (scenario/contrast shells), Power User modal.
+   - Remaining: map + channel/subcatchment cleanup, treatments.
 3. **Full Adoption (Phase Final)**
    - When all controls migrated, replace references to `0.htm` with `runs0_pure.htm`.
    - Remove legacy route toggles and unused CSS/JS shims.
@@ -51,7 +51,7 @@ base_pure.htm
 - Bootstrap script (`run_page_bootstrap.js.j2`) must detect which template is active and initialise controls accordingly (e.g., skip legacy-only selectors when `runs0_pure` is active).
 
 ## 6. Dependencies & Outstanding Work
-- Status streaming: convert landuse, soils, map/delineation, treatments, and Omni controllers to the StatusStream pattern prior to swapping templates.
+- Status streaming: finalise map/delineation cleanup and migrate the treatments suite to the StatusStream pattern prior to swapping templates.
 - Global assets: ensure `controllers.js` bundle ships modal manager, StatusStream, tabset helper (done); map-related utilities will need review during the map conversion.
 - Styling: extend `ui-foundation.css` with map-panel, delineation, and Omni-specific layout tokens once those controls migrate.
 - Documentation: continue updating `control_components.md`, `ash-control-plan.md`, and other module docs as controls move; keep `control-inventory.md` aligned with actual runtime status.
@@ -80,8 +80,6 @@ base_pure.htm
 ## 10. Next Actions
 1. Finalise migration of high-impact legacy controls:
    - Map cleanup + channel/subcatchment delineation bundle
-   - Treatments workflow (if retained)
-   - Omni scenarios & contrasts
    - RHEM control
 2. Track migration status in this document (append dated notes per control as they go Pure) and update `control-inventory.md` concurrently.
 3. Once remaining controls ship, flip the feature flag so `runs0_pure.htm` becomes the default and retire the legacy placeholders.
@@ -108,3 +106,8 @@ base_pure.htm
 - DSS Export control now lives in `controls/dss_export_pure.htm`, replacing Bootstrap rows with radio/checkbox macros and delegated handlers in `dss_export.js`. The Pure runs page includes the control (with TOC entry) while the legacy `_base.htm` version continues to power `0.htm`.
 - Ash/WATAR control rebuilt as `controls/ash_pure.htm`; `ash.js` now hydrates Pure markup, caches per-model edits, and performs client-side validation. Legacy template remains available for the classic runs page but no longer carries inline scripts.
 - Backend upload endpoints for Ash now use the shared `save_run_file` helper, aligning validation with the Pure control.
+
+## 14. Implementation Notes (2025-10-22)
+- Map, landuse, soil, set outlet, and channel/subcatchment controls were renamed to the `_pure.htm` convention and wired directly into `runs0_pure.htm`; the legacy `0.htm` template was removed.
+- Treatments control migrated to `controls/treatments_pure.htm`, adopting Pure macros, delegated JS events, and shared upload validation via `save_run_file`.
+- Omni scenarios and contrast controls now render through `omni_scenarios_pure.htm` / `omni_contrasts_pure.htm`; documentation and inventory entries updated accordingly.
