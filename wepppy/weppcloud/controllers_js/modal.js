@@ -160,11 +160,13 @@
         if (!trigger) {
             return;
         }
-        event.preventDefault();
         var targetId = trigger.getAttribute("data-modal-open");
-        if (targetId) {
-            openModal(targetId);
+        // Only handle if the value is a modal ID (string), not "true" (open state marker)
+        if (!targetId || targetId === "true") {
+            return;
         }
+        event.preventDefault();
+        openModal(targetId);
     }
 
     function handleDismissClick(event) {

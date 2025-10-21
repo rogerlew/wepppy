@@ -181,6 +181,13 @@
     <div class="wc-map-layout__canvas">
       <div class="wc-map">
         <div id="mapid" class="wc-map__canvas" role="application" aria-label="Watershed map viewport"></div>
+        <button type="button"
+                class="wc-map__resize-handle"
+                aria-label="Resize map"
+                title="Resize map"
+                data-map-resize-handle>
+          <span class="wc-map__resize-grip" aria-hidden="true"></span>
+        </button>
       </div>
       <div class="wc-map-status" aria-live="polite">
         <span id="mapstatus"></span>
@@ -193,3 +200,185 @@
     </div>
   </div>
 {% endcall %}
+<script>
+(function setupMapResizeHandle() {
+  "use strict";
+
+  var mapContainer = document.querySelector('.wc-map');
+  if (!mapContainer || mapContainer.hasAttribute('data-map-resize-enhanced')) {
+    return;
+  }
+
+  var handle = mapContainer.querySelector('[data-map-resize-handle]');
+  if (!handle) {
+    return;
+  }
+
+  if (!('PointerEvent' in window)) {
+    console.warn('[Map Resize] Pointer events are not supported in this browser. Resize handle disabled.');
+    return;
+  }
+
+  mapContainer.setAttribute('data-map-resize-enhanced', 'true');
+  handle.setAttribute('tabindex', '0');
+
+  var computedStyle = window.getComputedStyle(mapContainer);
+  var mapInstance = null;
+  var mapLayout = mapContainer.closest('.wc-map-layout');
+  var minWidth = parseFloat(computedStyle.minWidth) || 320;
+  var minHeight = parseFloat(computedStyle.minHeight) || 320;
+  var pointerId = null;
+  var startX = 0;
+  var startY = 0;
+  var startWidth = 0;
+  var startHeight = 0;
+
+  function getMapInstance() {
+    if (mapInstance) {
+      return mapInstance;
+    }
+    if (window.MapController && typeof window.MapController.getInstance === 'function') {
+      try {
+        mapInstance = window.MapController.getInstance();
+        return mapInstance;
+      } catch (error) {
+        console.warn('[Map Resize] Unable to obtain MapController instance:', error);
+      }
+    }
+    return null;
+  }
+
+  function clamp(value, minimum) {
+    return value < minimum ? minimum : value;
+  }
+
+  function updateColumnWidth(width) {
+    if (!mapLayout) {
+      return;
+    }
+    var normalized = clamp(Math.round(width), minWidth);
+    mapLayout.style.setProperty('--wc-map-layout-left', 'minmax(' + minWidth + 'px, ' + normalized + 'px)');
+  }
+
+  function applySize(width, height) {
+    mapContainer.style.width = width + 'px';
+    mapContainer.style.height = height + 'px';
+    updateColumnWidth(width);
+    var map = getMapInstance();
+    if (map && typeof map.invalidateSize === 'function') {
+      map.invalidateSize({ animate: false });
+    }
+  }
+
+  function handlePointerMove(event) {
+    if (pointerId === null || event.pointerId !== pointerId) {
+      return;
+    }
+    event.preventDefault();
+    if (typeof event.stopPropagation === 'function') {
+      event.stopPropagation();
+    }
+
+    var deltaX = event.clientX - startX;
+    var deltaY = event.clientY - startY;
+
+    var nextWidth = clamp(startWidth + deltaX, minWidth);
+    var nextHeight = clamp(startHeight + deltaY, minHeight);
+
+    applySize(nextWidth, nextHeight);
+  }
+
+  function handlePointerEnd(event) {
+    if (pointerId === null || event.pointerId !== pointerId) {
+      return;
+    }
+    if (typeof event.stopPropagation === 'function') {
+      event.stopPropagation();
+    }
+    if (typeof handle.releasePointerCapture === 'function') {
+      handle.releasePointerCapture(pointerId);
+    }
+    pointerId = null;
+    document.removeEventListener('pointermove', handlePointerMove);
+    document.removeEventListener('pointerup', handlePointerEnd);
+    document.removeEventListener('pointercancel', handlePointerEnd);
+  }
+
+  function handlePointerStart(event) {
+    if (pointerId !== null) {
+      handlePointerEnd({ pointerId: pointerId });
+    }
+
+    pointerId = event.pointerId;
+    startX = event.clientX;
+    startY = event.clientY;
+    startWidth = mapContainer.offsetWidth;
+    startHeight = mapContainer.offsetHeight;
+
+    mapContainer.style.maxWidth = '100%';
+    mapContainer.style.maxHeight = 'none';
+
+    if (!mapContainer.style.width) {
+      mapContainer.style.width = startWidth + 'px';
+    }
+    if (!mapContainer.style.height) {
+      mapContainer.style.height = startHeight + 'px';
+    }
+    updateColumnWidth(startWidth);
+
+    if (typeof handle.setPointerCapture === 'function') {
+      handle.setPointerCapture(pointerId);
+    }
+
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerEnd);
+    document.addEventListener('pointercancel', handlePointerEnd);
+
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function handleKeyDown(event) {
+    var step = event.shiftKey ? 32 : 16;
+    var handled = false;
+    var width = mapContainer.offsetWidth;
+    var height = mapContainer.offsetHeight;
+
+    if (!mapContainer.style.width) {
+      mapContainer.style.width = width + 'px';
+    }
+    if (!mapContainer.style.height) {
+      mapContainer.style.height = height + 'px';
+    }
+
+    switch (event.key) {
+      case 'ArrowRight':
+        width += step;
+        handled = true;
+        break;
+      case 'ArrowLeft':
+        width = clamp(width - step, minWidth);
+        handled = true;
+        break;
+      case 'ArrowDown':
+        height += step;
+        handled = true;
+        break;
+      case 'ArrowUp':
+        height = clamp(height - step, minHeight);
+        handled = true;
+        break;
+      default:
+        break;
+    }
+
+    if (handled) {
+      event.preventDefault();
+      applySize(width, height);
+    }
+  }
+
+  handle.addEventListener('pointerdown', handlePointerStart);
+  handle.addEventListener('keydown', handleKeyDown);
+})();
+</script>

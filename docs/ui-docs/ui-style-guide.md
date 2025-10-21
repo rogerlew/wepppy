@@ -192,6 +192,20 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 
 ### Modal/dialogue content
 - When Bootstrap modals are required, apply `.pure-modal` on the dialogue content to keep typography, spacing, and squared edges in sync, benefiting from the shared medium elevation shadow.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L846-L850】
+- **Pure modal pattern (`modal.js`):** Use the `data-modal` attribute system for lightweight modals without Bootstrap. Follow the markup conventions in `templates/controls/unitizer_modal.htm`:
+  * Wrap the modal in `<div class="wc-modal" id="modalId" data-modal hidden>`
+  * Include `data-modal-dismiss` on overlay and close buttons
+  * Trigger with `<button data-modal-open="modalId">`
+  * The modal manager (`controllers_js/modal.js`) handles focus trapping, Escape key, and accessibility
+- **Critical implementation note:** When a modal opens, `modal.js` adds `data-modal-open="true"` to track state. The `handleOpenClick` function checks if the attribute value is "true" (state marker) vs. a modal ID (trigger) to prevent `preventDefault()` from blocking form interactions inside the modal. Do not modify this logic without testing interactive form controls (radios, checkboxes, selects) inside the modal.
+- **Testing & validation:** The modal system is relatively new (introduced October 2025). Before migrating Bootstrap modals or creating complex modal content:
+  * Start with simple modals (confirmation dialogs, read-only content) to validate the pattern
+  * Test with plain text, buttons, and links before adding complex forms
+  * Add interactive form controls (radios, checkboxes, selects, inputs) incrementally
+  * Verify keyboard navigation (Tab, Shift+Tab, Escape) works correctly
+  * Check that form submissions and change events fire as expected
+  * The unitizer modal serves as a reference implementation but was a complex first use case - simpler modals are recommended for pattern validation
+- Always test interactive form elements (especially radio buttons and checkboxes) inside modals to ensure click events aren't being prevented by modal event handlers. If adding complex forms to modals, consider whether a dedicated page might be simpler until the modal pattern matures.
 
 ### Tooltip primitives
 - Use `.wc-tooltip` and `.wc-tooltip__bubble` to create accessible hover/focus descriptions without importing additional libraries. Anchor the bubble with `aria-describedby` IDs and toggle via CSS/JS as needed.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L617-L637】

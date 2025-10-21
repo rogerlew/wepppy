@@ -203,13 +203,24 @@ var Project = function () {
                 console.error("Failed to initialize unit preferences", error);
             });
 
+        that._unitPreferenceInflight = null;
+        that._pendingUnitPreference = null;
+
         that.handleGlobalUnitPreference = function (pref) {
             var numericPref = Number(pref);
             console.log("[Unitizer] handleGlobalUnitPreference invoked with", pref);
             if (Number.isNaN(numericPref)) {
                 return Promise.resolve();
             }
-            return UnitizerClient.ready()
+
+            if (that._unitPreferenceInflight) {
+                that._pendingUnitPreference = numericPref;
+                return that._unitPreferenceInflight;
+            }
+
+            that._pendingUnitPreference = null;
+
+            that._unitPreferenceInflight = UnitizerClient.ready()
                 .then(function (client) {
                     client.setGlobalPreference(numericPref);
                     client.applyPreferenceRadios(document);
@@ -220,7 +231,17 @@ var Project = function () {
                 })
                 .catch(function (error) {
                     console.error("Error applying global unit preference", error);
+                })
+                .finally(function () {
+                    var nextPref = that._pendingUnitPreference;
+                    that._unitPreferenceInflight = null;
+                    if (nextPref !== null && nextPref !== undefined) {
+                        that._pendingUnitPreference = null;
+                        that.handleGlobalUnitPreference(nextPref);
+                    }
                 });
+
+            return that._unitPreferenceInflight;
         };
 
         that.handleUnitPreferenceChange = function () {
