@@ -181,6 +181,65 @@ wctl run-stubgen                      # sync stubs/wepppy/
   - `forced_mappings` adds explicit word mappings.
   - Agents have authority to edit this file; rerun `uk2us` after changes to confirm the fix.
 
+### README.md Authoring and Maintenance
+Every module, service, and significant package should have a README.md that serves multiple audiences: GitHub visitors, web indexers, domain experts (hydrologists, land managers), and developers (human and AI agents).
+
+**Template and Guidance**:
+- Comprehensive README template: [`docs/prompt_templates/readme_authoring_template.md`](docs/prompt_templates/readme_authoring_template.md)
+- Module type templates: NoDb controllers, microservices, routes/blueprints, utilities
+- Audience-specific guidance: Tailoring content for different reader types
+- Quality checklist and maintenance workflow
+
+**When to Create/Update README.md**:
+1. **New module or service**: Always create a README.md before committing
+2. **Significant refactoring**: Update README.md to reflect new patterns or structure
+3. **API changes**: Document breaking changes and migration paths
+4. **User-reported confusion**: If users can't understand usage, improve the README.md
+
+**Key Principles**:
+- **Start with the why**: Explain the problem before the solution
+- **Use examples**: Concrete code snippets are more valuable than prose
+- **Link strategically**: Cross-reference AGENTS.md for coding conventions, main readme.md for architecture
+- **Serve all audiences**: Include sections for different reader types (overview for visitors, developer notes for contributors)
+- **Keep it updated**: README.md should evolve with the code
+
+**README.md Structure** (adapt as needed):
+```markdown
+# [Module Name]
+> Brief tagline (1-2 sentences)
+> **See also:** [AGENTS.md](path) for [relevant section]
+
+## Overview
+[What, why, who, key capabilities]
+
+## [Core Section: Architecture/API/Usage/Workflow]
+[Main technical content]
+
+## Quick Start / Examples
+[Concrete usage examples]
+
+## Developer Notes
+[Implementation details, patterns, testing]
+
+## Further Reading
+[Related docs, dev-notes, external refs]
+```
+
+**Quality Standards**:
+- Clear title and tagline answering "what is this?"
+- Concrete, runnable examples
+- Cross-references to AGENTS.md where appropriate
+- Tables for structured data (parameters, endpoints)
+- Code blocks with language specification for syntax highlighting
+- American English spelling (run `uk2us` after completion)
+- No confidential information or hardcoded secrets
+
+**Audit and Improvement**:
+- The template includes an audit of existing README.md files with improvement recommendations
+- Prioritize READMEs for user-facing components and frequently-modified modules
+- When touching a module with a minimal README.md, consider expanding it
+- AI agents have authority to create and revise README.md files per authorship policy
+
 
 ## Development Workflow
 
