@@ -1,0 +1,57 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Runs the Cannon et&nbsp;al. (2010) debris-flow probability model for the current watershed.
+    Results may differ from newer formulations such as Staley (2016, 2017).
+  </p>
+{% endset %}
+
+{% set status_panel_override %}
+  {% call ui.status_panel(
+       id="debris_flow_status_panel",
+       title="Status",
+       variant="compact",
+       log_id="status",
+       height="4rem"
+     ) %}
+    <div id="rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
+    <span id="braille" class="wc-status-panel__meta" aria-hidden="true"></span>
+  {% endcall %}
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="debris_flow_form",
+     title="Debris Flow Analysis",
+     collapsible=False,
+     description=description,
+     status_panel_override=status_panel_override,
+     summary_panel_override=ui.legacy_summary_panel(),
+     stacktrace_panel_override=ui.stacktrace_panel(
+       id="debris_flow_stacktrace_panel",
+       summary="Details",
+       collapsed=True,
+       body_id="stacktrace",
+       empty_state="No stack trace recorded."
+     )
+   ) %}
+
+  <section class="wc-debris-flow">
+    {% call button_row() %}
+      <button
+        id="btn_run_debris_flow"
+        type="button"
+        class="pure-button pure-button-primary disable-readonly">
+        <img
+          id="run_debris_flow_lock"
+          src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}"
+          alt=""
+          style="display:none;">
+        <span>Run Model</span>
+      </button>
+    {% endcall %}
+    <p id="hint_run_debris_flow" class="wc-field__help" aria-live="polite"></p>
+  </section>
+
+{% endcall %}

@@ -1774,6 +1774,74 @@ code * {
   margin-top: var(--wc-space-sm);
 }
 
+.wc-observed {
+  display: grid;
+  gap: var(--wc-space-md);
+}
+
+.wc-observed .wc-button-row {
+  justify-content: flex-start;
+}
+
+.wc-rap-ts {
+  display: grid;
+  gap: var(--wc-space-md);
+}
+
+.wc-rap-ts .wc-button-row {
+  justify-content: flex-start;
+}
+
+.wc-debris-flow {
+  display: grid;
+  gap: var(--wc-space-md);
+}
+
+.wc-debris-flow .wc-button-row {
+  justify-content: flex-start;
+}
+
+.wc-dss-export {
+  display: grid;
+  gap: var(--wc-space-md);
+}
+
+.wc-dss-export__orders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-space-md);
+}
+
+.wc-dss-export .wc-button-row {
+  justify-content: flex-start;
+}
+
+.wc-rangeland {
+  display: grid;
+  gap: var(--wc-space-lg);
+}
+
+.wc-rangeland__heading {
+  margin: var(--wc-space-md) 0 var(--wc-space-sm);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.wc-rangeland__grid {
+  display: grid;
+  gap: var(--wc-space-md);
+}
+
+@media (min-width: 720px) {
+  .wc-rangeland__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.wc-rangeland__rap-year {
+  max-width: 18rem;
+}
+
 .wc-map-layout {
   display: grid;
   gap: var(--wc-space-lg);

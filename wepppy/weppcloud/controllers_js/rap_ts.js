@@ -12,10 +12,26 @@ var RAP_TS = function () {
         that.status = $("#rap_ts_form  #status");
         that.stacktrace = $("#rap_ts_form #stacktrace");
         that.ws_client = new WSClient('rap_ts_form', 'rap_ts');
-       that.ws_client.attachControl(that);
+        that.ws_client.attachControl(that);
         that.rq_job_id = null;
         that.rq_job = $("#rap_ts_form #rq_job");
         that.command_btn_id = 'btn_build_rap_ts';
+
+        that.bindHandlers = function () {
+            if (!that.form || !that.form.length) {
+                return;
+            }
+
+            if (that.form.data("rapTsHandlersBound")) {
+                return;
+            }
+            that.form.data("rapTsHandlersBound", true);
+
+            that.form.on("click", "#btn_build_rap_ts", function (event) {
+                event.preventDefault();
+                instance.acquire();
+            });
+        };
 
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
@@ -61,6 +77,8 @@ var RAP_TS = function () {
             var self = instance;
             self.status.html("RAP Timeseries fetched and analyzed")
         };
+
+        that.bindHandlers();
 
         return that;
     }

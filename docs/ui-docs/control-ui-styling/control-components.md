@@ -161,6 +161,12 @@ _Fixed console shell_
 - `.wc-map-status` replaces ad-hoc rows for center/zoom/elevation copy. Keep existing IDs (`mapstatus`, `mouseelev`) inside the flex row so `MapController` continues to patch text.
 - These helpers live in `ui-foundation.css`; avoid inline sizes so Leaflet can run `invalidateSize()` against predictable containers.
 
+### 2.4 Modal Scaffolding and Resource Panels
+- Build modals with `.wc-modal` wrappers (see `controls/unitizer_modal.htm`). The PowerUser panel conversion illustrates dialog sizing at 90% viewport width/height while keeping the shared overlay, header, and close button contracts intact.
+- When rendering repeated resource rows inside a modal, create a local macro (e.g. `resource_block`) that emits a `.wc-run-header__field` heading, lock icon placeholder, and paired `.pure-button.pure-button-secondary` links. This keeps lock toggles (`preflight.js`) compatible across layouts.
+- Use semantic lists with `.wc-link wc-link--file` for browse shortcuts. Buttons remain `.pure-button` variants so modal actions blend with the foundation palette; adjust spacing via shared tokens (`var(--wc-space-*)`) instead of inline pixel values.
+- Fix modal footers when they host command bars: `poweruser_panel.htm` applies a scoped rule that sets `.wc-modal__footer { height: 3rem; }` so the close button stays aligned even when the body scrolls.
+
 ---
 
 ## 3. Component Catalogue (macro inventory)
@@ -302,6 +308,34 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **JS contract**: Buttons expose `data-sbs-action` (`upload`, `remove`, `set-firedate`) and `data-sbs-uniform` for low/moderate/high presets. `baer.js` delegates events off the form and initialises visibility via `showHideControls` so both legacy and Pure markup stay in sync.
 - **Compatibility**: Legacy IDs (`#sbs_upload_form`, `#sbs_mode{0,1}_controls`, `hint_*`) are preserved to keep ControlBase logging and StatusStream wiring unchanged. The classic Bootstrap template remains at `controls/baer_upload.htm` for the legacy runs page until the toggle flips.
 - **Status**: Implemented; TOC entry appears when `baer` or `disturbed` mods are active and `lt` is not present.
+
+### Observed Data Control (`controls/observed_pure.htm`)
+- **Structure**: `ui.control_shell(collapsible=False)` with inline description of CSV requirements. Text entry uses `ui.textarea_field` (`id="observed_text"`) plus a `button_row()` housing `btn_run_observed`. Legacy summary/status IDs (`info`, `status`, `stacktrace`) remain via override hooks so `controlBase` and `WSClient` continue to work.
+- **Status wiring**: Uses `ui.status_panel` (`observed_status_panel`) + `ui.stacktrace_panel`. `observed.js` now binds button clicks via delegated handler while still supporting the legacy `_base.htm` inline `onclick`.
+- **Hints & locks**: `run_observed_lock` image stays hidden by default and exposed through `preflight.js`. Hint label `hint_run_wepp` remains for compatibility.
+- **Status**: Implemented; legacy template retained for classic runs page. Future enhancement: optional CSV upload hook to share logic with the uploads helper.
+
+### RAP Time Series Control (`controls/rap_ts_pure.htm`)
+- **Structure**: Minimal `ui.control_shell` with a short description paragraph and a single action button rendered via `button_row()`. The button retains `btn_build_rap_ts` so `rap_ts.js` can delegate clicks; the legacy template keeps its inline handler until the classic page is retired.
+- **Status wiring**: `ui.status_panel` + `ui.stacktrace_panel` mirror other converted controls, allowing ControlBase + WSClient to surface queue updates. The hint (`hint_build_rap_ts`) remains below the button for log messaging.
+- **Status**: Implemented; bootstrap placeholder removed from `runs0_pure.htm`. Legacy `_base.htm` template persists for `0.htm` until Pure becomes default.
+
+### Debris Flow Control (`controls/debris_flow_pure.htm`)
+- **Structure**: `ui.control_shell(collapsible=False)` with a brief model disclaimer followed by a `button_row()` that retains `btn_run_debris_flow`. The PowerUser gate lives at the template include to mirror legacy behaviour.
+- **Status wiring**: Uses `ui.status_panel` (`debris_flow_status_panel`) and `ui.stacktrace_panel` so ControlBase continues to stream RQ updates via `debris_flow.js`. The lock image `run_debris_flow_lock` remains for preflight integration.
+- **Status**: Implemented; legacy template remains on `0.htm` until the Pure layout becomes default.
+
+### DSS Export Control (`controls/dss_export_pure.htm`)
+- **Structure**: `ui.control_shell(collapsible=False)` with a radio group (`dss_export_mode`) for export strategy and two conditional stacks mirroring the original mode-specific inputs. `dss_export_channel_ids` stays as a text field; channel-order exclusions reuse checkbox macros in a flex wrapper.
+- **Status wiring**: `ui.status_panel` + `ui.stacktrace_panel` allow ControlBase + WSClient to surface queue updates (`post_dss_export_rq`). The export button retains `btn_export_dss` and lock image `btn_export_dss_lock` for preflight gating.
+- **Compatibility**: `dss_export.js` now binds mode toggles and export clicks via delegated handlers while still supporting the legacy inline `onchange`. The anchor toggle recognizes both legacy and Pure TOC IDs.
+- **Status**: Implemented; legacy template persists for `0.htm` until Pure is default.
+
+### Rangeland Cover Control (`controls/rangeland_cover_pure.htm`)
+- **Structure**: `ui.control_shell(collapsible=False)` wraps the mode selector (NLCD, RAP, watershed) and grouped foliar/ground default inputs. RAP-specific settings live in `#rangeland_cover_rap_year_div` so legacy JS can keep toggling visibility.
+- **Status wiring**: Reuses legacy IDs for the status, stacktrace, hint, and build button, enabling ControlBase/WSClient to stream updates without JS changes beyond delegated handlers.
+- **Integration**: The modify panel (`controls/modify_rangeland_cover.htm`) stays in the map tabset; the main control no longer duplicates that markup. `rangeland_cover.js` now delegates events so both legacy `_base.htm` and Pure layouts are supported.
+- **Status**: Implemented; the legacy template remains on `0.htm` until the Pure layout becomes default.
 
 ---
 

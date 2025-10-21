@@ -17,6 +17,31 @@ var RangelandCover = function () {
         that.rq_job_id = null;
         that.rq_job = $("#rangeland_cover_form #rq_job");
 
+        that.bindHandlers = function () {
+            if (!that.form || !that.form.length) {
+                return;
+            }
+
+            if (that.form.data("rangelandHandlersBound")) {
+                return;
+            }
+            that.form.data("rangelandHandlersBound", true);
+
+            that.form.on("change", "input[name='rangeland_cover_mode']", function (event) {
+                var mode = event && event.target ? event.target.value : undefined;
+                that.handleModeChange(mode);
+            });
+
+            that.form.on("change", "#rap_year", function () {
+                that.handleRapYearChange();
+            });
+
+            that.form.on("click", "#btn_build_rangeland_cover", function (event) {
+                event.preventDefault();
+                that.build();
+            });
+        };
+
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
             if (eventName === 'RANGELAND_COVER_BUILD_TASK_COMPLETED') {
@@ -134,6 +159,8 @@ var RangelandCover = function () {
                 $("#rangeland_cover_form #rangeland_cover_rap_year_div").hide();
             }
         };
+
+        that.bindHandlers();
 
         return that;
     }

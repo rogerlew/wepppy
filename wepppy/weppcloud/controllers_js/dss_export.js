@@ -22,6 +22,29 @@ var DssExport = function () {
         that.rq_job = $("#dss_export_form #rq_job");
         that.command_btn_id = 'btn_export_dss';
 
+        that.bindHandlers = function () {
+            if (!that.form || !that.form.length) {
+                return;
+            }
+
+            if (that.form.data("dssHandlersBound")) {
+                return;
+            }
+            that.form.data("dssHandlersBound", true);
+
+            that.form.on("change", "input[name='dss_export_mode']", function (event) {
+                var mode = parseInt(event.target.value, 10);
+                if (!isNaN(mode)) {
+                    instance.setMode(mode);
+                }
+            });
+
+            that.form.on("click", "#btn_export_dss", function (event) {
+                event.preventDefault();
+                instance.export();
+            });
+        };
+
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
             if (eventName === 'DSS_EXPORT_TASK_COMPLETED') {
@@ -41,12 +64,12 @@ var DssExport = function () {
 
         that.show = function () {
             that.container.show();
-            $('a[href="#partitioned-dss-export-for-hec"]').parent().show()
+            $('a[href="#partitioned-dss-export-for-hec"], a[href="#dss-export"]').parent().show()
         };
 
         that.hide = function () {
             that.container.hide();
-            $('a[href="#partitioned-dss-export-for-hec"]').parent().hide()
+            $('a[href="#partitioned-dss-export-for-hec"], a[href="#dss-export"]').parent().hide()
         };
 
         that.setMode = function (mode) {
@@ -106,6 +129,16 @@ var DssExport = function () {
             var self = instance;
             self.info.html("<a href='browse/export/dss.zip' target='_blank'>Download DSS Export Results (.zip)</a>");
         };
+
+        that.bindHandlers();
+
+        var initialModeInput = that.form.find("input[name='dss_export_mode']:checked");
+        if (initialModeInput.length) {
+            var modeValue = parseInt(initialModeInput.val(), 10);
+            if (!isNaN(modeValue)) {
+                that.setMode(modeValue);
+            }
+        }
 
         return that;
     }

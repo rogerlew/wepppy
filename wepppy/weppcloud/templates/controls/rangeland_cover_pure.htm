@@ -1,0 +1,173 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set current_mode = rangeland_cover.mode if rangeland_cover.mode in [0, 1, 2] else 0 %}
+{% set rap_enabled = 'rap' in rangeland_cover.mods %}
+
+{% set mode_options = [
+  {
+    "id": "rangeland_cover_mode0",
+    "label": "Determine per hillslope (USGS NLCD Shrubland 2016)",
+    "value": "0",
+    "selected": current_mode == 0,
+    "attrs": {"class": "disable-readonly", "data-rangeland-mode": "0"}
+  }
+] %}
+{% if rap_enabled %}
+  {% set mode_options = mode_options + [
+    {
+      "id": "rangeland_cover_mode2",
+      "label": "Determine per hillslope (RAP)",
+      "value": "2",
+      "selected": current_mode == 2,
+      "attrs": {"class": "disable-readonly", "data-rangeland-mode": "2"}
+    }
+  ] %}
+{% endif %}
+{% set mode_options = mode_options + [
+  {
+    "id": "rangeland_cover_mode1",
+    "label": "Single cover for watershed",
+    "value": "1",
+    "selected": current_mode == 1,
+    "attrs": {"class": "disable-readonly", "data-rangeland-mode": "1"}
+  }
+] %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Configure rangeland foliar and ground cover defaults. Use RAP datasets when available,
+    or provide a single watershed-wide cover. Rebuild soils after adjusting managements.
+  </p>
+{% endset %}
+
+{% set status_panel_override %}
+  {% call ui.status_panel(
+       id="rangeland_status_panel",
+       title="Status",
+       variant="compact",
+       log_id="status",
+       height="4rem"
+     ) %}
+    <div id="rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
+    <span id="braille" class="wc-status-panel__meta" aria-hidden="true"></span>
+  {% endcall %}
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="rangeland_cover_form",
+     title="Rangeland Cover Options",
+     collapsible=False,
+     description=description,
+     status_panel_override=status_panel_override,
+     summary_panel_override=ui.legacy_summary_panel(),
+     stacktrace_panel_override=ui.stacktrace_panel(
+       id="rangeland_stacktrace_panel",
+       summary="Details",
+       collapsed=True,
+       body_id="stacktrace",
+       empty_state="No stack trace recorded."
+     )
+   ) %}
+
+  <section class="wc-rangeland">
+    {{ ui.radio_group(
+         "rangeland_cover_mode",
+         label="Mode",
+         layout="vertical",
+         options=mode_options
+       ) }}
+
+    {% if rap_enabled %}
+      {% set rap_style = '' if current_mode == 2 else 'display: none;' %}
+      <div
+        id="rangeland_cover_rap_year_div"
+        class="wc-rangeland__rap-year hide-readonly"
+        {% if rap_style %}style="{{ rap_style }}"{% endif %}>
+        {{ ui.text_field(
+             "rap_year",
+             "RAP dataset year",
+             value=rangeland_cover.rap_year,
+             extra_control_class="disable-readonly",
+             attrs={"inputmode": "numeric"},
+             help="Specify the year to fetch RAP cover data."
+           ) }}
+      </div>
+    {% endif %}
+
+    <h3 class="wc-rangeland__heading">Default foliar cover (%)</h3>
+    <div class="wc-rangeland__grid">
+      {{ ui.text_field(
+           "input_bunchgrass_cover",
+           "Bunch Grass",
+           value=rangeland_cover.bunchgrass_cover_default,
+           extra_control_class="disable-readonly",
+           attrs={"inputmode": "decimal"}
+         ) }}
+      {{ ui.text_field(
+           "input_forbs_cover",
+           "Forbs/Annuals",
+           value=rangeland_cover.forbs_cover_default,
+           extra_control_class="disable-readonly",
+           attrs={"inputmode": "decimal"}
+         ) }}
+      {{ ui.text_field(
+           "input_sodgrass_cover",
+           "Sod Grass",
+           value=rangeland_cover.sodgrass_cover_default,
+           extra_control_class="disable-readonly",
+           attrs={"inputmode": "decimal"}
+         ) }}
+      {{ ui.text_field(
+           "input_shrub_cover",
+           "Shrub",
+           value=rangeland_cover.shrub_cover_default,
+           extra_control_class="disable-readonly",
+           attrs={"inputmode": "decimal"}
+         ) }}
+    </div>
+
+    <h3 class="wc-rangeland__heading">Default ground cover (%)</h3>
+    <div class="wc-rangeland__grid">
+      {{ ui.text_field(
+           "input_basal_cover",
+           "Basal Plant Cover",
+           value=rangeland_cover.basal_cover_default,
+           extra_control_class="disable-readonly",
+           attrs={"inputmode": "decimal"}
+         ) }}
+      {{ ui.text_field(
+           "input_rock_cover",
+           "Rock",
+           value=rangeland_cover.rock_cover_default,
+           extra_control_class="disable-readonly",
+           attrs={"inputmode": "decimal"}
+         ) }}
+      {{ ui.text_field(
+           "input_litter_cover",
+           "Litter",
+           value=rangeland_cover.litter_cover_default,
+           extra_control_class="disable-readonly",
+           attrs={"inputmode": "decimal"}
+         ) }}
+      {{ ui.text_field(
+           "input_cryptogams_cover",
+           "Biological Crusts Cover",
+           value=rangeland_cover.cryptogams_cover_default,
+           extra_control_class="disable-readonly",
+           attrs={"inputmode": "decimal"}
+         ) }}
+    </div>
+
+    {% call button_row() %}
+      <button
+        id="btn_build_rangeland_cover"
+        type="button"
+        class="pure-button pure-button-primary disable-readonly">
+        Build Rangeland Cover
+      </button>
+    {% endcall %}
+    <p id="hint_build_rangeland_cover" class="wc-field__help" aria-live="polite"></p>
+  </section>
+
+{% endcall %}

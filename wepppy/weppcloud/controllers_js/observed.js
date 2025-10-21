@@ -17,6 +17,22 @@ var Observed = function () {
         that.rq_job_id = null;
         that.rq_job = $("#observed_form #rq_job");
 
+        that.bindHandlers = function () {
+            if (!that.form || !that.form.length) {
+                return;
+            }
+
+            if (that.form.data("observedHandlersBound")) {
+                return;
+            }
+            that.form.data("observedHandlersBound", true);
+
+            that.form.on("click", "#btn_run_observed", function (event) {
+                event.preventDefault();
+                instance.run_model_fit();
+            });
+        };
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -90,6 +106,8 @@ var Observed = function () {
             var self = instance;
             self.info.html(`<a href='${url_for_run("report/observed/")}' target='_blank'>View Model Fit Results</a>`);
         };
+
+        that.bindHandlers();
 
         return that;
     }

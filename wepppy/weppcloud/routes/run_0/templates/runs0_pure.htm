@@ -40,11 +40,23 @@
         <li><a href="#channel-delineation">Channel Delineation</a></li>
         <li><a href="#set-outlet">Outlet</a></li>
         <li><a href="#subcatchments-delineation">Subcatchments Delineation</a></li>
+        {% if 'rangeland_cover' in ron.mods %}
+        <li><a href="#rangeland-cover">Rangeland Cover</a></li>
+        {% endif %}
         <li><a href="#landuse">Landuse</a></li>
-        <li><a href="#soils">Soils</a></li>
         <li><a href="#climate">Climate</a></li>
+        {% if 'rap_ts' in ron.mods %}
+        <li><a href="#rap-ts">RAP Time Series</a></li>
+        {% endif %}
+        <li><a href="#soils">Soils</a></li>
         <li><a href="#wepp">WEPP</a></li>
-        <li><a href="#legacy-wepp">Legacy WEPP control</a></li>
+        {% if observed is not none %}
+        <li><a href="#observed">Observed Data</a></li>
+        {% endif %}
+        {% if 'debris_flow' in ron.mods and user.has_role('PowerUser') %}
+        <li><a href="#debris-flow">Debris Flow</a></li>
+        {% endif %}
+        <li><a href="#dss-export">DSS Export</a></li>
       </ol>
     </nav>
 
@@ -71,6 +83,12 @@
         {% include 'controls/subcatchments.htm' %}
       </section>
 
+      {% if 'rangeland_cover' in ron.mods %}
+      <section id="rangeland-cover" class="wc-stack">
+        {% include 'controls/rangeland_cover_pure.htm' %}
+      </section>
+      {% endif %}
+
       <section id="landuse" class="wc-stack">
         {% include 'controls/landuse.htm' %}
       </section>
@@ -78,6 +96,12 @@
       <section id="climate" class="wc-stack">
         {% include 'controls/climate_pure.htm' %}
       </section>
+
+      {% if 'rap_ts' in ron.mods %}
+      <section id="rap-ts" class="wc-stack">
+        {% include 'controls/rap_ts_pure.htm' %}
+      </section>
+      {% endif %}
 
       <section id="soils" class="wc-stack">
         {% include 'controls/soil.htm' %}
@@ -87,29 +111,30 @@
         {% include 'controls/wepp_pure.htm' %}
       </section>
 
+      {% if observed is not none %}
+      <section id="observed" class="wc-stack">
+        {% include 'controls/observed_pure.htm' %}
+      </section>
+      {% endif %}
+
+      {% if 'debris_flow' in ron.mods and user.has_role('PowerUser') %}
+      <section id="debris-flow" class="wc-stack">
+        {% include 'controls/debris_flow_pure.htm' %}
+      </section>
+      {% endif %}
+
+      <section id="dss-export" class="wc-stack">
+        {% include 'controls/dss_export_pure.htm' %}
+      </section>
+
       <section id="legacy-wepp" class="wc-stack">
         <h2>Legacy WEPP Control</h2>
         <p class="wc-text-muted">Legacy WEPP execution panel placeholder. The existing `_base.htm` version remains available on classic runs pages.</p>
       </section>
 
-      <section id="legacy-debris-flow" class="wc-stack">
-        <h2>Legacy Debris Flow Control</h2>
-        <p class="wc-text-muted">Legacy Debris Flow execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
-      </section>
-      
-      <section id="legacy-observed" class="wc-stack">
-        <h2>Legacy Observed Control</h2>
-        <p class="wc-text-muted">Legacy Observed execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
-      </section>
-
       <section id="legacy-watar" class="wc-stack">
         <h2>Legacy WATAR Control (ash)</h2>
         <p class="wc-text-muted">Legacy WATAR execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
-      </section>
-
-      <section id="legacy-dss-export" class="wc-stack">
-        <h2>Legacy DSS Export Control</h2>
-        <p class="wc-text-muted">Legacy DSS Export execution panel placeholder. The existing `_base.htm` version remains active until the control is converted.</p>
       </section>
 
     </section>

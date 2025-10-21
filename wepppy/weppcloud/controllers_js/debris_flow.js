@@ -17,6 +17,22 @@ var DebrisFlow = function () {
         that.rq_job = $("#debris_flow_form #rq_job");
         that.command_btn_id = 'btn_run_debris_flow';
 
+        that.bindHandlers = function () {
+            if (!that.form || !that.form.length) {
+                return;
+            }
+
+            if (that.form.data("debrisFlowHandlersBound")) {
+                return;
+            }
+            that.form.data("debrisFlowHandlersBound", true);
+
+            that.form.on("click", "#btn_run_debris_flow", function (event) {
+                event.preventDefault();
+                instance.run();
+            });
+        };
+
         const baseTriggerEvent = that.triggerEvent.bind(that);
         that.triggerEvent = function (eventName, payload) {
             if (eventName === 'DEBRIS_FLOW_RUN_TASK_COMPLETED') {
@@ -67,6 +83,8 @@ var DebrisFlow = function () {
             var self = instance;
             self.info.html(`<a href='${url_for_run("report/debris_flow/")}' target='_blank'>View Debris Flow Model Results</a>`);
         };
+
+        that.bindHandlers();
 
         return that;
     }

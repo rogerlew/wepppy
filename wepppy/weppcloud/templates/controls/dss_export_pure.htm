@@ -1,0 +1,116 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set current_mode = wepp.dss_export_mode if wepp.dss_export_mode in [1, 2] else 1 %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Generate partitioned DSS exports for HEC tools. Choose to export specific channels or
+    filter by channel order before enqueueing the RQ task.
+  </p>
+{% endset %}
+
+{% set mode_options = [
+  {
+    "id": "dss_export_mode1",
+    "label": "Export select channels",
+    "value": "1",
+    "selected": current_mode == 1,
+    "attrs": {"class": "disable-readonly", "data-dss-export-mode": "1"}
+  },
+  {
+    "id": "dss_export_mode2",
+    "label": "Export based on channel order",
+    "value": "2",
+    "selected": current_mode == 2,
+    "attrs": {"class": "disable-readonly", "data-dss-export-mode": "2"}
+  }
+] %}
+
+{% set status_panel_override %}
+  {% call ui.status_panel(
+       id="dss_export_status_panel",
+       title="Status",
+       variant="compact",
+       log_id="status",
+       height="4rem"
+     ) %}
+    <div id="rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
+    <span id="braille" class="wc-status-panel__meta" aria-hidden="true"></span>
+  {% endcall %}
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="dss_export_form",
+     title="Partitioned DSS Export for HEC",
+     collapsible=False,
+     description=description,
+     status_panel_override=status_panel_override,
+     summary_panel_override=ui.legacy_summary_panel(),
+     stacktrace_panel_override=ui.stacktrace_panel(
+       id="dss_export_stacktrace_panel",
+       summary="Details",
+       collapsed=True,
+       body_id="stacktrace",
+       empty_state="No stack trace recorded."
+     )
+   ) %}
+
+  <section class="wc-dss-export">
+    {{ ui.radio_group(
+         "dss_export_mode",
+         label="Export mode",
+         layout="vertical",
+         options=mode_options
+       ) }}
+
+    {% set mode1_style = '' if current_mode == 1 else 'display: none;' %}
+    <div
+      id="dss_export_mode1_controls"
+      class="wc-dss-export__mode wc-stack hide-readonly"
+      {% if mode1_style %}style="{{ mode1_style }}"{% endif %}>
+      {{ ui.text_field(
+           "dss_export_channel_ids",
+           "Channel Topaz IDs to export",
+           value=(wepp.dss_export_channel_ids | join(', ')),
+           placeholder="e.g. 24, 54, 224",
+           extra_control_class="disable-readonly",
+           help="Provide a comma-separated list of channel Topaz IDs."
+         ) }}
+    </div>
+
+    {% set mode2_style = '' if current_mode == 2 else 'display: none;' %}
+    <div
+      id="dss_export_mode2_controls"
+      class="wc-dss-export__mode wc-stack hide-readonly"
+      {% if mode2_style %}style="{{ mode2_style }}"{% endif %}>
+      <span class="wc-field__label">Exclude channel orders</span>
+      <div class="wc-dss-export__orders">
+        {% for order in range(1, 6) %}
+          {{ ui.checkbox_field(
+               "dss_export_exclude_order_" ~ order,
+               order|string,
+               checked=(order in wepp.dss_excluded_channel_orders),
+               extra_control_class="disable-readonly"
+             ) }}
+        {% endfor %}
+      </div>
+    </div>
+
+    {% call button_row() %}
+      <button
+        id="btn_export_dss"
+        type="button"
+        class="pure-button pure-button-primary disable-readonly">
+        <img
+          id="btn_export_dss_lock"
+          src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}"
+          alt=""
+          style="display:none;">
+        <span>Export DSS</span>
+      </button>
+    {% endcall %}
+    <p id="hint_export_dss" class="wc-field__help" aria-live="polite"></p>
+  </section>
+
+{% endcall %}
