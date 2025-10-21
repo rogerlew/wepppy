@@ -1727,6 +1727,11 @@ code * {
 
 .wc-baer-classify__table {
   width: 100%;
+  max-width: 450px;
+}
+
+.wc-baer-classify__table th {
+  text-align: left;
 }
 
 .wc-baer-classify__input {
