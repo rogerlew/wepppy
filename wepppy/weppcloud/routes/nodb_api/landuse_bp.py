@@ -6,7 +6,7 @@ from typing import Dict, Iterable, List, Mapping, MutableMapping, Sequence, Tupl
 
 from flask import Response
 
-from .._common import Blueprint, jsonify, render_template, request
+from .._common import Blueprint, jsonify, parse_request_payload, render_template, request
 from .._common import exception_factory, get_wd, success_factory  # noqa: F401
 
 from wepppy.nodb.core import Landuse, LanduseMode, Ron
@@ -64,10 +64,16 @@ def build_landuse_report_context(landuse: Landuse) -> Dict[str, object]:
 @landuse_bp.route('/runs/<string:runid>/<config>/tasks/set_landuse_mode/', methods=['POST'])
 def set_landuse_mode(runid: str, config: str) -> Response:
     """Update landuse mode and single selection for the active run."""
+    payload = parse_request_payload(request)
+
     try:
-        mode = int(request.form.get('mode', None))
-        single_selection = request.form.get('landuse_single_selection', None)
-    except Exception:
+        mode_raw = payload.get('mode', None)
+        mode = int(mode_raw) if mode_raw is not None else None
+        single_selection = payload.get('landuse_single_selection', None)
+    except (TypeError, ValueError):
+        return exception_factory('mode and landuse_single_selection must be provided', runid=runid)
+
+    if mode is None:
         return exception_factory('mode and landuse_single_selection must be provided', runid=runid)
 
     if single_selection is None:
@@ -78,8 +84,9 @@ def set_landuse_mode(runid: str, config: str) -> Response:
 
     try:
         landuse.mode = LanduseMode(mode)
-        landuse.single_selection = single_selection
-    except Exception:
+        landuse.single_selection = str(single_selection)
+    except Exception as exc:
+        del exc  # explicit discard to silence linters while preserving behaviour
         return exception_factory('error setting landuse mode', runid=runid)
 
     return success_factory()
@@ -88,9 +95,10 @@ def set_landuse_mode(runid: str, config: str) -> Response:
 @landuse_bp.route('/runs/<string:runid>/<config>/tasks/set_landuse_db/', methods=['POST'])
 def set_landuse_db(runid: str, config: str) -> Response:
     """Persist NLCD database selection for the landuse controller."""
-    try:
-        db = request.form.get('landuse_db', None)
-    except Exception:
+    payload = parse_request_payload(request)
+    db = payload.get('landuse_db', None)
+
+    if db is None:
         return exception_factory('landuse_db must be provided', runid=runid)
 
     wd = get_wd(runid)
@@ -110,12 +118,18 @@ def modify_landuse_coverage(runid: str, config: str) -> Response:
     """Adjust coverage percentages for a given domain and cover class."""
     wd = get_wd(runid)
 
-    payload = request.get_json(silent=True) or {}
+    payload = parse_request_payload(request)
     dom = payload.get('dom')
     cover = payload.get('cover')
     value = payload.get('value')
 
-    Landuse.getInstance(wd).modify_coverage(dom, cover, value)
+    if dom is None or cover is None or value is None:
+        return exception_factory('dom, cover, and value must be provided', runid=runid)
+
+    try:
+        Landuse.getInstance(wd).modify_coverage(str(dom), str(cover), float(value))
+    except Exception:
+        return exception_factory('Failed to modify landuse coverage', runid=runid)
 
     return success_factory()
 
@@ -125,12 +139,18 @@ def task_modify_landuse_mapping(runid: str, config: str) -> Response:
     """Re-map domain identifiers in the landuse controller."""
     wd = get_wd(runid)
 
-    payload = request.get_json(silent=True) or {}
+    payload = parse_request_payload(request)
     dom = payload.get('dom', None)
     newdom = payload.get('newdom', None)
 
+    if dom is None or newdom is None:
+        return exception_factory('dom and newdom must be provided', runid=runid)
+
     landuse = Landuse.getInstance(wd)
-    landuse.modify_mapping(dom, newdom)
+    try:
+        landuse.modify_mapping(str(dom), str(newdom))
+    except Exception:
+        return exception_factory('Failed to modify landuse mapping', runid=runid)
 
     return success_factory()
 
@@ -193,11 +213,31 @@ def task_modify_landuse(runid: str, config: str) -> Response:
     landuse = Landuse.getInstance(wd)
 
     try:
-        topaz_ids = request.form.get('topaz_ids', None)
-        topaz_ids = topaz_ids.split(',')
-        topaz_ids = [str(int(v)) for v in topaz_ids]
-        lccode = request.form.get('landuse', None)
-        lccode = str(int(lccode))
+        payload = parse_request_payload(request)
+        raw_ids = payload.get('topaz_ids', None)
+        if raw_ids is None:
+            raise ValueError('topaz_ids missing')
+
+        if isinstance(raw_ids, str):
+            raw_values = [raw_ids]
+        elif isinstance(raw_ids, Sequence):
+            raw_values = [str(item) for item in raw_ids if item not in (None, '')]
+        else:
+            raise ValueError('topaz_ids must be a string or list')
+
+        candidate_ids: List[str] = []
+        for value in raw_values:
+            for segment in value.split(','):
+                segment = segment.strip()
+                if segment:
+                    candidate_ids.append(segment)
+
+        topaz_ids = [str(int(value)) for value in candidate_ids]
+
+        lccode_raw = payload.get('landuse', None)
+        if lccode_raw is None:
+            raise ValueError('landuse missing')
+        lccode = str(int(lccode_raw))
     except Exception:
         return exception_factory('Unpacking Modify Landuse Args Faied', runid=runid)
 

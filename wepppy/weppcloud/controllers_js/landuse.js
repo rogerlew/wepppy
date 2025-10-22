@@ -2,171 +2,201 @@
  * Landuse
  * ----------------------------------------------------------------------------
  */
-var Landuse = function () {
+var Landuse = (function () {
     var instance;
 
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#landuse_form");
-        that.info = $("#landuse_form #info");
-        that.status = $("#landuse_form  #status");
-        that.stacktrace = $("#landuse_form #stacktrace");
-        that.ws_client = new WSClient('landuse_form', 'landuse');
-        that.ws_client.attachControl(that);
-        that.rq_job_id = null;
-        that.rq_job = $("#landuse_form #rq_job");
-        that.command_btn_id = 'btn_build_landuse';
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
 
-        if (that.form && that.form.length) {
-            that.form.off('change.landuseMode', 'input[name="landuse_mode"]')
-                .on('change.landuseMode', 'input[name="landuse_mode"]', function () {
-                    that.handleModeChange(this.value);
-                });
-
-            that.form.off('change.landuseSingle', '#landuse_single_selection')
-                .on('change.landuseSingle', '#landuse_single_selection', function () {
-                    that.handleSingleSelectionChange();
-                });
-
-            that.form.off('change.landuseDb', '#landuse_db')
-                .on('change.landuseDb', '#landuse_db', function () {
-                    that.setLanduseDb(this.value);
-                });
-
-            that.form.off('click.landuseBuild', '#btn_build_landuse')
-                .on('click.landuseBuild', '#btn_build_landuse', function () {
-                    that.build();
-                });
+        if (!dom || typeof dom.ensureElement !== "function") {
+            throw new Error("Landuse controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("Landuse controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("Landuse controller requires WCHttp helpers.");
         }
 
-        const baseTriggerEvent = that.triggerEvent.bind(that);
-        that.triggerEvent = function (eventName, payload) {
-            if (eventName === 'LANDUSE_BUILD_TASK_COMPLETED') {
-                that.ws_client.disconnect();
-                that.report();
-                SubcatchmentDelineation.getInstance().enableColorMap('dom_lc');
+        return { dom: dom, forms: forms, http: http };
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function toResponsePayload(http, error) {
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error.detail || error.body || error.message || "Request failed";
+            return { Error: detail };
+        }
+        return { Error: (error && error.message) || "Request failed" };
+    }
+
+    function parseInteger(value, fallback) {
+        if (value === undefined || value === null || value === "") {
+            return fallback;
+        }
+        var parsed = parseInt(value, 10);
+        if (Number.isNaN(parsed)) {
+            return fallback;
+        }
+        return parsed;
+    }
+
+    function createInstance() {
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+
+        var landuse = controlBase();
+
+        var formElement = dom.ensureElement("#landuse_form", "Landuse form not found.");
+        var infoElement = dom.qs("#landuse_form #info");
+        var statusElement = dom.qs("#landuse_form #status");
+        var stacktraceElement = dom.qs("#landuse_form #stacktrace");
+        var rqJobElement = dom.qs("#landuse_form #rq_job");
+        var hintElement = dom.qs("#hint_build_landuse");
+
+        var infoAdapter = createLegacyAdapter(infoElement);
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+        var hintAdapter = createLegacyAdapter(hintElement);
+
+        landuse.form = formElement;
+        landuse.info = infoAdapter;
+        landuse.status = statusAdapter;
+        landuse.stacktrace = stacktraceAdapter;
+        landuse.rq_job = rqJobAdapter;
+        landuse.command_btn_id = "btn_build_landuse";
+        landuse.hint = hintAdapter;
+        landuse.infoElement = infoElement;
+
+        landuse.ws_client = new WSClient("landuse_form", "landuse");
+        landuse.ws_client.attachControl(landuse);
+
+        var modePanels = [
+            dom.qs("#landuse_mode0_controls"),
+            dom.qs("#landuse_mode1_controls"),
+            dom.qs("#landuse_mode2_controls"),
+            dom.qs("#landuse_mode3_controls"),
+            dom.qs("#landuse_mode4_controls")
+        ];
+
+        var baseTriggerEvent = landuse.triggerEvent.bind(landuse);
+        landuse.triggerEvent = function (eventName, payload) {
+            if (eventName === "LANDUSE_BUILD_TASK_COMPLETED") {
+                if (landuse.ws_client && typeof landuse.ws_client.disconnect === "function") {
+                    landuse.ws_client.disconnect();
+                }
+                landuse.report();
+                try {
+                    SubcatchmentDelineation.getInstance().enableColorMap("dom_lc");
+                } catch (err) {
+                    console.warn("[Landuse] Failed to enable Subcatchment color map", err);
+                }
             }
 
             baseTriggerEvent(eventName, payload);
         };
 
-
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
+        landuse.hideStacktrace = function () {
+            if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
+                stacktraceAdapter.hide();
+                return;
+            }
+            if (stacktraceElement) {
+                stacktraceElement.hidden = true;
+                stacktraceElement.style.display = "none";
+            }
         };
 
-        that.build = function () {
-            var self = instance;
-            var task_msg = "Building landuse";
+        function resetStatus(taskMsg) {
+            if (infoAdapter && typeof infoAdapter.text === "function") {
+                infoAdapter.text("");
+            }
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(taskMsg + "...");
+            }
+            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
+                stacktraceAdapter.text("");
+            }
+        }
 
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-            self.ws_client.connect();
+        function handleError(error) {
+            landuse.pushResponseStacktrace(landuse, toResponsePayload(http, error));
+        }
 
-            var formData = new FormData($('#landuse_form')[0]);
-
-            $.post({
-                url: "rq/api/build_landuse",
-                data: formData,
-                contentType: false,
-                cache: false,
-                processData: false,
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(`build_landuse job submitted: ${response.job_id}`);
-                        self.set_rq_job_id(self, response.job_id);
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.modify_coverage = function (dom, cover, value) {
-            var data = {
-                dom: dom,
-                cover: cover,
-                value: value
-            };
-
-            $.post({
-                url: "tasks/modify_landuse_coverage/",
-                data: JSON.stringify(data),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.modify_mapping = function (dom, newdom) {
-            var self = instance;
-
-            var data = {
-                dom: dom,
-                newdom: newdom
-            };
-
-            $.post({
-                url: "tasks/modify_landuse_mapping/",
-                data: JSON.stringify(data),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    self.report();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance;
-            $.get({
-                url: url_for_run("report/landuse/"),
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                    self.bindReportEvents();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.bindReportEvents = function () {
-            var self = instance;
-            if (!self.info || !self.info.length) {
+        function ensureReportDelegates() {
+            if (!landuse.infoElement) {
                 return;
             }
 
-            var root = self.info;
+            if (landuse._reportDelegates) {
+                return;
+            }
 
-            root.find('[data-landuse-toggle]').off('click.landuse').on('click.landuse', function (event) {
+            landuse._reportDelegates = [];
+
+            landuse._reportDelegates.push(dom.delegate(landuse.infoElement, "click", "[data-landuse-toggle]", function (event) {
                 event.preventDefault();
-                var targetId = $(this).attr('data-landuse-toggle');
+                var toggle = this;
+                var targetId = toggle.getAttribute("data-landuse-toggle");
                 if (!targetId) {
                     return;
                 }
@@ -174,189 +204,289 @@ var Landuse = function () {
                 if (!panel) {
                     return;
                 }
-                if (panel.tagName && panel.tagName.toLowerCase() === 'details') {
-                    panel.open = !panel.open;
-                    $(this).attr('aria-expanded', panel.open ? 'true' : 'false');
-                    var row = $(panel).closest('tr');
-                    if (row.length) {
-                        row.toggleClass('is-open', panel.open);
+                if (panel.tagName && panel.tagName.toLowerCase() === "details") {
+                    var willOpen = !panel.open;
+                    panel.open = willOpen;
+                    toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+                    if (typeof panel.closest === "function") {
+                        var row = panel.closest("tr");
+                        if (row) {
+                            if (willOpen) {
+                                row.classList.add("is-open");
+                            } else {
+                                row.classList.remove("is-open");
+                            }
+                        }
                     }
-                    if (panel.open && panel.scrollIntoView) {
-                        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    if (willOpen && typeof panel.scrollIntoView === "function") {
+                        panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
                     }
                 }
-            });
+            }));
 
-            root.find('[data-landuse-role="mapping-select"]').off('change.landuse').on('change.landuse', function () {
-                var dom = $(this).data('landuseDom');
-                var value = $(this).val();
-                if (dom === undefined || value === undefined) {
+            landuse._reportDelegates.push(dom.delegate(landuse.infoElement, "change", "[data-landuse-role=\"mapping-select\"]", function () {
+                var domId = this.getAttribute("data-landuse-dom");
+                var value = this.value;
+                if (domId === undefined || domId === null || value === undefined) {
                     return;
                 }
-                self.modify_mapping(String(dom), value);
-            });
+                landuse.modify_mapping(String(domId), value);
+            }));
 
-            root.find('[data-landuse-role="coverage-select"]').off('change.landuse').on('change.landuse', function () {
-                var dom = $(this).data('landuseDom');
-                var cover = $(this).data('landuseCover');
-                var value = $(this).val();
-                if (dom === undefined || cover === undefined) {
+            landuse._reportDelegates.push(dom.delegate(landuse.infoElement, "change", "[data-landuse-role=\"coverage-select\"]", function () {
+                var domId = this.getAttribute("data-landuse-dom");
+                var cover = this.getAttribute("data-landuse-cover");
+                var value = this.value;
+                if (domId === undefined || domId === null || cover === undefined || cover === null) {
                     return;
                 }
-                self.modify_coverage(String(dom), String(cover), value);
-            });
+                landuse.modify_coverage(String(domId), String(cover), value);
+            }));
+        }
+
+        landuse.bindReportEvents = function () {
+            ensureReportDelegates();
         };
 
-        that.restore = function (landuse_mode, landuse_single_selection) {
-            console.log("restore landuse mode: " + landuse_mode);
-            var self = instance;
-            $("#landuse_mode" + landuse_mode).prop("checked", true);
+        landuse.build = function () {
+            var taskMsg = "Building landuse";
+            resetStatus(taskMsg);
 
-            $('#landuse_single_selection').val('{{ landuse.single_selection }}').prop('selected', true);
+            if (landuse.ws_client && typeof landuse.ws_client.connect === "function") {
+                landuse.ws_client.connect();
+            }
 
-            self.showHideControls(landuse_mode);
+            var formData = new FormData(formElement);
+
+            http.request("rq/api/build_landuse", {
+                method: "POST",
+                body: formData,
+                form: formElement
+            }).then(function (result) {
+                var response = result && result.body ? result.body : null;
+                if (response && response.Success === true) {
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html("build_landuse job submitted: " + response.job_id);
+                    }
+                    landuse.set_rq_job_id(landuse, response.job_id);
+                } else if (response) {
+                    landuse.pushResponseStacktrace(landuse, response);
+                }
+            }).catch(handleError);
         };
 
-        that.handleModeChange = function (mode) {
+        landuse.modify_coverage = function (domId, cover, value) {
+            var payload = {
+                dom: domId,
+                cover: cover,
+                value: value
+            };
+
+            http.postJson("tasks/modify_landuse_coverage/", payload, { form: formElement })
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && response.Success === false) {
+                        landuse.pushResponseStacktrace(landuse, response);
+                    }
+                })
+                .catch(handleError);
+        };
+
+        landuse.modify_mapping = function (domId, newDom) {
+            var payload = {
+                dom: domId,
+                newdom: newDom
+            };
+
+            http.postJson("tasks/modify_landuse_mapping/", payload, { form: formElement })
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && response.Success === false) {
+                        landuse.pushResponseStacktrace(landuse, response);
+                        return;
+                    }
+                    landuse.report();
+                })
+                .catch(handleError);
+        };
+
+        landuse.report = function () {
+            http.request(url_for_run("report/landuse/"), {
+                method: "GET",
+                headers: { Accept: "text/html,application/xhtml+xml" }
+            }).then(function (result) {
+                var html = typeof result.body === "string" ? result.body : "";
+                if (infoAdapter && typeof infoAdapter.html === "function") {
+                    infoAdapter.html(html);
+                } else if (infoElement) {
+                    infoElement.innerHTML = html;
+                }
+                landuse.bindReportEvents();
+            }).catch(handleError);
+        };
+
+        landuse.restore = function (mode, singleSelection) {
+            var modeValue = parseInteger(mode, 0);
+            var singleValue = singleSelection === undefined || singleSelection === null ? null : String(singleSelection);
+
+            var radio = document.getElementById("landuse_mode" + modeValue);
+            if (radio) {
+                radio.checked = true;
+            }
+
+            var singleSelect = document.getElementById("landuse_single_selection");
+            if (singleSelect && singleValue !== null && singleValue !== "") {
+                singleSelect.value = singleValue;
+            }
+
+            landuse.showHideControls(modeValue);
+        };
+
+        landuse.handleModeChange = function (mode) {
             if (mode === undefined) {
-                that.setMode();
+                landuse.setMode();
                 return;
             }
-            that.setMode(parseInt(mode, 10));
+            landuse.setMode(parseInteger(mode, 0));
         };
 
-        that.handleSingleSelectionChange = function () {
-            that.setMode();
+        landuse.handleSingleSelectionChange = function () {
+            landuse.setMode();
         };
 
-        that.setMode = function (mode) {
-            var self = instance;
-            // mode is an optional parameter
-            // if it isn't provided then we get the checked value
-            if (mode === undefined) {
-                mode = $("input[name='landuse_mode']:checked").val();
+        landuse.setMode = function (mode) {
+            var payload = forms.serializeForm(formElement, { format: "json" }) || {};
+
+            if (mode === undefined || mode === null) {
+                mode = parseInteger(payload.landuse_mode, 0);
             }
-            mode = parseInt(mode, 10);
-            var landuse_single_selection = $("#landuse_single_selection").val();
-            self.mode = mode;
 
-            var task_msg = "Setting Mode to " + mode + " (" + landuse_single_selection + ")";
+            var singleSelection = payload.landuse_single_selection;
+            landuse.mode = mode;
 
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
+            var taskMsg = "Setting Mode to " + mode + " (" + (singleSelection || "") + ")";
+            resetStatus(taskMsg);
 
-            // sync landuse with nodb
-            $.post({
-                url: "tasks/set_landuse_mode/",
-                data: { "mode": mode, "landuse_single_selection": landuse_single_selection },
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
+            http.postJson("tasks/set_landuse_mode/", {
+                mode: mode,
+                landuse_single_selection: singleSelection
+            }, { form: formElement }).then(function (result) {
+                var response = result && result.body ? result.body : null;
+                if (response && response.Success === true) {
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(taskMsg + "... Success");
                     }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                } else if (response) {
+                    landuse.pushResponseStacktrace(landuse, response);
                 }
-            });
-            self.showHideControls(mode);
+            }).catch(handleError);
+
+            landuse.showHideControls(mode);
         };
 
-        that.setLanduseDb = function (db) {
-            var self = instance;
-            // mode is an optional parameter
-            // if it isn't provided then we get the checked value
-            if (db === undefined) {
-                var select = $("#landuse_db");
-                if (select.length) {
-                    db = select.val();
+        landuse.setLanduseDb = function (db) {
+            var value = db;
+            if (value === undefined) {
+                var select = document.getElementById("landuse_db");
+                if (select && select.value !== undefined) {
+                    value = select.value;
                 } else {
-                    db = $("input[name='landuse_db']:checked").val();
+                    var checked = formElement.querySelector("input[name='landuse_db']:checked");
+                    value = checked ? checked.value : null;
                 }
             }
 
-            var task_msg = "Setting Landuse Db to " + db;
+            if (value === undefined || value === null) {
+                return;
+            }
 
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
+            var taskMsg = "Setting Landuse Db to " + value;
+            resetStatus(taskMsg);
 
-            // sync landuse with nodb
-            $.post({
-                url: "tasks/set_landuse_db/",
-                data: { "landuse_db": db },
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
+            http.postJson("tasks/set_landuse_db/", { landuse_db: value }, { form: formElement })
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && response.Success === true) {
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html(taskMsg + "... Success");
+                        }
+                    } else if (response) {
+                        landuse.pushResponseStacktrace(landuse, response);
                     }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                })
+                .catch(handleError);
+
+            if (landuse.mode !== undefined) {
+                landuse.showHideControls(landuse.mode);
+            }
+        };
+
+        landuse.showHideControls = function (mode) {
+            var numericMode = parseInteger(mode, -1);
+
+            modePanels.forEach(function (panel, index) {
+                if (!panel) {
+                    return;
+                }
+                if (numericMode === index) {
+                    dom.show(panel);
+                } else {
+                    dom.hide(panel);
                 }
             });
-            self.showHideControls(self.mode);
-        };
 
-        that.showHideControls = function (mode) {
-            // show the appropriate controls
-            if (mode === -1) {
-                // neither
-                $("#landuse_mode0_controls").hide();
-                $("#landuse_mode1_controls").hide();
-                $("#landuse_mode2_controls").hide();
-                $("#landuse_mode3_controls").hide();
-                $("#landuse_mode4_controls").hide();
-            } else if (mode === 0) {
-                // gridded
-                $("#landuse_mode0_controls").show();
-                $("#landuse_mode1_controls").hide();
-                $("#landuse_mode2_controls").hide();
-                $("#landuse_mode3_controls").hide();
-                $("#landuse_mode4_controls").hide();
-            } else if (mode === 1) {
-                // single
-                $("#landuse_mode0_controls").hide();
-                $("#landuse_mode1_controls").show();
-                $("#landuse_mode2_controls").hide();
-                $("#landuse_mode3_controls").hide();
-                $("#landuse_mode4_controls").hide();
-            } else if (mode === 2) {
-                // single
-                $("#landuse_mode0_controls").hide();
-                $("#landuse_mode1_controls").hide();
-                $("#landuse_mode2_controls").show();
-                $("#landuse_mode3_controls").hide();
-                $("#landuse_mode4_controls").hide();
-            } else if (mode === 3) {
-                // single
-                $("#landuse_mode0_controls").hide();
-                $("#landuse_mode1_controls").hide();
-                $("#landuse_mode2_controls").hide();
-                $("#landuse_mode3_controls").show();
-                $("#landuse_mode4_controls").hide();
-            } else if (mode === 4) {
-                // single
-                $("#landuse_mode0_controls").hide();
-                $("#landuse_mode1_controls").hide();
-                $("#landuse_mode2_controls").hide();
-                $("#landuse_mode3_controls").hide();
-                $("#landuse_mode4_controls").show();
-            } else {
-                throw "ValueError: unknown mode";
+            if (numericMode < 0 || numericMode > modePanels.length - 1) {
+                if (numericMode === -1) {
+                    modePanels.forEach(function (panel) {
+                        if (panel) {
+                            dom.hide(panel);
+                        }
+                    });
+                    return;
+                }
+                throw new Error("ValueError: unknown mode");
             }
         };
 
-        return that;
+        var modeInputs = formElement.querySelectorAll('input[name="landuse_mode"]');
+        Array.prototype.forEach.call(modeInputs, function (input) {
+            input.addEventListener("change", function (event) {
+                landuse.handleModeChange(event.target.value);
+            });
+        });
+
+        var singleSelection = document.getElementById("landuse_single_selection");
+        if (singleSelection) {
+            singleSelection.addEventListener("change", function () {
+                landuse.handleSingleSelectionChange();
+            });
+        }
+
+        var dbSelect = document.getElementById("landuse_db");
+        if (dbSelect) {
+            dbSelect.addEventListener("change", function (event) {
+                landuse.setLanduseDb(event.target.value);
+            });
+        }
+
+        var dbRadios = formElement.querySelectorAll('input[name="landuse_db"]');
+        Array.prototype.forEach.call(dbRadios, function (input) {
+            input.addEventListener("change", function (event) {
+                landuse.setLanduseDb(event.target.value);
+            });
+        });
+
+        var buildButton = document.getElementById("btn_build_landuse");
+        if (buildButton) {
+            buildButton.addEventListener("click", function (event) {
+                event.preventDefault();
+                landuse.build();
+            });
+        }
+
+        ensureReportDelegates();
+
+        return landuse;
     }
 
     return {
@@ -367,4 +497,8 @@ var Landuse = function () {
             return instance;
         }
     };
-}();
+}());
+
+if (typeof globalThis !== "undefined") {
+    globalThis.Landuse = Landuse;
+}

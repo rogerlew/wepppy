@@ -15,6 +15,7 @@
   - `controlBase` mixin for job orchestration and telemetry.
   - `unitizer_client.js` usage (value rendering, reactive updates).
   - Map overlays / Leaflet integrations that may require helper-friendly wrappers.
+- ✅ Landuse controller now runs solely on helper modules—`WCDom` wraps the legacy adapters, delegated report actions, and visibility toggles, while `WCHttp` handles FormData uploads and JSON posts.
 
 ## Template Contract
 - Review `wepppy/weppcloud/templates/controls/landuse*.htm` and any included partials.
@@ -22,6 +23,7 @@
   - Decide whether vanilla delegation needs markup tweaks (e.g., add `data-action` hooks).
 - Flag inline scripts that reference `$` or expect jQuery globals.
   - Plan equivalent bootstrap strategy (DOMContentLoaded listeners, direct module initialization).
+- ✅ No template changes required for the helper migration; existing `data-landuse-*` hooks are now consumed via `WCDom.delegate`.
 
 ## Backend Touchpoints
 - Enumerate controller API calls and match to Flask endpoints:
@@ -33,6 +35,7 @@
 - Assess transition approach:
   - Determine if endpoints must support both legacy form posts and new JSON during rollout.
   - Decide whether the refactor will update all call sites in one sweep to avoid dual-mode maintenance.
+- ✅ All Landuse routes now use `parse_request_payload`, coerce numeric inputs (`mode`, coverage values, Topaz IDs), and return descriptive errors when payload fields are missing.
 
 ## State & Data Structures
 - Catalog complex payloads (selected landuse rows, mapping updates, units) that need explicit JSON structures.
@@ -55,6 +58,7 @@
   - Identify pytest suites to exercise updated endpoints (e.g., `tests/weppcloud/routes/test_landuse*.py`).
   - Plan integration tests for payload shape changes (arrays, booleans).
 - Ensure `npm test` and `python wepppy/weppcloud/controllers_js/build_controllers_js.py` remain part of the handoff validation.
+- ✅ Added `controllers_js/__tests__/landuse.test.js` (jsdom) plus expanded `tests/weppcloud/routes/test_landuse_bp.py` to cover JSON/form parity.
 
 ## Rollback Strategy
 - Pinpoint high-risk areas (large historical run archives, landuse data migrations) that could be impacted.

@@ -127,7 +127,7 @@ def test_modify_landuse_coverage_records_change(landuse_client):
     assert response.get_json()["Success"] is True
 
     controller = DummyLanduse.getInstance(run_dir)
-    assert controller.cover_changes == [("1", "forest", 75)]
+    assert controller.cover_changes == [("1", "forest", 75.0)]
 
 
 def test_report_landuse_renders_template(landuse_client):
@@ -155,3 +155,34 @@ def test_task_modify_landuse_parses_ids(landuse_client):
 
     controller = DummyLanduse.getInstance(run_dir)
     assert controller.modify_calls == [(['1', '2', '3'], '5')]
+
+
+def test_set_landuse_mode_accepts_json_payload(landuse_client):
+    client, DummyLanduse, _, run_dir = landuse_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_landuse_mode/",
+        json={"mode": int(landuse_module.LanduseMode.UserDefined), "landuse_single_selection": "riparian"},
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["Success"] is True
+
+    controller = DummyLanduse.getInstance(run_dir)
+    assert controller.mode == landuse_module.LanduseMode.UserDefined
+    assert controller.single_selection == "riparian"
+
+
+def test_task_modify_landuse_accepts_list_payload(landuse_client):
+    client, DummyLanduse, _, run_dir = landuse_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse/",
+        json={"topaz_ids": [1, "2", " 3 "], "landuse": 7},
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["Success"] is True
+
+    controller = DummyLanduse.getInstance(run_dir)
+    assert controller.modify_calls == [(['1', '2', '3'], '7')]
