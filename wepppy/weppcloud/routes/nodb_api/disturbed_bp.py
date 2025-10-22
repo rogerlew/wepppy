@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any, Dict, Tuple
 
 from flask import Response
@@ -19,6 +18,7 @@ from .._common import (
     secure_filename,
     send_file,
     success_factory,
+    parse_request_payload,
     _join,
 )
 from wepppy.nodb.core import Ron
@@ -84,7 +84,10 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
     authorize(runid, config)
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    data = json.loads(request.data.decode('utf-8'))
+    data = parse_request_payload(request, trim_strings=False)
+    rows = data.get('rows')
+    if isinstance(rows, dict):
+        data['rows'] = [rows]
     lookup_fn = Disturbed.getInstance(wd).lookup_fn
     write_disturbed_land_soil_lookup(lookup_fn, data)
     return success_factory()
@@ -144,8 +147,21 @@ def task_baer_class_map(runid: str, config: str) -> Response:
     if not baer.has_map:
         return error_factory('No SBS map has been specified')
 
-    classes = request.json.get('classes', None)
-    nodata_vals = request.json.get('nodata_vals', None)
+    payload = parse_request_payload(request)
+    raw_classes = payload.get('classes')
+    if raw_classes is None:
+        return error_factory('classes must be provided')
+    if not isinstance(raw_classes, list):
+        raw_classes = [raw_classes]
+    if len(raw_classes) != 4:
+        return error_factory('classes must include four break values')
+
+    try:
+        classes = [int(value) for value in raw_classes]
+    except (TypeError, ValueError):
+        return error_factory('classes must contain integers')
+
+    nodata_vals = payload.get('nodata_vals')
 
     baer.modify_burn_class(classes, nodata_vals)
     return success_factory()
@@ -166,13 +182,19 @@ def task_baer_modify_color_map(runid: str, config: str) -> Response:
     if not baer.has_map:
         return error_factory('No SBS map has been specified')
 
-    raw_map = request.json.get('color_map', None)
+    payload = parse_request_payload(request)
+    raw_map = payload.get('color_map')
     if raw_map is None:
         return error_factory('color_map must be provided')
+    if not isinstance(raw_map, dict):
+        return error_factory('color_map must be a mapping of RGB strings to severities')
 
     color_map: Dict[Tuple[int, int, int], Any] = {}
     for color, severity in raw_map.items():
-        rgb = tuple(int(component) for component in color.split('_'))
+        try:
+            rgb = tuple(int(component) for component in color.split('_'))
+        except (TypeError, ValueError):
+            return error_factory('color_map keys must be formatted as R_G_B integers')
         color_map[rgb] = severity
 
     baer.modify_color_map(color_map)
@@ -200,13 +222,15 @@ def resources_baer_sbs(runid: str, config: str) -> Response:
 
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/set_firedate/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_firedate(runid: str, config: str) -> Response:
     """Persist the fire date for the disturbed controller."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     disturbed = Disturbed.getInstance(wd)
     try:
-        fire_date = request.json.get('fire_date', None)
+        payload = parse_request_payload(request)
+        fire_date = payload.get('fire_date')
         disturbed.fire_date = fire_date
         return success_factory()
     except Exception:
@@ -214,6 +238,7 @@ def set_firedate(runid: str, config: str) -> Response:
 
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/upload_sbs/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_upload_sbs(runid: str, config: str) -> Response:
     """Upload and validate an SBS raster."""
     from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
@@ -226,9 +251,15 @@ def task_upload_sbs(runid: str, config: str) -> Response:
     else:
         baer = Disturbed.getInstance(wd)
 
-    file = request.files['input_upload_sbs']
-    filename = secure_filename(file.filename)
-    file.save(_join(baer.baer_dir, filename))
+    file_storage = request.files.get('input_upload_sbs')
+    if file_storage is None or not file_storage.filename:
+        return error_factory('input_upload_sbs must be provided')
+
+    filename = secure_filename(file_storage.filename)
+    if not filename:
+        return error_factory('input_upload_sbs must have a valid filename')
+
+    file_storage.save(_join(baer.baer_dir, filename))
 
     ret, description = sbs_map_sanity_check(_join(baer.baer_dir, filename))
     if ret != 0:
@@ -290,6 +321,11 @@ def task_build_uniform_sbs(runid: str, config: str, value: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     disturbed = Disturbed.getInstance(wd)
-    sbs_fn = disturbed.build_uniform_sbs(int(value))
+    try:
+        severity = int(value)
+    except (TypeError, ValueError):
+        return error_factory('value must be an integer')
+
+    sbs_fn = disturbed.build_uniform_sbs(severity)
     res = disturbed.validate(sbs_fn)
     return success_factory()

@@ -2,419 +2,838 @@
  * Baer
  * ----------------------------------------------------------------------------
  */
-var Baer = function () {
+var Baer = (function () {
     var instance;
 
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#sbs_upload_form");
-        that.info = $("#sbs_upload_form #info");
-        that.status = $("#sbs_upload_form  #status");
-        that.stacktrace = $("#sbs_upload_form #stacktrace");
-        that.ws_client = new WSClient('sbs_upload_form', 'sbs_upload');
-        that.ws_client.attachControl(that);
-        that.rq_job_id = null;
-        that.rq_job = $("#sbs_upload_form #rq_job");
+    var MODE_PANELS = {
+        0: "#sbs_mode0_controls",
+        1: "#sbs_mode1_controls"
+    };
 
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-        that.baer_map = null;
+    var EVENT_NAMES = [
+        "baer:mode:changed",
+        "baer:upload:started",
+        "baer:upload:completed",
+        "baer:upload:error",
+        "baer:remove:started",
+        "baer:remove:completed",
+        "baer:remove:error",
+        "baer:uniform:started",
+        "baer:uniform:completed",
+        "baer:uniform:error",
+        "baer:firedate:updated",
+        "baer:firedate:error",
+        "baer:classes:updated",
+        "baer:classes:error",
+        "baer:color-map:updated",
+        "baer:color-map:error",
+        "baer:map:shown",
+        "baer:map:error",
+        "baer:map:opacity"
+    ];
 
-        that.bindHandlers = function () {
-            var form = that.form;
+    var DEFAULT_OPACITY = 0.7;
+    var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
+    var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
 
-            if (!form || !form.length) {
-                return;
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
+
+        if (!dom || typeof dom.ensureElement !== "function") {
+            throw new Error("Baer controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("Baer controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("Baer controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("Baer controller requires WCEvents helpers.");
+        }
+
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
+
+    function normalizeElement(target) {
+        if (!target) {
+            return null;
+        }
+        if (typeof window.Node !== "undefined" && target instanceof window.Node) {
+            return target;
+        }
+        if (typeof window.Element !== "undefined" && target instanceof window.Element) {
+            return target;
+        }
+        if (target.jquery !== undefined && typeof target.get === "function") {
+            return target.get(0);
+        }
+        if (Array.isArray(target) && target.length > 0) {
+            var first = target[0];
+            if (typeof window.Node !== "undefined" && first instanceof window.Node) {
+                return first;
             }
-            if (form.data('baerHandlersBound')) {
-                return;
-            }
-            form.data('baerHandlersBound', true);
+        }
+        return null;
+    }
 
-            form.on("change", "input[name='sbs_mode']", function (event) {
-                var value = parseInt(event.target.value, 10);
-                if (isNaN(value)) {
+    function createLegacyAdapter(target) {
+        var element = normalizeElement(target);
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
                     return;
                 }
-                that.showHideControls(value);
-            });
-
-            form.on("click", "[data-sbs-action='upload']", function (event) {
-                event.preventDefault();
-                that.upload_sbs();
-            });
-
-            form.on("click", "[data-sbs-action='remove']", function (event) {
-                event.preventDefault();
-                that.remove_sbs();
-            });
-
-            form.on("click", "[data-sbs-uniform]", function (event) {
-                event.preventDefault();
-                var target = $(event.currentTarget);
-                var uniformValue = parseInt(target.attr("data-sbs-uniform"), 10);
-                if (!isNaN(uniformValue)) {
-                    that.build_uniform_sbs(uniformValue);
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
                 }
-            });
-
-            form.on("click", "[data-sbs-action='set-firedate']", function (event) {
-                event.preventDefault();
-                var value = form.find("#firedate").val();
-                that.set_firedate(value);
-            });
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
         };
+    }
 
-        that.initializeMode = function () {
-            if (!that.form || !that.form.length) {
-                that.showHideControls(-1);
+    function toResponsePayload(http, error) {
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error.detail || error.body || error.message || "Request failed";
+            return { Error: detail };
+        }
+        return { Error: (error && error.message) || "Request failed" };
+    }
+
+    function parseInteger(value, fallback) {
+        if (value === undefined || value === null || value === "") {
+            return fallback;
+        }
+        var parsed = parseInt(value, 10);
+        if (Number.isNaN(parsed)) {
+            return fallback;
+        }
+        return parsed;
+    }
+
+    function clampOpacity(value) {
+        var parsed = parseFloat(value);
+        if (Number.isNaN(parsed)) {
+            return DEFAULT_OPACITY;
+        }
+        if (parsed < 0) {
+            return 0;
+        }
+        if (parsed > 1) {
+            return 1;
+        }
+        return parsed;
+    }
+
+    function createInstance() {
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var events = helpers.events;
+
+        var baer = controlBase();
+        var baerEvents = null;
+
+        if (events && typeof events.createEmitter === "function") {
+            var emitterBase = events.createEmitter();
+            if (typeof events.useEventMap === "function") {
+                baerEvents = events.useEventMap(EVENT_NAMES, emitterBase);
+            } else {
+                baerEvents = emitterBase;
+            }
+        }
+
+        if (baerEvents) {
+            baer.events = baerEvents;
+        }
+
+        var formElement = dom.qs("#sbs_upload_form");
+        var infoElement = formElement ? dom.qs("#info", formElement) : null;
+        var statusElement = formElement ? dom.qs("#status", formElement) : null;
+        var stacktraceElement = formElement ? dom.qs("#stacktrace", formElement) : null;
+        var rqJobElement = formElement ? dom.qs("#rq_job", formElement) : null;
+
+        var infoAdapter = createLegacyAdapter(infoElement);
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+
+        var modePanelElements = {};
+        Object.keys(MODE_PANELS).forEach(function (key) {
+            modePanelElements[key] = dom.qs(MODE_PANELS[key]);
+        });
+
+        baer.form = formElement || null;
+        baer.info = infoAdapter;
+        baer.status = statusAdapter;
+        baer.stacktrace = stacktraceAdapter;
+        baer.rq_job = rqJobAdapter;
+        baer.infoElement = infoElement;
+        baer.baer_map = null;
+
+        baer.ws_client = new WSClient("sbs_upload_form", "sbs_upload");
+        baer.ws_client.attachControl(baer);
+
+        baer.hideStacktrace = function () {
+            if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
+                stacktraceAdapter.hide();
                 return;
             }
-            var selected = that.form.find("input[name='sbs_mode']:checked");
-            if (!selected.length) {
-                selected = that.form.find("input[name='sbs_mode']").first();
-                if (selected.length) {
-                    selected.prop("checked", true);
-                }
+            if (stacktraceElement) {
+                stacktraceElement.hidden = true;
+                stacktraceElement.style.display = "none";
             }
-            var modeValue = parseInt(selected.val(), 10);
-            if (isNaN(modeValue)) {
-                modeValue = 0;
-            }
-            that.showHideControls(modeValue);
         };
 
+        function emit(name, payload) {
+            if (!baerEvents || typeof baerEvents.emit !== "function" || !name) {
+                return;
+            }
+            baerEvents.emit(name, payload || {});
+        }
 
-        that.showHideControls = function (mode) {
-            // show the appropriate controls
+        function startTask(message) {
+            if (infoAdapter && typeof infoAdapter.html === "function") {
+                infoAdapter.html("");
+            }
+            if (statusAdapter && typeof statusAdapter.text === "function") {
+                statusAdapter.text(message + "...");
+            }
+            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
+                stacktraceAdapter.text("");
+            }
+            baer.hideStacktrace();
+        }
+
+        function completeTask(message) {
+            if (statusAdapter && typeof statusAdapter.text === "function") {
+                statusAdapter.text(message + "... Success");
+            }
+        }
+
+        function failTask(message) {
+            if (statusAdapter && typeof statusAdapter.text === "function") {
+                statusAdapter.text(message + "... Failed");
+            }
+        }
+
+        function jobStarted(task, extra) {
+            baer.triggerEvent("job:started", Object.assign({ task: task }, extra || {}));
+        }
+
+        function jobCompleted(task, extra) {
+            baer.triggerEvent("job:completed", Object.assign({ task: task }, extra || {}));
+        }
+
+        function jobErrored(task, extra) {
+            baer.triggerEvent("job:error", Object.assign({ task: task }, extra || {}));
+        }
+
+        function showHideControls(mode) {
             if (mode === -1) {
-                $("#sbs_mode0_controls").hide();
-                $("#sbs_mode1_controls").hide();
-            } else if (mode === 0) {
-                $("#sbs_mode0_controls").show();
-                $("#sbs_mode1_controls").hide();
-            } else if (mode === 1) {
-                $("#sbs_mode0_controls").hide();
-                $("#sbs_mode1_controls").show();
-            } else {
-                throw "ValueError: Landuse unknown mode";
-            }
-        };
-
-        that.set_firedate = function (fire_date) {
-            var self = instance;
-
-            var task_msg = "Setting Fire Date";
-
-            $.post({
-                url: "tasks/set_firedate/",
-                data: JSON.stringify({ fire_date: fire_date }),
-                contentType: "application/json; charset=utf-8",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.upload_sbs = function () {
-            var self = instance;
-
-            var task_msg = "Uploading SBS";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            var formData = new FormData($('#sbs_upload_form')[0]);
-
-            $.post({
-                url: "tasks/upload_sbs/",
-                data: formData,
-                contentType: false,
-                cache: false,
-                processData: false,
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                        self.form.trigger("SBS_UPLOAD_TASK_COMPLETE");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.remove_sbs = function () {
-            var self = instance;
-            var map = MapController.getInstance();
-            var task_msg = "Removing SBS";
-
-            $.post({
-                url: "tasks/remove_sbs",
-                contentType: false,
-                cache: false,
-                processData: false,
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                        self.form.trigger("SBS_REMOVE_TASK_COMPLETE");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            if (self.baer_map !== null) {
-                map.ctrls.removeLayer(self.baer_map);
-                map.removeLayer(self.baer_map);
-                self.baer_map = null;
-            }
-
-            self.info.html('');
-        };
-
-        that.build_uniform_sbs = function (value) {
-            var self = instance;
-
-            var task_msg = "Setting Uniform SBS";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/build_uniform_sbs/" + value.toString(),
-                contentType: false,
-                cache: false,
-                processData: false,
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                        self.form.trigger("SBS_UPLOAD_TASK_COMPLETE");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-
-        that.load_modify_class = function () {
-            var self = instance;
-
-            $.get({
-                url: "view/modify_burn_class",
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.modify_classes = function () {
-
-            var self = instance;
-            var data = [parseInt($('#baer_brk0').val(), 10),
-            parseInt($('#baer_brk1').val(), 10),
-            parseInt($('#baer_brk2').val(), 10),
-            parseInt($('#baer_brk3').val(), 10)];
-
-            var nodata_vals = $('#baer_nodata').val();
-
-            var task_msg = "Modifying Class Breaks";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/modify_burn_class",
-                data: JSON.stringify({ classes: data, nodata_vals: nodata_vals }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                        self.form.trigger("MODIFY_BURN_CLASS_TASK_COMPLETE");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-
-        that.modify_color_map = function () {
-
-            var self = instance;
-
-            var data = {};
-            // Use jQuery to find all select fields that start with "baer_color_"
-            $("select[id^='baer_color_']").each(function () {
-                var id = $(this).attr('id'); // Get the id of the select element
-                var rgb = id.replace('baer_color_', ''); // Extract the <R>_<G>_<B> part
-                var value = $(this).val(); // Get the selected value of the dropdown
-                data[rgb] = value; // Add to the data object
-            });
-
-            var task_msg = "Modifying Class Breaks";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/modify_color_map",
-                data: JSON.stringify({ color_map: data }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                        self.form.trigger("MODIFY_BURN_CLASS_TASK_COMPLETE");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-
-        that.show_sbs = function () {
-            var self = instance;
-            var map = MapController.getInstance();
-            var sub = SubcatchmentDelineation.getInstance();
-
-
-            if (self.baer_map !== null) {
-                map.ctrls.removeLayer(self.baer_map);
-                map.removeLayer(self.baer_map);
-                self.baer_map = null;
-            }
-
-            var task_msg = "Querying SBS map";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.get({
-                url: "query/baer_wgs_map/",
-                cache: false,
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-
-                        var bounds = response.Content.bounds;
-                        var imgurl = response.Content.imgurl + "?v=" + Date.now();
-
-                        self.baer_map = L.imageOverlay(imgurl, bounds, { opacity: 0.7 });
-                        self.baer_map.addTo(map);
-                        map.ctrls.addOverlay(self.baer_map, "Burn Severity Map");
-
-                        $.get({
-                            url: "query/has_dem/",
-                            cache: false,
-                            success: function doFlyTo(response) {
-                                if (response === false) {
-                                    map.flyToBounds(self.baer_map._bounds);
-                                }
-                            },
-                            error: function error(jqXHR) {
-                                self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                            },
-                            fail: function fail(jqXHR, textStatus, errorThrown) {
-                                self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                            }
-                        });
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            }).always(function () {
-                var self = instance;
-
-                $.get({
-                    url: "resources/legends/sbs/",
-                    cache: false,
-                    success: function (response) {
-                        var map = MapController.getInstance();
-                        map.sbs_legend.html(response);
-
-                        map.sbs_legend.append('<div id="slider-container"><p>SBS Map Opacity</p><input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="0.7"></div>');
-                        $('#opacity-slider').on('input change', function () {
-                            var newOpacity = $(this).val();
-                            self.baer_map.setOpacity(newOpacity);
-                        });
-                    },
-                    error: function error(jqXHR) {
-                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                    },
-                    fail: function fail(jqXHR, textStatus, errorThrown) {
-                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                Object.keys(modePanelElements).forEach(function (key) {
+                    var panel = modePanelElements[key];
+                    if (panel) {
+                        dom.hide(panel);
                     }
                 });
+                emit("baer:mode:changed", { mode: mode });
+                return;
+            }
+            var normalized = parseInteger(mode, 0);
+            if (!Object.prototype.hasOwnProperty.call(modePanelElements, String(normalized))) {
+                throw new Error("ValueError: BAER unknown mode");
+            }
+            Object.keys(modePanelElements).forEach(function (key) {
+                var panel = modePanelElements[key];
+                if (!panel) {
+                    return;
+                }
+                if (String(key) === String(normalized)) {
+                    dom.show(panel);
+                } else {
+                    dom.hide(panel);
+                }
             });
-        };
+            emit("baer:mode:changed", { mode: normalized });
+        }
 
-        that.bindHandlers();
-        that.initializeMode();
+        function initializeMode() {
+            if (!formElement) {
+                showHideControls(-1);
+                return;
+            }
+            var selected = formElement.querySelector("input[name='sbs_mode']:checked");
+            if (!selected) {
+                selected = formElement.querySelector("input[name='sbs_mode']");
+                if (selected) {
+                    selected.checked = true;
+                }
+            }
+            var modeValue = selected ? parseInteger(selected.value, 0) : 0;
+            showHideControls(modeValue);
+        }
 
-        return that;
+        function setFireDate(fireDate) {
+            var taskMsg = "Setting Fire Date";
+            startTask(taskMsg);
+
+            var effectiveFireDate = fireDate;
+            if (!effectiveFireDate && formElement && forms && typeof forms.serializeForm === "function") {
+                var formValues = forms.serializeForm(formElement, { format: "object" }) || {};
+                if (formValues && Object.prototype.hasOwnProperty.call(formValues, "firedate")) {
+                    effectiveFireDate = formValues.firedate;
+                }
+            }
+
+            return http.request("tasks/set_firedate/", {
+                method: "POST",
+                json: { fire_date: effectiveFireDate || null },
+                form: formElement
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.Success === true) {
+                        completeTask(taskMsg);
+                        emit("baer:firedate:updated", { fireDate: effectiveFireDate || null });
+                        return data;
+                    }
+                    baer.pushResponseStacktrace(baer, data);
+                    failTask(taskMsg);
+                    emit("baer:firedate:error", { response: data });
+                    return data;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                    failTask(taskMsg);
+                    emit("baer:firedate:error", { error: payload });
+                    return payload;
+                });
+        }
+
+        function uploadSbs() {
+            if (!formElement) {
+                return Promise.resolve(null);
+            }
+
+            var taskMsg = "Uploading SBS";
+            startTask(taskMsg);
+            var formData = new window.FormData(formElement);
+
+            emit("baer:upload:started", {});
+            jobStarted("baer:upload", {});
+
+            return http.request("tasks/upload_sbs/", {
+                method: "POST",
+                body: formData,
+                form: formElement
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.Success === true) {
+                        completeTask(taskMsg);
+                        baer.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
+                        emit("baer:upload:completed", { response: data });
+                        jobCompleted("baer:upload", { response: data });
+                        return data;
+                    }
+                    baer.pushResponseStacktrace(baer, data);
+                    failTask(taskMsg);
+                    emit("baer:upload:error", { response: data });
+                    jobErrored("baer:upload", { response: data });
+                    return data;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                    failTask(taskMsg);
+                    emit("baer:upload:error", { error: payload });
+                    jobErrored("baer:upload", { error: payload });
+                    return payload;
+                });
+        }
+
+        function removeSbs() {
+            var taskMsg = "Removing SBS";
+            startTask(taskMsg);
+
+            emit("baer:remove:started", {});
+            jobStarted("baer:remove", {});
+
+            return http.request("tasks/remove_sbs", {
+                method: "POST",
+                form: formElement
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.Success === true) {
+                        completeTask(taskMsg);
+                        baer.triggerEvent("SBS_REMOVE_TASK_COMPLETE", data);
+                        emit("baer:remove:completed", { response: data });
+                        jobCompleted("baer:remove", { response: data });
+
+                        try {
+                            var map = MapController.getInstance();
+                            if (baer.baer_map) {
+                                if (map && map.ctrls && typeof map.ctrls.removeLayer === "function") {
+                                    map.ctrls.removeLayer(baer.baer_map);
+                                }
+                                if (map && typeof map.removeLayer === "function") {
+                                    map.removeLayer(baer.baer_map);
+                                }
+                                baer.baer_map = null;
+                            }
+                        } catch (err) {
+                            console.warn("[Baer] Failed to remove SBS layer from map", err);
+                        }
+
+                        if (infoAdapter && typeof infoAdapter.html === "function") {
+                            infoAdapter.html("");
+                        }
+
+                        return data;
+                    }
+                    baer.pushResponseStacktrace(baer, data);
+                    failTask(taskMsg);
+                    emit("baer:remove:error", { response: data });
+                    jobErrored("baer:remove", { response: data });
+                    return data;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                    failTask(taskMsg);
+                    emit("baer:remove:error", { error: payload });
+                    jobErrored("baer:remove", { error: payload });
+                    return payload;
+                });
+        }
+
+        function buildUniformSbs(value) {
+            var severity = parseInteger(value, null);
+            if (severity === null) {
+                return Promise.resolve(null);
+            }
+
+            var taskMsg = "Setting Uniform SBS";
+            startTask(taskMsg);
+
+            emit("baer:uniform:started", { value: severity });
+            jobStarted("baer:uniform", { value: severity });
+
+            return http.request("tasks/build_uniform_sbs/" + severity, {
+                method: "POST",
+                form: formElement
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.Success === true) {
+                        completeTask(taskMsg);
+                        baer.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
+                        emit("baer:uniform:completed", { response: data, value: severity });
+                        jobCompleted("baer:uniform", { response: data, value: severity });
+                        return data;
+                    }
+                    baer.pushResponseStacktrace(baer, data);
+                    failTask(taskMsg);
+                    emit("baer:uniform:error", { response: data, value: severity });
+                    jobErrored("baer:uniform", { response: data, value: severity });
+                    return data;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                    failTask(taskMsg);
+                    emit("baer:uniform:error", { error: payload, value: severity });
+                    jobErrored("baer:uniform", { error: payload, value: severity });
+                    return payload;
+                });
+        }
+
+        function loadModifyClass() {
+            return http.request("view/modify_burn_class", {
+                method: "GET"
+            })
+                .then(function (result) {
+                    var content = result.body;
+                    if (infoAdapter && typeof infoAdapter.html === "function") {
+                        infoAdapter.html(content);
+                    } else if (infoElement) {
+                        infoElement.innerHTML = content === null || content === undefined ? "" : String(content);
+                    }
+                    return content;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                    return payload;
+                });
+        }
+
+        function readClassBreaks(values) {
+            var names = ["baer_brk0", "baer_brk1", "baer_brk2", "baer_brk3"];
+            return names.map(function (name) {
+                var raw = values && Object.prototype.hasOwnProperty.call(values, name) ? values[name] : null;
+                if (raw === null || raw === undefined) {
+                    var element = dom.qs("#" + name);
+                    raw = element ? element.value : null;
+                }
+                return parseInteger(raw, null);
+            });
+        }
+
+        function modifyClasses() {
+            var taskMsg = "Modifying Class Breaks";
+            startTask(taskMsg);
+
+            var formValues = {};
+            if (formElement && forms && typeof forms.serializeForm === "function") {
+                formValues = forms.serializeForm(formElement, { format: "object" }) || {};
+            }
+            var classBreaks = readClassBreaks(formValues);
+            var nodataVals;
+            if (formValues && Object.prototype.hasOwnProperty.call(formValues, "baer_nodata")) {
+                nodataVals = formValues.baer_nodata;
+            } else {
+                var nodataField = dom.qs("#baer_nodata");
+                nodataVals = nodataField ? nodataField.value : null;
+            }
+
+            return http.request("tasks/modify_burn_class", {
+                method: "POST",
+                json: { classes: classBreaks, nodata_vals: nodataVals },
+                form: formElement
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.Success === true) {
+                        completeTask(taskMsg);
+                        baer.triggerEvent("MODIFY_BURN_CLASS_TASK_COMPLETE", data);
+                        emit("baer:classes:updated", { response: data });
+                        return data;
+                    }
+                    baer.pushResponseStacktrace(baer, data);
+                    failTask(taskMsg);
+                    emit("baer:classes:error", { response: data });
+                    return data;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                    failTask(taskMsg);
+                    emit("baer:classes:error", { error: payload });
+                    return payload;
+                });
+        }
+
+        function modifyColorMap() {
+            var taskMsg = "Modifying Class Breaks";
+            startTask(taskMsg);
+
+            var selects = document.querySelectorAll("select[id^='baer_color_']");
+            var colorMap = {};
+            selects.forEach(function (select) {
+                var id = select.id || "";
+                if (!id) {
+                    return;
+                }
+                var rgb = id.replace("baer_color_", "");
+                colorMap[rgb] = select.value;
+            });
+
+            return http.request("tasks/modify_color_map", {
+                method: "POST",
+                json: { color_map: colorMap },
+                form: formElement
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.Success === true) {
+                        completeTask(taskMsg);
+                        baer.triggerEvent("MODIFY_BURN_CLASS_TASK_COMPLETE", data);
+                        emit("baer:color-map:updated", { response: data });
+                        return data;
+                    }
+                    baer.pushResponseStacktrace(baer, data);
+                    failTask(taskMsg);
+                    emit("baer:color-map:error", { response: data });
+                    return data;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                    failTask(taskMsg);
+                    emit("baer:color-map:error", { error: payload });
+                    return payload;
+                });
+        }
+
+        function attachOpacitySlider(legendElement) {
+            if (!legendElement) {
+                return;
+            }
+            var existing = legendElement.querySelector("#" + LEGEND_OPACITY_CONTAINER_ID);
+            if (existing && existing.parentNode) {
+                existing.parentNode.removeChild(existing);
+            }
+
+            var container = document.createElement("div");
+            container.id = LEGEND_OPACITY_CONTAINER_ID;
+
+            var label = document.createElement("p");
+            label.textContent = "SBS Map Opacity";
+
+            var slider = document.createElement("input");
+            slider.type = "range";
+            slider.id = LEGEND_OPACITY_INPUT_ID;
+            slider.min = "0";
+            slider.max = "1";
+            slider.step = "0.1";
+            var initialOpacity = baer.baer_map && typeof baer.baer_map.options === "object"
+                ? clampOpacity(baer.baer_map.options.opacity)
+                : DEFAULT_OPACITY;
+            slider.value = String(initialOpacity);
+
+            function updateOpacity(event) {
+                if (!baer.baer_map) {
+                    return;
+                }
+                var next = clampOpacity(event.target.value);
+                baer.baer_map.setOpacity(next);
+                emit("baer:map:opacity", { opacity: next });
+            }
+
+            slider.addEventListener("input", updateOpacity);
+            slider.addEventListener("change", updateOpacity);
+
+            container.appendChild(label);
+            container.appendChild(slider);
+
+            legendElement.appendChild(container);
+        }
+
+        function loadLegend() {
+            return http.request("resources/legends/sbs/", {
+                method: "GET"
+            })
+                .then(function (result) {
+                    var content = result.body;
+                    var legend = dom.qs("#sbs_legend");
+                    if (legend) {
+                        legend.innerHTML = content === null || content === undefined ? "" : String(content);
+                        attachOpacitySlider(legend);
+                    }
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                });
+        }
+
+        function showSbs() {
+            var taskMsg = "Querying SBS map";
+            startTask(taskMsg);
+
+            try {
+                SubcatchmentDelineation.getInstance();
+            } catch (err) {
+                console.warn("[Baer] Unable to initialize SubcatchmentDelineation controller", err);
+            }
+
+            try {
+                var map = MapController.getInstance();
+                if (baer.baer_map) {
+                    if (map && map.ctrls && typeof map.ctrls.removeLayer === "function") {
+                        map.ctrls.removeLayer(baer.baer_map);
+                    }
+                    if (map && typeof map.removeLayer === "function") {
+                        map.removeLayer(baer.baer_map);
+                    }
+                    baer.baer_map = null;
+                }
+            } catch (err) {
+                console.warn("[Baer] Failed to clear existing SBS map overlay", err);
+            }
+
+            return http.request("query/baer_wgs_map/", {
+                method: "GET"
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.Success === true && data.Content) {
+                        completeTask(taskMsg);
+                        var map;
+                        try {
+                            map = MapController.getInstance();
+                        } catch (err) {
+                            baer.pushErrorStacktrace(baer, err);
+                            throw err;
+                        }
+                        var bounds = data.Content.bounds;
+                        var imgurl = data.Content.imgurl ? data.Content.imgurl + "?v=" + Date.now() : null;
+
+                        if (map && bounds && imgurl) {
+                            baer.baer_map = L.imageOverlay(imgurl, bounds, { opacity: DEFAULT_OPACITY });
+                            baer.baer_map.addTo(map);
+                            if (map.ctrls && typeof map.ctrls.addOverlay === "function") {
+                                map.ctrls.addOverlay(baer.baer_map, "Burn Severity Map");
+                            }
+                            emit("baer:map:shown", { bounds: bounds, imgurl: imgurl });
+                        }
+
+                        return http.request("query/has_dem/", { method: "GET" })
+                            .then(function (demResult) {
+                                var hasDem = demResult.body;
+                                if (hasDem === false && map && baer.baer_map && typeof map.flyToBounds === "function") {
+                                    map.flyToBounds(baer.baer_map._bounds);
+                                }
+                                return data;
+                            })
+                            .catch(function (error) {
+                                var payload = toResponsePayload(http, error);
+                                baer.pushResponseStacktrace(baer, payload);
+                                return data;
+                            });
+                    }
+
+                    baer.pushResponseStacktrace(baer, data);
+                    failTask(taskMsg);
+                    emit("baer:map:error", { response: data });
+                    return data;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                    failTask(taskMsg);
+                    emit("baer:map:error", { error: payload });
+                    return payload;
+                })
+                .finally(function () {
+                    loadLegend();
+                });
+        }
+
+        function bindHandlers() {
+            if (!formElement) {
+                return;
+            }
+            if (formElement.dataset && formElement.dataset.baerHandlersBound === "true") {
+                return;
+            }
+            if (formElement.dataset) {
+                formElement.dataset.baerHandlersBound = "true";
+            }
+
+            dom.delegate(formElement, "change", "input[name='sbs_mode']", function (event, target) {
+                var nextMode = parseInteger(target.value, 0);
+                showHideControls(nextMode);
+            });
+
+            dom.delegate(formElement, "click", "[data-baer-action]", function (event, target) {
+                event.preventDefault();
+                var action = target.getAttribute("data-baer-action");
+                if (!action) {
+                    return;
+                }
+                if (action === "upload") {
+                    uploadSbs();
+                    return;
+                }
+                if (action === "remove") {
+                    removeSbs();
+                    return;
+                }
+                if (action === "build-uniform") {
+                    var uniformValue = target.getAttribute("data-baer-uniform");
+                    buildUniformSbs(uniformValue);
+                    return;
+                }
+                if (action === "set-firedate") {
+                    var selector = target.getAttribute("data-baer-target") || "#firedate";
+                    var input = selector ? dom.qs(selector) : null;
+                    var value = input ? input.value : null;
+                    setFireDate(value);
+                    return;
+                }
+                if (action === "load-classes") {
+                    loadModifyClass();
+                    return;
+                }
+                if (action === "modify-classes") {
+                    modifyClasses();
+                    return;
+                }
+                if (action === "modify-color-map") {
+                    modifyColorMap();
+                    return;
+                }
+                if (action === "show-map") {
+                    showSbs();
+                }
+            });
+        }
+
+        baer.showHideControls = showHideControls;
+        baer.initializeMode = initializeMode;
+        baer.set_firedate = setFireDate;
+        baer.upload_sbs = uploadSbs;
+        baer.remove_sbs = removeSbs;
+        baer.build_uniform_sbs = buildUniformSbs;
+        baer.load_modify_class = loadModifyClass;
+        baer.modify_classes = modifyClasses;
+        baer.modify_color_map = modifyColorMap;
+        baer.show_sbs = showSbs;
+
+        bindHandlers();
+        initializeMode();
+
+        return baer;
     }
 
     return {
@@ -425,4 +844,8 @@ var Baer = function () {
             return instance;
         }
     };
-}();
+}());
+
+if (typeof globalThis !== "undefined") {
+    globalThis.Baer = Baer;
+}

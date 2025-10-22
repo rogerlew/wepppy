@@ -8,9 +8,9 @@
      label="Color map",
      layout="vertical",
      options=[
-       {"id": "rhem_sub_cmap_radio_runoff", "label": "Runoff", "value": "sub_rhem_runoff"},
-       {"id": "rhem_sub_cmap_radio_sed_yield", "label": "Sediment Yield", "value": "sub_rhem_sed_yield"},
-       {"id": "rhem_sub_cmap_radio_soil_loss", "label": "Soil Loss", "value": "sub_rhem_soil_loss"}
+       {"id": "rhem_sub_cmap_radio_runoff", "label": "Runoff", "value": "sub_rhem_runoff", "attrs": {"data-subcatchment-role": "cmap-option"}},
+       {"id": "rhem_sub_cmap_radio_sed_yield", "label": "Sediment Yield", "value": "sub_rhem_sed_yield", "attrs": {"data-subcatchment-role": "cmap-option"}},
+       {"id": "rhem_sub_cmap_radio_soil_loss", "label": "Soil Loss", "value": "sub_rhem_soil_loss", "attrs": {"data-subcatchment-role": "cmap-option"}}
      ]
    ) }}
 
@@ -21,7 +21,7 @@
        "rhem_sub_cmap_canvas_runoff_min",
        "rhem_sub_cmap_canvas_runoff_max",
        label="Runoff legend",
-       range_attrs={"min": "0.0001", "max": "20", "value": "5", "step": "0.1"},
+       range_attrs={"min": "0.0001", "max": "20", "value": "5", "step": "0.1", "data-subcatchment-role": "scale-range", "data-subcatchment-scale": "rhem_runoff"},
        units_id="rhem_sub_cmap_canvas_runoff_units"
      ) }}
 </div>
@@ -33,7 +33,7 @@
        "rhem_sub_cmap_canvas_sed_yield_min",
        "rhem_sub_cmap_canvas_sed_yield_max",
        label="Sediment yield legend",
-       range_attrs={"min": "0.0001", "max": "5", "value": "0.5", "step": "0.01"},
+       range_attrs={"min": "0.0001", "max": "5", "value": "0.5", "step": "0.01", "data-subcatchment-role": "scale-range", "data-subcatchment-scale": "rhem_sed_yield"},
        units_id="rhem_sub_cmap_canvas_sed_yield_units"
      ) }}
 </div>
@@ -45,7 +45,7 @@
        "rhem_sub_cmap_canvas_soil_loss_min",
        "rhem_sub_cmap_canvas_soil_loss_max",
        label="Soil loss legend",
-       range_attrs={"min": "0.0001", "max": "5", "value": "0.5", "step": "0.01"},
+       range_attrs={"min": "0.0001", "max": "5", "value": "0.5", "step": "0.01", "data-subcatchment-role": "scale-range", "data-subcatchment-scale": "rhem_soil_loss"},
        units_id="rhem_sub_cmap_canvas_soil_loss_units"
      ) }}
 </div>

@@ -453,10 +453,35 @@ def fetch_dem_and_build_channels(runid, config):
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/set_outlet', methods=['POST'])
 def api_set_outlet(runid, config):
+    payload = parse_request_payload(request)
+
+    def _resolve_coordinate(key: str) -> Any:
+        value = payload.get(key)
+        if value is not None:
+            return value
+        coordinates = payload.get("coordinates")
+        if isinstance(coordinates, dict):
+            if key in coordinates:
+                return coordinates[key]
+            if key == "latitude":
+                return coordinates.get("lat")
+            if key == "longitude":
+                return coordinates.get("lng") or coordinates.get("lon")
+        return None
+
+    def _to_float(value: Any) -> float:
+        if value is None:
+            raise ValueError("missing coordinate")
+        if isinstance(value, (list, tuple)):
+            if not value:
+                raise ValueError("missing coordinate")
+            return _to_float(value[0])
+        return float(value)
+
     try:
-        outlet_lng = float(request.form.get('longitude', None))
-        outlet_lat = float(request.form.get('latitude', None))
-    except Exception:
+        outlet_lng = _to_float(_resolve_coordinate("longitude"))
+        outlet_lat = _to_float(_resolve_coordinate("latitude"))
+    except (TypeError, ValueError):
         return exception_factory('latitude and longitude must be provided as floats', runid=runid)
 
     try:    
@@ -476,53 +501,49 @@ def api_set_outlet(runid, config):
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_subcatchments_and_abstract_watershed', methods=['POST'])
 def api_build_subcatchments_and_abstract_watershed(runid, config):
 
-    pkcsa = request.form.get('pkcsa', None)
-    try:
-        pkcsa = float(pkcsa)
-    except:
-        pass
+    payload = parse_request_payload(
+        request,
+        boolean_fields=(
+            "clip_hillslopes",
+            "walk_flowpaths",
+            "mofe_buffer",
+            "bieger2015_widths",
+        ),
+    )
 
-    clip_hillslope_length = request.form.get('clip_hillslope_length', None)
-    try:
-        clip_hillslope_length = float(clip_hillslope_length)
-    except:
-        pass
+    def _to_float(value):
+        if value is None:
+            return None
+        if isinstance(value, (list, tuple)):
+            return _to_float(value[0] if value else None)
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
 
-    clip_hillslopes = request.form.get('clip_hillslopes', 'off')
-    try:
-        clip_hillslopes = clip_hillslopes.lower().startswith('on')
-    except:
-        pass
+    def _to_bool(value, default=False):
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            lowered = value.strip().lower()
+            if lowered in {"1", "true", "yes", "on"}:
+                return True
+            if lowered in {"0", "false", "no", "off"}:
+                return False
+        if isinstance(value, (int, float)):
+            return bool(value)
+        return default
 
-    walk_flowpaths = request.form.get('walk_flowpaths', 'off')
-    try:
-        walk_flowpaths = walk_flowpaths.lower().startswith('on')
-    except:
-        pass
-
-    mofe_target_length = request.form.get('mofe_target_length', None)
-    try:
-        mofe_target_length = float(mofe_target_length)
-    except:
-        pass
-
-    mofe_buffer = request.form.get('mofe_buffer', 'off')
-    try:
-        mofe_buffer = mofe_buffer.lower().startswith('on')
-    except:
-        pass
-
-    bieger2015_widths = request.form.get('bieger2015_widths', 'off')
-    try:
-        bieger2015_widths = bieger2015_widths.lower().startswith('on')
-    except:
-        pass
-
-    mofe_buffer_length = request.form.get('mofe_buffer_length', None)
-    try:
-        mofe_buffer_length = float(mofe_buffer_length)
-    except:
-        pass
+    pkcsa = _to_float(payload.get('pkcsa'))
+    clip_hillslope_length = _to_float(payload.get('clip_hillslope_length'))
+    walk_flowpaths = _to_bool(payload.get('walk_flowpaths'))
+    clip_hillslopes = _to_bool(payload.get('clip_hillslopes'))
+    mofe_target_length = _to_float(payload.get('mofe_target_length'))
+    mofe_buffer = _to_bool(payload.get('mofe_buffer'))
+    bieger2015_widths = _to_bool(payload.get('bieger2015_widths'))
+    mofe_buffer_length = _to_float(payload.get('mofe_buffer_length'))
 
     try:
         wd = get_wd(runid)

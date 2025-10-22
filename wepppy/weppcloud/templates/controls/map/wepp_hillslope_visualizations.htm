@@ -1,24 +1,26 @@
 {% import "controls/_pure_macros.html" as ui %}
 
+{% set subcatchment_radio_attrs = {"data-subcatchment-role": "cmap-option"} %}
+
 {% set wepp_radio_options = namespace(values=[
-  {"id": "wepp_sub_cmap_radio_runoff", "label": "Runoff", "value": "sub_runoff"},
-  {"id": "wepp_sub_cmap_radio_subrunoff", "label": "Lateral Flow", "value": "sub_subrunoff"},
-  {"id": "wepp_sub_cmap_radio_baseflow", "label": "Baseflow", "value": "sub_baseflow"},
-  {"id": "wepp_sub_cmap_radio_loss", "label": "Sediment Yield", "value": "sub_loss"}
+  {"id": "wepp_sub_cmap_radio_runoff", "label": "Runoff", "value": "sub_runoff", "attrs": subcatchment_radio_attrs},
+  {"id": "wepp_sub_cmap_radio_subrunoff", "label": "Lateral Flow", "value": "sub_subrunoff", "attrs": subcatchment_radio_attrs},
+  {"id": "wepp_sub_cmap_radio_baseflow", "label": "Baseflow", "value": "sub_baseflow", "attrs": subcatchment_radio_attrs},
+  {"id": "wepp_sub_cmap_radio_loss", "label": "Sediment Yield", "value": "sub_loss", "attrs": subcatchment_radio_attrs}
 ]) %}
 
 {% if wepp.has_phosphorus %}
   {% set wepp_radio_options.values = wepp_radio_options.values + [
-    {"id": "wepp_sub_cmap_radio_phosphorus", "label": "Total Phosphorus", "value": "sub_phosphorus"}
+    {"id": "wepp_sub_cmap_radio_phosphorus", "label": "Total Phosphorus", "value": "sub_phosphorus", "attrs": subcatchment_radio_attrs}
   ] %}
 {% endif %}
 
 {% if 'ash' in ron.mods %}
   {% set wepp_radio_options.values = wepp_radio_options.values + [
-    {"id": "ash_sub_cmap_radio_load", "label": "Ash Load", "value": "ash_load"},
-    {"id": "ash_sub_cmap_radio_wind", "label": "Wind", "value": "wind_transport (kg/ha)"},
-    {"id": "ash_sub_cmap_radio_water", "label": "Water", "value": "water_transport (kg/ha)"},
-    {"id": "ash_sub_cmap_radio_windwater", "label": "Wind/Water", "value": "ash_transport (kg/ha)"}
+    {"id": "ash_sub_cmap_radio_load", "label": "Ash Load", "value": "ash_load", "attrs": subcatchment_radio_attrs},
+    {"id": "ash_sub_cmap_radio_wind", "label": "Wind", "value": "wind_transport (kg/ha)", "attrs": subcatchment_radio_attrs},
+    {"id": "ash_sub_cmap_radio_water", "label": "Water", "value": "water_transport (kg/ha)", "attrs": subcatchment_radio_attrs},
+    {"id": "ash_sub_cmap_radio_windwater", "label": "Wind/Water", "value": "ash_transport (kg/ha)", "attrs": subcatchment_radio_attrs}
   ] %}
 {% endif %}
 
@@ -39,7 +41,7 @@
        "wepp_sub_cmap_canvas_runoff_min",
        "wepp_sub_cmap_canvas_runoff_max",
        label="Runoff legend",
-       range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1"}
+       range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1", "data-subcatchment-role": "scale-range", "data-subcatchment-scale": "runoff"}
      ) }}
 </div>
 
@@ -50,7 +52,7 @@
        "wepp_sub_cmap_canvas_loss_min",
        "wepp_sub_cmap_canvas_loss_max",
        label="Sediment yield legend",
-       range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1"}
+       range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1", "data-subcatchment-role": "scale-range", "data-subcatchment-scale": "loss"}
      ) }}
 </div>
 
@@ -62,7 +64,7 @@
          "wepp_sub_cmap_canvas_phosphorus_min",
          "wepp_sub_cmap_canvas_phosphorus_max",
          label="Total phosphorus legend",
-         range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1"},
+         range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1", "data-subcatchment-role": "scale-range", "data-subcatchment-scale": "phosphorus"},
          units_id="wepp_sub_cmap_canvas_phosphorus_units"
        ) }}
   </div>
@@ -77,7 +79,7 @@
          "ash_sub_cmap_canvas_load_min",
          "ash_sub_cmap_canvas_load_max",
          label="Ash load legend",
-         range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1"}
+         range_attrs={"min": "0.0001", "max": "100", "value": "5", "step": "0.1", "data-subcatchment-role": "scale-range", "data-subcatchment-scale": "ash_load"}
        ) }}
   </div>
   <div class="wc-map-scale" data-map-scale="ash_transport (kg/ha)">
@@ -87,7 +89,7 @@
          "ash_sub_cmap_canvas_transport_min",
          "ash_sub_cmap_canvas_transport_max",
          label="Ash transport legend",
-         range_attrs={"min": "0.0001", "max": "20", "value": "2", "step": "0.05"},
+         range_attrs={"min": "0.0001", "max": "20", "value": "2", "step": "0.05", "data-subcatchment-role": "scale-range", "data-subcatchment-scale": "ash_transport"},
          units_id="ash_sub_cmap_canvas_transport_units"
        ) }}
   </div>

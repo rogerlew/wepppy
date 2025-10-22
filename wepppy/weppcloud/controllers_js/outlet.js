@@ -2,260 +2,597 @@
  * Outlet
  * ----------------------------------------------------------------------------
  */
-var Outlet = function () {
+var Outlet = (function () {
     var instance;
 
-    function createInstance() {
-        var that = controlBase();
-        const MODE_SECTIONS = {
-            0: $("#set_outlet_mode0_controls"),
-            1: $("#set_outlet_mode1_controls")
-        };
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
 
-        function parseMode(value, fallback) {
-            var parsed = parseInt(value, 10);
-            return Number.isNaN(parsed) ? fallback : parsed;
+        if (!dom || typeof dom.ensureElement !== "function") {
+            throw new Error("Outlet controller requires WCDom helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("Outlet controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("Outlet controller requires WCEvents helpers.");
         }
 
-        that.form = $("#set_outlet_form");
-        that.info = $("#set_outlet_form #info");
-        that.status = $("#set_outlet_form  #status");
-        that.stacktrace = $("#set_outlet_form #stacktrace");
-        that.ws_client = new WSClient('set_outlet_form', 'outlet');
-        that.ws_client.attachControl(that);
-        that.rq_job_id = null;
-        that.rq_job = $("#set_outlet_form #rq_job");
-        that.command_btn_id = ['btn_set_outlet_cursor', 'btn_set_outlet_entry'];
-        that.modeInputs = $("input[name='set_outlet_mode']");
+        return { dom: dom, http: http, events: events };
+    }
 
-        const baseTriggerEvent = that.triggerEvent.bind(that);
-        that.triggerEvent = function (eventName, payload) {
-            if (eventName === 'SET_OUTLET_TASK_COMPLETED') {
-                that.ws_client.disconnect();
-                if (that.popup && typeof that.popup.remove === 'function') {
-                    that.popup.remove();
-                }
-                that.show();
-            }
-
-            baseTriggerEvent(eventName, payload);
-        };
-
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.outlet = null;
-        that.outletMarker = L.marker(undefined, {
-            pane: 'markerCustomPane'
-        });
-
-        that.remove = function () {
-            var self = instance;
-            var map = MapController.getInstance();
-            self.info.html("");
-            self.stacktrace.text("");
-
-            map.ctrls.removeLayer(self.outletMarker);
-            map.removeLayer(self.outletMarker);
-            self.status.html("");
-
-        };
-
-        that.show = function () {
-            var self = instance;
-
-            self.remove();
-
-            var task_msg = "Displaying Outlet...";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.get({
-                url: "query/outlet/",
-                cache: false,
-                success: function success(response) {
-                    var map = MapController.getInstance();
-
-                    var offset = cellsize * 5e-6;
-
-                    self.outletMarker.setLatLng([response.lat - offset, response.lng + offset]).addTo(map);
-                    map.ctrls.addOverlay(self.outletMarker, "Outlet");
-                    self.status.html(task_msg + "... Success");
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: url_for_run("report/outlet/"),
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        // Cursor Selection Control
-        that.cursorButton = $("#btn_set_outlet_cursor");
-        that.cursorHint = $("#hint_set_outlet_cursor");
-        that.entryInput = $("#input_set_outlet_entry");
-        that.entryButton = $("#btn_set_outlet_entry");
-        that.popup = L.popup();
-        that.cursorSelectionOn = false;
-
-        if (that.modeInputs && that.modeInputs.length) {
-            that.modeInputs.off('change.setoutlet').on('change.setoutlet', function () {
-                that.handleModeChange(this.value);
-            });
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
         }
 
-        if (that.cursorButton && that.cursorButton.length) {
-            that.cursorButton.off('click.setoutlet').on('click.setoutlet', function () {
-                that.handleCursorToggle();
-            });
-        }
-
-        if (that.entryButton && that.entryButton.length) {
-            that.entryButton.off('click.setoutlet').on('click.setoutlet', function () {
-                that.handleEntrySubmit();
-            });
-        }
-
-        that.setClickHandler = function (ev) {
-            var self = instance;
-            if (self.cursorSelectionOn) {
-                self.set_outlet(ev);
-            }
-        };
-
-        that.set_outlet = function (ev) {
-            var self = instance;
-            var map = MapController.getInstance();
-
-            var task_msg = "Attempting to set outlet";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-            self.ws_client.connect();
-
-            self.popup.setLatLng(ev.latlng).setContent("finding nearest channel...").openOn(map);
-
-            var lat = ev.latlng.lat;
-            var lng = ev.latlng.lng;
-
-            $.post({
-                url: "rq/api/set_outlet",
-                data: { latitude: lat, longitude: lng },
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(`set_outlet job submitted: ${response.job_id}`);
-                        self.set_rq_job_id(self, response.job_id);
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
                 }
-            });
-            self.setCursorSelection(false);
-        };
-
-        that.setCursorSelection = function (state) {
-            var self = instance;
-            self.cursorSelectionOn = state;
-
-            if (state) {
-                if (self.cursorButton && self.cursorButton.length) {
-                    self.cursorButton.text("Cancel");
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
                 }
-                $(".leaflet-container").css("cursor", "crosshair");
-                if (self.cursorHint && self.cursorHint.length) {
-                    self.cursorHint.text("Click on the map to define outlet.");
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
                 }
-            } else {
-                if (self.cursorButton && self.cursorButton.length) {
-                    self.cursorButton.text("Use Cursor");
-                }
-                $(".leaflet-container").css("cursor", "");
-                if (self.cursorHint && self.cursorHint.length) {
-                    self.cursorHint.text("");
-                }
-            }
-        };
-
-        that.setMode = function (mode) {
-            var self = instance;
-            self.mode = parseMode(mode, 0);
-
-            Object.keys(MODE_SECTIONS).forEach(function (key) {
-                var section = MODE_SECTIONS[key];
-                if (!section || section.length === 0) {
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
                     return;
                 }
-                if (Number(key) === self.mode) {
-                    section.show();
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function parseMode(value, fallback) {
+        if (value === undefined || value === null) {
+            return fallback;
+        }
+        if (typeof value === "number" && !Number.isNaN(value)) {
+            return value;
+        }
+        var parsed = parseInt(String(value), 10);
+        return Number.isNaN(parsed) ? fallback : parsed;
+    }
+
+    function normaliseModeKey(mode) {
+        return mode === 1 ? "entry" : "cursor";
+    }
+
+    function parseCoordinatesFromEntry(raw) {
+        var input = (raw || "").trim();
+        if (!input) {
+            throw new Error('Enter coordinates as "lon, lat".');
+        }
+
+        var parts = input.split(",").map(function (token) {
+            return token.trim();
+        }).filter(Boolean);
+
+        if (parts.length < 2) {
+            parts = input.split(/\s+/).filter(Boolean);
+        }
+        if (parts.length < 2) {
+            throw new Error('Enter coordinates as "lon, lat".');
+        }
+
+        var lng = parseFloat(parts[0]);
+        var lat = parseFloat(parts[1]);
+        if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+            throw new Error("Invalid coordinates.");
+        }
+        return { lat: lat, lng: lng };
+    }
+
+    function ensureLatLng(lat, lng) {
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+            throw new Error("Latitude and longitude must be finite numbers.");
+        }
+        return { lat: lat, lng: lng };
+    }
+
+    function createInstance() {
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var http = helpers.http;
+        var events = helpers.events;
+
+        var outlet = controlBase();
+        var baseTriggerEvent = outlet.triggerEvent.bind(outlet);
+
+        var outletEmitter = events.createEmitter();
+        if (typeof events.useEventMap === "function") {
+            outlet.events = events.useEventMap([
+                "outlet:mode:change",
+                "outlet:cursor:toggle",
+                "outlet:set:start",
+                "outlet:set:queued",
+                "outlet:set:success",
+                "outlet:set:error",
+                "outlet:display:refresh"
+            ], outletEmitter);
+        } else {
+            outlet.events = outletEmitter;
+        }
+
+        var formElement = dom.ensureElement("#set_outlet_form", "Outlet form not found.");
+        var infoElement = dom.qs("#set_outlet_form #info");
+        var statusElement = dom.qs("#set_outlet_form #status");
+        var stacktraceElement = dom.qs("#set_outlet_form #stacktrace");
+        var rqJobElement = dom.qs("#set_outlet_form #rq_job");
+        var hintElement = dom.qs("#hint_set_outlet_cursor");
+        var entryInputElement = dom.qs("[data-outlet-entry-field]", formElement);
+        var cursorButtonElement = dom.qs("[data-outlet-action='cursor-toggle']", formElement);
+        var entryButtonElement = dom.qs("[data-outlet-action='entry-submit']", formElement);
+        var modeSections = dom.qsa("[data-outlet-mode-section]", formElement);
+        var modeRadios = dom.qsa("input[name='set_outlet_mode']", formElement);
+        var outletRoot = dom.qs("[data-outlet-root]", formElement) || formElement;
+
+        var infoAdapter = createLegacyAdapter(infoElement);
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+        var hintAdapter = createLegacyAdapter(hintElement);
+
+        outlet.form = formElement;
+        outlet.info = infoAdapter;
+        outlet.status = statusAdapter;
+        outlet.stacktrace = stacktraceAdapter;
+        outlet.rq_job = rqJobAdapter;
+        outlet.command_btn_id = ["btn_set_outlet_cursor", "btn_set_outlet_entry"];
+        outlet.cursorHint = hintAdapter;
+        outlet.cursorButton = cursorButtonElement;
+        outlet.entryInput = entryInputElement;
+        outlet.entryButton = entryButtonElement;
+        outlet.mode = 0;
+
+        outlet.ws_client = new WSClient("set_outlet_form", "outlet");
+        outlet.ws_client.attachControl(outlet);
+
+        outlet.popup = L.popup();
+        outlet.cursorSelectionOn = false;
+        outlet.outletMarker = L.marker(undefined, {
+            pane: "markerCustomPane"
+        });
+        var lastSubmission = null;
+
+        function setStatusMessage(message) {
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(message || "");
+            }
+        }
+
+        function setErrorStatus(message) {
+            var text = message || "Unable to complete outlet request.";
+            setStatusMessage('<span class="text-danger">' + text + "</span>");
+        }
+
+        function resetStatus(taskMsg) {
+            if (infoAdapter && typeof infoAdapter.html === "function") {
+                infoAdapter.html("");
+            }
+            setStatusMessage(taskMsg ? taskMsg + "…" : "");
+            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
+                stacktraceAdapter.text("");
+            }
+        }
+
+        function updateModeUI(modeValue, options) {
+            var emitEvent = !options || options.emit !== false;
+            var nextMode = parseMode(modeValue, outlet.mode || 0);
+            var modeKey = normaliseModeKey(nextMode);
+
+            outlet.mode = nextMode;
+
+            modeSections.forEach(function (section) {
+                if (!section) {
+                    return;
+                }
+                var sectionMode = section.getAttribute("data-mode") || "";
+                var isActive = sectionMode === modeKey;
+                dom.toggle(section, isActive);
+                if (isActive) {
+                    section.removeAttribute("aria-hidden");
                 } else {
-                    section.hide();
+                    section.setAttribute("aria-hidden", "true");
                 }
             });
 
-            if (self.mode !== 0) {
-                self.setCursorSelection(false);
+            if (nextMode !== 0) {
+                setCursorSelection(false);
+            }
+
+            if (outlet.events && typeof outlet.events.emit === "function" && emitEvent) {
+                outlet.events.emit("outlet:mode:change", {
+                    mode: modeKey,
+                    value: nextMode
+                });
+            }
+        }
+
+        function setCursorSelection(state) {
+            var enabled = Boolean(state);
+            outlet.cursorSelectionOn = enabled;
+
+            if (cursorButtonElement) {
+                dom.setText(cursorButtonElement, enabled ? "Cancel" : "Use Cursor");
+                cursorButtonElement.setAttribute("aria-pressed", enabled ? "true" : "false");
+            }
+
+            if (hintElement) {
+                dom.setText(hintElement, enabled ? "Click on the map to define outlet." : "");
+            }
+
+            var containers = dom.qsa(".leaflet-container");
+            containers.forEach(function (container) {
+                if (!container || !container.style) {
+                    return;
+                }
+                container.style.cursor = enabled ? "crosshair" : "";
+            });
+
+            if (outlet.events && typeof outlet.events.emit === "function") {
+                outlet.events.emit("outlet:cursor:toggle", {
+                    enabled: enabled
+                });
+            }
+        }
+
+        function handleModeChange(event) {
+            if (!event || !event.target) {
+                return;
+            }
+            updateModeUI(event.target.value);
+        }
+
+        function handleCursorToggle(event) {
+            event.preventDefault();
+            setCursorSelection(!outlet.cursorSelectionOn);
+        }
+
+        function handleEntrySubmit(event) {
+            event.preventDefault();
+            if (!entryInputElement) {
+                return;
+            }
+            var coords;
+            try {
+                coords = parseCoordinatesFromEntry(entryInputElement.value);
+            } catch (err) {
+                setErrorStatus(err.message);
+                return;
+            }
+            var latlng = L.latLng(coords.lat, coords.lng);
+            submitOutlet(latlng, "entry");
+        }
+
+        function submitOutlet(latlng, source) {
+            if (!latlng) {
+                return Promise.reject(new Error("LatLng is required."));
+            }
+
+            var coordinates = ensureLatLng(latlng.lat, latlng.lng);
+
+            resetStatus("Attempting to set outlet");
+
+            if (outlet.ws_client && typeof outlet.ws_client.connect === "function") {
+                outlet.ws_client.connect();
+            }
+
+            try {
+                var map = MapController.getInstance();
+                outlet.popup
+                    .setLatLng(latlng)
+                    .setContent("finding nearest channel...")
+                    .openOn(map);
+            } catch (err) {
+                console.warn("Failed to display outlet popup.", err);
+            }
+
+            setCursorSelection(false);
+
+            if (outlet.events && typeof outlet.events.emit === "function") {
+                outlet.events.emit("outlet:set:start", {
+                    coordinates: coordinates,
+                    source: source || "cursor"
+                });
+            }
+
+            lastSubmission = {
+                coordinates: coordinates,
+                source: source || "cursor",
+                enqueuedAt: Date.now(),
+                jobId: null
+            };
+
+            return http.request("rq/api/set_outlet", {
+                method: "POST",
+                json: {
+                    latitude: coordinates.lat,
+                    longitude: coordinates.lng
+                },
+                form: formElement
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    var success = data.Success === true && data.job_id;
+                    if (success) {
+                        setStatusMessage("set_outlet job submitted: " + data.job_id);
+                        outlet.set_rq_job_id(outlet, data.job_id);
+                        if (outlet.events && typeof outlet.events.emit === "function") {
+                            outlet.events.emit("outlet:set:queued", {
+                                jobId: data.job_id,
+                                coordinates: coordinates,
+                                source: source || "cursor"
+                            });
+                        }
+                        if (lastSubmission) {
+                            lastSubmission.jobId = data.job_id;
+                        }
+                        outlet.triggerEvent("job:started", {
+                            jobId: data.job_id,
+                            task: "outlet:set",
+                            coordinates: coordinates,
+                            source: source || "cursor"
+                        });
+                        return data;
+                    }
+                    outlet.pushResponseStacktrace(outlet, data);
+                    setErrorStatus("Failed to submit outlet job.");
+                    if (outlet.events && typeof outlet.events.emit === "function") {
+                        outlet.events.emit("outlet:set:error", {
+                            reason: "server",
+                            response: data,
+                            coordinates: coordinates,
+                            source: source || "cursor"
+                        });
+                    }
+                    lastSubmission = null;
+                    outlet.triggerEvent("job:error", {
+                        reason: "server",
+                        response: data,
+                        task: "outlet:set",
+                        coordinates: coordinates,
+                        source: source || "cursor"
+                    });
+                    return data;
+                })
+                .catch(function (error) {
+                    outlet.pushErrorStacktrace(outlet, error);
+                    setErrorStatus("Unable to enqueue outlet job.");
+                    if (outlet.events && typeof outlet.events.emit === "function") {
+                        outlet.events.emit("outlet:set:error", {
+                            reason: "http",
+                            error: error,
+                            coordinates: coordinates,
+                            source: source || "cursor"
+                        });
+                    }
+                    lastSubmission = null;
+                    outlet.triggerEvent("job:error", {
+                        reason: "http",
+                        error: error,
+                        task: "outlet:set",
+                        coordinates: coordinates,
+                        source: source || "cursor"
+                    });
+                    throw error;
+                });
+        }
+
+        outlet.triggerEvent = function (eventName, payload) {
+            var normalized = (eventName || "").toString().toUpperCase();
+            if (normalized === "SET_OUTLET_TASK_COMPLETED") {
+                if (outlet.ws_client && typeof outlet.ws_client.disconnect === "function") {
+                    outlet.ws_client.disconnect();
+                }
+                if (outlet.popup && typeof outlet.popup.remove === "function") {
+                    try {
+                        outlet.popup.remove();
+                    } catch (err) {
+                        console.warn("Failed to remove outlet popup.", err);
+                    }
+                }
+                outlet.show();
+                if (outlet.events && typeof outlet.events.emit === "function") {
+                    outlet.events.emit("outlet:set:success", {
+                        jobId: outlet.rq_job_id || (lastSubmission && lastSubmission.jobId) || null,
+                        submission: lastSubmission,
+                        payload: payload || {}
+                    });
+                }
+                baseTriggerEvent("job:completed", {
+                    jobId: outlet.rq_job_id || null,
+                    task: "outlet:set",
+                    payload: payload || {}
+                });
+                lastSubmission = null;
+            }
+            return baseTriggerEvent(eventName, payload);
+        };
+
+        outlet.hideStacktrace = function () {
+            if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
+                stacktraceAdapter.hide();
+                return;
+            }
+            if (stacktraceElement) {
+                stacktraceElement.hidden = true;
+                stacktraceElement.style.display = "none";
             }
         };
 
-        that.handleModeChange = function (mode) {
-            that.setMode(mode);
+        outlet.remove = function () {
+            var map = MapController.getInstance();
+            if (map && map.ctrls && typeof map.ctrls.removeLayer === "function") {
+                try {
+                    map.ctrls.removeLayer(outlet.outletMarker);
+                } catch (err) {
+                    console.warn("Failed to remove outlet overlay.", err);
+                }
+            }
+            if (map && typeof map.removeLayer === "function") {
+                try {
+                    map.removeLayer(outlet.outletMarker);
+                } catch (err) {
+                    console.warn("Failed to remove outlet marker from map.", err);
+                }
+            }
+            if (infoAdapter && typeof infoAdapter.html === "function") {
+                infoAdapter.html("");
+            }
+            setStatusMessage("");
+            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
+                stacktraceAdapter.text("");
+            }
         };
 
-        that.handleCursorToggle = function () {
-            var self = instance;
-            self.setCursorSelection(!self.cursorSelectionOn);
+        outlet.show = function () {
+            var taskMsg = "Displaying Outlet";
+            resetStatus(taskMsg);
+            outlet.remove();
+
+            var map = MapController.getInstance();
+
+            var bust = { _: Date.now() };
+
+            var queryPromise = http.getJson("query/outlet/", { params: bust })
+                .then(function (response) {
+                    if (!response || typeof response.lat !== "number" || typeof response.lng !== "number") {
+                        setErrorStatus("Outlet location unavailable.");
+                        return;
+                    }
+
+                    var offset = typeof cellsize === "number" ? cellsize * 5e-6 : 0;
+                    var lat = response.lat - offset;
+                    var lng = response.lng + offset;
+                    outlet.outletMarker.setLatLng([lat, lng]).addTo(map);
+                    if (map && map.ctrls && typeof map.ctrls.addOverlay === "function") {
+                        map.ctrls.addOverlay(outlet.outletMarker, "Outlet");
+                    }
+                    setStatusMessage(taskMsg + "... Success");
+                })
+                .catch(function (error) {
+                    outlet.pushErrorStacktrace(outlet, error);
+                    setErrorStatus("Failed to display outlet.");
+                });
+
+            var reportPromise = http.request(url_for_run("report/outlet/"), { params: bust })
+                .then(function (result) {
+                    var response = result.body;
+                    if (infoAdapter && typeof infoAdapter.html === "function") {
+                        infoAdapter.html(response || "");
+                    }
+                })
+                .catch(function (error) {
+                    outlet.pushErrorStacktrace(outlet, error);
+                    setErrorStatus("Failed to load outlet report.");
+                });
+
+            Promise.all([queryPromise, reportPromise]).then(function () {
+                if (outlet.events && typeof outlet.events.emit === "function") {
+                    outlet.events.emit("outlet:display:refresh", {});
+                }
+            });
         };
 
-        that.handleEntrySubmit = function () {
-            var self = instance;
-            var raw = self.entryInput && self.entryInput.length ? self.entryInput.val() : '';
-            var parts = String(raw || '').split(',');
-
-            if (parts.length < 2) {
-                self.status.html('<span class="text-danger">Enter coordinates as "lon, lat".</span>');
+        outlet.setCursorSelection = setCursorSelection;
+        outlet.setMode = function (mode) {
+            updateModeUI(mode);
+        };
+        outlet.handleModeChange = function (mode) {
+            updateModeUI(mode);
+        };
+        outlet.handleCursorToggle = function () {
+            setCursorSelection(!outlet.cursorSelectionOn);
+        };
+        outlet.handleEntrySubmit = function () {
+            if (!entryInputElement) {
                 return false;
             }
-
-            var lng = parseFloat(parts[0]);
-            var lat = parseFloat(parts[1]);
-
-            if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
-                self.status.html('<span class="text-danger">Invalid coordinates.</span>');
+            var coords;
+            try {
+                coords = parseCoordinatesFromEntry(entryInputElement.value);
+            } catch (err) {
+                setErrorStatus(err.message);
                 return false;
             }
-
-            var ev = { latlng: L.latLng(lat, lng) };
-            self.set_outlet(ev);
+            var latlng = L.latLng(coords.lat, coords.lng);
+            submitOutlet(latlng, "entry");
             return true;
         };
 
-        return that;
+        outlet.set_outlet = function (ev, options) {
+            if (!ev || !ev.latlng) {
+                return Promise.reject(new Error("LatLng event required."));
+            }
+            var source = options && options.source ? options.source : "cursor";
+            return submitOutlet(ev.latlng, source);
+        };
+
+        outlet.setClickHandler = function (ev) {
+            if (outlet.cursorSelectionOn) {
+                outlet.set_outlet(ev);
+            }
+        };
+
+        if (modeRadios.length > 0) {
+            modeRadios.forEach(function (radio) {
+                radio.addEventListener("change", handleModeChange);
+            });
+            var initial = modeRadios.find(function (radio) {
+                return radio.checked;
+            });
+            if (initial) {
+                updateModeUI(initial.value, { emit: false });
+            }
+        }
+
+        dom.delegate(outletRoot, "click", "[data-outlet-action]", function (event, target) {
+            var action = target.getAttribute("data-outlet-action");
+            if (action === "cursor-toggle") {
+                handleCursorToggle(event);
+            }
+            if (action === "entry-submit") {
+                handleEntrySubmit(event);
+            }
+        });
+
+        return outlet;
     }
 
     return {
@@ -266,23 +603,26 @@ var Outlet = function () {
             return instance;
         }
     };
-}();
+})();
+
+if (typeof globalThis !== "undefined") {
+    globalThis.Outlet = Outlet;
+}
 
 function render_legend(cmap, canvasID) {
-    var canvas = $("#" + canvasID);
-
-    if (!canvas.length) {
+    var element = document.getElementById(canvasID);
+    if (!element) {
         return;
     }
 
-    var width = Math.round(canvas.outerWidth());
-    var height = Math.round(canvas.outerHeight());
+    var rect = element.getBoundingClientRect();
+    var width = Math.round(rect.width || element.offsetWidth || element.clientWidth || element.width || 0);
+    var height = Math.round(rect.height || element.offsetHeight || element.clientHeight || element.height || 0);
 
     if (width <= 0 || height <= 0) {
         return;
     }
 
-    var element = canvas[0];
     if (element.width !== width) {
         element.width = width;
     }

@@ -188,6 +188,31 @@ def test_task_baer_modify_color_map_converts_keys(disturbed_client):
     assert controller.color_map_updates[-1] == {(255, 0, 0): "High"}
 
 
+def test_task_baer_modify_class_parses_integers(disturbed_client):
+    client, _, DummyBaer, DummyRon, _, run_dir = disturbed_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_burn_class",
+        json={"classes": ["1", "2", "3", "4"], "nodata_vals": "999"},
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+    controller = DummyBaer.getInstance(run_dir)
+    assert controller.burn_class_updates[-1] == ([1, 2, 3, 4], "999")
+
+
+def test_task_baer_modify_class_requires_four_values(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_burn_class",
+        json={"classes": [1, 2, 3]},
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is False
+    assert "four" in payload["Error"].lower()
+
+
 def test_resources_baer_sbs_uses_send_file(disturbed_client):
     client, DummyDisturbed, DummyBaer, DummyRon, dispatched, run_dir = disturbed_client
     response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/baer.png")
@@ -196,6 +221,19 @@ def test_resources_baer_sbs_uses_send_file(disturbed_client):
     path, mimetype = dispatched["send_file"]
     assert path == DummyBaer.getInstance(run_dir).baer_rgb_png
     assert mimetype == "image/png"
+
+
+def test_set_firedate_updates_controller(disturbed_client):
+    client, DummyDisturbed, *_ , run_dir = disturbed_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_firedate/",
+        json={"fire_date": "2024-09-01"},
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+    controller = DummyDisturbed.getInstance(run_dir)
+    assert controller.fire_date == "2024-09-01"
 
 
 def test_set_firedate_updates_controller(disturbed_client):

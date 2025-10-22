@@ -32,7 +32,7 @@
      )
    ) %}
 
-  <div class="hide-readonly wc-stack">
+  <div class="hide-readonly wc-stack" data-outlet-root>
     {{ ui.radio_group(
          "set_outlet_mode",
          label="Outlet selection mode",
@@ -55,19 +55,32 @@
          help="Use the map cursor for interactive selection or enter coordinates manually."
        ) }}
 
-    <div id="set_outlet_mode0_controls" class="wc-stack" data-mode="cursor">
+    <div
+      id="set_outlet_mode0_controls"
+      class="wc-stack"
+      data-mode="cursor"
+      data-outlet-mode-section>
       {% call button_row() %}
         <button
           id="btn_set_outlet_cursor"
           type="button"
-          class="pure-button pure-button-primary disable-readonly">
+          class="pure-button pure-button-primary disable-readonly"
+          data-outlet-action="cursor-toggle">
           Use Cursor
         </button>
       {% endcall %}
-      <p id="hint_set_outlet_cursor" class="wc-text-muted" aria-live="polite"></p>
+      <p
+        id="hint_set_outlet_cursor"
+        class="wc-text-muted"
+        aria-live="polite"></p>
     </div>
 
-    <div id="set_outlet_mode1_controls" class="wc-stack" data-mode="entry" style="display: none;">
+    <div
+      id="set_outlet_mode1_controls"
+      class="wc-stack"
+      data-mode="entry"
+      data-outlet-mode-section
+      hidden>
       {{ ui.text_field(
            "input_set_outlet_entry",
            "Coordinates",
@@ -78,14 +91,16 @@
              "autocomplete": "off",
              "spellcheck": "false",
              "inputmode": "text",
-             "aria-label": "Longitude, Latitude"
+             "aria-label": "Longitude, Latitude",
+             "data-outlet-entry-field": ""
            }
          ) }}
       {% call button_row() %}
         <button
           id="btn_set_outlet_entry"
           type="button"
-          class="pure-button pure-button-secondary disable-readonly">
+          class="pure-button pure-button-secondary disable-readonly"
+          data-outlet-action="entry-submit">
           Specify Lon/Lat
         </button>
       {% endcall %}

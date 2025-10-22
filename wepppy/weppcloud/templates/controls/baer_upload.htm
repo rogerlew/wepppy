@@ -7,12 +7,12 @@
     <div class="col-sm-12">
         <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="sbs_mode0" name="sbs_mode"
-                onclick="Baer.getInstance().showHideControls(0)"> Upload SBS Map</label>
+                data-baer-mode="0"> Upload SBS Map</label>
     </div>
     <div class="col-sm-12">
         <label class="radio-inline">
             <input type="radio" value="1" class="disable-readonly" id="sbs_mode1" name="sbs_mode"
-                onclick="Baer.getInstance().showHideControls(1)"> Specify Uniform SBS (Must Delineate Channels
+                data-baer-mode="1"> Specify Uniform SBS (Must Delineate Channels
             First)</label>
     </div>
 </div>
@@ -39,7 +39,7 @@
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
-                onclick="Baer.getInstance().upload_sbs()">Upload SBS</button>
+                data-baer-action="upload">Upload SBS</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_upload_sbs"></small>
@@ -49,7 +49,7 @@
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
-                onclick="Baer.getInstance().remove_sbs()">Remove SBS</button>
+                data-baer-action="remove">Remove SBS</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_remove_sbs"></small>
@@ -62,7 +62,7 @@
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
-                onclick="Baer.getInstance().build_uniform_sbs(1)">Use Uniform Low SBS</button>
+                data-baer-action="build-uniform" data-baer-uniform="1">Use Uniform Low SBS</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_low_sbs"></small>
@@ -72,7 +72,7 @@
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
-                onclick="Baer.getInstance().build_uniform_sbs(2)">Use Uniform Moderate SBS</button>
+                data-baer-action="build-uniform" data-baer-uniform="2">Use Uniform Moderate SBS</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_moderate_sbs"></small>
@@ -82,7 +82,7 @@
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
-                onclick="Baer.getInstance().build_uniform_sbs(3)">Use Uniform High SBS</button>
+                data-baer-action="build-uniform" data-baer-uniform="3">Use Uniform High SBS</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_high_sbs"></small>
@@ -92,7 +92,7 @@
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
-                onclick="Baer.getInstance().remove_sbs()">Remove SBS</button>
+                data-baer-action="remove">Remove SBS</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_remove_sbs"></small>
@@ -114,7 +114,7 @@
     </div>
     <div class="col-sm-2">
         <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
-            onclick="Baer.getInstance().set_firedate($('#firedate').val())">Set Fire Date</button>
+            data-baer-action="set-firedate" data-baer-target="#firedate">Set Fire Date</button>
 
     </div>
 </div>

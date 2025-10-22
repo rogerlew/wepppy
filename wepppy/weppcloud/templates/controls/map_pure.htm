@@ -5,30 +5,36 @@
 {% set show_rangeland_modify = 'rangeland_cover' in ron.mods %}
 {% set show_rap = 'rap' in ron.mods %}
 
+{% set subcatchment_radio_attrs = {"data-subcatchment-role": "cmap-option"} %}
+
 {% set sub_cmap_options = [
   {
     "id": "sub_cmap_radio_default",
     "label": "Default",
     "value": "default",
-    "selected": True
+    "selected": True,
+    "attrs": subcatchment_radio_attrs
   },
   {
     "id": "sub_cmap_radio_slp_asp",
     "label": "Slope/Aspect",
     "value": "slp_asp",
-    "disabled": True
+    "disabled": True,
+    "attrs": subcatchment_radio_attrs
   },
   {
     "id": "sub_cmap_radio_dom_lc",
     "label": "Dominant Landcover",
     "value": "dom_lc",
-    "disabled": True
+    "disabled": True,
+    "attrs": subcatchment_radio_attrs
   },
   {
     "id": "sub_cmap_radio_dom_soil",
     "label": "Dominant Soil",
     "value": "dom_soil",
-    "disabled": True
+    "disabled": True,
+    "attrs": subcatchment_radio_attrs
   }
 ] %}
 {% if show_rangeland_modify %}
@@ -37,7 +43,8 @@
       "id": "sub_cmap_radio_rangeland_cover",
       "label": "Rangeland Cover",
       "value": "rangeland_cover",
-      "disabled": True
+      "disabled": True,
+      "attrs": subcatchment_radio_attrs
     }
   ] %}
 {% endif %}
@@ -46,7 +53,8 @@
     {
       "id": "sub_cmap_radio_landuse_cover",
       "label": "Vegetation Cover (%)",
-      "value": "landuse_cover"
+      "value": "landuse_cover",
+      "attrs": subcatchment_radio_attrs
     }
   ] %}
 {% endif %}
