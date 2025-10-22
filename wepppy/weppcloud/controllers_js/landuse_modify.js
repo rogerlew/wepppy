@@ -1,326 +1,761 @@
-var LanduseModify = function () {
+/* ----------------------------------------------------------------------------
+ * LanduseModify
+ * ----------------------------------------------------------------------------
+ */
+var LanduseModify = (function () {
     var instance;
 
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#modify_landuse_form");
-        that.status = $("#modify_landuse_form  #status");
-        that.stacktrace = $("#modify_landuse_form #stacktrace");
-        //that.ws_client = new WSClient('modify_landuse_form', 'modify_landuse');
-        that.rq_job_id = null;
-        that.rq_job = $("#modify_landuse_form #rq_job");
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
+    var EVENT_NAMES = [
+        "landuse:modify:started",
+        "landuse:modify:completed",
+        "landuse:modify:error",
+        "landuse:selection:changed",
+        "job:started",
+        "job:completed",
+        "job:error"
+    ];
 
-        const baseTriggerEvent = that.triggerEvent.bind(that);
-        that.triggerEvent = function (eventName, payload) {
-            if (eventName === 'LANDCOVER_MODIFY_TASK_COMPLETED') {
-                var subCtrl = SubcatchmentDelineation.getInstance();
-                if (subCtrl.getCmapMode && subCtrl.getCmapMode() === 'dom_lc') {
-                    subCtrl.setColorMap('dom_lc');
-                }
-                try {
-                    if (typeof Landuse !== 'undefined' && Landuse !== null) {
-                        var landuseController = Landuse.getInstance();
-                        if (landuseController && typeof landuseController.report === 'function') {
-                            landuseController.report();
-                        }
-                    }
-                } catch (err) {
-                    console.warn('Landuse report unavailable in current view', err);
-                }
-            }
+    var DEFAULT_STYLE = {
+        color: "white",
+        opacity: 1,
+        weight: 1,
+        fillColor: "#FFEDA0",
+        fillOpacity: 0.0
+    };
 
-            baseTriggerEvent(eventName, payload);
-        };
+    var SELECTED_STYLE = {
+        color: "red",
+        opacity: 1,
+        weight: 2,
+        fillOpacity: 0.0
+    };
 
-        that.checkbox = $('#checkbox_modify_landuse');
-        that.textarea = $('#textarea_modify_landuse');
-        that.selection = $('#selection_modify_landuse');
-        that.data = null; // Leaflet geoJSON layer
-        that.polys = null; // Leaflet geoJSON layer
-        that.selected = null;
+    var HOVER_STYLE = {
+        weight: 2,
+        color: "#666",
+        dashArray: "",
+        fillOpacity: 0.0
+    };
 
-        $('#btn_modify_landuse').on('click', function () {
-            instance.modify();
-        });
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
 
-        that.checkbox.on('change', function () {
-            instance.toggle();
-        });
-
-        that.style = {
-            color: "white",
-            opacity: 1,
-            weight: 1,
-            fillColor: "#FFEDA0",
-            fillOpacity: 0.0
-        };
-
-        that.selectedstyle = {
-            color: "red",
-            opacity: 1,
-            weight: 2,
-            fillOpacity: 0.0
-        };
-
-        that.mouseoverstyle = {
-            weight: 2,
-            color: '#666',
-            dashArray: '',
-            fillOpacity: 0.0
-        };
-
-        that.ll0 = null;
-        that.selectionRect = null;
-
-        that.boxSelectionModeMouseDown = function (evt) {
-            var self = instance;
-            self.ll0 = evt.latlng;
-        };
-
-        that.boxSelectionModeMouseMove = function (evt) {
-            var self = instance;
-            var map = MapController.getInstance();
-
-            if (self.ll0 === null) {
-                if (self.selectedRect !== null) {
-                    map.removeLayer(that.selectionRect);
-                    self.selectionRect = null;
-                }
-                return;
-            }
-
-            var bounds = L.latLngBounds(self.ll0, evt.latlng);
-
-            if (self.selectionRect === null) {
-                self.selectionRect = L.rectangle(bounds, { color: 'blue', weight: 1 }).addTo(map);
-            } else {
-                self.selectionRect.setLatLngs([bounds.getSouthWest(), bounds.getSouthEast(),
-                bounds.getNorthEast(), bounds.getNorthWest()]);
-                self.selectionRect.redraw();
-            }
-
-        };
-
-        that.find_layer_id = function (topaz_id) {
-            var self = instance;
-
-            for (var id in self.glLayer._layers) {
-                var topaz_id2 = self.glLayer._layers[id].feature.properties.TopazID;
-
-                if (topaz_id === topaz_id2) {
-                    return id;
-                }
-            }
-            return undefined;
+        if (!dom || typeof dom.ensureElement !== "function") {
+            throw new Error("LanduseModify controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.formToJSON !== "function") {
+            throw new Error("LanduseModify controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("LanduseModify controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("LanduseModify controller requires WCEvents helpers.");
         }
 
-        that.boxSelectionModeMouseUp = function (evt) {
-            var self = instance;
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
 
-            var map = MapController.getInstance();
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
 
-            var llend = evt.latlng;
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
 
-            if (self.ll0.lat === llend.lat && self.ll0.lng === llend.lng) {
-                that.ll0 = null;
-                map.removeLayer(that.selectionRect);
-                that.selectionRect = null;
+    function toResponsePayload(http, error) {
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error.detail || error.body || error.message || "Request failed";
+            return { Error: detail };
+        }
+        return { Error: (error && error.message) || "Request failed" };
+    }
+
+    function normalizeTopazId(value) {
+        if (value === null || value === undefined) {
+            return null;
+        }
+        var token = String(value).trim();
+        if (!token) {
+            return null;
+        }
+        var parsed = parseInt(token, 10);
+        if (Number.isNaN(parsed)) {
+            return null;
+        }
+        return String(parsed);
+    }
+
+    function parseTopazField(value) {
+        if (value === null || value === undefined) {
+            return [];
+        }
+        if (Array.isArray(value)) {
+            return value.map(normalizeTopazId).filter(Boolean);
+        }
+        var tokens = String(value).split(/[\s,]+/);
+        return tokens.map(normalizeTopazId).filter(Boolean);
+    }
+
+    function sortIds(ids) {
+        return ids.slice().sort(function (a, b) {
+            var left = parseInt(a, 10);
+            var right = parseInt(b, 10);
+            if (Number.isNaN(left) || Number.isNaN(right)) {
+                return a.localeCompare(b);
+            }
+            return left - right;
+        });
+    }
+
+    function getMapController() {
+        try {
+            if (window.MapController && typeof window.MapController.getInstance === "function") {
+                return window.MapController.getInstance();
+            }
+        } catch (err) {
+            console.warn("LanduseModify unable to load MapController", err);
+        }
+        return null;
+    }
+
+    function refreshDependentControllers() {
+        try {
+            if (window.SubcatchmentDelineation && typeof window.SubcatchmentDelineation.getInstance === "function") {
+                var subCtrl = window.SubcatchmentDelineation.getInstance();
+                if (subCtrl && typeof subCtrl.getCmapMode === "function" && subCtrl.getCmapMode() === "dom_lc" &&
+                    typeof subCtrl.setColorMap === "function") {
+                    subCtrl.setColorMap("dom_lc");
+                }
+            }
+        } catch (err) {
+            console.warn("LanduseModify: SubcatchmentDelineation refresh failed", err);
+        }
+
+        try {
+            if (window.Landuse && typeof window.Landuse.getInstance === "function") {
+                var landuseController = window.Landuse.getInstance();
+                if (landuseController && typeof landuseController.report === "function") {
+                    landuseController.report();
+                }
+            }
+        } catch (err2) {
+            console.warn("LanduseModify: Landuse report refresh failed", err2);
+        }
+    }
+
+    function createInstance() {
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var eventsApi = helpers.events;
+
+        var modify = controlBase();
+        var emitter = eventsApi.useEventMap(EVENT_NAMES, eventsApi.createEmitter());
+
+        var formElement = dom.ensureElement("#modify_landuse_form", "Modify Landuse form not found.");
+        var statusElement = dom.qs("#modify_landuse_form #status");
+        var stacktraceElement = dom.qs("#modify_landuse_form #stacktrace");
+        var rqJobElement = dom.qs("#modify_landuse_form #rq_job");
+        var checkboxElement = dom.ensureElement(
+            '#modify_landuse_form [data-landuse-modify-action="toggle-selection"]',
+            "Modify Landuse selection toggle not found."
+        );
+        var textareaElement = dom.ensureElement(
+            '#modify_landuse_form [data-landuse-modify-field="topaz-ids"]',
+            "Modify Landuse topaz field not found."
+        );
+        var selectionElement = dom.ensureElement(
+            '#modify_landuse_form [data-landuse-modify-field="landuse-code"]',
+            "Modify Landuse selection dropdown not found."
+        );
+        var submitElement = dom.ensureElement(
+            '#modify_landuse_form [data-landuse-modify-action="submit"]',
+            "Modify Landuse submit button not found."
+        );
+
+        function tryApplyValues(values) {
+            if (!forms || !formElement) {
+                return false;
+            }
+            var tagName = formElement.tagName ? String(formElement.tagName).toLowerCase() : "";
+            if (tagName === "form") {
+                try {
+                    forms.applyValues(formElement, values);
+                    return true;
+                } catch (err) {
+                    console.warn("LanduseModify unable to apply values via WCForms", err);
+                }
+            }
+            return false;
+        }
+
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+
+        modify.form = formElement;
+        modify.status = statusAdapter;
+        modify.stacktrace = stacktraceAdapter;
+        modify.rq_job = rqJobAdapter;
+        modify.checkbox = checkboxElement;
+        modify.textarea = textareaElement;
+        modify.selection = selectionElement;
+        modify.command_btn_id = submitElement.id || "btn_modify_landuse";
+        modify.events = emitter;
+
+        modify.hideStacktrace = function () {
+            if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
+                stacktraceAdapter.hide();
+                return;
+            }
+            if (!stacktraceElement) {
+                return;
+            }
+            stacktraceElement.hidden = true;
+            if (stacktraceElement.style) {
+                stacktraceElement.style.display = "none";
+            }
+        };
+
+        var selectionSet = new Set();
+        var selectionModeActive = false;
+        var suppressSelectionSync = false;
+        var suppressToggleSync = false;
+        var geoJsonData = null;
+        var geoLayer = null;
+        var selectionRectangle = null;
+        var dragStart = null;
+        var layerIndex = Object.create(null);
+
+        modify.selected = selectionSet;
+        modify.data = geoJsonData;
+        modify.glLayer = geoLayer;
+        modify.selectionRect = selectionRectangle;
+
+        function updateSelectionRect(map, bounds) {
+            if (!map || !bounds) {
+                return;
+            }
+            if (!selectionRectangle) {
+                selectionRectangle = L.rectangle(bounds, { color: "blue", weight: 1 }).addTo(map);
+            } else if (typeof selectionRectangle.setBounds === "function") {
+                selectionRectangle.setBounds(bounds);
+            }
+            modify.selectionRect = selectionRectangle;
+        }
+
+        function clearSelectionRect(map) {
+            if (selectionRectangle && map) {
+                map.removeLayer(selectionRectangle);
+            }
+            selectionRectangle = null;
+            modify.selectionRect = null;
+        }
+
+        function applyStylesToLayer(id) {
+            var key = String(id);
+            var layer = layerIndex[key];
+            if (!layer || typeof layer.setStyle !== "function") {
+                return;
+            }
+            if (selectionSet.has(key)) {
+                layer.setStyle(SELECTED_STYLE);
+            } else {
+                layer.setStyle(DEFAULT_STYLE);
+            }
+        }
+
+        function refreshLayerStyles() {
+            Object.keys(layerIndex).forEach(function (key) {
+                applyStylesToLayer(key);
+            });
+        }
+
+        function syncTextarea(ids) {
+            suppressSelectionSync = true;
+            try {
+                var value = ids.length ? ids.join(", ") : "";
+                if (!tryApplyValues({ textarea_modify_landuse: value }) && textareaElement) {
+                    textareaElement.value = value;
+                }
+            } finally {
+                suppressSelectionSync = false;
+            }
+        }
+
+        function emitSelectionChanged(ids, source, silent) {
+            if (silent) {
+                return;
+            }
+            emitter.emit("landuse:selection:changed", {
+                topazIds: ids.slice(),
+                source: source || "unknown"
+            });
+        }
+
+        function applySelection(ids, options) {
+            var opts = options || {};
+            var unique = [];
+            var seen = Object.create(null);
+            ids.forEach(function (value) {
+                var normalized = normalizeTopazId(value);
+                if (!normalized || seen[normalized]) {
+                    return;
+                }
+                seen[normalized] = true;
+                unique.push(normalized);
+            });
+            var sorted = sortIds(unique);
+
+            var changed = sorted.length !== selectionSet.size;
+            if (!changed) {
+                sorted.some(function (id) {
+                    if (!selectionSet.has(id)) {
+                        changed = true;
+                    }
+                    return !selectionSet.has(id);
+                });
+            }
+
+            if (changed) {
+                selectionSet.clear();
+                sorted.forEach(function (id) {
+                    selectionSet.add(id);
+                });
+            }
+
+            syncTextarea(sorted);
+            refreshLayerStyles();
+            emitSelectionChanged(sorted, opts.source, opts.silent);
+
+            return sorted;
+        }
+
+        function parseTextarea(value, options) {
+            return applySelection(parseTopazField(value), options);
+        }
+
+        function ensureInitialSelection() {
+            var initialValue = textareaElement ? textareaElement.value : "";
+            if (initialValue) {
+                parseTextarea(initialValue, { source: "initial", silent: true });
+            } else {
+                syncTextarea([]);
+            }
+        }
+
+        function handleFeatureClick(topazId) {
+            var ids = Array.from(selectionSet);
+            var index = ids.indexOf(topazId);
+            if (index !== -1) {
+                ids.splice(index, 1);
+            } else {
+                ids.push(topazId);
+            }
+            applySelection(ids, { source: "map" });
+        }
+
+        function handleSubIntersection(topazIds) {
+            var current = Array.from(selectionSet);
+            (Array.isArray(topazIds) ? topazIds : []).forEach(function (value) {
+                var normalized = normalizeTopazId(value);
+                if (!normalized) {
+                    return;
+                }
+                var idx = current.indexOf(normalized);
+                if (idx === -1) {
+                    current.push(normalized);
+                } else {
+                    current.splice(idx, 1);
+                }
+            });
+            applySelection(current, { source: "box-select" });
+        }
+
+        function buildGeoLayerFeatures(data) {
+            var map = getMapController();
+            if (!map || !data || !data.features) {
+                return;
+            }
+            layerIndex = Object.create(null);
+            if (geoLayer) {
+                map.removeLayer(geoLayer);
+            }
+            geoLayer = L.geoJSON(data.features, {
+                style: DEFAULT_STYLE,
+                onEachFeature: function (feature, layer) {
+                    if (!feature || !feature.properties) {
+                        return;
+                    }
+                    var topazId = normalizeTopazId(feature.properties.TopazID);
+                    if (!topazId) {
+                        return;
+                    }
+                    layerIndex[topazId] = layer;
+
+                    layer.on({
+                        mouseover: function () {
+                            if (typeof layer.setStyle === "function") {
+                                layer.setStyle(HOVER_STYLE);
+                            }
+                        },
+                        mouseout: function () {
+                            applyStylesToLayer(topazId);
+                        },
+                        click: function (event) {
+                            if (event && event.originalEvent) {
+                                event.originalEvent.preventDefault();
+                                event.originalEvent.stopPropagation();
+                            }
+                            handleFeatureClick(topazId);
+                        }
+                    });
+
+                    applyStylesToLayer(topazId);
+                }
+            });
+            geoLayer.addTo(map);
+            modify.glLayer = geoLayer;
+        }
+
+        function loadSubcatchments() {
+            return http.getJson("resources/subcatchments.json", {
+                params: { _: Date.now() },
+                form: formElement
+            }).then(function (data) {
+                geoJsonData = data || null;
+                modify.data = geoJsonData;
+                buildGeoLayerFeatures(geoJsonData);
+            }).catch(function (error) {
+                var payload = toResponsePayload(http, error);
+                modify.pushResponseStacktrace(modify, payload);
+                suppressToggleSync = true;
+                try {
+                    if (!tryApplyValues({ checkbox_modify_landuse: false }) && checkboxElement) {
+                        checkboxElement.checked = false;
+                    }
+                } finally {
+                    suppressToggleSync = false;
+                }
+                setSelectionMode(false);
+            });
+        }
+
+        function onMapMouseDown(event) {
+            if (!selectionModeActive) {
+                return;
+            }
+            dragStart = event && event.latlng ? event.latlng : null;
+        }
+
+        function onMapMouseMove(event) {
+            if (!selectionModeActive) {
+                return;
+            }
+            var map = getMapController();
+            if (!map) {
+                return;
+            }
+            if (!dragStart) {
+                clearSelectionRect(map);
+                return;
+            }
+            if (!event || !event.latlng) {
+                return;
+            }
+            var bounds = L.latLngBounds(dragStart, event.latlng);
+            updateSelectionRect(map, bounds);
+        }
+
+        function onMapMouseUp(event) {
+            if (!selectionModeActive) {
+                dragStart = null;
+                return;
+            }
+            var map = getMapController();
+            if (!map) {
+                dragStart = null;
+                return;
+            }
+            if (!dragStart || !event || !event.latlng) {
+                dragStart = null;
+                clearSelectionRect(map);
+                return;
+            }
+            var ll0 = dragStart;
+            var ll1 = event.latlng;
+            dragStart = null;
+
+            if (ll0.lat === ll1.lat && ll0.lng === ll1.lng) {
+                clearSelectionRect(map);
                 return;
             }
 
-            var bounds = L.latLngBounds(self.ll0, llend);
-
+            var bounds = L.latLngBounds(ll0, ll1);
             var sw = bounds.getSouthWest();
             var ne = bounds.getNorthEast();
             var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
 
-            $.post({
-                url: "tasks/sub_intersection/",
-                data: JSON.stringify({ extent: extent }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(topaz_ids) {
+            http.postJson("tasks/sub_intersection/", { extent: extent }, { form: formElement })
+                .then(function (response) {
+                    var payload = response.body;
+                    handleSubIntersection(payload);
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    modify.pushResponseStacktrace(modify, payload);
+                    emitter.emit("landuse:modify:error", {
+                        context: "box-select",
+                        error: payload
+                    });
+                })
+                .then(function () {
+                    clearSelectionRect(map);
+                });
+        }
 
-                    for (var i = 0; i < topaz_ids.length; i++) {
-                        var topaz_id = topaz_ids[i];
-                        var id = self.find_layer_id(topaz_id);
+        function attachMapListeners() {
+            var map = getMapController();
+            if (!map) {
+                return;
+            }
+            map.boxZoom.disable();
+            map.on("mousedown", onMapMouseDown);
+            map.on("mousemove", onMapMouseMove);
+            map.on("mouseup", onMapMouseUp);
+        }
 
-                        if (id == undefined) {
-                            continue;
-                        }
+        function detachMapListeners() {
+            var map = getMapController();
+            if (!map) {
+                return;
+            }
+            map.boxZoom.enable();
+            map.off("mousedown", onMapMouseDown);
+            map.off("mousemove", onMapMouseMove);
+            map.off("mouseup", onMapMouseUp);
+            if (geoLayer) {
+                map.removeLayer(geoLayer);
+            }
+            geoLayer = null;
+            modify.glLayer = null;
+            layerIndex = Object.create(null);
+            clearSelectionRect(map);
+        }
 
-                        var layer = self.glLayer._layers[id];
-
-                        if (self.selected.has(topaz_id)) {
-                            self.selected.delete(topaz_id);
-                            layer.setStyle(self.style);
-                        } else {
-                            self.selected.add(topaz_id);
-                            layer.setStyle(self.selectedstyle);
-                        }
-                    }
-
-                    that.textarea.val(Array.from(self.selected).join());
-
-                    map.removeLayer(that.selectionRect);
-                    that.selectionRect = null;
-
-                },
-                error: function error(jqXHR) {
-                    console.log(jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    console.log(error);
-                }
-            }).always(function () {
-                that.ll0 = null;
-            });
-        };
-
-        that.toggle = function () {
-            var self = instance;
-
-            if (self.checkbox.prop("checked") === true) {
-                if (self.glLayer == null) {
-                    self.showModifyMap();
-                }
-                if (self.selected == null) {
-                    self.selected = new Set();
+        function setSelectionMode(enabled) {
+            var targetState = Boolean(enabled);
+            if (selectionModeActive === targetState) {
+                return;
+            }
+            selectionModeActive = targetState;
+            if (selectionModeActive) {
+                attachMapListeners();
+                if (geoJsonData) {
+                    buildGeoLayerFeatures(geoJsonData);
+                } else {
+                    loadSubcatchments();
                 }
             } else {
-                self.hideModifyMap();
+                detachMapListeners();
             }
-        };
+        }
 
-        that.showModifyMap = function () {
-            var self = instance;
+        function setStatusMessage(message) {
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(message);
+            } else if (statusElement) {
+                statusElement.textContent = message;
+            }
+        }
 
-            var map = MapController.getInstance();
-            map.boxZoom.disable();
-            //map.dragging.disable();
+        function submitModification() {
+            var taskMsg = "Modifying landuse";
+            setStatusMessage(taskMsg + "...");
+            modify.hideStacktrace();
 
-            map.on('mousedown', self.boxSelectionModeMouseDown);
-            map.on('mousemove', self.boxSelectionModeMouseMove);
-            map.on('mouseup', self.boxSelectionModeMouseUp);
+            var formSnapshot;
+            try {
+                formSnapshot = forms.formToJSON(formElement);
+            } catch (err) {
+                formSnapshot = { textarea_modify_landuse: textareaElement ? textareaElement.value : "" };
+            }
 
-            self.data = null;
-            $.get({
-                url: "resources/subcatchments.json",
-                cache: false,
-                success: self.onShowSuccess,
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+            var ids = Array.from(selectionSet);
+            var landuseValue = normalizeTopazId(formSnapshot.selection_modify_landuse || selectionElement.value);
+            if (!landuseValue) {
+                var payload = { Error: "Select a landuse value before modifying." };
+                modify.pushResponseStacktrace(modify, payload);
+                emitter.emit("landuse:modify:error", { error: payload });
+                return;
+            }
+
+            emitter.emit("landuse:modify:started", {
+                topazIds: ids.slice(),
+                landuse: landuseValue
+            });
+            modify.triggerEvent("job:started", {
+                task: "landuse:modify",
+                payload: { topazIds: ids.slice(), landuse: landuseValue }
+            });
+
+            http.postJson("tasks/modify_landuse/", {
+                topaz_ids: ids,
+                landuse: landuseValue
+            }, { form: formElement }).then(function (response) {
+                var payload = response.body || {};
+                if (payload.Success === true || payload.success === true) {
+                    applySelection([], { source: "modify", silent: true });
+
+                    suppressToggleSync = true;
+                    try {
+                        if (!tryApplyValues({ checkbox_modify_landuse: false }) && checkboxElement) {
+                            checkboxElement.checked = false;
+                        }
+                        if (checkboxElement) {
+                            checkboxElement.checked = false;
+                        }
+                    } finally {
+                        suppressToggleSync = false;
+                    }
+                    setSelectionMode(false);
+
+                    setStatusMessage(taskMsg + "... Success");
+                    emitter.emit("landuse:modify:completed", {
+                        topazIds: ids.slice(),
+                        landuse: landuseValue,
+                        response: payload
+                    });
+                    modify.triggerEvent("job:completed", {
+                        task: "landuse:modify",
+                        payload: { topazIds: ids.slice(), landuse: landuseValue },
+                        response: payload
+                    });
+                    modify.triggerEvent("LANDCOVER_MODIFY_TASK_COMPLETED", {
+                        topazIds: ids.slice(),
+                        landuse: landuseValue
+                    });
+                    refreshDependentControllers();
+                } else {
+                    modify.pushResponseStacktrace(modify, payload);
+                    emitter.emit("landuse:modify:error", { error: payload });
+                    modify.triggerEvent("job:error", {
+                        task: "landuse:modify",
+                        payload: { topazIds: ids.slice(), landuse: landuseValue },
+                        error: payload
+                    });
                 }
+            }).catch(function (error) {
+                var payload = toResponsePayload(http, error);
+                modify.pushResponseStacktrace(modify, payload);
+                emitter.emit("landuse:modify:error", { error: payload });
+                modify.triggerEvent("job:error", {
+                    task: "landuse:modify",
+                    payload: { topazIds: ids.slice(), landuse: landuseValue },
+                    error: payload
+                });
             });
-        };
+        }
 
-        that.hideModifyMap = function () {
-            var self = instance;
-            var map = MapController.getInstance();
-
-            map.boxZoom.enable();
-            //map.dragging.enable();
-            map.off('mousedown', self.boxSelectionModeMouseDown);
-            map.off('mousemove', self.boxSelectionModeMouseMove);
-            map.off('mouseup', self.boxSelectionModeMouseUp);
-            map.removeLayer(self.glLayer);
-
-            self.data = null;
-            self.glLayer = null;
-            self.ll0 = null;
-        };
-
-        that.onShowSuccess = function (response) {
-            var self = instance;
-            var map = MapController.getInstance();
-            self.data = response;
-            self.glLayer = L.geoJSON(self.data.features, {
-                style: self.style,
-                onEachFeature: self.onEachFeature
-            });
-            self.glLayer.addTo(map);
-        };
-
-        that.onEachFeature = function (feature, layer) {
-            var self = instance;
-            var map = MapController.getInstance();
-
-            layer.on({
-                mouseover: function mouseover(e) {
-                    var layer = e.target;
-
-                    layer.setStyle(self.mouseoverstyle);
-
-                    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-                        layer.bringToFront();
-                    }
-                },
-                mouseout: function mouseout(e) {
-                    var topaz_id = e.target.feature.properties.TopazID;
-                    if (self.selected.has(topaz_id)) {
-                        layer.setStyle(self.selectedstyle);
-                    } else {
-                        layer.setStyle(self.style);
-                    }
-                },
-                click: function click(e) {
-                    var layer = e.target;
-                    var topaz_id = e.target.feature.properties.TopazID;
-
-                    if (self.selected.has(topaz_id)) {
-                        self.selected.delete(topaz_id);
-                        layer.setStyle(self.style);
-                    } else {
-                        self.selected.add(topaz_id);
-                        layer.setStyle(self.selectedstyle);
-                    }
-
-                    that.textarea.val(Array.from(self.selected).join());
+        var baseTriggerEvent = modify.triggerEvent.bind(modify);
+        modify.triggerEvent = function (eventName, payload) {
+            if (eventName === "LANDCOVER_MODIFY_TASK_COMPLETED") {
+                try {
+                    refreshDependentControllers();
+                } catch (err) {
+                    console.warn("LanduseModify: dependent controller refresh failed", err);
                 }
-            });
+            }
+            baseTriggerEvent(eventName, payload);
         };
 
-        that.modify = function () {
-            var self = instance;
-            var task_msg = "Modifying landuse";
-            self.status.html(task_msg + "...");
-            self.hideStacktrace();
+        dom.delegate(formElement, "click", '[data-landuse-modify-action="submit"]', function (event) {
+            event.preventDefault();
+            submitModification();
+        });
 
-            $.post({
-                url: "tasks/modify_landuse/",
-                data: {
-                    topaz_ids: self.textarea.val(),
-                    landuse: self.selection.val()
-                },
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.textarea.val("");
-                        self.checkbox.prop("checked", false);
-                        self.hideModifyMap();
-                        self.status.html(task_msg + "... Success");
+        dom.delegate(formElement, "change", '[data-landuse-modify-action="toggle-selection"]', function (event, matched) {
+            if (suppressToggleSync) {
+                return;
+            }
+            var checkbox = matched || event.target;
+            setSelectionMode(Boolean(checkbox && checkbox.checked));
+        });
 
-                        self.triggerEvent('LANDCOVER_MODIFY_TASK_COMPLETED');
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
+        dom.delegate(formElement, "input", '[data-landuse-modify-field="topaz-ids"]', function (event, matched) {
+            if (suppressSelectionSync) {
+                return;
+            }
+            var value = matched ? matched.value : "";
+            parseTextarea(value, { source: "manual" });
+        });
+
+        dom.delegate(formElement, "change", '[data-landuse-modify-field="landuse-code"]', function () {
+            emitter.emit("landuse:selection:changed", {
+                topazIds: Array.from(selectionSet),
+                source: "landuse-code"
             });
-        };
+        });
 
-        return that;
+        ensureInitialSelection();
+        if (checkboxElement && checkboxElement.checked) {
+            setSelectionMode(true);
+        }
+
+        return modify;
     }
 
     return {
@@ -331,4 +766,8 @@ var LanduseModify = function () {
             return instance;
         }
     };
-}();
+}());
+
+if (typeof globalThis !== "undefined") {
+    globalThis.LanduseModify = LanduseModify;
+}

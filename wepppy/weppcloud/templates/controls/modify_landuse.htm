@@ -13,7 +13,10 @@
        "checkbox_modify_landuse",
        "Enable selection mode",
        help="Click subcatchments to select or deselect them. Hold Shift and drag to draw a selection box.",
-       attrs={"data-role": "toggle-selection"}
+       attrs={
+         "data-role": "toggle-selection",
+         "data-landuse-modify-action": "toggle-selection"
+       }
      ) }}
 
   {{ ui.textarea_field(
@@ -21,20 +24,27 @@
        "Topaz IDs",
        rows=3,
        placeholder="Topaz IDs",
-       attrs={"required": "required"}
+       attrs={
+         "required": "required",
+         "data-landuse-modify-field": "topaz-ids"
+       }
      ) }}
 
   {{ ui.select_field(
        "selection_modify_landuse",
        "Select landuse",
-       landuse_select_options.values
+       landuse_select_options.values,
+       attrs={
+         "data-landuse-modify-field": "landuse-code"
+       }
      ) }}
 
   {% call button_row() %}
     <button
       id="btn_modify_landuse"
       type="button"
-      class="pure-button pure-button-primary">
+      class="pure-button pure-button-primary"
+      data-landuse-modify-action="submit">
       Modify Landuse
     </button>
   {% endcall %}

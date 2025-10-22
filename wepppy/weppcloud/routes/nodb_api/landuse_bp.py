@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Mapping, MutableMapping, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Sequence, Tuple
 
 from flask import Response
 
@@ -13,6 +13,44 @@ from wepppy.nodb.core import Landuse, LanduseMode, Ron
 
 
 landuse_bp = Blueprint('landuse', __name__)
+
+
+def _coerce_landuse_code(value: Any) -> str:
+    if value in (None, ''):
+        raise ValueError('landuse missing')
+    try:
+        return str(int(value))
+    except (TypeError, ValueError) as exc:
+        raise ValueError('landuse must be an integer value') from exc
+
+
+def _iter_values(raw: Any) -> Iterable[Any]:
+    if isinstance(raw, str):
+        yield from (segment.strip() for segment in raw.split(','))
+        return
+    if isinstance(raw, Sequence) and not isinstance(raw, (str, bytes, bytearray)):
+        for item in raw:
+            if item in (None, ''):
+                continue
+            if isinstance(item, str):
+                yield from (segment.strip() for segment in item.split(','))
+            else:
+                yield item
+        return
+    if raw not in (None, ''):
+        yield raw
+
+
+def _coerce_topaz_ids(raw: Any) -> List[str]:
+    candidate_ids: List[str] = []
+    for value in _iter_values(raw):
+        if value in (None, ''):
+            continue
+        try:
+            candidate_ids.append(str(int(value)))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f'invalid topaz id: {value!r}') from exc
+    return candidate_ids
 
 
 def build_landuse_report_context(landuse: Landuse) -> Dict[str, object]:
@@ -214,32 +252,14 @@ def task_modify_landuse(runid: str, config: str) -> Response:
 
     try:
         payload = parse_request_payload(request)
-        raw_ids = payload.get('topaz_ids', None)
-        if raw_ids is None:
-            raise ValueError('topaz_ids missing')
-
-        if isinstance(raw_ids, str):
-            raw_values = [raw_ids]
-        elif isinstance(raw_ids, Sequence):
-            raw_values = [str(item) for item in raw_ids if item not in (None, '')]
-        else:
-            raise ValueError('topaz_ids must be a string or list')
-
-        candidate_ids: List[str] = []
-        for value in raw_values:
-            for segment in value.split(','):
-                segment = segment.strip()
-                if segment:
-                    candidate_ids.append(segment)
-
-        topaz_ids = [str(int(value)) for value in candidate_ids]
-
-        lccode_raw = payload.get('landuse', None)
-        if lccode_raw is None:
-            raise ValueError('landuse missing')
-        lccode = str(int(lccode_raw))
-    except Exception:
-        return exception_factory('Unpacking Modify Landuse Args Faied', runid=runid)
+        topaz_ids = _coerce_topaz_ids(payload.get('topaz_ids'))
+        lccode = _coerce_landuse_code(payload.get('landuse'))
+    except Exception as exc:
+        message = 'Unpacking Modify Landuse Args Failed'
+        detail = str(exc).strip()
+        if detail:
+            message = f'{message}: {detail}'
+        return exception_factory(message, runid=runid)
 
     try:
         landuse.modify(topaz_ids, lccode)
