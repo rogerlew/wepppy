@@ -111,3 +111,22 @@ def test_diff_filesystem_created_paths() -> None:
     diff = cti.diff_filesystem(before_files, before_dirs, after_files, after_dirs)
     assert diff.created_files == ["two.txt"]
     assert diff.created_dirs == ["b/"]
+
+
+def test_worker_entry_writes_error_payload(monkeypatch, tmp_path: Path) -> None:
+    config_path = tmp_path / "config.json"
+    result_path = tmp_path / "result.json"
+    config_path.write_text(json.dumps({"targets": []}))
+
+    def boom(config):
+        raise RuntimeError("kaboom")
+
+    monkeypatch.setattr(cti, "run_pytest_worker", boom)
+
+    exit_code = cti.worker_entry(str(config_path), str(result_path))
+    assert exit_code == cti.ExitCode.TOOL_ERROR.value
+
+    payload = json.loads(result_path.read_text())
+    assert payload["exit_code"] == cti.ExitCode.TOOL_ERROR.value
+    assert payload["errors"][0]["nodeid"] == "<worker-exception>"
+    assert "kaboom" in payload["errors"][0]["longrepr"]

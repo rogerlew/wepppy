@@ -650,14 +650,28 @@ def subprocess_run_worker(config: Dict[str, Any]) -> PytestOutcome:
     ]
 
     completed = run_subprocess(cmd)
-    stdout_text = completed.stdout
-    stderr_text = completed.stderr
+    stdout_text = completed.stdout or ""
+    stderr_text = completed.stderr or ""
 
     try:
-        data = json.loads(result_path.read_text())
+        raw_payload = result_path.read_text()
+        data = json.loads(raw_payload)
     except Exception as exc:
-        raise RuntimeError(f"Failed to read worker result ({result_path}): {exc}") from exc
-    finally:
+        cfg_path.unlink(missing_ok=True)
+        result_path.unlink(missing_ok=True)
+        details = "\n".join(
+            [
+                "Isolation worker failed to produce a valid result payload.",
+                f"Command: {' '.join(cmd)}",
+                f"Exit code: {completed.returncode}",
+                "Captured stdout:",
+                stdout_text or "  (empty)",
+                "Captured stderr:",
+                stderr_text or "  (empty)",
+            ]
+        )
+        raise RuntimeError(details) from exc
+    else:
         cfg_path.unlink(missing_ok=True)
         result_path.unlink(missing_ok=True)
 
@@ -753,7 +767,33 @@ def run_subprocess(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
 
 def worker_entry(config_path: str, result_path: str) -> int:
     config = json.loads(Path(config_path).read_text())
-    outcome, exit_code = run_pytest_worker(config)
+    try:
+        outcome, exit_code = run_pytest_worker(config)
+    except Exception as exc:
+        import traceback
+
+        error_trace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        payload = {
+            "exit_code": ExitCode.TOOL_ERROR.value,
+            "failures": [],
+            "errors": [
+                {
+                    "nodeid": "<worker-exception>",
+                    "when": "internal",
+                    "longrepr": error_trace,
+                }
+            ],
+            "skips": [],
+            "xfails": [],
+            "collected": 0,
+            "duration_s": 0.0,
+            "files": [],
+            "json_report": None,
+            "state_diff": None,
+        }
+        Path(result_path).write_text(json.dumps(payload))
+        return ExitCode.TOOL_ERROR.value
+
     payload = {
         "exit_code": exit_code,
         "failures": [dataclasses.asdict(entry) for entry in outcome.failures],
