@@ -7,9 +7,10 @@
        "Cover transformation scenario",
        reveg_cover_transform_options,
        selected=reveg.cover_transform_fn if reveg.cover_transform_fn else ("user_cover_transform" if reveg.user_defined_cover_transform else ''),
-       extra_control_class="disable-readonly"
+       extra_control_class="disable-readonly",
+       attrs={"data-wepp-role": "reveg-scenario"}
      ) }}
-  <div id="user_defined_cover_transform_container" class="wc-stack" hidden>
+  <div id="user_defined_cover_transform_container" class="wc-stack"{% if not reveg.user_defined_cover_transform %} hidden{% endif %}>
     <div class="wc-field">
       <label class="wc-field__label" for="input_upload_cover_transform">Upload cover transform file (.csv)</label>
       <input id="input_upload_cover_transform"
@@ -20,21 +21,3 @@
     </div>
   </div>
 </section>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var selectElement = document.getElementById('reveg_scenario');
-    var userDefinedContainer = document.getElementById('user_defined_cover_transform_container');
-    if (!selectElement || !userDefinedContainer) {
-      return;
-    }
-    function toggleCoverTransform() {
-      if (selectElement.value === 'user_cover_transform') {
-        userDefinedContainer.removeAttribute('hidden');
-      } else {
-        userDefinedContainer.setAttribute('hidden', '');
-      }
-    }
-    selectElement.addEventListener('change', toggleCoverTransform);
-    toggleCoverTransform();
-  });
-</script>

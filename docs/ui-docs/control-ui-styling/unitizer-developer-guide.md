@@ -266,7 +266,7 @@ console.log('Closest modal-open:', target.closest('[data-modal-open]'));
 
 | Symptom | Likely Cause | Fix |
 |---------|--------------|-----|
-| Radios don't check | Event handler missing | Check `window.__unitizerGlobalChangeHandlerBound` is true |
+| Radios don't check | Controller not initialised | Ensure `Project.getInstance()` loads (check console) and that markup includes `data-project-unitizer` attributes |
 | Values don't convert | unitizer_map.js not loaded | Check network tab, ensure build ran |
 | Wrong units displayed | Preference state out of sync | Call `client.syncPreferencesFromDom()` |
 | POST fails | Backend error or lock | Check server logs, clear NoDb locks |
@@ -316,7 +316,7 @@ For large reports (1000+ values), this can cause layout thrashing. Consider:
 
 ### Complexity Reduction Opportunities
 
-1. **Move template logic to client**: The inline `setGlobalUnitizerPreference` function could live in `unitizer_client.js`
+1. **Template logic now centralized**: Global preference wiring lives in the Project controller; future tweaks should extend `Project.handleGlobalUnitPreference` instead of reintroducing inline scripts.
 2. **Simplify radio state management**: The triple-pass (uncheck → check → verify) is defensive but verbose
 3. **Consolidate sync functions**: `syncPreferencesFromDom`, `applyPreferenceRadios`, `applyGlobalRadio` overlap
 4. **Consider reactive framework**: If refactoring, React/Vue would handle state → DOM updates more elegantly

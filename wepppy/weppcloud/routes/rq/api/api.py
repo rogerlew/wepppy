@@ -7,6 +7,7 @@ from os.path import exists as _exists
 from subprocess import check_output
 
 import awesome_codename
+from typing import Any, Dict
 
 from flask_login import login_required
 import pandas as pd
@@ -65,11 +66,8 @@ from wepppy.topo.watershed_abstraction import (
 )
 
 from wepppy.nodb.core import *
-
 from wepppy.all_your_base import isint, isfloat
-
 from wepppy.weppcloud.utils.archive import has_archive
-
 from wepppy.nodb.status_messenger import StatusMessenger
 
 from ..._common import roles_required, parse_request_payload
@@ -629,7 +627,8 @@ def api_build_climate(runid, config):
     climate = Climate.getInstance(wd)
 
     try:
-        climate.parse_inputs(request.form)
+        payload = parse_request_payload(request)
+        climate.parse_inputs(payload)
     except Exception:
         return exception_factory('Error parsing climate inputs', runid=runid)
 
@@ -744,27 +743,18 @@ def api_run_wepp(runid, config):
         boolean_fields.add(f'dss_export_exclude_order_{i}')
 
     payload = parse_request_payload(request, boolean_fields=boolean_fields)
+    controller_payload: Dict[str, Any] = dict(payload)
 
-    string_payload = {}
-    for key, value in payload.items():
-        if key in boolean_fields:
-            continue
-        if value is None:
-            string_payload[key] = ""
-        elif isinstance(value, (list, tuple, set)):
-            string_payload[key] = ",".join(str(item) for item in value)
-        else:
-            string_payload[key] = str(value)
-
-    try:
-        wepp.parse_inputs(string_payload)
-    except Exception:
-        return exception_factory('Error parsing wepp inputs', runid=runid)
-
-    soils = Soils.getInstance(wd)
-
-    clip_soils = bool(payload.get('clip_soils', False))
-    soils.clip_soils = clip_soils
+    def pop_scalar(mapping: Dict[str, Any], key: str, default: Any = None) -> Any:
+        if key not in mapping:
+            return default
+        value = mapping.pop(key)
+        if isinstance(value, (list, tuple, set)):
+            for item in value:
+                if item not in (None, ''):
+                    return item
+            return default
+        return value
 
     def parse_int(value):
         if value in (None, "", False):
@@ -782,41 +772,53 @@ def api_run_wepp(runid, config):
         except (TypeError, ValueError):
             return None
 
-    clip_soils_depth = parse_int(payload.get('clip_soils_depth'))
+    soils = Soils.getInstance(wd)
+
+    clip_soils = bool(pop_scalar(controller_payload, 'clip_soils', False))
+    soils.clip_soils = clip_soils
+
+    clip_soils_depth = parse_int(pop_scalar(controller_payload, 'clip_soils_depth'))
     if clip_soils_depth is not None:
         soils.clip_soils_depth = clip_soils_depth
 
     watershed = Watershed.getInstance(wd)
 
-    clip_hillslopes = bool(payload.get('clip_hillslopes', False))
+    clip_hillslopes = bool(pop_scalar(controller_payload, 'clip_hillslopes', False))
     watershed.clip_hillslopes = clip_hillslopes
 
-    clip_hillslope_length = parse_int(payload.get('clip_hillslope_length'))
+    clip_hillslope_length = parse_int(pop_scalar(controller_payload, 'clip_hillslope_length'))
 
     if clip_hillslope_length is not None:
         watershed.clip_hillslope_length = clip_hillslope_length
 
-    initial_sat = parse_float(payload.get('initial_sat'))
+    initial_sat = parse_float(pop_scalar(controller_payload, 'initial_sat'))
 
     if initial_sat is not None:
         soils.initial_sat = initial_sat
 
-    reveg_scenario = payload.get('reveg_scenario', None)
+    reveg_scenario = pop_scalar(controller_payload, 'reveg_scenario', None)
+    if isinstance(reveg_scenario, str):
+        reveg_scenario = reveg_scenario.strip()
 
     if reveg_scenario is not None:
         from wepppy.nodb.mods.revegetation import Revegetation
         reveg = Revegetation.getInstance(wd)
         reveg.load_cover_transform(reveg_scenario)
 
-    prep_details_on_run_completion = bool(payload.get('prep_details_on_run_completion', False))
-    arc_export_on_run_completion = bool(payload.get('arc_export_on_run_completion', False))
-    legacy_arc_export_on_run_completion = bool(payload.get('legacy_arc_export_on_run_completion', False))
-    dss_export_on_run_completion = bool(payload.get('dss_export_on_run_completion', False))
+    prep_details_on_run_completion = bool(pop_scalar(controller_payload, 'prep_details_on_run_completion', False))
+    arc_export_on_run_completion = bool(pop_scalar(controller_payload, 'arc_export_on_run_completion', False))
+    legacy_arc_export_on_run_completion = bool(pop_scalar(controller_payload, 'legacy_arc_export_on_run_completion', False))
+    dss_export_on_run_completion = bool(pop_scalar(controller_payload, 'dss_export_on_run_completion', False))
 
     dss_export_exclude_orders = []
     for i in range(1, 6):
-        if payload.get(f'dss_export_exclude_order_{i}', False):
+        if bool(pop_scalar(controller_payload, f'dss_export_exclude_order_{i}', False)):
             dss_export_exclude_orders.append(i)
+
+    try:
+        wepp.parse_inputs(controller_payload)
+    except Exception:
+        return exception_factory('Error parsing wepp inputs', runid=runid)
 
     with wepp.locked():
         wepp._prep_details_on_run_completion = prep_details_on_run_completion
@@ -1014,59 +1016,65 @@ def run_omni_contrasts(runid, config):
 def api_run_ash(runid, config):
     try:
         wd = get_wd(runid)
-        form = request.form
+        payload = parse_request_payload(request)
 
-        # ash_depth_mode
-        mode_raw = form.get('ash_depth_mode')
+        mode_raw = payload.get('ash_depth_mode')
         if mode_raw is None:
-            return exception_factory("ash_depth_mode is required (1=depths, 2=loads)", runid=runid)
+            return exception_factory("ash_depth_mode is required (0=loads, 1=depths, 2=maps)", runid=runid)
         try:
             ash_depth_mode = int(mode_raw)
-        except ValueError:
-            return exception_factory("ash_depth_mode must be an integer (1 or 2)", runid=runid)
+        except (TypeError, ValueError):
+            return exception_factory("ash_depth_mode must be an integer (0, 1, or 2)", runid=runid)
         if ash_depth_mode not in (0, 1, 2):
             return exception_factory("ash_depth_mode must be 0, 1, or 2", runid=runid)
+        payload['ash_depth_mode'] = ash_depth_mode
 
-        fire_date = form.get('fire_date')
+        fire_date = payload.get('fire_date')
 
-        # Gather numeric fields
-        def _req_float(name):
-            v = form.get(name)
-            if v is None:
+        def _require_float(name):
+            value = payload.get(name)
+            if value is None:
                 raise KeyError(name)
             try:
-                return float(v)
-            except ValueError:
+                numeric = float(value)
+            except (TypeError, ValueError):
                 raise ValueError(name)
+            payload[name] = numeric
+            return numeric
 
         if ash_depth_mode == 1:
             try:
-                ini_black_ash_depth_mm = _req_float('ini_black_depth')
-                ini_white_ash_depth_mm = _req_float('ini_white_depth')
-            except KeyError as k:
-                return exception_factory(f"Missing field: {k.args[0]} when ash_depth_mode=1", runid=runid)
-            except ValueError as k:
-                return exception_factory(f"Field must be numeric: {k.args[0]}", runid=runid)
+                ini_black_ash_depth_mm = _require_float('ini_black_depth')
+                ini_white_ash_depth_mm = _require_float('ini_white_depth')
+            except KeyError as exc:
+                missing = exc.args[0]
+                return exception_factory(f"Missing field: {missing} when ash_depth_mode=1", runid=runid)
+            except ValueError as exc:
+                invalid = exc.args[0]
+                return exception_factory(f"Field must be numeric: {invalid}", runid=runid)
         elif ash_depth_mode == 0:
-            # mode 2: convert loads to depths using bulk densities
             required = ('ini_black_load', 'ini_white_load', 'field_black_bulkdensity', 'field_white_bulkdensity')
-            missing = [n for n in required if form.get(n) is None]
+            missing = [name for name in required if payload.get(name) is None]
             if missing:
-                return exception_factory(f"Missing fields for ash_depth_mode=2: {', '.join(missing)}", runid=runid)
+                return exception_factory(f"Missing fields for ash_depth_mode=0: {', '.join(missing)}", runid=runid)
             try:
-                ini_black_ash_depth_mm = float(form['ini_black_load']) / float(form['field_black_bulkdensity'])
-                ini_white_ash_depth_mm = float(form['ini_white_load']) / float(form['field_white_bulkdensity'])
-            except ValueError:
-                return exception_factory('All mode 2 fields must be numeric"', runid=runid)
+                ini_black_load = _require_float('ini_black_load')
+                ini_white_load = _require_float('ini_white_load')
+                field_black_bulkdensity = _require_float('field_black_bulkdensity')
+                field_white_bulkdensity = _require_float('field_white_bulkdensity')
+                ini_black_ash_depth_mm = ini_black_load / field_black_bulkdensity
+                ini_white_ash_depth_mm = ini_white_load / field_white_bulkdensity
+            except ValueError as exc:
+                invalid = exc.args[0]
+                return exception_factory(f"Field must be numeric: {invalid}", runid=runid)
             except ZeroDivisionError:
-                return exception_factory('Bulk density cannot be zero"', runid=runid)
+                return exception_factory("Bulk density cannot be zero", runid=runid)
         else:  # ash_depth_mode == 2
-            ini_black_ash_depth_mm = 3.0  # dummy values, will be replaced by ash load map
-            ini_white_ash_depth_mm = 3.0  # dummy values, will be replaced by ash load map
+            ini_black_ash_depth_mm = 3.0  # placeholder; replaced by map inputs
+            ini_white_ash_depth_mm = 3.0
 
-        # Parse and persist other inputs
         ash = Ash.getInstance(wd)
-        ash.parse_inputs(dict(form))
+        ash.parse_inputs(payload)
 
         if ash_depth_mode == 2:
             with ash.locked():
@@ -1083,11 +1091,9 @@ def api_run_ash(runid, config):
 
         if ash.ash_load_fn is None:
             return exception_factory('Expecting ashload map"', runid=runid)
-        
-        # remember mode for the view
+
         ash.ash_depth_mode = ash_depth_mode
 
-        # RQ job
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_watar)
         rq_timeout = globals().get('TIMEOUT', 600)
@@ -1103,7 +1109,7 @@ def api_run_ash(runid, config):
 
         return jsonify(Success=True, job_id=job.id), 200
 
-    except Exception as e:
+    except Exception:
         return exception_factory('Error Running Ash Transport', runid=runid)
 
 

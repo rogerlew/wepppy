@@ -8,17 +8,30 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
-from pydsstools.core import TimeSeriesContainer
-from pydsstools.heclib.dss import HecDss
 
-from wepppy.nodb.status_messenger import StatusMessenger
-from wepppy.topo.watershed_abstraction import upland_hillslopes
+try:  # Optional dependency for DSS exports
+    from pydsstools.core import TimeSeriesContainer
+    from pydsstools.heclib.dss import HecDss
+except ModuleNotFoundError as exc:  # pragma: no cover - executed when pydsstools missing
+    TimeSeriesContainer = None  # type: ignore[assignment]
+    HecDss = None  # type: ignore[assignment]
+    _PYDSSTOOLS_IMPORT_ERROR = exc
+else:
+    _PYDSSTOOLS_IMPORT_ERROR = None
+
 from wepppy.wepp.interchange.totalwatsed3 import run_totalwatsed3
 
 __all__ = ["totalwatsed_partitioned_dss_export", "archive_dss_export_zip"]
 
 
 def _channel_wepp_ids(translator, network, channel_top_id: int) -> list[int]:
+    try:
+        from wepppy.topo.watershed_abstraction import upland_hillslopes
+    except ModuleNotFoundError as exc:  # pragma: no cover - optional dependency
+        raise ModuleNotFoundError(
+            "watershed_totalwatsed_export requires wepppy.topo.watershed_abstraction"
+        ) from exc
+
     hillslopes = upland_hillslopes(channel_top_id, network, translator)
     wepp_ids: list[int] = []
     for topo_id in hillslopes:
@@ -36,6 +49,14 @@ def _column_units(table: pq.Table) -> dict[str, str]:
         raw = metadata.get(b"units")
         units[field.name] = raw.decode("utf-8") if raw else ""
     return units
+
+
+def _require_pydsstools() -> tuple[type, type]:
+    if TimeSeriesContainer is None or HecDss is None:
+        raise ModuleNotFoundError(
+            "pydsstools is required for DSS export operations"
+        ) from _PYDSSTOOLS_IMPORT_ERROR
+    return TimeSeriesContainer, HecDss
 
 
 def totalwatsed_partitioned_dss_export(
@@ -60,16 +81,25 @@ def totalwatsed_partitioned_dss_export(
     interchange_dir = wd_path / "wepp" / "output" / "interchange"
     dss_export_dir = wd_path / "export" / "dss"
 
+    status_publisher = None
     if status_channel is not None:
-        StatusMessenger.publish(status_channel, "totalwatsed_partitioned_dss_export()...\n")
+        try:
+            from wepppy.nodb.status_messenger import StatusMessenger
+        except ModuleNotFoundError as exc:  # pragma: no cover - optional dependency
+            raise ModuleNotFoundError(
+                "StatusMessenger is unavailable; ensure NoDb components are installed"
+            ) from exc
+        status_publisher = StatusMessenger.publish
+        status_publisher(status_channel, "totalwatsed_partitioned_dss_export()...\n")
 
     if dss_export_dir.exists():
-        if status_channel is not None:
-            StatusMessenger.publish(status_channel, "cleaning export/dss/totalwatsed3_chan_*.dss\n")
+        if status_publisher is not None and status_channel is not None:
+            status_publisher(status_channel, "cleaning export/dss/totalwatsed3_chan_*.dss\n")
         for fn in glob(str(dss_export_dir / "totalwatsed3_chan_*.dss")):
             os.remove(fn)
 
     dss_export_dir.mkdir(parents=True, exist_ok=True)
+    TimeSeriesContainer_cls, HecDss_cls = _require_pydsstools()
 
     for chn_id_str in translator.iter_chn_ids():
         channel_top_id = int(chn_id_str.split("_")[1])
@@ -77,8 +107,8 @@ def totalwatsed_partitioned_dss_export(
         if export_channel_ids is not None and channel_top_id not in export_channel_ids:
             continue
 
-        if status_channel is not None:
-            StatusMessenger.publish(status_channel, f"processing channel {channel_top_id}...\n")
+        if status_publisher is not None and status_channel is not None:
+            status_publisher(status_channel, f"processing channel {channel_top_id}...\n")
 
         wepp_ids = _channel_wepp_ids(translator, network, channel_top_id)
         if not wepp_ids:
@@ -126,7 +156,7 @@ def totalwatsed_partitioned_dss_export(
         start_date = date_index.iloc[0]
 
         dss_file = dss_export_dir / f"totalwatsed3_chan_{channel_top_id}.dss"
-        with HecDss.Open(str(dss_file)) as fid:
+        with HecDss_cls.Open(str(dss_file)) as fid:
             for column in df.columns:
                 if column in identifier_columns:
                     continue
@@ -142,7 +172,7 @@ def totalwatsed_partitioned_dss_export(
                 )
 
                 pathname = f"/WEPP/TOTALWATSED3/{label.upper()}//1DAY/{channel_top_id}/"
-                tsc = TimeSeriesContainer()
+                tsc = TimeSeriesContainer_cls()
                 tsc.pathname = pathname
                 tsc.startDateTime = start_date.strftime("%d%b%Y %H:%M:%S").upper()
                 tsc.interval = 1440
@@ -157,6 +187,12 @@ def totalwatsed_partitioned_dss_export(
 
 def archive_dss_export_zip(wd: str | Path, status_channel: str | None = None) -> None:
     if status_channel is not None:
+        try:
+            from wepppy.nodb.status_messenger import StatusMessenger
+        except ModuleNotFoundError as exc:  # pragma: no cover - optional dependency
+            raise ModuleNotFoundError(
+                "StatusMessenger is unavailable; ensure NoDb components are installed"
+            ) from exc
         StatusMessenger.publish(status_channel, "zipping export/dss\n")
 
     wd_path = Path(wd)

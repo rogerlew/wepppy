@@ -1,3 +1,17 @@
+import importlib
+import sys
+
+
+def _ensure_package(name: str) -> None:
+    module = sys.modules.get(name)
+    if module is not None and not hasattr(module, "__path__"):
+        sys.modules.pop(name, None)
+    if name not in sys.modules:
+        importlib.import_module(name)
+
+
+_ensure_package("wepppy.all_your_base")
+
 from .hill_ebe_interchange import run_wepp_hillslope_ebe_interchange
 from .hill_element_interchange import run_wepp_hillslope_element_interchange
 from .hill_loss_interchange import run_wepp_hillslope_loss_interchange
@@ -8,6 +22,7 @@ from .watershed_ebe_interchange import run_wepp_watershed_ebe_interchange
 from .watershed_chnwb_interchange import run_wepp_watershed_chnwb_interchange
 from .watershed_chanwb_interchange import run_wepp_watershed_chanwb_interchange
 from .watershed_chan_peak_interchange import run_wepp_watershed_chan_peak_interchange, chanout_dss_export
+from .watershed_chan_interchange import run_wepp_watershed_chan_interchange
 from .watershed_totalwatsed_export import (
     totalwatsed_partitioned_dss_export,
     archive_dss_export_zip,
@@ -42,6 +57,7 @@ __all__ = [
     "run_wepp_watershed_ebe_interchange",
     "run_wepp_watershed_chnwb_interchange",
     "run_wepp_watershed_chanwb_interchange",
+    "run_wepp_watershed_chan_interchange",
     "run_wepp_watershed_chan_peak_interchange",
     "chanout_dss_export",
     "totalwatsed_partitioned_dss_export",

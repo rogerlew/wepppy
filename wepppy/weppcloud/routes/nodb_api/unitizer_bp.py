@@ -14,9 +14,15 @@ def task_set_unit_preferences(runid, config):
         ctx = load_run_context(runid, config)
         wd = str(ctx.active_root)
         unitizer = Unitizer.getInstance(wd)
-        res = unitizer.set_preferences(request.form)
-        return success_factory(res)
-    except:
+        payload = parse_request_payload(request, trim_strings=True)
+        preferences = {
+            key: value
+            for key, value in payload.items()
+            if value is not None
+        }
+        res = unitizer.set_preferences(preferences)
+        return success_factory({'preferences': res})
+    except Exception:
         return exception_factory('Error setting unit preferences', runid=runid)
 
 

@@ -9,8 +9,9 @@ var Wepp = (function () {
         var dom = window.WCDom;
         var forms = window.WCForms;
         var http = window.WCHttp;
+        var events = window.WCEvents;
 
-        if (!dom || typeof dom.qs !== "function" || typeof dom.ensureElement !== "function") {
+        if (!dom || typeof dom.qs !== "function" || typeof dom.ensureElement !== "function" || typeof dom.delegate !== "function") {
             throw new Error("Wepp controller requires WCDom helpers.");
         }
         if (!forms || typeof forms.serializeForm !== "function") {
@@ -19,8 +20,11 @@ var Wepp = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("Wepp controller requires WCHttp helpers.");
         }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("Wepp controller requires WCEvents helpers.");
+        }
 
-        return { dom: dom, forms: forms, http: http };
+        return { dom: dom, forms: forms, http: http, events: events };
     }
 
     function createLegacyAdapter(element) {
@@ -84,39 +88,30 @@ var Wepp = (function () {
         return { Error: (error && error.message) || "Request failed" };
     }
 
-    function registerEventListeners(controller, dom) {
-        dom.qsa('[data-wepp-action="run"]').forEach(function (button) {
-            button.addEventListener("click", function (event) {
-                event.preventDefault();
-                controller.run();
-            });
-        });
-
-        dom.qsa('[data-wepp-routine]').forEach(function (toggle) {
-            toggle.addEventListener("change", function (event) {
-                var target = event.currentTarget;
-                var routine = target.getAttribute("data-wepp-routine");
-                if (!routine) {
-                    return;
-                }
-                controller.set_run_wepp_routine(routine, Boolean(target.checked));
-            });
-        });
-
-        dom.qsa('[data-wepp-action="upload-cover-transform"]').forEach(function (input) {
-            input.addEventListener("change", function (event) {
-                controller.handleCoverTransformUpload(event.currentTarget);
-            });
-        });
-    }
-
     function createInstance() {
         var helpers = ensureHelpers();
         var dom = helpers.dom;
         var forms = helpers.forms;
         var http = helpers.http;
+        var events = helpers.events;
 
         var wepp = controlBase();
+        var weppEvents = null;
+
+        if (events && typeof events.createEmitter === "function") {
+            var emitterBase = events.createEmitter();
+            if (typeof events.useEventMap === "function") {
+                weppEvents = events.useEventMap([
+                    "wepp:run:started",
+                    "wepp:run:queued",
+                    "wepp:run:completed",
+                    "wepp:run:error",
+                    "wepp:report:loaded"
+                ], emitterBase);
+            } else {
+                weppEvents = emitterBase;
+            }
+        }
 
         var formElement = dom.ensureElement("#wepp_form", "WEPP form not found.");
         var infoElement = dom.qs("#wepp_form #info");
@@ -124,6 +119,8 @@ var Wepp = (function () {
         var stacktraceElement = dom.qs("#wepp_form #stacktrace");
         var rqJobElement = dom.qs("#wepp_form #rq_job");
         var resultsContainer = dom.qs("#wepp-results");
+        var revegSelect = dom.qs("#reveg_scenario");
+        var coverTransformContainer = dom.qs("#user_defined_cover_transform_container");
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
@@ -141,6 +138,11 @@ var Wepp = (function () {
         wepp.stacktracePanelEl = dom.qs("#wepp_stacktrace_panel");
         wepp.statusStream = null;
         wepp.ws_client = null;
+        wepp._delegates = [];
+
+        if (weppEvents) {
+            wepp.events = weppEvents;
+        }
 
         wepp.appendStatus = function (message, meta) {
             if (!message) {
@@ -179,7 +181,8 @@ var Wepp = (function () {
 
         var baseTriggerEvent = wepp.triggerEvent.bind(wepp);
         wepp.triggerEvent = function (eventName, payload) {
-            if (eventName === "WEPP_RUN_TASK_COMPLETED") {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "WEPP_RUN_TASK_COMPLETED") {
                 if (wepp.ws_client) {
                     wepp.ws_client.disconnect();
                 }
@@ -188,6 +191,9 @@ var Wepp = (function () {
                     Observed.getInstance().onWeppRunCompleted();
                 } catch (err) {
                     console.warn("[WEPP] Observed controller notification failed", err);
+                }
+                if (weppEvents && typeof weppEvents.emit === "function") {
+                    weppEvents.emit("wepp:run:completed", payload || {});
                 }
             }
 
@@ -252,7 +258,7 @@ var Wepp = (function () {
             }
             wepp.appendStatus(taskMsg + "...");
 
-            return http.postJson("tasks/set_run_wepp_routine/", { routine: routine, state: state })
+            return http.postJson("tasks/set_run_wepp_routine/", { routine: routine, state: state }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
@@ -292,6 +298,27 @@ var Wepp = (function () {
             return true;
         };
 
+        wepp.handleRevegetationScenarioChange = function (value) {
+            if (!coverTransformContainer) {
+                return;
+            }
+            if (value === "user_cover_transform") {
+                if (dom.show) {
+                    dom.show(coverTransformContainer);
+                } else {
+                    coverTransformContainer.hidden = false;
+                    coverTransformContainer.style.removeProperty("display");
+                }
+            } else {
+                if (dom.hide) {
+                    dom.hide(coverTransformContainer);
+                } else {
+                    coverTransformContainer.hidden = true;
+                    coverTransformContainer.style.display = "none";
+                }
+            }
+        };
+
         wepp.run = function () {
             var taskMsg = "Submitting wepp run";
 
@@ -310,9 +337,13 @@ var Wepp = (function () {
                 wepp.ws_client.connect();
             }
 
-            var params = forms.serializeForm(formElement, { format: "url" });
+            var payload = forms.serializeForm(formElement, { format: "json" }) || {};
 
-            http.postForm("rq/api/run_wepp", params, { form: formElement })
+            if (weppEvents && typeof weppEvents.emit === "function") {
+                weppEvents.emit("wepp:run:started", { payload: payload });
+            }
+
+            http.postJson("rq/api/run_wepp", payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
@@ -322,17 +353,24 @@ var Wepp = (function () {
                         }
                         wepp.appendStatus(message, { job_id: response.job_id });
                         wepp.set_rq_job_id(wepp, response.job_id);
+                        if (weppEvents && typeof weppEvents.emit === "function") {
+                            weppEvents.emit("wepp:run:queued", { jobId: response.job_id, payload: payload });
+                        }
                     } else if (response) {
                         wepp.pushResponseStacktrace(wepp, response);
                     }
                 })
                 .catch(function (error) {
+                    if (weppEvents && typeof weppEvents.emit === "function") {
+                        weppEvents.emit("wepp:run:error", toResponsePayload(http, error));
+                    }
                     wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
                 });
         };
 
         wepp.report = function () {
             var taskMsg = "Fetching Summary";
+            var resultsHtml = "";
 
             if (infoAdapter && typeof infoAdapter.text === "function") {
                 infoAdapter.text("");
@@ -355,6 +393,7 @@ var Wepp = (function () {
                     var body = result && result.body;
                     if (typeof body === "string" && resultsContainer) {
                         resultsContainer.innerHTML = body;
+                        resultsHtml = body;
                     }
                 })
                 .catch(function (error) {
@@ -380,13 +419,49 @@ var Wepp = (function () {
                     } catch (error) {
                         console.warn("[WEPP] Failed to apply preferred units", error);
                     }
+                    if (weppEvents && typeof weppEvents.emit === "function") {
+                        weppEvents.emit("wepp:report:loaded", {
+                            summary: typeof body === "string" ? body : "",
+                            results: resultsHtml
+                        });
+                    }
                 })
                 .catch(function (error) {
                     wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
                 });
         };
 
-        registerEventListeners(wepp, dom);
+        function ensureDelegates() {
+            if (wepp._delegates && wepp._delegates.length) {
+                return;
+            }
+
+            wepp._delegates.push(dom.delegate(formElement, "click", '[data-wepp-action="run"]', function (event) {
+                if (event && typeof event.preventDefault === "function") {
+                    event.preventDefault();
+                }
+                wepp.run();
+            }));
+
+            wepp._delegates.push(dom.delegate(formElement, "change", "[data-wepp-routine]", function () {
+                var routine = this.getAttribute("data-wepp-routine");
+                if (!routine) {
+                    return;
+                }
+                wepp.set_run_wepp_routine(routine, Boolean(this.checked));
+            }));
+
+            wepp._delegates.push(dom.delegate(formElement, "change", '[data-wepp-action="upload-cover-transform"]', function () {
+                wepp.handleCoverTransformUpload(this);
+            }));
+
+            wepp._delegates.push(dom.delegate(formElement, "change", '[data-wepp-role="reveg-scenario"]', function () {
+                wepp.handleRevegetationScenarioChange(this.value);
+            }));
+        }
+
+        ensureDelegates();
+        wepp.handleRevegetationScenarioChange(revegSelect ? revegSelect.value : "");
 
         return wepp;
     }

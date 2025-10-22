@@ -36,6 +36,21 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 - The singleton pattern avoids repeated DOM wiring and ensures components like WebSocket connections are not duplicated. Callers must use `ControllerName.getInstance()` rather than constructing their own copy.
 - Controllers are expected to initialize inside existing forms (usually via document ready hooks in the templates). They usually cache references to form elements (`that.form = $('#wepp_form')`), register AJAX handlers, and expose methods that other controllers can call.
 
+### Project Controller Contract (2024 refresh)
+
+### Climate Controller Reference (2024 helper migration)
+- **DOM contract**: templates expose `data-climate-action` hooks on radios, checkboxes, selects, and buttons plus `data-climate-section` / `data-precip-section` wrappers for conditional panels. Hidden inputs tagged with `data-climate-field` mirror controller state (`climate_catalog_id`, `climate_mode`). Catalog metadata ships via `<script id="climate_catalog_data" type="application/json">` so the controller can hydrate offline datasets without extra requests.
+- **Event surface**: `Climate.getInstance().events = WCEvents.useEventMap([...])` emits `climate:dataset:changed`, `climate:dataset:mode`, `climate:station:mode`, `climate:station:selected`, `climate:station:list:loading`, `climate:station:list:loaded`, `climate:build:started`, `climate:build:completed`, `climate:build:failed`, `climate:precip:mode`, `climate:upload:completed`, `climate:upload:failed`, and `climate:gridmet:updated`. Subscribe instead of scraping DOM so status dashboards and RRED tooling stay decoupled.
+- **Transport**: all mutations travel through JSON payloads (`WCHttp.postJson`) or `FormData` uploads; the paired Flask routes now call `parse_request_payload` so either JSON bodies or legacy form submissions succeed. `Climate.parse_inputs` receives native ints/bools and persists the catalog selection, spatial mode, precipitation scaling, and single-storm fields.
+- **Status + telemetry**: the controller attaches `StatusStream` to the climate panel, feeds `controlBase` for RQ job wiring, and fans out lifecycle events (`CLIMATE_*`) into the emitter so reports refresh once builds finish.
+- **Testing**: coverage lives in `controllers_js/__tests__/climate.test.js` (jsdom) and `tests/weppcloud/routes/test_climate_bp.py` (pytest). Keep both suites green when changing payload schemas or UI wiring; add fixtures for new events/endpoints as they appear.
+
+
+- **Data hooks**: templates expose `data-project-field`, `data-project-toggle`, `data-project-action`, and `data-project-unitizer` attributes. The controller relies exclusively on `WCDom.delegate` to listen for updates, so avoid inline `on*` handlers when extending the UI.
+- **Scoped events**: `Project.getInstance().events` is a `WCEvents.useEventMap` wrapper that emits `project:name:updated`, `project:name:update:failed`, `project:scenario:updated`, `project:scenario:update:failed`, `project:readonly:changed`, `project:readonly:update:failed`, `project:public:changed`, `project:public:update:failed`, `project:unitizer:sync:started`, `project:unitizer:preferences`, `project:unitizer:sync:completed`, and `project:unitizer:sync:failed`. Subscribe through the emitter instead of poking controller internals.
+- **Command bar + globals**: the controller routes every status message through `controlBase` and `initializeCommandBar`. The legacy `window.setGlobalUnitizerPreference` helper now delegates to `Project.handleGlobalUnitPreference`, keeping command-bar shortcuts and third-party scripts working without bespoke DOM glue.
+- **Backend payloads**: paired routes (`tasks/setname/`, `tasks/setscenario/`, `tasks/set_public`, `tasks/set_readonly`, `tasks/set_unit_preferences/`) all parse requests via `parse_request_payload`. Name/scenario inputs trim whitespace, toggles expect native booleans, and unit preferences accept JSON or form posts containing `{category_key: preferred_unit}`. NoDb setters (`Ron.name`, `Ron.scenario`, `Unitizer.set_preferences`) coerce native types so controllers can post JSON without adding `"on"`/`"off"` shims.
+
 ## ControlBase and Job Orchestration
 - `control_base.js` provides the common behavior that every controller mixes in. Calling `controlBase()` returns an object with helper methods for:
   - Tracking RQ job state (`set_rq_job_id`, `fetch_job_status`, `render_job_status`).
@@ -78,6 +93,18 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 - File uploads (user cover transforms) move through `FormData` bodies handled by `WCHttp.request`, matching the conventions used elsewhere in the bundle.
 - Jest coverage in `controllers_js/__tests__/wepp.test.js` exercises run submission, advanced option toggles, phosphorus defaults, and summary fetches. Execute it with `wctl run-npm test`.
 
+## Ash Controller Modernization (2024 helper-first baseline)
+- `ash.js` eliminates jQuery entirely—DOM wiring travels through `WCDom.delegate` listening to `data-ash-*` hooks (`data-ash-depth-mode`, `data-ash-action`, `data-ash-upload`). Template JSON (`#ash-model-params-data`) hydrates calibration defaults without global scripts.
+- The controller registers `ash.events = WCEvents.useEventMap([...])` and emits lifecycle signals: `ash:mode:changed`, `ash:model:changed`, `ash:transport:mode`, `ash:run:started`, `ash:run:completed`, and `ash:model:values:capture`. Downstream consumers should subscribe to these instead of poking private properties.
+- Long-running work posts `FormData` via `WCHttp.request` so raster uploads survive, while lightweight toggles (`set_ash_wind_transport`) send JSON through `WCHttp.postJson`. The paired Flask route (`/rq/api/run_ash`) now uses `parse_request_payload` and `Ash.parse_inputs` accepts native booleans/ints/floats.
+- Jest coverage lives in `controllers_js/__tests__/ash.test.js` (depth mode toggles, cache restores, run submission, error handling). Backend parsing is exercised by `tests/weppcloud/routes/test_rq_api_ash.py`. Run these alongside linting when editing the controller:
+  ```bash
+  wctl run-npm lint
+  wctl run-npm test -- ash
+  python wepppy/weppcloud/controllers_js/build_controllers_js.py
+  wctl run-pytest tests/weppcloud/routes/test_rq_api_ash.py
+  ```
+
 Keep this document updated when the bundling flow or controller contract changes.
 
 ## Migration Patterns
@@ -91,5 +118,6 @@ Keep this document updated when the bundling flow or controller contract changes
 - Run `wctl run-npm lint` before committing controller changes; ESLint is configured to flag remaining jQuery dependencies.
 - Execute `wctl run-npm test` (or `wctl run-npm check` for lint + test) to keep the jsdom suites green. Tests live under `wepppy/weppcloud/controllers_js/__tests__/`.
 - The Landuse migration added `__tests__/landuse.test.js` covering delegated report events, FormData submissions, and helper-driven error handling. Treat it as the template for future controller suites—each test boots the controller with stubbed helpers and asserts against helper calls rather than DOM snapshots.
+- The WEPP migration introduced a scoped `WCEvents` emitter (`wepp:run:*`, `wepp:report:loaded`) and expanded `__tests__/wepp.test.js` to exercise lifecycle signals, delegated uploads, and error propagation. Use this suite when adding new run-control behaviours or subscribing to WEPP events from neighbouring modules.
 - The Soils migration added `__tests__/soil.test.js`, which validates mode toggles, ksflag updates, and disturbed payload routing via the helper stack; reuse its setup when migrating remaining run controls.
 - Rebuild the bundle with `python wepppy/weppcloud/controllers_js/build_controllers_js.py` after large refactors to catch syntax errors outside of Jest.

@@ -197,7 +197,7 @@ def test_set_readonly_enqueues_background_job(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "job_id": "job-123", "readonly": True}
+    assert payload == {"Success": True, "Content": {"readonly": True, "job_id": "job-123"}}
 
     assert dispatched["redis_db"] == project_module.RedisDB.RQ
     assert dispatched["redis_kwargs"] == {"url": "redis://test"}

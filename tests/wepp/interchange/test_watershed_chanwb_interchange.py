@@ -1,43 +1,23 @@
 from __future__ import annotations
 
-import importlib.util
-import sys
-import types
 from pathlib import Path
 import shutil
 
 import pyarrow.parquet as pq
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from .module_loader import cleanup_import_state, load_module
 
 
-def _load_module(full_name: str, relative_path: str):
-    parts = full_name.split(".")
-    for idx in range(1, len(parts)):
-        pkg = ".".join(parts[:idx])
-        if pkg not in sys.modules:
-            module = types.ModuleType(pkg)
-            module.__path__ = []
-            sys.modules[pkg] = module
+load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
+load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
 
-    module_path = REPO_ROOT / relative_path
-    spec = importlib.util.spec_from_file_location(full_name, module_path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[full_name] = module
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
-
-
-_load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
-_load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
-
-_watershed_chanwb = _load_module(
-    "wepppy.wepp.interchange.watershed_chanwb_interchange",
-    "wepppy/wepp/interchange/watershed_chanwb_interchange.py",
+_watershed_chanwb = load_module(
+    "wepppy.wepp.interchange.watershed_chnwb_interchange",
+    "wepppy/wepp/interchange/watershed_chnwb_interchange.py",
 )
+cleanup_import_state()
 
-run_wepp_watershed_chanwb_interchange = _watershed_chanwb.run_wepp_watershed_chanwb_interchange
+run_wepp_watershed_chanwb_interchange = _watershed_chanwb.run_wepp_watershed_chnwb_interchange
 CHANWB_PARQUET = _watershed_chanwb.CHANWB_PARQUET
 MEASUREMENT_COLUMNS = [col for col, *_ in _watershed_chanwb.MEASUREMENT_COLUMNS]
 
@@ -85,4 +65,3 @@ def test_watershed_chanwb_interchange_writes_parquet(tmp_path: Path) -> None:
     assert 1 <= first_row["day_of_month"] <= 31
     assert first_row["P (mm)"] >= 0.0
     assert df["Area (m^2)"].unique().tolist() == [130.8]
-

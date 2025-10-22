@@ -19,7 +19,10 @@ from osgeo import gdal
 from enum import IntEnum
 from deprecated import deprecated
 
-from wepppy.all_your_base import isint, isfloat
+try:
+    from wepppy.all_your_base import isint, isfloat
+except ImportError:  # pragma: no cover - fallback for reduced package exports
+    from wepppy.all_your_base.all_your_base import isint, isfloat
 from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster_stacker, validate_srs
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil, SoilMultipleOfeSynth

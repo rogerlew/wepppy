@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -9,7 +10,11 @@ import pytest
 pytest.importorskip("flask")
 from flask import Flask
 
-import wepppy.weppcloud.routes.nodb_api.climate_bp as climate_module
+try:
+    import wepppy.weppcloud.routes.nodb_api.climate_bp as climate_module
+    from wepppy.nodb.core.climate import ClimateMode
+except ImportError:
+    pytest.skip("Climate blueprint dependencies missing", allow_module_level=True)
 
 RUN_ID = "test-run"
 CONFIG = "main"
@@ -75,6 +80,12 @@ def climate_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
             self.set_cli_calls = 0
             self.use_gridmet_wind_when_applicable = False
             self.climatestation_par_contents = "PAR DATA"
+            self.climate_mode = ClimateMode.Vanilla
+            self.catalog_id = "dataset_a"
+            self._datasets = {
+                "dataset_a": SimpleNamespace(catalog_id="dataset_a"),
+                "dataset_b": SimpleNamespace(catalog_id="dataset_b")
+            }
 
         @classmethod
         def getInstance(cls, wd: str, ignore_lock: bool = False) -> "DummyClimate":
@@ -95,6 +106,9 @@ def climate_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
         def find_heuristic_stations(self) -> list[dict[str, Any]]:
             return list(self.closest_stations)
+
+        def _resolve_catalog_dataset(self, catalog_id: str, include_hidden: bool = False):
+            return self._datasets.get(catalog_id)
 
     monkeypatch.setattr(climate_module, "Climate", DummyClimate)
 
@@ -121,6 +135,67 @@ def test_set_climatestation_mode_updates_controller(climate_client):
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.climatestation_mode == climate_module.ClimateStationMode.Heuristic
+
+
+def test_set_climatestation_mode_accepts_json(climate_client):
+    client, climate_cls, run_dir = climate_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_climatestation_mode/",
+        json={"mode": int(climate_module.ClimateStationMode.EUHeuristic)},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+
+    controller = climate_cls.getInstance(str(run_dir))
+    assert controller.climatestation_mode == climate_module.ClimateStationMode.EUHeuristic
+
+
+def test_set_climatestation_accepts_json(climate_client):
+    client, climate_cls, run_dir = climate_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_climatestation/",
+        json={"station": "STA-42"},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+
+    controller = climate_cls.getInstance(str(run_dir))
+    assert controller.climatestation == "STA-42"
+
+
+def test_set_climate_mode_updates_catalog_from_json(climate_client):
+    client, climate_cls, run_dir = climate_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_climate_mode/",
+        json={"mode": int(ClimateMode.Future), "catalog_id": "dataset_b"},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+
+    controller = climate_cls.getInstance(str(run_dir))
+    assert controller.climate_mode == ClimateMode.Future
+    assert controller.catalog_id == "dataset_b"
+
+
+def test_set_climate_spatialmode_accepts_json(climate_client):
+    client, climate_cls, run_dir = climate_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_climate_spatialmode/",
+        json={"spatialmode": 1},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+
+    controller = climate_cls.getInstance(str(run_dir))
+    assert controller.climate_spatialmode == 1
 
 
 def test_view_closest_stations_generates_options(climate_client):

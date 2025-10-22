@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, TYPE_CHECKING, Any
 
 import duckdb
 import numpy as np
@@ -10,10 +10,13 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from wepppy.nodb.core.wepp import BaseflowOpts
-
 from .schema_utils import pa_field
 from .versioning import schema_with_version
+
+if TYPE_CHECKING:
+    from wepppy.nodb.core.wepp import BaseflowOpts
+else:
+    BaseflowOpts = Any  # type: ignore[assignment]
 
 DATE_COLUMNS = ("year", "sim_day_index", "julian", "month", "day_of_month", "water_year")
 PASS_METRIC_COLUMNS = (

@@ -79,6 +79,12 @@ def _stub_wepppy_modules() -> None:
 
     helpers_mod = types.ModuleType("wepppy.all_your_base")
 
+    def _isint(value: object) -> bool:
+        try:
+            return float(int(value)) == float(value)
+        except Exception:
+            return False
+
     def _isfloat(value: object) -> bool:
         try:
             float(value)
@@ -92,6 +98,7 @@ def _stub_wepppy_modules() -> None:
         except Exception:
             return False
 
+    helpers_mod.isint = _isint  # type: ignore[attr-defined]
     helpers_mod.isfloat = _isfloat  # type: ignore[attr-defined]
     helpers_mod.isnan = _isnan  # type: ignore[attr-defined]
     sys.modules["wepppy.all_your_base"] = helpers_mod

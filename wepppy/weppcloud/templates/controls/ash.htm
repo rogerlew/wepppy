@@ -139,6 +139,7 @@
             <div class="col-sm-4" style="padding-left: 3em;">
                 <label class="form-check-label">
                     <input id="checkbox_run_wind_transport" type="checkbox" class="form-check-input disable-readonly"
+                        data-ash-action="toggle-wind"
                         {% if ash.run_wind_transport
                         %}checked{% endif %}>
                     Run Wind Transport
@@ -153,7 +154,7 @@
                 <label for="ash_model_select">Ash Model</label>
             </div>
             <div class="col-sm-6">
-                <select id="ash_model_select" name="ash_model" class="form-control">
+                <select id="ash_model_select" name="ash_model" class="form-control" data-ash-action="model-select">
                     {% for value, text in ash.available_models %}
                     <option value="{{ value }}" {% if value==ash.model %}selected{% endif %}>{{ text }}</option>
                     {% endfor %}
@@ -166,7 +167,7 @@
                 <label for="ash_transport_mode_select">Transport Mode:</label>
             </div>
             <div class="col-sm-6">
-                <select id="ash_transport_mode_select" name="transport_mode" class="form-control">
+                <select id="ash_transport_mode_select" name="transport_mode" class="form-control" data-ash-action="transport-select">
                     <option value="dynamic" {% if ash.transport_mode=='dynamic' %}selected{% endif %}>Dynamic</option>
                     <option value="static" {% if ash.transport_mode=='static' %}selected{% endif %}>Static</option>
                 </select>

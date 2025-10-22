@@ -11,6 +11,7 @@
       <label class="wc-choice">
         <input type="radio"
                name="unit_main_selector"
+               data-project-unitizer="global"
                value="0"
                {% if is_english is defined and not is_english %}checked{% endif %}>
         <span class="wc-choice__body">
@@ -21,6 +22,7 @@
       <label class="wc-choice">
         <input type="radio"
                name="unit_main_selector"
+               data-project-unitizer="global"
                value="1"
                {% if is_english %}checked{% endif %}>
         <span class="wc-choice__body">
@@ -57,6 +59,8 @@
             <label class="wc-choice">
               <input type="radio"
                      name="unitizer_{{ unitclass }}_radio"
+                     data-project-unitizer="category"
+                     data-unitizer-category="{{ unitclass }}"
                      value="{{ token }}"
                      {% if preferred == units_key %}checked{% endif %}>
               <span class="wc-choice__body">
@@ -71,73 +75,3 @@
     </div>
   </details>
 </section>
-<script>
-function setGlobalUnitizerPreference(pref) {
-  // Guard against undefined/null/empty values
-  if (pref === undefined || pref === null || pref === '') {
-    return;
-  }
-  
-  var project = (window.Project && typeof window.Project.getInstance === "function")
-    ? window.Project.getInstance()
-    : null;
-  var handlerType = project && project.handleGlobalUnitPreference;
-  
-  var targetValue = String(pref);
-  var radios = document.querySelectorAll("input[name='unit_main_selector']");
-  
-  if (radios && radios.length) {
-    // First pass: uncheck ALL radios
-    Array.prototype.forEach.call(radios, function (radio) {
-      radio.checked = false;
-      radio.removeAttribute("checked");
-    });
-    // Second pass: check only the target
-    Array.prototype.forEach.call(radios, function (radio) {
-      if (radio.value === targetValue) {
-        radio.checked = true;
-        radio.setAttribute("checked", "checked");
-      }
-    });
-  }
-  
-  if (!project || typeof handlerType !== "function") {
-    return;
-  }
-  return project.handleGlobalUnitPreference(pref);
-}
-
-(function ensureGlobalUnitizerChangeHandler() {
-  if (window.__unitizerGlobalChangeHandlerBound) {
-    return;
-  }
-  window.__unitizerGlobalChangeHandlerBound = true;
-  
-  var handler = function (event) {
-    var target = event && event.target;
-    if (!target) {
-      return;
-    }
-    
-    // Handle global unit preference (SI vs English)
-    if (target.name === "unit_main_selector") {
-      setGlobalUnitizerPreference(target.value);
-      return;
-    }
-    
-    // Handle category-specific unit preferences
-    if (target.name && target.name.indexOf("unitizer_") === 0 && target.name.indexOf("_radio") > 0) {
-      var project = (window.Project && typeof window.Project.getInstance === "function")
-        ? window.Project.getInstance()
-        : null;
-      if (project && typeof project.handleUnitPreferenceChange === "function") {
-        project.handleUnitPreferenceChange();
-      }
-      return;
-    }
-  };
-  
-  document.addEventListener("change", handler, true);  // Capture phase
-  document.addEventListener("change", handler, false); // Bubble phase
-})();
-</script>

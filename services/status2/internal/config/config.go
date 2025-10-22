@@ -30,7 +30,7 @@ const (
 	defaultListenAddr         = ":9002"
 	defaultRedisURL           = "redis://localhost:6379/2"
 	defaultPingInterval       = 5 * time.Second
-	defaultPongTimeout        = 15 * time.Second
+	defaultPongTimeout        = 75 * time.Second
 	defaultWriteTimeout       = 2 * time.Second
 	defaultRedisRequestTimout = time.Second
 	defaultRedisRetryBase     = time.Second

@@ -703,10 +703,15 @@ class Wepp(NoDbBase):
                 self._pmet_rawp = float(_pmet_rawp)
 
             _kslast = kwds.get('kslast', '')
+            if isinstance(_kslast, (list, tuple, set)):
+                _kslast = next((item for item in _kslast if item not in (None, '')), '')
             if isfloat(_kslast):
                 self._kslast = float(_kslast)
-            elif _kslast.lower().startswith('none') or _kslast == '':
-                self._kslast = None
+            else:
+                if _kslast in (None, ''):
+                    self._kslast = None
+                elif isinstance(_kslast, str) and _kslast.strip().lower().startswith('none'):
+                    self._kslast = None
 
             _wepp_bin = kwds.get('wepp_bin', None)
             if _wepp_bin is not None:
@@ -721,14 +726,23 @@ class Wepp(NoDbBase):
 
             _chn_topaz_ids_of_interest = kwds.get('chn_topaz_ids_of_interest', None)
             if _chn_topaz_ids_of_interest is not None:
-                if ',' in _chn_topaz_ids_of_interest:
-                    _chn_topaz_ids_of_interest = _chn_topaz_ids_of_interest.split(',')
-                elif ' ' in _chn_topaz_ids_of_interest:
-                    _chn_topaz_ids_of_interest = _chn_topaz_ids_of_interest.split(' ')
+                values: List[int] = []
+                if isinstance(_chn_topaz_ids_of_interest, (list, tuple, set)):
+                    for entry in _chn_topaz_ids_of_interest:
+                        if entry in (None, ''):
+                            continue
+                        values.append(int(entry))
                 else:
-                    _chn_topaz_ids_of_interest = [_chn_topaz_ids_of_interest]
-                _chn_topaz_ids_of_interest = [int(v) for v in _chn_topaz_ids_of_interest]
-                self._chn_topaz_ids_of_interest = _chn_topaz_ids_of_interest
+                    tokens = str(_chn_topaz_ids_of_interest)
+                    if ',' in tokens:
+                        values = [int(v.strip()) for v in tokens.split(',') if v.strip()]
+                    elif ' ' in tokens:
+                        values = [int(v.strip()) for v in tokens.split(' ') if v.strip()]
+                    else:
+                        tokens = tokens.strip()
+                        if tokens:
+                            values = [int(tokens)]
+                self._chn_topaz_ids_of_interest = values
 
 
     @property

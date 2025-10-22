@@ -1,0 +1,44 @@
+# Prompt Construction Strategy for Controller Refactors
+
+> How we compose agent prompts that deliver consistent, high-quality controller migrations.
+
+The goal of every prompt is to give a follow-up agent enough context, guard rails, and acceptance criteria to ship a complete refactor without guesswork. Here’s the recipe we’ve been using:
+
+## 1. Anchor the prompt in shared guidance
+- **Architecture:** Always cite `docs/dev-notes/controller_foundations.md` so the agent aligns with the long-term vision (helpers, controlBase evolution, events, schemas).
+- **Workflow:** Reference `docs/dev-notes/module_refactor_workflow.md` and insist they follow it end-to-end—helpers, routes, testing, docs, handoff.
+- **Domain note:** Point to any controller-specific migration plan (`docs/dev-notes/<domain>-controller-migration-plan.md`) so discovery is cohesive.
+
+## 2. Enumerate the working set
+- Spell out the key files:
+  - Controller source (`wepppy/weppcloud/controllers_js/<name>.js`)
+  - Templates, routes, NoDb modules, RQ endpoints
+  - Relevant tests (`tests/weppcloud/routes/...`, Jest suites)
+- Include helper modules (`dom.js`, `forms.js`, `http.js`, `events.js`, `control_base.js`) to reinforce the tooling expectations.
+
+## 3. Break down the deliverables
+- “Controller refactor” section:
+  - Remove jQuery, use helper APIs, emit events, keep StatusStream/WS working.
+- “Template alignment” block:
+  - Replace inline handlers with data attributes, preserve markup contracts.
+- “Backend alignment” block:
+  - Adopt `parse_request_payload`, normalize types, adjust NoDb setters, keep telemetry intact.
+- “Testing & validation” list:
+  - `wctl run-npm lint`, `wctl run-npm test`, bundle rebuild, targeted pytest (plus broader run if needed).
+  - Specify new Jest/Pytest coverage targets.
+- “Documentation” block:
+  - Update README/AGENTS, extend domain notes with payload/event info.
+- “Handoff checklist” block matching the module workflow (helpers only, routes updated, tests pass, docs updated, final report).
+
+## 4. Highlight validations up front
+- Place lint/test/build commands in the deliverables, not as an afterthought.
+- Request final status in the handoff summary (code changes, commands run/results, risks).
+
+## 5. Encourage event-driven controllers
+- Call out the need for `WCEvents.createEmitter` + `useEventMap` so domain signals have namespaced events (e.g., `wepp:run:completed`, `climate:dataset:changed`).
+
+## 6. Use positive steering
+- Frame tasks as “Modernize <controller>” instead of “remove jQuery”; focus on the target architecture.
+- Refer to recent successful migrations (landuse, wepp, project, etc.) to set expectations.
+
+Following this template keeps prompts structured, explicit, and reusable. Every refactor agent knows the references, the deliverables, the tests they must run, and the documentation they must touch—reducing ambiguity and drift across the codebase.

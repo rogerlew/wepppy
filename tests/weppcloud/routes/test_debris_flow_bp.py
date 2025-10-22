@@ -8,7 +8,10 @@ import pytest
 pytest.importorskip("flask")
 from flask import Flask
 
-import wepppy.weppcloud.routes.nodb_api.debris_flow_bp as debris_flow_module
+try:
+    import wepppy.weppcloud.routes.nodb_api.debris_flow_bp as debris_flow_module
+except ImportError:
+    pytest.skip("Debris flow blueprint dependencies missing", allow_module_level=True)
 
 RUN_ID = "test-run"
 CONFIG = "main"

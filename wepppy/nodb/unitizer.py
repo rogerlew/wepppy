@@ -339,11 +339,26 @@ class Unitizer(NoDbBase):
 
     def set_preferences(self, kwds):
         with self.locked():
-            for k, v in kwds.items():
-                v = v.replace('-/', ',')
-                assert k in precisions, k
-                assert v in precisions[k], v
-                self._preferences[k] = v
+            for key, raw_value in kwds.items():
+                if raw_value is None:
+                    continue
+
+                if isinstance(raw_value, (list, tuple, set)):
+                    if not raw_value:
+                        continue
+                    value = raw_value[-1]
+                else:
+                    value = raw_value
+
+                key_str = str(key)
+                value_str = str(value).replace('-/', ',')
+
+                if key_str not in precisions:
+                    raise KeyError(f'Unknown unitizer preference key: {key_str}')
+                if value_str not in precisions[key_str]:
+                    raise ValueError(f'Invalid unitizer preference value {value_str!r} for key {key_str!r}')
+
+                self._preferences[key_str] = value_str
 
         return self._preferences
 

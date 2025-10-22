@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import importlib.util
-import sys
-import types
 import shutil
 import threading
 import time
@@ -12,34 +9,16 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-
-REPO_ROOT = Path(__file__).resolve().parents[3]
-
-
-def _load_module(full_name: str, relative_path: str):
-    parts = full_name.split(".")
-    for idx in range(1, len(parts)):
-        pkg = ".".join(parts[:idx])
-        if pkg not in sys.modules:
-            module = types.ModuleType(pkg)
-            module.__path__ = []
-            sys.modules[pkg] = module
-
-    module_path = REPO_ROOT / relative_path
-    spec = importlib.util.spec_from_file_location(full_name, module_path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[full_name] = module
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
+from .module_loader import cleanup_import_state, load_module
 
 
-_all_your_base = _load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
-_load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
-_concurrency = _load_module("wepppy.wepp.interchange.concurrency", "wepppy/wepp/interchange/concurrency.py")
-_load_module("wepppy.wepp.interchange.schema_utils", "wepppy/wepp/interchange/schema_utils.py")
-_load_module("wepppy.wepp.interchange._utils", "wepppy/wepp/interchange/_utils.py")
-_hill_pass = _load_module("wepppy.wepp.interchange.hill_pass_interchange", "wepppy/wepp/interchange/hill_pass_interchange.py")
+_all_your_base = load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
+load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
+_concurrency = load_module("wepppy.wepp.interchange.concurrency", "wepppy/wepp/interchange/concurrency.py")
+load_module("wepppy.wepp.interchange.schema_utils", "wepppy/wepp/interchange/schema_utils.py")
+load_module("wepppy.wepp.interchange._utils", "wepppy/wepp/interchange/_utils.py")
+_hill_pass = load_module("wepppy.wepp.interchange.hill_pass_interchange", "wepppy/wepp/interchange/hill_pass_interchange.py")
+cleanup_import_state()
 
 write_parquet_with_pool = _concurrency.write_parquet_with_pool
 SCHEMA = _hill_pass.SCHEMA

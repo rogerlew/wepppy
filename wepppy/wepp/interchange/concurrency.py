@@ -18,6 +18,7 @@ from wepppy.all_your_base import NCPU
 
 INTERCHANGE_TMP_DIR = Path(os.environ.get("WEPP_INTERCHANGE_TMP_DIR", "/dev/shm"))
 _LOCAL_FILESYSTEM = fs.LocalFileSystem()
+_FORCE_SERIAL = os.environ.get("WEPP_INTERCHANGE_FORCE_SERIAL", "").lower() in {"1", "true", "yes"}
 _WRITER_SENTINEL = (-1, None)
 
 
@@ -122,6 +123,12 @@ def _write_impl(
     try:
         if not file_list:
             pq.write_table(empty_table, tmp_path, filesystem=_LOCAL_FILESYSTEM, compression="snappy", use_dictionary=True)
+            tmp_persisted = True
+            _commit_tmp(tmp_path, target)
+            return target
+
+        if max_workers == 0:
+            _write_serial()
             tmp_persisted = True
             _commit_tmp(tmp_path, target)
             return target
@@ -247,6 +254,9 @@ def write_parquet_with_pool(
     target = Path(target_path)
     if empty_table is None:
         empty_table = _default_empty_table(schema)
+
+    if _FORCE_SERIAL and max_workers is None:
+        max_workers = 0
 
     try:
         return _write_impl(

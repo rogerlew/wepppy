@@ -10,14 +10,12 @@
     <div class="form-group row">
         <div class="col-sm-4">
             <label class="radio-inline">
-                <input type="radio" value="0" name="climate_build_mode" {{ ('', 'checked')[climate.climatestation_mode != 4] }}
-                  onchange="Climate.getInstance().handleBuildModeChange(this.value)"> 
+                <input type="radio" value="0" name="climate_build_mode" {{ ('', 'checked')[climate.climatestation_mode != 4] }} data-climate-action="build-mode"> 
                   Use CLIGEN</label>
         </div>
         <div class="col-sm-6">
             <label class="radio-inline">
-                <input type="radio" value="1"  name="climate_build_mode" {{ ('', 'checked')[climate.climatestation_mode == 4] }}
-                  onchange="Climate.getInstance().handleBuildModeChange(this.value)"> 
+                <input type="radio" value="1"  name="climate_build_mode" {{ ('', 'checked')[climate.climatestation_mode == 4] }} data-climate-action="build-mode"> 
                   User Defined Climate</label>
         </div>
     </div>
@@ -33,12 +31,10 @@
         <h5>Spatial Mode</h5>
         <div class="form-group row">
             <div class="col-sm-6">
-                <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }}
-                    onchange="Climate.getInstance().handleSpatialModeChange(this.value)"> Single Climate
+                <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }} data-climate-action="spatial-mode"> Single Climate
                     <a data-toggle="tooltip" data-placement="top" title="One per watershed."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}
-                    onchange="Climate.getInstance().handleSpatialModeChange(this.value)"> Multiple Climates
+                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }} data-climate-action="spatial-mode"> Multiple Climates
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
             </div>
@@ -46,8 +42,7 @@
     </div>
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
-            <button id="btn_upload_cli" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" 
-             onclick="Climate.getInstance().upload_cli()">Upload .cli</button>
+            <button id="btn_upload_cli" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" data-climate-action="upload-cli">Upload .cli</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_upload_cli"></small>
@@ -64,53 +59,46 @@
         <div class="col-sm-2">
             <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"
-            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }}
-            onchange="Climate.getInstance().handleStationModeChange(this.value)">
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }} data-climate-action="station-mode">
                 Closest</label>
         </div>
         <div class="col-sm-8">
             <label class="radio-inline">
             <input type="radio" value="1" class="disable-readonly" id="climatestation_mode1"
-            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }}
-            onchange="Climate.getInstance().handleStationModeChange(this.value)">
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }} data-climate-action="station-mode">
                 Multi-Factor Ranking (Considers Distance, Elevation, and Climate)</label>
         </div>
         {% elif 'eu' in ron.locales %}
         <div class="col-sm-2">
             <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"
-            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }}
-            onchange="Climate.getInstance().handleStationModeChange(this.value)">
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }} data-climate-action="station-mode">
                 Closest</label>
         </div>
         <div class="col-sm-8">
             <label class="radio-inline">
             <input type="radio" value="1" class="disable-readonly" id="climatestation_mode1"
-            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }}
-            onchange="Climate.getInstance().handleStationModeChange(this.value)">
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }} data-climate-action="station-mode">
                 Multi-Factor Ranking (Considers Distance, Elevation, and Climate)</label>
         </div>
         {% elif 'au' in ron.locales %}
         <div class="col-sm-2">
             <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"
-            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }}
-            onchange="Climate.getInstance().handleStationModeChange(this.value)">
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }} data-climate-action="station-mode">
                 Closest</label>
         </div>
         <div class="col-sm-8">
             <label class="radio-inline">
             <input type="radio" value="1" class="disable-readonly" id="climatestation_mode1"
-            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }}
-            onchange="Climate.getInstance().handleStationModeChange(this.value)">
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }} data-climate-action="station-mode">
                 Multi-Factor Ranking (Considers Distance, Elevation, and Climate)</label>
         </div>
         {% endif %}
     </div>    
     <div class="form-group row">
         <div class="col-sm-10">
-            <select class="form-control disable-readonly" id="climate_station_selection" name="climate_station_selection"
-              onchange="Climate.getInstance().handleStationSelectionChange(this.value)">
+            <select class="form-control disable-readonly" id="climate_station_selection" name="climate_station_selection" data-climate-action="station-select">
             </select>
         </div>
         <div class="col-sm-3">
@@ -129,46 +117,46 @@
     <div class="form-group row">
         <div class="col-sm-12">
             {% if 'alaska' not in ron.locales and 'hawaii' not in ron.locales and 'nigeria' not in ron.locales and 'eu' not in ron.locales and 'au' not in ron.locales %}
-                <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 5] }}> Stochastic PRISM Modified
+                <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> Stochastic PRISM Modified
                     <a data-toggle="tooltip" data-placement="top" title="Recommended for BAER Analysis and comparison to historical data is not needed. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
             {%  endif %}                
-            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
+            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
                 <a data-toggle="tooltip" data-placement="top" title="Actual climate station data. No spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             {% if 'alaska' not in ron.locales and 'hawaii' not in ron.locales and 'nigeria' not in ron.locales and 'eu' not in ron.locales and 'au' not in ron.locales %} 
-                <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed DAYMET (GRIDMET wind) [1980 - {{ climate.daymet_last_available_year }}]
+                <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed DAYMET (GRIDMET wind) [1980 - {{ climate.daymet_last_available_year }}]
                     <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to 2019."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed GRIDMET [1980 - Present]
+                <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed GRIDMET [1980 - Present]
                     <a data-toggle="tooltip" data-placement="top" title="Useful when streamflow data is available. Does spatial interpolation. Available up to the day before yesterday. (For current year data to the end of the year is stochastically generated to allow WEPP to run.)"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="13" class="disable-readonly" id="climate_mode13" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 13] }}> DEP NEXRAD Breakpoint files (0.01° grid) [2007 - Present]
+                <label class="radio"><input type="radio" value="13" class="disable-readonly" id="climate_mode13" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 13] }}> DEP NEXRAD Breakpoint files (0.01° grid) [2007 - Present]
                     <a data-toggle="tooltip" data-placement="top" title="Breakpoint climate files 2007-present"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5) [2006 - 2099]
+                <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5) [2006 - 2099]
                     <a data-toggle="tooltip" data-placement="top" title="Experimental."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
 
                 {% if climate.observed_clis != none %}
-                    <label class="radio"><input type="radio" value="6" class="disable-readonly" id="climate_mode6" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 6] }}> Observed Climate Database</label><br/>
+                    <label class="radio"><input type="radio" value="6" class="disable-readonly" id="climate_mode6" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 6] }}> Observed Climate Database</label><br/>
                 {%  endif %}
                 {% if climate.future_clis != none %}
-                    <label class="radio"><input type="radio" value="7" class="disable-readonly" id="climate_mode7" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 7] }}> Future Climate Database</label><br/>
+                    <label class="radio"><input type="radio" value="7" class="disable-readonly" id="climate_mode7" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 7] }}> Future Climate Database</label><br/>
                 {%  endif %}
             {%  endif %}
 
-                <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
+                <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
                     <a data-toggle="tooltip" data-placement="top" title="Designed Event."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="14" class="disable-readonly" id="climate_mode14" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 14] }}> Single Storm Batch
+                <label class="radio"><input type="radio" value="14" class="disable-readonly" id="climate_mode14" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 14] }}> Single Storm Batch
                     <a data-toggle="tooltip" data-placement="top" title="Designed Events ran in Batch Mode."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
             {% if 'eu' in ron.locales %}
-            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
+            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
                 <a data-toggle="tooltip" data-placement="top" title="Actual climate station data. No spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
-            <label class="radio"><input type="radio" value="8" class="disable-readonly" id="climate_mode8" name="climate_mode" onchange="Climate.getInstance().handleModeChange(this.value)" {{ ('', 'checked')[climate.climate_mode == 8] }}> E-OBS Modified (Europe)
+            <label class="radio"><input type="radio" value="8" class="disable-readonly" id="climate_mode8" name="climate_mode" data-climate-action="mode" {{ ('', 'checked')[climate.climate_mode == 8] }}> E-OBS Modified (Europe)
                 <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a><br/>
             </label><br/>
             {% endif %}
@@ -206,23 +194,20 @@
         <div class="form-group row">
             <div class="col-sm-6">
                 <label class="radio">
-                    <input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }}
-                      onchange="Climate.getInstance().handleSpatialModeChange(this.value)"> Single Climate
+                    <input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }} data-climate-action="spatial-mode"> Single Climate
                     <a data-toggle="tooltip" data-placement="top" 
                       title="One per watershed.">
                       <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
                 <label class="radio">
                     <input type="radio" value="1" class="disable-readonly" 
-                      id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}
-                      onchange="Climate.getInstance().handleSpatialModeChange(this.value)"> Multiple PRISM Revision
+                      id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }} data-climate-action="spatial-mode"> Multiple PRISM Revision
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope.">
                       <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
                 <label class="radio">
                     <input type="radio" value="2" class="disable-readonly" 
-                      id="climate_spatialmode2" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 2] }}
-                      onchange="Climate.getInstance().handleSpatialModeChange(this.value)"> Multiple Interpolated (Slow)
+                      id="climate_spatialmode2" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 2] }} data-climate-action="spatial-mode"> Multiple Interpolated (Slow)
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope, interpolates climate grid. Slow.">
                       <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
@@ -405,8 +390,7 @@
     <div class="form-group row">
         <div class="col-sm-4" style="padding-left: 3em;">
             <label class="form-check-label">
-                <input id="checkbox_use_gridmet_wind_when_applicable" type="checkbox" class="form-check-input disable-readonly"
-                    onchange="Climate.getInstance().set_use_gridmet_wind_when_applicable(this.checked);" {% if climate.use_gridmet_wind_when_applicable
+                <input id="checkbox_use_gridmet_wind_when_applicable" type="checkbox" class="form-check-input disable-readonly" data-climate-action="gridmet-wind" {% if climate.use_gridmet_wind_when_applicable
                     %}checked{% endif %}>
                 Use GRIDMET Wind When Applicable (e.g. DAYMET Observed)
             </label>
@@ -417,32 +401,27 @@
     <div class="form-group row">
         <div class="col-sm-6">
             <label class="radio">
-                <input type="radio" value="0" class="disable-readonly" id="climate_precipscaling_mode0" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 0] }}
-                  onchange="Climate.getInstance().handlePrecipScalingModeChange(this.value)"> No Scaling
+                <input type="radio" value="0" class="disable-readonly" id="climate_precipscaling_mode0" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 0] }} data-climate-action="precip-mode"> No Scaling
                 <a data-toggle="tooltip" data-placement="top" title="No Scaling.">
                   <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio">
-                <input type="radio" value="1" class="disable-readonly" id="climate_precipscaling_mode1" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 1] }}
-                  onchange="Climate.getInstance().handlePrecipScalingModeChange(this.value)"> Scalar Scaling
+                <input type="radio" value="1" class="disable-readonly" id="climate_precipscaling_mode1" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 1] }} data-climate-action="precip-mode"> Scalar Scaling
                 <a data-toggle="tooltip" data-placement="top" title="Scalar.">
                   <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio">
-                <input type="radio" value="2" class="disable-readonly" id="climate_precipscaling_mode2" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 2] }}
-                  onchange="Climate.getInstance().handlePrecipScalingModeChange(this.value)"> Monthly Scaling (requires Observed Climate)
+                <input type="radio" value="2" class="disable-readonly" id="climate_precipscaling_mode2" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 2] }} data-climate-action="precip-mode"> Monthly Scaling (requires Observed Climate)
                 <a data-toggle="tooltip" data-placement="top" title="Vector of monthly scale values.">
                   <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio">
-                <input type="radio" value="3" class="disable-readonly" id="climate_precipscaling_mode3" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 3] }}
-                  onchange="Climate.getInstance().handlePrecipScalingModeChange(this.value)"> Reference Scaling
+                <input type="radio" value="3" class="disable-readonly" id="climate_precipscaling_mode3" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 3] }} data-climate-action="precip-mode"> Reference Scaling
                 <a data-toggle="tooltip" data-placement="top" title="Scale to reference dataset month-by-month.">
                   <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio">
-                <input type="radio" value="4" class="disable-readonly" id="climate_precipscaling_mode4" name="precip_scaling_mode" disabled {{ ('', 'checked')[climate.precip_scaling_mode == 4] }}
-                  onchange="Climate.getInstance().handlePrecipScalingModeChange(this.value)"> Spatial Scaling from Map (config dependent)
+                <input type="radio" value="4" class="disable-readonly" id="climate_precipscaling_mode4" name="precip_scaling_mode" disabled {{ ('', 'checked')[climate.precip_scaling_mode == 4] }} data-climate-action="precip-mode"> Spatial Scaling from Map (config dependent)
                 <a data-toggle="tooltip" data-placement="top" title="Queries map for scale value for each hillslope.">
                   <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
@@ -621,8 +600,7 @@
 
 <div class="form-group row hide-readonly" id="btn_build_climate_container">
     <div class="col-sm-4">
-        <button 
-            onclick="Climate.getInstance().build();"
+        <button data-climate-action="build"
             id="btn_build_climate" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
 
           <img  id="build_climate_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />

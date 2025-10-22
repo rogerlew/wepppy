@@ -304,4 +304,4 @@ def task_set_readonly(runid, config):
     except Exception:
         return exception_factory('Error queuing readonly task', runid=runid)
 
-    return jsonify({'Success': True, 'job_id': job.id, 'readonly': desired_state})
+    return success_factory({'readonly': desired_state, 'job_id': job.id})

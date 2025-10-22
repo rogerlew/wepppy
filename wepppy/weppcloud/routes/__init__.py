@@ -1,24 +1,84 @@
 
+import importlib
+import sys
+
+if 'wepppy.all_your_base' not in sys.modules:
+    importlib.import_module('wepppy.all_your_base')
+
 from ._run_context import register_run_context_preprocessor
 
-from .nodb_api.climate_bp import climate_bp
-from .nodb_api.debris_flow_bp import debris_flow_bp
-from .nodb_api.disturbed_bp import disturbed_bp
-from .nodb_api.landuse_bp import landuse_bp
-from .nodb_api.interchange_bp import interchange_bp
-from .nodb_api.observed_bp import observed_bp
-from .nodb_api.omni_bp import omni_bp
-from .nodb_api.path_ce_bp import path_ce_bp
-from .nodb_api.project_bp import project_bp
-from .nodb_api.rangeland_bp import rangeland_bp
-from .nodb_api.rangeland_cover_bp import rangeland_cover_bp
-from .nodb_api.rhem_bp import rhem_bp
-from .nodb_api.soils_bp import soils_bp
-from .nodb_api.treatments_bp import treatments_bp
-from .nodb_api.unitizer_bp import unitizer_bp
-from .nodb_api.watar_bp import watar_bp
-from .nodb_api.watershed_bp import watershed_bp
-from .nodb_api.wepp_bp import wepp_bp
+try:
+    from .nodb_api.climate_bp import climate_bp
+except ImportError:
+    climate_bp = None  # optional blueprint
+try:
+    from .nodb_api.debris_flow_bp import debris_flow_bp
+except ImportError:
+    debris_flow_bp = None  # optional blueprint
+try:
+    from .nodb_api.disturbed_bp import disturbed_bp
+except ImportError:
+    disturbed_bp = None  # optional blueprint
+try:
+    from .nodb_api.landuse_bp import landuse_bp
+except ImportError:
+    landuse_bp = None  # optional blueprint
+try:
+    from .nodb_api.interchange_bp import interchange_bp
+except ImportError:
+    interchange_bp = None  # optional blueprint
+try:
+    from .nodb_api.observed_bp import observed_bp
+except ImportError:
+    observed_bp = None  # optional blueprint
+try:
+    from .nodb_api.omni_bp import omni_bp
+except ImportError:
+    omni_bp = None  # optional blueprint
+try:
+    from .nodb_api.path_ce_bp import path_ce_bp
+except ImportError:
+    path_ce_bp = None  # optional blueprint
+try:
+    from .nodb_api.project_bp import project_bp
+except ImportError:
+    project_bp = None  # optional blueprint
+try:
+    from .nodb_api.rangeland_bp import rangeland_bp
+except ImportError:
+    rangeland_bp = None  # optional blueprint
+try:
+    from .nodb_api.rangeland_cover_bp import rangeland_cover_bp
+except ImportError:
+    rangeland_cover_bp = None  # optional blueprint
+try:
+    from .nodb_api.rhem_bp import rhem_bp
+except ImportError:
+    rhem_bp = None  # optional blueprint
+try:
+    from .nodb_api.soils_bp import soils_bp
+except ImportError:
+    soils_bp = None  # optional blueprint
+try:
+    from .nodb_api.treatments_bp import treatments_bp
+except ImportError:
+    treatments_bp = None  # optional blueprint
+try:
+    from .nodb_api.unitizer_bp import unitizer_bp
+except ImportError:
+    unitizer_bp = None  # optional blueprint
+try:
+    from .nodb_api.watar_bp import watar_bp
+except ImportError:
+    watar_bp = None  # optional blueprint
+try:
+    from .nodb_api.watershed_bp import watershed_bp
+except ImportError:
+    watershed_bp = None  # optional blueprint
+try:
+    from .nodb_api.wepp_bp import wepp_bp
+except ImportError:
+    wepp_bp = None  # optional blueprint
 
 from .weppcloud_site import weppcloud_site_bp
 from .admin import admin_bp
@@ -86,7 +146,8 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
 ])
 
 for _bp in _RUN_CONTEXT_BLUEPRINTS:
-    register_run_context_preprocessor(_bp)
+    if _bp is not None:
+        register_run_context_preprocessor(_bp)
 
 
 __all__ = [

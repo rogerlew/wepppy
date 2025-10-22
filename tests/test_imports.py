@@ -1,12 +1,22 @@
-import sys
-import os
 import importlib
+import os
+import sys
+from pathlib import Path
 
-def test_imports_in_directory(base_path):
+import pytest
+
+
+@pytest.fixture
+def base_path() -> str:
+    return str(Path(__file__).resolve().parents[1] / "wepppy")
+
+
+def test_imports_in_directory(base_path: str):
     print(f"Testing imports in: {base_path}")
-    original_sys_path = sys.path[:] # Save original path
+    original_sys_path = sys.path[:]  # Save original path
     # Add the base_path to sys.path so modules can be imported
     sys.path.insert(0, base_path)
+    package_name = Path(base_path).name
 
     success_count = 0
     failure_count = 0
@@ -18,12 +28,16 @@ def test_imports_in_directory(base_path):
                 # Relative path from base_path to current file's directory
                 relative_dir = os.path.relpath(root, base_path)
                 # Remove .py extension
-                module_name = file[:-3]
-                
-                if relative_dir != '.':
-                    # Replace os.sep with '.' for module path
-                    module_name = f"{relative_dir.replace(os.sep, '.')}.{module_name}"
-                
+                module_base = file[:-3]
+
+                if relative_dir == '.':
+                    if module_base == "__init__":
+                        module_name = package_name
+                    else:
+                        module_name = f"{package_name}.{module_base}"
+                else:
+                    module_name = f"{package_name}.{relative_dir.replace(os.sep, '.')}.{module_base}"
+
                 print(f"  Attempting to import: {module_name}...")
                 try:
                     # Try to import the module

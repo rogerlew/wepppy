@@ -581,7 +581,10 @@ class Ron(NoDbBase):
     @name.setter
     @nodb_setter
     def name(self, value: str) -> None:
-        self._name = value
+        if value is None:
+            self._name = ''
+            return
+        self._name = str(value)
 
     #
     # scenario
@@ -593,7 +596,10 @@ class Ron(NoDbBase):
     @scenario.setter
     @nodb_setter
     def scenario(self, value: str) -> None:
-        self._scenario = value
+        if value is None:
+            self._scenario = ''
+            return
+        self._scenario = str(value)
 
     @property
     def has_ash_results(self) -> bool:

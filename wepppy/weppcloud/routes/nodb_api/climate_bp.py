@@ -35,9 +35,12 @@ def set_climatestation_mode(runid: str, config: str) -> Response:
     Returns:
         Response: JSON payload indicating success or detailing the failure reason.
     """
+    payload = parse_request_payload(request)
+    mode_value = payload.get('mode', None)
+
     try:
-        mode = int(request.form.get('mode', None))
-    except Exception:
+        mode = int(mode_value)
+    except (TypeError, ValueError):
         return exception_factory('Could not determine mode', runid=runid)
 
     wd = get_wd(runid)
@@ -62,9 +65,9 @@ def set_climatestation(runid: str, config: str) -> Response:
     Returns:
         Response: JSON response describing success or the encountered error.
     """
-    try:
-        station = request.form.get('station', None)
-    except Exception:
+    payload = parse_request_payload(request)
+    station = payload.get('station', None)
+    if station in (None, ''):
         return exception_factory('Station not provided', runid=runid)
 
     wd = get_wd(runid)
@@ -197,17 +200,25 @@ def set_climate_mode(runid: str, config: str) -> Response:
     Returns:
         Response: JSON success payload or error description.
     """
-    try:
-        mode = int(request.form.get('mode', None))
-    except Exception:
-        return exception_factory('Could not determine mode', runid=runid)
+    payload = parse_request_payload(request)
+    mode_value = payload.get('mode', None)
+    catalog_id = payload.get('catalog_id') or payload.get('climate_catalog_id')
+
+    mode: int | None
+    if mode_value is None or mode_value == '':
+        mode = None
+    else:
+        try:
+            mode = int(mode_value)
+        except (TypeError, ValueError):
+            return exception_factory('Could not determine mode', runid=runid)
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
-    catalog_id = request.form.get('catalog_id') or request.form.get('climate_catalog_id')
 
     try:
-        climate.climate_mode = mode
+        if mode is not None:
+            climate.climate_mode = mode
         if catalog_id:
             dataset = climate._resolve_catalog_dataset(str(catalog_id), include_hidden=True)
             if dataset is None:
@@ -230,9 +241,11 @@ def set_climate_spatialmode(runid: str, config: str) -> Response:
     Returns:
         Response: JSON success payload or an error response.
     """
+    payload = parse_request_payload(request)
+    spatial_value = payload.get('spatialmode', None)
     try:
-        spatialmode = int(request.form.get('spatialmode', None))
-    except Exception:
+        spatialmode = int(spatial_value)
+    except (TypeError, ValueError):
         return exception_factory('Could not determine mode', runid=runid)
 
     wd = get_wd(runid)

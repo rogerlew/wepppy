@@ -143,7 +143,7 @@ Each connection includes:
 | `STATUS_REDIS_URL` | `redis://localhost:6379/2` | Target Redis DB. |
 | `STATUS_LISTEN_ADDR` | `:9002` | Bind address. |
 | `STATUS_PING_INTERVAL` | `5s` | Heartbeat cadence. |
-| `STATUS_PONG_TIMEOUT` | `65s` | Idle cutoff. |
+| `STATUS_PONG_TIMEOUT` | `75s` | Idle cutoff (set ≥60s in production). |
 | `STATUS_LOG_LEVEL` | `info` | Log level for slog handler. |
 | `STATUS_METRICS_ENABLED` | `false` | Whether to serve `/metrics`. |
 | `STATUS_ALLOWED_ORIGINS` | *(empty)* | Comma-separated wildcard list (e.g., `*.usda.gov`). |
@@ -158,8 +158,9 @@ Each connection includes:
 
 - **Backpressure**: WebSocket writes use timeouts and per-connection mutex to
   avoid concurrent writes; slow clients are disconnected after timeout.
-- **Redis resilience**: Retry loops back off exponentially with jitter (e.g.,
-  50% randomization) to avoid thundering herd. After exceeding retry limit,
+- **Redis resilience**: Retry loops back off exponentially with per-connection
+  jitter (full jitter between base interval and cap) to avoid thundering herd.
+  After exceeding retry limit,
   connection closes with appropriate log.
 - **Stateless scaling**: No shared state; multiple replicas behind a load
   balancer can handle clients independently.
@@ -264,3 +265,32 @@ Each connection includes:
 - **Logging**: Structured JSON to stdout. Capture logs via `docker compose logs status -f | jq '.'` or ship to centralized logging. Investigate messages like `redis stream interrupted` promptly.
 - **Redis setup**: No keyspace notifications required, but Pub/Sub must be enabled (default). Verify connectivity with `redis-cli -n 2 PUBLISH test:wepp "hello"` while a client listens.
 - **Deployment strategy**: Roll out alongside the Python service on a canary port, update Caddy/Nginx routes once validated, and keep the legacy container on standby for rapid rollback until the Go version proves stable across releases.
+
+## 16. WebSocket Contract
+
+### 16.1 Handshake & Message Semantics
+
+- Clients SHOULD optimistically send `{"type":"init"}` immediately after the WebSocket upgrade completes. `status2` does not require the frame to begin streaming, but it keeps parity with historical clients (`wepppy/weppcloud/controllers_js/status_stream.js:294` and `wepppy/weppcloud/controllers_js/ws_client.js:25`).
+- `status2` MUST acknowledge readiness by issuing heartbeat frames of the form `{"type":"ping"}` at the cadence defined by `STATUS_PING_INTERVAL` (default 5s).
+- Clients MUST reply to every heartbeat with `{"type":"pong"}` over the same connection without additional metadata (`wepppy/weppcloud/controllers_js/status_stream.js:273`, `wepppy/weppcloud/controllers_js/ws_client.js:35`, `wepppy/weppcloud/routes/command_bar/static/command-bar.js:783`).
+- Application payloads are text frames encoded as `{"type":"status","data":<string>}`. Unknown message types SHOULD be ignored to preserve forward compatibility.
+- When the server intends to terminate a connection, it SHOULD send a final `{"type":"hangup"}` frame and close the socket with normal closure status. Clients MAY treat `hangup` as a cue to reconnect after a randomized backoff.
+
+### 16.2 Heartbeat & Timeout Requirements
+
+- `STATUS_PING_INTERVAL` MUST remain no lower than 5s to avoid overloading browsers with unnecessary traffic; values between 5–15s keep UI panels reactive without spamming telemetry.
+- `STATUS_PONG_TIMEOUT` MUST be configured to at least 60s (recommended 75s) in production. Browser clients process pong replies on the main thread; background tabs can experience scheduling delays of 30–45s under Chromium throttling. Values below 60s risk false positives during heavy DOM work or GC pauses.
+- Operators MAY retain the legacy 15s timeout during local development for quicker failure detection, but fleet deployments MUST apply `STATUS_PONG_TIMEOUT >= 60s` through environment configuration until the code default is raised.
+- Connections that miss two consecutive ping intervals beyond the timeout MUST be closed with `StatusPolicyViolation`. Clients SHOULD treat this as an invitation to reconnect using their built-in exponential backoff.
+
+### 16.3 Known Client Expectations
+
+- **StatusStream panels** (`wepppy/weppcloud/controllers_js/status_stream.js:268-339`) auto-respond to pings and maintain their own reconnect loop. They expect timeliness guarantees on pong windows but tolerate brief transport gaps.
+- **Command bar command channel** (`wepppy/weppcloud/routes/command_bar/static/command-bar.js:620-789`) uses the same handshake, responds with `pong`, and reconnects with exponential backoff capped at 30s.
+- **Legacy WSClient** controls (`wepppy/weppcloud/controllers_js/ws_client.js:23-109`) respond synchronously to heartbeats and emit spinner UI cues. They do not disable themselves in background tabs, so longer pong windows are essential when the page is throttled.
+
+### 16.4 Compatibility Notes
+
+- Third-party or automation clients MUST honor the same heartbeat contract and SHOULD mirror the browser behavior of sending `init`, replying with `pong`, and ignoring unknown message types.
+- Future protocol extensions MUST preserve the `status` frame schema or version it explicitly. Additional control frames MUST be optional and documented alongside this contract.
+- Operators SHOULD monitor `status2_write_errors_total` and connection churn metrics when adjusting heartbeat settings; spikes indicate misconfigured timeouts or clients that are not compliant with the contract.

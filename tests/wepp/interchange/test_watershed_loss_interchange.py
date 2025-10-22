@@ -1,42 +1,22 @@
 from __future__ import annotations
 
-import importlib.util
 import shutil
-import sys
-import types
 from pathlib import Path
 
 import pandas as pd
 import pyarrow.parquet as pq
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from .module_loader import cleanup_import_state, load_module
 
 
-def _load_module(full_name: str, relative_path: str):
-    parts = full_name.split(".")
-    for idx in range(1, len(parts)):
-        pkg = ".".join(parts[:idx])
-        if pkg not in sys.modules:
-            module = types.ModuleType(pkg)
-            module.__path__ = []
-            sys.modules[pkg] = module
-
-    module_path = REPO_ROOT / relative_path
-    spec = importlib.util.spec_from_file_location(full_name, module_path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[full_name] = module
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
-
-
-_load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
-_load_module("wepppy.wepp.interchange.versioning", "wepppy/wepp/interchange/versioning.py")
-_watershed_loss = _load_module(
+load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
+load_module("wepppy.wepp.interchange.versioning", "wepppy/wepp/interchange/versioning.py")
+_watershed_loss = load_module(
     "wepppy.wepp.interchange.watershed_loss_interchange",
     "wepppy/wepp/interchange/watershed_loss_interchange.py",
 )
+cleanup_import_state()
 
 run_wepp_watershed_loss_interchange = _watershed_loss.run_wepp_watershed_loss_interchange
 AVERAGE_FILENAMES = _watershed_loss.AVERAGE_FILENAMES

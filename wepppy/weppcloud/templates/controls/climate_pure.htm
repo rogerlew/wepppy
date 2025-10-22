@@ -22,7 +22,13 @@
       "value": dataset.catalog_id,
       "selected": dataset.catalog_id == ns.selected,
       "description": dataset.description,
-      "disabled": (not dataset.ui_exposed) and (dataset.catalog_id != ns.selected)
+      "disabled": (not dataset.ui_exposed) and (dataset.catalog_id != ns.selected),
+      "attrs": {
+        "class": "disable-readonly",
+        "data-climate-action": "dataset",
+        "data-climate-dataset": dataset.catalog_id,
+        "data-climate-mode": dataset.climate_mode
+      }
     }] %}
   {% endif %}
   {% if dataset.catalog_id == ns.selected %}
@@ -66,6 +72,7 @@
 {% call ui.control_shell(
      form_id="climate_form",
      title="Climate Options",
+     form_attrs={"data-controller": "climate"},
      collapsible=False,
      status_panel_override=status_panel_override,
      stacktrace_panel_override=stacktrace_panel_override
@@ -73,8 +80,8 @@
 
   <script type="application/json" id="climate_catalog_data">{{ catalog | tojson }}</script>
 
-  <input type="hidden" id="climate_catalog_id" name="climate_catalog_id" value="{{ selected_catalog_id }}">
-  <input type="hidden" id="climate_mode" name="climate_mode" value="{{ selected_mode }}">
+  <input type="hidden" id="climate_catalog_id" name="climate_catalog_id" value="{{ selected_catalog_id }}" data-climate-field="catalog-id">
+  <input type="hidden" id="climate_mode" name="climate_mode" value="{{ selected_mode }}" data-climate-field="mode">
 
   <section class="wc-stack" id="climate_dataset_section" data-climate-element="dataset">
     {{ ui.radio_group(
@@ -101,35 +108,35 @@
       "label": "Closest station",
       "value": "0",
       "selected": selected_station_mode == 0,
-      "attrs": {"class": "disable-readonly", "data-mode-value": "0"}
+      "attrs": {"class": "disable-readonly", "data-mode-value": "0", "data-climate-action": "station-mode"}
     },
     {
       "id": "climatestation_mode1",
       "label": "Multi-factor ranking",
       "value": "1",
       "selected": selected_station_mode == 1,
-      "attrs": {"class": "disable-readonly", "data-mode-value": "1"}
+      "attrs": {"class": "disable-readonly", "data-mode-value": "1", "data-climate-action": "station-mode"}
     },
     {
       "id": "climatestation_mode2",
       "label": "EU heuristic",
       "value": "2",
       "selected": selected_station_mode == 2,
-      "attrs": {"class": "disable-readonly", "data-mode-value": "2"}
+      "attrs": {"class": "disable-readonly", "data-mode-value": "2", "data-climate-action": "station-mode"}
     },
     {
       "id": "climatestation_mode3",
       "label": "AU heuristic",
       "value": "3",
       "selected": selected_station_mode == 3,
-      "attrs": {"class": "disable-readonly", "data-mode-value": "3"}
+      "attrs": {"class": "disable-readonly", "data-mode-value": "3", "data-climate-action": "station-mode"}
     },
     {
       "id": "climatestation_mode4",
       "label": "User-defined",
       "value": "4",
       "selected": selected_station_mode == 4,
-      "attrs": {"class": "disable-readonly", "data-mode-value": "4"}
+      "attrs": {"class": "disable-readonly", "data-mode-value": "4", "data-climate-action": "station-mode"}
     }
   ] %}
 
@@ -149,6 +156,7 @@
           id="climate_station_selection"
           name="climate_station_selection"
           class="wc-field__control disable-readonly"
+          data-climate-action="station-select"
           aria-describedby="climate_station_hint">
         </select>
         <p id="climate_station_hint" class="wc-field__help">Station list updates when the selection mode changes.</p>
@@ -170,21 +178,21 @@
       "label": "Single climate",
       "value": "0",
       "selected": spatial_mode == 0,
-      "attrs": {"class": "disable-readonly", "data-spatial-value": "0"}
+      "attrs": {"class": "disable-readonly", "data-spatial-value": "0", "data-climate-action": "spatial-mode"}
     },
     {
       "id": "climate_spatialmode1",
       "label": "Multiple climates (PRISM revision)",
       "value": "1",
       "selected": spatial_mode == 1,
-      "attrs": {"class": "disable-readonly", "data-spatial-value": "1"}
+      "attrs": {"class": "disable-readonly", "data-spatial-value": "1", "data-climate-action": "spatial-mode"}
     },
     {
       "id": "climate_spatialmode2",
       "label": "Multiple climates (Interpolated)",
       "value": "2",
       "selected": spatial_mode == 2,
-      "attrs": {"class": "disable-readonly", "data-spatial-value": "2"}
+      "attrs": {"class": "disable-readonly", "data-spatial-value": "2", "data-climate-action": "spatial-mode"}
     }
   ] %}
 
@@ -353,6 +361,7 @@
       <button
         id="btn_upload_cli"
         class="pure-button pure-button-secondary disable-readonly"
+        data-climate-action="upload-cli"
         type="button">
         Upload .cli
       </button>
@@ -405,7 +414,7 @@
            "Use GRIDMET wind when applicable",
            checked=climate.use_gridmet_wind_when_applicable,
            help="Applies GRIDMET wind fields for observed datasets that require wind data.",
-           attrs={"class": "disable-readonly"}
+           attrs={"class": "disable-readonly", "data-climate-action": "gridmet-wind"}
          ) }}
     </section>
 
@@ -416,35 +425,35 @@
         "label": "No scaling",
         "value": "0",
         "selected": precip_mode == 0,
-        "attrs": {"class": "disable-readonly"}
+        "attrs": {"class": "disable-readonly", "data-climate-action": "precip-mode"}
       },
       {
         "id": "climate_precipscaling_mode1",
         "label": "Scalar scaling",
         "value": "1",
         "selected": precip_mode == 1,
-        "attrs": {"class": "disable-readonly"}
+        "attrs": {"class": "disable-readonly", "data-climate-action": "precip-mode"}
       },
       {
         "id": "climate_precipscaling_mode2",
         "label": "Monthly scaling",
         "value": "2",
         "selected": precip_mode == 2,
-        "attrs": {"class": "disable-readonly"}
+        "attrs": {"class": "disable-readonly", "data-climate-action": "precip-mode"}
       },
       {
         "id": "climate_precipscaling_mode3",
         "label": "Reference scaling",
         "value": "3",
         "selected": precip_mode == 3,
-        "attrs": {"class": "disable-readonly"}
+        "attrs": {"class": "disable-readonly", "data-climate-action": "precip-mode"}
       },
       {
         "id": "climate_precipscaling_mode4",
         "label": "Spatial scaling from map",
         "value": "4",
         "selected": precip_mode == 4,
-        "attrs": {"class": "disable-readonly", "disabled": True}
+        "attrs": {"class": "disable-readonly", "disabled": True, "data-climate-action": "precip-mode"}
       }
     ] %}
 
@@ -505,21 +514,13 @@
 
 {% call button_row() %}
     <button
-      onclick="Climate.getInstance().build();"
       id="btn_build_climate"
       class="pure-button pure-button-primary disable-readonly"
-      type="button">
+      type="button"
+      data-climate-action="build">
       Build Climate
     </button>
   {% endcall %}
   <p id="hint_build_climate" class="wc-text-muted" aria-live="polite"></p>
 
 {% endcall %}
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    if (typeof Climate !== "undefined" && Climate && typeof Climate.getInstance === "function") {
-      Climate.getInstance();
-    }
-  });
-</script>

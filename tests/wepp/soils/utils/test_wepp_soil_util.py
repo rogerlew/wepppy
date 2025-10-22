@@ -78,9 +78,17 @@ def _stub_isfloat(value):
         return False
 
 
+def _stub_isint(value):
+    try:
+        return float(int(value)) == float(value)
+    except Exception:
+        return False
+
+
 all_your_base_stub.try_parse = _stub_try_parse
 all_your_base_stub.try_parse_float = _stub_try_parse_float
 all_your_base_stub.isfloat = _stub_isfloat
+all_your_base_stub.isint = _stub_isint
 sys.modules["wepppy.all_your_base"] = all_your_base_stub
 
 

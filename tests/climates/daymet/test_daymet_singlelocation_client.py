@@ -7,9 +7,19 @@ import types
 from dataclasses import dataclass
 from typing import Iterable
 
+import importlib
+
 import numpy as np
 import pandas as pd
 import pytest
+
+module = sys.modules.get("wepppy")
+if module is None or getattr(module, "__name__", "") != "wepppy" or not hasattr(module, "__path__"):
+    sys.modules.pop("wepppy", None)
+    importlib.import_module("wepppy")
+
+climates_module = importlib.import_module("wepppy.climates")
+sys.modules["wepppy"].climates = climates_module
 
 if "pyproj" not in sys.modules:
     pyproj_module = types.ModuleType("pyproj")
@@ -321,6 +331,13 @@ def _install_fake_daymet(monkeypatch, response_text: str):
 
     def _fake_get(url):
         return _FakeResponse(response_text)
+
+    import importlib
+
+    wepp_module = sys.modules.get("wepppy")
+    if wepp_module is None or not hasattr(wepp_module, "climates"):
+        climates_module = importlib.import_module("wepppy.climates")
+        sys.modules["wepppy"].climates = climates_module
 
     monkeypatch.setattr("wepppy.climates.daymet.daymet_singlelocation_client.requests.get", _fake_get)
 

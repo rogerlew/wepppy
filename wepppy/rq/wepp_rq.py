@@ -34,13 +34,30 @@ from wepppy.wepp.interchange import (
 )
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from wepp_runner import (
-    run_ss_batch_hillslope,
-    run_hillslope,
-    run_flowpath,
-    run_watershed,
-    run_ss_batch_watershed,
-)
+try:
+    from wepp_runner import (
+        run_ss_batch_hillslope,
+        run_hillslope,
+        run_flowpath,
+        run_watershed,
+        run_ss_batch_watershed,
+    )
+except (ModuleNotFoundError, ImportError) as exc:  # pragma: no cover - optional runner dependency
+    _WEPP_RUNNER_IMPORT_ERROR = exc
+
+    def _missing_runner(*_args, **_kwargs):
+        raise ModuleNotFoundError(
+            "wepp_runner is required for WEPP execution tasks. "
+            "Install the optional runner dependencies to enable these RQ jobs."
+        ) from _WEPP_RUNNER_IMPORT_ERROR
+
+    run_ss_batch_hillslope = _missing_runner  # type: ignore[assignment]
+    run_hillslope = _missing_runner  # type: ignore[assignment]
+    run_flowpath = _missing_runner  # type: ignore[assignment]
+    run_watershed = _missing_runner  # type: ignore[assignment]
+    run_ss_batch_watershed = _missing_runner  # type: ignore[assignment]
+else:
+    _WEPP_RUNNER_IMPORT_ERROR = None
 
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.disturbed import Disturbed

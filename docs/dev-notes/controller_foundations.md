@@ -10,6 +10,7 @@ This note captures the shared architectural goals that sit behind the per-module
 - Encourage controllers to surface domain signals through a scoped emitter (`WCEvents.createEmitter` + `useEventMap`) so other modules subscribe without reaching inside implementation details (for example, `landuse:build:completed`).
 - Aim for each controller to focus on domain logic (payload preparation, NoDb syncing) while the primitives handle DOM wiring.
 - Document these primitives alongside usage examples in `controllers_js/README.md` as new pieces are added.
+- The ash controller refactor (2024) pairs delegated `data-ash-*` hooks with a scoped `WCEvents` emitter and serves as the reference implementation for helper-first run controls; link to it when introducing similar patterns.
 
 ## 2. Unified payload schemas
 - Whenever a controller sends structured data, define the schema once and reuse it:
@@ -29,6 +30,7 @@ This note captures the shared architectural goals that sit behind the per-module
 - For every major controller domain, maintain a short “contract” doc:
   - Enumerate endpoints, payload schemas, emitted events, and unitizer hooks.
   - Reference the controller primitives used and any shared utilities.
+- Project-specific requests/events live in `docs/dev-notes/project-controller-migration-plan.md`; keep it in sync whenever payloads or data hooks change.
 - Update `controllers_js/AGENTS.md`, `controllers_js/README.md`, and the per-domain plan whenever new primitives or patterns ship.
 - Tie these contracts back into the refactor workflow so contributors see the broader picture before coding.
 

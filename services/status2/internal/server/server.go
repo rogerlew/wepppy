@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math/rand"
 	"net/http"
 	"regexp"
 	"strings"
@@ -139,6 +140,7 @@ type connection struct {
 	ws       *websocket.Conn
 	lastSeen atomic.Int64
 	writeMu  sync.Mutex
+	rand     *rand.Rand
 }
 
 func newConnection(srv *Server, logger *slog.Logger, runID, channel string, ws *websocket.Conn) *connection {
@@ -148,6 +150,7 @@ func newConnection(srv *Server, logger *slog.Logger, runID, channel string, ws *
 		runID:   runID,
 		channel: channel,
 		ws:      ws,
+		rand:    rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 	c.touch()
 	return c
@@ -252,7 +255,10 @@ outer:
 			}
 		}()
 
-		if _, err := pubsub.Receive(ctx); err != nil {
+		receiveAckCtx, cancelAck := c.redisRequestContext(ctx)
+		_, err := pubsub.Receive(receiveAckCtx)
+		cancelAck()
+		if err != nil {
 			cancelWatcher()
 			closePubsub("subscribe ack failed")
 			attempt++
@@ -271,7 +277,9 @@ outer:
 
 		attempt = 0
 		for {
-			msg, err := pubsub.ReceiveMessage(ctx)
+			messageCtx, cancel := c.redisRequestContext(ctx)
+			msg, err := pubsub.ReceiveMessage(messageCtx)
+			cancel()
 			if err != nil {
 				cancelWatcher()
 				closePubsub("receive message failed")
@@ -345,11 +353,19 @@ func (c *connection) redisBackoff(attempt int, base time.Duration) time.Duration
 	if attempt <= 0 {
 		return base
 	}
-	d := base * time.Duration(1<<uint(min(attempt-1, 10)))
-	if d > c.srv.cfg.RedisRetryMax {
-		return c.srv.cfg.RedisRetryMax
+	maxBackoff := base * time.Duration(1<<uint(min(attempt-1, 10)))
+	if maxBackoff > c.srv.cfg.RedisRetryMax {
+		maxBackoff = c.srv.cfg.RedisRetryMax
 	}
-	return d
+	if maxBackoff <= base {
+		return maxBackoff
+	}
+
+	jitterRange := maxBackoff - base
+	if jitterRange <= 0 {
+		return maxBackoff
+	}
+	return base + time.Duration(c.rand.Int63n(int64(jitterRange)+1))
 }
 
 func (c *connection) shouldAbort(attempt int) bool {
@@ -357,6 +373,14 @@ func (c *connection) shouldAbort(attempt int) bool {
 		return false
 	}
 	return attempt >= c.srv.cfg.RedisMaxRetries
+}
+
+func (c *connection) redisRequestContext(parent context.Context) (context.Context, context.CancelFunc) {
+	timeout := c.srv.cfg.RedisRequestTimeout
+	if timeout <= 0 {
+		return parent, func() {}
+	}
+	return context.WithTimeout(parent, timeout)
 }
 
 func min(a, b int) int {

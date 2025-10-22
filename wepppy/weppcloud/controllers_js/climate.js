@@ -1,23 +1,135 @@
 /* ----------------------------------------------------------------------------
- * Climate (Pure UI)
+ * Climate (Pure UI + Legacy Console)
  * ----------------------------------------------------------------------------
  */
 var Climate = (function () {
+    "use strict";
+
     var instance;
 
-    function parseJSONScript(id) {
-        var el = document.getElementById(id);
-        if (!el) {
+    var EVENT_NAMES = [
+        "climate:dataset:changed",
+        "climate:dataset:mode",
+        "climate:station:mode",
+        "climate:station:selected",
+        "climate:station:list:loading",
+        "climate:station:list:loaded",
+        "climate:build:started",
+        "climate:build:completed",
+        "climate:build:failed",
+        "climate:precip:mode",
+        "climate:upload:completed",
+        "climate:upload:failed",
+        "climate:gridmet:updated"
+    ];
+
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
+
+        if (
+            !dom ||
+            typeof dom.ensureElement !== "function" ||
+            typeof dom.delegate !== "function" ||
+            typeof dom.show !== "function" ||
+            typeof dom.hide !== "function"
+        ) {
+            throw new Error("Climate controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("Climate controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("Climate controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("Climate controller requires WCEvents helpers.");
+        }
+
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function toResponsePayload(http, error) {
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error.detail || error.body || error.message || "Request failed";
+            return { Error: detail };
+        }
+        return { Error: (error && error.message) || "Request failed" };
+    }
+
+    function parseJsonScript(id) {
+        if (!id) {
             return null;
         }
-        var text = el.textContent || el.innerText || "";
-        if (!text.length) {
+        var element = document.getElementById(id);
+        if (!element) {
+            return null;
+        }
+        var raw = element.textContent || element.innerText || "";
+        if (!raw) {
             return null;
         }
         try {
-            return JSON.parse(text);
+            return JSON.parse(raw);
         } catch (err) {
-            console.error("Failed to parse JSON from element #" + id, err);
+            console.error("[Climate] Failed to parse JSON from #" + id, err);
             return null;
         }
     }
@@ -32,206 +144,259 @@ var Climate = (function () {
         return [value];
     }
 
-    function intOr(value, fallback) {
+    function parseInteger(value, fallback) {
+        if (value === undefined || value === null || value === "") {
+            return fallback;
+        }
         var parsed = parseInt(value, 10);
-        return isNaN(parsed) ? fallback : parsed;
+        if (Number.isNaN(parsed)) {
+            return fallback;
+        }
+        return parsed;
+    }
+
+    function toggleChoiceDisabled(input, disabled) {
+        if (!input) {
+            return;
+        }
+        var isDisabled = Boolean(disabled);
+        input.disabled = isDisabled;
+        if (isDisabled) {
+            input.setAttribute("aria-disabled", "true");
+        } else {
+            input.removeAttribute("aria-disabled");
+        }
+        if (typeof input.closest === "function") {
+            var wrapper = input.closest(".wc-choice");
+            if (wrapper) {
+                if (isDisabled) {
+                    wrapper.classList.add("is-disabled");
+                } else {
+                    wrapper.classList.remove("is-disabled");
+                }
+            }
+        }
+    }
+
+    function getRadioValue(radios) {
+        if (!radios || radios.length === 0) {
+            return null;
+        }
+        for (var i = 0; i < radios.length; i += 1) {
+            if (radios[i] && radios[i].checked) {
+                return radios[i].value;
+            }
+        }
+        return null;
+    }
+
+    function setRadioValue(radios, targetValue) {
+        if (!radios || radios.length === 0) {
+            return;
+        }
+        var normalized = targetValue !== undefined && targetValue !== null ? String(targetValue) : null;
+        for (var i = 0; i < radios.length; i += 1) {
+            var radio = radios[i];
+            if (!radio) {
+                continue;
+            }
+            radio.checked = normalized !== null && String(radio.value) === normalized;
+        }
     }
 
     function createInstance() {
-        var that = controlBase();
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var events = helpers.events;
 
-        that.form = $("#climate_form");
-        that.status = $("#climate_form #status");
-        that.info = $("#climate_form #info");
-        that.stacktrace = $("#climate_form #stacktrace");
-        that.rq_job = $("#climate_form #rq_job");
-        that.command_btn_id = "btn_build_climate";
-        that.statusPanelEl = document.getElementById("climate_status_panel");
-        that.stacktracePanelEl = document.getElementById("climate_stacktrace_panel");
-        that.statusStream = null;
+        var climate = controlBase();
+        var climateEvents = events.useEventMap(EVENT_NAMES, events.createEmitter());
 
-        that.catalogData = parseJSONScript("climate_catalog_data") || [];
-        that.datasetMap = {};
-        that.catalogData.forEach(function (dataset) {
+        var formElement = dom.ensureElement("#climate_form", "Climate form not found.");
+        var infoElement = dom.qs("#climate_form #info");
+        var statusElement = dom.qs("#climate_form #status");
+        var stacktraceElement = dom.qs("#climate_form #stacktrace");
+        var rqJobElement = dom.qs("#climate_form #rq_job");
+        var hintUploadElement = dom.qs("#hint_upload_cli");
+        var hintBuildElement = dom.qs("#hint_build_climate");
+
+        var infoAdapter = createLegacyAdapter(infoElement);
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+        var uploadHintAdapter = createLegacyAdapter(hintUploadElement);
+        var buildHintAdapter = createLegacyAdapter(hintBuildElement);
+
+        climate.form = formElement;
+        climate.info = infoAdapter;
+        climate.status = statusAdapter;
+        climate.stacktrace = stacktraceAdapter;
+        climate.rq_job = rqJobAdapter;
+        climate.command_btn_id = "btn_build_climate";
+        climate.events = climateEvents;
+
+        climate.statusPanelEl = dom.qs("#climate_status_panel");
+        climate.stacktracePanelEl = dom.qs("#climate_stacktrace_panel");
+        climate.statusStream = null;
+        climate.ws_client = null;
+
+        climate.datasetMessage = dom.qs("#climate_dataset_message");
+        climate.stationSelect = dom.qs("#climate_station_selection");
+        climate.monthliesContainer = dom.qs("#climate_monthlies");
+        climate.catalogHiddenInput = dom.qs("#climate_catalog_id");
+        climate.modeHiddenInput = dom.qs("#climate_mode");
+        climate.userDefinedSection = dom.qs("#climate_userdefined");
+        climate.cligenSection = dom.qs("#climate_cligen");
+        climate.hintUpload = uploadHintAdapter;
+        climate.hintBuild = buildHintAdapter;
+
+        climate.datasetRadios = dom.qsa("input[name=\"climate_dataset_choice\"]", formElement);
+        climate.stationModeRadios = dom.qsa("input[name=\"climatestation_mode\"]", formElement);
+        climate.spatialModeRadios = dom.qsa("input[name=\"climate_spatialmode\"]", formElement);
+        climate.precipModeRadios = dom.qsa("input[name=\"precip_scaling_mode\"]", formElement);
+        climate.buildModeRadios = dom.qsa("input[name=\"climate_build_mode\"]", formElement);
+        climate.gridmetCheckbox = dom.qs("#checkbox_use_gridmet_wind_when_applicable");
+
+        climate.sectionNodes = dom.qsa("[data-climate-section]", formElement);
+        climate.precipSections = dom.qsa("[data-precip-section]", formElement);
+
+        climate.catalogData = ensureArray(parseJsonScript("climate_catalog_data"));
+        climate.datasetMap = {};
+        climate.catalogData.forEach(function (dataset) {
             if (dataset && dataset.catalog_id) {
-                that.datasetMap[dataset.catalog_id] = dataset;
+                climate.datasetMap[dataset.catalog_id] = dataset;
             }
         });
 
-        that.datasetRadios = $("input[name='climate_dataset_choice']");
-        that.stationModeRadios = $("input[name='climatestation_mode']");
-        that.spatialRadios = $("input[name='climate_spatialmode']");
-        that.precipRadios = $("input[name='precip_scaling_mode']");
+        climate.datasetId = null;
+        climate._previousStationMode = null;
+        climate._delegates = [];
 
-        that.datasetMessage = $("#climate_dataset_message");
-        that.stationSelect = $("#climate_station_selection");
-        that.monthliesContainer = $("#climate_monthlies");
-        that.uploadButton = $("#btn_upload_cli");
-        that.buildButton = $("#btn_build_climate");
-        that.hintUpload = $("#hint_upload_cli");
-        that.hintBuild = $("#hint_build_climate");
-        that.catalogHiddenInput = $("#climate_catalog_id");
-        that.modeHiddenInput = $("#climate_mode");
-
-        that.sectionNodes = Array.prototype.slice.call(document.querySelectorAll("[data-climate-section]"));
-        that.precipSections = Array.prototype.slice.call(document.querySelectorAll("[data-precip-section]"));
-
-        that.datasetId = that.catalogHiddenInput.val() || (that.catalogData.length ? that.catalogData[0].catalog_id : null);
-
-        const baseTriggerEvent = that.triggerEvent.bind(that);
-        that.triggerEvent = function (eventName, payload) {
-            var normalized = (eventName || "").toString().toUpperCase();
-            if (normalized === "CLIMATE_SETSTATIONMODE_TASK_COMPLETED") {
-                that.refreshStationSelection();
-                that.viewStationMonthlies();
-            } else if (normalized === "CLIMATE_SETSTATION_TASK_COMPLETED") {
-                that.viewStationMonthlies();
-            } else if (normalized === "CLIMATE_BUILD_TASK_COMPLETED" || normalized === "CLIMATE_BUILD_COMPLETE") {
-                that.report();
-            }
-
-            baseTriggerEvent(eventName, payload);
-        };
-
-        that.datasetRadios.on("change", function () {
-            that.handleDatasetChange(this.value);
-        });
-
-        that.stationModeRadios.on("change", function () {
-            that.setStationMode(this.value);
-        });
-
-        that.spatialRadios.on("change", function () {
-            that.setSpatialMode(this.value);
-        });
-
-        that.precipRadios.on("change", function () {
-            that.handlePrecipScalingModeChange(this.value);
-        });
-
-        $("#checkbox_use_gridmet_wind_when_applicable").on("change", function () {
-            that.set_use_gridmet_wind_when_applicable(this.checked);
-        });
-
-        if (that.uploadButton.length) {
-            that.uploadButton.on("click", function () {
-                that.upload_cli();
-            });
+        function handleError(error) {
+            climate.pushResponseStacktrace(climate, toResponsePayload(http, error));
         }
 
-        ensureExtended(that);
-        that.applyDataset(that.datasetId, { skipPersist: true, skipStationRefresh: true });
-        that.handlePrecipScalingModeChange($("input[name='precip_scaling_mode']:checked").val());
-        that.refreshStationSelection();
-        that.viewStationMonthlies();
-
-        return that;
-    }
-
-    function formatDatasetMessage(dataset) {
-        var lines = [];
-        if (dataset.help_text) {
-            lines.push(dataset.help_text);
-        } else if (dataset.description) {
-            lines.push(dataset.description);
-        } else {
-            lines.push("Configure the dataset-specific options below.");
-        }
-
-        if (dataset.rap_compatible) {
-            lines.push("Compatible with RAP time-series workflows.");
-        }
-
-        if (!dataset.ui_exposed) {
-            lines.push("This dataset is read-only in the Pure UI and managed through catalog metadata.");
-        }
-
-        if (dataset.metadata && dataset.metadata.year_bounds) {
-            var bounds = dataset.metadata.year_bounds;
-            var minYear = bounds.min || bounds.min_start || bounds.start;
-            var maxYear = bounds.max || bounds.max_end || bounds.end;
-            if (minYear || maxYear) {
-                var rangeText = "Available years";
-                if (minYear && maxYear) {
-                    rangeText += ": " + minYear + "–" + maxYear + ".";
-                } else if (minYear) {
-                    rangeText += " from " + minYear + ".";
-                } else if (maxYear) {
-                    rangeText += " through " + maxYear + ".";
-                }
-                lines.push(rangeText);
-            }
-        }
-
-        return lines;
-    }
-
-    function ensureExtended(target) {
-        if (!target) {
-            return null;
-        }
-        if (!target._climateExtended) {
-            extendInstance(target);
-            target._climateExtended = true;
-        }
-        return target;
-    }
-
-    function extendInstance(that) {
-        that.getDataset = function (catalogId) {
-            if (catalogId && that.datasetMap[catalogId]) {
-                return that.datasetMap[catalogId];
-            }
-            if (that.catalogData.length) {
-                return that.catalogData[0];
-            }
-            return null;
-        };
-
-        that.applyDataset = function (catalogId, options) {
-            var opts = options || {};
-            var dataset = that.getDataset(catalogId);
-            if (!dataset) {
-                return null;
-            }
-
-            that.datasetId = dataset.catalog_id;
-            that.catalogHiddenInput.val(dataset.catalog_id);
-            that.modeHiddenInput.val(dataset.climate_mode);
-
-            that.datasetRadios.each(function () {
-                this.checked = (this.value === dataset.catalog_id);
-            });
-
-            that.updateDatasetMessage(dataset);
-            that.updateSectionVisibility(dataset);
-            that.updateSpatialModes(dataset, opts);
-            that.updateStationModes(dataset, opts);
-            that.updateStationVisibility(dataset);
-            return dataset;
-        };
-
-        that.updateDatasetMessage = function (dataset) {
-            if (!that.datasetMessage.length) {
+        climate.appendStatus = function (message, meta) {
+            if (!message) {
                 return;
             }
+            if (climate.statusStream && typeof climate.statusStream.append === "function") {
+                climate.statusStream.append(message, meta || null);
+                return;
+            }
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(message);
+                return;
+            }
+            if (statusElement) {
+                statusElement.innerHTML = message;
+            }
+        };
+
+        climate.attachStatusStream = function () {
+            if (typeof StatusStream === "undefined" || !climate.statusPanelEl) {
+                return null;
+            }
+            if (climate.statusStream && typeof StatusStream.disconnect === "function") {
+                StatusStream.disconnect(climate.statusStream);
+            }
+            var stacktraceConfig = null;
+            if (climate.stacktracePanelEl) {
+                stacktraceConfig = { element: climate.stacktracePanelEl };
+            }
+            climate.statusStream = StatusStream.attach({
+                element: climate.statusPanelEl,
+                channel: "climate",
+                runId: window.runid || window.runId || null,
+                logLimit: 400,
+                stacktrace: stacktraceConfig,
+                onTrigger: function (detail) {
+                    if (detail && detail.event) {
+                        climate.triggerEvent(detail.event, detail);
+                    }
+                }
+            });
+            return climate.statusStream;
+        };
+
+        function formatDatasetMessage(dataset) {
+            var lines = [];
+            if (!dataset) {
+                return lines;
+            }
+            if (dataset.help_text) {
+                lines.push(dataset.help_text);
+            } else if (dataset.description) {
+                lines.push(dataset.description);
+            } else {
+                lines.push("Configure the dataset-specific options below.");
+            }
+            if (dataset.rap_compatible) {
+                lines.push("Compatible with RAP time-series workflows.");
+            }
+            if (dataset.ui_exposed === false) {
+                lines.push("This dataset is read-only in the Pure UI and managed through catalog metadata.");
+            }
+            if (dataset.metadata && dataset.metadata.year_bounds) {
+                var bounds = dataset.metadata.year_bounds;
+                var minYear = bounds.min || bounds.min_start || bounds.start;
+                var maxYear = bounds.max || bounds.max_end || bounds.end;
+                if (minYear || maxYear) {
+                    var rangeText = "Available years";
+                    if (minYear && maxYear) {
+                        rangeText += ": " + minYear + "–" + maxYear + ".";
+                    } else if (minYear) {
+                        rangeText += " from " + minYear + ".";
+                    } else if (maxYear) {
+                        rangeText += " through " + maxYear + ".";
+                    }
+                    lines.push(rangeText);
+                }
+            }
+            return lines;
+        }
+
+        climate.getDataset = function (catalogId) {
+            if (catalogId && climate.datasetMap[catalogId]) {
+                return climate.datasetMap[catalogId];
+            }
+            if (climate.catalogData.length > 0) {
+                return climate.catalogData[0];
+            }
+            return null;
+        };
+
+        climate.updateDatasetMessage = function (dataset) {
+            if (!climate.datasetMessage) {
+                return;
+            }
+            climate.datasetMessage.innerHTML = "";
             var messages = formatDatasetMessage(dataset);
-            that.datasetMessage.empty();
+            if (!messages.length) {
+                return;
+            }
             messages.forEach(function (line, index) {
-                var paragraph = $("<p/>", {
-                    "class": index === 0 ? "wc-alert__body" : "wc-alert__meta"
-                }).text(line);
-                that.datasetMessage.append(paragraph);
+                var paragraph = document.createElement("p");
+                paragraph.className = index === 0 ? "wc-alert__body" : "wc-alert__meta";
+                paragraph.textContent = line;
+                climate.datasetMessage.appendChild(paragraph);
             });
         };
 
-        that.updateSectionVisibility = function (dataset) {
-            var inputs = ensureArray(dataset.inputs).map(function (value) {
+        climate.updateSectionVisibility = function (dataset) {
+            if (!climate.sectionNodes || climate.sectionNodes.length === 0) {
+                return;
+            }
+            var inputs = ensureArray(dataset && dataset.inputs).map(function (value) {
                 return String(value || "");
             });
-            var spatialDefined = ensureArray(dataset.spatial_modes).length > 1;
-
-            that.sectionNodes.forEach(function (node) {
+            var spatialDefined = ensureArray(dataset && dataset.spatial_modes).length > 1;
+            climate.sectionNodes.forEach(function (node) {
+                if (!node || !node.getAttribute) {
+                    return;
+                }
                 var key = node.getAttribute("data-climate-section");
                 if (!key) {
                     return;
@@ -244,53 +409,58 @@ var Climate = (function () {
             });
         };
 
-        that.updateSpatialModes = function (dataset, options) {
+        climate.updateSpatialModes = function (dataset, options) {
             var opts = options || {};
-            var allowed = ensureArray(dataset.spatial_modes).map(function (value) {
-                return parseInt(value, 10);
-            }).filter(function (value) {
-                return !isNaN(value);
-            });
+            if (!climate.spatialModeRadios || climate.spatialModeRadios.length === 0) {
+                return;
+            }
+            var allowed = ensureArray(dataset && dataset.spatial_modes)
+                .map(function (value) {
+                    return parseInteger(value, null);
+                })
+                .filter(function (value) {
+                    return value !== null && !Number.isNaN(value);
+                });
             if (!allowed.length) {
                 allowed = [0];
             }
-            var defaultMode = dataset.default_spatial_mode;
-            if (defaultMode === undefined || defaultMode === null) {
-                defaultMode = allowed[0];
-            }
-            defaultMode = parseInt(defaultMode, 10);
-            if (isNaN(defaultMode)) {
-                defaultMode = allowed[0];
-            }
+            var defaultMode = dataset && dataset.default_spatial_mode !== undefined && dataset.default_spatial_mode !== null
+                ? parseInteger(dataset.default_spatial_mode, allowed[0])
+                : allowed[0];
+            var currentValue = parseInteger(getRadioValue(climate.spatialModeRadios), defaultMode);
+            var nextValue = currentValue;
 
-            var current = intOr($("input[name='climate_spatialmode']:checked").val(), defaultMode);
-            var newValue = current;
-
-            that.spatialRadios.each(function () {
-                var value = parseInt(this.value, 10);
-                var enabled = allowed.indexOf(value) !== -1;
-                $(this).prop("disabled", !enabled);
-                $(this).closest(".wc-choice").toggleClass("is-disabled", !enabled);
-                if (!enabled && value === current) {
-                    newValue = defaultMode;
+            climate.spatialModeRadios.forEach(function (radio) {
+                if (!radio) {
+                    return;
+                }
+                var value = parseInteger(radio.value, null);
+                var enabled = value !== null && allowed.indexOf(value) !== -1;
+                toggleChoiceDisabled(radio, !enabled);
+                if (!enabled && value === currentValue) {
+                    nextValue = defaultMode;
                 }
             });
 
-            if (newValue !== current || isNaN(current)) {
-                that.setSpatialMode(newValue, { silent: true });
+            if (Number.isNaN(currentValue) || nextValue !== currentValue) {
+                climate.setSpatialMode(nextValue, { silent: true });
+            } else if (opts.silent) {
+                climate.setSpatialMode(currentValue, { silent: true });
             }
         };
 
-        that.updateStationVisibility = function (dataset) {
+        climate.updateStationVisibility = function (dataset) {
             var section = document.getElementById("climate_station_section");
             if (!section) {
                 return;
             }
-            var stationModes = ensureArray(dataset.station_modes).map(function (value) {
-                return parseInt(value, 10);
-            }).filter(function (value) {
-                return !isNaN(value);
-            });
+            var stationModes = ensureArray(dataset && dataset.station_modes)
+                .map(function (value) {
+                    return parseInteger(value, null);
+                })
+                .filter(function (value) {
+                    return value !== null && !Number.isNaN(value);
+                });
             if (!stationModes.length) {
                 stationModes = [0];
             }
@@ -300,165 +470,220 @@ var Climate = (function () {
             section.hidden = !shouldShow;
         };
 
-        that.updateStationModes = function (dataset, options) {
+        climate.updateStationModes = function (dataset, options) {
             var opts = options || {};
-            var allowed = ensureArray(dataset.station_modes).map(function (value) {
-                return parseInt(value, 10);
-            }).filter(function (value) {
-                return !isNaN(value);
-            });
+            if (!climate.stationModeRadios || climate.stationModeRadios.length === 0) {
+                return;
+            }
+            var allowed = ensureArray(dataset && dataset.station_modes)
+                .map(function (value) {
+                    return parseInteger(value, null);
+                })
+                .filter(function (value) {
+                    return value !== null && !Number.isNaN(value);
+                });
             if (!allowed.length) {
                 allowed = [0];
             }
+            var currentValue = parseInteger(getRadioValue(climate.stationModeRadios), allowed[0]);
+            var nextValue = currentValue;
 
-            var current = intOr($("input[name='climatestation_mode']:checked").val(), allowed[0]);
-            var newValue = current;
-
-            that.stationModeRadios.each(function () {
-                var value = intOr(this.value, -1);
-                var enabled = allowed.indexOf(value) !== -1;
-                $(this).prop("disabled", !enabled);
-                $(this).closest(".wc-choice").toggleClass("is-disabled", !enabled);
-                if (!enabled && value === current) {
-                    newValue = allowed[0];
+            climate.stationModeRadios.forEach(function (radio) {
+                if (!radio) {
+                    return;
+                }
+                var value = parseInteger(radio.value, null);
+                var enabled = value !== null && allowed.indexOf(value) !== -1;
+                toggleChoiceDisabled(radio, !enabled);
+                if (!enabled && value === currentValue) {
+                    nextValue = allowed[0];
                 }
             });
 
-            if (newValue !== current || isNaN(current)) {
-                that.setStationMode(newValue, { silent: true, skipRefresh: true });
+            if (Number.isNaN(currentValue) || nextValue !== currentValue) {
+                climate.setStationMode(nextValue, { silent: true, skipRefresh: true });
+            } else if (opts.silent) {
+                climate.setStationMode(currentValue, { silent: true, skipRefresh: true });
             }
 
-            if (!(opts.skipStationRefresh || allowed.length === 1 && allowed[0] === 4)) {
-                that.refreshStationSelection();
-            } else if (allowed.length === 1 && allowed[0] === 4) {
-                that.stationSelect.empty();
+            if (!(opts.skipStationRefresh || (allowed.length === 1 && allowed[0] === 4))) {
+                climate.refreshStationSelection();
+            } else if (allowed.length === 1 && allowed[0] === 4 && climate.stationSelect) {
+                climate.stationSelect.innerHTML = "";
             }
         };
 
-        that.handleDatasetChange = function (catalogId) {
-            var dataset = that.applyDataset(catalogId, { skipPersist: false, skipStationRefresh: true });
+        climate.applyDataset = function (catalogId, options) {
+            var dataset = climate.getDataset(catalogId);
             if (!dataset) {
-                return;
+                return null;
             }
-            that.setCatalogMode(dataset.catalog_id, dataset.climate_mode);
-            if (dataset.station_modes && dataset.station_modes.indexOf(4) !== -1 && dataset.station_modes.length === 1) {
-                that.stationSelect.empty();
-            } else {
-                that.refreshStationSelection();
+            climate.datasetId = dataset.catalog_id || null;
+            if (climate.catalogHiddenInput) {
+                climate.catalogHiddenInput.value = dataset.catalog_id || "";
             }
-            that.viewStationMonthlies();
+            if (climate.modeHiddenInput) {
+                climate.modeHiddenInput.value = dataset.climate_mode !== undefined && dataset.climate_mode !== null
+                    ? String(dataset.climate_mode)
+                    : "";
+            }
+            if (climate.datasetRadios && climate.datasetRadios.length > 0) {
+                setRadioValue(climate.datasetRadios, dataset.catalog_id);
+            }
+            climate.updateDatasetMessage(dataset);
+            climate.updateSectionVisibility(dataset);
+            climate.updateSpatialModes(dataset, options || {});
+            climate.updateStationModes(dataset, options || {});
+            climate.updateStationVisibility(dataset);
+            climate.events.emit("climate:dataset:mode", {
+                catalogId: dataset.catalog_id,
+                climateMode: dataset.climate_mode
+            });
+            return dataset;
         };
 
-        that.setCatalogMode = function (catalogId, mode) {
-            var dataset = that.getDataset(catalogId);
+        climate.handleDatasetChange = function (catalogId) {
+            infoAdapter.text("");
+            stacktraceAdapter.text("");
+
+            var dataset = climate.applyDataset(catalogId, { skipPersist: true, skipStationRefresh: true });
             if (!dataset) {
                 return;
             }
-            var climateMode = mode !== undefined ? mode : dataset.climate_mode;
-            that.info.text("");
-            that.stacktrace.text("");
+            climate.events.emit("climate:dataset:changed", {
+                catalogId: dataset.catalog_id,
+                dataset: dataset
+            });
 
-            $.post({
-                url: "tasks/set_climate_mode/",
-                data: {
-                    mode: climateMode,
-                    catalog_id: dataset.catalog_id
-                },
-                success: function (response) {
-                    if (response.Success === true) {
-                        that.triggerEvent("CLIMATE_SETMODE_TASK_COMPLETED", response);
+            climate.setCatalogMode(dataset.catalog_id, dataset.climate_mode)
+                .then(function () {
+                    var stationModes = ensureArray(dataset.station_modes)
+                        .map(function (value) {
+                            return parseInteger(value, null);
+                        })
+                        .filter(function (value) {
+                            return value !== null && !Number.isNaN(value);
+                        });
+                    if (stationModes.length === 1 && stationModes[0] === 4 && climate.stationSelect) {
+                        climate.stationSelect.innerHTML = "";
                     } else {
-                        that.pushResponseStacktrace(that, response);
+                        climate.refreshStationSelection();
                     }
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
-                }
-            });
+                    climate.viewStationMonthlies();
+                })
+                .catch(function (error) {
+                    handleError(error);
+                });
         };
 
-        that.setStationMode = function (mode, options) {
-            var opts = options || {};
-            var parsedMode = intOr(mode, -1);
+        climate.setCatalogMode = function (catalogId, mode) {
+            infoAdapter.text("");
+            stacktraceAdapter.text("");
 
-            that.stationModeRadios.each(function () {
-                this.checked = intOr(this.value, -1) === parsedMode;
-            });
+            var payload = {};
+            var normalizedMode = parseInteger(mode, null);
+            if (normalizedMode !== null && !Number.isNaN(normalizedMode)) {
+                payload.mode = normalizedMode;
+            }
+            if (catalogId !== undefined && catalogId !== null && catalogId !== "") {
+                payload.catalog_id = catalogId;
+            }
+            return http.postJson("tasks/set_climate_mode/", payload, { form: formElement })
+                .then(function (response) {
+                    var body = response.body || {};
+                    if (body.Success === true) {
+                        climate.triggerEvent("CLIMATE_SETMODE_TASK_COMPLETED", body);
+                        return body;
+                    }
+                    climate.pushResponseStacktrace(climate, body);
+                    return Promise.reject(body);
+                })
+                .catch(function (error) {
+                    handleError(error);
+                    return Promise.reject(error);
+                });
+        };
+
+        climate.setStationMode = function (mode, options) {
+            var opts = options || {};
+            var parsedMode = parseInteger(mode, -1);
+            setRadioValue(climate.stationModeRadios, parsedMode);
+
+            if (parsedMode !== 4) {
+                climate._previousStationMode = parsedMode;
+            }
 
             if (opts.silent) {
                 if (!opts.skipRefresh) {
-                    that.refreshStationSelection();
+                    climate.refreshStationSelection();
                 }
-                return;
+                climate.events.emit("climate:station:mode", { mode: parsedMode, silent: true });
+                return Promise.resolve(null);
             }
 
-            that.info.text("");
-            that.stacktrace.text("");
+            infoAdapter.text("");
+            stacktraceAdapter.text("");
 
-            $.post({
-                url: "tasks/set_climatestation_mode/",
-                data: { mode: parsedMode },
-                success: function (response) {
-                    if (response.Success === true) {
-                        that.triggerEvent("CLIMATE_SETSTATIONMODE_TASK_COMPLETED", response);
-                    } else {
-                        that.pushResponseStacktrace(that, response);
+            climate.events.emit("climate:station:mode", { mode: parsedMode, silent: false });
+
+            return http.postJson("tasks/set_climatestation_mode/", { mode: parsedMode }, { form: formElement })
+                .then(function (response) {
+                    var body = response.body || {};
+                    if (body.Success === true) {
+                        climate.triggerEvent("CLIMATE_SETSTATIONMODE_TASK_COMPLETED", body);
+                        if (!opts.skipRefresh) {
+                            climate.refreshStationSelection();
+                        }
+                        return body;
                     }
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
-                }
-            });
+                    climate.pushResponseStacktrace(climate, body);
+                    return Promise.reject(body);
+                })
+                .catch(function (error) {
+                    handleError(error);
+                    return Promise.reject(error);
+                });
         };
 
-        that.setSpatialMode = function (mode, options) {
+        climate.setSpatialMode = function (mode, options) {
             var opts = options || {};
-            var parsedMode = intOr(mode, 0);
-
-            that.spatialRadios.each(function () {
-                this.checked = intOr(this.value, 0) === parsedMode;
-            });
+            var parsedMode = parseInteger(mode, 0);
+            setRadioValue(climate.spatialModeRadios, parsedMode);
 
             if (opts.silent) {
-                return;
+                return Promise.resolve(null);
             }
 
-            that.info.text("");
-            that.stacktrace.text("");
+            infoAdapter.text("");
+            stacktraceAdapter.text("");
 
-            $.post({
-                url: "tasks/set_climate_spatialmode/",
-                data: { spatialmode: parsedMode },
-                success: function (response) {
-                    if (response.Success === true) {
-                        that.triggerEvent("CLIMATE_SETSPATIALMODE_TASK_COMPLETED", response);
-                    } else {
-                        that.pushResponseStacktrace(that, response);
+            return http.postJson("tasks/set_climate_spatialmode/", { spatialmode: parsedMode }, { form: formElement })
+                .then(function (response) {
+                    var body = response.body || {};
+                    if (body.Success === true) {
+                        climate.triggerEvent("CLIMATE_SETSPATIALMODE_TASK_COMPLETED", body);
+                        return body;
                     }
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
-                }
-            });
+                    climate.pushResponseStacktrace(climate, body);
+                    return Promise.reject(body);
+                })
+                .catch(function (error) {
+                    handleError(error);
+                    return Promise.reject(error);
+                });
         };
 
-        that.refreshStationSelection = function () {
-            var mode = intOr($("input[name='climatestation_mode']:checked").val(), -1);
+        climate.refreshStationSelection = function () {
+            if (!climate.stationSelect) {
+                return;
+            }
+            var mode = parseInteger(getRadioValue(climate.stationModeRadios), -1);
             if (mode === -1 || mode === 4) {
                 return;
             }
 
-            that.info.text("");
-            that.stacktrace.text("");
+            infoAdapter.text("");
+            stacktraceAdapter.text("");
 
             var endpoint = null;
             if (mode === 0) {
@@ -470,235 +695,364 @@ var Climate = (function () {
             } else if (mode === 3) {
                 endpoint = "view/au_heuristic_stations/";
             }
-
             if (!endpoint) {
                 return;
             }
 
-            $.get({
-                url: endpoint,
-                cache: false,
-                data: { mode: mode },
-                success: function (response) {
-                    that.stationSelect.html(response);
-                    that.triggerEvent("CLIMATE_SETSTATION_TASK_COMPLETED");
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
-                }
-            });
+            climate.events.emit("climate:station:list:loading", { mode: mode });
+
+            http.request(endpoint, { params: { mode: mode } })
+                .then(function (response) {
+                    var body = response.body;
+                    climate.stationSelect.innerHTML = typeof body === "string" ? body : "";
+                    climate.triggerEvent("CLIMATE_SETSTATION_TASK_COMPLETED", { mode: mode });
+                    climate.events.emit("climate:station:list:loaded", { mode: mode });
+                })
+                .catch(function (error) {
+                    handleError(error);
+                });
         };
 
-        that.setStation = function (station) {
+        climate.setStation = function (station) {
             var selectedStation = station;
-            if (selectedStation === undefined) {
-                selectedStation = that.stationSelect.val();
+            if (selectedStation === undefined || selectedStation === null) {
+                selectedStation = climate.stationSelect ? climate.stationSelect.value : null;
             }
             if (!selectedStation) {
                 return;
             }
 
-            that.info.text("");
-            that.stacktrace.text("");
+            infoAdapter.text("");
+            stacktraceAdapter.text("");
 
-            $.post({
-                url: "tasks/set_climatestation/",
-                data: { station: selectedStation },
-                success: function (response) {
-                    if (response.Success === true) {
-                        that.triggerEvent("CLIMATE_SETSTATION_TASK_COMPLETED");
-                    } else {
-                        that.pushResponseStacktrace(that, response);
+            climate.events.emit("climate:station:selected", { station: selectedStation });
+
+            http.postJson("tasks/set_climatestation/", { station: selectedStation }, { form: formElement })
+                .then(function (response) {
+                    var body = response.body || {};
+                    if (body.Success === true) {
+                        climate.triggerEvent("CLIMATE_SETSTATION_TASK_COMPLETED", body);
+                        return;
                     }
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
-                }
-            });
+                    climate.pushResponseStacktrace(climate, body);
+                })
+                .catch(function (error) {
+                    handleError(error);
+                });
         };
 
-        that.viewStationMonthlies = function () {
-            var project = Project.getInstance();
-            $.get({
-                url: "view/climate_monthlies/",
-                cache: false,
-                success: function (response) {
-                    that.monthliesContainer.html(response);
-                    project.set_preferred_units();
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.handlePrecipScalingModeChange = function (mode) {
-            var parsedMode = intOr(mode, -1);
-            that.precipSections.forEach(function (section) {
-                var key = intOr(section.getAttribute("data-precip-section"), -1);
-                section.hidden = key !== parsedMode;
-            });
-        };
-
-        that.appendStatus = function (message, meta) {
-            if (that.statusStream && typeof that.statusStream.append === "function") {
-                that.statusStream.append(message, meta || null);
-            } else if (that.status && that.status.length) {
-                that.status.text(message);
+        climate.viewStationMonthlies = function () {
+            if (!climate.monthliesContainer) {
+                return;
             }
-        };
-
-        that.attachStatusStream = function () {
-            if (typeof StatusStream === "undefined" || !that.statusPanelEl) {
-                return null;
-            }
-            if (that.statusStream) {
-                StatusStream.disconnect(that.statusStream);
-            }
-            var stacktraceConfig = null;
-            if (that.stacktracePanelEl) {
-                stacktraceConfig = { element: that.stacktracePanelEl };
-            }
-            that.statusStream = StatusStream.attach({
-                element: that.statusPanelEl,
-                channel: "climate",
-                runId: window.runid || window.runId || null,
-                logLimit: 400,
-                stacktrace: stacktraceConfig,
-                onTrigger: function (detail) {
-                    if (detail && detail.event) {
-                        that.triggerEvent(detail.event, detail);
+            var project = window.Project && typeof window.Project.getInstance === "function" ? window.Project.getInstance() : null;
+            http.request("view/climate_monthlies/", { params: {} })
+                .then(function (response) {
+                    var body = response.body;
+                    climate.monthliesContainer.innerHTML = typeof body === "string" ? body : "";
+                    if (project && typeof project.set_preferred_units === "function") {
+                        project.set_preferred_units();
                     }
-                }
-            });
-            return that.statusStream;
+                })
+                .catch(function (error) {
+                    handleError(error);
+                });
         };
 
-        that.build = function () {
-            var project = Project.getInstance();
-            var task_msg = "Building climate";
-
-            that.info.text("");
-            that.status.html(task_msg + "...");
-            that.stacktrace.text("");
-            that.appendStatus(task_msg + "...");
-
-            $.post({
-                url: "rq/api/build_climate",
-                data: that.form.serialize(),
-                success: function (response) {
-                    if (response.Success === true) {
-                        var message = "build_climate job submitted: " + response.job_id;
-                        that.status.html(message);
-                        that.appendStatus(message);
-                        that.set_rq_job_id(that, response.job_id);
-                    } else {
-                        that.pushResponseStacktrace(that, response);
+        climate.handlePrecipScalingModeChange = function (mode) {
+            var parsedMode = parseInteger(mode, -1);
+            if (climate.precipModeRadios && climate.precipModeRadios.length > 0) {
+                setRadioValue(climate.precipModeRadios, parsedMode);
+            }
+            if (climate.precipSections) {
+                climate.precipSections.forEach(function (section) {
+                    if (!section || !section.getAttribute) {
+                        return;
                     }
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
-                }
-            });
+                    var key = parseInteger(section.getAttribute("data-precip-section"), -1);
+                    section.hidden = key !== parsedMode;
+                });
+            }
+            climate.events.emit("climate:precip:mode", { mode: parsedMode });
         };
 
-        that.report = function () {
-            var project = Project.getInstance();
-            $.get({
-                url: url_for_run("report/climate/"),
-                cache: false,
-                success: function (response) {
-                    that.info.html(response);
-                    project.set_preferred_units();
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.upload_cli = function () {
-            that.info.text("");
-            that.stacktrace.text("");
-            var formData = new FormData($("#climate_form")[0]);
-
-            $.post({
-                url: "tasks/upload_cli/",
-                data: formData,
-                contentType: false,
-                cache: false,
-                processData: false,
-                success: function (response) {
-                    if (response.Success === true) {
-                        that.appendStatus("User-defined climate uploaded successfully.");
-                        that.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED");
-                    } else {
-                        that.pushResponseStacktrace(that, response);
+        climate.report = function () {
+            var project = window.Project && typeof window.Project.getInstance === "function" ? window.Project.getInstance() : null;
+            http.request(url_for_run("report/climate/"), { params: {}, method: "GET" })
+                .then(function (response) {
+                    var body = response.body;
+                    if (infoAdapter && typeof infoAdapter.html === "function") {
+                        infoAdapter.html(typeof body === "string" ? body : "");
+                    } else if (infoElement) {
+                        infoElement.innerHTML = typeof body === "string" ? body : "";
                     }
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
+                    if (project && typeof project.set_preferred_units === "function") {
+                        project.set_preferred_units();
+                    }
+                })
+                .catch(function (error) {
+                    handleError(error);
+                });
+        };
+
+        climate.build = function () {
+            var taskMsg = "Building climate";
+            infoAdapter.text("");
+            statusAdapter.html(taskMsg + "...");
+            stacktraceAdapter.text("");
+            climate.appendStatus(taskMsg + "...");
+
+            var payload = forms.serializeForm(formElement, { format: "json" });
+            climate.events.emit("climate:build:started", { payload: payload });
+
+            http.postJson("rq/api/build_climate", payload, { form: formElement })
+                .then(function (response) {
+                    var body = response.body || {};
+                    if (body.Success === true) {
+                        var message = "build_climate job submitted: " + body.job_id;
+                        statusAdapter.html(message);
+                        climate.appendStatus(message);
+                        climate.set_rq_job_id(climate, body.job_id);
+                        climate.events.emit("climate:build:completed", { jobId: body.job_id, payload: payload });
+                        return;
+                    }
+                    climate.pushResponseStacktrace(climate, body);
+                    climate.events.emit("climate:build:failed", { payload: payload, response: body });
+                })
+                .catch(function (error) {
+                    handleError(error);
+                    climate.events.emit("climate:build:failed", { payload: payload, error: error });
+                });
+        };
+
+        climate.upload_cli = function () {
+            infoAdapter.text("");
+            stacktraceAdapter.text("");
+
+            var formData = new FormData(formElement);
+            http.request("tasks/upload_cli/", {
+                method: "POST",
+                body: formData,
+                form: formElement
+            }).then(function (response) {
+                var body = response.body || {};
+                if (body.Success === true) {
+                    climate.appendStatus("User-defined climate uploaded successfully.");
+                    climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED", body);
+                    climate.events.emit("climate:upload:completed", body);
+                    return;
                 }
+                climate.pushResponseStacktrace(climate, body);
+                climate.events.emit("climate:upload:failed", body);
+            }).catch(function (error) {
+                handleError(error);
+                climate.events.emit("climate:upload:failed", { error: error });
             });
         };
 
-        that.set_use_gridmet_wind_when_applicable = function (state) {
-            that.status.html("Setting use_gridmet_wind_when_applicable (" + state + ")...");
-            that.stacktrace.text("");
+        climate.set_use_gridmet_wind_when_applicable = function (state) {
+            var normalizedState = Boolean(state);
+            statusAdapter.html("Setting use_gridmet_wind_when_applicable (" + normalizedState + ")...");
+            stacktraceAdapter.text("");
 
-            $.post({
-                url: "tasks/set_use_gridmet_wind_when_applicable/",
-                data: JSON.stringify({ state: state }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (response) {
-                    if (response.Success === true) {
+            http.postJson("tasks/set_use_gridmet_wind_when_applicable/", { state: normalizedState }, { form: formElement })
+                .then(function (response) {
+                    var body = response.body || {};
+                    if (body.Success === true) {
                         var message = "use_gridmet_wind_when_applicable updated.";
-                        that.status.html(message);
-                        that.appendStatus(message);
-                    } else {
-                        that.pushResponseStacktrace(that, response);
+                        statusAdapter.html(message);
+                        climate.appendStatus(message);
+                        climate.events.emit("climate:gridmet:updated", { state: normalizedState });
+                        return;
                     }
-                },
-                error: function (jqXHR) {
-                    that.pushResponseStacktrace(that, jqXHR.responseJSON);
-                },
-                fail: function (jqXHR, textStatus, errorThrown) {
-                    that.pushErrorStacktrace(that, jqXHR, textStatus, errorThrown);
-                }
-            });
+                    climate.pushResponseStacktrace(climate, body);
+                })
+                .catch(function (error) {
+                    handleError(error);
+                });
         };
 
-        that._climateExtended = true;
+        climate.setBuildMode = function (mode, options) {
+            var opts = options || {};
+            var parsedMode = parseInteger(mode, 0);
+            if (climate.buildModeRadios && climate.buildModeRadios.length > 0) {
+                setRadioValue(climate.buildModeRadios, parsedMode);
+            }
+            if (parsedMode === 1) {
+                if (climate.userDefinedSection) {
+                    dom.show(climate.userDefinedSection);
+                }
+                if (climate.cligenSection) {
+                    dom.hide(climate.cligenSection);
+                }
+                if (!opts.skipStationMode) {
+                    climate.setStationMode(4, { silent: false, skipRefresh: true });
+                    if (climate.stationSelect) {
+                        climate.stationSelect.innerHTML = "";
+                    }
+                }
+            } else {
+                if (climate.userDefinedSection) {
+                    dom.hide(climate.userDefinedSection);
+                }
+                if (climate.cligenSection) {
+                    dom.show(climate.cligenSection);
+                }
+                if (!opts.skipStationMode) {
+                    var restoreMode = climate._previousStationMode;
+                    if (restoreMode === null || restoreMode === undefined || restoreMode === 4) {
+                        restoreMode = 0;
+                    }
+                    climate.setStationMode(restoreMode, { silent: false });
+                }
+            }
+        };
+
+        climate.handleBuildModeChange = function (value) {
+            climate.setBuildMode(value, { skipStationMode: false });
+        };
+
+        climate.handleModeChange = function (value) {
+            var parsedMode = parseInteger(value, null);
+            if (climate.modeHiddenInput) {
+                climate.modeHiddenInput.value = parsedMode !== null && !Number.isNaN(parsedMode) ? String(parsedMode) : "";
+            }
+            climate.setCatalogMode(climate.datasetId, parsedMode)
+                .then(function () {
+                    climate.viewStationMonthlies();
+                })
+                .catch(function (error) {
+                    handleError(error);
+                });
+        };
+
+        var baseTriggerEvent = climate.triggerEvent.bind(climate);
+        climate.triggerEvent = function (eventName, payload) {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "CLIMATE_SETSTATIONMODE_TASK_COMPLETED") {
+                climate.refreshStationSelection();
+                climate.viewStationMonthlies();
+            } else if (normalized === "CLIMATE_SETSTATION_TASK_COMPLETED") {
+                climate.viewStationMonthlies();
+            } else if (normalized === "CLIMATE_BUILD_TASK_COMPLETED" || normalized === "CLIMATE_BUILD_COMPLETE") {
+                climate.report();
+            }
+            baseTriggerEvent(eventName, payload);
+        };
+
+        if (typeof dom.delegate === "function") {
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"dataset\"]", function (event, matched) {
+                event.preventDefault();
+                var value = matched ? matched.value : null;
+                climate.handleDatasetChange(value);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"station-mode\"]", function (event, matched) {
+                event.preventDefault();
+                var value = matched ? matched.value : null;
+                climate.setStationMode(value);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"spatial-mode\"]", function (event, matched) {
+                event.preventDefault();
+                var value = matched ? matched.value : null;
+                climate.setSpatialMode(value);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"mode\"]", function (event, matched) {
+                event.preventDefault();
+                var value = matched ? matched.value : null;
+                climate.handleModeChange(value);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"station-select\"]", function (event, matched) {
+                event.preventDefault();
+                var value = matched ? matched.value : null;
+                climate.setStation(value);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"precip-mode\"]", function (event, matched) {
+                event.preventDefault();
+                var value = matched ? matched.value : null;
+                climate.handlePrecipScalingModeChange(value);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"gridmet-wind\"]", function (event, matched) {
+                event.preventDefault();
+                var checked = matched ? matched.checked : false;
+                climate.set_use_gridmet_wind_when_applicable(checked);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"build-mode\"]", function (event, matched) {
+                event.preventDefault();
+                var value = matched ? matched.value : null;
+                climate.handleBuildModeChange(value);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "click", "[data-climate-action=\"upload-cli\"]", function (event) {
+                event.preventDefault();
+                climate.upload_cli();
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "click", "[data-climate-action=\"build\"]", function (event) {
+                event.preventDefault();
+                climate.build();
+            }));
+        }
+
+        var initialDatasetId = null;
+        if (climate.catalogHiddenInput && climate.catalogHiddenInput.value) {
+            initialDatasetId = climate.catalogHiddenInput.value;
+        }
+        if (!initialDatasetId && climate.datasetRadios && climate.datasetRadios.length > 0) {
+            var radioValue = getRadioValue(climate.datasetRadios);
+            if (radioValue !== null) {
+                initialDatasetId = radioValue;
+            }
+        }
+        if (initialDatasetId) {
+            climate.applyDataset(initialDatasetId, { skipPersist: true, skipStationRefresh: true });
+        }
+
+        var initialPrecip = dom.qs("input[name=\"precip_scaling_mode\"]:checked", formElement);
+        if (initialPrecip) {
+            climate.handlePrecipScalingModeChange(initialPrecip.value);
+        } else {
+            climate.handlePrecipScalingModeChange(null);
+        }
+
+        if (climate.buildModeRadios && climate.buildModeRadios.length > 0) {
+            var initialBuildMode = getRadioValue(climate.buildModeRadios);
+            climate.setBuildMode(initialBuildMode, { skipStationMode: true });
+        }
+
+        climate.attachStatusStream();
+        climate.refreshStationSelection();
+        climate.viewStationMonthlies();
+
+        return climate;
     }
 
     function initialise() {
         if (!instance) {
             instance = createInstance();
-            ensureExtended(instance);
-            if (instance && typeof instance.attachStatusStream === "function") {
-                instance.attachStatusStream();
-            }
         }
         return instance;
+    }
+
+    if (typeof document !== "undefined") {
+        var bootstrapClimate = function () {
+            try {
+                Climate.getInstance();
+            } catch (err) {
+                console.error("[Climate] Initialisation failed:", err);
+            }
+        };
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", bootstrapClimate, { once: true });
+        } else {
+            setTimeout(bootstrapClimate, 0);
+        }
     }
 
     return {
@@ -707,3 +1061,8 @@ var Climate = (function () {
         }
     };
 }());
+
+if (typeof globalThis !== "undefined") {
+    globalThis.Climate = Climate;
+}
+
