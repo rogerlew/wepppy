@@ -37,6 +37,11 @@ _BATCH_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$")
 _GEOJSON_MAX_BYTES = 10 * 1024 * 1024
 _GEOJSON_MAX_MB = int(_GEOJSON_MAX_BYTES // (1024 * 1024))
 
+
+def _max_geojson_size_bytes() -> int:
+    """Expose the GeoJSON size limit for easy monkeypatching in tests."""
+    return _GEOJSON_MAX_BYTES
+
 def _current_user_email() -> Optional[str]:
     """
     Resolve the best identifier for the active user (email > username > id).
@@ -217,7 +222,7 @@ def view_batch(batch_name: str):
         "batch_runner_state": batch_runner_state,
         "user": current_user,
         "precisions": unitizer_module.precisions,
-        "geojson_limit_mb": _GEOJSON_MAX_MB,
+        "geojson_limit_mb": max(1, int(_max_geojson_size_bytes() // (1024 * 1024))),
         "run_id": base_runid,
         "runid": base_runid,
         "batch_base_runid": base_runid,
@@ -242,11 +247,6 @@ def update_run_directives(batch_name: str):
     raw_directives = payload.get('run_directives')
     if raw_directives is None:
         return jsonify({'success': False, 'error': 'run_directives payload is required.'}), 400
-
-    if isinstance(raw_directives, list):
-        raw_directives = {str(index): value for index, value in enumerate(raw_directives)}
-    elif isinstance(raw_directives, tuple):
-        raw_directives = {str(index): value for index, value in enumerate(list(raw_directives))}
 
     if not isinstance(raw_directives, dict):
         return jsonify({'success': False, 'error': 'run_directives must be an object mapping task names to booleans.'}), 400
@@ -307,7 +307,7 @@ def upload_geojson(batch_name: str):
         analysis_results = watershed_collection.analysis_results  # lazy runs analysis
     except ValueError as exc:
         _safe_unlink(dest_path)
-        return jsonify({"success": False, "error": str(exc)}), 400
+        return jsonify({"success": False, "error": f"GeoJSON must be a FeatureCollection: {exc}"}), 400
     except Exception as exc:  # pragma: no cover - unexpected errors
         _safe_unlink(dest_path)
         current_app.logger.exception("Failed to ingest GeoJSON upload")
@@ -317,9 +317,11 @@ def upload_geojson(batch_name: str):
         _safe_unlink(dest_path)
         return jsonify({"success": False, "error": "GeoJSON contains no features."}), 400
 
-    if os.path.getsize(dest_path) > _GEOJSON_MAX_BYTES:
+    limit_bytes = _max_geojson_size_bytes()
+    if os.path.getsize(dest_path) > limit_bytes:
         _safe_unlink(dest_path)
-        return jsonify({"success": False, "error": f"GeoJSON file exceeds maximum size of {_GEOJSON_MAX_MB} MB."}), 400
+        limit_mb = max(1, int(limit_bytes // (1024 * 1024)))
+        return jsonify({"success": False, "error": f"GeoJSON file exceeds maximum size of {limit_mb} MB."}), 400
 
     relative_path = os.path.relpath(dest_path, batch_runner.wd)
     metadata = {
@@ -340,7 +342,7 @@ def upload_geojson(batch_name: str):
 
     # let BatchRunner verify it meets the requirements
     try:
-        batch_runner.register_geojson(watershed_collection)
+        batch_runner.register_geojson(watershed_collection, metadata=metadata)
     except ValueError as exc:
         response_payload = {"success": False, "error": str(exc)}
         return jsonify(response_payload), 400

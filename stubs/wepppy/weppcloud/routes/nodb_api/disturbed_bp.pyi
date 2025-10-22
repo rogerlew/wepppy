@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from flask import Blueprint, Response
+from typing import Optional
 
 disturbed_bp: Blueprint
 
@@ -32,4 +33,4 @@ def task_upload_cover_transform(runid: str, config: str) -> Response: ...
 
 def task_remove_sbs(runid: str, config: str) -> Response: ...
 
-def task_build_uniform_sbs(runid: str, config: str, value: str) -> Response: ...
+def task_build_uniform_sbs(runid: str, config: str, value: Optional[str] = ...) -> Response: ...

@@ -389,7 +389,7 @@ class BatchRunner(NoDbBase):
     # ------------------------------------------------------------------
     # Watershed GeoJSON
     # ------------------------------------------------------------------
-    def register_geojson(self, watershed_collection: WatershedCollection) -> Dict[str, Any]:
+    def register_geojson(self, watershed_collection: WatershedCollection, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Register a GeoJSON file as the watershed definition for this batch.
 
         Fail fast, this is model code.
@@ -406,10 +406,16 @@ class BatchRunner(NoDbBase):
         if analysis_results["feature_count"] == 0:
             os.remove(watershed_collection.geojson_filepath)
             raise ValueError("GeoJSON contains no features.")
+
+        if metadata:
+            enriched_results = deepcopy(analysis_results)
+            enriched_results.update(metadata)
+        else:
+            enriched_results = analysis_results
         
         # Update state
         with self.locked():
-            self._geojson_state = analysis_results
+            self._geojson_state = enriched_results
             if self._runid_template_state:
                 stale_state = deepcopy(self._runid_template_state)
                 stale_state["status"] = "stale"

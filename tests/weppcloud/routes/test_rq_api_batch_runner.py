@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from flask import Flask
+from flask import Flask, g
 
 import wepppy.weppcloud.routes.rq.api.api as rq_api_module
 
@@ -15,6 +15,10 @@ def rq_batch_client(monkeypatch: pytest.MonkeyPatch, rq_environment):
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(rq_api_module.rq_api_bp)
+
+    @app.before_request
+    def ensure_identity():  # pragma: no cover - simple test shim
+        g.identity = type("Identity", (), {"can": lambda self, perm=None: True})()
 
     batch_runner_stub = singleton_factory(
         "BatchRunnerStub",

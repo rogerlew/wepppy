@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple, Union
 
 from flask import Response
 
@@ -44,7 +44,7 @@ def modify_disturbed(runid: str, config: str) -> Response:
         csv_url='download/disturbed/disturbed_land_soil_lookup.csv',
     )
 
-@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/reset_disturbed')
+@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/reset_disturbed', methods=['GET', 'POST'])
 @authorize_and_handle_with_exception_factory
 def reset_disturbed(runid: str, config: str) -> Response:
     """Reset the disturbed land/soil lookup to defaults."""
@@ -54,7 +54,7 @@ def reset_disturbed(runid: str, config: str) -> Response:
     disturbed.reset_land_soil_lookup()
     return success_factory()
 
-@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup')
+@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup', methods=['GET', 'POST'])
 @authorize_and_handle_with_exception_factory
 def load_extended_land_soil_lookup(runid: str, config: str) -> Response:
     """Populate the extended disturbed land/soil lookup."""
@@ -314,15 +314,32 @@ def task_remove_sbs(runid: str, config: str) -> Response:
     return success_factory()
 
 
+@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/build_uniform_sbs', methods=['POST'])
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/build_uniform_sbs/<value>', methods=['POST'])
 @authorize_and_handle_with_exception_factory
-def task_build_uniform_sbs(runid: str, config: str, value: str) -> Response:
+def task_build_uniform_sbs(runid: str, config: str, value: Optional[str] = None) -> Response:
     """Generate a uniform SBS raster with the requested severity value."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     disturbed = Disturbed.getInstance(wd)
+    payload = parse_request_payload(request)
+
+    raw_value: Union[str, int, None]
+    if 'value' in payload:
+        raw_value = payload['value']
+    elif 'severity' in payload:
+        raw_value = payload['severity']
+    else:
+        raw_value = value
+
+    if isinstance(raw_value, list):
+        raw_value = raw_value[0] if raw_value else None
+
+    if raw_value is None:
+        return error_factory('value must be provided')
+
     try:
-        severity = int(value)
+        severity = int(raw_value)
     except (TypeError, ValueError):
         return error_factory('value must be an integer')
 
