@@ -2,7 +2,7 @@
 <div style="padding-left:3em;">
 <label class="form-check-label">
     <input id="checkbox_wepp_tcr" type="checkbox" class="form-check-input disable-readonly"
-     onchange="Wepp.getInstance().set_run_wepp_routine('tcr', this.checked);"
+     data-wepp-routine="tcr"
      {% if wepp.run_tcr %}checked{% endif %}>
     Use variable channel critical shear as a function of channel slope (tcr.txt)
 </label>

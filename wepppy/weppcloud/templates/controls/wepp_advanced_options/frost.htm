@@ -3,7 +3,7 @@
 <div style="padding-left:3em;"
 <label class="form-check-label">
     <input id="checkbox_wepp_frost" type="checkbox" class="form-check-input disable-readonly"
-     onchange="Wepp.getInstance().set_run_wepp_routine('frost', this.checked);"
+     data-wepp-routine="frost"
      {% if wepp.run_frost %}checked{% endif %}>
     Run Frost (frost.txt)
 </label>

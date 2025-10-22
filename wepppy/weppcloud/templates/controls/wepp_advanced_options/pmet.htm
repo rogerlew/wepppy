@@ -32,7 +32,7 @@
 
 <label class="form-check-label">
     <input id="checkbox_wepp_pmet" type="checkbox" class="form-check-input disable-readonly"
-     onchange="Wepp.getInstance().set_run_wepp_routine('pmet', this.checked);"
+     data-wepp-routine="pmet"
      {% if wepp.run_pmet %}checked{% endif %}>
     Run PMET (pmetpara.txt)
 </label>

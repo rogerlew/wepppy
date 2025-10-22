@@ -6,11 +6,18 @@ function controlBase() {
     const TERMINAL_JOB_STATUSES = new Set(["finished", "failed", "stopped", "canceled", "not_found"]);
     const DEFAULT_POLL_INTERVAL_MS = 800;
 
+    function ensureHttp() {
+        const http = window.WCHttp;
+        if (!http || typeof http.request !== "function") {
+            throw new Error("controlBase requires WCHttp helper.");
+        }
+        return http;
+    }
+
     function escapeHtml(value) {
         if (value === null || value === undefined) {
             return "";
         }
-
         return String(value)
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -38,25 +45,188 @@ function controlBase() {
         return `https://${window.location.host}/weppcloud/rq/job-dashboard/${encodeURIComponent(jobId)}`;
     }
 
+    function callAdapter(target, method, args) {
+        if (!target) {
+            return false;
+        }
+        const fn = target[method];
+        if (typeof fn === "function") {
+            fn.apply(target, args || []);
+            return true;
+        }
+        return false;
+    }
+
+    function unwrapElement(target) {
+        if (!target) {
+            return null;
+        }
+        if (typeof window.Node !== "undefined" && target instanceof window.Node) {
+            return target;
+        }
+        if (typeof Element !== "undefined" && target instanceof Element) {
+            return target;
+        }
+        if (target.jquery !== undefined || typeof target.get === "function") {
+            try {
+                const el = typeof target.get === "function" ? target.get(0) : target[0];
+                if (el && typeof window.Node !== "undefined" && el instanceof window.Node) {
+                    return el;
+                }
+            } catch (err) {
+                return null;
+            }
+        }
+        if (Array.isArray(target) && target.length > 0) {
+            const first = target[0];
+            if (typeof window.Node !== "undefined" && first instanceof window.Node) {
+                return first;
+            }
+        }
+        return null;
+    }
+
+    function showTarget(target) {
+        if (callAdapter(target, "show")) {
+            return;
+        }
+        const element = unwrapElement(target);
+        if (!element) {
+            return;
+        }
+        element.hidden = false;
+        if (element.style && element.style.display === "none") {
+            element.style.removeProperty("display");
+        }
+    }
+
+    function hideTarget(target) {
+        if (callAdapter(target, "hide")) {
+            return;
+        }
+        const element = unwrapElement(target);
+        if (!element) {
+            return;
+        }
+        element.hidden = true;
+        if (element.style) {
+            element.style.display = "none";
+        }
+    }
+
+    function setTextContent(target, value) {
+        if (callAdapter(target, "text", [value])) {
+            return;
+        }
+        const element = unwrapElement(target);
+        if (!element) {
+            return;
+        }
+        const text = value === undefined || value === null ? "" : String(value);
+        element.textContent = text;
+    }
+
+    function clearContent(target) {
+        if (callAdapter(target, "empty")) {
+            return;
+        }
+        setHtmlContent(target, "");
+    }
+
+    function setHtmlContent(target, value) {
+        if (callAdapter(target, "html", [value])) {
+            return;
+        }
+        const element = unwrapElement(target);
+        if (!element) {
+            return;
+        }
+        element.innerHTML = value === undefined || value === null ? "" : String(value);
+    }
+
+    function appendHtml(target, value) {
+        if (callAdapter(target, "append", [value])) {
+            return;
+        }
+        const element = unwrapElement(target);
+        if (!element) {
+            return;
+        }
+        if (value instanceof window.Node) {
+            element.appendChild(value);
+            return;
+        }
+        const html = value === undefined || value === null ? "" : String(value);
+        element.insertAdjacentHTML("beforeend", html);
+    }
+
     function resolveButtons(self) {
         if (!self || !self.command_btn_id) {
             return [];
         }
-
         const ids = Array.isArray(self.command_btn_id) ? self.command_btn_id : [self.command_btn_id];
         const resolved = [];
-
         ids.forEach(function (id) {
             if (!id) {
                 return;
             }
-            const element = document.getElementById(id);
+            if (typeof id === "string") {
+                const element = document.getElementById(id);
+                if (element) {
+                    resolved.push(element);
+                }
+                return;
+            }
+            const element = unwrapElement(id);
             if (element) {
-                resolved.push($(element));
+                resolved.push(element);
             }
         });
-
         return resolved;
+    }
+
+    function deriveErrorParts(error, textStatus, errorThrown) {
+        let statusCode = "";
+        let statusText = "";
+        let detail = errorThrown;
+
+        if (error) {
+            if (typeof error.status === "number" && error.status > 0) {
+                statusCode = String(error.status);
+            }
+            if (typeof error.statusText === "string" && error.statusText) {
+                statusText = error.statusText;
+            }
+            if (error.detail !== undefined) {
+                detail = error.detail;
+            } else if (typeof error.body === "string") {
+                detail = error.body;
+            } else if (error.body && typeof error.body === "object") {
+                try {
+                    detail = JSON.stringify(error.body);
+                } catch (err) {
+                    detail = String(error.body);
+                }
+            } else if (error.message && !detail) {
+                detail = error.message;
+            }
+        }
+
+        if (!statusText && textStatus) {
+            statusText = textStatus;
+        }
+        if (detail === undefined && textStatus) {
+            detail = textStatus;
+        }
+        if (detail === undefined && errorThrown) {
+            detail = errorThrown;
+        }
+
+        return {
+            statusCode: statusCode || "ERR",
+            statusText: statusText || "Unable to refresh job status",
+            detail: detail
+        };
     }
 
     return {
@@ -69,32 +239,50 @@ function controlBase() {
         _job_status_error: null,
 
         pushResponseStacktrace: function pushResponseStacktrace(self, response) {
-            self.stacktrace.show();
-            self.stacktrace.text("");
+            showTarget(self.stacktrace);
+            setTextContent(self.stacktrace, "");
+
+            if (!response) {
+                return;
+            }
 
             if (response.Error !== undefined) {
-                self.stacktrace.append("<h6>" + response.Error + "</h6>");
+                appendHtml(self.stacktrace, "<h6>" + escapeHtml(response.Error) + "</h6>");
             }
 
             if (response.StackTrace !== undefined) {
-                self.stacktrace.append("<pre><small class=\"text-muted\">" + response.StackTrace.join('\n') + "</small></pre>");
+                const lines = Array.isArray(response.StackTrace) ? response.StackTrace : [response.StackTrace];
+                const escaped = lines.map(escapeHtml).join("\n");
+                appendHtml(self.stacktrace, '<pre><small class="text-muted">' + escaped + "</small></pre>");
 
-                if (response.StackTrace.includes('lock() called on an already locked nodb')) {
-                    self.stacktrace.append('<a href="https://doc.wepp.cloud/AdvancedTopics.html#Clearing-Locks">Clearing Locks</a>');
+                if (lines.some(function (value) { return typeof value === "string" && value.includes("lock() called on an already locked nodb"); })) {
+                    appendHtml(
+                        self.stacktrace,
+                        '<a href="https://doc.wepp.cloud/AdvancedTopics.html#Clearing-Locks">Clearing Locks</a>'
+                    );
                 }
             }
 
             if (response.Error === undefined && response.StackTrace === undefined) {
-                self.stacktrace.append("<pre><small class=\"text-muted\">" + response + "</small></pre>");
+                appendHtml(
+                    self.stacktrace,
+                    '<pre><small class="text-muted">' + escapeHtml(String(response)) + "</small></pre>"
+                );
             }
         },
 
-        pushErrorStacktrace: function pushErrorStacktrace(self, jqXHR, textStatus, errorThrown) {
-            self.stacktrace.show();
-            self.stacktrace.text("");
-            self.stacktrace.append("<h6>" + jqXHR.status + "</h6>");
-            self.stacktrace.append("<pre><small class=\"text-muted\">" + textStatus + "</small></pre>");
-            self.stacktrace.append("<pre><small class=\"text-muted\">" + errorThrown + "</small></pre>");
+        pushErrorStacktrace: function pushErrorStacktrace(self, error, textStatus, errorThrown) {
+            const parts = deriveErrorParts(error, textStatus, errorThrown);
+            showTarget(self.stacktrace);
+            setTextContent(self.stacktrace, "");
+            appendHtml(self.stacktrace, "<h6>" + escapeHtml(parts.statusCode) + "</h6>");
+            appendHtml(self.stacktrace, '<pre><small class="text-muted">' + escapeHtml(parts.statusText) + "</small></pre>");
+            if (parts.detail !== undefined && parts.detail !== null) {
+                appendHtml(
+                    self.stacktrace,
+                    '<pre><small class="text-muted">' + escapeHtml(String(parts.detail)) + "</small></pre>"
+                );
+            }
         },
 
         should_disable_command_button: function should_disable_command_button(self) {
@@ -117,23 +305,23 @@ function controlBase() {
 
             const disable = self.should_disable_command_button(self);
 
-            buttons.forEach(function ($btn) {
-                if (!$btn || $btn.length === 0) {
+            buttons.forEach(function (button) {
+                if (!button) {
                     return;
                 }
 
-                const wasDisabledByJob = $btn.data('jobDisabled') === true;
+                const wasDisabledByJob = button.dataset.jobDisabled === "true";
 
                 if (disable) {
                     if (!wasDisabledByJob) {
-                        $btn.data('jobDisabledPrev', $btn.prop('disabled'));
+                        button.dataset.jobDisabledPrev = button.disabled ? "true" : "false";
                     }
-                    $btn.prop('disabled', true);
-                    $btn.data('jobDisabled', true);
+                    button.disabled = true;
+                    button.dataset.jobDisabled = "true";
                 } else if (wasDisabledByJob) {
-                    const previousState = $btn.data('jobDisabledPrev');
-                    $btn.prop('disabled', previousState === true);
-                    $btn.data('jobDisabled', false);
+                    const previous = button.dataset.jobDisabledPrev === "true";
+                    button.disabled = previous;
+                    button.dataset.jobDisabled = "false";
                 }
             });
         },
@@ -146,7 +334,7 @@ function controlBase() {
                     self.render_job_status(self);
                     self.update_command_button_state(self);
                     self.manage_ws_client(self, null);
-                    if (self.ws_client && typeof self.ws_client.resetSpinner === 'function') {
+                    if (self.ws_client && typeof self.ws_client.resetSpinner === "function") {
                         self.ws_client.resetSpinner();
                     }
                 } else if (!self._job_status_fetch_inflight) {
@@ -159,7 +347,7 @@ function controlBase() {
             self.rq_job_status = null;
             self._job_status_error = null;
 
-            if (self.ws_client && typeof self.ws_client.resetSpinner === 'function') {
+            if (self.ws_client && typeof self.ws_client.resetSpinner === "function") {
                 self.ws_client.resetSpinner();
             }
 
@@ -181,49 +369,38 @@ function controlBase() {
             }
 
             self._job_status_fetch_inflight = true;
+            const http = ensureHttp();
+            const url = `/weppcloud/rq/api/jobstatus/${encodeURIComponent(self.rq_job_id)}`;
 
-            $.ajax({
-                url: `/weppcloud/rq/api/jobstatus/${encodeURIComponent(self.rq_job_id)}`,
-                method: 'GET',
-                dataType: 'json',
-                cache: false
-            }).done(function (data) {
-                self.handle_job_status_response(self, data);
-            }).fail(function (jqXHR) {
-                self.handle_job_status_error(self, jqXHR);
-            }).always(function () {
-                self._job_status_fetch_inflight = false;
-            });
+            http.getJson(url, { params: { _: Date.now() } })
+                .then(function (data) {
+                    self.handle_job_status_response(self, data);
+                })
+                .catch(function (error) {
+                    self.handle_job_status_error(self, error);
+                })
+                .finally(function () {
+                    self._job_status_fetch_inflight = false;
+                });
         },
 
         handle_job_status_response: function handle_job_status_response(self, data) {
             self._job_status_error = null;
-            self.rq_job_status = data || null;
-
+            self.rq_job_status = data || {};
             self.render_job_status(self);
-            self.update_command_button_state(self);
 
-            const currentStatus = data && data.status ? data.status : null;
-            self.manage_ws_client(self, currentStatus);
-
-            if (currentStatus && typeof currentStatus === 'string' && currentStatus.toLowerCase() === 'started') {
-                if (self.ws_client && typeof self.ws_client.advanceSpinner === 'function') {
-                    self.ws_client.advanceSpinner();
-                }
-            }
-
-            if (self.should_continue_polling(self, currentStatus)) {
+            if (self.should_continue_polling(self, self.rq_job_status && self.rq_job_status.status)) {
                 self.schedule_job_status_poll(self);
             } else {
                 self.stop_job_status_polling(self);
             }
+
+            self.update_command_button_state(self);
         },
 
-        handle_job_status_error: function handle_job_status_error(self, jqXHR) {
-            const statusCode = jqXHR && jqXHR.status ? jqXHR.status : 'ERR';
-            const statusText = jqXHR && jqXHR.statusText ? jqXHR.statusText : 'Unable to refresh job status';
-            self._job_status_error = `${statusCode} ${statusText}`.trim();
-
+        handle_job_status_error: function handle_job_status_error(self, error) {
+            const parts = deriveErrorParts(error);
+            self._job_status_error = `${parts.statusCode} ${parts.statusText}`.trim();
             self.render_job_status(self);
 
             if (self.should_continue_polling(self)) {
@@ -234,39 +411,37 @@ function controlBase() {
         },
 
         render_job_status: function render_job_status(self) {
-            if (!self.rq_job || self.rq_job.length === 0) {
+            if (!self.rq_job) {
                 return;
             }
 
             if (!self.rq_job_id) {
-                self.rq_job.empty();
+                clearContent(self.rq_job);
                 return;
             }
 
             const statusObj = self.rq_job_status || {};
-            const statusLabel = formatStatusLabel(statusObj.status || (self._job_status_error ? 'unknown' : 'checking'));
+            const statusLabel = formatStatusLabel(statusObj.status || (self._job_status_error ? "unknown" : "checking"));
             const parts = [];
 
-            parts.push(`<div>job_id: <a href="${jobDashboardUrl(self.rq_job_id)}" target="_blank">${escapeHtml(self.rq_job_id)}</a></div>`);
+            parts.push(
+                `<div>job_id: <a href="${jobDashboardUrl(self.rq_job_id)}" target="_blank">${escapeHtml(self.rq_job_id)}</a></div>`
+            );
             parts.push(`<div class="small text-muted">Status: ${escapeHtml(statusLabel)}</div>`);
 
-            const _times = [];
+            const timeline = [];
 
             if (statusObj.started_at) {
-                _times.push(
-                    `<span class="mr-3">Started: ${escapeHtml(statusObj.started_at)}</span>`
-                );
+                timeline.push(`<span class="mr-3">Started: ${escapeHtml(statusObj.started_at)}</span>`);
             }
 
             if (statusObj.ended_at) {
-                _times.push(
-                    `<span class="mr-3">Ended: ${escapeHtml(statusObj.ended_at)}</span>`
-                );
+                timeline.push(`<span class="mr-3">Ended: ${escapeHtml(statusObj.ended_at)}</span>`);
             }
 
-            if (_times.length) {
+            if (timeline.length) {
                 parts.push(
-                    `<div class="small text-muted d-flex flex-wrap align-items-baseline">${_times.join("")}</div>`
+                    `<div class="small text-muted d-flex flex-wrap align-items-baseline">${timeline.join("")}</div>`
                 );
             }
 
@@ -274,7 +449,7 @@ function controlBase() {
                 parts.push(`<div class="text-danger small">${escapeHtml(self._job_status_error)}</div>`);
             }
 
-            self.rq_job.html(parts.join(''));
+            setHtmlContent(self.rq_job, parts.join(""));
         },
 
         schedule_job_status_poll: function schedule_job_status_poll(self) {
@@ -319,7 +494,7 @@ function controlBase() {
             }
 
             if (self.should_continue_polling(self, status)) {
-                if (typeof self.ws_client.connect === 'function') {
+                if (typeof self.ws_client.connect === "function") {
                     self.ws_client.connect();
                 }
             }
@@ -330,15 +505,35 @@ function controlBase() {
                 return;
             }
 
-            var form = this.form;
-            if (form && typeof form.trigger === 'function') {
+            const form = this.form;
+            if (!form) {
+                return;
+            }
+
+            if (typeof form.trigger === "function") {
                 if (payload === undefined) {
                     form.trigger(eventName);
                 } else {
                     form.trigger(eventName, payload);
                 }
+                return;
             }
-        }
 
+            const element = unwrapElement(form);
+            if (!element || typeof window.CustomEvent !== "function") {
+                return;
+            }
+
+            const event = new CustomEvent(eventName, {
+                detail: payload,
+                bubbles: true,
+                cancelable: true
+            });
+            element.dispatchEvent(event);
+        }
     };
+}
+
+if (typeof globalThis !== "undefined") {
+    globalThis.controlBase = controlBase;
 }

@@ -357,47 +357,43 @@ def view_management(runid, config, key):
 @wepp_bp.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine/', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_set_hourly_seepage(runid, config):
+    payload = parse_request_payload(request, boolean_fields={'state'})
 
-    try:
-        routine = request.json.get('routine', None)
-    except Exception:
-        return exception_factory('Error parsing routine', runid=runid)
-
+    routine = payload.get('routine')
     if routine is None:
         return error_factory('routine is None')
 
+    routine = str(routine)
     if routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']:
         return error_factory("routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']")
 
-    try:
-        state = request.json.get('state', None)
-    except Exception:
-        return exception_factory('Error parsing state', runid=runid)
-
+    state = payload.get('state', None)
     if state is None:
         return error_factory('state is None')
+    if isinstance(state, str):
+        return error_factory('state must be boolean')
 
     try:
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
 
         if routine == 'wepp_ui':
-            wepp.set_run_wepp_ui(state)
+            wepp.set_run_wepp_ui(bool(state))
         elif routine == 'pmet':
-            wepp.set_run_pmet(state)
+            wepp.set_run_pmet(bool(state))
         elif routine == 'frost':
-            wepp.set_run_frost(state)
+            wepp.set_run_frost(bool(state))
         elif routine == 'tcr':
-            wepp.set_run_tcr(state)
+            wepp.set_run_tcr(bool(state))
         elif routine == 'snow':
-            wepp.set_run_snow(state)
+            wepp.set_run_snow(bool(state))
         elif routine == 'run_flowpaths':
-            wepp.set_run_flowpaths(state)
+            wepp.set_run_flowpaths(bool(state))
 
     except Exception:
         return exception_factory('Error setting state', runid=runid)
 
-    return success_factory()
+    return success_factory({'routine': routine, 'state': bool(state)})
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/results')

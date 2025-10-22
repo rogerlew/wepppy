@@ -65,10 +65,16 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 - Keep controller methods focused on DOM wiring and async orchestration. Shared logic should live in helper modules under `controllers_js/` so that other controllers can `include` them via the bundle template.
 - Because the bundle is rebuilt when the entrypoint runs (container start or explicit call), restart the container or rerun the script whenever you edit controller sources. `.vscode/settings.json` is configured to ignore the built
 `controllers.js` file.
+- `control_base.js` now uses `WCHttp`/`WCDom` internally. Controllers may continue supplying legacy jQuery objects, but new code should pass native elements (the base normalises both).
 
 ## Project Controller Modernization
 - `project.js` now consumes `WCDom`, `WCHttp`, and `WCForms` exclusively—jQuery hooks have been replaced with delegated listeners that target `data-project-field`, `data-project-toggle`, and `data-project-action` attributes in the header and power-user templates. Update templates with those attributes instead of inline `on*` handlers when expanding the control.
 - Command bar feedback and unitizer integration are still exposed through `Project.getInstance()`, but outbound network calls flow through `WCHttp.postForm`/`postJson`, enabling native Promise semantics and shared error handling.
 - Regression coverage lives in `controllers_js/__tests__/project.test.js`. Run it via `wctl run-npm test` (wrapper for `npm --prefix wepppy/weppcloud/static-src test`). The suite verifies name/scenario saves, debounce behaviour, and failure handling so future refactors can rely on automated guardrails.
+
+## WEPP Controller Modernization
+- `wepp.js` now uses the helper namespaces exclusively. Templates advertise `data-wepp-action` and `data-wepp-routine` attributes so the controller wires event listeners without inline handlers, and network calls go through `WCHttp`.
+- File uploads (user cover transforms) move through `FormData` bodies handled by `WCHttp.request`, matching the conventions used elsewhere in the bundle.
+- Jest coverage in `controllers_js/__tests__/wepp.test.js` exercises run submission, advanced option toggles, phosphorus defaults, and summary fetches. Execute it with `wctl run-npm test`.
 
 Keep this document updated when the bundling flow or controller contract changes.

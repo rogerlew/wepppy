@@ -9,6 +9,6 @@
        "checkbox_hourly_seepage",
        "Run hourly seepage (wepp_ui.txt)",
        checked=wepp.run_wepp_ui,
-       attrs={"class": "disable-readonly", "onchange": "Wepp.getInstance().set_run_wepp_routine('wepp_ui', this.checked);"}
+       attrs={"class": "disable-readonly", "data-wepp-routine": "wepp_ui"}
      ) }}
 </section>

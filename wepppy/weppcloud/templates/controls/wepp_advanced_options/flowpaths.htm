@@ -6,7 +6,7 @@
                 <input id="run_flowpaths"
                        name="run_flowpaths"
                        type="checkbox"
-                       onchange="Wepp.getInstance().set_run_wepp_routine('run_flowpaths', this.checked);"
+                       data-wepp-routine="run_flowpaths"
                        class="form-check-input disable-readonly"
                    {% if wepp.run_flowpaths %}checked{% endif %}>
             </div>

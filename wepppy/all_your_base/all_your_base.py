@@ -11,37 +11,53 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping
-from typing import Any, NamedTuple, Optional, TypeAlias, Union
-
-import os
-from os.path import exists as _exists
-from operator import itemgetter
-from itertools import groupby
-import shutil
-import math
-import random
-import multiprocessing
+from typing import Any, Final, NamedTuple, Optional, TypeAlias, Union
 
 import json
+import math
+import multiprocessing
+import os
+import random
+import shutil
+from itertools import groupby
+from operator import itemgetter
+from os.path import exists as _exists
+
 import numpy as np
 
-try:
-    NCPU: int = int(os.environ['WEPPPY_NCPU'])
-except KeyError:
-    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
-    if NCPU < 1:
-        NCPU = 1
 
-geodata_dir: str = '/geodata/'
-SCRATCH: str = '/media/ramdisk'
+def _resolve_worker_count() -> int:
+    """Return the configured worker count with a minimum of one."""
+    env_value = os.environ.get('WEPPPY_NCPU')
+    if env_value is not None:
+        count = int(env_value)
+    else:
+        count = math.floor(multiprocessing.cpu_count() * 0.5)
 
-if not _exists(SCRATCH):
-    SCRATCH = '/Users/roger/Downloads'
+    if count < 1:
+        return 1
+    return count
 
-if not _exists(SCRATCH):
-    SCRATCH = '/workdir/scratch'
 
-IS_WINDOWS: bool = os.name == 'nt'
+def _resolve_scratch_path() -> str:
+    """Select the first available scratch directory from preferred locations."""
+    for candidate in ('/media/ramdisk', '/Users/roger/Downloads', '/workdir/scratch'):
+        if _exists(candidate):
+            return candidate
+    return '/workdir/scratch'
+
+
+#: Number of worker processes reserved for CPU-bound utilities.
+NCPU: Final[int] = _resolve_worker_count()
+
+#: Path prefix for shared geodata assets.
+geodata_dir: Final[str] = '/geodata/'
+
+#: High-speed scratch directory used for large temporary files.
+SCRATCH: Final[str] = _resolve_scratch_path()
+
+#: Whether the current platform reports as Windows.
+IS_WINDOWS: Final[bool] = os.name == 'nt'
 
 __all__ = [
     'NCPU',
@@ -307,7 +323,7 @@ def isnan(f: Any) -> bool:
         f: Value to inspect.
 
     Returns:
-        True when ``f`` represents ``math.naan``.
+        True when ``f`` represents ``math.nan``.
     """
     if not isfloat(f):
         return False
@@ -413,10 +429,13 @@ class RowData:
 
     Args:
         row: Mapping of column headings to values.
+
+    Attributes:
+        row: Original mapping backing the row representation.
     """
 
     def __init__(self, row: Mapping[str, Any]) -> None:
-        self.row = row
+        self.row: Mapping[str, Any] = row
 
     def __getitem__(self, item: str) -> Any:
         """Return the value for the first column that starts with ``item``.

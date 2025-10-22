@@ -7,7 +7,7 @@
        "checkbox_wepp_snow",
        "Write snow inputs (snow.txt)",
        checked=wepp.run_snow,
-       attrs={"class": "disable-readonly", "onchange": "Wepp.getInstance().set_run_wepp_routine('snow', this.checked);"}
+       attrs={"class": "disable-readonly", "data-wepp-routine": "snow"}
      ) }}
   {{ ui.text_field(
        "snow_opts_rst",

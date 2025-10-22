@@ -72,7 +72,7 @@ from wepppy.weppcloud.utils.archive import has_archive
 
 from wepppy.nodb.status_messenger import StatusMessenger
 
-from ..._common import roles_required
+from ..._common import roles_required, parse_request_payload
 
 import inspect
 import time
@@ -657,28 +657,37 @@ def api_post_dss_export_rq(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
 
-    try:
-        dss_export_mode = request.form.get('dss_export_mode', None)
-        if dss_export_mode is not None:
+    boolean_fields = {f'dss_export_exclude_order_{i}' for i in range(1, 6)}
+    payload = parse_request_payload(request, boolean_fields=boolean_fields)
+
+    dss_export_mode = payload.get('dss_export_mode', None)
+    if dss_export_mode not in (None, ''):
+        try:
             dss_export_mode = int(dss_export_mode)
-    except:
+        except (TypeError, ValueError):
+            dss_export_mode = None
+    else:
         dss_export_mode = None
 
-    try:
-        dss_excluded_channel_orders = []
-        for i in range(1, 6):
-            if request.form.get(f'dss_export_exclude_order_{i}') == 'on':
-                dss_excluded_channel_orders.append(i)
-    except:
-        dss_excluded_channel_orders = None
+    dss_excluded_channel_orders = []
+    for i in range(1, 6):
+        if payload.get(f'dss_export_exclude_order_{i}'):
+            dss_excluded_channel_orders.append(i)
 
-    try:
-        dss_export_channel_ids = request.form.get('dss_export_channel_ids', None)
-        if dss_export_channel_ids is not None:
-            dss_export_channel_ids = [int(i) for i in dss_export_channel_ids.split(',')]
-    except:
+    dss_export_channel_ids = payload.get('dss_export_channel_ids', None)
+    if dss_export_channel_ids not in (None, ''):
+        if isinstance(dss_export_channel_ids, (list, tuple, set)):
+            try:
+                dss_export_channel_ids = [int(i) for i in dss_export_channel_ids]
+            except ValueError:
+                dss_export_channel_ids = None
+        else:
+            try:
+                dss_export_channel_ids = [int(i) for i in str(dss_export_channel_ids).split(',') if i.strip()]
+            except ValueError:
+                dss_export_channel_ids = None
+    else:
         dss_export_channel_ids = None
-
 
     if dss_export_mode == 2:
         dss_export_channel_ids = []
@@ -719,109 +728,98 @@ def api_run_wepp(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
 
+    boolean_fields = {
+        'clip_soils',
+        'clip_hillslopes',
+        'prep_details_on_run_completion',
+        'arc_export_on_run_completion',
+        'legacy_arc_export_on_run_completion',
+        'dss_export_on_run_completion',
+    }
+    for i in range(1, 6):
+        boolean_fields.add(f'dss_export_exclude_order_{i}')
+
+    payload = parse_request_payload(request, boolean_fields=boolean_fields)
+
+    string_payload = {}
+    for key, value in payload.items():
+        if key in boolean_fields:
+            continue
+        if value is None:
+            string_payload[key] = ""
+        elif isinstance(value, (list, tuple, set)):
+            string_payload[key] = ",".join(str(item) for item in value)
+        else:
+            string_payload[key] = str(value)
+
     try:
-        wepp.parse_inputs(request.form)
+        wepp.parse_inputs(string_payload)
     except Exception:
         return exception_factory('Error parsing wepp inputs', runid=runid)
 
     soils = Soils.getInstance(wd)
 
-    try:
-        clip_soils = request.form.get('clip_soils') == 'on'
-    except:
-        clip_soils = None
+    clip_soils = bool(payload.get('clip_soils', False))
+    soils.clip_soils = clip_soils
 
-    if clip_soils is not None:
-        soils.clip_soils = clip_soils
+    def parse_int(value):
+        if value in (None, "", False):
+            return None
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
 
-    try:
-        clip_soils_depth = int(request.form.get('clip_soils_depth'))
-    except:
-        clip_soils_depth = None
+    def parse_float(value):
+        if value in (None, "", False):
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
 
+    clip_soils_depth = parse_int(payload.get('clip_soils_depth'))
     if clip_soils_depth is not None:
         soils.clip_soils_depth = clip_soils_depth
 
     watershed = Watershed.getInstance(wd)
 
-    try:
-        clip_hillslopes = request.form.get('clip_hillslopes') == 'on'
-    except:
-        clip_hillslopes = None
+    clip_hillslopes = bool(payload.get('clip_hillslopes', False))
+    watershed.clip_hillslopes = clip_hillslopes
 
-    if clip_hillslopes is not None:
-        watershed.clip_hillslopes = clip_hillslopes
-
-    try:
-        clip_hillslope_length = int(request.form.get('clip_hillslope_length'))
-    except:
-        clip_hillslope_length = None
+    clip_hillslope_length = parse_int(payload.get('clip_hillslope_length'))
 
     if clip_hillslope_length is not None:
         watershed.clip_hillslope_length = clip_hillslope_length
 
-    try:
-        initial_sat = float(request.form.get('initial_sat'))
-    except:
-        initial_sat = None
+    initial_sat = parse_float(payload.get('initial_sat'))
 
     if initial_sat is not None:
         soils.initial_sat = initial_sat
 
-    try:
-        reveg_scenario = request.form.get('reveg_scenario', None)
-    except:
-        reveg_scenario = None
+    reveg_scenario = payload.get('reveg_scenario', None)
 
     if reveg_scenario is not None:
         from wepppy.nodb.mods.revegetation import Revegetation
         reveg = Revegetation.getInstance(wd)
         reveg.load_cover_transform(reveg_scenario)
 
-    try:
-        prep_details_on_run_completion = request.form.get('prep_details_on_run_completion') == 'on'
-    except:
-        prep_details_on_run_completion = None
+    prep_details_on_run_completion = bool(payload.get('prep_details_on_run_completion', False))
+    arc_export_on_run_completion = bool(payload.get('arc_export_on_run_completion', False))
+    legacy_arc_export_on_run_completion = bool(payload.get('legacy_arc_export_on_run_completion', False))
+    dss_export_on_run_completion = bool(payload.get('dss_export_on_run_completion', False))
 
-    try:
-        arc_export_on_run_completion = request.form.get('arc_export_on_run_completion') == 'on'
-    except:
-        arc_export_on_run_completion = None
-
-    try:
-        legacy_arc_export_on_run_completion = request.form.get('legacy_arc_export_on_run_completion') == 'on'
-    except:
-        legacy_arc_export_on_run_completion = None
-
-    try:
-        dss_export_on_run_completion = request.form.get('dss_export_on_run_completion') == 'on'
-    except:
-        dss_export_on_run_completion = None
-
-
-    try:
-        dss_export_exclude_orders = []
-        for i in range(1, 6):
-            if request.form.get(f'dss_export_exclude_order_{i}') == 'on':
-                dss_export_exclude_orders.append(i)
-    except:
-        dss_export_exclude_orders = None
+    dss_export_exclude_orders = []
+    for i in range(1, 6):
+        if payload.get(f'dss_export_exclude_order_{i}', False):
+            dss_export_exclude_orders.append(i)
 
     with wepp.locked():
-        if prep_details_on_run_completion is not None:
-            wepp._prep_details_on_run_completion = prep_details_on_run_completion
-
-        if arc_export_on_run_completion is not None:
-            wepp._arc_export_on_run_completion = arc_export_on_run_completion
-
-        if legacy_arc_export_on_run_completion is not None:
-            wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
-
-        if dss_export_on_run_completion is not None:
-            wepp._dss_export_on_run_completion = dss_export_on_run_completion
-
-        if dss_export_exclude_orders is not None:
-            wepp._dss_export_exclude_orders = dss_export_exclude_orders
+        wepp._prep_details_on_run_completion = prep_details_on_run_completion
+        wepp._arc_export_on_run_completion = arc_export_on_run_completion
+        wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
+        wepp._dss_export_on_run_completion = dss_export_on_run_completion
+        wepp._dss_export_exclude_orders = dss_export_exclude_orders
 
     try:
         prep = RedisPrep.getInstance(wd)

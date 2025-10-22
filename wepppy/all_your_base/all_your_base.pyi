@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping
 import json
-from typing import Any, NamedTuple, Optional, TypeAlias, Union
+from typing import Any, Final, NamedTuple, Optional, TypeAlias, Union
 
-NCPU: int
-geodata_dir: str
-SCRATCH: str
-IS_WINDOWS: bool
+NCPU: Final[int]
+geodata_dir: Final[str]
+SCRATCH: Final[str]
+IS_WINDOWS: Final[bool]
 
 
 class RGBA(NamedTuple):
