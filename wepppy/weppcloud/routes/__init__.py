@@ -103,6 +103,7 @@ __all__ = [
     'fork_bp',
     'diff_bp',
     'geodata_bp',
+    'huc_fire_bp',
     'landuse_bp',
     'map_bp',
     'observed_bp',

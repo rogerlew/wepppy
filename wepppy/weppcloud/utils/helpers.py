@@ -260,10 +260,16 @@ def authorize(runid, config, require_owner=False):
     from wepppy.nodb.core import Ron
     from wepppy.weppcloud.app import get_run_owners
 
-
-    if current_user.has_role("Admin"):
+    login_manager = getattr(current_app, "login_manager", None)
+    if login_manager is None:
         return
-    
+
+    try:
+        if current_user.has_role("Admin"):
+            return
+    except Exception:
+        return
+
     wd = get_wd(runid)
     owners = get_run_owners(runid)
 

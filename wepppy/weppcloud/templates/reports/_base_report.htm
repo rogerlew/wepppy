@@ -26,8 +26,7 @@
                    class="wc-run-header__input disable-readonly"
                    placeholder="Name"
                    value="{{ current_ron.name }}"
-                   oninput="Project.getInstance().setNameFromInput()"
-                   onblur="Project.getInstance().commitNameFromInput()">
+                   data-project-field="name">
           </label>
           <label class="wc-run-header__field">
             <span>Scenario</span>
@@ -37,8 +36,7 @@
                    class="wc-run-header__input disable-readonly"
                    placeholder="Scenario"
                    value="{{ current_ron.scenario }}"
-                   oninput="Project.getInstance().setScenarioFromInput()"
-                   onblur="Project.getInstance().commitScenarioFromInput()">
+                   data-project-field="scenario">
           </label>
         </div>
         <div class="wc-run-header__actions">
@@ -54,13 +52,17 @@
             <button type="button" class="pure-button" data-command="open-poweruser">PowerUser</button>
             <button type="button" class="pure-button" data-command="open-unitizer">Unitizer</button>
             <label class="wc-run-header__toggle">
-              <input id="checkbox_readonly" type="checkbox" {% if current_ron.readonly %}checked{% endif %}
-                onchange="Project.getInstance().set_readonly(this.checked);">
+              <input id="checkbox_readonly"
+                     type="checkbox"
+                     data-project-toggle="readonly"
+                     {% if current_ron.readonly %}checked{% endif %}>
               <span>Readonly</span>
             </label>
             <label class="wc-run-header__toggle">
-              <input id="checkbox_public" type="checkbox" {% if current_ron.public %}checked{% endif %}
-                onchange="Project.getInstance().set_public(this.checked);">
+              <input id="checkbox_public"
+                     type="checkbox"
+                     data-project-toggle="public"
+                     {% if current_ron.public %}checked{% endif %}>
               <span>Public</span>
             </label>
             {% if user.has_role('Admin') %}

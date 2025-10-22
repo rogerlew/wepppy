@@ -28,8 +28,7 @@
         value=sample.project_name,
         placeholder="Name",
         attrs={
-          "oninput": "Project.getInstance().setNameFromInput()",
-          "onblur": "Project.getInstance().commitNameFromInput()"
+          "data-project-field": "name"
         }
       ) }}
       {{ ui.header_text_field(
@@ -38,8 +37,7 @@
         value=sample.scenario,
         placeholder="Scenario",
         attrs={
-          "oninput": "Project.getInstance().setScenarioFromInput()",
-          "onblur": "Project.getInstance().commitScenarioFromInput()"
+          "data-project-field": "scenario"
         }
       ) }}
     </div>
@@ -523,25 +521,33 @@
     (function () {
       "use strict";
 
-      var originalPost = $.post;
-      $.post = function () {
-        var args = Array.prototype.slice.call(arguments);
-        var options = args[0];
-        var url = typeof options === "string" ? options : options && options.url;
-        if (url && url.indexOf("set_unit_preferences") !== -1) {
-          var deferred = $.Deferred();
-          var response = { Success: true };
-          if (typeof options === "object" && typeof options.success === "function") {
-            options.success(response);
-          } else if (typeof args[2] === "function") {
-            args[2](response);
+      var originalFetch = window.fetch;
+      if (typeof originalFetch === "function") {
+        window.fetch = function patchedFetch(input, init) {
+          var request = (typeof Request === "function" && input instanceof Request) ? input : null;
+          var url = request ? request.url : input;
+          var method = "GET";
+
+          if (init && init.method) {
+            method = init.method;
+          } else if (request && request.method) {
+            method = request.method;
           }
-          console.log("[UI Showcase] Simulated POST", url, options && options.data ? options.data : args[1]);
-          deferred.resolve(response);
-          return deferred.promise();
-        }
-        return originalPost.apply($, args);
-      };
+
+          method = (method || "GET").toUpperCase();
+
+          if (url && url.indexOf("set_unit_preferences") !== -1 && method === "POST") {
+            var payload = init && init.body;
+            console.log("[UI Showcase] Simulated POST", url, payload);
+            return Promise.resolve(new Response(JSON.stringify({ Success: true }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" }
+            }));
+          }
+
+          return originalFetch.call(this, input, init);
+        };
+      }
 
       document.addEventListener('DOMContentLoaded', function () {
         UnitizerClient.ready()

@@ -1,11 +1,13 @@
 from flask import jsonify
 from wepppy.weppcloud.routes import *
 
+
 def register_blueprints(app):
 
-    @app.route('/health')
-    def health():
-        return jsonify('OK')
+    if hasattr(app, "route"):
+        @app.route('/health')
+        def health():
+            return jsonify('OK')
 
     app.register_blueprint(rq_api_bp)
     app.register_blueprint(rq_jobinfo_bp)
@@ -32,6 +34,7 @@ def register_blueprints(app):
     app.register_blueprint(disturbed_bp)
     app.register_blueprint(export_bp)
     app.register_blueprint(geodata_bp)
+    app.register_blueprint(huc_fire_bp)
     app.register_blueprint(diff_bp)
     app.register_blueprint(fork_bp)
     app.register_blueprint(observed_bp)

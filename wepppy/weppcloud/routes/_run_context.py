@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from flask import abort, g, request
+import sys
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -42,14 +43,37 @@ def _validate_pup_root(run_root: Path, pup_relpath: str) -> Path:
     return candidate
 
 
-def load_run_context(runid: str, config: str) -> RunContext:
+def _store_run_context(ctx: Any) -> None:
+    g.run_context = ctx
+    if hasattr(ctx, "run_root"):
+        run_root = getattr(ctx, "run_root")
+        g.run_root = str(run_root)
+    if hasattr(ctx, "active_root"):
+        active_root = getattr(ctx, "active_root")
+        g.active_run_root = str(active_root)
+    if hasattr(ctx, "pup_root"):
+        pup_root = getattr(ctx, "pup_root")
+        g.pup_root = None if pup_root is None else str(pup_root)
+    if hasattr(ctx, "pup_relpath"):
+        g.pup_relpath = getattr(ctx, "pup_relpath")
+
+
+def load_run_context(
+    runid: str, config: str, get_wd_fn: Optional[Callable[..., str]] = None
+) -> RunContext:
     """
     Resolve the working directories for the given run route.
 
     Stores the ``RunContext`` on ``flask.g`` so downstream helpers can reuse it.
     """
 
-    run_root = Path(get_wd(runid, prefer_active=False)).resolve()
+    resolver: Callable[..., str] = get_wd_fn or get_wd
+    try:
+        resolved_path = resolver(runid, prefer_active=False)
+    except TypeError:
+        resolved_path = resolver(runid)
+
+    run_root = Path(resolved_path).resolve()
     if not run_root.is_dir():
         abort(404, description=f"Run '{runid}' not found")
 
@@ -82,6 +106,8 @@ def load_run_context(runid: str, config: str) -> RunContext:
 def register_run_context_preprocessor(bp):
     """Attach a url value preprocessor that resolves run context lazily."""
 
+    module_name = bp.import_name
+
     @bp.url_value_preprocessor
     def _load_context(endpoint, values):  # pragma: no cover - flask hook
         if not values:
@@ -93,6 +119,19 @@ def register_run_context_preprocessor(bp):
         if runid is None or config is None:
             return
 
-        load_run_context(runid, config)
+        module = sys.modules.get(module_name)
+        override_get_wd = None
+        override_load = None
+        if module is not None:
+            override_get_wd = getattr(module, "get_wd", None)
+            override_load = getattr(module, "load_run_context", None)
+
+        if callable(override_load) and override_load is not load_run_context:
+            result = override_load(runid, config)
+            if result is not None:
+                _store_run_context(result)
+            return
+
+        load_run_context(runid, config, get_wd_fn=override_get_wd)
 
     return bp

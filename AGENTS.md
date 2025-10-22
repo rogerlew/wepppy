@@ -381,47 +381,43 @@ Logs automatically flow to:
 
 ## Testing and Validation
 
-### Test Structure
-Tests live in `tests/` and use pytest:
-```bash
-# Run all tests
-pytest tests/
+### Execution Workflow
+- **Always use the Docker wrapper.** Run suites with `wctl run-pytest …` so pytest executes inside the `weppcloud` container with the same dependency set and environment variables as production.
+- **Minimum cadence.**
+  - While iterating: `wctl run-pytest tests/<path or module>`
+  - Before handoff or commit: `wctl run-pytest tests --maxfail=1`
+- `wctl` merges `docker/.env`, an optional project-root `.env` (or `WCTL_HOST_ENV`), and any exported shell variables. Keep `docker/.env` authoritative; use the host override for machine-specific values (API keys, host paths).
 
-# Run specific module
-pytest tests/test_wepp_top_translator.py
-
-# Run with coverage
-pytest --cov=wepppy tests/
-```
+### Suite Layout
+- `tests/README.md` — human quick-start (how to run tests, structure overview).
+- `tests/AGENTS.md` — agent playbook covering fixtures, serialization patterns, Flask patching, microservice mocking, and expectations for new suites.
+- Tests mirror the source tree. New module under `wepppy/foo/bar.py` → add `tests/foo/test_bar.py`.
+- **Frontend checks** should go through `wctl run-npm …` (host command wrapping `npm --prefix wepppy/weppcloud/static-src`). Use `wctl run-npm test` before shipping controller changes.
 
 ### NoDb Testing Patterns
-When testing NoDb controllers:
-1. Create isolated working directories (use tempfile)
-2. Test serialization round-trips (`dump()` then `getInstance()`)
-3. Verify singleton behavior
-4. Test locking mechanisms if applicable
+1. Use `tmp_path`/`tmpdir` for isolated working directories.
+2. Wrap mutations with `with controller.locked():` and call `dump_and_unlock()` before inspecting persisted state.
+3. Verify singleton behaviour by comparing identity of two `getInstance` calls.
+4. Reset class-level caches between tests (clear `_instances` dicts) to prevent bleed-over.
 
 Example:
 ```python
-def test_nodb_controller(tmpdir):
-    wd = str(tmpdir)
-    
-    # First instance
+def test_nodb_round_trip(tmp_path):
+    wd = str(tmp_path)
     controller = MyController.getInstance(wd)
-    controller.my_data['test'] = 'value'
-    controller.dump_and_unlock()
-    
-    # Verify singleton
-    controller2 = MyController.getInstance(wd)
-    assert controller is controller2
-    assert controller2.my_data['test'] == 'value'
+    with controller.locked():
+        controller.state = "value"
+        controller.dump_and_unlock()
+
+    clone = MyController.getInstance(wd)
+    assert clone is controller
+    assert clone.state == "value"
 ```
 
-### Redis Testing
-Tests involving Redis should use Redis DB 0-15 carefully. Consider:
-- Flushing test keys after tests
-- Using unique prefixes for test data
-- Mocking Redis connections for unit tests
+### Redis / External Services
+- Leverage the Redis stub in `tests/conftest.py`; extend it when new client APIs are required rather than importing the real client.
+- Network traffic is disallowed. Mock requests/responses explicitly (e.g., `responses`, `httpx.MockTransport`) and drop payload fixtures under `tests/data/`.
+- Flush or namespace any temporary keys/files created during tests.
 
 ## Front-End Development
 

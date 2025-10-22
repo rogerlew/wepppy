@@ -16,8 +16,7 @@
             value=current_ron.name,
             placeholder="Name",
             attrs={
-              "oninput": "Project.getInstance().setNameFromInput()",
-              "onblur": "Project.getInstance().commitNameFromInput()"
+              "data-project-field": "name"
             },
             extra_class="disable-readonly"
           ) }}
@@ -27,8 +26,7 @@
             value=current_ron.scenario,
             placeholder="Scenario",
             attrs={
-              "oninput": "Project.getInstance().setScenarioFromInput()",
-              "onblur": "Project.getInstance().commitScenarioFromInput()"
+              "data-project-field": "scenario"
             },
             extra_class="disable-readonly"
           ) }}
@@ -74,14 +72,14 @@
             <label class="wc-run-header__toggle">
               <input id="checkbox_readonly"
                      type="checkbox"
-                     onchange="Project.getInstance().set_readonly(this.checked);"
+                     data-project-toggle="readonly"
                      {% if current_ron.readonly %}checked{% endif %}>
               <span>Readonly</span>
             </label>
             <label class="wc-run-header__toggle">
               <input id="checkbox_public"
                      type="checkbox"
-                     onchange="Project.getInstance().set_public(this.checked);"
+                     data-project-toggle="public"
                      {% if current_ron.public %}checked{% endif %}>
               <span>Public</span>
             </label>

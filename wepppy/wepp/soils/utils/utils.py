@@ -21,7 +21,6 @@ __all__ = [
 ]
 
 
-@deprecated
 @dataclass
 class SoilReplacements:
     """Container describing per-parameter overrides applied to a soil file."""

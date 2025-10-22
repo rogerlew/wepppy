@@ -105,6 +105,17 @@ and
 so cache files are writable. Pass one or more module names (defaults to
 .BR wepppy.nodb.core ).
 .TP
+.B wctl run-npm
+Runs
+.B npm
+on the host with
+.BR "--prefix wepppy/weppcloud/static-src" .
+Common invocations include
+.BR "wctl run-npm install"
+and
+.BR "wctl run-npm test" .
+This helper ensures frontend tooling executes from the correct project directory without extra typing.
+.TP
 .B wctl run-stubgen
 Regenerates the local stub tree via
 .BR "python tools/sync_stubs.py" .

@@ -94,14 +94,16 @@ def task_upload_cli(runid: str, config: str) -> Response:
     ron = Ron.getInstance(wd)
     climate = Climate.getInstance(wd)
 
+    cli_dir = climate.cli_dir
+
     try:
         saved_path = save_run_file(
             runid=runid,
             config=config,
             form_field='input_upload_cli',
             allowed_extensions=('cli',),
-            dest_subdir='climate',
-            run_root=wd,
+            dest_subdir='',
+            run_root=cli_dir,
             filename_transform=lambda value: value,
             overwrite=True,
         )

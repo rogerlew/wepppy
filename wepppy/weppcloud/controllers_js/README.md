@@ -1,13 +1,35 @@
 # Controllers JS Architecture
 
-> **See also:** [AGENTS.md](../../../AGENTS.md) for Front-End Development section and controller bundling overview.
+> **See also:** [AGENTS.md](../../../AGENTS.md) for Front-End Development section and controller bundling overview.  
+> Agent workflow specifics live in [controllers_js/AGENTS.md](./AGENTS.md).
 
 This note explains how the controller JavaScript in `wepppy/weppcloud` is organized, how individual controller modules cooperate with the shared infrastructure, and what needs to happen when you extend the system.
 
 ## Layout and Bundling
-- Authoring happens in `wepppy/weppcloud/controllers_js/*.js` (one file per controller plus shared helpers such as `control_base.js`, `ws_client.js`, and `status_stream.js`).
+- Authoring happens in `wepppy/weppcloud/controllers_js/*.js` (one file per controller plus shared helpers such as `dom.js`, `http.js`, `forms.js`, `events.js`, `control_base.js`, `ws_client.js`, and `status_stream.js`).
 - The browser still downloads a single bundle, `wepppy/weppcloud/static/js/controllers.js`. The bundle is rendered from `controllers_js/templates/controllers.js.j2`, which now loops over the discovered `.js` files automatically; simply dropping a new controller file into the directory is enough for it to be included.
-- The `build_controllers_js.py` helper (same directory) renders the template with Jinja, stamps a build date, and writes the bundle just before Gunicorn starts. Core infrastructure files (`utils.js`, `control_base.js`, `project.js`, etc.) are emitted first to preserve dependencies; the remainder are appended alphabetically.
+- The `build_controllers_js.py` helper (same directory) renders the template with Jinja, stamps a build date, and writes the bundle just before Gunicorn starts. Core infrastructure files now load in this order to guarantee that controllers see every helper namespace:
+  1. `dom.js`, `events.js`, `forms.js`, `http.js`
+  2. `utils.js`, `modal.js`, `unitizer_client.js`, `ws_client.js`, `status_stream.js`, `control_base.js`, `project.js`
+  3. Remaining controllers alphabetically
+- Controllers can assume that `window.WCDom`, `window.WCEvents`, `window.WCForms`, and `window.WCHttp` exist before their module executes.
+
+## Vanilla Helper Modules
+- **`dom.js` (`window.WCDom`)** — Query helpers (`qs`, `qsa`, `ensureElement`), class/visibility utilities (`show`, `hide`, `toggle`, `toggleClass`), delegated event wiring (`delegate`), and light ARIA helpers. Each function accepts either selector strings or actual nodes and fails fast with descriptive errors when misused.
+- **`events.js` (`window.WCEvents`)** — Lightweight event emitter factory with `on/off/once/emit`, DOM bridge (`emitDom`), piping (`forward`), and `useEventMap` for opt-in event name validation during development.
+- **`forms.js` (`window.WCForms`)** — Form serialization compatible with jQuery semantics (`serializeForm`, `serializeFields`, `formToJSON`), value hydration (`applyValues`), and CSRF discovery (`findCsrfToken`). Checkboxes become booleans for object/JSON formats and remain URL encoded for query strings.
+- **`http.js` (`window.WCHttp`)** — Fetch wrapper that handles `site_prefix`, query params, timeout cancellation, CSRF propagation, and rich error reporting via `HttpError`. Convenience helpers `getJson`, `postJson`, and `postForm` encapsulate the common call patterns used across controllers.
+
+Controllers should destructure what they need from the globals:
+
+```javascript
+const { qs, delegate, show, hide } = WCDom;
+const { request, postForm, HttpError } = WCHttp;
+const { serializeForm, applyValues } = WCForms;
+const { createEmitter, forward } = WCEvents;
+```
+
+Bundled modules remain global so legacy controllers can incrementally migrate away from jQuery without build tooling changes.
 
 ## Singleton Controller Modules
 - Each controller file exposes a global (for example `var Project = function () { … }();`). The module keeps a private `instance` and returns an object containing `getInstance`, so we effectively have singletons.
@@ -43,5 +65,10 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
 - Keep controller methods focused on DOM wiring and async orchestration. Shared logic should live in helper modules under `controllers_js/` so that other controllers can `include` them via the bundle template.
 - Because the bundle is rebuilt when the entrypoint runs (container start or explicit call), restart the container or rerun the script whenever you edit controller sources. `.vscode/settings.json` is configured to ignore the built
 `controllers.js` file.
+
+## Project Controller Modernization
+- `project.js` now consumes `WCDom`, `WCHttp`, and `WCForms` exclusively—jQuery hooks have been replaced with delegated listeners that target `data-project-field`, `data-project-toggle`, and `data-project-action` attributes in the header and power-user templates. Update templates with those attributes instead of inline `on*` handlers when expanding the control.
+- Command bar feedback and unitizer integration are still exposed through `Project.getInstance()`, but outbound network calls flow through `WCHttp.postForm`/`postJson`, enabling native Promise semantics and shared error handling.
+- Regression coverage lives in `controllers_js/__tests__/project.test.js`. Run it via `wctl run-npm test` (wrapper for `npm --prefix wepppy/weppcloud/static-src test`). The suite verifies name/scenario saves, debounce behaviour, and failure handling so future refactors can rely on automated guardrails.
 
 Keep this document updated when the bundling flow or controller contract changes.

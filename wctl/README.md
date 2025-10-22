@@ -11,7 +11,7 @@ The wctl script is a simple yet powerful Bash script that performs the following
 
 1. **Sets Project Directory:** The script derives the project root dynamically based on the location of the wctl directory.  
 2. **Changes Directory:** It immediately changes its execution context to that project directory so that all relative paths within the compose file resolve correctly.  
-3. **Executes Docker Compose:** It runs docker compose, pointing to the shared env file (docker/.env) and the compose file selected during installation (dev or prod).  
+3. **Executes Docker Compose:** It runs docker compose using a generated env file that starts with `docker/.env` and, if present, merges in overrides from the project root `.env` (or the path supplied via `WCTL_HOST_ENV`). The compose file selected during installation (dev or prod) is used for all commands.  
 4. **Forwards Arguments:** Any arguments or commands you pass to wctl (e.g., up \-d, down, logs) are appended to the end of the docker compose command using the $@ shell parameter.
 
 This allows a command like wctl ps to be translated seamlessly into:
@@ -28,9 +28,30 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 - `wctl flask-db-upgrade`: executes `flask --app wepppy.weppcloud.app db upgrade` inside the running `weppcloud` container. Any additional arguments are forwarded, so `wctl flask-db-upgrade --tag current` works the same as the underlying Flask-Migrate command.
 - `wctl man` (or `man wctl` after installation): displays the wctl manual page. Additional arguments are passed through to `man`, so `wctl man --no-pager` works as expected.
 - `wctl update-stub-requirements`: runs `tools/update_stub_requirements.py` to analyse mypy output and refresh `docker/requirements-stubs-uv.txt`. Pass any script flags (for example `--no-verify`) after the command.
-- `wctl run-pytest`: executes `pytest` inside the `weppcloud` container (defaults to `pytest tests`). Pass extra arguments to forward them to pytest.
+- `wctl run-pytest`: executes `pytest` inside the `weppcloud` container (defaults to `pytest tests`). Pass extra arguments to forward them to pytest; for example, `wctl run-pytest tests/weppcloud/routes/test_climate_bp.py`.
 - `wctl run-stubtest`: runs `stubtest` inside the container with the appropriate environment (defaults to `wepppy.nodb.core`). Provide module names to narrow the check.
+- `wctl run-npm`: runs `npm` on the host with `--prefix wepppy/weppcloud/static-src`. Example: `wctl run-npm test` or `wctl run-npm install`.
 - `wctl run-stubgen`: regenerates the local `stubs/` tree via `python tools/sync_stubs.py`.
+
+### **Host Environment Overrides**
+
+If a `.env` file exists at the project root, wctl automatically merges it on top of the required `docker/.env` when generating the temporary environment passed to docker compose. Keys defined in the host file override the defaults from `docker/.env`, making it easy to keep machine-specific values out of version control.  
+Set the `WCTL_HOST_ENV` environment variable (absolute or project-relative path) before invoking wctl if you need to use a different host-side env file.
+
+After the files are merged, wctl scans the active docker compose file for `${VAR}` placeholders and, when a matching variable is defined in the current shell environment, copies that value into the generated env file as the final override. This lets you keep secrets in exported environment variables (or injected by tools like `direnv`) without committing them anywhere.
+
+### **pytest Workflow**
+
+- Keep `docker/.env` populated with the stack-wide defaults (UID/GID, secrets, hostnames). Wctl always starts there so the containers boot with predictable values.
+- Add a project-root `.env` (gitignored) or point `WCTL_HOST_ENV` at a private file for local overrides such as API keys, database URLs, and filesystem mount points.
+- For temporary values (CI, ad-hoc debugging), simply export environment variables before running `wctl`; the wrapper pulls them into the generated env file automatically.
+- Run targeted suites aggressively:
+  ```bash
+  wctl run-pytest tests/weppcloud/routes/test_climate_bp.py
+  wctl run-pytest tests/weppcloud/routes  # package-level smoke
+  wctl run-pytest tests --maxfail=1        # full run before handoff
+  ```
+- Make `wctl run-pytest …` part of your default workflow anytime routes, controllers, or shared utilities change. The command exercises the code inside the real container image, so failures mirror production.
 
 ### **Running Type Checks / Stubtest**
 

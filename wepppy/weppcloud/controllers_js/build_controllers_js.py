@@ -35,6 +35,10 @@ write_unitizer_module = _builder_module.write_unitizer_module
 TEMPLATES_DIR: Final[Path] = MODULE_DIR / "templates"
 OUTPUT_PATH: Final[Path] = ROOT / "static" / "js" / "controllers.js"
 PRIORITY_MODULES: Final[List[str]] = [
+    "dom.js",
+    "events.js",
+    "forms.js",
+    "http.js",
     "utils.js",
     "modal.js",
     "unitizer_client.js",

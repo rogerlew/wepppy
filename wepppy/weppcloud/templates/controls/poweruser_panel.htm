@@ -195,7 +195,7 @@
           <div class="pu-action-list">
             <button type="button"
                     class="pure-button pure-button-secondary"
-                    onclick="Project.getInstance().clear_locks()">
+                    data-project-action="clear-locks">
               Clear Locks
             </button>
             {% if 'disturbed' in ron.mods %}
@@ -225,14 +225,14 @@
             {% if 'omni' not in ron.mods %}
               <button type="button"
                       class="pure-button pure-button-secondary"
-                      onclick="Project.getInstance().migrate_to_omni()">
+                      data-project-action="migrate-omni">
                 Omni Migration
               </button>
             {% endif %}
             {% if 'path_ce' not in ron.mods %}
               <button type="button"
                       class="pure-button pure-button-secondary"
-                      onclick="Project.getInstance().enable_path_cost_effective()">
+                      data-project-action="enable-path-ce">
                 Enable PATH Cost-Effective
               </button>
             {% endif %}

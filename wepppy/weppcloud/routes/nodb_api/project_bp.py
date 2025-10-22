@@ -237,8 +237,13 @@ def resources_bounds_geojson(runid, config, simplify=False):
 def task_setname(runid, config):
     ctx = load_run_context(runid, config)
     ron = Ron.getInstance(str(ctx.active_root))
-    ron.name = request.form.get('name', 'Untitled')
-    return success_factory()
+    payload = parse_request_payload(request)
+    raw_name = payload.get('name', '')
+    name = str(raw_name).strip() if raw_name is not None else ''
+    if not name:
+        name = 'Untitled'
+    ron.name = name
+    return success_factory({'name': name})
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/setscenario/', methods=['POST'])
@@ -246,20 +251,23 @@ def task_setname(runid, config):
 def task_setscenario(runid, config):
     ctx = load_run_context(runid, config)
     ron = Ron.getInstance(str(ctx.active_root))
-    ron.scenario = request.form.get('scenario', '')
-    return success_factory()
+    payload = parse_request_payload(request)
+    raw_scenario = payload.get('scenario', '')
+    scenario = str(raw_scenario).strip() if raw_scenario is not None else ''
+    ron.scenario = scenario
+    return success_factory({'scenario': scenario})
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/set_public', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_set_public(runid, config):
-    try:
-        state = request.json.get('public', None)
-    except Exception:
-        return exception_factory('Error parsing state', runid=runid)
+    payload = parse_request_payload(request, boolean_fields={'public'})
+    state = payload.get('public', None)
 
     if state is None:
         return error_factory('state is None')
+    if isinstance(state, str):
+        return error_factory('state must be boolean')
 
     try:
         ctx = load_run_context(runid, config)
@@ -267,7 +275,7 @@ def task_set_public(runid, config):
     except Exception:
         return exception_factory('Error setting state', runid=runid)
 
-    return success_factory()
+    return success_factory({'public': bool(state)})
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/set_readonly', methods=['POST'])
@@ -278,13 +286,13 @@ def task_set_readonly(runid, config):
         TIMEOUT,
     )
 
-    try:
-        state = request.json.get('readonly', None)
-    except Exception:
-        return exception_factory('Error parsing state', runid=runid)
+    payload = parse_request_payload(request, boolean_fields={'readonly'})
+    state = payload.get('readonly', None)
 
     if state is None:
         return error_factory('state is None')
+    if isinstance(state, str):
+        return error_factory('state must be boolean')
 
     try:
         load_run_context(runid, config)
@@ -296,4 +304,4 @@ def task_set_readonly(runid, config):
     except Exception:
         return exception_factory('Error queuing readonly task', runid=runid)
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'Success': True, 'job_id': job.id, 'readonly': desired_state})

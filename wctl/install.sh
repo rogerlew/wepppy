@@ -76,6 +76,23 @@ SOURCE_ENV="${PROJECT_DIR}/docker/.env"
 COMPOSE_FILE_RELATIVE="__COMPOSE_FILE_RELATIVE__"
 COMPOSE_FILE="${PROJECT_DIR}/${COMPOSE_FILE_RELATIVE}"
 
+HOST_ENV_DEFAULT="${PROJECT_DIR}/.env"
+if [[ -n "${WCTL_HOST_ENV:-}" ]]; then
+  if [[ "${WCTL_HOST_ENV}" = /* ]]; then
+    HOST_ENV_CANDIDATE="${WCTL_HOST_ENV}"
+  else
+    HOST_ENV_CANDIDATE="${PROJECT_DIR}/${WCTL_HOST_ENV}"
+  fi
+else
+  HOST_ENV_CANDIDATE="${HOST_ENV_DEFAULT}"
+fi
+
+if [[ -n "${HOST_ENV_CANDIDATE}" && -f "${HOST_ENV_CANDIDATE}" ]]; then
+  HOST_ENV="$(resolve_realpath "${HOST_ENV_CANDIDATE}")"
+else
+  HOST_ENV=""
+fi
+
 cd "${PROJECT_DIR}" || exit 1
 
 if [[ ! -f "${SOURCE_ENV}" ]]; then
@@ -108,24 +125,53 @@ for raw in path.read_text().splitlines():
 PY
 }
 
-python3 - "${SOURCE_ENV}" "${TEMP_ENV}" <<'PY'
+python3 - "${SOURCE_ENV}" "${HOST_ENV}" "${TEMP_ENV}" "${COMPOSE_FILE}" <<'PY'
 import sys
+import os
+import re
 from pathlib import Path
+from collections import OrderedDict
 
-src = Path(sys.argv[1])
-dst = Path(sys.argv[2])
-lines = []
-for raw in src.read_text().splitlines():
-    if not raw or raw.lstrip().startswith("#"):
-        lines.append(raw)
-        continue
-    if "=" not in raw:
-        lines.append(raw)
-        continue
-    key, value = raw.split("=", 1)
-    value = value.replace("$", "$$")
-    lines.append(f"{key}={value}")
-dst.write_text("\n".join(lines) + "\n")
+source = Path(sys.argv[1])
+host_arg = sys.argv[2]
+dest = Path(sys.argv[3])
+compose_path = Path(sys.argv[4])
+
+paths = [source]
+if host_arg:
+    host_path = Path(host_arg)
+    if host_path.exists():
+        paths.append(host_path)
+
+def iter_entries(path: Path):
+    for raw in path.read_text().splitlines():
+        if not raw or raw.lstrip().startswith("#") or "=" not in raw:
+            continue
+        key, value = raw.split("=", 1)
+        yield key.strip(), value
+
+merged = OrderedDict()
+for path in paths:
+    for key, value in iter_entries(path):
+        merged[key] = value.replace("$", "$$")
+
+compose_keys = set()
+if compose_path.exists():
+    pattern = re.compile(r"\${([A-Za-z0-9_]+)")
+    try:
+        text = compose_path.read_text()
+    except Exception:
+        text = ""
+    for match in pattern.finditer(text):
+        compose_keys.add(match.group(1))
+
+for key in compose_keys:
+    value = os.environ.get(key)
+    if value is not None:
+        merged[key] = value.replace("$", "$$")
+
+lines = [f"{key}={value}" for key, value in merged.items()]
+dest.write_text("\n".join(lines) + ("\n" if lines else ""))
 PY
 
 export WEPPPY_ENV_FILE="${TEMP_ENV}"
@@ -287,6 +333,15 @@ if [[ $# -gt 0 ]]; then
       fi
       CMD_ARGS=$(quote_args "$@")
       compose_exec_weppcloud "cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest ${CMD_ARGS}"
+      exit 0
+      ;;
+    run-npm)
+      shift
+      if ! command -v npm >/dev/null 2>&1; then
+        echo "npm is required for run-npm." >&2
+        exit 1
+      fi
+      npm --prefix "${PROJECT_DIR}/wepppy/weppcloud/static-src" "$@"
       exit 0
       ;;
     run-stubgen)

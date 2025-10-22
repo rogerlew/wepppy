@@ -156,6 +156,7 @@ def task_baer_class_map(runid: str, config: str) -> Response:
 def task_baer_modify_color_map(runid: str, config: str) -> Response:
     """Update the color map used to render BAER severity classes."""
     ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
         baer = Baer.getInstance(wd)

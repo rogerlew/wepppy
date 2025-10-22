@@ -17,24 +17,34 @@ landuse_bp = Blueprint('landuse', __name__)
 
 def build_landuse_report_context(landuse: Landuse) -> Dict[str, object]:
     """Prepare dataset options and report rows for landuse summaries."""
+    dataset_source = getattr(landuse, "available_datasets", [])
     datasets = [
-        dataset for dataset in landuse.available_datasets if dataset.kind == "mapping"
+        dataset
+        for dataset in dataset_source
+        if getattr(dataset, "kind", None) == "mapping"
     ]
 
     dataset_options: List[Tuple[str, str]] = []
     for dataset in datasets:
-        label = dataset.label
-        if dataset.description and dataset.management_file:
-            label = f"{dataset.description} ({dataset.management_file})"
-        dataset_options.append((dataset.key, label))
+        key = getattr(dataset, "key", "")
+        label = getattr(dataset, "label", key)
+        description = getattr(dataset, "description", "")
+        management_file = getattr(dataset, "management_file", "")
+        if description and management_file:
+            label = f"{description} ({management_file})"
+        dataset_options.append((key, label))
 
     prefix_order = sorted(datasets, key=lambda ds: len(ds.key), reverse=True)
     report_rows: List[Dict[str, object]] = []
 
-    try:
-        report_entries = list(landuse.report)
-    except AttributeError:
-        report_entries = []
+    report_source = getattr(landuse, "report", [])
+    if isinstance(report_source, Mapping):
+        report_entries = list(report_source.get("rows", []))
+    else:
+        try:
+            report_entries = list(report_source)
+        except TypeError:
+            report_entries = []
 
     for entry in report_entries:
         row = dict(entry)
@@ -46,7 +56,7 @@ def build_landuse_report_context(landuse: Landuse) -> Dict[str, object]:
 
     return {
         'dataset_options': dataset_options,
-        'coverage_percentages': landuse.coverage_percentages,
+        'coverage_percentages': getattr(landuse, "coverage_percentages", ()),
         'report_rows': report_rows,
     }
 
