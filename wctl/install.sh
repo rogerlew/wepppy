@@ -361,6 +361,17 @@ if [[ $# -gt 0 ]]; then
       python3 "${PROJECT_DIR}/tools/sync_stubs.py" "$@"
       exit 0
       ;;
+    check-test-stubs)
+      shift
+      compose_exec_weppcloud "cd /workdir/wepppy && python tools/check_stubs.py"
+      exit 0
+      ;;
+    check-test-isolation)
+      shift
+      CMD_ARGS=$(quote_args "$@")
+      compose_exec_weppcloud "cd /workdir/wepppy && python tools/check_test_isolation.py ${CMD_ARGS}"
+      exit 0
+      ;;
   esac
 fi
 

@@ -168,7 +168,33 @@ def test_catalog_supports_parameter_aliases(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
 
     runid = "alias-run"
-    app, _ = _make_client(monkeypatch, tmp_path, runid)
+    files = [
+        {
+            "path": "datasets/a.parquet",
+            "extension": ".parquet",
+            "size_bytes": 1,
+            "modified": "2024-01-01T00:00:00Z",
+            "schema": {
+                "fields": [
+                    {"name": "col_a", "type": "INTEGER"},
+                    {"name": "col_b", "type": "TEXT"},
+                ]
+            },
+        },
+        {
+            "path": "datasets/b.parquet",
+            "extension": ".parquet",
+            "size_bytes": 1,
+            "modified": "2024-01-02T00:00:00Z",
+            "schema": {
+                "fields": [
+                    {"name": "col_x", "type": "INTEGER"},
+                    {"name": "col_y", "type": "TEXT"},
+                ]
+            },
+        },
+    ]
+    app, _ = _make_client(monkeypatch, tmp_path, runid, files=files)
 
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth

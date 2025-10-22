@@ -9,7 +9,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from .module_loader import cleanup_import_state, load_module
+from .module_loader import PROJECT_OUTPUT, cleanup_import_state, load_module
 
 
 _all_your_base = load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
@@ -91,7 +91,7 @@ def test_write_parquet_with_pool_falls_back_when_tmp_invalid(tmp_path: Path) -> 
 
 
 def test_hill_pass_interchange_writes_parquet(tmp_path: Path) -> None:
-    src = Path("tests/wepp/interchange/test_project/output")
+    src = PROJECT_OUTPUT
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
 

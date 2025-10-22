@@ -56,6 +56,8 @@ Most files mirror the module they cover. For example, `tests/weppcloud/routes/te
 - Tests assume no network access. If you must touch external services, stub the call or drop mock payloads into `tests/data/`.
 - Mirror source layout when creating new tests—if you add `wepppy/foo/bar.py`, expect to create `tests/foo/test_bar.py`.
 - Frontend helpers/controllers have their own tooling—run `wctl run-npm lint` and `wctl run-npm test` (or `wctl run-npm check`) before shipping JS changes.
+- Finish by verifying stubs: `wctl check-test-stubs` ensures `sys.modules` shims match their real module APIs.
+- Add or update pytest markers when you touch a test. Every test should declare a category (e.g., `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.routes`) and mark long-running cases with `@pytest.mark.slow`.
 - Check [`tests/AGENTS.md`](AGENTS.md) for guidance on fixtures, NoDb serialization patterns, and expectations when adding new suites.
 
 Happy testing! Keep the muscles fresh by running `wctl run-pytest tests --maxfail=1` early and often.

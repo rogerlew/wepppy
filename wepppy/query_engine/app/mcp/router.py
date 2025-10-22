@@ -6,7 +6,7 @@ import os
 import time
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Iterable, Mapping, Sequence
 from uuid import uuid4
 
 from starlette.applications import Starlette
@@ -98,6 +98,166 @@ def _load_catalog_metadata(run_path: os.PathLike[str]) -> tuple[bool, str | None
         return True, None, 0
     dataset_count = len(entries)
     return True, generated_at, dataset_count
+
+
+def _load_prompt_template() -> str:
+    try:
+        return PROMPT_TEMPLATE_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return (
+            "Run {{RUN_ID}}\n"
+            "Endpoint {{QUERY_ENDPOINT}}\n"
+            "Limit {{ROW_LIMIT}}\n"
+            "{{SCHEMA_SUMMARY}}\n"
+            "{{SAMPLE_PAYLOAD}}\n"
+        )
+
+
+def _build_schema_summary(raw_entries: Iterable[Mapping[str, Any]]) -> str:
+    lines: list[str] = []
+    for entry in raw_entries:
+        path = entry.get("path") if isinstance(entry, Mapping) else None
+        if not isinstance(path, str):
+            continue
+        schema = entry.get("schema") if isinstance(entry, Mapping) else None
+        fields = schema.get("fields") if isinstance(schema, Mapping) else None
+        if isinstance(fields, Sequence):
+            names = [field.get("name") for field in fields if isinstance(field, Mapping) and field.get("name")]
+            if names:
+                lines.append(f"* {path}: {', '.join(names)}")
+                continue
+        lines.append(f"* {path}")
+    if not lines:
+        return "_No catalog schema available._"
+    return "\n".join(lines)
+
+
+def _build_default_payload(raw_entries: Sequence[Mapping[str, Any]]) -> Mapping[str, Any]:
+    datasets: list[dict[str, Any]] = []
+    if raw_entries:
+        first = raw_entries[0]
+        path = first.get("path") if isinstance(first, Mapping) else None
+        if isinstance(path, str):
+            dataset_entry: dict[str, Any] = {"path": path}
+            schema = first.get("schema") if isinstance(first, Mapping) else None
+            fields = schema.get("fields") if isinstance(schema, Mapping) else None
+            if isinstance(fields, Sequence):
+                names = [field.get("name") for field in fields if isinstance(field, Mapping) and field.get("name")]
+                if names:
+                    dataset_entry["columns"] = names[: min(len(names), 3)]
+            datasets.append(dataset_entry)
+    payload = {
+        "datasets": datasets or [],
+        "limit": DEFAULT_PROMPT_ROW_LIMIT,
+        "include_schema": True,
+    }
+    return payload
+
+
+def _render_prompt_template(template: str, placeholders: Mapping[str, Any]) -> str:
+    rendered = template
+    for key, value in placeholders.items():
+        rendered = rendered.replace(f"{{{{{key}}}}}", str(value))
+    return rendered
+
+
+def _prepare_query_request(
+    payload: Mapping[str, Any],
+    *,
+    runid: str,
+    run_path: os.PathLike[str],
+) -> tuple[QueryRequest, Mapping[str, Any], list[dict[str, Any]], str | None]:
+    try:
+        raw_entries, generated_at = _load_catalog_data(run_path)
+    except FileNotFoundError as exc:
+        raise QueryValidationException(404, "catalog_missing", f"Catalog for run '{runid}' not found") from exc
+    except Exception as exc:  # pragma: no cover - defensive logging
+        LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
+        raise QueryValidationException(500, "catalog_invalid", f"Catalog for run '{runid}' is invalid") from exc
+
+    catalog_index = OrderedDict()
+    for entry in raw_entries:
+        if isinstance(entry, Mapping):
+            path = entry.get("path")
+            if isinstance(path, str):
+                catalog_index[path] = entry
+
+    datasets_value = payload.get("datasets")
+    if not isinstance(datasets_value, Sequence) or isinstance(datasets_value, (str, bytes)):
+        raise QueryValidationException(400, "invalid_request", "'datasets' must be a list")
+
+    sanitized_datasets: list[Any] = []
+    missing: list[str] = []
+
+    for index, dataset in enumerate(datasets_value):
+        if isinstance(dataset, str):
+            path = dataset
+            sanitized = {"path": path}
+        elif isinstance(dataset, Mapping):
+            path = dataset.get("path") or dataset.get("dataset")
+            if not path:
+                raise QueryValidationException(400, "invalid_request", "Dataset object must define 'path'")
+            sanitized = dict(dataset)
+            sanitized["path"] = str(path)
+        else:
+            raise QueryValidationException(400, "invalid_request", "Dataset entries must be strings or objects")
+
+        path_str = str(path)
+        if path_str not in catalog_index:
+            missing.append(path_str)
+
+        sanitized_datasets.append(sanitized)
+
+    if missing:
+        raise QueryValidationException(
+            422,
+            "dataset_missing",
+            "One or more datasets were not found in the catalog",
+            {"missing": missing},
+        )
+
+    request_kwargs = dict(payload)
+    request_kwargs["datasets"] = sanitized_datasets
+
+    try:
+        query_request = QueryRequest(**request_kwargs)
+    except (TypeError, ValueError) as exc:
+        raise QueryValidationException(422, "invalid_payload", str(exc)) from exc
+
+    normalized_datasets: list[dict[str, Any]] = []
+    for spec in query_request._dataset_specs:
+        dataset_entry = OrderedDict()
+        dataset_entry["path"] = spec.path
+        dataset_entry["alias"] = spec.alias
+        if spec.columns:
+            dataset_entry["columns"] = list(spec.columns)
+        normalized_datasets.append(dataset_entry)
+
+    normalized_payload: OrderedDict[str, Any] = OrderedDict()
+    normalized_payload["datasets"] = normalized_datasets
+
+    if query_request.columns is not None:
+        normalized_payload["columns"] = list(query_request.columns)
+    if query_request.limit is not None:
+        normalized_payload["limit"] = int(query_request.limit)
+    normalized_payload["include_schema"] = bool(query_request.include_schema)
+    normalized_payload["include_sql"] = bool(query_request.include_sql)
+    if query_request.joins:
+        normalized_payload["joins"] = query_request.joins
+    if query_request.group_by:
+        normalized_payload["group_by"] = list(query_request.group_by)
+    if query_request.aggregations:
+        normalized_payload["aggregations"] = query_request.aggregations
+    if query_request.order_by:
+        normalized_payload["order_by"] = list(query_request.order_by)
+    if query_request.filters:
+        normalized_payload["filters"] = query_request.filters
+    if query_request.computed_columns:
+        normalized_payload["computed_columns"] = query_request.computed_columns
+    if query_request.reshape:
+        normalized_payload["reshape"] = query_request.reshape
+
+    return query_request, normalized_payload, raw_entries, generated_at
 
 
 def resolve_catalog_path(run_path: os.PathLike[str]) -> Path:

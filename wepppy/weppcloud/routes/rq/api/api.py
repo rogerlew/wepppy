@@ -89,6 +89,98 @@ TIMEOUT = 216_000
 SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 SBS_MAX_BYTES = 100 * 1024 * 1024
 
+
+def _coerce_omni_scenario_list(payload: Dict[str, Any], raw_json: Any) -> list[Dict[str, Any]] | None:
+    if isinstance(raw_json, list):
+        return raw_json
+
+    scenarios_raw = payload.get("scenarios")
+    if scenarios_raw is None:
+        return None
+
+    if isinstance(scenarios_raw, list):
+        if len(scenarios_raw) == 1 and isinstance(scenarios_raw[0], str):
+            scenarios_raw = scenarios_raw[0]
+        else:
+            return scenarios_raw  # type: ignore[return-value]
+
+    if isinstance(scenarios_raw, dict):
+        return [scenarios_raw]
+
+    if isinstance(scenarios_raw, str):
+        try:
+            parsed = json.loads(scenarios_raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError("Scenarios data must be valid JSON") from exc
+        if not isinstance(parsed, list):
+            raise ValueError("Scenarios data must be a list")
+        return parsed
+
+    raise ValueError("Scenarios data must be a list")
+
+
+def _prepare_omni_scenarios(
+    payload: Dict[str, Any],
+    raw_json: Any,
+    req: 'flask.Request',
+    *,
+    runid: str,
+    config: str,
+    wd: str,
+) -> list[tuple[OmniScenario, Dict[str, Any]]]:
+    scenarios_payload = _coerce_omni_scenario_list(payload, raw_json)
+    if scenarios_payload is None:
+        raise ValueError("Missing scenarios data")
+    if not isinstance(scenarios_payload, list):
+        raise ValueError("Scenarios data must be a list")
+
+    os.makedirs(_join(wd, 'omni', '_limbo'), exist_ok=True)
+
+    parsed_inputs: list[tuple[OmniScenario, Dict[str, Any]]] = []
+    for idx, scenario in enumerate(scenarios_payload):
+        if not isinstance(scenario, dict):
+            raise ValueError(f"Scenario {idx} must be an object")
+
+        scenario_type = scenario.get("type")
+        if not scenario_type:
+            raise ValueError(f"Scenario {idx} is missing type")
+
+        scenario_enum = OmniScenario.parse(scenario_type)
+        scenario_params: Dict[str, Any] = dict(scenario)
+        scenario_params["type"] = scenario_type
+
+        if scenario_enum == OmniScenario.SBSmap:
+            file_key = f"scenarios[{idx}][sbs_file]"
+            storage = req.files.get(file_key)
+
+            if storage and storage.filename:
+                try:
+                    upload_path = save_run_file(
+                        runid=runid,
+                        config=config,
+                        form_field=file_key,
+                        allowed_extensions=SBS_ALLOWED_EXTENSIONS,
+                        dest_subdir=f"omni/_limbo/{idx:02d}",
+                        run_root=wd,
+                        overwrite=True,
+                        max_bytes=SBS_MAX_BYTES,
+                    )
+                except UploadError as exc:
+                    raise ValueError(f"Invalid SBS file for scenario {idx}: {exc}") from exc
+
+                scenario_params["sbs_file_path"] = str(upload_path)
+            elif scenario_params.get("sbs_file_path"):
+                scenario_params["sbs_file_path"] = str(scenario_params["sbs_file_path"])
+            else:
+                raise ValueError(f"Missing SBS file for scenario {idx}")
+
+            scenario_params.pop("sbs_file", None)
+
+        parsed_inputs.append((scenario_enum, scenario_params))
+
+    return parsed_inputs
+
+
 rq_api_bp = Blueprint('rq_api', __name__)
 
 
@@ -178,46 +270,96 @@ def api_run_batch(batch_name: str):
     return jsonify(payload), 200
 
 
-def _parse_map_change(form):
+def _parse_map_change(payload: Dict[str, Any]):
+    center_raw = payload.get('map_center')
+    zoom_raw = payload.get('map_zoom')
+    bounds_raw = payload.get('map_bounds')
+    mcl_raw = payload.get('mcl')
+    csa_raw = payload.get('csa')
+    wbt_fill_or_breach_raw = payload.get('wbt_fill_or_breach')
+    wbt_blc_dist_raw = payload.get('wbt_blc_dist')
+    set_extent_mode_raw = payload.get('set_extent_mode', 0)
+    map_bounds_text_raw = payload.get('map_bounds_text', '')
 
-    center = form.get('map_center', None)
-    zoom = form.get('map_zoom', None)
-    bounds = form.get('map_bounds', None)
-    mcl = form.get('mcl', None)
-    csa = form.get('csa', None)
-    wbt_fill_or_breach = form.get('wbt_fill_or_breach', None)
-    wbt_blc_dist = form.get('wbt_blc_dist', None)
-    set_extent_mode = form.get('set_extent_mode', 0)
-    map_bounds_text = form.get('map_bounds_text', '')
-
-    if center is None or zoom is None or bounds is None \
-            or mcl is None or csa is None:
+    if center_raw is None or zoom_raw is None or bounds_raw is None or mcl_raw is None or csa_raw is None:
         error = error_factory('Expecting center, zoom, bounds, mcl, and csa')
         return error, None
+
+    def _as_float_sequence(value: Any, expected_len: int, label: str) -> list[float]:
+        if isinstance(value, (list, tuple)):
+            parts = list(value)
+        elif isinstance(value, str):
+            parts = [part.strip() for part in value.split(',') if part.strip()]
+        else:
+            raise ValueError(f'Invalid {label} payload.')
+        if len(parts) != expected_len:
+            raise ValueError(f'{label} must contain {expected_len} values.')
+        result: list[float] = []
+        for part in parts:
+            try:
+                result.append(float(part))
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f'Could not parse {label}.') from exc
+        return result
+
+    def _as_float(value: Any, label: str) -> float:
+        try:
+            if isinstance(value, bool):
+                return float(int(value))
+            return float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f'Could not parse {label}.') from exc
+
+    def _as_int(value: Any, label: str) -> int:
+        try:
+            if isinstance(value, bool):
+                return int(value)
+            if value is None or value == '':
+                raise ValueError(f'Missing {label}.')
+            return int(float(value))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f'Could not parse {label}.') from exc
+
     try:
-        center = [float(v) for v in center.split(',')]
-        zoom = float(zoom)
-        extent = [float(v) for v in bounds.split(',')]
-        assert len(extent) == 4
+        center = _as_float_sequence(center_raw, 2, 'center')
+        extent = _as_float_sequence(bounds_raw, 4, 'bounds')
+        zoom = _as_float(zoom_raw, 'zoom')
+        mcl = _as_float(mcl_raw, 'mcl')
+        csa = _as_float(csa_raw, 'csa')
+
         l, b, r, t = extent
-        assert l < r and b < t, (l, b, r, t)
-    except Exception:
-        error = exception_factory('Could not parse center, zoom, and/or bounds')
+        if not (l < r and b < t):
+            raise ValueError('Invalid bounds ordering.')
+
+        set_extent_mode = _as_int(set_extent_mode_raw, 'set_extent_mode')
+        if set_extent_mode not in (0, 1):
+            raise ValueError('set_extent_mode must be 0 or 1.')
+
+        if isinstance(wbt_fill_or_breach_raw, (list, tuple)):
+            wbt_fill_or_breach = next((str(item) for item in wbt_fill_or_breach_raw if item not in (None, '')), None)
+        elif wbt_fill_or_breach_raw in (None, ''):
+            wbt_fill_or_breach = None
+        else:
+            wbt_fill_or_breach = str(wbt_fill_or_breach_raw)
+
+        if wbt_blc_dist_raw in (None, '', []):
+            wbt_blc_dist = None
+        elif isinstance(wbt_blc_dist_raw, (list, tuple)):
+            wbt_blc_dist = _as_int(wbt_blc_dist_raw[0], 'wbt_blc_dist')
+        else:
+            wbt_blc_dist = _as_int(wbt_blc_dist_raw, 'wbt_blc_dist')
+
+        if isinstance(map_bounds_text_raw, (list, tuple)):
+            map_bounds_text_candidates = [item for item in map_bounds_text_raw if item not in (None, '')]
+            map_bounds_text = str(map_bounds_text_candidates[0]) if map_bounds_text_candidates else ''
+        else:
+            map_bounds_text = str(map_bounds_text_raw or '')
+
+    except ValueError as exc:
+        error = exception_factory(str(exc))
         return error, None
 
-    try:
-        mcl = float(mcl)
-    except Exception:
-        error = exception_factory('Could not parse mcl')
-        return error, None
-
-    try:
-        csa = float(csa)
-    except Exception:
-        error = exception_factory('Could not parse csa')
-        return error, None
-
-    return None,  [extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text]
+    return None, [extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text]
 
 
 @rq_api_bp.route('/rq/api/landuse_and_soils', methods=['POST'])
@@ -265,7 +407,8 @@ def download_landuse_and_soils(uuid):
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/fetch_dem_and_build_channels', methods=['POST'])
 def fetch_dem_and_build_channels(runid, config):
     try:
-        error, args = _parse_map_change(request.form)
+        payload = parse_request_payload(request)
+        error, args = _parse_map_change(payload)
 
         if error is not None:
             return jsonify(error)
@@ -281,6 +424,8 @@ def fetch_dem_and_build_channels(runid, config):
             with watershed.locked():
                 watershed._mcl = mcl
                 watershed._csa = csa
+                watershed._set_extent_mode = int(set_extent_mode)
+                watershed._map_bounds_text = map_bounds_text
                 if watershed.delineation_backend_is_wbt:
                     if wbt_fill_or_breach is not None:
                         watershed._wbt_fill_or_breach = wbt_fill_or_breach
@@ -875,55 +1020,20 @@ def api_run_omni(runid, config):
     omni = Omni.getInstance(wd)
 
     try:
-        # Ensure the _limbo directory exists
-        limbo_dir = _join(wd, 'omni', '_limbo')
-        os.makedirs(limbo_dir, exist_ok=True)
-
-        # Parse the scenarios JSON from FormData
-        if 'scenarios' not in request.form:
-            return exception_factory('Missing scenarios data', runid=runid)
-        
-        scenarios_data = json.loads(request.form['scenarios'])
-        if not isinstance(scenarios_data, list):
-            return exception_factory('Scenarios data must be a list', runid=runid)
-
-        # Process each scenario and handle file uploads
-        parsed_inputs = []
-        for idx, scenario in enumerate(scenarios_data):
-            scenario_type = scenario.get('type')
-
-            # Map scenario type to OmniScenario enum
-            scenario_enum = OmniScenario.parse(scenario_type)
-
-            # Handle file uploads for SBS Map scenario
-            # place the maps in {wd}/omni/.limbo/{idx:02d} so they are available for Omni
-            scenario_params = scenario.copy()
-            if scenario_enum == OmniScenario.SBSmap:
-                file_key = f'scenarios[{idx}][sbs_file]'
-                if file_key not in request.files:
-                    return exception_factory(f'Missing SBS file for scenario {idx}', runid=runid)
-
-                try:
-                    upload_path = save_run_file(
-                        runid=runid,
-                        config=config,
-                        form_field=file_key,
-                        allowed_extensions=SBS_ALLOWED_EXTENSIONS,
-                        dest_subdir=f"omni/_limbo/{idx:02d}",
-                        run_root=wd,
-                        overwrite=True,
-                        max_bytes=SBS_MAX_BYTES,
-                    )
-                except UploadError as exc:
-                    return error_factory(f'Invalid SBS file for scenario {idx}: {exc}')
-
-                scenario_params['sbs_file_path'] = str(upload_path)
-
-            parsed_inputs.append((scenario_enum, scenario_params))
-
-        # Pass the parsed scenarios to omni.parse_inputs
+        payload = parse_request_payload(request)
+        raw_json = request.get_json(silent=True)
+        parsed_inputs = _prepare_omni_scenarios(
+            payload,
+            raw_json,
+            request,
+            runid=runid,
+            config=config,
+            wd=wd,
+        )
         omni.parse_scenarios(parsed_inputs)
 
+    except ValueError as exc:
+        return error_factory(str(exc))
     except Exception as e:
         return exception_factory(f'Error parsing omni inputs: {str(e)}', runid=runid)
 
@@ -947,55 +1057,20 @@ def run_omni_contrasts(runid, config):
     omni = Omni.getInstance(wd)
 
     try:
-        # Ensure the _limbo directory exists
-        limbo_dir = _join(wd, 'omni', '_limbo')
-        os.makedirs(limbo_dir, exist_ok=True)
-
-        # Parse the scenarios JSON from FormData
-        if 'scenarios' not in request.form:
-            return exception_factory('Missing scenarios data', runid=runid)
-        
-        scenarios_data = json.loads(request.form['scenarios'])
-        if not isinstance(scenarios_data, list):
-            return exception_factory('Scenarios data must be a list', runid=runid)
-
-        # Process each scenario and handle file uploads
-        parsed_inputs = []
-        for idx, scenario in enumerate(scenarios_data):
-            scenario_type = scenario.get('type')
-
-            # Map scenario type to OmniScenario enum
-            scenario_enum = OmniScenario.parse(scenario_type)
-
-            # Handle file uploads for SBS Map scenario
-            # place the maps in {wd}/omni/.limbo/{idx:02d} so they are available for Omni
-            scenario_params = scenario.copy()
-            if scenario_enum == OmniScenario.SBSmap:
-                file_key = f'scenarios[{idx}][sbs_file]'
-                if file_key not in request.files:
-                    return exception_factory(f'Missing SBS file for scenario {idx}', runid=runid)
-
-                try:
-                    upload_path = save_run_file(
-                        runid=runid,
-                        config=config,
-                        form_field=file_key,
-                        allowed_extensions=SBS_ALLOWED_EXTENSIONS,
-                        dest_subdir=f"omni/_limbo/{idx:02d}",
-                        run_root=wd,
-                        overwrite=True,
-                        max_bytes=SBS_MAX_BYTES,
-                    )
-                except UploadError as exc:
-                    return error_factory(f'Invalid SBS file for scenario {idx}: {exc}')
-
-                scenario_params['sbs_file_path'] = str(upload_path)
-
-            parsed_inputs.append((scenario_enum, scenario_params))
-
-        # Pass the parsed scenarios to omni.parse_inputs
+        payload = parse_request_payload(request)
+        raw_json = request.get_json(silent=True)
+        parsed_inputs = _prepare_omni_scenarios(
+            payload,
+            raw_json,
+            request,
+            runid=runid,
+            config=config,
+            wd=wd,
+        )
         omni.parse_scenarios(parsed_inputs)
 
+    except ValueError as exc:
+        return error_factory(str(exc))
     except Exception as e:
         return exception_factory(f'Error parsing omni inputs: {str(e)}', runid=runid)
 

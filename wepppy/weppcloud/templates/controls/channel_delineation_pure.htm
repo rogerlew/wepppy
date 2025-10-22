@@ -22,14 +22,14 @@
              "label": "Use map extent",
              "value": "0",
              "selected": watershed.set_extent_mode == 0,
-             "attrs": {"class": "disable-readonly"}
+             "attrs": {"class": "disable-readonly", "data-channel-role": "extent-mode"}
            },
            {
              "id": "set_extent_mode_manual",
              "label": "Specify extent",
              "value": "1",
              "selected": watershed.set_extent_mode == 1,
-             "attrs": {"class": "disable-readonly"}
+             "attrs": {"class": "disable-readonly", "data-channel-role": "extent-mode"}
            }
          ]
        ) }}
@@ -192,7 +192,7 @@
         id="input_wbt_fill_or_breach"
         name="wbt_fill_or_breach"
         class="wc-field__control disable-readonly"
-        onchange="toggleBreachDistance()">
+        data-channel-role="wbt-fill">
         <option value="fill" {% if watershed.wbt_fill_or_breach=='fill' %}selected{% endif %}>Fill</option>
         <option value="breach" {% if watershed.wbt_fill_or_breach=='breach' %}selected{% endif %}>Breach</option>
         <option value="breach_least_cost" {% if watershed.wbt_fill_or_breach=='breach_least_cost' %}selected{% endif %}>Breach (Least Cost)</option>
@@ -225,7 +225,7 @@
         id="btn_build_channels_en"
         class="pure-button pure-button-primary"
         type="button"
-        onclick="return ChannelDelineation.getInstance().build()">
+        data-channel-action="build">
         <img
         id="build_channels_en_lock"
         src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}"
@@ -238,33 +238,3 @@
   </div>
 
 {% endcall %}
-
-<script>
-  function toggleBreachDistance() {
-    var select = document.getElementById('input_wbt_fill_or_breach');
-    var container = document.getElementById('wbt_blc_dist_container');
-    if (!select || !container) {
-      return;
-    }
-    container.style.display = select.value === 'breach_least_cost' ? '' : 'none';
-  }
-
-  function toggleExtentInput() {
-    var modeInput = document.querySelector('input[name="set_extent_mode"]:checked');
-    var group = document.getElementById('map_bounds_text_group');
-    if (!group) {
-      return;
-    }
-    if (modeInput && modeInput.value === '1') {
-      group.style.display = '';
-    } else {
-      group.style.display = 'none';
-    }
-  }
-
-  document.querySelectorAll('input[name="set_extent_mode"]').forEach(function (input) {
-    input.addEventListener('change', toggleExtentInput);
-  });
-  toggleExtentInput();
-  toggleBreachDistance();
-</script>

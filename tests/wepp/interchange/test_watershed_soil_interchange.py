@@ -6,7 +6,7 @@ from pathlib import Path
 import pyarrow.parquet as pq
 import pytest
 
-from .module_loader import cleanup_import_state, load_module
+from .module_loader import PROJECT_OUTPUT, cleanup_import_state, load_module
 
 
 load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
@@ -23,7 +23,7 @@ SOIL_PARQUET = _watershed_soil.SOIL_PARQUET
 
 
 def test_watershed_soil_interchange_writes_parquet(tmp_path: Path) -> None:
-    src = Path("tests/wepp/interchange/test_project/output")
+    src = PROJECT_OUTPUT
     if not any((src / name).exists() for name in ("soil_pw0.txt", "soil_pw0.txt.gz")):
         pytest.skip("soil_pw0 dataset not available in test fixture")
     workdir = tmp_path / "output"

@@ -2,27 +2,209 @@
  * Channel Delineation
  * ----------------------------------------------------------------------------
  */
-var ChannelDelineation = function () {
+var ChannelDelineation = (function () {
     var instance;
 
-    function createInstance() {
-        var that = controlBase();
-        that.zoom_min = 12;
-        that.data = null; // JSON from Flask
-        that.polys = null; // Leaflet geoJSON layer
-        that.topIds = [];
-        that.glLayer = null;        // <- webgl layer
-        that.labels = L.layerGroup();
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
 
-        that.style = function (feature) {
-            let order = parseInt(feature.properties.Order, 6);
+        if (!dom || typeof dom.ensureElement !== "function") {
+            throw new Error("ChannelDelineation controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("ChannelDelineation controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("ChannelDelineation controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("ChannelDelineation controller requires WCEvents helpers.");
+        }
+
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function toFloat(value) {
+        if (value === null || value === undefined || value === "") {
+            return null;
+        }
+        if (Array.isArray(value)) {
+            return toFloat(value[0]);
+        }
+        var parsed = Number(value);
+        if (!Number.isFinite(parsed)) {
+            return null;
+        }
+        return parsed;
+    }
+
+    function toInteger(value) {
+        var parsed = toFloat(value);
+        if (parsed === null) {
+            return null;
+        }
+        return Math.trunc(parsed);
+    }
+
+    function parseNumericList(value, expectedLength) {
+        if (value === null || value === undefined) {
+            return null;
+        }
+        var parts = [];
+        if (Array.isArray(value)) {
+            parts = value;
+        } else if (typeof value === "string") {
+            parts = value.split(",").map(function (part) {
+                return part.trim();
+            });
+        } else {
+            parts = [value];
+        }
+        var numbers = parts
+            .map(function (part) {
+                return toFloat(part);
+            })
+            .filter(function (part) {
+                return part !== null && !Number.isNaN(part);
+            });
+        if (expectedLength && numbers.length !== expectedLength) {
+            return null;
+        }
+        return numbers.length ? numbers : null;
+    }
+
+    function createInstance() {
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var events = helpers.events;
+
+        var channel = controlBase();
+
+        var emitterBase = events.createEmitter();
+        var channelEvents = typeof events.useEventMap === "function"
+            ? events.useEventMap([
+                "channel:build:started",
+                "channel:build:completed",
+                "channel:build:error",
+                "channel:map:updated",
+                "channel:extent:mode",
+                "channel:report:loaded",
+                "channel:layers:loaded"
+            ], emitterBase)
+            : emitterBase;
+
+        channel.events = channelEvents;
+
+        var formElement = dom.ensureElement("#build_channels_form", "Channel delineation form not found.");
+        var infoElement = dom.qs("#build_channels_form #info");
+        var statusElement = dom.qs("#build_channels_form #status");
+        var stacktraceElement = dom.qs("#build_channels_form #stacktrace");
+        var rqJobElement = dom.qs("#build_channels_form #rq_job");
+        var hintElement = dom.qs("#hint_build_channels_en");
+        var manualExtentGroup = dom.qs("#map_bounds_text_group");
+        var manualExtentInput = dom.qs("#map_bounds_text");
+        var mapBoundsInput = dom.qs("#map_bounds");
+        var mapCenterInput = dom.qs("#map_center");
+        var mapZoomInput = dom.qs("#map_zoom");
+        var mapDistanceInput = dom.qs("#map_distance");
+        var wbtFillSelect = dom.qs("#input_wbt_fill_or_breach");
+        var wbtBreachContainer = dom.qs("#wbt_blc_dist_container");
+        var wbtBreachInput = dom.qs("#wbt_blc_dist");
+        var buildButton = document.getElementById("btn_build_channels_en");
+
+        var infoAdapter = createLegacyAdapter(infoElement);
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+        var hintAdapter = createLegacyAdapter(hintElement);
+
+        channel.form = formElement;
+        channel.info = infoAdapter;
+        channel.status = statusAdapter;
+        channel.stacktrace = stacktraceAdapter;
+        channel.rq_job = rqJobAdapter;
+        channel.hint = hintAdapter;
+        channel.command_btn_id = "btn_build_channels_en";
+
+        channel.zoom_min = 12;
+        channel.data = null;
+        channel.polys = null;
+        channel.topIds = [];
+        channel.glLayer = null;
+        channel.labels = L.layerGroup();
+
+        channel.style = function (feature) {
+            var order = parseInt(feature && feature.properties ? feature.properties.Order : 0, 6);
+
+            if (Number.isNaN(order)) {
+                order = 0;
+            }
 
             if (order > 7) {
                 order = 7;
             }
 
-            // simple map for Orders 1–6
-            const colors = {
+            var colors = {
                 0: "#8AE5FE",
                 1: "#65C8FE",
                 2: "#479EFF",
@@ -30,11 +212,10 @@ var ChannelDelineation = function () {
                 4: "#2500F4",
                 5: "#6600cc",
                 6: "#50006b",
-                7: "#6b006b",
+                7: "#6b006b"
             };
-            // default for everything else (>6 or missing)
-            const stroke = colors[order] || "#1F00CF";
-            const fill = colors[order - 1] || "#2838FE";
+            var stroke = colors[order] || "#1F00CF";
+            var fill = colors[order - 1] || "#2838FE";
             return {
                 color: stroke,
                 weight: 1,
@@ -44,115 +225,337 @@ var ChannelDelineation = function () {
             };
         };
 
-        that.labelStyle = "color:blue; text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
+        channel.labelStyle = "color:blue; text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
 
-        that.form = $("#build_channels_form");
-        that.info = $("#build_channels_form #info");
-        that.status = $("#build_channels_form  #status");
-        that.stacktrace = $("#build_channels_form #stacktrace");
-        that.ws_client = new WSClient('build_channels_form', 'channel_delineation');
-        that.ws_client.attachControl(that);
-        that.rq_job_id = null;
-        that.rq_job = $("#build_channels_form #rq_job");
-        that.command_btn_id = ['btn_build_channels', 'btn_build_channels_en'];
+        channel.ws_client = new WSClient("build_channels_form", "channel_delineation");
+        channel.ws_client.attachControl(channel);
 
-        const baseTriggerEvent = that.triggerEvent.bind(that);
-        that.triggerEvent = function (eventName, payload) {
-            if (eventName === 'BUILD_CHANNELS_TASK_COMPLETED') {
-                that.ws_client.disconnect();
-                that.show();
-                that.report();
+        function emit(eventName, payload) {
+            if (channelEvents && typeof channelEvents.emit === "function") {
+                channelEvents.emit(eventName, payload || {});
+            }
+        }
+
+        function setHint(message) {
+            if (hintAdapter && typeof hintAdapter.text === "function") {
+                hintAdapter.text(message || "");
+            }
+        }
+
+        function resetStatus(message) {
+            if (infoAdapter && typeof infoAdapter.text === "function") {
+                infoAdapter.text("");
+            }
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(message + "...");
+            }
+            if (stacktraceAdapter && typeof stacktraceAdapter.empty === "function") {
+                stacktraceAdapter.empty();
+            }
+            channel.hideStacktrace();
+        }
+
+        function showErrorStatus(message) {
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html('<span class="text-danger">' + message + "</span>");
+            }
+        }
+
+        function getExtentMode() {
+            var radios = dom.qsa('[data-channel-role="extent-mode"]', formElement);
+            for (var i = 0; i < radios.length; i += 1) {
+                if (radios[i].checked) {
+                    var parsed = parseInt(radios[i].value, 10);
+                    return Number.isNaN(parsed) ? 0 : parsed;
+                }
+            }
+            return 0;
+        }
+
+        function updateManualExtentVisibility(mode) {
+            if (!manualExtentGroup) {
+                return;
+            }
+            if (mode === 1) {
+                dom.show(manualExtentGroup);
+            } else {
+                dom.hide(manualExtentGroup);
+            }
+        }
+
+        function updateBreachDistanceVisibility(selection) {
+            if (!wbtBreachContainer) {
+                return;
+            }
+            if (selection === "breach_least_cost") {
+                dom.show(wbtBreachContainer);
+            } else {
+                dom.hide(wbtBreachContainer);
+            }
+        }
+
+        function setBuildButtonEnabled(enabled, reason) {
+            if (!buildButton) {
+                return;
+            }
+            buildButton.dataset.mapDisabled = enabled ? "false" : "true";
+            if (buildButton.dataset.jobDisabled === "true") {
+                buildButton.disabled = true;
+            } else {
+                buildButton.disabled = !enabled;
+            }
+            setHint(enabled ? "" : reason);
+        }
+
+        var baseShouldDisable = channel.should_disable_command_button.bind(channel);
+        channel.should_disable_command_button = function (self) {
+            if (baseShouldDisable(self)) {
+                return true;
+            }
+            if (buildButton && buildButton.dataset.mapDisabled === "true") {
+                return true;
+            }
+            return false;
+        };
+
+        function prepareExtentFields() {
+            if (getExtentMode() !== 1) {
+                return;
+            }
+            if (!manualExtentInput || !mapBoundsInput) {
+                return;
+            }
+            var raw = manualExtentInput.value || "";
+            var bbox = parseBboxText(raw);
+            manualExtentInput.value = bbox.join(", ");
+            mapBoundsInput.value = bbox.join(",");
+        }
+
+        function buildPayload() {
+            prepareExtentFields();
+
+            var raw = forms.serializeForm(formElement, { format: "object" });
+            var center = parseNumericList(raw.map_center, 2);
+            var bounds = parseNumericList(raw.map_bounds, 4);
+            var zoom = toFloat(raw.map_zoom);
+            var distance = toFloat(raw.map_distance);
+            var mcl = toFloat(raw.mcl);
+            var csa = toFloat(raw.csa);
+            var setExtentMode = toInteger(raw.set_extent_mode);
+            var wbtFill = raw.wbt_fill_or_breach || null;
+            var wbtBreachDistance = toInteger(raw.wbt_blc_dist);
+            var mapBoundsText = raw.map_bounds_text || "";
+
+            if (!center || center.length !== 2) {
+                throw new Error("Map center is not available yet. Move the map to establish bounds.");
+            }
+            if (!bounds || bounds.length !== 4) {
+                throw new Error("Map extent is missing. Navigate the map or specify a manual extent.");
+            }
+            if (mcl === null || csa === null) {
+                throw new Error("Minimum channel length and critical source area must be numeric.");
+            }
+            if (setExtentMode === null) {
+                setExtentMode = 0;
+            }
+
+            return {
+                map_center: center,
+                map_zoom: zoom,
+                map_bounds: bounds,
+                map_distance: distance,
+                mcl: mcl,
+                csa: csa,
+                wbt_fill_or_breach: wbtFill,
+                wbt_blc_dist: wbtBreachDistance,
+                set_extent_mode: setExtentMode,
+                map_bounds_text: mapBoundsText
+            };
+        }
+
+        var delegates = [];
+
+        delegates.push(dom.delegate(formElement, "change", "[data-channel-role=\"extent-mode\"]", function () {
+            var mode = parseInt(this.value, 10);
+            if (Number.isNaN(mode)) {
+                mode = 0;
+            }
+            updateManualExtentVisibility(mode);
+            emit("channel:extent:mode", { mode: mode });
+        }));
+
+        delegates.push(dom.delegate(formElement, "change", "[data-channel-role=\"wbt-fill\"]", function () {
+            updateBreachDistanceVisibility(this.value);
+        }));
+
+        delegates.push(dom.delegate(formElement, "click", "[data-channel-action=\"build\"]", function (event) {
+            event.preventDefault();
+            channel.build();
+        }));
+
+        function initializeUI() {
+            updateManualExtentVisibility(getExtentMode());
+            if (wbtFillSelect) {
+                updateBreachDistanceVisibility(wbtFillSelect.value);
+            }
+            if (buildButton) {
+                buildButton.dataset.mapDisabled = "false";
+            }
+        }
+
+        initializeUI();
+
+        var baseTriggerEvent = channel.triggerEvent.bind(channel);
+        channel.triggerEvent = function (eventName, payload) {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "BUILD_CHANNELS_TASK_COMPLETED") {
+                if (channel.ws_client && typeof channel.ws_client.disconnect === "function") {
+                    channel.ws_client.disconnect();
+                }
+                channel.show();
+                channel.report();
+                emit("channel:build:completed", payload || {});
+                baseTriggerEvent("job:completed", {
+                    jobId: channel.rq_job_id,
+                    task: "channel:build",
+                    payload: payload || {}
+                });
+            } else if (normalized === "BUILD_CHANNELS_TASK_FAILED" || normalized === "BUILD_CHANNELS_TASK_ERROR") {
+                emit("channel:build:error", {
+                    reason: "job_failure",
+                    payload: payload || {}
+                });
+                baseTriggerEvent("job:error", {
+                    jobId: channel.rq_job_id,
+                    task: "channel:build",
+                    payload: payload || {}
+                });
             }
 
             baseTriggerEvent(eventName, payload);
         };
 
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.remove = function () {
-            var self = instance;
-            var map = MapController.getInstance();
-
-            if (self.glLayer !== null) {
-                map.ctrls.removeLayer(self.glLayer);
-                map.removeLayer(self.glLayer);
-            }
-
-            if (self.labels !== null) {
-                map.ctrls.removeLayer(self.labels);
-                map.removeLayer(self.labels);
-            }
-        };
-
-        that.has_dem = function (onSuccessCallback) {
-            var self = instance;
-
-            $.get({
-                url: "query/has_dem/",
-                cache: false,
-                success: onSuccessCallback,
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-
-        that.build = function () {
-            var self = instance;
-
-            self.remove();
-            Outlet.getInstance().remove();
-
-            var task_msg = "Delineating channels";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-            self.ws_client.connect();
-
-            try {
-                const mode = $('input[name=set_extent_mode]:checked').val();
-                if (mode === "1") {
-                    // User-specified extent → parse and write into hidden #map_bounds
-                    const raw = $('#map_bounds_text').val() || '';
-                    const bbox = parseBboxText(raw);
-                    $('#map_bounds').val(bbox.join(','));
-                }
-            } catch (e) {
-                // Surface a friendly error and abort
-                self.status.html('<span class="text-danger">Invalid extent: ' + e.message + '</span>');
+        channel.hideStacktrace = function () {
+            if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
+                stacktraceAdapter.hide();
                 return;
             }
-
-            $.post({
-                url: "rq/api/fetch_dem_and_build_channels",
-                data: self.form.serialize(),
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(`fetch_dem_and_build_channels_rq job submitted: ${response.job_id}`);
-                        self.set_rq_job_id(self, response.job_id);
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+            if (!stacktraceElement) {
+                return;
+            }
+            stacktraceElement.hidden = true;
+            stacktraceElement.style.display = "none";
         };
 
-        that.onMapChange = function () {
-            var self = instance;
+        channel.remove = function () {
+            var map = MapController.getInstance();
+
+            if (channel.glLayer !== null) {
+                map.ctrls.removeLayer(channel.glLayer);
+                map.removeLayer(channel.glLayer);
+                channel.glLayer = null;
+            }
+
+            if (channel.labels !== null) {
+                map.ctrls.removeLayer(channel.labels);
+                map.removeLayer(channel.labels);
+                channel.labels = L.layerGroup();
+            }
+        };
+
+        channel.has_dem = function (onSuccessCallback) {
+            return http.getJson("query/has_dem/", { params: { _: Date.now() } })
+                .then(function (response) {
+                    if (typeof onSuccessCallback === "function") {
+                        onSuccessCallback(response);
+                    }
+                    return response;
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                    throw error;
+                });
+        };
+
+        channel.build = function () {
+            var taskMsg = "Delineating channels";
+            resetStatus(taskMsg);
+
+            channel.remove();
+            try {
+                Outlet.getInstance().remove();
+            } catch (err) {
+                console.warn("Failed to remove outlet before channel build", err);
+            }
+
+            if (channel.ws_client && typeof channel.ws_client.connect === "function") {
+                channel.ws_client.connect();
+            }
+
+            var payload;
+            try {
+                payload = buildPayload();
+            } catch (err) {
+                showErrorStatus(err.message);
+                emit("channel:build:error", { reason: "validation", error: err });
+                channel.triggerEvent("job:error", {
+                    reason: "validation",
+                    message: err.message
+                });
+                return Promise.reject(err);
+            }
+
+            emit("channel:build:started", {
+                payload: payload
+            });
+
+            return http.request("rq/api/fetch_dem_and_build_channels", {
+                method: "POST",
+                json: payload,
+                form: formElement
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.Success === true && data.job_id) {
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html("fetch_dem_and_build_channels_rq job submitted: " + data.job_id);
+                        }
+                        channel.set_rq_job_id(channel, data.job_id);
+                        channel.triggerEvent("job:started", {
+                            jobId: data.job_id,
+                            task: "channel:build",
+                            payload: payload
+                        });
+                        return data;
+                    }
+                    channel.pushResponseStacktrace(channel, data);
+                    showErrorStatus("Failed to submit channel delineation job.");
+                    emit("channel:build:error", {
+                        reason: "server",
+                        response: data
+                    });
+                    channel.triggerEvent("job:error", {
+                        reason: "server",
+                        response: data
+                    });
+                    return data;
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                    showErrorStatus("Unable to enqueue channel delineation job.");
+                    emit("channel:build:error", {
+                        reason: "http",
+                        error: error
+                    });
+                    channel.triggerEvent("job:error", {
+                        reason: "http",
+                        error: error
+                    });
+                    throw error;
+                });
+        };
+
+        channel.onMapChange = function () {
             var map = MapController.getInstance();
 
             var center = map.getCenter();
@@ -163,205 +566,200 @@ var ChannelDelineation = function () {
             var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
             var distance = map.distance(ne, sw);
 
-            $("#map_center").val([center.lng, center.lat]);
-            $("#map_zoom").val(zoom);
-            $("#map_distance").val(distance);
-            $("#map_bounds").val(extent.join(","));
-
-            if (zoom >= self.zoom_min || ispoweruser) {
-                $("#btn_build_channels").prop("disabled", false);
-                $("#hint_build_channels").text("");
-
-                $("#btn_build_channels_en").prop("disabled", false);
-                $("#hint_build_channels_en").text("");
-            } else {
-                $("#btn_build_channels").prop("disabled", true);
-                $("#hint_build_channels").text("Area is too large, zoom must be 13 " + self.zoom_min.toString() + ", current zoom is " + zoom.toString());
-
-                $("#btn_build_channels_en").prop("disabled", true);
-                $("#hint_build_channels_en").text("Area is too large, zoom must be 13 " + self.zoom_min.toString() + ", current zoom is " + zoom.toString());
+            if (mapCenterInput) {
+                mapCenterInput.value = [center.lng, center.lat].join(",");
             }
-        };
+            if (mapZoomInput) {
+                mapZoomInput.value = zoom;
+            }
+            if (mapDistanceInput) {
+                mapDistanceInput.value = distance;
+            }
+            if (mapBoundsInput) {
+                mapBoundsInput.value = extent.join(",");
+            }
 
-        that.show = function () {
-            var self = instance;
+            var zoomOk = zoom >= channel.zoom_min;
+            var powerOverride = typeof window.ispoweruser !== "undefined" && window.ispoweruser;
+            var enabled = zoomOk || powerOverride;
 
-            self.remove();
-            var task_msg = "Identifying topaz_pass";
+            if (!enabled) {
+                setBuildButtonEnabled(false, "Area is too large, zoom must be " + channel.zoom_min + ", current zoom is " + zoom + ".");
+            } else {
+                setBuildButtonEnabled(true, "");
+            }
 
+            channel.update_command_button_state(channel);
 
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            // Ask the Cloud what pass we are on. If the subcatchments have been
-            // eliminated we can just show the channels in the watershed. The
-            // underlying vector will contain feature.properties.TopazID attributes
-            $.get({
-                url: "query/delineation_pass/",
-                cache: false,
-                success: function success(response) {
-                    response = parseInt(response, 10);
-                    if ($.inArray(response, [0, 1, 2]) === -1) {
-                        self.pushResponseStacktrace(self, { Error: "Error Determining Delineation Pass" });
-                        return;
-                    }
-
-                    if (response === 0) {
-                        self.pushResponseStacktrace(self, { Error: "Channels not delineated" });
-                        return;
-                    }
-
-                    if (response === 1) {
-                        self.show_1();
-                    } else {
-                        self.show_2();
-                    }
-                    self.status.html(task_msg + "... Success");
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
+            emit("channel:map:updated", {
+                center: [center.lng, center.lat],
+                zoom: zoom,
+                distance: distance,
+                extent: extent
             });
         };
 
-        // Topaz Pass 1
-        // Shows the NETFUL.ARC built by TOPAZ
-        // --- hex → {r,g,b,a} helper (CSS-Tricks / SO recipe) ---
-
-        // same palette you used, just no alpha here
-        const palette = [
+        var palette = [
             "#8AE5FE", "#65C8FE", "#479EFF", "#306EFE",
             "#2500F4", "#6600cc", "#50006b", "#6b006b"
-        ].map(color => fromHex(color, 0.9));
+        ].map(function (color) {
+            return fromHex(color, 0.9);
+        });
 
-        //------------------------------------------------------------------
-        // glify show_1
-        //------------------------------------------------------------------
-        that.show_1 = function () {
-            const self = instance;
-            self.remove();
+        channel.show = function () {
+            var taskMsg = "Identifying topaz_pass";
+            resetStatus(taskMsg);
 
-            const task_msg = "Displaying Channel Map (WebGL)";
-            self.status.text(`${task_msg}…`);
+            return http.request("query/delineation_pass/", { params: { _: Date.now() } })
+                .then(function (result) {
+                    var response = result.body;
+                    var pass = parseInt(response, 10);
+                    if ([0, 1, 2].indexOf(pass) === -1) {
+                        channel.pushResponseStacktrace(channel, { Error: "Error Determining Delineation Pass" });
+                        showErrorStatus("Error determining delineation pass.");
+                        return;
+                    }
+                    if (pass === 0) {
+                        channel.pushResponseStacktrace(channel, { Error: "Channels not delineated" });
+                        showErrorStatus("Channels have not been delineated yet.");
+                        return;
+                    }
 
-            $.getJSON("resources/netful.json")
-                .done(function (fc) {
-                    const map = MapController.getInstance();
-                    self.glLayer = L.glify.layer({
+                    if (pass === 1) {
+                        channel.show_1();
+                    } else {
+                        channel.show_2();
+                    }
+
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(taskMsg + "... Success");
+                    }
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                });
+        };
+
+        channel.show_1 = function () {
+            channel.remove();
+
+            var taskMsg = "Displaying Channel Map (WebGL)";
+            if (statusAdapter && typeof statusAdapter.text === "function") {
+                statusAdapter.text(taskMsg + "…");
+            }
+
+            http.getJson("resources/netful.json", { params: { _: Date.now() } })
+                .then(function (fc) {
+                    var map = MapController.getInstance();
+                    channel.glLayer = L.glify.layer({
                         geojson: fc,
-                        paneName: 'channelGlPane',
+                        paneName: "channelGlPane",
                         glifyOptions: {
                             opacity: 0.9,
                             border: false,
-                            color: (i, feat) => {
-                                let order = parseInt(feat.properties.Order, 10) || 4;
+                            color: function (i, feat) {
+                                var order = parseInt(feat.properties.Order, 10) || 4;
                                 order = Math.min(order, 7);
                                 return palette[order];
                             }
                         }
                     }).addTo(map);
 
-                    map.ctrls.addOverlay(self.glLayer, "Channels");
+                    map.ctrls.addOverlay(channel.glLayer, "Channels");
 
-                    self.status.text(`${task_msg} – done`);
+                    if (statusAdapter && typeof statusAdapter.text === "function") {
+                        statusAdapter.text(taskMsg + " – done");
+                    }
+
+                    emit("channel:layers:loaded", { mode: 1 });
                 })
-                .fail((jqXHR, textStatus, err) =>
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, err)
-                );
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                });
         };
 
-        // Topaz Pass 2
-        // Shows the channels from SUBWTA.ARC built by TOPAZ (channels end with '4')
-        //------------------------------------------------------------------
-        // glify show_2  – channels from SUBWTA.ARC   (Topaz “4” polygons)
-        //------------------------------------------------------------------
-        that.show_2 = function () {
-            const self = instance;
-            self.remove();                                   // clear previous layers
-            self.status.text("Displaying SUBWTA channels…");
+        channel.show_2 = function () {
+            channel.remove();
+            if (statusAdapter && typeof statusAdapter.text === "function") {
+                statusAdapter.text("Displaying SUBWTA channels…");
+            }
 
-            $.getJSON("resources/channels.json")
-                .done(function (fc) {
-                    const map = MapController.getInstance();
+            http.getJson("resources/channels.json", { params: { _: Date.now() } })
+                .then(function (fc) {
+                    var map = MapController.getInstance();
 
-                    // ---------- WebGL polygons ----------
-                    self.glLayer = L.glify.layer({
+                    channel.glLayer = L.glify.layer({
                         geojson: fc,
-                        paneName: 'channelGlPane',
+                        paneName: "channelGlPane",
                         glifyOptions: {
                             opacity: 0.6,
                             border: true,
-                            color: (i, feat) => {
-                                // reuse your style logic – fall back to order 4
-                                let order = parseInt(feat.properties.Order, 10) || 4;
+                            color: function (i, feat) {
+                                var order = parseInt(feat.properties.Order, 10) || 4;
                                 order = Math.min(order, 7);
-                                return palette[order];     // palette[] == [{r,g,b,a}, …]
+                                return palette[order];
                             },
-                            click: (e, feat) => {
-                                const map = MapController.getInstance();
-                                map.chnQuery(feat.properties.TopazID); // same as before
+                            click: function (e, feat) {
+                                var ctrl = MapController.getInstance();
+                                ctrl.chnQuery(feat.properties.TopazID);
                             }
                         }
                     }).addTo(map);
 
-                    map.ctrls.addOverlay(self.glLayer, "Channels");
+                    map.ctrls.addOverlay(channel.glLayer, "Channels");
 
-                    // ---------- text labels ----------
-                    self.labels = L.layerGroup();
-                    const seen = new Set();
+                    channel.labels = L.layerGroup();
+                    var seen = new Set();
 
-                    fc.features.forEach(f => {
-                        const topId = f.properties.TopazID;
-                        if (seen.has(topId)) return;
+                    fc.features.forEach(function (feature) {
+                        var topId = feature && feature.properties ? feature.properties.TopazID : null;
+                        if (!topId || seen.has(topId)) {
+                            return;
+                        }
                         seen.add(topId);
 
-                        // crude centroid – last ring, first vertex (matches old code)
-                        const ring = f.geometry.coordinates[0][0];
-                        const center = [ring[1], ring[0]];          // [lat,lng]
+                        var ring = feature.geometry.coordinates[0][0];
+                        var center = [ring[1], ring[0]];
 
-                        const lbl = L.marker(center, {
+                        var marker = L.marker(center, {
                             icon: L.divIcon({
                                 className: "label",
-                                html: `<div style="${self.labelStyle}">${topId}</div>`
+                                html: '<div style="' + channel.labelStyle + '">' + topId + "</div>"
                             }),
-                            pane: 'markerCustomPane'
+                            pane: "markerCustomPane"
                         });
-                        self.labels.addLayer(lbl);
+                        channel.labels.addLayer(marker);
                     });
 
-                    //self.labels.addTo(map);
-                    map.ctrls.addOverlay(self.labels, "Channel Labels");
+                    map.ctrls.addOverlay(channel.labels, "Channel Labels");
 
-                    self.status.text("Displaying SUBWTA channels – done");
+                    if (statusAdapter && typeof statusAdapter.text === "function") {
+                        statusAdapter.text("Displaying SUBWTA channels – done");
+                    }
+
+                    emit("channel:layers:loaded", { mode: 2 });
                 })
-                .fail((jq, txt, err) =>
-                    self.pushErrorStacktrace(self, jq, txt, err)
-                );
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                });
         };
 
-        that.report = function () {
-            var self = instance;
-
-            $.get({
-                url: url_for_run("report/channel"),
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+        channel.report = function () {
+            return http.request(url_for_run("report/channel"), {
+                headers: { Accept: "text/html, */*;q=0.8" }
+            })
+                .then(function (result) {
+                    if (infoAdapter && typeof infoAdapter.html === "function") {
+                        infoAdapter.html(result.body || "");
+                    }
+                    emit("channel:report:loaded", {});
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                });
         };
 
-        return that;
+        return channel;
     }
 
     return {
@@ -372,4 +770,8 @@ var ChannelDelineation = function () {
             return instance;
         }
     };
-}();
+}());
+
+if (typeof globalThis !== "undefined") {
+    globalThis.ChannelDelineation = ChannelDelineation;
+}

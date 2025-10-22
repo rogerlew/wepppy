@@ -65,6 +65,13 @@ Follow `docs/dev-notes/module_refactor_workflow.md` for end-to-end instructions.
 - The `/rq/api/run_ash` route now runs everything through `parse_request_payload` and `Ash.parse_inputs` consumes native booleans/ints/floats. Keep routes and NoDb signatures aligned when payloads evolve.
 - Lint/test cadence: `wctl run-npm lint`, `wctl run-npm test -- ash`, `python wepppy/weppcloud/controllers_js/build_controllers_js.py`, and `wctl run-pytest tests/weppcloud/routes/test_rq_api_ash.py`. The Jest suite exercises depth-mode toggles, cache persistence, run submission, and error handling; pytest covers payload normalisation and RQ enqueue logic.
 
+### Omni controller reference
+- DOM hooks now rely on `data-omni-action` (`add-scenario`, `run-scenarios`), delegated scenario selectors tagged with `data-omni-role="scenario-select"`, and per-row containers marked `data-omni-scenario-controls`. Templates no longer ship inline scripts—let the controller render scenario cards dynamically and document any new `data-omni-*` hooks when requirements change.
+- `Omni.getInstance().events = WCEvents.useEventMap([...])` publishes `omni:scenario:added`, `omni:scenario:removed`, `omni:scenario:updated`, `omni:scenarios:loaded`, `omni:run:started`, `omni:run:completed`, and `omni:run:error`. Subscribe to these lifecycle signals instead of reading internal state when other controls (status panels, unitizer) need to react.
+- Scenario submissions build a `FormData` payload containing `scenarios` JSON plus optional SBS uploads; backend routes `/rq/api/run_omni` and `/rq/api/run_omni_contrasts` call `parse_request_payload` so JSON and multipart submissions share one parser. SBS files stage in `omni/_limbo/{idx}` via `save_run_file`, and payloads hydrate `Omni.parse_scenarios` with native values (no `"on"` strings).
+- Validation happens client-side for SBS uploads (allowed extensions + 100 MB cap) before hitting the network; failures emit `omni:run:error` and surface in the legacy status area via `controlBase`.
+- Testing cadence: `wctl run-npm lint`, `wctl run-npm test -- omni`, `python wepppy/weppcloud/controllers_js/build_controllers_js.py`, and `wctl run-pytest tests/weppcloud/routes/test_rq_api_omni.py`. The Jest suite (`__tests__/omni.test.js`) covers FormData serialization, scenario hydration, and validation; pytest exercises JSON vs multipart payloads, Redis queue wiring, and SBS upload staging.
+
 
 ## Testing & Tooling Notes
 - Jest config lives in `static-src/jest.config.mjs` (jsdom + ESM). Execute via `wctl run-npm test`; the script sets `NODE_OPTIONS=--experimental-vm-modules` automatically.

@@ -14,7 +14,8 @@ def test_landcover_datasets_default_locale():
     keys = _landcover_keys([])
     assert len(keys) == 114
     assert keys[0] == "nlcd/ever_forest/2024"
-    assert keys[40] == "nlcd/2015"
+    assert keys[40] == "nlcd/2024"
+    assert "nlcd/2015" in keys
     assert keys[-1] == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1984"
 
 

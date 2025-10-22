@@ -1,8 +1,10 @@
-import uuid
 import sys
+import shutil
 import types
 import importlib.util
 from pathlib import Path
+from typing import NamedTuple
+import uuid
 
 import yaml as pyyaml
 
@@ -89,6 +91,17 @@ all_your_base_stub.try_parse = _stub_try_parse
 all_your_base_stub.try_parse_float = _stub_try_parse_float
 all_your_base_stub.isfloat = _stub_isfloat
 all_your_base_stub.isint = _stub_isint
+all_your_base_stub.NCPU = 1
+class _StubRGBA(NamedTuple):
+    red: int
+    green: int
+    blue: int
+    alpha: int = 255
+
+    def tohex(self) -> str:
+        return "#" + "".join(f"{component:02X}" for component in self)
+
+all_your_base_stub.RGBA = _StubRGBA
 sys.modules["wepppy.all_your_base"] = all_your_base_stub
 
 
@@ -175,15 +188,10 @@ def _soil_payload(luse="test use"):
 
 
 @pytest.fixture
-def workspace_tmp_dir():
-    base = Path(__file__).parent / "__tmp__"
-    base.mkdir(parents=True, exist_ok=True)
-    tmp_dir = base / uuid.uuid4().hex
-    tmp_dir.mkdir()
+def workspace_tmp_dir(tmp_path_factory):
+    tmp_dir = tmp_path_factory.mktemp("soil_utils")
     yield tmp_dir
-    for child in tmp_dir.iterdir():
-        child.unlink()
-    tmp_dir.rmdir()
+    shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 @pytest.fixture
@@ -191,7 +199,7 @@ def make_soil_yaml(workspace_tmp_dir):
     def _factory(luse="test use"):
         payload = _soil_payload(luse=luse)
         path = workspace_tmp_dir / f"soil_{uuid.uuid4().hex}.yaml"
-        path.write_text(yaml.dump(payload))
+        path.write_text(pyyaml.safe_dump(payload))
         return path
 
     return _factory

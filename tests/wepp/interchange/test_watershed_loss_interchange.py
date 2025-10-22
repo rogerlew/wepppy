@@ -7,7 +7,7 @@ import pandas as pd
 import pyarrow.parquet as pq
 import pytest
 
-from .module_loader import cleanup_import_state, load_module
+from .module_loader import PROJECT_OUTPUT, cleanup_import_state, load_module
 
 
 load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
@@ -28,7 +28,7 @@ def _read(path: Path) -> pd.DataFrame:
 
 
 def test_watershed_loss_interchange_outputs_expected_tables(tmp_path: Path) -> None:
-    src = Path("tests/wepp/interchange/test_project/output")
+    src = PROJECT_OUTPUT
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
 

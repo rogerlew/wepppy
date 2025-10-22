@@ -24,157 +24,24 @@
     <div class="card">
         <div class="card-body">
             <div id="scenario-container"></div>
-            <button class="btn btn-success mb-3" onclick="addScenario()">+</button>
+            <button class="btn btn-success mb-3"
+                    type="button"
+                    data-omni-action="add-scenario">
+              +
+            </button>
         </div>
     </div>
 </div>
 
-<script>
-    // Configuration for scenarios and their controls
-    const scenarios = {
-        uniform_low: {
-            label: "Uniform Low Severity Fire",
-            controls: []
-        },
-        uniform_moderate: {
-            label: "Uniform Moderate Severity Fire",
-            controls: []
-        },
-        uniform_high: {
-            label: "Uniform High Severity Fire",
-            controls: []
-        },
-        sbs_map: {
-            label: "SBS Map",
-            controls: [
-                { type: "file", name: "sbs_file", label: "Upload SBS File" }
-            ]
-        },
-        undisturbed: {
-            label: "Undisturbed",
-            controls: [],
-            condition: () => Disturbed.getInstance()?.has_sbs() || false
-        },
-        prescribed_fire: {
-            label: "Prescribed Fire",
-            controls: [],
-            condition: () => {
-                const hasUndisturbed = document.querySelector('select[name="scenario"] option[value="undisturbed"]:checked');
-                return hasUndisturbed || !Disturbed.getInstance()?.has_sbs();
-            }
-        },
-        thinning: {
-            label: "Thinning",
-            controls: [
-                { type: "select", name: "canopy_cover", label: "Canopy Cover Reduction to", options: ["40%", "65%"] },
-                {   type: "select", 
-                    name: "ground_cover", 
-                    label: "Ground Cover", 
-                    options: ["93%", "90%", "85%", "75%"],
-                    optionLabels: {
-                        "93%": "93% - Cable",
-                        "90%": "90% - Forward",
-                        "85%": "85% - Skidder",
-                        "75%": "75%"
-                    } 
-                }
-            ]
-        },
-        mulch: {
-            label: "Mulching",
-            controls: [
-                {   type: "select", 
-                    name: "ground_cover_increase", 
-                    label: "Ground Cover Increase", 
-                    options: ["15%", "30%", "60%"],
-                    optionLabels: {
-                        "15%": "15% - ½ tons/acre",
-                        "30%": "30% - 1 tons/acre",
-                        "60%": "60% - 2 tons/acre"
-                    }
-                },
-                { 
-                    type: "select", 
-                    name: "base_scenario", 
-                    label: "Base Scenario", 
-                    options: ["uniform_low", "uniform_moderate", "uniform_high", "sbs_map"],
-                    optionLabels: {
-                        uniform_low: "Uniform Low Severity Fire",
-                        uniform_moderate: "Uniform Moderate Severity Fire",
-                        uniform_high: "Uniform High Severity Fire",
-                        sbs_map: "SBS Map"
-                    }
-                }
-            ]
-        }
-    };
-
-    function addScenario() {
-        const container = document.getElementById('scenario-container');
-        const scenarioItem = document.createElement('div');
-        scenarioItem.className = 'row align-items-end mb-3 pb-3 border-bottom scenario-item';
-        scenarioItem.innerHTML = `
-            <div class="col pr-5">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="scenario-select">Scenario</label>
-                            <select class="form-control" id="scenario-select" name="scenario" onchange="updateControls(this)">
-                                <option value="">Select Scenario</option>
-                                ${Object.entries(scenarios)
-                                    .filter(([key, config]) => !config.condition || config.condition())
-                                    .map(([key, config]) => `<option value="${key}">${config.label}</option>`)
-                                    .join('')}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-8 scenario-controls d-flex"></div>
-                </div>
-            </div>
-            <div class="remove-btn-col">
-                <button class="btn btn-danger btn-sm w-100" onclick="this.parentElement.parentElement.remove()">-</button>
-            </div>
-        `;
-        container.appendChild(scenarioItem);
-    }
-
-    function updateControls(selectElement) {
-        const scenarioKey = selectElement.value;
-        const controlsDiv = selectElement.parentElement.parentElement.parentElement.querySelector('.scenario-controls');
-        controlsDiv.innerHTML = '';
-
-        if (scenarioKey && scenarios[scenarioKey]) {
-            const config = scenarios[scenarioKey];
-            config.controls.forEach(control => {
-                let html = `
-                    <div class="form-group px-2">
-                        <label for="${control.name}">${control.label}</label>
-                `;
-                if (control.type === 'select') {
-                    html += `
-                        <select class="form-control" id="${control.name}" name="${control.name}">
-                            ${control.options.map(opt => 
-                                `<option value="${opt}">${control.optionLabels?.[opt] || opt}</option>`
-                            ).join('')}
-                        </select>
-                    `;
-                } else if (control.type === 'file') {
-                    html += `<input type="file" class="form-control-file" id="${control.name}" name="${control.name}" accept=".tif,.tiff,.img">`;
-                    html += `<small class="form-text text-muted">Upload GeoTIFF/IMG files up to 100&nbsp;MB.</small>`;
-                }
-                html += `</div>`;
-                controlsDiv.insertAdjacentHTML('beforeend', html);
-            });
-        }
-    }
-
-    
-</script>
-
 <div style="height:1em;"></div>
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
-        <button id="btn_run_omni" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Omni.getInstance().run_omni_scenarios()">Run Omni</button>
+        <button id="btn_run_omni"
+                class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
+                type="button"
+                data-omni-action="run-scenarios">
+          Run Omni
+        </button>
     </div>
     <div class="col-sm-5">
         <small id="hint_run_omni"></small>

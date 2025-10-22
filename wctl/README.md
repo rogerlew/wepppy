@@ -32,6 +32,8 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 - `wctl run-stubtest`: runs `stubtest` inside the container with the appropriate environment (defaults to `wepppy.nodb.core`). Provide module names to narrow the check.
 - `wctl run-npm`: runs `npm` on the host with `--prefix wepppy/weppcloud/static-src`. Example: `wctl run-npm lint`, `wctl run-npm test`, or `wctl run-npm check`.
 - `wctl run-stubgen`: regenerates the local `stubs/` tree via `python tools/sync_stubs.py`.
+- `wctl check-test-stubs`: executes `python tools/check_stubs.py` inside the container to ensure sys.modules stubs match their public APIs.
+- `wctl check-test-isolation`: launches `python tools/check_test_isolation.py` inside the container. Supports all script flags (`--quick`, `--strict`, `--iterations`, `--json`, etc.) and surfaces order-dependent failures plus leaked global state before they surprise downstream suites.
 
 ### **Host Environment Overrides**
 

@@ -33,6 +33,75 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 - Prefer `tmp_path`/`tmp_path_factory` for on-disk work. For NoDb controllers, pass `str(tmp_path)` to `getInstance`.
 - Need a clean environment variable? Use `monkeypatch.setenv` and `monkeypatch.delenv` inside tests.
 
+### Module Stub Management
+
+**Critical**: When creating stubs for `wepppy` modules via `sys.modules` to isolate tests from heavy dependencies, follow these rules:
+
+1. **Prefer shared fixtures over per-test stubs.** If multiple tests need the same stub, create a session-scoped fixture in `conftest.py` rather than duplicating stub logic.
+
+2. **Match the full public API.** When stubbing a module, inspect its `__all__` export list and implement **every** public function/class that other code might import:
+   ```python
+   # Check the real module's exports first
+   from wepppy.all_your_base import __all__
+   print(__all__)  # ['isint', 'isfloat', 'isnan', ...]
+   
+   # Then ensure your stub covers all of them
+   stub.isint = lambda x: ...
+   stub.isfloat = lambda x: ...
+   stub.isnan = lambda x: ...
+   ```
+
+3. **Document stub coverage.** Add a comment listing which functions the stub implements and why certain ones are omitted (if any).
+
+4. **Centralize common stubs.** If `wepppy.all_your_base` stubs appear in multiple test files, extract them to `conftest.py` or a dedicated `tests/stubs.py` module that all tests can import.
+
+5. **Avoid `sys.modules` pollution during collection.** If test modules execute stub creation at module level (outside fixtures), those stubs persist across the entire pytest session. This caused the `isint` import error when:
+   - `test_wepp_soil_util.py` created an incomplete stub at import time
+   - `test_disturbed_bp.py` later tried to import routes that need `isint`
+   - The stub was still in `sys.modules` but missing `isint`
+
+6. **Prefer fixture-scoped stubs when possible:**
+   ```python
+   @pytest.fixture(autouse=True)
+   def stub_all_your_base():
+       original = sys.modules.get('wepppy.all_your_base')
+       stub = types.ModuleType('wepppy.all_your_base')
+       stub.isint = lambda x: ...
+       stub.isfloat = lambda x: ...
+       sys.modules['wepppy.all_your_base'] = stub
+       yield
+       if original:
+           sys.modules['wepppy.all_your_base'] = original
+       else:
+           sys.modules.pop('wepppy.all_your_base', None)
+   ```
+
+7. **Test stub completeness.** When adding imports to production code from stubbed modules, grep for existing stubs and update them simultaneously:
+   ```bash
+   # Added 'from wepppy.all_your_base import isint' somewhere?
+   git grep "sys.modules\[\"wepppy.all_your_base\"\]"
+   # Then update ALL stub sites with the new function
+   ```
+
+8. **Run the automated checker.** Execute `wctl check-test-stubs` (or `python tools/check_stubs.py`) before committing to ensure every stub matches the module's `__all__`.
+
+**Recent example:** The `isint` import error occurred because:
+- `/workdir/wepppy/wepppy/weppcloud/controllers_js/unitizer_map_builder.py` created a stub with only `isfloat` and `isnan`
+- `/workdir/wepppy/tests/wepp/soils/utils/test_wepp_soil_util.py` created a stub with only `try_parse`, `try_parse_float`, and `isfloat`
+- Both were missing `isint`, which `/workdir/wepppy/wepppy/weppcloud/routes/rq/api/api.py` imports
+
+**Fix:** Added `isint` to both stubs to match the real module's `__all__` list.
+
+### Test Marker Guidelines
+
+- Treat markers as mandatory metadata. Every test should declare a category marker such as `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.routes`, or `@pytest.mark.microservice`. Pick the one that best matches the subsystem exercised.
+- Add `@pytest.mark.slow` for tests that consistently exceed ~2 seconds. Combine with the category marker (`@pytest.mark.integration + @pytest.mark.slow`) as needed.
+- Use environment markers (`@pytest.mark.requires_network`, `@pytest.mark.requires_docker`, etc.) when the test depends on optional services. Guard the body with `pytest.importorskip` or fixture checks so it skips cleanly if the requirement is missing.
+- Place decorators directly above the test function or class. When an entire module shares the same requirement, set `pytestmark = pytest.mark.<marker>` at the top of the file.
+- Avoid conflicting combinations (e.g., `unit` plus `slow`). Either refactor the test to be fast or promote it to an integration-style test.
+- When editing legacy tests that lack markers, backfill them as part of the change. We want full coverage across the suite.
+- Until the planned `wctl check-test-markers` helper lands, reviewers should manually verify marker usage. Running targeted selections like `pytest -m "not slow"` should still leave a healthy subset of tests.
+
 ## NoDb Test Patterns
 
 ```python

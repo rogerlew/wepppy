@@ -12,6 +12,8 @@ import pandas as pd
 import pytest
 import pyarrow.parquet as pq
 
+from tests.wepp.interchange.module_loader import PROJECT_OUTPUT
+
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -90,8 +92,8 @@ def _prepare_totwatsed3(source_tot2: Path, target_tot3: Path) -> None:
 
 
 def _prepare_run_directory(base: Path) -> Path:
-    sample_root = Path("tests/wepp/interchange/test_project")
-    source_output = sample_root / "output"
+    sample_root = PROJECT_OUTPUT.parent
+    source_output = PROJECT_OUTPUT
 
     run_dir = base / "run"
     output_dir = run_dir / "wepp" / "output"

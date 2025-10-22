@@ -446,7 +446,7 @@ def fetch_dem_and_build_channels_rq(
     mcl: float,
     wbt_fill_or_breach: Optional[str],
     wbt_blc_dist: Optional[int],
-    set_extent_mode: str,
+    set_extent_mode: int,
     map_bounds_text: str,
 ) -> None:
     """Chain DEM acquisition and channel building via dependent RQ jobs.
@@ -473,7 +473,7 @@ def fetch_dem_and_build_channels_rq(
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         watershed = Watershed.getInstance(get_wd(runid))
-        watershed.set_extent_mode = set_extent_mode
+        watershed.set_extent_mode = int(set_extent_mode)
         watershed.map_bounds_text = map_bounds_text
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)

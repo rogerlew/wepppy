@@ -300,6 +300,15 @@ async def elevationquery_endpoint(request: Request) -> JSONResponse:
         dem_path = await asyncio.to_thread(_locate_dem, active_root)
     except DemNotFoundError as exc:
         return _build_response(elevation=None, lat=lat, lng=lng, error=str(exc))
+    except Exception as exc:
+        logger.exception("Unexpected error locating DEM for %s", runid)
+        return _build_response(
+            elevation=None,
+            lat=lat,
+            lng=lng,
+            error=_format_exception_message(exc),
+            status_code=500,
+        )
 
     try:
         elevation = await asyncio.to_thread(_sample_dem, dem_path, lng, lat)

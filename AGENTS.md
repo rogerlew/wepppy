@@ -419,6 +419,79 @@ def test_nodb_round_trip(tmp_path):
 - Network traffic is disallowed. Mock requests/responses explicitly (e.g., `responses`, `httpx.MockTransport`) and drop payload fixtures under `tests/data/`.
 - Flush or namespace any temporary keys/files created during tests.
 
+### Module Stubs and sys.modules Pollution
+**Critical anti-pattern:** Multiple test modules creating incomplete stubs for shared dependencies at import time.
+
+When tests need to isolate heavy modules (e.g., `wepppy.all_your_base`, `wepppy.nodb.*`) via `sys.modules` stubs:
+
+1. **Check for existing stubs first:**
+   ```bash
+   git grep 'sys.modules\["wepppy.module_name"\]'
+   ```
+   If stubs already exist, extend them rather than creating new ones.
+
+2. **Match the full public API.** Inspect the real module's `__all__` export list and implement every function that other code might import. Partial stubs cause `ImportError` when unrelated tests import routes/controllers that use the missing symbols.
+
+3. **Prefer shared fixtures over module-level stub creation.** Module-level stubs (`sys.modules[...] = stub` at file scope) persist for the entire pytest session and affect **all** tests, including those in different files. Use session/function-scoped fixtures with cleanup:
+   ```python
+   @pytest.fixture(autouse=True)
+   def stub_module():
+       original = sys.modules.get('wepppy.module')
+       stub = types.ModuleType('wepppy.module')
+       stub.func_a = lambda: ...
+       stub.func_b = lambda: ...
+       sys.modules['wepppy.module'] = stub
+       yield
+       if original:
+           sys.modules['wepppy.module'] = original
+       else:
+           sys.modules.pop('wepppy.module', None)
+   ```
+
+4. **Document and centralize.** If multiple test files stub the same module, extract the stub logic to `tests/conftest.py` or a dedicated `tests/stubs.py` module. Add a comment listing covered functions and why others are omitted.
+
+5. **Update stubs when adding imports to production code.** When introducing `from wepppy.all_your_base import new_func` in production code, grep for existing stubs and add the function to **all** of them immediately:
+   ```bash
+   git grep 'sys.modules\["wepppy.all_your_base"\]' tests/
+   # Then update each stub file
+   ```
+
+**Case study (October 2025):** The `test_disturbed_bp.py` import failure was caused by:
+- `unitizer_map_builder.py` creating a stub with only `isfloat`/`isnan`
+- `test_wepp_soil_util.py` creating a stub with only `try_parse`/`try_parse_float`/`isfloat`
+- Both missing `isint`, which `routes/rq/api/api.py` imports
+- Pytest collected the stub-creating test first, then failed when `test_disturbed_bp.py` tried to import routes
+
+**Fix:** Added `isint` to both stubs to match `wepppy.all_your_base.__all__`. See `tests/AGENTS.md` for detailed stub management guidance.
+
+Run `wctl check-test-stubs` before committing test changes to automatically verify stub completeness.
+
+### Test Marker Guidelines
+
+Consistent pytest markers keep the suite selectable (fast unit loops vs. full integration runs) and make it obvious which tests can run in constrained environments. Every new or modified test should follow these rules:
+
+- **Category marker required.** Choose exactly one of:
+  - `@pytest.mark.unit` – Pure in-process logic; should run in <0.5s and avoid filesystem/network access. This is the default expectation when no other marker applies, but we still prefer the explicit marker for clarity.
+  - `@pytest.mark.integration` – Touches multiple subsystems, external binaries (WEPP, Peridot), or real services even if mocked.
+  - `@pytest.mark.microservice`/`@pytest.mark.routes`/`@pytest.mark.nodb` – Use when a package already has a standard marker for targeted runs. (Check `tests/AGENTS.md` for the current list.)
+
+- **Duration markers.**
+  - `@pytest.mark.slow` for any test whose steady-state runtime exceeds 2 seconds.
+  - `@pytest.mark.benchmark` for performance baselines (often skipped by default); pair with fixtures that guard against noisy environments.
+
+- **Environment markers.**
+  - `@pytest.mark.requires_network`, `@pytest.mark.requires_docker`, etc., when a test depends on optional infrastructure. Prefer to skip gracefully inside the test if requirements are missing.
+
+- **Placement.** Decorators belong directly above the test function or on a class definition (applies to every method). For entire modules, `pytestmark = pytest.mark.slow` is acceptable when every test shares the same requirement.
+
+- **Combined markers.** It is acceptable to combine (e.g., `@pytest.mark.integration` + `@pytest.mark.slow`) when both attributes apply. Avoid contradictory combinations such as `unit` + `slow`—re-evaluate whether the test should be refactored.
+
+- **Review existing markers before adding new ones.** Keep the marker vocabulary tight; if a new category is required, document it in `tests/AGENTS.md` and announce it in PR notes.
+
+- **Backfill when touching a file.** If you edit an older test that lacks markers, add them as part of the change. We are working toward universal coverage.
+
+Until the automated marker checker lands (`wctl check-test-markers` from the tooling spec), reviewers should manually ensure new/modified tests obey these conventions. Future work will wire the checker into CI so regressions are caught automatically.
+
 ## Front-End Development
 
 ### Controller Bundling
@@ -652,6 +725,16 @@ When resuming Kubernetes work:
 3. Examine existing implementations for patterns
 4. Use `git log` to understand change history
 5. Search codebase for similar functionality: `git grep "pattern"`
+
+### Extracting Documentation Snippets
+- Use the `markdown-extract` CLI (installed at `/usr/local/bin/markdown-extract`) to pull a single section out of a long Markdown file.
+  - Example: `markdown-extract "Test Marker" docs/dev-notes/test-tooling-spec.md`
+  - Patterns are regex-based and case-insensitive by default; pass `--case-sensitive` when needed.
+  - Add `--all` to print every matching section and `--no-print-matched-heading` to omit the heading line.
+- The command is pipeline-friendly—feel free to pipe to `head`, `less`, or redirect to a scratch file when you only need a quick excerpt.
+- Source lives in `/workdir/markdown-extract`; if you need new features (extra filters, formatting tweaks, etc.), update that crate and rebuild.
+- When writing docs, give each section a distinctive heading (for example `## 1. Test Isolation Checker`). Mention those sections using Markdown anchors when linking elsewhere, e.g. `docs/dev-notes/test-tooling-spec.md#1-test-isolation-checker-wctl-check-test-isolation`.
+- Handy when the doc is huge and you just want a specific section without scrolling.
 
 ### Common Pitfalls
 - **NoDb locking**: Always use `with self.locked()` for mutations

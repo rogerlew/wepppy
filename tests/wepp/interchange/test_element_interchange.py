@@ -4,16 +4,15 @@ import shutil
 import pyarrow.parquet as pq
 import pytest
 
-from .module_loader import cleanup_import_state, load_module
+from .module_loader import PROJECT_OUTPUT, cleanup_import_state, load_module
 load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
 load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
 concurrency_module = load_module("wepppy.wepp.interchange.concurrency", "wepppy/wepp/interchange/concurrency.py")
 element_module = load_module("wepppy.wepp.interchange.hill_element_interchange", "wepppy/wepp/interchange/hill_element_interchange.py")
 cleanup_import_state()
 
-
 def test_element_interchange_writes_parquet(tmp_path, monkeypatch):
-    src = Path("tests/wepp/interchange/test_project/output")
+    src = PROJECT_OUTPUT
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
 

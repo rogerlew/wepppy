@@ -38,7 +38,7 @@ def fetch_dem_and_build_channels_rq(
     mcl: float,
     wbt_fill_or_breach: Optional[str],
     wbt_blc_dist: Optional[int],
-    set_extent_mode: str,
+    set_extent_mode: int,
     map_bounds_text: str,
 ) -> None: ...
 

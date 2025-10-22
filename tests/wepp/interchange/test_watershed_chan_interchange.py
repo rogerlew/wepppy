@@ -5,7 +5,7 @@ import shutil
 
 import pyarrow.parquet as pq
 
-from .module_loader import cleanup_import_state, load_module
+from .module_loader import PROJECT_OUTPUT, cleanup_import_state, load_module
 
 
 load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
@@ -23,7 +23,7 @@ MEASUREMENTS = [col for col, *_ in _watershed_chan.MEASUREMENT_COLUMNS]
 
 
 def test_watershed_chan_interchange_writes_parquet(tmp_path: Path) -> None:
-    src = Path("tests/wepp/interchange/test_project/output")
+    src = PROJECT_OUTPUT
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
 

@@ -119,6 +119,25 @@ This helper ensures frontend tooling executes from the correct project directory
 .B wctl run-stubgen
 Regenerates the local stub tree via
 .BR "python tools/sync_stubs.py" .
+.TP
+.B wctl check-test-stubs
+Runs
+.BR "python tools/check_stubs.py"
+inside the
+.I weppcloud
+container to verify that sys.modules stubs defined in the test suite match the public API exports of the modules they replace.
+.TP
+.B wctl check-test-isolation
+Invokes
+.BR "python tools/check_test_isolation.py"
+inside the
+.I weppcloud
+container. Use this command to fuzz test order, re-run each file in isolation, and flag leaked global state before it trips other suites. All script flags are supported, including
+.BR --quick ,
+.BR --strict ,
+.BR --iterations ,
+and
+.BR --json .
 .SH ENVIRONMENT
 .TP
 .B WEPPPY_ENV_FILE

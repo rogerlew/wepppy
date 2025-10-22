@@ -401,7 +401,7 @@ def try_redis_set_log_level(runid, level: str):
 
     try:
         level = LogLevel.parse(level)
-        redis_log_level_client.set(f'loglevel:{runid}', str(level))
+        redis_log_level_client.set(f'loglevel:{runid}', str(int(level)))
     except Exception as e:
         logging.error(f'Error setting log level in Redis: {e}')
 
@@ -625,6 +625,26 @@ class NoDbBase(object):
             return relpath
         
         return None
+
+    @property
+    def is_omni_run(self) -> bool:
+        relpath = self.pup_relpath
+        if not relpath:
+            return False
+        normalized = relpath.replace("\\", "/")
+        if normalized.startswith("_pups/omni/"):
+            return True
+        return normalized.startswith("omni/")
+
+    @property
+    def _relpath_to_parent(self) -> str:
+        relpath = self.pup_relpath
+        if not relpath:
+            return ""
+        normalized = relpath.replace("\\", "/")
+        if normalized.startswith("_pups/"):
+            return normalized[len("_pups/"):]
+        return normalized
     
         
     @property
@@ -651,6 +671,8 @@ class NoDbBase(object):
     
         if _rel_path.startswith('_pups/omni/'):
             return f'{self.runid}:omni'
+
+        return f'{self.runid}:{self.class_name}'
 
     def _init_logging(self):
         # Initialize loggers
@@ -1308,6 +1330,10 @@ class NoDbBase(object):
             if self.group_name is None:
                 raise ValueError('run_group is set but group_name is None')
             group_prefix = f'{self.run_group};;{self.group_name};;'
+
+        if self.parent_wd:
+            parent_name = os.path.basename(self.parent_wd.rstrip(os.sep))
+            return group_prefix + parent_name
 
         wd = self.wd
         split_wd = wd.split(os.sep)
