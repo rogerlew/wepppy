@@ -2,145 +2,567 @@
  * DSS Export
  * ----------------------------------------------------------------------------
  */
-var DssExport = function () {
+var DssExport = (function () {
+    "use strict";
+
     var instance;
 
+    var FORM_ID = "dss_export_form";
+    var DSS_CHANNEL = "dss_export";
+    var EXPORT_TASK = "dss:export";
+    var EXPORT_MESSAGE = "Exporting to DSS";
+
+    var SELECTORS = {
+        form: "#" + FORM_ID,
+        info: "#info",
+        status: "#status",
+        stacktrace: "#stacktrace",
+        rqJob: "#rq_job",
+        hint: "#hint_export_dss",
+        mode1: "#dss_export_mode1_controls",
+        mode2: "#dss_export_mode2_controls"
+    };
+
+    var ACTIONS = {
+        modeToggle: '[data-action="dss-export-mode"]',
+        runExport: '[data-action="dss-export-run"]'
+    };
+
+    var NAV_LINK_SELECTORS = [
+        'a[href="#partitioned-dss-export-for-hec"]',
+        'a[href="#dss-export"]'
+    ];
+
+    var EVENT_NAMES = [
+        "dss:mode:changed",
+        "dss:export:started",
+        "dss:export:completed",
+        "dss:export:error",
+        "job:started",
+        "job:completed",
+        "job:error"
+    ];
+
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
+
+        if (!dom || typeof dom.delegate !== "function" || typeof dom.show !== "function" || typeof dom.hide !== "function") {
+            throw new Error("DssExport controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("DssExport controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.postJson !== "function") {
+            throw new Error("DssExport controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("DssExport controller requires WCEvents helpers.");
+        }
+
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style && element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                if (element.style) {
+                    element.style.display = "none";
+                }
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function parseMode(value, fallback) {
+        if (value === undefined || value === null || value === "") {
+            return fallback === undefined ? null : fallback;
+        }
+        var parsed = parseInt(String(value), 10);
+        if (parsed === 1 || parsed === 2) {
+            return parsed;
+        }
+        return fallback === undefined ? null : fallback;
+    }
+
+    function parseChannelIds(value) {
+        if (value === undefined || value === null) {
+            return [];
+        }
+
+        var tokens = [];
+        if (Array.isArray(value)) {
+            tokens = value.slice();
+        } else if (typeof value === "string") {
+            tokens = value.split(/[,;\s]+/);
+        } else {
+            tokens = [value];
+        }
+
+        var seen = new Set();
+        var ids = [];
+        tokens.forEach(function (token) {
+            if (token === undefined || token === null || token === "") {
+                return;
+            }
+            var parsed = parseInt(String(token).trim(), 10);
+            if (!Number.isNaN(parsed) && parsed > 0 && !seen.has(parsed)) {
+                seen.add(parsed);
+                ids.push(parsed);
+            }
+        });
+        return ids;
+    }
+
+    function collectExcludeOrders(payload) {
+        var orders = [];
+        if (!payload) {
+            return orders;
+        }
+
+        for (var i = 1; i <= 5; i += 1) {
+            var key = "dss_export_exclude_order_" + i;
+            var raw = payload[key];
+            var selected = false;
+
+            if (Array.isArray(raw)) {
+                selected = raw.some(function (value) {
+                    return Boolean(value);
+                });
+            } else if (typeof raw === "string") {
+                var lowered = raw.toLowerCase();
+                selected = lowered === "true" || lowered === "on" || lowered === "1";
+            } else {
+                selected = Boolean(raw);
+            }
+
+            if (selected) {
+                orders.push(i);
+            }
+        }
+
+        if (orders.length === 0 && payload.dss_export_exclude_orders !== undefined) {
+            var direct = payload.dss_export_exclude_orders;
+            var values = Array.isArray(direct) ? direct : [direct];
+            values.forEach(function (value) {
+                var parsed = parseInt(String(value), 10);
+                if (!Number.isNaN(parsed) && parsed >= 1 && parsed <= 5 && orders.indexOf(parsed) === -1) {
+                    orders.push(parsed);
+                }
+            });
+        }
+
+        return orders;
+    }
+
+    function toggleNavEntries(dom, shouldShow) {
+        NAV_LINK_SELECTORS.forEach(function (selector) {
+            var links = [];
+            try {
+                links = dom.qsa(selector);
+            } catch (err) {
+                // ignore selector failures
+            }
+            if (!links || links.length === 0) {
+                return;
+            }
+            links.forEach(function (link) {
+                if (!link) {
+                    return;
+                }
+                var target = link.parentElement || link;
+                if (!target) {
+                    return;
+                }
+                if (shouldShow) {
+                    dom.show(target);
+                } else {
+                    dom.hide(target);
+                }
+            });
+        });
+    }
+
+    function buildDownloadUrl(path) {
+        var prefix = typeof window.site_prefix === "string" ? window.site_prefix : "";
+        var normalizedPrefix = prefix.replace(/\/+$/, "");
+        var normalizedPath = (path || "").replace(/^\/+/, "");
+        if (!normalizedPrefix) {
+            return normalizedPath || "/";
+        }
+        if (!normalizedPath) {
+            return normalizedPrefix;
+        }
+        return normalizedPrefix + "/" + normalizedPath;
+    }
+
+    function applyMode(controller, mode, options) {
+        if (!controller) {
+            return null;
+        }
+        var fallback = options && options.fallback !== undefined ? options.fallback : controller.state.mode || 1;
+        var parsed = parseMode(mode, null);
+        if (parsed === null) {
+            parsed = parseMode(fallback, 1);
+        }
+        if (parsed !== 1 && parsed !== 2) {
+            throw new Error("ValueError: unknown mode");
+        }
+
+        controller.state.mode = parsed;
+
+        var panel1 = controller.modePanels ? controller.modePanels[1] : null;
+        var panel2 = controller.modePanels ? controller.modePanels[2] : null;
+
+        if (parsed === 1) {
+            if (panel1 && typeof panel1.show === "function") {
+                panel1.show();
+            }
+            if (panel2 && typeof panel2.hide === "function") {
+                panel2.hide();
+            }
+        } else {
+            if (panel1 && typeof panel1.hide === "function") {
+                panel1.hide();
+            }
+            if (panel2 && typeof panel2.show === "function") {
+                panel2.show();
+            }
+        }
+
+        if (controller.form && (options ? options.updateRadios !== false : true)) {
+            var radios = controller.form.querySelectorAll("input[name='dss_export_mode']");
+            radios.forEach(function (radio) {
+                if (!radio) {
+                    return;
+                }
+                radio.checked = String(radio.value) === String(parsed);
+            });
+        }
+
+        if (!options || options.emit !== false) {
+            var detail = { mode: parsed };
+            if (controller.events && typeof controller.events.emit === "function") {
+                controller.events.emit("dss:mode:changed", detail);
+            }
+            controller.triggerEvent("dss:mode:changed", detail);
+        }
+
+        return parsed;
+    }
+
     function createInstance() {
-        var that = controlBase();
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var eventsApi = helpers.events;
 
-        that.form = $("#dss_export_form");
-        that.container = that.form.closest(".controller-section");
-        if (!that.container.length) {
-            that.container = that.form;
+        var base = controlBase();
+        var emitter = null;
+
+        if (eventsApi && typeof eventsApi.createEmitter === "function") {
+            var baseEmitter = eventsApi.createEmitter();
+            emitter = typeof eventsApi.useEventMap === "function"
+                ? eventsApi.useEventMap(EVENT_NAMES, baseEmitter)
+                : baseEmitter;
         }
-        that.info = $("#dss_export_form #info");
-        that.status = $("#dss_export_form  #status");
-        that.stacktrace = $("#dss_export_form #stacktrace");
-        that.ws_client = new WSClient('dss_export_form', 'dss_export');
-        that.ws_client.attachControl(that);
-        that.rq_job_id = null;
-        that.rq_job = $("#dss_export_form #rq_job");
-        that.command_btn_id = 'btn_export_dss';
 
-        that.bindHandlers = function () {
-            if (!that.form || !that.form.length) {
+        var formElement = null;
+        try {
+            formElement = dom.qs(SELECTORS.form);
+        } catch (err) {
+            console.warn("DssExport controller could not locate form:", err);
+        }
+
+        var containerElement = null;
+        if (formElement && typeof formElement.closest === "function") {
+            containerElement = formElement.closest(".controller-section");
+        }
+        if (!containerElement) {
+            containerElement = formElement || null;
+        }
+
+        var infoElement = formElement ? dom.qs(SELECTORS.info, formElement) : null;
+        var statusElement = formElement ? dom.qs(SELECTORS.status, formElement) : null;
+        var stacktraceElement = formElement ? dom.qs(SELECTORS.stacktrace, formElement) : null;
+        var rqJobElement = formElement ? dom.qs(SELECTORS.rqJob, formElement) : null;
+        var hintElement = formElement ? dom.qs(SELECTORS.hint, formElement) : null;
+        var mode1Element = formElement ? dom.qs(SELECTORS.mode1, formElement) : null;
+        var mode2Element = formElement ? dom.qs(SELECTORS.mode2, formElement) : null;
+
+        var controller = Object.assign(base, {
+            dom: dom,
+            forms: forms,
+            http: http,
+            events: emitter,
+            form: formElement,
+            container: containerElement,
+            info: createLegacyAdapter(infoElement),
+            status: createLegacyAdapter(statusElement),
+            stacktrace: createLegacyAdapter(stacktraceElement),
+            rq_job: createLegacyAdapter(rqJobElement),
+            hint: createLegacyAdapter(hintElement),
+            modePanels: {
+                1: createLegacyAdapter(mode1Element),
+                2: createLegacyAdapter(mode2Element)
+            },
+            command_btn_id: "btn_export_dss",
+            ws_client: null,
+            state: {
+                mode: 1
+            },
+            _delegates: []
+        });
+
+        controller.ws_client = new WSClient(FORM_ID, DSS_CHANNEL);
+        controller.ws_client.attachControl(controller);
+
+        controller.hideStacktrace = function () {
+            if (controller.stacktrace && typeof controller.stacktrace.hide === "function") {
+                controller.stacktrace.hide();
+                return;
+            }
+            if (stacktraceElement) {
+                stacktraceElement.hidden = true;
+                stacktraceElement.style.display = "none";
+            }
+        };
+
+        controller.setMode = function (mode) {
+            return applyMode(controller, mode, { emit: true, updateRadios: true });
+        };
+
+        controller.buildRequestPayload = function () {
+            if (!controller.form) {
+                return {};
+            }
+            var payload = forms.serializeForm(controller.form, { format: "json" }) || {};
+            var currentMode = parseMode(payload.dss_export_mode, controller.state.mode || 1);
+            var channelIds = parseChannelIds(payload.dss_export_channel_ids);
+            var excludeOrders = collectExcludeOrders(payload);
+
+            return {
+                dss_export_mode: currentMode,
+                dss_export_channel_ids: channelIds,
+                dss_export_exclude_orders: excludeOrders
+            };
+        };
+
+        controller.export = function () {
+            if (!controller.form) {
                 return;
             }
 
-            if (that.form.data("dssHandlersBound")) {
-                return;
+            controller.info.html("");
+            controller.status.html(EXPORT_MESSAGE + "…");
+            controller.stacktrace.text("");
+            controller.hideStacktrace();
+            if (controller.hint && typeof controller.hint.text === "function") {
+                controller.hint.text("");
             }
-            that.form.data("dssHandlersBound", true);
 
-            that.form.on("change", "input[name='dss_export_mode']", function (event) {
-                var mode = parseInt(event.target.value, 10);
-                if (!isNaN(mode)) {
-                    instance.setMode(mode);
+            var payload = controller.buildRequestPayload();
+            controller.state.mode = payload.dss_export_mode || controller.state.mode || 1;
+
+            controller.triggerEvent("job:started", {
+                task: EXPORT_TASK,
+                payload: payload
+            });
+            if (controller.events && typeof controller.events.emit === "function") {
+                controller.events.emit("dss:export:started", {
+                    task: EXPORT_TASK,
+                    payload: payload
+                });
+            }
+
+            if (controller.ws_client && typeof controller.ws_client.connect === "function") {
+                controller.ws_client.connect();
+            }
+
+            http.postJson("rq/api/post_dss_export_rq", payload, { form: controller.form }).then(function (response) {
+                var body = response && response.body ? response.body : response;
+                var normalized = body || {};
+
+                if (normalized.Success === true || normalized.success === true) {
+                    var jobId = normalized.job_id || normalized.jobId || null;
+                    controller.status.html("post_dss_export_rq job submitted: " + jobId);
+                    controller.set_rq_job_id(controller, jobId);
+                    if (controller.events && typeof controller.events.emit === "function") {
+                        controller.events.emit("dss:export:started", {
+                            task: EXPORT_TASK,
+                            payload: payload,
+                            jobId: jobId,
+                            status: "queued"
+                        });
+                    }
+                    return;
+                }
+
+                controller.pushResponseStacktrace(controller, normalized);
+                if (controller.events && typeof controller.events.emit === "function") {
+                    controller.events.emit("dss:export:error", {
+                        task: EXPORT_TASK,
+                        error: normalized
+                    });
+                }
+                controller.triggerEvent("job:error", {
+                    task: EXPORT_TASK,
+                    error: normalized
+                });
+                if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
+                    controller.ws_client.disconnect();
+                }
+            }).catch(function (error) {
+                controller.pushErrorStacktrace(controller, error);
+                if (controller.events && typeof controller.events.emit === "function") {
+                    controller.events.emit("dss:export:error", {
+                        task: EXPORT_TASK,
+                        error: error
+                    });
+                }
+                controller.triggerEvent("job:error", {
+                    task: EXPORT_TASK,
+                    error: error
+                });
+                if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
+                    controller.ws_client.disconnect();
                 }
             });
+        };
 
-            that.form.on("click", "#btn_export_dss", function (event) {
+        controller.report = function () {
+            var href = buildDownloadUrl("browse/export/dss.zip");
+            controller.info.html("<a href='" + href + "' target='_blank'>Download DSS Export Results (.zip)</a>");
+        };
+
+        controller.handleExportTaskCompleted = function (detail) {
+            if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
+                controller.ws_client.disconnect();
+            }
+            controller.report();
+            if (controller.events && typeof controller.events.emit === "function") {
+                controller.events.emit("dss:export:completed", {
+                    task: EXPORT_TASK,
+                    jobId: controller.rq_job_id || null,
+                    detail: detail || null
+                });
+            }
+            controller.triggerEvent("job:completed", {
+                task: EXPORT_TASK,
+                jobId: controller.rq_job_id || null,
+                detail: detail || null
+            });
+        };
+
+        controller.show = function () {
+            if (controller.container) {
+                dom.show(controller.container);
+            }
+            toggleNavEntries(dom, true);
+        };
+
+        controller.hide = function () {
+            if (controller.container) {
+                dom.hide(controller.container);
+            }
+            toggleNavEntries(dom, false);
+        };
+
+        controller.dispose = function () {
+            controller._delegates.forEach(function (unsubscribe) {
+                if (typeof unsubscribe === "function") {
+                    unsubscribe();
+                }
+            });
+            controller._delegates = [];
+            if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
+                controller.ws_client.disconnect();
+            }
+        };
+
+        if (formElement) {
+            controller._delegates.push(dom.delegate(formElement, "change", ACTIONS.modeToggle, function (event, target) {
                 event.preventDefault();
-                instance.export();
-            });
-        };
-
-        const baseTriggerEvent = that.triggerEvent.bind(that);
-        that.triggerEvent = function (eventName, payload) {
-            if (eventName === 'DSS_EXPORT_TASK_COMPLETED') {
-                that.ws_client.disconnect();
-                that.report();
-
-                if (typeof DssExport !== 'undefined') {
-                    var dss_export = DssExport.getInstance();
-                    if (dss_export && dss_export.ws_client && typeof dss_export.ws_client.disconnect === 'function') {
-                        dss_export.ws_client.disconnect();
-                    }
+                var datasetMode = target && target.getAttribute("data-dss-export-mode");
+                var nextMode = parseMode(datasetMode || (target ? target.value : undefined), null);
+                try {
+                    controller.setMode(nextMode);
+                } catch (err) {
+                    console.error("[DssExport] Unable to set mode:", err);
                 }
-            }
+            }));
 
-            baseTriggerEvent(eventName, payload);
-        };
+            controller._delegates.push(dom.delegate(formElement, "click", ACTIONS.runExport, function (event) {
+                event.preventDefault();
+                controller.export();
+            }));
 
-        that.show = function () {
-            that.container.show();
-            $('a[href="#partitioned-dss-export-for-hec"], a[href="#dss-export"]').parent().show()
-        };
-
-        that.hide = function () {
-            that.container.hide();
-            $('a[href="#partitioned-dss-export-for-hec"], a[href="#dss-export"]').parent().hide()
-        };
-
-        that.setMode = function (mode) {
-            var self = instance;
-
-            // verify mode is 1 or 2
-            if (mode !== 1 && mode !== 2) {
-                throw "ValueError: unknown mode";
-            }
-
-            if (mode === 1) {
-                $("#dss_export_mode1_controls").show();
-                $("#dss_export_mode2_controls").hide();
-            }
-            else if (mode === 2) {
-                $("#dss_export_mode1_controls").hide();
-                $("#dss_export_mode2_controls").show();
-            }
-
-        };
-
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.export = function () {
-            var self = instance;
-
-            var task_msg = "Exporting to DSS";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-            self.ws_client.connect();
-
-            $.post({
-                url: "rq/api/post_dss_export_rq",
-                data: self.form.serialize(),
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(`post_dss_export_rq job submitted: ${response.job_id}`);
-                        self.set_rq_job_id(self, response.job_id);
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
+            formElement.addEventListener("DSS_EXPORT_TASK_COMPLETED", function (event) {
+                controller.handleExportTaskCompleted(event && event.detail ? event.detail : null);
             });
-        };
-        that.report = function () {
-            var self = instance;
-            self.info.html("<a href='browse/export/dss.zip' target='_blank'>Download DSS Export Results (.zip)</a>");
-        };
-
-        that.bindHandlers();
-
-        var initialModeInput = that.form.find("input[name='dss_export_mode']:checked");
-        if (initialModeInput.length) {
-            var modeValue = parseInt(initialModeInput.val(), 10);
-            if (!isNaN(modeValue)) {
-                that.setMode(modeValue);
-            }
         }
 
-        return that;
+        var initialModeElement = formElement ? formElement.querySelector("input[name='dss_export_mode']:checked") : null;
+        var initialMode = parseMode(initialModeElement ? initialModeElement.value : null, 1);
+        controller.state.mode = initialMode;
+        try {
+            applyMode(controller, initialMode, { emit: false, updateRadios: true, fallback: 1 });
+        } catch (err) {
+            console.warn("[DssExport] Failed to apply initial mode:", err);
+        }
+
+        controller.hideStacktrace();
+
+        return controller;
     }
 
     return {
@@ -151,4 +573,8 @@ var DssExport = function () {
             return instance;
         }
     };
-}();
+})();
+
+if (typeof globalThis !== "undefined") {
+    globalThis.DssExport = DssExport;
+}

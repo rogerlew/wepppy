@@ -14,8 +14,8 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/weppcloud/wepppy/services/preflight2/internal/config"
-	"github.com/weppcloud/wepppy/services/preflight2/internal/server"
+	"github.com/rogerlew/wepppy/services/preflight2/internal/config"
+	"github.com/rogerlew/wepppy/services/preflight2/internal/server"
 )
 
 func main() {

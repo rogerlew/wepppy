@@ -17,13 +17,13 @@ import (
 	"golang.org/x/sync/errgroup"
 	"nhooyr.io/websocket"
 
-	"github.com/weppcloud/wepppy/services/preflight2/internal/checklist"
-	"github.com/weppcloud/wepppy/services/preflight2/internal/config"
+	"github.com/rogerlew/wepppy/services/preflight2/internal/checklist"
+	"github.com/rogerlew/wepppy/services/preflight2/internal/config"
 )
 
 var (
-	runIDPattern = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
-	pingPayload  = []byte(`{"type":"ping"}`)
+	runIDPattern  = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
+	pingPayload   = []byte(`{"type":"ping"}`)
 	hangupPayload = []byte(`{"type":"hangup"}`)
 )
 
@@ -142,17 +142,31 @@ func (s *Server) keyspaceChannel(runID string) string {
 	return fmt.Sprintf("__keyspace@%d__:%s", s.redisDB, runID)
 }
 
+type wsConn interface {
+	Read(context.Context) (websocket.MessageType, []byte, error)
+	Write(context.Context, websocket.MessageType, []byte) error
+	Close(websocket.StatusCode, string) error
+	SetReadLimit(int64)
+}
+
 type connection struct {
 	srv      *Server
 	logger   *slog.Logger
 	runID    string
-	ws       *websocket.Conn
+	ws       wsConn
 	lastSeen atomic.Int64
 	last     *checklist.Payload
 	writeMu  sync.Mutex
 }
 
-func newConnection(srv *Server, logger *slog.Logger, runID string, ws *websocket.Conn) *connection {
+func newConnection(srv *Server, logger *slog.Logger, runID string, ws wsConn) *connection {
+	if logger == nil {
+		if srv.logger != nil {
+			logger = srv.logger
+		} else {
+			logger = slog.Default()
+		}
+	}
 	c := &connection{
 		srv:    srv,
 		logger: logger,

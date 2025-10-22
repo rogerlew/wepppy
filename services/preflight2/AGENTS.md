@@ -33,6 +33,11 @@ All environment variables use the `PREFLIGHT_` prefix:
    ```
    A connected WebSocket client should receive the updated checklist payload.
 
+## Testing
+- **Unit**: `wctl run-preflight-tests` (runs `go test ./...` inside the Go builder).
+- **Integration**: `wctl run-preflight-tests -tags=integration ./internal/server` exercises the miniredis-backed pub/sub harness.
+- **Plan**: `docs/testing-strategy-and-implementation-plan.md` tracks phases, tooling expectations, and open tasks.
+
 ## Operational Tips
 - On startup failures, inspect `docker compose logs preflight` for retry warnings. Misconfiguration (bad URL, auth failure) exits immediately; networking errors trigger the retry loop.
 - Combined with the Redis healthcheck in `docker-compose`, the container won’t start until Redis is actually ready. After Redis maintenance, the service will reconnect automatically.

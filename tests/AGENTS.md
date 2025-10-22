@@ -17,6 +17,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | Climate/soils/wepp | `tests/climates/`, `tests/wepp/`, `tests/soils/` | Integration against data pipelines and WEPP executables |
 | Microservices | `tests/microservices/` | Starlette/FastAPI endpoints, payload validation |
 | Query engine | `tests/query_engine/` | DuckDB-backed analytics, MCP endpoints |
+| Go microservices | `services/status2/internal/**/_test.go` (Go) | Go-based WebSocket and checklist services (`status2`, `preflight2`) |
 
 ## Execution Strategy
 
@@ -26,6 +27,11 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
   - Mandatory pre-handoff sweep: `wctl run-pytest tests --maxfail=1`
 - **CI vs local parity.** Add new fixtures or stubs so tests pass with no network access and without real Redis/WEPP executables. If a test needs large artifacts, drop them under `tests/data/` and reference them relative to `Path(__file__).parent`.
 - **Frontend harness.** When controller changes require Jest or other npm scripts, invoke them via `wctl run-npm <script>` so the `npm --prefix wepppy/weppcloud/static-src` prefix is handled consistently (for example, `wctl run-npm test`).
+- **Go microservices.** Leverage the compose-managed builders so the toolchain stays isolated:
+  - `wctl run-status-tests` runs `go test ./...` for `services/status2`, after a `go mod tidy`. Pass extra arguments (e.g., `-tags=integration ./internal/server`) to widen coverage.
+  - `wctl run --rm status-build sh -lc 'PATH=/usr/local/go/bin:$PATH go test -tags=integration ./internal/server'` is the raw escape hatch when you need ad-hoc Go commands.
+  - `wctl run-preflight-tests` mirrors the status workflow for `services/preflight2`; tack on `-tags=integration` when you need the Redis/WebSocket flow.
+  - Integration cases (tagged `//go:build integration`) spin up `miniredis` and real WebSocket flows; expect to supply `-tags=integration` when you need them.
 
 ## Fixtures & Stubs
 

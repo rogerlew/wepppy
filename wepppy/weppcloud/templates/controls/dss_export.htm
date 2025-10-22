@@ -5,12 +5,12 @@
 <div class="form-group row">
   <div class="col-sm-3">
     <label class="radio-inline"><input type="radio" class="disable-readonly" value="1" id="dss_export_mode1"
-        name="dss_export_mode" onchange="if(this.checked) DssExport.getInstance().setMode(1)" 
+        name="dss_export_mode" data-action="dss-export-mode" data-dss-export-mode="1"
         {% if wepp.dss_export_mode == 1 %} checked {% endif %}> Export Select Channels</label>
   </div>
   <div class="col-sm-3">
     <label class="radio-inline"><input type="radio" class="disable-readonly" value="2" id="dss_export_mode2"
-        name="dss_export_mode" onchange="if(this.checked) DssExport.getInstance().setMode(2)"
+        name="dss_export_mode" data-action="dss-export-mode" data-dss-export-mode="2"
         {% if wepp.dss_export_mode == 2 %} checked {% endif %}> Export Based on Channel Order</label>
   </div>
 </div>
@@ -80,8 +80,8 @@
 <div class="form-group row hide-readonly" id="btn_export_dss_container">
     <div class="col-sm-4">
         <button 
-            onclick="DssExport.getInstance().export();"
-            id="btn_export_dss" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
+            id="btn_export_dss" class="btn btn-outline-success my-2 my-sm-0 col-sm-12 disable-readonly" type="button"
+            data-action="dss-export-run">
 
           <img  id="btn_export_dss_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
           Export DSS

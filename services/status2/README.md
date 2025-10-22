@@ -238,6 +238,11 @@ Each connection includes:
 - **Load tests**: 300+ concurrent clients publishing at moderate frequency to
   identify bottlenecks.
 
+Run the Go suite via:
+
+- `wctl run-status-tests` — executes `go test ./...` inside the compose-managed Go builder.
+- `wctl run-status-tests -tags=integration ./internal/server` — adds the Redis/WebSocket integration harness on demand.
+
 ## 13. Migration Notes
 
 - Redis keyspace configuration unaffected (pure Pub/Sub).
@@ -255,6 +260,7 @@ Each connection includes:
 - **Testing**: Place unit tests near their packages. Use `go test ./...` for fast feedback. For end-to-end testing with Redis, start `docker compose up redis` and run `REDIS_URL=redis://localhost:6379/2 go test ./... -tags=integration`.
 - **Telemetry helpers**: Reuse patterns from `preflight2` (metrics, logging). If you extend functionality, keep interfaces aligned so operators don’t juggle two different observability stacks.
 - **Code organization**: Shared components (config parsing, metrics scaffolding) may eventually move to a `services/common` module; until then, maintain parity manually to avoid drift.
+- **Chaos & load drills**: See `docs/chaos-playbook.md` for Redis restart, network jitter, and k6 load-testing procedures. The reusable k6 scenario lives at `docs/k6-status2-load.js`.
 
 ## 15. DevOps Playbook
 

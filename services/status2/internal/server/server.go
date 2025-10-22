@@ -18,8 +18,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"nhooyr.io/websocket"
 
-	"github.com/weppcloud/wepppy/services/status2/internal/config"
-	"github.com/weppcloud/wepppy/services/status2/internal/payload"
+	"github.com/rogerlew/wepppy/services/status2/internal/config"
+	"github.com/rogerlew/wepppy/services/status2/internal/payload"
 )
 
 var channelPattern = regexp.MustCompile(`^[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$`)

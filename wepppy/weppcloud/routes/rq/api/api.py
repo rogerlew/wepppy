@@ -829,52 +829,74 @@ def api_post_dss_export_rq(runid, config):
     boolean_fields = {f'dss_export_exclude_order_{i}' for i in range(1, 6)}
     payload = parse_request_payload(request, boolean_fields=boolean_fields)
 
-    dss_export_mode = payload.get('dss_export_mode', None)
-    if dss_export_mode not in (None, ''):
-        try:
-            dss_export_mode = int(dss_export_mode)
-        except (TypeError, ValueError):
-            dss_export_mode = None
-    else:
+    def _coerce_int_list(raw_value):
+        if raw_value in (None, "", []):
+            return []
+        if isinstance(raw_value, (list, tuple, set)):
+            iterable = raw_value
+        else:
+            iterable = str(raw_value).split(",")
+        seen: set[int] = set()
+        result: list[int] = []
+        for item in iterable:
+            if item in (None, ""):
+                continue
+            try:
+                parsed = int(str(item).strip())
+            except (TypeError, ValueError):
+                continue
+            if parsed not in seen:
+                seen.add(parsed)
+                result.append(parsed)
+        return result
+
+    raw_mode = payload.get('dss_export_mode')
+    try:
+        dss_export_mode = int(raw_mode) if raw_mode not in (None, '') else None
+    except (TypeError, ValueError):
+        dss_export_mode = None
+    if dss_export_mode not in (None, 1, 2):
         dss_export_mode = None
 
-    dss_excluded_channel_orders = []
-    for i in range(1, 6):
-        if payload.get(f'dss_export_exclude_order_{i}'):
-            dss_excluded_channel_orders.append(i)
-
-    dss_export_channel_ids = payload.get('dss_export_channel_ids', None)
-    if dss_export_channel_ids not in (None, ''):
-        if isinstance(dss_export_channel_ids, (list, tuple, set)):
-            try:
-                dss_export_channel_ids = [int(i) for i in dss_export_channel_ids]
-            except ValueError:
-                dss_export_channel_ids = None
-        else:
-            try:
-                dss_export_channel_ids = [int(i) for i in str(dss_export_channel_ids).split(',') if i.strip()]
-            except ValueError:
-                dss_export_channel_ids = None
+    exclude_orders_payload = payload.get('dss_export_exclude_orders')
+    if exclude_orders_payload is not None:
+        dss_excluded_channel_orders = [
+            order for order in _coerce_int_list(exclude_orders_payload)
+            if 1 <= order <= 5
+        ]
     else:
-        dss_export_channel_ids = None
+        dss_excluded_channel_orders = [
+            order for order in range(1, 6)
+            if payload.get(f'dss_export_exclude_order_{order}')
+        ]
+
+    dss_export_channel_ids_payload = payload.get('dss_export_channel_ids')
+    if isinstance(dss_export_channel_ids_payload, dict):
+        # Unexpected structure; ignore to avoid raising.
+        dss_export_channel_ids = []
+    else:
+        dss_export_channel_ids = _coerce_int_list(dss_export_channel_ids_payload)
 
     if dss_export_mode == 2:
-        dss_export_channel_ids = []
-
         watershed = Watershed.getInstance(wd)
+        dss_export_channel_ids = []
         for chn_id, chn_summary in watershed.chns_summary.items():
-            order = int(chn_summary['order'])
+            try:
+                order = int(chn_summary['order'])
+            except (TypeError, ValueError):
+                continue
             if order in dss_excluded_channel_orders:
                 continue
-            dss_export_channel_ids.append(int(chn_id))
+            try:
+                dss_export_channel_ids.append(int(chn_id))
+            except (TypeError, ValueError):
+                continue
 
     with wepp.locked():
         if dss_export_mode is not None:
-            wepp._dss_export_mode = dss_export_mode
-        if dss_excluded_channel_orders is not None:
-            wepp._dss_excluded_channel_orders = dss_excluded_channel_orders
-        if dss_export_channel_ids is not None:
-            wepp._dss_export_channel_ids = dss_export_channel_ids
+            wepp.dss_export_mode = dss_export_mode
+        wepp.dss_excluded_channel_orders = dss_excluded_channel_orders
+        wepp.dss_export_channel_ids = dss_export_channel_ids
     
     try:
         prep = RedisPrep.getInstance(wd)

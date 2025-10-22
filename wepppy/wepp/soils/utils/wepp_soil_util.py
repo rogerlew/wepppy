@@ -13,12 +13,17 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-import oyaml as yaml
+import yaml
 
 try:
-    from yaml import CLoader as Loader, CDumper as Dumper  # type: ignore
+    from yaml import CSafeLoader as Loader  # type: ignore
 except ImportError:  # pragma: no cover - C extensions may be unavailable
-    from yaml import Loader, Dumper  # type: ignore
+    from yaml import SafeLoader as Loader  # type: ignore
+
+try:
+    from yaml import CSafeDumper as Dumper  # type: ignore
+except ImportError:  # pragma: no cover - C extensions may be unavailable
+    from yaml import SafeDumper as Dumper  # type: ignore
 
 from wepppy.all_your_base import isfloat, try_parse, try_parse_float
 
@@ -848,11 +853,17 @@ class WeppSoilUtil(object):
     def _load_yaml(self, fn: str) -> None:
         with open(fn) as fp:
             yaml_txt = fp.read()
-            self.obj = yaml.safe_load(yaml_txt)
+            self.obj = yaml.load(yaml_txt, Loader=Loader)
 
     def dump_yaml(self, dst: str) -> None:
         with open(dst, 'w') as fp:
-            fp.write(yaml.dump(self.obj))
+            fp.write(
+                yaml.dump(
+                    self.obj,
+                    Dumper=Dumper,
+                    sort_keys=False,
+                )
+            )
 
     def _load_bson(self, fn: str) -> None:
         import bson

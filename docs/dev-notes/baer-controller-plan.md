@@ -45,7 +45,7 @@
 ## Testing Strategy
 - **Frontend**: `controllers_js/__tests__/baer.test.js` exercises delegated handlers, FormData submissions, slider opacity updates, and error surfacing. Keep fixtures in sync with template data attributes (`data-baer-*`) whenever markup evolves.
 - **Backend**: `tests/weppcloud/routes/test_disturbed_bp.py` now asserts class-break coercion, RGB parsing, fire-date persistence, and the single-row wrapping logic introduced by `parse_request_payload`.
-- **Commands**: Standard cadence—`wctl run-npm lint`, `wctl run-npm test`, `python wepppy/weppcloud/controllers_js/build_controllers_js.py`, `wctl run-pytest tests/weppcloud/routes/test_disturbed_bp.py`, then `wctl run-pytest tests --maxfail=1` (note the suite currently fails early in `tests/wepp/soils/utils/test_wepp_soil_util.py` because `oyaml.safe_load` is unavailable in the sandbox image).
+- **Commands**: Standard cadence—`wctl run-npm lint`, `wctl run-npm test`, `python wepppy/weppcloud/controllers_js/build_controllers_js.py`, `wctl run-pytest tests/weppcloud/routes/test_disturbed_bp.py`, then `wctl run-pytest tests --maxfail=1`.
 
 ## Open Questions / Follow-ups
 - Confirm whether `nodata_vals` expects comma-separated string or requires parsing into iterable for `Baer.modify_burn_class`.

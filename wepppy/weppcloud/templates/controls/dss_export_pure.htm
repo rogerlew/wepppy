@@ -16,14 +16,14 @@
     "label": "Export select channels",
     "value": "1",
     "selected": current_mode == 1,
-    "attrs": {"class": "disable-readonly", "data-dss-export-mode": "1"}
+    "attrs": {"class": "disable-readonly", "data-dss-export-mode": "1", "data-action": "dss-export-mode"}
   },
   {
     "id": "dss_export_mode2",
     "label": "Export based on channel order",
     "value": "2",
     "selected": current_mode == 2,
-    "attrs": {"class": "disable-readonly", "data-dss-export-mode": "2"}
+    "attrs": {"class": "disable-readonly", "data-dss-export-mode": "2", "data-action": "dss-export-mode"}
   }
 ] %}
 
@@ -101,7 +101,8 @@
       <button
         id="btn_export_dss"
         type="button"
-        class="pure-button pure-button-primary disable-readonly">
+        class="pure-button pure-button-primary disable-readonly"
+        data-action="dss-export-run">
         <img
           id="btn_export_dss_lock"
           src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}"

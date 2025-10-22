@@ -62,7 +62,6 @@ IGNORE_MODULE_PREFIXES = {
     "osgeo",
     "jsonpickle",
     "rosetta",
-    "oyaml",
     "pyarrow",
     "netCDF4",
     "utm",

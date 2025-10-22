@@ -1,8 +1,9 @@
-module github.com/weppcloud/wepppy/services/preflight2
+module github.com/rogerlew/wepppy/services/preflight2
 
 go 1.25
 
 require (
+	github.com/alicebob/miniredis/v2 v2.35.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/redis/go-redis/v9 v9.5.5
 	golang.org/x/sync v0.7.0
@@ -17,6 +18,7 @@ require (
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
+	github.com/yuin/gopher-lua v1.1.1 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )

@@ -51,8 +51,6 @@ if not hasattr(deprecated_module, "deprecated"):
         return decorator
 
     deprecated_module.deprecated = _noop_deprecated
-
-sys.modules.setdefault("oyaml", types.ModuleType("oyaml"))
 if "imageio" not in sys.modules:
     imageio_module = types.ModuleType("imageio")
     sys.modules["imageio"] = imageio_module

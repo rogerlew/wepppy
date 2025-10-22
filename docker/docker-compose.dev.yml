@@ -94,6 +94,21 @@ services:
       redis:
         condition: service_started
 
+  preflight-build:
+    image: golang:1.25-alpine
+    container_name: weppcloud-preflight-build
+    working_dir: /workspace/services/preflight2
+    volumes:
+      - ..:/workspace
+      - type: volume
+        source: preflight_go_cache
+        target: /go
+    environment:
+      GOMODCACHE: /go/pkg/mod
+    depends_on:
+      redis:
+        condition: service_started
+
   preflight:
     build:
       context: ..
@@ -442,4 +457,6 @@ volumes:
   weppcloudr-renv-cache:
     driver: local
   status_go_cache:
+    driver: local
+  preflight_go_cache:
     driver: local

@@ -17,7 +17,7 @@
 - [x] Update templates with `data-*` hooks required for delegated listeners; avoid inline JS.
 - [x] Add Jest coverage for form submission success/failure, map toggle interactions, and event emissions. Mock fetch + WS behavior as needed.
 - [x] Extend pytest suites to validate new payload shapes and RQ orchestration, mirroring `module_refactor_workflow.md`.
-- [x] Run required validation commands (`wctl run-npm lint/test`, bundle rebuild, targeted pytest`). (Full-suite pytest hits the existing `oyaml.safe_load` failure noted in soils utils; see test output.)
+- [x] Run required validation commands (`wctl run-npm lint/test`, bundle rebuild, targeted pytest`) and finish with `wctl run-pytest tests --maxfail=1`.
 - [x] Update docs (`controllers_js/README.md`, `controllers_js/AGENTS.md`) to describe the new controller contracts and testing guidance.
 
 ## Implementation Notes (2025-10-22)

@@ -168,7 +168,7 @@ runaway calls during outages.
 | `PREFLIGHT_REDIS_URL` | `redis://localhost:6379/0` | Target Redis DB. |
 | `PREFLIGHT_LISTEN_ADDR` | `:9001` | Bind address. |
 | `PREFLIGHT_PING_INTERVAL` | `5s` | Heartbeat cadence. |
-| `PREFLIGHT_PONG_TIMEOUT` | `65s` | Idle cutoff. |
+| `PREFLIGHT_PONG_TIMEOUT` | `75s` | Idle cutoff (set ≥60s in production). |
 | `PREFLIGHT_LOG_LEVEL` | `info` | Log verbosity. |
 | `PREFLIGHT_METRICS_ENABLED` | `false` | Expose `/metrics`. |
 | `PREFLIGHT_MAX_MESSAGE_SIZE` | `64KB` | WebSocket read limit. |
@@ -272,7 +272,7 @@ runaway calls during outages.
 
 - **Local builds**: `go build ./...` from `services/preflight2` compiles the binary. If Go tooling isn’t installed, `docker compose build preflight` performs the build inside a container and produces an updated `go.sum`.
 - **Formatting & linting**: Run `go fmt ./...` before committing. Optional linters (e.g., `golangci-lint run ./...`) are encouraged but not required yet.
-- **Testing**: Unit tests live alongside the packages (`*_test.go`). For Redis integration tests, spin up `docker compose up redis` and run `go test ./... -tags=integration`.
+- **Testing**: Use the compose-managed Go builder. `wctl run-preflight-tests` runs `go test ./...`; append flags such as `-tags=integration ./internal/server` to exercise the miniredis/WebSocket harness. See `docs/testing-strategy-and-implementation-plan.md` for the full workflow.
 - **Configuration management**: Prefer injecting `PREFLIGHT_*` vars via `.env` or Compose overrides rather than hardcoding defaults. Avoid committing secrets; Redis credentials should come from the environment or Docker secrets.
 - **Shared utilities**: If you need common code between `preflight2` and `status2`, consider creating `services/common` for shared logging/config helpers to avoid divergence.
 

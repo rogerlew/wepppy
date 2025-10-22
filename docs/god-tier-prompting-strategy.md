@@ -61,10 +61,10 @@ Use this GitHub-style checklist to track remaining controller migrations. Index 
 - [x] `wepppy/weppcloud/controllers_js/baer.js`
 - [x] `wepppy/weppcloud/controllers_js/debris_flow.js`
 - [x] `wepppy/weppcloud/controllers_js/batch_runner.js`
+- [x] `wepppy/weppcloud/controllers_js/disturbed.js`
+- [ ] `wepppy/weppcloud/controllers_js/dss_export.js` 
 
 **Pending Migration**
-- [ ] `wepppy/weppcloud/controllers_js/disturbed.js` — `$.get` / `$.ajax` chains (line 13)
-- [ ] `wepppy/weppcloud/controllers_js/dss_export.js` — legacy show/hide + selectors (`$("#dss_export_form")`, line 11)
 - [ ] `wepppy/weppcloud/controllers_js/landuse_modify.js` — `$("#modify_landuse_form")`, line 6
 - [ ] `wepppy/weppcloud/controllers_js/map.js` — DOM references via `$()` (`$("#mouseelev")`, line 117)
 - [ ] `wepppy/weppcloud/controllers_js/observed.js` — `$("#observed_form")`, line 10

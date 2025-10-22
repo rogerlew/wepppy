@@ -70,11 +70,15 @@ All integration tests should run behind a `-tags=integration` build flag so they
 2. **Integration harness**: Create `internal/server/integration_test.go` guarded behind `integration` build tag. Reuse helper to spin up full server, start real WebSocket client using `websocket.Dial`, and manipulate Redis.
 3. **CI wiring**: Update project CI to run `go test ./...` on every change; add optional job for `-tags=integration` triggered via label or nightly schedule.
 
+**Status:** ✅ Unit tests cover configuration overrides and retry helpers (`internal/config/config_test.go`, `internal/server/server_test.go`). An integration harness backed by `miniredis` validates Redis→WebSocket forwarding (`internal/server/integration_test.go`, enabled with `-tags=integration`). The new `wctl run-status-tests` helper runs both suites, and accepts extra arguments to toggle integration coverage in CI.
+
 ### Phase 3 – Observability & Load Validation (Weeks 3–4)
 
 1. **Metrics verification**: Implement e2e test (canary or smoke job) executing k6 scenario, validating Prometheus gauges/counters via scrape snapshot.
 2. **Chaos scripts**: Add docker-compose task that restarts Redis during load to validate reconnect logs and ensure no stale sockets remain.
 3. **Documentation refresh**: Update `services/status2/README.md` and `AGENTS.md` with new defaults, testing commands, and operational runbooks. Link to this document for future context.
+
+**Status:** ✅ Load-testing harness and chaos drills captured in `docs/k6-status2-load.js` and `docs/chaos-playbook.md`. The README now references the new workflows. Outstanding work: integrate k6 + chaos runs into CI/CD and capture metrics snapshots for regression tracking.
 
 ### Deliverables & Acceptance
 
@@ -82,4 +86,3 @@ All integration tests should run behind a `-tags=integration` build flag so they
 - Updated defaults and logging protecting against silent insecure origin usage.
 - Load- and chaos-testing evidence showing reconnect jitter prevents synchronized storms and that the service meets latency/SLO targets.
 - Documentation referencing the new tooling so future agents can execute tests without rediscovering the workflow.
-

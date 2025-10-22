@@ -35,6 +35,7 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 - `wctl check-test-stubs`: executes `python tools/check_stubs.py` inside the container to ensure sys.modules stubs match their public APIs.
 - `wctl check-test-isolation`: launches `python tools/check_test_isolation.py` inside the container. Supports all script flags (`--quick`, `--strict`, `--iterations`, `--json`, etc.) and surfaces order-dependent failures plus leaked global state before they surprise downstream suites.
 - `wctl run-status-tests`: compiles and runs the Go unit/integration tests for `services/status2` using the compose-managed `status-build` helper (golang:1.25-alpine). The helper runs `go mod tidy` before `go test`; extra arguments after the command are forwarded to `go test`.
+- `wctl run-preflight-tests`: same workflow as above but scoped to `services/preflight2`. Use flags like `-tags=integration ./internal/server` to exercise the Redis/WebSocket harness.
 
 ### **Host Environment Overrides**
 

@@ -8,9 +8,6 @@ import uuid
 
 import yaml as pyyaml
 
-if "oyaml" not in sys.modules:
-    sys.modules["oyaml"] = pyyaml
-
 if "deprecated" not in sys.modules:
     deprecated_stub = types.ModuleType("deprecated")
 
@@ -112,7 +109,7 @@ module = importlib.util.module_from_spec(module_spec)
 sys.modules[module_spec.name] = module
 module_spec.loader.exec_module(module)
 
-import oyaml as yaml
+import yaml
 import pytest
 
 WeppSoilUtil = module.WeppSoilUtil
