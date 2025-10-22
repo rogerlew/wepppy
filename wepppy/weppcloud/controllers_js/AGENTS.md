@@ -36,7 +36,7 @@
 - ESLint config lives in `.eslintrc.cjs`. Run `wctl run-npm lint` (add `-- --fix` for auto-fixes) and prefer `wctl run-npm check` before handoff.
 - Add new suites under `controllers_js/__tests__/` and keep them self-contained (each suite should import the helper(s) it exercises).
 - If the bundle grows new helpers, document both usage and ordering in `README.md` and extend test coverage to guard the public API.
-- `__tests__/landuse.test.js` exercises the fully helper-based Landuse controller; mirror its setup when migrating additional controls away from jQuery (stub helpers, bootstrap DOM, assert on helper calls).
+- `__tests__/landuse.test.js` and `__tests__/soil.test.js` exercise helper-based controllers; mirror their setup when migrating additional controls away from jQuery (stub helpers, bootstrap DOM, assert on helper calls).
 
 ## Communication
 - If a change affects other repos (e.g., static assets build), annotate the summary so downstream maintainers can align.

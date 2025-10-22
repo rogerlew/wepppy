@@ -1,5 +1,5 @@
 # Landuse Controller Migration Plan
-> Information-gathering checklist for the upcoming `landuse.js` refactor.
+> Information-gathering checklist for the upcoming `landuse.js` refactor. Review `docs/dev-notes/controller_foundations.md` first so this plan stays aligned with the shared controller strategy.
 
 ## Controller Surface Audit
 - Inventory every jQuery touchpoint in `wepppy/weppcloud/controllers_js/landuse.js`:
@@ -15,7 +15,7 @@
   - `controlBase` mixin for job orchestration and telemetry.
   - `unitizer_client.js` usage (value rendering, reactive updates).
   - Map overlays / Leaflet integrations that may require helper-friendly wrappers.
-- ✅ Landuse controller now runs solely on helper modules—`WCDom` wraps the legacy adapters, delegated report actions, and visibility toggles, while `WCHttp` handles FormData uploads and JSON posts.
+- ✅ Landuse controller now runs solely on helper modules—`WCDom` wraps the legacy adapters, delegated report actions, and visibility toggles, while `WCHttp` handles FormData uploads and JSON posts. `WCEvents.createEmitter` backs a scoped event bus (`landuse:build:*`, `landuse:report:loaded`, etc.) so neighboring controllers can subscribe without polling DOM state.
 
 ## Template Contract
 - Review `wepppy/weppcloud/templates/controls/landuse*.htm` and any included partials.
@@ -36,6 +36,7 @@
   - Determine if endpoints must support both legacy form posts and new JSON during rollout.
   - Decide whether the refactor will update all call sites in one sweep to avoid dual-mode maintenance.
 - ✅ All Landuse routes now use `parse_request_payload`, coerce numeric inputs (`mode`, coverage values, Topaz IDs), and return descriptive errors when payload fields are missing.
+- ✅ The RQ build endpoint now calls `Landuse.parse_inputs` to hydrate native integers/booleans and reuses `parse_request_payload` for JSON + form parity. New pytest coverage (`tests/weppcloud/routes/test_rq_api_landuse.py`) verifies Redis task wiring, disturbed flags, and user-defined uploads.
 
 ## State & Data Structures
 - Catalog complex payloads (selected landuse rows, mapping updates, units) that need explicit JSON structures.
@@ -59,6 +60,7 @@
   - Plan integration tests for payload shape changes (arrays, booleans).
 - Ensure `npm test` and `python wepppy/weppcloud/controllers_js/build_controllers_js.py` remain part of the handoff validation.
 - ✅ Added `controllers_js/__tests__/landuse.test.js` (jsdom) plus expanded `tests/weppcloud/routes/test_landuse_bp.py` to cover JSON/form parity.
+- ✅ Added RQ-flavoured regression tests (`tests/weppcloud/routes/test_rq_api_landuse.py`) to guard async job orchestration and ensure RedisPrep/job queue side effects remain stable during helper migrations.
 
 ## Rollback Strategy
 - Pinpoint high-risk areas (large historical run archives, landuse data migrations) that could be impacted.

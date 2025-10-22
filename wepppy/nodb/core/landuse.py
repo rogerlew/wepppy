@@ -57,7 +57,7 @@ import os
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
-from typing import Optional, Dict, List, Any, Tuple
+from typing import Optional, Dict, List, Any, Tuple, Mapping
 import shutil
 from enum import IntEnum
 import time
@@ -268,17 +268,66 @@ class Landuse(NoDbBase):
         return self._single_man
 
     @property
-    def mofe_buffer_selection(self) -> int:
+    def mofe_buffer_selection(self) -> Optional[int]:
         """
         id of the selected management
         """
-        return getattr(self, '_mofe_buffer_selection', None)
+        value = getattr(self, '_mofe_buffer_selection', None)
+        if value is None:
+            return None
+        if isinstance(value, str):
+            token = value.strip()
+            if not token:
+                return None
+            value = token
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
 
     @mofe_buffer_selection.setter
     @nodb_setter
-    def mofe_buffer_selection(self, k: int) -> None:
-        self._mofe_buffer_selection = str(k)
-        self._buffer_man = get_management_summary(k)
+    def mofe_buffer_selection(self, value: Optional[int]) -> None:
+        if value is None:
+            self._mofe_buffer_selection = None
+            self._buffer_man = None
+            return
+
+        if isinstance(value, str):
+            token = value.strip()
+            if not token:
+                self._mofe_buffer_selection = None
+                self._buffer_man = None
+                return
+            try:
+                parsed = int(token)
+            except ValueError as exc:
+                raise ValueError('mofe_buffer_selection must be an integer') from exc
+        else:
+            try:
+                parsed = int(value)
+            except (TypeError, ValueError) as exc:
+                raise ValueError('mofe_buffer_selection must be an integer') from exc
+
+        self._mofe_buffer_selection = parsed
+        self._buffer_man = get_management_summary(parsed)
+
+    def parse_inputs(self, payload: Mapping[str, Any]) -> None:
+        """
+        Update configurable properties from a request payload that may contain
+        string or JSON-native values.
+        """
+        if not isinstance(payload, Mapping):
+            return
+
+        raw_buffer = payload.get('mofe_buffer_selection')
+        if isinstance(raw_buffer, (list, tuple, set)):
+            raw_buffer = next((item for item in raw_buffer if item not in (None, '')), None)
+
+        if raw_buffer in (None, ''):
+            return
+
+        self.mofe_buffer_selection = raw_buffer
 
     @property
     def buffer_man(self) -> Optional[Any]:

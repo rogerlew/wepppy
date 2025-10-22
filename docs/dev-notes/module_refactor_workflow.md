@@ -12,6 +12,7 @@
 - Skim `wepppy/weppcloud/controllers_js/AGENTS.md` for the current controllers_js agent expectations.
 - Skim the existing controller’s template(s) under `wepppy/weppcloud/templates/controls/`.
 - Identify backend routes (`wepppy/weppcloud/routes/...`) handling the controller’s requests.
+- Familiarise yourself with the architectural guide in `docs/dev-notes/controller_foundations.md`—it explains the shared UI primitives, payload schemas, and controlBase patterns we expect refactors to reinforce.
 - Confirm the JavaScript toolchain is wired up for the workspace:
   - `wctl run-npm lint` (ESLint + Prettier) — lints staged controller changes.
   - `wctl run-npm test` — runs the Jest suite for controllers/helpers.

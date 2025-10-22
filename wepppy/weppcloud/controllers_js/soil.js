@@ -2,249 +2,395 @@
  * Soil
  * ----------------------------------------------------------------------------
  */
-var Soil = function () {
+var Soil = (function () {
     var instance;
 
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#soil_form");
-        that.info = $("#soil_form #info");
-        that.status = $("#soil_form  #status");
-        that.stacktrace = $("#soil_form #stacktrace");
-        that.ws_client = new WSClient('soil_form', 'soils');
-        that.ws_client.attachControl(that);
-        that.rq_job_id = null;
-        that.rq_job = $("#soil_form #rq_job");
-        that.command_btn_id = 'btn_build_soil';
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
 
-        if (that.form && that.form.length) {
-            that.form.off('change.soilMode', 'input[name="soil_mode"]').on('change.soilMode', 'input[name="soil_mode"]', function () {
-                that.handleModeChange(this.value);
-            });
-
-            that.form.off('input.soilSingle', '#soil_single_selection').on('input.soilSingle', '#soil_single_selection', function () {
-                that.handleSingleSelectionInput();
-            });
-
-            that.form.off('change.soilDb', '#soil_single_dbselection').on('change.soilDb', '#soil_single_dbselection', function () {
-                that.handleDbSelectionChange();
-            });
-
-            that.form.off('change.soilKsflag', '#checkbox_run_flowpaths').on('change.soilKsflag', '#checkbox_run_flowpaths', function () {
-                that.set_ksflag(this.checked);
-            });
-
-            that.form.off('click.soilBuild', '#btn_build_soil').on('click.soilBuild', '#btn_build_soil', function () {
-                that.build();
-            });
+        if (!dom || typeof dom.ensureElement !== "function") {
+            throw new Error("Soil controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("Soil controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("Soil controller requires WCHttp helpers.");
         }
 
-        const baseTriggerEvent = that.triggerEvent.bind(that);
-        that.triggerEvent = function (eventName, payload) {
-            if (eventName === 'SOILS_BUILD_TASK_COMPLETED') {
-                that.ws_client.disconnect();
-                that.report();
-                SubcatchmentDelineation.getInstance().enableColorMap('dom_soil');
+        return { dom: dom, forms: forms, http: http };
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function toResponsePayload(http, error) {
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error.detail || error.body || error.message || "Request failed";
+            return { Error: detail };
+        }
+        return { Error: (error && error.message) || "Request failed" };
+    }
+
+    function parseInteger(value, fallback) {
+        if (value === undefined || value === null || value === "") {
+            return fallback;
+        }
+        var parsed = parseInt(value, 10);
+        if (Number.isNaN(parsed)) {
+            return fallback;
+        }
+        return parsed;
+    }
+
+    function createInstance() {
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+
+        var soil = controlBase();
+
+        var formElement = dom.ensureElement("#soil_form", "Soil form not found.");
+        var infoElement = dom.qs("#soil_form #info");
+        var statusElement = dom.qs("#soil_form #status");
+        var stacktraceElement = dom.qs("#soil_form #stacktrace");
+        var rqJobElement = dom.qs("#soil_form #rq_job");
+        var hintElement = dom.qs("#hint_build_soil");
+
+        var infoAdapter = createLegacyAdapter(infoElement);
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+        var hintAdapter = createLegacyAdapter(hintElement);
+
+        soil.form = formElement;
+        soil.info = infoAdapter;
+        soil.status = statusAdapter;
+        soil.stacktrace = stacktraceAdapter;
+        soil.rq_job = rqJobAdapter;
+        soil.command_btn_id = "btn_build_soil";
+        soil.hint = hintAdapter;
+
+        soil.ws_client = new WSClient("soil_form", "soils");
+        soil.ws_client.attachControl(soil);
+
+        var modePanels = [
+            dom.qs("#soil_mode0_controls"),
+            dom.qs("#soil_mode1_controls"),
+            dom.qs("#soil_mode2_controls"),
+            dom.qs("#soil_mode3_controls"),
+            dom.qs("#soil_mode4_controls")
+        ];
+
+        var baseTriggerEvent = soil.triggerEvent.bind(soil);
+        soil.triggerEvent = function (eventName, payload) {
+            if (eventName === "SOILS_BUILD_TASK_COMPLETED") {
+                if (soil.ws_client && typeof soil.ws_client.disconnect === "function") {
+                    soil.ws_client.disconnect();
+                }
+                soil.report();
+                try {
+                    SubcatchmentDelineation.getInstance().enableColorMap("dom_soil");
+                } catch (err) {
+                    console.warn("[Soil] Failed to enable Subcatchment color map", err);
+                }
             }
 
             baseTriggerEvent(eventName, payload);
         };
 
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
-
-        that.handleModeChange = function (mode) {
-            if (mode === undefined) {
-                that.setMode();
+        soil.hideStacktrace = function () {
+            if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
+                stacktraceAdapter.hide();
                 return;
             }
-            that.setMode(parseInt(mode, 10));
+            if (stacktraceElement) {
+                stacktraceElement.hidden = true;
+                stacktraceElement.style.display = "none";
+            }
         };
 
-        that.handleSingleSelectionInput = function () {
-            that.setMode();
-        };
+        function resetStatus(taskMsg) {
+            if (infoAdapter && typeof infoAdapter.text === "function") {
+                infoAdapter.text("");
+            }
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(taskMsg + "...");
+            }
+            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
+                stacktraceAdapter.text("");
+            }
+        }
 
-        that.handleDbSelectionChange = function () {
-            that.setMode();
-        };
+        function handleError(error) {
+            soil.pushResponseStacktrace(soil, toResponsePayload(http, error));
+        }
 
-        that.build = function () {
-            var self = instance;
-            var task_msg = "Building soil";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-            self.ws_client.connect();
-
-            $.post({
-                url: "rq/api/build_soils",
-                data: self.form.serialize(),
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(`build_soils_rq job submitted: ${response.job_id}`);
-                        self.set_rq_job_id(self, response.job_id);
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance;
-            $.get({
-                url: url_for_run("report/soils/"),
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.restore = function (soil_mode) {
-            var self = instance;
-            $("#soil_mode" + soil_mode).prop("checked", true);
-
-            self.showHideControls(soil_mode);
-        };
-
-        that.set_ksflag = function (state) {
-            var self = instance;
-            var task_msg = "Setting ksflag (" + state + ")";
-
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/set_soils_ksflag/",
-                data: JSON.stringify({ ksflag: state }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(error) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-        };
-
-        that.setMode = function (mode) {
-            var self = instance;
-            // mode is an optional parameter
-            // if it isn't provided then we get the checked value
+        soil.handleModeChange = function (mode) {
             if (mode === undefined) {
-                mode = $("input[name='soil_mode']:checked").val();
+                soil.setMode();
+                return;
             }
-            mode = parseInt(mode, 10);
-            var soil_single_selection = $("#soil_single_selection").val();
-            var soil_single_dbselection = $("#soil_single_dbselection").val();
+            soil.setMode(parseInteger(mode, 0));
+        };
 
-            var task_msg = "Setting Mode to " + mode;
+        soil.handleSingleSelectionInput = function () {
+            soil.setMode();
+        };
 
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
+        soil.handleDbSelectionChange = function () {
+            soil.setMode();
+        };
 
-            // sync soil with nodb
-            $.post({
-                url: "tasks/set_soil_mode/",
-                data: {
-                    "mode": mode,
-                    "soil_single_selection": soil_single_selection,
-                    "soil_single_dbselection": soil_single_dbselection
-                },
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
+        soil.build = function () {
+            var taskMsg = "Building soil";
+            resetStatus(taskMsg);
+
+            if (soil.ws_client && typeof soil.ws_client.connect === "function") {
+                soil.ws_client.connect();
+            }
+
+            var params = forms.serializeForm(formElement, { format: "url" });
+
+            http.postForm("rq/api/build_soils", params, { form: formElement })
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && response.Success === true) {
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html("build_soils_rq job submitted: " + response.job_id);
+                        }
+                        soil.set_rq_job_id(soil, response.job_id);
+                    } else if (response) {
+                        soil.pushResponseStacktrace(soil, response);
                     }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                })
+                .catch(handleError);
+        };
+
+        soil.report = function () {
+            http.request(url_for_run("report/soils/"), {
+                method: "GET",
+                headers: { Accept: "text/html,application/xhtml+xml" }
+            }).then(function (result) {
+                var html = typeof result.body === "string" ? result.body : "";
+                if (infoAdapter && typeof infoAdapter.html === "function") {
+                    infoAdapter.html(html);
+                } else if (infoElement) {
+                    infoElement.innerHTML = html;
+                }
+            }).catch(handleError);
+        };
+
+        soil.restore = function (mode) {
+            var modeValue = parseInteger(mode, 0);
+            var radio = document.getElementById("soil_mode" + modeValue);
+            if (radio) {
+                radio.checked = true;
+            }
+            soil.showHideControls(modeValue);
+        };
+
+        soil.set_ksflag = function (state) {
+            var taskMsg = "Setting ksflag (" + state + ")";
+            resetStatus(taskMsg);
+
+            http.postJson("tasks/set_soils_ksflag/", { ksflag: Boolean(state) }, { form: formElement })
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && response.Success === true) {
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html(taskMsg + "... Success");
+                        }
+                    } else if (response) {
+                        soil.pushResponseStacktrace(soil, response);
+                    }
+                })
+                .catch(handleError);
+        };
+
+        soil.set_disturbed_sol_ver = function (value) {
+            if (value === undefined || value === null || value === "") {
+                return;
+            }
+
+            var taskMsg = "Setting disturbed sol_ver to " + value;
+            resetStatus(taskMsg);
+
+            http.postJson("tasks/set_disturbed_sol_ver/", { sol_ver: value }, { form: formElement })
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && response.Success === true) {
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html(taskMsg + "... Success");
+                        }
+                    } else if (response) {
+                        soil.pushResponseStacktrace(soil, response);
+                    }
+                })
+                .catch(handleError);
+        };
+
+        soil.setMode = function (mode) {
+            var payload = forms.serializeForm(formElement, { format: "json" }) || {};
+            var resolvedMode = mode;
+            if (resolvedMode === undefined || resolvedMode === null) {
+                resolvedMode = parseInteger(payload.soil_mode, 0);
+            }
+            resolvedMode = parseInteger(resolvedMode, 0);
+
+            var singleSelectionRaw = payload.soil_single_selection;
+            var singleDbSelection = payload.soil_single_dbselection || null;
+            var singleSelection = singleSelectionRaw === undefined || singleSelectionRaw === null || singleSelectionRaw === ""
+                ? null
+                : parseInteger(singleSelectionRaw, null);
+
+            soil.mode = resolvedMode;
+
+            var taskMsg = "Setting Mode to " + resolvedMode;
+            resetStatus(taskMsg);
+
+            http.postJson("tasks/set_soil_mode/", {
+                mode: resolvedMode,
+                soil_single_selection: singleSelection,
+                soil_single_dbselection: singleDbSelection
+            }, { form: formElement }).then(function (result) {
+                var response = result && result.body ? result.body : null;
+                if (response && response.Success === true) {
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(taskMsg + "... Success");
+                    }
+                } else if (response) {
+                    soil.pushResponseStacktrace(soil, response);
+                }
+            }).catch(handleError);
+
+            soil.showHideControls(resolvedMode);
+        };
+
+        soil.showHideControls = function (mode) {
+            var numericMode = parseInteger(mode, -1);
+
+            if (numericMode === -1) {
+                modePanels.forEach(function (panel) {
+                    if (panel) {
+                        dom.hide(panel);
+                    }
+                });
+                return;
+            }
+
+            if (numericMode < 0 || numericMode >= modePanels.length) {
+                throw new Error("ValueError: unknown mode");
+            }
+
+            modePanels.forEach(function (panel, index) {
+                if (!panel) {
+                    return;
+                }
+                if (index === numericMode) {
+                    dom.show(panel);
+                } else {
+                    dom.hide(panel);
                 }
             });
-            self.showHideControls(mode);
         };
 
-        that.showHideControls = function (mode) {
-            // show the appropriate controls
-            if (mode === -1) {
-                // neither
-                $("#soil_mode0_controls").hide();
-                $("#soil_mode1_controls").hide();
-                $("#soil_mode2_controls").hide();
-                $("#soil_mode3_controls").hide();
-                $("#soil_mode4_controls").hide();
-            } else if (mode === 0) {
-                // gridded
-                $("#soil_mode0_controls").show();
-                $("#soil_mode1_controls").hide();
-                $("#soil_mode2_controls").hide();
-                $("#soil_mode3_controls").hide();
-                $("#soil_mode4_controls").hide();
-            } else if (mode === 1) {
-                // single
-                $("#soil_mode0_controls").hide();
-                $("#soil_mode1_controls").show();
-                $("#soil_mode2_controls").hide();
-                $("#soil_mode3_controls").hide();
-                $("#soil_mode4_controls").hide();
-            } else if (mode === 2) {
-                // singledb
-                $("#soil_mode0_controls").hide();
-                $("#soil_mode1_controls").hide();
-                $("#soil_mode2_controls").show();
-                $("#soil_mode3_controls").hide();
-                $("#soil_mode4_controls").hide();
-            } else if (mode === 3) {
-                // RRED Unburned
-                $("#soil_mode0_controls").hide();
-                $("#soil_mode1_controls").hide();
-                $("#soil_mode2_controls").hide();
-                $("#soil_mode3_controls").show();
-                $("#soil_mode4_controls").hide();
-            } else if (mode === 4) {
-                // RRED Burned
-                $("#soil_mode0_controls").hide();
-                $("#soil_mode1_controls").hide();
-                $("#soil_mode2_controls").hide();
-                $("#soil_mode3_controls").hide();
-                $("#soil_mode4_controls").show();
-            } else {
-                throw "ValueError: Landuse unknown mode";
-            }
-        };
+        var modeInputs = formElement.querySelectorAll('input[name="soil_mode"]');
+        Array.prototype.forEach.call(modeInputs, function (input) {
+            input.addEventListener("change", function (event) {
+                soil.handleModeChange(event.target.value);
+            });
+        });
 
-        return that;
+        var singleSelectionInput = document.getElementById("soil_single_selection");
+        if (singleSelectionInput) {
+            singleSelectionInput.addEventListener("input", soil.handleSingleSelectionInput);
+            singleSelectionInput.addEventListener("change", soil.handleSingleSelectionInput);
+        }
+
+        var dbSelectionInput = document.getElementById("soil_single_dbselection");
+        if (dbSelectionInput) {
+            dbSelectionInput.addEventListener("change", soil.handleDbSelectionChange);
+        }
+
+        var ksflagCheckbox = document.getElementById("checkbox_run_flowpaths");
+        if (ksflagCheckbox) {
+            ksflagCheckbox.addEventListener("change", function (event) {
+                soil.set_ksflag(event.target.checked);
+            });
+        }
+
+        var solVerSelect = document.getElementById("sol_ver");
+        if (solVerSelect) {
+            solVerSelect.addEventListener("change", function (event) {
+                soil.set_disturbed_sol_ver(event.target.value);
+            });
+        }
+
+        var buildButton = document.getElementById("btn_build_soil");
+        if (buildButton) {
+            buildButton.addEventListener("click", function (event) {
+                event.preventDefault();
+                soil.build();
+            });
+        }
+
+        return soil;
     }
 
     return {
@@ -255,4 +401,8 @@ var Soil = function () {
             return instance;
         }
     };
-}();
+}());
+
+if (typeof globalThis !== "undefined") {
+    globalThis.Soil = Soil;
+}

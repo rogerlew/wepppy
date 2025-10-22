@@ -84,11 +84,12 @@ Keep this document updated when the bundling flow or controller contract changes
 - Replace jQuery DOM calls with `WCDom` helpers (`qs`, `qsa`, `delegate`, `show`, `hide`, `toggleClass`). This keeps selectors scoped, plays nicely with document fragments, and matches our progressive enhancement strategy.
 - Swap `$.ajax`/`$.get` with `WCHttp.request` or the convenience wrappers (`getJson`, `postJson`, `postForm`) so CSRF, timeouts, and Accept headers stay consistent across controllers.
 - Use `WCForms.serializeForm(..., { format: 'json' })` when controllers need native booleans/arrays and `FormData` only when file uploads are involved.
-- When controllers still rely on `controlBase` UI adapters, follow the pattern introduced in `landuse.js`—wrap raw DOM nodes in lightweight adapters that expose `show/hide/text/html` to preserve legacy expectations without reintroducing jQuery.
+- When controllers still rely on `controlBase` UI adapters, follow the pattern introduced in `landuse.js` and `soil.js`—wrap raw DOM nodes in lightweight adapters that expose `show/hide/text/html` to preserve legacy expectations without reintroducing jQuery.
 - Audit templates for inline `$()` usage during migrations; move bootstrap logic to dedicated modules so controllers can initialise via `DOMContentLoaded` or direct module execution.
 
 ## Testing & Tooling Notes
 - Run `wctl run-npm lint` before committing controller changes; ESLint is configured to flag remaining jQuery dependencies.
 - Execute `wctl run-npm test` (or `wctl run-npm check` for lint + test) to keep the jsdom suites green. Tests live under `wepppy/weppcloud/controllers_js/__tests__/`.
 - The Landuse migration added `__tests__/landuse.test.js` covering delegated report events, FormData submissions, and helper-driven error handling. Treat it as the template for future controller suites—each test boots the controller with stubbed helpers and asserts against helper calls rather than DOM snapshots.
+- The Soils migration added `__tests__/soil.test.js`, which validates mode toggles, ksflag updates, and disturbed payload routing via the helper stack; reuse its setup when migrating remaining run controls.
 - Rebuild the bundle with `python wepppy/weppcloud/controllers_js/build_controllers_js.py` after large refactors to catch syntax errors outside of Jest.

@@ -9,6 +9,7 @@ var Landuse = (function () {
         var dom = window.WCDom;
         var forms = window.WCForms;
         var http = window.WCHttp;
+        var events = window.WCEvents;
 
         if (!dom || typeof dom.ensureElement !== "function") {
             throw new Error("Landuse controller requires WCDom helpers.");
@@ -19,8 +20,11 @@ var Landuse = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("Landuse controller requires WCHttp helpers.");
         }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("Landuse controller requires WCEvents helpers.");
+        }
 
-        return { dom: dom, forms: forms, http: http };
+        return { dom: dom, forms: forms, http: http, events: events };
     }
 
     function createLegacyAdapter(element) {
@@ -102,8 +106,29 @@ var Landuse = (function () {
         var dom = helpers.dom;
         var forms = helpers.forms;
         var http = helpers.http;
+        var events = helpers.events;
 
         var landuse = controlBase();
+        var landuseEvents = null;
+
+        if (events && typeof events.createEmitter === "function") {
+            var emitterBase = events.createEmitter();
+            if (typeof events.useEventMap === "function") {
+                landuseEvents = events.useEventMap([
+                    "landuse:build:started",
+                    "landuse:build:completed",
+                    "landuse:report:loaded",
+                    "landuse:mode:change",
+                    "landuse:db:change"
+                ], emitterBase);
+            } else {
+                landuseEvents = emitterBase;
+            }
+        }
+
+        if (landuseEvents) {
+            landuse.events = landuseEvents;
+        }
 
         var formElement = dom.ensureElement("#landuse_form", "Landuse form not found.");
         var infoElement = dom.qs("#landuse_form #info");
@@ -140,7 +165,8 @@ var Landuse = (function () {
 
         var baseTriggerEvent = landuse.triggerEvent.bind(landuse);
         landuse.triggerEvent = function (eventName, payload) {
-            if (eventName === "LANDUSE_BUILD_TASK_COMPLETED") {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "LANDUSE_BUILD_TASK_COMPLETED") {
                 if (landuse.ws_client && typeof landuse.ws_client.disconnect === "function") {
                     landuse.ws_client.disconnect();
                 }
@@ -149,6 +175,9 @@ var Landuse = (function () {
                     SubcatchmentDelineation.getInstance().enableColorMap("dom_lc");
                 } catch (err) {
                     console.warn("[Landuse] Failed to enable Subcatchment color map", err);
+                }
+                if (landuseEvents && typeof landuseEvents.emit === "function") {
+                    landuseEvents.emit("landuse:build:completed", payload || {});
                 }
             }
 
@@ -248,9 +277,42 @@ var Landuse = (function () {
             ensureReportDelegates();
         };
 
+        function ensureFormDelegates() {
+            if (landuse._formDelegates) {
+                return;
+            }
+
+            landuse._formDelegates = [];
+
+            landuse._formDelegates.push(dom.delegate(formElement, "change", "[data-landuse-role=\"mode\"]", function () {
+                var modeAttr = this.getAttribute("data-landuse-mode");
+                var nextMode = modeAttr !== null ? modeAttr : this.value;
+                landuse.handleModeChange(nextMode);
+            }));
+
+            landuse._formDelegates.push(dom.delegate(formElement, "change", "[data-landuse-role=\"single-selection\"]", function () {
+                landuse.handleSingleSelectionChange();
+            }));
+
+            landuse._formDelegates.push(dom.delegate(formElement, "change", "[data-landuse-role=\"db\"]", function () {
+                landuse.setLanduseDb(this.value);
+            }));
+
+            landuse._formDelegates.push(dom.delegate(formElement, "click", "[data-landuse-action=\"build\"]", function (event) {
+                event.preventDefault();
+                landuse.build();
+            }));
+        }
+
         landuse.build = function () {
             var taskMsg = "Building landuse";
             resetStatus(taskMsg);
+
+            if (landuseEvents && typeof landuseEvents.emit === "function") {
+                landuseEvents.emit("landuse:build:started", {
+                    mode: landuse.mode
+                });
+            }
 
             if (landuse.ws_client && typeof landuse.ws_client.connect === "function") {
                 landuse.ws_client.connect();
@@ -322,6 +384,18 @@ var Landuse = (function () {
                     infoElement.innerHTML = html;
                 }
                 landuse.bindReportEvents();
+                if (landuseEvents && typeof landuseEvents.emit === "function") {
+                    landuseEvents.emit("landuse:report:loaded", { html: html });
+                }
+                if (window.UnitizerClient && typeof window.UnitizerClient.ready === "function") {
+                    window.UnitizerClient.ready().then(function (client) {
+                        if (client && typeof client.updateNumericFields === "function" && infoElement) {
+                            client.updateNumericFields(infoElement);
+                        }
+                    }).catch(function (error) {
+                        console.warn("[Landuse] Failed to update unitizer fields", error);
+                    });
+                }
             }).catch(handleError);
         };
 
@@ -382,6 +456,13 @@ var Landuse = (function () {
             }).catch(handleError);
 
             landuse.showHideControls(mode);
+
+            if (landuseEvents && typeof landuseEvents.emit === "function") {
+                landuseEvents.emit("landuse:mode:change", {
+                    mode: mode,
+                    singleSelection: singleSelection !== undefined && singleSelection !== null ? String(singleSelection) : null
+                });
+            }
         };
 
         landuse.setLanduseDb = function (db) {
@@ -419,6 +500,10 @@ var Landuse = (function () {
             if (landuse.mode !== undefined) {
                 landuse.showHideControls(landuse.mode);
             }
+
+            if (landuseEvents && typeof landuseEvents.emit === "function") {
+                landuseEvents.emit("landuse:db:change", { db: value });
+            }
         };
 
         landuse.showHideControls = function (mode) {
@@ -448,42 +533,7 @@ var Landuse = (function () {
             }
         };
 
-        var modeInputs = formElement.querySelectorAll('input[name="landuse_mode"]');
-        Array.prototype.forEach.call(modeInputs, function (input) {
-            input.addEventListener("change", function (event) {
-                landuse.handleModeChange(event.target.value);
-            });
-        });
-
-        var singleSelection = document.getElementById("landuse_single_selection");
-        if (singleSelection) {
-            singleSelection.addEventListener("change", function () {
-                landuse.handleSingleSelectionChange();
-            });
-        }
-
-        var dbSelect = document.getElementById("landuse_db");
-        if (dbSelect) {
-            dbSelect.addEventListener("change", function (event) {
-                landuse.setLanduseDb(event.target.value);
-            });
-        }
-
-        var dbRadios = formElement.querySelectorAll('input[name="landuse_db"]');
-        Array.prototype.forEach.call(dbRadios, function (input) {
-            input.addEventListener("change", function (event) {
-                landuse.setLanduseDb(event.target.value);
-            });
-        });
-
-        var buildButton = document.getElementById("btn_build_landuse");
-        if (buildButton) {
-            buildButton.addEventListener("click", function (event) {
-                event.preventDefault();
-                landuse.build();
-            });
-        }
-
+        ensureFormDelegates();
         ensureReportDelegates();
 
         return landuse;

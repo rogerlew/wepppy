@@ -436,37 +436,41 @@ def api_build_landuse(runid, config):
         wd = get_wd(runid)
         landuse = Landuse.getInstance(wd)
 
-#        for k,v in request.form.items():
-#            print(f'{k}={v}')
-#[Fri Apr 25 12:13:11.207539 2025] [wsgi:error] [pid 2459502:tid 137065371985600] [remote 192.168.1.1:26513] landuse_mode=4
-#[Fri Apr 25 12:13:11.207675 2025] [wsgi:error] [pid 2459502:tid 137065371985600] [remote 192.168.1.1:26513] landuse_db=locales/earth/C3Slandcover/2020
-#[Fri Apr 25 12:13:11.207702 2025] [wsgi:error] [pid 2459502:tid 137065371985600] [remote 192.168.1.1:26513] landuse_management_mapping_selection=disturbed
+        payload = parse_request_payload(
+            request,
+            boolean_fields=(
+                "checkbox_burn_shrubs",
+                "checkbox_burn_grass",
+                "burn_shrubs",
+                "burn_grass",
+            ),
+        )
 
-        mofe_buffer_selection = request.form.get('mofe_buffer_selection', None)
+        def _first(value):
+            if isinstance(value, (list, tuple)):
+                return value[0] if value else None
+            return value
+
         try:
-            mofe_buffer_selection = int(mofe_buffer_selection)
-        except:
-            pass
-
-        if mofe_buffer_selection is not None:
-            landuse.mofe_buffer_selection = mofe_buffer_selection
+            landuse.parse_inputs(payload)
+        except ValueError as exc:
+            return exception_factory(str(exc), runid=runid)
 
         if 'disturbed' in landuse.mods:
             disturbed = Disturbed.getInstance(wd)
-            burn_shrubs = request.form.get('burn_shrubs', 'off')
-            if burn_shrubs.lower().startswith('on'):
-                disturbed.burn_shrubs = True
-            else:
-                disturbed.burn_shrubs = False
+            burn_shrubs_value = payload.get('checkbox_burn_shrubs')
+            if burn_shrubs_value is None:
+                burn_shrubs_value = payload.get('burn_shrubs')
+            disturbed.burn_shrubs = bool(burn_shrubs_value)
 
-            burn_grass = request.form.get('burn_grass', 'off')
-            if burn_grass.lower().startswith('on'):
-                disturbed.burn_grass = True
-            else:
-                disturbed.burn_grass = False
+            burn_grass_value = payload.get('checkbox_burn_grass')
+            if burn_grass_value is None:
+                burn_grass_value = payload.get('burn_grass')
+            disturbed.burn_grass = bool(burn_grass_value)
 
-        # get mapping selection for user-defined landuse
-        mapping = request.form.get('landuse_management_mapping_selection', None)
+        mapping = _first(payload.get('landuse_management_mapping_selection'))
+        if isinstance(mapping, str):
+            mapping = mapping.strip() or None
 
         # check for file for mode 4, mode is set asynchronously
         if landuse.mode == LanduseMode.UserDefined:
@@ -475,9 +479,9 @@ def api_build_landuse(runid, config):
 
             if mapping is None:
                 return error_factory('landuse_management_mapping_selection must be provided')
-            else:
-                landuse.mapping = mapping
-            
+
+            landuse.mapping = mapping
+
             try:
                 file = request.files['input_upload_landuse']
             except Exception:

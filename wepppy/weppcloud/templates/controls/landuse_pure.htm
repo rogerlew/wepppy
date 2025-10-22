@@ -9,14 +9,14 @@
     "label": "Determine per hillslope",
     "value": "0",
     "selected": current_mode == 0,
-    "attrs": {"class": "disable-readonly", "data-landuse-mode": "0"}
+    "attrs": {"class": "disable-readonly", "data-landuse-mode": "0", "data-landuse-role": "mode"}
   },
   {
     "id": "landuse_mode1",
     "label": "Single landuse for watershed",
     "value": "1",
     "selected": current_mode == 1,
-    "attrs": {"class": "disable-readonly", "data-landuse-mode": "1"}
+    "attrs": {"class": "disable-readonly", "data-landuse-mode": "1", "data-landuse-role": "mode"}
   }
 ] %}
 {% if 'rred' in ron.mods %}
@@ -26,14 +26,14 @@
       "label": "RRED Unburned",
       "value": "2",
       "selected": current_mode == 2,
-      "attrs": {"class": "disable-readonly", "data-landuse-mode": "2"}
+      "attrs": {"class": "disable-readonly", "data-landuse-mode": "2", "data-landuse-role": "mode"}
     },
     {
       "id": "landuse_mode3",
       "label": "RRED Burned",
       "value": "3",
       "selected": current_mode == 3,
-      "attrs": {"class": "disable-readonly", "data-landuse-mode": "3"}
+      "attrs": {"class": "disable-readonly", "data-landuse-mode": "3", "data-landuse-role": "mode"}
     }
   ] %}
 {% endif %}
@@ -43,7 +43,7 @@
     "label": "Upload landcover map",
     "value": "4",
     "selected": current_mode == 4,
-    "attrs": {"class": "disable-readonly", "data-landuse-mode": "4"}
+    "attrs": {"class": "disable-readonly", "data-landuse-mode": "4", "data-landuse-role": "mode"}
   }
 ] %}
 
@@ -112,6 +112,7 @@
          landcover_ns.options,
          selected=landuse.nlcd_db,
          help="Choose the raster catalog used when landuse is determined per hillslope.",
+         attrs={"data-landuse-role": "db"},
          extra_control_class="disable-readonly"
        ) }}
   </div>
@@ -124,6 +125,7 @@
          single_ns.options,
          selected=landuse.single_selection,
          help="Assign the chosen management class to the entire watershed.",
+         attrs={"data-landuse-role": "single-selection"},
          extra_control_class="disable-readonly"
        ) }}
   </div>
@@ -185,7 +187,8 @@
     <button
       type="button"
       class="pure-button pure-button-primary disable-readonly"
-      id="btn_build_landuse">
+      id="btn_build_landuse"
+      data-landuse-action="build">
       Build Landuse
     </button>
   {% endcall %}

@@ -8,6 +8,7 @@ describe("Landuse controller", () => {
     let wsClientInstance;
     let baseInstance;
     let landuse;
+    let unitizerClient;
 
     beforeEach(async () => {
         jest.resetModules();
@@ -22,16 +23,16 @@ describe("Landuse controller", () => {
                 <div id="landuse_mode2_controls" hidden></div>
                 <div id="landuse_mode3_controls" hidden></div>
                 <div id="landuse_mode4_controls" hidden></div>
-                <input type="radio" id="landuse_mode0" name="landuse_mode" value="0" checked>
-                <input type="radio" id="landuse_mode1" name="landuse_mode" value="1">
-                <select id="landuse_db">
+                <input type="radio" id="landuse_mode0" name="landuse_mode" value="0" data-landuse-role="mode" data-landuse-mode="0" checked>
+                <input type="radio" id="landuse_mode1" name="landuse_mode" value="1" data-landuse-role="mode" data-landuse-mode="1">
+                <select id="landuse_db" data-landuse-role="db">
                     <option value="nlcd">NLCD</option>
                 </select>
-                <select id="landuse_single_selection">
+                <select id="landuse_single_selection" data-landuse-role="single-selection">
                     <option value="101">Option 101</option>
                     <option value="202">Option 202</option>
                 </select>
-                <button type="button" id="btn_build_landuse">Build</button>
+                <button type="button" id="btn_build_landuse" data-landuse-action="build">Build</button>
             </form>
             <div id="hint_build_landuse"></div>
         `;
@@ -39,10 +40,67 @@ describe("Landuse controller", () => {
         await import("../dom.js");
 
         global.WCForms = {
-            serializeForm: jest.fn(() => ({
-                landuse_mode: "0",
-                landuse_single_selection: "101",
-            })),
+            serializeForm: jest.fn((form) => {
+                const modeInput = form.querySelector('input[name="landuse_mode"]:checked');
+                const singleSelect = form.querySelector("#landuse_single_selection");
+                return {
+                    landuse_mode: modeInput ? modeInput.value : null,
+                    landuse_single_selection: singleSelect ? singleSelect.value : null,
+                };
+            }),
+        };
+
+        function createEmitter() {
+            const listeners = {};
+            return {
+                on(event, handler) {
+                    (listeners[event] = listeners[event] || []).push(handler);
+                    return () => {
+                        listeners[event] = (listeners[event] || []).filter((fn) => fn !== handler);
+                    };
+                },
+                once(event, handler) {
+                    const unsubscribe = this.on(event, (payload) => {
+                        unsubscribe();
+                        handler(payload);
+                    });
+                    return unsubscribe;
+                },
+                off(event, handler) {
+                    if (!listeners[event]) {
+                        return;
+                    }
+                    if (!handler) {
+                        listeners[event] = [];
+                        return;
+                    }
+                    listeners[event] = listeners[event].filter((fn) => fn !== handler);
+                },
+                emit(event, payload) {
+                    const bucket = listeners[event] || [];
+                    bucket.slice().forEach((fn) => fn(payload));
+                    return bucket.length > 0;
+                },
+                listenerCount(event) {
+                    if (event) {
+                        return (listeners[event] || []).length;
+                    }
+                    return Object.values(listeners).reduce((total, bucket) => total + bucket.length, 0);
+                },
+            };
+        }
+
+        global.WCEvents = {
+            createEmitter,
+            useEventMap: jest.fn((events, emitter) => emitter),
+        };
+
+        unitizerClient = {
+            updateNumericFields: jest.fn(),
+        };
+
+        global.UnitizerClient = {
+            ready: jest.fn(() => Promise.resolve(unitizerClient)),
         };
 
         httpRequestMock = jest.fn((url) => {
@@ -97,6 +155,8 @@ describe("Landuse controller", () => {
         delete global.WSClient;
         delete global.SubcatchmentDelineation;
         delete global.url_for_run;
+        delete global.WCEvents;
+        delete global.UnitizerClient;
         if (global.WCDom) {
             delete global.WCDom;
         }
@@ -178,5 +238,49 @@ describe("Landuse controller", () => {
         await Promise.resolve();
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(landuse, { Error: "boom" });
+    });
+
+    test("emits lifecycle events", async () => {
+        const started = jest.fn();
+        const completed = jest.fn();
+        landuse.events.on("landuse:build:started", started);
+        landuse.events.on("landuse:build:completed", completed);
+
+        landuse.build();
+        await Promise.resolve();
+        landuse.triggerEvent("LANDUSE_BUILD_TASK_COMPLETED");
+
+        expect(started).toHaveBeenCalled();
+        expect(completed).toHaveBeenCalled();
+    });
+
+    test("report emits event and updates unitizer", async () => {
+        const listener = jest.fn();
+        landuse.events.on("landuse:report:loaded", listener);
+
+        landuse.report();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(listener).toHaveBeenCalledWith({ html: "<div>report</div>" });
+        expect(global.UnitizerClient.ready).toHaveBeenCalled();
+        expect(unitizerClient.updateNumericFields).toHaveBeenCalledWith(expect.any(HTMLElement));
+    });
+
+    test("mode change delegate posts payload and emits event", async () => {
+        const listener = jest.fn();
+        landuse.events.on("landuse:mode:change", listener);
+
+        const modeOne = document.getElementById("landuse_mode1");
+        modeOne.checked = true;
+        modeOne.dispatchEvent(new Event("change", { bubbles: true }));
+        await Promise.resolve();
+
+        expect(httpPostJsonMock).toHaveBeenCalledWith(
+            "tasks/set_landuse_mode/",
+            { mode: 1, landuse_single_selection: "101" },
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+        expect(listener).toHaveBeenCalledWith(expect.objectContaining({ mode: 1 }));
     });
 });
