@@ -14,7 +14,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from wepppy.all_your_base import isint, IS_WINDOWS
+from wepppy.all_your_base import isint
 
 # noinspection PyProtectedMember
 from wepppy.climates.cligen import (
@@ -56,7 +56,7 @@ shutil.copyfile(stationMeta.parpath, stationMeta.par)
 
 # build cmd
 cli_fn = f"{site_name}_future.cli"
-cmd = [_join(_bin_dir, ('cligen532', 'cligen532.exe')[IS_WINDOWS]),
+cmd = [_join(_bin_dir, 'cligen532'),
        "-i%s" % stationMeta.par,
        "-Oinput.prn",
        "-o%s" % cli_fn,
@@ -74,4 +74,3 @@ climate = ClimateFile(cli_fn)
 
 # can replace variables in climate file and rewrite 
 # https://github.com/rogerlew/wepppy/blob/master/wepppy/climates/cligen/cligen.py
-

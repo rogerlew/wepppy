@@ -9,7 +9,7 @@ from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
 from wepppy.climates.cligen import ClimateFile, CligenStationsManager, df_to_prn, _bin_dir
 from wepppy.climates import cligen_client as cc
 
-from wepppy.all_your_base import isint, IS_WINDOWS
+from wepppy.all_your_base import isint
 
 
 def build_future_climate(lng, lat, start_year, end_year, model='GFDL-ESM2G', replace_vars=None, cli_dir='./'):
@@ -49,7 +49,7 @@ def build_future_climate(lng, lat, start_year, end_year, model='GFDL-ESM2G', rep
     
     # build cmd
     cli_fn = _join(wd, 'future.cli')
-    cmd = [_join(_bin_dir, ('cligen532', 'cligen532.exe')[IS_WINDOWS]),
+    cmd = [_join(_bin_dir, 'cligen532'),
            "-i%s.par" % par,
            "-Oinput.prn",
            "-o%s" % cli_fn,

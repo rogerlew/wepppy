@@ -21,7 +21,7 @@
 4. **Update documentation**: adjust `README.md` when architectural or usage patterns change.
 5. **Validate**:
    - Build bundle: `python wepppy/weppcloud/controllers_js/build_controllers_js.py`
-   - Run tests from static sources: `cd wepppy/weppcloud/static-src && npm test`
+   - Lint/tests: `wctl run-npm lint`, `wctl run-npm test`, or `wctl run-npm check` to run both
    - Re-run bundle if helper ordering changed.
 
 ## Controller Migration Tips
@@ -32,7 +32,8 @@
 - After refactoring, search for leftover `$(` in the module to ensure the jQuery dependency was removed.
 
 ## Testing & Tooling Notes
-- Jest config lives in `static-src/jest.config.mjs` (jsdom + ESM). `npm test` already sets `NODE_OPTIONS=--experimental-vm-modules`.
+- Jest config lives in `static-src/jest.config.mjs` (jsdom + ESM). Execute via `wctl run-npm test`; the script sets `NODE_OPTIONS=--experimental-vm-modules` automatically.
+- ESLint config lives in `.eslintrc.cjs`. Run `wctl run-npm lint` (add `-- --fix` for auto-fixes) and prefer `wctl run-npm check` before handoff.
 - Add new suites under `controllers_js/__tests__/` and keep them self-contained (each suite should import the helper(s) it exercises).
 - If the bundle grows new helpers, document both usage and ordering in `README.md` and extend test coverage to guard the public API.
 

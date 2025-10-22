@@ -5,9 +5,6 @@ import json
 from typing import Any, Final, NamedTuple, Optional, TypeAlias, Union
 
 NCPU: Final[int]
-geodata_dir: Final[str]
-SCRATCH: Final[str]
-IS_WINDOWS: Final[bool]
 
 
 class RGBA(NamedTuple):

@@ -24,9 +24,6 @@ other packages import without needing heavier dependencies.
 | Symbol | Type | Summary |
 | --- | --- | --- |
 | `NCPU` | `int` constant | Worker count reserved for CPU-bound fan-out utilities. |
-| `geodata_dir` | `str` constant | Root directory that mirrors mounted geospatial assets. |
-| `SCRATCH` | `str` constant | Preferred scratch directory selected from platform locations. |
-| `IS_WINDOWS` | `bool` constant | Quick flag for Windows-specific behavior gates. |
 | `RGBA` | Named tuple | RGBA color helper with `tohex()` and random color generation. |
 | `NumpyEncoder` | `json.JSONEncoder` subclass | Serializes NumPy scalars and arrays during JSON dumps. |
 | `cmyk_to_rgb` | Function | Converts CMYK components into normalized RGB triples. |
@@ -64,3 +61,12 @@ sediment, units = next(iter(row))
 Pair the base helpers with the specialized subpackages (`dateutils`, `geo`,
 `hydro`, `stats`) for domain-specific features—the catalog above stays focused
 on the light-weight utilities re-used throughout the stack.
+
+### Infrastructure Contract
+
+The runtime environment must bind-mount shared geospatial assets at `/geodata`
+(or set `GEODATA_DIR` appropriately). This contract lives outside
+`wepppy.all_your_base`; service-specific modules are responsible for reading
+the environment variable and resolving dataset paths. Temporary scratch
+artifacts now write directly to `/dev/shm`, so ensure the container exposes
+that tmpfs mount with sufficient capacity.

@@ -30,7 +30,7 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 - `wctl update-stub-requirements`: runs `tools/update_stub_requirements.py` to analyse mypy output and refresh `docker/requirements-stubs-uv.txt`. Pass any script flags (for example `--no-verify`) after the command.
 - `wctl run-pytest`: executes `pytest` inside the `weppcloud` container (defaults to `pytest tests`). Pass extra arguments to forward them to pytest; for example, `wctl run-pytest tests/weppcloud/routes/test_climate_bp.py`.
 - `wctl run-stubtest`: runs `stubtest` inside the container with the appropriate environment (defaults to `wepppy.nodb.core`). Provide module names to narrow the check.
-- `wctl run-npm`: runs `npm` on the host with `--prefix wepppy/weppcloud/static-src`. Example: `wctl run-npm test` or `wctl run-npm install`.
+- `wctl run-npm`: runs `npm` on the host with `--prefix wepppy/weppcloud/static-src`. Example: `wctl run-npm lint`, `wctl run-npm test`, or `wctl run-npm check`.
 - `wctl run-stubgen`: regenerates the local `stubs/` tree via `python tools/sync_stubs.py`.
 
 ### **Host Environment Overrides**

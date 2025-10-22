@@ -55,6 +55,7 @@ Most files mirror the module they cover. For example, `tests/weppcloud/routes/te
 - The suite ships with a Redis stub (`tests/conftest.py`), so you never need a live Redis server for local runs.
 - Tests assume no network access. If you must touch external services, stub the call or drop mock payloads into `tests/data/`.
 - Mirror source layout when creating new tests—if you add `wepppy/foo/bar.py`, expect to create `tests/foo/test_bar.py`.
+- Frontend helpers/controllers have their own tooling—run `wctl run-npm lint` and `wctl run-npm test` (or `wctl run-npm check`) before shipping JS changes.
 - Check [`tests/AGENTS.md`](AGENTS.md) for guidance on fixtures, NoDb serialization patterns, and expectations when adding new suites.
 
 Happy testing! Keep the muscles fresh by running `wctl run-pytest tests --maxfail=1` early and often.

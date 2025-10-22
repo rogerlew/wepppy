@@ -21,7 +21,6 @@ import random
 import shutil
 from itertools import groupby
 from operator import itemgetter
-from os.path import exists as _exists
 
 import numpy as np
 
@@ -39,31 +38,11 @@ def _resolve_worker_count() -> int:
     return count
 
 
-def _resolve_scratch_path() -> str:
-    """Select the first available scratch directory from preferred locations."""
-    for candidate in ('/media/ramdisk', '/Users/roger/Downloads', '/workdir/scratch'):
-        if _exists(candidate):
-            return candidate
-    return '/workdir/scratch'
-
-
 #: Number of worker processes reserved for CPU-bound utilities.
 NCPU: Final[int] = _resolve_worker_count()
 
-#: Path prefix for shared geodata assets.
-geodata_dir: Final[str] = '/geodata/'
-
-#: High-speed scratch directory used for large temporary files.
-SCRATCH: Final[str] = _resolve_scratch_path()
-
-#: Whether the current platform reports as Windows.
-IS_WINDOWS: Final[bool] = os.name == 'nt'
-
 __all__ = [
     'NCPU',
-    'geodata_dir',
-    'SCRATCH',
-    'IS_WINDOWS',
     'RGBA',
     'NumpyEncoder',
     'cmyk_to_rgb',

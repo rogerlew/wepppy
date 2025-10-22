@@ -81,7 +81,7 @@ def from_b64url_compact(s: str) -> dict:
     return json.loads(raw.decode("utf-8"))
 
 geodata_dir = os.environ.get("GEODATA_DIR", "/geodata")
-SCRATCH = "/media/ramdisk"
+SCRATCH_DIR = "/dev/shm"
 _this_dir = os.path.dirname(__file__)
 _catalog = os.environ.get(
     'CATALOG_PATH', 
@@ -163,7 +163,7 @@ def process_raster(
         raise HTTPException(status_code=404, detail=f"Cannot find dataset: {src}")
 
     fn_uuid = str(uuid4().hex)
-    dst = os.path.join(SCRATCH, fn_uuid + ".tif")
+    dst = os.path.join(SCRATCH_DIR, fn_uuid + ".tif")
     fn_list_to_cleanup = [dst]
 
     # 2. Determine UTM projection
@@ -215,7 +215,7 @@ def process_raster(
     # 6. Run optional gdaldem processing
     dst_current = dst
     if gdaldem:
-        dst2 = os.path.join(SCRATCH, f"{fn_uuid}_dem.tif")
+        dst2 = os.path.join(SCRATCH_DIR, f"{fn_uuid}_dem.tif")
         fn_list_to_cleanup.append(dst2)
         cmd_dem = ["gdaldem", gdaldem, dst, dst2]
         res_dem = subprocess.run(cmd_dem, capture_output=True, text=True)

@@ -20,7 +20,7 @@ import subprocess
 
 from deprecated import deprecated
 
-from ..all_your_base import isfloat, SCRATCH
+from ..all_your_base import isfloat
 from .geo_transformer import GeoTransformer
 from .locationinfo import RasterDatasetInterpolator
 
@@ -31,6 +31,8 @@ from rasterio.warp import reproject, Resampling, calculate_default_transform
 from wepppy import f_esri as _f_esri
 
 gdal.UseExceptions()
+
+SCRATCH_DIR = '/dev/shm'
 
 
 wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
@@ -627,7 +629,7 @@ def format_convert(src, _format):
 
 def crop_and_transform(src, dst, bbox, layer='', cellsize=30, resample=None, fmt=None, gdaldem=None):
     fn_uuid = str(uuid4().hex) + '.tif'
-    dst1 = os.path.join(SCRATCH, fn_uuid)
+    dst1 = os.path.join(SCRATCH_DIR, fn_uuid)
 
     # if the src file doesn't exist we can abort
     if not os.path.exists(src):
@@ -704,7 +706,7 @@ def crop_and_transform(src, dst, bbox, layer='', cellsize=30, resample=None, fmt
         assert gdaldem in _GDALDEM_MODES
 
         fn_uuid2 = str(uuid4().hex) + '.tif'
-        dst2 = os.path.join(SCRATCH, fn_uuid2)
+        dst2 = os.path.join(SCRATCH_DIR, fn_uuid2)
 
         cmd2 = 'gdaldem %s %s %s' % (gdaldem, dst1, dst2)
 

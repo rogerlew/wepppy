@@ -144,7 +144,6 @@ from wepppy.all_your_base import (
     isfloat,
     isnan,
     isinf,
-    IS_WINDOWS,
     NumpyEncoder
 )
 from wepppy.all_your_base import try_parse_float, isint
@@ -180,10 +179,7 @@ def _copyfile(src_fn: str, dst_fn: str) -> None:
     if _exists(dst_fn):
         os.remove(dst_fn)
 
-    if IS_WINDOWS:
-        shutil.copyfile(src_fn, dst_fn)
-    else:
-        os.link(src_fn, dst_fn)
+    os.link(src_fn, dst_fn)
 
 
 class ChannelRoutingMethod(IntEnum):

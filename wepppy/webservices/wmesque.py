@@ -71,7 +71,7 @@ _this_dir = os.path.dirname(__file__)
 _catalog = os.path.join(_this_dir, "catalog")
 
 
-SCRATCH = "/media/ramdisk"
+SCRATCH_DIR = "/dev/shm"
 
 
 def raster_stats(src):
@@ -224,7 +224,7 @@ def api_dataset_year(
     src = os.path.join(*path_parts)
 
     fn_uuid = str(uuid4().hex) + ".tif"
-    dst = os.path.join(SCRATCH, fn_uuid)
+    dst = os.path.join(SCRATCH_DIR, fn_uuid)
 
     # if the src file doesn't exist we can abort
     if not os.path.exists(src):
@@ -341,7 +341,7 @@ def api_dataset_year(
             return jsonify({"Error": "Invalid gdaldem mode: %s" % gdaldem})
 
         fn_uuid2 = str(uuid4().hex) + ".tif"
-        dst2 = os.path.join(SCRATCH, fn_uuid)
+        dst2 = os.path.join(SCRATCH_DIR, fn_uuid)
 
         cmd2 = "gdaldem %s %s %s" % (gdaldem, dst, dst2)
 

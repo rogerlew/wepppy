@@ -341,7 +341,19 @@ if [[ $# -gt 0 ]]; then
         echo "npm is required for run-npm." >&2
         exit 1
       fi
-      npm --prefix "${PROJECT_DIR}/wepppy/weppcloud/static-src" "$@"
+      NPM_PREFIX="${PROJECT_DIR}/wepppy/weppcloud/static-src"
+      if [[ $# -eq 0 ]]; then
+        npm --prefix "${NPM_PREFIX}"
+      else
+        case "$1" in
+          install|ci|update|exec|run|init|publish|link|login|logout|cache|config|set|get|rebuild|outdated|dedupe|audit|doctor|fund)
+            npm --prefix "${NPM_PREFIX}" "$@"
+            ;;
+          *)
+            npm --prefix "${NPM_PREFIX}" run "$@"
+            ;;
+        esac
+      fi
       exit 0
       ;;
     run-stubgen)

@@ -18,7 +18,7 @@ import requests
 
 from calendar import isleap
 
-from wepppy.all_your_base import SCRATCH, isint
+from wepppy.all_your_base import isint
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
 
 from scipy.interpolate import RegularGridInterpolator
@@ -34,6 +34,8 @@ from wepppyo3.climate import interpolate_geospatial
 from wepppy.climates.cligen import df_to_prn
 
 from wepppy.nodb.status_messenger import StatusMessenger
+
+SCRATCH_DIR = '/dev/shm'
 
 
 
@@ -142,7 +144,7 @@ def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=Non
     if _id is None:
         _id = str(uuid.uuid4())+abbrv+str(year)
     if met_dir is None:
-        met_dir = SCRATCH
+        met_dir = SCRATCH_DIR
 
     with open(_join(met_dir, '%s.nc' % _id), 'wb') as out_file:
         shutil.copyfileobj(response.raw, out_file)
@@ -214,7 +216,7 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
     for gridvariable in variables:
         for year in range(start_year, end_year + 1):
             id = retrieve_nc(gridvariable, bbox, year)
-            fn = _join(SCRATCH, '%s.nc' % id)
+            fn = _join(SCRATCH_DIR, '%s.nc' % id)
 
             try:
                 _d = nc_extract(fn, locations)

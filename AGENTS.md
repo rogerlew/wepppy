@@ -392,7 +392,7 @@ Logs automatically flow to:
 - `tests/README.md` — human quick-start (how to run tests, structure overview).
 - `tests/AGENTS.md` — agent playbook covering fixtures, serialization patterns, Flask patching, microservice mocking, and expectations for new suites.
 - Tests mirror the source tree. New module under `wepppy/foo/bar.py` → add `tests/foo/test_bar.py`.
-- **Frontend checks** should go through `wctl run-npm …` (host command wrapping `npm --prefix wepppy/weppcloud/static-src`). Use `wctl run-npm test` before shipping controller changes.
+- **Frontend checks** should go through `wctl run-npm …` (host command wrapping `npm --prefix wepppy/weppcloud/static-src`). Run `wctl run-npm lint` and `wctl run-npm test` (or `wctl run-npm check`) before shipping controller changes.
 
 ### NoDb Testing Patterns
 1. Use `tmp_path`/`tmpdir` for isolated working directories.

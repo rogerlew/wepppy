@@ -24,7 +24,7 @@ import warnings
 from copy import deepcopy
 from flask import Flask, jsonify, request, Response
 
-from wepppy.all_your_base import isint, IS_WINDOWS
+from wepppy.all_your_base import isint
 
 # noinspection PyProtectedMember
 from wepppy.climates.cligen import (
@@ -266,20 +266,11 @@ def _multiple_year(par, _request, singleyearmode=False):
 
     # build cmd
     if cliver == "4.3":
-        if IS_WINDOWS:
-            raise NotImplementedError('Cligen43.exe is not available on Windows')
-        else:
-            cmd = [_join(_bin_dir, 'cligen43')]
+        cmd = [_join(_bin_dir, 'cligen43')]
     elif cliver == "5.2":
-        if IS_WINDOWS:
-            raise NotImplementedError('Cligen52.exe is not available on Windows')
-        else:
-            cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
+        cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
     else:
-        if IS_WINDOWS:
-            cmd = [_join(_bin_dir, 'cligen532.exe'), "-i%s" % par_fn]
-        else:
-            cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
+        cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
         
     if randseed is not None:
         cmd.append('-r%s' % randseed)
@@ -427,20 +418,11 @@ def single_storm(par):
 
     # build cmd
     if cliver == "4.3":
-        if IS_WINDOWS:
-            raise NotImplementedError('Cligen43.exe is not available on Windows')
-        else:
-            cmd = [_join(_bin_dir, 'cligen43')]
+        cmd = [_join(_bin_dir, 'cligen43')]
     elif cliver == "5.2":
-        if IS_WINDOWS:
-            raise NotImplementedError('Cligen52.exe is not available on Windows')
-        else:
-            cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
+        cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
     else:
-        if IS_WINDOWS:
-            cmd = [_join(_bin_dir, 'cligen532.exe'), "-i%s" % par_fn]
-        else:
-            cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
+        cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
 
     # run cligen
     _clinp = open("clinp.txt")
@@ -670,7 +652,7 @@ def future_rcp85(par):
     
     # build cmd
     cli_fn = "future.cli"
-    cmd = [_join(_bin_dir, ('cligen532', 'cligen532.exe')[IS_WINDOWS]),
+    cmd = [_join(_bin_dir, 'cligen532'),
            "-i%s.par" % par,
            "-Oinput.prn",
            "-o%s" % cli_fn,

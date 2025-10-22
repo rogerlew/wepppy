@@ -30,7 +30,6 @@ from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request, make_response, send_file, after_this_request
 
 from wepppy.climates.daymet import daymet_proj4
-from wepppy.all_your_base import SCRATCH
 from wepppy.all_your_base.geo import wgs84_proj4
 
 import numpy as np
@@ -45,6 +44,8 @@ from glob import glob
 
 from osgeo import ogr, osr, gdal
 gdal.UseExceptions()
+
+SCRATCH_DIR = '/dev/shm'
 
 def isint(x):
     # noinspection PyBroadException
@@ -287,7 +288,7 @@ def daily_worker(args):
     fname = fname[0]
 
     fn_uuid = str(uuid4().hex) + '.nc4'
-    dst = os.path.join(SCRATCH, fn_uuid)
+    dst = os.path.join(SCRATCH_DIR, fn_uuid)
 
     # noinspection PyBroadException
     try:
@@ -362,7 +363,7 @@ def query_daily():
         dst = fn_list[0]
     else:
         fn_uuid = str(uuid4().hex) + '.nc4'
-        dst = os.path.join(SCRATCH, fn_uuid)
+        dst = os.path.join(SCRATCH_DIR, fn_uuid)
         # noinspection PyBroadException
         try:
             merge_nc(fn_list, dst)

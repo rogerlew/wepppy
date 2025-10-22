@@ -12,7 +12,10 @@
 - Skim `wepppy/weppcloud/controllers_js/AGENTS.md` for the current controllers_js agent expectations.
 - Skim the existing controller’s template(s) under `wepppy/weppcloud/templates/controls/`.
 - Identify backend routes (`wepppy/weppcloud/routes/...`) handling the controller’s requests.
-- Confirm Jest runs clean via `cd wepppy/weppcloud/static-src && npm test`.
+- Confirm the JavaScript toolchain is wired up for the workspace:
+  - `wctl run-npm lint` (ESLint + Prettier) — lints staged controller changes.
+  - `wctl run-npm test` — runs the Jest suite for controllers/helpers.
+- Ensure the controller bundle builds: `python wepppy/weppcloud/controllers_js/build_controllers_js.py`.
 - Ensure the controller bundle builds: `python wepppy/weppcloud/controllers_js/build_controllers_js.py`.
 
 ## Workflow Overview
@@ -40,12 +43,13 @@
      - Normalize booleans, arrays, and defaults previously inferred from jQuery’s serialization.
      - Maintain existing permission checks (`authorize`, etc.) and error semantics.
      - Add meaningful error messages for invalid payloads; ensure `exception_factory` integration remains intact.
+     - Update associated NoDb singletons (`parse_inputs`, `set_*` helpers) to accept native Python values instead of `"on"`/`"True"` strings so both legacy form posts and JSON bodies behave the same way.
 
 4. **Validate**
    - **Frontend**
-     - `cd wepppy/weppcloud/static-src`
-     - `wctl run-npm test` (ensures helper/controller Jest suites pass)
-     - `python ../controllers_js/build_controllers_js.py` (or run it from the repo root) to rebuild the bundle and verify no syntax errors.
+     - `wctl run-npm lint` (ESLint/Prettier formatting checks for controllers/helpers)
+     - `wctl run-npm test` (Jest regression tests)
+     - `python wepppy/weppcloud/controllers_js/build_controllers_js.py` (or run from repo root) to rebuild the bundle and verify no syntax errors.
    - **Backend**
      - Run targeted pytest suites via `wctl run-pytest tests/weppcloud/...` so the code executes inside the Docker image with the same environment variables as production.
      - For broader changes, finish with `wctl run-pytest tests --maxfail=1` before handoff; no refactor is complete without a green pytest run.

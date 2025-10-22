@@ -32,7 +32,7 @@ import pandas as pd
 
 from collections import namedtuple
 
-from wepppy.all_your_base import isfloat, clamp, IS_WINDOWS
+from wepppy.all_your_base import isfloat, clamp
 
 from wepppy.all_your_base.geo.webclients import elevationquery
 from wepppy.all_your_base.geo import haversine
@@ -1175,7 +1175,7 @@ class StationMeta:
         if _exists(cli_fn):
             os.remove(cli_fn)
 
-        cmd = [_join(_bin_dir, ('cligen532', 'cligen532.exe')[IS_WINDOWS]),
+        cmd = [_join(_bin_dir, 'cligen532'),
             f"-i{self.par}",
             f"-O{prn_fn}",
             f"-o{cli_fn}",
@@ -1565,20 +1565,13 @@ class Cligen:
             raise NotImplementedError('Cligen version must be greater than 5')
 
         if self.cliver == '5.2':
-            if IS_WINDOWS:
-                raise NotImplementedError('Cligen52.exe is not available on Windows')
-            else:
-                cligen_bin = _join(_bin_dir, 'cligen52')
+            cligen_bin = _join(_bin_dir, 'cligen52')
         elif self.cliver == '5.3':
-            if IS_WINDOWS:
-                cligen_bin = _join(_bin_dir, 'cligen53.exe')
-            else:
-                cligen_bin = _join(_bin_dir, 'cligen53')
+            cligen_bin = _join(_bin_dir, 'cligen53')
         elif self.cliver == '5.3.2':
-            if IS_WINDOWS:
-                cligen_bin = _join(_bin_dir, 'cligen532.exe')
-            else:
-                cligen_bin = _join(_bin_dir, 'cligen532')
+            cligen_bin = _join(_bin_dir, 'cligen532')
+        else:
+            raise NotImplementedError('Cligen version must be 5.2, 5.3, or 5.3.2')
 
         assert _exists(cligen_bin)
 
@@ -1880,43 +1873,23 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
 
         # build cmd
         if cliver == "4.3":
-            if IS_WINDOWS:
-                raise NotImplementedError('Cligen43.exe is not available on Windows')
-            else:
-                cmd = [_join(_bin_dir, 'cligen43')]
+            cmd = [_join(_bin_dir, 'cligen43')]
         elif cliver == "5.2":
-            if IS_WINDOWS:
-                raise NotImplementedError('Cligen52.exe is not available on Windows')
-            else:
-                cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
+            cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
         else:
-            if IS_WINDOWS:
-                cmd = [_join(_bin_dir, 'cligen532.exe'), "-i%s" % par_fn]
-            else:
-                cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
+            cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
 
         if randseed is not None:
             cmd.append('-r%s' % randseed)
 
 
-        if IS_WINDOWS:
-            # run cligen
-            _clinp = open(_clinp_path)
-            process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE)
-            process.wait(timeout=5)
-            output = process.stdout.read()
-            output += process.stderr.read()
-            fp_log.write(str(output))
-            fp_log.flush()
-            _clinp.close()
-        else:
-            stdout_str, stderr_str = _run_cligen_posix(
-                cmd=cmd,
-                clinp_path=_clinp_path,
-                timeout_sec=50,
-                log_fp=fp_log,
-            )
-            output = stdout_str + stderr_str
+        stdout_str, stderr_str = _run_cligen_posix(
+            cmd=cmd,
+            clinp_path=_clinp_path,
+            timeout_sec=50,
+            log_fp=fp_log,
+        )
+        output = stdout_str + stderr_str
 
         assert _exists(cli_fn), (cli_fn, cmd)
 
