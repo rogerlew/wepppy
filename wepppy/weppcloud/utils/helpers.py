@@ -121,7 +121,11 @@ def get_batch_base_wd(batch_name: str) -> str:
     return _join(get_batch_root_dir(), batch_name, '_base')
 
 
-def get_batch_root_dir() -> Path:
+def get_batch_root_dir() -> str:
+    if current_app:
+        root = current_app.config.get("BATCH_RUNNER_ROOT")
+        if root:
+            return os.fspath(root)
     return "/wc1/batch"
 
 

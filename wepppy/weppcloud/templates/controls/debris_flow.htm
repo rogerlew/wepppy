@@ -6,15 +6,17 @@
   ...).<br /></div>
 <div class="form-group row hide-readonly">
   <div class="col-sm-4">
-    <button id="btn_run_debris_flow"
-      onclick="DebrisFlow.getInstance().run();"
-      class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
+    <button
+      id="btn_run_debris_flow"
+      data-debris-action="run"
+      class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
+      type="button">
       <img id="run_debris_flow_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
       Run Model
     </button>
   </div>
   <div class="col-sm-5">
-    <small id="hint_run_wepp"></small>
+    <small id="hint_run_debris_flow"></small>
   </div>
 </div>
 {% endblock %}

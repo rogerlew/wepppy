@@ -2,20 +2,25 @@ from __future__ import annotations
 
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Dict, Tuple
-from contextlib import contextmanager
+from typing import Any, Dict
 
 import pytest
 from flask import Flask
 
 import wepppy.weppcloud.routes.rq.api.api as rq_api_module
 
+from tests.factories.singleton import LockedMixin, ParseInputsRecorderMixin, singleton_factory
+
 RUN_ID = "test-run"
 CONFIG = "cfg"
 
 
 @pytest.fixture()
-def rq_ash_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+def rq_ash_client(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    rq_environment,
+):
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(rq_api_module.rq_api_bp)
@@ -28,98 +33,48 @@ def rq_ash_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
     monkeypatch.setattr(rq_api_module, "get_wd", lambda runid: str(run_dir))
 
-    class DummyAsh:
-        _instances: Dict[str, "DummyAsh"] = {}
+    def _parse_inputs(self, payload: Dict[str, Any]) -> None:
+        ParseInputsRecorderMixin.parse_inputs(self, payload.copy())
 
-        def __init__(self, wd: str) -> None:
-            self.wd = wd
-            self.ash_dir = str(Path(wd) / "ash")
-            self.parse_inputs_calls: list[Dict[str, Any]] = []
-            self._ash_load_fn: str | None = str(Path(self.ash_dir) / "default_load.tif")
-            self._ash_type_map_fn: str | None = None
-            self._spatial_mode = rq_api_module.AshSpatialMode.Single
-            self.ash_depth_mode: int | None = None
+    def _ash_load_fn(self) -> str | None:
+        return getattr(self, "_ash_load_fn", None)
 
-        @classmethod
-        def getInstance(cls, wd: str) -> "DummyAsh":
-            instance = cls._instances.get(wd)
-            if instance is None:
-                instance = cls(wd)
-                cls._instances[wd] = instance
-            return instance
+    def _locked(self):
+        return LockedMixin.locked(self)
 
-        def parse_inputs(self, payload: Dict[str, Any]) -> None:
-            self.parse_inputs_calls.append(payload.copy())
+    AshStub = singleton_factory(
+        "AshStub",
+        attrs={
+            "ash_dir": str(run_dir / "ash"),
+            "_ash_load_fn": str(run_dir / "ash" / "default_load.tif"),
+            "_ash_type_map_fn": None,
+            "_spatial_mode": rq_api_module.AshSpatialMode.Single,
+            "ash_depth_mode": None,
+        },
+        methods={
+            "parse_inputs": _parse_inputs,
+            "ash_load_fn": property(_ash_load_fn),
+            "locked": _locked,
+        },
+        mixins=(ParseInputsRecorderMixin, LockedMixin),
+    )
 
-        @property
-        def ash_load_fn(self) -> str | None:
-            return self._ash_load_fn
+    monkeypatch.setattr(rq_api_module, "Ash", AshStub)
 
-        def locked(self):
-            @contextmanager
-            def _cm():
-                yield self
-            return _cm()
-
-    monkeypatch.setattr(rq_api_module, "Ash", DummyAsh)
-
-    class DummyRedisPrep:
-        _instances: Dict[str, "DummyRedisPrep"] = {}
-
-        def __init__(self, wd: str) -> None:
-            self.wd = wd
-            self.removed: list[Any] = []
-            self.job_ids: Dict[str, str] = {}
-
-        @classmethod
-        def getInstance(cls, wd: str) -> "DummyRedisPrep":
-            instance = cls._instances.get(wd)
-            if instance is None:
-                instance = cls(wd)
-                cls._instances[wd] = instance
-            return instance
-
-        def remove_timestamp(self, task) -> None:  # noqa: ANN001 - preserve signature
-            self.removed.append(task)
-
-        def set_rq_job_id(self, key: str, job_id: str) -> None:
-            self.job_ids[key] = job_id
-
-    monkeypatch.setattr(rq_api_module, "RedisPrep", DummyRedisPrep)
-
-    class DummyRedisConn:
-        def __enter__(self) -> str:
-            state.setdefault("redis", []).append("enter")
-            return "redis-conn"
-
-        def __exit__(self, exc_type, exc, tb) -> None:
-            state.setdefault("redis", []).append("exit")
-
-    monkeypatch.setattr(rq_api_module, "_redis_conn", lambda: DummyRedisConn())
-
-    class DummyJob:
-        def __init__(self, job_id: str = "job-ash") -> None:
-            self.id = job_id
+    env = rq_environment
+    env.patch_module(monkeypatch, rq_api_module, default_job_id="job-ash")
 
     def fake_run_ash_rq(runid: str, fire_date: str, white_depth: float, black_depth: float) -> None:
         state.setdefault("rq_calls", []).append(
-            {"runid": runid, "fire_date": fire_date, "white_depth": white_depth, "black_depth": black_depth}
+            {
+                "runid": runid,
+                "fire_date": fire_date,
+                "white_depth": white_depth,
+                "black_depth": black_depth,
+            }
         )
 
     monkeypatch.setattr(rq_api_module, "run_ash_rq", fake_run_ash_rq)
-
-    class DummyQueue:
-        def __init__(self, connection: str) -> None:
-            state["queue_connection"] = connection
-
-        def enqueue_call(self, func, args: Tuple[Any, ...] = (), timeout: int | None = None) -> DummyJob:
-            job = DummyJob()
-            state.setdefault("queue_calls", []).append(
-                {"func": func, "args": args, "timeout": timeout, "job": job}
-            )
-            return job
-
-    monkeypatch.setattr(rq_api_module, "Queue", DummyQueue)
 
     def fake_upload(runid: str, config: str, field: str, *, required: bool = True, overwrite: bool = True) -> str | None:
         state.setdefault("uploads", []).append({"field": field, "required": required})
@@ -132,15 +87,16 @@ def rq_ash_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     monkeypatch.setattr(rq_api_module, "_task_upload_ash_map", fake_upload)
 
     with app.test_client() as client:
-        yield client, DummyAsh, DummyRedisPrep, state
+        yield client, AshStub, env, state
 
-    DummyAsh._instances.clear()
-    DummyRedisPrep._instances.clear()
+    AshStub.reset_instances()
+    env.redis_prep_class.reset_instances()
+    env.recorder.reset()
     state.clear()
 
 
 def test_run_ash_depth_mode_one_enqueues_job(rq_ash_client):
-    client, DummyAsh, DummyRedisPrep, state = rq_ash_client
+    client, AshStub, env, state = rq_ash_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/rq/api/run_ash",
@@ -160,25 +116,26 @@ def test_run_ash_depth_mode_one_enqueues_job(rq_ash_client):
     assert payload["Success"] is True
     assert payload["job_id"] == "job-ash"
 
-    ash = DummyAsh.getInstance(state["run_dir"])
+    ash = AshStub.getInstance(state["run_dir"])
     assert ash.ash_depth_mode == 1
-    assert ash.parse_inputs_calls, "parse_inputs should receive normalised payload"
+    assert ash.parse_inputs_calls
     parsed_payload = ash.parse_inputs_calls[0]
     assert parsed_payload["ash_model"] == "multi"
     assert parsed_payload["field_black_bulkdensity"] == 0.7
 
-    prep = DummyRedisPrep.getInstance(state["run_dir"])
+    prep = env.redis_prep_class.getInstance(state["run_dir"])
     assert rq_api_module.TaskEnum.run_watar in prep.removed
     assert prep.job_ids["run_ash_rq"] == "job-ash"
 
-    queue_call = state["queue_calls"][0]
-    assert queue_call["func"] is rq_api_module.run_ash_rq
-    assert queue_call["args"] == (RUN_ID, "8/04", 4.4, 3.2)
-    assert state["redis"] == ["enter", "exit"]
+    queue_call = env.recorder.queue_calls[0]
+    assert queue_call.func is rq_api_module.run_ash_rq
+    assert queue_call.args == (RUN_ID, "8/04", 4.4, 3.2)
+    entries = env.recorder.redis_entries
+    assert "enter" in entries and "exit" in entries
 
 
 def test_run_ash_mode_zero_converts_loads(rq_ash_client):
-    client, DummyAsh, DummyRedisPrep, state = rq_ash_client
+    client, AshStub, env, state = rq_ash_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/rq/api/run_ash",
@@ -195,16 +152,15 @@ def test_run_ash_mode_zero_converts_loads(rq_ash_client):
     payload = response.get_json()
     assert payload["Success"] is True
 
-    queue_call = state["queue_calls"][0]
-    # loads converted to depths via division (12/2, 10/1)
-    assert queue_call["args"][2] == pytest.approx(10.0)  # white depth
-    assert queue_call["args"][3] == pytest.approx(6.0)   # black depth
+    queue_call = env.recorder.queue_calls[0]
+    assert queue_call.args[2] == pytest.approx(10.0)
+    assert queue_call.args[3] == pytest.approx(6.0)
 
 
 def test_run_ash_mode_two_handles_uploads(rq_ash_client):
-    client, DummyAsh, DummyRedisPrep, state = rq_ash_client
+    client, AshStub, env, state = rq_ash_client
 
-    ash = DummyAsh.getInstance(state["run_dir"])
+    ash = AshStub.getInstance(state["run_dir"])
     ash._ash_load_fn = None
 
     response = client.post(
@@ -231,7 +187,7 @@ def test_run_ash_mode_two_handles_uploads(rq_ash_client):
 
 
 def test_run_ash_missing_required_fields_returns_error(rq_ash_client):
-    client, DummyAsh, DummyRedisPrep, state = rq_ash_client
+    client, AshStub, env, state = rq_ash_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/rq/api/run_ash",
@@ -247,11 +203,11 @@ def test_run_ash_missing_required_fields_returns_error(rq_ash_client):
     assert payload["Success"] is False
     assert "Field must be numeric" in payload["Error"]
 
-    assert state.get("queue_calls") is None
+    assert env.recorder.queue_calls == []
 
 
 def test_run_ash_mode_two_missing_load_errors(monkeypatch: pytest.MonkeyPatch, rq_ash_client):
-    client, DummyAsh, DummyRedisPrep, state = rq_ash_client
+    client, AshStub, env, state = rq_ash_client
 
     def raise_upload(*args, **kwargs):
         raise ValueError("Missing file for input_upload_ash_load")
@@ -260,7 +216,10 @@ def test_run_ash_mode_two_missing_load_errors(monkeypatch: pytest.MonkeyPatch, r
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/rq/api/run_ash",
-        data={"ash_depth_mode": "2"},
+        data={
+            "ash_depth_mode": "2",
+            "input_upload_ash_type_map": (BytesIO(b"fake"), "type.tif"),
+        },
         content_type="multipart/form-data",
     )
 
@@ -268,3 +227,5 @@ def test_run_ash_mode_two_missing_load_errors(monkeypatch: pytest.MonkeyPatch, r
     payload = response.get_json()
     assert payload["Success"] is False
     assert "Missing file" in payload["Error"]
+
+    assert env.recorder.queue_calls == []

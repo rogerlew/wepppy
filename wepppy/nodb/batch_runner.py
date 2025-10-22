@@ -32,11 +32,28 @@ __all__ = [
     'BatchRunner',
 ]
 
+
+def _coerce_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "1", "yes", "on"}:
+            return True
+        if lowered in {"false", "0", "no", "off"}:
+            return False
+    raise ValueError(f"Invalid boolean value: {value!r}")
+
+
 class BatchRunner(NoDbBase):
     """NoDb controller for batch runner state."""
 
     __name__ = "BatchRunner"
     filename = "batch_runner.nodb"
+
+    RESOURCE_WATERSHED: ClassVar[str] = "watershed_geojson"
 
     DEFAULT_TASKS: ClassVar[Tuple[TaskEnum, ...]] = (
         TaskEnum.if_exists_rmtree,
@@ -124,14 +141,14 @@ class BatchRunner(NoDbBase):
                     continue
 
                 try:
-                    value = bool(value)
+                    coerced_value = _coerce_bool(value)
                 except ValueError:
                     self.logger.warning(f"Invalid task directive value: {raw_key}: {value}")
                     continue
 
                 if task in self._run_directives:
-                    self._run_directives[task] = bool(value)
-                    self.logger.info(f"Updated task directive: {task} = {value}")
+                    self._run_directives[task] = coerced_value
+                    self.logger.info(f"Updated task directive: {task} = {coerced_value}")
 
         return deepcopy(self._run_directives)
 
@@ -404,7 +421,7 @@ class BatchRunner(NoDbBase):
     def get_watershed_collection(self) -> WatershedCollection:
         """Get the registered watershed collection, if any."""
         if not self._geojson_state:
-            raise ValueError("No GeoJSON registered.")    
+            raise ValueError("Upload a GeoJSON resource before validating.")
         
         return WatershedCollection.load_from_analysis_results(
             self._geojson_state, self._runid_template_state)
@@ -446,6 +463,32 @@ class BatchRunner(NoDbBase):
             }
         return report
 
+    def state_dict(self) -> Dict[str, Any]:
+        snapshot: Dict[str, Any] = {
+            "batch_name": self.batch_name,
+            "base_config": self.base_config,
+            "resources": {},
+            "metadata": {},
+            "runid_template": None,
+            "run_directives": [],
+        }
+
+        if self._geojson_state:
+            snapshot["resources"][self.RESOURCE_WATERSHED] = deepcopy(self._geojson_state)
+
+        if self._runid_template_state:
+            snapshot["metadata"]["template_validation"] = deepcopy(self._runid_template_state)
+            snapshot["runid_template"] = self._runid_template_state.get("template")
+
+        for task in self.DEFAULT_TASKS:
+            snapshot["run_directives"].append({
+                "slug": task.value,
+                "label": task.label(),
+                "enabled": bool(self._run_directives.get(task, True)),
+            })
+
+        return snapshot
+
     def generate_runstate_cli_report(self) -> Dict[str, Any]:
         from wcwidth import wcswidth
         watershed_collection = self.get_watershed_collection()
@@ -482,4 +525,3 @@ class BatchRunner(NoDbBase):
         cli_report = '\033c' + cli_report
 
         print(cli_report)
-

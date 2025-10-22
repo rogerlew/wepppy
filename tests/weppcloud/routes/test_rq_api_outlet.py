@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import pytest
 from flask import Flask
@@ -15,7 +15,11 @@ pytestmark = pytest.mark.routes
 
 
 @pytest.fixture()
-def rq_outlet_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
+def rq_outlet_client(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+    rq_environment,
+):
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(rq_api_module.rq_api_bp)
@@ -31,52 +35,12 @@ def rq_outlet_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
 
     monkeypatch.setattr(rq_api_module, "get_wd", fake_get_wd)
 
-    class DummyRedisPrep:
-        _instances: Dict[str, "DummyRedisPrep"] = {}
-
-        def __init__(self, wd: str) -> None:
-            self.wd = wd
-            self.removed: list[Any] = []
-            self.job_ids: Dict[str, str] = {}
-
-        @classmethod
-        def getInstance(cls, wd: str) -> "DummyRedisPrep":
-            instance = cls._instances.get(wd)
-            if instance is None:
-                instance = cls(wd)
-                cls._instances[wd] = instance
-            return instance
-
-        def remove_timestamp(self, task) -> None:  # noqa: ANN001
-            self.removed.append(task)
-
-        def set_rq_job_id(self, key: str, job_id: str) -> None:
-            self.job_ids[key] = job_id
-
-    monkeypatch.setattr(rq_api_module, "RedisPrep", DummyRedisPrep)
-
-    class DummyQueue:
-        def __init__(self, connection: str) -> None:
-            state["queue_connection"] = connection
-
-        def enqueue_call(self, func, args: Tuple[Any, ...] = (), timeout: int | None = None):
-            job = type("DummyJob", (), {"id": "job-456"})()
-            state.setdefault("queue_calls", []).append(
-                {"func": func, "args": args, "timeout": timeout, "job": job}
-            )
-            return job
-
-    monkeypatch.setattr(rq_api_module, "Queue", DummyQueue)
-
-    class DummyRedisConn:
-        def __enter__(self) -> str:
-            state.setdefault("redis_calls", []).append("enter")
-            return "redis-conn"
-
-        def __exit__(self, exc_type, exc, tb) -> None:  # pragma: no cover - errors bubble automatically
-            state.setdefault("redis_calls", []).append("exit")
-
-    monkeypatch.setattr(rq_api_module, "_redis_conn", lambda: DummyRedisConn())
+    env = rq_environment
+    env.patch_module(
+        monkeypatch,
+        rq_api_module,
+        default_job_id="job-456",
+    )
 
     def fake_set_outlet_rq(runid: str, lng: float, lat: float) -> None:
         state.setdefault("jobs", []).append({"runid": runid, "lng": lng, "lat": lat})
@@ -84,14 +48,14 @@ def rq_outlet_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
     monkeypatch.setattr(rq_api_module, "set_outlet_rq", fake_set_outlet_rq)
 
     with app.test_client() as client:
-        yield client, DummyRedisPrep, state
+        yield client, env, state
 
-    DummyRedisPrep._instances.clear()
+    env.redis_prep_class.reset_instances()
     state.clear()
 
 
 def test_api_set_outlet_accepts_json_payload(rq_outlet_client):
-    client, DummyRedisPrep, state = rq_outlet_client
+    client, env, state = rq_outlet_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/rq/api/set_outlet",
@@ -102,18 +66,19 @@ def test_api_set_outlet_accepts_json_payload(rq_outlet_client):
     payload = response.get_json()
     assert payload == {"Success": True, "job_id": "job-456"}
 
-    prep = DummyRedisPrep.getInstance(state["run_dir"])
+    prep = env.redis_prep_class.getInstance(state["run_dir"])
     assert rq_api_module.TaskEnum.set_outlet in prep.removed
     assert prep.job_ids["set_outlet_rq"] == "job-456"
 
-    queue_call = state["queue_calls"][0]
-    assert queue_call["func"] is rq_api_module.set_outlet_rq
-    assert queue_call["args"] == (RUN_ID, -117.5, 44.1)
-    assert state["redis_calls"] == ["enter", "exit"]
+    queue_call = env.recorder.queue_calls[0]
+    assert queue_call.func is rq_api_module.set_outlet_rq
+    assert queue_call.args == (RUN_ID, -117.5, 44.1)
+    entries = env.recorder.redis_entries
+    assert "enter" in entries and "exit" in entries
 
 
 def test_api_set_outlet_accepts_coordinate_object(rq_outlet_client):
-    client, DummyRedisPrep, state = rq_outlet_client
+    client, env, state = rq_outlet_client
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/rq/api/set_outlet",
         json={"coordinates": {"lat": 43.2, "lng": -118.9}},
@@ -123,8 +88,8 @@ def test_api_set_outlet_accepts_coordinate_object(rq_outlet_client):
     payload = response.get_json()
     assert payload["Success"] is True
 
-    queue_call = state["queue_calls"][0]
-    assert queue_call["args"] == (RUN_ID, -118.9, 43.2)
+    queue_call = env.recorder.queue_calls[0]
+    assert queue_call.args == (RUN_ID, -118.9, 43.2)
 
 
 def test_api_set_outlet_requires_coordinates(rq_outlet_client):

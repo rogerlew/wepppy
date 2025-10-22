@@ -130,7 +130,11 @@ def test_set_run_wepp_routine_requires_known_routine(wepp_client):
 
 
 @pytest.fixture()
-def run_wepp_api_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
+def run_wepp_api_client(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+    rq_environment,
+):
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(wepp_rq_module.rq_api_bp)
@@ -237,29 +241,8 @@ def run_wepp_api_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
 
     monkeypatch.setattr(reveg_module, "Revegetation", DummyRevegetation)
 
-    class DummyRedisPrep:
-        _instances: Dict[str, "DummyRedisPrep"] = {}
-
-        def __init__(self, wd: str) -> None:
-            self.wd = wd
-            self.removed: list[Any] = []
-            self.job_ids: list[tuple[str, str]] = []
-
-        @classmethod
-        def getInstance(cls, wd: str) -> "DummyRedisPrep":
-            instance = cls._instances.get(wd)
-            if instance is None:
-                instance = cls(wd)
-                cls._instances[wd] = instance
-            return instance
-
-        def remove_timestamp(self, task: Any) -> None:
-            self.removed.append(task)
-
-        def set_rq_job_id(self, key: str, job_id: str) -> None:
-            self.job_ids.append((key, job_id))
-
-    monkeypatch.setattr(wepp_rq_module, "RedisPrep", DummyRedisPrep)
+    env = rq_environment
+    env.patch_module(monkeypatch, wepp_rq_module, default_job_id="job-123")
 
     class DummyTaskEnum:
         run_wepp_hillslopes = "run_wepp_hillslopes"
@@ -267,37 +250,10 @@ def run_wepp_api_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
 
     monkeypatch.setattr(wepp_rq_module, "TaskEnum", DummyTaskEnum)
 
-    class DummyRedisConn:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-    monkeypatch.setattr(wepp_rq_module, "_redis_conn", lambda: DummyRedisConn())
-
-    queue_holder: Dict[str, Any] = {}
-
-    class DummyJob:
-        def __init__(self, job_id: str) -> None:
-            self.id = job_id
-
     def dummy_run_wepp_rq(runid: str) -> None:
         return None
 
     monkeypatch.setattr(wepp_rq_module, "run_wepp_rq", dummy_run_wepp_rq)
-
-    class DummyQueue:
-        def __init__(self, connection: Any) -> None:
-            queue_holder["instance"] = self
-            self.connection = connection
-            self.calls: list[Dict[str, Any]] = []
-
-        def enqueue_call(self, func, args=(), timeout=None):
-            self.calls.append({"func": func, "args": args, "timeout": timeout})
-            return DummyJob("job-123")
-
-    monkeypatch.setattr(wepp_rq_module, "Queue", DummyQueue)
 
     with app.test_client() as client:
         yield client, {
@@ -305,15 +261,14 @@ def run_wepp_api_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
             "wepp_cls": DummyWepp,
             "soils_cls": DummySoils,
             "watershed_cls": DummyWatershed,
-            "prep_cls": DummyRedisPrep,
-            "queue_holder": queue_holder,
+            "reveg_cls": reveg_module.Revegetation,
+            "env": env,
             "run_wepp_rq": dummy_run_wepp_rq,
         }
 
     DummyWepp._instances.clear()
     DummySoils._instances.clear()
     DummyWatershed._instances.clear()
-    DummyRedisPrep._instances.clear()
     reveg_module.Revegetation._instances.clear()
 
 
@@ -365,11 +320,12 @@ def test_run_wepp_accepts_json_payload(run_wepp_api_client):
     assert watershed.clip_hillslopes is False
     assert watershed.clip_hillslope_length == 15
 
-    prep = ctx["prep_cls"].getInstance(run_dir)
+    env = ctx["env"]
+    prep = env.redis_prep_class.getInstance(run_dir)
     assert prep.removed == ["run_wepp_hillslopes", "run_wepp_watershed"]
-    assert prep.job_ids == [("run_wepp_rq", "job-123")]
+    assert prep.job_history == [("run_wepp_rq", "job-123")]
 
-    queue = ctx["queue_holder"]["instance"]
-    assert queue.calls == [
-        {"func": ctx["run_wepp_rq"], "args": (RUN_ID,), "timeout": wepp_rq_module.TIMEOUT}
-    ]
+    queue_call = env.recorder.queue_calls[0]
+    assert queue_call.func is ctx["run_wepp_rq"]
+    assert queue_call.args == (RUN_ID,)
+    assert queue_call.timeout == wepp_rq_module.TIMEOUT

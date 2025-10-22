@@ -9,12 +9,18 @@ from flask import Flask
 
 import wepppy.weppcloud.routes.nodb_api.project_bp as project_module
 
+from tests.factories.singleton import singleton_factory
+
 RUN_ID = "test-run"
 CONFIG = "cfg"
 
 
 @pytest.fixture()
-def project_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
+def project_client(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+    rq_environment,
+):
     """Provide a Flask client with project blueprint dependencies stubbed out."""
 
     app = Flask(__name__)
@@ -38,26 +44,18 @@ def project_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
 
     monkeypatch.setattr(project_module, "load_run_context", fake_load_run_context)
 
-    class DummyRon:
-        _instances: Dict[str, "DummyRon"] = {}
+    RonStub = singleton_factory(
+        "RonStub",
+        attrs={
+            "name": "",
+            "scenario": "",
+            "public": False,
+            "readonly": False,
+            "_mods": [],
+        },
+    )
 
-        def __init__(self, wd: str) -> None:
-            self.wd = wd
-            self.name: str = ""
-            self.scenario: str = ""
-            self.public: bool = False
-            self.readonly: bool = False
-            self._mods: list[str] = []
-
-        @classmethod
-        def getInstance(cls, wd: str) -> "DummyRon":
-            instance = cls._instances.get(wd)
-            if instance is None:
-                instance = cls(wd)
-                cls._instances[wd] = instance
-            return instance
-
-    monkeypatch.setattr(project_module, "Ron", DummyRon)
+    monkeypatch.setattr(project_module, "Ron", RonStub)
 
     dispatched: Dict[str, Any] = {}
 
@@ -67,44 +65,25 @@ def project_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
 
     monkeypatch.setattr(project_module, "redis_connection_kwargs", fake_redis_connection_kwargs)
 
-    class DummyRedis:
-        def __init__(self, **kwargs):
-            dispatched["redis_kwargs"] = kwargs
+    env = rq_environment
+    queue_cls = env.queue_class(default_job_id="job-123")
+    monkeypatch.setattr(project_module, "Queue", queue_cls)
 
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return None
-
-    monkeypatch.setattr(project_module.redis, "Redis", DummyRedis)
-
-    class DummyJob:
-        def __init__(self, job_id: str) -> None:
-            self.id = job_id
-
-    class DummyQueue:
-        def __init__(self, connection: Any) -> None:
-            dispatched["queue_connection"] = connection
-
-        def enqueue_call(self, func, args, timeout):
-            dispatched["enqueue_call"] = {"func": func, "args": args, "timeout": timeout}
-            return DummyJob("job-123")
-
-    monkeypatch.setattr(project_module, "Queue", DummyQueue)
+    redis_client_cls = env.redis_client_class()
+    monkeypatch.setattr(project_module.redis, "Redis", redis_client_cls)
 
     project_rq = __import__("wepppy.rq.project_rq", fromlist=["set_run_readonly_rq"])
     monkeypatch.setattr(project_rq, "set_run_readonly_rq", lambda runid, state: None)
     monkeypatch.setattr(project_rq, "TIMEOUT", 42)
 
     with app.test_client() as client:
-        yield client, DummyRon, dispatched, str(run_dir)
+        yield client, RonStub, dispatched, str(run_dir), env
 
-    DummyRon._instances.clear()
+    RonStub.reset_instances()
 
 
 def test_setname_accepts_json_payload(project_client):
-    client, DummyRon, _, run_dir = project_client
+    client, RonStub, _, run_dir, _ = project_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/setname/",
@@ -115,12 +94,12 @@ def test_setname_accepts_json_payload(project_client):
     payload = response.get_json()
     assert payload == {"Success": True, "Content": {"name": "Watershed Scenario"}}
 
-    controller = DummyRon.getInstance(run_dir)
+    controller = RonStub.getInstance(run_dir)
     assert controller.name == "Watershed Scenario"
 
 
 def test_setname_defaults_to_untitled_when_blank(project_client):
-    client, DummyRon, _, run_dir = project_client
+    client, RonStub, _, run_dir, _ = project_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/setname/",
@@ -131,12 +110,12 @@ def test_setname_defaults_to_untitled_when_blank(project_client):
     payload = response.get_json()
     assert payload == {"Success": True, "Content": {"name": "Untitled"}}
 
-    controller = DummyRon.getInstance(run_dir)
+    controller = RonStub.getInstance(run_dir)
     assert controller.name == "Untitled"
 
 
 def test_setscenario_handles_form_payload(project_client):
-    client, DummyRon, _, run_dir = project_client
+    client, RonStub, _, run_dir, _ = project_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/setscenario/",
@@ -147,12 +126,12 @@ def test_setscenario_handles_form_payload(project_client):
     payload = response.get_json()
     assert payload == {"Success": True, "Content": {"scenario": "fire response"}}
 
-    controller = DummyRon.getInstance(run_dir)
+    controller = RonStub.getInstance(run_dir)
     assert controller.scenario == "fire response"
 
 
 def test_set_public_accepts_boolean_variants(project_client):
-    client, DummyRon, _, run_dir = project_client
+    client, RonStub, _, run_dir, _ = project_client
 
     response_json = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/set_public",
@@ -161,7 +140,7 @@ def test_set_public_accepts_boolean_variants(project_client):
     assert response_json.status_code == 200
     payload_json = response_json.get_json()
     assert payload_json == {"Success": True, "Content": {"public": True}}
-    assert DummyRon.getInstance(run_dir).public is True
+    assert RonStub.getInstance(run_dir).public is True
 
     response_form = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/set_public",
@@ -170,11 +149,11 @@ def test_set_public_accepts_boolean_variants(project_client):
     assert response_form.status_code == 200
     payload_form = response_form.get_json()
     assert payload_form == {"Success": True, "Content": {"public": False}}
-    assert DummyRon.getInstance(run_dir).public is False
+    assert RonStub.getInstance(run_dir).public is False
 
 
 def test_set_public_rejects_non_boolean_token(project_client):
-    client, DummyRon, _, _ = project_client
+    client, RonStub, _, _, _ = project_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/set_public",
@@ -188,7 +167,7 @@ def test_set_public_rejects_non_boolean_token(project_client):
 
 
 def test_set_readonly_enqueues_background_job(project_client):
-    client, _, dispatched, _ = project_client
+    client, _, dispatched, _, env = project_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/set_readonly",
@@ -200,9 +179,13 @@ def test_set_readonly_enqueues_background_job(project_client):
     assert payload == {"Success": True, "Content": {"readonly": True, "job_id": "job-123"}}
 
     assert dispatched["redis_db"] == project_module.RedisDB.RQ
-    assert dispatched["redis_kwargs"] == {"url": "redis://test"}
-    assert "queue_connection" in dispatched
+    client_entry = next(entry for entry in env.recorder.redis_entries if isinstance(entry, tuple))
+    assert client_entry[1] == {"url": "redis://test"}
+    queue_connection = env.recorder.queue_connections[0]
+    assert getattr(queue_connection, "kwargs", {}) == {"url": "redis://test"}
+
+    queue_call = env.recorder.queue_calls[0]
     project_rq = __import__("wepppy.rq.project_rq", fromlist=["set_run_readonly_rq"])
-    assert dispatched["enqueue_call"]["func"] is project_rq.set_run_readonly_rq
-    assert dispatched["enqueue_call"]["args"] == (RUN_ID, True)
-    assert dispatched["enqueue_call"]["timeout"] == 42
+    assert queue_call.func is project_rq.set_run_readonly_rq
+    assert queue_call.args == (RUN_ID, True)
+    assert queue_call.timeout == 42

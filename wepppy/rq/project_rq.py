@@ -22,7 +22,7 @@ from datetime import datetime
 from glob import glob
 from pathlib import Path
 from subprocess import PIPE, Popen, call
-from typing import Optional, Sequence, TextIO
+from typing import Any, Mapping, Optional, Sequence, TextIO
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -728,7 +728,7 @@ def run_ash_rq(
         raise
 
 
-def run_debris_flow_rq(runid: str) -> None:
+def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = None) -> None:
     """Run the debris flow model for the current watershed configuration.
 
     Args:
@@ -744,7 +744,13 @@ def run_debris_flow_rq(runid: str) -> None:
         status_channel = f'{runid}:debris_flow'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         debris = DebrisFlow.getInstance(wd)
-        debris.run_debris_flow()
+
+        options = payload or {}
+        cc = options.get("clay_pct")
+        ll = options.get("liquid_limit")
+        req_datasource = options.get("datasource")
+
+        debris.run_debris_flow(cc=cc, ll=ll, req_datasource=req_datasource)
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   debris_flow DEBRIS_FLOW_RUN_TASK_COMPLETED')

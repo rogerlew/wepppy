@@ -28,7 +28,10 @@ def test_sanitize_subpath_variants():
 
 
 @pytest.fixture()
-def interchange_client(monkeypatch: pytest.MonkeyPatch):
+def interchange_client(
+    monkeypatch: pytest.MonkeyPatch,
+    rq_environment,
+):
     """Provide a Flask client with Redis/RQ dependencies stubbed out."""
 
     app = Flask(__name__)
@@ -46,44 +49,18 @@ def interchange_client(monkeypatch: pytest.MonkeyPatch):
     helpers = __import__("wepppy.weppcloud.utils.helpers", fromlist=["authorize"])
     monkeypatch.setattr(helpers, "authorize", lambda runid, config, require_owner=False: None)
 
-    class DummyJob:
-        def __init__(self, job_id: str) -> None:
-            self.id = job_id
-
-    class DummyQueue:
-        def __init__(self, connection: Any) -> None:
-            self.connection = connection
-            dispatched["queue_connection"] = connection
-            self.last_kwargs: Dict[str, Any] = {}
-
-        def enqueue_call(self, func, args, timeout):
-            dispatched["enqueue_args"] = args
-            dispatched["enqueue_func"] = func
-            dispatched["enqueue_timeout"] = timeout
-            job = DummyJob("job-123")
-            dispatched["job"] = job
-            return job
-
-    class DummyRedis:
-        def __init__(self, **kwargs: Any) -> None:
-            self.kwargs = kwargs
-            dispatched["redis_kwargs"] = kwargs
-
-        def __enter__(self) -> "DummyRedis":
-            return self
-
-        def __exit__(self, exc_type, exc, tb) -> None:
-            return None
-
-    monkeypatch.setattr(interchange_module.redis, "Redis", DummyRedis)
-    monkeypatch.setattr(interchange_module, "Queue", DummyQueue)
+    env = rq_environment
+    queue_cls = env.queue_class(default_job_id="job-123")
+    monkeypatch.setattr(interchange_module, "Queue", queue_cls)
+    redis_client_cls = env.redis_client_class()
+    monkeypatch.setattr(interchange_module.redis, "Redis", redis_client_cls)
 
     with app.test_client() as client:
-        yield client, dispatched
+        yield client, dispatched, env
 
 
 def test_migrate_default_interchange_enqueues_job(interchange_client):
-    client, dispatched = interchange_client
+    client, dispatched, env = interchange_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/interchange/migrate",
@@ -95,13 +72,14 @@ def test_migrate_default_interchange_enqueues_job(interchange_client):
     assert payload == {"Success": True, "job_id": "job-123"}
 
     assert dispatched["context"] == (RUN_ID, CONFIG)
-    assert dispatched["enqueue_args"] == (RUN_ID, "subdir")
-    assert dispatched["enqueue_func"] is interchange_module.run_interchange_migration
-    assert dispatched["enqueue_timeout"] == interchange_module.TIMEOUT
+    queue_call = env.recorder.queue_calls[0]
+    assert queue_call.args == (RUN_ID, "subdir")
+    assert queue_call.func is interchange_module.run_interchange_migration
+    assert queue_call.timeout == interchange_module.TIMEOUT
 
 
 def test_migrate_default_interchange_rejects_bad_path(interchange_client):
-    client, _ = interchange_client
+    client, _, _ = interchange_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/interchange/migrate",

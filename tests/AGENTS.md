@@ -32,6 +32,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 - `tests/conftest.py` installs a lightweight Redis stub that satisfies `redis`, `redis.exceptions`, and `redis.client.Pipeline` imports. Extend it rather than importing the real Redis client.
 - Prefer `tmp_path`/`tmp_path_factory` for on-disk work. For NoDb controllers, pass `str(tmp_path)` to `getInstance`.
 - Need a clean environment variable? Use `monkeypatch.setenv` and `monkeypatch.delenv` inside tests.
+- Reuse the shared factories in `tests/factories/` whenever you need RedisPrep/Queue/NoDb stubs. `rq_environment` (imported in `tests/conftest.py`) provides recorder-backed helpers so blueprints can assert on queued jobs without copy/pasting mocks.
 
 ### Module Stub Management
 

@@ -4,6 +4,8 @@ from typing import Any
 
 import pytest
 
+from tests.factories.fixtures import rq_environment, rq_recorder  # noqa: F401
+
 
 def pytest_configure(config) -> None:
     """Register custom markers used across the suite."""

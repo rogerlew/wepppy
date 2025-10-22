@@ -1,423 +1,1174 @@
 /* ----------------------------------------------------------------------------
- * Batch Runner (Phase 2)
+ * Batch Runner (Modernized)
  * ----------------------------------------------------------------------------
  */
 var BatchRunner = (function () {
+    "use strict";
+
     var instance;
 
+    var RUN_DIRECTIVE_STATUS_CLASSES = ["text-danger", "text-success", "text-muted", "text-warning"];
+    var RUN_BATCH_MESSAGE_CLASSES = ["text-danger", "text-success", "text-muted", "text-warning", "text-info"];
+
+    var EVENT_NAMES = [
+        "batch:upload:started",
+        "batch:upload:completed",
+        "batch:upload:failed",
+        "batch:template:validate-started",
+        "batch:template:validate-completed",
+        "batch:template:validate-failed",
+        "batch:run-directives:updated",
+        "batch:run-directives:update-failed",
+        "batch:run:started",
+        "batch:run:completed",
+        "batch:run:failed",
+        "job:started",
+        "job:completed",
+        "job:error"
+    ];
+
+    var JOB_INFO_TERMINAL_STATUSES = new Set([
+        "finished",
+        "failed",
+        "stopped",
+        "canceled",
+        "not_found",
+        "complete",
+        "completed",
+        "success",
+        "error"
+    ]);
+
+    var SELECTORS = {
+        form: "#batch_runner_form",
+        statusDisplay: "#batch_runner_form #status",
+        stacktrace: "#batch_runner_form #stacktrace",
+        infoPanel: "#batch_runner_form #info",
+        rqJob: "#batch_runner_form #rq_job",
+        container: "#batch-runner-root",
+        resourceCard: "#batch-runner-resource-card",
+        templateCard: "#batch-runner-template-card",
+        runBatchButton: "#btn_run_batch",
+        runBatchHint: "#hint_run_batch",
+        runBatchLock: "#run_batch_lock"
+    };
+
+    var DATA_ROLES = {
+        uploadForm: '[data-role="upload-form"]',
+        geojsonInput: '[data-role="geojson-input"]',
+        uploadButton: '[data-role="upload-button"]',
+        uploadStatus: '[data-role="upload-status"]',
+        resourceEmpty: '[data-role="resource-empty"]',
+        resourceDetails: '[data-role="resource-details"]',
+        resourceMeta: '[data-role="resource-meta"]',
+        resourceSchema: '[data-role="resource-schema"]',
+        resourceSchemaBody: '[data-role="resource-schema-body"]',
+        resourceSamples: '[data-role="resource-samples"]',
+        resourceSamplesBody: '[data-role="resource-samples-body"]',
+        runDirectiveList: '[data-role="run-directive-list"]',
+        runDirectiveStatus: '[data-role="run-directive-status"]',
+        templateInput: '[data-role="template-input"]',
+        validateButton: '[data-role="validate-button"]',
+        templateStatus: '[data-role="template-status"]',
+        validationSummary: '[data-role="validation-summary"]',
+        validationSummaryList: '[data-role="validation-summary-list"]',
+        validationIssues: '[data-role="validation-issues"]',
+        validationIssuesList: '[data-role="validation-issues-list"]',
+        validationPreview: '[data-role="validation-preview"]',
+        previewBody: '[data-role="preview-body"]'
+    };
+
+    var ACTIONS = {
+        upload: '[data-action="batch-upload"]',
+        validate: '[data-action="batch-validate"]',
+        run: '[data-action="batch-run"]'
+    };
+
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
+
+        if (!dom || typeof dom.delegate !== "function" || typeof dom.show !== "function") {
+            throw new Error("BatchRunner controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("BatchRunner controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("BatchRunner controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function" || typeof events.useEventMap !== "function") {
+            throw new Error("BatchRunner controller requires WCEvents helpers.");
+        }
+
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
+
+    function escapeHtml(value) {
+        if (value === undefined || value === null) {
+            return "";
+        }
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function formatBytes(bytes) {
+        if (bytes === undefined || bytes === null || isNaN(bytes)) {
+            return "—";
+        }
+        var size = Number(bytes);
+        if (size < 1024) {
+            return size + " B";
+        }
+        if (size < 1024 * 1024) {
+            return (size / 1024).toFixed(1) + " KB";
+        }
+        return (size / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function formatBBox(bbox) {
+        if (!bbox || bbox.length !== 4) {
+            return "—";
+        }
+        return bbox
+            .map(function (val) {
+                var num = Number(val);
+                return Number.isFinite(num) ? num.toFixed(4) : String(val);
+            })
+            .join(", ");
+    }
+
+    function formatTimestamp(timestamp) {
+        if (!timestamp) {
+            return "—";
+        }
+        try {
+            var date = new Date(timestamp);
+            if (!isNaN(date.getTime())) {
+                return date.toLocaleString();
+            }
+        } catch (err) {
+            // ignore
+        }
+        return timestamp || "—";
+    }
+
+    function buildValidationMessage(summary) {
+        if (!summary || typeof summary !== "object") {
+            return [];
+        }
+        var items = [];
+        if (summary.feature_count != null) {
+            items.push("Features analysed: " + summary.feature_count);
+        }
+        if (summary.unique_runids != null) {
+            items.push("Unique run IDs: " + summary.unique_runids);
+        }
+        if (summary.duplicate_runids && summary.duplicate_runids.length) {
+            items.push("Duplicates: " + summary.duplicate_runids.length);
+        }
+        if (summary.missing_values && summary.missing_values.length) {
+            items.push("Missing values: " + summary.missing_values.length);
+        }
+        return items;
+    }
+
     function createInstance() {
-        var that = controlBase();
+        var base = controlBase();
+        var deps = ensureHelpers();
+        var emitter = deps.events.useEventMap(EVENT_NAMES, deps.events.createEmitter());
 
-        that.container = null;
-        that.resourceCard = null;
-        that.templateCard = null;
-        that.state = {};
-        that.sitePrefix = '';
-        that.baseUrl = '';
-        that.templateInitialised = false;
-        that.command_btn_id = 'btn_run_batch';
-        that.ws_client = null;
-        that._jobInfoAbortController = null;
-        that._jobInfoTrackedIds = new Set();
-        that._jobInfoLastPayload = null;
-        that._runDirectivesSaving = false;
-        that._runDirectivesStatus = { message: '', css: 'text-muted' };
-        that._jobInfoPollIntervalMs = 3000;
-        that._jobInfoRefreshTimer = null;
-        that._jobInfoFetchInFlight = false;
-        that._jobInfoRefreshPending = false;
-        that._jobInfoLastFetchStartedAt = 0;
-        that._jobInfoForceNextFetch = false;
-        that._jobInfoCompletedIds = new Set();
-        that._jobInfoTerminalStatuses = new Set(['finished', 'failed', 'stopped', 'canceled', 'not_found', 'complete', 'completed', 'success', 'error']);
+        var controller = Object.assign(base, {
+            dom: deps.dom,
+            forms: deps.forms,
+            http: deps.http,
+            eventsModule: deps.events,
+            emitter: emitter
+        });
 
-        that.init = function init(bootstrap) {
+        controller.state = {
+            enabled: false,
+            batchName: "",
+            snapshot: {},
+            validation: null,
+            geojsonLimitMb: null
+        };
+        controller.sitePrefix = "";
+        controller.baseUrl = "";
+        controller.templateInitialised = false;
+        controller.command_btn_id = "btn_run_batch";
+        controller.ws_client = null;
+
+        controller._delegates = [];
+        controller._runDirectivesSaving = false;
+        controller._runDirectivesStatus = { message: "", css: "" };
+
+        controller.jobInfo = {
+            pollIntervalMs: 3000,
+            refreshTimer: null,
+            fetchInFlight: false,
+            refreshPending: false,
+            lastFetchStartedAt: 0,
+            forceNextFetch: false,
+            trackedIds: new Set(),
+            completedIds: new Set(),
+            lastPayload: null,
+            abortController: null
+        };
+
+        controller.container = null;
+        controller.resourceCard = null;
+        controller.templateCard = null;
+
+        controller.form = null;
+        controller.statusDisplay = null;
+        controller.stacktrace = null;
+        controller.infoPanel = null;
+        controller.rq_job = null;
+        controller.runBatchButton = null;
+        controller.runBatchHint = null;
+        controller.runBatchLock = null;
+
+        controller.uploadForm = null;
+        controller.uploadInput = null;
+        controller.uploadButton = null;
+        controller.uploadStatus = null;
+        controller.resourceEmpty = null;
+        controller.resourceDetails = null;
+        controller.resourceMeta = null;
+        controller.resourceSchema = null;
+        controller.resourceSchemaBody = null;
+        controller.resourceSamples = null;
+        controller.resourceSamplesBody = null;
+        controller.runDirectiveList = null;
+        controller.runDirectiveStatus = null;
+
+        controller.templateInput = null;
+        controller.validateButton = null;
+        controller.templateStatus = null;
+        controller.validationSummary = null;
+        controller.validationSummaryList = null;
+        controller.validationIssues = null;
+        controller.validationIssuesList = null;
+        controller.validationPreview = null;
+        controller.previewBody = null;
+
+        controller._jobInfoTerminalStatuses = JOB_INFO_TERMINAL_STATUSES;
+        controller._jobInfoTrackedIds = controller.jobInfo.trackedIds;
+        controller._jobInfoCompletedIds = controller.jobInfo.completedIds;
+
+        controller.init = init;
+        controller.initCreate = init;
+        controller.initManage = init;
+        controller.destroy = destroy;
+        controller.refreshJobInfo = refreshJobInfo;
+        controller.runBatch = runBatch;
+        controller.uploadGeojson = uploadGeojson;
+        controller.validateTemplate = validateTemplate;
+
+        controller.render = render;
+        controller.renderResource = renderResource;
+        controller.renderValidation = renderValidation;
+
+        controller._setRunBatchMessage = setRunBatchMessage;
+        controller._renderRunControls = renderRunControls;
+        controller._setRunBatchBusy = setRunBatchBusy;
+        controller._setUploadBusy = setUploadBusy;
+        controller._setUploadStatus = setUploadStatus;
+        controller._setValidateBusy = setValidateBusy;
+        controller._setRunDirectivesStatus = setRunDirectivesStatus;
+        controller._renderRunDirectives = renderRunDirectives;
+        controller._applyResourceVisibility = applyResourceVisibility;
+
+        controller._handleRunDirectiveToggle = handleRunDirectiveToggle;
+        controller._handleUpload = handleUpload;
+        controller._handleValidate = handleValidate;
+
+        controller._setRunDirectivesBusy = setRunDirectivesBusy;
+        controller._submitRunDirectives = submitRunDirectives;
+
+        controller._renderCoreStatus = renderCoreStatus;
+        controller._renderJobInfo = renderJobInfo;
+        controller._collectJobNodes = collectJobNodes;
+        controller._registerTrackedJobId = registerTrackedJobId;
+        controller._registerTrackedJobIds = registerTrackedJobIds;
+        controller._unregisterTrackedJobId = unregisterTrackedJobId;
+        controller._bootstrapTrackedJobIds = bootstrapTrackedJobIds;
+        controller._resolveJobInfoRequestIds = resolveJobInfoRequestIds;
+        controller._normalizeJobInfoPayload = normalizeJobInfoPayload;
+        controller._registerJobInfoTrees = registerJobInfoTrees;
+        controller._dedupeJobNodes = dedupeJobNodes;
+        controller._pruneCompletedJobIds = pruneCompletedJobIds;
+        controller._cancelJobInfoTimer = cancelJobInfoTimer;
+        controller._ensureJobInfoFetchScheduled = ensureJobInfoFetchScheduled;
+        controller._performJobInfoFetch = performJobInfoFetch;
+
+        controller._buildBaseUrl = buildBaseUrl;
+        controller._apiUrl = apiUrl;
+
+        overrideControlBase(controller);
+
+        return controller;
+
+        function init(bootstrap) {
             bootstrap = bootstrap || {};
-            this.state = {
+            controller.state = {
                 enabled: Boolean(bootstrap.enabled),
-                batchName: bootstrap.batchName || '',
+                batchName: bootstrap.batchName || "",
                 snapshot: bootstrap.state || {},
-                geojsonLimitMb: bootstrap.geojsonLimitMb,
+                validation: extractValidation(bootstrap.state || {}),
+                geojsonLimitMb: bootstrap.geojsonLimitMb
             };
-            this._bootstrapTrackedJobIds(bootstrap);
-            this.state.validation = this._extractValidation(this.state.snapshot);
-            this.sitePrefix = bootstrap.sitePrefix || '';
-            this.baseUrl = this._buildBaseUrl();
+            controller.sitePrefix = bootstrap.sitePrefix || "";
+            controller.baseUrl = buildBaseUrl();
+            controller.templateInitialised = false;
 
-            this.form = $('#batch_runner_form');
-            this.statusDisplay = $('#batch_runner_form #status');
-            this.stacktrace = $('#batch_runner_form #stacktrace');
-            this.infoPanel = $('#batch_runner_form #info');
-            this.rq_job = $('#batch_runner_form #rq_job');
+            controller.form = deps.dom.qs(SELECTORS.form);
+            controller.statusDisplay = deps.dom.qs(SELECTORS.statusDisplay);
+            controller.stacktrace = deps.dom.qs(SELECTORS.stacktrace);
+            controller.infoPanel = deps.dom.qs(SELECTORS.infoPanel);
+            controller.rq_job = deps.dom.qs(SELECTORS.rqJob);
 
-            if (!this.ws_client) {
-                this.ws_client = new WSClient('batch_runner_form', 'batch');
-                this.ws_client.attachControl(this);
-            }
+            controller.container = deps.dom.qs(SELECTORS.container);
+            controller.resourceCard = deps.dom.qs(SELECTORS.resourceCard);
+            controller.templateCard = deps.dom.qs(SELECTORS.templateCard);
 
-            if (this.ws_client && this.state.batchName) {
-                this.ws_client.wsUrl = `wss://${window.location.host}/weppcloud-microservices/status/${encodeURIComponent(this.state.batchName)}:batch`;
-            }
+            controller.runBatchButton = deps.dom.qs(SELECTORS.runBatchButton);
+            controller.runBatchHint = deps.dom.qs(SELECTORS.runBatchHint);
+            controller.runBatchLock = deps.dom.qs(SELECTORS.runBatchLock);
 
-            this.container = $("#batch-runner-root");
-            this.resourceCard = $("#batch-runner-resource-card");
-            this.templateCard = $("#batch-runner-template-card");
-
-            if (!this.container.length) {
+            if (!controller.container) {
                 console.warn("BatchRunner container not found");
-                return this;
+                return controller;
             }
 
-            this._cacheElements();
-            this._bindEvents();
-            this._renderCoreStatus();
-            this.render();
-            this.refreshJobInfo();
-            this.render_job_status(this);
-            return this;
-        };
+            cacheElements();
+            bindEvents();
 
-        that.initManage = that.init;
-        that.initCreate = that.init;
+            if (!controller.ws_client) {
+                controller.ws_client = new WSClient("batch_runner_form", "batch");
+                controller.ws_client.attachControl(controller);
+            }
+            if (controller.ws_client && controller.state.batchName) {
+                controller.ws_client.wsUrl =
+                    "wss://" +
+                    window.location.host +
+                    "/weppcloud-microservices/status/" +
+                    encodeURIComponent(controller.state.batchName) +
+                    ":batch";
+            }
 
-        that._cacheElements = function () {
-            this.uploadForm = this.resourceCard.find('[data-role="upload-form"]');
-            this.uploadInput = this.resourceCard.find('[data-role="geojson-input"]');
-            this.uploadButton = this.resourceCard.find('[data-role="upload-button"]');
-            this.uploadStatus = this.resourceCard.find('[data-role="upload-status"]');
-            this.resourceEmpty = this.resourceCard.find('[data-role="resource-empty"]');
-            this.resourceDetails = this.resourceCard.find('[data-role="resource-details"]');
-            this.resourceMeta = this.resourceCard.find('[data-role="resource-meta"]');
-            this.resourceSchema = this.resourceCard.find('[data-role="resource-schema"]');
-            this.resourceSchemaBody = this.resourceCard.find('[data-role="resource-schema-body"]');
-            this.resourceSamples = this.resourceCard.find('[data-role="resource-samples"]');
-            this.resourceSamplesBody = this.resourceCard.find('[data-role="resource-samples-body"]');
-            this.runBatchButton = $('#btn_run_batch');
-            this.runBatchHint = $('#hint_run_batch');
-            this.runBatchLock = $('#run_batch_lock');
-            this.runDirectiveList = this.container.find('[data-role="run-directive-list"]');
-            this.runDirectiveStatus = this.container.find('[data-role="run-directive-status"]');
+            bootstrapTrackedJobIds(bootstrap);
 
-            this.templateInput = this.templateCard.find('[data-role="template-input"]');
-            this.validateButton = this.templateCard.find('[data-role="validate-button"]');
-            this.templateStatus = this.templateCard.find('[data-role="template-status"]');
-            this.validationSummary = this.templateCard.find('[data-role="validation-summary"]');
-            this.validationSummaryList = this.templateCard.find('[data-role="validation-summary-list"]');
-            this.validationIssues = this.templateCard.find('[data-role="validation-issues"]');
-            this.validationIssuesList = this.templateCard.find('[data-role="validation-issues-list"]');
-            this.validationPreview = this.templateCard.find('[data-role="validation-preview"]');
-            this.previewBody = this.templateCard.find('[data-role="preview-body"]');
-        };
+            renderCoreStatus();
+            render();
+            refreshJobInfo();
+            controller.render_job_status(controller);
 
-        that._bindEvents = function () {
-            var self = this;
-            if (this.uploadForm.length) {
-                if (this.uploadForm.is('form')) {
-                    this.uploadForm.on('submit', function (evt) {
-                        evt.preventDefault();
-                        self._handleUpload();
-                    });
-                } else if (this.uploadButton.length && !this.uploadButton.attr('onclick')) {
-                    this.uploadButton.on('click', function (evt) {
-                        evt.preventDefault();
-                        self._handleUpload();
-                    });
+            return controller;
+        }
+
+        function destroy() {
+            controller._delegates.forEach(function (unsubscribe) {
+                try {
+                    if (typeof unsubscribe === "function") {
+                        unsubscribe();
+                    }
+                } catch (err) {
+                    console.warn("Failed to remove BatchRunner delegate listener", err);
+                }
+            });
+            controller._delegates = [];
+            cancelJobInfoTimer();
+            if (controller.jobInfo.abortController && typeof controller.jobInfo.abortController.abort === "function") {
+                try {
+                    controller.jobInfo.abortController.abort();
+                } catch (err) {
+                    console.warn("Failed to abort job info request during destroy", err);
                 }
             }
-            if (this.validateButton.length && !this.validateButton.attr('onclick')) {
-                this.validateButton.on('click', function (evt) {
-                    evt.preventDefault();
-                    self._handleValidate();
-                });
-            }
-            if (this.runDirectiveList && this.runDirectiveList.length) {
-                this.runDirectiveList.on('change', 'input[data-slug]', function (evt) {
-                    self._handleRunDirectiveToggle(evt);
-                });
-            }
-        };
+        }
 
-        that._extractValidation = function (snapshot) {
-            snapshot = snapshot || {};
-            var metadata = snapshot.metadata || {};
-            return metadata.template_validation || null;
-        };
+        function cacheElements() {
+            if (!controller.resourceCard) {
+                return;
+            }
+            controller.uploadForm = controller.resourceCard.querySelector(DATA_ROLES.uploadForm);
+            controller.uploadInput = controller.resourceCard.querySelector(DATA_ROLES.geojsonInput);
+            controller.uploadButton = controller.resourceCard.querySelector(DATA_ROLES.uploadButton);
+            controller.uploadStatus = controller.resourceCard.querySelector(DATA_ROLES.uploadStatus);
+            controller.resourceEmpty = controller.resourceCard.querySelector(DATA_ROLES.resourceEmpty);
+            controller.resourceDetails = controller.resourceCard.querySelector(DATA_ROLES.resourceDetails);
+            controller.resourceMeta = controller.resourceCard.querySelector(DATA_ROLES.resourceMeta);
+            controller.resourceSchema = controller.resourceCard.querySelector(DATA_ROLES.resourceSchema);
+            controller.resourceSchemaBody = controller.resourceCard.querySelector(DATA_ROLES.resourceSchemaBody);
+            controller.resourceSamples = controller.resourceCard.querySelector(DATA_ROLES.resourceSamples);
+            controller.resourceSamplesBody = controller.resourceCard.querySelector(DATA_ROLES.resourceSamplesBody);
+            controller.runDirectiveList = controller.container.querySelector(DATA_ROLES.runDirectiveList);
+            controller.runDirectiveStatus = controller.container.querySelector(DATA_ROLES.runDirectiveStatus);
 
-        that._buildBaseUrl = function () {
-            var prefix = this.sitePrefix || '';
-            if (prefix && prefix.slice(-1) === '/') {
+            if (controller.templateCard) {
+                controller.templateInput = controller.templateCard.querySelector(DATA_ROLES.templateInput);
+                controller.validateButton = controller.templateCard.querySelector(DATA_ROLES.validateButton);
+                controller.templateStatus = controller.templateCard.querySelector(DATA_ROLES.templateStatus);
+                controller.validationSummary = controller.templateCard.querySelector(DATA_ROLES.validationSummary);
+                controller.validationSummaryList = controller.templateCard.querySelector(DATA_ROLES.validationSummaryList);
+                controller.validationIssues = controller.templateCard.querySelector(DATA_ROLES.validationIssues);
+                controller.validationIssuesList = controller.templateCard.querySelector(DATA_ROLES.validationIssuesList);
+                controller.validationPreview = controller.templateCard.querySelector(DATA_ROLES.validationPreview);
+                controller.previewBody = controller.templateCard.querySelector(DATA_ROLES.previewBody);
+            }
+        }
+
+        function bindEvents() {
+            var delegates = controller._delegates;
+
+            if (
+                controller.uploadForm &&
+                controller.uploadForm.tagName &&
+                controller.uploadForm.tagName.toLowerCase() === "form"
+            ) {
+                delegates.push(
+                    deps.dom.delegate(controller.uploadForm, "submit", function (event) {
+                        event.preventDefault();
+                        handleUpload();
+                    })
+                );
+            }
+
+            delegates.push(
+                deps.dom.delegate(controller.resourceCard || controller.container, "click", ACTIONS.upload, function (event) {
+                    event.preventDefault();
+                    handleUpload();
+                })
+            );
+
+            delegates.push(
+                deps.dom.delegate(controller.templateCard || controller.container, "click", ACTIONS.validate, function (event) {
+                    event.preventDefault();
+                    handleValidate();
+                })
+            );
+
+            delegates.push(
+                deps.dom.delegate(controller.container, "change", "[data-run-directive]", function (event) {
+                    handleRunDirectiveToggle(event);
+                })
+            );
+
+            if (controller.runBatchButton) {
+                delegates.push(
+                    deps.dom.delegate(controller.runBatchButton, "click", ACTIONS.run, function (event) {
+                        event.preventDefault();
+                        runBatch();
+                    })
+                );
+            }
+        }
+
+        function buildBaseUrl() {
+            var prefix = controller.sitePrefix || "";
+            if (prefix && prefix.slice(-1) === "/") {
                 prefix = prefix.slice(0, -1);
             }
-            if (this.state.batchName) {
-                return prefix + '/batch/_/' + encodeURIComponent(this.state.batchName);
+            if (controller.state.batchName) {
+                return prefix + "/batch/_/" + encodeURIComponent(controller.state.batchName);
             }
-            var pathname = window.location.pathname || '';
-            return pathname.replace(/\/$/, '');
-        };
+            var pathname = window.location.pathname || "";
+            return pathname.replace(/\/$/, "");
+        }
 
-        that._apiUrl = function (suffix) {
-            var base = this.baseUrl || '';
+        function apiUrl(suffix) {
+            var base = controller.baseUrl || "";
             if (!suffix) {
                 return base;
             }
-            if (suffix.charAt(0) !== '/') {
-                suffix = '/' + suffix;
+            if (suffix.charAt(0) !== "/") {
+                suffix = "/" + suffix;
             }
             return base + suffix;
-        };
+        }
 
-        that._renderCoreStatus = function () {
-            var snapshot = this.state.snapshot || {};
-            this.container.find('[data-role="enabled-flag"]').text(this.state.enabled ? 'True' : 'False');
-            this.container.find('[data-role="batch-name"]').text(this.state.batchName || '—');
-            this.container.find('[data-role="manifest-version"]').text(snapshot.state_version || '—');
-            this.container.find('[data-role="created-by"]').text(snapshot.created_by || '—');
-            this.container.find('[data-role="manifest-json"]').text(JSON.stringify(snapshot, null, 2));
-        };
+        function extractValidation(snapshot) {
+            snapshot = snapshot || {};
+            var metadata = snapshot.metadata || {};
+            return metadata.template_validation || null;
+        }
 
-        that.render = function render() {
-            this._renderResource();
-            this._renderValidation();
-            this._renderRunDirectives();
-            this._renderRunControls();
-        };
-
-        that._setRunBatchMessage = function (message, cssClass) {
-            if (!this.runBatchHint || !this.runBatchHint.length) {
+        function renderCoreStatus() {
+            if (!controller.container) {
                 return;
             }
-            this.runBatchHint.removeClass('text-danger text-success text-warning text-muted text-info');
-            if (cssClass) {
-                this.runBatchHint.addClass(cssClass);
-            }
-            this.runBatchHint.text(message || '');
-        };
+            var snapshot = controller.state.snapshot || {};
+            setText(controller.container.querySelector('[data-role="enabled-flag"]'), controller.state.enabled ? "True" : "False");
+            setText(controller.container.querySelector('[data-role="batch-name"]'), controller.state.batchName || "—");
+            setText(controller.container.querySelector('[data-role="manifest-version"]'), snapshot.state_version || "—");
+            setText(controller.container.querySelector('[data-role="created-by"]'), snapshot.created_by || "—");
+            setText(controller.container.querySelector('[data-role="manifest-json"]'), JSON.stringify(snapshot, null, 2));
+        }
 
-        that._renderRunControls = function (options) {
+        function render() {
+            renderResource();
+            renderValidation();
+            renderRunDirectives();
+            renderRunControls();
+        }
+
+        function renderResource() {
+            var snapshot = controller.state.snapshot || {};
+            var resources = snapshot.resources || {};
+            var resource = resources.watershed_geojson;
+
+            if (!controller.resourceCard) {
+                return;
+            }
+
+            if (!resource) {
+                deps.dom.show(controller.resourceEmpty);
+                deps.dom.hide(controller.resourceDetails);
+                deps.dom.hide(controller.resourceSchema);
+                deps.dom.hide(controller.resourceSamples);
+                return;
+            }
+
+            deps.dom.hide(controller.resourceEmpty);
+            deps.dom.show(controller.resourceDetails);
+
+            var metaRows = [];
+            metaRows.push(renderMetaRow("Filename", resource.filename || resource.original_filename || "—"));
+            if (resource.uploaded_by) {
+                metaRows.push(renderMetaRow("Uploaded by", resource.uploaded_by));
+            }
+            if (resource.uploaded_at) {
+                metaRows.push(renderMetaRow("Uploaded at", formatTimestamp(resource.uploaded_at)));
+            }
+            if (resource.size_bytes != null) {
+                metaRows.push(renderMetaRow("Size", formatBytes(resource.size_bytes)));
+            }
+            if (resource.feature_count != null) {
+                metaRows.push(renderMetaRow("Features", resource.feature_count));
+            }
+            if (resource.bbox) {
+                metaRows.push(renderMetaRow("Bounding Box", formatBBox(resource.bbox)));
+            }
+            if (resource.epsg) {
+                metaRows.push(
+                    renderMetaRow(
+                        "EPSG",
+                        resource.epsg + (resource.epsg_source ? " (" + resource.epsg_source + ")" : "")
+                    )
+                );
+            }
+            if (resource.checksum) {
+                metaRows.push(renderMetaRow("Checksum", resource.checksum));
+            }
+            if (resource.relative_path) {
+                metaRows.push(renderMetaRow("Path", resource.relative_path));
+            }
+
+            if (controller.resourceMeta) {
+                controller.resourceMeta.innerHTML = metaRows.join("");
+            }
+
+            if (Array.isArray(resource.attribute_schema) && controller.resourceSchemaBody) {
+                deps.dom.show(controller.resourceSchema);
+                controller.resourceSchemaBody.innerHTML = resource.attribute_schema
+                    .map(function (entry) {
+                        var name = escapeHtml(entry.name || "—");
+                        var type = escapeHtml(entry.type || entry.type_hint || "—");
+                        return "<tr><td>" + name + "</td><td>" + type + "</td></tr>";
+                    })
+                    .join("");
+            } else {
+                deps.dom.hide(controller.resourceSchema);
+            }
+
+            if (Array.isArray(resource.sample_properties) && controller.resourceSamplesBody) {
+                deps.dom.show(controller.resourceSamples);
+                controller.resourceSamplesBody.innerHTML = resource.sample_properties
+                    .map(function (entry, index) {
+                        var props = escapeHtml(JSON.stringify(entry.properties || entry, null, 2));
+                        var idx = escapeHtml(String(entry.index != null ? entry.index : index));
+                        var featureId = escapeHtml(String(entry.feature_id || entry.id || "—"));
+                        return (
+                            "<tr><td>" +
+                            idx +
+                            "</td><td><code>" +
+                            featureId +
+                            '</code></td><td><pre class="mb-0">' +
+                            props +
+                            "</pre></td></tr>"
+                        );
+                    })
+                    .join("");
+            } else {
+                deps.dom.hide(controller.resourceSamples);
+            }
+        }
+
+        function renderValidation() {
+            var validation = controller.state.validation;
+            if (!controller.templateCard) {
+                return;
+            }
+
+            if (!controller.templateInitialised && controller.templateInput && controller.state.snapshot) {
+                var storedTemplate = controller.state.snapshot.runid_template || "";
+                controller.templateInput.value = storedTemplate || "";
+                controller.templateInitialised = true;
+            }
+
+            if (!validation) {
+                setText(controller.templateStatus, "");
+                deps.dom.hide(controller.validationSummary);
+                deps.dom.hide(controller.validationIssues);
+                deps.dom.hide(controller.validationPreview);
+                return;
+            }
+
+            var status = validation.status || "unknown";
+            var summary = validation.summary || {};
+            var issues = validation.errors || [];
+            var preview = validation.preview || [];
+
+            setText(
+                controller.templateStatus,
+                status === "ok" ? "Template is valid." : "Template requires attention."
+            );
+
+            if (controller.validationSummary && controller.validationSummaryList) {
+                var items = buildValidationMessage(summary).map(function (item) {
+                    return "<li>" + escapeHtml(item) + "</li>";
+                });
+                controller.validationSummaryList.innerHTML = items.join("");
+                deps.dom.toggle(controller.validationSummary, items.length > 0);
+            }
+
+            if (controller.validationIssues && controller.validationIssuesList) {
+                if (issues.length) {
+                    controller.validationIssuesList.innerHTML = issues
+                        .slice(0, 10)
+                        .map(function (item) {
+                            return escapeHtml(item);
+                        })
+                        .join("<br>");
+                    deps.dom.show(controller.validationIssues);
+                } else {
+                    controller.validationIssuesList.innerHTML = "";
+                    deps.dom.hide(controller.validationIssues);
+                }
+            }
+
+            if (controller.validationPreview && controller.previewBody) {
+                if (Array.isArray(preview) && preview.length) {
+                    controller.previewBody.innerHTML = preview
+                        .slice(0, 25)
+                        .map(function (entry) {
+                            var rowIndex = escapeHtml(
+                                entry.index != null
+                                    ? entry.index
+                                    : entry.one_based_index != null
+                                    ? entry.one_based_index - 1
+                                    : "—"
+                            );
+                            var featureId = escapeHtml(entry.feature_id || entry.featureId || "—");
+                            var runid = escapeHtml(entry.runid || entry.runId || "—");
+                            var error = escapeHtml(entry.error || "");
+                            return (
+                                "<tr><td>" +
+                                rowIndex +
+                                "</td><td><code>" +
+                                featureId +
+                                "</code></td><td><code>" +
+                                runid +
+                                "</code></td><td>" +
+                                error +
+                                "</td></tr>"
+                            );
+                        })
+                        .join("");
+                    deps.dom.show(controller.validationPreview);
+                } else {
+                    controller.previewBody.innerHTML = "";
+                    deps.dom.hide(controller.validationPreview);
+                }
+            }
+        }
+
+        function renderRunDirectives() {
+            if (!controller.runDirectiveList) {
+                return;
+            }
+
+            var snapshot = controller.state.snapshot || {};
+            var directives = snapshot.run_directives || [];
+
+            if (!Array.isArray(directives) || directives.length === 0) {
+                controller.runDirectiveList.innerHTML =
+                    '<div class="text-muted small">No batch tasks configured.</div>';
+                setRunDirectivesStatus("No batch tasks configured.", "text-muted");
+                return;
+            }
+
+            var html = directives
+                .map(function (directive, index) {
+                    if (!directive || typeof directive !== "object") {
+                        return "";
+                    }
+                    var slug = directive.slug || "directive-" + index;
+                    var label = directive.label || slug;
+                    var controlId = "batch-runner-directive-" + slug;
+                    var checked = directive.enabled ? " checked" : "";
+                    var disabled = !controller.state.enabled || controller._runDirectivesSaving ? " disabled" : "";
+                    return (
+                        '<div class="custom-control custom-checkbox mb-1">' +
+                        '<input type="checkbox" class="custom-control-input" id="' +
+                        controlId +
+                        '" data-run-directive="' +
+                        escapeHtml(slug) +
+                        '"' +
+                        checked +
+                        disabled +
+                        ">" +
+                        '<label class="custom-control-label" for="' +
+                        controlId +
+                        '">' +
+                        escapeHtml(label) +
+                        "</label>" +
+                        "</div>"
+                    );
+                })
+                .join("");
+
+            controller.runDirectiveList.innerHTML = html;
+            syncRunDirectiveDisabledState();
+
+            if (controller._runDirectivesStatus && controller._runDirectivesStatus.message) {
+                applyStoredRunDirectiveStatus();
+            } else if (!controller.state.enabled) {
+                setRunDirectivesStatus("Batch runner is disabled; tasks cannot be edited.", "text-muted");
+            }
+        }
+
+        function renderRunControls(options) {
             options = options || {};
             var preserveMessage = options.preserveMessage === true;
 
-            if (!this.runBatchButton || !this.runBatchButton.length) {
+            if (!controller.runBatchButton) {
                 return;
             }
 
-            var jobLocked = this.should_disable_command_button(this);
-            this.update_command_button_state(this);
+            var jobLocked = controller.should_disable_command_button(controller);
+            controller.update_command_button_state(controller);
 
-            if (this.runBatchLock && this.runBatchLock.length) {
+            if (controller.runBatchLock) {
                 if (jobLocked) {
-                    this.runBatchLock.show();
+                    deps.dom.show(controller.runBatchLock);
                 } else {
-                    this.runBatchLock.hide();
+                    deps.dom.hide(controller.runBatchLock);
                 }
             }
 
             if (jobLocked) {
-                this.runBatchButton.prop('disabled', true);
-                this._setRunBatchMessage('Batch run in progress…', 'text-muted');
+                controller.runBatchButton.disabled = true;
+                setRunBatchMessage("Batch run in progress…", "text-muted");
                 return;
             }
 
-            var enabled = Boolean(this.state.enabled);
-            var snapshot = this.state.snapshot || {};
+            var enabled = Boolean(controller.state.enabled);
+            var snapshot = controller.state.snapshot || {};
             var resources = snapshot.resources || {};
             var resource = resources.watershed_geojson;
-            var templateState = this.state.validation || (snapshot.metadata && snapshot.metadata.template_validation) || null;
-            var templateStatus = templateState && (templateState.status || 'ok');
+            var templateState =
+                controller.state.validation || (snapshot.metadata && snapshot.metadata.template_validation) || null;
+            var templateStatus = templateState && (templateState.status || "ok");
             var summary = templateState && templateState.summary;
-            var templateIsValid = Boolean(templateState && summary && summary.is_valid && templateStatus === 'ok');
+            var templateIsValid = Boolean(templateState && summary && summary.is_valid && templateStatus === "ok");
 
             var allowRun = enabled && Boolean(resource) && templateIsValid;
-            var message = '';
-            var cssClass = 'text-muted';
+            var message = "";
+            var cssClass = "text-muted";
 
             if (!enabled) {
-                message = 'Batch runner is disabled.';
-                cssClass = 'text-warning';
+                message = "Batch runner is disabled.";
+                cssClass = "text-warning";
             } else if (!resource) {
-                message = 'Upload a watershed GeoJSON before running.';
+                message = "Upload a watershed GeoJSON before running.";
             } else if (!templateIsValid) {
-                message = 'Validate and resolve template issues before running.';
-                cssClass = 'text-warning';
+                message = "Validate and resolve template issues before running.";
+                cssClass = "text-warning";
             } else {
-                message = 'Ready to run batch.';
+                message = "Ready to run batch.";
             }
 
-            this.runBatchButton.prop('disabled', !allowRun);
+            controller.runBatchButton.disabled = !allowRun;
 
             if (!preserveMessage || !allowRun) {
-                this._setRunBatchMessage(message, cssClass);
+                setRunBatchMessage(message, cssClass);
             }
-        };
+        }
 
-        that._syncRunDirectiveDisabledState = function () {
-            if (!this.runDirectiveList || !this.runDirectiveList.length) {
+        function syncRunDirectiveDisabledState() {
+            if (!controller.runDirectiveList) {
                 return;
             }
-            var shouldDisable = this._runDirectivesSaving || !this.state.enabled;
-            this.runDirectiveList.find('input[data-slug]').prop('disabled', shouldDisable);
-        };
+            var shouldDisable = controller._runDirectivesSaving || !controller.state.enabled;
+            var inputs = controller.runDirectiveList.querySelectorAll("input[data-run-directive]");
+            inputs.forEach(function (input) {
+                input.disabled = shouldDisable;
+            });
+        }
 
-        that._setRunDirectivesStatus = function (message, cssClass) {
-            this._runDirectivesStatus = {
-                message: message || '',
-                css: cssClass || '',
+        function setRunDirectivesBusy(busy) {
+            controller._runDirectivesSaving = busy === true;
+            syncRunDirectiveDisabledState();
+        }
+
+        function setRunBatchBusy(busy, message, cssClass) {
+            if (controller.runBatchButton && busy) {
+                controller.runBatchButton.disabled = true;
+            }
+            if (controller.runBatchLock) {
+                if (busy) {
+                    deps.dom.show(controller.runBatchLock);
+                } else if (!controller.should_disable_command_button(controller)) {
+                    deps.dom.hide(controller.runBatchLock);
+                }
+            }
+            if (message != null) {
+                setRunBatchMessage(message, cssClass || "text-muted");
+            }
+            if (!busy) {
+                renderRunControls({ preserveMessage: true });
+            }
+        }
+
+        function setRunDirectivesStatus(message, cssClass) {
+            controller._runDirectivesStatus = {
+                message: message || "",
+                css: cssClass || ""
             };
-            if (!this.runDirectiveStatus || !this.runDirectiveStatus.length) {
+            if (!controller.runDirectiveStatus) {
                 return;
             }
-            this.runDirectiveStatus.removeClass('text-danger text-success text-muted text-warning');
+            RUN_DIRECTIVE_STATUS_CLASSES.forEach(function (cls) {
+                controller.runDirectiveStatus.classList.remove(cls);
+            });
             if (cssClass) {
-                this.runDirectiveStatus.addClass(cssClass);
+                controller.runDirectiveStatus.classList.add(cssClass);
             }
-            this.runDirectiveStatus.text(message || '');
-        };
+            setText(controller.runDirectiveStatus, message || "");
+        }
 
-        that._applyStoredRunDirectiveStatus = function () {
-            if (!this.runDirectiveStatus || !this.runDirectiveStatus.length) {
+        function applyStoredRunDirectiveStatus() {
+            if (!controller.runDirectiveStatus) {
                 return;
             }
-            var status = this._runDirectivesStatus || {};
-            this.runDirectiveStatus.removeClass('text-danger text-success text-muted text-warning');
+            var status = controller._runDirectivesStatus || {};
+            RUN_DIRECTIVE_STATUS_CLASSES.forEach(function (cls) {
+                controller.runDirectiveStatus.classList.remove(cls);
+            });
             if (status.css) {
-                this.runDirectiveStatus.addClass(status.css);
+                controller.runDirectiveStatus.classList.add(status.css);
             }
-            this.runDirectiveStatus.text(status.message || '');
-        };
+            setText(controller.runDirectiveStatus, status.message || "");
+        }
 
-        that._renderRunDirectives = function () {
-            if (!this.runDirectiveList || !this.runDirectiveList.length) {
+        function setRunBatchMessage(message, cssClass) {
+            if (!controller.runBatchHint) {
                 return;
             }
+            RUN_BATCH_MESSAGE_CLASSES.forEach(function (cls) {
+                controller.runBatchHint.classList.remove(cls);
+            });
+            if (cssClass) {
+                controller.runBatchHint.classList.add(cssClass);
+            }
+            setText(controller.runBatchHint, message || "");
+        }
 
-            var snapshot = this.state.snapshot || {};
-            var directives = snapshot.run_directives || [];
-            var self = this;
+        function setUploadBusy(busy, message) {
+            if (controller.uploadButton) {
+                controller.uploadButton.disabled = busy || !controller.state.enabled;
+            }
+            if (message != null) {
+                setUploadStatus(message, busy ? "text-muted" : "");
+            }
+        }
 
-            if (!Array.isArray(directives) || directives.length === 0) {
-                this.runDirectiveList.html('<div class="text-muted small">No batch tasks configured.</div>');
-                this._setRunDirectivesStatus('No batch tasks configured.', 'text-muted');
+        function setValidateBusy(busy, message) {
+            if (controller.validateButton) {
+                controller.validateButton.disabled = busy || !controller.state.enabled;
+            }
+            if (message != null) {
+                setText(controller.templateStatus, message);
+            }
+        }
+
+        function setUploadStatus(message, cssClass) {
+            if (!controller.uploadStatus) {
                 return;
             }
-
-            var html = directives.map(function (directive, index) {
-                if (!directive || typeof directive !== 'object') {
-                    return '';
-                }
-                var slug = directive.slug || ('directive-' + index);
-                var label = directive.label || slug;
-                var controlId = 'batch-runner-directive-' + slug;
-                var checked = directive.enabled ? ' checked' : '';
-                var disabled = (!self.state.enabled || self._runDirectivesSaving) ? ' disabled' : '';
-                return '<div class="custom-control custom-checkbox mb-1">' +
-                    '<input type="checkbox" class="custom-control-input" id="' + controlId + '" data-slug="' + slug + '"' + checked + disabled + '>' +
-                    '<label class="custom-control-label" for="' + controlId + '">' + self._escapeHtml(label) + '</label>' +
-                    '</div>';
-            }).join('');
-
-            this.runDirectiveList.html(html);
-            this._syncRunDirectiveDisabledState();
-            if (!this._runDirectivesStatus || !this._runDirectivesStatus.message) {
-                if (!this.state.enabled) {
-                    this._setRunDirectivesStatus('Batch runner is disabled; tasks cannot be edited.', 'text-muted');
-                } else {
-                    this._applyStoredRunDirectiveStatus();
-                }
-            } else {
-                this._applyStoredRunDirectiveStatus();
+            RUN_BATCH_MESSAGE_CLASSES.concat(["text-info"]).forEach(function (cls) {
+                controller.uploadStatus.classList.remove(cls);
+            });
+            if (cssClass) {
+                controller.uploadStatus.classList.add(cssClass);
             }
-        };
+            setText(controller.uploadStatus, message || "");
+        }
 
-        that._setRunDirectivesBusy = function (busy) {
-            this._runDirectivesSaving = busy === true;
-            this._syncRunDirectiveDisabledState();
-        };
-
-        that._collectRunDirectiveValues = function () {
+        function collectRunDirectiveValues() {
             var result = {};
-            if (!this.runDirectiveList || !this.runDirectiveList.length) {
+            if (!controller.runDirectiveList) {
                 return result;
             }
-            this.runDirectiveList.find('input[data-slug]').each(function () {
-                var $input = $(this);
-                var slug = $input.data('slug');
+            var inputs = controller.runDirectiveList.querySelectorAll("input[data-run-directive]");
+            inputs.forEach(function (input) {
+                var slug = input.getAttribute("data-run-directive");
                 if (!slug) {
                     return;
                 }
-                result[String(slug)] = $input.is(':checked');
+                result[String(slug)] = Boolean(input.checked);
             });
             return result;
-        };
+        }
 
-        that._submitRunDirectives = function (values) {
+        function submitRunDirectives(values) {
             if (!values) {
                 return;
             }
-            var self = this;
-            this._setRunDirectivesBusy(true);
-            this._setRunDirectivesStatus('Saving batch task selection…', 'text-muted');
+            setRunDirectivesBusy(true);
+            setRunDirectivesStatus("Saving batch task selection…", "text-muted");
 
-            fetch(this._apiUrl('run-directives'), {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ run_directives: values })
-            })
+            controller.http
+                .postJson(apiUrl("run-directives"), { run_directives: values })
                 .then(function (response) {
-                    return response.json().then(function (data) {
-                        data._httpStatus = response.status;
-                        return data;
-                    });
-                })
-                .then(function (payload) {
+                    var payload = response.body || {};
                     if (!payload || payload.success !== true) {
-                        throw (payload && (payload.error || payload.message)) || 'Failed to update batch tasks.';
+                        var errorMsg =
+                            (payload && (payload.error || payload.message)) ||
+                            "Failed to update batch tasks.";
+                        throw new Error(errorMsg);
                     }
 
                     if (payload.snapshot) {
-                        self.state.snapshot = payload.snapshot;
+                        controller.state.snapshot = payload.snapshot;
                     } else if (Array.isArray(payload.run_directives)) {
-                        var snapshot = self.state.snapshot || {};
+                        var snapshot = controller.state.snapshot || {};
                         snapshot.run_directives = payload.run_directives;
-                        self.state.snapshot = snapshot;
+                        controller.state.snapshot = snapshot;
                     }
 
-                    self._setRunDirectivesStatus('Batch tasks updated.', 'text-success');
-                    self._renderRunDirectives();
+                    setRunDirectivesStatus("Batch tasks updated.", "text-success");
+                    controller.emitter.emit("batch:run-directives:updated", {
+                        success: true,
+                        batchName: controller.state.batchName,
+                        directives: controller.state.snapshot.run_directives || []
+                    });
+                    renderRunDirectives();
+                    renderRunControls();
                 })
                 .catch(function (error) {
-                    var message = typeof error === 'string' ? error : (error && error.error) || 'Failed to update batch tasks.';
-                    self._setRunDirectivesStatus(message, 'text-danger');
-                    self._renderRunDirectives();
+                    var message =
+                        error && error.message ? error.message : "Failed to update batch tasks.";
+                    setRunDirectivesStatus(message, "text-danger");
+                    controller.emitter.emit("batch:run-directives:update-failed", {
+                        error: message,
+                        batchName: controller.state.batchName
+                    });
+                    renderRunDirectives();
+                    renderRunControls();
                 })
                 .finally(function () {
-                    self._setRunDirectivesBusy(false);
+                    setRunDirectivesBusy(false);
                 });
-        };
+        }
 
-        that._handleRunDirectiveToggle = function (evt) {
-            if (this._runDirectivesSaving) {
-                if (evt && typeof evt.preventDefault === 'function') {
+        function handleRunDirectiveToggle(evt) {
+            if (controller._runDirectivesSaving) {
+                if (evt && typeof evt.preventDefault === "function") {
                     evt.preventDefault();
                 }
                 return;
             }
 
-            if (!this.state.enabled) {
-                if (evt && typeof evt.preventDefault === 'function') {
+            if (!controller.state.enabled) {
+                if (evt && typeof evt.preventDefault === "function") {
                     evt.preventDefault();
                 }
-                this._renderRunDirectives();
+                renderRunDirectives();
                 return;
             }
 
-            var values = this._collectRunDirectiveValues();
-            this._submitRunDirectives(values);
-        };
+            var values = collectRunDirectiveValues();
+            submitRunDirectives(values);
+        }
 
-        that._collectJobNodes = function (jobInfo, acc) {
+        function renderJobInfo(payload) {
+            var infoPanel = controller.infoPanel;
+            if (!infoPanel) {
+                return;
+            }
+
+            if (!payload) {
+                infoPanel.innerHTML = '<span class="text-muted">Job information unavailable.</span>';
+                return;
+            }
+
+            controller.jobInfo.lastPayload = payload;
+            var normalized = normalizeJobInfoPayload(payload);
+            var jobInfos = Array.isArray(normalized.jobs) ? normalized.jobs : [];
+
+            if (!jobInfos.length) {
+                infoPanel.innerHTML = '<span class="text-muted">Job information unavailable.</span>';
+                return;
+            }
+
+            registerJobInfoTrees(jobInfos);
+
+            var nodes = [];
+            jobInfos.forEach(function (info) {
+                collectJobNodes(info, nodes);
+            });
+            var dedupedNodes = dedupeJobNodes(nodes);
+            pruneCompletedJobIds(dedupedNodes);
+
+            var watershedNodes = dedupedNodes.filter(function (node) {
+                return node && node.runid;
+            });
+
+            var totalWatersheds = watershedNodes.length;
+            var completedWatersheds = watershedNodes.filter(function (node) {
+                return node.status === "finished";
+            }).length;
+            var failedWatersheds = watershedNodes.filter(function (node) {
+                return (
+                    node.status === "failed" ||
+                    node.status === "stopped" ||
+                    node.status === "canceled"
+                );
+            });
+            var activeWatersheds = watershedNodes.filter(function (node) {
+                return (
+                    node.status &&
+                    node.status !== "finished" &&
+                    node.status !== "failed" &&
+                    node.status !== "stopped" &&
+                    node.status !== "canceled"
+                );
+            });
+
+            var parts = [];
+
+            if (jobInfos.length === 1) {
+                var rootInfo = jobInfos[0] || {};
+                parts.push(
+                    "<div><strong>Batch status:</strong> " +
+                        escapeHtml(rootInfo.status || "unknown") +
+                        "</div>"
+                );
+                if (rootInfo.id) {
+                    parts.push(
+                        '<div class="small text-muted">Job ID: <code>' +
+                            escapeHtml(rootInfo.id) +
+                            "</code></div>"
+                    );
+                }
+            } else {
+                parts.push("<div><strong>Tracked jobs:</strong></div>");
+                var maxJobsToShow = 6;
+                var jobBadges = jobInfos.slice(0, maxJobsToShow).map(function (info) {
+                    var safeStatus = escapeHtml((info && info.status) || "unknown");
+                    var safeId = escapeHtml((info && info.id) || "—");
+                    return (
+                        '<span class="badge badge-light text-dark border mr-1 mb-1">' +
+                        safeStatus +
+                        " · <code>" +
+                        safeId +
+                        "</code></span>"
+                    );
+                });
+                if (jobInfos.length > maxJobsToShow) {
+                    jobBadges.push('<span class="text-muted">…</span>');
+                }
+                parts.push('<div class="mt-1">' + jobBadges.join(" ") + "</div>");
+            }
+
+            var allNotFound = jobInfos.every(function (info) {
+                return info && info.status === "not_found";
+            });
+
+            if (allNotFound) {
+                parts.push(
+                    '<div class="small text-muted">Requested job IDs were not found in the queue.</div>'
+                );
+                infoPanel.innerHTML = parts.join("");
+                return;
+            }
+
+            if (totalWatersheds > 0) {
+                parts.push(
+                    '<div class="small text-muted">Watersheds: ' +
+                        completedWatersheds +
+                        "/" +
+                        totalWatersheds +
+                        " finished</div>"
+                );
+            } else {
+                parts.push(
+                    '<div class="small text-muted">Watershed tasks have not started yet.</div>'
+                );
+            }
+
+            if (activeWatersheds.length) {
+                var activeList = activeWatersheds.slice(0, 6).map(function (node) {
+                    return (
+                        '<span class="badge badge-info text-dark mr-1 mb-1">' +
+                        escapeHtml(node.runid) +
+                        " · " +
+                        escapeHtml(node.status || "pending") +
+                        "</span>"
+                    );
+                });
+                if (activeWatersheds.length > activeList.length) {
+                    activeList.push('<span class="text-muted">…</span>');
+                }
+                parts.push(
+                    '<div class="mt-2"><strong>Active</strong><div>' +
+                        activeList.join(" ") +
+                        "</div></div>"
+                );
+            }
+
+            if (failedWatersheds.length) {
+                var failedList = failedWatersheds.slice(0, 6).map(function (node) {
+                    return (
+                        '<span class="badge badge-danger text-light mr-1 mb-1">' +
+                        escapeHtml(node.runid) +
+                        "</span>"
+                    );
+                });
+                if (failedWatersheds.length > failedList.length) {
+                    failedList.push('<span class="text-muted">…</span>');
+                }
+                parts.push(
+                    '<div class="mt-2"><strong class="text-danger">Failures</strong><div>' +
+                        failedList.join(" ") +
+                        "</div></div>"
+                );
+            }
+
+            infoPanel.innerHTML = parts.join("");
+        }
+
+        function collectJobNodes(jobInfo, acc) {
             if (!jobInfo) {
                 return;
             }
@@ -427,13 +1178,13 @@ var BatchRunner = (function () {
                 var bucket = children[orderKey] || [];
                 bucket.forEach(function (child) {
                     if (child) {
-                        that._collectJobNodes(child, acc);
+                        collectJobNodes(child, acc);
                     }
                 });
             });
-        };
+        }
 
-        that._registerTrackedJobId = function (jobId) {
+        function registerTrackedJobId(jobId) {
             if (jobId === undefined || jobId === null) {
                 return false;
             }
@@ -441,17 +1192,17 @@ var BatchRunner = (function () {
             if (!normalized) {
                 return false;
             }
-            if (this._jobInfoCompletedIds && this._jobInfoCompletedIds.has(normalized)) {
+            if (controller.jobInfo.completedIds.has(normalized)) {
                 return false;
             }
-            if (!this._jobInfoTrackedIds.has(normalized)) {
-                this._jobInfoTrackedIds.add(normalized);
+            if (!controller.jobInfo.trackedIds.has(normalized)) {
+                controller.jobInfo.trackedIds.add(normalized);
                 return true;
             }
             return false;
-        };
+        }
 
-        that._unregisterTrackedJobId = function (jobId) {
+        function unregisterTrackedJobId(jobId) {
             if (jobId === undefined || jobId === null) {
                 return false;
             }
@@ -459,686 +1210,351 @@ var BatchRunner = (function () {
             if (!normalized) {
                 return false;
             }
-            if (this._jobInfoTrackedIds.has(normalized)) {
-                this._jobInfoTrackedIds.delete(normalized);
+            if (controller.jobInfo.trackedIds.has(normalized)) {
+                controller.jobInfo.trackedIds.delete(normalized);
                 return true;
             }
             return false;
-        };
+        }
 
-        that._registerTrackedJobIds = function (collection) {
-            var self = this;
+        function registerTrackedJobIds(collection) {
             if (!collection) {
                 return;
             }
             if (Array.isArray(collection)) {
-                collection.forEach(function (value) {
-                    self._registerTrackedJobId(value);
-                });
+                collection.forEach(registerTrackedJobId);
                 return;
             }
-            if (typeof collection === 'object') {
+            if (typeof collection === "object") {
                 Object.keys(collection).forEach(function (key) {
-                    self._registerTrackedJobId(collection[key]);
+                    registerTrackedJobId(collection[key]);
                 });
                 return;
             }
-            self._registerTrackedJobId(collection);
-        };
+            registerTrackedJobId(collection);
+        }
 
-        that._bootstrapTrackedJobIds = function (bootstrap) {
-            if (!bootstrap || typeof bootstrap !== 'object') {
+        function bootstrapTrackedJobIds(bootstrap) {
+            if (!bootstrap || typeof bootstrap !== "object") {
                 return;
             }
 
             if (Array.isArray(bootstrap.jobIds)) {
-                this._registerTrackedJobIds(bootstrap.jobIds);
+                registerTrackedJobIds(bootstrap.jobIds);
             }
 
-            if (bootstrap.rqJobIds && typeof bootstrap.rqJobIds === 'object') {
-                this._registerTrackedJobIds(bootstrap.rqJobIds);
+            if (bootstrap.rqJobIds && typeof bootstrap.rqJobIds === "object") {
+                registerTrackedJobIds(bootstrap.rqJobIds);
             }
 
             var snapshot = bootstrap.state || {};
-            var metadata = snapshot && typeof snapshot === 'object' ? (snapshot.metadata || {}) : {};
+            var metadata =
+                snapshot && typeof snapshot === "object" ? snapshot.metadata || {} : {};
 
-            this._registerTrackedJobIds(snapshot.job_ids);
-            this._registerTrackedJobIds(metadata.job_ids);
-            this._registerTrackedJobIds(metadata.rq_job_ids);
-            this._registerTrackedJobIds(metadata.tracked_job_ids);
-        };
+            registerTrackedJobIds(snapshot.job_ids);
+            registerTrackedJobIds(metadata.job_ids);
+            registerTrackedJobIds(metadata.rq_job_ids);
+            registerTrackedJobIds(metadata.tracked_job_ids);
+        }
 
-        that._resolveJobInfoRequestIds = function () {
+        function resolveJobInfoRequestIds() {
             var ids = new Set();
-            var self = this;
-            var completedIds = this._jobInfoCompletedIds || new Set();
 
-            if (this.rq_job_id) {
-                var rootId = String(this.rq_job_id).trim();
-                if (rootId && !completedIds.has(rootId)) {
+            if (controller.rq_job_id) {
+                var rootId = String(controller.rq_job_id).trim();
+                if (rootId && !controller.jobInfo.completedIds.has(rootId)) {
                     ids.add(rootId);
                 }
             }
 
-            if (this._jobInfoTrackedIds && this._jobInfoTrackedIds.size) {
-                this._jobInfoTrackedIds.forEach(function (value) {
-                    if (value) {
-                        var normalizedTracked = String(value).trim();
-                        if (normalizedTracked && !completedIds.has(normalizedTracked)) {
-                            ids.add(normalizedTracked);
-                        }
-                    }
-                });
-            }
-
-            var snapshot = (this.state && this.state.snapshot) || {};
-            var metadata = snapshot && typeof snapshot === 'object' ? (snapshot.metadata || {}) : {};
-
-            [snapshot.job_ids, metadata.job_ids, metadata.rq_job_ids, metadata.tracked_job_ids].forEach(function (collection) {
-                if (!collection) {
+            controller.jobInfo.trackedIds.forEach(function (value) {
+                if (!value) {
                     return;
                 }
-                var items;
-                if (Array.isArray(collection)) {
-                    items = collection;
-                } else if (typeof collection === 'object') {
-                    items = Object.values(collection);
-                } else {
-                    items = [collection];
+                var normalizedTracked = String(value).trim();
+                if (normalizedTracked && !controller.jobInfo.completedIds.has(normalizedTracked)) {
+                    ids.add(normalizedTracked);
                 }
-                items.forEach(function (item) {
-                    if (item === undefined || item === null) {
-                        return;
-                    }
-                    var normalized = String(item).trim();
-                    if (normalized && !completedIds.has(normalized)) {
-                        ids.add(normalized);
-                    }
-                });
             });
 
-            return Array.from(ids).filter(function (value) {
-                return typeof value === 'string' && value.length > 0;
-            });
-        };
+            return Array.from(ids);
+        }
 
-        that._normalizeJobInfoPayload = function (payload) {
-            if (!payload) {
-                return [];
+        function normalizeJobInfoPayload(payload) {
+            if (!payload || typeof payload !== "object") {
+                return { jobs: [] };
             }
-
-            if (Array.isArray(payload)) {
-                return payload.filter(function (item) {
-                    return item && typeof item === 'object';
-                });
+            if (Array.isArray(payload.jobs)) {
+                return payload;
             }
-
-            if (payload.jobs && typeof payload.jobs === 'object') {
-                return Object.keys(payload.jobs).map(function (key) {
-                    return payload.jobs[key];
-                }).filter(function (item) {
-                    return item && typeof item === 'object';
-                });
+            if (Array.isArray(payload.job_info)) {
+                return { jobs: payload.job_info };
             }
-
-            if (payload.job && typeof payload.job === 'object') {
-                return [payload.job];
+            if (payload.jobs && typeof payload.jobs === "object") {
+                return { jobs: Object.values(payload.jobs) };
             }
+            return { jobs: [] };
+        }
 
-            if (payload && typeof payload === 'object' && (payload.id || payload.status || payload.children)) {
-                return [payload];
-            }
-
-            return [];
-        };
-
-        that._registerJobInfoTrees = function (jobInfos) {
-            var self = this;
-            if (!Array.isArray(jobInfos) || jobInfos.length === 0) {
+        function registerJobInfoTrees(jobInfos) {
+            if (!Array.isArray(jobInfos)) {
                 return;
             }
             jobInfos.forEach(function (info) {
-                if (!info || typeof info !== 'object') {
-                    return;
-                }
-                var nodes = [];
-                self._collectJobNodes(info, nodes);
-                nodes.forEach(function (node) {
-                    if (node && node.id) {
-                        self._registerTrackedJobId(node.id);
+                if (info && info.id) {
+                    registerTrackedJobId(info.id);
+                    if (controller._jobInfoTerminalStatuses.has(info.status)) {
+                        controller.jobInfo.completedIds.add(String(info.id).trim());
                     }
-                });
+                }
             });
-        };
+        }
 
-        that._dedupeJobNodes = function (nodes) {
-            if (!Array.isArray(nodes)) {
-                return [];
-            }
-            var deduped = [];
+        function dedupeJobNodes(nodes) {
             var seen = new Set();
-
-            nodes.forEach(function (node) {
-                if (!node) {
-                    return;
-                }
-                var key = node.id ? String(node.id) : (node.runid ? 'runid:' + node.runid : null);
-                if (key && seen.has(key)) {
-                    return;
-                }
-                if (key) {
-                    seen.add(key);
-                }
-                deduped.push(node);
-            });
-
-            return deduped;
-        };
-
-        that._pruneCompletedJobIds = function (nodes) {
-            if (!Array.isArray(nodes) || nodes.length === 0) {
-                return;
-            }
-
-            var self = this;
+            var result = [];
             nodes.forEach(function (node) {
                 if (!node || !node.id) {
                     return;
                 }
-                var status = node.status;
-                if (!status || typeof status !== 'string') {
+                var normalized = String(node.id).trim();
+                if (seen.has(normalized)) {
                     return;
                 }
-                var normalizedStatus = status.toLowerCase();
-                if (!self._jobInfoTerminalStatuses.has(normalizedStatus)) {
+                seen.add(normalized);
+                result.push(node);
+            });
+            return result;
+        }
+
+        function pruneCompletedJobIds(nodes) {
+            if (!Array.isArray(nodes)) {
+                return;
+            }
+            nodes.forEach(function (node) {
+                if (!node || !node.id) {
                     return;
                 }
-                var normalizedId = String(node.id).trim();
-                if (!normalizedId) {
+                var id = String(node.id).trim();
+                if (!id) {
                     return;
                 }
-                if (self._jobInfoCompletedIds) {
-                    self._jobInfoCompletedIds.add(normalizedId);
+                if (controller._jobInfoTerminalStatuses.has(node.status)) {
+                    controller.jobInfo.completedIds.add(id);
+                    controller.jobInfo.trackedIds.delete(id);
                 }
-                self._unregisterTrackedJobId(normalizedId);
             });
-        };
+        }
 
-        that._renderJobInfo = function (payload) {
-            if (!this.infoPanel || !this.infoPanel.length) {
-                return;
+        function cancelJobInfoTimer() {
+            if (controller.jobInfo.refreshTimer) {
+                clearTimeout(controller.jobInfo.refreshTimer);
+                controller.jobInfo.refreshTimer = null;
             }
+        }
 
-            this._jobInfoLastPayload = payload;
-
-            var jobInfos = this._normalizeJobInfoPayload(payload);
-            if (!jobInfos.length) {
-                this.infoPanel.html('<span class="text-muted">Job information unavailable.</span>');
-                return;
-            }
-
-            this._registerJobInfoTrees(jobInfos);
-
-            var that = this;
-            var nodes = [];
-            jobInfos.forEach(function (info) {
-                that._collectJobNodes(info, nodes);
-            });
-            var dedupedNodes = this._dedupeJobNodes(nodes);
-            this._pruneCompletedJobIds(dedupedNodes);
-
-            var watershedNodes = dedupedNodes.filter(function (node) {
-                return node && node.runid;
-            });
-
-            var totalWatersheds = watershedNodes.length;
-            var completedWatersheds = watershedNodes.filter(function (node) {
-                return node.status === 'finished';
-            }).length;
-            var failedWatersheds = watershedNodes.filter(function (node) {
-                return node.status === 'failed' || node.status === 'stopped' || node.status === 'canceled';
-            });
-            var activeWatersheds = watershedNodes.filter(function (node) {
-                return node.status && node.status !== 'finished' && node.status !== 'failed' && node.status !== 'stopped' && node.status !== 'canceled';
-            });
-
-            var parts = [];
-
-            if (jobInfos.length === 1) {
-                var rootInfo = jobInfos[0] || {};
-                parts.push('<div><strong>Batch status:</strong> ' + this._escapeHtml(rootInfo.status || 'unknown') + '</div>');
-                if (rootInfo.id) {
-                    parts.push('<div class="small text-muted">Job ID: <code>' + this._escapeHtml(rootInfo.id) + '</code></div>');
-                }
-            } else {
-                parts.push('<div><strong>Tracked jobs:</strong></div>');
-                var maxJobsToShow = 6;
-                var jobBadges = jobInfos.slice(0, maxJobsToShow).map(function (info) {
-                    var safeStatus = that._escapeHtml((info && info.status) || 'unknown');
-                    var safeId = that._escapeHtml((info && info.id) || '—');
-                    return '<span class="badge badge-light text-dark border mr-1 mb-1">' + safeStatus + ' · <code>' + safeId + '</code></span>';
-                });
-                if (jobInfos.length > maxJobsToShow) {
-                    jobBadges.push('<span class="text-muted">…</span>');
-                }
-                parts.push('<div class="mt-1">' + jobBadges.join(' ') + '</div>');
-            }
-
-            var allNotFound = jobInfos.every(function (info) {
-                return info && info.status === 'not_found';
-            });
-
-            if (allNotFound) {
-                parts.push('<div class="small text-muted">Requested job IDs were not found in the queue.</div>');
-                this.infoPanel.html(parts.join(''));
-                return;
-            }
-
-            if (totalWatersheds > 0) {
-                parts.push('<div class="small text-muted">Watersheds: ' + completedWatersheds + '/' + totalWatersheds + ' finished</div>');
-            } else {
-                parts.push('<div class="small text-muted">Watershed tasks have not started yet.</div>');
-            }
-
-            if (activeWatersheds.length) {
-                var activeList = activeWatersheds.slice(0, 6).map(function (node) {
-                    return '<span class="badge badge-info text-dark mr-1 mb-1">' + that._escapeHtml(node.runid) + ' · ' + that._escapeHtml(node.status || 'pending') + '</span>';
-                });
-                if (activeWatersheds.length > activeList.length) {
-                    activeList.push('<span class="text-muted">…</span>');
-                }
-                parts.push('<div class="mt-2"><strong>Active</strong><div>' + activeList.join(' ') + '</div></div>');
-            }
-
-            if (failedWatersheds.length) {
-                var failedList = failedWatersheds.slice(0, 6).map(function (node) {
-                    return '<span class="badge badge-danger text-light mr-1 mb-1">' + that._escapeHtml(node.runid) + '</span>';
-                });
-                if (failedWatersheds.length > failedList.length) {
-                    failedList.push('<span class="text-muted">…</span>');
-                }
-                parts.push('<div class="mt-2"><strong class="text-danger">Failures</strong><div>' + failedList.join(' ') + '</div></div>');
-            }
-
-            this.infoPanel.html(parts.join(''));
-        };
-
-        that._cancelJobInfoTimer = function () {
-            if (this._jobInfoRefreshTimer) {
-                clearTimeout(this._jobInfoRefreshTimer);
-                this._jobInfoRefreshTimer = null;
-            }
-        };
-
-        that._ensureJobInfoFetchScheduled = function () {
-            if (this._jobInfoFetchInFlight) {
+        function ensureJobInfoFetchScheduled() {
+            if (controller.jobInfo.fetchInFlight) {
                 return;
             }
 
             var now = Date.now();
-            var interval = this._jobInfoPollIntervalMs || 0;
-            var lastStarted = this._jobInfoLastFetchStartedAt || 0;
+            var interval = controller.jobInfo.pollIntervalMs || 0;
+            var lastStarted = controller.jobInfo.lastFetchStartedAt || 0;
             var elapsed = now - lastStarted;
-            var forceNext = this._jobInfoForceNextFetch === true;
+            var forceNext = controller.jobInfo.forceNextFetch === true;
 
             if (!forceNext && interval > 0 && elapsed < interval) {
-                if (this._jobInfoRefreshTimer) {
+                if (controller.jobInfo.refreshTimer) {
                     return;
                 }
-                var self = this;
-                this._jobInfoRefreshTimer = setTimeout(function () {
-                    self._jobInfoRefreshTimer = null;
-                    self._performJobInfoFetch();
+                controller.jobInfo.refreshTimer = setTimeout(function () {
+                    controller.jobInfo.refreshTimer = null;
+                    performJobInfoFetch();
                 }, interval - elapsed);
                 return;
             }
 
-            this._jobInfoForceNextFetch = false;
-            this._performJobInfoFetch();
-        };
+            controller.jobInfo.forceNextFetch = false;
+            performJobInfoFetch();
+        }
 
-        that._performJobInfoFetch = function () {
-            if (!this.infoPanel || !this.infoPanel.length) {
+        function performJobInfoFetch() {
+            if (!controller.infoPanel) {
                 return;
             }
 
-            if (this._jobInfoFetchInFlight) {
+            if (controller.jobInfo.fetchInFlight) {
                 return;
             }
 
-            this._cancelJobInfoTimer();
-            this._jobInfoForceNextFetch = false;
+            cancelJobInfoTimer();
+            controller.jobInfo.forceNextFetch = false;
 
-            var jobIds = this._resolveJobInfoRequestIds();
+            var jobIds = resolveJobInfoRequestIds();
             if (!jobIds.length) {
-                this._jobInfoRefreshPending = false;
-                if (!this._jobInfoLastPayload) {
-                    this.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
+                controller.jobInfo.refreshPending = false;
+                if (!controller.jobInfo.lastPayload) {
+                    controller.infoPanel.innerHTML =
+                        '<span class="text-muted">No batch job submitted yet.</span>';
                 }
                 return;
             }
 
-            var self = this;
-            jobIds.forEach(function (jobId) {
-                self._registerTrackedJobId(jobId);
-            });
+            jobIds.forEach(registerTrackedJobId);
 
-            this._jobInfoRefreshPending = false;
-            this._jobInfoFetchInFlight = true;
-            this._jobInfoLastFetchStartedAt = Date.now();
+            controller.jobInfo.refreshPending = false;
+            controller.jobInfo.fetchInFlight = true;
+            controller.jobInfo.lastFetchStartedAt = Date.now();
 
-            if (typeof AbortController !== 'undefined') {
-                if (this._jobInfoAbortController) {
-                    this._jobInfoAbortController.abort();
+            if (typeof AbortController !== "undefined") {
+                if (controller.jobInfo.abortController) {
+                    controller.jobInfo.abortController.abort();
                 }
-                this._jobInfoAbortController = new AbortController();
+                controller.jobInfo.abortController = new AbortController();
             }
 
-            var controller = this._jobInfoAbortController;
-            fetch('/weppcloud/rq/api/jobinfo', {
-                method: 'POST',
-                signal: controller ? controller.signal : undefined,
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ job_ids: jobIds })
-            })
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch job info');
-                    }
-                    return response.json();
-                })
-                .then(function (payload) {
-                    if (payload && Array.isArray(payload.job_ids)) {
-                        self._registerTrackedJobIds(payload.job_ids);
-                    } else if (payload && payload.jobs && typeof payload.jobs === 'object') {
-                        self._registerTrackedJobIds(Object.keys(payload.jobs));
-                    }
+            var signal = controller.jobInfo.abortController
+                ? controller.jobInfo.abortController.signal
+                : undefined;
 
-                    self._renderJobInfo(payload);
+            controller.http
+                .postJson("/weppcloud/rq/api/jobinfo", { job_ids: jobIds }, { signal: signal })
+                .then(function (response) {
+                    var payload = normalizeJobInfoPayload(response.body);
+                    registerTrackedJobIds(payload.job_ids);
+                    renderJobInfo(payload);
                 })
                 .catch(function (error) {
-                    if (error && error.name === 'AbortError') {
+                    if (
+                        error &&
+                        error.name === "HttpError" &&
+                        error.cause &&
+                        error.cause.name === "AbortError"
+                    ) {
                         return;
                     }
-                    console.warn('Unable to refresh batch job info:', error);
-                    if (self.infoPanel && self.infoPanel.length) {
-                        self.infoPanel.html('<span class="text-muted">Unable to refresh batch job details.</span>');
+                    console.warn("Unable to refresh batch job info:", error);
+                    if (controller.infoPanel) {
+                        controller.infoPanel.innerHTML =
+                            '<span class="text-muted">Unable to refresh batch job details.</span>';
                     }
                 })
                 .finally(function () {
-                    if (controller && controller === self._jobInfoAbortController) {
-                        self._jobInfoAbortController = null;
+                    if (controller.jobInfo.abortController) {
+                        controller.jobInfo.abortController = null;
                     }
-                    self._jobInfoFetchInFlight = false;
-                    if (self._jobInfoRefreshPending) {
-                        self._ensureJobInfoFetchScheduled();
+                    controller.jobInfo.fetchInFlight = false;
+                    if (controller.jobInfo.refreshPending) {
+                        ensureJobInfoFetchScheduled();
                     }
                 });
-        };
+        }
 
-        that.refreshJobInfo = function (options) {
+        function refreshJobInfo(options) {
             options = options || {};
-            if (!this.infoPanel || !this.infoPanel.length) {
+            if (!controller.infoPanel) {
                 return;
             }
 
             if (options.force === true) {
-                this._jobInfoForceNextFetch = true;
-                this._jobInfoRefreshPending = true;
-                this._cancelJobInfoTimer();
-                if (!this._jobInfoFetchInFlight) {
-                    this._performJobInfoFetch();
+                controller.jobInfo.forceNextFetch = true;
+                controller.jobInfo.refreshPending = true;
+                cancelJobInfoTimer();
+                if (!controller.jobInfo.fetchInFlight) {
+                    performJobInfoFetch();
                 }
                 return;
             }
 
-            this._jobInfoRefreshPending = true;
-            this._ensureJobInfoFetchScheduled();
-        };
+            controller.jobInfo.refreshPending = true;
+            ensureJobInfoFetchScheduled();
+        }
 
-        that._renderResource = function () {
-            var snapshot = this.state.snapshot || {};
+        function applyResourceVisibility() {
+            var snapshot = controller.state.snapshot || {};
             var resources = snapshot.resources || {};
             var resource = resources.watershed_geojson;
-            var self = this;
-            console.debug('[BatchRunner] _renderResource snapshot', snapshot);
-            console.debug('[BatchRunner] _renderResource resource present?', Boolean(resource), resource);
 
-            if (!this.resourceCard.length) {
+            if (!controller.resourceCard) {
                 return;
             }
 
             if (!resource) {
-                console.debug('[BatchRunner] No watershed resource on render; showing empty state.');
-                this._setHidden(this.resourceEmpty, false);
-                this._setHidden(this.resourceDetails, true);
-                this._setHidden(this.resourceSchema, true);
-                this._setHidden(this.resourceSamples, true);
-                return;
-            }
-
-            console.debug('[BatchRunner] Watershed resource detected; updating details card.');
-            this._setHidden(this.resourceEmpty, true);
-            this._setHidden(this.resourceDetails, false);
-
-            var metaHtml = [];
-            metaHtml.push(this._renderMetaRow('Filename', resource.filename || resource.original_filename || '—'));
-            if (resource.original_filename && resource.original_filename !== resource.filename) {
-                metaHtml.push(this._renderMetaRow('Original Filename', resource.original_filename));
-            }
-            metaHtml.push(this._renderMetaRow('Size', this._formatBytes(resource.size_bytes)));
-            metaHtml.push(this._renderMetaRow('Checksum', resource.checksum || '—'));
-            metaHtml.push(this._renderMetaRow('Feature Count', resource.feature_count != null ? resource.feature_count : '—'));
-            if (Array.isArray(resource.properties)) {
-                metaHtml.push(this._renderMetaRow('Property Count', resource.properties.length));
-            }
-            if (resource.bbox) {
-                metaHtml.push(this._renderMetaRow('Bounding Box', this._formatBBox(resource.bbox)));
-            }
-            if (resource.epsg) {
-                var epsgLabel = resource.epsg;
-                if (resource.epsg_source && resource.epsg_source !== 'declared') {
-                    epsgLabel += ' (inferred)';
-                }
-                metaHtml.push(this._renderMetaRow('CRS', epsgLabel));
-            }
-            if (resource.uploaded_at) {
-                metaHtml.push(this._renderMetaRow('Uploaded', this._formatTimestamp(resource.uploaded_at)));
-            }
-            if (resource.uploaded_by) {
-                metaHtml.push(this._renderMetaRow('Uploaded By', resource.uploaded_by));
-            }
-            if (resource.replaced) {
-                metaHtml.push(this._renderMetaRow('Replaced Existing', resource.replaced ? 'Yes' : 'No'));
-            }
-
-            this.resourceMeta.html(metaHtml.join(''));
-
-            var schema = resource.attribute_schema || {};
-            var schemaKeys = Object.keys(schema || {});
-            if (schemaKeys.length) {
-                schemaKeys.sort();
-                var schemaRows = schemaKeys.map(function (name) {
-                    return '<tr><td>' + self._escapeHtml(name) + '</td><td>' + self._escapeHtml(schema[name]) + '</td></tr>';
-                });
-                this.resourceSchemaBody.html(schemaRows.join(''));
-                this._setHidden(this.resourceSchema, false);
+                deps.dom.show(controller.resourceEmpty);
+                deps.dom.hide(controller.resourceDetails);
+                deps.dom.hide(controller.resourceSchema);
+                deps.dom.hide(controller.resourceSamples);
             } else {
-                this.resourceSchemaBody.empty();
-                this._setHidden(this.resourceSchema, true);
+                deps.dom.hide(controller.resourceEmpty);
+                deps.dom.show(controller.resourceDetails);
             }
+        }
 
-            var samples = Array.isArray(resource.sample_properties) ? resource.sample_properties : [];
-            if (samples.length) {
-                var sampleRows = samples.map(function (sample) {
-                    var props = sample.properties || {};
-                    var propsJson;
-                    try {
-                        propsJson = JSON.stringify(props, null, 2);
-                    } catch (err) {
-                        propsJson = String(props);
-                    }
-                    return '<tr><td>' + self._escapeHtml(sample.index != null ? sample.index : '—') + '</td>' +
-                        '<td><pre class="mb-0 small">' + self._escapeHtml(propsJson) + '</pre></td></tr>';
-                });
-                this.resourceSamplesBody.html(sampleRows.join(''));
-                this._setHidden(this.resourceSamples, false);
-            } else {
-                this.resourceSamplesBody.empty();
-                this._setHidden(this.resourceSamples, true);
-            }
-        };
+        function renderMetaRow(label, value) {
+            return (
+                '<dt class="col-sm-4">' +
+                escapeHtml(label) +
+                "</dt>" +
+                '<dd class="col-sm-8">' +
+                escapeHtml(value) +
+                "</dd>"
+            );
+        }
 
-        that._renderValidation = function () {
-            if (!this.templateCard.length) {
+        function setText(node, value) {
+            if (!node) {
                 return;
             }
+            node.textContent = value === undefined || value === null ? "" : String(value);
+        }
 
-            var snapshot = this.state.snapshot || {};
-            var resources = snapshot.resources || {};
-            var resource = resources.watershed_geojson;
-            var manifest = snapshot || {};
-            var storedValidation = this._extractValidation(manifest);
-
-            if (!this.templateInitialised) {
-                var tpl = snapshot.runid_template || '';
-                if (tpl && !this.templateInput.is(':focus')) {
-                    this.templateInput.val(tpl);
-                }
-                this.templateInitialised = true;
+        function handleUpload(event) {
+            if (event && typeof event.preventDefault === "function") {
+                event.preventDefault();
             }
-
-            if (!resource) {
-                this.templateStatus.text('Upload a GeoJSON resource to enable template validation.');
-                this._setHidden(this.validationSummary, true);
-                this._setHidden(this.validationIssues, true);
-                this._setHidden(this.validationPreview, true);
+            if (!controller.state.enabled) {
                 return;
             }
-
-            var validation = this.state.validation || storedValidation;
-            this.state.validation = validation;
-
-            if (!validation) {
-                if (storedValidation && storedValidation.status === 'stale') {
-                    this.templateStatus.text('Previous validation is stale. Re-run validation after reviewing the new GeoJSON.');
-                } else {
-                    this.templateStatus.text('No validation recorded. Provide a template and validate.');
-                }
-                this._setHidden(this.validationSummary, true);
-                this._setHidden(this.validationIssues, true);
-                this._setHidden(this.validationPreview, true);
-                return;
-            }
-
-            var summary = validation.summary || {};
-            var summaryItems = [];
-            summaryItems.push('<li>Total features: ' + (summary.total_features != null ? summary.total_features : '—') + '</li>');
-            summaryItems.push('<li>Valid run IDs: ' + (summary.valid_run_ids != null ? summary.valid_run_ids : '—') + '</li>');
-            summaryItems.push('<li>Unique run IDs: ' + (summary.unique_run_ids != null ? summary.unique_run_ids : '—') + '</li>');
-            summaryItems.push('<li>Duplicate run IDs: ' + (summary.duplicate_run_ids != null ? summary.duplicate_run_ids : '—') + '</li>');
-            summaryItems.push('<li>Errors: ' + (summary.errors != null ? summary.errors : '—') + '</li>');
-
-            var statusText = summary.is_valid ? 'Template is valid.' : 'Template has issues. Review details below.';
-            if (validation.status === 'stale') {
-                statusText = 'Validation is stale. Re-run validation with the latest resource.';
-            }
-            this.templateStatus.text(statusText);
-
-            this.validationSummaryList.html(summaryItems.join(''));
-            this._setHidden(this.validationSummary, false);
-
-            var issues = [];
-            (validation.errors || []).forEach(function (err) {
-                issues.push('Feature #' + err.index + (err.feature_id ? ' [' + err.feature_id + ']' : '') + ': ' + err.error);
-            });
-            (validation.duplicates || []).forEach(function (dup) {
-                issues.push('Duplicate run ID ' + dup.run_id + ' found at indexes ' + dup.indexes.join(', '));
-            });
-
-            if (issues.length) {
-                this.validationIssuesList.html(issues.map(function (text) {
-                    return $('<div/>').text(text).html();
-                }).join('<br>'));
-                this._setHidden(this.validationIssues, false);
-            } else {
-                this.validationIssuesList.empty();
-                this._setHidden(this.validationIssues, true);
-            }
-
-            var previewRows = validation.preview || [];
-            if (!previewRows.length && validation.rows) {
-                previewRows = validation.rows.slice(0, 20);
-            }
-
-            if (previewRows.length) {
-                var previewHtml = previewRows.map(function (row) {
-                    var errorCell = row.error ? $('<span/>').text(row.error).html() : '';
-                    var runIdCell = row.run_id ? $('<span/>').text(row.run_id).html() : '';
-                    var featureId = row.feature_id != null ? row.feature_id : '—';
-                    return '<tr>' +
-                        '<td>' + row.index + '</td>' +
-                        '<td>' + $('<span/>').text(featureId).html() + '</td>' +
-                        '<td>' + runIdCell + '</td>' +
-                        '<td>' + errorCell + '</td>' +
-                        '</tr>';
-                }).join('');
-                this.previewBody.html(previewHtml);
-                this._setHidden(this.validationPreview, false);
-            } else {
-                this.previewBody.empty();
-                this._setHidden(this.validationPreview, true);
-            }
-        };
-
-        that._handleUpload = function () {
-            if (!this.state.enabled) {
-                return;
-            }
-            var fileInput = this.uploadInput.get(0);
+            var fileInput = controller.uploadInput;
             if (!fileInput || !fileInput.files || !fileInput.files.length) {
-                this._setUploadStatus('Please choose a GeoJSON file to upload.', 'text-danger');
+                setUploadStatus("Choose a GeoJSON file before uploading.", "text-warning");
                 return;
             }
 
             var formData = new FormData();
-            formData.append('geojson_file', fileInput.files[0]);
+            formData.append("geojson_file", fileInput.files[0]);
 
-            var self = this;
-            this._setUploadBusy(true, 'Uploading GeoJSON…');
+            setUploadBusy(true, "Uploading GeoJSON…");
+            controller.emitter.emit("batch:upload:started", {
+                batchName: controller.state.batchName,
+                filename: fileInput.files[0].name,
+                size: fileInput.files[0].size
+            });
 
-            fetch(this._apiUrl('upload-geojson'), {
-                method: 'POST',
-                body: formData,
-                credentials: 'same-origin',
-            })
-                .then(function (response) {
-                    return response.json().then(function (data) {
-                        data._httpStatus = response.status;
-                        return data;
-                    });
+            controller.http
+                .request(apiUrl("upload-geojson"), {
+                    method: "POST",
+                    body: formData
                 })
-                .then(function (payload) {
+                .then(function (response) {
+                    var payload = response.body || {};
                     if (!payload.success) {
-                        throw payload.error || 'Upload failed.';
+                        var errorMsg = payload.error || payload.message || "Upload failed.";
+                        throw new Error(errorMsg);
                     }
 
                     if (payload.snapshot) {
-                        console.debug('[BatchRunner] Upload response snapshot', payload.snapshot);
-                        self.state.snapshot = payload.snapshot || {};
-                        self.state.validation = self._extractValidation(self.state.snapshot);
+                        controller.state.snapshot = payload.snapshot || {};
+                        controller.state.validation = extractValidation(controller.state.snapshot);
                     } else {
-                        console.debug('[BatchRunner] Upload response metadata', payload);
-                        var snapshot = self.state.snapshot || {};
+                        var snapshot = controller.state.snapshot || {};
                         snapshot.resources = snapshot.resources || {};
                         var resource = payload.resource;
                         if (!resource && payload.resource_metadata) {
                             resource = Object.assign({}, payload.resource_metadata);
                             var analysis = payload.template_validation || {};
-                            if (analysis && typeof analysis === 'object') {
+                            if (analysis && typeof analysis === "object") {
                                 if (analysis.feature_count != null) {
                                     resource.feature_count = analysis.feature_count;
                                 }
@@ -1169,401 +1585,285 @@ var BatchRunner = (function () {
                             }
                         }
                         if (resource) {
-                            console.debug('[BatchRunner] Merging resource into snapshot', resource);
                             snapshot.resources.watershed_geojson = resource;
-                        } else {
-                            console.debug('[BatchRunner] No resource derived from payload.');
                         }
                         snapshot.metadata = snapshot.metadata || {};
                         if (payload.template_validation && payload.template_validation.summary) {
                             snapshot.metadata.template_validation = payload.template_validation;
-                            self.state.validation = payload.template_validation;
+                            controller.state.validation = payload.template_validation;
                         } else if (snapshot.metadata.template_validation) {
-                            snapshot.metadata.template_validation.status = 'stale';
-                            self.state.validation = snapshot.metadata.template_validation;
+                            snapshot.metadata.template_validation.status = "stale";
+                            controller.state.validation = snapshot.metadata.template_validation;
                         } else {
-                            self.state.validation = null;
+                            controller.state.validation = null;
                         }
-                        self.state.snapshot = snapshot;
+                        controller.state.snapshot = snapshot;
                     }
 
-                    console.debug('[BatchRunner] Post-upload snapshot state', self.state.snapshot);
-                    self._setUploadStatus(payload.message || 'Upload complete.', 'text-success');
-                    fileInput.value = '';
-                    self.templateInitialised = false;
-                    self._applyResourceVisibility();
-                    self.render();
-                })
-                .catch(function (error) {
-                    var message = typeof error === 'string' ? error : (error && error.error) || 'Upload failed.';
-                    self._setUploadStatus(message, 'text-danger');
-                })
-                .finally(function () {
-                    self._setUploadBusy(false);
-                });
-        };
+                    setUploadStatus(payload.message || "Upload complete.", "text-success");
+                    if (fileInput) {
+                        fileInput.value = "";
+                    }
+                    controller.templateInitialised = false;
+                    applyResourceVisibility();
+                    render();
 
-        that._handleValidate = function () {
-            if (!this.state.enabled) {
-                return;
-            }
-            var template = (this.templateInput.val() || '').trim();
-            if (!template) {
-                this.templateStatus.text('Enter a template before validating.');
-                return;
-            }
-
-            var self = this;
-            this._setValidateBusy(true, 'Validating template…');
-
-            fetch(this._apiUrl('validate-template'), {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ template: template }),
-            })
-                .then(function (response) {
-                    return response.json().then(function (data) {
-                        data._httpStatus = response.status;
-                        return data;
+                    controller.emitter.emit("batch:upload:completed", {
+                        success: true,
+                        batchName: controller.state.batchName,
+                        snapshot: controller.state.snapshot
                     });
                 })
-                .then(function (payload) {
+                .catch(function (error) {
+                    var message = error && error.message ? error.message : "Upload failed.";
+                    setUploadStatus(message, "text-danger");
+                    controller.emitter.emit("batch:upload:failed", {
+                        error: message,
+                        batchName: controller.state.batchName
+                    });
+                })
+                .finally(function () {
+                    setUploadBusy(false);
+                });
+        }
+
+        function handleValidate(event) {
+            if (event && typeof event.preventDefault === "function") {
+                event.preventDefault();
+            }
+            if (!controller.state.enabled) {
+                return;
+            }
+            var template = (controller.templateInput && controller.templateInput.value || "").trim();
+            if (!template) {
+                setText(controller.templateStatus, "Enter a template before validating.");
+                return;
+            }
+
+            setValidateBusy(true, "Validating template…");
+            controller.emitter.emit("batch:template:validate-started", {
+                batchName: controller.state.batchName,
+                template: template
+            });
+
+            controller.http
+                .postJson(apiUrl("validate-template"), { template: template })
+                .then(function (response) {
+                    var payload = response.body || {};
                     if (!payload.validation) {
-                        throw payload.error || 'Template validation failed.';
+                        var errorMsg =
+                            payload.error || payload.message || "Template validation failed.";
+                        throw new Error(errorMsg);
                     }
 
-                    self.state.validation = payload.validation;
+                    controller.state.validation = payload.validation;
                     if (payload.snapshot) {
-                        self.state.snapshot = payload.snapshot || {};
+                        controller.state.snapshot = payload.snapshot || {};
                     } else {
-                        var snapshot = self.state.snapshot || {};
+                        var snapshot = controller.state.snapshot || {};
                         snapshot.metadata = snapshot.metadata || {};
                         snapshot.metadata.template_validation = payload.stored;
                         snapshot.runid_template = template;
-                        self.state.snapshot = snapshot;
+                        controller.state.snapshot = snapshot;
                     }
-                    self.templateInitialised = false;
-                    self.render();
-                })
-                .catch(function (error) {
-                    var message = typeof error === 'string' ? error : (error && error.error) || 'Template validation failed.';
-                    self.templateStatus.text(message);
-                })
-                .finally(function () {
-                    self._setValidateBusy(false);
-                });
-        };
+                    controller.templateInitialised = false;
+                    render();
 
-        that._setUploadBusy = function (busy, message) {
-            if (this.uploadButton.length) {
-                this.uploadButton.prop('disabled', busy || !this.state.enabled);
-            }
-            if (message != null) {
-                this._setUploadStatus(message, busy ? 'text-muted' : '');
-            }
-        };
-
-        that._setValidateBusy = function (busy, message) {
-            if (this.validateButton.length) {
-                this.validateButton.prop('disabled', busy || !this.state.enabled);
-            }
-            if (message != null) {
-                this.templateStatus.text(message);
-            }
-        };
-
-        that._setRunBatchBusy = function (busy, message, cssClass) {
-            if (this.runBatchButton && this.runBatchButton.length && busy) {
-                this.runBatchButton.prop('disabled', true);
-            }
-
-            if (this.runBatchLock && this.runBatchLock.length) {
-                if (busy) {
-                    this.runBatchLock.show();
-                } else if (!this.should_disable_command_button(this)) {
-                    this.runBatchLock.hide();
-                }
-            }
-
-            if (message != null) {
-                this._setRunBatchMessage(message, cssClass || 'text-muted');
-            }
-
-            if (!busy) {
-                this._renderRunControls({ preserveMessage: true });
-            }
-        };
-
-        var baseSetRqJobId = that.set_rq_job_id;
-        that.set_rq_job_id = function (self, job_id) {
-            baseSetRqJobId.call(this, self, job_id);
-            if (self === that) {
-                if (job_id) {
-                    var normalizedJobId = String(job_id).trim();
-                    if (that._jobInfoCompletedIds) {
-                        that._jobInfoCompletedIds.delete(normalizedJobId);
-                    }
-                    that._registerTrackedJobId(normalizedJobId);
-                }
-                if (job_id) {
-                    that.refreshJobInfo({ force: true });
-                } else if (that.infoPanel && that.infoPanel.length) {
-                    that.infoPanel.html('<span class="text-muted">No batch job submitted yet.</span>');
-                }
-            }
-        };
-
-        var baseHandleJobStatusResponse = that.handle_job_status_response;
-        that.handle_job_status_response = function (self, data) {
-            baseHandleJobStatusResponse.call(this, self, data);
-            if (self === that) {
-                that.refreshJobInfo();
-            }
-        };
-
-        that.uploadGeojson = function (evt) {
-            if (!this.state.enabled) {
-                this._setUploadStatus('Batch runner is disabled.', 'text-warning');
-                return false;
-            }
-
-            if (evt) {
-                evt.preventDefault();
-                if (typeof evt.stopImmediatePropagation === 'function') {
-                    evt.stopImmediatePropagation();
-                }
-            }
-
-            this._handleUpload();
-            return false;
-        };
-
-        that.validateTemplate = function (evt) {
-            if (!this.state.enabled) {
-                this.templateStatus.text('Batch runner is disabled.');
-                return false;
-            }
-
-            if (evt) {
-                evt.preventDefault();
-                if (typeof evt.stopImmediatePropagation === 'function') {
-                    evt.stopImmediatePropagation();
-                }
-            }
-
-            this._handleValidate();
-            return false;
-        };
-
-        that._setUploadStatus = function (message, cssClass) {
-            if (!this.uploadStatus.length) {
-                return;
-            }
-            this.uploadStatus.removeClass('text-danger text-success text-muted text-warning');
-            if (cssClass) {
-                this.uploadStatus.addClass(cssClass);
-            }
-            this.uploadStatus.text(message || '');
-        };
-
-        that._applyResourceVisibility = function () {
-            if (!this.resourceCard || !this.resourceCard.length) {
-                return;
-            }
-            var snapshot = this.state.snapshot || {};
-            var resources = snapshot.resources || {};
-            var resource = resources.watershed_geojson;
-            console.debug('[BatchRunner] _applyResourceVisibility resource present?', Boolean(resource), resource);
-            if (resource) {
-                this.resourceEmpty.hide();
-                this.resourceDetails.show();
-            }
-        };
-
-        that._escapeHtml = function (value) {
-            return $('<span/>').text(value != null ? value : '').html();
-        };
-
-        that._renderMetaRow = function (label, value) {
-            return '<dt class="col-sm-4">' + this._escapeHtml(label) + '</dt>' +
-                '<dd class="col-sm-8">' + this._escapeHtml(value != null ? value : '—') + '</dd>';
-        };
-
-        that._setHidden = function (element, hidden) {
-            if (!element || !element.length) {
-                return;
-            }
-            var domNode = element[0];
-            if (hidden) {
-                element.attr('hidden', 'hidden');
-                element.prop('hidden', true);
-                element.addClass('d-none');
-                if (typeof element.hide === 'function') {
-                    element.hide();
-                }
-                if (domNode && domNode.style) {
-                    domNode.style.setProperty('display', 'none', 'important');
-                }
-            } else {
-                element.removeAttr('hidden');
-                element.prop('hidden', false);
-                element.removeClass('d-none');
-                if (domNode && domNode.style) {
-                    domNode.style.removeProperty('display');
-                }
-                if (typeof element.show === 'function') {
-                    element.show();
-                }
-            }
-        };
-
-        that._formatBytes = function (bytes) {
-            if (bytes == null || isNaN(bytes)) {
-                return '—';
-            }
-            var size = Number(bytes);
-            if (size < 1024) {
-                return size + ' B';
-            }
-            if (size < 1024 * 1024) {
-                return (size / 1024).toFixed(1) + ' KB';
-            }
-            return (size / (1024 * 1024)).toFixed(1) + ' MB';
-        };
-
-        that._formatBBox = function (bbox) {
-            if (!bbox || bbox.length !== 4) {
-                return '—';
-            }
-            return bbox.map(function (val) {
-                return Number(val).toFixed(4);
-            }).join(', ');
-        };
-
-        that._formatTimestamp = function (timestamp) {
-            try {
-                var date = new Date(timestamp);
-                if (!isNaN(date.getTime())) {
-                    return date.toLocaleString();
-                }
-            } catch (err) {
-                // ignore
-            }
-            return timestamp || '—';
-        };
-
-        that.runBatch = function () {
-            if (!this.state.enabled) {
-                this._setRunBatchMessage('Batch runner is disabled.', 'text-warning');
-                return;
-            }
-
-            if (this.should_disable_command_button(this)) {
-                return;
-            }
-
-            var self = this;
-            if (self._jobInfoAbortController && typeof self._jobInfoAbortController.abort === 'function') {
-                try {
-                    self._jobInfoAbortController.abort();
-                } catch (abortError) {
-                    console.warn('Failed to abort in-flight job info request before submitting batch:', abortError);
-                }
-                self._jobInfoAbortController = null;
-            }
-            if (typeof self._cancelJobInfoTimer === 'function') {
-                self._cancelJobInfoTimer();
-            }
-            self._jobInfoFetchInFlight = false;
-            self._jobInfoRefreshPending = false;
-            self._jobInfoForceNextFetch = false;
-            self._jobInfoLastFetchStartedAt = 0;
-            if (self._jobInfoTrackedIds && typeof self._jobInfoTrackedIds.clear === 'function') {
-                self._jobInfoTrackedIds.clear();
-            }
-            if (self._jobInfoCompletedIds && typeof self._jobInfoCompletedIds.clear === 'function') {
-                self._jobInfoCompletedIds.clear();
-            }
-            self._jobInfoLastPayload = null;
-            
-            self._setRunBatchBusy(true, 'Submitting batch run…', 'text-muted');
-
-            if (self.ws_client && typeof self.ws_client.connect === 'function') {
-                self.ws_client.connect();
-            }
-
-            if (self.infoPanel && self.infoPanel.length) {
-                self.infoPanel.html('<span class="text-muted">Submitting batch job…</span>');
-            }
-
-            fetch(this._apiUrl('rq/api/run-batch'), {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-                .then(function (response) {
-                    return response.json().then(function (data) {
-                        data._httpStatus = response.status;
-                        return data;
+                    controller.emitter.emit("batch:template:validate-completed", {
+                        success: true,
+                        batchName: controller.state.batchName,
+                        validation: payload.validation
                     });
                 })
-                .then(function (payload) {
+                .catch(function (error) {
+                    var message =
+                        error && error.message ? error.message : "Template validation failed.";
+                    setText(controller.templateStatus, message);
+                    controller.emitter.emit("batch:template:validate-failed", {
+                        error: message,
+                        batchName: controller.state.batchName
+                    });
+                })
+                .finally(function () {
+                    setValidateBusy(false);
+                });
+        }
+
+        function runBatch() {
+            if (!controller.state.enabled) {
+                setRunBatchMessage("Batch runner is disabled.", "text-warning");
+                return;
+            }
+
+            if (controller.should_disable_command_button(controller)) {
+                return;
+            }
+
+            if (
+                controller.jobInfo.abortController &&
+                typeof controller.jobInfo.abortController.abort === "function"
+            ) {
+                try {
+                    controller.jobInfo.abortController.abort();
+                } catch (abortError) {
+                    console.warn(
+                        "Failed to abort in-flight job info request before submitting batch:",
+                        abortError
+                    );
+                }
+                controller.jobInfo.abortController = null;
+            }
+            cancelJobInfoTimer();
+            controller.jobInfo.fetchInFlight = false;
+            controller.jobInfo.refreshPending = false;
+            controller.jobInfo.forceNextFetch = false;
+            controller.jobInfo.lastFetchStartedAt = 0;
+            controller.jobInfo.trackedIds.clear();
+            controller.jobInfo.completedIds.clear();
+            controller.jobInfo.lastPayload = null;
+
+            setRunBatchBusy(true, "Submitting batch run…", "text-muted");
+
+            if (controller.ws_client && typeof controller.ws_client.connect === "function") {
+                controller.ws_client.connect();
+            }
+
+            if (controller.infoPanel) {
+                controller.infoPanel.innerHTML =
+                    '<span class="text-muted">Submitting batch job…</span>';
+            }
+
+            controller.http
+                .postJson(apiUrl("rq/api/run-batch"), {})
+                .then(function (response) {
+                    var payload = response.body || {};
                     if (!payload.success) {
-                        throw payload.error || 'Failed to submit batch run.';
+                        var errorMsg = payload.error || payload.message || "Failed to submit batch run.";
+                        throw new Error(errorMsg);
                     }
 
                     if (payload.job_id) {
-                        self.set_rq_job_id(self, payload.job_id);
+                        controller.set_rq_job_id(controller, payload.job_id);
                     } else {
-                        self.update_command_button_state(self);
+                        controller.update_command_button_state(controller);
                     }
 
-                    var successMessage = payload.message || 'Batch run submitted.';
-                    self._setRunBatchMessage(successMessage, 'text-success');
+                    var successMessage = payload.message || "Batch run submitted.";
+                    setRunBatchMessage(successMessage, "text-success");
+
+                    controller.emitter.emit("batch:run:started", {
+                        batchName: controller.state.batchName,
+                        jobId: payload.job_id || null
+                    });
+                    controller.emitter.emit("job:started", {
+                        batchName: controller.state.batchName,
+                        jobId: payload.job_id || null
+                    });
                 })
                 .catch(function (error) {
-                    var message;
-                    if (typeof error === 'string') {
-                        message = error;
-                    } else if (error && typeof error === 'object') {
-                        message = error.error || error.message;
+                    var message =
+                        error && error.message ? error.message : "Failed to submit batch run.";
+                    setRunBatchMessage(message, "text-danger");
+                    if (controller.infoPanel) {
+                        controller.infoPanel.innerHTML =
+                            '<span class="text-danger">' + escapeHtml(message) + "</span>";
                     }
-                    self._setRunBatchMessage(message || 'Failed to submit batch run.', 'text-danger');
-                    if (self.infoPanel && self.infoPanel.length) {
-                        self.infoPanel.html('<span class="text-danger">' + self._escapeHtml(message || 'Failed to submit batch run.') + '</span>');
+                    if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
+                        controller.ws_client.disconnect();
                     }
-                    if (self.ws_client && typeof self.ws_client.disconnect === 'function') {
-                        self.ws_client.disconnect();
-                    }
+                    controller.emitter.emit("batch:run:failed", {
+                        error: message,
+                        batchName: controller.state.batchName
+                    });
+                    controller.emitter.emit("job:error", {
+                        error: message,
+                        batchName: controller.state.batchName
+                    });
                 })
                 .finally(function () {
-                    self._setRunBatchBusy(false);
+                    setRunBatchBusy(false);
                 });
-        };
+        }
 
-        var baseTriggerEvent = that.triggerEvent;
-        that.triggerEvent = function (eventName, payload) {
-            if (eventName === 'BATCH_RUN_COMPLETED' || eventName === 'END_BROADCAST') {
-                if (this.ws_client && typeof this.ws_client.disconnect === 'function') {
-                    this.ws_client.disconnect();
+        function uploadGeojson(event) {
+            handleUpload(event);
+            return false;
+        }
+
+        function validateTemplate(event) {
+            handleValidate(event);
+            return false;
+        }
+
+        function overrideControlBase(ctrl) {
+            var baseSetRqJobId = ctrl.set_rq_job_id;
+            ctrl.set_rq_job_id = function (self, jobId) {
+                baseSetRqJobId.call(ctrl, self, jobId);
+                if (self === ctrl) {
+                    if (jobId) {
+                        var normalizedJobId = String(jobId).trim();
+                        if (ctrl.jobInfo.completedIds) {
+                            ctrl.jobInfo.completedIds.delete(normalizedJobId);
+                        }
+                        registerTrackedJobId(normalizedJobId);
+                    }
+                    if (jobId) {
+                        refreshJobInfo({ force: true });
+                    } else if (ctrl.infoPanel) {
+                        ctrl.infoPanel.innerHTML =
+                            '<span class="text-muted">No batch job submitted yet.</span>';
+                    }
                 }
-                if (this.ws_client && typeof this.ws_client.resetSpinner === 'function') {
-                    this.ws_client.resetSpinner();
+            };
+
+            var baseHandleJobStatusResponse = ctrl.handle_job_status_response;
+            ctrl.handle_job_status_response = function (self, data) {
+                baseHandleJobStatusResponse.call(ctrl, self, data);
+                if (self === ctrl) {
+                    refreshJobInfo();
                 }
-                this.refreshJobInfo({ force: true });
-            } else if (eventName === 'BATCH_WATERSHED_TASK_COMPLETED') {
-                this.refreshJobInfo();
-            }
+            };
 
-            baseTriggerEvent.call(this, eventName, payload);
-        };
+            var baseTriggerEvent = ctrl.triggerEvent;
+            ctrl.triggerEvent = function (eventName, payload) {
+                if (eventName === "BATCH_RUN_COMPLETED" || eventName === "END_BROADCAST") {
+                    if (ctrl.ws_client && typeof ctrl.ws_client.disconnect === "function") {
+                        ctrl.ws_client.disconnect();
+                    }
+                    if (ctrl.ws_client && typeof ctrl.ws_client.resetSpinner === "function") {
+                        ctrl.ws_client.resetSpinner();
+                    }
+                    refreshJobInfo({ force: true });
+                    if (eventName === "BATCH_RUN_COMPLETED") {
+                        ctrl.emitter.emit("batch:run:completed", {
+                            success: true,
+                            batchName: ctrl.state.batchName,
+                            jobId: ctrl.rq_job_id || null,
+                            payload: payload || null
+                        });
+                        ctrl.emitter.emit("job:completed", {
+                            success: true,
+                            batchName: ctrl.state.batchName,
+                            jobId: ctrl.rq_job_id || null,
+                            payload: payload || null
+                        });
+                    }
+                } else if (eventName === "BATCH_RUN_FAILED") {
+                    ctrl.emitter.emit("batch:run:failed", {
+                        error: payload && payload.error ? payload.error : "Batch run failed.",
+                        batchName: ctrl.state.batchName
+                    });
+                    ctrl.emitter.emit("job:error", {
+                        error: payload && payload.error ? payload.error : "Batch run failed.",
+                        batchName: ctrl.state.batchName
+                    });
+                } else if (eventName === "BATCH_WATERSHED_TASK_COMPLETED") {
+                    refreshJobInfo();
+                }
 
-        return that;
+                baseTriggerEvent.call(ctrl, eventName, payload);
+            };
+        }
     }
 
     return {

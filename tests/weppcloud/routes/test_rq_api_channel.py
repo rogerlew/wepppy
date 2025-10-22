@@ -1,19 +1,24 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import pytest
 from flask import Flask
 
 import wepppy.weppcloud.routes.rq.api.api as rq_api_module
 
+from tests.factories.singleton import LockedMixin, singleton_factory
+
 RUN_ID = "test-run"
 CONFIG = "cfg"
 
 
 @pytest.fixture()
-def rq_channel_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
+def rq_channel_client(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+    rq_environment,
+):
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(rq_api_module.rq_api_bp)
@@ -29,97 +34,37 @@ def rq_channel_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
 
     monkeypatch.setattr(rq_api_module, "get_wd", fake_get_wd)
 
-    class DummyWatershed:
-        _instances: Dict[str, "DummyWatershed"] = {}
+    WatershedStub = singleton_factory(
+        "WatershedStub",
+        attrs={
+            "run_group": "default",
+            "_mcl": None,
+            "_csa": None,
+            "_wbt_fill_or_breach": None,
+            "_wbt_blc_dist": None,
+            "_set_extent_mode": None,
+            "_map_bounds_text": "",
+            "delineation_backend_is_wbt": True,
+        },
+        mixins=(LockedMixin,),
+    )
 
-        def __init__(self, wd: str) -> None:
-            self.wd = wd
-            self.run_group = "default"
-            self._mcl: float | None = None
-            self._csa: float | None = None
-            self._wbt_fill_or_breach: str | None = None
-            self._wbt_blc_dist: int | None = None
-            self._set_extent_mode: int | None = None
-            self._map_bounds_text: str = ""
-            self.delineation_backend_is_wbt = True
-            self._lock_calls = 0
+    monkeypatch.setattr(rq_api_module, "Watershed", WatershedStub)
 
-        @classmethod
-        def getInstance(cls, wd: str) -> "DummyWatershed":
-            instance = cls._instances.get(wd)
-            if instance is None:
-                instance = cls(wd)
-                cls._instances[wd] = instance
-            return instance
-
-        @contextmanager
-        def locked(self):
-            self._lock_calls += 1
-            yield
-
-    monkeypatch.setattr(rq_api_module, "Watershed", DummyWatershed)
-
-    class DummyRedisPrep:
-        _instances: Dict[str, "DummyRedisPrep"] = {}
-
-        def __init__(self, wd: str) -> None:
-            self.wd = wd
-            self.removed: list[Any] = []
-            self.job_ids: Dict[str, str] = {}
-
-        @classmethod
-        def getInstance(cls, wd: str) -> "DummyRedisPrep":
-            instance = cls._instances.get(wd)
-            if instance is None:
-                instance = cls(wd)
-                cls._instances[wd] = instance
-            return instance
-
-        def remove_timestamp(self, task) -> None:  # noqa: ANN001 - mirror signature
-            self.removed.append(task)
-
-        def set_rq_job_id(self, key: str, job_id: str) -> None:
-            self.job_ids[key] = job_id
-
-    monkeypatch.setattr(rq_api_module, "RedisPrep", DummyRedisPrep)
-
-    class DummyRedisConn:
-        def __enter__(self) -> str:
-            state.setdefault("redis", []).append("enter")
-            return "redis-conn"
-
-        def __exit__(self, exc_type, exc, tb) -> None:  # pragma: no cover - errors bubble automatically
-            state.setdefault("redis", []).append("exit")
-
-    monkeypatch.setattr(rq_api_module, "_redis_conn", lambda: DummyRedisConn())
-
-    class DummyJob:
-        def __init__(self, job_id: str = "job-123") -> None:
-            self.id = job_id
-
-    class DummyQueue:
-        def __init__(self, connection: str) -> None:
-            state["queue_connection"] = connection
-
-        def enqueue_call(self, func, args: Tuple[Any, ...] = (), timeout: int | None = None) -> DummyJob:
-            job = DummyJob()
-            state.setdefault("queue_calls", []).append(
-                {"func": func, "args": args, "timeout": timeout, "job": job}
-            )
-            return job
-
-    monkeypatch.setattr(rq_api_module, "Queue", DummyQueue)
+    env = rq_environment
+    env.patch_module(monkeypatch, rq_api_module, default_job_id="job-123")
 
     with app.test_client() as client:
-        yield client, DummyWatershed, DummyRedisPrep, state
+        yield client, WatershedStub, env, state
 
-    DummyWatershed._instances.clear()
-    DummyRedisPrep._instances.clear()
+    WatershedStub.reset_instances()
+    env.redis_prep_class.reset_instances()
+    env.recorder.reset()
     state.clear()
 
 
 def test_fetch_dem_and_build_channels_accepts_json_payload(rq_channel_client):
-    client, DummyWatershed, DummyRedisPrep, state = rq_channel_client
+    client, WatershedStub, env, state = rq_channel_client
 
     payload = {
         "map_center": [-117.52, 46.88],
@@ -144,9 +89,9 @@ def test_fetch_dem_and_build_channels_accepts_json_payload(rq_channel_client):
     assert body["Success"] is True
     assert body["job_id"] == "job-123"
 
-    queue_call = state["queue_calls"][0]
-    assert queue_call["func"] is rq_api_module.fetch_dem_and_build_channels_rq
-    args = queue_call["args"]
+    queue_call = env.recorder.queue_calls[0]
+    assert queue_call.func is rq_api_module.fetch_dem_and_build_channels_rq
+    args = queue_call.args
     assert args[0] == RUN_ID
     assert args[1] == payload["map_bounds"]
     assert args[2] == payload["map_center"]
@@ -158,16 +103,17 @@ def test_fetch_dem_and_build_channels_accepts_json_payload(rq_channel_client):
     assert args[8] == 1
     assert args[9] == payload["map_bounds_text"]
 
-    prep = DummyRedisPrep.getInstance(state["run_dir"])
+    prep = env.redis_prep_class.getInstance(state["run_dir"])
     assert rq_api_module.TaskEnum.fetch_dem in prep.removed
     assert rq_api_module.TaskEnum.build_channels in prep.removed
     assert prep.job_ids["fetch_dem_and_build_channels_rq"] == "job-123"
 
-    assert state["redis"] == ["enter", "exit"]
+    entries = env.recorder.redis_entries
+    assert "enter" in entries and "exit" in entries
 
 
 def test_fetch_dem_and_build_channels_accepts_form_payload(rq_channel_client):
-    client, DummyWatershed, DummyRedisPrep, state = rq_channel_client
+    client, WatershedStub, env, state = rq_channel_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/rq/api/fetch_dem_and_build_channels",
@@ -186,8 +132,8 @@ def test_fetch_dem_and_build_channels_accepts_form_payload(rq_channel_client):
     body = response.get_json()
     assert body["Success"] is True
 
-    queue_call = state["queue_calls"][0]
-    args = queue_call["args"]
+    queue_call = env.recorder.queue_calls[0]
+    args = queue_call.args
     assert args[1] == [-118.0, 46.5, -117.0, 47.0]
     assert args[2] == [-117.52, 46.88]
     assert args[3] == pytest.approx(12.0)
@@ -199,9 +145,9 @@ def test_fetch_dem_and_build_channels_accepts_form_payload(rq_channel_client):
 
 
 def test_fetch_dem_and_build_channels_batch_mode_short_circuits(rq_channel_client):
-    client, DummyWatershed, DummyRedisPrep, state = rq_channel_client
+    client, WatershedStub, env, state = rq_channel_client
 
-    watershed = DummyWatershed.getInstance(state["run_dir"])
+    watershed = WatershedStub.getInstance(state["run_dir"])
     watershed.run_group = "batch"
 
     response = client.post(
@@ -233,4 +179,4 @@ def test_fetch_dem_and_build_channels_batch_mode_short_circuits(rq_channel_clien
     assert watershed._wbt_fill_or_breach == "breach"
     assert watershed._wbt_blc_dist == 400
 
-    assert "queue_calls" not in state or state["queue_calls"] == []
+    assert env.recorder.queue_calls == []

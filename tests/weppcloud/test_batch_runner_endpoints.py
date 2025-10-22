@@ -48,6 +48,7 @@ def app(tmp_path, monkeypatch):
 
     _unwrap("batch_runner.upload_geojson")
     _unwrap("batch_runner.validate_template")
+    _unwrap("batch_runner.update_run_directives")
 
     with application.app_context():
         root = Path(application.config["BATCH_RUNNER_ROOT"])
@@ -171,3 +172,66 @@ def test_validate_template_success_path(client, app):
     assert payload["stored"]["status"] == "ok"
     state = _read_state(app)
     assert state["runid_template"] == "{slug(properties['HucName'])}-{zfill(one_based_index, 3)}"
+
+
+def test_update_run_directives_accepts_booleans(client, app):
+    response = client.post(
+        "/batch/_/demo/run-directives",
+        json={
+            "run_directives": {
+                "fetch_dem": True,
+                "build_channels": False,
+            }
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["success"] is True
+
+    directives = {entry["slug"]: entry["enabled"] for entry in payload["run_directives"]}
+    assert directives["fetch_dem"] is True
+    assert directives["build_channels"] is False
+
+    state = _read_state(app)
+    state_directives = {entry["slug"]: entry["enabled"] for entry in state["run_directives"]}
+    assert state_directives["fetch_dem"] is True
+    assert state_directives["build_channels"] is False
+
+
+def test_update_run_directives_coerces_string_booleans(client, app):
+    response = client.post(
+        "/batch/_/demo/run-directives",
+        json={
+            "run_directives": {
+                "fetch_dem": "false",
+                "build_channels": "true",
+            }
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["success"] is True
+
+    directives = {entry["slug"]: entry["enabled"] for entry in payload["run_directives"]}
+    assert directives["fetch_dem"] is False
+    assert directives["build_channels"] is True
+
+    state = _read_state(app)
+    state_directives = {entry["slug"]: entry["enabled"] for entry in state["run_directives"]}
+    assert state_directives["fetch_dem"] is False
+    assert state_directives["build_channels"] is True
+
+
+def test_update_run_directives_rejects_non_mapping(client):
+    response = client.post(
+        "/batch/_/demo/run-directives",
+        json={
+            "run_directives": ["invalid", "payload"],
+        },
+    )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["success"] is False

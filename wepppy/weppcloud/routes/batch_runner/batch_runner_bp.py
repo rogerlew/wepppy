@@ -15,7 +15,7 @@ from flask_security import current_user
 
 from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
 
-from .._common import Blueprint, roles_required, secure_filename
+from .._common import Blueprint, roles_required, secure_filename, parse_request_payload
 from wepppy.nodb import unitizer as unitizer_module
 from wepppy.nodb.base import get_configs, get_config_dir
 from wepppy.nodb.core.ron import RonViewModel
@@ -36,6 +36,17 @@ def _batch_runner_feature_enabled() -> bool:
 _BATCH_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$")
 _GEOJSON_MAX_BYTES = 10 * 1024 * 1024
 _GEOJSON_MAX_MB = int(_GEOJSON_MAX_BYTES // (1024 * 1024))
+
+def _current_user_email() -> Optional[str]:
+    """
+    Resolve the best identifier for the active user (email > username > id).
+    Tests patch this helper so the blueprint can run outside Flask-Security.
+    """
+    for attr in ("email", "username", "id"):
+        value = getattr(current_user, attr, None)
+        if value:
+            return str(value)
+    return None
 
 def _validate_batch_name(raw_name: str) -> str:
     name = (raw_name or "").strip()
@@ -227,12 +238,22 @@ def update_run_directives(batch_name: str):
     
     batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
 
-    payload = request.get_json(silent=True) or {}
+    payload = parse_request_payload(request, trim_strings=True)
     raw_directives = payload.get('run_directives')
     if raw_directives is None:
         return jsonify({'success': False, 'error': 'run_directives payload is required.'}), 400
 
-    batch_runner.update_run_directives(raw_directives)
+    if isinstance(raw_directives, list):
+        raw_directives = {str(index): value for index, value in enumerate(raw_directives)}
+    elif isinstance(raw_directives, tuple):
+        raw_directives = {str(index): value for index, value in enumerate(list(raw_directives))}
+
+    if not isinstance(raw_directives, dict):
+        return jsonify({'success': False, 'error': 'run_directives must be an object mapping task names to booleans.'}), 400
+
+    directives_payload = {str(key): value for key, value in raw_directives.items()}
+
+    batch_runner.update_run_directives(directives_payload)
 
     snapshot = _build_batch_runner_snapshot(batch_runner)
 
@@ -311,7 +332,7 @@ def upload_geojson(batch_name: str):
     }
 
     metadata["uploaded_at"] = datetime.now(timezone.utc).isoformat()
-    uploader = getattr(current_user, "email", None) or getattr(current_user, "username", None) or getattr(current_user, "id", None)
+    uploader = _current_user_email()
     if uploader:
         metadata["uploaded_by"] = str(uploader)
 
@@ -357,7 +378,7 @@ def validate_template(batch_name: str):
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
     except FileNotFoundError as exc:
         return jsonify({"success": False, "error": str(exc)}), 404
-    payload = request.get_json(silent=True) or {}
+    payload = parse_request_payload(request, trim_strings=True)
     template = payload.get("template")
     if not template:
         return jsonify({"success": False, "error": "Template is required."}), 400

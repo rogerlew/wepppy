@@ -62,6 +62,7 @@
    - Update or create README/AGENTS/dev notes describing the new APIs or flows.
    - If templates changed, note required markup expectations (data attributes, IDs).
    - Mention the Jest workflow in `controllers_js/AGENTS.md`  when adding new suites.
+   - Call out the shared test factories (`tests/factories/`) in any route/controller notes you touch so future work leans on `rq_environment` and `singleton_factory` instead of bespoke mocks.
    - Log any deferred follow-ups (e.g., next controller to migrate) in the relevant dev note or task tracker.
 
 6. **Handoff Checklist**

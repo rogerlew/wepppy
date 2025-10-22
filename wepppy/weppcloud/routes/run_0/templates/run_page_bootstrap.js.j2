@@ -37,10 +37,8 @@ function onReady() {
     var wepp = Wepp.getInstance();
     var observed = Observed.getInstance();
     var debris_flow = DebrisFlow.getInstance();
-    var ash = Ash.getInstance();
     var rap_ts = RAP_TS.getInstance();
     var disturbed = Disturbed.getInstance();
-    var omni = Omni.getInstance();
     var dss_export = DssExport.getInstance();
 
     if (disturbed && typeof disturbed.set_has_sbs_cached === 'function') {
@@ -81,7 +79,7 @@ function onReady() {
     }
 
 
-    {% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
+    {% if ('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods %}
 /*
      * Baer mod
      * ======================
@@ -282,6 +280,7 @@ function onReady() {
     * Omni
     * ======================
     */
+    var omni = Omni.getInstance();
     omni.load_scenarios_from_backend();
 
     omni.set_rq_job_id(omni, {{ rq_job_ids.get("run_omni_rq") | tojson }});
@@ -329,7 +328,6 @@ function onReady() {
         ash.report();
     }
     ash.setAshDepthMode({{ ash.ash_depth_mode }});
-    ash.showHideControls();
     {% endif %}
 
     /*
@@ -505,7 +503,9 @@ window.addEventListener('load', function () {
     setGlobalUnitizerPreference(pref);
     
     {% if 'ash' in ron.mods %}
-    ash.showHideControls();
+    if (ash && typeof ash.showHideControls === 'function') {
+        ash.showHideControls();
+    }
     {% endif %}
 });
 </script>

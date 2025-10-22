@@ -37,7 +37,7 @@
         </div>
         <div class="col-sm-4 text-sm-end">
             <button type="button" class="btn btn-primary mt-3 mt-sm-0" data-role="upload-button"
-                onclick="return BatchRunner.getInstance().uploadGeojson(event);"
+                data-action="batch-upload"
                 {% if not feature_enabled %}disabled{% endif %}>Upload GeoJSON</button>
         </div>
     </div>
@@ -104,7 +104,7 @@
     </div>
     <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
         <button class="btn btn-outline-primary" type="button" data-role="validate-button"
-            onclick="return BatchRunner.getInstance().validateTemplate(event);"
+            data-action="batch-validate"
             {% if not feature_enabled %}disabled{% endif %}>Validate Template</button>
         <div class="small" data-role="template-status"></div>
     </div>
@@ -145,9 +145,9 @@
 
 <div class="form-group row hide-readonly" id="batch_runner_run_container">
     <div class="col-sm-4">
-        <button 
-            onclick="BatchRunner.getInstance().runBatch();"
-            id="btn_run_batch" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
+        <button
+            id="btn_run_batch" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+            data-action="batch-run">
 
           <img  id="run_batch_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
           Run Batch

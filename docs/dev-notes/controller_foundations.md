@@ -38,6 +38,7 @@ This note captures the shared architectural goals that sit behind the per-module
 - Lint and test quickly: `wctl run-npm lint`, `wctl run-npm test`, `wctl run-pytest …`.
 - Keep helper modules thin and well-tested; add Jest suites whenever a primitive or controlBase feature is introduced.
 - When introducing new patterns, stage them in one controller, document the contract here, then schedule follow-up work to roll them out broadly.
+- Lean on the shared test factories (`tests/factories/`) when migrating routes or controllers. `rq_environment` replaces bespoke Redis/Queue mocks, and `singleton_factory` helps you clone NoDb-style controllers with lock/parse behavior for pytest coverage.
 
 ---
 

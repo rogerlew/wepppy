@@ -1211,21 +1211,57 @@ def api_run_ash(runid, config):
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_debris_flow', methods=['POST'])
 def api_run_debris_flow(runid, config):
-
     try:
+        payload = parse_request_payload(request)
+
+        clay_pct = payload.get('clay_pct')
+        liquid_limit = payload.get('liquid_limit')
+        datasource = payload.get('datasource')
+
+        if clay_pct is not None:
+            try:
+                clay_pct = float(clay_pct)
+            except (TypeError, ValueError):
+                return exception_factory('clay_pct must be numeric', runid=runid)
+
+        if liquid_limit is not None:
+            try:
+                liquid_limit = float(liquid_limit)
+            except (TypeError, ValueError):
+                return exception_factory('liquid_limit must be numeric', runid=runid)
+
+        if datasource is not None:
+            datasource = str(datasource).strip() or None
+
         wd = get_wd(runid)
-        
+
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_debris)
 
+        job_kwargs = None
+        if any(value is not None for value in (clay_pct, liquid_limit, datasource)):
+            job_options = {}
+            if clay_pct is not None:
+                job_options['clay_pct'] = clay_pct
+            if liquid_limit is not None:
+                job_options['liquid_limit'] = liquid_limit
+            if datasource is not None:
+                job_options['datasource'] = datasource
+            job_kwargs = {'payload': job_options}
+
         with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_debris_flow_rq, (runid,), timeout=TIMEOUT)
+            job = q.enqueue_call(
+                run_debris_flow_rq,
+                (runid,),
+                kwargs=job_kwargs,
+                timeout=TIMEOUT
+            )
             prep.set_rq_job_id('run_debris_flow_rq', job.id)
 
     except Exception:
         return exception_factory('Error Running Debris Flow', runid=runid)
-        
+
     return jsonify({'Success': True, 'job_id': job.id})
 
 

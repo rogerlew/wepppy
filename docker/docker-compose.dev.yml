@@ -79,6 +79,21 @@ services:
       redis:
         condition: service_healthy
 
+  status-build:
+    image: golang:1.25-alpine
+    container_name: weppcloud-status-build
+    working_dir: /workspace/services/status2
+    volumes:
+      - ..:/workspace
+      - type: volume
+        source: status_go_cache
+        target: /go
+    environment:
+      GOMODCACHE: /go/pkg/mod
+    depends_on:
+      redis:
+        condition: service_started
+
   preflight:
     build:
       context: ..
@@ -425,3 +440,6 @@ networks:
 
 volumes:
   weppcloudr-renv-cache:
+    driver: local
+  status_go_cache:
+    driver: local

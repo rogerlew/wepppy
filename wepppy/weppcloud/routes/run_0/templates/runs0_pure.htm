@@ -143,15 +143,18 @@
       </section>
       {% endif %}
 
-      {% if 'path_ce' in ron.mods %}
-      <section id="path-cost-effective" class="wc-stack">
-        {% include 'controls/path_cost_effective_pure.htm' %}
+      {% if 'omni' in ron.mods %}
+      <section id="omni-scenarios" class="wc-stack">
+        {% include 'controls/omni_scenarios_pure.htm' %}
+      </section>
+      <section id="omni-contrasts" class="wc-stack">
+        {% include 'controls/omni_contrasts_pure.htm' %}
       </section>
       {% endif %}
 
-      {% if 'omni' in ron.mods %}
-      <section id="omni-contrasts" class="wc-stack">
-        {% include 'controls/omni_contrasts_pure.htm' %}
+      {% if 'path_ce' in ron.mods %}
+      <section id="path-cost-effective" class="wc-stack">
+        {% include 'controls/path_cost_effective_pure.htm' %}
       </section>
       {% endif %}
 
