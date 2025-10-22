@@ -16,7 +16,6 @@
   - `wctl run-npm lint` (ESLint + Prettier) — lints staged controller changes.
   - `wctl run-npm test` — runs the Jest suite for controllers/helpers.
 - Ensure the controller bundle builds: `python wepppy/weppcloud/controllers_js/build_controllers_js.py`.
-- Ensure the controller bundle builds: `python wepppy/weppcloud/controllers_js/build_controllers_js.py`.
 
 ## Workflow Overview
 1. **Assess & Scope**
