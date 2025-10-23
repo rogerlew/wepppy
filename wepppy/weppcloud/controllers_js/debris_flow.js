@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * DebrisFlow
+ * Doc: controllers_js/README.md — Debris Flow Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var DebrisFlow = (function () {

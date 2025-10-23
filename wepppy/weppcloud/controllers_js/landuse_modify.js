@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * LanduseModify
+ * Doc: controllers_js/README.md — Landuse Modify Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var LanduseModify = (function () {

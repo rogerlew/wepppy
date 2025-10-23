@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * RangelandCoverModify
+ * Doc: controllers_js/README.md — Rangeland Cover Modify Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var RangelandCoverModify = (function () {

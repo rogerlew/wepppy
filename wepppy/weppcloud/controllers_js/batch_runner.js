@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Batch Runner (Modernized)
+ * Doc: controllers_js/README.md — Batch Runner Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var BatchRunner = (function () {

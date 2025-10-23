@@ -7,7 +7,7 @@ The goal of every prompt is to give a follow-up agent enough context, guard rail
 ## 1. Anchor the prompt in shared guidance
 - **Architecture:** Always cite `docs/dev-notes/controller_foundations.md` so the agent aligns with the long-term vision (helpers, controlBase evolution, events, schemas).
 - **Workflow:** Reference `docs/dev-notes/module_refactor_workflow.md` and insist they follow it end-to-end—helpers, routes, testing, docs, handoff.
-- **Domain note:** Point to any controller-specific migration plan (`docs/dev-notes/<domain>-controller-migration-plan.md`) so discovery is cohesive.
+- **Domain note:** Point to the archived controller plan in `docs/work-packages/20251023_controller_modernization/notes/archived-plans/<domain>-controller-plan.md` so discovery is cohesive.
 
 ## 2. Enumerate the working set
 - Spell out the key files:

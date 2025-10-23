@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * PATH Cost-Effective Control
+ * Doc: controllers_js/README.md — Path CE Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var PathCE = (function () {

@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Observed
+ * Doc: controllers_js/README.md — Observed Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var Observed = (function () {

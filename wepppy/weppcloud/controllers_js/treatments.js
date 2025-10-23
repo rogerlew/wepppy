@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Treatments
+ * Doc: controllers_js/README.md — Treatments Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var Treatments = (function () {

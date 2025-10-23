@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * DSS Export
+ * Doc: controllers_js/README.md — DSS Export Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var DssExport = (function () {

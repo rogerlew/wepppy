@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Climate (Pure UI + Legacy Console)
+ * Doc: controllers_js/README.md — Climate Controller Reference (2024 helper migration)
  * ----------------------------------------------------------------------------
  */
 var Climate = (function () {

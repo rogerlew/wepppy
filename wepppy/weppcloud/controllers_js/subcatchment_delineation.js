@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Subcatchment Delineation (Modernized)
+ * Doc: controllers_js/README.md — Subcatchment Delineation Controller (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var SubcatchmentDelineation = (function () {

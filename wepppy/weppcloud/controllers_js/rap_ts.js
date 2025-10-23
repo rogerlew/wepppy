@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * RAP Time Series
+ * Doc: controllers_js/README.md — RAP Time Series Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var RAP_TS = (function () {

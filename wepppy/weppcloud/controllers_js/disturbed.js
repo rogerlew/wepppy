@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Disturbed
+ * Doc: controllers_js/README.md — Disturbed Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var Disturbed = (function () {

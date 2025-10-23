@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Outlet
+ * Doc: controllers_js/README.md — Outlet Controller Reference (2025 helper migration)
  * ----------------------------------------------------------------------------
  */
 var Outlet = (function () {

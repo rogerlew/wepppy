@@ -1,5 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Ash
+ * Doc: controllers_js/README.md — Ash Controller Modernization (2024 helper-first baseline)
  * ----------------------------------------------------------------------------
  */
 var Ash = (function () {
