@@ -19,7 +19,7 @@
        log_id="status",
        height="4rem"
      ) %}
-    <div id="rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
+    <div id="rq_job" class="wc-status-panel__meta" data-treatments-role="job" aria-live="polite"></div>
     <span id="braille" class="wc-status-panel__meta" aria-hidden="true"></span>
   {% endcall %}
 {% endset %}
@@ -30,14 +30,22 @@
     "label": "Specify Hillslopes",
     "value": "1",
     "selected": current_mode == 1,
-    "attrs": {"class": "disable-readonly", "data-treatments-mode": "1"}
+    "attrs": {
+      "class": "disable-readonly",
+      "data-treatments-role": "mode",
+      "data-treatments-mode": "1"
+    }
   },
   {
     "id": "treatments_mode4",
     "label": "Upload Treatment Map",
     "value": "4",
     "selected": current_mode == 4,
-    "attrs": {"class": "disable-readonly", "data-treatments-mode": "4"}
+    "attrs": {
+      "class": "disable-readonly",
+      "data-treatments-role": "mode",
+      "data-treatments-mode": "4"
+    }
   }
 ] %}
 
@@ -51,6 +59,7 @@
      title="Treatments",
      collapsible=False,
      description=description,
+     form_attrs={"data-treatments-form": true},
      status_panel_override=status_panel_override,
      summary_panel_override=ui.legacy_summary_panel(),
      stacktrace_panel_override=ui.stacktrace_panel(
@@ -73,13 +82,14 @@
   {% set mode1_style = '' if current_mode == 1 else 'display: none;' %}
   <div id="treatments_mode1_controls"
        class="wc-stack hide-readonly"
+       data-treatments-panel="selection"
        {% if mode1_style %}style="{{ mode1_style }}"{% endif %}>
     {{ ui.select_field(
          "treatments_single_selection",
          label="Select treatment",
          options=treatment_select_options,
          selected=treatment_select_options[0][0] if treatment_select_options else None,
-         attrs={"class": "disable-readonly"},
+         attrs={"class": "disable-readonly", "data-treatments-role": "selection"},
          help="Apply the selected treatment to the highlighted hillslopes."
        ) }}
   </div>
@@ -87,13 +97,14 @@
   {% set mode4_style = '' if current_mode == 4 else 'display: none;' %}
   <div id="treatments_mode4_controls"
        class="wc-stack hide-readonly"
+       data-treatments-panel="upload"
        {% if mode4_style %}style="{{ mode4_style }}"{% endif %}>
     {{ ui.file_upload(
          "input_upload_landuse",
          label="Treatment map (.tif or .img)",
          accept=".tif,.img",
          help="Raster should encode treatment class keys; it will be aligned to the watershed automatically.",
-         attrs={"class": "disable-readonly"}
+         attrs={"class": "disable-readonly", "data-treatments-role": "upload"}
        ) }}
 
     <div class="wc-stack">
@@ -135,6 +146,6 @@
     </button>
   {% endcall %}
 
-  <p id="hint_build_treatments" class="wc-field__help" aria-live="polite"></p>
+  <p id="hint_build_treatments" class="wc-field__help" data-treatments-role="hint" aria-live="polite"></p>
 
 {% endcall %}

@@ -10,7 +10,11 @@
     "label": "Determine per hillslope (USGS NLCD Shrubland 2016)",
     "value": "0",
     "selected": current_mode == 0,
-    "attrs": {"class": "disable-readonly", "data-rangeland-mode": "0"}
+    "attrs": {
+      "class": "disable-readonly",
+      "data-rangeland-role": "mode",
+      "data-rangeland-mode": "0"
+    }
   }
 ] %}
 {% if rap_enabled %}
@@ -20,7 +24,11 @@
       "label": "Determine per hillslope (RAP)",
       "value": "2",
       "selected": current_mode == 2,
-      "attrs": {"class": "disable-readonly", "data-rangeland-mode": "2"}
+      "attrs": {
+        "class": "disable-readonly",
+        "data-rangeland-role": "mode",
+        "data-rangeland-mode": "2"
+      }
     }
   ] %}
 {% endif %}
@@ -30,7 +38,11 @@
     "label": "Single cover for watershed",
     "value": "1",
     "selected": current_mode == 1,
-    "attrs": {"class": "disable-readonly", "data-rangeland-mode": "1"}
+    "attrs": {
+      "class": "disable-readonly",
+      "data-rangeland-role": "mode",
+      "data-rangeland-mode": "1"
+    }
   }
 ] %}
 
@@ -83,13 +95,17 @@
       <div
         id="rangeland_cover_rap_year_div"
         class="wc-rangeland__rap-year hide-readonly"
+        data-rangeland-rap-section
         {% if rap_style %}style="{{ rap_style }}"{% endif %}>
         {{ ui.text_field(
              "rap_year",
              "RAP dataset year",
              value=rangeland_cover.rap_year,
              extra_control_class="disable-readonly",
-             attrs={"inputmode": "numeric"},
+             attrs={
+               "inputmode": "numeric",
+               "data-rangeland-input": "rap-year"
+             },
              help="Specify the year to fetch RAP cover data."
            ) }}
       </div>
@@ -163,7 +179,8 @@
       <button
         id="btn_build_rangeland_cover"
         type="button"
-        class="pure-button pure-button-primary disable-readonly">
+        class="pure-button pure-button-primary disable-readonly"
+        data-rangeland-action="build">
         Build Rangeland Cover
       </button>
     {% endcall %}

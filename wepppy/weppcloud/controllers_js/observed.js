@@ -2,114 +2,393 @@
  * Observed
  * ----------------------------------------------------------------------------
  */
-var Observed = function () {
+var Observed = (function () {
+    "use strict";
+
     var instance;
 
+    var FORM_ID = "observed_form";
+    var WS_CHANNEL = "observed";
+    var TASK_NAME = "observed:model-fit";
+    var RUN_MESSAGE = "Running observed model fit";
+
+    var SELECTORS = {
+        form: "#" + FORM_ID,
+        info: "#info",
+        status: "#status",
+        stacktrace: "#stacktrace",
+        rqJob: "#rq_job",
+        textarea: "#observed_text",
+        hint: "#hint_run_wepp"
+    };
+
+    var ACTIONS = {
+        run: '[data-action="observed-run"]'
+    };
+
+    var EVENT_NAMES = [
+        "observed:data:loaded",
+        "observed:model:fit",
+        "observed:error",
+        "job:started",
+        "job:completed",
+        "job:error"
+    ];
+
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
+
+        if (!dom || typeof dom.delegate !== "function" || typeof dom.hide !== "function" || typeof dom.show !== "function") {
+            throw new Error("Observed controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("Observed controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.postJson !== "function" || typeof http.getJson !== "function") {
+            throw new Error("Observed controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("Observed controller requires WCEvents helpers.");
+        }
+
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style && element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                if (element.style) {
+                    element.style.display = "none";
+                }
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function normalizeError(http, error) {
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error.detail || error.message || "Request failed";
+            var stacktrace = [];
+            if (error.body && typeof error.body === "object") {
+                if (Array.isArray(error.body.StackTrace)) {
+                    stacktrace = error.body.StackTrace;
+                } else if (typeof error.body.StackTrace === "string") {
+                    stacktrace = [error.body.StackTrace];
+                }
+                if (error.body.Error) {
+                    detail = error.body.Error;
+                }
+            }
+            return {
+                Success: false,
+                Error: detail,
+                StackTrace: stacktrace
+            };
+        }
+        return {
+            Success: false,
+            Error: (error && error.message) || "Request failed"
+        };
+    }
+
     function createInstance() {
-        var that = controlBase();
-        that.form = $("#observed_form");
-        that.textarea = $("#observed_form #observed_text");
-        that.info = $("#observed_form #info");
-        that.status = $("#observed_form  #status");
-        that.stacktrace = $("#observed_form #stacktrace");
-        that.ws_client = new WSClient('observed_form', 'observed');
-        that.ws_client.attachControl(that);
-        that.rq_job_id = null;
-        that.rq_job = $("#observed_form #rq_job");
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var eventsApi = helpers.events;
 
-        that.bindHandlers = function () {
-            if (!that.form || !that.form.length) {
+        var base = controlBase();
+        var emitter = null;
+
+        if (eventsApi && typeof eventsApi.createEmitter === "function") {
+            var baseEmitter = eventsApi.createEmitter();
+            emitter = typeof eventsApi.useEventMap === "function"
+                ? eventsApi.useEventMap(EVENT_NAMES, baseEmitter)
+                : baseEmitter;
+        }
+
+        var formElement = null;
+        try {
+            formElement = dom.qs(SELECTORS.form);
+        } catch (err) {
+            console.warn("[Observed] Unable to locate form element:", err);
+        }
+
+        var containerElement = null;
+        if (formElement && typeof formElement.closest === "function") {
+            containerElement = formElement.closest(".controller-section");
+        }
+        if (!containerElement) {
+            containerElement = formElement || null;
+        }
+
+        var infoElement = formElement ? dom.qs(SELECTORS.info, formElement) : null;
+        var statusElement = formElement ? dom.qs(SELECTORS.status, formElement) : null;
+        var stacktraceElement = formElement ? dom.qs(SELECTORS.stacktrace, formElement) : null;
+        var rqJobElement = formElement ? dom.qs(SELECTORS.rqJob, formElement) : null;
+        var textAreaElement = formElement ? dom.qs(SELECTORS.textarea, formElement) : null;
+        var hintElement = formElement ? dom.qs(SELECTORS.hint, formElement) : null;
+
+        var controller = Object.assign(base, {
+            dom: dom,
+            forms: forms,
+            http: http,
+            events: emitter,
+            form: formElement,
+            container: containerElement,
+            info: createLegacyAdapter(infoElement),
+            status: createLegacyAdapter(statusElement),
+            stacktrace: createLegacyAdapter(stacktraceElement),
+            rq_job: createLegacyAdapter(rqJobElement),
+            hint: createLegacyAdapter(hintElement),
+            textarea: textAreaElement,
+            command_btn_id: "btn_run_observed",
+            ws_client: null,
+            state: {
+                visible: false
+            },
+            _delegates: []
+        });
+
+        controller.ws_client = new WSClient(FORM_ID, WS_CHANNEL);
+        controller.ws_client.attachControl(controller);
+
+        controller.hideStacktrace = function () {
+            if (controller.stacktrace && typeof controller.stacktrace.hide === "function") {
+                controller.stacktrace.hide();
+                return;
+            }
+            if (stacktraceElement) {
+                stacktraceElement.hidden = true;
+                stacktraceElement.style.display = "none";
+            }
+        };
+
+        controller.showControl = function () {
+            controller.state.visible = true;
+            if (controller.container) {
+                dom.show(controller.container);
+            }
+            if (controller.events && typeof controller.events.emit === "function") {
+                controller.events.emit("observed:data:loaded", { available: true });
+            }
+        };
+
+        controller.hideControl = function () {
+            controller.state.visible = false;
+            if (controller.container) {
+                dom.hide(controller.container);
+            }
+            if (controller.events && typeof controller.events.emit === "function") {
+                controller.events.emit("observed:data:loaded", { available: false });
+            }
+        };
+
+        controller.onWeppRunCompleted = function () {
+            http.getJson("query/climate_has_observed/").then(function (hasObserved) {
+                var available = false;
+                if (typeof hasObserved === "boolean") {
+                    available = hasObserved;
+                } else if (hasObserved && typeof hasObserved === "object" && typeof hasObserved.available === "boolean") {
+                    available = hasObserved.available;
+                }
+
+                if (available) {
+                    controller.showControl();
+                } else {
+                    controller.hideControl();
+                }
+            }).catch(function (error) {
+                controller.pushErrorStacktrace(controller, error);
+                if (controller.events && typeof controller.events.emit === "function") {
+                    controller.events.emit("observed:error", {
+                        context: "climate_has_observed",
+                        error: error
+                    });
+                }
+            });
+        };
+
+        controller.report = function () {
+            if (!controller.info || typeof controller.info.html !== "function") {
+                return;
+            }
+            var href = url_for_run("report/observed/");
+            controller.info.html("<a href='" + href + "' target='_blank'>View Model Fit Results</a>");
+        };
+
+        controller.run_model_fit = function () {
+            if (!controller.form) {
                 return;
             }
 
-            if (that.form.data("observedHandlersBound")) {
-                return;
+            controller.info.html("");
+            controller.status.html(RUN_MESSAGE + "…");
+            controller.stacktrace.text("");
+            controller.hideStacktrace();
+            if (controller.hint && typeof controller.hint.text === "function") {
+                controller.hint.text("");
             }
-            that.form.data("observedHandlersBound", true);
 
-            that.form.on("click", "#btn_run_observed", function (event) {
+            var payload = forms.serializeForm(controller.form, { format: "json" }) || {};
+            var text = "";
+            if (typeof payload.data === "string" && payload.data) {
+                text = payload.data;
+            } else if (typeof payload.observed_text === "string") {
+                text = payload.observed_text;
+            } else if (controller.textarea && typeof controller.textarea.value === "string") {
+                text = controller.textarea.value;
+            }
+
+            var submission = { data: text };
+
+            controller.triggerEvent("job:started", {
+                task: TASK_NAME,
+                payload: submission
+            });
+            if (controller.events && typeof controller.events.emit === "function") {
+                controller.events.emit("observed:model:fit", {
+                    status: "started",
+                    task: TASK_NAME,
+                    payload: submission
+                });
+            }
+
+            if (controller.ws_client && typeof controller.ws_client.connect === "function") {
+                controller.ws_client.connect();
+            }
+
+            http.postJson("tasks/run_model_fit/", submission, { form: controller.form }).then(function (response) {
+                var body = response && response.body !== undefined ? response.body : response;
+                var normalized = body || {};
+
+                if (normalized.Success === true || normalized.success === true) {
+                    controller.status.html(RUN_MESSAGE + "… done.");
+                    controller.report();
+                    if (controller.events && typeof controller.events.emit === "function") {
+                        controller.events.emit("observed:model:fit", {
+                            status: "completed",
+                            task: TASK_NAME,
+                            payload: submission,
+                            response: normalized
+                        });
+                    }
+                    controller.triggerEvent("job:completed", {
+                        task: TASK_NAME,
+                        payload: submission,
+                        response: normalized
+                    });
+                } else {
+                    controller.pushResponseStacktrace(controller, normalized);
+                    if (controller.events && typeof controller.events.emit === "function") {
+                        controller.events.emit("observed:error", {
+                            task: TASK_NAME,
+                            payload: submission,
+                            error: normalized
+                        });
+                    }
+                    controller.triggerEvent("job:error", {
+                        task: TASK_NAME,
+                        payload: submission,
+                        error: normalized
+                    });
+                }
+            }).catch(function (error) {
+                var normalizedError = normalizeError(http, error);
+                controller.pushResponseStacktrace(controller, normalizedError);
+                if (controller.events && typeof controller.events.emit === "function") {
+                    controller.events.emit("observed:error", {
+                        task: TASK_NAME,
+                        payload: submission,
+                        error: normalizedError
+                    });
+                }
+                controller.triggerEvent("job:error", {
+                    task: TASK_NAME,
+                    payload: submission,
+                    error: normalizedError
+                });
+            }).finally(function () {
+                if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
+                    controller.ws_client.disconnect();
+                }
+            });
+        };
+
+        controller.runModelFit = controller.run_model_fit;
+
+        controller.dispose = function () {
+            controller._delegates.forEach(function (unsubscribe) {
+                if (typeof unsubscribe === "function") {
+                    unsubscribe();
+                }
+            });
+            controller._delegates = [];
+            if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
+                controller.ws_client.disconnect();
+            }
+        };
+
+        if (formElement) {
+            controller._delegates.push(dom.delegate(formElement, "click", ACTIONS.run, function (event) {
                 event.preventDefault();
-                instance.run_model_fit();
-            });
-        };
+                controller.run_model_fit();
+            }));
+        }
 
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
+        controller.hideStacktrace();
 
-        that.hideControl = function () {
-            var self = instance;
-            self.form.hide();
-        };
-
-        that.showControl = function () {
-            var self = instance;
-            self.form.show();
-        };
-
-        that.onWeppRunCompleted = function () {
-            var self = instance;
-
-            $.get({
-                url: "query/climate_has_observed/",
-                success: function success(response) {
-                    if (response === true) {
-                        self.showControl();
-                    } else {
-                        self.hideControl();
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-        };
-
-        that.run_model_fit = function () {
-            var self = instance;
-            var textdata = self.textarea.val();
-
-            var task_msg = "Running observed model fit";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/run_model_fit/",
-                data: JSON.stringify({ data: textdata }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... done.");
-                        self.report();
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance;
-            self.info.html(`<a href='${url_for_run("report/observed/")}' target='_blank'>View Model Fit Results</a>`);
-        };
-
-        that.bindHandlers();
-
-        return that;
+        return controller;
     }
 
     return {
@@ -120,4 +399,8 @@ var Observed = function () {
             return instance;
         }
     };
-}();
+})();
+
+if (typeof globalThis !== "undefined") {
+    globalThis.Observed = Observed;
+}

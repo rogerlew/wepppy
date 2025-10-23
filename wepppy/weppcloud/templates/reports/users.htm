@@ -15,7 +15,16 @@
       {% if loop.first %}
       <td></td>
       {% else %}
-      <td><a href="javascript:Team.getInstance().removeuser({{ user.id }})">Remove</a></td>
+      <td>
+        <button
+          type="button"
+          class="btn btn-link btn-sm text-danger disable-readonly"
+          data-team-action="remove"
+          data-team-user-id="{{ user.id }}"
+          aria-label="Remove {{ user.first_name }} {{ user.last_name }} from collaborators">
+          Remove
+        </button>
+      </td>
       {% endif %}
     </tr>
   {% endfor %}

@@ -49,11 +49,11 @@
     <legend class="wc-fieldset__legend">Thresholds</legend>
     <div class="wc-field wc-field--inline">
       <label class="wc-field__label" for="path_ce_sddc_threshold">Sediment Discharge Threshold (tons)</label>
-      <input id="path_ce_sddc_threshold" class="pure-input-1" type="number" step="any" min="0" placeholder="0">
+      <input id="path_ce_sddc_threshold" name="sddc_threshold" class="pure-input-1" type="number" step="any" min="0" placeholder="0">
     </div>
     <div class="wc-field wc-field--inline">
       <label class="wc-field__label" for="path_ce_sdyd_threshold">Sediment Yield Threshold (tons)</label>
-      <input id="path_ce_sdyd_threshold" class="pure-input-1" type="number" step="any" min="0" placeholder="0">
+      <input id="path_ce_sdyd_threshold" name="sdyd_threshold" class="pure-input-1" type="number" step="any" min="0" placeholder="0">
     </div>
   </fieldset>
 
@@ -62,16 +62,16 @@
     <div class="wc-grid wc-grid--2">
       <div class="wc-field">
         <label class="wc-field__label" for="path_ce_slope_min">Slope ≥ (deg)</label>
-        <input id="path_ce_slope_min" class="pure-input-1" type="number" step="any" placeholder="None">
+        <input id="path_ce_slope_min" name="slope_min" class="pure-input-1" type="number" step="any" placeholder="None">
       </div>
       <div class="wc-field">
         <label class="wc-field__label" for="path_ce_slope_max">Slope ≤ (deg)</label>
-        <input id="path_ce_slope_max" class="pure-input-1" type="number" step="any" placeholder="None">
+        <input id="path_ce_slope_max" name="slope_max" class="pure-input-1" type="number" step="any" placeholder="None">
       </div>
     </div>
     <div class="wc-field">
       <label class="wc-field__label" for="path_ce_severity">Burn Severities</label>
-      <select id="path_ce_severity" class="pure-input-1" multiple size="3">
+      <select id="path_ce_severity" name="severity_filter" class="pure-input-1" multiple size="3">
         <option value="High">High</option>
         <option value="Moderate">Moderate</option>
         <option value="Low">Low</option>
@@ -102,7 +102,8 @@
       <button
         id="path_ce_add_treatment"
         type="button"
-        class="pure-button pure-button-secondary">
+        class="pure-button pure-button-secondary"
+        data-pathce-action="add-treatment">
         Add Treatment
       </button>
     </div>
@@ -113,25 +114,17 @@
       id="path_ce_save"
       type="button"
       class="pure-button"
-      onclick="PathCE.getInstance().saveConfig();">
+      data-pathce-action="save-config">
       Save Configuration
     </button>
     <button
       id="path_ce_run"
       type="button"
       class="pure-button pure-button-primary disable-readonly"
-      onclick="PathCE.getInstance().run();">
+      data-pathce-action="run">
       Run PATH Cost-Effective
     </button>
   {% endcall %}
   <p id="path_ce_hint" class="wc-field__help" aria-live="polite"></p>
 
 {% endcall %}
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    if (typeof PathCE !== "undefined" && PathCE.getInstance) {
-      PathCE.getInstance();
-    }
-  });
-</script>

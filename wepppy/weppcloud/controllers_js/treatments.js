@@ -2,284 +2,610 @@
  * Treatments
  * ----------------------------------------------------------------------------
  */
-var Treatments = function () {
+var Treatments = (function () {
     var instance;
 
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#treatments_form");
-        that.info = $("#treatments_form #info");
-        that.status = $("#treatments_form  #status");
-        that.stacktrace = $("#treatments_form #stacktrace");
-        that.statusPanelEl = document.getElementById("treatments_status_panel");
-        that.stacktracePanelEl = document.getElementById("treatments_stacktrace_panel");
-        that.statusStream = null;
-        that.ws_client = null;
-        that.rq_job_id = null;
-        that.rq_job = $("#treatments_form #rq_job");
-        that.command_btn_id = 'btn_build_treatments';
-        that.hint = $("#hint_build_treatments");
+    var MODE_PANEL_MAP = {
+        1: "#treatments_mode1_controls",
+        4: "#treatments_mode4_controls"
+    };
 
-        that.appendStatus = function (message, meta) {
+    var EVENT_NAMES = [
+        "treatments:list:loaded",
+        "treatments:scenario:updated",
+        "treatments:mode:changed",
+        "treatments:mode:error",
+        "treatments:selection:changed",
+        "treatments:run:started",
+        "treatments:run:submitted",
+        "treatments:run:error",
+        "treatments:job:started",
+        "treatments:job:completed",
+        "treatments:job:failed",
+        "treatments:status:updated"
+    ];
+
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
+
+        if (!dom || typeof dom.ensureElement !== "function") {
+            throw new Error("Treatments controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("Treatments controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("Treatments controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("Treatments controller requires WCEvents helpers.");
+        }
+
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function toResponsePayload(http, error) {
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error.detail || error.body || error.message || "Request failed";
+            return { Error: detail };
+        }
+        return { Error: (error && error.message) || "Request failed" };
+    }
+
+    function parseMode(value, fallback) {
+        if (value === undefined || value === null || value === "") {
+            return fallback;
+        }
+        var parsed = parseInt(value, 10);
+        if (Number.isNaN(parsed)) {
+            return fallback;
+        }
+        return parsed;
+    }
+
+    function getOptionSnapshot(selectElement) {
+        if (!selectElement || !selectElement.options) {
+            return [];
+        }
+        return Array.prototype.slice.call(selectElement.options).map(function (option) {
+            return {
+                value: option.value,
+                label: option.textContent,
+                selected: Boolean(option.selected)
+            };
+        });
+    }
+
+    function createInstance() {
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var events = helpers.events;
+
+        var treatments = controlBase();
+        var treatmentsEvents = null;
+
+        if (events && typeof events.createEmitter === "function") {
+            var emitterBase = events.createEmitter();
+            if (typeof events.useEventMap === "function") {
+                treatmentsEvents = events.useEventMap(EVENT_NAMES, emitterBase);
+            } else {
+                treatmentsEvents = emitterBase;
+            }
+        }
+
+        if (treatmentsEvents) {
+            treatments.events = treatmentsEvents;
+        }
+
+        var formElement = dom.ensureElement("#treatments_form", "Treatments form not found.");
+        var infoElement = dom.qs("[data-treatments-role=\"info\"]", formElement) || dom.qs("#info", formElement);
+        var statusElement = dom.qs("[data-treatments-role=\"status\"]", formElement) || dom.qs("#status", formElement);
+        var stacktraceElement = dom.qs("[data-treatments-role=\"stacktrace\"]", formElement) || dom.qs("#stacktrace", formElement);
+        var statusPanelEl = dom.qs("#treatments_status_panel");
+        var stacktracePanelEl = dom.qs("#treatments_stacktrace_panel");
+        var hintElement = dom.qs("[data-treatments-role=\"hint\"]") || dom.qs("#hint_build_treatments");
+        var rqJobElement = dom.qs("[data-treatments-role=\"job\"]", formElement) || dom.qs("#rq_job", formElement);
+        var selectionElement = dom.qs("[data-treatments-role=\"selection\"]", formElement) || dom.qs("#treatments_single_selection", formElement);
+
+        var infoAdapter = createLegacyAdapter(infoElement);
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var hintAdapter = createLegacyAdapter(hintElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+
+        treatments.form = formElement;
+        treatments.info = infoAdapter;
+        treatments.status = statusAdapter;
+        treatments.stacktrace = stacktraceAdapter;
+        treatments.statusPanelEl = statusPanelEl || null;
+        treatments.stacktracePanelEl = stacktracePanelEl || null;
+        treatments.statusStream = null;
+        treatments.ws_client = null;
+        treatments.command_btn_id = "btn_build_treatments";
+        treatments.hint = hintAdapter;
+        treatments.rq_job = rqJobAdapter;
+
+        function snapshotForm() {
+            try {
+                return forms.serializeForm(formElement, { format: "json" }) || {};
+            } catch (err) {
+                return {};
+            }
+        }
+
+        function getSelectionValue() {
+            if (!selectionElement) {
+                return null;
+            }
+            var value = selectionElement.value;
+            if (value === undefined || value === null || value === "") {
+                return null;
+            }
+            return String(value);
+        }
+
+        function applyModeToRadios(modeValue) {
+            var radios = formElement.querySelectorAll("input[name=\"treatments_mode\"]");
+            if (!radios) {
+                return;
+            }
+            Array.prototype.slice.call(radios).forEach(function (radio) {
+                radio.checked = String(radio.value) === String(modeValue);
+            });
+        }
+
+        function updateScenarioEmit(source) {
+            if (!treatmentsEvents) {
+                return;
+            }
+            treatmentsEvents.emit("treatments:scenario:updated", {
+                mode: treatments.mode,
+                selection: getSelectionValue(),
+                source: source || "controller"
+            });
+        }
+
+        function emitStatus(message, meta) {
             if (!message) {
                 return;
             }
-            if (that.statusStream && typeof that.statusStream.append === "function") {
-                that.statusStream.append(message, meta || null);
+            if (treatments.statusStream && typeof treatments.statusStream.append === "function") {
+                treatments.statusStream.append(message, meta || null);
             }
-            if (that.status && that.status.length) {
-                that.status.html(message);
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(message);
+            } else if (statusElement) {
+                statusElement.innerHTML = message;
             }
-            if (that.hint && that.hint.length) {
-                that.hint.text(message);
+            if (hintAdapter && typeof hintAdapter.text === "function") {
+                hintAdapter.text(message);
+            } else if (hintElement) {
+                hintElement.textContent = message;
             }
-        };
-
-        if (typeof StatusStream !== "undefined" && that.statusPanelEl) {
-            var stacktraceConfig = null;
-            if (that.stacktracePanelEl) {
-                stacktraceConfig = { element: that.stacktracePanelEl };
-            }
-            that.statusStream = StatusStream.attach({
-                element: that.statusPanelEl,
-                channel: "treatments",
-                runId: window.runid || window.runId || null,
-                logLimit: 200,
-                stacktrace: stacktraceConfig,
-                onTrigger: function (detail) {
-                    if (detail && detail.event) {
-                        that.triggerEvent(detail.event, detail);
-                    }
-                }
-            });
-        } else {
-            that.ws_client = new WSClient('treatments_form', 'treatments');
-            that.ws_client.attachControl(that);
-        }
-
-        that.hideStacktrace = function () {
-            if (that.stacktrace && that.stacktrace.length) {
-                that.stacktrace.hide();
-            }
-        };
-
-        function getFormElement() {
-            return document.getElementById('treatments_form');
-        }
-
-        function normalizeMode(mode, fallback) {
-            var parsed = parseInt(mode, 10);
-            return Number.isNaN(parsed) ? fallback : parsed;
-        }
-
-        function getSelectedMode() {
-            var formEl = getFormElement();
-            if (!formEl) {
-                return undefined;
-            }
-            var checked = formEl.querySelector('input[name="treatments_mode"]:checked');
-            return checked ? checked.value : undefined;
-        }
-
-        function getTreatmentsSelectValue() {
-            var formEl = getFormElement();
-            if (!formEl) {
-                return undefined;
-            }
-            var selectEl = formEl.querySelector('#treatments_single_selection');
-            return selectEl ? selectEl.value : undefined;
-        }
-
-        that.build = function () {
-            var self = instance || that;
-            var task_msg = "Building treatments";
-
-            self.info.text("");
-            self.appendStatus(task_msg + "...");
-            if (self.stacktrace && self.stacktrace.length) {
-                self.stacktrace.text("");
-            }
-            if (self.ws_client) {
-                self.ws_client.connect();
-            }
-
-            var formEl = getFormElement();
-            if (!formEl) {
-                self.appendStatus("Unable to locate treatments form.");
-                return;
-            }
-
-            var formData = new FormData(formEl);
-
-            $.post({
-                url: "rq/api/build_treatments",
-                data: formData,
-                contentType: false,
-                cache: false,
-                processData: false,
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.appendStatus("build_treatments job submitted: " + response.job_id);
-                        self.set_rq_job_id(self, response.job_id);
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance || that;
-            $.get({
-                url: url_for_run("report/treatments/"),
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.restore = function (treatments_mode, treatments_single_selection) {
-            var formEl = getFormElement();
-            if (!formEl) {
-                return;
-            }
-
-            if (treatments_mode !== undefined && treatments_mode !== null) {
-                var normalized = normalizeMode(treatments_mode, null);
-                if (normalized !== null) {
-                    var radio = formEl.querySelector('input[name="treatments_mode"][value="' + normalized + '"]');
-                    if (radio) {
-                        radio.checked = true;
-                    }
-                }
-            }
-
-            if (typeof treatments_single_selection !== 'undefined' && treatments_single_selection !== null) {
-                var selectEl = formEl.querySelector('#treatments_single_selection');
-                if (selectEl) {
-                    selectEl.value = treatments_single_selection;
-                }
-            }
-
-            that.updateModeUI(getSelectedMode());
-        };
-
-        that.setMode = function (mode) {
-            var self = instance || that;
-            var selectedMode = mode !== undefined ? mode : getSelectedMode();
-            var normalizedMode = normalizeMode(selectedMode, -1);
-
-            var formEl = getFormElement();
-            if (formEl) {
-                var targetRadio = formEl.querySelector('input[name="treatments_mode"][value="' + normalizedMode + '"]');
-                if (targetRadio) {
-                    targetRadio.checked = true;
-                }
-            }
-
-            var treatments_single_selection = getTreatmentsSelectValue();
-            if (treatments_single_selection === undefined || treatments_single_selection === null) {
-                treatments_single_selection = '';
-            }
-
-            var task_msg = "Setting Mode to " + normalizedMode + " (" + treatments_single_selection + ")";
-
-            self.info.text("");
-            self.appendStatus(task_msg + "...");
-            if (self.stacktrace && self.stacktrace.length) {
-                self.stacktrace.text("");
-            }
-
-            $.post({
-                url: "tasks/set_treatments_mode/",
-                data: { "mode": normalizedMode, "treatments_single_selection": treatments_single_selection },
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.appendStatus(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            self.updateModeUI(normalizedMode);
-        };
-
-        that.updateModeUI = function (mode) {
-            var normalized = normalizeMode(mode !== undefined ? mode : getSelectedMode(), -1);
-            var selectionControls = document.getElementById('treatments_mode1_controls');
-            var uploadControls = document.getElementById('treatments_mode4_controls');
-
-            if (selectionControls) {
-                selectionControls.style.display = normalized === 1 ? '' : 'none';
-            }
-            if (uploadControls) {
-                uploadControls.style.display = normalized === 4 ? '' : 'none';
-            }
-        };
-
-        that.initializeForm = function () {
-            var formEl = getFormElement();
-            if (!formEl) {
-                return;
-            }
-            if (formEl.dataset.treatmentsHandlersBound === "true") {
-                return;
-            }
-            formEl.dataset.treatmentsHandlersBound = "true";
-
-            formEl.querySelectorAll('input[name="treatments_mode"]').forEach(function (radio) {
-                radio.addEventListener('change', function () {
-                    that.setMode(this.value);
+            if (treatmentsEvents) {
+                treatmentsEvents.emit("treatments:status:updated", {
+                    message: message,
+                    meta: meta || null
                 });
-            });
+            }
+        }
 
-            var selectEl = formEl.querySelector('#treatments_single_selection');
-            if (selectEl) {
-                selectEl.addEventListener('change', function () {
-                    that.setMode();
+        treatments.appendStatus = emitStatus;
+
+        treatments.hideStacktrace = function () {
+            if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
+                stacktraceAdapter.hide();
+                return;
+            }
+            if (stacktraceElement) {
+                stacktraceElement.hidden = true;
+                stacktraceElement.style.display = "none";
+            }
+        };
+
+        function resetBeforeRun(taskMessage) {
+            if (infoAdapter && typeof infoAdapter.text === "function") {
+                infoAdapter.text("");
+            } else if (infoElement) {
+                infoElement.textContent = "";
+            }
+            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
+                stacktraceAdapter.text("");
+            } else if (stacktraceElement) {
+                stacktraceElement.textContent = "";
+            }
+            treatments.hideStacktrace();
+            if (rqJobAdapter && typeof rqJobAdapter.text === "function") {
+                rqJobAdapter.text("");
+            }
+            if (hintAdapter && typeof hintAdapter.text === "function") {
+                hintAdapter.text("");
+            } else if (hintElement) {
+                hintElement.textContent = "";
+            }
+            if (taskMessage) {
+                emitStatus(taskMessage + "...");
+            }
+        }
+
+        function handleModeError(error, normalized, selectionValue) {
+            var payload = toResponsePayload(http, error);
+            treatments.pushResponseStacktrace(treatments, payload);
+            if (treatmentsEvents) {
+                treatmentsEvents.emit("treatments:mode:error", {
+                    mode: normalized,
+                    selection: selectionValue,
+                    error: payload,
+                    cause: error
+                });
+            }
+        }
+
+        function postModeUpdate(normalized, selectionValue) {
+            return http.postJson("tasks/set_treatments_mode/", {
+                mode: normalized,
+                single_selection: selectionValue
+            }, { form: formElement }).then(function (result) {
+                var response = result && result.body ? result.body : null;
+                if (response && response.Success === false) {
+                    treatments.pushResponseStacktrace(treatments, response);
+                    if (treatmentsEvents) {
+                        treatmentsEvents.emit("treatments:mode:error", {
+                            mode: normalized,
+                            selection: selectionValue,
+                            response: response
+                        });
+                    }
+                    return response;
+                }
+                updateScenarioEmit("server");
+                return response;
+            }).catch(function (error) {
+                handleModeError(error, normalized, selectionValue);
+                throw error;
+            });
+        }
+
+        treatments.updateModeUI = function (mode) {
+            var normalized = parseMode(mode, treatments.mode);
+            Object.keys(MODE_PANEL_MAP).forEach(function (key) {
+                var selector = MODE_PANEL_MAP[key];
+                if (!selector) {
+                    return;
+                }
+                var panel = dom.qs(selector);
+                if (!panel) {
+                    return;
+                }
+                if (parseInt(key, 10) === normalized) {
+                    dom.show(panel);
+                } else {
+                    dom.hide(panel);
+                }
+            });
+            applyModeToRadios(normalized);
+        };
+
+        treatments.setMode = function (mode, options) {
+            var normalized = parseMode(
+                mode !== undefined ? mode : (snapshotForm().treatments_mode),
+                treatments.mode !== undefined ? treatments.mode : -1
+            );
+            var selectionValue = getSelectionValue();
+
+            treatments.mode = normalized;
+            treatments.updateModeUI(normalized);
+
+            if (treatmentsEvents) {
+                treatmentsEvents.emit("treatments:mode:changed", {
+                    mode: normalized,
+                    selection: selectionValue,
+                    source: options && options.source ? options.source : "controller"
                 });
             }
 
-            var buildButton = document.getElementById('btn_build_treatments');
-            if (buildButton) {
-                buildButton.addEventListener('click', function () {
-                    that.build();
+            if (options && options.skipRequest) {
+                updateScenarioEmit(options.source || "controller");
+                return Promise.resolve({ skipped: true });
+            }
+
+            return postModeUpdate(normalized, selectionValue);
+        };
+
+        treatments.build = function () {
+            var taskMessage = "Building treatments";
+            resetBeforeRun(taskMessage);
+
+            if (treatmentsEvents) {
+                treatmentsEvents.emit("treatments:run:started", {
+                    mode: treatments.mode,
+                    selection: getSelectionValue()
                 });
             }
 
-            that.updateModeUI(getSelectedMode());
+            if (treatments.ws_client && typeof treatments.ws_client.connect === "function") {
+                treatments.ws_client.connect();
+            }
+
+            var formData = new FormData(formElement);
+
+            http.request("rq/api/build_treatments", {
+                method: "POST",
+                body: formData,
+                form: formElement
+            }).then(function (result) {
+                var response = result && result.body ? result.body : null;
+                if (response && response.Success === true) {
+                    var message = "build_treatments job submitted: " + response.job_id;
+                    emitStatus(message);
+                    treatments.set_rq_job_id(treatments, response.job_id);
+                    if (treatmentsEvents) {
+                        treatmentsEvents.emit("treatments:run:submitted", {
+                            jobId: response.job_id,
+                            mode: treatments.mode,
+                            selection: getSelectionValue()
+                        });
+                    }
+                    return;
+                }
+                if (response) {
+                    treatments.pushResponseStacktrace(treatments, response);
+                    if (treatmentsEvents) {
+                        treatmentsEvents.emit("treatments:run:error", {
+                            mode: treatments.mode,
+                            selection: getSelectionValue(),
+                            response: response
+                        });
+                    }
+                }
+            }).catch(function (error) {
+                var payload = toResponsePayload(http, error);
+                treatments.pushResponseStacktrace(treatments, payload);
+                if (treatmentsEvents) {
+                    treatmentsEvents.emit("treatments:run:error", {
+                        mode: treatments.mode,
+                        selection: getSelectionValue(),
+                        error: payload,
+                        cause: error
+                    });
+                }
+            });
         };
 
-        return that;
+        treatments.report = function () {
+            http.request(url_for_run("report/treatments/"), {
+                method: "GET",
+                headers: { Accept: "text/html,application/xhtml+xml" }
+            }).then(function (result) {
+                var html = typeof result.body === "string" ? result.body : "";
+                if (infoAdapter && typeof infoAdapter.html === "function") {
+                    infoAdapter.html(html);
+                } else if (infoElement) {
+                    infoElement.innerHTML = html;
+                }
+                if (treatmentsEvents) {
+                    treatmentsEvents.emit("treatments:list:loaded", {
+                        html: html,
+                        mode: treatments.mode,
+                        selection: getSelectionValue()
+                    });
+                }
+            }).catch(function (error) {
+                var payload = toResponsePayload(http, error);
+                treatments.pushResponseStacktrace(treatments, payload);
+                if (treatmentsEvents) {
+                    treatmentsEvents.emit("treatments:run:error", {
+                        error: payload,
+                        cause: error,
+                        action: "report"
+                    });
+                }
+            });
+        };
+
+        treatments.restore = function (mode, singleSelection) {
+            var normalized = parseMode(mode, treatments.mode !== undefined ? treatments.mode : -1);
+            var selectionValue = singleSelection === undefined || singleSelection === null ? null : String(singleSelection);
+
+            treatments.mode = normalized;
+            applyModeToRadios(normalized);
+            if (selectionElement && selectionValue !== null) {
+                selectionElement.value = selectionValue;
+            }
+            treatments.updateModeUI(normalized);
+            updateScenarioEmit("restore");
+        };
+
+        var baseTriggerEvent = treatments.triggerEvent.bind(treatments);
+        treatments.triggerEvent = function (eventName, detail) {
+            if (eventName) {
+                var normalized = String(eventName).toUpperCase();
+                if (treatmentsEvents) {
+                    if (normalized.indexOf("STARTED") >= 0 || normalized.indexOf("QUEUED") >= 0) {
+                        treatmentsEvents.emit("treatments:job:started", detail || {});
+                    }
+                    if (normalized.indexOf("COMPLETED") >= 0 || normalized.indexOf("FINISHED") >= 0 || normalized.indexOf("SUCCESS") >= 0) {
+                        treatmentsEvents.emit("treatments:job:completed", detail || {});
+                    }
+                    if (normalized.indexOf("FAILED") >= 0 || normalized.indexOf("ERROR") >= 0) {
+                        treatmentsEvents.emit("treatments:job:failed", detail || {});
+                    }
+                }
+            }
+            baseTriggerEvent(eventName, detail);
+        };
+
+        function setupStatusStream() {
+            if (typeof window.StatusStream !== "undefined" && treatments.statusPanelEl) {
+                var stacktraceConfig = null;
+                if (treatments.stacktracePanelEl) {
+                    stacktraceConfig = { element: treatments.stacktracePanelEl };
+                }
+                treatments.statusStream = window.StatusStream.attach({
+                    element: treatments.statusPanelEl,
+                    channel: "treatments",
+                    runId: window.runid || window.runId || null,
+                    logLimit: 200,
+                    stacktrace: stacktraceConfig,
+                    onTrigger: function (detail) {
+                        if (detail && detail.event) {
+                            treatments.triggerEvent(detail.event, detail);
+                        }
+                    }
+                });
+            } else {
+                treatments.ws_client = new WSClient("treatments_form", "treatments");
+                treatments.ws_client.attachControl(treatments);
+            }
+        }
+
+        setupStatusStream();
+
+        var delegates = [];
+
+        delegates.push(dom.delegate(formElement, "change", "[data-treatments-role=\"mode\"]", function () {
+            var modeAttr = this.getAttribute("data-treatments-mode");
+            var normalized = parseMode(modeAttr, snapshotForm().treatments_mode);
+            treatments.setMode(normalized, { source: "mode-change" });
+        }));
+
+        if (selectionElement) {
+            delegates.push(dom.delegate(formElement, "change", "[data-treatments-role=\"selection\"]", function () {
+                if (treatmentsEvents) {
+                    treatmentsEvents.emit("treatments:selection:changed", {
+                        selection: getSelectionValue(),
+                        mode: treatments.mode
+                    });
+                }
+                treatments.setMode(treatments.mode, { source: "selection-change" });
+            }));
+        }
+
+        delegates.push(dom.delegate(formElement, "click", "[data-treatments-action=\"build\"]", function (event) {
+            event.preventDefault();
+            treatments.build();
+        }));
+
+        treatments._delegates = delegates;
+
+        var initialSnapshot = snapshotForm();
+        var initialMode = parseMode(initialSnapshot.treatments_mode, -1);
+        var initialSelection = initialSnapshot.treatments_single_selection;
+        if (initialSelection === undefined && selectionElement) {
+            initialSelection = selectionElement.value;
+        }
+
+        treatments.mode = initialMode;
+        applyModeToRadios(initialMode);
+        if (selectionElement && initialSelection !== undefined && initialSelection !== null) {
+            selectionElement.value = String(initialSelection);
+        }
+        treatments.updateModeUI(initialMode);
+
+        var optionSnapshot = getOptionSnapshot(selectionElement);
+        if (treatmentsEvents && optionSnapshot.length > 0) {
+            treatmentsEvents.emit("treatments:list:loaded", {
+                options: optionSnapshot,
+                mode: treatments.mode,
+                selection: getSelectionValue()
+            });
+        }
+        updateScenarioEmit("init");
+
+        treatments.destroy = function () {
+            if (delegates && delegates.length) {
+                delegates.forEach(function (unsubscribe) {
+                    if (typeof unsubscribe === "function") {
+                        try {
+                            unsubscribe();
+                        } catch (err) {
+                            // ignore
+                        }
+                    }
+                });
+                delegates = [];
+            }
+            if (treatments.ws_client && typeof treatments.ws_client.disconnect === "function") {
+                treatments.ws_client.disconnect();
+            }
+            if (treatments.statusStream && typeof window.StatusStream !== "undefined" && typeof window.StatusStream.disconnect === "function") {
+                window.StatusStream.disconnect(treatments.statusStream);
+            }
+        };
+
+        return treatments;
     }
 
     return {
         getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
-                instance.initializeForm();
             }
             return instance;
         }
     };
-}();
+}());
+
+if (typeof globalThis !== "undefined") {
+    globalThis.Treatments = Treatments;
+}

@@ -40,6 +40,7 @@ function onReady() {
     var rap_ts = RAP_TS.getInstance();
     var disturbed = Disturbed.getInstance();
     var dss_export = DssExport.getInstance();
+    var path_ce = (typeof PathCE !== "undefined" && PathCE.getInstance) ? PathCE.getInstance() : null;
 
     if (disturbed && typeof disturbed.set_has_sbs_cached === 'function') {
         disturbed.set_has_sbs_cached(initialHasSbs);

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import errno
+import re
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional, Set
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -17,6 +18,7 @@ from .versioning import schema_with_version
 EBE_FILENAME = "ebe_pw0.txt"
 EBE_PARQUET = "ebe_pw0.parquet"
 CHUNK_SIZE = 250_000
+_HILLSLOPE_PATTERN = re.compile(r"^H(\d+)\.ebe\.dat$", re.IGNORECASE)
 
 
 MEASUREMENT_COLUMNS: List[str] = [
@@ -71,6 +73,7 @@ def _write_ebe_parquet(
     *,
     start_year: int | None = None,
     chunk_size: int = CHUNK_SIZE,
+    legacy_element_id: int | None = None,
 ) -> None:
     tmp_target = target.with_suffix(f"{target.suffix}.tmp")
     if tmp_target.exists():
@@ -102,7 +105,7 @@ def _write_ebe_parquet(
                     continue
 
                 tokens = stripped.split()
-                if len(tokens) != 11:
+                if len(tokens) not in (10, 11):
                     continue
 
                 day_of_month = int(tokens[0])
@@ -129,7 +132,13 @@ def _write_ebe_parquet(
                 store["particulate_pollutant"].append(_parse_float(tokens[8]))
                 store["total_pollutant"].append(_parse_float(tokens[9]))
 
-                store["element_id"].append(int(tokens[10]))
+                element_value: Optional[int]
+                if len(tokens) == 11:
+                    element_value = int(tokens[10])
+                else:
+                    element_value = legacy_element_id
+
+                store["element_id"].append(element_value)
 
                 row_counter += 1
                 if row_counter % chunk_size == 0:
@@ -154,6 +163,46 @@ def _write_ebe_parquet(
             else:
                 raise
 
+
+def _collect_hillslope_wepp_ids(base: Path) -> Set[int]:
+    hillslope_ids: Set[int] = set()
+    for path in base.glob("H*.ebe.dat"):
+        match = _HILLSLOPE_PATTERN.match(path.name)
+        if match:
+            hillslope_ids.add(int(match.group(1)))
+    return hillslope_ids
+
+
+def _infer_outlet_element_id(base: Path) -> int | None:
+    hillslope_ids = _collect_hillslope_wepp_ids(base)
+    if hillslope_ids:
+        return max(hillslope_ids) + 1
+
+    chan_path = base / "chan.out"
+    if chan_path.exists():
+        fallback: int | None = None
+        with chan_path.open("r") as stream:
+            for raw_line in stream:
+                stripped = raw_line.strip()
+                if not stripped or stripped.startswith(("Channel", "Muskingum", "Peak", "Year")):
+                    continue
+                tokens = stripped.split()
+                if len(tokens) < 4:
+                    continue
+                try:
+                    element_id = int(tokens[2])
+                    chan_id = int(tokens[3])
+                except ValueError:
+                    continue
+                if chan_id == 1:
+                    return element_id
+                if fallback is None:
+                    fallback = element_id
+        if fallback is not None:
+            return fallback
+
+    return None
+
 def run_wepp_watershed_ebe_interchange(
     wepp_output_dir: Path | str, *, start_year: int | None = None
 ) -> Path:
@@ -172,5 +221,11 @@ def run_wepp_watershed_ebe_interchange(
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / EBE_PARQUET
-    _write_ebe_parquet(ebe_path, target, start_year=start_year)
+    outlet_element_id = _infer_outlet_element_id(base)
+    _write_ebe_parquet(
+        ebe_path,
+        target,
+        start_year=start_year,
+        legacy_element_id=outlet_element_id,
+    )
     return target

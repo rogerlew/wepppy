@@ -763,11 +763,14 @@ def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = Non
         raise
 
 
-def run_rhem_rq(runid: str) -> None:
+def run_rhem_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = None) -> None:
     """Execute the rangeland hydrology and erosion model (RHEM).
 
     Args:
         runid: Identifier used to locate the working directory.
+        payload: Optional controller-supplied overrides that adjust which stages
+            execute (``clean``, ``prep``, ``run`` booleans). Defaults run every
+            stage to preserve legacy behaviour.
 
     Raises:
         Exception: Propagates errors from RHEM preprocessing or execution.
@@ -780,9 +783,38 @@ def run_rhem_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         rhem = Rhem.getInstance(wd)
-        rhem.clean()
-        rhem.prep_hillslopes()
-        rhem.run_hillslopes()
+        options = payload or {}
+
+        should_clean = options.get("clean")
+        if should_clean is None:
+            should_clean = options.get("clean_hillslopes", True)
+        if should_clean is None:
+            should_clean = True
+
+        should_prep = options.get("prep")
+        if should_prep is None:
+            should_prep = options.get("prep_hillslopes", True)
+        if should_prep is None:
+            should_prep = True
+
+        should_run = options.get("run")
+        if should_run is None:
+            should_run = options.get("run_hillslopes", True)
+        if should_run is None:
+            should_run = True
+
+        if should_clean:
+            rhem.clean()
+        else:
+            StatusMessenger.publish(status_channel, "Skipping RHEM clean step (payload clean=False).")
+        if should_prep:
+            rhem.prep_hillslopes()
+        else:
+            StatusMessenger.publish(status_channel, "Skipping RHEM hillslope prep (payload prep=False).")
+        if should_run:
+            rhem.run_hillslopes()
+        else:
+            StatusMessenger.publish(status_channel, "Skipping RHEM hillslope run (payload run=False).")
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   rhem RHEM_RUN_TASK_COMPLETED')
@@ -1245,11 +1277,12 @@ def restore_archive_rq(runid: str, archive_name: str) -> None:
 
 # RAP_TS Functions
 
-def fetch_and_analyze_rap_ts_rq(runid: str) -> None:
+def fetch_and_analyze_rap_ts_rq(runid: str, payload: Mapping[str, Any] | None = None) -> None:
     """Download and analyze RAP time series rasters for the scenario.
 
     Args:
         runid: Identifier used to locate the working directory.
+        payload: Optional scheduling or dataset metadata supplied by the controller.
 
     Raises:
         Exception: Propagates RAP acquisition or analysis errors.
@@ -1261,11 +1294,19 @@ def fetch_and_analyze_rap_ts_rq(runid: str) -> None:
         status_channel = f'{runid}:rap_ts'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
+        options = dict(payload) if payload else {}
+
         climate = Climate.getInstance(wd)
         assert climate.observed_start_year is not None
         assert climate.observed_end_year is not None
 
         rap_ts = RAP_TS.getInstance(wd)
+        if options:
+            try:
+                rap_ts.logger.info('RAP_TS job options: %s', json.dumps(options, sort_keys=True))
+            except Exception:
+                rap_ts.logger.info('RAP_TS job options provided (%d keys)', len(options))
+
         rap_ts.acquire_rasters(start_year=climate.observed_start_year,
                                end_year=climate.observed_end_year)
         rap_ts.analyze()

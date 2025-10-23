@@ -102,30 +102,64 @@ def meta_subcatchmets_wgs(runid, config):
 def task_adduser(runid, config):
     authorize(runid, config)
     load_run_context(runid, config)
-    owners = get_run_owners_lazy(runid)
+    owners = list(get_run_owners_lazy(runid) or [])
+    email = None
     try:
         Run, User, user_datastore = get_user_models()
+        payload = parse_request_payload(request, trim_strings=True)
 
-        email = request.form.get('adduser-email')
-        user = User.query.filter(func.lower(User.email) == email.lower()).first()
+        email = payload.get('email')
+        if email in (None, ''):
+            email = payload.get('adduser-email')
+        if isinstance(email, list):
+            email = email[0]
+        if email is None:
+            return error_factory('Email address is required.')
+        email = str(email).strip()
+        if not email:
+            return error_factory('Email address is required.')
+
+        user = None
+        if hasattr(user_datastore, 'find_user'):
+            try:
+                user = user_datastore.find_user(email=email)
+            except Exception:
+                user = None
 
         if user is None:
-            return error_factory('{} does not have a WeppCloud account.'
-                                 .format(email))
+            try:
+                user = User.query.filter(func.lower(User.email) == email.lower()).first()
+            except Exception:
+                user = None
 
-        run = Run.query.filter(Run.runid == runid).first()
+        if user is None:
+            return error_factory(f'{email} does not have a WeppCloud account.')
+
+        try:
+            run = Run.query.filter(Run.runid == runid).first()
+        except Exception:
+            run = None
 
         if run is None:
             run = user_datastore.create_run(runid, config, user)
 
-        assert user not in owners
-        assert run is not None
+        if user in owners:
+            if run and run not in getattr(user, 'runs', []):
+                user_datastore.add_run_to_user(user, run)
+            return success_factory({
+                'already_member': True,
+                'user_id': getattr(user, 'id', None),
+                'email': getattr(user, 'email', email)
+            })
 
-        if not run in user.runs:
+        if run not in getattr(user, 'runs', []):
             user_datastore.add_run_to_user(user, run)
 
-        return success_factory()
-    except:
+        return success_factory({
+            'user_id': getattr(user, 'id', None),
+            'email': getattr(user, 'email', email)
+        })
+    except Exception:
         return exception_factory(f'Error adding user: {email}', runid=runid)
 
 
@@ -134,22 +168,54 @@ def task_adduser(runid, config):
 def task_removeuser(runid, config):
     authorize(runid, config)
     load_run_context(runid, config)
-    owners = get_run_owners_lazy(runid)
+    owners = list(get_run_owners_lazy(runid) or [])
+    user_id = None
     try:
         Run, User, user_datastore = get_user_models()
+        payload = parse_request_payload(request, trim_strings=True)
 
-        user_id = request.json.get('user_id')
-        user = User.query.filter(User.id == user_id).first()
-        run = Run.query.filter(Run.runid == runid).first()
+        user_id = payload.get('user_id')
+        if user_id in (None, ''):
+            user_id = payload.get('user-id')
+        if isinstance(user_id, list):
+            user_id = user_id[0]
+        if user_id is None or (isinstance(user_id, str) and not user_id.strip()):
+            return error_factory('user_id is required.')
 
-        assert user is not None, user
-        assert user in owners, user
-        assert run is not None, run
+        try:
+            user_id = int(user_id)
+        except (TypeError, ValueError):
+            return error_factory('user_id must be an integer.')
+
+        try:
+            user = User.query.filter(User.id == user_id).first()
+        except Exception:
+            user = None
+
+        if user is None:
+            return error_factory(f'User {user_id} not found.')
+
+        try:
+            run = Run.query.filter(Run.runid == runid).first()
+        except Exception:
+            run = None
+
+        if run is None:
+            return error_factory('Project run not found.')
+
+        if owners and user not in owners:
+            return error_factory('User is not a collaborator on this project.')
+
+        if run not in getattr(user, 'runs', []):
+            return success_factory({
+                'already_removed': True,
+                'user_id': user_id
+            })
 
         user_datastore.remove_run_to_user(user, run)
 
-        return success_factory()
-    except:
+        return success_factory({'user_id': user_id})
+    except Exception:
         return exception_factory(f'Error removing user: {user_id}', runid=runid)
 
 

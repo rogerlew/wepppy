@@ -62,19 +62,17 @@ Use this GitHub-style checklist to track remaining controller migrations. Index 
 - [x] `wepppy/weppcloud/controllers_js/debris_flow.js`
 - [x] `wepppy/weppcloud/controllers_js/batch_runner.js`
 - [x] `wepppy/weppcloud/controllers_js/disturbed.js`
-- [ ] `wepppy/weppcloud/controllers_js/dss_export.js` 
-
-**Pending Migration**
-- [ ] `wepppy/weppcloud/controllers_js/landuse_modify.js` — `$("#modify_landuse_form")`, line 6
-- [ ] `wepppy/weppcloud/controllers_js/map.js` — DOM references via `$()` (`$("#mouseelev")`, line 117)
-- [ ] `wepppy/weppcloud/controllers_js/observed.js` — `$("#observed_form")`, line 10
-- [ ] `wepppy/weppcloud/controllers_js/path_ce.js` — form/table updates via `$()` (`$(selectors.severity).val()`, line 46)
-- [ ] `wepppy/weppcloud/controllers_js/rangeland_cover.js` — `$("#rangeland_cover_form")`, line 11
-- [ ] `wepppy/weppcloud/controllers_js/rangeland_cover_modify.js` — multiple selectors (`$("#modify_rangeland_cover_form")`, line 10)
-- [ ] `wepppy/weppcloud/controllers_js/rap_ts.js` — `$("#rap_ts_form")`, line 10
-- [ ] `wepppy/weppcloud/controllers_js/rhem.js` — `$("#rhem_form")`, line 10
-- [ ] `wepppy/weppcloud/controllers_js/team.js` — `$("#team_form")`, line 10
-- [ ] `wepppy/weppcloud/controllers_js/treatments.js` — `$("#treatments_form")`, line 10
+- [x] `wepppy/weppcloud/controllers_js/dss_export.js`
+- [x] `wepppy/weppcloud/controllers_js/landuse_modify.js`
+- [x] `wepppy/weppcloud/controllers_js/map.js`
+- [x] `wepppy/weppcloud/controllers_js/observed.js` 
+- [x] `wepppy/weppcloud/controllers_js/path_ce.js` 
+- [x] `wepppy/weppcloud/controllers_js/rangeland_cover.js`
+- [x] `wepppy/weppcloud/controllers_js/rangeland_cover_modify.js` 
+- [x] `wepppy/weppcloud/controllers_js/rap_ts.js`
+- [x] `wepppy/weppcloud/controllers_js/rhem.js`
+- [x] `wepppy/weppcloud/controllers_js/team.js`
+- [x] `wepppy/weppcloud/controllers_js/treatments.js`
 
 **Shared Infrastructure Still Using jQuery**
 - [ ] `wepppy/weppcloud/controllers_js/ws_client.js` — DOM writes via `$("#" + formId + " #status")` (lines 94–100); modernize to unblock remaining controllers.

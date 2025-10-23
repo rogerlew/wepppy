@@ -75,3 +75,22 @@ def test_watershed_ebe_interchange_writes_parquet(tmp_path: Path) -> None:
     assert first_row["simulation_year"] == 1
     assert first_row["year"] == start_year
     assert first_row["julian"] == 1
+
+
+def test_watershed_ebe_interchange_supports_legacy_file(tmp_path: Path) -> None:
+    src = PROJECT_OUTPUT
+    workdir = tmp_path / "legacy_output"
+    shutil.copytree(src, workdir)
+
+    legacy_path = Path(__file__).resolve().parent / "legacy_ebe_pw0.txt"
+    (workdir / "ebe_pw0.txt").write_text(legacy_path.read_text())
+
+    legacy_start_year = 1997
+    target = run_wepp_watershed_ebe_interchange(workdir, start_year=legacy_start_year)
+    assert target.exists()
+
+    table = pq.read_table(target)
+    df = table.to_pandas()
+    assert not df.empty
+    assert set(df["element_id"].dropna().unique()) == {4}
+    assert df["year"].min() == legacy_start_year

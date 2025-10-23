@@ -9,11 +9,12 @@
             <button id="btn_build_rap_ts"
             class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
             type="button"
-            onclick="RAP_TS.getInstance().acquire()">Acquire RAP Data</button>
+            data-rap-action="run">Acquire RAP Data</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_build_rap_ts"></small>
         </div>
     </div>
+    {% set _rap_schedule = rap_schedule | default([], true) %}
+    <script type="application/json" id="rap_ts_schedule_data" data-rap-schedule>{{ _rap_schedule | tojson }}</script>
 {% endblock %}
-

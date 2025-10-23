@@ -11,11 +11,22 @@
             <label for="adduser-email">Add Collaborator to Project</label>
         </div>
         <div class="col-sm-5">
-            <input id="adduser-email" name="adduser-email" class="form-control mr-sm-3"
-                   type="text" placeholder="e-mail" aria-label="email">
+            <input id="adduser-email"
+                   name="adduser-email"
+                   class="form-control mr-sm-3"
+                   type="email"
+                   placeholder="e-mail"
+                   aria-label="email"
+                   autocomplete="email"
+                   data-team-field="email">
         </div>
         <div class="col-sm-2">
-            <button class="btn btn-outline-success" type="button" onclick="Team.getInstance().adduser_click()">Add User</button>
+            <button id="btn_adduser"
+                    class="btn btn-outline-success disable-readonly"
+                    type="button"
+                    data-team-action="invite">
+                Add User
+            </button>
         </div>
     </div>
 {% endblock %}

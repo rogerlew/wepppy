@@ -47,7 +47,8 @@
            "autocomplete": "email",
            "inputmode": "email",
            "spellcheck": "false",
-           "class": "disable-readonly"
+           "class": "disable-readonly",
+           "data-team-field": "email"
          }
        ) }}
 
@@ -56,7 +57,7 @@
         id="btn_adduser"
         type="button"
         class="pure-button pure-button-primary disable-readonly"
-        onclick="Team.getInstance().adduser_click()">
+        data-team-action="invite">
         Add User
       </button>
     {% endcall %}

@@ -2,147 +2,361 @@
  * Rhem
  * ----------------------------------------------------------------------------
  */
-var Rhem = function () {
+var Rhem = (function () {
     var instance;
 
-    function createInstance() {
-        var that = controlBase();
-        that.form = $("#rhem_form");
-        that.info = $("#rhem_form #info");
-        that.status = $("#rhem_form  #status");
-        that.stacktrace = $("#rhem_form #stacktrace");
-        that.statusPanelEl = document.getElementById("rhem_status_panel");
-        that.stacktracePanelEl = document.getElementById("rhem_stacktrace_panel");
-        that.statusStream = null;
-        that.ws_client = null;
+    var EVENT_NAMES = [
+        "rhem:config:loaded",
+        "rhem:run:started",
+        "rhem:run:queued",
+        "rhem:run:completed",
+        "rhem:run:failed",
+        "rhem:status:updated"
+    ];
 
-        that.appendStatus = function (message, meta) {
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
+
+        if (!dom || typeof dom.ensureElement !== "function") {
+            throw new Error("Rhem controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("Rhem controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function") {
+            throw new Error("Rhem controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("Rhem controller requires WCEvents helpers.");
+        }
+
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function toResponsePayload(http, error) {
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error.detail || error.body || error.message || "Request failed";
+            return { Error: detail };
+        }
+        return { Error: (error && error.message) || "Request failed" };
+    }
+
+    function getActiveRunId() {
+        return window.runid || window.runId || null;
+    }
+
+    function createInstance() {
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var eventsApi = helpers.events;
+
+        var rhem = controlBase();
+
+        var formElement = dom.ensureElement("#rhem_form", "RHEM form not found.");
+        var infoElement = dom.qs("#rhem_form #info");
+        var statusElement = dom.qs("#rhem_form #status");
+        var stacktraceElement = dom.qs("#rhem_form #stacktrace");
+        var rqJobElement = dom.qs("#rhem_form #rq_job");
+        var hintElement = dom.qs("#hint_run_rhem");
+        var statusPanelElement = dom.qs("#rhem_status_panel");
+        var stacktracePanelElement = dom.qs("#rhem_stacktrace_panel");
+        var resultsElement = dom.qs("#rhem-results");
+
+        var infoAdapter = createLegacyAdapter(infoElement);
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+        var hintAdapter = createLegacyAdapter(hintElement);
+
+        var emitter = eventsApi.useEventMap(EVENT_NAMES, eventsApi.createEmitter());
+
+        rhem.form = formElement;
+        rhem.info = infoAdapter;
+        rhem.status = statusAdapter;
+        rhem.stacktrace = stacktraceAdapter;
+        rhem.rq_job = rqJobAdapter;
+        rhem.hint = hintAdapter;
+        rhem.statusPanelEl = statusPanelElement || null;
+        rhem.stacktracePanelEl = stacktracePanelElement || null;
+        rhem.command_btn_id = "btn_run_rhem";
+        rhem.statusStream = null;
+        rhem.ws_client = null;
+        rhem.events = emitter;
+
+        function appendStatus(message, meta) {
             if (!message) {
                 return;
             }
-            if (that.statusStream && typeof that.statusStream.append === "function") {
-                that.statusStream.append(message, meta || null);
+            if (rhem.statusStream && typeof rhem.statusStream.append === "function") {
+                rhem.statusStream.append(message, meta || null);
             }
-            if (that.status && that.status.length) {
-                that.status.html(message);
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(message);
+            } else if (statusElement) {
+                statusElement.innerHTML = message;
+            }
+            emitter.emit("rhem:status:updated", {
+                message: message,
+                meta: meta || null
+            });
+        }
+        rhem.appendStatus = appendStatus;
+
+        function clearStatus(taskMsg) {
+            if (infoAdapter && typeof infoAdapter.text === "function") {
+                infoAdapter.text("");
+            }
+            appendStatus(taskMsg + "...", { phase: "pending" });
+            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
+                stacktraceAdapter.text("");
+            } else if (stacktraceElement) {
+                stacktraceElement.textContent = "";
+            }
+            if (hintAdapter && typeof hintAdapter.text === "function") {
+                hintAdapter.text("");
+            }
+            rhem.hideStacktrace();
+        }
+
+        function handleError(error) {
+            var payload = toResponsePayload(http, error);
+            rhem.pushResponseStacktrace(rhem, payload);
+            emitter.emit("rhem:run:failed", {
+                runId: getActiveRunId(),
+                error: payload
+            });
+            rhem.triggerEvent("job:error", {
+                task: "rhem:run",
+                error: payload
+            });
+            if (rhem.ws_client && typeof rhem.ws_client.disconnect === "function") {
+                rhem.ws_client.disconnect();
+            }
+        }
+
+        function attachStatusChannel() {
+            if (typeof window.StatusStream !== "undefined" && rhem.statusPanelEl) {
+                var stacktraceConfig = null;
+                if (rhem.stacktracePanelEl) {
+                    stacktraceConfig = { element: rhem.stacktracePanelEl };
+                }
+                rhem.statusStream = window.StatusStream.attach({
+                    element: rhem.statusPanelEl,
+                    channel: "rhem",
+                    runId: getActiveRunId(),
+                    logLimit: 200,
+                    stacktrace: stacktraceConfig,
+                    onTrigger: function (detail) {
+                        if (detail && detail.event) {
+                            rhem.triggerEvent(detail.event, detail);
+                        }
+                        emitter.emit("rhem:status:updated", detail || {});
+                    }
+                });
+                return;
+            }
+            rhem.ws_client = new WSClient("rhem_form", "rhem");
+            rhem.ws_client.attachControl(rhem);
+        }
+
+        attachStatusChannel();
+
+        emitter.emit("rhem:config:loaded", {
+            hasStatusStream: Boolean(rhem.statusStream),
+            runId: getActiveRunId()
+        });
+
+        rhem.hideStacktrace = function () {
+            if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
+                stacktraceAdapter.hide();
+                return;
+            }
+            if (stacktraceElement) {
+                stacktraceElement.hidden = true;
+                stacktraceElement.style.display = "none";
             }
         };
 
-        if (typeof StatusStream !== "undefined" && that.statusPanelEl) {
-            var stacktraceConfig = null;
-            if (that.stacktracePanelEl) {
-                stacktraceConfig = { element: that.stacktracePanelEl };
+        function submitRunRequest() {
+            var payload = forms.serializeForm(formElement, { format: "object" }) || {};
+            http.postJson("rq/api/run_rhem_rq", payload, { form: formElement })
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && (response.Success === true || response.success === true)) {
+                        var jobId = response.job_id || response.jobId || null;
+                        appendStatus("run_rhem_rq job submitted: " + jobId, {
+                            status: "queued"
+                        });
+                        rhem.set_rq_job_id(rhem, jobId);
+                        emitter.emit("rhem:run:queued", {
+                            runId: getActiveRunId(),
+                            jobId: jobId
+                        });
+                        return;
+                    }
+                    var errorPayload = response || { Error: "RHEM job submission failed." };
+                    rhem.pushResponseStacktrace(rhem, errorPayload);
+                    emitter.emit("rhem:run:failed", {
+                        runId: getActiveRunId(),
+                        error: errorPayload
+                    });
+                    rhem.triggerEvent("job:error", {
+                        task: "rhem:run",
+                        error: errorPayload
+                    });
+                    if (rhem.ws_client && typeof rhem.ws_client.disconnect === "function") {
+                        rhem.ws_client.disconnect();
+                    }
+                })
+                .catch(handleError);
+        }
+
+        rhem.run = function () {
+            var taskMsg = "Submitting RHEM run";
+            clearStatus(taskMsg);
+
+            rhem.triggerEvent("job:started", {
+                task: "rhem:run",
+                runId: getActiveRunId()
+            });
+            emitter.emit("rhem:run:started", {
+                runId: getActiveRunId(),
+                jobId: null
+            });
+
+            if (rhem.ws_client && typeof rhem.ws_client.connect === "function") {
+                rhem.ws_client.connect();
             }
-            that.statusStream = StatusStream.attach({
-                element: that.statusPanelEl,
-                channel: "rhem",
-                runId: window.runid || window.runId || null,
-                logLimit: 200,
-                stacktrace: stacktraceConfig,
-                onTrigger: function (detail) {
-                    if (detail && detail.event) {
-                        that.triggerEvent(detail.event, detail);
+
+            submitRunRequest();
+        };
+
+        rhem.report = function () {
+            var taskMsg = "Fetching Summary";
+            clearStatus(taskMsg);
+
+            http.request(url_for_run("report/rhem/results/"), {
+                method: "GET",
+                headers: { Accept: "text/html,application/xhtml+xml" }
+            }).then(function (result) {
+                var html = typeof result.body === "string" ? result.body : "";
+                if (resultsElement) {
+                    resultsElement.innerHTML = html;
+                }
+            }).catch(handleError);
+
+            http.request(url_for_run("report/rhem/run_summary/"), {
+                method: "GET",
+                headers: { Accept: "text/html,application/xhtml+xml" }
+            }).then(function (result) {
+                var html = typeof result.body === "string" ? result.body : "";
+                if (infoAdapter && typeof infoAdapter.html === "function") {
+                    infoAdapter.html(html);
+                } else if (infoElement) {
+                    infoElement.innerHTML = html;
+                }
+                appendStatus(taskMsg + "... Success", { status: "completed" });
+
+                if (window.Project && typeof window.Project.getInstance === "function") {
+                    try {
+                        var project = window.Project.getInstance();
+                        if (project && typeof project.set_preferred_units === "function") {
+                            project.set_preferred_units();
+                        }
+                    } catch (err) {
+                        console.warn("[Rhem] Failed to set preferred units", err);
                     }
                 }
-            });
-        } else {
-            that.ws_client = new WSClient('rhem_form', 'rhem');
-            that.ws_client.attachControl(that);
-        }
-        that.rq_job_id = null;
-        that.rq_job = $("#rhem_form #rq_job");
-        that.command_btn_id = 'btn_run_rhem';
 
-        const baseTriggerEvent = that.triggerEvent.bind(that);
-        that.triggerEvent = function (eventName, payload) {
-            if (eventName === 'RHEM_RUN_TASK_COMPLETED') {
-                if (that.ws_client) {
-                    that.ws_client.disconnect();
+                emitter.emit("rhem:run:completed", {
+                    runId: getActiveRunId(),
+                    jobId: rhem.rq_job_id || null
+                });
+                rhem.triggerEvent("job:completed", {
+                    task: "rhem:run",
+                    jobId: rhem.rq_job_id || null
+                });
+            }).catch(handleError);
+        };
+
+        var baseTriggerEvent = rhem.triggerEvent.bind(rhem);
+        rhem.triggerEvent = function (eventName, payload) {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "RHEM_RUN_TASK_COMPLETED") {
+                if (rhem.ws_client && typeof rhem.ws_client.disconnect === "function") {
+                    rhem.ws_client.disconnect();
                 }
-                that.report();
+                rhem.report();
             }
-
             baseTriggerEvent(eventName, payload);
         };
 
-        that.hideStacktrace = function () {
-            var self = instance;
-            self.stacktrace.hide();
-        };
+        dom.delegate(formElement, "click", "[data-rhem-action='run']", function (event) {
+            event.preventDefault();
+            rhem.run();
+        });
 
-        that.run = function () {
-            var self = instance;
-            var task_msg = "Submitting rhem run";
-
-            self.info.text("");
-            self.appendStatus(task_msg + "...");
-            self.stacktrace.text("");
-            if (self.ws_client) {
-                self.ws_client.connect();
-            }
-
-            $.post({
-                url: "rq_api/run_rhem/",
-                data: self.form.serialize(),
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.appendStatus(`run_rhem_rq job submitted: ${response.job_id}`);
-                        self.set_rq_job_id(self, response.job_id);
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.report = function () {
-            var self = instance;
-            var project = Project.getInstance();
-            var task_msg = "Fetching Summary";
-
-            self.info.text("");
-            self.appendStatus(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.get({
-                url: url_for_run("report/rhem/results/"),
-                cache: false,
-                success: function success(response) {
-                    $('#rhem-results').html(response);
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-            $.get({
-                url: url_for_run("report/rhem/run_summary/"),
-                cache: false,
-                success: function success(response) {
-                    self.info.html(response);
-                    self.appendStatus(task_msg + "... Success");
-                    project.set_preferred_units();
-                },
-                error: function error(jqXHR) {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-
-        };
-
-        return that;
+        return rhem;
     }
 
     return {
@@ -153,4 +367,8 @@ var Rhem = function () {
             return instance;
         }
     };
-}();
+})();
+
+if (typeof globalThis !== "undefined") {
+    globalThis.Rhem = Rhem;
+}

@@ -57,21 +57,43 @@ def task_build_rangeland_cover(runid, config):
     wd = str(ctx.active_root)
     rangeland_cover = RangelandCover.getInstance(wd)
 
-    rap_year = request.form.get('rap_year')
+    payload = parse_request_payload(request)
 
-    default_covers = dict(
-        bunchgrass=request.form.get('bunchgrass_cover'),
-        forbs=request.form.get('forbs_cover'),
-        sodgrass=request.form.get('sodgrass_cover'),
-        shrub=request.form.get('shrub_cover'),
-        basal=request.form.get('basal_cover'),
-        rock=request.form.get('rock_cover'),
-        litter=request.form.get('litter_cover'),
-        cryptogams=request.form.get('cryptogams_cover'))
+    rap_year_raw = payload.get('rap_year')
+    if rap_year_raw in (None, ''):
+        rap_year = None
+    else:
+        try:
+            rap_year = int(rap_year_raw)
+        except (TypeError, ValueError):
+            return exception_factory('Building RangelandCover Failed', runid=runid)
+
+    defaults_payload = payload.get('defaults')
+    if not isinstance(defaults_payload, dict):
+        defaults_payload = {
+            'bunchgrass': payload.get('bunchgrass_cover'),
+            'forbs': payload.get('forbs_cover'),
+            'sodgrass': payload.get('sodgrass_cover'),
+            'shrub': payload.get('shrub_cover'),
+            'basal': payload.get('basal_cover'),
+            'rock': payload.get('rock_cover'),
+            'litter': payload.get('litter_cover'),
+            'cryptogams': payload.get('cryptogams_cover'),
+        }
 
     try:
+        default_covers = dict(
+            bunchgrass=float(defaults_payload.get('bunchgrass')),
+            forbs=float(defaults_payload.get('forbs')),
+            sodgrass=float(defaults_payload.get('sodgrass')),
+            shrub=float(defaults_payload.get('shrub')),
+            basal=float(defaults_payload.get('basal')),
+            rock=float(defaults_payload.get('rock')),
+            litter=float(defaults_payload.get('litter')),
+            cryptogams=float(defaults_payload.get('cryptogams')),
+        )
         rangeland_cover.build(rap_year=rap_year, default_covers=default_covers)
     except Exception:
-        return exception_factory('Building RangelandCover Failed')
+        return exception_factory('Building RangelandCover Failed', runid=runid)
 
     return success_factory()

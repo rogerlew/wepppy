@@ -1291,13 +1291,33 @@ def api_run_debris_flow(runid, config):
 def api_run_rhem(runid, config):
     try:
         wd = get_wd(runid)
-        
+        payload = parse_request_payload(
+            request,
+            boolean_fields=(
+                "clean",
+                "clean_hillslopes",
+                "prep",
+                "prep_hillslopes",
+                "run",
+                "run_hillslopes",
+            ),
+        )
+
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_rhem)
 
+        job_kwargs = None
+        if payload:
+            job_kwargs = {"payload": payload}
+
         with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_rhem_rq, (runid,), timeout=TIMEOUT)
+            job = q.enqueue_call(
+                run_rhem_rq,
+                (runid,),
+                kwargs=job_kwargs,
+                timeout=TIMEOUT,
+            )
             prep.set_rq_job_id('run_rhem_rq', job.id)
 
     except Exception:
@@ -1309,20 +1329,109 @@ def api_run_rhem(runid, config):
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/acquire_rap_ts', methods=['POST'])
 def api_rap_ts_acquire(runid, config):
     try:
+        raw_json = request.get_json(silent=True)
+        payload = parse_request_payload(
+            request,
+            boolean_fields=("force_refresh",),
+        )
+
+        raw_datasets = payload.get("datasets")
+        if isinstance(raw_json, dict) and raw_json.get("datasets") is not None:
+            raw_datasets = raw_json.get("datasets")
+        raw_schedule = payload.get("schedule")
+        if isinstance(raw_json, dict) and raw_json.get("schedule") is not None:
+            raw_schedule = raw_json.get("schedule")
+        raw_force_refresh = payload.get("force_refresh")
+
+        def _normalize_string_list(value):
+            if value is None:
+                return None
+            if isinstance(value, list):
+                result = []
+                for item in value:
+                    if item is None:
+                        continue
+                    text = str(item).strip()
+                    if text:
+                        result.append(text)
+                return result
+            if isinstance(value, str):
+                stripped = value.strip()
+                if not stripped:
+                    return []
+                try:
+                    parsed = json.loads(stripped)
+                except json.JSONDecodeError:
+                    return [token for token in (tok.strip() for tok in stripped.split(",")) if token]
+                if isinstance(parsed, list):
+                    return [
+                        str(item).strip()
+                        for item in parsed
+                        if item is not None and str(item).strip()
+                    ]
+                if parsed is None:
+                    return []
+                return [str(parsed).strip()]
+            return [str(value).strip()]
+
+        def _normalize_schedule(value):
+            if value is None:
+                return None
+            if isinstance(value, (list, dict)):
+                return value
+            if isinstance(value, str):
+                stripped = value.strip()
+                if not stripped:
+                    return []
+                try:
+                    parsed = json.loads(stripped)
+                except json.JSONDecodeError as exc:
+                    raise ValueError("Schedule payload must be valid JSON.") from exc
+                return parsed
+            raise ValueError("Schedule payload must be a list, object, or JSON string.")
+
+        datasets = _normalize_string_list(raw_datasets)
+        schedule = None
+        if raw_schedule is not None:
+            try:
+                schedule = _normalize_schedule(raw_schedule)
+            except ValueError as exc:
+                return exception_factory(str(exc), runid=runid)
+
+        force_refresh = None
+        if raw_force_refresh is not None:
+            force_refresh = bool(raw_force_refresh)
+
+        job_payload: Dict[str, Any] = {}
+        if datasets:
+            job_payload["datasets"] = datasets
+        if schedule not in (None, [], {}):
+            job_payload["schedule"] = schedule
+        if force_refresh is not None:
+            job_payload["force_refresh"] = force_refresh
+
         wd = get_wd(runid)
-        
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.fetch_rap_ts)
 
         with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(fetch_and_analyze_rap_ts_rq, (runid,), timeout=TIMEOUT)
+            job = q.enqueue_call(
+                fetch_and_analyze_rap_ts_rq,
+                (runid,),
+                kwargs={"payload": job_payload} if job_payload else {},
+                timeout=TIMEOUT
+            )
             prep.set_rq_job_id('fetch_and_analyze_rap_ts_rq', job.id)
 
     except Exception:
         return exception_factory('Error Running RAP_TS', runid=runid)
-        
-    return jsonify({'Success': True, 'job_id': job.id})
+
+    response_payload: Dict[str, Any] = {'Success': True, 'job_id': job.id}
+    if job_payload:
+        response_payload['payload'] = job_payload
+
+    return jsonify(response_payload)
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/fork', methods=['POST'])

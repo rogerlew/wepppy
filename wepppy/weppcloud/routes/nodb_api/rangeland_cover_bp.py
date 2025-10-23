@@ -20,14 +20,19 @@ def query_rangeland_cover_current(runid, config):
 
 @rangeland_cover_bp.route('/runs/<string:runid>/<config>/tasks/set_rangeland_cover_mode/', methods=['POST'])
 def set_rangeland_cover_mode(runid, config):
+    payload = parse_request_payload(request)
 
-    mode = None
-    rap_year = None
+    mode_raw = payload.get('mode')
+    rap_year_raw = payload.get('rap_year')
+
+    if rap_year_raw in (None, ''):
+        return exception_factory('mode and rap_year must be provided', runid=runid)
+
     try:
-        mode = int(request.form.get('mode', None))
-        rap_year = int(request.form.get('rap_year', None))
-    except Exception:
-        exception_factory('mode and rap_year must be provided', runid=runid)
+        mode = int(mode_raw)
+        rap_year = int(rap_year_raw)
+    except (TypeError, ValueError):
+        return exception_factory('mode and rap_year must be provided', runid=runid)
 
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
@@ -37,6 +42,6 @@ def set_rangeland_cover_mode(runid, config):
         rangeland_cover.mode = RangelandCoverMode(mode)
         rangeland_cover.rap_year = rap_year
     except Exception:
-        exception_factory('error setting mode or rap_year', runid=runid)
+        return exception_factory('error setting mode or rap_year', runid=runid)
 
     return success_factory()

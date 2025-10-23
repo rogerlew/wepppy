@@ -175,9 +175,18 @@
     </div>
     <div class="wc-map-controls__actions">
       {% call button_row() %}
-        <button type="button" class="pure-button pure-button-primary" id="btn_setloc">Go</button>
-        <button type="button" class="pure-button pure-button-secondary" id="btn_find_topaz_id">Find Topaz ID</button>
-        <button type="button" class="pure-button pure-button-secondary" id="btn_find_wepp_id">Find WEPP ID</button>
+        <button type="button"
+                class="pure-button pure-button-primary"
+                id="btn_setloc"
+                data-map-action="go">Go</button>
+        <button type="button"
+                class="pure-button pure-button-secondary"
+                id="btn_find_topaz_id"
+                data-map-action="find-topaz">Find Topaz ID</button>
+        <button type="button"
+                class="pure-button pure-button-secondary"
+                id="btn_find_wepp_id"
+                data-map-action="find-wepp">Find WEPP ID</button>
       {% endcall %}
     </div>
   </div>

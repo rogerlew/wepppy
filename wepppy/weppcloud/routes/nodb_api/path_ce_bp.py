@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any, Dict, List, Optional
+
 import redis
 from flask import Response
 from rq import Queue
@@ -14,6 +16,65 @@ from wepppy.rq.path_ce_rq import TIMEOUT, run_path_cost_effective_rq
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
 
 path_ce_bp = Blueprint("path_ce", __name__)
+
+
+def _coerce_optional_float(value: Any) -> Optional[float]:
+    if value in (None, "", [], ()):
+        return None
+    if isinstance(value, (list, tuple)):
+        if not value:
+            return None
+        value = value[0]
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_float(value: Any, default: float = 0.0) -> float:
+    coerced = _coerce_optional_float(value)
+    return default if coerced is None else coerced
+
+
+def _normalize_severity(value: Any) -> Optional[List[str]]:
+    if value is None or value == "":
+        return None
+    if isinstance(value, str):
+        value = [value]
+    try:
+        normalized = [str(item).strip() for item in value if item not in (None, "")]
+    except TypeError:
+        return None
+    return normalized or None
+
+
+def _normalize_treatment_options(options: Any) -> List[Dict[str, Any]]:
+    if not isinstance(options, list):
+        return []
+    normalized: List[Dict[str, Any]] = []
+    for item in options:
+        if isinstance(item, dict):
+            normalized.append(dict(item))
+    return normalized
+
+
+def _build_config_payload(raw: Dict[str, Any]) -> Dict[str, Any]:
+    payload = dict(raw)
+    payload["sddc_threshold"] = _coerce_float(raw.get("sddc_threshold"))
+    payload["sdyd_threshold"] = _coerce_float(raw.get("sdyd_threshold"))
+
+    slope_min = _coerce_optional_float(raw.get("slope_min") or raw.get("slope_range_min"))
+    slope_max = _coerce_optional_float(raw.get("slope_max") or raw.get("slope_range_max"))
+    payload["slope_range"] = [slope_min, slope_max]
+    payload.pop("slope_min", None)
+    payload.pop("slope_max", None)
+    payload.pop("slope_range_min", None)
+    payload.pop("slope_range_max", None)
+
+    payload["severity_filter"] = _normalize_severity(raw.get("severity_filter"))
+    payload["treatment_options"] = _normalize_treatment_options(raw.get("treatment_options"))
+
+    return payload
 
 
 @path_ce_bp.route(
@@ -75,7 +136,8 @@ def update_path_cost_effective_config(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     controller = _ensure_controller(wd, f"{config}.cfg")
-    payload = request.get_json(silent=True) or {}
+    raw_payload = parse_request_payload(request)
+    payload = _build_config_payload(raw_payload)
     controller.config = payload
     return success_factory({"config": controller.config})
 

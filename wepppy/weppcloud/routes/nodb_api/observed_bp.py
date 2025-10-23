@@ -16,7 +16,20 @@ def submit_task_run_model_fit(runid, config):
     wd = get_wd(runid)
     observed = Observed.getInstance(wd)
 
-    textdata = request.json.get('data', None)
+    payload = parse_request_payload(request, trim_strings=False)
+    textdata = payload.get('data')
+    if textdata is None:
+        textdata = payload.get('observed_text')
+
+    if textdata is None:
+        response = error_factory('No observed dataset supplied.')
+        response.status_code = 400
+        return response
+
+    if not isinstance(textdata, str):
+        response = error_factory('Observed dataset must be provided as CSV text.')
+        response.status_code = 400
+        return response
 
     try:
         observed.parse_textdata(textdata)
