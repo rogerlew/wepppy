@@ -157,4 +157,19 @@ describe("Observed controller", () => {
         expect(states).toContain(false);
         expect(states).toContain(true);
     });
+
+    test("bootstrap hides and shows control based on context", () => {
+        const hideSpy = jest.spyOn(observed, "hideControl");
+        const showSpy = jest.spyOn(observed, "showControl");
+
+        observed.bootstrap({
+            data: {
+                climate: { hasObserved: true },
+                observed: { hasResults: false }
+            }
+        });
+
+        expect(hideSpy).toHaveBeenCalled();
+        expect(showSpy).toHaveBeenCalled();
+    });
 });

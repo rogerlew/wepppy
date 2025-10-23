@@ -449,6 +449,74 @@ var Wepp = (function () {
         ensureDelegates();
         wepp.handleRevegetationScenarioChange(revegSelect ? revegSelect.value : "");
 
+        var bootstrapState = {
+            modeListenersBound: false,
+            reportTriggered: false
+        };
+
+        wepp.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "wepp")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "run_wepp_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_rq")) {
+                    var value = jobIds.run_wepp_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof wepp.set_rq_job_id === "function") {
+                wepp.set_rq_job_id(wepp, jobId);
+            }
+
+            if (!bootstrapState.modeListenersBound && typeof wepp.setMode === "function") {
+                var modeInputs = document.querySelectorAll("input[name='wepp_mode']");
+                modeInputs.forEach(function (input) {
+                    input.addEventListener("change", function () {
+                        wepp.setMode();
+                    });
+                });
+                var singleSelectionInput = document.getElementById("wepp_single_selection");
+                if (singleSelectionInput) {
+                    singleSelectionInput.addEventListener("change", function () {
+                        wepp.setMode();
+                    });
+                }
+                bootstrapState.modeListenersBound = modeInputs.length > 0 || Boolean(singleSelectionInput);
+                if (bootstrapState.modeListenersBound) {
+                    try {
+                        wepp.setMode();
+                    } catch (err) {
+                        console.warn("[WEPP] Failed to apply initial mode", err);
+                    }
+                }
+            }
+
+            var weppData = (ctx.data && ctx.data.wepp) || {};
+            var hasRun = controllerContext.hasRun;
+            if (hasRun === undefined) {
+                hasRun = weppData.hasRun;
+            }
+            if (hasRun && !bootstrapState.reportTriggered && typeof wepp.report === "function") {
+                wepp.report();
+                bootstrapState.reportTriggered = true;
+            }
+
+            return wepp;
+        };
+
         return wepp;
     }
 

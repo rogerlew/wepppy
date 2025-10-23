@@ -893,6 +893,19 @@ var Project = (function () {
 
         project.set_readonly_controls(state.readonly);
 
+        project.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var controllerContext = ctx.controllers && ctx.controllers.project ? ctx.controllers.project : {};
+            var readonly = controllerContext.readonly;
+            if (readonly === undefined && ctx.user) {
+                readonly = ctx.user.readonly;
+            }
+            if (readonly !== undefined && typeof project.set_readonly_controls === "function") {
+                project.set_readonly_controls(Boolean(readonly));
+            }
+            return project;
+        };
+
         return project;
     }
 

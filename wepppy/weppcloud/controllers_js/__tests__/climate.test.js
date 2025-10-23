@@ -374,4 +374,22 @@ describe("Climate controller", () => {
         );
         expect(controlBaseInstance.detach_status_stream).toHaveBeenCalled();
     });
+
+    test("bootstrap wires job id and refreshes climate data", () => {
+        const precipSpy = jest.spyOn(climate, "handlePrecipScalingModeChange");
+        const refreshSpy = jest.spyOn(climate, "refreshStationSelection").mockImplementation(() => {});
+        const monthliesSpy = jest.spyOn(climate, "viewStationMonthlies").mockImplementation(() => {});
+        climate.report = jest.fn();
+
+        climate.bootstrap({
+            jobIds: { build_climate_rq: "climate-job" },
+            data: { climate: { hasStation: true, hasClimate: true, precipScalingMode: "model" } }
+        });
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(climate, "climate-job");
+        expect(precipSpy).toHaveBeenCalledWith("model");
+        expect(refreshSpy).toHaveBeenCalled();
+        expect(monthliesSpy).toHaveBeenCalled();
+        expect(climate.report).toHaveBeenCalled();
+    });
 });

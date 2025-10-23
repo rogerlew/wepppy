@@ -504,6 +504,34 @@ var Team = (function () {
         attachStatusChannel();
         refreshMembers({ silentStatus: true });
 
+        var bootstrapState = {
+            listenersBound: false,
+            initialReport: false
+        };
+
+        team.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var user = ctx.user || {};
+            var form = team.form;
+
+            if (form && !bootstrapState.listenersBound && typeof form.addEventListener === "function") {
+                form.addEventListener("TEAM_ADDUSER_TASK_COMPLETED", function () {
+                    team.report();
+                });
+                form.addEventListener("TEAM_REMOVEUSER_TASK_COMPLETED", function () {
+                    team.report();
+                });
+                bootstrapState.listenersBound = true;
+            }
+
+            if (user.isAuthenticated && !bootstrapState.initialReport) {
+                team.report();
+                bootstrapState.initialReport = true;
+            }
+
+            return team;
+        };
+
         return team;
     }
 

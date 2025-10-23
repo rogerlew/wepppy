@@ -235,4 +235,16 @@ describe("Wepp controller", () => {
 
         expect(container.hidden).toBe(false);
     });
+
+    test("bootstrap assigns job id and triggers report when run complete", () => {
+        const reportSpy = jest.spyOn(wepp, "report").mockImplementation(() => {});
+
+        wepp.bootstrap({
+            jobIds: { run_wepp_rq: "wepp-job" },
+            data: { wepp: { hasRun: true } }
+        });
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(wepp, "wepp-job");
+        expect(reportSpy).toHaveBeenCalled();
+    });
 });

@@ -41,6 +41,8 @@ describe("Map controller", () => {
                 toBBoxString: () => "-118.0,46.2,-116.9,47.1",
             })),
             flyTo: jest.fn(),
+            setView: jest.fn(),
+            setZoom: jest.fn(),
             hasLayer: jest.fn(() => true),
             addLayer: jest.fn(),
             removeLayer: jest.fn(),
@@ -161,6 +163,7 @@ describe("Map controller", () => {
         delete global.WEPP_FIND_AND_FLASH;
         delete global.coordRound;
         delete global.url_for_run;
+        delete global.ResizeObserver;
         delete global.runid;
         delete global.config;
         emittedEvents = [];
@@ -256,5 +259,36 @@ describe("Map controller", () => {
         expect(getJsonMock).toHaveBeenCalledWith("/resources/example", expect.any(Object));
         expect(controlStub.addOverlay).toHaveBeenCalled();
         expect(emittedEvents.some((evt) => evt.name === "map:layer:refreshed" && evt.payload.name === "Example")).toBe(true);
+    });
+
+    test("bootstrap applies context and boundary overlay", () => {
+        const resizeObserverMock = jest.fn(function (callback) {
+            this.observe = jest.fn(() => callback());
+        });
+        global.ResizeObserver = resizeObserverMock;
+
+        const setViewSpy = jest.spyOn(mapInstance, "setView");
+        const addOverlaySpy = jest.spyOn(mapInstance, "addGeoJsonOverlay");
+        const onMapChangeSpy = jest.spyOn(mapInstance, "onMapChange");
+
+        mapInstance.bootstrap({
+            map: {
+                center: [46.25, -117.45],
+                zoom: 11,
+                boundary: {
+                    url: "/resources/boundary",
+                    layerName: "Run Boundary",
+                    style: { color: "#00ff00", weight: 2 }
+                }
+            }
+        });
+
+        expect(setViewSpy).toHaveBeenCalledWith([46.25, -117.45], 11);
+        expect(addOverlaySpy).toHaveBeenCalledWith({
+            url: "/resources/boundary",
+            layerName: "Run Boundary",
+            style: { color: "#00ff00", weight: 2 }
+        });
+        expect(onMapChangeSpy).toHaveBeenCalled();
     });
 });

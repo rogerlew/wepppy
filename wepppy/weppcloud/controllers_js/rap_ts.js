@@ -439,6 +439,30 @@ var RAP_TS = (function () {
             }));
         }
 
+        controller.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "fetch_and_analyze_rap_ts_rq")
+                : null;
+            if (!jobId && ctx.controllers && ctx.controllers.rapTs && ctx.controllers.rapTs.jobId) {
+                jobId = ctx.controllers.rapTs.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "fetch_and_analyze_rap_ts_rq")) {
+                    var value = jobIds.fetch_and_analyze_rap_ts_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+            if (typeof controller.set_rq_job_id === "function") {
+                controller.set_rq_job_id(controller, jobId);
+            }
+            return controller;
+        };
+
         return controller;
     }
 

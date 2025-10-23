@@ -840,6 +840,78 @@ var Baer = (function () {
         bindHandlers();
         initializeMode();
 
+        var bootstrapState = {
+            listenersBound: false,
+            initialSbsLoaded: false
+        };
+
+        baer.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var flags = ctx.flags || {};
+            var initialHasSbs = Boolean(flags.initialHasSbs);
+            var controllerContext = (ctx.controllers && ctx.controllers.baer) || {};
+
+            var form = baer.form;
+            if (form && !bootstrapState.listenersBound && typeof form.addEventListener === "function") {
+                var attach = function (eventName, handler) {
+                    form.addEventListener(eventName, handler);
+                };
+
+                attach("SBS_UPLOAD_TASK_COMPLETE", function () {
+                    setTimeout(function () { baer.show_sbs(); }, 100);
+                    setTimeout(function () { baer.load_modify_class(); }, 100);
+                    try {
+                        var disturbed = typeof Disturbed !== "undefined" ? Disturbed.getInstance() : null;
+                        if (disturbed && typeof disturbed.set_has_sbs_cached === "function") {
+                            disturbed.set_has_sbs_cached(true);
+                        }
+                    } catch (err) {
+                        console.warn("[Baer] Failed to sync Disturbed controller after SBS upload", err);
+                    }
+                    if (flags) {
+                        flags.initialHasSbs = true;
+                    }
+                });
+
+                attach("SBS_REMOVE_TASK_COMPLETE", function () {
+                    try {
+                        var disturbed = typeof Disturbed !== "undefined" ? Disturbed.getInstance() : null;
+                        if (disturbed && typeof disturbed.set_has_sbs_cached === "function") {
+                            disturbed.set_has_sbs_cached(false);
+                        }
+                    } catch (err) {
+                        console.warn("[Baer] Failed to sync Disturbed controller after SBS removal", err);
+                    }
+                    if (flags) {
+                        flags.initialHasSbs = false;
+                    }
+                });
+
+                attach("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {
+                    setTimeout(function () { baer.show_sbs(); }, 100);
+                    setTimeout(function () { baer.load_modify_class(); }, 100);
+                });
+
+                bootstrapState.listenersBound = true;
+            }
+
+            if (initialHasSbs && !bootstrapState.initialSbsLoaded) {
+                setTimeout(function () { baer.show_sbs(); }, 0);
+                setTimeout(function () { baer.load_modify_class(); }, 0);
+                bootstrapState.initialSbsLoaded = true;
+            }
+
+            if (typeof baer.showHideControls === "function") {
+                var nextMode = controllerContext.mode;
+                if (nextMode === undefined || nextMode === null) {
+                    nextMode = 0;
+                }
+                baer.showHideControls(nextMode);
+            }
+
+            return baer;
+        };
+
         return baer;
     }
 

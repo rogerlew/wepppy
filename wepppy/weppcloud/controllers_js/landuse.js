@@ -537,6 +537,62 @@ var Landuse = (function () {
         ensureFormDelegates();
         ensureReportDelegates();
 
+        var bootstrapState = {
+            buildTriggered: false
+        };
+
+        landuse.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "landuse")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "build_landuse_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "build_landuse_rq")) {
+                    var value = jobIds.build_landuse_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof landuse.set_rq_job_id === "function") {
+                landuse.set_rq_job_id(landuse, jobId);
+            }
+
+            var settings = (ctx.data && ctx.data.landuse) || {};
+            var restoreMode = controllerContext.mode !== undefined && controllerContext.mode !== null
+                ? controllerContext.mode
+                : settings.mode;
+            var restoreSelection = controllerContext.singleSelection !== undefined && controllerContext.singleSelection !== null
+                ? controllerContext.singleSelection
+                : settings.singleSelection;
+
+            if (typeof landuse.restore === "function") {
+                landuse.restore(restoreMode, restoreSelection);
+            }
+
+            var hasLanduse = controllerContext.hasLanduse;
+            if (hasLanduse === undefined) {
+                hasLanduse = settings.hasLanduse;
+            }
+
+            if (hasLanduse && !bootstrapState.buildTriggered && typeof landuse.triggerEvent === "function") {
+                landuse.triggerEvent("LANDUSE_BUILD_TASK_COMPLETED");
+                bootstrapState.buildTriggered = true;
+            }
+
+            return landuse;
+        };
+
         return landuse;
     }
 

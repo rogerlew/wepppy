@@ -1,45 +1,48 @@
+"""AgFields NoDb controller.
+
+This module manages agricultural field workflows in WEPPcloud. It validates
+field boundary GeoJSON, abstracts sub-fields with Peridot, prepares crop
+rotation managements, and launches WEPP runs per sub-field. Outputs include
+normalized GeoJSON, raster maps, parquet summaries, and WEPP loss reports that
+drive agricultural dashboards and treatment comparisons.
+"""
+
 from __future__ import annotations
-from dataclasses import dataclass
-import re
-from typing import List, Optional, Dict, Any, Tuple
 
-import os
 import hashlib
-import time
 import logging
-
-from os.path import exists as _exists
-from os.path import join as _join
-from os.path import split as _split
-from os.path import isdir
-from csv import DictWriter
-import base64
-import zipfile
-import pandas as pd
-from functools import partial
-from copy import deepcopy
-from pathlib import Path, PurePosixPath
-
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
-from enum import Enum, IntEnum
-from copy import deepcopy
-from glob import glob
+import os
+import re
 import shutil
+import time
+import zipfile
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
+from copy import deepcopy
+from enum import Enum, IntEnum
+from glob import glob
+from pathlib import Path, PurePosixPath
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Tuple
+
+import pandas as pd
 
 from wepp_runner.wepp_runner import run_hillslope
 
 from wepppy.all_your_base.all_your_base import isint
 from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
-from wepppy.nodb.core import Watershed
-from wepppy.topo.peridot.peridot_runner import run_peridot_wbt_sub_fields_abstraction, post_abstract_sub_fields
-from wepppy.wepp.management.utils import ManagementRotationSynth, downgrade_to_98_4_format
-from wepppy.wepp.management.managements import read_management, WEPPPY_MAN_DIR
-from wepppy.wepp.management import get_management_summary, InvalidManagementKey
-
+from wepppy.nodb.base import NoDbBase, nodb_setter
+from wepppy.nodb.core import Climate, Landuse, Watershed
+from wepppy.topo.peridot.peridot_runner import (
+    post_abstract_sub_fields,
+    run_peridot_wbt_sub_fields_abstraction,
+)
 from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
+from wepppy.wepp.management import InvalidManagementKey, get_management_summary
+from wepppy.wepp.management.managements import read_management
+from wepppy.wepp.management.utils import ManagementRotationSynth, downgrade_to_98_4_format
 
-from wepppy.nodb.core import *
-from wepppy.nodb.base import *
+from os.path import exists as _exists
+from os.path import join as _join
+from os.path import split as _split
 
 __all__ = [
     'AgFieldsNoDbLockedException',
@@ -51,9 +54,7 @@ class AgFieldsNoDbLockedException(Exception):
 
 
 class AgFields(NoDbBase):
-    """
-    AgFields
-    """
+    """Controller responsible for agricultural field prep, validation, and WEPP runs."""
     __name__ = 'AgFields'
 
     __exclude__ = ('_w3w', 
@@ -64,8 +65,14 @@ class AgFields(NoDbBase):
 
     filename = 'ag_fields.nodb'
 
-    def __init__(self, wd, cfg_fn='disturbed_9002.cfg', run_group=None, group_name=None):
-        super(AgFields, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
+    def __init__(
+        self,
+        wd: str,
+        cfg_fn: str = 'disturbed_9002.cfg',
+        run_group: Optional[str] = None,
+        group_name: Optional[str] = None,
+    ) -> None:
+        super().__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             if not _exists(self.ag_field_wepp_runs_dir):
@@ -99,38 +106,38 @@ class AgFields(NoDbBase):
             self._field_columns = []
 
     @property
-    def field_n(self):
-        return getattr(self, '_field_n', 0)
+    def field_n(self) -> int:
+        return int(getattr(self, '_field_n', 0))
 
     @property
-    def sub_field_n(self):
-        return getattr(self, '_sub_field_n', 0)
+    def sub_field_n(self) -> int:
+        return int(getattr(self, '_sub_field_n', 0))
 
     @property
-    def sub_field_fp_n(self):
-        return getattr(self, '_sub_field_fp_n', 0)
+    def sub_field_fp_n(self) -> int:
+        return int(getattr(self, '_sub_field_fp_n', 0))
 
     @property
-    def geojson_timestamp(self):
+    def geojson_timestamp(self) -> Optional[int]:
         return getattr(self, '_geojson_timestamp', None)
 
     @property
-    def geojson_is_valid(self):
-        return getattr(self, '_geojson_is_valid', False)
+    def geojson_is_valid(self) -> bool:
+        return bool(getattr(self, '_geojson_is_valid', False))
 
     @property
-    def field_columns(self):
+    def field_columns(self) -> List[str]:
         return deepcopy(getattr(self, '_field_columns', []))
     
     @property
-    def field_boundaries_geojson(self):
-        return self._field_boundaries_geojson
+    def field_boundaries_geojson(self) -> Optional[str]:
+        return getattr(self, '_field_boundaries_geojson', None)
 
     @property
-    def field_id_key(self):
-        return self._field_id_key
+    def field_id_key(self) -> Optional[str]:
+        return getattr(self, '_field_id_key', None)
 
-    def validate_field_boundary_geojson(self, fn):
+    def validate_field_boundary_geojson(self, fn: str | os.PathLike[str]) -> Dict[str, List[Any]]:
         """
         Validate a user-supplied field boundary GeoJSON and normalize it into the canonical
         `ag_fields/fields.WGS.geojson` location for downstream tooling.
@@ -168,7 +175,7 @@ class AgFields(NoDbBase):
         if "field_id" not in df.columns:
             raise ValueError(f'field_id column not found in field boundary GeoJSON: {canonical_path}')
 
-        duplicates: set[Any] = set()
+        duplicates: Set[Any] = set()
         if df["field_id"].duplicated().any():
             duplicates = set(df[df["field_id"].duplicated()]["field_id"].tolist())
             self.logger.warn(
@@ -191,16 +198,16 @@ class AgFields(NoDbBase):
 
         return dict(field_id_duplicates=sorted(duplicates))
 
-    def get_unique_crops(self) -> set:
-        # get the set of unique crops in the rotation schedule
+    def get_unique_crops(self) -> Set[str]:
+        """Return the distinct crop names referenced by the rotation schedule."""
         rotation_schedule_df = pd.read_parquet(self.rotation_schedule_parquet)
-        unique_crops = set()
+        unique_crops: Set[str] = set()
         for year in self._crop_year_iter():
             column_key = self.get_rotation_key(year)
-            unique_crops.update(rotation_schedule_df[column_key].unique())
+            unique_crops.update(str(value) for value in rotation_schedule_df[column_key].unique())
         return unique_crops
 
-    def set_field_id_key(self, key: str):
+    def set_field_id_key(self, key: str) -> None:
         if not self.field_boundaries_geojson:
             raise ValueError("field_boundaries_geojson is not set. Call validate_field_boundary_geojson first.")
 
@@ -211,10 +218,10 @@ class AgFields(NoDbBase):
             self._field_id_key = key
 
     @property
-    def field_boundaries_tif(self):
+    def field_boundaries_tif(self) -> str:
         return _join(self.ag_fields_dir, 'field_boundaries.tif')
     
-    def rasterize_field_boundaries_geojson(self):
+    def rasterize_field_boundaries_geojson(self) -> None:
         """
         Rasterizes the field boundaries GeoJSON file to a TIFF using the project's DEM as a template.
         The values in the raster correspond to the field IDs specified by self.field_id_key.
@@ -352,12 +359,12 @@ class AgFields(NoDbBase):
         self.logger.info(f"Terminating Rasterization. Wrote {unique_field_id_count} objects to raster")
 
     @property
-    def sub_field_min_area_threshold_m2(self):
-        return getattr(self, '_sub_field_min_area_threshold_m2', 0.0)
+    def sub_field_min_area_threshold_m2(self) -> float:
+        return float(getattr(self, '_sub_field_min_area_threshold_m2', 0.0))
     
     @sub_field_min_area_threshold_m2.setter
     @nodb_setter
-    def sub_field_min_area_threshold_m2(self, value: float):
+    def sub_field_min_area_threshold_m2(self, value: float) -> None:
         if value < 0.0:
             raise ValueError('sub_field_min_area_threshold_m2 must be non-negative.')
         self._sub_field_min_area_threshold_m2 = float(value)
@@ -366,7 +373,7 @@ class AgFields(NoDbBase):
         self,
         sub_field_min_area_threshold_m2: Optional[float] = None,
         verbose: bool = True
-    ):
+    ) -> None:
         """
         Run PERIDOT to abstract sub-fields (e.g. generate slope files) and post-process the results.
         """
@@ -387,7 +394,7 @@ class AgFields(NoDbBase):
             )
             self._sub_field_n, self._sub_field_fp_n = post_abstract_sub_fields(self.wd, verbose=verbose)
 
-    def get_sub_field_translator(self) -> Dict[str, Tuple [int, int, int] ]:
+    def get_sub_field_translator(self) -> Dict[str, Tuple[int, int, int]]:
         """
         returns a lookup dict of sub_field_id -> (field_id, topaz_id, wepp_id)
         """
@@ -405,18 +412,18 @@ class AgFields(NoDbBase):
         return sub_field_translator
     
     @property
-    def sub_fields_map(self):
+    def sub_fields_map(self) -> str:
         return _join(self.ag_fields_dir, 'sub_fields/sub_field_id_map.tif')
 
     @property
-    def sub_fields_geojson(self):
+    def sub_fields_geojson(self) -> str:
         return _join(self.ag_fields_dir, 'sub_fields/sub_fields.geojson')
 
     @property
-    def sub_fields_wgs_geojson(self):
+    def sub_fields_wgs_geojson(self) -> str:
         return _join(self.ag_fields_dir, 'sub_fields/sub_fields.WGS.geojson')
 
-    def polygonize_sub_fields(self):
+    def polygonize_sub_fields(self) -> None:
         """
         polygonize sub fields
         """
@@ -428,44 +435,44 @@ class AgFields(NoDbBase):
             self.sub_fields_geojson)
 
     @property
-    def rotation_schedule_parquet(self):
+    def rotation_schedule_parquet(self) -> str:
         return _join(self.ag_fields_dir, 'rotation_schedule.parquet')
 
     @property
-    def ag_field_wepp_runs_dir(self):
+    def ag_field_wepp_runs_dir(self) -> str:
         return _join(self.wd, 'wepp/ag_fields/runs')
 
     @property
-    def ag_field_wepp_output_dir(self):
+    def ag_field_wepp_output_dir(self) -> str:
         return _join(self.wd, 'wepp/ag_fields/output')
 
     @property
-    def ag_fields_dir(self):
+    def ag_fields_dir(self) -> str:
         return _join(self.wd, 'ag_fields')
 
     @property
-    def plant_files_dir(self):
+    def plant_files_dir(self) -> str:
         return _join(self.ag_fields_dir, 'plant_files')
 
     @property
-    def plant_files_2017_1_dir(self):
+    def plant_files_2017_1_dir(self) -> str:
         return _join(self.plant_files_dir, '2017.1')
 
-    def clear_ag_field_wepp_runs(self):
+    def clear_ag_field_wepp_runs(self) -> None:
         if _exists(self.ag_field_wepp_runs_dir):
             shutil.rmtree(self.ag_field_wepp_runs_dir)
         os.makedirs(self.ag_field_wepp_runs_dir, exist_ok=True) 
 
-    def clear_ag_field_wepp_outputs(self):
+    def clear_ag_field_wepp_outputs(self) -> None:
         if _exists(self.ag_field_wepp_output_dir):
             shutil.rmtree(self.ag_field_wepp_output_dir)
         os.makedirs(self.ag_field_wepp_output_dir, exist_ok=True)
 
     @property
-    def rotation_accessor(self):
+    def rotation_accessor(self) -> Optional[str]:
         return getattr(self, '_rotation_accessor', None)
-    
-    def set_rotation_accessor(self, candidate: str):
+
+    def set_rotation_accessor(self, candidate: str) -> None:
         """
         Defined by user, used to lookup the column in rotation_schedule_parquet.
         Must contain {} str.format is applied with year as the argument.
@@ -491,7 +498,7 @@ class AgFields(NoDbBase):
             self._rotation_accessor = candidate
             self.logger.info(f'Set rotation_accessor to "{candidate}"')
 
-    def handle_plant_file_db_upload(self, plant_db_zip_fn: str):
+    def handle_plant_file_db_upload(self, plant_db_zip_fn: str) -> None:
         """
         Unzip the plant file database zip files int self.plant_files_dir.
         
@@ -600,7 +607,7 @@ class AgFields(NoDbBase):
 
         self.logger.info(f'Finished handling plant file DB upload for {plant_db_zip_fn}')
 
-    def get_valid_plant_files(self) -> list[str]:
+    def get_valid_plant_files(self) -> List[str]:
         return deepcopy(getattr(self, '_valid_plant_files', []))
 
     def get_rotation_key(self, year: int) -> str:  # to access Crop{year} column in rotation_schedule_parquet
@@ -608,7 +615,7 @@ class AgFields(NoDbBase):
             raise ValueError('rotation_accessor is not set. Call set_rotation_accessor first.')
         return self.rotation_accessor.format(str(year))
 
-    def _crop_year_iter(self):
+    def _crop_year_iter(self) -> Iterator[int]:
         climate = self.climate_instance
         start_year = climate.observed_start_year
         end_year = climate.observed_end_year
@@ -619,7 +626,7 @@ class AgFields(NoDbBase):
         for year in range(start_year, end_year + 1):
             yield year
 
-    def validate_rotation_lookup(self):  
+    def validate_rotation_lookup(self) -> None:  
         # the rotation_crop_to_man.tsv should be generated using an interface on the website.
         # backend identifies all the crops in the rotation schedule and then the user must map
         # then loads a table form with three columns:
@@ -631,16 +638,16 @@ class AgFields(NoDbBase):
         pprint(rotation_manager.rotation_lookup)
 
     @property
-    def subfields_parquet_path(self):
+    def subfields_parquet_path(self) -> str:
         return _join(self.ag_fields_dir, 'sub_fields/fields.parquet')
 
     @property
-    def subfields_parquet(self):
+    def subfields_parquet(self) -> pd.DataFrame:
         if not _exists(self.subfields_parquet_path):
             raise FileNotFoundError(f'Sub-fields parquet file not found: {self.subfields_parquet_path}')
         return pd.read_parquet(self.subfields_parquet_path)
 
-    def run_wepp_ag_fields(self, max_workers: int | None = None):
+    def run_wepp_ag_fields(self, max_workers: Optional[int] = None) -> None:
         """
         Run WEPP for each sub-field defined in the Peridot output.
 
@@ -658,7 +665,7 @@ class AgFields(NoDbBase):
         subfields_df = self.subfields_parquet
         rotation_schedule_df = pd.read_parquet(self.rotation_schedule_parquet)
 
-        tasks = []
+        tasks: List[Tuple[int, str, int, int, List[str]]] = []
         for index, field in subfields_df.iterrows():
 
             field_id = field['field_id']
@@ -706,7 +713,7 @@ class AgFields(NoDbBase):
         self.logger.info(f'Submitting {total_tasks} sub-field WEPP runs with max_workers={max_workers}')
 
         with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            futures = {}
+            futures: Dict[Future[None], Tuple[int, str, int, int]] = {}
             for field_id, topaz_id, wepp_id, sub_field_id, schedule in tasks:
                 self.logger.info(
                     f'  Submitting sub_field_id={sub_field_id} (field_id={field_id}, topaz_id={topaz_id}, wepp_id={wepp_id})'
@@ -754,10 +761,10 @@ class CropRotationDatabase(Enum):
     WEPP_CLOUD = 'weppcloud'
     PLANT_FILES_DB = 'plant_file_db'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
-    def __getstate__(self):
+    def __getstate__(self) -> str:
         return self.value
 
 
@@ -768,7 +775,7 @@ class CropRotation:
         self.rotation_id = rotation_id  # dom key from the project's mapping or plant file name
         self.man_path = man_path  # path to management file
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'CropRotation(crop_name={self.crop_name}, database={self.database}, rotation_id={self.rotation_id}, man_path={self.man_path})'
         
     def to_dict(self) -> Dict[str, Any]:
@@ -776,7 +783,7 @@ class CropRotation:
             'crop_name': self.crop_name,
             'database': str(self.database),
             'value': self.rotation_id,
-            'man_file_path': self.man_file_path,
+            'man_file_path': self.man_path,
         }
 
 # Example output of rotation_manager.rotation_lookup
@@ -823,7 +830,6 @@ class CropRotationManager:
     def __init__(self, ag_fields_dir: str, landuse_mapping: str, logger_name: str | None):
         logger = logging.getLogger(logger_name or __name__)
 
-        wd = _split(os.path.abspath(ag_fields_dir))[0]
         plant_files_dir = _join(ag_fields_dir, 'plant_files')
 
         # get the path and verify it exists
@@ -886,17 +892,17 @@ class CropRotationManager:
             rotation_lookup[crop_name] = CropRotation(crop_name, CropRotationDatabase(database), rotation_id, man_path)
 
         self.ag_fields_dir = ag_fields_dir
-        self.rotation_lookup = rotation_lookup
+        self.rotation_lookup: Dict[str, CropRotation] = rotation_lookup
         self.logger_name = logger_name
 
-    def dump_rotation_lookup(self):
+    def dump_rotation_lookup(self) -> None:
         # dump to tsv
         with open(_join(self.ag_fields_dir, 'rotation_lookup_dump.tsv'), 'w') as f:
             f.write('crop_name\tdatabase\trotation_id\n')
             for crop, rotation in self.rotation_lookup.items():
                 f.write(f'{crop}\t{rotation.database}\t{rotation.rotation_id}\n')
 
-    def build_rotation_stack(self, crop_rotation_schedule: List[str], man_filepath):
+    def build_rotation_stack(self, crop_rotation_schedule: List[str], man_filepath: str) -> None:
         stack = []
         for crop in crop_rotation_schedule:
             if crop not in self.rotation_lookup:
@@ -911,7 +917,7 @@ _thisdir = os.path.dirname(__file__)
 _template_dir = _join(_thisdir, 'run_templates')
 
 
-def _template_loader(fn):
+def _template_loader(fn: str) -> str:
     global _template_dir
 
     with open(_join(_template_dir, fn)) as fp:
@@ -927,19 +933,30 @@ def _template_loader(fn):
 
 
 def run_wepp_subfield(
-        wd, 
-        field_id, 
-        topaz_id, 
-        wepp_id, 
-        sub_field_id, 
-        crop_rotation_schedule, 
-        clip_hillslopes, 
-        clip_hillslope_length,
-        logger_name=None
-    ):
+    wd: str,
+    field_id: int,
+    topaz_id: str,
+    wepp_id: int,
+    sub_field_id: int,
+    crop_rotation_schedule: Iterable[str],
+    clip_hillslopes: bool,
+    clip_hillslope_length: Optional[float],
+    logger_name: Optional[str] = None,
+) -> None:
     
     logger = logging.getLogger(logger_name or __name__)
-    logger.info(f'run_wepp_subfield(field_id={field_id}, topaz_id={topaz_id}, wepp_id={wepp_id}, sub_field_id={sub_field_id}, crop_rotation_schedule={crop_rotation_schedule}, clip_hillslopes={clip_hillslopes}, clip_hillslope_length={clip_hillslope_length})')
+    rotation_schedule = list(crop_rotation_schedule)
+    logger.info(
+        'run_wepp_subfield(field_id=%s, topaz_id=%s, wepp_id=%s, sub_field_id=%s, crop_rotation_schedule=%s, '
+        'clip_hillslopes=%s, clip_hillslope_length=%s)',
+        field_id,
+        topaz_id,
+        wepp_id,
+        sub_field_id,
+        rotation_schedule,
+        clip_hillslopes,
+        clip_hillslope_length,
+    )
     
     climate = Climate.getInstance(wd)
     landuse = Landuse.getInstance(wd)
@@ -953,6 +970,8 @@ def run_wepp_subfield(
     slp_path = _join(ag_field_dir, 'sub_fields/slope_files', f'field_{field_id}_{topaz_id}.slp')
     slp_relpath = f'p{sub_field_id}.slp'
     if clip_hillslopes:
+        if clip_hillslope_length is None:
+            raise ValueError('clip_hillslope_length must be provided when clip_hillslopes is True.')
         logger.info(f'  Clipping slope file {slp_path} to max hillslope length {clip_hillslope_length} m')
         clip_slope_file_length(slp_path, _join(ag_field_wepp_runs_dir, slp_relpath), clip_hillslope_length)
     else:
@@ -971,7 +990,7 @@ def run_wepp_subfield(
     man_relpath = f'p{sub_field_id}.man'
 
     rotation_manager = CropRotationManager(ag_field_dir, landuse.mapping, logger_name=None)
-    rotation_manager.build_rotation_stack(crop_rotation_schedule, _join(ag_field_wepp_runs_dir, man_relpath))
+    rotation_manager.build_rotation_stack(rotation_schedule, _join(ag_field_wepp_runs_dir, man_relpath))
     
     _wepp_run_sub_field_template = _template_loader('sub_field.template')
     run_fn = f'p{sub_field_id}.run'

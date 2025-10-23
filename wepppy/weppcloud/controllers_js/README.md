@@ -36,6 +36,19 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 - The singleton pattern avoids repeated DOM wiring and ensures components like WebSocket connections are not duplicated. Callers must use `ControllerName.getInstance()` rather than constructing their own copy.
 - Controllers are expected to initialize inside existing forms (usually via document ready hooks in the templates). They usually cache references to form elements (`that.form = $('#wepp_form')`), register AJAX handlers, and expose methods that other controllers can call.
 
+### Bootstrap Contract (2025 refresh)
+- Controllers now expose an idempotent `instance.bootstrap(context)` method. The context is a plain object built by the page bootstrapper (`run_page_bootstrap.js.j2`) and contains:
+  - `run`, `user`, `mods`, `flags`, and `map` metadata for cross-controller coordination
+  - `jobIds` (RQ names → job ids) and `data` (domain flags such as `hasChannels`, `hasRun`, `precipScalingMode`)
+  - Optional `controllers[controllerName]` overrides for controller-specific hints (for example default color maps)
+- The helper `bootstrap.js` publishes `window.WCControllerBootstrap` so pages can:
+  - `setContext(context)` — cache the run context once per page load
+  - `bootstrapMany(entries, context)` — resolve controller singletons and call `bootstrap`
+  - `resolveJobId(context, key)` / `getControllerContext(context, name)` — utility lookups used by controllers for fallbacks
+- Controllers should read only the slices of context they need, e.g. `const climateData = (context.data && context.data.climate) || {};`. Guard against missing keys; the contract intentionally stays flexible so templates can omit data on lightweight pages.
+- Every controller continues to operate without `WCControllerBootstrap` (tests stub it out). Always fall back to `context.jobIds` or `context.controllers` data when helpers are absent.
+- Page templates must no longer poke controller internals directly. Instead they build the context once, call `bootstrapMany`, and let the controllers wire their own events (job id assignment, report hydration, color map defaults, etc.).
+
 ### Project Controller Contract (2024 refresh)
 
 ### Climate Controller Reference (2024 helper migration)

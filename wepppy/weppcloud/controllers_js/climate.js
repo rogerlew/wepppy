@@ -1028,6 +1028,88 @@ var Climate = (function () {
         climate.refreshStationSelection();
         climate.viewStationMonthlies();
 
+        var bootstrapState = {
+            reportTriggered: false,
+            stationRefreshed: false
+        };
+
+        climate.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "climate")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "build_climate_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "build_climate_rq")) {
+                    var value = jobIds.build_climate_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof climate.set_rq_job_id === "function") {
+                climate.set_rq_job_id(climate, jobId);
+            }
+
+            var precipMode = controllerContext.precipScalingMode;
+            if (precipMode === undefined && ctx.data && ctx.data.climate) {
+                precipMode = ctx.data.climate.precipScalingMode;
+            }
+            if (precipMode === undefined && climate.form) {
+                var selected = climate.form.querySelector('input[name="precip_scaling_mode"]:checked');
+                if (selected) {
+                    precipMode = selected.value;
+                }
+            }
+            if (typeof climate.handlePrecipScalingModeChange === "function") {
+                climate.handlePrecipScalingModeChange(precipMode);
+            }
+
+            var climateData = (ctx.data && ctx.data.climate) || {};
+            var hasStation = controllerContext.hasStation;
+            if (hasStation === undefined) {
+                hasStation = climateData.hasStation;
+            }
+
+            if (hasStation) {
+                if (typeof climate.refreshStationSelection === "function") {
+                    climate.refreshStationSelection();
+                }
+                if (typeof climate.viewStationMonthlies === "function") {
+                    climate.viewStationMonthlies();
+                }
+                bootstrapState.stationRefreshed = true;
+            } else if (!bootstrapState.stationRefreshed && climateData.hasStation) {
+                if (typeof climate.refreshStationSelection === "function") {
+                    climate.refreshStationSelection();
+                }
+                if (typeof climate.viewStationMonthlies === "function") {
+                    climate.viewStationMonthlies();
+                }
+                bootstrapState.stationRefreshed = true;
+            }
+
+            var hasClimate = controllerContext.hasClimate;
+            if (hasClimate === undefined) {
+                hasClimate = climateData.hasClimate;
+            }
+            if (hasClimate && !bootstrapState.reportTriggered && typeof climate.report === "function") {
+                climate.report();
+                bootstrapState.reportTriggered = true;
+            }
+
+            return climate;
+        };
+
         return climate;
     }
 

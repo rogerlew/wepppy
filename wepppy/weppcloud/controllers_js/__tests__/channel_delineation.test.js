@@ -247,4 +247,21 @@ describe("Channel Delineation controller", () => {
         expect(global.L.glify.layer).toHaveBeenCalled();
         expect(mapStub.ctrls.addOverlay).toHaveBeenCalled();
     });
+
+    test("bootstrap assigns job id and triggers initial report", () => {
+        const setJobSpy = jest.spyOn(channel, "set_rq_job_id");
+        const onMapChangeSpy = jest.spyOn(channel, "onMapChange").mockImplementation(() => {});
+        const reportSpy = jest.spyOn(channel, "report").mockImplementation(() => {});
+        const showSpy = jest.spyOn(channel, "show").mockImplementation(() => {});
+
+        channel.bootstrap({
+            jobIds: { fetch_dem_and_build_channels_rq: "job-123" },
+            data: { watershed: { hasChannels: true, hasSubcatchments: false } }
+        });
+
+        expect(setJobSpy).toHaveBeenCalledWith(channel, "job-123");
+        expect(onMapChangeSpy).toHaveBeenCalled();
+        expect(reportSpy).toHaveBeenCalled();
+        expect(showSpy).toHaveBeenCalled();
+    });
 });

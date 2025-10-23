@@ -225,6 +225,30 @@ var DebrisFlow = (function () {
             debris.run();
         });
 
+        debris.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "run_debris_flow_rq")
+                : null;
+            if (!jobId && ctx.controllers && ctx.controllers.debrisFlow && ctx.controllers.debrisFlow.jobId) {
+                jobId = ctx.controllers.debrisFlow.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_debris_flow_rq")) {
+                    var value = jobIds.run_debris_flow_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+            if (typeof debris.set_rq_job_id === "function") {
+                debris.set_rq_job_id(debris, jobId);
+            }
+            return debris;
+        };
+
         return debris;
     }
 

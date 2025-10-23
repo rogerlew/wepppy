@@ -1,67 +1,76 @@
-# Copyright (c) 2016-2018, University of Idaho
-# All rights reserved.
-#
-# Roger Lew (rogerlew@gmail.com)
-#
-# The project described was supported by NSF award number IIA-1301792
-# from the NSF Idaho EPSCoR Program and by the National Science Foundation.
+"""Revegetation cover transform controller.
+
+This module manages post-fire revegetation cover transforms that rescale RAP
+fractional cover time series before WEPP or RHEM runs. It keeps a working
+directory under the run root, validates user-provided CSV transforms, and
+loads library scenarios shipped with WEPPcloud.
+
+Inputs:
+- Scenario name selected in the UI or `user_cover_transform` for ad-hoc CSVs.
+- Cover transform CSVs where column headers pair soil burn severity and
+  vegetation class, followed by yearly scale factors.
+
+Outputs and downstream consumers:
+- `revegetation/<scenario>.csv` copied into the working directory for job
+  reproducibility.
+- `cover_transform` property returning per-band scale factors consumed by
+  `RAP_TS` when generating WEPP `.cov` files and by RHEM dashboards.
+- Flags that indicate whether the active transform was user supplied.
+"""
+
+from __future__ import annotations
 
 import os
-from os.path import join as _join
-from os.path import exists as _exists
-from os.path import split as _split
-
-from copy import deepcopy
-from glob import glob
 import shutil
-from time import sleep
-from enum import IntEnum
-import pandas as pd
+from os.path import exists as _exists
+from os.path import join as _join
+from typing import ClassVar, Dict, Optional, Tuple, TypeAlias
+
 import numpy as np
-from datetime import datetime
-
-from wepppy.topo.watershed_abstraction import SlopeFile
-from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import simple_texture
-
-# wepppy submodules
-from wepppy.nodb.core import *
-from wepppy.nodb.mods.rangeland_cover import RangelandCover
-from wepppy.wepp.soils.utils import WeppSoilUtil, SoilMultipleOfeSynth
-
-from wepppy.all_your_base import isfloat, NCPU
+import numpy.typing as npt
+import pandas as pd
 
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 
-__all__ = [
+__all__: list[str] = [
     'RevegetationNoDbLockedException',
     'Revegetation',
 ]
 
+_THISDIR = os.path.dirname(__file__)
+_DATA_DIR = _join(_THISDIR, 'data')
+_COVER_TRANSFORMS_DIR = _join(_DATA_DIR, 'cover_transforms')
 
-_thisdir = os.path.dirname(__file__)
-_data_dir = _join(_thisdir, 'data')
-_cover_transforms_dir = _join(_data_dir, 'cover_transforms')
+CoverTransform: TypeAlias = Dict[Tuple[str, str], npt.NDArray[np.float32]]
 
 
 class RevegetationNoDbLockedException(Exception):
-    pass
+    """Raised when the revegetation NoDb instance cannot acquire its lock."""
 
 
 class Revegetation(NoDbBase):
-    __name__ = 'Revegetation'
+    __name__: ClassVar[str] = 'Revegetation'
 
-    filename = 'revegetation.nodb'  
+    filename: ClassVar[str] = 'revegetation.nodb'
 
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
-        super(Revegetation, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
+    def __init__(
+        self,
+        wd: str,
+        cfg_fn: str,
+        run_group: Optional[str] = None,
+        group_name: Optional[str] = None
+    ) -> None:
+        super().__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
+
+        self._cover_transform_fn: str = ''
+        self._user_defined_cover_transform: bool = False
 
         with self.locked():
             self.clean()
             self._cover_transform_fn = ''
             self._user_defined_cover_transform = False
 
-    def validate_user_defined_cover_transform(self, fn):
+    def validate_user_defined_cover_transform(self, fn: str) -> None:
         with self.locked():
             assert _exists(_join(self.revegetation_dir, fn)), fn
             self._cover_transform_fn = fn
@@ -69,73 +78,65 @@ class Revegetation(NoDbBase):
 
     @property
     def user_defined_cover_transform(self) -> bool:
-        return getattr(self, '_user_defined_cover_transform', False)
-    
-    def load_cover_transform(self, reveg_scenario: str):
+        return self._user_defined_cover_transform
+
+    def load_cover_transform(self, reveg_scenario: str) -> None:
         if reveg_scenario == 'user_cover_transform':
             return
-        
+
         if reveg_scenario == '':
             self.cover_transform_fn = ''
             return
-        
-        src_fn = _join(_cover_transforms_dir, reveg_scenario)
+
+        src_fn = _join(_COVER_TRANSFORMS_DIR, reveg_scenario)
         assert _exists(src_fn), src_fn
         self.cover_transform_fn = reveg_scenario
         shutil.copyfile(src_fn, self.cover_transform_path)
 
     @property
     def cover_transform_fn(self) -> str:
-        return getattr(self, '_cover_transform_fn', '')
-    
+        return self._cover_transform_fn
+
     @cover_transform_fn.setter
     @nodb_setter
-    def cover_transform_fn(self, value: str) -> str:
+    def cover_transform_fn(self, value: str) -> None:
         self._cover_transform_fn = value
 
     @property
-    def revegetation_dir(self):
+    def revegetation_dir(self) -> str:
         return _join(self.wd, 'revegetation')
 
     @property
     def cover_transform_path(self) -> str:
         return _join(self.revegetation_dir, self.cover_transform_fn)
-    
 
     @property
-    def cover_transform(self):
-        cover_transform_path = self.cover_transform_path 
+    def cover_transform(self) -> Optional[CoverTransform]:
+        cover_transform_path = self.cover_transform_path
         if not _exists(cover_transform_path) or not cover_transform_path.endswith('.csv'):
             return None
 
-        # Replace 'your_file.csv' with the path to your CSV file
         df = pd.read_csv(cover_transform_path, header=None)
 
-        # Extracting the first two rows for keys
-        sbs = df.iloc[0]  # Soil burn severities
-        landuse = df.iloc[1]  # Landuse types
+        soil_burn_classes = df.iloc[0]
+        landuse_labels = df.iloc[1]
 
-        # Initialize the dictionary
-        data_dict = {}
-
-        # Iterate over columns to populate the dictionary
+        staged: Dict[Tuple[str, str], list[float]] = {}
         for col in range(df.shape[1]):
-            key = (sbs[col], landuse[col])
-            if key not in data_dict:
-                data_dict[key] = []
-            data_dict[key].extend(df.iloc[2:, col])
+            key = (str(soil_burn_classes[col]), str(landuse_labels[col]))
+            staged.setdefault(key, []).extend(df.iloc[2:, col].tolist())
 
-        # Convert lists to np.array of type np.float32
-        for key in data_dict:
-            data_dict[key] = np.array(data_dict[key], dtype=np.float32)
+        cover_transform: CoverTransform = {}
+        for key, values in staged.items():
+            cover_transform[key] = np.array(values, dtype=np.float32)
 
-        return data_dict
+        return cover_transform
 
-    def clean(self):
+    def clean(self) -> None:
         revegetation_dir = self.revegetation_dir
         if _exists(revegetation_dir):
             shutil.rmtree(revegetation_dir)
         os.mkdir(revegetation_dir)
 
-    def on(self, evt):
+    def on(self, evt: TriggerEvents) -> None:
         pass

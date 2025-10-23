@@ -1459,6 +1459,79 @@ var SubcatchmentDelineation = (function () {
         sub.renderRhemSedYield = renderRhemSedYield;
         sub.renderRhemSoilLoss = renderRhemSoilLoss;
 
+        var bootstrapState = {
+            colorControlsInitialised: false,
+            defaultColorMapEnabled: false,
+            reportLoaded: false
+        };
+
+        sub.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "subcatchment")
+                : {};
+
+            if (!bootstrapState.colorControlsInitialised && typeof sub.initializeColorMapControls === "function") {
+                try {
+                    sub.initializeColorMapControls();
+                } catch (err) {
+                    console.warn("[Subcatchment] Failed to initialize color map controls", err);
+                }
+                bootstrapState.colorControlsInitialised = true;
+            }
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "build_subcatchments_and_abstract_watershed_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "build_subcatchments_and_abstract_watershed_rq")) {
+                    var value = jobIds.build_subcatchments_and_abstract_watershed_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof sub.set_rq_job_id === "function") {
+                sub.set_rq_job_id(sub, jobId);
+            }
+
+            var watershed = (ctx.data && ctx.data.watershed) || {};
+            var hasSubcatchments = Boolean(watershed.hasSubcatchments);
+
+            if (hasSubcatchments) {
+                if (typeof sub.show === "function") {
+                    sub.show();
+                }
+                if (!bootstrapState.reportLoaded && typeof sub.report === "function") {
+                    sub.report();
+                    bootstrapState.reportLoaded = true;
+                }
+                var defaultColorMap = controllerContext.defaultColorMap || "slp_asp";
+                if (!bootstrapState.defaultColorMapEnabled && typeof sub.enableColorMap === "function") {
+                    sub.enableColorMap(defaultColorMap);
+                    bootstrapState.defaultColorMapEnabled = true;
+                }
+                try {
+                    if (typeof ChannelDelineation !== "undefined" && ChannelDelineation !== null) {
+                        var channel = ChannelDelineation.getInstance();
+                        if (channel && typeof channel.show === "function") {
+                            channel.show();
+                        }
+                    }
+                } catch (err) {
+                    console.warn("[Subcatchment] Failed to toggle channel controller", err);
+                }
+            }
+
+            return sub;
+        };
+
         return sub;
     }
 

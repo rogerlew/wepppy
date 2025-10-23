@@ -44,16 +44,17 @@ _Last updated: 2025-10-18_
 
 ## Working Agreements
 - Showcase (`/ui/components/`) is the canonical example. Update it before touching production controls so reviewers can test new patterns in isolation.
-- Keep legacy `_base.htm` untouched until a new macro pattern is proven in the showcase and documented.
+- `_base.htm` is archived; production controls must use the Pure macros. Update the showcase first so reviewers can test changes in isolation.
 - When a control is migrated, update both `control-inventory.md` and this AGENTS file with progress/notes.
 - Pure shell styling lives in `ui-foundation.css`; no inline styles in templates.
 - Checkbox/radio styling: reuse shared classes (`.wc-choice`, `.wc-choice--checkbox`, `.wc-run-header__toggle`) so accent colors and spacing stay consistent; blue system toggles mean the class is missing.
 - Dark mode is explicitly out-of-scope for this iteration; stay focused on polishing the light theme tokens and contrast ratios.
+- Run pages now bootstrap controllers via `WCControllerBootstrap`. Build a single `runContext` object (run metadata, job ids, `data.*` feature flags) and call `WCControllerBootstrap.bootstrapMany([...], runContext)` instead of poking controller internals. Controllers own their job wiring and report hydration via `instance.bootstrap(context)`.
 
 ## Near-Term Focus
 - **Unitizer modal polish:** restyle the modal with Pure tokens and align the toggle controls with the shared checkbox/radio pattern.
 - **Numeric unit switching:** wire the unitizer controls into `numeric_field` so unit changes propagate across paired inputs.
-- **ControlBase migration plan:** refactor run controls to render `status_panel` / `stacktrace_panel` and rely on `controlBase.attach_status_stream` for telemetry.
+- **ControlBase integration:** ensure new/updated controls continue to render `status_panel` / `stacktrace_panel` and rely on `controlBase.attach_status_stream` for telemetry.
 - **Console follow-through:** monitor fork/archive consoles for regressions (autoscroll, trigger handling, stacktrace enrichment) and fold lessons into the broader migration.
 - **Controller metadata contract:** formalize the schema (labels, units, validation states) so macros can rely on consistent inputs.
 - **Error/warning messaging:** standardise copy and iconography for validation states before wider macro adoption.
@@ -65,7 +66,7 @@ _Last updated: 2025-10-18_
 - Avoid introducing a new build dependency if possible—prefer extending the existing `wctl build-static-assets` / controllers build flow.
 
 ## Open Questions
-- Final macro signatures for table-oriented panels (landuse/soils summaries) and how to wrap dynamic controller-managed sections; defer decision until we port the first legacy control.
+- Final macro signatures for table-oriented panels (landuse/soils summaries) and how to wrap dynamic controller-managed sections; document decisions as the integration package progresses.
 - Whether to expose additional global CSS variables for spacing/width adjustments beyond the current token set.
 
 ## Contact / Escalation

@@ -352,6 +352,51 @@ var Rhem = (function () {
             rhem.run();
         });
 
+        var bootstrapState = {
+            reportLoaded: false
+        };
+
+        rhem.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "rhem")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "run_rhem_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_rhem_rq")) {
+                    var value = jobIds.run_rhem_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof rhem.set_rq_job_id === "function") {
+                rhem.set_rq_job_id(rhem, jobId);
+            }
+
+            var rhemData = (ctx.data && ctx.data.rhem) || {};
+            var hasRun = controllerContext.hasRun;
+            if (hasRun === undefined) {
+                hasRun = rhemData.hasRun;
+            }
+
+            if (hasRun && !bootstrapState.reportLoaded && typeof rhem.report === "function") {
+                rhem.report();
+                bootstrapState.reportLoaded = true;
+            }
+
+            return rhem;
+        };
+
         return rhem;
     }
 

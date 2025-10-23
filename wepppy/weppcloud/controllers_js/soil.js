@@ -388,6 +388,73 @@ var Soil = (function () {
             });
         }
 
+        var bootstrapState = {
+            buildTriggered: false
+        };
+
+        soil.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "soil")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "build_soils_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "build_soils_rq")) {
+                    var value = jobIds.build_soils_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof soil.set_rq_job_id === "function") {
+                soil.set_rq_job_id(soil, jobId);
+            }
+
+            var settings = (ctx.data && ctx.data.soils) || {};
+            var restoreMode = controllerContext.mode !== undefined && controllerContext.mode !== null
+                ? controllerContext.mode
+                : settings.mode;
+
+            if (typeof soil.restore === "function") {
+                soil.restore(restoreMode);
+            }
+
+            var dbSelection = controllerContext.singleDbSelection;
+            if (dbSelection === undefined) {
+                dbSelection = settings.singleDbSelection;
+            }
+            if (dbSelection === undefined) {
+                dbSelection = settings.single_dbselection;
+            }
+
+            if (dbSelection !== undefined && dbSelection !== null) {
+                var dbSelectElement = document.getElementById("soil_single_dbselection");
+                if (dbSelectElement) {
+                    dbSelectElement.value = String(dbSelection);
+                }
+            }
+
+            var hasSoils = controllerContext.hasSoils;
+            if (hasSoils === undefined) {
+                hasSoils = settings.hasSoils;
+            }
+            if (hasSoils && !bootstrapState.buildTriggered && typeof soil.triggerEvent === "function") {
+                soil.triggerEvent("SOILS_BUILD_TASK_COMPLETED");
+                bootstrapState.buildTriggered = true;
+            }
+
+            return soil;
+        };
+
         return soil;
     }
 

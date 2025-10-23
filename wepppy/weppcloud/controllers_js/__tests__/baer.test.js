@@ -233,4 +233,28 @@ describe("Baer controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
         expect(emitter.emit).toHaveBeenCalledWith("baer:upload:error", expect.any(Object));
     });
+
+    test("bootstrap syncs SBS state and hooks events", () => {
+        jest.useFakeTimers();
+        const baer = getController();
+        const showSpy = jest.spyOn(baer, "show_sbs").mockImplementation(() => {});
+        const loadSpy = jest.spyOn(baer, "load_modify_class").mockImplementation(() => {});
+
+        baer.bootstrap({ flags: { initialHasSbs: true } });
+        jest.runOnlyPendingTimers();
+
+        expect(showSpy).toHaveBeenCalled();
+        expect(loadSpy).toHaveBeenCalled();
+
+        showSpy.mockClear();
+        loadSpy.mockClear();
+
+        baer.form.dispatchEvent(new CustomEvent("SBS_UPLOAD_TASK_COMPLETE"));
+        jest.runOnlyPendingTimers();
+
+        expect(showSpy).toHaveBeenCalled();
+        expect(loadSpy).toHaveBeenCalled();
+
+        jest.useRealTimers();
+    });
 });

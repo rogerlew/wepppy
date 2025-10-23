@@ -760,6 +760,63 @@ var ChannelDelineation = (function () {
                 });
         };
 
+        var bootstrapState = {
+            reported: false,
+            shownWithoutSubcatchments: false
+        };
+
+        channel.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "channel")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "fetch_dem_and_build_channels_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "fetch_dem_and_build_channels_rq")) {
+                    var value = jobIds.fetch_dem_and_build_channels_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof channel.set_rq_job_id === "function") {
+                channel.set_rq_job_id(channel, jobId);
+            }
+
+            if (controllerContext.zoomMin !== undefined && controllerContext.zoomMin !== null) {
+                channel.zoom_min = controllerContext.zoomMin;
+            }
+
+            if (typeof channel.onMapChange === "function") {
+                channel.onMapChange();
+            }
+
+            var watershed = (ctx.data && ctx.data.watershed) || {};
+            var hasChannels = Boolean(watershed.hasChannels);
+            var hasSubcatchments = Boolean(watershed.hasSubcatchments);
+
+            if (hasChannels && !bootstrapState.reported && typeof channel.report === "function") {
+                channel.report();
+                bootstrapState.reported = true;
+            }
+
+            if (hasChannels && !hasSubcatchments && !bootstrapState.shownWithoutSubcatchments && typeof channel.show === "function") {
+                channel.show();
+                bootstrapState.shownWithoutSubcatchments = true;
+            }
+
+            return channel;
+        };
+
         return channel;
     }
 

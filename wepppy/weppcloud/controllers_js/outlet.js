@@ -603,6 +603,84 @@ var Outlet = (function () {
             }
         });
 
+        var bootstrapState = {
+            mapClickBound: false,
+            outletLoaded: false,
+            initialModeApplied: false
+        };
+
+        outlet.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "outlet")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "set_outlet_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "set_outlet_rq")) {
+                    var value = jobIds.set_outlet_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof outlet.set_rq_job_id === "function") {
+                outlet.set_rq_job_id(outlet, jobId);
+            }
+
+            if (!bootstrapState.mapClickBound) {
+                try {
+                    var map = typeof MapController !== "undefined" ? MapController.getInstance() : null;
+                    if (map && typeof map.on === "function") {
+                        map.on("click", outlet.setClickHandler);
+                        bootstrapState.mapClickBound = true;
+                    }
+                } catch (err) {
+                    console.warn("[Outlet] Failed to register map click handler", err);
+                }
+            }
+
+            if (!bootstrapState.initialModeApplied) {
+                var initialMode = controllerContext.mode;
+                if (initialMode === undefined || initialMode === null) {
+                    var initialModeElement = document.querySelector("input[name='set_outlet_mode']:checked");
+                    initialMode = initialModeElement ? initialModeElement.value : null;
+                }
+                if (initialMode !== undefined && initialMode !== null) {
+                    try {
+                        outlet.handleModeChange(initialMode);
+                        bootstrapState.initialModeApplied = true;
+                    } catch (err) {
+                        console.warn("[Outlet] Failed to apply initial mode", err);
+                    }
+                }
+            }
+
+            var watershed = (ctx.data && ctx.data.watershed) || {};
+            var hasOutlet = controllerContext.hasOutlet;
+            if (hasOutlet === undefined) {
+                hasOutlet = watershed.hasOutlet;
+            }
+            if (hasOutlet && !bootstrapState.outletLoaded) {
+                try {
+                    outlet.triggerEvent("SET_OUTLET_TASK_COMPLETED");
+                } catch (err) {
+                    console.warn("[Outlet] Failed to trigger outlet display", err);
+                }
+                bootstrapState.outletLoaded = true;
+            }
+
+            return outlet;
+        };
+
         return outlet;
     }
 

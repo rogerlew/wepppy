@@ -5,11 +5,11 @@
 - Provide a migration scaffold so we can drop in Pure-ready controls as they land while leaving legacy templates untouched until their turn.
 - Keep runs0 functional throughout the transition via feature flags/toggles and exhaustive JS compatibility checks (StatusStream, ControlBase, map integrations, etc.).
 
-## 2. Current Progress Snapshot _(2025-10-22)_
-- Pure controls embedded on `runs0_pure.htm`: Soil Burn Severity (`disturbed_sbs_pure.htm`), Climate (`climate_pure.htm`), WEPP (`wepp_pure.htm`), Landuse (`landuse_pure.htm`), Soil (`soil_pure.htm`), RAP Time Series (`rap_ts_pure.htm`), RHEM (`rhem_pure.htm`), Debris Flow (`debris_flow_pure.htm`), Observed Data (`observed_pure.htm`), DSS Export (`dss_export_pure.htm`), Ash/WATAR (`ash_pure.htm`), Team/Collaborators (`team_pure.htm`), Omni Scenarios/Contrasts (`omni_scenarios_pure.htm` / `omni_contrasts_pure.htm`), Power User modal, plus fork/archive consoles and the rangeland modify panels.
-- Controls still slated for cleanup: map + delineation bundle (`map_pure.htm`, `channel_delineation_pure.htm`, `subcatchments_pure.htm`) require a follow-up UX pass; treatments remain on the legacy scaffold until their conversion lands.
+## 2. Current Progress Snapshot _(2025-02-24)_
+- Pure controls embedded on the production runs0 page: Map (`map_pure.htm`), Channel Delineation (`channel_delineation_pure.htm`), Subcatchments (`subcatchments_pure.htm`), Soil Burn Severity, Climate, WEPP, Landuse, Soil, RAP Time Series, RHEM, Debris Flow, Observed Data, DSS Export, Ash/WATAR, Team, Omni scenarios/contrasts, Power User modal, fork/archive consoles, and rangeland modify panels.
+- All controls now ship with the Pure scaffold; remaining polish items (map inspector UX, documentation clean-up, smoke scripts) are tracked under the 20251023 Frontend Integration work package.
 - Shared infrastructure in place: `control_shell`, `status_panel` / `stacktrace_panel`, tabset utilities, StatusStream bindings, command bar, and the Pure TOC layout.
-- Remaining migrations (high priority): map/delineation cleanup and treatments suite; Omni reporting polish continues in parallel.
+- Automation focus: bootstrap refactor + smoke testing pipeline (see work package).
 
 ## 3. Proposed Page Skeleton (`runs0_pure.htm`)
 ```
@@ -39,16 +39,13 @@ base_pure.htm
      - Update `control-inventory.md`.
    - Completed to date: SBS, Climate, WEPP, Landuse, Soil, RAP TS, RHEM, Debris Flow, Observed, DSS Export, Ash, Team, Omni (scenario/contrast shells), Power User modal.
    - Remaining: map + channel/subcatchment cleanup, treatments.
-3. **Full Adoption (Phase Final)**
-   - When all controls migrated, replace references to `0.htm` with `runs0_pure.htm`.
-   - Remove legacy route toggles and unused CSS/JS shims.
+3. **Full Adoption (Completed)**
+   - Legacy `0.htm` retired; runs0 now renders Pure layout by default.
+   - Legacy CSS/JS shims removed; any future work happens on top of the Pure foundation.
 
 ## 5. Feature Flag / Routing Strategy
-- Keep `run_0_bp.runs0` serving legacy page by default.
-- Introduce toggle (ordered by preference):
-  1. Query parameter `?view=pure` for developer testing.
-  2. Config flag in `settings.py` (e.g., `RUNS0_USE_PURE`) for staging environments.
-- Bootstrap script (`run_page_bootstrap.js.j2`) must detect which template is active and initialise controls accordingly (e.g., skip legacy-only selectors when `runs0_pure` is active).
+- Pure layout is the default (no legacy fallback). Future experiments can still use query parameters, but the production path should treat the Pure template as canonical.
+- Bootstrap script (`run_page_bootstrap.js.j2`) can assume Pure markup; temporary safeguards for legacy selectors should be removed once the new bootstrap API lands.
 
 ## 6. Dependencies & Outstanding Work
 - Status streaming: finalise map/delineation cleanup and migrate the treatments suite to the StatusStream pattern prior to swapping templates.

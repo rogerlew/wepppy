@@ -700,6 +700,79 @@ var Ash = (function () {
             updateTransportModeUI(transportModeEl.value || "dynamic", false);
         }
 
+        var bootstrapState = {
+            reportTriggered: false,
+            depthModeApplied: false,
+            controlsShown: false
+        };
+
+        ash.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "ash")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "run_ash_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_ash_rq")) {
+                    var value = jobIds.run_ash_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof ash.set_rq_job_id === "function") {
+                ash.set_rq_job_id(ash, jobId);
+            }
+
+            var ashData = (ctx.data && ctx.data.ash) || {};
+
+            var depthMode = controllerContext.depthMode;
+            if (depthMode === undefined || depthMode === null) {
+                depthMode = ashData.depthMode !== undefined ? ashData.depthMode : ashData.ashDepthMode;
+            }
+            if (depthMode === undefined || depthMode === null) {
+                depthMode = state.depthMode;
+            }
+
+            if (!bootstrapState.depthModeApplied && typeof ash.setAshDepthMode === "function") {
+                try {
+                    ash.setAshDepthMode(depthMode);
+                } catch (err) {
+                    console.warn("[Ash] Failed to set depth mode", err);
+                }
+                bootstrapState.depthModeApplied = true;
+            }
+
+            var hasResults = controllerContext.hasResults;
+            if (hasResults === undefined) {
+                hasResults = ashData.hasResults !== undefined ? ashData.hasResults : ashData.has_results;
+            }
+            if (hasResults && !bootstrapState.reportTriggered && typeof ash.report === "function") {
+                ash.report();
+                bootstrapState.reportTriggered = true;
+            }
+
+            if (!bootstrapState.controlsShown && typeof ash.showHideControls === "function") {
+                try {
+                    ash.showHideControls();
+                } catch (err) {
+                    console.warn("[Ash] Failed to toggle controls", err);
+                }
+                bootstrapState.controlsShown = true;
+            }
+
+            return ash;
+        };
+
         return ash;
     }
 

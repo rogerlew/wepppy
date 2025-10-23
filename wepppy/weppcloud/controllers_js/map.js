@@ -835,6 +835,79 @@ var MapController = (function () {
             }
         }, 0);
 
+        var bootstrapState = {
+            resizeObserver: null,
+            windowResizeHandler: null,
+            boundarySignature: null,
+            readyEmitted: false
+        };
+
+        map.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var controllerContext = (ctx.controllers && ctx.controllers.map) || {};
+            var mapContext = ctx.map && typeof ctx.map === "object" ? ctx.map : controllerContext;
+
+            var center = mapContext && Array.isArray(mapContext.center) ? mapContext.center : null;
+            var zoom = mapContext && typeof mapContext.zoom === "number" ? mapContext.zoom : null;
+
+            if (center && typeof map.setView === "function") {
+                map.setView(center, zoom !== null ? zoom : map.getZoom());
+            } else if (zoom !== null && typeof map.setZoom === "function") {
+                map.setZoom(zoom);
+            }
+
+            if (typeof map.onMapChange === "function") {
+                map.onMapChange();
+            }
+
+            if (typeof window.ResizeObserver === "function" && !bootstrapState.resizeObserver) {
+                var selector = mapContext && mapContext.containerSelector ? mapContext.containerSelector : ".wc-map";
+                var container = selector ? document.querySelector(selector) : null;
+                if (container) {
+                    var observer = new ResizeObserver(function () {
+                        if (typeof map.invalidateSize === "function") {
+                            map.invalidateSize();
+                        }
+                    });
+                    observer.observe(container);
+                    bootstrapState.resizeObserver = observer;
+                }
+            }
+
+            if (!bootstrapState.windowResizeHandler) {
+                var handler = function () {
+                    if (typeof map.invalidateSize === "function") {
+                        map.invalidateSize();
+                    }
+                };
+                window.addEventListener("resize", handler);
+                bootstrapState.windowResizeHandler = handler;
+                setTimeout(handler, 100);
+            }
+
+            var boundary = mapContext && mapContext.boundary ? mapContext.boundary : null;
+            if (boundary && boundary.url) {
+                var style = boundary.style || {};
+                var signature = boundary.url + "|" + (boundary.layerName || "") + "|" + JSON.stringify(style);
+                if (bootstrapState.boundarySignature !== signature) {
+                    map.addGeoJsonOverlay({
+                        url: boundary.url,
+                        layerName: boundary.layerName,
+                        style: style
+                    });
+                    bootstrapState.boundarySignature = signature;
+                }
+            }
+
+            if (!bootstrapState.readyEmitted) {
+                emit("map:ready", buildViewportPayload());
+                bootstrapState.readyEmitted = true;
+            }
+            updateMapStatus();
+
+            return map;
+        };
+
         emit("map:ready", buildViewportPayload());
         updateMapStatus();
 

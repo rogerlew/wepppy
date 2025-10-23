@@ -696,6 +696,15 @@ var Disturbed = (function () {
             return state.hasSbs === true;
         };
 
+        disturbed.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var flags = ctx.flags || {};
+            if (flags.initialHasSbs !== undefined && typeof disturbed.set_has_sbs_cached === "function") {
+                disturbed.set_has_sbs_cached(Boolean(flags.initialHasSbs));
+            }
+            return disturbed;
+        };
+
         return disturbed;
     }
 

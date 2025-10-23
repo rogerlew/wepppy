@@ -1,3 +1,29 @@
+"""Rangeland Analysis Platform (RAP) time-series controller.
+
+The RAP time-series mod orchestrates multi-year downloads of the RAP fractional
+cover rasters, summarizes the per-band values to TOPAZ hillslopes (and optional
+multi-OFE footprints), and persists the results for downstream analytics.
+
+Inputs:
+- Watershed rasters (`subwta`, optional `mofe_map`) supplied by the `Watershed`
+  controller and cached in the working directory.
+- RAP fractional cover rasters fetched through
+  `RangelandAnalysisPlatformV3.retrieve` for the configured year range.
+- Optional revegetation metadata (burn classes, cover transforms) when the
+  `Revegetation` mod is active.
+
+Outputs and integrations:
+- `rap_ts.parquet` capturing the summarized fractional cover values for each
+  RAP band, year, TOPAZ hillslope, and optional OFE. Dashboards and notebooks
+  read this parquet for time-series analytics.
+- `.cov` files written to WEPP run directories via `prep_cover`, enabling WEPP
+  and RHEM runs to incorporate time-varying cover.
+- Redis task timestamps updated through `RedisPrep` so UI controllers can
+  reflect job completion.
+"""
+
+from __future__ import annotations
+
 # Copyright (c) 2016-2025, University of Idaho
 # All rights reserved.
 #
@@ -5,26 +31,25 @@
 #
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
-from typing import Dict, Tuple
 
 import os
-from os.path import join as _join
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from os.path import exists as _exists
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
-from osgeo import gdal
-import numpy as np
+from os.path import join as _join
+from typing import Any, ClassVar, Dict, Iterator, Optional, Tuple, TypeAlias
+
 import pandas as pd
 import pyarrow
-
-from wepppy.nodb.core import *
-from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
-from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.landcover.rap import *
+from osgeo import gdal
 
 import wepppyo3
-from wepppyo3.raster_characteristics import identify_median_single_raster_key
 from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
+from wepppyo3.raster_characteristics import identify_median_single_raster_key
 
+from wepppy.landcover.rap import RAP_Band, RangelandAnalysisPlatformV3
+from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
+from wepppy.nodb.core import Ron, Watershed
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.query_engine.activate import update_catalog_entry
 
 from .rap import RAPPointData
@@ -40,18 +65,37 @@ __all__ = [
     'RAP_TS',
 ]
 
+YearKey: TypeAlias = int | str
+TopazId: TypeAlias = int | str
+MofeId: TypeAlias = int | str
+SingleOFEValues: TypeAlias = Dict[TopazId, float]
+MultiOFEValues: TypeAlias = Dict[TopazId, Dict[MofeId, float]]
+BandYearSummary: TypeAlias = Dict[YearKey, SingleOFEValues | MultiOFEValues]
+RAPTimeSeriesData: TypeAlias = Dict[RAP_Band, BandYearSummary]
+
 
 class RAPNoDbLockedException(Exception):
     pass
 
 
 class RAP_TS(NoDbBase):
-    __name__ = 'RAP_TS'
+    __name__: ClassVar[str] = 'RAP_TS'
 
-    filename = 'rap_ts.nodb'
-    
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
-        super(RAP_TS, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
+    filename: ClassVar[str] = 'rap_ts.nodb'
+
+    def __init__(
+        self,
+        wd: str,
+        cfg_fn: str,
+        run_group: Optional[str] = None,
+        group_name: Optional[str] = None
+    ) -> None:
+        super().__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
+
+        self.data: Optional[RAPTimeSeriesData] = None
+        self._rap_start_year: Optional[int] = None
+        self._rap_end_year: Optional[int] = None
+        self._rap_mgr: Optional[RangelandAnalysisPlatformV3] = None
 
         with self.locked():
             os.makedirs(self.rap_dir, exist_ok=True)
@@ -60,13 +104,13 @@ class RAP_TS(NoDbBase):
             self._rap_end_year = None
             self._rap_mgr = None
 
-    def __getstate__(self):
+    def __getstate__(self) -> Dict[str, Any]:
         """
         Customize object serialization. If data is stored in Parquet,
         remove it from the state dictionary to prevent it from being
         written to the .nodb file.
         """
-        state = super().__getstate__()
+        super().__getstate__()
         state = self.__dict__.copy()
         parquet_path = _join(self.rap_dir, 'rap_ts.parquet')
         if _exists(parquet_path):
@@ -75,7 +119,7 @@ class RAP_TS(NoDbBase):
         return state
 
     @classmethod
-    def _post_instance_loaded(cls, instance):
+    def _post_instance_loaded(cls, instance: 'RAP_TS') -> 'RAP_TS':
         instance = super()._post_instance_loaded(instance)
 
         # New method: Hydrate from parquet for performance
@@ -83,11 +127,11 @@ class RAP_TS(NoDbBase):
         if _exists(parquet_path):
             if pd is None or pyarrow is None:
                 raise ImportError("pandas and pyarrow are required to read RAP data from parquet.")
-                
+
             df = pd.read_parquet(parquet_path)
-            
+
             # Reconstruct the nested dictionary from the flat DataFrame
-            reconstructed_data = {}
+            reconstructed_data: RAPTimeSeriesData = {}
             is_multi_ofe = 'mofe_id' in df.columns and (df['mofe_id'] != -1).any()
 
             for row in df.itertuples():
@@ -98,10 +142,10 @@ class RAP_TS(NoDbBase):
 
                 if band not in reconstructed_data:
                     reconstructed_data[band] = {}
-                
+
                 if year not in reconstructed_data[band]:
                     reconstructed_data[band][year] = {}
-                
+
                 if is_multi_ofe:
                     mofe_id = str(row.mofe_id)
                     if topaz_id not in reconstructed_data[band][year]:
@@ -109,14 +153,14 @@ class RAP_TS(NoDbBase):
                     reconstructed_data[band][year][topaz_id][mofe_id] = value
                 else:
                     reconstructed_data[band][year][topaz_id] = value
-                    
+
             instance.data = reconstructed_data
             return instance
 
         # Backwards compatibility: data is in the nodb file
         data = getattr(instance, 'data', None)
         if data is not None:
-            mapped = {}
+            mapped: RAPTimeSeriesData = {}
             for key in RAP_Band:
                 key_repr = repr(key)
                 if key_repr in data:
@@ -126,37 +170,41 @@ class RAP_TS(NoDbBase):
         return instance
 
     @property
-    def rap_end_year(self):
+    def rap_end_year(self) -> Optional[int]:
         return self._rap_end_year
 
     @rap_end_year.setter
     @nodb_setter
-    def rap_end_year(self, value: int):
+    def rap_end_year(self, value: int) -> None:
         self._rap_end_year = value
 
     @property
-    def rap_start_year(self):
+    def rap_start_year(self) -> Optional[int]:
         return self._rap_start_year
 
     @rap_start_year.setter
     @nodb_setter
-    def rap_start_year(self, value: int):
+    def rap_start_year(self, value: int) -> None:
         self._rap_start_year = value
 
     @property
-    def rap_dir(self):
+    def rap_dir(self) -> str:
         return _join(self.wd, 'rap')
 
-    def acquire_rasters(self, start_year=None, end_year=None):
+    def acquire_rasters(
+        self,
+        start_year: Optional[int] = None,
+        end_year: Optional[int] = None
+    ) -> None:
 
-        def retrieve_rap_year(year):
+        def retrieve_rap_year(year: int) -> int:
             self.logger.info(f'  retrieving rap {year}...')
             retries = rap_mgr.retrieve([year])
             if retries > 0:
                 self.logger.info(f'  retries: {retries}\n')
             return year
 
-        def oncomplete(future):
+        def oncomplete(future: Future[int]) -> None:
             year = future.result()
             self.logger.info(f'  retrieving rap {year} completed.\n')
 
@@ -174,7 +222,7 @@ class RAP_TS(NoDbBase):
             _map = Ron.getInstance(self.wd).map
             rap_mgr = RangelandAnalysisPlatformV3(wd=self.rap_dir, bbox=_map.extent, cellsize=_map.cellsize)
 
-            futures = []
+            futures: list[Future[int]] = []
             with ThreadPoolExecutor() as pool:
                 for year in range(start_year, end_year + 1):
                     future = pool.submit(retrieve_rap_year, year)
@@ -183,7 +231,7 @@ class RAP_TS(NoDbBase):
 
                 futures_n = len(futures)
                 count = 0
-                pending = set(futures)
+                pending: set[Future[int]] = set(futures)
                 while pending:
                     done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
 
@@ -205,39 +253,53 @@ class RAP_TS(NoDbBase):
             self._rap_mgr = rap_mgr
             update_catalog_entry(self.wd, self.rap_dir)
 
-    def on(self, evt):
+    def on(self, evt: TriggerEvents) -> None:
         pass
 
         #if evt == TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE:
         #    self.acquire_rasters()
 
-    def get_cover(self, topaz_id, year, fallback=True):
+    def get_cover(
+        self,
+        topaz_id: TopazId,
+        year: YearKey,
+        fallback: bool = True
+    ) -> float:
+        if self.data is None:
+            return 0.0
+
         cover = 0.0
         for band in [RAP_Band.ANNUAL_FORB_AND_GRASS,
                      RAP_Band.PERENNIAL_FORB_AND_GRASS,
                      RAP_Band.SHRUB,
                      RAP_Band.TREE]:
-            _cover = self.data[band][str(year)].get(str(topaz_id), None)
-            if _cover is not None and fallback:
-                _cover = self.data[band][str(year)].get(str(topaz_id), 0.0)
-            cover += _cover
+            band_years = self.data.get(band, {})
+            year_key = str(year)
+            values = band_years.get(year_key, {})
+            cover_value = None
+            if isinstance(values, dict):
+                cover_value = values.get(str(topaz_id))
+                if cover_value is None and fallback:
+                    cover_value = values.get(str(topaz_id), 0.0)
+
+            cover += float(cover_value if cover_value is not None else 0.0)
         return cover
 
-    def analyze(self, use_sbs=False, verbose=False):
-        from wepppy.nodb.core import Ron
-        from wepppy.nodb.mods import Disturbed
-
+    def analyze(self, use_sbs: bool = False, verbose: bool = False) -> None:
         start_year = self.rap_start_year
         end_year = self.rap_end_year
+        if start_year is None or end_year is None:
+            raise ValueError('RAP start and end years must be set before analysis.')
 
-        wd = self.wd
-        watershed = Watershed.getInstance(wd)
+        watershed = Watershed.getInstance(self.wd)
         rap_mgr = self._rap_mgr
+        if rap_mgr is None:
+            raise RuntimeError('RAP rasters must be acquired before analysis.')
 
         with self.locked():
-            data_ds = {}
+            data_ds: RAPTimeSeriesData = {}
 
-            def analyze_band_year(year, band):
+            def analyze_band_year(year: int, band: RAP_Band) -> Tuple[int, RAP_Band]:
                 if verbose:
                     print(year, band)
 
@@ -257,11 +319,11 @@ class RAP_TS(NoDbBase):
                 data_ds[band][year] = result
                 return year, band
 
-            def oncomplete(future):
+            def oncomplete(future: Future[Tuple[int, RAP_Band]]) -> None:
                 year, band = future.result()
                 self.logger.info(f'  analyzing rap {year} {band} completed.\n')
 
-            futures = []
+            futures: list[Future[Tuple[int, RAP_Band]]] = []
             with ThreadPoolExecutor() as pool:
                 for year in range(start_year, end_year + 1):
                     for band in [RAP_Band.ANNUAL_FORB_AND_GRASS,
@@ -276,7 +338,7 @@ class RAP_TS(NoDbBase):
 
                 futures_n = len(futures)
                 count = 0
-                pending = set(futures)
+                pending: set[Future[Tuple[int, RAP_Band]]] = set(futures)
                 while pending:
                     done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
 
@@ -297,7 +359,7 @@ class RAP_TS(NoDbBase):
 
             # For new projects, save data to parquet for performance.
             if pd is not None and pyarrow is not None and data_ds:
-                records = []
+                records: list[dict[str, int | float]] = []
                 # Check the structure of the first data point to determine if multi-ofe
                 first_band = next(iter(data_ds.keys()))
                 first_year = next(iter(data_ds[first_band].keys()))
@@ -332,7 +394,7 @@ class RAP_TS(NoDbBase):
                     parquet_path = _join(self.rap_dir, 'rap_ts.parquet')
                     df.to_parquet(parquet_path)
                     update_catalog_entry(self.wd, 'rap/rap_ts.parquet')
-                    
+
             self.data = data_ds
 
         self.logger.info('analysis complete...')
@@ -343,13 +405,70 @@ class RAP_TS(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def __iter__(self):
-        assert self.data is not None
+    def __iter__(self) -> Iterator[Tuple[str, RAPPointData]]:
+        if self.data is None or self.multi_ofe:
+            return iter(())
 
-        for topaz_id in self.data:
-            yield topaz_id, RAPPointData(**{band.name.lower(): v for band, v in self.data[topaz_id].items()})
+        tree_band = self.data.get(RAP_Band.TREE, {})
+        if not tree_band:
+            return iter(())
 
-    def prep_cover(self, runs_dir, fallback=True):
+        year_keys = list(tree_band.keys())
+        str_years = {str(key) for key in year_keys}
+
+        target_year = None
+        if self.rap_end_year is not None:
+            candidate = str(self.rap_end_year)
+            if candidate in str_years:
+                target_year = candidate
+
+        if target_year is None:
+            def sort_key(value: YearKey) -> Tuple[int, str]:
+                text = str(value)
+                return (int(text) if text.isdigit() else -1, text)
+
+            sorted_years = sorted(year_keys, key=sort_key)
+            if not sorted_years:
+                return iter(())
+            target_year = str(sorted_years[-1])
+
+        def resolve_single_ofe(mapping: BandYearSummary, key: str) -> Optional[SingleOFEValues]:
+            value = mapping.get(key)
+            if value is None and key.isdigit():
+                value = mapping.get(int(key))
+            if isinstance(value, dict):
+                first_value = next(iter(value.values()), None)
+                if isinstance(first_value, dict):
+                    return None
+                cleaned: SingleOFEValues = {}
+                for k, v in value.items():
+                    if v is None:
+                        continue
+                    cleaned[str(k)] = float(v)
+                return cleaned
+            return None
+
+        reference_values = resolve_single_ofe(tree_band, target_year)
+        if reference_values is None:
+            return iter(())
+
+        def iterator() -> Iterator[Tuple[str, RAPPointData]]:
+            for topaz_key in reference_values:
+                payload: Dict[str, Optional[float]] = {}
+                for band in [RAP_Band.ANNUAL_FORB_AND_GRASS,
+                             RAP_Band.BARE_GROUND,
+                             RAP_Band.LITTER,
+                             RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                             RAP_Band.SHRUB,
+                             RAP_Band.TREE]:
+                    band_years = self.data.get(band, {})
+                    band_values = resolve_single_ofe(band_years, target_year)
+                    payload[band.name.lower()] = band_values.get(topaz_key) if band_values else None
+                yield str(topaz_key), RAPPointData(**payload)
+
+        return iterator()
+
+    def prep_cover(self, runs_dir: str, fallback: bool = True) -> None:
         from wepppy.nodb.mods.disturbed import Disturbed
         from wepppy.nodb.mods.revegetation import Revegetation
 
@@ -421,7 +540,7 @@ class RAP_TS(NoDbBase):
                         fp.write(' \t'.join([str(_cover) for _cover in _covers]))
                         fp.write('\n')
 
-    def _prep_transformed_cover(self, runs_dir):
+    def _prep_transformed_cover(self, runs_dir: str) -> None:
         from wepppy.nodb.mods.disturbed import Disturbed
         from wepppy.nodb.mods.revegetation import Revegetation
         from wepppy.nodb.core import Landuse

@@ -1,168 +1,322 @@
-# nodb_api Blueprint Reference
+# NoDb API Blueprint Map
+> Cross-reference every `/routes/nodb_api` endpoint with the NoDb singletons, helpers, and background jobs it drives.
 
-Authored: 10-18-2025
+## Overview
+- The NoDb API blueprints expose the server-side counterpart for the singleton controllers defined in `wepppy.nodb`. Each handler grabs a working directory, resolves the appropriate `NoDbBase` subclass via `getInstance`, and either mutates state (the `tasks/` routes) or emits read-only snapshots for UI controllers.
+- Unlike legacy Flask blueprints, these modules avoid direct SQL/ORM access; all persistence flows through the NoDb objects cached on disk and mirrored in Redis. Shared helper utilities (`success_factory`, `exception_factory`, `authorize*`, `parse_request_payload`, etc.) keep responses consistent with the broader WEPPcloud stack.
+- Paired front-end controllers live under `wepppy/weppcloud/controllers_js/` and are described in [controllers_js/README.md](../../controllers_js/README.md). See also [controller_foundations.md](../../../../docs/dev-notes/controller_foundations.md) and [controllers_js_jquery_retro.md](../../../../docs/dev-notes/controllers_js_jquery_retro.md) for UI wiring and helper migration history.
 
-This note summarises every Flask blueprint under `wepppy/weppcloud/routes/nodb_api/`. The goal is to orient contributors to the NoDb-backed API surface that powers the Control UI and report views. Use it as an index before drilling into module source or NoDb controllers.
-
-## Common Patterns
-- Every module imports shared helpers from `wepppy/weppcloud/routes/_common.py` for `Blueprint`, request helpers, and `load_run_context`.
-- Route prefixes follow `/runs/<runid>/<config>/…` and expect callers to include the current working directory identifier and configuration name.
-- Most handlers fetch the run’s working directory with `get_wd()` or `load_run_context()` and then operate on a singleton NoDb controller (for example `Climate.getInstance(wd)`).
-- `tasks/` routes mutate state and usually return `success_factory()`; `query/` routes return JSON snapshots; `report/` and `view/` render HTML templates; `resources/` streams files in `static`/`_reports` directories.
-- Authorization helpers (`authorize`, `authorize_and_handle_with_exception_factory`, `login_required`) wrap endpoints that require authenticated users or ownership checks.
+## How to Use This Guide
+- Each section targets one blueprint module. Bullet lists capture the NoDb singletons touched, the matching front-end controller documentation (when available), the helper utilities shared across the routes, and the relevant regression tests or stubbing patterns.
+- Tables enumerate the Flask routes. A trailing `[/]` means both the literal path and a version with a trailing slash are registered. `NoDb interactions` lists property/method access on the singleton; if a handler only passes the instance into a template, no attribute is shown even though `getInstance()` is invoked.
+- The `Notes` column highlights deviations from the blueprint-level helper stack (for example, Redis Queue enqueues or file streaming). Routine helpers such as `get_wd()`, `jsonify()`, and `success_factory()` are referenced in the bullets and omitted from individual rows for readability.
 
 ## Blueprint Catalogue
 
-### `climate_bp.py`
-- **Purpose**: Drive climate-source selection, heuristics, and reporting for a run’s `Climate` controller.
-- **Dependencies**: `Climate`, `ClimateStationMode`, `Ron`, `StationMeta`; uses `secure_filename` to persist uploaded `.cli` files.
-- **Key routes**:
-  - `tasks/`: set climate station mode, choose a station, upload user `.cli`, switch climate mode/spatial mode, and toggle GridMET wind fallback.
-  - `query/`: return the active climate station string and a `has_observed` indicator.
-  - `view/`: render HTML dropdowns for closest/heuristic stations (domestic and EU/AU variants), preview `.par` contents, and climate monthly summaries.
-  - `report/`: render `reports/climate.htm` with station metadata.
-- **Notes**: Many `view/` endpoints honour `Climate.getInstance(wd, ignore_lock=True)` so read-only runs can browse cached results without mutating state.
+### Climate (`wepppy.weppcloud.routes.nodb_api.climate_bp`)
+- **NoDb singletons**: [Climate](../../../nodb/core/climate.py), [Ron](../../../nodb/core/ron.py)
+- **Controller docs**: [Climate Controller Reference (2024 helper migration)](../../controllers_js/README.md#climate-controller-reference-2024-helper-migration)
+- **Helper stack**: `parse_request_payload`, `get_wd`, `success_factory`, `exception_factory`, `render_template`, `jsonify`, `save_run_file`, `upload_success`, `upload_failure`
+- **Testing**: [tests/weppcloud/routes/test_climate_bp.py](../../../../tests/weppcloud/routes/test_climate_bp.py) — monkeypatches dummy Climate/Ron instances; update fixtures when payloads change.
 
-### `debris_flow_bp.py`
-- **Purpose**: Present debris-flow analysis for runs with the `DebrisFlow` mod enabled.
-- **Dependencies**: `DebrisFlow`, `Ron`, `Unitizer`, `wepppy.nodb.unitizer.precisions`.
-- **Key routes**:
-  - `report/debris_flow`: renders `reports/debris_flow.htm` populated with the NoDb controllers and user context.
-- **Notes**: Read-only blueprint; all work happens inside the template using supplied NoDb instances.
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/tasks/set_climatestation_mode[/]` | `POST` | Climate.climatestation_mode (set) | — |
+| `/runs/<string:runid>/<config>/tasks/set_climatestation[/]` | `POST` | Climate.climatestation (set) | — |
+| `/runs/<string:runid>/<config>/tasks/upload_cli[/]` | `POST` | Climate.cli_dir, Climate.set_user_defined_cli | Uses `save_run_file()` plus `upload_success` / `upload_failure` for feedback |
+| `/runs/<string:runid>/<config>/query/climatestation[/]` | `GET` | Climate.climatestation | — |
+| `/runs/<string:runid>/<config>/query/climate_has_observed[/]` | `GET` | Climate.has_observed | — |
+| `/runs/<string:runid>/<config>/query/climate_catalog[/]` | `GET` | Climate.catalog_datasets_payload | — |
+| `/runs/<string:runid>/<config>/report/climate[/]` | `GET` | Climate.climatestation_meta | — |
+| `/runs/<string:runid>/<config>/tasks/set_climate_mode[/]` | `POST` | Climate._resolve_catalog_dataset, Climate.catalog_id (set), Climate.climate_mode (set) | — |
+| `/runs/<string:runid>/<config>/tasks/set_climate_spatialmode[/]` | `POST` | Climate.climate_spatialmode (set) | — |
+| `/runs/<string:runid>/<config>/view/closest_stations[/]` | `GET` | Climate.climatestation, Climate.closest_stations, Climate.find_closest_stations, Climate.readonly | Calls `Climate.getInstance(..., ignore_lock=True)` so read-only runs can preview options |
+| `/runs/<string:runid>/<config>/view/heuristic_stations[/]` | `GET` | Climate.climatestation, Climate.find_heuristic_stations, Climate.heuristic_stations, Climate.readonly | Uses `ignore_lock=True` and falls back to cached heuristics when readonly |
+| `/runs/<string:runid>/<config>/view/par[/]` | `GET` | Climate.climatestation_par_contents | — |
+| `/runs/<string:runid>/<config>/view/eu_heuristic_stations[/]` | `GET` | Climate.climatestation, Climate.find_eu_heuristic_stations | `ignore_lock=True` EU heuristic lookup |
+| `/runs/<string:runid>/<config>/view/au_heuristic_stations[/]` | `GET` | Climate.climatestation, Climate.find_au_heuristic_stations | `ignore_lock=True` AU heuristic lookup |
+| `/runs/<string:runid>/<config>/view/climate_monthlies[/]` | `GET` | Climate.climatestation_meta | — |
+| `/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable[/]` | `POST` | Climate.use_gridmet_wind_when_applicable (set) | Boolean payload normalised via `parse_request_payload` |
 
-### `disturbed_bp.py`
-- **Purpose**: Manage SBS/BAER disturbed-land inputs, fire dates, and cover transforms.
-- **Dependencies**: `Disturbed`, `Baer`, `Ron`, `write_disturbed_land_soil_lookup`, revegetation helpers, SBS sanity checks.
-- **Key routes**:
-  - `tasks/`: reset or extend the land/soil lookup, apply edits, adjust burn classes, upload SBS rasters and cover transforms, toggle fire date, and build uniform SBS placeholders.
-  - `api/`: lightweight JSON endpoints for SBS presence flags.
-  - `query/` and `view/`: surface BAER map bounds and render classification UI.
-  - `resources/baer.png`: streams the RGB overlay for the map widget.
-- **Notes**: Most routes enforce `authorize_and_handle_with_exception_factory` to guard sensitive raster updates.
+### Debris Flow (`wepppy.weppcloud.routes.nodb_api.debris_flow_bp`)
+- **NoDb singletons**: [Ron](../../../nodb/core/ron.py), [DebrisFlow](../../../nodb/mods/debris_flow.py), [Unitizer](../../../nodb/unitizer.py)
+- **Controller docs**: [Debris Flow Controller Reference (2025 helper migration)](../../controllers_js/README.md#debris-flow-controller-reference-2025-helper-migration)
+- **Helper stack**: `get_wd`, `render_template`, `success_factory`, `exception_factory`
+- **Testing**: [tests/weppcloud/routes/test_debris_flow_bp.py](../../../../tests/weppcloud/routes/test_debris_flow_bp.py) — validates rendered context with stubbed precision tables.
 
-### `interchange_bp.py`
-- **Purpose**: Kick off Redis Queue jobs that migrate legacy WEPP interchange archives into the modern schema.
-- **Dependencies**: `run_interchange_migration` RQ task, `RedisDB.RQ`.
-- **Key routes**:
-  - `tasks/interchange/migrate`: validates optional subpath input, enqueues RQ job, and returns the job id.
-- **Notes**: `_sanitize_subpath` protects against traversal by rejecting `..` or absolute prefixes.
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/report/debris_flow[/]` | `GET` | DebrisFlow (template context), Ron (template context), Unitizer (template context) | Renders `reports/debris_flow.htm` with singleton instances in context |
 
-### `landuse_bp.py`
-- **Purpose**: Control landuse modes, NLCD database selection, and coverage edits.
-- **Dependencies**: `Landuse`, `LanduseMode`, `Ron`.
-- **Key routes**:
-  - `tasks/`: set landuse mode/database, mutate landuse coverage and mapping, bulk modify landuse assignments.
-  - `query/`: expose domain dictionaries plus subcatchment/channel summaries and cover tables.
-  - `report/`: render `reports/landuse.htm` with computed options and summaries.
-- **Notes**: Many mutations rely on JSON payloads with domain identifiers (`dom`, `cover`, `value`).
+### Disturbed / BAER (`wepppy.weppcloud.routes.nodb_api.disturbed_bp`)
+- **NoDb singletons**: [Disturbed](../../../nodb/mods/disturbed.py), [Baer](../../../nodb/mods/baer/__init__.py), [Revegetation](../../../nodb/mods/revegetation.py), [Ron](../../../nodb/core/ron.py)
+- **Controller docs**: [Disturbed Controller Reference (2025 helper migration)](../../controllers_js/README.md#disturbed-controller-reference-2025-helper-migration), [BAER Controller Reference (2025 helper migration)](../../controllers_js/README.md#baer-controller-reference-2025-helper-migration)
+- **Helper stack**: `authorize`, `authorize_and_handle_with_exception_factory`, `load_run_context`, `parse_request_payload`, `secure_filename`, `send_file`, `save_run_file`, `upload_success`, `upload_failure`, `success_factory`, `exception_factory`, `error_factory`
+- **Testing**: [tests/weppcloud/routes/test_disturbed_bp.py](../../../../tests/weppcloud/routes/test_disturbed_bp.py) — uses `tests.factories.singleton_factory` to stub Disturbed/Baer/Revegetation; keep stub signatures aligned.
 
-### `observed_bp.py`
-- **Purpose**: Handle observed timeseries ingestion, calibration, and reporting.
-- **Dependencies**: `Observed`, `Wepp`, `Ron`, `Unitizer`.
-- **Key routes**:
-  - `tasks/run_model_fit`: queue or run the observed-model fitting routine.
-  - `report/observed`: serve the observed summary template.
-  - `plot/observed/<selected>`: stream Matplotlib plots for selected observed datasets.
-  - `resources/observed/<file>`: download CSV/JSON artifacts created during fitting.
-- **Notes**: Most endpoints wrap responses with `exception_factory` to surface fit errors to the UI.
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/modify_disturbed` | `GET` | Disturbed (template context) | Serves legacy CSV editor; no NoDb mutation until save. |
+| `/runs/<string:runid>/<config>/tasks/reset_disturbed` | `GET, POST` | Disturbed.reset_land_soil_lookup | — |
+| `/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup` | `GET, POST` | Disturbed.build_extended_land_soil_lookup | — |
+| `/runs/<string:runid>/<config>/api/disturbed/has_sbs[/]` | `GET` | Disturbed.has_sbs | — |
+| `/runs/<string:runid>/<config>/tasks/modify_disturbed` | `POST` | Disturbed.lookup_fn | — |
+| `/runs/<string:runid>/<config>/query/baer_wgs_map[/]` | `GET` | Disturbed.bounds, Disturbed.classes, Disturbed.has_map, Ron.mods | — |
+| `/runs/<string:runid>/<config>/view/modify_burn_class` | `GET` | Disturbed.has_map, Ron.mods | — |
+| `/runs/<string:runid>/<config>/tasks/modify_burn_class` | `POST` | Disturbed.has_map, Disturbed.modify_burn_class, Ron.mods | — |
+| `/runs/<string:runid>/<config>/tasks/modify_color_map` | `POST` | Disturbed.has_map, Disturbed.modify_color_map, Ron.mods | — |
+| `/runs/<string:runid>/<config>/resources/baer.png` | `GET` | Disturbed.baer_rgb_png, Disturbed.has_map, Ron.mods | Streams RGB overlay from either BAER or Disturbed controller |
+| `/runs/<string:runid>/<config>/tasks/set_firedate[/]` | `POST` | Disturbed.fire_date (set) | — |
+| `/runs/<string:runid>/<config>/tasks/upload_sbs[/]` | `POST` | Disturbed.baer_dir, Disturbed.validate, Ron.mods | Persists SBS raster, runs `sbs_map_sanity_check`, then validates via controller |
+| `/runs/<string:runid>/<config>/tasks/upload_cover_transform` | `POST` | Revegetation.validate_user_defined_cover_transform | Delegates to `Revegetation.validate_user_defined_cover_transform()` |
+| `/runs/<string:runid>/<config>/tasks/remove_sbs` | `POST` | Baer.remove_sbs, Disturbed.remove_sbs, Ron.mods | Removes SBS raster from whichever controller owns it |
+| `/runs/<string:runid>/<config>/tasks/build_uniform_sbs<br>/runs/<string:runid>/<config>/tasks/build_uniform_sbs/<value>` | `POST` | Disturbed.build_uniform_sbs, Disturbed.validate | Builds uniform raster then validates; accepts optional severity parameter |
 
-### `omni_bp.py`
-- **Purpose**: Manage Omni scenario bundles and migration for multi-scenario projects.
-- **Dependencies**: `Omni`, `Treatments`, `Ron`, `Watershed`.
-- **Key routes**:
-  - `api/omni/get_scenarios` and `get_scenario_run_state`: return scenario metadata and dependency trees.
-  - `tasks/omni_migration`: initializes Omni (and Treatments if missing) inside the project’s `_mods`.
-  - `report/omni_scenarios`: builds the Omni scenario summary report using run statistics.
-- **Notes**: Migration enforces exclusive access via `ron.locked()` before mutating `_mods`.
+### Interchange Migration (`wepppy.weppcloud.routes.nodb_api.interchange_bp`)
+- **NoDb singletons**: _None_
+- **Controller docs**: [Batch Runner Controller Reference (2025 helper migration)](../../controllers_js/README.md#batch-runner-controller-reference-2025-helper-migration)
+- **Helper stack**: `authorize_and_handle_with_exception_factory`, `load_run_context`, `jsonify`, `error_factory`
+- **Testing**: [tests/weppcloud/routes/test_interchange_bp.py](../../../../tests/weppcloud/routes/test_interchange_bp.py) — asserts payload validation and RQ enqueue wiring.
 
-### `project_bp.py`
-- **Purpose**: Project-level orchestration: cache management, ownership, metadata, and geometry exports.
-- **Dependencies**: `Ron`, `Watershed`, `arc_export`, `clear_nodb_file_cache`, RQ helpers for set-readonly, Redis connections.
-- **Key routes**:
-  - `tasks/`: clear locks/cache, delete runs, add/remove users, update project name/scenario, toggle `public`/`readonly` flags (with RQ job), and manage metadata.
-  - `meta/` and `resources/`: stream shapefiles/GeoJSON (subcatchments, netful, bounding polygons) after ensuring state.
-  - `report/users`: renders collaborator list for the run.
-- **Notes**: Deletion removes filesystem run directory and associated database rows; most routes call `authorize_and_handle_with_exception_factory`.
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/tasks/interchange/migrate` | `POST` | — | Validates optional subpath then enqueues `run_interchange_migration` on Redis Queue |
 
-### `rangeland_bp.py`
-- **Purpose**: Configure rangeland cover fractions and build RAP-driven coverage.
-- **Dependencies**: `RangelandCover`, `Ron`.
-- **Key routes**:
-  - `tasks/modify_rangeland_cover` and `build_rangeland_cover`: accept JSON or form payloads to update cover percentages and bootstrap defaults.
-  - `query/rangeland_cover/subcatchments`: JSON summary for UI tables.
-  - `report/rangeland_cover`: render rangeland cover report for the run.
-- **Notes**: Validates cover percentages (0–100) before applying updates.
+### Landuse (`wepppy.weppcloud.routes.nodb_api.landuse_bp`)
+- **NoDb singletons**: [Landuse](../../../nodb/core/landuse.py), [Ron](../../../nodb/core/ron.py)
+- **Controller docs**: [Landuse Modify Controller Reference (2025 helper migration)](../../controllers_js/README.md#landuse-modify-controller-reference-2025-helper-migration)
+- **Helper stack**: `parse_request_payload`, `get_wd`, `jsonify`, `render_template`, `success_factory`, `exception_factory`
+- **Testing**: [tests/weppcloud/routes/test_landuse_bp.py](../../../../tests/weppcloud/routes/test_landuse_bp.py) — covers coercion helpers and JSON payload handling.
 
-### `rangeland_cover_bp.py`
-- **Purpose**: Surface RAP-driven rangeland cover summaries and manage RAP year/mode toggles.
-- **Dependencies**: `RangelandCover`, `RangelandCoverMode`.
-- **Key routes**:
-  - `query/rangeland_cover/current_cover_summary`: POST JSON list of Topaz ids and returns cover snapshot.
-  - `tasks/set_rangeland_cover_mode`: update mode and RAP year on the NoDb controller.
-- **Notes**: Uses `load_run_context` to resolve the working directory, mirroring `rangeland_bp`.
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/tasks/set_landuse_mode[/]` | `POST` | Landuse.mode (set), Landuse.single_selection (set) | — |
+| `/runs/<string:runid>/<config>/tasks/set_landuse_db[/]` | `POST` | Landuse.nlcd_db (set) | — |
+| `/runs/<string:runid>/<config>/tasks/modify_landuse_coverage[/]` | `POST` | Landuse.modify_coverage, Landuse.modify_coverage() | Normalises domain/cover IDs then writes via `Landuse.modify_coverage()` |
+| `/runs/<string:runid>/<config>/tasks/modify_landuse_mapping[/]` | `POST` | Landuse.modify_mapping | Uses `_coerce_topaz_ids` to keep legacy form inputs compatible |
+| `/runs/<string:runid>/<config>/query/landuse[/]` | `GET` | Landuse.domlc_d | — |
+| `/runs/<string:runid>/<config>/query/landuse/subcatchments[/]` | `GET` | Landuse.subs_summary | — |
+| `/runs/<string:runid>/<config>/query/landuse/channels[/]` | `GET` | Landuse.chns_summary | — |
+| `/runs/<string:runid>/<config>/report/landuse[/]` | `GET` | Landuse.landuseoptions | Builds template context via `build_landuse_report_context()` |
+| `/runs/<string:runid>/<config>/tasks/modify_landuse[/]` | `POST` | Landuse.modify | Accepts comma-separated Topaz IDs, coerces landuse code, then calls `Landuse.modify()` |
+| `/runs/<string:runid>/<config>/query/landuse/cover/subcatchments[/]` | `GET` | Landuse.hillslope_cancovs | — |
 
-### `rhem_bp.py`
-- **Purpose**: Provide RHEM (rangeland hydrology and erosion model) reports and derived queries.
-- **Dependencies**: `RhemPost`, `Ron`, `Unitizer`, RAP precisions.
-- **Key routes**:
-  - `report/`: family of templates for results, run summary, average annuals, and return periods.
-  - `query/rhem/...`: JSON helpers for runoff, sediment yield, and soil loss per subcatchment.
-- **Notes**: Templates expect precomputed files in `rhem/output/`; route guards use `authorize`.
+### Observed (`wepppy.weppcloud.routes.nodb_api.observed_bp`)
+- **NoDb singletons**: [Observed](../../../nodb/mods/observed.py), [Wepp](../../../nodb/core/wepp.py), [Ron](../../../nodb/core/ron.py), [Unitizer](../../../nodb/unitizer.py)
+- **Controller docs**: [Observed Controller Reference (2025 helper migration)](../../controllers_js/README.md#observed-controller-reference-2025-helper-migration)
+- **Helper stack**: `parse_request_payload`, `success_factory`, `exception_factory`, `error_factory`, `render_template`, `send_file`
+- **Testing**: [tests/weppcloud/routes/test_observed_bp.py](../../../../tests/weppcloud/routes/test_observed_bp.py) — stubs Observed singleton to exercise parsing and plotting routes.
 
-### `soils_bp.py`
-- **Purpose**: Configure soil selections, toggles, and summaries.
-- **Dependencies**: `Soils`, `SoilsMode`, `Disturbed`.
-- **Key routes**:
-  - `tasks/`: set soil mode (including DB selections), toggle KS flags, and push disturbed soil versions down to the Disturbed mod.
-  - `query/`: domain dictionary plus subcatchment/channel summaries.
-  - `report/soils`: render soils report.
-- **Notes**: Validates JSON payloads for flag updates; all state is persisted through the NoDb singleton.
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/tasks/run_model_fit[/]` | `POST` | Observed.calc_model_fit, Observed.parse_textdata | Parses inline CSV, runs `Observed.calc_model_fit()` synchronously (TODO RQ) |
+| `/runs/<string:runid>/<config>/report/observed[/]` | `GET` | Observed.results, Observed.stat_names | — |
+| `/runs/<string:runid>/<config>/plot/observed/<selected>[/]` | `GET` | Wepp.observed_dir | — |
+| `/runs/<string:runid>/<config>/resources/observed/<file>` | `GET` | Ron.observed_dir | Streams CSV artifacts from `Ron.observed_dir` |
 
-### `treatments_bp.py`
-- **Purpose**: Switch treatment planning modes.
-- **Dependencies**: `Treatments`, `TreatmentsMode`.
-- **Key routes**:
-  - `tasks/set_treatments_mode`: update treatments mode from form data.
-- **Notes**: Narrow blueprint introduced to replace logic embedded in landuse routes.
+### Omni Scenarios (`wepppy.weppcloud.routes.nodb_api.omni_bp`)
+- **NoDb singletons**: [Omni](../../../nodb/mods/omni.py), [Treatments](../../../nodb/mods/treatments.py), [Ron](../../../nodb/core/ron.py), [Watershed](../../../nodb/core/watershed.py)
+- **Controller docs**: [Omni Controller Reference (2024 helper migration)](../../controllers_js/README.md#omni-controller-reference-2024-helper-migration)
+- **Helper stack**: `authorize`, `parse_request_payload`, `success_factory`, `exception_factory`, `error_factory`, `jsonify`, `render_template`
+- **Testing**: [tests/weppcloud/routes/test_rq_api_omni.py](../../../../tests/weppcloud/routes/test_rq_api_omni.py) — covers downstream job orchestration; add blueprint-specific tests when behaviour expands.
 
-### `unitizer_bp.py`
-- **Purpose**: Provide unit conversion helpers for UI widgets.
-- **Dependencies**: `Unitizer`.
-- **Key routes**:
-  - `tasks/set_unit_preferences`: persist per-run unit preferences (length, area, discharge, etc.).
-  - `/unitizer` and `/unitizer_units`: expose context-processor functions (`unitizer` and `unitizer_units`) returning conversion tables.
-  - `report/tasks/set_unit_preferences`: alias for report contexts.
-- **Notes**: Routes return `success_factory` JSON for direct UI use; errors fall back to `exception_factory`.
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/api/omni/get_scenarios` | `GET` | Omni.scenarios | — |
+| `/runs/<string:runid>/<config>/api/omni/get_scenario_run_state` | `GET` | Omni.scenario_dependency_tree, Omni.scenario_run_state | — |
+| `/runs/<string:runid>/<config>/tasks/omni_migration` | `GET` | Ron._mods, Ron.locked | Adds `omni`/`treatments` mods inside `Ron.locked()` then instantiates controllers |
+| `/runs/<string:runid>/<config>/report/omni_scenarios[/]` | `GET` | Omni.scenarios_report | Builds scenario summary table using `Omni.scenarios_report()` and `Watershed.getInstance` |
 
-### `watar_bp.py`
-- **Purpose**: Serve WATAR ash transport analytics, including hillslope simulations and contaminant reports.
-- **Dependencies**: `Ash`, `AshPost`, `AshType`, `Disturbed`, `Climate`, `Wepp`, `Watershed`, `Unitizer`, `load_hill_wat_dataframe`, report builders (`HillSummaryReport`, `ChannelSummaryReport`, `OutletSummaryReport`).
-- **Key routes**:
-  - `hillslope/<topaz_id>/ash`: run per-hillslope ash transport evaluation using selected ash type and fire date.
-  - `tasks/set_ash_wind_transport`: toggle wind transport processing.
-  - `report/`: suite covering run dashboard, ash summaries, contaminant reports, recurrence tables.
-  - `query/ash_out`: return JSON emission summaries for UI widgets.
-- **Notes**: Hillslope route performs runtime simulations and writes to `_ash/`; access requires ownership unless the project is public or the user is an admin.
+### Path Cost-Effective (`wepppy.weppcloud.routes.nodb_api.path_ce_bp`)
+- **NoDb singletons**: [PathCostEffective](../../../nodb/mods/path_ce.py), [Ron](../../../nodb/core/ron.py)
+- **Controller docs**: [Path CE Controller Reference (2025 helper migration)](../../controllers_js/README.md#path-ce-controller-reference-2025-helper-migration)
+- **Helper stack**: `authorize`, `authorize_and_handle_with_exception_factory`, `load_run_context`, `parse_request_payload`, `jsonify`, `success_factory`
+- **Testing**: [tests/weppcloud/routes/test_path_ce_bp.py](../../../../tests/weppcloud/routes/test_path_ce_bp.py) — exercises payload normalisation and status/result endpoints.
 
-### `watershed_bp.py`
-- **Purpose**: Manage watershed delineation outputs, subcatchment/channel metadata, and abstraction triggers.
-- **Dependencies**: `Watershed`, `Ron`, `ChannelRoutingError`, authorization helpers.
-- **Key routes**:
-  - `query/`: presence checks (`has_dem`, `delineation_pass`), bounding extents, outlet metadata, subcatchment/channel summaries, map layers.
-  - `report/`: render watershed summaries and detailed channel/outlet reports.
-  - `resources/channels.json`: stream cached channel GeoJSON.
-  - `tasks/`: trigger watershed abstraction and subcatchment intersection rebuilds.
-- **Notes**: Many query routes simply `jsonify` cached NoDb properties, keeping expensive processing in the controllers.
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/tasks/path_cost_effective_enable` | `GET` | Ron._mods, Ron._mods (set), Ron.locked, Ron.mods | Appends `path_ce` mod inside `Ron.locked()` and bootstraps controller |
+| `/runs/<string:runid>/<config>/api/path_ce/config` | `GET` | PathCostEffective.config | `GET` lazily instantiates controller if missing; `POST` normalises numeric ranges before persisting |
+| `/runs/<string:runid>/<config>/api/path_ce/config` | `POST` | PathCostEffective.config | `GET` lazily instantiates controller if missing; `POST` normalises numeric ranges before persisting |
+| `/runs/<string:runid>/<config>/api/path_ce/status` | `GET` | PathCostEffective.progress, PathCostEffective.status, PathCostEffective.status_message | — |
+| `/runs/<string:runid>/<config>/api/path_ce/results` | `GET` | PathCostEffective.results | — |
+| `/runs/<string:runid>/<config>/tasks/path_cost_effective_run` | `POST` | Ron.mods | Enqueues `run_path_cost_effective_rq` on Redis Queue |
 
-### `wepp_bp.py`
-- **Purpose**: Central blueprint for WEPP model execution, reporting, and map resources.
-- **Dependencies**: `Wepp`, `Landuse`, `Climate`, `Watershed`, `Ron`, `RedisPrep`, `Unitizer` (converters and precisions), query engine (`activate_query_engine`, `run_query`), WEPP report classes.
-- **Key routes**:
-  - `tasks/set_run_wepp_routine`: toggle long-running WEPP routines.
-  - `view/`: return HTML fragments for channel definitions and management editors.
-  - `report/wepp/*`: extensive library of summary, annual, watbal, return-period, flood, and sediment reports alongside subcatchment/channel detail views.
-  - `query/`: JSON results covering summary tables, phosphorus options/subcatchments, time-series pulls, map boundaries, recurrence interval parsing.
-  - `plot/`: stream hydrograph plots such as streamflow.
-  - `resources/`: expose raster outputs (loss grids, flowpath rasters) for download or map overlays.
-- **Notes**: Several routes call `activate_query_engine()` before running DuckDB-backed queries; others reach into NoDb controllers for cached results. Error paths prefer `exception_factory` for telemetry.
+### Project (`wepppy.weppcloud.routes.nodb_api.project_bp`)
+- **NoDb singletons**: [Ron](../../../nodb/core/ron.py), [Watershed](../../../nodb/core/watershed.py)
+- **Controller docs**: [Project Controller Contract (2024 refresh)](../../controllers_js/README.md#project-controller-contract-2024-refresh), [Map Controller Reference (2025 helper migration)](../../controllers_js/README.md#map-controller-reference-2025-helper-migration)
+- **Helper stack**: `authorize`, `authorize_and_handle_with_exception_factory`, `login_required`, `load_run_context`, `parse_request_payload`, `jsonify`, `render_template`, `send_file`, `success_factory`, `exception_factory`, `error_factory`
+- **Testing**: [tests/weppcloud/routes/test_project_bp.py](../../../../tests/weppcloud/routes/test_project_bp.py) — covers lock clearing, collaborator management, and GeoJSON streaming.
 
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/tasks/clear_locks` | `GET` | NoDbBase.clear_locks | Calls `wepppy.nodb.base.clear_locks()` after loading run context |
+| `/runs/<string:runid>/<config>/tasks/clear_nodb_cache` | `GET` | NoDbBase.clear_nodb_file_cache | Clears cached `.nodb` payloads via `clear_nodb_file_cache()` |
+| `/runs/<string:runid>/<config>/tasks/delete[/]` | `POST` | Ron.readonly | Deletes working directory then removes run from user datastore |
+| `/runs/<string:runid>/<config>/meta/subcatchments.WGS.json[/]` | `GET` | Ron.export_dir | Runs `wepppy.export.arc_export` before streaming GeoJSON |
+| `/runs/<string:runid>/<config>/tasks/adduser[/]` | `POST` | — | — |
+| `/runs/<string:runid>/<config>/tasks/removeuser[/]` | `POST` | — | — |
+| `/runs/<string:runid>/<config>/report/users[/]` | `GET` | Ron (ownership lookup) | — |
+| `/runs/<string:runid>/<config>/resources/netful.json` | `GET` | Watershed.netful_shp | Streams GeoJSON from `Watershed.channels_shp` |
+| `/runs/<string:runid>/<config>/resources/subcatchments.json` | `GET` | Ron.name, Watershed.subwta_shp | Injects run name into subcatchment GeoJSON before return |
+| `/runs/<string:runid>/<config>/resources/bound.json` | `GET` | Ron.name, Watershed.bound_shp | Optional ogr2ogr simplify branch retained but disabled |
+| `/runs/<string:runid>/<config>/tasks/setname[/]` | `POST` | Ron.name (set) | — |
+| `/runs/<string:runid>/<config>/tasks/setscenario[/]` | `POST` | Ron.scenario (set) | — |
+| `/runs/<string:runid>/<config>/tasks/set_public` | `POST` | Ron.public (set) | — |
+| `/runs/<string:runid>/<config>/tasks/set_readonly` | `POST` | — | Enqueues `set_run_readonly_rq`; payload coerced via `parse_request_payload(boolean_fields={...})` |
+
+### Rangeland Cover (`wepppy.weppcloud.routes.nodb_api.rangeland_bp`)
+- **NoDb singletons**: [RangelandCover](../../../nodb/mods/rangeland_cover.py), [Ron](../../../nodb/core/ron.py)
+- **Controller docs**: [Rangeland Cover Controller Reference (2025 helper migration)](../../controllers_js/README.md#rangeland-cover-controller-reference-2025-helper-migration)
+- **Helper stack**: `load_run_context`, `parse_request_payload`, `success_factory`, `exception_factory`, `jsonify`
+- **Testing**: [tests/weppcloud/routes/test_rangeland_cover_bp.py](../../../../tests/weppcloud/routes/test_rangeland_cover_bp.py) — verifies cover normalisation and job payload construction.
+
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/tasks/modify_rangeland_cover[/]` | `POST` | RangelandCover.modify_covers | Normalises Topaz IDs and cover percentages before calling `modify_covers()` |
+| `/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments[/]` | `GET` | RangelandCover.subs_summary | — |
+| `/runs/<string:runid>/<config>/report/rangeland_cover[/]` | `GET` | RangelandCover (template context) | — |
+| `/runs/<string:runid>/<config>/tasks/build_rangeland_cover[/]` | `POST` | RangelandCover.build | Accepts RAP year + defaults payload; values cast to float before `build()` |
+
+### Rangeland Cover Modify (`wepppy.weppcloud.routes.nodb_api.rangeland_cover_bp`)
+- **NoDb singletons**: [RangelandCover](../../../nodb/mods/rangeland_cover.py)
+- **Controller docs**: [Rangeland Cover Modify Controller Reference (2025 helper migration)](../../controllers_js/README.md#rangeland-cover-modify-controller-reference-2025-helper-migration)
+- **Helper stack**: `load_run_context`, `parse_request_payload`, `jsonify`, `success_factory`, `exception_factory`
+- **Testing**: [tests/weppcloud/routes/test_rangeland_cover_bp.py](../../../../tests/weppcloud/routes/test_rangeland_cover_bp.py) — covers current-cover summaries and mode toggles alongside the main blueprint.
+
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/query/rangeland_cover/current_cover_summary[/]` | `POST` | RangelandCover.current_cover_summary | — |
+| `/runs/<string:runid>/<config>/tasks/set_rangeland_cover_mode[/]` | `POST` | RangelandCover.mode (set), RangelandCover.rap_year (set) | Requires both mode and RAP year; coerces to ints before persisting |
+
+### RHEM (`wepppy.weppcloud.routes.nodb_api.rhem_bp`)
+- **NoDb singletons**: [RhemPost](../../../nodb/mods/rhem.py), [Ron](../../../nodb/core/ron.py), [Unitizer](../../../nodb/unitizer.py)
+- **Controller docs**: [RHEM Controller Reference (2025 helper migration)](../../controllers_js/README.md#rhem-controller-reference-2025-helper-migration)
+- **Helper stack**: `authorize`, `get_wd`, `render_template`, `jsonify`, `exception_factory`
+- **Testing**: [tests/weppcloud/routes/test_rhem_bp.py](../../../../tests/weppcloud/routes/test_rhem_bp.py) — covers report rendering and JSON query helpers with stubbed output files.
+
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/report/rhem/results[/]` | `GET` | RhemPost (template context) | Serves template shell; individual reports fetched via AJAX |
+| `/runs/<string:runid>/<config>/report/rhem/run_summary[/]` | `GET` | RhemPost (template context), Ron (template context) | Counts `.sum` files under `rhem/output` to populate summary |
+| `/runs/<string:runid>/<config>/report/rhem/summary[/]` | `GET` | RhemPost (template context), Ron (template context), Unitizer (template context) | Injects `Unitizer` precisions for display |
+| `/runs/<string:runid>/<config>/report/rhem/return_periods[/]` | `GET` | RhemPost (template context), Ron (template context), Unitizer (template context) | Supports `extraneous=true` query flag for additional rows |
+| `/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments[/]` | `GET` | RhemPost.query_sub_val | — |
+| `/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments[/]` | `GET` | RhemPost.query_sub_val | — |
+| `/runs/<string:runid>/<config>/query/rhem/soil_loss/subcatchments[/]` | `GET` | RhemPost.query_sub_val | — |
+
+### Soils (`wepppy.weppcloud.routes.nodb_api.soils_bp`)
+- **NoDb singletons**: [Soils](../../../nodb/core/soils.py), [Disturbed](../../../nodb/mods/disturbed.py)
+- **Controller docs**: No dedicated controllers_js entry yet; UI reuses project + map helpers.
+- **Helper stack**: `load_run_context`, `parse_request_payload`, `jsonify`, `render_template`, `success_factory`, `exception_factory`, `error_factory`
+- **Testing**: [tests/weppcloud/routes/test_soils_bp.py](../../../../tests/weppcloud/routes/test_soils_bp.py) — covers mode toggles, ksflag boolean coercion, and disturbed sol_ver passthrough.
+
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/tasks/set_soil_mode[/]` | `POST` | Soils.mode (set), Soils.single_dbselection (set), Soils.single_selection (set) | Normalises optional single-selection/dbselection values before applying |
+| `/runs/<string:runid>/<config>/query/soils[/]` | `GET` | Soils.domsoil_d | — |
+| `/runs/<string:runid>/<config>/query/soils/subcatchments[/]` | `GET` | Soils.subs_summary | — |
+| `/runs/<string:runid>/<config>/query/soils/channels[/]` | `GET` | Soils.chns_summary | — |
+| `/runs/<string:runid>/<config>/report/soils[/]` | `GET` | Soils.report | — |
+| `/runs/<string:runid>/<config>/tasks/set_soils_ksflag[/]` | `POST` | Soils.ksflag (set) | Boolean payload handled via `parse_request_payload(boolean_fields={...})` |
+| `/runs/<string:runid>/<config>/tasks/set_disturbed_sol_ver[/]` | `POST` | Disturbed.sol_ver (set) | Updates `Disturbed.sol_ver` for compatibility with BAER workflows |
+
+### Treatments (`wepppy.weppcloud.routes.nodb_api.treatments_bp`)
+- **NoDb singletons**: [Treatments](../../../nodb/mods/treatments.py)
+- **Controller docs**: [Treatments Controller Reference (2025 helper migration)](../../controllers_js/README.md#treatments-controller-reference-2025-helper-migration)
+- **Helper stack**: `parse_request_payload`, `success_factory`, `error_factory`, `exception_factory`
+- **Testing**: [tests/weppcloud/routes/test_treatments_bp.py](../../../../tests/weppcloud/routes/test_treatments_bp.py) — covers mode coercion and error handling.
+
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/tasks/set_treatments_mode[/]` | `POST` | Treatments.mode (set) | Supports legacy `treatments_mode` field before coercing to enum |
+
+### Unitizer (`wepppy.weppcloud.routes.nodb_api.unitizer_bp`)
+- **NoDb singletons**: [Unitizer](../../../nodb/unitizer.py)
+- **Controller docs**: [Project Controller Contract (2024 refresh)](../../controllers_js/README.md#project-controller-contract-2024-refresh)
+- **Helper stack**: `load_run_context`, `parse_request_payload`, `success_factory`, `exception_factory`
+- **Testing**: [tests/weppcloud/routes/test_unitizer_bp.py](../../../../tests/weppcloud/routes/test_unitizer_bp.py) — covers preference persistence and context-processor wrappers.
+
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/report/tasks/set_unit_preferences[/]<br>/runs/<string:runid>/<config>/tasks/set_unit_preferences[/]` | `POST` | Unitizer.set_preferences | Report variant proxies to the main task for legacy templates |
+| `/runs/<string:runid>/<config>/unitizer[/]` | `GET` | Unitizer.context_processor_package | Invokes context processor to convert supplied value |
+| `/runs/<string:runid>/<config>/unitizer_units[/]` | `GET` | Unitizer.context_processor_package | Returns preferred units metadata via context processor |
+
+### WATAR (`wepppy.weppcloud.routes.nodb_api.watar_bp`)
+- **NoDb singletons**: [Ash](../../../nodb/mods/ash_transport/__init__.py), [AshPost](../../../nodb/mods/ash_transport/__init__.py), [Disturbed](../../../nodb/mods/disturbed.py), [Climate](../../../nodb/core/climate.py), [Wepp](../../../nodb/core/wepp.py), [Watershed](../../../nodb/core/watershed.py), [Unitizer](../../../nodb/unitizer.py), [Ron](../../../nodb/core/ron.py)
+- **Controller docs**: No dedicated controllers_js entry; ash panels reuse disturbed + project helpers.
+- **Helper stack**: `get_wd`, `authorize`, `parse_rec_intervals`, `render_template`, `jsonify`, `success_factory`, `exception_factory`
+- **Testing**: [tests/weppcloud/routes/test_rq_api_ash.py](../../../../tests/weppcloud/routes/test_rq_api_ash.py) — covers RQ interfaces; add blueprint tests when hillslope/run dashboards evolve.
+
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash[/]` | `GET` | Climate.cli_path, Ron.public, Watershed.sub_summary, Watershed.translator_factory, Wepp.output_dir | Runs multi-year ash model (Black/White) and writes hill summaries under `_ash/` |
+| `/runs/<string:runid>/<config>/tasks/set_ash_wind_transport[/]` | `POST` | Ash.run_wind_transport (set) | Accepts JSON body, toggles `Ash.run_wind_transport` |
+| `/runs/<string:runid>/<config>/report/run_ash[/]` | `GET` | Ash (template context) | — |
+| `/runs/<string:runid>/<config>/report/ash[/]` | `GET` | Ash.burn_class_summary, Ash.fire_date, Ash.ini_black_ash_depth_mm, Ash.ini_white_ash_depth_mm, AshPost.cum_return_periods, AshPost.recurrence_intervals, AshPost.return_periods, Climate.years | Builds watershed summary with burn class + recurrence tables |
+| `/runs/<string:runid>/<config>/query/ash_out[/]` | `GET` | AshPost.ash_out | — |
+| `/runs/<string:runid>/<config>/report/ash_contaminant[/]` | `GET, POST` | Ash.high_contaminant_concentrations, Ash.parse_cc_inputs, AshPost.burn_class_return_periods, AshPost.pw0_stats, AshPost.recurrence_intervals, AshPost.return_periods, Climate.years | Supports POST form updates via `Ash.parse_cc_inputs` before rendering |
+
+### Watershed (`wepppy.weppcloud.routes.nodb_api.watershed_bp`)
+- **NoDb singletons**: [Watershed](../../../nodb/core/watershed.py), [Ron](../../../nodb/core/ron.py)
+- **Controller docs**: [Map Controller Reference (2025 helper migration)](../../controllers_js/README.md#map-controller-reference-2025-helper-migration), [Subcatchment Delineation Controller (2025 helper migration)](../../controllers_js/README.md#subcatchment-delineation-controller-2025-helper-migration)
+- **Helper stack**: `authorize_and_handle_with_exception_factory`, `load_run_context`, `jsonify`, `render_template`, `success_factory`, `request`
+- **Testing**: [tests/weppcloud/routes/test_rq_api_subcatchments.py](../../../../tests/weppcloud/routes/test_rq_api_subcatchments.py) — covers related subcatchment jobs; add direct blueprint coverage when endpoints expand.
+
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/query/delineation_pass[/]` | `GET` | Watershed.has_channels, Watershed.has_subcatchments | — |
+| `/runs/<string:runid>/<config>/resources/channels.json` | `GET` | Ron.name, Watershed.channels_shp | Loads shapefile, injects project name before returning JSON |
+| `/runs/<string:runid>/<config>/query/extent[/]` | `GET` | Ron.extent | — |
+| `/runs/<string:runid>/<config>/report/channel` | `GET` | Ron.map | Renders `reports/channel.htm` with `Ron.map` |
+| `/runs/<string:runid>/<config>/query/outlet[/]` | `GET` | Watershed.outlet | — |
+| `/runs/<string:runid>/<config>/report/outlet[/]` | `GET` | Watershed.outlet | — |
+| `/runs/<string:runid>/<config>/query/has_dem[/]` | `GET` | Ron.has_dem | — |
+| `/runs/<string:runid>/<config>/query/watershed/subcatchments[/]` | `GET` | Watershed.subs_summary | — |
+| `/runs/<string:runid>/<config>/query/watershed/channels[/]` | `GET` | Watershed.chns_summary | — |
+| `/runs/<string:runid>/<config>/report/watershed[/]` | `GET` | Watershed (template context) | — |
+| `/runs/<string:runid>/<config>/tasks/abstract_watershed[/]` | `GET, POST` | Watershed.abstract_watershed | — |
+| `/runs/<string:runid>/<config>/tasks/sub_intersection[/]` | `POST` | Ron.map, Watershed.subwta | Uses `Ron.map.raster_intersection` to find Topaz IDs within extent |
+
+### WEPP (`wepppy.weppcloud.routes.nodb_api.wepp_bp`)
+- **NoDb singletons**: [Wepp](../../../nodb/core/wepp.py), [Ron](../../../nodb/core/ron.py), [Climate](../../../nodb/core/climate.py), [Landuse](../../../nodb/core/landuse.py), [Watershed](../../../nodb/core/watershed.py), [Unitizer](../../../nodb/unitizer.py), [RedisPrep](../../../nodb/redis_prep.py)
+- **Controller docs**: [Outlet Controller Reference (2025 helper migration)](../../controllers_js/README.md#outlet-controller-reference-2025-helper-migration), [Map Controller Reference (2025 helper migration)](../../controllers_js/README.md#map-controller-reference-2025-helper-migration), [Landuse Modify Controller Reference (2025 helper migration)](../../controllers_js/README.md#landuse-modify-controller-reference-2025-helper-migration)
+- **Helper stack**: `authorize_and_handle_with_exception_factory`, `get_wd`, `parse_request_payload`, `jsonify`, `render_template`, `send_file`, `success_factory`, `exception_factory`, `activate_query_engine`, `run_query`
+- **Testing**: [tests/weppcloud/routes/test_wepp_bp.py](../../../../tests/weppcloud/routes/test_wepp_bp.py) — covers query engine activation, report CSV rendering, and resource streaming.
+
+| Route | Methods | NoDb interactions | Notes |
+| --- | --- | --- | --- |
+| `/runs/<string:runid>/<config>/view/channel_def/<chn_key>[/]` | `GET` | — | Uses `wepppy.wepp.management` helpers (no NoDb singleton) |
+| `/runs/<string:runid>/<config>/view/management/<key>[/]` | `GET` | Landuse.managements | — |
+| `/runs/<string:runid>/<config>/tasks/set_run_wepp_routine[/]` | `POST` | Wepp.set_run_flowpaths, Wepp.set_run_frost, Wepp.set_run_pmet, Wepp.set_run_snow, Wepp.set_run_tcr, Wepp.set_run_wepp_ui | Toggles multiple execution flags via setter helpers |
+| `/runs/<string:runid>/<config>/report/wepp/results[/]` | `GET` | Climate (template context), RedisPrep (template context), Watershed (template context), Wepp (template context) | Loads `RedisPrep` cache plus `Wepp` summaries before rendering |
+| `/runs/<string:runid>/<config>/query/subcatchments_summary[/]` | `GET` | Ron.subs_summary | — |
+| `/runs/<string:runid>/<config>/query/channels_summary[/]` | `GET` | Ron.chns_summary | — |
+| `/runs/<string:runid>/<config>/report/wepp/prep_details[/]` | `GET` | Ron.chns_summary, Ron.subs_summary | — |
+| `/runs/<string:runid>/<config>/query/wepp/phosphorus_opts[/]` | `GET` | Wepp.phosphorus_opts | — |
+| `/runs/<string:runid>/<config>/report/wepp/run_summary[/]` | `GET` | Ron (template context), Unitizer (template context), Wepp (template context) | Renders aggregated run summaries with Unitizer preferences |
+| `/runs/<string:runid>/<config>/report/wepp/summary[/]` | `GET` | Climate.is_single_storm | — |
+| `/runs/<string:runid>/<config>/report/wepp/yearly_watbal[/]` | `GET` | — | Streams `TotalWatbalReport` data via `_render_report_csv` helper |
+| `/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse[/]` | `GET` | — | Aggregates by landuse before rendering |
+| `/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal[/]` | `GET` | Wepp.report_chn_watbal, Wepp.report_hill_watbal | — |
+| `/runs/<string:runid>/<config>/plot/wepp/streamflow[/]` | `GET` | — | Streams PNG from cached plot directory |
+| `/runs/<string:runid>/<config>/report/wepp/return_periods[/]` | `GET` | Climate.years, Watershed.translator_factory, Watershed.translator_factory(), Wepp.chn_topaz_ids_of_interest, Wepp.report_return_periods | Requires translator + recur intervals; optional extraneous flag |
+| `/runs/<string:runid>/<config>/report/wepp/frq_flood[/]` | `GET` | Watershed.translator_factory, Watershed.translator_factory(), Wepp.report_frq_flood, Wepp.report_frq_flood() | Delegates to `Wepp.report_frq_flood()` and translator |
+| `/runs/<string:runid>/<config>/report/wepp/sediment_characteristics[/]` | `GET` | Watershed.translator_factory, Watershed.translator_factory(), Wepp.report_sediment_delivery, Wepp.report_sediment_delivery() | Delegates to `Wepp.report_sediment_delivery()` with translator |
+| `/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments[/]` | `GET` | Wepp.query_sub_val | — |
+| `/runs/<string:runid>/<config>/query/chn_summary/<topaz_id>[/]` | `GET` | Ron.chn_summary | — |
+| `/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>[/]` | `GET` | Ron.sub_summary | — |
+| `/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>[/]` | `GET` | Ron.chn_summary | — |
+| `/runs/<string:runid>/<config>/query/topaz_wepp_map[/]` | `GET` | Watershed.translator_factory, Watershed.translator_factory() | — |
+| `/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>[/]` | `GET` | Ron.sub_summary | — |
+| `/runs/<string:runid>/<config>/resources/wepp_loss.tif` | `GET` | Ron.plot_dir | Streams raster from `Ron.plot_dir` |
+| `/runs/<string:runid>/<config>/resources/flowpaths_loss.tif` | `GET` | Ron.plot_dir | Streams raster from `Ron.plot_dir` |
+| `/runs/<string:runid>/<config>/query/bound_coords[/]` | `GET` | Ron.topaz_wd | — |
+
+## Maintaining This Reference
+- Capture new routes as you implement them: add entries to the table, list the singleton(s) touched, and note any helper deviations (for example, new RQ jobs or file streams).
+- When a route starts using a different helper, update the blueprint’s **Helper stack** bullet so other contributors know which utilities to stub.
+- Mirror updates in the test suite—extend or add coverage under `tests/weppcloud/routes/` and document any new stubs so they stay in sync with controller imports.
+- If you introduce a related UI controller section in `controllers_js/README.md`, link the exact heading here so doc-extract tooling keeps the cross references fresh.
+- Before committing, run `rg 'README.md' wepppy/weppcloud/routes/nodb_api` to confirm this is the only README in the directory and check that Markdown linting passes.

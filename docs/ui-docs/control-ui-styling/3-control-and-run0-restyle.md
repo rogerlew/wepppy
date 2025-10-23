@@ -3,14 +3,14 @@
 ## 1. Current state inventory
 
 ### 1.1 Control templates
-- All controller views extend `templates/controls/_base.htm`, which still ships Bootstrap era layout (`col-md-*`, `.form-group`) and inline spacing for titles, status, and summary panes.【F:wepppy/weppcloud/templates/controls/_base.htm†L1-L18】
+- All controller views now extend the Pure macros (`controls/*_pure.htm`). Legacy `_base.htm` is retained only for historical reference and archived templates.【F:wepppy/weppcloud/templates/controls/map_pure.htm†L1-L5】
 - Individual controls (e.g., `landuse.htm`) embed large conditional blocks that pivot on locale flags and module toggles (such as `ron.locales` or `ron.mods`), leading to deeply nested `<option>` lists and duplicated markup for display modes and advanced inputs.【F:wepppy/weppcloud/templates/controls/landuse.htm†L1-L117】
 - Specialized panes like Omni and BatchRunner pull in extra partials under `controls/omni/` or separate blueprints, but they still rely on the `_base.htm` DOM contract for status, stacktrace, and summary rendering.
 
 ### 1.2 Run 0 page shell
-- `routes/run_0/templates/0.htm` is a self-contained HTML document that bootstraps Bootstrap, jQuery, Leaflet, glify, and the legacy CSS bundle, then inlines a large `<style>` block to arrange the sidebar and content areas.【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L1-L133】
-- The page includes nearly every control template in sequence, producing a long single-column layout with repeated `controller-section` wrappers and bespoke spacing overrides.【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L69-L140】
-- Command routing is orchestrated via the `controllers.js` bundle and `preflight.js`, both included globally on the run page regardless of which controls are active.【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L22-L64】
+- `runs0_pure.htm` replaced the legacy `0.htm`, providing the Pure layout, table-of-contents, and shared command bar. The previous Bootstrap-era document is archived for reference only.【F:wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm†L1-L140】
+- The page composes control sections via Pure macros and the standardized `control_shell`, eliminating bespoke spacing overrides.
+- Command routing remains orchestrated via the `controllers.js` bundle and `preflight.js`, with StatusStream helper wiring shared across controls.
 
 ### 1.3 JavaScript orchestration
 - `control_base.js` defines the shared contract for ControlBase subclasses: run/job state management, stacktrace rendering, RQ job polling, and WebSocket integration via `controlBase.attach_status_stream`. Controls configure IDs and callbacks so the infrastructure can disable buttons, fetch `/rq/api/jobstatus/`, and stream status updates to the standard DOM nodes.【F:wepppy/weppcloud/controllers_js/control_base.js†L1-L138】【F:wepppy/weppcloud/controllers_js/control_base.js†L139-L220】

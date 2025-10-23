@@ -2,391 +2,249 @@
 <script>
 "use strict";
 
-var site_prefix = "{{ site_prefix }}";
-var runid = "{{ ron.runid }}";
-var config = "{{ ron.config_stem }}";
-var ispoweruser = {{ current_user.has_role('PowerUser') | tojson }};
-var WEPP_channel_critical_shear = null;
+(function () {
+    {% set mods_list = ron.mods or [] %}
+    {% if ron.boundary %}
+    {% set boundary = {
+        "url": site_prefix ~ "/" ~ ron.boundary,
+        "layerName": ron.boundary_name,
+        "style": {
+            "color": ron.boundary_color,
+            "opacity": 1,
+            "weight": 1,
+            "fillOpacity": 0.0
+        }
+    } %}
+    {% else %}
+    {% set boundary = None %}
+    {% endif %}
 
-var error = null;
+    {% set rangeland_has_covers = False %}
+    {% if 'rangeland_cover' in mods_list %}
+        {% set rangeland_has_covers = rangeland_cover.has_covers %}
+    {% endif %}
 
-var cellsize = {{ ron.cellsize }};
-var readonly = {{ ron.readonly | tojson }};
-var initialHasSbs = {{ ron.has_sbs | tojson }};
+    {% set omni_has_ran_scenarios = False %}
+    {% if 'omni' in mods_list and omni %}
+        {% set omni_has_ran_scenarios = omni.has_ran_scenarios %}
+    {% endif %}
 
-function window_resize() {
-    var map = MapController.getInstance();
-    if (map && typeof map.invalidateSize === 'function') {
-        map.invalidateSize();
+    {% set rhem_has_run = False %}
+    {% if 'rhem' in mods_list %}
+        {% set rhem_has_run = rhem.has_run %}
+    {% endif %}
+
+    {% set ash_has_results = False %}
+    {% set ash_depth_mode = None %}
+    {% if 'ash' in mods_list %}
+        {% set ash_has_results = ron.has_ash_results %}
+        {% set ash_depth_mode = ash.ash_depth_mode %}
+    {% endif %}
+
+    {% set climate_precip_mode = climate.precip_scaling_mode if climate.precip_scaling_mode is defined else None %}
+
+    var sitePrefix = {{ site_prefix | tojson }};
+    var runId = {{ ron.runid | tojson }};
+    var runConfig = {{ ron.config_stem | tojson }};
+
+    var runContext = {{ {
+        "run": {
+            "id": ron.runid,
+            "config": ron.config_stem,
+            "sitePrefix": site_prefix
+        },
+        "user": {
+            "isPowerUser": current_user.has_role('PowerUser'),
+            "isAuthenticated": user.is_authenticated,
+            "readonly": ron.readonly
+        },
+        "environment": {
+            "cellSize": ron.cellsize
+        },
+        "jobIds": rq_job_ids,
+        "mods": {
+            "list": mods_list,
+            "flags": {
+                "baer": 'baer' in mods_list,
+                "disturbed": 'disturbed' in mods_list,
+                "rangeland_cover": 'rangeland_cover' in mods_list,
+                "ash": 'ash' in mods_list,
+                "omni": 'omni' in mods_list,
+                "rhem": 'rhem' in mods_list,
+                "dss_export": 'dss_export' in mods_list
+            }
+        },
+        "flags": {
+            "initialHasSbs": ron.has_sbs
+        },
+        "map": {
+            "center": ron.center0,
+            "zoom": ron.zoom0,
+            "boundary": boundary
+        },
+        "data": {
+            "watershed": {
+                "hasChannels": watershed.has_channels,
+                "hasSubcatchments": watershed.has_subcatchments,
+                "hasOutlet": watershed.has_outlet
+            },
+            "landuse": {
+                "hasLanduse": landuse.has_landuse,
+                "mode": landuse.mode,
+                "singleSelection": landuse.single_selection
+            },
+            "soils": {
+                "hasSoils": soils.has_soils,
+                "mode": soils.mode,
+                "singleDbSelection": soils.single_dbselection
+            },
+            "climate": {
+                "hasStation": climate.has_station,
+                "hasClimate": climate.has_climate,
+                "hasObserved": climate.has_observed,
+                "precipScalingMode": climate_precip_mode
+            },
+            "observed": {
+                "hasResults": observed.results is not none
+            },
+            "rangelandCover": {
+                "hasCovers": rangeland_has_covers
+            },
+            "wepp": {
+                "hasRun": wepp.has_run,
+                "dssExportMode": wepp.dss_export_mode,
+                "hasDssZip": wepp.has_dss_zip
+            },
+            "omni": {
+                "hasRanScenarios": omni_has_ran_scenarios
+            },
+            "rhem": {
+                "hasRun": rhem_has_run
+            },
+            "ash": {
+                "hasResults": ash_has_results,
+                "depthMode": ash_depth_mode
+            }
+        },
+        "controllers": {
+            "map": {"boundary": boundary},
+            "channel": {"zoomMin": 11},
+            "subcatchment": {"defaultColorMap": "slp_asp"},
+            "project": {"readonly": ron.readonly},
+            "outlet": {},
+            "baer": {"mode": 0}
+        },
+        "ui": {
+            "tocTaskEmojis": toc_task_emojis
+        }
+    } | tojson }};
+
+    var modsFlags = runContext.mods && runContext.mods.flags ? runContext.mods.flags : {};
+
+    window.site_prefix = sitePrefix;
+    window.runid = runId;
+    window.runId = runId;
+    window.config = runConfig;
+    window.WEPP_channel_critical_shear = null;
+
+    function initUnitizers() {
+        if (typeof initUnitConverters === "function") {
+            try {
+                initUnitConverters(document);
+            } catch (err) {
+                console.warn("[Bootstrap] Unitizer initialisation failed", err);
+            }
+        }
     }
-};
 
-function onReady() {
-    console.log("Document ready");
+    function createBootstrapEntries(modFlags) {
+        var entries = [];
 
-    var project = Project.getInstance();
-    var team = Team.getInstance();
-    var map = MapController.getInstance();
-    var channel_ctrl = ChannelDelineation.getInstance();
-    var outlet = Outlet.getInstance();
-    var sub_ctrl = SubcatchmentDelineation.getInstance();
-    var landuse = Landuse.getInstance();
-    var lc_modify = LanduseModify.getInstance();
-    var soil = Soil.getInstance();
-    var climate = Climate.getInstance();
-    var wepp = Wepp.getInstance();
-    var observed = Observed.getInstance();
-    var debris_flow = DebrisFlow.getInstance();
-    var rap_ts = RAP_TS.getInstance();
-    var disturbed = Disturbed.getInstance();
-    var dss_export = DssExport.getInstance();
-    var path_ce = (typeof PathCE !== "undefined" && PathCE.getInstance) ? PathCE.getInstance() : null;
+        function add(name, symbol) {
+            if (!symbol || typeof symbol.getInstance !== "function") {
+                return;
+            }
+            entries.push({ controller: symbol, name: name });
+        }
 
-    if (disturbed && typeof disturbed.set_has_sbs_cached === 'function') {
-        disturbed.set_has_sbs_cached(initialHasSbs);
+        add("project", typeof Project !== "undefined" ? Project : null);
+        add("team", typeof Team !== "undefined" ? Team : null);
+        add("map", typeof MapController !== "undefined" ? MapController : null);
+        add("channel", typeof ChannelDelineation !== "undefined" ? ChannelDelineation : null);
+        add("outlet", typeof Outlet !== "undefined" ? Outlet : null);
+        add("subcatchment", typeof SubcatchmentDelineation !== "undefined" ? SubcatchmentDelineation : null);
+        add("landuse", typeof Landuse !== "undefined" ? Landuse : null);
+        add("landuseModify", typeof LanduseModify !== "undefined" ? LanduseModify : null);
+        add("soil", typeof Soil !== "undefined" ? Soil : null);
+        add("climate", typeof Climate !== "undefined" ? Climate : null);
+        add("observed", typeof Observed !== "undefined" ? Observed : null);
+        add("wepp", typeof Wepp !== "undefined" ? Wepp : null);
+        add("dssExport", typeof DssExport !== "undefined" ? DssExport : null);
+        add("debrisFlow", typeof DebrisFlow !== "undefined" ? DebrisFlow : null);
+        add("rapTs", typeof RAP_TS !== "undefined" ? RAP_TS : null);
+
+        if (modFlags.disturbed || modFlags.baer) {
+            add("disturbed", typeof Disturbed !== "undefined" ? Disturbed : null);
+        }
+        if (modFlags.baer) {
+            add("baer", typeof Baer !== "undefined" ? Baer : null);
+        }
+        if (modFlags.rangeland_cover) {
+            add("rangelandCover", typeof RangelandCover !== "undefined" ? RangelandCover : null);
+            add("rangelandCoverModify", typeof RangelandCoverModify !== "undefined" ? RangelandCoverModify : null);
+        }
+        if (modFlags.omni) {
+            add("omni", typeof Omni !== "undefined" ? Omni : null);
+        }
+        if (modFlags.rhem) {
+            add("rhem", typeof Rhem !== "undefined" ? Rhem : null);
+        }
+        if (modFlags.ash) {
+            add("ash", typeof Ash !== "undefined" ? Ash : null);
+        }
+        if (typeof PathCE !== "undefined" && PathCE && typeof PathCE.getInstance === "function") {
+            add("pathCe", PathCE);
+        }
+
+        return entries;
     }
 
-    initUnitConverters(document);
-    
-    /*
-     * Map
-     * ==================
-     */
-    map.setView({{ ron.center0 }}, {{ ron.zoom0 }});
+    function bootstrapControllers(context) {
+        var helper = window.WCControllerBootstrap || null;
+        var entries = createBootstrapEntries(context.mods && context.mods.flags ? context.mods.flags : {});
 
-    // call map.onMapChange to update mapStatus
-    map.onMapChange();
+        if (helper && typeof helper.setContext === "function") {
+            helper.setContext(context);
+        }
 
-    var mapWrapper = document.querySelector('.wc-map');
-    if (mapWrapper && window.ResizeObserver) {
-        var ro = new ResizeObserver(function () {
-            map.invalidateSize();
-        });
-        ro.observe(mapWrapper);
-    }
+        if (helper && typeof helper.bootstrapMany === "function") {
+            try {
+                helper.bootstrapMany(entries, context);
+                return;
+            } catch (err) {
+                console.error("Controller bootstrap failure", err);
+            }
+        }
 
-    if ({{ (ron.boundary != None) | tojson }}) {
-        map.addGeoJsonOverlay({
-            url: "{{ site_prefix }}/{{ ron.boundary }}",
-            layerName: '{{ ron.boundary_name }}',
-            style: {
-                color: "{{ ron.boundary_color }}",
-                opacity: 1,
-                weight: 1,
-                fillOpacity: 0.0
+        entries.forEach(function (entry) {
+            try {
+                var instance = entry.controller.getInstance();
+                if (instance && typeof instance.bootstrap === "function") {
+                    instance.bootstrap(context);
+                }
+            } catch (err) {
+                console.error("Fallback bootstrap failure for " + entry.name, err);
             }
         });
-
     }
-
-
-    {% if ('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods %}
-/*
-     * Baer mod
-     * ======================
-     */
-
-    var baer = Baer.getInstance();
-
-    baer.form.on("SBS_UPLOAD_TASK_COMPLETE", function () {
-        setTimeout(baer.show_sbs, 100);
-        setTimeout(baer.load_modify_class, 100);
-        if (disturbed && typeof disturbed.set_has_sbs_cached === 'function') {
-            disturbed.set_has_sbs_cached(true);
-            initialHasSbs = true;
-        }
-    });
-
-    baer.form.on("SBS_REMOVE_TASK_COMPLETE", function () {
-        if (disturbed && typeof disturbed.set_has_sbs_cached === 'function') {
-            disturbed.set_has_sbs_cached(false);
-            initialHasSbs = false;
-        }
-    });
-
-    baer.form.on("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {
-        setTimeout(baer.show_sbs, 100);
-        setTimeout(baer.load_modify_class, 100);
-    });
-
-    if ({{ ron.has_sbs | tojson }})
-    {
-        baer.show_sbs();
-        baer.load_modify_class();
-    }
-    baer.showHideControls(0);
-    {% endif %}
-
-    if (channel_ctrl && outlet) {
-        /*
-         * Channel
-         * ======================
-         */
-
-        // load the hidden inputs on channel form
-        channel_ctrl.onMapChange();
-
-        channel_ctrl.set_rq_job_id(channel_ctrl, {{ rq_job_ids.get("fetch_dem_and_build_channels_rq") | tojson }});
-
-        channel_ctrl.zoom_min = 11;
-        if ({{ watershed.has_channels | tojson }}) {
-            channel_ctrl.report();
-        }
-        if ({{ watershed.has_channels | tojson }} && !({{ watershed.has_subcatchments | tojson }})) {
-            channel_ctrl.show();
-        }
-
-        /*
-         * Outlet
-         * =====================
-         */
-        outlet.set_rq_job_id(outlet, {{ rq_job_ids.get("set_outlet_rq") | tojson }});
-
-        // Load outlet from server
-        if ({{ watershed.has_outlet | tojson }}) {
-            outlet.triggerEvent('SET_OUTLET_TASK_COMPLETED');
-        }
-
-        var initialOutletModeElement = document.querySelector("input[name='set_outlet_mode']:checked");
-        var initialOutletMode = initialOutletModeElement ? initialOutletModeElement.value : undefined;
-        if (initialOutletMode !== undefined) {
-            outlet.handleModeChange(initialOutletMode);
-        }
-
-        map.on("click", function (ev) {
-            outlet.setClickHandler(ev);
-        });
-    }
-
-    /*
-     * Subcatchment
-     * ===========================
-     */
-    sub_ctrl.initializeColorMapControls();
-    sub_ctrl.set_rq_job_id(sub_ctrl, {{ rq_job_ids.get("build_subcatchments_and_abstract_watershed_rq") | tojson }});
-
-    if ({{ watershed.has_subcatchments | tojson }}) {
-        sub_ctrl.show();
-        sub_ctrl.report();
-        channel_ctrl.show();
-        sub_ctrl.enableColorMap("slp_asp");
-    }
-
-    {% if 'rangeland_cover' in ron.mods %}
-    /*
-     * Rangeland Cover
-     * ===============================
-     */
-    var rangeland_cover = RangelandCover.getInstance();
-    var rangeland_cover_modify = RangelandCoverModify.getInstance();
-    rangeland_cover.setMode();
-
-    if ({{ rangeland_cover.has_covers | tojson }}) {
-        rangeland_cover.report();
-        sub_ctrl.enableColorMap("rangeland_cover");
-    }
-    {% endif %}
-
-    /*
-     * Landuse
-     * ======================
-     */
-
-    landuse.set_rq_job_id(landuse, {{ rq_job_ids.get("build_landuse_rq") | tojson }});
-
-    // load landuse
-    if ({{ landuse.has_landuse | tojson }} ) {
-        landuse.triggerEvent('LANDUSE_BUILD_TASK_COMPLETED');
-    }
-
-    landuse.restore({{ landuse.mode | int }}, {{ landuse.single_selection | int }});
-
-    /*
-     * Soil
-     * ======================
-     */
-
-    soil.set_rq_job_id(soil, {{ rq_job_ids.get("build_soils_rq") | tojson }});
-    soil.restore({{ soils.mode | int }});
-
-    if ({{ (soils.single_dbselection != none) | tojson }})
-    {
-        var soilSingleDbSelection = document.getElementById('soil_single_dbselection');
-        if (soilSingleDbSelection) {
-            soilSingleDbSelection.value = '{{ soils.single_dbselection }}';
-        }
-    }
-    // load soil
-    if ({{ soils.has_soils | tojson }} ) {
-        soil.triggerEvent('SOILS_BUILD_TASK_COMPLETED');
-    }
-
-    /*
-     * Climate
-     * ======================
-     */
-
-    if (typeof climate.handlePrecipScalingModeChange === "function") {
-        climate.handlePrecipScalingModeChange($("input[name='precip_scaling_mode']:checked").val());
-    }
-    climate.set_rq_job_id(climate, {{ rq_job_ids.get("build_climate_rq") | tojson }});
-
-    observed.hideControl();
-
-    // load climate
-    if ({{ climate.has_station | tojson }} ) {
-        climate.refreshStationSelection();
-        climate.viewStationMonthlies();
-    }
-
-    if ({{ climate.has_climate | tojson }} ) {
-        climate.report();
-    }
-
-    if ({{ climate.has_observed | tojson }} ||
-        {{ observed.results is not none | tojson }}) {
-        observed.showControl();
-    }
-
-    /*
-    * Wepp
-    * ======================
-    */
-
-    var weppModeInputs = document.querySelectorAll("[name='wepp_mode']");
-    if (wepp && typeof wepp.setMode === 'function') {
-        Array.prototype.forEach.call(weppModeInputs, function (input) {
-            input.addEventListener('change', function () {
-                wepp.setMode();
-            });
-        });
-
-        var weppSingleSelection = document.getElementById('wepp_single_selection');
-        if (weppSingleSelection) {
-            weppSingleSelection.addEventListener('change', function () {
-                wepp.setMode();
-            });
-        }
-    }
-
-    wepp.set_rq_job_id(wepp, {{ rq_job_ids.get("run_wepp_rq") | tojson }});
-
-    // show report if wepp has run
-    if ({{ wepp.has_run | tojson }} ) {
-        wepp.report();
-    }
-
-    {% if 'omni' in ron.mods and omni %}
-    /*
-    * Omni
-    * ======================
-    */
-    var omni = Omni.getInstance();
-    omni.load_scenarios_from_backend();
-
-    omni.set_rq_job_id(omni, {{ rq_job_ids.get("run_omni_rq") | tojson }});
-
-    if ({{ omni.has_ran_scenarios | tojson }}) {
-        omni.report_scenarios()
-    }
-
-    {% endif %}
-
-    {% if 'rhem' in ron.mods %}
-    /*
-    * Rhem
-    * ======================
-    */
-    var rhem = Rhem.getInstance();
-    rhem.set_rq_job_id(rhem, {{ rq_job_ids.get("run_rhem_rq") | tojson }});
-    if ({{ rhem.has_run | tojson }} ) {
-        rhem.report();
-    }
-    {% endif %}
-
-    /*
-    * Observed
-    * ====================
-    if ({{ observed.has_results | tojson }} ) {
-        observed.report();
-    }
-
-    {% if 'ash' in ron.mods %}
-    /*
-    * Ash
-    * ====================
-    ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
-
-    var ashDepthModeInputs = document.querySelectorAll("[name='ash_depth_mode']");
-    Array.prototype.forEach.call(ashDepthModeInputs, function (input) {
-        input.addEventListener('change', function () {
-            ash.setAshDepthMode();
-        });
-    });
-
-    // show report if ash model has run
-    if ({{ ron.has_ash_results | tojson }} ) {
-        ash.report();
-    }
-    ash.setAshDepthMode({{ ash.ash_depth_mode }});
-    {% endif %}
-
-    /*
-    * Ash
-    * ====================
-    rap_ts.set_rq_job_id(rap_ts, {{ rq_job_ids.get("fetch_and_analyze_rap_ts_rq") | tojson }});
-
-    /*
-    * DebrisFlow
-    * ====================
-    debris_flow.set_rq_job_id(debris_flow, {{ rq_job_ids.get("run_debris_flow_rq") | tojson }});
-
-    /*
-    * Project
-    * ====================
-    project.set_readonly_controls({{ ron.readonly | tojson }})
-
-    /*
-     * Team
-     * ======================
-     */
-    team.form.on("TEAM_ADDUSER_TASK_COMPLETED", function () {
-        team.report();
-    });
-
-    team.form.on("TEAM_REMOVEUSER_TASK_COMPLETED", function () {
-        team.report();
-    });
-
-    // show report if wepp has run
-    if ({{ user.is_authenticated | tojson }} ) {
-        team.report();
-    }
-
-    /*
-     * DSS Export
-     * =================
-     */
-    dss_export.setMode({{ wepp.dss_export_mode | int }});
-
-    if ({{ wepp.has_dss_zip | tojson }} ) {
-        dss_export.report();
-    }
-
-    /*
-     * Table of Contents
-     * =================
-     */
-    var tocTaskEmojis = {{ toc_task_emojis | tojson }};
-    window.tocTaskEmojis = tocTaskEmojis;
 
     function registerTocEmojiMetadata(navElement, emojiMap) {
         if (!navElement || !emojiMap) {
             return;
         }
-        var anchors = navElement.querySelectorAll('a.nav-link');
+        var anchors = navElement.querySelectorAll("a.nav-link");
         Array.prototype.forEach.call(anchors, function (anchor) {
-            var href = anchor.getAttribute('href');
+            var href = anchor.getAttribute("href");
             if (!href) {
                 return;
             }
@@ -394,82 +252,71 @@ function onReady() {
             if (!emoji) {
                 return;
             }
-            var existingText = (anchor.textContent || '').trim();
-            var storedText = anchor.getAttribute('data-original-text');
+            var existingText = (anchor.textContent || "").trim();
+            var storedText = anchor.getAttribute("data-original-text");
             if (!storedText) {
                 if (emoji && existingText.indexOf(emoji) === 0) {
                     existingText = existingText.slice(emoji.length).trim();
                 }
                 storedText = existingText;
             }
-            anchor.setAttribute('data-original-text', storedText);
-            anchor.setAttribute('data-toc-emoji-value', emoji);
-            if (!anchor.hasAttribute('data-toc-emoji')) {
-                anchor.setAttribute('data-toc-emoji', '');
+            anchor.setAttribute("data-original-text", storedText);
+            anchor.setAttribute("data-toc-emoji-value", emoji);
+            if (!anchor.hasAttribute("data-toc-emoji")) {
+                anchor.setAttribute("data-toc-emoji", "");
             }
             if (anchor.dataset) {
                 anchor.dataset.originalText = storedText;
                 anchor.dataset.tocEmojiValue = emoji;
-                if (typeof anchor.dataset.tocEmoji === 'undefined') {
-                    anchor.dataset.tocEmoji = '';
+                if (typeof anchor.dataset.tocEmoji === "undefined") {
+                    anchor.dataset.tocEmoji = "";
                 }
             }
             anchor.textContent = storedText;
         });
     }
 
-    $(function () {
-        var navSelector = "#toc";
-        var $myNav = $(navSelector);
-        if (typeof Toc !== 'undefined' && typeof Toc.init === 'function') {
-            Toc.init($myNav);
-            registerTocEmojiMetadata($myNav.get(0), tocTaskEmojis);
-        }
-        if (typeof updateUI === 'function' && typeof lastPreflightChecklist !== 'undefined' && lastPreflightChecklist) {
-            updateUI(lastPreflightChecklist);
-        }
-    });
-
     function computeScrollOffset() {
-        var header = document.querySelector('header .navbar');
+        var header = document.querySelector("header .navbar");
         if (header) {
             return Math.ceil(header.getBoundingClientRect().height) + 12;
         }
-        var cssOffset = parseInt(getComputedStyle(document.documentElement)
-            .getPropertyValue('--project-header-offset'), 10);
+        var cssOffset = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--project-header-offset"), 10);
         if (Number.isNaN(cssOffset)) {
             cssOffset = 72;
         }
         return cssOffset + 12;
     }
 
-    function scrollToSection(el) {
-        if (!el) {
+    function scrollToSection(element) {
+        if (!element) {
             return;
         }
         var offset = computeScrollOffset();
-        var targetY = window.pageYOffset + el.getBoundingClientRect().top - offset;
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
+        var targetY = window.pageYOffset + element.getBoundingClientRect().top - offset;
+        window.scrollTo({ top: targetY, behavior: "smooth" });
     }
 
-    var tocElement = document.getElementById('toc');
-    if (tocElement) {
-        tocElement.addEventListener('click', function (event) {
+    function setupTocScroll(navElement) {
+        if (!navElement) {
+            return;
+        }
+        navElement.addEventListener("click", function (event) {
             var link = event.target;
-            while (link && link !== tocElement) {
-                if (link.tagName === 'A') {
-                    var hasNavLinkClass = link.classList ? link.classList.contains('nav-link') : (' ' + link.className + ' ').indexOf(' nav-link ') !== -1;
+            while (link && link !== navElement) {
+                if (link.tagName === "A") {
+                    var hasNavLinkClass = link.classList ? link.classList.contains("nav-link") : (" " + link.className + " ").indexOf(" nav-link ") !== -1;
                     if (hasNavLinkClass) {
                         break;
                     }
                 }
                 link = link.parentElement;
             }
-            if (!link || link === tocElement) {
+            if (!link || link === navElement) {
                 return;
             }
-            var href = link.getAttribute('href');
-            if (!href || href.charAt(0) !== '#') {
+            var href = link.getAttribute("href");
+            if (!href || href.charAt(0) !== "#") {
                 return;
             }
             var targetElement = document.querySelector(href);
@@ -479,35 +326,81 @@ function onReady() {
             }
         });
     }
-}
-document.addEventListener('DOMContentLoaded', onReady);
 
-window.addEventListener('load', function () {
-    window.addEventListener('resize', window_resize);
-    setTimeout(window_resize, 100);
-
-    initPreflight("{{run_id}}");
-
-    {% if 'dss_export' not in ron.mods %}
-    // Ensure this runs after all other initialization
-    setTimeout(function () {
-        var dssExport = DssExport.getInstance();
-        if (dssExport && typeof dssExport.hide === 'function') {
-            dssExport.hide();
-            console.log("DssExport component hidden");
+    function initializeToc(emojiMap) {
+        var navElement = document.getElementById("toc");
+        if (!navElement) {
+            return;
         }
-    }, 300);
-    {% endif %}
-
-    var unitPreferenceElement = document.querySelector("input[name='uni_main_selector']:checked");
-    var pref = unitPreferenceElement ? parseInt(unitPreferenceElement.value, 10) : undefined;
-    setGlobalUnitizerPreference(pref);
-    
-    {% if 'ash' in ron.mods %}
-    if (ash && typeof ash.showHideControls === 'function') {
-        ash.showHideControls();
+        if (typeof Toc !== "undefined" && typeof Toc.init === "function" && window.jQuery) {
+            try {
+                Toc.init(window.jQuery(navElement));
+            } catch (err) {
+                console.warn("[Bootstrap] Failed to initialize TOC", err);
+            }
+        }
+        registerTocEmojiMetadata(navElement, emojiMap || {});
+        setupTocScroll(navElement);
+        if (typeof window.updateUI === "function" && typeof window.lastPreflightChecklist !== "undefined" && window.lastPreflightChecklist) {
+            try {
+                window.updateUI(window.lastPreflightChecklist);
+            } catch (err) {
+                console.warn("[Bootstrap] Failed to apply preflight UI", err);
+            }
+        }
     }
-    {% endif %}
-});
+
+    document.addEventListener("DOMContentLoaded", function () {
+        initUnitizers();
+        bootstrapControllers(runContext);
+        window.tocTaskEmojis = runContext.ui && runContext.ui.tocTaskEmojis ? runContext.ui.tocTaskEmojis : {};
+        initializeToc(window.tocTaskEmojis);
+    });
+
+    window.addEventListener("load", function () {
+        if (typeof initPreflight === "function") {
+            try {
+                initPreflight({{ run_id | tojson }});
+            } catch (err) {
+                console.warn("[Bootstrap] Failed to initialize preflight", err);
+            }
+        }
+
+        if (!modsFlags.dss_export) {
+            setTimeout(function () {
+                try {
+                    var dssExport = typeof DssExport !== "undefined" ? DssExport.getInstance() : null;
+                    if (dssExport && typeof dssExport.hide === "function") {
+                        dssExport.hide();
+                        console.log("DssExport component hidden");
+                    }
+                } catch (err) {
+                    console.warn("[Bootstrap] Failed to hide DSS export panel", err);
+                }
+            }, 300);
+        }
+
+        var unitPreferenceElement = document.querySelector("input[name='uni_main_selector']:checked");
+        var pref = unitPreferenceElement ? parseInt(unitPreferenceElement.value, 10) : undefined;
+        if (typeof setGlobalUnitizerPreference === "function") {
+            try {
+                setGlobalUnitizerPreference(pref);
+            } catch (err) {
+                console.warn("[Bootstrap] Failed to apply unit preference", err);
+            }
+        }
+
+        if (modsFlags.ash) {
+            try {
+                var ashController = typeof Ash !== "undefined" ? Ash.getInstance() : null;
+                if (ashController && typeof ashController.showHideControls === "function") {
+                    ashController.showHideControls();
+                }
+            } catch (err) {
+                console.warn("[Bootstrap] Failed to sync ash controls", err);
+            }
+        }
+    });
+}());
 </script>
 <!-- End wepppy/weppcloud/templates/js/run_page_bootstrap.js.j2 -->

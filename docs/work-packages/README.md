@@ -11,7 +11,7 @@ This directory groups long-running initiatives into self-contained "work package
 ```
 YYYYMMDD_slug/
 ├── package.md          # High-level brief: scope, goals, contacts, success criteria
-├── tracker.md          # Living status log: tasks, decisions, risks, next steps
+├── tracker.md          # Living status log: tasks, decisions, risks, next steps, communication between agents
 ├── prompts/
 │   ├── active/         # Prompts/checklists/scripts still in use
 │   └── completed/      # Retired prompts with outcomes or notes

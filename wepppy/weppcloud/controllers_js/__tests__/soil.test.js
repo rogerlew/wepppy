@@ -143,4 +143,16 @@ describe("Soil controller", () => {
 
         expect(postJsonMock).toHaveBeenCalledWith("tasks/set_disturbed_sol_ver/", { sol_ver: "9002.0" }, expect.any(Object));
     });
+
+    test("bootstrap wires job id and restores mode", () => {
+        const triggerSpy = jest.spyOn(soil, "triggerEvent");
+        soil.bootstrap({
+            jobIds: { build_soils_rq: "soil-bootstrap" },
+            data: { soils: { hasSoils: true, mode: 2, singleDbSelection: "DB2" } }
+        });
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(soil, "soil-bootstrap");
+        expect(triggerSpy).toHaveBeenCalledWith("SOILS_BUILD_TASK_COMPLETED");
+        expect(document.getElementById("soil_mode2").checked).toBe(true);
+    });
 });

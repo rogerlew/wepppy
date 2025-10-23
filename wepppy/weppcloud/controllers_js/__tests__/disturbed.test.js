@@ -157,4 +157,13 @@ describe("Disturbed controller", () => {
         await controller.reset_land_soil_lookup();
         expect(emitter.emit).toHaveBeenCalledWith("disturbed:lookup:reset", {});
     });
+
+    test("bootstrap seeds has_sbs cache", () => {
+        const controller = getController();
+        controller.clear_has_sbs_cache();
+
+        controller.bootstrap({ flags: { initialHasSbs: true } });
+
+        expect(controller.has_sbs()).toBe(true);
+    });
 });

@@ -577,6 +577,61 @@ var DssExport = (function () {
 
         controller.hideStacktrace();
 
+        var bootstrapState = {
+            reportDisplayed: false
+        };
+
+        controller.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "dssExport")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "post_dss_export_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "post_dss_export_rq")) {
+                    var value = jobIds.post_dss_export_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+            if (jobId && typeof controller.set_rq_job_id === "function") {
+                controller.set_rq_job_id(controller, jobId);
+            }
+
+            var exportData = (ctx.data && ctx.data.wepp) || {};
+            var nextMode = controllerContext.mode;
+            if (nextMode === undefined || nextMode === null) {
+                nextMode = exportData.dssExportMode !== undefined ? exportData.dssExportMode : exportData.dss_export_mode;
+            }
+            if (nextMode !== undefined && nextMode !== null) {
+                try {
+                    controller.setMode(nextMode);
+                } catch (err) {
+                    console.warn("[DssExport] Failed to apply bootstrap mode:", err);
+                }
+            }
+
+            var hasZip = controllerContext.hasZip;
+            if (hasZip === undefined) {
+                hasZip = exportData.hasDssZip !== undefined ? exportData.hasDssZip : exportData.has_dss_zip;
+            }
+            if (hasZip && !bootstrapState.reportDisplayed && typeof controller.report === "function") {
+                controller.report();
+                bootstrapState.reportDisplayed = true;
+            }
+
+            return controller;
+        };
+
         return controller;
     }
 

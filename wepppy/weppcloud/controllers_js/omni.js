@@ -835,6 +835,57 @@ var Omni = (function () {
             refreshScenarioOptions();
         });
 
+        var bootstrapState = {
+            scenariosLoaded: false,
+            reportDisplayed: false
+        };
+
+        omni.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "omni")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "run_omni_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_omni_rq")) {
+                    var value = jobIds.run_omni_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof omni.set_rq_job_id === "function") {
+                omni.set_rq_job_id(omni, jobId);
+            }
+
+            if (!bootstrapState.scenariosLoaded && typeof omni.load_scenarios_from_backend === "function") {
+                omni.load_scenarios_from_backend();
+                bootstrapState.scenariosLoaded = true;
+            }
+
+            var omniData = (ctx.data && ctx.data.omni) || {};
+            var hasRanScenarios = controllerContext.hasRanScenarios;
+            if (hasRanScenarios === undefined) {
+                hasRanScenarios = omniData.hasRanScenarios;
+            }
+
+            if (hasRanScenarios && !bootstrapState.reportDisplayed && typeof omni.report_scenarios === "function") {
+                omni.report_scenarios();
+                bootstrapState.reportDisplayed = true;
+            }
+
+            return omni;
+        };
+
         return omni;
     }
 

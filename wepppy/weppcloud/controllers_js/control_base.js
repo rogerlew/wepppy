@@ -933,6 +933,10 @@ function controlBase() {
                 cancelable: true
             });
             element.dispatchEvent(event);
+        },
+
+        bootstrap: function bootstrap() {
+            return this;
         }
     };
 }

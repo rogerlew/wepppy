@@ -282,4 +282,17 @@ describe("Landuse controller", () => {
         );
         expect(listener).toHaveBeenCalledWith(expect.objectContaining({ mode: 1 }));
     });
+
+    test("bootstrap sets job id and triggers build completion", () => {
+        const triggerSpy = jest.spyOn(landuse, "triggerEvent");
+        landuse.report = jest.fn();
+
+        landuse.bootstrap({
+            jobIds: { build_landuse_rq: "job-abc" },
+            data: { landuse: { hasLanduse: true, mode: 3, singleSelection: 202 } }
+        });
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "job-abc");
+        expect(triggerSpy).toHaveBeenCalledWith("LANDUSE_BUILD_TASK_COMPLETED");
+    });
 });

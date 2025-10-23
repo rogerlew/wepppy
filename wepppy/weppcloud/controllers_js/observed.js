@@ -395,6 +395,21 @@ var Observed = (function () {
 
         controller.hideStacktrace();
 
+        controller.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var climateData = (ctx.data && ctx.data.climate) || {};
+            var observedData = (ctx.data && ctx.data.observed) || {};
+            var shouldShow = Boolean(climateData.hasObserved || observedData.hasResults || observedData.resultsAvailable);
+
+            if (typeof controller.hideControl === "function") {
+                controller.hideControl();
+            }
+            if (shouldShow && typeof controller.showControl === "function") {
+                controller.showControl();
+            }
+            return controller;
+        };
+
         return controller;
     }
 

@@ -455,6 +455,49 @@ var RangelandCover = (function () {
             defaults: initialState.defaults
         });
 
+        var bootstrapState = {
+            reportTriggered: false,
+            modeApplied: false
+        };
+
+        rangeland.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "rangelandCover")
+                : {};
+
+            var mode = controllerContext.mode;
+            if (mode === undefined && ctx.data && ctx.data.rangelandCover) {
+                mode = ctx.data.rangelandCover.mode;
+            }
+            if (!bootstrapState.modeApplied && typeof rangeland.setMode === "function") {
+                try {
+                    rangeland.setMode(mode);
+                } catch (err) {
+                    console.warn("[RangelandCover] Failed to apply bootstrap mode", err);
+                }
+                bootstrapState.modeApplied = true;
+            }
+
+            var hasCovers = controllerContext.hasCovers;
+            if (hasCovers === undefined && ctx.data && ctx.data.rangelandCover) {
+                hasCovers = ctx.data.rangelandCover.hasCovers;
+            }
+
+            if (hasCovers && !bootstrapState.reportTriggered && typeof rangeland.report === "function") {
+                rangeland.report();
+                bootstrapState.reportTriggered = true;
+                try {
+                    SubcatchmentDelineation.getInstance().enableColorMap("rangeland_cover");
+                } catch (err) {
+                    console.warn("[RangelandCover] Failed to enable Subcatchment color map", err);
+                }
+            }
+
+            return rangeland;
+        };
+
         return rangeland;
     }
 

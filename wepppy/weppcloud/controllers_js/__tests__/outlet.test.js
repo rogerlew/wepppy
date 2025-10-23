@@ -252,4 +252,18 @@ describe("Outlet controller", () => {
         cursorButton.click();
         expect(outlet.cursorSelectionOn).toBe(false);
     });
+
+    test("bootstrap hooks map click handler and loads outlet", () => {
+        const mapOnSpy = jest.spyOn(mapInstance, "on");
+        const triggerSpy = jest.spyOn(outlet, "triggerEvent");
+
+        outlet.bootstrap({
+            jobIds: { set_outlet_rq: "outlet-job" },
+            data: { watershed: { hasOutlet: true } }
+        });
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(outlet, "outlet-job");
+        expect(mapOnSpy).toHaveBeenCalledWith("click", outlet.setClickHandler);
+        expect(triggerSpy).toHaveBeenCalledWith("SET_OUTLET_TASK_COMPLETED");
+    });
 });
