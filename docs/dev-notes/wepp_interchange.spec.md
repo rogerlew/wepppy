@@ -207,8 +207,8 @@ The legacy parsers live under `wepppy/wepp/out/` and act as data brokers for oth
 - 2025-02-17: Elevated orchestration via `run_wepp_hillslope_pass_interchange`/`run_wepp_hillslope_interchange` so a single call materializes all hillslope parquet artifacts beneath `wepp/output/interchange/`. Tests now assert every parquet target is emitted when PASS runs.
 - 2025-02-20: Added worker-pool helper integration across all hillslope writers with `/dev/shm` staging, taught EBE parsing to accept a `start_year` offset for 1-indexed WEPP years, and refreshed the interchange tests to assert the concurrent fan-out path.
 - 2025-02-21: Swapped the thread pool for a `ProcessPoolExecutor` plus a streaming writer queue so parsing and parquet emission overlap fully. End-to-end runtime on `/wc1/runs/co/copacetic-note/wepp/ag_fields/output/` dropped from ~5,360 s to ~469 s (≈11× faster), leaving raw file I/O as the primary cost.
-- 2025-02-24: Added watershed counterparts to the streaming writers (chan/chanwb/chan_peak/ebe/soil/pass) and introduced `run_wepp_watershed_interchange` with threaded fan-out. All writers now flush via chunked `ParquetWriter` calls and fall back to serial mode when the sandbox blocks process pools.
-- 2025-02-24: Hardened `write_parquet_with_pool` with a serial fallback when multiprocessing semaphores are unavailable; updated tests to encode per-file delays rather than cross-process barriers so concurrency assumptions hold across Python start methods.
+- 2025-10-23: Added watershed counterparts to the streaming writers (chan/chanwb/chan_peak/ebe/soil/pass) and introduced `run_wepp_watershed_interchange` with threaded fan-out. All writers now flush via chunked `ParquetWriter` calls and fall back to serial mode when the sandbox blocks process pools.
+- 2025-10-23: Hardened `write_parquet_with_pool` with a serial fallback when multiprocessing semaphores are unavailable; updated tests to encode per-file delays rather than cross-process barriers so concurrency assumptions hold across Python start methods.
 
 
 ```

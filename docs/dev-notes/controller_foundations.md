@@ -24,13 +24,14 @@ This note captures the shared architectural goals that sit behind the per-module
   - Provide APIs like `submitJob({ url, method, payload, status })` so controllers stop duplicating fetch + status + WebSocket wiring.
   - Offer convenience methods (`setStatus`, `appendStatus`, `clearStacktrace`) that write through to StatusStream or plain DOM automatically.
   - Emit lifecycle events via `WCEvents` (`job:started`, `job:completed`, `job:error`) so controllers attach behavior without monkey-patching `triggerEvent`.
+- Status telemetry flows exclusively through `controlBase.attach_status_stream` + `StatusStream`; new code must **not** reintroduce the old `WSClient` shim or direct WebSocket wiring.
 - Ensure new helpers work with both legacy adapters (jQuery-like objects) and native elements/components.
 
 ## 4. Documentation alignment
 - For every major controller domain, maintain a short “contract” doc:
   - Enumerate endpoints, payload schemas, emitted events, and unitizer hooks.
   - Reference the controller primitives used and any shared utilities.
-- Project-specific requests/events live in `docs/dev-notes/project-controller-migration-plan.md`; keep it in sync whenever payloads or data hooks change.
+- Project-specific requests/events live in `docs/work-packages/20251023_controller_modernization/notes/archived-plans/project-controller-migration-plan.md`; keep it in sync whenever payloads or data hooks change.
 - Update `controllers_js/AGENTS.md`, `controllers_js/README.md`, and the per-domain plan whenever new primitives or patterns ship.
 - Tie these contracts back into the refactor workflow so contributors see the broader picture before coding.
 

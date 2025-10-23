@@ -1,10 +1,10 @@
 # Agent Prompt: Implement controllers_js Helper Modules
 
 ## Mission
-Build the foundational vanilla JS helper modules that will replace our jQuery dependency inside `wepppy/weppcloud/controllers_js/`. Your implementation should follow the contracts documented in `docs/dev-notes/controllers_js-jquery-removal.md` (see **Helper Module Specifications** section).
+Build the foundational vanilla JS helper modules that will replace our jQuery dependency inside `wepppy/weppcloud/controllers_js/`. Your implementation should follow the contracts documented in `docs/dev-notes/controllers_js_jquery_retro.md` (see **Helper Module Specifications** section).
 
 ## Key References
-- `docs/dev-notes/controllers_js-jquery-removal.md` — authoritative spec (targets: `dom.js`, `http.js`, `forms.js`, `events.js`).
+- `docs/dev-notes/controllers_js_jquery_retro.md` — authoritative spec (targets: `dom.js`, `http.js`, `forms.js`, `events.js`).
 - `wepppy/weppcloud/controllers_js/` — bundle sources and current build script (`build_controllers_js.py`).
 - `wepppy/weppcloud/controllers_js/README.md` — update this file to describe the new helpers and bundling order.
 

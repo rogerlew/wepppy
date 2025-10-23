@@ -1,5 +1,25 @@
+"""Omni scenario orchestration controller.
+
+The Omni mod manages scenario clones and contrast analyses for WEPPcloud runs.
+It snapshots the working directory into `_pups/omni`, applies treatments,
+rebuilds WEPP inputs, executes hillslope and watershed runs, and aggregates
+loss metrics into DuckDB-backed parquet outputs. Results feed dashboards
+(`scenarios.out.parquet`, contrast NDJSON audit logs) and inform follow-on
+analytics such as RAP/RHEM summaries.
+
+Inputs:
+* Project working directory (climate, watershed, soils, landuse, disturbed data)
+* Scenario definitions provided by the UI (uniform burn, thinning, mulch, SBS map)
+* Contrast objectives and selection filters coming from Omni forms
+
+Outputs:
+* Per-scenario WEPP outputs stored under `_pups/omni/scenarios/*`
+* Contrast clones with curated `loss_pw0` datasets
+* Combined parquet reports for scenarios, hillslopes, and channels
+"""
+
 from __future__ import annotations
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import os
 import hashlib
@@ -16,9 +36,6 @@ from csv import DictWriter
 import base64
 
 import pandas as pd
-
-from functools import partial
-
 from enum import IntEnum
 from copy import deepcopy
 from glob import glob
@@ -26,14 +43,12 @@ import json
 import shutil
 from time import sleep
 
-# non-standard
-import utm
-
 # wepppy
 from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
-from wepppy.nodb.core import *
-from wepppy.nodb.base import *
+from wepppy.nodb.core import Climate, Soils, Watershed, Wepp
+from wepppy.nodb.base import NoDbBase, clear_locks, clear_nodb_file_cache, nodb_setter
+from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.version import copy_version_for_clone
 
 __all__ = [
@@ -47,6 +62,13 @@ __all__ = [
 OMNI_REL_DIR = '_pups/omni'
 
 LOGGER = logging.getLogger(__name__)
+
+CoverValues = Dict[str, float]
+RhemRunResult = Tuple[bool, str, float]
+ScenarioDef = Dict[str, Any]
+ScenarioDependency = Dict[str, Dict[str, Any]]
+ContrastMapping = Dict[int | str, str]
+ContrastDependency = Dict[str, Dict[str, Optional[str]]]
 
 
 def _clear_nodb_cache_and_locks(runid: str, pup_relpath: Optional[str] = None) -> None:
@@ -90,26 +112,28 @@ class OmniScenario(IntEnum):
 
     # TODO: search for references to mulching30 and mulching60
     @staticmethod
-    def parse(x):
-        if x == 'uniform_low':
+    def parse(value: int | str | OmniScenario) -> OmniScenario:
+        if isinstance(value, OmniScenario):
+            return value
+        if value == 'uniform_low' or value == OmniScenario.UniformLow.value:
             return OmniScenario.UniformLow
-        elif x == 'uniform_moderate':
+        elif value == 'uniform_moderate' or value == OmniScenario.UniformModerate.value:
             return OmniScenario.UniformModerate
-        elif x == 'uniform_high':
+        elif value == 'uniform_high' or value == OmniScenario.UniformHigh.value:
             return OmniScenario.UniformHigh
-        elif x == 'thinning':
+        elif value == 'thinning' or value == OmniScenario.Thinning.value:
             return OmniScenario.Thinning
-        elif x == 'mulch':
+        elif value == 'mulch' or value == OmniScenario.Mulch.value:
             return OmniScenario.Mulch
-        elif x == 'sbs_map':
+        elif value == 'sbs_map' or value == OmniScenario.SBSmap.value:
             return OmniScenario.SBSmap
-        elif x == 'undisturbed':
+        elif value == 'undisturbed' or value == OmniScenario.Undisturbed.value:
             return OmniScenario.Undisturbed
-        elif x == 'prescribed_fire':
+        elif value == 'prescribed_fire' or value == OmniScenario.PrescribedFire.value:
             return OmniScenario.PrescribedFire
-        raise KeyError(f"Invalid scenario: {x}")
+        raise KeyError(f"Invalid scenario: {value}")
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         the string representations match the distubed_class names
         """
@@ -131,7 +155,7 @@ class OmniScenario(IntEnum):
             return 'prescribed_fire'
         raise KeyError
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, OmniScenario):
             return self.value == other.value
         if isinstance(other, int):
@@ -141,7 +165,14 @@ class OmniScenario(IntEnum):
         return False
     
 
-def _run_contrast(contrast_id, contrast_name, contrasts, wd, runid, wepp_bin='wepp_a557997'):
+def _run_contrast(
+    contrast_id: str,
+    contrast_name: str,
+    contrasts: Dict[int | str, str],
+    wd: str,
+    runid: str,
+    wepp_bin: str = 'wepp_a557997'
+) -> str:
     from wepppy.nodb.core import Landuse, Soils, Wepp
     global OMNI_REL_DIR
 
@@ -204,7 +235,7 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, runid, wepp_bin='we
     return new_wd
 
 
-def _omni_clone(scenario_def: dict, wd: str, runid):
+def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
     global OMNI_REL_DIR
     
     scenario = scenario_def.get('type')
@@ -288,7 +319,7 @@ def _omni_clone(scenario_def: dict, wd: str, runid):
     return new_wd
 
 
-def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid:str, parent_wd: str):
+def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, parent_wd: str) -> None:
     """
     after _omni_clone copies watershed, climates, wepp from the base_scenario (parent)
 
@@ -344,7 +375,7 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid:str, pa
         os.remove(_join(new_wd, 'READONLY'))
 
 
-def _scenario_name_from_scenario_definition(scenario_def) -> str:
+def _scenario_name_from_scenario_definition(scenario_def: Dict[str, Any]) -> str:
     """
     Get the scenario name from the scenario definition.
     :param scenario_def: The scenario definition.
@@ -482,21 +513,21 @@ class Omni(NoDbBase):
             self._scenario_run_state = []
 
     @property
-    def scenarios(self):
-        return self._scenarios
+    def scenarios(self) -> List[Dict[str, Any]]:
+        return getattr(self, '_scenarios', []) or []
     
     @scenarios.setter
     @nodb_setter
-    def scenarios(self, value: set[OmniScenario]):
+    def scenarios(self, value: List[Dict[str, Any]]) -> None:
         self._scenarios = value
 
     @property
-    def scenario_dependency_tree(self) -> Dict[str, Dict[str, Any]]:
+    def scenario_dependency_tree(self) -> ScenarioDependency:
         return getattr(self, '_scenario_dependency_tree', {}) or {}
 
     @scenario_dependency_tree.setter
     @nodb_setter
-    def scenario_dependency_tree(self, value: Dict[str, Dict[str, Any]]):
+    def scenario_dependency_tree(self, value: ScenarioDependency) -> None:
         self._scenario_dependency_tree = value
 
     @property
@@ -505,10 +536,10 @@ class Omni(NoDbBase):
 
     @scenario_run_state.setter
     @nodb_setter
-    def scenario_run_state(self, value: List[Dict[str, Any]]):
+    def scenario_run_state(self, value: List[Dict[str, Any]]) -> None:
         self._scenario_run_state = value
 
-    def parse_scenarios(self, parsed_inputs):
+    def parse_scenarios(self, parsed_inputs: Iterable[Tuple[OmniScenario, ScenarioDef]]) -> None:
         """
         Parse the scenarios and their parameters into the NoDb structure.
         :param parsed_inputs: List of (scenario_enum, params) tuples
@@ -555,7 +586,7 @@ class Omni(NoDbBase):
                         'type': scenario_type
                     })
 
-    def parse_inputs(self, kwds):
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         """
         this is called from the web backend to set the parameters in the nodb
         """
@@ -597,38 +628,38 @@ class Omni(NoDbBase):
                 self._contrast_select_topaz_ids = select_topaz_ids
 
     @property
-    def contrasts(self):
-        return self._contrasts
+    def contrasts(self) -> Optional[List[ContrastMapping]]:
+        return getattr(self, '_contrasts', None)
     
     @contrasts.setter
     @nodb_setter
-    def contrasts(self, value):
+    def contrasts(self, value: Optional[List[ContrastMapping]]) -> None:
         self._contrasts = value
 
     @property
-    def contrast_names(self):
-        return self._contrast_names
+    def contrast_names(self) -> Optional[List[str]]:
+        return getattr(self, '_contrast_names', None)
 
     @contrast_names.setter
     @nodb_setter
-    def contrast_names(self, value):
+    def contrast_names(self, value: Optional[List[str]]) -> None:
         self._contrast_names = value
 
     @property
-    def contrast_dependency_tree(self) -> Dict[str, Dict[str, Any]]:
+    def contrast_dependency_tree(self) -> ContrastDependency:
         return getattr(self, '_contrast_dependency_tree', {}) or {}
 
     @contrast_dependency_tree.setter
     @nodb_setter
-    def contrast_dependency_tree(self, value: Dict[str, Dict[str, Any]]):
+    def contrast_dependency_tree(self, value: ContrastDependency) -> None:
         self._contrast_dependency_tree = value
 
     @property
-    def omni_dir(self):
+    def omni_dir(self) -> str:
         global OMNI_REL_DIR
         return _join(self.wd, OMNI_REL_DIR)
     
-    def get_objective_parameter_from_gpkg(self, objective_parameter, scenario=None):
+    def get_objective_parameter_from_gpkg(self, objective_parameter: str, scenario: Optional[str] = None) -> Tuple[List[Any], float]:
         if scenario is None:
             gpkg_fn = glob(_join(self.wd, 'export/arcmap/*.gpkg'))[0]
         else:
@@ -636,19 +667,24 @@ class Omni(NoDbBase):
 
         objective_parameter_descending, total_objective_parameter = gpkg_extract_objective_parameter(gpkg_fn, obj_param=objective_parameter)
         return objective_parameter_descending, total_objective_parameter
-
-    def clear_contrasts(self):
+    
+    def clear_contrasts(self) -> None:
         with self.locked():
             self._contrasts = None
             self._contrast_names = None
 
-    def build_contrasts(self, control_scenario_def, contrast_scenario_def,
-                        obj_param='Runoff_mm',
-                        contrast_cumulative_obj_param_threshold_fraction=0.8,
-                        contrast_hillslope_limit=None,
-                        hill_min_slope=None, hill_max_slope=None,
-                        select_burn_severities=None,
-                        select_topaz_ids=None):
+    def build_contrasts(
+        self,
+        control_scenario_def: ScenarioDef,
+        contrast_scenario_def: ScenarioDef,
+        obj_param: str = 'Runoff_mm',
+        contrast_cumulative_obj_param_threshold_fraction: float = 0.8,
+        contrast_hillslope_limit: Optional[int] = None,
+        hill_min_slope: Optional[float] = None,
+        hill_max_slope: Optional[float] = None,
+        select_burn_severities: Optional[List[int]] = None,
+        select_topaz_ids: Optional[List[int]] = None
+    ) -> None:
         """
         Extracts the specified objective parameter from the specified GeoPackage file.
 
@@ -699,12 +735,12 @@ class Omni(NoDbBase):
         self._build_contrasts()
 
     @property
-    def base_scenario(self):
+    def base_scenario(self) -> OmniScenario:
         if self.has_sbs:
             return OmniScenario.SBSmap
         return OmniScenario.Undisturbed
 
-    def _build_contrasts(self):
+    def _build_contrasts(self) -> None:
         global OMNI_REL_DIR
 
         obj_param = self._contrast_object_param
@@ -809,7 +845,7 @@ class Omni(NoDbBase):
                 self._contrasts.extend(contrasts)
                 self._contrast_names.extend(contrast_names)
 
-    def run_omni_contrasts(self):
+    def run_omni_contrasts(self) -> None:
         global OMNI_REL_DIR
 
         self.logger.info('run_omni_contrasts')
@@ -818,12 +854,14 @@ class Omni(NoDbBase):
             self.logger.info('  run_omni_contrasts: No contrasts to run')
             return
 
-        dependency_tree = dict(self.contrast_dependency_tree)
-        active_contrasts = set()
+        dependency_tree: ContrastDependency = dict(self.contrast_dependency_tree)
+        active_contrasts: Set[str] = set()
 
-        total_contrasts = len(self.contrasts)
+        contrasts: List[ContrastMapping] = self.contrasts or []
+        contrast_names: List[str] = self.contrast_names or []
+        total_contrasts = len(contrasts)
 
-        for contrast_id, (contrast_name, _contrasts) in enumerate(zip(self.contrast_names, self.contrasts), start=1):
+        for contrast_id, (contrast_name, _contrasts) in enumerate(zip(contrast_names, contrasts), start=1):
             active_contrasts.add(contrast_name)
             dependencies = self._contrast_dependencies(contrast_name)
             signature = self._contrast_signature(contrast_name, _contrasts)
@@ -856,21 +894,25 @@ class Omni(NoDbBase):
             dependency_tree.pop(contrast_name, None)
         self.contrast_dependency_tree = dependency_tree
 
-        self.contrast_dependency_tree = dependency_tree
-
-    def run_omni_contrast(self, contrast_id: int):
+    def run_omni_contrast(self, contrast_id: int) -> str:
         self.logger.info(f'run_omni_contrast {contrast_id}')
-        contrast_name = self.contrast_names[contrast_id - 1]
-        _contrasts = self.contrasts[contrast_id - 1]
+        contrast_names = self.contrast_names or []
+        contrasts = self.contrasts or []
+        contrast_name = contrast_names[contrast_id - 1]
+        _contrasts = contrasts[contrast_id - 1]
         omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
         self._post_omni_run(omni_wd, contrast_name)
+        return omni_wd
 
-    def contrasts_report(self):
+    def contrasts_report(self) -> pd.DataFrame:
         global OMNI_REL_DIR
 
         parquet_files = {}
 
-        for contrast_id, (contrast_name, _contrasts) in enumerate(zip(self.contrast_names, self.contrasts), start=1):
+        if not self.contrast_names or not self.contrasts:
+            return pd.DataFrame(columns=['key', 'v', 'units', 'control_scenario', 'contrast_topaz_id', 'contrast'])
+
+        for contrast_id, (contrast_name, _contrasts) in enumerate(zip(self.contrast_names or [], self.contrasts or []), start=1):
             parquet_files[contrast_name] = _join(self.wd, OMNI_REL_DIR, 'contrasts', str(contrast_id), 'wepp', 'output', 'loss_pw0.out.parquet')
 
         dfs = []
@@ -947,7 +989,7 @@ class Omni(NoDbBase):
 
         return scenario_path if _exists(scenario_path) else (base_path if scenario_key == str(self.base_scenario) else scenario_path)
 
-    def _scenario_signature(self, scenario_def: dict) -> str:
+    def _scenario_signature(self, scenario_def: ScenarioDef) -> str:
         sanitized: Dict[str, Any] = {}
         for key, value in scenario_def.items():
             if key == 'type' and isinstance(value, OmniScenario):
@@ -956,12 +998,12 @@ class Omni(NoDbBase):
                 sanitized[key] = value
         return json.dumps(sanitized, sort_keys=True, default=str)
 
-    def _scenario_dependency_target(self, scenario: OmniScenario, scenario_def: dict) -> Optional[str]:
+    def _scenario_dependency_target(self, scenario: OmniScenario, scenario_def: ScenarioDef) -> Optional[str]:
         if scenario == OmniScenario.Mulch:
             return scenario_def.get('base_scenario')
         return str(self.base_scenario)
 
-    def _contrast_dependencies(self, contrast_name: str) -> Dict[str, Dict[str, Optional[str]]]:
+    def _contrast_dependencies(self, contrast_name: str) -> ContrastDependency:
         control_part, target_part = contrast_name.split('__to__')
         control_scenario_raw = control_part.split(',')[0]
         control_key = self._normalize_scenario_key(control_scenario_raw)
@@ -977,7 +1019,7 @@ class Omni(NoDbBase):
             }
         return dependencies
 
-    def _contrast_signature(self, contrast_name: str, contrast_payload: dict) -> str:
+    def _contrast_signature(self, contrast_name: str, contrast_payload: ContrastMapping) -> str:
         payload_serializable = {
             'name': contrast_name,
             'items': sorted((str(k), str(v)) for k, v in contrast_payload.items())
@@ -1029,7 +1071,7 @@ class Omni(NoDbBase):
         return cpu_count
 
 
-    def run_omni_scenarios(self):
+    def run_omni_scenarios(self) -> None:
         """
         Runs all the scenarios in two passes to ensure dependencies are met.
         has dependency checking and skips scenarios that are up-to-date.
@@ -1045,7 +1087,7 @@ class Omni(NoDbBase):
             self.logger.info('  run_omni_scenarios: No scenarios to run')
             raise Exception('No scenarios to run')
 
-        dependency_tree = dict(self.scenario_dependency_tree)
+        dependency_tree: ScenarioDependency = dict(self.scenario_dependency_tree)
 
         run_states: List[Dict[str, Any]] = []
         self.scenario_run_state = run_states
@@ -1053,7 +1095,7 @@ class Omni(NoDbBase):
         active_scenarios = set()
         processed_scenarios = set()
 
-        def dependency_info(scenario_enum: OmniScenario, scenario_def: dict):
+        def dependency_info(scenario_enum: OmniScenario, scenario_def: ScenarioDef):
             scenario_name = _scenario_name_from_scenario_definition(scenario_def)
             active_scenarios.add(scenario_name)
             dependency_target = self._scenario_dependency_target(scenario_enum, scenario_def)
@@ -1201,7 +1243,7 @@ class Omni(NoDbBase):
         self.logger.info('  run_omni_scenarios: compiling hillslope summaries')
         self.compile_hillslope_summaries()
 
-    def run_omni_scenario(self, scenario_def: dict):
+    def run_omni_scenario(self, scenario_def: ScenarioDef) -> Tuple[str, str]:
         from wepppy.nodb.core import Landuse, Soils, Wepp
         from wepppy.nodb.mods.disturbed import Disturbed
         from wepppy.nodb.mods.treatments import Treatments
@@ -1421,7 +1463,7 @@ class Omni(NoDbBase):
         return new_wd, scenario_name
 
     @property
-    def has_ran_scenarios(self):
+    def has_ran_scenarios(self) -> bool:
         global OMNI_REL_DIR
         if not hasattr(self, 'scenarios'):
             return False
@@ -1434,7 +1476,7 @@ class Omni(NoDbBase):
 
         return True
 
-    def scenarios_report(self):
+    def scenarios_report(self) -> pd.DataFrame:
         """
         compiles the loss_pw0.out.parquet across the scenarios
         """
@@ -1464,7 +1506,7 @@ class Omni(NoDbBase):
 
         return combined
     
-    def compile_hillslope_summaries(self):
+    def compile_hillslope_summaries(self) -> pd.DataFrame:
         global OMNI_REL_DIR
         from wepppy.nodb.core import Wepp
         from wepppy.wepp.reports import HillSummaryReport
@@ -1507,8 +1549,10 @@ class Omni(NoDbBase):
         out_path = _join(self.wd, OMNI_REL_DIR, 'scenarios.hillslope_summaries.parquet')
         combined.to_parquet(out_path)
 
+        return combined
 
-    def compile_channel_summaries(self):
+
+    def compile_channel_summaries(self) -> pd.DataFrame:
         global OMNI_REL_DIR
         from wepppy.nodb.core import Wepp
         from wepppy.wepp.reports import ChannelSummaryReport
@@ -1528,6 +1572,9 @@ class Omni(NoDbBase):
             df['scenario'] = scenario
             dfs.append(df)
 
+        if not dfs:
+            return pd.DataFrame()
+
         combined = pd.concat(dfs, ignore_index=True)
 
         # WeppID,TopazID,Landuse,Soil,Length (m),Hillslope Area (ha),Runoff (mm),Lateral Flow (mm),Baseflow (mm),Soil Loss (kg/ha),Sediment Deposition (kg/ha),Sediment Yield (kg/ha),scenario
@@ -1535,6 +1582,8 @@ class Omni(NoDbBase):
 
         out_path = _join(self.wd, OMNI_REL_DIR, 'scenarios.channel_summaries.parquet')
         combined.to_parquet(out_path)
+
+        return combined
 
 # [x] add NTU
 # [ ] add NTU for outlet

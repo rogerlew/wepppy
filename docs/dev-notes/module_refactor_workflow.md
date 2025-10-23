@@ -8,7 +8,7 @@
 - Coordinating validation (Jest + Python tests) before handing off to downstream agents.
 
 ## Prerequisites
-- Review the helper specs in `docs/dev-notes/controllers_js-jquery-removal.md`.
+- Review the helper specs captured in `docs/dev-notes/controllers_js_jquery_retro.md`.
 - Skim `wepppy/weppcloud/controllers_js/AGENTS.md` for the current controllers_js agent expectations.
 - Skim the existing controller’s template(s) under `wepppy/weppcloud/templates/controls/`.
 - Identify backend routes (`wepppy/weppcloud/routes/...`) handling the controller’s requests.
