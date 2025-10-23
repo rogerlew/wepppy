@@ -2,11 +2,13 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Treatments controller", () => {
     let httpRequestMock;
     let postJsonMock;
-    let wsClientInstance;
     let baseInstance;
+    let statusStreamMock;
     let treatments;
     let emittedEvents;
 
@@ -92,20 +94,13 @@ describe("Treatments controller", () => {
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn(),
-        };
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn(),
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
         global.StatusStream = undefined;
 
         await import("../treatments.js");
@@ -118,7 +113,6 @@ describe("Treatments controller", () => {
         delete global.WCHttp;
         delete global.WCForms;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.StatusStream;
         delete global.WCEvents;
         delete global.url_for_run;
@@ -196,9 +190,12 @@ describe("Treatments controller", () => {
             "rq/api/build_treatments",
             expect.objectContaining({ method: "POST", body: expect.any(FormData) })
         );
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(treatments, "job-123");
-        expect(document.querySelector("#status").innerHTML).toContain("build_treatments job submitted");
+        expect(statusStreamMock.append).toHaveBeenCalledWith(
+            expect.stringContaining("build_treatments job submitted"),
+            expect.any(Object)
+        );
 
         const started = emittedEvents.find((entry) => entry.event === "treatments:run:started");
         const submitted = emittedEvents.find((entry) => entry.event === "treatments:run:submitted");

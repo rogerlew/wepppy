@@ -3,7 +3,7 @@
 
 ## Discovery Log (2025-10-22)
 - Legacy controller (`wepppy/weppcloud/controllers_js/subcatchment_delineation.js`) is still jQuery-heavy: direct `$("#...")` bindings, `.on()` namespaced listeners, and manual AJAX flows.
-- Job orchestration rides on `controlBase` + `WSClient`, but custom `triggerEvent` overrides gate downstream controllers (`ChannelDelineation`, `Wepp`). Need to translate these into `WCEvents` contracts (`subcatchment:build:*`) while keeping the legacy notifications alive.
+- Job orchestration rides on `controlBase.attach_status_stream`, but custom `triggerEvent` overrides gate downstream controllers (`ChannelDelineation`, `Wepp`). Need to translate these into `WCEvents` contracts (`subcatchment:build:*`) while keeping the legacy notifications alive.
 - Color-map UI relies on radio groups, range inputs, and explicit `render_legend` calls. Sliders/radios are wired via bespoke helpers (`bindSlider`, `bindRadioGroup`). Expect to replace these with `WCDom` delegation + targeted helpers.
 - GeoJSON rendering toggles `L.layerGroup` and a custom WebGL layer with palette lookups. Need to ensure helper adoption does not break Leaflet integrations or label overlays.
 - Current payload assembly happens via form serialization and manual boolean coercion (`"on"`). Backend endpoints likely accept legacy form posts; will move to `parse_request_payload` for consistent typing.
@@ -25,7 +25,7 @@
 - `controlBase` responsibilities stay intact—`build()` triggers the WebSocket job machinery, but build lifecycle also emits `subcatchment:build:started`/`completed`/`error` so neighbouring controllers subscribe without inspecting DOM internals. Existing `triggerEvent` overrides still fire to keep Channel/WEPP legacy hooks alive.
 - Backend route `/rq/api/build_subcatchments_and_abstract_watershed` consumes JSON or form data through `parse_request_payload`, coercing booleans (`clip_hillslopes`, `walk_flowpaths`, `mofe_buffer`, `bieger2015_widths`) and numerics before mutating the `Watershed` singleton. Pytest coverage (`tests/weppcloud/routes/test_rq_api_subcatchments.py`) verifies queue wiring and batch-mode short-circuit behaviour.
 - Templates shed inline `onclick` handlers; buttons expose `data-subcatchment-action="build"` and color-map controls reuse shared Pure macros with helper-friendly attributes. Map legends continue to render through `render_legend`, but legend HTML now flows through `setSubLegend`, which tolerates both jQuery and raw elements.
-- Added Jest suite `__tests__/subcatchment_delineation.test.js` to lock in build submission, delegated color-map toggles, and error propagation (via the new event bus). Stubs cover `MapController`, `WSClient`, Leaflet glify layers, and ensure these tests run under jsdom without touching the real map stack.
+- Added Jest suite `__tests__/subcatchment_delineation.test.js` to lock in build submission, delegated color-map toggles, and error propagation (via the new event bus). Stubs cover `MapController`, the StatusStream wiring, Leaflet glify layers, and ensure these tests run under jsdom without touching the real map stack.
 
 ## Open Questions / Follow-ups
 - Do existing helpers expose a clean abstraction for Leaflet WebGL layer lifecycle? If not, document the gap and implement minimal wrappers without regressing performance.

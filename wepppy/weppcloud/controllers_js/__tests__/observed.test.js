@@ -2,12 +2,14 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Observed controller", () => {
     const STATUS_DONE = "Running observed model fit… done.";
 
     let httpMock;
     let baseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let observed;
 
     beforeEach(async () => {
@@ -41,20 +43,13 @@ describe("Observed controller", () => {
         };
         global.WCHttp = httpMock;
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             triggerEvent: jest.fn(),
             hideStacktrace: jest.fn()
-        };
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn()
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         window.url_for_run = jest.fn((path) => "/weppcloud/" + path);
 
@@ -67,7 +62,6 @@ describe("Observed controller", () => {
         delete window.Observed;
         delete global.WCHttp;
         delete global.controlBase;
-        delete global.WSClient;
         delete window.url_for_run;
         if (global.WCDom) {
             delete global.WCDom;
@@ -102,8 +96,8 @@ describe("Observed controller", () => {
             },
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
-        expect(wsClientInstance.connect).toHaveBeenCalled();
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith(
             "job:started",
             expect.objectContaining({ task: "observed:model-fit" })
@@ -144,7 +138,7 @@ describe("Observed controller", () => {
         );
         expect(errors).toHaveLength(1);
         expect(errors[0]).toEqual(expect.objectContaining({ task: "observed:model-fit" }));
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 
     test("onWeppRunCompleted toggles visibility based on availability", async () => {

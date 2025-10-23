@@ -136,8 +136,8 @@ var Wepp = (function () {
 
         wepp.statusPanelEl = dom.qs("#wepp_status_panel");
         wepp.stacktracePanelEl = dom.qs("#wepp_stacktrace_panel");
+        wepp.statusSpinnerEl = wepp.statusPanelEl ? wepp.statusPanelEl.querySelector("#braille") : null;
         wepp.statusStream = null;
-        wepp.ws_client = null;
         wepp._delegates = [];
 
         if (weppEvents) {
@@ -157,35 +157,25 @@ var Wepp = (function () {
             }
         };
 
-        if (typeof StatusStream !== "undefined" && wepp.statusPanelEl) {
-            var stacktraceConfig = null;
-            if (wepp.stacktracePanelEl) {
-                stacktraceConfig = { element: wepp.stacktracePanelEl };
-            }
-            wepp.statusStream = StatusStream.attach({
-                element: wepp.statusPanelEl,
-                channel: "wepp",
-                runId: window.runid || window.runId || null,
-                logLimit: 400,
-                stacktrace: stacktraceConfig,
-                onTrigger: function (detail) {
-                    if (detail && detail.event) {
-                        wepp.triggerEvent(detail.event, detail);
-                    }
+        wepp.attach_status_stream(wepp, {
+            element: wepp.statusPanelEl,
+            channel: "wepp",
+            runId: window.runid || window.runId || null,
+            stacktrace: wepp.stacktracePanelEl ? { element: wepp.stacktracePanelEl } : null,
+            spinner: wepp.statusSpinnerEl,
+            logLimit: 400,
+            onTrigger: function (detail) {
+                if (detail && detail.event) {
+                    wepp.triggerEvent(detail.event, detail);
                 }
-            });
-        } else {
-            wepp.ws_client = new WSClient("wepp_form", "wepp");
-            wepp.ws_client.attachControl(wepp);
-        }
+            }
+        });
 
         var baseTriggerEvent = wepp.triggerEvent.bind(wepp);
         wepp.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "WEPP_RUN_TASK_COMPLETED") {
-                if (wepp.ws_client) {
-                    wepp.ws_client.disconnect();
-                }
+                wepp.disconnect_status_stream(wepp);
                 wepp.report();
                 try {
                     Observed.getInstance().onWeppRunCompleted();
@@ -325,17 +315,13 @@ var Wepp = (function () {
             if (infoAdapter && typeof infoAdapter.text === "function") {
                 infoAdapter.text("");
             }
-            if (statusAdapter && typeof statusAdapter.html === "function") {
-                statusAdapter.html(taskMsg + "...");
-            }
+            wepp.clear_status_messages(wepp);
             if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
                 stacktraceAdapter.text("");
             }
             wepp.appendStatus(taskMsg + "...");
 
-            if (wepp.ws_client) {
-                wepp.ws_client.connect();
-            }
+            wepp.connect_status_stream(wepp);
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
 

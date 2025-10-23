@@ -208,6 +208,7 @@ var RAP_TS = (function () {
         var hintElement = formElement ? dom.qs(SELECTORS.hint, formElement) : null;
         var statusPanelElement = dom.qs("#rap_ts_status_panel");
         var stacktracePanelElement = dom.qs("#rap_ts_stacktrace_panel");
+        var statusSpinnerElement = statusPanelElement ? statusPanelElement.querySelector("#braille") : null;
 
         var controller = Object.assign(base, {
             dom: dom,
@@ -224,7 +225,7 @@ var RAP_TS = (function () {
             statusPanelEl: statusPanelElement,
             stacktracePanelEl: stacktracePanelElement,
             statusStream: null,
-            ws_client: null,
+            statusSpinnerEl: statusSpinnerElement,
             command_btn_id: "btn_build_rap_ts",
             _delegates: [],
             state: {
@@ -253,27 +254,19 @@ var RAP_TS = (function () {
 
         controller.setStatusMessage = controller.appendStatus;
 
-        if (typeof StatusStream !== "undefined" && controller.statusPanelEl) {
-            var stacktraceConfig = null;
-            if (controller.stacktracePanelEl) {
-                stacktraceConfig = { element: controller.stacktracePanelEl };
-            }
-            controller.statusStream = StatusStream.attach({
-                element: controller.statusPanelEl,
-                channel: WS_CHANNEL,
-                runId: window.runid || window.runId || null,
-                logLimit: 200,
-                stacktrace: stacktraceConfig,
-                onTrigger: function (detail) {
-                    if (detail && detail.event) {
-                        controller.triggerEvent(detail.event, detail);
-                    }
+        controller.attach_status_stream(controller, {
+            element: controller.statusPanelEl,
+            channel: WS_CHANNEL,
+            runId: window.runid || window.runId || null,
+            stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
+            spinner: controller.statusSpinnerEl,
+            logLimit: 200,
+            onTrigger: function (detail) {
+                if (detail && detail.event) {
+                    controller.triggerEvent(detail.event, detail);
                 }
-            });
-        } else if (typeof WSClient === "function") {
-            controller.ws_client = new WSClient(FORM_ID, WS_CHANNEL);
-            controller.ws_client.attachControl(controller);
-        }
+            }
+        });
 
         controller.hideStacktrace = function () {
             if (controller.stacktrace && typeof controller.stacktrace.hide === "function") {
@@ -292,9 +285,7 @@ var RAP_TS = (function () {
 
         controller.handleRunCompletion = function (detail) {
             controller.report();
-            if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                controller.ws_client.disconnect();
-            }
+            controller.disconnect_status_stream(controller);
             if (controller.events && typeof controller.events.emit === "function") {
                 controller.events.emit("rap:timeseries:run:completed", {
                     task: TASK_NAME,
@@ -363,9 +354,7 @@ var RAP_TS = (function () {
                 payload: submission
             });
 
-            if (controller.ws_client && typeof controller.ws_client.connect === "function") {
-                controller.ws_client.connect();
-            }
+            controller.connect_status_stream(controller);
 
             function handleError(result) {
                 controller.pushResponseStacktrace(controller, result);
@@ -388,9 +377,7 @@ var RAP_TS = (function () {
                     payload: submission,
                     error: result
                 });
-                if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                    controller.ws_client.disconnect();
-                }
+                controller.disconnect_status_stream(controller);
             }
 
             http.postJson("rq/api/acquire_rap_ts", submission, { form: controller.form }).then(function (response) {
@@ -429,9 +416,7 @@ var RAP_TS = (function () {
                 }
             });
             controller._delegates = [];
-            if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                controller.ws_client.disconnect();
-            }
+            controller.disconnect_status_stream(controller);
         };
 
         controller.hideStacktrace();

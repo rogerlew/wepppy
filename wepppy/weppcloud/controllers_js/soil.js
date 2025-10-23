@@ -125,9 +125,16 @@ var Soil = (function () {
         soil.rq_job = rqJobAdapter;
         soil.command_btn_id = "btn_build_soil";
         soil.hint = hintAdapter;
+        soil.statusPanelEl = dom.qs("#soil_status_panel");
+        soil.stacktracePanelEl = dom.qs("#soil_stacktrace_panel");
+        var spinnerElement = soil.statusPanelEl ? soil.statusPanelEl.querySelector("#braille") : null;
 
-        soil.ws_client = new WSClient("soil_form", "soils");
-        soil.ws_client.attachControl(soil);
+        soil.attach_status_stream(soil, {
+            element: soil.statusPanelEl,
+            channel: "soils",
+            stacktrace: soil.stacktracePanelEl ? { element: soil.stacktracePanelEl } : null,
+            spinner: spinnerElement
+        });
 
         var modePanels = [
             dom.qs("#soil_mode0_controls"),
@@ -140,9 +147,7 @@ var Soil = (function () {
         var baseTriggerEvent = soil.triggerEvent.bind(soil);
         soil.triggerEvent = function (eventName, payload) {
             if (eventName === "SOILS_BUILD_TASK_COMPLETED") {
-                if (soil.ws_client && typeof soil.ws_client.disconnect === "function") {
-                    soil.ws_client.disconnect();
-                }
+                soil.disconnect_status_stream(soil);
                 soil.report();
                 try {
                     SubcatchmentDelineation.getInstance().enableColorMap("dom_soil");
@@ -169,11 +174,14 @@ var Soil = (function () {
             if (infoAdapter && typeof infoAdapter.text === "function") {
                 infoAdapter.text("");
             }
-            if (statusAdapter && typeof statusAdapter.html === "function") {
-                statusAdapter.html(taskMsg + "...");
+            soil.clear_status_messages(soil);
+            if (taskMsg) {
+                soil.append_status_message(soil, taskMsg + "...");
             }
             if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
                 stacktraceAdapter.text("");
+            } else if (stacktraceElement) {
+                stacktraceElement.textContent = "";
             }
         }
 
@@ -201,9 +209,7 @@ var Soil = (function () {
             var taskMsg = "Building soil";
             resetStatus(taskMsg);
 
-            if (soil.ws_client && typeof soil.ws_client.connect === "function") {
-                soil.ws_client.connect();
-            }
+            soil.connect_status_stream(soil);
 
             var params = forms.serializeForm(formElement, { format: "url" });
 
@@ -211,9 +217,7 @@ var Soil = (function () {
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
-                        if (statusAdapter && typeof statusAdapter.html === "function") {
-                            statusAdapter.html("build_soils_rq job submitted: " + response.job_id);
-                        }
+                        soil.append_status_message(soil, "build_soils_rq job submitted: " + response.job_id);
                         soil.set_rq_job_id(soil, response.job_id);
                     } else if (response) {
                         soil.pushResponseStacktrace(soil, response);
@@ -253,9 +257,7 @@ var Soil = (function () {
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
-                        if (statusAdapter && typeof statusAdapter.html === "function") {
-                            statusAdapter.html(taskMsg + "... Success");
-                        }
+                        soil.append_status_message(soil, taskMsg + "... Success");
                     } else if (response) {
                         soil.pushResponseStacktrace(soil, response);
                     }
@@ -275,9 +277,7 @@ var Soil = (function () {
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
-                        if (statusAdapter && typeof statusAdapter.html === "function") {
-                            statusAdapter.html(taskMsg + "... Success");
-                        }
+                        soil.append_status_message(soil, taskMsg + "... Success");
                     } else if (response) {
                         soil.pushResponseStacktrace(soil, response);
                     }
@@ -311,9 +311,7 @@ var Soil = (function () {
             }, { form: formElement }).then(function (result) {
                 var response = result && result.body ? result.body : null;
                 if (response && response.Success === true) {
-                    if (statusAdapter && typeof statusAdapter.html === "function") {
-                        statusAdapter.html(taskMsg + "... Success");
-                    }
+                    soil.append_status_message(soil, taskMsg + "... Success");
                 } else if (response) {
                     soil.pushResponseStacktrace(soil, response);
                 }

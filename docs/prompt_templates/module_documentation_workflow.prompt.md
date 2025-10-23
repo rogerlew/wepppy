@@ -1,10 +1,10 @@
 > Module Documentation, Typing, and Stub Validation Workflow
 
 Background references:
-- `AGENTS.md` → “Type Stub Management” section
-- `docs/dev-notes/style-guide.md` → Python conventions and docstring expectations
-- `wctl/README.md` and `wctl/wctl.1` → helper commands (`run-pytest`, `run-stubtest`, `run-stubgen`)
-- Runtime source tree under `wepppy/…` (especially the target module)
+- `AGENTS.md` -> "Type Stub Management" section
+- `docs/dev-notes/style-guide.md` -> Python conventions and docstring expectations
+- `wctl/README.md` and `wctl/wctl.1` -> helper commands (`run-pytest`, `run-stubtest`, `run-stubgen`)
+- Runtime source tree under `wepppy/...` (especially the target module)
 
 When asked to document or modernize a module (or when planning the work yourself), follow this sequence:
 
@@ -16,6 +16,7 @@ The goal of documentation is to increase code understandability and maintainabil
    - Read the existing `.py` module and any related tests or dev-notes.
    - Check `AGENTS.md` for project-wide expectations (type hints, docstrings, stubs).
    - Decide whether this is a module edit only, or if you must touch adjacent code (tests, consumers).
+   - Identify companion modules that share a namespace (for example `__init__` aggregators, lazy loaders, or helper utilities) and make sure they receive the same documentation/typing attention.
 
 2. **Bring the module up to standard**
    - Add/refresh Google-style docstrings. Keep them concise; document args/returns/raises and any side-effects or warnings. Preserve existing semantics.
@@ -30,6 +31,7 @@ The goal of documentation is to increase code understandability and maintainabil
      (This regenerates `stubs/wepppy/...`; use it to diff but do not commit generated `stubs/` directly.)
    - Manually reconcile the `.pyi` sitting next to the runtime module (`wepppy/.../*.pyi`). Make enums use real values, mark class-level constants as `ClassVar[...]`, and match property signatures including setters.
    - If you add a new module, mirror its public API in a `.pyi` file alongside the `.py`.
+   - When a package of related modules (mods, utilities, facades) achieves complete annotations, add `.pyi` coverage for each public entry point so optional consumers remain in sync.
    - After editing, run `python tools/sync_stubs.py` (or `wctl run-stubgen`) so the standalone `stubs/wepppy/` tree matches the source-of-truth `.pyi` files.
 
 4. **Validate with stubtest**
@@ -46,7 +48,7 @@ The goal of documentation is to increase code understandability and maintainabil
 
 6. **Document what changed**
    - Update module-level comments or README snippets if behavior or public API changes.
-   - Note new helper commands or workflows in `AGENTS.md` only if they didn’t exist previously (avoid duplicate guidance).
+   - Note new helper commands or workflows in `AGENTS.md` only if they didn't exist previously (avoid duplicate guidance).
 
 7. **Final review**
    - Confirm `git status` shows the expected `.py` and `.pyi` edits plus any regenerated prompt/README changes.
@@ -56,7 +58,7 @@ The goal of documentation is to increase code understandability and maintainabil
        ```bash
        diff -u path/to/file.py <(uk2us path/to/file.py)
        ```
-     - Review the diff carefully—changes should only affect comments, docstrings, and documentation
+     - Review the diff carefully--changes should only affect comments, docstrings, and documentation
      - Do not apply if changes would modify code identifiers, string literals, or technical terms
      - Apply after verification: `uk2us -i path/to/file.py`
      - Adjust `/workdir/uk2us/config/uk2us_rules.json` if the defaults misfire

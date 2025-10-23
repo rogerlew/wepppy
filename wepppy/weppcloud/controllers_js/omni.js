@@ -465,6 +465,7 @@ var Omni = (function () {
         var statusElement = dom.qs("#omni_form #status");
         var stacktraceElement = dom.qs("#omni_form #stacktrace");
         var rqJobElement = dom.qs("#omni_form #rq_job");
+        var spinnerElement = dom.qs("#omni_form #braille");
         var hintElement = dom.qs("#hint_run_omni");
         var scenarioContainer = dom.ensureElement("#scenario-container", "Omni scenario container not found.");
 
@@ -479,27 +480,28 @@ var Omni = (function () {
         omni.status = statusAdapter;
         omni.stacktrace = stacktraceAdapter;
         omni.rq_job = rqJobAdapter;
+        omni.statusSpinnerEl = spinnerElement;
         omni.command_btn_id = "btn_run_omni";
         omni.hint = hintAdapter;
 
-        omni.ws_client = new WSClient("omni_form", "omni");
-        omni.ws_client.attachControl(omni);
+        omni.attach_status_stream(omni, {
+            form: formElement,
+            channel: "omni",
+            runId: window.runid || window.runId || null,
+            spinner: spinnerElement
+        });
 
         var baseTriggerEvent = omni.triggerEvent.bind(omni);
         omni.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "OMNI_SCENARIO_RUN_TASK_COMPLETED") {
                 omni.report_scenarios();
-                if (omni.ws_client && typeof omni.ws_client.disconnect === "function") {
-                    omni.ws_client.disconnect();
-                }
+                omni.disconnect_status_stream(omni);
                 if (omniEvents && typeof omniEvents.emit === "function") {
                     omniEvents.emit("omni:run:completed", payload || {});
                 }
             } else if (normalized === "END_BROADCAST") {
-                if (omni.ws_client && typeof omni.ws_client.disconnect === "function") {
-                    omni.ws_client.disconnect();
-                }
+                omni.disconnect_status_stream(omni);
             }
 
             baseTriggerEvent(eventName, payload);
@@ -709,9 +711,7 @@ var Omni = (function () {
             }
 
             setStatus("Submitting omni run...");
-            if (omni.ws_client && typeof omni.ws_client.connect === "function") {
-                omni.ws_client.connect();
-            }
+            omni.connect_status_stream(omni);
 
             if (omniEvents && typeof omniEvents.emit === "function") {
                 omniEvents.emit("omni:run:started", { scenarios: payload.scenarios });

@@ -126,7 +126,9 @@
             onTrigger: typeof options.onTrigger === "function" ? options.onTrigger : null,
             reconnectBaseMs: options.reconnectBaseMs || DEFAULT_RECONNECT_BASE_MS,
             reconnectMaxMs: options.reconnectMaxMs || DEFAULT_RECONNECT_MAX_MS,
-            stacktrace: options.stacktrace || null
+            stacktrace: options.stacktrace || null,
+            onAppend: typeof options.onAppend === "function" ? options.onAppend : null,
+            autoConnect: options.autoConnect === undefined ? true : Boolean(options.autoConnect)
         };
 
         if (!config.channel) {
@@ -143,6 +145,7 @@
         var reconnectAttempts = 0;
         var ws = null;
         var shouldReconnect = true;
+        var api = this;
 
         if (logElement.textContent) {
             logElement.textContent.split("\n").forEach(function (line) {
@@ -188,6 +191,13 @@
             }
 
             dispatch("status:append", { message: formatted, raw: message, meta: meta || null });
+            if (config.onAppend) {
+                try {
+                    config.onAppend({ message: formatted, raw: message, meta: meta || null, stream: api });
+                } catch (err) {
+                    console.warn("StatusStream onAppend error:", err);
+                }
+            }
         }
 
         function resolveStacktraceTargets(stacktraceConfig) {
@@ -274,6 +284,11 @@
                 if (ws && ws.readyState === WebSocket.OPEN) {
                     ws.send(JSON.stringify({ type: "pong" }));
                 }
+                return;
+            }
+
+            if (payload.type === "hangup") {
+                disconnect();
                 return;
             }
 
@@ -370,7 +385,9 @@
             return ws && ws.readyState === WebSocket.OPEN;
         };
 
-        connect();
+        if (config.autoConnect) {
+            connect();
+        }
     }
 
     function attach(options) {

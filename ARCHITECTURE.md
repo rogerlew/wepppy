@@ -127,7 +127,6 @@ wepppy/weppcloud/
 │   └── ...
 ├── controllers_js/           # Front-end controllers (bundled)
 │   ├── control_base.js       # Base async controller
-│   ├── ws_client.js          # WebSocket client
 │   └── [module controllers]
 ├── static/                   # Built static assets
 ├── static-src/               # Source static assets
@@ -183,7 +182,7 @@ NoDb Controller Logger
         │         Go WebSocket Service (status2)
         │                    │
         │                    ▼
-        │         Browser WebSocket Client (ws_client.js)
+        │         Browser StatusStream helper (`controllers_js/status_stream.js`)
         │                    │
         │                    ▼
         └──────────→ UI Control Panels (logs, progress)
@@ -323,7 +322,7 @@ Go WebSocket service (status2) subscribed to channel
     ↓
 WebSocket broadcast to connected browsers
     ↓
-ws_client.js receives message
+StatusStream helper (controlBase.attach_status_stream) receives message
     ↓
 controlBase updates UI (logs panel, progress bar)
 ```

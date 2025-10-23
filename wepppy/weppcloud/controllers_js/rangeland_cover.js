@@ -200,6 +200,9 @@ var RangelandCover = (function () {
         var stacktraceElement = dom.qs("#rangeland_cover_form #stacktrace");
         var rqJobElement = dom.qs("#rangeland_cover_form #rq_job");
         var hintElement = dom.qs("#hint_build_rangeland_cover");
+        var statusPanelElement = dom.qs("#rangeland_status_panel");
+        var stacktracePanelElement = dom.qs("#rangeland_stacktrace_panel");
+        var spinnerElement = statusPanelElement ? statusPanelElement.querySelector("#braille") : null;
         var rapSectionElement = dom.qs("[data-rangeland-rap-section]", formElement);
 
         var infoAdapter = createLegacyAdapter(infoElement);
@@ -214,11 +217,20 @@ var RangelandCover = (function () {
         rangeland.stacktrace = stacktraceAdapter;
         rangeland.rq_job = rqJobAdapter;
         rangeland.hint = hintAdapter;
+        rangeland.statusPanelEl = statusPanelElement || null;
+        rangeland.stacktracePanelEl = stacktracePanelElement || null;
+        rangeland.statusSpinnerEl = spinnerElement || null;
         rangeland.infoElement = infoElement;
         rangeland.command_btn_id = "btn_build_rangeland_cover";
 
-        rangeland.ws_client = new WSClient("rangeland_cover_form", "rangeland_cover");
-        rangeland.ws_client.attachControl(rangeland);
+        rangeland.attach_status_stream(rangeland, {
+            element: statusPanelElement,
+            form: formElement,
+            channel: "rangeland_cover",
+            runId: window.runid || window.runId || null,
+            stacktrace: stacktracePanelElement ? { element: stacktracePanelElement } : null,
+            spinner: spinnerElement
+        });
 
         function emit(eventName, payload) {
             if (!rangelandEvents || typeof rangelandEvents.emit !== "function") {
@@ -393,9 +405,7 @@ var RangelandCover = (function () {
         rangeland.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "RANGELAND_COVER_BUILD_TASK_COMPLETED") {
-                if (rangeland.ws_client && typeof rangeland.ws_client.disconnect === "function") {
-                    rangeland.ws_client.disconnect();
-                }
+                rangeland.disconnect_status_stream(rangeland);
                 try {
                     SubcatchmentDelineation.getInstance().enableColorMap("rangeland_cover");
                 } catch (err) {

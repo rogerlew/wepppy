@@ -1,3 +1,26 @@
+"""Rangeland cover NoDb controller.
+
+This module assembles rangeland cover fractions for each watershed hillslope.
+It can either apply a single default cover profile, sample gridded USGS
+shrubland layers, or consume Regional Assessment of Part (RAP) rasters. The
+controller persists per-hillslope cover dictionaries, emits colorized summaries
+for UI layers, and provides inputs used by the RHEM mod when generating WEPP
+management files.
+
+Key inputs:
+* `rhem.mode` and `rhem.rap_year` settings plus optional overrides received via
+  Flask routes.
+* RAP or USGS shrubland rasters retrieved through sibling NoDb mods.
+
+Outputs and integrations:
+* `self.covers` mapping of TOPAZ hillslope ids to cover proportions.
+* `subs_summary` adds hex colors for map rendering consumed by UI routes.
+* Updates propagate through standard NoDb locking, enabling Redis status events
+  when paired with higher-level controllers.
+"""
+
+from __future__ import annotations
+
 # Copyright (c) 2016-2018, University of Idaho
 # All rights reserved.
 #
@@ -7,25 +30,15 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
-import shutil
-
 from os.path import join as _join
-from os.path import exists as _exists
 
 from copy import deepcopy
-
 from enum import IntEnum
+from typing import Any, Dict, Iterable, Mapping, MutableMapping, Optional, Set, cast
 
-import time
-
-from glob import glob
-from datetime import datetime
-
-import numpy as np
 from osgeo import gdal
 
 from wepppy.all_your_base import cmyk_to_rgb, RGBA
-from wepppy.landcover import LandcoverMap
 from wepppy.nodb.core import Watershed
 from ...base import NoDbBase, TriggerEvents, nodb_setter
 
@@ -41,8 +54,10 @@ gdal.UseExceptions()
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
+CoverValues = Dict[str, float]
+CoverMap = Dict[int | str, CoverValues]
 
-def gen_cover_color(cover):
+def gen_cover_color(cover: Mapping[str, float]) -> str:
     rock = cover['rock']
     litter = cover['litter']
     forbs = cover['forbs']
@@ -85,8 +100,14 @@ class RangelandCover(NoDbBase):
 
     filename = 'rangeland_cover.nodb'
     
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
-        super(RangelandCover, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
+    def __init__(
+        self,
+        wd: str,
+        cfg_fn: str,
+        run_group: Optional[str] = None,
+        group_name: Optional[str] = None
+    ) -> None:
+        super().__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             self._mode = RangelandCoverMode(self.config_get_int('rhem', 'mode'))
@@ -102,13 +123,13 @@ class RangelandCover(NoDbBase):
             self._litter_cover_default = 25.0
             self._cryptogams_cover_default = 5.0
 
-            self.covers = None
+            self.covers: Optional[CoverMap] = None
 
-    def on(self, evt):
+    def on(self, evt: TriggerEvents) -> None:
         pass
 
     @property
-    def rap_year(self):
+    def rap_year(self) -> int:
         return getattr(self, '_rap_year', self.config_get_int('rhem', 'rap_year'))
 
     @rap_year.setter
@@ -117,12 +138,12 @@ class RangelandCover(NoDbBase):
         self._rap_year = value
 
     @property
-    def mode(self):
+    def mode(self) -> RangelandCoverMode:
         return self._mode
 
     @mode.setter
     @nodb_setter
-    def mode(self, value):
+    def mode(self, value: RangelandCoverMode | int) -> None:
         if isinstance(value, RangelandCoverMode):
             self._mode = value
         elif isinstance(value, int):
@@ -131,78 +152,78 @@ class RangelandCover(NoDbBase):
             raise ValueError('most be RangelandCoverMode or int')
             
     @property
-    def bunchgrass_cover_default(self):
+    def bunchgrass_cover_default(self) -> float:
         return self._bunchgrass_cover_default
 
     @bunchgrass_cover_default.setter
     @nodb_setter
-    def bunchgrass_cover_default(self, value):
+    def bunchgrass_cover_default(self, value: float) -> None:
         self._bunchgrass_cover_default = value
 
     @property
-    def forbs_cover_default(self):
+    def forbs_cover_default(self) -> float:
         return self._forbs_cover_default
 
     @forbs_cover_default.setter
     @nodb_setter
-    def forbs_cover_default(self, value):
+    def forbs_cover_default(self, value: float) -> None:
         self._forbs_cover_default = value
             
     @property
-    def sodgrass_cover_default(self):
+    def sodgrass_cover_default(self) -> float:
         return self._sodgrass_cover_default
 
     @sodgrass_cover_default.setter
     @nodb_setter
-    def sodgrass_cover_default(self, value):
+    def sodgrass_cover_default(self, value: float) -> None:
         self._sodgrass_cover_default = value
 
     @property
-    def shrub_cover_default(self):
+    def shrub_cover_default(self) -> float:
         return self._shrub_cover_default
 
     @shrub_cover_default.setter
     @nodb_setter
-    def shrub_cover_default(self, value):
+    def shrub_cover_default(self, value: float) -> None:
         self._shrub_cover_default = value
             
     @property
-    def basal_cover_default(self):
+    def basal_cover_default(self) -> float:
         return self._basal_cover_default
 
     @basal_cover_default.setter
     @nodb_setter
-    def basal_cover_default(self, value):
+    def basal_cover_default(self, value: float) -> None:
         self._basal_cover_default = value
             
     @property
-    def rock_cover_default(self):
+    def rock_cover_default(self) -> float:
         return self._rock_cover_default
 
     @rock_cover_default.setter
     @nodb_setter
-    def rock_cover_default(self, value):
+    def rock_cover_default(self, value: float) -> None:
         self._rock_cover_default = value
 
     @property
-    def litter_cover_default(self):
+    def litter_cover_default(self) -> float:
         return self._litter_cover_default
 
     @litter_cover_default.setter
     @nodb_setter
-    def litter_cover_default(self, value):
+    def litter_cover_default(self, value: float) -> None:
         self._litter_cover_default = value
 
     @property
-    def cryptogams_cover_default(self):
+    def cryptogams_cover_default(self) -> float:
         return self._cryptogams_cover_default
 
     @cryptogams_cover_default.setter
     @nodb_setter
-    def cryptogams_cover_default(self, value):
+    def cryptogams_cover_default(self, value: float) -> None:
         self._cryptogams_cover_default = value
 
-    def set_default_covers(self, default_covers):
+    def set_default_covers(self, default_covers: Mapping[str, float]) -> None:
         with self.locked():
             v = default_covers['bunchgrass']
             self._bunchgrass_cover_default = float(v)
@@ -228,7 +249,11 @@ class RangelandCover(NoDbBase):
             v = default_covers['cryptogams']
             self._cryptogams_cover_default = float(v)
 
-    def build(self, rap_year=None, default_covers=None):
+    def build(
+        self,
+        rap_year: Optional[int] = None,
+        default_covers: Optional[Mapping[str, float]] = None
+    ) -> None:
         if default_covers is not None:
             self.set_default_covers(default_covers)
 
@@ -242,12 +267,12 @@ class RangelandCover(NoDbBase):
         else:
             raise NotImplementedError() 
 
-    def _build_single(self):
+    def _build_single(self) -> None:
         wd = self.wd
 
         with self.locked():
             watershed = Watershed.getInstance(wd)
-            covers = {}
+            covers: CoverMap = {}
             for topaz_id in watershed._subs_summary:
                 cover = dict(bunchgrass=self._bunchgrass_cover_default,
                              forbs=self._forbs_cover_default,
@@ -262,11 +287,11 @@ class RangelandCover(NoDbBase):
             self.covers = covers
 
     @property
-    def rap_report(self):
+    def rap_report(self) -> Any:
         from wepppy.nodb.mods import RAP
         return RAP.getInstance(self.wd).report
 
-    def _build_gridded_rap(self, rap_year=None):
+    def _build_gridded_rap(self, rap_year: Optional[int] = None) -> None:
         wd = self.wd
         from wepppy.nodb.mods import RAP
 
@@ -279,7 +304,7 @@ class RangelandCover(NoDbBase):
             rap.acquire_rasters(year=self.rap_year)
             rap.analyze()
 
-            covers = {}
+            covers: CoverMap = {}
 
             for topaz_id, rap_data in rap:
                 if not rap_data.isvalid:
@@ -344,11 +369,11 @@ class RangelandCover(NoDbBase):
             self.covers = covers
 
     @property
-    def usgs_shrubland_report(self):
+    def usgs_shrubland_report(self) -> Any:
         from wepppy.nodb.mods import Shrubland
         return Shrubland.getInstance(self.wd).report
 
-    def _build_gridded_usgs_shrubland(self):
+    def _build_gridded_usgs_shrubland(self) -> None:
         wd = self.wd
         from wepppy.nodb.mods import Shrubland, nlcd_shrubland_layers
 
@@ -415,10 +440,10 @@ class RangelandCover(NoDbBase):
             self.covers = covers
             
     @property
-    def has_covers(self):
+    def has_covers(self) -> bool:
         return self.covers is not None
 
-    def current_cover_summary(self, topaz_ids):
+    def current_cover_summary(self, topaz_ids: Iterable[int | str]) -> Dict[str, str]:
         covers = self.covers
         if covers is None or len(topaz_ids) == 0:
             return dict(bunchgrass='',
@@ -430,14 +455,14 @@ class RangelandCover(NoDbBase):
                         litter='',
                         cryptogams='')
 
-        sub_covers = dict(bunchgrass=set(),
-                          forbs=set(),
-                          sodgrass=set(),
-                          shrub=set(),
-                          basal=set(),
-                          rock=set(),
-                          litter=set(),
-                          cryptogams=set())
+        sub_covers: Dict[str, Set[float]] = dict(bunchgrass=set(),
+                                                 forbs=set(),
+                                                 sodgrass=set(),
+                                                 shrub=set(),
+                                                 basal=set(),
+                                                 rock=set(),
+                                                 litter=set(),
+                                                 cryptogams=set())
 
         for topaz_id in topaz_ids:
             assert topaz_id in covers, topaz_id
@@ -453,12 +478,17 @@ class RangelandCover(NoDbBase):
 
         return sub_covers
 
-    def modify_covers(self, topaz_ids, new_cover):
+    def modify_covers(
+        self,
+        topaz_ids: Iterable[int | str],
+        new_cover: Mapping[str, float]
+    ) -> None:
         for topaz_id in topaz_ids:
             assert topaz_id in self.covers, (topaz_id, self.covers)
 
         with self.locked():
             covers = self.covers
+            assert covers is not None
 
             for topaz_id in topaz_ids:
                 for measure, value in new_cover.items():
@@ -467,12 +497,12 @@ class RangelandCover(NoDbBase):
             self.covers = covers
             
     @property
-    def subs_summary(self):
+    def subs_summary(self) -> Dict[int | str, Dict[str, float | str]]:
         """
         returns a dictionary of topaz_id keys and
         management summaries as dicts
         """
-        covers = deepcopy(self.covers)
+        covers = cast(CoverMap, deepcopy(self.covers))
 
         for topaz_id, cover in covers.items():
             covers[topaz_id]['color'] = gen_cover_color(cover)

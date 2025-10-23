@@ -74,7 +74,7 @@
 
 ## Tips & Best Practices
 - Keep changes cohesive: controller + route + docs + tests in one commit when possible.
-- Preserve telemetry hooks (`controlBase`, `WSClient`/`StatusStream`) so status panels stay functional.
+- Preserve telemetry hooks (`controlBase`, `controlBase.attach_status_stream`/`StatusStream`) so status panels stay functional.
 - Prefer explicit booleans in JSON payloads—avoid `"on"`/`"off"` strings to reduce backend ambiguity.
 - For large controllers, refactor in logical sections (e.g., setup, event wiring, async workflow) with intermediate validations.
 

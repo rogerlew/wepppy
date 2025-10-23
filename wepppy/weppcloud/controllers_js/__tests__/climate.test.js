@@ -121,15 +121,26 @@ describe("Climate controller", () => {
             </form>
         `;
 
+        const streamStub = { append: jest.fn(), connect: jest.fn(), disconnect: jest.fn() };
+
         controlBaseInstance = {
             triggerEvent: jest.fn(),
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
-            manage_ws_client: jest.fn(),
             stop_job_status_polling: jest.fn(),
             render_job_status: jest.fn(),
-            update_command_button_state: jest.fn()
+            update_command_button_state: jest.fn(),
+            attach_status_stream: jest.fn((self, options) => {
+                controlBaseInstance.statusStream = streamStub;
+                return streamStub;
+            }),
+            detach_status_stream: jest.fn(() => {
+                controlBaseInstance.statusStream = null;
+            }),
+            connect_status_stream: jest.fn(),
+            disconnect_status_stream: jest.fn(),
+            reset_status_spinner: jest.fn()
         };
 
         global.controlBase = jest.fn(() => controlBaseInstance);
@@ -350,5 +361,17 @@ describe("Climate controller", () => {
             expect.objectContaining({ station: "STA-1" }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
+    });
+
+    test("attaches status stream using controlBase helper", () => {
+        expect(controlBaseInstance.attach_status_stream).toHaveBeenCalledWith(
+            controlBaseInstance,
+            expect.objectContaining({
+                form: expect.any(HTMLFormElement),
+                channel: "climate",
+                autoConnect: true
+            })
+        );
+        expect(controlBaseInstance.detach_status_stream).toHaveBeenCalled();
     });
 });

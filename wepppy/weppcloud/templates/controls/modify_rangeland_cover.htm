@@ -7,7 +7,7 @@
        "checkbox_modify_rangeland_cover",
        "Enable selection mode",
        help="Click subcatchments to select or deselect them. Hold Shift and drag to draw a selection box.",
-       attrs={"data-role": "toggle-selection"}
+       attrs={"data-rcm-action": "toggle-selection"}
      ) }}
 
   {{ ui.textarea_field(
@@ -15,7 +15,7 @@
        "Topaz IDs",
        rows=3,
        placeholder="Topaz IDs",
-       attrs={"required": "required"}
+       attrs={"required": "required", "data-rcm-field": "topaz-ids"}
      ) }}
 
   <h4 class="wc-map-panel__subtitle">Foliar Cover (%)</h4>
@@ -23,22 +23,26 @@
     {{ ui.text_field(
          "input_bunchgrass_cover",
          "Bunch Grass",
-         extra_control_class="disable-readonly"
+         extra_control_class="disable-readonly",
+         attrs={"data-rcm-field": "bunchgrass"}
        ) }}
     {{ ui.text_field(
          "input_forbs_cover",
          "Forbs/Annuals",
-         extra_control_class="disable-readonly"
+         extra_control_class="disable-readonly",
+         attrs={"data-rcm-field": "forbs"}
        ) }}
     {{ ui.text_field(
          "input_sodgrass_cover",
          "Sod Grass",
-         extra_control_class="disable-readonly"
+         extra_control_class="disable-readonly",
+         attrs={"data-rcm-field": "sodgrass"}
        ) }}
     {{ ui.text_field(
          "input_shrub_cover",
          "Shrub",
-         extra_control_class="disable-readonly"
+         extra_control_class="disable-readonly",
+         attrs={"data-rcm-field": "shrub"}
        ) }}
   </div>
 
@@ -47,22 +51,26 @@
     {{ ui.text_field(
          "input_basal_cover",
          "Basal Plant Cover",
-         extra_control_class="disable-readonly"
+         extra_control_class="disable-readonly",
+         attrs={"data-rcm-field": "basal"}
        ) }}
     {{ ui.text_field(
          "input_rock_cover",
          "Rock",
-         extra_control_class="disable-readonly"
+         extra_control_class="disable-readonly",
+         attrs={"data-rcm-field": "rock"}
        ) }}
     {{ ui.text_field(
          "input_litter_cover",
          "Litter",
-         extra_control_class="disable-readonly"
+         extra_control_class="disable-readonly",
+         attrs={"data-rcm-field": "litter"}
        ) }}
     {{ ui.text_field(
          "input_cryptogams_cover",
          "Biological Crusts Cover",
-         extra_control_class="disable-readonly"
+         extra_control_class="disable-readonly",
+         attrs={"data-rcm-field": "cryptogams"}
        ) }}
   </div>
 
@@ -70,7 +78,8 @@
     <button
       id="btn_modify_rangeland_cover"
       type="button"
-      class="pure-button pure-button-primary">
+      class="pure-button pure-button-primary"
+      data-rcm-action="submit">
       Modify Rangeland Cover
     </button>
   {% endcall %}

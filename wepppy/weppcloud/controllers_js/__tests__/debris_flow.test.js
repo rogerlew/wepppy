@@ -2,10 +2,12 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("DebrisFlow controller", () => {
     let httpMock;
     let baseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let debris;
 
     beforeEach(async () => {
@@ -33,20 +35,13 @@ describe("DebrisFlow controller", () => {
         };
         global.WCHttp = httpMock;
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn(),
             hideStacktrace: jest.fn()
-        };
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn()
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
         global.url_for_run = jest.fn((path) => path);
         window.site_prefix = "";
 
@@ -59,7 +54,6 @@ describe("DebrisFlow controller", () => {
         delete window.DebrisFlow;
         delete global.WCHttp;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.url_for_run;
         delete window.site_prefix;
         if (global.WCDom) {
@@ -85,7 +79,7 @@ describe("DebrisFlow controller", () => {
             {},
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(debris, "job-123");
         expect(events.length).toBeGreaterThan(0);
         expect(events[0].event).toBe("started");
@@ -98,7 +92,7 @@ describe("DebrisFlow controller", () => {
 
         document.getElementById("debris_flow_form").dispatchEvent(new CustomEvent("DEBRIS_FLOW_RUN_TASK_COMPLETED"));
 
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(document.getElementById("info").innerHTML).toContain("report/debris_flow/");
         expect(completions).toHaveLength(1);
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith(
@@ -140,6 +134,6 @@ describe("DebrisFlow controller", () => {
             "job:error",
             expect.objectContaining({ task: "debris:run" })
         );
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 });

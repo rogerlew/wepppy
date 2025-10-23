@@ -38,7 +38,7 @@ NoDb subclass logger
   ↓ QueueHandler + QueueListener (async fan-out)
   ↓ StatusMessengerHandler pushes to Redis DB 2 Pub/Sub
   ↓ services/status2 Go WebSocket service
-  ↓ WSClient (controllers.js) WebSocket bridge
+  ↓ StatusStream helper (controlBase.attach_status_stream) WebSocket bridge
   ↓ controlBase panels update logs, checklists, charts
 ```
 
@@ -715,7 +715,7 @@ When resuming Kubernetes work:
 ### External Projects
 - [wepppyo3](https://github.com/wepp-in-the-woods/wepppyo3) - Rust Python bindings
 - [peridot](https://github.com/wepp-in-the-woods/peridot) - Watershed abstraction
-- [WhiteboxTools](https://github.com/rogerlew/whitebox-tools) - Custom TOPAZ fork
+- [Weppcloud-WBT](https://github.com/rogerlew/weppcloud-wbt) - Custom TOPAZ fork
 
 ## Getting Help
 

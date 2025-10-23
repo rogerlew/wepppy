@@ -3,7 +3,7 @@
 
 ## 1. Current Status (2025 refresh)
 - **Controller**: `wepppy/weppcloud/controllers_js/rhem.js` now boots via `controlBase()` and the helper stack (`WCDom`, `WCForms`, `WCHttp`, `WCEvents`). Lifecycle signals surface through `rhem.events = WCEvents.useEventMap(['rhem:config:loaded', 'rhem:run:started', 'rhem:run:queued', 'rhem:run:completed', 'rhem:run:failed', 'rhem:status:updated'])` plus the inherited `job:*` events.
-- **Telemetry**: When `StatusStream` is available the controller attaches log/stacktrace panels directly; otherwise it falls back to `WSClient`. `appendStatus` fans updates to both the DOM and the helper emitter so dashboards stay synchronised.
+- **Telemetry**: The controller now calls `controlBase.attach_status_stream` so log/stacktrace panels attach through the shared helper. `appendStatus` fans updates to both the DOM and the helper emitter so dashboards stay synchronised.
 - **Templates**: `controls/rhem_pure.htm` and `controls/rhem.htm` expose `data-rhem-action="run"` on the command button, keep status/stacktrace/hint/job nodes under `#rhem_form`, and render report results inside `#rhem-results`. Optional stage toggles bind to checkbox inputs (`name="clean"`, `name="prep"`, `name="run"`).
 - **Backend**: `/rq/api/run_rhem_rq` now runs requests through `parse_request_payload`, coercing the stage booleans before enqueuing `run_rhem_rq(payload=…)`. The RQ task honours those flags—skipping `clean()`, `prep_hillslopes()`, or `run_hillslopes()` when instructed—while continuing to publish StatusStream output. Reporting endpoints (`rhem_bp.py`) still authorize and render templates without modification.
 - **Tests**: Helper behaviour is covered by `controllers_js/__tests__/rhem.test.js`. Backend endpoints are exercised by `tests/weppcloud/routes/test_rhem_bp.py` and `tests/weppcloud/routes/test_rq_api_rhem.py`, both relying on `tests.factories.singleton_factory` + `tests.factories.rq`.
@@ -19,7 +19,7 @@
 ## 3. Front-End Refactor Outline
 - Controller initialisation now resolves DOM nodes via `WCDom.ensureElement/qs`, wraps legacy panels with lightweight adapters, and wires delegated interactions through `WCDom.delegate("[data-rhem-action='run']")`.
 - Payload submission relies on `WCForms.serializeForm(form, { format: "object" })` to capture native booleans before calling `WCHttp.postJson("rq/api/run_rhem_rq", payload, { form })`.
-- Status updates flow through `StatusStream.attach` when available; otherwise `WSClient` maintains the WebSocket bridge. Both paths invoke `rhem.triggerEvent` so helper subscribers and `controlBase` telemetry stay aligned.
+- Status updates flow through `StatusStream.attach` via `controlBase.attach_status_stream`. Both paths invoke `rhem.triggerEvent` so helper subscribers and `controlBase` telemetry stay aligned.
 - `rhem.report()` now pulls HTML via `WCHttp.request(url_for_run(...))`, refreshes the info/results panels, emits `rhem:run:completed`, and triggers the `job:completed` lifecycle for `controlBase`.
 
 ## 4. Backend Alignment Tasks
@@ -50,4 +50,4 @@ wctl run-pytest tests/weppcloud/routes/test_rq_api_rhem.py
 ## 7. Follow-Ups & Open Questions
 - Determine whether future UX needs to expose stage toggles in the UI (currently checkboxes are optional). If so, document the payload contract and update Jest/Pytest coverage accordingly.
 - Identify downstream consumers that should subscribe to `rhem:run:*` or `rhem:status:updated` and document expectations (dashboards, notifications).
-- Legacy `WSClient` still emits TRIGGER tokens; consider migrating it to helper-first DOM updates once other controllers transition away from jQuery.
+- Historical note: the legacy shim emitted TRIGGER tokens; the alias has now been removed.

@@ -2,11 +2,13 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Ash controller", () => {
     let requestMock;
     let postJsonMock;
-    let wsClientInstance;
     let baseInstance;
+    let statusStreamMock;
     let projectInstance;
     let ash;
 
@@ -132,21 +134,14 @@ describe("Ash controller", () => {
             HttpError: class extends Error {}
         };
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn()
-        };
+        }));
 
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn()
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         projectInstance = {
             set_preferred_units: jest.fn()
@@ -166,7 +161,6 @@ describe("Ash controller", () => {
         delete window.Ash;
         delete global.WCHttp;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.Project;
         delete global.url_for_run;
 
@@ -298,7 +292,7 @@ describe("Ash controller", () => {
 
         ash.triggerEvent("ASH_RUN_TASK_COMPLETED");
 
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(ash.report).toHaveBeenCalled();
         expect(completed).toHaveBeenCalledWith({
             jobId: "finished-job",

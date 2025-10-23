@@ -5,7 +5,7 @@
 describe("DssExport controller", () => {
     let httpMock;
     let baseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let dss;
 
     beforeEach(async () => {
@@ -55,6 +55,8 @@ describe("DssExport controller", () => {
             </ul>
         `;
 
+        const createControlBaseStub = require("./helpers/control_base_stub");
+
         await import("../dom.js");
         await import("../forms.js");
         await import("../events.js");
@@ -64,21 +66,14 @@ describe("DssExport controller", () => {
         };
         global.WCHttp = httpMock;
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn(),
             hideStacktrace: jest.fn()
-        };
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn()
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         window.site_prefix = "/weppcloud";
 
@@ -91,7 +86,6 @@ describe("DssExport controller", () => {
         delete window.DssExport;
         delete global.WCHttp;
         delete global.controlBase;
-        delete global.WSClient;
         delete window.site_prefix;
         if (global.WCDom) {
             delete global.WCDom;
@@ -120,7 +114,7 @@ describe("DssExport controller", () => {
             { dss_export_mode: 1, dss_export_channel_ids: [12, 34], dss_export_exclude_orders: [] },
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(dss, "job-xyz");
         expect(startedEvents).not.toHaveLength(0);
         expect(startedEvents[0]).toEqual(expect.objectContaining({ task: "dss:export" }));
@@ -149,7 +143,7 @@ describe("DssExport controller", () => {
             new CustomEvent("DSS_EXPORT_TASK_COMPLETED", { bubbles: true })
         );
 
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(document.getElementById("info").innerHTML).toContain("weppcloud/browse/export/dss.zip");
         expect(completions).toHaveLength(1);
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith(
@@ -173,7 +167,7 @@ describe("DssExport controller", () => {
             "job:error",
             expect.objectContaining({ task: "dss:export" })
         );
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 
     test("request rejection routes through pushErrorStacktrace", async () => {
@@ -189,6 +183,6 @@ describe("DssExport controller", () => {
             "job:error",
             expect.objectContaining({ task: "dss:export" })
         );
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 });

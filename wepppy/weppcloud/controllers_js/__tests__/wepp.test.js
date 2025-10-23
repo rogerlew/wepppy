@@ -2,11 +2,14 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Wepp controller", () => {
     let postJsonMock;
     let requestMock;
     let getJsonMock;
     let controlBaseInstance;
+    let statusStreamMock;
     let wepp;
 
     beforeEach(async () => {
@@ -47,16 +50,15 @@ describe("Wepp controller", () => {
         await import("../events.js");
         await import("../forms.js");
 
-        controlBaseInstance = {
+        ({ base: controlBaseInstance, statusStreamMock } = createControlBaseStub({
             triggerEvent: jest.fn(),
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
-            manage_ws_client: jest.fn(),
             stop_job_status_polling: jest.fn()
-        };
+        }));
 
-        global.controlBase = jest.fn(() => controlBaseInstance);
+        global.controlBase = jest.fn(() => Object.assign({}, controlBaseInstance));
 
         postJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-1" } }));
         getJsonMock = jest.fn(() => Promise.resolve({
@@ -138,7 +140,7 @@ describe("Wepp controller", () => {
             expect.objectContaining({ clip_soils: true, initial_sat: "0.3" }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
-        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(controlBaseInstance, "job-1");
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), "job-1");
     });
 
     test("run emits lifecycle events", async () => {

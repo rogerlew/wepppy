@@ -36,6 +36,6 @@
 - `wctl run-pytest tests --maxfail=1` when changes spill into shared helpers or control base
 
 ## Follow-ups / Ideas
-- `WSClient` is still the legacy adapter; consider modernising it so batch runner (and the remaining controllers) can drop jQuery-era affordances entirely.
+- BatchRunner now attaches status streams via `controlBase.attach_status_stream`; the legacy adapter has been removed.
 - Explore promoting the job-info polling logic into a reusable helper once other RQ-heavy controllers migrate.
 - Template validation preview still builds table rows by hand; evaluate whether a shared tabular render helper would reduce duplication.

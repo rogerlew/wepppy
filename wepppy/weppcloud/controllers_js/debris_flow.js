@@ -106,6 +106,9 @@ var DebrisFlow = (function () {
         var stacktraceElement = dom.qs("#debris_flow_form #stacktrace");
         var rqJobElement = dom.qs("#debris_flow_form #rq_job");
         var hintElement = dom.qs("#hint_run_debris_flow");
+        var statusPanelElement = dom.qs("#debris_flow_status_panel");
+        var stacktracePanelElement = dom.qs("#debris_flow_stacktrace_panel");
+        var spinnerElement = statusPanelElement ? statusPanelElement.querySelector("#braille") : null;
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
@@ -122,8 +125,17 @@ var DebrisFlow = (function () {
         debris.rq_job = rqJobAdapter;
         debris.hint = hintAdapter;
         debris.command_btn_id = "btn_run_debris_flow";
-        debris.ws_client = new WSClient("debris_flow_form", "debris_flow");
-        debris.ws_client.attachControl(debris);
+        debris.statusPanelEl = statusPanelElement || null;
+        debris.stacktracePanelEl = stacktracePanelElement || null;
+        debris.statusSpinnerEl = spinnerElement || null;
+        debris.attach_status_stream(debris, {
+            element: statusPanelElement,
+            form: formElement,
+            channel: "debris_flow",
+            runId: window.runid || window.runId || null,
+            stacktrace: stacktracePanelElement ? { element: stacktracePanelElement } : null,
+            spinner: spinnerElement
+        });
         debris.events = emitter;
 
         function resetStatus(taskMsg) {
@@ -147,9 +159,7 @@ var DebrisFlow = (function () {
             debris.pushResponseStacktrace(debris, payload);
             emitter.emit("debris:run:error", { error: payload });
             debris.triggerEvent("job:error", { task: "debris:run", error: payload });
-            if (debris.ws_client && typeof debris.ws_client.disconnect === "function") {
-                debris.ws_client.disconnect();
-            }
+            debris.disconnect_status_stream(debris);
         }
 
         debris.hideStacktrace = function () {
@@ -170,9 +180,7 @@ var DebrisFlow = (function () {
             debris.triggerEvent("job:started", { task: "debris:run" });
             emitter.emit("debris:run:started", { jobId: null, task: "debris:run" });
 
-            if (debris.ws_client && typeof debris.ws_client.connect === "function") {
-                debris.ws_client.connect();
-            }
+            debris.connect_status_stream(debris);
 
             http.postJson("rq/api/run_debris_flow", {}, { form: formElement }).then(function (response) {
                 var payload = response.body || {};
@@ -207,9 +215,7 @@ var DebrisFlow = (function () {
         };
 
         formElement.addEventListener("DEBRIS_FLOW_RUN_TASK_COMPLETED", function () {
-            if (debris.ws_client && typeof debris.ws_client.disconnect === "function") {
-                debris.ws_client.disconnect();
-            }
+            debris.disconnect_status_stream(debris);
             debris.report();
         });
 

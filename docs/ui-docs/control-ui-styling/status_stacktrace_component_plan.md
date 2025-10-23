@@ -8,7 +8,7 @@
 ## Current State Findings
 - **Templates**: `rq-fork-console.htm` and `rq-archive-dashboard.htm` hand-roll status `<div>`s and stacktrace `<details>` with slightly different DOM ids and ad-hoc spacing classes.
 - **CSS**: `ui-foundation.css` includes `.wc-status`, `.wc-log`, and `.wc-panel` styles but no variant for tall, fixed-height streaming panes.
-- **JavaScript**: Each page defines its own `WSClient` class, `appendStatus` queue, and stacktrace logic (including polling `/rq/api/jobinfo/<id>`). ControlBase already manages similar flows, but the code paths diverged.
+- **JavaScript**: Legacy pages once defined their own `WSClient` clones, `appendStatus` queues, and stacktrace logic (including polling `/rq/api/jobinfo/<id>`). The migration standardizes this on `StatusStream.attach` via `controlBase.attach_status_stream`, and the old wrapper has been removed.
 - **Accessibility**: Live regions vary (`aria-live="polite"` vs none) and stacktrace toggles rely on manually toggled `hidden`.
 
 ## Component Strategy
@@ -53,8 +53,8 @@
    - Refactor `Project`/ControlBase to optionally delegate to the module (while keeping existing behavior until migration completes).
 3. **Migrate Console Pages**
    - Replace manual markup in `rq-fork-console` and `rq-archive-dashboard` with new macros.
-   - Swap inline WSClient/appendStatus code for `status_stream.js`.
-   - Use module callbacks to trigger page-specific actions (fork completion, archive refresh).
+   - Swap inline legacy WSClient/appendStatus code for the shared `StatusStream` module (via `controlBase.attach_status_stream` in run controls or direct `StatusStream.attach` elsewhere).
+   - Use module callbacks to trigger page-specific actions (fork completion, archive refresh) while letting the helper drop in hidden placeholders when the legacy markup lacks panels.
 4. **Integrate with ControlBase**
    - Update control macros to optionally render the new status/stacktrace components in `_pure_base.htm`.
    - Refactor ControlBase JS to register status panels using the shared module, ensuring existing run0 controls benefit from consistent behavior.

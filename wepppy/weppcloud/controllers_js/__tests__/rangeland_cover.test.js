@@ -2,6 +2,8 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("RangelandCover bootstrap requirements", () => {
     beforeEach(() => {
         jest.resetModules();
@@ -15,20 +17,18 @@ describe("RangelandCover bootstrap requirements", () => {
             <p id="hint_build_rangeland_cover"></p>
         `;
 
-        global.controlBase = jest.fn(() => ({
+        const { base: baseInstance } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             triggerEvent: jest.fn()
-        }));
-
-        global.WSClient = jest.fn(() => ({ attachControl: jest.fn() }));
+        });
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
         global.url_for_run = jest.fn((path) => path);
     });
 
     afterEach(() => {
         jest.clearAllMocks();
         delete global.controlBase;
-        delete global.WSClient;
         delete global.url_for_run;
         if (global.WCDom) {
             delete global.WCDom;
@@ -54,7 +54,8 @@ describe("RangelandCover bootstrap requirements", () => {
 describe("RangelandCover controller", () => {
     let httpRequestMock;
     let httpPostJsonMock;
-    let wsClientInstance;
+    let baseInstance;
+    let statusStreamMock;
     let rangeland;
     let eventLog;
 
@@ -153,15 +154,13 @@ describe("RangelandCover controller", () => {
             isHttpError: jest.fn(() => false)
         };
 
-        await import("../control_base.js");
-
-        wsClientInstance = {
-            attachControl: jest.fn(),
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            resetSpinner: jest.fn()
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
+            pushResponseStacktrace: jest.fn(),
+            pushErrorStacktrace: jest.fn(),
+            triggerEvent: jest.fn(),
+            set_rq_job_id: jest.fn()
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         const colorMapMock = { enableColorMap: jest.fn() };
         global.SubcatchmentDelineation = {
@@ -176,7 +175,7 @@ describe("RangelandCover controller", () => {
     afterEach(() => {
         jest.clearAllMocks();
         delete window.RangelandCover;
-        delete global.WSClient;
+        delete global.controlBase;
         delete global.SubcatchmentDelineation;
         delete global.url_for_run;
         delete global.WCHttp;

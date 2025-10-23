@@ -1,3 +1,18 @@
+"""BAER (Burned Area Emergency Response) NoDb controller.
+
+This module orchestrates burn severity rasters, soils replacements, and
+post-fire landuse handling as part of the NoDb workflow. BAER predates the
+Disturbed mod and remains in use for legacy projects that expect the
+four-class Soil Burn Severity pipeline.
+
+Responsibilities:
+* Validate and reproject SBS rasters for map display and watershed alignment.
+* Derive landuse/soil replacements from burn severity classes.
+* Trigger optional RRED cost-effectiveness analyses.
+"""
+
+from __future__ import annotations
+
 # Copyright (c) 2016-2018, University of Idaho
 # All rights reserved.
 #
@@ -6,30 +21,33 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-import os
 import ast
+import os
 import shutil
 from collections import Counter
 from copy import deepcopy
-
-from subprocess import Popen, PIPE
-from os.path import join as _join
-from os.path import exists as _exists
+from subprocess import PIPE, Popen
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 from osgeo import gdal
 
 from deprecated import deprecated
 
-from wepppy.all_your_base import isint
-from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster_stacker
-from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import SoilReplacements, simple_texture, WeppSoilUtil
+from os.path import exists as _exists
+from os.path import join as _join
 
-from wepppy.nodb.core import *
-from ...mods.rred import Rred
-from ...base import NoDbBase, TriggerEvents
-from ...redis_prep import RedisPrep, TaskEnum
+from wepppy.all_your_base import isint
+from wepppy.all_your_base.geo import haversine, read_raster, wgs84_proj4
+from wepppy.nodb.base import NoDbBase, TriggerEvents
+from wepppy.nodb.core.landuse import Landuse, LanduseMode
+from wepppy.nodb.core.ron import Ron
+from wepppy.nodb.core.soils import Soils, SoilsMode
+from wepppy.nodb.core.watershed import Watershed
+from wepppy.nodb.mods.rred import Rred
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.soils.ssurgo import SoilSummary
+from wepppy.wepp.soils.utils import SoilReplacements, WeppSoilUtil, simple_texture
 
 from .sbs_map import SoilBurnSeverityMap
 
@@ -59,84 +77,96 @@ sbs_soil_replacements = dict(
 
 @deprecated("supplanted by Disturbed, needed for Portland")
 class Baer(NoDbBase):
+    """Legacy BAER controller that coordinates burn severity workflows."""
     __name__ = 'Baer'
 
     filename = 'baer.nodb'
 
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
-        super(Baer, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
+    def __init__(
+        self,
+        wd: str,
+        cfg_fn: str,
+        run_group: Optional[str] = None,
+        group_name: Optional[str] = None
+    ) -> None:
+        super().__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
-            os.mkdir(self.baer_dir)
+            if not _exists(self.baer_dir):
+                os.mkdir(self.baer_dir)
 
-            self._baer_fn = None
-            self._bounds = None
-            self._classes = None
-            self._breaks = None
-            self._counts = None
-            self._nodata_vals = None
-            self._is256 = None
+            self._baer_fn: Optional[str] = None
+            self._bounds: Optional[List[List[float]]] = None
+            self._classes: Optional[List[int]] = None
+            self._breaks: Optional[List[int]] = None
+            self._counts: Optional[Dict[str, int]] = None
+            self._nodata_vals: Optional[List[int]] = None
+            self._is256: Optional[bool] = None
 
-            self._legacy_mode = self.config_get_bool('baer', 'legacy_mode')
+            self._legacy_mode: bool = self.config_get_bool('baer', 'legacy_mode')
 
-            self.sbs_coverage = None
+            self.sbs_coverage: Optional[Dict[str, float]] = None
 
     @property
-    def legacy_mode(self):
+    def legacy_mode(self) -> bool:
         return getattr(self, '_legacy_mode', False)
 
     @property
-    def baer_dir(self):
+    def baer_dir(self) -> str:
         return _join(self.wd, 'baer')
 
     @property
-    def baer_soils_dir(self):
+    def baer_soils_dir(self) -> str:
         return _join(_data_dir, 'soils')
 
     @property
-    def baer_fn(self):
+    def baer_fn(self) -> Optional[str]:
         return self._baer_fn
 
     @property
-    def has_map(self):
+    def has_map(self) -> bool:
         return self._baer_fn is not None
 
     @property
-    def is256(self):
+    def is256(self) -> bool:
         return self._is256 is not None
 
     @property
-    def color_tbl_path(self):
+    def color_tbl_path(self) -> str:
         return _join(self.baer_dir, 'color_table.txt')
 
     @property
-    def bounds(self):
+    def bounds(self) -> Optional[List[List[float]]]:
         return self._bounds
 
     @property
-    def classes(self):
+    def classes(self) -> Optional[List[int]]:
         return self._classes
 
     @property
-    def breaks(self):
+    def breaks(self) -> Optional[List[int]]:
         return self._breaks
 
     @property
-    def nodata_vals(self):
+    def nodata_vals(self) -> str:
         if self._nodata_vals is None:
             return ''
 
         return ', '.join(str(v) for v in self._nodata_vals)
 
-    def classify(self, v):
+    def classify(self, value: int) -> str:
 
         if self._nodata_vals is not None:
-            if v in self._nodata_vals:
+            if value in self._nodata_vals:
                 return 'No Data'
 
         i = 0
-        for i, brk in enumerate(self.breaks):
-            if v <= brk:
+        breaks = self.breaks
+        if breaks is None:
+            raise ValueError('Burn class breaks are not defined.')
+
+        for i, brk in enumerate(breaks):
+            if value <= brk:
                 break
 
         return ('No Burn',
@@ -145,31 +175,33 @@ class Baer(NoDbBase):
                 'High Severity Burn')[i]
 
     @property
-    def baer_path(self):
+    def baer_path(self) -> Optional[str]:
         if self._baer_fn is None:
             return None
 
         return _join(self.baer_dir, self._baer_fn)
 
     @property
-    def baer_wgs(self):
+    def baer_wgs(self) -> str:
         baer_path = self.baer_path
+        if baer_path is None:
+            raise ValueError('BAER raster has not been validated yet.')
         return baer_path[:-4] + '.wgs' + baer_path[-4:]
 
     @property
-    def baer_rgb(self):
+    def baer_rgb(self) -> str:
         return self.baer_wgs[:-4] + '.rgb.vrt'
 
     @property
-    def baer_rgb_png(self):
+    def baer_rgb_png(self) -> str:
         return _join(self.baer_dir, 'baer.wgs.rgba.png')
 
     @property
-    def baer_cropped(self):
+    def baer_cropped(self) -> str:
         return _join(self.baer_dir, 'baer.cropped.tif')
 
     @property
-    def legend(self):
+    def legend(self) -> List[Tuple[int, str, str]]:
         keys = [130, 131, 132, 133]
 
         descs = ['No Burn',
@@ -181,8 +213,10 @@ class Baer(NoDbBase):
 
         return list(zip(keys, descs, colors))
 
-    def write_color_table(self):
+    def write_color_table(self) -> None:
         breaks = self.breaks
+        if breaks is None:
+            raise ValueError('Burn class breaks are not defined.')
         assert len(breaks) == 4
 
         _map = dict([('No Data', '0 0 0'),
@@ -197,7 +231,7 @@ class Baer(NoDbBase):
 
             fp.write("nv 0 0 0\n")
 
-    def build_color_map(self):
+    def build_color_map(self) -> None:
         baer_rgb = self.baer_rgb
         if _exists(baer_rgb):
             os.remove(baer_rgb)
@@ -215,18 +249,24 @@ class Baer(NoDbBase):
         p.wait()
 
     @property
-    def sbs_wgs_n(self):
+    def sbs_wgs_n(self) -> int:
         """
         number of pixels in the WGS projected SBS
         """
+        if self._counts is None:
+            raise ValueError('Burn severity map has not been validated.')
         return sum(self._counts.values())
 
     @property
-    def sbs_wgs_area_ha(self):
+    def sbs_wgs_area_ha(self) -> float:
         """
         area of the WGS projected SBS in ha
         """
-        [[sw_y, sw_x], [ne_y, ne_x]] = self.bounds
+        bounds = self.bounds
+        if bounds is None:
+            raise ValueError('Burn severity bounds are not available.')
+
+        [[sw_y, sw_x], [ne_y, ne_x]] = bounds
         nw_y, nw_x = ne_y, sw_x
 
         width = haversine((nw_x, nw_y), (ne_x, ne_y)) * 1000
@@ -234,18 +274,23 @@ class Baer(NoDbBase):
         return width * height * 0.0001
 
     @property
-    def sbs_class_counts(self):
+    def sbs_class_counts(self) -> Counter[str]:
         """
         dictionary with burn class keys and pixel counts of the WGS projected SBS
         """
+        classes = self.classes
+        counts_raw = self._counts
+        if classes is None or counts_raw is None:
+            raise ValueError('Burn severity classes are not available.')
+
         counts = Counter()
-        for v in self.classes:
-            counts[self.classify(v)] += self._counts[str(v)]
+        for value in classes:
+            counts[self.classify(value)] += counts_raw[str(value)]
 
         return counts
 
     @property
-    def sbs_class_pcts(self):
+    def sbs_class_pcts(self) -> Dict[str, float]:
         """
         dictionary with burn class keys percentages of cover of the WGS projected SBS
         """
@@ -264,7 +309,7 @@ class Baer(NoDbBase):
         return pcts
 
     @property
-    def sbs_class_areas(self):
+    def sbs_class_areas(self) -> Dict[str, float]:
         """
         dictionary with burn class keys and areas (ha) of the WGS projected SBS
         """
@@ -278,17 +323,20 @@ class Baer(NoDbBase):
         return areas
 
     @property
-    def class_map(self):
+    def class_map(self) -> List[Tuple[int, str, int]]:
+        if self.classes is None or self._counts is None:
+            raise ValueError('Burn severity classes are not available.')
         return [(v, self.classify(v), self._counts[str(v)]) for v in self.classes]
 
-    def modify_burn_class(self, breaks, nodata_vals):
+    def modify_burn_class(self, breaks: Sequence[int], nodata_vals: Optional[str]) -> None:
         with self.locked():
-            assert len(breaks) == 4
-            assert breaks[0] <= breaks[1]
-            assert breaks[1] <= breaks[2]
-            assert breaks[2] <= breaks[3]
+            break_values = list(breaks)
+            assert len(break_values) == 4
+            assert break_values[0] <= break_values[1]
+            assert break_values[1] <= break_values[2]
+            assert break_values[2] <= break_values[3]
 
-            self._breaks = breaks
+            self._breaks = break_values
             if nodata_vals is not None:
                 if str(nodata_vals).strip() != '':
                     _nodata_vals = ast.literal_eval('[{}]'.format(nodata_vals))
@@ -305,7 +353,7 @@ class Baer(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def remove_sbs(self):
+    def remove_sbs(self) -> None:
         with self.locked():
             if _exists(self._baer_fn):
                 os.remove(self._baer_fn)
@@ -325,7 +373,7 @@ class Baer(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def validate(self, fn):
+    def validate(self, fn: str) -> None:
         with self.locked():
             self._baer_fn = fn
             self._nodata_vals = None
@@ -407,7 +455,7 @@ class Baer(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def on(self, evt):
+    def on(self, evt: TriggerEvents) -> None:
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
             self.remap_landuse()
             if 'rred' in self.mods:
@@ -435,10 +483,10 @@ class Baer(NoDbBase):
                 self.modify_soils()
 
     @property
-    def ct(self):
+    def ct(self) -> Optional[str]:
         return None
 
-    def remap_landuse(self):
+    def remap_landuse(self) -> None:
         wd = self.wd
         baer_path = self.baer_path
 
@@ -497,7 +545,7 @@ class Baer(NoDbBase):
             landuse = landuse.getInstance(wd)
             landuse.build_managements(_map='default')
 
-    def _assign_eu_soils(self):
+    def _assign_eu_soils(self) -> None:
 
         wd = self.wd
 
@@ -536,7 +584,7 @@ class Baer(NoDbBase):
             soils.soils = _soils
             soils.domsoil_d = _domsoil_d
 
-    def _assign_au_soils(self):
+    def _assign_au_soils(self) -> None:
 
         wd = self.wd
 
@@ -575,7 +623,7 @@ class Baer(NoDbBase):
             soils.soils = _soils
             soils.domsoil_d = _domsoil_d
 
-    def modify_soils(self):
+    def modify_soils(self) -> None:
 
         wd = self.wd
 
@@ -665,7 +713,7 @@ class Baer(NoDbBase):
             soils.soils.update(_soils)
             soils.domsoil_d = _domsoil_d
 
-    def _calc_sbs_coverage(self, sbs):
+    def _calc_sbs_coverage(self, sbs: Optional[SoilBurnSeverityMap]) -> None:
         with self.locked():
             if sbs is None:
                 self.sbs_coverage = {

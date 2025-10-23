@@ -53,7 +53,7 @@ _Last updated: 2025-10-18_
 ## Near-Term Focus
 - **Unitizer modal polish:** restyle the modal with Pure tokens and align the toggle controls with the shared checkbox/radio pattern.
 - **Numeric unit switching:** wire the unitizer controls into `numeric_field` so unit changes propagate across paired inputs.
-- **ControlBase migration plan:** refactor run controls to render `status_panel` / `stacktrace_panel` and switch the shared JS from `WSClient` to `StatusStream`.
+- **ControlBase migration plan:** refactor run controls to render `status_panel` / `stacktrace_panel` and rely on `controlBase.attach_status_stream` for telemetry.
 - **Console follow-through:** monitor fork/archive consoles for regressions (autoscroll, trigger handling, stacktrace enrichment) and fold lessons into the broader migration.
 - **Controller metadata contract:** formalize the schema (labels, units, validation states) so macros can rely on consistent inputs.
 - **Error/warning messaging:** standardise copy and iconography for validation states before wider macro adoption.

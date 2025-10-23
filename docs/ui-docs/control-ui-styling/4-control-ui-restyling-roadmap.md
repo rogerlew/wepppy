@@ -60,7 +60,7 @@ This note captures the current state of controller views and the `runs0` experie
   - Group controller endpoints by NoDb class (e.g., `/controls/climate/{action}`) and dispatch using reflection. Each controller shares a `control_action(action_name, payload)` on the NoDb singleton that validates inputs and returns structured responses.
   - Maintain a single validation surface: the NoDb method performs schema enforcement (potentially via `pydantic`-style dataclasses) and returns serialized errors for the UI.
 - **WebSocket alignment**
-  - Keep ControlBase's `WSClient` integration, but expose config via data attributes (channel name, run id). Controllers with live streams simply opt in by adding `data-ws-channel` to their form.
+  - Standardize on `controlBase.attach_status_stream` with `data-ws-channel` (or explicit args) so controllers opt in without manual wiring. The helper fabricates hidden panels when Pure markup is missing, eliminating the need for the legacy `WSClient` shim.
 
 ## Backend Expectations
 1. **NoDb singletons**

@@ -1,3 +1,11 @@
+"""Linear-programming solver utilities for the PathCE mod.
+
+Encapsulates the pulp model setup and post-processing routines that compute the
+most cost-effective set of hillslope treatments while respecting sediment
+reduction targets. Split out so the NoDb controller can test the optimization
+logic in isolation.
+"""
+
 from __future__ import annotations
 
 import logging

@@ -38,17 +38,29 @@ def rangeland_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     def build(self, rap_year=None, default_covers=None):
         self.build_calls.append({"rap_year": rap_year, "defaults": default_covers})
 
+    def current_cover_summary(self, topaz_ids):
+        self.current_summary_calls.append(list(topaz_ids))
+        return {}
+
+    def modify_covers(self, topaz_ids, covers):
+        self.modify_calls.append({
+            "topaz_ids": list(topaz_ids),
+            "covers": dict(covers),
+        })
+
     RangelandStub = singleton_factory(
         "RangelandStub",
         attrs={
             "mode": None,
             "rap_year": None,
-            "build_calls": []
+            "build_calls": [],
+            "current_summary_calls": [],
+            "modify_calls": [],
         },
         methods={
             "build": build,
-            "current_cover_summary": lambda self, _: {},
-            "modify_covers": lambda self, *_args: None,
+            "current_cover_summary": current_cover_summary,
+            "modify_covers": modify_covers,
         },
         mixins=(LockedMixin,),
     )
@@ -159,3 +171,124 @@ def test_build_supports_legacy_form_payload(rangeland_client):
             "cryptogams": 5.0,
         },
     }
+
+
+def test_modify_rangeland_cover_normalizes_payload(rangeland_client):
+    client, RangelandStub, run_dir = rangeland_client
+
+    payload = {
+        "topaz_ids": ["101", " 102 ", "101"],
+        "covers": {
+            "bunchgrass": "11.5",
+            "forbs": "22.0",
+            "sodgrass": "33.5",
+            "shrub": "44.0",
+            "basal": "10.0",
+            "rock": "5.0",
+            "litter": "25.0",
+            "cryptogams": "7.5",
+        },
+    }
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_rangeland_cover/",
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["Success"] is True
+
+    instance = RangelandStub.getInstance(run_dir)
+    assert instance.modify_calls[-1] == {
+        "topaz_ids": ["101", "102"],
+        "covers": {
+            "bunchgrass": 11.5,
+            "forbs": 22.0,
+            "sodgrass": 33.5,
+            "shrub": 44.0,
+            "basal": 10.0,
+            "rock": 5.0,
+            "litter": 25.0,
+            "cryptogams": 7.5,
+        },
+    }
+
+
+def test_modify_rangeland_cover_validates_cover_range(rangeland_client):
+    client, RangelandStub, run_dir = rangeland_client
+
+    payload = {
+        "topaz_ids": ["201"],
+        "covers": {
+            "bunchgrass": "10",
+            "forbs": "20",
+            "sodgrass": "30",
+            "shrub": "40",
+            "basal": "15",
+            "rock": "5",
+            "litter": "25",
+            "cryptogams": "120",  # out of range
+        },
+    }
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_rangeland_cover/",
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 500
+    body = response.get_json()
+    assert body["Success"] is False
+    assert "between 0 and 100" in body["Error"]
+
+    instance = RangelandStub.getInstance(run_dir)
+    assert instance.modify_calls == []
+
+
+def test_modify_rangeland_cover_requires_topaz_ids(rangeland_client):
+    client, RangelandStub, run_dir = rangeland_client
+
+    payload = {
+        "topaz_ids": [],
+        "covers": {
+            "bunchgrass": "10",
+            "forbs": "20",
+            "sodgrass": "30",
+            "shrub": "40",
+            "basal": "15",
+            "rock": "5",
+            "litter": "25",
+            "cryptogams": "10",
+        },
+    }
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_rangeland_cover/",
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 500
+    body = response.get_json()
+    assert body["Success"] is False
+    assert "Topaz ID" in body["Error"] or "provide at least one" in body["Error"]
+
+    instance = RangelandStub.getInstance(run_dir)
+    assert instance.modify_calls == []
+
+
+def test_current_cover_summary_normalizes_topaz_ids(rangeland_client):
+    client, RangelandStub, run_dir = rangeland_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/query/rangeland_cover/current_cover_summary/",
+        data=json.dumps({"topaz_ids": "101,  202 , 101"}),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 200
+    instance = RangelandStub.getInstance(run_dir)
+    assert instance.current_summary_calls[-1] == ["101", "202"]

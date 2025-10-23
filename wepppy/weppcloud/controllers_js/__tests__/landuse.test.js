@@ -2,13 +2,17 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Landuse controller", () => {
     let httpRequestMock;
     let httpPostJsonMock;
-    let wsClientInstance;
     let baseInstance;
+    let statusStreamMock;
     let landuse;
     let unitizerClient;
+
+    const flushPromises = () => Promise.resolve().then(() => Promise.resolve());
 
     beforeEach(async () => {
         jest.resetModules();
@@ -123,20 +127,13 @@ describe("Landuse controller", () => {
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn(),
-        };
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn(),
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
         global.SubcatchmentDelineation = {
             getInstance: jest.fn(() => ({ enableColorMap: jest.fn() })),
         };
@@ -152,7 +149,6 @@ describe("Landuse controller", () => {
         delete global.WCHttp;
         delete global.WCForms;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.SubcatchmentDelineation;
         delete global.url_for_run;
         delete global.WCEvents;
@@ -165,16 +161,19 @@ describe("Landuse controller", () => {
 
     test("build submits form data and records job id", async () => {
         landuse.build();
-        await Promise.resolve();
+        await flushPromises();
 
         expect(httpRequestMock).toHaveBeenCalledWith("rq/api/build_landuse", expect.objectContaining({
             method: "POST",
         }));
         const requestOptions = httpRequestMock.mock.calls[0][1];
         expect(requestOptions.body).toBeInstanceOf(FormData);
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "job-1");
-        expect(document.querySelector("#status").textContent).toContain("build_landuse job submitted");
+        expect(baseInstance.append_status_message).toHaveBeenCalledWith(
+            expect.any(Object),
+            expect.stringContaining("build_landuse job submitted")
+        );
     });
 
     test("modify_mapping posts payload and refreshes report", async () => {

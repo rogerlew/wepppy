@@ -12,7 +12,7 @@ New
 
 ## 2. Control Infrastructure in JavaScript
 - `control_base.js` is the mixin that all controllers consume. It standardizes job-state polling, button disabling, stacktrace rendering, and WebSocket orchestration by assuming the template IDs defined in `_base.htm`. The helper also renders RQ job metadata, requeues polling while work is in-flight, and exposes `triggerEvent` for cross-controller signaling.【F:wepppy/weppcloud/controllers_js/control_base.js†L5-L344】
-- `ws_client.js` connects each control to the Redis-backed status stream. It pushes spinner frames into `#braille`, appends exception text to `#stacktrace`, and forwards `TRIGGER` payloads back into the parent control’s `triggerEvent` handler.【F:wepppy/weppcloud/controllers_js/ws_client.js†L6-L161】
+- `status_stream.js`, orchestrated by `controlBase.attach_status_stream`, connects each control to the Redis-backed status stream. It pushes spinner frames into `#braille`, appends exception text to `#stacktrace`, and forwards `TRIGGER` payloads back into the parent control’s `triggerEvent` handler.【F:wepppy/weppcloud/controllers_js/status_stream.js†L1-L215】【F:wepppy/weppcloud/controllers_js/control_base.js†L520-L840】
 - The controllers bundle is documented in `controllers_js/README.md`, which clarifies the singleton pattern (`Controller.getInstance()`), the bundling pipeline, and the DOM contract between templates and JavaScript. This doc is the authoritative reference for keeping new controls aligned with the infrastructure.【F:wepppy/weppcloud/controllers_js/README.md†L7-L46】
 
 ## 3. Categories of Existing Controls
@@ -25,7 +25,7 @@ New
 ## 4. Data Flow from Runs to Controllers
 - `run_0_bp.runs0` loads the working directory context, instantiates all relevant `NoDbBase` singletons, harvests cached RQ job IDs from `RedisPrep`, and passes everything into the `0.htm` template so the front end can restore state and resume polling.【F:wepppy/weppcloud/routes/run_0/run_0_bp.py†L115-L219】
 - `run_page_bootstrap.js.j2` seeds globals (`runid`, `config`, `readonly`), then asks every singleton controller to bind to the DOM, restore their state, and set RQ job IDs. The script also wires cross-control dependencies (map clicks feed outlet selection, subcatchment coloring toggles rangeland panels, etc.).【F:wepppy/weppcloud/routes/run_0/templates/run_page_bootstrap.js.j2†L5-L200】
-- Once a controller submits work it typically hits a `tasks/<name>/` or `rq/api/<job>` endpoint, queues an RQ job, and relies on the Redis pub/sub → Go status relay → `WSClient` path described in the repository’s architecture notes.【F:wepppy/weppcloud/controllers_js/control_base.js†L178-L277】【F:wepppy/weppcloud/controllers_js/ws_client.js†L35-L108】
+- Once a controller submits work it typically hits a `tasks/<name>/` or `rq/api/<job>` endpoint, queues an RQ job, and relies on the Redis pub/sub → Go status relay → `controlBase.attach_status_stream` pipeline described in the repository’s architecture notes.【F:wepppy/weppcloud/controllers_js/control_base.js†L178-L277】
 
 ## 5. Unit Awareness Today
 - `initUnitConverters` scans the DOM for `[data-convert-*]` attributes and keeps paired metric/imperial inputs synchronized, but the integration is ad-hoc: individual templates need to set the attributes manually and must call `initUnitConverters` after injecting new markup.【F:wepppy/weppcloud/static/js/input-unit-converters.js†L1-L95】【F:wepppy/weppcloud/routes/run_0/templates/run_page_bootstrap.js.j2†L51-L57】

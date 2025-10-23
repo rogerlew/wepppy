@@ -45,5 +45,5 @@ Keep this note updated if helper limitations or follow-up tasks surface during i
 - Test coverage: Jest suite `controllers_js/__tests__/debris_flow.test.js`, route regression `tests/weppcloud/routes/test_rq_api_debris_flow.py`, and task coverage `tests/rq/test_project_rq_debris_flow.py`.
 
 ## Follow-ups
-- `WSClient` still updates DOM via jQuery selectors; modernise the status/stacktrace bridge once the shared WebSocket client migrates.
+- Status streaming now runs through `controlBase.attach_status_stream`; verify no stray legacy DOM writes remain now that the compatibility shim is gone.
 - Surface optional payload fields (clay %, liquid limit, datasource preference) in the UI when product requirements solidify, then extend the controller and route validation accordingly.

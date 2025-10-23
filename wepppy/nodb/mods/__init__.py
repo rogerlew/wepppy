@@ -1,3 +1,16 @@
+"""Dynamic import facade for optional NoDb controller mods.
+
+This package exposes dozens of optional NoDb controllers (for example BAER,
+Disturbed, RRED). Rather than importing every module eagerly, it lazily resolves
+attributes on demand so projects only pay for the dependencies they use. The
+resolver scans the ``wepppy.nodb`` tree to build a legacy redirect map which
+preserves older dotted-paths for jsonpickle payloads.
+
+Consumers typically write ``from wepppy.nodb import mods`` and access controller
+classes as attributes (``mods.Disturbed``). The ``__getattr__`` hook below
+performs the lookup and caches the result.
+"""
+
 import importlib
 import os
 import re

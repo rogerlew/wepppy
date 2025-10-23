@@ -179,9 +179,18 @@ var Outlet = (function () {
         outlet.entryInput = entryInputElement;
         outlet.entryButton = entryButtonElement;
         outlet.mode = 0;
+        outlet.statusPanelEl = dom.qs("#set_outlet_status_panel");
+        outlet.stacktracePanelEl = dom.qs("#set_outlet_stacktrace_panel");
+        outlet.statusStream = null;
+        var spinnerElement = outlet.statusPanelEl ? outlet.statusPanelEl.querySelector("#braille") : null;
 
-        outlet.ws_client = new WSClient("set_outlet_form", "outlet");
-        outlet.ws_client.attachControl(outlet);
+        outlet.attach_status_stream(outlet, {
+            element: outlet.statusPanelEl,
+            channel: "outlet",
+            stacktrace: outlet.stacktracePanelEl ? { element: outlet.stacktracePanelEl } : null,
+            spinner: spinnerElement,
+            logLimit: 200
+        });
 
         outlet.popup = L.popup();
         outlet.cursorSelectionOn = false;
@@ -191,8 +200,9 @@ var Outlet = (function () {
         var lastSubmission = null;
 
         function setStatusMessage(message) {
-            if (statusAdapter && typeof statusAdapter.html === "function") {
-                statusAdapter.html(message || "");
+            outlet.clear_status_messages(outlet);
+            if (message) {
+                outlet.append_status_message(outlet, message);
             }
         }
 
@@ -205,7 +215,11 @@ var Outlet = (function () {
             if (infoAdapter && typeof infoAdapter.html === "function") {
                 infoAdapter.html("");
             }
-            setStatusMessage(taskMsg ? taskMsg + "…" : "");
+            if (taskMsg) {
+                setStatusMessage(taskMsg + "…");
+            } else {
+                setStatusMessage("");
+            }
             if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
                 stacktraceAdapter.text("");
             }
@@ -309,9 +323,7 @@ var Outlet = (function () {
 
             resetStatus("Attempting to set outlet");
 
-            if (outlet.ws_client && typeof outlet.ws_client.connect === "function") {
-                outlet.ws_client.connect();
-            }
+            outlet.connect_status_stream(outlet);
 
             try {
                 var map = MapController.getInstance();
@@ -417,9 +429,7 @@ var Outlet = (function () {
         outlet.triggerEvent = function (eventName, payload) {
             var normalized = (eventName || "").toString().toUpperCase();
             if (normalized === "SET_OUTLET_TASK_COMPLETED") {
-                if (outlet.ws_client && typeof outlet.ws_client.disconnect === "function") {
-                    outlet.ws_client.disconnect();
-                }
+                outlet.disconnect_status_stream(outlet);
                 if (outlet.popup && typeof outlet.popup.remove === "function") {
                     try {
                         outlet.popup.remove();

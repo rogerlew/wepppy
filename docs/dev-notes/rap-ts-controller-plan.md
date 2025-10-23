@@ -2,7 +2,7 @@
 > Contract and follow-up notes for the helper-first RAP time-series control (2025 refresh).
 
 ## Current Architecture
-- Controller lives in `wepppy/weppcloud/controllers_js/rap_ts.js` and now relies exclusively on `WCDom`, `WCForms`, `WCHttp`, `WCEvents`, `controlBase`, and `StatusStream` (with `WSClient` fallback). The singleton exposes `RAP_TS.getInstance()`.
+- Controller lives in `wepppy/weppcloud/controllers_js/rap_ts.js` and now relies exclusively on `WCDom`, `WCForms`, `WCHttp`, `WCEvents`, `controlBase`, and `controlBase.attach_status_stream`. The singleton exposes `RAP_TS.getInstance()`.
 - Templates (`rap_ts.htm`, `rap_ts_pure.htm`) drop inline handlers in favour of delegated hooks:
   - Acquisition button carries `data-rap-action="run"` to keep interactions helper-friendly.
   - Schedule metadata (if any) ships via `<script id="rap_ts_schedule_data" type="application/json" data-rap-schedule>…</script>` for zero-request hydration.
@@ -49,4 +49,3 @@ Content-Type: application/json
 - `fetch_and_analyze_rap_ts_rq` ignores `force_refresh` beyond logging. If cache bypass is required, extend the NoDb helper to clear parquet/rasters when the flag is true.
 - StatusStream still emits raw RQ status lines. Consider adding a shared formatter for RAP to provide user-friendly text (mirrors `controlBase.appendStatus`).
 - Keep this plan in sync when payload fields, helper dependencies, or event names change; link downstream docs (e.g., `docs/ui-docs/control-components.md`) when the control gains UI affordances.
-

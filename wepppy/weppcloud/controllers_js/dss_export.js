@@ -356,15 +356,39 @@ var DssExport = (function () {
                 2: createLegacyAdapter(mode2Element)
             },
             command_btn_id: "btn_export_dss",
-            ws_client: null,
             state: {
                 mode: 1
             },
             _delegates: []
         });
 
-        controller.ws_client = new WSClient(FORM_ID, DSS_CHANNEL);
-        controller.ws_client.attachControl(controller);
+        controller.statusPanelEl = formElement ? dom.qs("#dss_export_status_panel") : null;
+        controller.stacktracePanelEl = formElement ? dom.qs("#dss_export_stacktrace_panel") : null;
+        var spinnerElement = controller.statusPanelEl ? controller.statusPanelEl.querySelector("#braille") : null;
+
+        controller.attach_status_stream(controller, {
+            element: controller.statusPanelEl,
+            channel: DSS_CHANNEL,
+            stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
+            spinner: spinnerElement
+        });
+
+        controller.appendStatus = function (message, meta) {
+            if (!message) {
+                return;
+            }
+            if (controller.statusStream && typeof controller.statusStream.append === "function") {
+                controller.statusStream.append(message, meta || null);
+                return;
+            }
+            if (controller.status && typeof controller.status.html === "function") {
+                controller.status.html(message);
+                return;
+            }
+            if (statusElement) {
+                statusElement.innerHTML = message;
+            }
+        };
 
         controller.hideStacktrace = function () {
             if (controller.stacktrace && typeof controller.stacktrace.hide === "function") {
@@ -403,7 +427,7 @@ var DssExport = (function () {
             }
 
             controller.info.html("");
-            controller.status.html(EXPORT_MESSAGE + "…");
+            controller.appendStatus(EXPORT_MESSAGE + "…");
             controller.stacktrace.text("");
             controller.hideStacktrace();
             if (controller.hint && typeof controller.hint.text === "function") {
@@ -424,9 +448,7 @@ var DssExport = (function () {
                 });
             }
 
-            if (controller.ws_client && typeof controller.ws_client.connect === "function") {
-                controller.ws_client.connect();
-            }
+            controller.connect_status_stream(controller);
 
             http.postJson("rq/api/post_dss_export_rq", payload, { form: controller.form }).then(function (response) {
                 var body = response && response.body ? response.body : response;
@@ -434,7 +456,7 @@ var DssExport = (function () {
 
                 if (normalized.Success === true || normalized.success === true) {
                     var jobId = normalized.job_id || normalized.jobId || null;
-                    controller.status.html("post_dss_export_rq job submitted: " + jobId);
+                    controller.appendStatus("post_dss_export_rq job submitted: " + jobId);
                     controller.set_rq_job_id(controller, jobId);
                     if (controller.events && typeof controller.events.emit === "function") {
                         controller.events.emit("dss:export:started", {
@@ -458,9 +480,7 @@ var DssExport = (function () {
                     task: EXPORT_TASK,
                     error: normalized
                 });
-                if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                    controller.ws_client.disconnect();
-                }
+                controller.disconnect_status_stream(controller);
             }).catch(function (error) {
                 controller.pushErrorStacktrace(controller, error);
                 if (controller.events && typeof controller.events.emit === "function") {
@@ -473,9 +493,7 @@ var DssExport = (function () {
                     task: EXPORT_TASK,
                     error: error
                 });
-                if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                    controller.ws_client.disconnect();
-                }
+                controller.disconnect_status_stream(controller);
             });
         };
 
@@ -485,9 +503,7 @@ var DssExport = (function () {
         };
 
         controller.handleExportTaskCompleted = function (detail) {
-            if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                controller.ws_client.disconnect();
-            }
+            controller.disconnect_status_stream(controller);
             controller.report();
             if (controller.events && typeof controller.events.emit === "function") {
                 controller.events.emit("dss:export:completed", {
@@ -524,9 +540,7 @@ var DssExport = (function () {
                 }
             });
             controller._delegates = [];
-            if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                controller.ws_client.disconnect();
-            }
+            controller.detach_status_stream(controller);
         };
 
         if (formElement) {

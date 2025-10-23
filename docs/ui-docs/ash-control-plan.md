@@ -35,7 +35,7 @@
 - **Module pattern**: `Ash` remains a singleton on top of `controlBase()`, but now exposes `initializeForm()` to hydrate Pure controls and legacy markup alike.
 - **Dependencies**:
   - jQuery still backs ControlBase status helpers and the AJAX calls, but all DOM wiring happens with vanilla listeners.
-  - Global helpers: `controlBase`, `WSClient`, `Project`, `url_for_run`. Bootstrap collapse is still required only for the legacy `_base.htm` template.
+  - Global helpers: `controlBase`, `controlBase.attach_status_stream`, `Project`, `url_for_run`. Bootstrap collapse is still required only for the legacy `_base.htm` template.
   - Browser APIs: `FormData`, `ResizeObserver`, `window.addEventListener`.
 - **State wiring**:
   - `initializeForm()` grabs references (form, radios, selects, file inputs, status hint) and parses model presets from a `<script type="application/json" id="ash-model-params-data">` payload (falls back to the legacy `window.modelParams`).

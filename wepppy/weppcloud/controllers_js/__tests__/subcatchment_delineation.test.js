@@ -2,11 +2,13 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Subcatchment Delineation controller", () => {
     let httpPostJsonMock;
     let httpRequestMock;
     let baseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let mapInstance;
     let subcatchment;
     let delegateSpy;
@@ -104,20 +106,13 @@ describe("Subcatchment Delineation controller", () => {
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn(),
-        };
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn(),
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         const glLayer = {
             remove: jest.fn(),
@@ -175,7 +170,6 @@ describe("Subcatchment Delineation controller", () => {
         delete global.WCForms;
         delete global.WCEvents;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.MapController;
         delete global.ChannelDelineation;
         delete global.Wepp;
@@ -208,7 +202,7 @@ describe("Subcatchment Delineation controller", () => {
             { clip_hillslopes: true },
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(subcatchment, "job-77");
     });
 

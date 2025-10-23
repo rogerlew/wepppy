@@ -178,6 +178,9 @@ var Observed = (function () {
         var rqJobElement = formElement ? dom.qs(SELECTORS.rqJob, formElement) : null;
         var textAreaElement = formElement ? dom.qs(SELECTORS.textarea, formElement) : null;
         var hintElement = formElement ? dom.qs(SELECTORS.hint, formElement) : null;
+        var statusPanelElement = dom.qs("#observed_status_panel");
+        var stacktracePanelElement = dom.qs("#observed_stacktrace_panel");
+        var spinnerElement = statusPanelElement ? statusPanelElement.querySelector("#braille") : null;
 
         var controller = Object.assign(base, {
             dom: dom,
@@ -192,16 +195,25 @@ var Observed = (function () {
             rq_job: createLegacyAdapter(rqJobElement),
             hint: createLegacyAdapter(hintElement),
             textarea: textAreaElement,
+            statusPanelEl: statusPanelElement,
+            stacktracePanelEl: stacktracePanelElement,
+            statusSpinnerEl: spinnerElement,
+            statusStream: null,
             command_btn_id: "btn_run_observed",
-            ws_client: null,
             state: {
                 visible: false
             },
             _delegates: []
         });
 
-        controller.ws_client = new WSClient(FORM_ID, WS_CHANNEL);
-        controller.ws_client.attachControl(controller);
+        controller.attach_status_stream(controller, {
+            element: statusPanelElement,
+            form: formElement,
+            channel: WS_CHANNEL,
+            runId: window.runid || window.runId || null,
+            stacktrace: stacktracePanelElement ? { element: stacktracePanelElement } : null,
+            spinner: spinnerElement
+        });
 
         controller.hideStacktrace = function () {
             if (controller.stacktrace && typeof controller.stacktrace.hide === "function") {
@@ -304,9 +316,7 @@ var Observed = (function () {
                 });
             }
 
-            if (controller.ws_client && typeof controller.ws_client.connect === "function") {
-                controller.ws_client.connect();
-            }
+            controller.connect_status_stream(controller);
 
             http.postJson("tasks/run_model_fit/", submission, { form: controller.form }).then(function (response) {
                 var body = response && response.body !== undefined ? response.body : response;
@@ -359,9 +369,7 @@ var Observed = (function () {
                     error: normalizedError
                 });
             }).finally(function () {
-                if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                    controller.ws_client.disconnect();
-                }
+                controller.disconnect_status_stream(controller);
             });
         };
 
@@ -374,9 +382,7 @@ var Observed = (function () {
                 }
             });
             controller._delegates = [];
-            if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                controller.ws_client.disconnect();
-            }
+            controller.disconnect_status_stream(controller);
         };
 
         if (formElement) {

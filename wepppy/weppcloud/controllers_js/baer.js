@@ -197,6 +197,7 @@ var Baer = (function () {
         var statusElement = formElement ? dom.qs("#status", formElement) : null;
         var stacktraceElement = formElement ? dom.qs("#stacktrace", formElement) : null;
         var rqJobElement = formElement ? dom.qs("#rq_job", formElement) : null;
+        var spinnerElement = formElement ? dom.qs("#braille", formElement) : null;
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
@@ -215,9 +216,14 @@ var Baer = (function () {
         baer.rq_job = rqJobAdapter;
         baer.infoElement = infoElement;
         baer.baer_map = null;
+        baer.statusSpinnerEl = spinnerElement;
 
-        baer.ws_client = new WSClient("sbs_upload_form", "sbs_upload");
-        baer.ws_client.attachControl(baer);
+        baer.attach_status_stream(baer, {
+            form: formElement,
+            channel: "sbs_upload",
+            runId: window.runid || window.runId || null,
+            spinner: spinnerElement
+        });
 
         baer.hideStacktrace = function () {
             if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {

@@ -5,6 +5,7 @@
 function controlBase() {
     const TERMINAL_JOB_STATUSES = new Set(["finished", "failed", "stopped", "canceled", "not_found"]);
     const DEFAULT_POLL_INTERVAL_MS = 800;
+    const DEFAULT_SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
     function ensureHttp() {
         const http = window.WCHttp;
@@ -160,6 +161,78 @@ function controlBase() {
         element.insertAdjacentHTML("beforeend", html);
     }
 
+    function resolveElement(target) {
+        if (!target) {
+            return null;
+        }
+        if (typeof target === "string") {
+            try {
+                return document.querySelector(target);
+            } catch (err) {
+                return null;
+            }
+        }
+        return unwrapElement(target);
+    }
+
+    function makeTextSetter(target) {
+        if (!target) {
+            return null;
+        }
+        if (typeof target === "function") {
+            return function (value) {
+                target(value === undefined || value === null ? "" : String(value));
+            };
+        }
+        if (typeof target.text === "function") {
+            return function (value) {
+                target.text(value === undefined || value === null ? "" : String(value));
+            };
+        }
+        if (typeof target.html === "function") {
+            return function (value) {
+                if (value === undefined || value === null) {
+                    target.html("");
+                } else {
+                    target.html(String(value));
+                }
+            };
+        }
+        const element = resolveElement(target);
+        if (!element) {
+            return null;
+        }
+        return function (value) {
+            element.textContent = value === undefined || value === null ? "" : String(value);
+        };
+    }
+
+    function extractSummaryText(raw, maxLength) {
+        if (raw === undefined || raw === null) {
+            return "";
+        }
+        let text;
+        if (typeof raw === "string") {
+            text = raw;
+        } else if (typeof raw === "object") {
+            try {
+                text = JSON.stringify(raw);
+            } catch (err) {
+                text = String(raw);
+            }
+        } else {
+            text = String(raw);
+        }
+        const firstLine = text.split(/\r?\n/, 1)[0].trim();
+        if (!maxLength || maxLength <= 0 || firstLine.length <= maxLength) {
+            return firstLine;
+        }
+        if (maxLength <= 3) {
+            return firstLine.slice(0, maxLength);
+        }
+        return firstLine.slice(0, maxLength - 3) + "...";
+    }
+
     function resolveButtons(self) {
         if (!self || !self.command_btn_id) {
             return [];
@@ -237,6 +310,8 @@ function controlBase() {
         _job_status_poll_timeout: null,
         _job_status_fetch_inflight: false,
         _job_status_error: null,
+        statusStream: null,
+        _statusStreamHandle: null,
 
         pushResponseStacktrace: function pushResponseStacktrace(self, response) {
             showTarget(self.stacktrace);
@@ -333,10 +408,8 @@ function controlBase() {
                 if (!normalizedJobId) {
                     self.render_job_status(self);
                     self.update_command_button_state(self);
-                    self.manage_ws_client(self, null);
-                    if (self.ws_client && typeof self.ws_client.resetSpinner === "function") {
-                        self.ws_client.resetSpinner();
-                    }
+                    self.manage_status_stream(self, null);
+                    self.reset_status_spinner(self);
                 } else if (!self._job_status_fetch_inflight) {
                     self.fetch_job_status(self);
                 }
@@ -347,16 +420,13 @@ function controlBase() {
             self.rq_job_status = null;
             self._job_status_error = null;
 
-            if (self.ws_client && typeof self.ws_client.resetSpinner === "function") {
-                self.ws_client.resetSpinner();
-            }
-
+            self.reset_status_spinner(self);
             self.stop_job_status_polling(self);
             self.render_job_status(self);
             self.update_command_button_state(self);
 
             if (!self.rq_job_id) {
-                self.manage_ws_client(self, null);
+                self.manage_status_stream(self, null);
                 return;
             }
 
@@ -488,15 +558,348 @@ function controlBase() {
             return !TERMINAL_JOB_STATUSES.has(effectiveStatus);
         },
 
-        manage_ws_client: function manage_ws_client(self, status) {
-            if (!self.ws_client) {
-                return;
+        attach_status_stream: function attach_status_stream(self, options) {
+            if (typeof window === "undefined" || typeof window.StatusStream === "undefined") {
+                console.warn("StatusStream helper unavailable; skipping attachment.");
+                return null;
             }
 
-            if (self.should_continue_polling(self, status)) {
-                if (typeof self.ws_client.connect === "function") {
-                    self.ws_client.connect();
+            const config = Object.assign({}, options || {});
+            let panelElement = resolveElement(
+                config.element || config.panel || config.root || self.statusPanelEl || null
+            );
+            let createdPanel = false;
+            let createdLog = false;
+            let injectedElements = null;
+
+            function ensurePanelPlaceholder(formEl) {
+                if (typeof document === "undefined" || !formEl || typeof formEl.appendChild !== "function") {
+                    return null;
                 }
+                const container = document.createElement("div");
+                const generatedId = (formEl.id || self.formId || "status") + "__status_stream";
+                container.id = generatedId;
+                container.setAttribute("data-status-panel", "");
+                container.style.display = "none";
+
+                const logNode = document.createElement("div");
+                logNode.setAttribute("data-status-log", "");
+                container.appendChild(logNode);
+
+                formEl.appendChild(container);
+                injectedElements = { panel: container, log: logNode };
+                return container;
+            }
+
+            if (!panelElement) {
+                const fallbackForm = resolveElement(config.form || self.form || null);
+                const generatedPanel = ensurePanelPlaceholder(fallbackForm);
+                if (generatedPanel) {
+                    panelElement = generatedPanel;
+                    createdPanel = true;
+                    config.logElement = config.logElement || injectedElements.log;
+                }
+            }
+
+            if (!panelElement) {
+                console.warn("controlBase.attach_status_stream: panel element not found.");
+                return null;
+            }
+
+            if (!config.logElement) {
+                const existingLog = panelElement.querySelector("[data-status-log]");
+                if (existingLog) {
+                    config.logElement = existingLog;
+                } else if (typeof document !== "undefined") {
+                    const logNode = document.createElement("div");
+                    logNode.setAttribute("data-status-log", "");
+                    panelElement.appendChild(logNode);
+                    config.logElement = logNode;
+                    createdLog = true;
+                } else {
+                    console.warn("controlBase.attach_status_stream: log element not found.");
+                }
+            }
+
+            const spinnerSetter = makeTextSetter(
+                config.spinner || config.spinnerTarget || config.spinnerAdapter || self.statusSpinnerEl || null
+            );
+            const hintSetter = makeTextSetter(config.hint || config.hintTarget || self.hint || null);
+            const summarySetter = makeTextSetter(
+                config.summary ||
+                config.summaryTarget ||
+                config.statusSummary ||
+                self.status ||
+                config.statusAdapter ||
+                config.statusElement ||
+                null
+            );
+            const summaryMaxLength = typeof config.summaryMaxLength === "number" ? config.summaryMaxLength : 160;
+            const spinnerFrames = Array.isArray(config.spinnerFrames) && config.spinnerFrames.length > 0
+                ? config.spinnerFrames.slice()
+                : DEFAULT_SPINNER_FRAMES.slice();
+            let spinnerIndex = 0;
+
+            function resetSpinner() {
+                spinnerIndex = 0;
+                if (spinnerSetter) {
+                    spinnerSetter("");
+                }
+            }
+
+            function advanceSpinner() {
+                if (!spinnerSetter || spinnerFrames.length === 0) {
+                    return;
+                }
+                const frame = spinnerFrames[spinnerIndex];
+                spinnerSetter(frame);
+                spinnerIndex = (spinnerIndex + 1) % spinnerFrames.length;
+            }
+
+            const onStatusCallback = typeof config.onStatus === "function" ? config.onStatus : null;
+            const onAppendCallback = typeof config.onAppend === "function" ? config.onAppend : null;
+            const onTriggerCallback = typeof config.onTrigger === "function" ? config.onTrigger : null;
+
+            let resolvedStacktrace = null;
+            if (config.stacktrace) {
+                resolvedStacktrace = Object.assign({}, config.stacktrace);
+                if (resolvedStacktrace.element) {
+                    resolvedStacktrace.element = resolveElement(resolvedStacktrace.element);
+                }
+                if (resolvedStacktrace.body) {
+                    resolvedStacktrace.body = resolveElement(resolvedStacktrace.body);
+                }
+            } else if (config.stacktracePanel || self.stacktracePanelEl) {
+                const panel = resolveElement(config.stacktracePanel || self.stacktracePanelEl);
+                if (panel) {
+                    resolvedStacktrace = { element: panel };
+                    if (config.stacktraceBody) {
+                        resolvedStacktrace.body = resolveElement(config.stacktraceBody);
+                    }
+                }
+            }
+
+            const streamOptions = {
+                element: panelElement,
+                channel: config.channel || config.topic || null,
+                runId: config.runId || self.runId || window.runid || window.runId || null,
+                logLimit: typeof config.logLimit === "number" ? config.logLimit : undefined,
+                formatter: config.formatter,
+                reconnectBaseMs: config.reconnectBaseMs,
+                reconnectMaxMs: config.reconnectMaxMs,
+                stacktrace: resolvedStacktrace,
+                autoConnect: config.autoConnect === undefined ? false : Boolean(config.autoConnect),
+                onAppend: function (detail) {
+                    advanceSpinner();
+
+                    const rawMessage = detail && detail.raw !== undefined ? detail.raw : detail ? detail.message : "";
+                    const summary = extractSummaryText(rawMessage, summaryMaxLength);
+
+                    if (summarySetter) {
+                        summarySetter(summary);
+                    }
+                    if (hintSetter) {
+                        hintSetter(summary);
+                    }
+                    if (onStatusCallback) {
+                        try {
+                            onStatusCallback({ summary: summary, detail: detail });
+                        } catch (err) {
+                            console.warn("StatusStream onStatus callback error:", err);
+                        }
+                    }
+                    if (onAppendCallback) {
+                        try {
+                            onAppendCallback(detail);
+                        } catch (err) {
+                            console.warn("StatusStream onAppend callback error:", err);
+                        }
+                    }
+                },
+                onTrigger: function (detail) {
+                    if (detail && detail.event) {
+                        try {
+                            self.triggerEvent(detail.event, detail);
+                        } catch (err) {
+                            console.warn("controlBase triggerEvent error:", err);
+                        }
+                        const normalized = String(detail.event).toUpperCase();
+                        if (
+                            normalized.includes("COMPLETE") ||
+                            normalized.includes("FINISH") ||
+                            normalized.includes("SUCCESS") ||
+                            normalized.includes("END_BROADCAST")
+                        ) {
+                            resetSpinner();
+                        }
+                    }
+                    if (onTriggerCallback) {
+                        try {
+                            onTriggerCallback(detail);
+                        } catch (err) {
+                            console.warn("StatusStream onTrigger callback error:", err);
+                        }
+                    }
+                }
+            };
+
+            if (!streamOptions.channel) {
+                throw new Error("controlBase.attach_status_stream requires a channel name.");
+            }
+
+            if (config.logElement || config.logSelector) {
+                const logTarget = resolveElement(config.logElement || config.logSelector);
+                if (logTarget) {
+                    streamOptions.logElement = logTarget;
+                }
+            }
+
+            const instance = window.StatusStream.attach(streamOptions);
+
+            resetSpinner();
+
+            const handle = {
+                instance: instance,
+                element: panelElement,
+                createdPanel: createdPanel,
+                createdLog: createdLog,
+                injectedElements: injectedElements,
+                connect: function () {
+                    if (instance && typeof instance.connect === "function") {
+                        instance.connect();
+                    }
+                },
+                disconnect: function () {
+                    if (instance && typeof instance.disconnect === "function") {
+                        instance.disconnect();
+                    }
+                },
+                resetSpinner: resetSpinner,
+                destroy: function () {
+                    resetSpinner();
+                    if (typeof window.StatusStream !== "undefined") {
+                        window.StatusStream.disconnect(instance);
+                    }
+                    if (this.createdPanel && this.injectedElements && this.injectedElements.panel) {
+                        const parent = this.injectedElements.panel.parentNode;
+                        if (parent && typeof parent.removeChild === "function") {
+                            parent.removeChild(this.injectedElements.panel);
+                        }
+                    }
+                }
+            };
+
+            self.statusStream = instance;
+            self._statusStreamHandle = handle;
+
+            return instance;
+        },
+
+        detach_status_stream: function detach_status_stream(self) {
+            if (!self._statusStreamHandle) {
+                return;
+            }
+            try {
+                self._statusStreamHandle.destroy();
+            } catch (err) {
+                console.warn("StatusStream destroy error:", err);
+            }
+            self._statusStreamHandle = null;
+            if (typeof window !== "undefined" && typeof window.StatusStream !== "undefined" && self.statusStream) {
+                window.StatusStream.disconnect(self.statusStream);
+            }
+            self.statusStream = null;
+        },
+
+        connect_status_stream: function connect_status_stream(self) {
+            if (self._statusStreamHandle && typeof self._statusStreamHandle.connect === "function") {
+                self._statusStreamHandle.connect();
+            } else if (self.statusStream && typeof self.statusStream.connect === "function") {
+                self.statusStream.connect();
+            }
+        },
+
+        disconnect_status_stream: function disconnect_status_stream(self) {
+            if (self._statusStreamHandle && typeof self._statusStreamHandle.disconnect === "function") {
+                self._statusStreamHandle.disconnect();
+            } else if (self.statusStream && typeof self.statusStream.disconnect === "function") {
+                self.statusStream.disconnect();
+            }
+        },
+
+        reset_status_spinner: function reset_status_spinner(self) {
+            if (self._statusStreamHandle && typeof self._statusStreamHandle.resetSpinner === "function") {
+                self._statusStreamHandle.resetSpinner();
+            } else if (self.statusStream && typeof self.statusStream.resetSpinner === "function") {
+                self.statusStream.resetSpinner();
+            }
+        },
+
+        manage_status_stream: function manage_status_stream(self, status) {
+            if (!self._statusStreamHandle && !self.statusStream) {
+                return;
+            }
+            if (self.should_continue_polling(self, status)) {
+                self.connect_status_stream(self);
+            } else {
+                self.disconnect_status_stream(self);
+                self.reset_status_spinner(self);
+            }
+        },
+
+        append_status_message: function append_status_message(self, message, meta) {
+            if (!message) {
+                return;
+            }
+            if (self.statusStream && typeof self.statusStream.append === "function") {
+                self.statusStream.append(message, meta || null);
+                return;
+            }
+            var adapter = self.status;
+            if (adapter && typeof adapter.html === "function") {
+                adapter.html(message);
+                return;
+            }
+            if (adapter && typeof adapter.text === "function") {
+                adapter.text(message);
+                return;
+            }
+            var element = resolveElement(self.statusElement || null);
+            if (!element && self.form) {
+                try {
+                    element = resolveElement(self.form.querySelector("#status"));
+                } catch (err) {
+                    element = null;
+                }
+            }
+            if (element) {
+                element.innerHTML = message;
+            }
+        },
+
+        clear_status_messages: function clear_status_messages(self) {
+            if (self.statusStream && typeof self.statusStream.clear === "function") {
+                self.statusStream.clear();
+            }
+            var adapter = self.status;
+            if (adapter && typeof adapter.html === "function") {
+                adapter.html("");
+                return;
+            }
+            if (adapter && typeof adapter.text === "function") {
+                adapter.text("");
+                return;
+            }
+            var element = resolveElement(self.statusElement || null);
+            if (!element && self.form) {
+                try {
+                    element = resolveElement(self.form.querySelector("#status"));
+                } catch (err) {
+                    element = null;
+                }
+            }
+            if (element) {
+                element.innerHTML = "";
             }
         },
 

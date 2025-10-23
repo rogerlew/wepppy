@@ -1,4 +1,5 @@
 # Control Base + WebSocket Client Merge
+> Status: Completed — `ws_client.js` has been removed and ControlBase now owns the StatusStream wiring.
 
 ## Rationale
 - **Single source of truth for run-state plumbing**: `control_base.js` and `ws_client.js` both track job IDs, disable buttons, and surface stack traces. Merging them eliminates divergent state machines and reduces the chances of UI regressions when adding new telemetry.
@@ -10,7 +11,7 @@
 1. **Author a vanilla `ControlBase` module**
    - Export a class that takes DOM selectors, an optional Redis channel, and an options hash (element IDs, stacktrace panel, command button IDs).
    - Replace jQuery calls with lightweight helpers (`qs`, `qsa`, `on`) so controllers can migrate incrementally.
-   - Keep legacy method names (`set_rq_job_id`, `render_job_status`, `manage_ws_client`) but internally call new primitives.
+   - Keep legacy method names (`set_rq_job_id`, `render_job_status`) but internally call new primitives.
 
 2. **Fold WebSocket handling into the base**
    - Introduce a `StatusStream` helper object inside `ControlBase` that wraps `WebSocket` creation, ping/pong, reconnects, and message parsing.
@@ -24,7 +25,7 @@
 4. **Incrementally migrate controllers**
    - Pick one controller (suggested: `Map` or `Landuse`) to adopt the new base. Verify that command button disablement, stack traces, and spinner updates behave identically.
    - Update `run_page_bootstrap.js.j2` to work with the merged base—ideally controllers call a single `initControlBase()` method instead of juggling both files.
-   - Once verified, remove the legacy `ws_client.js` file and update the controller bundle build (`build_controllers_js.py`) to exclude it.
+   - Once verified, remove the legacy `ws_client.js` file and update the controller bundle build (`build_controllers_js.py`) to exclude it (completed).
 
 5. **Testing & rollout**
    - Manual smoke test: trigger RQ jobs, confirm status streaming, failure handling, and button state resets for converted controllers.

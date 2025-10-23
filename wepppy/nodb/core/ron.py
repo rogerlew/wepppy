@@ -6,6 +6,46 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""Run Object Node (RON) controller.
+
+This module coordinates project metadata, base map preparation, and activation
+of supporting NoDb controllers. ``Ron`` reads the run configuration, provisions
+digital elevation models, and primes DuckDB summary agents so the web
+application can report watershed health immediately after initialization.
+
+Key Components:
+    Map: View model describing map extent, UTM geometry, and pixel sizing.
+    Ron: NoDb controller orchestrating project setup and downstream services.
+    RonViewModel: Serializes run state for web clients.
+    RonNoDbLockedException: Raised when concurrent access cannot be acquired.
+
+Responsibilities:
+    - Parse configuration values for map extent, DEM sources, and locales.
+    - Copy or download DEM assets (OpenTopography, prebuilt rasters) into the
+      working directory.
+    - Instantiate watershed, land use, soils, climate, and WEPP controllers so
+      their ``*.nodb`` snapshots exist for subsequent requests.
+    - Register project tasks with Redis and activate the query engine catalog.
+    - Provide Leaflet ready map bounds, summaries, and export utilities via the
+      DuckDB agents.
+
+External Services:
+    - OpenTopography and WMEsque endpoints for raster acquisition.
+    - Redis (``RedisPrep``) for task bookkeeping and telemetry.
+    - Query engine catalog managed through ``activate_query_engine``.
+
+Example:
+    >>> from wepppy.nodb.core import Ron
+    >>> from wepppy.nodb.base import TriggerEvents
+    >>> ron = Ron.getInstance('/runs/example')
+    >>> ron.map.bounds_str  # serialized Leaflet bounds
+    >>> ron.trigger(TriggerEvents.ON_INIT_FINISH)
+
+See Also:
+    - ``wepppy.nodb.core.watershed`` for delineation after RON setup.
+    - ``wepppy.nodb.base.NoDbBase`` for locking and persistence details.
+"""
+
 # standard libraries
 import os
 

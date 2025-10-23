@@ -203,7 +203,9 @@ var BatchRunner = (function () {
         controller.baseUrl = "";
         controller.templateInitialised = false;
         controller.command_btn_id = "btn_run_batch";
-        controller.ws_client = null;
+        controller.statusStream = null;
+        controller.statusSpinnerEl = null;
+        controller._statusStreamRunId = null;
 
         controller._delegates = [];
         controller._runDirectivesSaving = false;
@@ -342,6 +344,13 @@ var BatchRunner = (function () {
             controller.runBatchButton = deps.dom.qs(SELECTORS.runBatchButton);
             controller.runBatchHint = deps.dom.qs(SELECTORS.runBatchHint);
             controller.runBatchLock = deps.dom.qs(SELECTORS.runBatchLock);
+            if (!controller.statusSpinnerEl && controller.form) {
+                try {
+                    controller.statusSpinnerEl = controller.form.querySelector("#braille");
+                } catch (err) {
+                    controller.statusSpinnerEl = null;
+                }
+            }
 
             if (!controller.container) {
                 console.warn("BatchRunner container not found");
@@ -351,18 +360,7 @@ var BatchRunner = (function () {
             cacheElements();
             bindEvents();
 
-            if (!controller.ws_client) {
-                controller.ws_client = new WSClient("batch_runner_form", "batch");
-                controller.ws_client.attachControl(controller);
-            }
-            if (controller.ws_client && controller.state.batchName) {
-                controller.ws_client.wsUrl =
-                    "wss://" +
-                    window.location.host +
-                    "/weppcloud-microservices/status/" +
-                    encodeURIComponent(controller.state.batchName) +
-                    ":batch";
-            }
+            updateStatusStream(controller.state.batchName);
 
             bootstrapTrackedJobIds(bootstrap);
 
@@ -372,6 +370,22 @@ var BatchRunner = (function () {
             controller.render_job_status(controller);
 
             return controller;
+        }
+
+        function updateStatusStream(runId) {
+            var desiredRunId = runId || window.runid || window.runId || null;
+            if (controller._statusStreamRunId === desiredRunId && controller.statusStream) {
+                return;
+            }
+            controller.detach_status_stream(controller);
+            controller.attach_status_stream(controller, {
+                form: controller.form,
+                channel: "batch",
+                runId: desiredRunId,
+                spinner: controller.statusSpinnerEl,
+                logLimit: 400
+            });
+            controller._statusStreamRunId = desiredRunId;
         }
 
         function destroy() {
@@ -1724,9 +1738,7 @@ var BatchRunner = (function () {
 
             setRunBatchBusy(true, "Submitting batch run…", "text-muted");
 
-            if (controller.ws_client && typeof controller.ws_client.connect === "function") {
-                controller.ws_client.connect();
-            }
+            controller.connect_status_stream(controller);
 
             if (controller.infoPanel) {
                 controller.infoPanel.innerHTML =
@@ -1768,9 +1780,7 @@ var BatchRunner = (function () {
                         controller.infoPanel.innerHTML =
                             '<span class="text-danger">' + escapeHtml(message) + "</span>";
                     }
-                    if (controller.ws_client && typeof controller.ws_client.disconnect === "function") {
-                        controller.ws_client.disconnect();
-                    }
+                    controller.disconnect_status_stream(controller);
                     controller.emitter.emit("batch:run:failed", {
                         error: message,
                         batchName: controller.state.batchName
@@ -1827,12 +1837,8 @@ var BatchRunner = (function () {
             var baseTriggerEvent = ctrl.triggerEvent;
             ctrl.triggerEvent = function (eventName, payload) {
                 if (eventName === "BATCH_RUN_COMPLETED" || eventName === "END_BROADCAST") {
-                    if (ctrl.ws_client && typeof ctrl.ws_client.disconnect === "function") {
-                        ctrl.ws_client.disconnect();
-                    }
-                    if (ctrl.ws_client && typeof ctrl.ws_client.resetSpinner === "function") {
-                        ctrl.ws_client.resetSpinner();
-                    }
+                    ctrl.disconnect_status_stream(ctrl);
+                    ctrl.reset_status_spinner(ctrl);
                     refreshJobInfo({ force: true });
                     if (eventName === "BATCH_RUN_COMPLETED") {
                         ctrl.emitter.emit("batch:run:completed", {

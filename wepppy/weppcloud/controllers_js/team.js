@@ -217,8 +217,7 @@ var Team = (function () {
         team.hint = hintAdapter;
         team.statusPanelEl = statusPanelElement || null;
         team.stacktracePanelEl = stacktracePanelElement || null;
-        team.statusStream = null;
-        team.ws_client = null;
+        team.statusSpinnerEl = team.statusPanelEl ? team.statusPanelEl.querySelector("#braille") : null;
         team.command_btn_id = "btn_adduser";
         team.events = emitter;
         team.membersElement = membersElement;
@@ -258,32 +257,20 @@ var Team = (function () {
         };
 
         function attachStatusChannel() {
-            if (typeof window.StatusStream !== "undefined" && team.statusPanelEl) {
-                var stacktraceConfig = null;
-                if (team.stacktracePanelEl) {
-                    stacktraceConfig = { element: team.stacktracePanelEl };
-                }
-                team.statusStream = window.StatusStream.attach({
-                    element: team.statusPanelEl,
-                    channel: "team",
-                    runId: getActiveRunId(),
-                    logLimit: 200,
-                    stacktrace: stacktraceConfig,
-                    onTrigger: function (detail) {
-                        if (detail && detail.event) {
-                            team.triggerEvent(detail.event, detail);
-                        }
-                        emitter.emit("team:status:updated", detail || {});
+            team.attach_status_stream(team, {
+                element: team.statusPanelEl,
+                form: formElement,
+                channel: "team",
+                runId: getActiveRunId(),
+                stacktrace: team.stacktracePanelEl ? { element: team.stacktracePanelEl } : null,
+                spinner: team.statusSpinnerEl,
+                onTrigger: function (detail) {
+                    if (detail && detail.event) {
+                        team.triggerEvent(detail.event, detail);
                     }
-                });
-                return;
-            }
-            if (typeof window.WSClient === "function") {
-                team.ws_client = new window.WSClient("team_form", "team");
-                if (team.ws_client && typeof team.ws_client.attachControl === "function") {
-                    team.ws_client.attachControl(team);
+                    emitter.emit("team:status:updated", detail || {});
                 }
-            }
+            });
         }
 
         function refreshMembers(options) {
@@ -532,4 +519,3 @@ var Team = (function () {
 if (typeof globalThis !== "undefined") {
     globalThis.Team = Team;
 }
-

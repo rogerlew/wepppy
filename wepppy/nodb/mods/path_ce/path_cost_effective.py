@@ -1,3 +1,15 @@
+"""Cost-effective mitigation path optimizer.
+
+This module provides the ``PathCostEffective`` NoDb controller which ranks
+post-fire mitigation treatments (mulch, seeding, road upgrades) by cost and
+sediment reduction benefit. The workflow loads treatment parameters from Parquet
+summaries, runs the linear programming solver, and writes an interchange bundle
+so downstream UI panels and WEPP runs stay in sync.
+
+It relies on helper utilities in ``data_loader`` and ``path_ce_solver`` for
+Parquet ingestion and pulp-based optimization respectively.
+"""
+
 from __future__ import annotations
 
 import logging

@@ -59,8 +59,8 @@
 
 ## JavaScript Behaviour (`wepppy/weppcloud/controllers_js/omni.js` + inline helpers)
 
-- Module pattern: Immediately invoked `Omni` singleton layered on `controlBase()`. Requires global jQuery, Bootstrap tooltips, `WSClient`, and helpers such as `url_for_run`, `Project`, and `controlBase`.
-- DOM wiring: caches `#omni_form`, `#info`, `#status`, `#stacktrace`, `#rq_job`, and command button `btn_run_omni`. Instantiates `new WSClient('omni_form', 'omni')` and overrides `triggerEvent` to handle `OMNI_SCENARIO_RUN_TASK_COMPLETED` (pull report) and `END_BROADCAST` (disconnect socket).
+- Module pattern: Immediately invoked `Omni` singleton layered on `controlBase()`. Requires global jQuery, Bootstrap tooltips, `controlBase.attach_status_stream`, and helpers such as `url_for_run`, `Project`, and `controlBase`.
+- DOM wiring: caches `#omni_form`, `#info`, `#status`, `#stacktrace`, `#rq_job`, and command button `btn_run_omni`. Calls `controlBase.attach_status_stream({ formId: 'omni_form', channel: 'omni' })`, letting the helper create hidden fallback panels when the legacy template omits Pure status markup, and overrides `triggerEvent` to handle `OMNI_SCENARIO_RUN_TASK_COMPLETED` (pull report) and `END_BROADCAST` (disconnect socket).
 - Exported methods and helpers:
   - `serializeScenarios()` – iterate `.scenario-item` nodes, gather `<select name="scenario">` and related inputs, append files as `scenarios[{index}][name]`, and stringify the scenario list into `FormData`.
   - `run_omni_scenarios()` – submit multipart payload via `$.post` to `/rq/api/run_omni`, update status text, and record the returned job id.
@@ -129,7 +129,7 @@
 4. **Modernize JavaScript**
    - Rewrite the controller as an ES module that exports lifecycle hooks for Pure. Replace jQuery AJAX with `fetch` (`multipart/form-data` still required).
    - Encapsulate scenario state in a store (e.g., reactive signal) that keeps per-scenario form data, including staging for uploads.
-   - Wire WebSocket events through the shared `WSClient` wrapper but publish state changes to Pure components instead of manipulating DOM directly.
+   - Attach job telemetry with `controlBase.attach_status_stream` (no direct `WSClient` usage) and publish state changes to Pure components instead of manipulating DOM directly. Note: the helper keeps creating hidden placeholders so the Bootstrap layout continues to work during the migration.
    - Implement `defineContrasts()` front-end logic to call the new contrasts endpoint and surface progress feedback.
 5. **UI/UX Improvements**
    - Replace Bootstrap tooltips and cards with Pure equivalents; enforce unique ids and accessible labels.

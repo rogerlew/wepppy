@@ -2,12 +2,14 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Soil controller", () => {
     let postFormMock;
     let postJsonMock;
     let requestMock;
     let baseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let soil;
 
     beforeEach(async () => {
@@ -57,21 +59,14 @@ describe("Soil controller", () => {
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn(),
-        };
+        }));
 
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn(),
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         global.SubcatchmentDelineation = {
             getInstance: jest.fn(() => ({ enableColorMap: jest.fn() })),
@@ -88,7 +83,6 @@ describe("Soil controller", () => {
         delete window.Soil;
         delete global.WCHttp;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.SubcatchmentDelineation;
         delete global.url_for_run;
         if (global.WCDom) {
@@ -110,7 +104,7 @@ describe("Soil controller", () => {
         }));
         const params = postFormMock.mock.calls[0][1];
         expect(params.get("soil_single_selection")).toBe("101");
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(soil, "soil-job");
     });
 

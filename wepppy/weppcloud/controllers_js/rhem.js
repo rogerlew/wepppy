@@ -120,6 +120,7 @@ var Rhem = (function () {
         var hintElement = dom.qs("#hint_run_rhem");
         var statusPanelElement = dom.qs("#rhem_status_panel");
         var stacktracePanelElement = dom.qs("#rhem_stacktrace_panel");
+        var statusSpinnerElement = statusPanelElement ? statusPanelElement.querySelector("#braille") : null;
         var resultsElement = dom.qs("#rhem-results");
 
         var infoAdapter = createLegacyAdapter(infoElement);
@@ -138,17 +139,14 @@ var Rhem = (function () {
         rhem.hint = hintAdapter;
         rhem.statusPanelEl = statusPanelElement || null;
         rhem.stacktracePanelEl = stacktracePanelElement || null;
+        rhem.statusSpinnerEl = statusSpinnerElement || null;
         rhem.command_btn_id = "btn_run_rhem";
         rhem.statusStream = null;
-        rhem.ws_client = null;
         rhem.events = emitter;
 
-        function appendStatus(message, meta) {
+        function renderStatus(message, meta) {
             if (!message) {
                 return;
-            }
-            if (rhem.statusStream && typeof rhem.statusStream.append === "function") {
-                rhem.statusStream.append(message, meta || null);
             }
             if (statusAdapter && typeof statusAdapter.html === "function") {
                 statusAdapter.html(message);
@@ -160,13 +158,27 @@ var Rhem = (function () {
                 meta: meta || null
             });
         }
+
+        function appendStatus(message, meta) {
+            if (!message) {
+                return;
+            }
+            if (rhem.statusStream && typeof rhem.statusStream.append === "function") {
+                rhem.statusStream.append(message, meta || null);
+                return;
+            }
+            renderStatus(message, meta);
+        }
         rhem.appendStatus = appendStatus;
 
         function clearStatus(taskMsg) {
             if (infoAdapter && typeof infoAdapter.text === "function") {
                 infoAdapter.text("");
             }
-            appendStatus(taskMsg + "...", { phase: "pending" });
+            rhem.clear_status_messages(rhem);
+            if (taskMsg) {
+                appendStatus(taskMsg + "...", { phase: "pending" });
+            }
             if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
                 stacktraceAdapter.text("");
             } else if (stacktraceElement) {
@@ -189,37 +201,26 @@ var Rhem = (function () {
                 task: "rhem:run",
                 error: payload
             });
-            if (rhem.ws_client && typeof rhem.ws_client.disconnect === "function") {
-                rhem.ws_client.disconnect();
-            }
+            rhem.disconnect_status_stream(rhem);
         }
-
-        function attachStatusChannel() {
-            if (typeof window.StatusStream !== "undefined" && rhem.statusPanelEl) {
-                var stacktraceConfig = null;
-                if (rhem.stacktracePanelEl) {
-                    stacktraceConfig = { element: rhem.stacktracePanelEl };
+        rhem.attach_status_stream(rhem, {
+            element: rhem.statusPanelEl,
+            channel: "rhem",
+            runId: getActiveRunId(),
+            stacktrace: rhem.stacktracePanelEl ? { element: rhem.stacktracePanelEl } : null,
+            spinner: rhem.statusSpinnerEl,
+            logLimit: 200,
+            onAppend: function (detail) {
+                renderStatus(detail ? detail.message : "", detail ? detail.meta : null);
+                emitter.emit("rhem:status:updated", detail || {});
+            },
+            onTrigger: function (detail) {
+                if (detail && detail.event) {
+                    rhem.triggerEvent(detail.event, detail);
                 }
-                rhem.statusStream = window.StatusStream.attach({
-                    element: rhem.statusPanelEl,
-                    channel: "rhem",
-                    runId: getActiveRunId(),
-                    logLimit: 200,
-                    stacktrace: stacktraceConfig,
-                    onTrigger: function (detail) {
-                        if (detail && detail.event) {
-                            rhem.triggerEvent(detail.event, detail);
-                        }
-                        emitter.emit("rhem:status:updated", detail || {});
-                    }
-                });
-                return;
+                emitter.emit("rhem:status:updated", detail || {});
             }
-            rhem.ws_client = new WSClient("rhem_form", "rhem");
-            rhem.ws_client.attachControl(rhem);
-        }
-
-        attachStatusChannel();
+        });
 
         emitter.emit("rhem:config:loaded", {
             hasStatusStream: Boolean(rhem.statusStream),
@@ -264,9 +265,7 @@ var Rhem = (function () {
                         task: "rhem:run",
                         error: errorPayload
                     });
-                    if (rhem.ws_client && typeof rhem.ws_client.disconnect === "function") {
-                        rhem.ws_client.disconnect();
-                    }
+                    rhem.disconnect_status_stream(rhem);
                 })
                 .catch(handleError);
         }
@@ -284,9 +283,7 @@ var Rhem = (function () {
                 jobId: null
             });
 
-            if (rhem.ws_client && typeof rhem.ws_client.connect === "function") {
-                rhem.ws_client.connect();
-            }
+            rhem.connect_status_stream(rhem);
 
             submitRunRequest();
         };
@@ -343,9 +340,7 @@ var Rhem = (function () {
         rhem.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "RHEM_RUN_TASK_COMPLETED") {
-                if (rhem.ws_client && typeof rhem.ws_client.disconnect === "function") {
-                    rhem.ws_client.disconnect();
-                }
+                rhem.disconnect_status_stream(rhem);
                 rhem.report();
             }
             baseTriggerEvent(eventName, payload);

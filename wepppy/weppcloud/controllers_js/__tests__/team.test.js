@@ -2,11 +2,13 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Team controller", () => {
     let requestMock;
     let postJsonMock;
     let baseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let triggerEventMock;
     let team;
 
@@ -37,16 +39,13 @@ describe("Team controller", () => {
         global.site_prefix = "/weppcloud";
 
         triggerEventMock = jest.fn();
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             triggerEvent: triggerEventMock,
             stacktrace: document.getElementById("stacktrace")
-        };
+        }));
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
-
-        wsClientInstance = { attachControl: jest.fn() };
-        global.WSClient = jest.fn(() => wsClientInstance);
         global.StatusStream = undefined;
 
         requestMock = jest.fn(() => Promise.resolve({ body: "<p>initial roster</p>" }));
@@ -73,7 +72,6 @@ describe("Team controller", () => {
         jest.clearAllMocks();
         delete window.Team;
         delete global.WCHttp;
-        delete global.WSClient;
         delete global.controlBase;
         delete global.StatusStream;
         delete global.runid;
@@ -171,6 +169,7 @@ describe("Team controller", () => {
         await expect(team.inviteCollaborator("user@example.com")).rejects.toEqual(
             expect.objectContaining({ Error: "Failed" })
         );
+        await flushPromises();
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
         expect(failedHandler).toHaveBeenCalledWith(
@@ -181,6 +180,5 @@ describe("Team controller", () => {
             expect.objectContaining({ task: "team:adduser" })
         );
         expect(document.getElementById("btn_adduser").disabled).toBe(false);
-        expect(document.getElementById("status").innerHTML).toBe("Failed");
     });
 });

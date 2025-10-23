@@ -6,6 +6,51 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""TOPAZ watershed preprocessing controller.
+
+This module wraps interactions with the legacy TOPographic PArameter eXtraction
+(TOPAZ) toolchain and exposes them through the NoDb interface. The
+``Topaz`` controller manages channel network extraction, outlet placement, and
+derived raster products that seed later watershed abstraction steps.
+
+Key Components:
+    Topaz: NoDb controller that manages TOPAZ execution and state.
+    Outlet: Lightweight record describing the snapped watershed outlet.
+    TopazRunner: Utility wrapper around the TOPAZ binaries.
+
+Responsibilities:
+    - Maintain TOPAZ working directories inside the run workspace.
+    - Execute channel extraction with configurable contributing area (CSA)
+      and minimum channel length (MCL) thresholds.
+    - Persist grid metadata (extent, projection, cell size) for downstream
+      controllers.
+    - Snap requested outlet coordinates to the extracted drainage network and
+      record the resulting offsets.
+    - Compute summary terrain metrics (relief, ruggedness, drainage area).
+
+Inputs:
+    - Digital elevation model (DEM) path resolved from ``ron`` configuration.
+    - CSA and MCL thresholds sourced from ``topaz`` config.
+    - Optional outlet coordinates or desired drainage area.
+
+Outputs:
+    - ESRI ARC grids (for example ``SUBWTA.ARC`` and ``NETFUL.ARC``).
+    - Outlet metadata stored in ``topaz.nodb``.
+    - Channel extent, projection, and grid sizing used by
+      ``wepppy.nodb.core.watershed``.
+
+Example:
+    >>> from wepppy.nodb.core import Topaz
+    >>> topaz = Topaz.getInstance('/runs/example')
+    >>> topaz.build_channels(csa=3.0, mcl=45)
+    >>> topaz.set_outlet(lng=-116.98, lat=46.73)
+    >>> topaz.dump_and_unlock()  # persist for other controllers
+
+See Also:
+    - ``wepppy.nodb.core.watershed`` for watershed abstraction.
+    - ``wepppy.topo.topaz.TopazRunner`` for low level CLI execution.
+"""
+
 import os
 from os.path import join as _join
 from os.path import exists as _exists

@@ -10,7 +10,7 @@ This note captures the current shape of WEPPcloud controller views, the JavaScri
 - The page assembles controller sections by including dozens of templates in a fixed order, with conditional blocks for optional mods (BAER, Omni, RHEM, etc.).【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L120-L179】
 
 ### 1.2 JavaScript Control Infrastructure
-- `control_base.js` is the shared mixin that every controller singleton imports. It wires RQ job polling, command button disable/enable logic, stacktrace rendering, and WebSocket hand-offs to `WSClient` when a job is running.【F:wepppy/weppcloud/controllers_js/control_base.js†L5-L344】
+- `control_base.js` is the shared mixin that every controller singleton imports. It wires RQ job polling, command button disable/enable logic, stacktrace rendering, and attaches the StatusStream via `controlBase.attach_status_stream` when a job is running.【F:wepppy/weppcloud/controllers_js/control_base.js†L5-L344】
 - Controllers register themselves as singletons (for example `Omni.getInstance()`), bind DOM handles, override `triggerEvent` when they need extra bookkeeping, and then rely on `set_rq_job_id` to start/stop polling and WebSocket streaming.【F:wepppy/weppcloud/controllers_js/omni.js†L5-L151】
 - Long-lived flows such as BatchRunner build richer state machines on top of `controlBase`, bolting on card-oriented DOM fragments, file uploads, and bespoke polling for child tasks while reusing the base job status and button management functions.【F:wepppy/weppcloud/controllers_js/batch_runner.js†L1-L158】
 
@@ -46,7 +46,7 @@ This note captures the current shape of WEPPcloud controller views, the JavaScri
 ## 4. Asynchronous Workflow Contract
 - Consolidate job submission routes behind a reflection-friendly API layer (e.g., `/rq/api/<controller>/<action>`). `controlBase.set_rq_job_id` already normalizes job IDs; we can inject metadata (`data-controller`, `data-action`) to auto-wire event handling without dozens of custom JS methods.【F:wepppy/weppcloud/controllers_js/control_base.js†L141-L208】
 - `RedisPrep.get_rq_job_ids()` is the authoritative source of current work; expose it through a unified `/runs/<id>/<cfg>/jobs` endpoint so all controllers can hydrate from a single JSON payload and subscribe to updates via WebSocket topics keyed by controller names.【F:wepppy/weppcloud/routes/run_0/run_0_bp.py†L178-L219】
-- Align front-end polling cadence with backend push: the WebSocket `WSClient` should become the primary conduit, with polling only as a fallback when a channel is unavailable. That keeps the backend validation surface single-layered—NoDb remains the enforcer and RQ just reports status.【F:wepppy/weppcloud/controllers_js/control_base.js†L203-L344】
+- Align front-end polling cadence with backend push: the StatusStream (attached through `controlBase.attach_status_stream`) should remain the primary conduit, with polling only as a fallback when a channel is unavailable. That keeps the backend validation surface single-layered—NoDb remains the enforcer and RQ just reports status.【F:wepppy/weppcloud/controllers_js/control_base.js†L203-L344】
 - Htmx fits well for partial refreshes (e.g., summary tables, advanced option panels) because it leans on existing Flask routes and avoids bundling overhead. Each controller section can expose an `hx-get` endpoint that re-renders only the summary card after a job completes.
 
 ## 5. Runs0 Page Modernization Concept

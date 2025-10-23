@@ -2,10 +2,12 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Baer controller", () => {
     let httpRequestMock;
     let baseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let emitter;
     let mapInstance;
     let overlayMock;
@@ -91,20 +93,13 @@ describe("Baer controller", () => {
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             hideStacktrace: jest.fn(),
             triggerEvent: jest.fn(),
-        };
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            attachControl: jest.fn(),
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         mapInstance = {
             ctrls: {
@@ -140,7 +135,6 @@ describe("Baer controller", () => {
         delete global.WCHttp;
         delete global.WCForms;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.MapController;
         delete global.SubcatchmentDelineation;
         delete global.WCEvents;
@@ -170,7 +164,7 @@ describe("Baer controller", () => {
         expect(mode0.hidden).toBe(true);
         expect(mode1.hidden).toBe(false);
         expect(emitter.emit).toHaveBeenCalledWith("baer:mode:changed", { mode: 1 });
-        expect(wsClientInstance.attachControl).toHaveBeenCalledWith(baer);
+        expect(baseInstance.attach_status_stream).toHaveBeenCalledWith(expect.any(Object), expect.any(Object));
     });
 
     test("upload_sbs posts form data and emits lifecycle events", async () => {

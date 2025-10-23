@@ -36,12 +36,12 @@ NoDb subclass logger
   ↓ QueueHandler + QueueListener (async fan-out)
   ↓ StatusMessengerHandler pushes to Redis DB 2 Pub/Sub
   ↓ services/status2 Go WebSocket service
-  ↓ WSClient (controllers.js) WebSocket bridge, offloads from flask workers, enables multiple gunicorn workers (unlike Flask-SocketIO)
+  ↓ StatusStream helper (controlBase.attach_status_stream) fan-out to controller panels
   ↓ controlBase panels update logs, checklists, charts
 ```
 - `wepppy.nodb.base` wires every NoDb instance with a `QueueHandler`, pushing log records through `StatusMessengerHandler` into Redis channels like `<runid>:wepp`.
 - `services/status2` is a Go WebSocket proxy that subscribes to the channels and fans out JSON frames to browsers, complete with heartbeat pings and exponential backoff reconnects.
-- `controllers_js/ws_client.js` mixes the stream into `controlBase`, so every task panel renders live stdout, RQ job states, and exception traces without page refreshes.
+- `controllers_js/status_stream.js`, orchestrated by `controlBase.attach_status_stream`, mixes the stream into each controller so task panels render live stdout, RQ job states, and exception traces without page refreshes.
 
 ## NoDb Singletons + Redis Caching
 - `NoDbBase.getInstance(wd)` guarantees a singleton per working directory. Instances are serialized to disk and mirrored into Redis DB 13 for 72 hours so hot runs rebuild instantly.
@@ -59,7 +59,7 @@ NoDb subclass logger
 
 ## Rust-Powered Geospatial Acceleration
 - [`wepppyo3`](https://github.com/wepp-in-the-woods/wepppyo3) exposes Rust bindings for climate interpolation, raster mode lookups, and soil loss grids. Python falls back gracefully when the crate is absent, but production boxes pin the wheel for SIMD speedups.
-- Hillslope delineation can be configured to use TOPAZ or a custom tool implmented in Rust [`hillslopes_topaz.rs`](https://github.com/rogerlew/whitebox-tools/blob/master/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.rs). The watershed abstraction is delegated to [`peridot`](https://github.com/wepp-in-the-woods/peridot)
+- Hillslope delineation can be configured to use TOPAZ or a custom tool implmented in Rust [`hillslopes_topaz.rs`](https://github.com/rogerlew/weppcloud-wbt/blob/master/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.rs). The watershed abstraction is delegated to [`peridot`](https://github.com/wepp-in-the-woods/peridot)
 - Raster-heavy routines (NLCD landcover, soils, RAP) all try `wepppyo3.raster_characteristics` first, using Python fallbacks only when the Rust extension is missing.
 
 ## Front-End Controls & Build Automation

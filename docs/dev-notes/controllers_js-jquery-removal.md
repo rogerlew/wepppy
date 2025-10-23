@@ -2,7 +2,7 @@
 > Inventory and roadmap for migrating WEPPcloud run controllers away from jQuery.
 
 ## Snapshot
-- The `controllers_js/` bundle still depends heavily on global jQuery for DOM selection, event delegation, form serialization, and AJAX calls. Core infrastructure (`control_base.js`, `WSClient`, most controllers) expose jQuery objects to one another.
+- The `controllers_js/` bundle still depends heavily on global jQuery for DOM selection, event delegation, form serialization, and AJAX calls. Core infrastructure (`control_base.js`, `status_stream.js`, most controllers) expose jQuery-aware adapters to one another, although new controllers default to native DOM helpers.
 - Newer utilities (`status_stream.js`, `modal.js`, `unitizer_client.js`) already use modern browser APIs, proving a path to full removal.
 - Eliminating jQuery requires a coordinated rewrite of `control_base`, shared helpers, and 20+ controllers that currently assume `$` is available. The largest blockers are job-status management, form serialization, and delegated events on controller forms.
 - We can phase the migration by first introducing vanilla helpers (fetch wrapper, DOM utilities, event bus) and then refactoring controllers in families while keeping build output stable.
@@ -10,7 +10,7 @@
 ## Current Footprint
 
 ### Bundling and Infrastructure
-- `build_controllers_js.py` renders `templates/controllers.js.j2`, concatenating all `.js` files in dependency order. `control_base.js`, `utils.js`, `ws_client.js`, and `status_stream.js` land first; controller modules follow alphabetically.
+- `build_controllers_js.py` renders `templates/controllers.js.j2`, concatenating all `.js` files in dependency order. `control_base.js`, `utils.js`, and `status_stream.js` land first; controller modules follow alphabetically.
 - Most controller modules initialize via `var Foo = function () { … return { getInstance } }();`. Inside `createInstance()` they call `controlBase()` to inherit common behavior, cache jQuery selections (`that.form = $('#control_form')`), and wire up delegated `form.on('event', selector, handler)` listeners.
 - HTML templates under `wepppy/weppcloud/templates/controls/` expose IDs/classes that the controllers expect. `_pure_macros.html` and `_base.htm` define the shared regions `#status`, `#stacktrace`, `#rq_job`, etc.
 
@@ -44,7 +44,6 @@ The table below captures the jQuery AJAX helpers detected in each controller (vi
 | team.js | `$.get`, `$.post` |
 | treatments.js | `$.get`, `$.post` |
 | wepp.js | `$.get`, `$.post` |
-| ws_client.js | `$.get` (stack-trace enrichment) |
 
 DOM-heavy patterns include:
 - Cached jQuery objects (e.g., `that.stacktrace = $("#stacktrace")`, `that.centerInput = $("#input_centerloc")`) shared across methods.
@@ -54,7 +53,7 @@ DOM-heavy patterns include:
 
 ### Shared Dependencies and Touchpoints
 - **`control_base.js`**: Manages RQ job IDs, polling intervals, button enable/disable, stacktrace rendering, and WebSocket integration. It relies on jQuery objects for buttons, status areas, and event emission (`form.trigger`). Every control that calls `controlBase()` inherits these expectations.
-- **`WSClient`**: Uses jQuery selectors inside WebSocket callbacks (`$("#" + formId + " #status")`, `stacktrace.append(...)`) and fetches job stack traces with `$.get`. Any migration must keep WebSocket message handling aligned with `StatusStream`.
+- **StatusStream helper**: `controlBase.attach_status_stream` is now the single integration point for job telemetry. It fabricates hidden panels when legacy templates lack Pure status markup, so no additional shim is required.
 - **Form templates**: Many macros (e.g., `controls/_pure_macros.html`, `runs0_pure.htm`) include script blocks that assume `$` exists when initializing controllers.
 - **`UnitizerClient` bridge**: Controllers like `project.js` and `landuse.js` call into `UnitizerClient.ready()` then manipulate jQuery-wrapped DOM to update units. The bridge itself is vanilla but expects callers to pass native elements or jQuery objects with `.html()`/`.val()`.
 - **Leaflet + jQuery**: Map interactions mix Leaflet APIs with jQuery for DOM controls (search inputs, legend toggles) and rely on the `leaflet-ajax` plugin (`L.geoJson.ajax`).
@@ -93,11 +92,10 @@ DOM-heavy patterns include:
    - Accept selectors or elements and wrap them in lightweight adapters.
    - Replace `$.ajax` polling with `fetch` (`GET` status endpoint, `signal` for abort).
    - Swap `stacktrace.show()/text()/append()` with templated DOM writes (consider using `<details>` for persistent stack traces).
-2. **Update `WSClient`**:
-   - Replace jQuery selectors with `document.querySelector`.
-   - Use `fetch` inside the stacktrace enrichment path instead of `$.get`.
-   - Emit custom events instead of `form.trigger`.
-3. **Provide compatibility shim**: while controllers still pass jQuery objects, detect `.jquery` and extract `.get(0)` so the transition is non-breaking.
+2. **Lock status streaming on the helper**:
+   - Ensure every controller calls `controlBase.attach_status_stream({ channel })`; legacy `WSClient` constructors should not reappear.
+   - Let the helper build fallback status/stacktrace panels on legacy templates so controllers never branch on markup presence.
+   - (Completed) Delete the legacy `ws_client.js` compatibility shim now that every template relies on `controlBase.attach_status_stream`.
 
 ### Phase 2 — Controller Families
 Proceed controller-by-controller in logical groups so shared templates can be updated together:

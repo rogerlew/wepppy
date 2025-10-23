@@ -5,7 +5,7 @@
 describe("RAP_TS controller", () => {
     let httpMock;
     let baseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let controller;
 
     function flushPromises() {
@@ -29,6 +29,8 @@ describe("RAP_TS controller", () => {
             <script id="rap_ts_schedule_data" type="application/json" data-rap-schedule>["2024"]</script>
         `;
 
+        const createControlBaseStub = require("./helpers/control_base_stub");
+
         await import("../dom.js");
         await import("../forms.js");
         await import("../events.js");
@@ -39,32 +41,23 @@ describe("RAP_TS controller", () => {
         };
         global.WCHttp = httpMock;
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
-            manage_ws_client: jest.fn(),
             set_rq_job_id: jest.fn(),
             render_job_status: jest.fn(),
             update_command_button_state: jest.fn(),
             stop_job_status_polling: jest.fn(),
             fetch_job_status: jest.fn(),
-            triggerEvent: function () {},
-            stacktrace: {
-                hide: jest.fn(),
-                empty: jest.fn()
-            },
+            triggerEvent: jest.fn(),
             status: {
                 html: jest.fn()
+            },
+            stacktrace: {
+                hide: jest.fn()
             }
-        };
+        }));
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn()
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
 
         await import("../rap_ts.js");
         const rapFactory = globalThis.RAP_TS || (typeof window !== "undefined" ? window.RAP_TS : undefined);
@@ -79,7 +72,6 @@ describe("RAP_TS controller", () => {
         delete window.RAP_TS;
         delete global.WCHttp;
         delete global.controlBase;
-        delete global.WSClient;
         if (global.WCDom) {
             delete global.WCDom;
         }
@@ -114,7 +106,7 @@ describe("RAP_TS controller", () => {
             {},
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.objectContaining({}), "job-123");
 
         const statusNode = document.getElementById("status");
@@ -144,7 +136,7 @@ describe("RAP_TS controller", () => {
             Success: false,
             Error: "Service unavailable"
         });
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+  expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(errors).toHaveLength(1);
         expect(errors[0]).toEqual({
             Success: false,

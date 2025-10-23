@@ -57,6 +57,7 @@ Watershed abstraction begins by acquiring a Digital Elevation Map or DEM.
 
 ### wbt-weppcloud(https:///github.com/rogerlew/whitebox-tools)
 - rust lang, MIT license
+- fork of whitebox-tools
 - no gdal, but geotiff support
 - performant
 - tools are written in a straight-forward encapulated procedural style and relatively easy to extend

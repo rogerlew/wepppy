@@ -75,4 +75,4 @@ Use this GitHub-style checklist to track remaining controller migrations. Index 
 - [x] `wepppy/weppcloud/controllers_js/treatments.js`
 
 **Shared Infrastructure Still Using jQuery**
-- [ ] `wepppy/weppcloud/controllers_js/ws_client.js` — DOM writes via `$("#" + formId + " #status")` (lines 94–100); modernize to unblock remaining controllers.
+- [x] Retired `wepppy/weppcloud/controllers_js/ws_client.js` in favor of the unified `controlBase.attach_status_stream` helper.

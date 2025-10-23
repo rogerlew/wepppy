@@ -239,8 +239,8 @@ var Climate = (function () {
 
         climate.statusPanelEl = dom.qs("#climate_status_panel");
         climate.stacktracePanelEl = dom.qs("#climate_stacktrace_panel");
+        climate.statusSpinnerEl = climate.statusPanelEl ? climate.statusPanelEl.querySelector("#braille") : null;
         climate.statusStream = null;
-        climate.ws_client = null;
 
         climate.datasetMessage = dom.qs("#climate_dataset_message");
         climate.stationSelect = dom.qs("#climate_station_selection");
@@ -296,28 +296,25 @@ var Climate = (function () {
         };
 
         climate.attachStatusStream = function () {
-            if (typeof StatusStream === "undefined" || !climate.statusPanelEl) {
-                return null;
+            climate.detach_status_stream(climate);
+
+            if (!climate.statusSpinnerEl && climate.statusPanelEl) {
+                climate.statusSpinnerEl = climate.statusPanelEl.querySelector("#braille");
             }
-            if (climate.statusStream && typeof StatusStream.disconnect === "function") {
-                StatusStream.disconnect(climate.statusStream);
-            }
-            var stacktraceConfig = null;
-            if (climate.stacktracePanelEl) {
-                stacktraceConfig = { element: climate.stacktracePanelEl };
-            }
-            climate.statusStream = StatusStream.attach({
+
+            var stacktraceConfig = climate.stacktracePanelEl ? { element: climate.stacktracePanelEl } : null;
+
+            climate.attach_status_stream(climate, {
                 element: climate.statusPanelEl,
+                form: formElement,
                 channel: "climate",
                 runId: window.runid || window.runId || null,
                 logLimit: 400,
                 stacktrace: stacktraceConfig,
-                onTrigger: function (detail) {
-                    if (detail && detail.event) {
-                        climate.triggerEvent(detail.event, detail);
-                    }
-                }
+                spinner: climate.statusSpinnerEl,
+                autoConnect: true
             });
+
             return climate.statusStream;
         };
 
@@ -1065,4 +1062,3 @@ var Climate = (function () {
 if (typeof globalThis !== "undefined") {
     globalThis.Climate = Climate;
 }
-

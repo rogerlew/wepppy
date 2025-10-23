@@ -172,6 +172,7 @@ var SubcatchmentDelineation = (function () {
         var stacktraceElement = dom.qs("#build_subcatchments_form #stacktrace");
         var rqJobElement = dom.qs("#build_subcatchments_form #rq_job");
         var hintElement = dom.qs("#hint_build_subcatchments");
+        var spinnerElement = dom.qs("#build_subcatchments_form #braille");
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
@@ -186,9 +187,13 @@ var SubcatchmentDelineation = (function () {
         sub.rq_job = rqJobAdapter;
         sub.hint = hintAdapter;
         sub.command_btn_id = "btn_build_subcatchments";
-
-        sub.ws_client = new WSClient("build_subcatchments_form", "subcatchment_delineation");
-        sub.ws_client.attachControl(sub);
+        sub.statusSpinnerEl = spinnerElement;
+        sub.attach_status_stream(sub, {
+            form: formElement,
+            channel: "subcatchment_delineation",
+            runId: window.runid || window.runId || null,
+            spinner: spinnerElement
+        });
 
         sub.hideStacktrace = function () {
             if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
@@ -310,9 +315,7 @@ var SubcatchmentDelineation = (function () {
                 emit("subcatchment:build:completed", payload || {});
             } else if (normalized === "WATERSHED_ABSTRACTION_TASK_COMPLETED") {
                 sub.report();
-                if (sub.ws_client && typeof sub.ws_client.disconnect === "function") {
-                    sub.ws_client.disconnect();
-                }
+                sub.disconnect_status_stream(sub);
                 sub.enableColorMap("slp_asp");
                 try {
                     Wepp.getInstance().updatePhosphorus();
@@ -1356,9 +1359,7 @@ var SubcatchmentDelineation = (function () {
             var taskMsg = "Building Subcatchments";
 
             resetStatus(taskMsg);
-            if (sub.ws_client && typeof sub.ws_client.connect === "function") {
-                sub.ws_client.connect();
-            }
+            sub.connect_status_stream(sub);
 
             disposeGlLayer();
             removeGrid();

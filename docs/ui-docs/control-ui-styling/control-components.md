@@ -310,19 +310,19 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **Status**: Implemented; TOC entry appears when `baer` or `disturbed` mods are active and `lt` is not present.
 
 ### Observed Data Control (`controls/observed_pure.htm`)
-- **Structure**: `ui.control_shell(collapsible=False)` with inline description of CSV requirements. Text entry uses `ui.textarea_field` (`id="observed_text"`) plus a `button_row()` housing `btn_run_observed`. Legacy summary/status IDs (`info`, `status`, `stacktrace`) remain via override hooks so `controlBase` and `WSClient` continue to work.
+- **Structure**: `ui.control_shell(collapsible=False)` with inline description of CSV requirements. Text entry uses `ui.textarea_field` (`id="observed_text"`) plus a `button_row()` housing `btn_run_observed`. Legacy summary/status IDs (`info`, `status`, `stacktrace`) remain via override hooks so `controlBase.attach_status_stream` continues to work.
 - **Status wiring**: Uses `ui.status_panel` (`observed_status_panel`) + `ui.stacktrace_panel`. `observed.js` now binds button clicks via delegated handler while still supporting the legacy `_base.htm` inline `onclick`.
 - **Hints & locks**: `run_observed_lock` image stays hidden by default and exposed through `preflight.js`. Hint label `hint_run_wepp` remains for compatibility.
 - **Status**: Implemented; legacy template retained for classic runs page. Future enhancement: optional CSV upload hook to share logic with the uploads helper.
 
 ### RAP Time Series Control (`controls/rap_ts_pure.htm`)
 - **Structure**: Minimal `ui.control_shell` with a short description paragraph and a single action button rendered via `button_row()`. The button retains `btn_build_rap_ts` so `rap_ts.js` can delegate clicks; the legacy template keeps its inline handler until the classic page is retired.
-- **Status wiring**: `ui.status_panel` + `ui.stacktrace_panel` mirror other converted controls, allowing ControlBase + WSClient to surface queue updates. The hint (`hint_build_rap_ts`) remains below the button for log messaging.
+- **Status wiring**: `ui.status_panel` + `ui.stacktrace_panel` mirror other converted controls, allowing `controlBase.attach_status_stream` to surface queue updates. The hint (`hint_build_rap_ts`) remains below the button for log messaging, and the helper fabricates hidden placeholders when the legacy template renders.
 - **Status**: Implemented; bootstrap placeholder removed from `runs0_pure.htm`. Legacy `_base.htm` template persists for `0.htm` until Pure becomes default.
 
 ### RHEM Control (`controls/rhem_pure.htm`)
 - **Structure**: Matches the RAP pattern with `ui.control_shell(collapsible=False)`, a short description, and a `button_row()` hosting the existing `btn_run_rhem` control. Hint text (`hint_run_rhem`) stays below the command bar for compatibility with legacy messaging.
-- **Status wiring**: Custom `status_panel`/`stacktrace_panel` overrides expose `#rq_job`, `#status`, and `#stacktrace` so `rhem.js` can stream updates. The controller now attaches `StatusStream` when the Pure panel is present and falls back to `WSClient` on the legacy `_base.htm` markup.
+- **Status wiring**: Custom `status_panel`/`stacktrace_panel` overrides expose `#rq_job`, `#status`, and `#stacktrace` so `rhem.js` can stream updates. The controller attaches via `controlBase.attach_status_stream`, which creates fallback markup when the legacy `_base.htm` template renders.
 - **Status**: Implemented; legacy template remains on `0.htm` until the Pure layout becomes default.
 
 ### Debris Flow Control (`controls/debris_flow_pure.htm`)
@@ -332,13 +332,13 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 
 ### DSS Export Control (`controls/dss_export_pure.htm`)
 - **Structure**: `ui.control_shell(collapsible=False)` with a radio group (`dss_export_mode`) for export strategy and two conditional stacks mirroring the original mode-specific inputs. `dss_export_channel_ids` stays as a text field; channel-order exclusions reuse checkbox macros in a flex wrapper.
-- **Status wiring**: `ui.status_panel` + `ui.stacktrace_panel` allow ControlBase + WSClient to surface queue updates (`post_dss_export_rq`). The export button retains `btn_export_dss` and lock image `btn_export_dss_lock` for preflight gating.
+- **Status wiring**: `ui.status_panel` + `ui.stacktrace_panel` allow `controlBase.attach_status_stream` to surface queue updates (`post_dss_export_rq`). The export button retains `btn_export_dss` and lock image `btn_export_dss_lock` for preflight gating, and the helper seeds hidden placeholders when the panel is missing.
 - **Compatibility**: `dss_export.js` now binds mode toggles and export clicks via delegated handlers while still supporting the legacy inline `onchange`. The anchor toggle recognizes both legacy and Pure TOC IDs.
 - **Status**: Implemented; legacy template persists for `0.htm` until Pure is default.
 
 ### Rangeland Cover Control (`controls/rangeland_cover_pure.htm`)
 - **Structure**: `ui.control_shell(collapsible=False)` wraps the mode selector (NLCD, RAP, watershed) and grouped foliar/ground default inputs. RAP-specific settings live in `#rangeland_cover_rap_year_div` so legacy JS can keep toggling visibility.
-- **Status wiring**: Reuses legacy IDs for the status, stacktrace, hint, and build button, enabling ControlBase/WSClient to stream updates without JS changes beyond delegated handlers.
+- **Status wiring**: Reuses legacy IDs for the status, stacktrace, hint, and build button, enabling `controlBase.attach_status_stream` to stream updates without JS changes beyond delegated handlers.
 - **Integration**: The modify panel (`controls/modify_rangeland_cover.htm`) stays in the map tabset; the main control no longer duplicates that markup. `rangeland_cover.js` now delegates events so both legacy `_base.htm` and Pure layouts are supported.
 - **Status**: Implemented; the legacy template remains on `0.htm` until the Pure layout becomes default.
 
@@ -351,7 +351,7 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 
 ### Team Control (`controls/team_pure.htm`)
 - **Structure**: `ui.control_shell(collapsible=False)` wraps a brief description, the invite textbox (`ui.text_field` retaining `adduser-email`), and a `button_row()` housing `btn_adduser`. Hint text (`hint_run_team`) remains for inline feedback while collaborator listings render inside `#team-info`.
-- **Status wiring**: Uses compact `status_panel`/`stacktrace_panel` overrides so `team.js` can stream updates with `StatusStream`. The controller falls back to `WSClient` when the legacy template is active.
+- **Status wiring**: Uses compact `status_panel`/`stacktrace_panel` overrides so `team.js` can stream updates with `StatusStream` via `controlBase.attach_status_stream`, even when the legacy template loads.
 - **Status**: Implemented; legacy `_base.htm` version remains on `0.htm` until the Pure layout becomes default.
 
 ---

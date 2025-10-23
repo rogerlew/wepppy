@@ -2,10 +2,12 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Disturbed controller", () => {
     let httpRequestMock;
     let controlBaseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let emitter;
 
     beforeEach(async () => {
@@ -60,16 +62,11 @@ describe("Disturbed controller", () => {
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        controlBaseInstance = {
+        ({ base: controlBaseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             triggerEvent: jest.fn(),
-        };
-        global.controlBase = jest.fn(() => controlBaseInstance);
-
-        wsClientInstance = {
-            attachControl: jest.fn(),
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, controlBaseInstance));
 
         await import("../disturbed.js");
     });
@@ -80,7 +77,6 @@ describe("Disturbed controller", () => {
         delete global.WCHttp;
         delete global.WCForms;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.WCEvents;
         if (global.WCDom) {
             delete global.WCDom;

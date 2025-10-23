@@ -2,11 +2,13 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Channel Delineation controller", () => {
     let requestMock;
     let getJsonMock;
-    let wsClientInstance;
     let baseInstance;
+    let statusStreamMock;
     let mapStub;
     let channel;
     let outletRemoveMock;
@@ -56,16 +58,16 @@ describe("Channel Delineation controller", () => {
         await import("../events.js");
         await import("../utils.js");
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn(),
             update_command_button_state: jest.fn(),
-            should_disable_command_button: jest.fn(() => false),
-        };
+            should_disable_command_button: jest.fn(() => false)
+        }));
 
-        global.controlBase = jest.fn(() => baseInstance);
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         requestMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-99" } }));
         getJsonMock = jest.fn(() => Promise.resolve({ type: "FeatureCollection", features: [] }));
@@ -76,14 +78,6 @@ describe("Channel Delineation controller", () => {
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn(),
-            resetSpinner: jest.fn(),
-        };
-
-        global.WSClient = jest.fn(() => wsClientInstance);
         global.url_for_run = jest.fn((path) => path);
 
         mapStub = {
@@ -156,7 +150,6 @@ describe("Channel Delineation controller", () => {
         jest.clearAllMocks();
         delete window.ChannelDelineation;
         delete global.WCHttp;
-        delete global.WSClient;
         delete global.controlBase;
         delete global.MapController;
         delete global.Outlet;
@@ -200,7 +193,7 @@ describe("Channel Delineation controller", () => {
         expect(jsonPayload.csa).toBe(5);
         expect(jsonPayload.set_extent_mode).toBe(0);
 
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(channel, "job-99");
         expect(events).toHaveLength(1);
         expect(events[0].payload.payload.map_center).toEqual([-117.52, 46.88]);

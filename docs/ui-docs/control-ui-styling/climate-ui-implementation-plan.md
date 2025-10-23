@@ -94,7 +94,7 @@ Create a structured dataset (JSON/YAML or DuckDB table) that mirrors the landuse
 - Normalize section toggling by targeting `data-section` attributes rather than explicit IDs.
 
 ### 3.2 Status & events
-- Integrate new StatusStream control pipeline (per `control-components.md`). Replace direct `WSClient` wiring with `StatusStream.attach`, ensuring run events (`CLIMATE_BUILD_TASK_COMPLETED`) still trigger report refresh.
+- Integrate the StatusStream control pipeline (per `control-components.md`) by calling `controlBase.attach_status_stream` and letting it proxy to `StatusStream.attach`; ensure run events (`CLIMATE_BUILD_TASK_COMPLETED`) still trigger report refresh now that the legacy shim is gone.
 - Leave user-defined uploads synchronous. After a successful upload, show an inline toast/message and refresh the report instead of emitting StatusStream telemetry (processing is near-instant).
 
 ### 3.3 Locale-driven logic

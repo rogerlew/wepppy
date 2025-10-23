@@ -42,7 +42,6 @@ PRIORITY_MODULES: Final[List[str]] = [
     "utils.js",
     "modal.js",
     "unitizer_client.js",
-    "ws_client.js",
     "status_stream.js",
     "control_base.js",
     "project.js",

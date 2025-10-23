@@ -224,6 +224,7 @@ var Ash = (function () {
         var stacktraceElement = dom.qs("#ash_form #stacktrace");
         var rqJobElement = dom.qs("#ash_form #rq_job");
         var hintElement = dom.qs("#hint_run_ash");
+        var spinnerElement = dom.qs("#ash_form #braille");
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
@@ -239,9 +240,14 @@ var Ash = (function () {
         ash.command_btn_id = "btn_run_ash";
         ash.hint = hintAdapter;
         ash.events = emitter;
+        ash.statusSpinnerEl = spinnerElement;
 
-        ash.ws_client = new WSClient("ash_form", "ash");
-        ash.ws_client.attachControl(ash);
+        ash.attach_status_stream(ash, {
+            form: formElement,
+            channel: "ash",
+            runId: window.runid || window.runId || null,
+            spinner: spinnerElement
+        });
         ash.rq_job_id = null;
 
         var depthModeInputs = dom.qsa('input[name="ash_depth_mode"]', formElement);
@@ -543,9 +549,7 @@ var Ash = (function () {
                 return;
             }
 
-            if (ash.ws_client && typeof ash.ws_client.connect === "function") {
-                ash.ws_client.connect();
-            }
+            ash.connect_status_stream(ash);
 
             var formData;
             var payloadSnapshot = null;
@@ -644,9 +648,7 @@ var Ash = (function () {
         var baseTriggerEvent = ash.triggerEvent.bind(ash);
         ash.triggerEvent = function (eventName, payload) {
             if (eventName === "ASH_RUN_TASK_COMPLETED") {
-                if (ash.ws_client && typeof ash.ws_client.disconnect === "function") {
-                    ash.ws_client.disconnect();
-                }
+                ash.disconnect_status_stream(ash);
                 ash.report();
                 emitter.emit("ash:run:completed", {
                     jobId: ash.rq_job_id || null,

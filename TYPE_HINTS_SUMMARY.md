@@ -1,188 +1,77 @@
-# Type Hints Implementation Summary
+# Type Hints & Documentation Status
 
 ## Overview
-This PR adds comprehensive type hints to core NoDb modules in the wepppy repository, following Python 3.12+ conventions and PEP 484 standards.
+The NoDb core controllers now follow the module documentation workflow (`docs/prompt_templates/module_documentation_workflow.prompt.md`). Each module was audited for three pillars:
+- clear module-level documentation (Google-style narrative docstrings)
+- comprehensive runtime type hints
+- parallel `.pyi` stubs that mirror the exported surface
 
-## Modules Updated
+The table below captures the current status so we can see which modules are fully modernized and which still need attention.
 
-### Completed (5 modules, 6,474 total lines)
+## Current Coverage (NoDb Core)
+| Module | Lines | Documentation | Type Hints | `.pyi` Stub | Notes |
+| --- | ---: | --- | --- | --- | --- |
+| `wepppy/nodb/core/climate.py` | 2914 | Complete | Complete | Present | Detailed module docstring, exhaustive annotations across 118 methods, `wepppy/nodb/core/climate.pyi` aligned. |
+| `wepppy/nodb/core/soils.py` | 1357 | Complete | Complete | Present | Module docstring covers soil data pipeline; `.pyi` mirrors public API. |
+| `wepppy/nodb/core/landuse.py` | 1288 | Complete | Complete | Present | Documented management workflows with examples; stub kept in sync. |
+| `wepppy/nodb/core/watershed.py` | 1652 | Complete | Complete | Present | Updated docstring describes delineation backends; annotations propagated to helper classes; `.pyi` validated. |
+| `wepppy/nodb/core/wepp.py` | 2706 | Complete | Complete | Present | Extensive module docstring outlining WEPP runs; `.pyi` captures enums, dataclasses, and controller surface. |
+| `wepppy/nodb/core/topaz.py` | 250 | Complete | Complete | Present | Module docstring documents TOPAZ preprocessing workflow; annotations and stub remain in sync. |
+| `wepppy/nodb/core/ron.py` | 897 | Complete | Complete | Present | Narrative docstring added for project bootstrap and external dependencies. |
+| `wepppy/nodb/base.py` | 1880 | Complete | Partial | Missing | Docstring now documents NoDb philosophy; additional annotations and a `.pyi` stub still outstanding. |
 
-1. **wepppy/nodb/core/topaz.py** (235 lines)
-   - Added type hints to `Outlet` class
-   - Added type hints to `Topaz` class
-   - All methods and properties now have return type annotations
-   - All parameters have type annotations
+## NoDb Mods
+Quick audit across 68 modules under `wepppy/nodb/mods` shows only **5/68** files currently ship with module docstrings and just **6/45** executable modules achieve full annotation coverage (no `.pyi` stubs exist yet). The table highlights the most frequently used mods so we can prioritize doc and typing work.
 
-2. **wepppy/nodb/core/ron.py** (857 lines)
-   - Added type hints to `Map` class (all properties and methods)
-   - Added type hints to `Ron` class (all properties and methods)
-   - Added type hints to `RonViewModel` class
-   - Added type hints to helper functions (`_try_str`, `_try_bool`)
+| Module | Documentation | Type Hints | `.pyi` Stub | Notes |
+| --- | --- | --- | --- | --- |
+| `wepppy/nodb/mods/disturbed/disturbed.py` | Complete | Complete | Missing | New docstring outlines disturbance workflow; all public APIs annotated. |
+| `wepppy/nodb/mods/path_ce/path_cost_effective.py` | Complete | Complete | Missing | Controller plus helpers (`data_loader`, `path_ce_solver`) now documented but still need stubs. |
+| `wepppy/nodb/mods/path_ce/data_loader.py` | Complete | Complete | Missing | Loader is documented and typed; add stub once controller surface stabilizes. |
+| `wepppy/nodb/mods/path_ce/path_ce_solver.py` | Complete | Complete | Missing | Solver utilities fully typed/documented; good target for `.pyi`. |
+| `wepppy/nodb/mods/omni/omni.py` | Missing | Partial | Missing | Core analytics mod; only ~27% of functions carry annotations. |
+| `wepppy/nodb/mods/ag_fields/ag_fields.py` | Missing | Sparse | Missing | Heavy raster processing file lacks docstring and most signatures. |
+| `wepppy/nodb/mods/ash_transport/ash.py` | Complete | Complete | Present | Module docstring, annotations, and `ash.pyi` align with module documentation workflow. |
+| `wepppy/nodb/mods/baer/baer.py` | Complete | Complete | Present | Added module docstring, full annotations, and `baer.pyi`; validated with stubtest (via `wctl`). |
+| `wepppy/nodb/mods/rangeland_cover/rangeland_cover.py` | Complete | Complete | Present | Module docstring plus `rangeland_cover.pyi` align with the modernization workflow. |
+| `wepppy/nodb/mods/rap/rap.py` | Missing | None | Missing | RAP data ingestion lacks documentation and typing. |
+| `wepppy/nodb/mods/rap/rap_ts.py` | Missing | None | Missing | Time-series RAP utilities mirror the same gap as `rap.py`. |
+| `wepppy/nodb/mods/revegetation/revegetation.py` | Missing | Partial | Missing | Some annotations exist (~36%); add docstring and complete typing. |
+| `wepppy/nodb/mods/shrubland/shrubland.py` | Missing | None | Missing | Shrubland classifiers require full documentation and typing pass. |
+| `wepppy/nodb/mods/treatments/treatments.py` | Missing | Sparse | Missing | Controller logic lightly annotated; needs docstring, typing, and stub. |
+| `wepppy/nodb/mods/treecanopy/treecanopy.py` | Missing | None | Missing | Tree canopy mod is undoc'd and untyped; high priority for UI workflows. |
+| `wepppy/nodb/mods/debris_flow/debris_flow.py` | Missing | None | Missing | Debris flow mod lacks docstring and type hints despite being user-facing. |
+| `wepppy/nodb/mods/rhem/rhem.py` | Missing | None | Missing | RHEM summaries remain untyped and undocumented. |
 
-3. **wepppy/nodb/core/landuse.py** (1,211 lines)
-   - Added type hints to `Landuse` class
-   - Added type hints to `read_cover_defaults` function
-   - All key methods and properties have type annotations
-   - Build methods and summary methods fully annotated
+## Highlights
+- **Fully modernized controllers**  
+  Climate, Soils, Landuse, Watershed, and Wepp now ship with descriptive module docstrings, saturated type hints, and synchronized `.pyi` stubs. Their docs explain primary workflows, enumerate key enums and dataclasses, and provide runnable examples that align with the template guidance.
 
-4. **wepppy/nodb/core/soils.py** (1,316 lines)
-   - Added type hints to `Soils` class
-   - All properties (clip_soils, ksflag, mode, etc.) have type annotations
-   - All build methods have parameter and return type hints
-   - Summary and report methods fully annotated
+- **Topaz and Ron documentation filled in**  
+  These controllers now describe their responsibilities, required inputs, and downstream consumers. The docstrings align with the workflow template and give operators a clear launch checklist.
 
-5. **wepppy/nodb/core/climate.py** (2,855 lines)
-   - Added type hints to all 118 functions and methods
-   - Added type hints to `Climate` class (all properties, setters, and methods)
-   - Added type hints to data classes (`ClimateSummary`)
-   - Added type hints to exception classes (`NoClimateStationSelectedError`, `ClimateModeIsUndefinedError`)
-   - Added type hints to Enum classes with parse methods
-   - Added type hints to helper functions (pixel center calculations, download, etc.)
-   - Added type hints to module-level build functions (observed, future, gridmet, daymet, prism)
-   - All private build methods fully annotated
+- **NoDb mods baseline in place**  
+  Disturbed, PathCE, Ash Transport, and Rangeland Cover mods now include narrative docstrings; the aggregator (`wepppy.nodb.mods.__init__`) documents the lazy loader. The remaining high-traffic mods still need docstrings, annotations, and `.pyi` coverage.
 
-## Type Hint Patterns Used
+- **Base infrastructure**  
+  `wepppy.nodb.base` introduces a thorough docstring describing locking and Redis integration, yet its runtime annotations remain incomplete and no `.pyi` stub exists. It should be the next target so downstream controllers can rely on typed primitives.
 
-### Imports
-```python
-from typing import Optional, Tuple, List, Dict, Any
+## Recommended Validation Workflow
+Whenever a module is updated, run the validation sequence from the template:
+```bash
+wctl run-stubtest wepppy.nodb.core.<module_name>
+wctl run-pytest tests/nodb/test_type_hints.py
+python tools/sync_stubs.py  # keep stubs/wepppy/ in sync with inline .pyi files
 ```
 
-### Class Initialization
-```python
-def __init__(
-    self, 
-    wd: str, 
-    cfg_fn: str, 
-    run_group: Optional[str] = None, 
-    group_name: Optional[str] = None
-) -> None:
-```
-
-### Properties
-```python
-@property
-def has_dem(self) -> bool:
-    return _exists(self.dem_fn)
-
-@property
-def extent(self) -> Optional[List[float]]:
-    if self.map is None:
-        return None
-    return self.map.extent
-```
-
-### Methods
-```python
-def build(
-    self, 
-    initial_sat: Optional[float] = None, 
-    ksflag: Optional[bool] = None, 
-    max_workers: Optional[int] = None
-) -> None:
-    # Implementation
-```
-
-### Setters
-```python
-@mode.setter
-@nodb_setter
-def mode(self, value: Any) -> None:
-    if isinstance(value, SoilsMode):
-        self._mode = value
-```
-
-## Configuration Files Added
-
-### mypy.ini
-- Configured for Python 3.12
-- Lenient initial settings (can be tightened incrementally)
-- Per-module configuration sections
-- Ignore missing imports for external dependencies
-- Check untyped defs enabled
-
-## Tests Added
-
-### tests/nodb/test_type_hints.py
-- Validates that modules can be imported with type hints
-- Tests type hint extraction using `get_type_hints()`
-- Verifies all modified modules compile successfully
-- Can be run standalone or via pytest
-
-## Validation
-
-All modified modules have been validated to:
-1. ✅ Compile successfully with Python 3.12
-2. ✅ Import without errors
-3. ✅ Maintain backward compatibility
-4. ✅ Follow existing code patterns
-
-## Benefits
-
-1. **Better IDE Support**: Enhanced autocomplete and inline documentation
-2. **Type Safety**: Catch type-related bugs before runtime
-3. **Documentation**: Type hints serve as inline documentation
-4. **Maintainability**: Easier to understand function signatures
-5. **Refactoring Support**: Safer refactoring with type checking
-
-## Future Work
-
-### Remaining Core Modules (2 modules, ~4,266 lines)
-- [ ] wepppy/nodb/core/watershed.py (1,596 lines) - Partially complete, has some return type annotations
-- [ ] wepppy/nodb/core/wepp.py (2,670 lines)
-
-### Additional Improvements
-- [ ] Update wepppy/nodb/base.py with additional type hints
-- [ ] Add type hints to mod modules in wepppy/nodb/mods/
-- [ ] Gradually enable stricter mypy settings
-- [ ] Add type stubs for external dependencies if needed
-- [ ] Consider using `typing.Protocol` for duck-typed interfaces
-
-## Migration Guide
-
-When adding type hints to additional modules:
-
-1. **Import types at the top**:
-   ```python
-   from typing import Optional, Dict, List, Tuple, Any
-   ```
-
-2. **Start with `__init__` methods**:
-   - Add parameter types
-   - Add `-> None` return type
-
-3. **Add property return types**:
-   ```python
-   @property
-   def value(self) -> str:
-   ```
-
-4. **Add method signatures**:
-   - Parameter types
-   - Return types
-   - Use `Optional[T]` for nullable values
-
-5. **Test compilation**:
-   ```bash
-   python -m py_compile wepppy/nodb/core/topaz.py
-   # Or validate all modified modules:
-   python -m py_compile wepppy/nodb/core/*.py
-   ```
-
-6. **Update mypy.ini**:
-   - Add per-module configuration section
-   - Can gradually enable stricter checking
-
-## Notes
-
-- Type hints are optional at runtime and don't affect performance
-- Used `Any` sparingly where exact types are complex or dynamic
-- Maintained compatibility with existing code patterns
-- All changes are minimal and surgical
-- No functional changes were made - only type annotations added
+## Outstanding Work
+1. Expand type hints in `wepppy/nodb/base.py`, create a matching `.pyi`, and validate with `stubtest`.
+2. Author module docstrings and add annotations for priority mods: `omni`, `ag_fields`, and `rhem`.
+3. Introduce `.pyi` stubs for NoDb mods once runtime signatures stabilize; Disturbed, PathCE, and BAER now have complete annotations.
+4. Re-run `uk2us` on touched files to maintain American English spellings and repeat the validation workflow once base typing is complete.
 
 ## References
-
-- [PEP 484 – Type Hints](https://peps.python.org/pep-0484/)
-- [Python typing documentation](https://docs.python.org/3/library/typing.html)
+- `docs/prompt_templates/module_documentation_workflow.prompt.md`
+- `AGENTS.md` (Type Stub Management)
+- [PEP 484 - Type Hints](https://peps.python.org/pep-0484/)
 - [mypy documentation](https://mypy.readthedocs.io/)

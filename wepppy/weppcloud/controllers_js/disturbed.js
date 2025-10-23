@@ -177,6 +177,7 @@ var Disturbed = (function () {
         var statusElement = formElement ? dom.qs("#status", formElement) : null;
         var stacktraceElement = formElement ? dom.qs("#stacktrace", formElement) : null;
         var rqJobElement = formElement ? dom.qs("#rq_job", formElement) : null;
+        var spinnerElement = formElement ? dom.qs("#braille", formElement) : null;
 
         var uploadHintElement = formElement ? dom.qs("#hint_upload_sbs", formElement) : null;
         var removeHintElement = formElement ? dom.qs("#hint_remove_sbs", formElement) : null;
@@ -201,6 +202,7 @@ var Disturbed = (function () {
         disturbed.stacktrace = stacktraceAdapter;
         disturbed.rq_job = rqJobAdapter;
         disturbed.infoElement = infoElement;
+        disturbed.statusSpinnerEl = spinnerElement;
 
         var commandButtons = [];
         [
@@ -222,8 +224,12 @@ var Disturbed = (function () {
             disturbed.command_btn_id = commandButtons;
         }
 
-        disturbed.ws_client = new WSClient("sbs_upload_form", "disturbed");
-        disturbed.ws_client.attachControl(disturbed);
+        disturbed.attach_status_stream(disturbed, {
+            form: formElement,
+            channel: "disturbed",
+            runId: window.runid || window.runId || null,
+            spinner: spinnerElement
+        });
 
         var modePanels = {};
         Object.keys(MODE_PANELS).forEach(function (key) {

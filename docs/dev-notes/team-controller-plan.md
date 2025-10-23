@@ -3,7 +3,7 @@
 
 ## Overview
 - Coordinates the Team run-control (`wepppy/weppcloud/controllers_js/team.js`), collaborator templates (`wepppy/weppcloud/templates/controls/team*.htm` and `templates/reports/users.htm`), and project blueprint endpoints (`project_bp.task_adduser`, `project_bp.task_removeuser`).
-- Replaces jQuery-era wiring with `WCDom`, `WCForms`, `WCHttp`, `WCEvents`, and `controlBase`, keeping StatusStream/WSClient telemetry intact.
+- Replaces jQuery-era wiring with `WCDom`, `WCForms`, `WCHttp`, `WCEvents`, and `controlBase`, keeping `controlBase.attach_status_stream` telemetry intact.
 - Maintains legacy public methods (`Team.adduser`, `Team.removeuser`, `Team.report`) and DOM events (`TEAM_ADDUSER_TASK_COMPLETED`, `TEAM_REMOVEUSER_TASK_COMPLETED`) while emitting scoped helper events for downstream dashboards.
 
 ## DOM Contract
@@ -37,7 +37,7 @@
 
 ## Telemetry & Helpers
 - `controlBase` integration keeps queue-friendly behaviour (status appenders, stacktrace helpers, `job:*` events).
-- Status panels prefer `StatusStream.attach` when available; otherwise the WS fallback reconnects via `WSClient` as before.
+- Status panels attach via `StatusStream.attach` through `controlBase.attach_status_stream`.
 - Buttons respect `data-jobDisabled` flags written by `controlBase` so queue polling can continue to disable inputs when necessary.
 
 ## Testing & Tooling

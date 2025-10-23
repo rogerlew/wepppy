@@ -6,6 +6,29 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""Disturbed land-use NoDb controller.
+
+The Disturbed mod lets users parameterize wildfire, logging, and other acute
+disturbance scenarios for WEPP runs. It ingests disturbance lookup tables,
+reprojects geospatial rasters into the watershed frame, and orchestrates the
+creation of WEPP-ready management, soil, and slope artifacts for affected
+subcatchments.
+
+Key Responsibilities:
+    - Parse CSV lookup tables describing disturbance-to-soil/land-use mappings.
+    - Reproject disturbance rasters into the watershed DEM grid using RasterIO.
+    - Synthesize WEPP soil files (multi-OFE) and management records for each
+      impacted hillslope.
+    - Emit progress events via Redis so the UI can track long-running jobs.
+
+Typical Usage:
+    >>> from wepppy.nodb.mods import Disturbed
+    >>> disturbed = Disturbed.getInstance('/runs/example')
+    >>> with disturbed.locked():
+    ...     disturbed.apply_disturbance('fire_2024.tif')
+    ...     disturbed.dump_and_unlock()
+"""
+
 import os
 import ast
 import csv

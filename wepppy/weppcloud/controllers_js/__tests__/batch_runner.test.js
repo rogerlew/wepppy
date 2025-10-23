@@ -2,6 +2,8 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 const TestFile = typeof File === "undefined"
     ? class TestFile extends Blob {
           constructor(chunks, name, options) {
@@ -16,7 +18,8 @@ describe("BatchRunner controller", () => {
     let requestMock;
     let postJsonMock;
     let delegateTeardowns;
-    let wsClientMock;
+    let baseInstance;
+    let statusStreamMock;
 
     function flushPromises() {
         return Promise.resolve().then(() => Promise.resolve());
@@ -166,16 +169,7 @@ describe("BatchRunner controller", () => {
             isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };
 
-        wsClientMock = {
-            attachControl: jest.fn(),
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            resetSpinner: jest.fn()
-        };
-
-        global.WSClient = jest.fn(() => wsClientMock);
-
-        global.controlBase = jest.fn(() => ({
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             command_btn_id: null,
             render_job_status: jest.fn(),
             update_command_button_state: jest.fn(),
@@ -188,6 +182,8 @@ describe("BatchRunner controller", () => {
             pushResponseStacktrace: jest.fn(),
             stacktrace: { show: jest.fn(), text: jest.fn() }
         }));
+
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         await import("../events.js");
         await import("../batch_runner.js");
@@ -215,7 +211,6 @@ describe("BatchRunner controller", () => {
         delete global.WCDom;
         delete global.WCForms;
         delete global.WCHttp;
-        delete global.WSClient;
         delete global.controlBase;
         delete global.site_prefix;
 
@@ -379,7 +374,7 @@ describe("BatchRunner controller", () => {
 
         expect(postJsonMock).toHaveBeenCalledWith("/batch/_/demo/rq/api/run-batch", {});
         expect(started).toHaveBeenCalledWith(expect.objectContaining({ jobId: "job-42" }));
-        expect(wsClientMock.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 
     test("refreshJobInfo posts job info request when forced", async () => {

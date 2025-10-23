@@ -154,7 +154,10 @@ var ControllerName = function () {
         that.info = $("#form_id #info");
         that.status = $("#form_id #status");
         that.stacktrace = $("#form_id #stacktrace");
-        that.ws_client = new WSClient('form_id', 'channel');
+        that.attach_status_stream(that, {
+            form: document.getElementById("form_id"),
+            channel: "channel"
+        }); // Builds fallback status/stacktrace panels when absent and proxies through StatusStream.
         that.rq_job_id = null;
         that.rq_job = $("#form_id #rq_job");
         that.command_btn_id = 'btn_id'; // or ['btn_id1', 'btn_id2']

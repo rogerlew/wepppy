@@ -2,10 +2,12 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Rhem controller", () => {
     let httpMock;
     let baseInstance;
-    let wsClientInstance;
+    let statusStreamMock;
     let rhem;
     let projectMock;
 
@@ -45,20 +47,13 @@ describe("Rhem controller", () => {
         };
         global.WCHttp = httpMock;
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn(),
             hideStacktrace: jest.fn()
-        };
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn()
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         global.url_for_run = jest.fn((path) => path);
         projectMock = { set_preferred_units: jest.fn() };
@@ -73,7 +68,6 @@ describe("Rhem controller", () => {
         delete window.Rhem;
         delete global.WCHttp;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.url_for_run;
         delete window.Project;
         delete window.runid;
@@ -110,7 +104,7 @@ describe("Rhem controller", () => {
             expect.objectContaining({ clean: true, prep: false }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(rhem, "job-456");
         expect(started).toHaveBeenCalledWith(expect.objectContaining({ runId: "demo-run" }));
         expect(queued).toHaveBeenCalledWith(expect.objectContaining({ jobId: "job-456" }));
@@ -127,7 +121,7 @@ describe("Rhem controller", () => {
         rhem.triggerEvent("RHEM_RUN_TASK_COMPLETED");
         await flushPromises();
 
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(httpMock.request).toHaveBeenNthCalledWith(
             1,
             "report/rhem/results/",
@@ -140,7 +134,7 @@ describe("Rhem controller", () => {
         );
         expect(document.getElementById("rhem-results").innerHTML).toContain("Results");
         expect(document.getElementById("info").innerHTML).toContain("Summary");
-        expect(document.getElementById("status").innerHTML).toContain("Success");
+        expect(statusStreamMock.append).toHaveBeenCalledWith(expect.stringContaining("Success"), expect.any(Object));
         expect(projectMock.set_preferred_units).toHaveBeenCalled();
         expect(completions).toHaveLength(1);
     });
@@ -158,7 +152,7 @@ describe("Rhem controller", () => {
             expect.objectContaining({ Success: false, Error: "Nope" })
         );
         expect(errors).toHaveLength(1);
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 
     test("request rejection surfaces through controlBase stacktrace", async () => {
@@ -172,6 +166,6 @@ describe("Rhem controller", () => {
             rhem,
             expect.objectContaining({ Error: "network failure" })
         );
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 });

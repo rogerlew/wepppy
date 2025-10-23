@@ -2,12 +2,14 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
 describe("Omni controller", () => {
     let originalHttp;
     let requestMock;
     let getJsonMock;
-    let wsClientInstance;
     let baseInstance;
+    let statusStreamMock;
     let omni;
 
     beforeEach(async () => {
@@ -48,26 +50,17 @@ describe("Omni controller", () => {
         global.WCHttp.getJson = getJsonMock;
         global.WCHttp.isHttpError = jest.fn(() => false);
 
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(),
             triggerEvent: jest.fn(),
             update_command_button_state: jest.fn(),
-            manage_ws_client: jest.fn(),
             render_job_status: jest.fn(),
             stop_job_status_polling: jest.fn()
-        };
+        }));
 
-        global.controlBase = jest.fn(() => baseInstance);
-
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn(),
-            resetSpinner: jest.fn()
-        };
-        global.WSClient = jest.fn(() => wsClientInstance);
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         global.url_for_run = jest.fn((path) => path);
 
@@ -80,7 +73,6 @@ describe("Omni controller", () => {
         Object.assign(global.WCHttp, originalHttp);
         delete window.Omni;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.url_for_run;
         document.body.innerHTML = "";
     });

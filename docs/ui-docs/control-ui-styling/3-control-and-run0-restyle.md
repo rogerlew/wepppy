@@ -13,7 +13,7 @@
 - Command routing is orchestrated via the `controllers.js` bundle and `preflight.js`, both included globally on the run page regardless of which controls are active.【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L22-L64】
 
 ### 1.3 JavaScript orchestration
-- `control_base.js` defines the shared contract for ControlBase subclasses: run/job state management, stacktrace rendering, RQ job polling, and WebSocket integration with `WSClient`. Controls configure IDs and callbacks so the infrastructure can disable buttons, fetch `/rq/api/jobstatus/`, and stream status updates to the standard DOM nodes.【F:wepppy/weppcloud/controllers_js/control_base.js†L1-L138】【F:wepppy/weppcloud/controllers_js/control_base.js†L139-L220】
+- `control_base.js` defines the shared contract for ControlBase subclasses: run/job state management, stacktrace rendering, RQ job polling, and WebSocket integration via `controlBase.attach_status_stream`. Controls configure IDs and callbacks so the infrastructure can disable buttons, fetch `/rq/api/jobstatus/`, and stream status updates to the standard DOM nodes.【F:wepppy/weppcloud/controllers_js/control_base.js†L1-L138】【F:wepppy/weppcloud/controllers_js/control_base.js†L139-L220】
 - Controller modules are singletons assembled into `static/js/controllers.js` through a Jinja template, guaranteeing each panel hooks into the shared form markup once per page.【F:wepppy/weppcloud/controllers_js/README.md†L5-L62】
 
 ### 1.4 Backend singletons & locales
@@ -50,7 +50,7 @@
 - **Centralize endpoint mapping.** Extend `control_base.js` (or companion helper) to generate URLs based on control name + action (`/weppcloud/controls/<slug>/<action>`), enabling reflection-friendly backend routing.
 - **Event normalization.** Encourage controllers to emit structured events (`control:submitted`, `control:mode-changed`) on the form element; htmx can then listen and fetch partial updates for advanced options or summary panels.
 - **Unit sync helpers.** Surface a small adapter over `Unitizer` so controls can display both system and metric units and keep them synchronized. For onchange sync, throttle AJAX requests and coalesce updates server-side.
-- **WebSocket standardization.** Document channel naming conventions and message payloads so new controls know which topics to subscribe to when streaming job status through Redis + `WSClient`.
+- **WebSocket standardization.** Document channel naming conventions and message payloads so new controls know which topics to subscribe to when streaming job status through Redis + the `controlBase.attach_status_stream` helper.
 
 ### 4.3 Backend routing & NoDb expectations
 - **Consolidated blueprint.** Introduce a `/controls` blueprint (or extend `run_0` blueprint) with predictable POST routes: `/<control_slug>/submit`, `/<control_slug>/preview`, `/<control_slug>/upload`. Each route delegates to a method on the corresponding NoDb singleton, keeping validation centralized.

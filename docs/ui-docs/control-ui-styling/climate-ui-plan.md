@@ -35,7 +35,7 @@ This plan inventories the legacy climate control so we can translate it to the P
   - `setMode`, `setSpatialMode`, and `setStationMode` POST to `/tasks/set_climate_*` endpoints then immediately call their corresponding show/hide helpers.
 - **Station fetching** – `refreshStationSelection` routes requests to `/view/closest_stations/`, `/view/heuristic_stations/`, `/view/eu_heuristic_stations/`, or `/view/au_heuristic_stations/` based on the currently selected mode. Without radios for modes 2/3, the EU/AU endpoints never receive traffic.
 - **Uploads** – `upload_cli` builds a `FormData` submission to `/tasks/upload_cli/`. On success the controller fakes a “build complete” event to refresh the climate report without queuing an RQ job.
-- **Build workflow** – `build()` serialises the entire form to `/rq/api/build_climate`, starts the WebSocket stream (`WSClient`) to follow job progress, and surfaces the resulting report once the RQ event fires.
+- **Build workflow** – `build()` serialises the entire form to `/rq/api/build_climate`, starts the WebSocket stream via `controlBase.attach_status_stream`, and surfaces the resulting report once the RQ event fires.
 - **Precip scaling** – `updatePrecipScalingControls` is the only place sections 1–4 are toggled; scalar/monthly/reference/spatial inputs remain visible unless this handler runs, so the new build should pre-collapse them by default.
 
 ## 3. Backend Mapping (`wepppy/nodb/core/climate.py`, `…/routes/nodb_api/climate_bp.py`, `…/routes/rq/api/api.py`)

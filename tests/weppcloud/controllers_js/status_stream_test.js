@@ -148,6 +148,7 @@ async function runTests() {
 
   const triggerCalls = [];
   const stacktraceFetches = [];
+  const appendCalls = [];
 
   const modulePath = path.resolve(
     __dirname,
@@ -178,6 +179,7 @@ async function runTests() {
       },
     },
     onTrigger: (detail) => triggerCalls.push(detail),
+    onAppend: (detail) => appendCalls.push(detail),
   });
 
   assert.strictEqual(typeof instance.append, "function");
@@ -196,6 +198,9 @@ async function runTests() {
   socket.emitMessage(JSON.stringify({ type: "status", data: "line one" }));
   assert.ok(logElement.textContent.includes("line one"), "Log should contain message");
   assert.strictEqual(events.append, 2, "status:append should fire twice");
+  assert.strictEqual(appendCalls.length, 2);
+  assert.strictEqual(appendCalls[0].message, "manual");
+  assert.strictEqual(appendCalls[1].message, "line one");
 
   // Ping handling
   socket.emitMessage(JSON.stringify({ type: "ping" }));

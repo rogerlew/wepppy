@@ -151,9 +151,17 @@ var Landuse = (function () {
         landuse.command_btn_id = "btn_build_landuse";
         landuse.hint = hintAdapter;
         landuse.infoElement = infoElement;
+        landuse.statusPanelEl = dom.qs("#landuse_status_panel");
+        landuse.stacktracePanelEl = dom.qs("#landuse_stacktrace_panel");
+        landuse.statusStream = null;
+        var spinnerElement = landuse.statusPanelEl ? landuse.statusPanelEl.querySelector("#braille") : null;
 
-        landuse.ws_client = new WSClient("landuse_form", "landuse");
-        landuse.ws_client.attachControl(landuse);
+        landuse.attach_status_stream(landuse, {
+            element: landuse.statusPanelEl,
+            channel: "landuse",
+            stacktrace: landuse.stacktracePanelEl ? { element: landuse.stacktracePanelEl } : null,
+            spinner: spinnerElement
+        });
 
         var modePanels = [
             dom.qs("#landuse_mode0_controls"),
@@ -167,9 +175,7 @@ var Landuse = (function () {
         landuse.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "LANDUSE_BUILD_TASK_COMPLETED") {
-                if (landuse.ws_client && typeof landuse.ws_client.disconnect === "function") {
-                    landuse.ws_client.disconnect();
-                }
+                landuse.disconnect_status_stream(landuse);
                 landuse.report();
                 try {
                     SubcatchmentDelineation.getInstance().enableColorMap("dom_lc");
@@ -199,11 +205,14 @@ var Landuse = (function () {
             if (infoAdapter && typeof infoAdapter.text === "function") {
                 infoAdapter.text("");
             }
-            if (statusAdapter && typeof statusAdapter.html === "function") {
-                statusAdapter.html(taskMsg + "...");
+            landuse.clear_status_messages(landuse);
+            if (taskMsg) {
+                landuse.append_status_message(landuse, taskMsg + "...");
             }
             if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
                 stacktraceAdapter.text("");
+            } else if (stacktraceElement) {
+                stacktraceElement.textContent = "";
             }
         }
 
@@ -314,9 +323,7 @@ var Landuse = (function () {
                 });
             }
 
-            if (landuse.ws_client && typeof landuse.ws_client.connect === "function") {
-                landuse.ws_client.connect();
-            }
+            landuse.connect_status_stream(landuse);
 
             var formData = new FormData(formElement);
 
@@ -327,9 +334,7 @@ var Landuse = (function () {
             }).then(function (result) {
                 var response = result && result.body ? result.body : null;
                 if (response && response.Success === true) {
-                    if (statusAdapter && typeof statusAdapter.html === "function") {
-                        statusAdapter.html("build_landuse job submitted: " + response.job_id);
-                    }
+                    landuse.append_status_message(landuse, "build_landuse job submitted: " + response.job_id);
                     landuse.set_rq_job_id(landuse, response.job_id);
                 } else if (response) {
                     landuse.pushResponseStacktrace(landuse, response);
@@ -447,9 +452,7 @@ var Landuse = (function () {
             }, { form: formElement }).then(function (result) {
                 var response = result && result.body ? result.body : null;
                 if (response && response.Success === true) {
-                    if (statusAdapter && typeof statusAdapter.html === "function") {
-                        statusAdapter.html(taskMsg + "... Success");
-                    }
+                    landuse.append_status_message(landuse, taskMsg + "... Success");
                 } else if (response) {
                     landuse.pushResponseStacktrace(landuse, response);
                 }
@@ -488,9 +491,7 @@ var Landuse = (function () {
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
-                        if (statusAdapter && typeof statusAdapter.html === "function") {
-                            statusAdapter.html(taskMsg + "... Success");
-                        }
+                        landuse.append_status_message(landuse, taskMsg + "... Success");
                     } else if (response) {
                         landuse.pushResponseStacktrace(landuse, response);
                     }

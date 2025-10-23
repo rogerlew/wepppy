@@ -4,13 +4,13 @@
 ## Current State
 - Controller relies heavily on jQuery (`$`, `.on`, `.post`, `.get`) and manual DOM manipulation.
 - Upload form (`#sbs_upload_form`) wires inline `onclick` handlers in `controls/baer_upload.htm`.
-- Websocket lifecycle is delegated to `WSClient`, but UI status/stacktrace areas are managed directly via jQuery wrappers.
+- Websocket lifecycle is delegated through `controlBase.attach_status_stream`; UI status/stacktrace areas are managed directly via jQuery wrappers.
 - Map overlay logic calls directly into `MapController` and injects a slider via raw HTML string plus jQuery listeners.
 - Backend routes live in `wepppy/weppcloud/routes/nodb_api/disturbed_bp.py` and expect form posts/JSON without `parse_request_payload`.
 - No dedicated Jest coverage for BAER; backend tests piggyback on disturbed module fixtures.
 
 ## Key Dependencies
-- **Frontend helpers**: `controlBase`, `WCDom`, `WCForms`, `WCHttp`, `WCEvents`, `WSClient`, `MapController`, `SubcatchmentDelineation`.
+- **Frontend helpers**: `controlBase`, `controlBase.attach_status_stream`, `WCDom`, `WCForms`, `WCHttp`, `WCEvents`, `MapController`, `SubcatchmentDelineation`.
 - **Templates**: `wepppy/weppcloud/templates/controls/baer_upload.htm`, run page includes (`runs0_pure.htm`).
 - **Backend**: `disturbed_bp` routes (`tasks/upload_sbs`, `tasks/remove_sbs`, `tasks/build_uniform_sbs/<value>`, `tasks/modify_burn_class`, `tasks/modify_color_map`, `tasks/set_firedate`, `query/baer_wgs_map`, `view/modify_burn_class`, legend/resource endpoints).
 - **NoDb mods**: `wepppy.nodb.mods.baer`, `wepppy.nodb.mods.disturbed` (shared interface for map operations).
@@ -50,7 +50,7 @@
 ## Open Questions / Follow-ups
 - Confirm whether `nodata_vals` expects comma-separated string or requires parsing into iterable for `Baer.modify_burn_class`.
 - Determine if opacity slider should be shared via `control_base` events for other map controllers.
-- Audit `WSClient` integration—ensure new event flow does not duplicate existing socket updates.
+- Audit status-stream integration—ensure `controlBase.attach_status_stream` events do not duplicate existing socket updates and that any legacy `WSClient` references are removed.
 - Verify backend can safely coerce missing map data (should return `error_factory` as today).
 
 *Last updated: 2025-10-22.*

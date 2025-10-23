@@ -276,9 +276,9 @@ Run the Go suite via:
 
 ### 16.1 Handshake & Message Semantics
 
-- Clients SHOULD optimistically send `{"type":"init"}` immediately after the WebSocket upgrade completes. `status2` does not require the frame to begin streaming, but it keeps parity with historical clients (`wepppy/weppcloud/controllers_js/status_stream.js:294` and `wepppy/weppcloud/controllers_js/ws_client.js:25`).
+- Clients SHOULD optimistically send `{"type":"init"}` immediately after the WebSocket upgrade completes. `status2` does not require the frame to begin streaming, but it keeps parity with historical clients (`wepppy/weppcloud/controllers_js/status_stream.js:294`).
 - `status2` MUST acknowledge readiness by issuing heartbeat frames of the form `{"type":"ping"}` at the cadence defined by `STATUS_PING_INTERVAL` (default 5s).
-- Clients MUST reply to every heartbeat with `{"type":"pong"}` over the same connection without additional metadata (`wepppy/weppcloud/controllers_js/status_stream.js:273`, `wepppy/weppcloud/controllers_js/ws_client.js:35`, `wepppy/weppcloud/routes/command_bar/static/command-bar.js:783`).
+- Clients MUST reply to every heartbeat with `{"type":"pong"}` over the same connection without additional metadata (`wepppy/weppcloud/controllers_js/status_stream.js:273`, `wepppy/weppcloud/routes/command_bar/static/command-bar.js:783`).
 - Application payloads are text frames encoded as `{"type":"status","data":<string>}`. Unknown message types SHOULD be ignored to preserve forward compatibility.
 - When the server intends to terminate a connection, it SHOULD send a final `{"type":"hangup"}` frame and close the socket with normal closure status. Clients MAY treat `hangup` as a cue to reconnect after a randomized backoff.
 
@@ -293,7 +293,7 @@ Run the Go suite via:
 
 - **StatusStream panels** (`wepppy/weppcloud/controllers_js/status_stream.js:268-339`) auto-respond to pings and maintain their own reconnect loop. They expect timeliness guarantees on pong windows but tolerate brief transport gaps.
 - **Command bar command channel** (`wepppy/weppcloud/routes/command_bar/static/command-bar.js:620-789`) uses the same handshake, responds with `pong`, and reconnects with exponential backoff capped at 30s.
-- **Legacy WSClient** controls (`wepppy/weppcloud/controllers_js/ws_client.js:23-109`) respond synchronously to heartbeats and emit spinner UI cues. They do not disable themselves in background tabs, so longer pong windows are essential when the page is throttled.
+- Historical note: prior to the StatusStream consolidation, a separate `WSClient` bridge responded synchronously to heartbeats and emitted spinner UI cues. That shim has been removed.
 
 ### 16.4 Compatibility Notes
 

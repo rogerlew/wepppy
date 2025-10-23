@@ -1,3 +1,10 @@
+"""Load and normalize RRED/PathCE treatment data for optimization.
+
+This utility module converts raw raster/CSV summaries into structured solver
+inputs. It expands treatment definitions, applies severity lookups, and returns
+ready-to-score NumPy/Pandas objects consumed by ``path_cost_effective``.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

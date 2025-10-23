@@ -1,3 +1,25 @@
+"""Ash transport NoDb controller.
+
+This module prepares post-fire ash transport simulations by combining burn
+severity maps, watershed geometry, and user-supplied parameter overrides. The
+Ash controller normalizes contaminant concentrations, configures the
+appropriate multi-year ash model, and launches hillslope runs (optionally via
+process pools). Output time-series are handed to the companion `AshPost`
+module which aggregates watershed summaries and populates dashboards.
+
+Key inputs:
+* Burn severity (from `Landuse`) and optional raster overrides (ash load/type).
+* WEPP hydrology tables and CLIGEN climate files for each hillslope.
+
+Outputs and downstream integrations:
+* Per-hillslope ash transport parquet files in `ash_dir`.
+* Redis `TaskEnum.run_watar` timestamp for UI progress tracking.
+* Invokes `AshPost` post-processing to publish watershed reports.
+"""
+
+from __future__ import annotations
+
+import logging
 import shutil
 from glob import glob
 import os
@@ -6,10 +28,10 @@ from os.path import exists as _exists
 from time import sleep
 from subprocess import Popen, PIPE
 from enum import IntEnum
-from collections import namedtuple
 from deprecated import deprecated
 
 from concurrent.futures import as_completed
+from typing import Any, Dict, Iterator, List, Mapping, MutableMapping, Optional, Tuple
 
 # wepppy
 from wepppy.landcover import LandcoverMap
@@ -46,33 +68,46 @@ __all__ = [
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
-MULTIPROCESSING = True
+AshMetadata = Dict[int | str, Dict[str, Any]]
+ContaminantLevels = Dict[str, float]
+RasterSummary = Dict[int, float]
+
+MULTIPROCESSING: bool = True
 
 from .ashpost import AshPost
-from .ash_multi_year_model import WHITE_ASH_BD, BLACK_ASH_BD, AshType
+from .ash_multi_year_model import WHITE_ASH_BD, BLACK_ASH_BD, AshModel, AshType
 from .ash_multi_year_model import WhiteAshModel as WhiteAshModelAnu
 from .ash_multi_year_model import BlackAshModel as BlackAshModelAnu
 from .ash_multi_year_model_alex import WhiteAshModel as WhiteAshModelAlex
 from .ash_multi_year_model_alex import BlackAshModel as BlackAshModelAlex
 
-def run_ash_model(kwds):
+def run_ash_model(kwds: MutableMapping[str, Any]) -> str:
     """
-    global function for running ash model to add with multiprocessing
+    Execute a single hillslope ash model run.
 
-    :param kwds: args package by Ash.run_model
-    :return:
+    Parameters
+    ----------
+    kwds:
+        Keyword arguments assembled by `Ash.run_ash`. Includes the model
+        instance plus the derived ash load/ash depth parameters for one
+        hillslope.
+
+    Returns
+    -------
+    str
+        Path to the generated parquet file for the hillslope run.
     """
-    ash_type = kwds['ash_type']
-    ini_ash_load = kwds['ini_ash_load']
-    ash_bulkdensity = kwds['ash_bulkdensity']
-    ash_model = kwds['ash_model']
+    ash_type: AshType = kwds['ash_type']
+    ini_ash_load: float = kwds['ini_ash_load']
+    ash_bulkdensity: float = kwds['ash_bulkdensity']
+    ash_model: AshModel = kwds['ash_model']
 
     del kwds['ash_type']
     del kwds['ash_bulkdensity']
     del kwds['ash_model']
 
-    logger = kwds['logger']
-    prefix = kwds['prefix']
+    logger: logging.Logger = kwds['logger']
+    prefix: str = kwds['prefix']
 
     del kwds['logger']
     out_fn = ash_model.run_model(**kwds)
@@ -91,49 +126,53 @@ class AshNoDbLockedException(Exception):
 
 
 class Ash(NoDbBase):
-    """
-    Manager that keeps track of project details
-    and coordinates access of NoDb instances.
-    """
+    """NoDb controller coordinating ash transport simulations."""
     __name__ = 'Ash'
 
     filename = 'ash.nodb'
     
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
-        super(Ash, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
+    def __init__(
+        self,
+        wd: str,
+        cfg_fn: str,
+        run_group: Optional[str] = None,
+        group_name: Optional[str] = None
+    ) -> None:
+        super().__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             # config = self.config
-            self.fire_date = YearlessDate(8, 4) 
-            self.ini_black_ash_depth_mm = 5.0
-            self.ini_white_ash_depth_mm = 5.0
-            self.meta = None
-            self.fire_years = None
-            self._reservoir_capacity_m3 = 1000000
-            self._reservoir_storage = 80
-            self._ash_depth_mode = 1
-            self._spatial_mode = AshSpatialMode.Single           
+            self.fire_date: YearlessDate = YearlessDate(8, 4)
+            self.ini_black_ash_depth_mm: float = 5.0
+            self.ini_white_ash_depth_mm: float = 5.0
+            self.meta: Optional[AshMetadata] = None
+            self.fire_years: Optional[int] = None
+            self._reservoir_capacity_m3: float = 1_000_000.0
+            self._reservoir_storage: float = 80.0
+            self._ash_depth_mode: int = 1
+            self._spatial_mode: AshSpatialMode = AshSpatialMode.Single
 
-            self._ash_load_fn = self.config_get_path('ash', 'ash_load_fn')
-            self._ash_bulk_density_fn = self.config_get_path('ash', 'ash_bulk_density_fn')
-            self._ash_type_map_fn = self.config_get_path('ash', 'ash_type_map_fn')
+            self._ash_load_fn: Optional[str] = self.config_get_path('ash', 'ash_load_fn')
+            self._ash_bulk_density_fn: Optional[str] = self.config_get_path('ash', 'ash_bulk_density_fn')
+            self._ash_type_map_fn: Optional[str] = self.config_get_path('ash', 'ash_type_map_fn')
 
-            self._ash_load_d = None
-            self._ash_type_d = None
-            
-            self._field_black_ash_bulkdensity = BLACK_ASH_BD
-            self._field_white_ash_bulkdensity = WHITE_ASH_BD
+            self._ash_load_d: Optional[RasterSummary] = None
+            self._ash_bulk_density_d: Optional[RasterSummary] = None
+            self._ash_type_d: Optional[RasterSummary] = None
 
-            self._black_ash_bulkdensity = BLACK_ASH_BD
-            self._white_ash_bulkdensity = WHITE_ASH_BD
+            self._field_black_ash_bulkdensity: float = BLACK_ASH_BD
+            self._field_white_ash_bulkdensity: float = WHITE_ASH_BD
 
-            self._run_wind_transport = self.config_get_bool('ash', 'run_wind_transport')
-            self._model = self.config_get_str('ash', 'model', 'multi')
+            self._black_ash_bulkdensity: float = BLACK_ASH_BD
+            self._white_ash_bulkdensity: float = WHITE_ASH_BD
 
-            self._alex_white_ash_model_pars = WhiteAshModelAlex()
-            self._alex_black_ash_model_pars = BlackAshModelAlex()
-            self._anu_white_ash_model_pars = WhiteAshModelAnu()
-            self._anu_black_ash_model_pars = BlackAshModelAnu()
+            self._run_wind_transport: bool = self.config_get_bool('ash', 'run_wind_transport')
+            self._model: str = self.config_get_str('ash', 'model', 'multi')
+
+            self._alex_white_ash_model_pars: WhiteAshModelAlex = WhiteAshModelAlex()
+            self._alex_black_ash_model_pars: BlackAshModelAlex = BlackAshModelAlex()
+            self._anu_white_ash_model_pars: WhiteAshModelAnu = WhiteAshModelAnu()
+            self._anu_black_ash_model_pars: BlackAshModelAnu = BlackAshModelAnu()
             
         ash_dir = self.ash_dir
         if _exists(ash_dir):
@@ -143,10 +182,10 @@ class Ash(NoDbBase):
 
         AshPost(wd, cfg_fn)
     
-    def _load_contaminants_from_config(self):
+    def _load_contaminants_from_config(self) -> None:
         with self.locked():
             # Define the severity levels and corresponding attribute names
-            severities = {
+            severities: Dict[str, str] = {
                 'low': 'low_contaminant_concentrations',
                 'moderate': 'moderate_contaminant_concentrations',
                 'high': 'high_contaminant_concentrations'
@@ -154,7 +193,7 @@ class Ash(NoDbBase):
 
             for severity, attr_name in severities.items():
                 section = f'ash.contaminants.{severity}'
-                contaminants_dict = {}
+                contaminants_dict: ContaminantLevels = {}
 
                 # Check if the section exists in the config
                 if self._configparser.has_section(section):
@@ -171,7 +210,7 @@ class Ash(NoDbBase):
                 # Set the dictionary to the corresponding instance attribute
                 setattr(self, attr_name, contaminants_dict)
 
-    def get_cc_default(self, severity):
+    def get_cc_default(self, severity: str) -> ContaminantLevels:
         if severity == 'high':
             return dict(
                     C=248.4,
@@ -243,9 +282,8 @@ class Ash(NoDbBase):
                     Cr=36.1,
                     Co=5.0)
 
-    def parse_inputs(self, kwds):
-
-        normalised = {}
+    def parse_inputs(self, kwds: Mapping[str, Any]) -> None:
+        normalised: Dict[str, Any] = {}
         for key, value in kwds.items():
             if isinstance(value, bool):
                 normalised[key] = value
@@ -315,7 +353,7 @@ class Ash(NoDbBase):
                 self._anu_black_ash_model_pars.fin_erod = data.get('black_fin_erod', self._anu_black_ash_model_pars.fin_erod)
                 self._anu_black_ash_model_pars.roughness_limit = data.get('black_roughness_limit', self._anu_black_ash_model_pars.roughness_limit )
 
-    def parse_cc_inputs(self, kwds):
+    def parse_cc_inputs(self, kwds: MutableMapping[str, Any]) -> None:
         # Convert all possible numeric values in kwds to float
         for k in kwds:
             try:
@@ -328,7 +366,7 @@ class Ash(NoDbBase):
 
         with self.locked():
             # Map form prefixes to the instance's contaminant dictionaries
-            severity_map = {
+            severity_map: Dict[str, ContaminantLevels] = {
                 'low': self.low_contaminant_concentrations,
                 'mod': self.moderate_contaminant_concentrations,
                 'high': self.high_contaminant_concentrations
@@ -349,7 +387,7 @@ class Ash(NoDbBase):
             self._reservoir_storage = kwds.get('reservoir_storage', self._reservoir_storage)
 
     @classmethod
-    def _post_instance_loaded(cls, instance):
+    def _post_instance_loaded(cls, instance: 'Ash') -> 'Ash':
         instance = super()._post_instance_loaded(instance)
 
         from .ash_multi_year_model import AshType
@@ -363,7 +401,7 @@ class Ash(NoDbBase):
         return instance
 
     @property
-    def has_ash_results(self):
+    def has_ash_results(self) -> bool:
         if glob(_join(self.ash_dir, 'post', '*.parquet')):
             return True
         if glob(_join(self.ash_dir, 'post', '*.pkl')):
@@ -372,7 +410,7 @@ class Ash(NoDbBase):
 
     # These are setup this way for the html views
     @property
-    def anu_white_ash_model_pars(self):
+    def anu_white_ash_model_pars(self) -> WhiteAshModelAnu:
         pars = getattr(self, '_anu_white_ash_model_pars', None)
         if pars is None:
             with self.locked():
@@ -380,7 +418,7 @@ class Ash(NoDbBase):
         return pars
 
     @property
-    def anu_black_ash_model_pars(self):
+    def anu_black_ash_model_pars(self) -> BlackAshModelAnu:
         pars = getattr(self, '_anu_black_ash_model_pars', None)
         if pars is None:
             with self.locked():
@@ -388,7 +426,7 @@ class Ash(NoDbBase):
         return pars
 
     @property
-    def alex_white_ash_model_pars(self):
+    def alex_white_ash_model_pars(self) -> WhiteAshModelAlex:
         pars = getattr(self, '_alex_white_ash_model_pars', None)
         if pars is None:
             with self.locked():
@@ -396,7 +434,7 @@ class Ash(NoDbBase):
         return pars
 
     @property
-    def alex_black_ash_model_pars(self):
+    def alex_black_ash_model_pars(self) -> BlackAshModelAlex:
         pars = getattr(self, '_alex_black_ash_model_pars', None)
         if pars is None:
             with self.locked():
@@ -404,45 +442,45 @@ class Ash(NoDbBase):
         return pars
     
     @property
-    def model(self):
+    def model(self) -> str:
         return self._model
 
     @model.setter
     @nodb_setter
-    def model(self, value):
+    def model(self, value: str) -> None:
         self._model = value
             
     @property
-    def reservoir_storage(self):
+    def reservoir_storage(self) -> float:
         if not getattr(self, '_reservoir_storage'):
             self.reservoir_storage = 1000000
         return self._reservoir_storage
 
     @reservoir_storage.setter
     @nodb_setter
-    def reservoir_storage(self, value):
+    def reservoir_storage(self, value: float) -> None:
         assert isfloat(value), value
         self._reservoir_storage = float(value)
 
     @property
-    def run_wind_transport(self):
+    def run_wind_transport(self) -> bool:
         return getattr(self, '_run_wind_transport', False)
 
     @run_wind_transport.setter
     @nodb_setter
-    def run_wind_transport(self, value):
+    def run_wind_transport(self, value: bool) -> None:
         self._run_wind_transport = bool(value)
 
     @property
-    def ash_load_d(self):
+    def ash_load_d(self) -> Optional[RasterSummary]:
         return getattr(self, '_ash_load_d', None)
 
     @property
-    def ash_bulk_density_d(self):
+    def ash_bulk_density_d(self) -> Optional[RasterSummary]:
         return getattr(self, '_ash_bulk_density_d', None)
 
     @property
-    def ash_load_fn(self):
+    def ash_load_fn(self) -> Optional[str]:
         fn = getattr(self, '_ash_load_fn', None) 
 
         if fn is None:
@@ -452,11 +490,11 @@ class Ash(NoDbBase):
         
     @ash_load_fn.setter
     @nodb_setter
-    def ash_load_fn(self, value):
+    def ash_load_fn(self, value: Optional[str]) -> None:
         self._ash_load_fn = value
 
     @property
-    def ash_type_map_fn(self):
+    def ash_type_map_fn(self) -> Optional[str]:
         fn = getattr(self, '_ash_type_map_fn', None) 
         if fn is None:
             return None
@@ -465,12 +503,12 @@ class Ash(NoDbBase):
 
     @ash_type_map_fn.setter
     @nodb_setter
-    def ash_type_map_fn(self, value):
+    def ash_type_map_fn(self, value: Optional[str]) -> None:
         self._ash_type_map_fn = value
 
     @property
     @deprecated
-    def ash_bulk_density_fn(self):
+    def ash_bulk_density_fn(self) -> Optional[str]:
         fn = getattr(self, '_ash_bulk_density_fn', None) 
         if fn is None:
             return None
@@ -480,11 +518,11 @@ class Ash(NoDbBase):
     @ash_bulk_density_fn.setter
     @deprecated
     @nodb_setter
-    def ash_bulk_density_fn(self, value):
+    def ash_bulk_density_fn(self, value: Optional[str]) -> None:
         self._ash_bulk_density_fn = value
 
     @property
-    def ash_spatial_mode(self):
+    def ash_spatial_mode(self) -> AshSpatialMode:
         if not getattr(self, '_ash_spatial_mode'):
             self.ash_spatial_mode = AshSpatialMode.Single
 
@@ -492,13 +530,13 @@ class Ash(NoDbBase):
 
     @ash_spatial_mode.setter
     @nodb_setter
-    def ash_spatial_mode(self, value):
+    def ash_spatial_mode(self, value: AshSpatialMode) -> None:
         if not isinstance(value, AshSpatialMode):
             raise TypeError(f"Expected AshSpatialMode, got {type(value)}")
         self._ash_spatial_mode = value
 
     @property
-    def ash_depth_mode(self):
+    def ash_depth_mode(self) -> int:
         if not getattr(self, '_ash_depth_mode'):
             self.ash_depth_mode = 1
 
@@ -506,46 +544,48 @@ class Ash(NoDbBase):
 
     @ash_depth_mode.setter
     @nodb_setter
-    def ash_depth_mode(self, value):
+    def ash_depth_mode(self, value: int) -> None:
         assert isfloat(value), value
         self._ash_depth_mode = int(value)
 
     @property
-    def reservoir_capacity_m3(self):
+    def reservoir_capacity_m3(self) -> float:
         if not getattr(self, '_reservoir_capacity_m3'):
             self.reservoir_capacity_m3 = 1000000
 
         return self._reservoir_capacity_m3
 
     @property
-    def reservoir_capacity_ft3(self):
+    def reservoir_capacity_ft3(self) -> float:
         return self.reservoir_capacity_m3 * 35.3147
 
     @reservoir_capacity_m3.setter
     @nodb_setter
-    def reservoir_capacity_m3(self, value):
+    def reservoir_capacity_m3(self, value: float) -> None:
         assert isfloat(value), value
         self._reservoir_capacity_m3 = float(value)
 
     @property
     @deprecated
-    def ash_bulk_density_cropped_fn(self):
+    def ash_bulk_density_cropped_fn(self) -> str:
         return _join(self.ash_dir, 'ash_bulk_density_cropped.tif')
 
     @property
-    def ash_load_cropped_fn(self):
+    def ash_load_cropped_fn(self) -> str:
         return _join(self.ash_dir, 'ash_load_cropped.tif')
 
     @property
-    def ash_type_map_cropped_fn(self):
+    def ash_type_map_cropped_fn(self) -> str:
         return _join(self.ash_dir, 'ash_type_map_cropped.tif')
 
-    def run_ash(self, 
-                fire_date='8/4', 
-                ini_white_ash_depth_mm=3.0, 
-                ini_black_ash_depth_mm=5.0,
-                slope=None):
-        run_wind_transport=self.run_wind_transport
+    def run_ash(
+        self,
+        fire_date: str = '8/4',
+        ini_white_ash_depth_mm: float = 3.0,
+        ini_black_ash_depth_mm: float = 5.0,
+        slope: Optional[float] = None
+    ) -> None:
+        run_wind_transport = self.run_wind_transport
 
         self.logger.info("=" * 100)
         with self.locked():
@@ -609,8 +649,8 @@ class Ash(NoDbBase):
 
 
             self.logger.info('  Running Hillslopes')
-            meta = {}
-            args = []
+            meta: AshMetadata = {}
+            args: List[Dict[str, Any]] = []
             for topaz_id in watershed._subs_summary:
                 self.logger.info(f'    Running Hillslope {topaz_id}')
 
@@ -777,7 +817,7 @@ class Ash(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def get_ash_type(self, topaz_id):
+    def get_ash_type(self, topaz_id: int | str) -> Optional[str]:
         if 'multi' not in self.model:
             raise DeprecationWarning
         else:
@@ -789,7 +829,7 @@ class Ash(NoDbBase):
         elif ash_type == AshType.WHITE:
             return 'white'
 
-    def get_ini_ash_depth(self, topaz_id):
+    def get_ini_ash_depth(self, topaz_id: int | str) -> Optional[float]:
         if 'multi' not in self.model:
             raise DeprecationWarning
         else:
@@ -821,48 +861,48 @@ class Ash(NoDbBase):
                 return load_d[str(topaz_id)] * 0.1 / white_bd
 
     @property
-    def available_models(self):
+    def available_models(self) -> List[Tuple[str, str]]:
         return [('multi', 'Srivastava2023'), ('alex', 'Watanabe2025')]
 
     @property
-    def black_ash_bulkdensity(self):
+    def black_ash_bulkdensity(self) -> float:
         return getattr(self, '_black_ash_bulkdensity', 
                        self.config_get_float('ash', 'black_ash_bulkdensity'))
 
     @property
-    def white_ash_bulkdensity(self):
+    def white_ash_bulkdensity(self) -> float:
         return getattr(self, '_white_ash_bulkdensity', 
                        self.config_get_float('ash', 'white_ash_bulkdensity'))
 
     @property
-    def field_black_ash_bulkdensity(self):
+    def field_black_ash_bulkdensity(self) -> float:
         return getattr(self, '_field_black_ash_bulkdensity', BLACK_ASH_BD)
 
     @property
-    def field_white_ash_bulkdensity(self):
+    def field_white_ash_bulkdensity(self) -> float:
         return getattr(self, '_field_white_ash_bulkdensity', WHITE_ASH_BD)
 
     @property
-    def ini_black_ash_load(self):
+    def ini_black_ash_load(self) -> float:
         return self.ini_black_ash_depth_mm * self.field_black_ash_bulkdensity
 
     @property
-    def ini_white_ash_load(self):
+    def ini_white_ash_load(self) -> float:
         return self.ini_white_ash_depth_mm * self.field_white_ash_bulkdensity
 
     @property
-    def has_watershed_summaries(self):
+    def has_watershed_summaries(self) -> bool:
         for ext in ('parquet', 'pkl'):
             if glob(_join(self.ash_dir, f'post/watershed_annuals.{ext}')):
                 return True
         return False
 
-    def hillslope_is_burned(self, topaz_id):
+    def hillslope_is_burned(self, topaz_id: int | str) -> bool:
         watershed = Watershed.getInstance(self.wd)
         burn_class = self.meta[str(topaz_id)]['burn_class']
         return burn_class in [2, 3, 4]
 
-    def contaminants_iter(self):
+    def contaminants_iter(self) -> Iterator[Tuple[str, Optional[float], Optional[float], Optional[float], str]] | None:
         # Use the keys from one of the dictionaries as the master list of contaminants.
         # Sorting ensures a consistent order.
         if not self.high_contaminant_concentrations:
@@ -886,7 +926,7 @@ class Ash(NoDbBase):
 
             yield contaminant, high, mod, low, units
 
-    def burn_class_summary(self):
+    def burn_class_summary(self) -> Dict[int, float]:
         assert self.meta is not None
 
         burn_class_sum = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}

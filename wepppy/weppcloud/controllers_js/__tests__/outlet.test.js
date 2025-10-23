@@ -5,8 +5,8 @@
 describe("Outlet controller", () => {
     let httpRequestMock;
     let httpGetJsonMock;
-    let wsClientInstance;
     let baseInstance;
+    let statusStreamMock;
     let mapInstance;
     let outlet;
     let markerFactory;
@@ -68,6 +68,8 @@ describe("Outlet controller", () => {
         resetDom();
         window.cellsize = 30;
 
+        const createControlBaseStub = require("./helpers/control_base_stub");
+
         await import("../dom.js");
         await import("../events.js");
 
@@ -86,14 +88,8 @@ describe("Outlet controller", () => {
             remove: jest.fn()
         });
 
-        wsClientInstance = {
-            connect: jest.fn(),
-            disconnect: jest.fn(),
-            attachControl: jest.fn()
-        };
-
         const triggerEventMock = jest.fn();
-        baseInstance = {
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
             set_rq_job_id: jest.fn(function (target, jobId) {
@@ -102,7 +98,7 @@ describe("Outlet controller", () => {
             triggerEvent: triggerEventMock,
             __triggerEventMock: triggerEventMock,
             command_btn_id: []
-        };
+        }));
 
         mapInstance = {
             ctrls: {
@@ -121,8 +117,7 @@ describe("Outlet controller", () => {
             getJson: httpGetJsonMock,
             isHttpError: jest.fn().mockReturnValue(false)
         };
-        global.controlBase = jest.fn(() => baseInstance);
-        global.WSClient = jest.fn(() => wsClientInstance);
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
         global.MapController = {
             getInstance: jest.fn(() => mapInstance)
         };
@@ -147,7 +142,6 @@ describe("Outlet controller", () => {
         delete window.Outlet;
         delete global.WCHttp;
         delete global.controlBase;
-        delete global.WSClient;
         delete global.MapController;
         delete global.url_for_run;
         delete global.L;
@@ -185,7 +179,7 @@ describe("Outlet controller", () => {
         await outlet.set_outlet({ latlng: window.L.latLng(46.1, -112.5) });
         await Promise.resolve();
 
-        expect(wsClientInstance.connect).toHaveBeenCalled();
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(httpRequestMock).toHaveBeenCalledWith(
             "rq/api/set_outlet",
             expect.objectContaining({
@@ -209,7 +203,7 @@ describe("Outlet controller", () => {
         outlet.show = jest.fn();
         outlet.triggerEvent("SET_OUTLET_TASK_COMPLETED", { message: "done" });
 
-        expect(wsClientInstance.disconnect).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.__triggerEventMock).toHaveBeenCalledWith(
             "job:completed",
             expect.objectContaining({ jobId: "job-123", task: "outlet:set" })
@@ -229,7 +223,10 @@ describe("Outlet controller", () => {
         const result = outlet.handleEntrySubmit();
 
         expect(result).toBe(false);
-        expect(document.getElementById("status").innerHTML).toContain("Invalid coordinates.");
+        expect(baseInstance.append_status_message).toHaveBeenCalledWith(
+            expect.any(Object),
+            expect.stringContaining("Invalid coordinates")
+        );
     });
 
     test("show refreshes outlet display and populates info", async () => {

@@ -326,11 +326,13 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
         if col == 'area (ha)':
             agg_d[col] = 'sum'
             continue
-        if 'm^3' in col or 'tonne':
+        # Sum volumetric/mass columns; depths and densities will be dropped and recalculated
+        if 'm^3' in col or 'tonne' in col:
             agg_d[col] = 'sum'
         if col in common_cols:
             agg_d[col] = 'first'
 
+        # Drop per-area columns; they will be recalculated from totals after aggregation
         if 'mm' in col or 'tonne/ha' in col or col.startswith('cum_'):
             ws_cols_to_drop.append(col)
 

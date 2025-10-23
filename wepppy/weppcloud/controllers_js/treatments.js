@@ -180,10 +180,12 @@ var Treatments = (function () {
         treatments.statusPanelEl = statusPanelEl || null;
         treatments.stacktracePanelEl = stacktracePanelEl || null;
         treatments.statusStream = null;
-        treatments.ws_client = null;
         treatments.command_btn_id = "btn_build_treatments";
         treatments.hint = hintAdapter;
         treatments.rq_job = rqJobAdapter;
+
+        var spinnerElement = statusPanelEl ? statusPanelEl.querySelector("#braille") : null;
+        treatments.statusSpinnerEl = spinnerElement;
 
         function snapshotForm() {
             try {
@@ -231,8 +233,7 @@ var Treatments = (function () {
             }
             if (treatments.statusStream && typeof treatments.statusStream.append === "function") {
                 treatments.statusStream.append(message, meta || null);
-            }
-            if (statusAdapter && typeof statusAdapter.html === "function") {
+            } else if (statusAdapter && typeof statusAdapter.html === "function") {
                 statusAdapter.html(message);
             } else if (statusElement) {
                 statusElement.innerHTML = message;
@@ -383,9 +384,7 @@ var Treatments = (function () {
                 });
             }
 
-            if (treatments.ws_client && typeof treatments.ws_client.connect === "function") {
-                treatments.ws_client.connect();
-            }
+            treatments.connect_status_stream(treatments);
 
             var formData = new FormData(formElement);
 
@@ -486,6 +485,7 @@ var Treatments = (function () {
                     }
                     if (normalized.indexOf("COMPLETED") >= 0 || normalized.indexOf("FINISHED") >= 0 || normalized.indexOf("SUCCESS") >= 0) {
                         treatmentsEvents.emit("treatments:job:completed", detail || {});
+                        treatments.disconnect_status_stream(treatments);
                     }
                     if (normalized.indexOf("FAILED") >= 0 || normalized.indexOf("ERROR") >= 0) {
                         treatmentsEvents.emit("treatments:job:failed", detail || {});
@@ -496,27 +496,20 @@ var Treatments = (function () {
         };
 
         function setupStatusStream() {
-            if (typeof window.StatusStream !== "undefined" && treatments.statusPanelEl) {
-                var stacktraceConfig = null;
-                if (treatments.stacktracePanelEl) {
-                    stacktraceConfig = { element: treatments.stacktracePanelEl };
-                }
-                treatments.statusStream = window.StatusStream.attach({
-                    element: treatments.statusPanelEl,
-                    channel: "treatments",
-                    runId: window.runid || window.runId || null,
-                    logLimit: 200,
-                    stacktrace: stacktraceConfig,
-                    onTrigger: function (detail) {
-                        if (detail && detail.event) {
-                            treatments.triggerEvent(detail.event, detail);
-                        }
-                    }
-                });
-            } else {
-                treatments.ws_client = new WSClient("treatments_form", "treatments");
-                treatments.ws_client.attachControl(treatments);
+            treatments.detach_status_stream(treatments);
+            var spinnerEl = treatments.statusSpinnerEl;
+            if (!spinnerEl && treatments.statusPanelEl) {
+                spinnerEl = treatments.statusPanelEl.querySelector("#braille");
+                treatments.statusSpinnerEl = spinnerEl;
             }
+            treatments.attach_status_stream(treatments, {
+                element: treatments.statusPanelEl,
+                form: formElement,
+                channel: "treatments",
+                stacktrace: treatments.stacktracePanelEl ? { element: treatments.stacktracePanelEl } : null,
+                spinner: spinnerEl,
+                logLimit: 200
+            });
         }
 
         setupStatusStream();
@@ -585,12 +578,7 @@ var Treatments = (function () {
                 });
                 delegates = [];
             }
-            if (treatments.ws_client && typeof treatments.ws_client.disconnect === "function") {
-                treatments.ws_client.disconnect();
-            }
-            if (treatments.statusStream && typeof window.StatusStream !== "undefined" && typeof window.StatusStream.disconnect === "function") {
-                window.StatusStream.disconnect(treatments.statusStream);
-            }
+            treatments.detach_status_stream(treatments);
         };
 
         return treatments;

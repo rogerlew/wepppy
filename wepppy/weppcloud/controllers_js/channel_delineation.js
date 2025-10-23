@@ -161,6 +161,7 @@ var ChannelDelineation = (function () {
         var stacktraceElement = dom.qs("#build_channels_form #stacktrace");
         var rqJobElement = dom.qs("#build_channels_form #rq_job");
         var hintElement = dom.qs("#hint_build_channels_en");
+        var spinnerElement = dom.qs("#build_channels_form #braille");
         var manualExtentGroup = dom.qs("#map_bounds_text_group");
         var manualExtentInput = dom.qs("#map_bounds_text");
         var mapBoundsInput = dom.qs("#map_bounds");
@@ -185,6 +186,13 @@ var ChannelDelineation = (function () {
         channel.rq_job = rqJobAdapter;
         channel.hint = hintAdapter;
         channel.command_btn_id = "btn_build_channels_en";
+        channel.statusSpinnerEl = spinnerElement;
+        channel.attach_status_stream(channel, {
+            form: formElement,
+            channel: "channel_delineation",
+            runId: window.runid || window.runId || null,
+            spinner: spinnerElement
+        });
 
         channel.zoom_min = 12;
         channel.data = null;
@@ -226,9 +234,6 @@ var ChannelDelineation = (function () {
         };
 
         channel.labelStyle = "color:blue; text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
-
-        channel.ws_client = new WSClient("build_channels_form", "channel_delineation");
-        channel.ws_client.attachControl(channel);
 
         function emit(eventName, payload) {
             if (channelEvents && typeof channelEvents.emit === "function") {
@@ -409,9 +414,7 @@ var ChannelDelineation = (function () {
         channel.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "BUILD_CHANNELS_TASK_COMPLETED") {
-                if (channel.ws_client && typeof channel.ws_client.disconnect === "function") {
-                    channel.ws_client.disconnect();
-                }
+                channel.disconnect_status_stream(channel);
                 channel.show();
                 channel.report();
                 emit("channel:build:completed", payload || {});
@@ -488,9 +491,7 @@ var ChannelDelineation = (function () {
                 console.warn("Failed to remove outlet before channel build", err);
             }
 
-            if (channel.ws_client && typeof channel.ws_client.connect === "function") {
-                channel.ws_client.connect();
-            }
+            channel.connect_status_stream(channel);
 
             var payload;
             try {

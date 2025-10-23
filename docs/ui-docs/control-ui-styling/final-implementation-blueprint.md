@@ -64,7 +64,7 @@ This blueprint fuses the prior controller UI strategy drafts into a single imple
   - Every async action returns the uniform JSON schema (`status`, `info`, `summary_html`, `stacktrace`, optional `htmx`) so `control_base.js` can update the DOM without controller-specific logic.
   - Maintain a single validation surface: the NoDb method performs schema enforcement (potentially via dataclasses) and returns serialized errors for the UI. Metadata routes reuse the same descriptors that power macros to keep template data consistent.
 - **WebSocket alignment**
-  - Keep ControlBase's `WSClient` integration, but expose config via data attributes (channel name, run id). Controllers with live streams simply opt in by adding `data-ws-channel` to their form.
+  - Standardize on `controlBase.attach_status_stream` with `data-ws-channel` (or explicit options) so controllers opt in without manual wiring. The helper fabricates hidden status/stacktrace panels when Pure markup is absent; the legacy `ws_client.js` bridge has been removed.
 
 ## Target Architecture
 - **Templating + metadata contract**
