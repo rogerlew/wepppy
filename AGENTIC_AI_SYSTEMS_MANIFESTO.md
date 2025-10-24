@@ -581,6 +581,7 @@ Before comprehensive agent documentation:
 - Agent-executable tooling (wctl, validation commands)
 - Self-checking capability (tests provide validation)
 - Continuously improve agent developer ergonomics
+- Agents have ownership over documentation
 - **No human in the loop for mechanical work**
 
 **4. Orchestration at scale**
