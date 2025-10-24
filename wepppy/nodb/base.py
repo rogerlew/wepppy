@@ -75,6 +75,8 @@ Warning:
     Always call dump_and_unlock() before context exit
 """
 
+from __future__ import annotations
+
 import functools
 import importlib
 import inspect
@@ -130,13 +132,13 @@ from enum import Enum, IntEnum
 from glob import glob
 from contextlib import contextmanager
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import Any, Callable, ClassVar, Concatenate, Generator, Iterator, Optional, ParamSpec, TypeVar, cast
 from weakref import WeakKeyDictionary
 from collections import defaultdict
 
 import json
 
-# non-standard
+# nonstandard
 import jsonpickle
 
 from configparser import (
@@ -170,12 +172,12 @@ from wepppy.config.redis_settings import (
 from .version import CURRENT_VERSION, ensure_version, write_version
 
 
-def _discover_legacy_module_redirects():
+def _discover_legacy_module_redirects() -> dict[str, str]:
     """Build lookup of legacy module stems to their relocated modules."""
     base_dir = Path(__file__).resolve().parent
-    redirects = {}
+    redirects: dict[str, str] = {}
 
-    def register(stem, module_path):
+    def register(stem: str, module_path: str) -> None:
         if stem in ('', '__init__'):
             return
         redirects.setdefault(stem, module_path)
@@ -213,7 +215,9 @@ REDIS_NODB_EXPIRY = 72 * 3600  # 72 hours
 REDIS_LOG_LEVEL_DB = int(RedisDB.LOG_LEVEL)
 
 
-def _default_lock_ttl():
+def _default_lock_ttl() -> int:
+    """Return the configured lock TTL in seconds, falling back to six hours."""
+
     try:
         return int(os.getenv('WEPPPY_LOCK_TTL_SECONDS', 6 * 3600))
     except (TypeError, ValueError):
@@ -222,23 +226,31 @@ def _default_lock_ttl():
 
 LOCK_KEY_PREFIX = 'nodb-lock'
 LOCK_DEFAULT_TTL = max(1, _default_lock_ttl())
-_ACTIVE_LOCK_TOKENS: WeakKeyDictionary = WeakKeyDictionary()
+_ACTIVE_LOCK_TOKENS: WeakKeyDictionary['NoDbBase', str] = WeakKeyDictionary()
 
 
 def _normalize_lock_relpath(relpath: str) -> str:
+    """Normalize lock-relative paths to forward-slash separators."""
+
     return relpath.replace('\\', '/')
 
 
 def _lock_key_for(runid: str, relpath: str) -> str:
+    """Return the Redis key for a distributed lock."""
+
     norm_rel = _normalize_lock_relpath(relpath)
     return f'{LOCK_KEY_PREFIX}:{runid}:{norm_rel}'
 
 
 def _lock_owner_id() -> str:
+    """Return a string identifier for the current process (host:pid)."""
+
     return f'{socket.gethostname()}:{os.getpid()}'
 
 
 def _serialize_lock_payload(token: str, ttl: int) -> str:
+    """Serialize lock metadata so it can be stored alongside the token."""
+
     now = int(time())
     payload = {
         'token': token,
@@ -250,7 +262,9 @@ def _serialize_lock_payload(token: str, ttl: int) -> str:
     return json.dumps(payload, separators=(',', ':'))
 
 
-def _parse_lock_payload(raw: str) -> dict:
+def _parse_lock_payload(raw: str) -> dict[str, Any]:
+    """Deserialize a payload stored for a distributed lock."""
+
     if not raw:
         return {}
     try:
@@ -264,6 +278,8 @@ def _parse_lock_payload(raw: str) -> dict:
 
 
 def _extract_token(raw: Optional[str]) -> Optional[str]:
+    """Extract the lock token from a serialized payload string."""
+
     if raw is None:
         return None
     data = _parse_lock_payload(raw)
@@ -273,18 +289,24 @@ def _extract_token(raw: Optional[str]) -> Optional[str]:
     return token
 
 
-def _set_local_lock_token(instance, token: Optional[str]):
+def _set_local_lock_token(instance: 'NoDbBase', token: Optional[str]) -> None:
+    """Remember a distributed lock token on the instance for re-entrancy."""
+
     if token is None:
         _ACTIVE_LOCK_TOKENS.pop(instance, None)
     else:
         _ACTIVE_LOCK_TOKENS[instance] = token
 
 
-def _get_local_lock_token(instance) -> Optional[str]:
+def _get_local_lock_token(instance: 'NoDbBase') -> Optional[str]:
+    """Return the cached lock token for ``instance`` if one exists."""
+
     return _ACTIVE_LOCK_TOKENS.get(instance)
 
 
 def _matches_scope(relpath: str, scope: Optional[str]) -> bool:
+    """Return ``True`` if ``relpath`` is equal to or nested within ``scope``."""
+
     if scope is None:
         return True
     rel_norm = _normalize_lock_relpath(relpath)
@@ -293,6 +315,8 @@ def _matches_scope(relpath: str, scope: Optional[str]) -> bool:
 
 
 def _relpath_from_lock_key(runid: str, lock_key: str) -> str:
+    """Convert a distributed lock key back into a relative filesystem path."""
+
     prefix = f'{LOCK_KEY_PREFIX}:{runid}:'
     if lock_key.startswith(prefix):
         rel = lock_key[len(prefix):]
@@ -353,6 +377,8 @@ except Exception as e:
     redis_log_level_client = None
 
 class LogLevel(IntEnum):
+    """Enumerate supported logging levels mirrored into Redis."""
+
     DEBUG = logging.DEBUG
     INFO = logging.INFO
     WARNING = logging.WARNING
@@ -360,7 +386,7 @@ class LogLevel(IntEnum):
     CRITICAL = logging.CRITICAL
 
     @staticmethod
-    def parse(x: str):
+    def parse(x: str) -> 'LogLevel':
         x = x.lower()
         if x == 'debug':
             return LogLevel.DEBUG
@@ -373,12 +399,14 @@ class LogLevel(IntEnum):
         elif x == 'critical':
             return LogLevel.CRITICAL
         return LogLevel.INFO
-    
-    def __str__(self):
+
+    def __str__(self) -> str:
         return super().__str__().replace('LogLevel.', '').lower()
 
 
-def try_redis_get_log_level(runid, default=logging.INFO):
+def try_redis_get_log_level(runid: str, default: int | LogLevel = logging.INFO) -> int:
+    """Best-effort lookup of the log level configured for ``runid``."""
+
     if redis_log_level_client is None:
         return default
     try:
@@ -393,25 +421,32 @@ def try_redis_get_log_level(runid, default=logging.INFO):
     except Exception as e:
         logging.error(f'Error getting log level from Redis: {e}')
         return default
-    
 
-def try_redis_set_log_level(runid, level: str):
+
+def try_redis_set_log_level(runid: str, level: str | LogLevel) -> None:
+    """Persist the desired log level for ``runid`` into Redis."""
+
     if redis_log_level_client is None:
         return
 
+    parsed = LogLevel.INFO
     try:
-        level = LogLevel.parse(level)
-        redis_log_level_client.set(f'loglevel:{runid}', str(int(level)))
+        parsed = LogLevel.parse(str(level))
+        redis_log_level_client.set(f'loglevel:{runid}', str(int(parsed)))
     except Exception as e:
         logging.error(f'Error setting log level in Redis: {e}')
 
     try:
-        logging.getLogger(f'wepppy.run.{runid}').setLevel(int(level))
+        logging.getLogger(f'wepppy.run.{runid}').setLevel(int(parsed))
     except Exception as e:
         logging.error(f'Error setting log level for logger: {e}')
 
 
-def createProcessPoolExecutor(max_workers, logger=None, prefer_spawn=True):
+def createProcessPoolExecutor(
+    max_workers: int,
+    logger: Optional[logging.Logger] = None,
+    prefer_spawn: bool = True,
+) -> ProcessPoolExecutor:
     """Create a `ProcessPoolExecutor`, preferring the spawn context when requested.
 
     Falls back to the default context when spawn is unavailable, restricted,
@@ -456,71 +491,69 @@ _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
 _default_config = _join(_config_dir, '_defaults.toml')
 
-def get_config_dir():
+
+def get_config_dir() -> str:
+    """Return the on-disk directory that houses default NoDb configs."""
+
     return _config_dir
 
-class CaseSensitiveRawConfigParser(RawConfigParser):
-    def optionxform(self, s): return s
 
-def get_configs():
+class CaseSensitiveRawConfigParser(RawConfigParser):
+    """Config parser variant that preserves key casing."""
+
+    def optionxform(self, optionstr: str) -> str:  # type: ignore[override]
+        return optionstr
+
+
+def get_configs() -> list[str]:
+    """List available controller configuration basenames (``*.cfg`` files)."""
+
     return [Path(fn).stem for fn in glob(_join(_config_dir, '*.cfg'))]
 
-def get_legacy_configs():
+
+def get_legacy_configs() -> list[str]:
+    """List available legacy configuration basenames (``legacy/*.toml`` files)."""
+
     return [Path(fn).stem for fn in glob(_join(_config_dir, 'legacy', '*.toml'))]
 
-def nodb_setter(setter_func):
-    """
-    A decorator that logs the setter call and wraps the operation
-    in a 'locked' context.
-    """
-    @functools.wraps(setter_func)
-    def wrapper(self, value):
-        # setter_func.__name__ will correctly be 'input_years'
-        # thanks to @functools.wraps
-        func_name = setter_func.__name__
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-        
-        with self.locked():
-            # Call the original setter function to perform the assignment
-            return setter_func(self, value)
-            
-    return wrapper
 
-def nodb_setter(setter_func):
-    """
-    A decorator that logs the setter call and wraps the operation
-    in a 'locked' context.
-    """
-    @functools.wraps(setter_func)
-    def wrapper(self, value):
-        # setter_func.__name__ will correctly be 'input_years'
-        # thanks to @functools.wraps
-        func_name = setter_func.__name__
-        self.logger.info(f'{self.class_name}.{func_name} -> {value}')
-        
-        with self.locked():
-            # Call the original setter function to perform the assignment
-            return setter_func(self, value)
-            
-    return wrapper
+P = ParamSpec('P')
+R = TypeVar('R')
 
-def nodb_timed(method_func):
-    """
-    A decorator that wraps a method call in the instance's `timed` 
-    context manager, using the method's name as the task name.
-    """
+
+def nodb_setter(
+    setter_func: Callable[Concatenate['NoDbBase', P], R]
+) -> Callable[Concatenate['NoDbBase', P], R]:
+    """Ensure setters log the change and run inside a lock."""
+
+    @functools.wraps(setter_func)
+    def wrapper(self: 'NoDbBase', *args: P.args, **kwargs: P.kwargs) -> R:
+        func_name = setter_func.__name__
+        self.logger.info('%s.%s -> %s', self.class_name, func_name, args[0] if args else kwargs)
+
+        with self.locked():
+            return setter_func(self, *args, **kwargs)
+
+    return cast(Callable[Concatenate['NoDbBase', P], R], wrapper)
+
+
+def nodb_timed(
+    method_func: Callable[Concatenate['NoDbBase', P], R]
+) -> Callable[Concatenate['NoDbBase', P], R]:
+    """Time a NoDb method using the instance ``timed`` context manager."""
+
     @functools.wraps(method_func)
-    def wrapper(self, *args, **kwargs):
-        # method_func.__name__ correctly gets the decorated function's name
+    def wrapper(self: 'NoDbBase', *args: P.args, **kwargs: P.kwargs) -> R:
         func_name = method_func.__name__
-        
+
         with self.timed(func_name):
-            # Call the original method and return its result
             return method_func(self, *args, **kwargs)
-            
-    return wrapper
+
+    return cast(Callable[Concatenate['NoDbBase', P], R], wrapper)
 
 class TriggerEvents(Enum):
+    """Event hooks emitted by NoDb controllers during lifecycle milestones."""
+
     ON_INIT_FINISH = 1
     LANDUSE_DOMLC_COMPLETE = 2
     LANDUSE_BUILD_COMPLETE = 5
@@ -533,13 +566,21 @@ class TriggerEvents(Enum):
 
 
 class NoDbBase(object):
-    DEBUG = 0
-    _js_decode_replacements = ()
+    """Common runtime for NoDb controllers providing locking and persistence."""
 
-    filename: ClassVar[str] = None # just the basename
+    DEBUG = 0
+    _js_decode_replacements: ClassVar[tuple[tuple[str, str], ...]] = ()
+
+    filename: ClassVar[Optional[str]] = None  # just the basename
     _legacy_module_redirects: ClassVar[dict[str, str]] = _LEGACY_MODULE_REDIRECTS
 
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+    def __init__(
+        self,
+        wd: str,
+        cfg_fn: str,
+        run_group: Optional[str] = None,
+        group_name: Optional[str] = None,
+    ) -> None:
         wd = os.path.abspath(wd)
         assert _exists(wd)
 
@@ -570,50 +611,43 @@ class NoDbBase(object):
         self._init_logging()
 
     @property
-    def _nodb(self):
-        """
-        Absolute path to the .nodb file from the runid working directory.
-        """
+    def _nodb(self) -> str:
+        """Absolute path to the ``.nodb`` file from the run working directory."""
         return _join(self.wd, self.filename)
     
     @property
-    def _rel_nodb(self):
-        """
-        Relative path to the .nodb file from the runid working directory.
-
-        e.g. 'wepp.nodb', 'ron.nodb', 'landuse.nodb', etc.
-        or for pup (child) runs: '_pups/omni/scenarios/undisturbed/wepp.nodb'
-        """
+    def _rel_nodb(self) -> str:
+        """Relative path to the ``.nodb`` file from the run working directory."""
         _rel_path = self.pup_relpath
         if _rel_path is None:
             return self.filename
         return _join(_rel_path, self.filename)
 
     @property
-    def _file_lock_key(self):
+    def _file_lock_key(self) -> str:
         return f'locked:{self._rel_nodb}'
     
     @property
-    def _distributed_lock_key(self):
+    def _distributed_lock_key(self) -> str:
         return _lock_key_for(self.runid, self._rel_nodb)
             
     @property
-    def parent_wd(self):
+    def parent_wd(self) -> Optional[str]:
         return getattr(self, '_parent_wd', None)
     
     @parent_wd.setter
-    def parent_wd(self, value: str):
+    def parent_wd(self, value: str) -> None:
         self._parent_wd = value
 
     @property
-    def is_child_run(self):
+    def is_child_run(self) -> bool:
         if self.parent_wd is None:
             return False
         
         return self.pup_relpath.startswith('_pups/')
 
     @property
-    def pup_relpath(self):  # relative path to the parent or None
+    def pup_relpath(self) -> Optional[str]:  # relative path to the parent or None
         if self.parent_wd is None:
             return None
         
@@ -648,7 +682,7 @@ class NoDbBase(object):
     
         
     @property
-    def _logger_base_name(self):
+    def _logger_base_name(self) -> str:
         _rel_path = self.pup_relpath
         if _rel_path is None:
             return f'wepppy.run.{self.runid}'
@@ -656,14 +690,12 @@ class NoDbBase(object):
         return f'wepppy.run.{self.runid}' + '.' + ','.join(_rel_path)
     
     @property
-    def class_name(self):
+    def class_name(self) -> str:
         return type(self).filename.removesuffix(".nodb")
 
     @property
-    def _status_channel(self):
-        """
-        Redis channel name for status messages.
-        """
+    def _status_channel(self) -> str:
+        """Redis channel name for status messages."""
         # this is a router
         _rel_path = self.pup_relpath
         if _rel_path is None:    
@@ -757,7 +789,9 @@ class NoDbBase(object):
             self._exception_file_handler = self.logger._exception_file_handler
             self._console_handler = self.logger._console_handler
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
+        """Remove non-serializable logger attributes before pickling."""
+
         state = self.__dict__.copy()
         for attr in (
             'runid_logger',
@@ -774,7 +808,7 @@ class NoDbBase(object):
         return state
 
     @contextmanager
-    def timed(self, task_name: str, level=logging.INFO):
+    def timed(self, task_name: str, level: int = logging.INFO) -> Generator[None, None, None]:
         """Context manager to log the start, end, and duration of a task."""
         from time import perf_counter
 
@@ -788,7 +822,13 @@ class NoDbBase(object):
             self.logger.log(level, f"{task_name}... done. ({duration:.2f}s)")
 
     @classmethod
-    def getInstance(cls, wd='.', allow_nonexistent=False, ignore_lock=False):
+    def getInstance(
+        cls,
+        wd: str = '.',
+        allow_nonexistent: bool = False,
+        ignore_lock: bool = False,
+    ) -> 'NoDbBase':
+        """Return the singleton controller for ``wd``, hydrating from disk or cache."""
         global redis_nodb_cache_client, REDIS_NODB_EXPIRY
 
         wd = os.path.abspath(wd)
@@ -882,14 +922,24 @@ class NoDbBase(object):
         return db
     
     @classmethod
-    def tryGetInstance(cls, wd='.', allow_nonexistent=True, ignore_lock=False):
+    def tryGetInstance(
+        cls,
+        wd: str = '.',
+        allow_nonexistent: bool = True,
+        ignore_lock: bool = False,
+    ) -> Optional['NoDbBase']:
         try:
             return cls.getInstance(wd, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
         except FileNotFoundError:
             return None
 
     @classmethod
-    def getInstanceFromRunID(cls, runid, allow_nonexistent=False, ignore_lock=False):
+    def getInstanceFromRunID(
+        cls,
+        runid: str,
+        allow_nonexistent: bool = False,
+        ignore_lock: bool = False,
+    ) -> 'NoDbBase':
         from wepppy.weppcloud.utils.helpers import get_wd
 
         return cls.getInstance(
@@ -897,7 +947,7 @@ class NoDbBase(object):
         )
 
     @contextmanager
-    def locked(self, validate_on_success=True):
+    def locked(self, validate_on_success: bool = True) -> Generator[None, None, None]:
         """
         A context manager to handle the lock -> modify -> dump/unlock pattern.
 
@@ -920,7 +970,9 @@ class NoDbBase(object):
             raise
         self.dump_and_unlock()
 
-    def dump_and_unlock(self, validate=True):
+    def dump_and_unlock(self, validate: bool = True) -> None:
+        """Persist the controller and release its lock."""
+
         self.dump()
         self.unlock()
 
@@ -933,11 +985,11 @@ class NoDbBase(object):
         self = type(self)._post_dump_and_unlock(self)
                 
     @classmethod
-    def _post_dump_and_unlock(cls, instance):
+    def _post_dump_and_unlock(cls, instance: 'NoDbBase') -> 'NoDbBase':
         # hook for subclasses needing to mutate the decoded instance
         return instance
 
-    def dump(self):
+    def dump(self) -> None:
         global redis_nodb_cache_client, REDIS_NODB_EXPIRY
 
         if not self.islocked():
@@ -966,23 +1018,25 @@ class NoDbBase(object):
             pass
 
     @classmethod
-    def _get_nodb_path(cls, wd):
+    def _get_nodb_path(cls, wd: str) -> str:
         if cls.filename is None:
             raise AttributeError(f"{cls.__name__} must define a class attribute 'filename'")
         return _join(wd, cls.filename)
 
     @classmethod
-    def _preprocess_json_for_decode(cls, json_text):
-        for old, new in getattr(cls, '_js_decode_replacements', ()):
+    def _preprocess_json_for_decode(cls, json_text: str) -> str:
+        for old, new in getattr(cls, '_js_decode_replacements', ()):  # type: ignore[attr-defined]
             json_text = json_text.replace(old, new)
         return json_text
 
     @classmethod
-    def _decode_jsonpickle(cls, json_text):
+    def _decode_jsonpickle(cls, json_text: str) -> Any:
         return jsonpickle.decode(json_text)
 
     @classmethod
-    def _ensure_legacy_module_imports(cls, json_text: str):
+    def _ensure_legacy_module_imports(cls, json_text: str) -> None:
+        """Ensure jsonpickle can resolve legacy module paths during decode."""
+
         if 'wepppy.nodb.' not in json_text:
             return
 
@@ -1641,9 +1695,9 @@ class NoDbBase(object):
         return self.config_get_str('wmesque', 'endpoint', None)
 
 
-def _iter_nodb_subclasses():
-    seen = set()
-    stack = [NoDbBase]
+def _iter_nodb_subclasses() -> Iterator[type['NoDbBase']]:
+    seen: set[type['NoDbBase']] = set()
+    stack: list[type['NoDbBase']] = [NoDbBase]
     while stack:
         cls = stack.pop()
         for subcls in cls.__subclasses__():
@@ -1652,9 +1706,11 @@ def _iter_nodb_subclasses():
                 stack.append(subcls)
                 yield subcls
 
-def iter_nodb_mods_subclasses():
-    seen = set()
-    stack = [NoDbBase]
+def iter_nodb_mods_subclasses() -> Iterator[tuple[str, type['NoDbBase']]]:
+    """Yield ``(mod_name, subclass)`` pairs for all NoDb mod controllers."""
+
+    seen: set[type['NoDbBase']] = set()
+    stack: list[type['NoDbBase']] = [NoDbBase]
     while stack:
         cls = stack.pop()
         for subcls in cls.__subclasses__():
@@ -1666,13 +1722,9 @@ def iter_nodb_mods_subclasses():
                     yield subcls.filename.removesuffix('.nodb'), subcls
 
 
-def clear_locks(runid, pup_relpath=None):
-    """
-    Clear locks for the given runid.
-    If ``pup_relpath`` is provided, only locks whose relative paths fall under that
-    subtree are cleared.
-    Low-level function that interacts directly with Redis.
-    """
+def clear_locks(runid: str, pup_relpath: Optional[str] = None) -> list[str]:
+    """Clear Redis-backed locks for ``runid`` (optionally scoped to ``pup_relpath``)."""
+
     if redis_lock_client is None:
         raise RuntimeError('Redis lock client is unavailable')
 
@@ -1719,7 +1771,7 @@ def clear_locks(runid, pup_relpath=None):
     return cleared
 
 
-def lock_statuses(runid) -> defaultdict[str, bool]:
+def lock_statuses(runid: str) -> defaultdict[str, bool]:
     """
     Return the lock status for each known `.nodb` file under the run.
     Distributed locks (SETNX keys) are considered the source of truth; legacy
@@ -1772,7 +1824,7 @@ def lock_statuses(runid) -> defaultdict[str, bool]:
     return statuses
 
 
-def clear_nodb_file_cache(runid, pup_relpath=None) -> list[Path]:
+def clear_nodb_file_cache(runid: str, pup_relpath: Optional[str] = None) -> list[Path]:
     """Clear Redis cache entries for `.nodb` files under a run (optionally scoped)."""
     if redis_nodb_cache_client is None:
         raise RuntimeError('Redis NoDb cache client is unavailable')
