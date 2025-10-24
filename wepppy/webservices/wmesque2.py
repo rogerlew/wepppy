@@ -6,18 +6,44 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-"""
-WMSesque is a high-performance FastAPI web service providing an endpoint for
-on-the-fly acquisition and processing of tiled raster datasets.
+"""FastAPI façade for on-demand raster tiling and reprojection.
 
-The service reprojects (warps) source data to a UTM projection derived from a
-request's bounding box (`bbox`) and scales it to a specified `cellsize`. It
-returns the processed raster in various formats (e.g., GeoTiff, PNG) and
-includes detailed processing metadata in a custom response header.
+`wmesque2` modernizes the legacy WMS-esque Flask service by exposing an
+async FastAPI application that can reproject, clip, and optionally post-process
+GDAL datasets on the fly. Requests specify:
 
-The service expects source data to be structured as GDAL Virtual Datasets (VRTs)
-within a local directory, typically following a path like:
-`{geodata_dir}/{dataset}/{...}/.vrt`
+* ``dataset`` – path fragment pointing at a GDAL VRT under ``GEODATA_DIR``
+* ``bbox`` – comma-delimited ``left,bottom,right,top`` coordinates in WGS84
+* ``cellsize`` – desired output resolution in meters (defaults to ``30``)
+* optional quality knobs such as ``resample``, ``gdaldem`` mode, and
+  ``format`` (GeoTIFF, PNG, ASCII grid, or ENVI)
+
+The service determines an appropriate UTM projection from the bounding box,
+warps the chosen dataset with ``gdalwarp``, and returns the resulting raster as
+an attachment. Metadata describing the operation (input dataset, transformed
+bounding box, command invocations, and timestamps) is compressed into the
+``WMesque-Meta`` response header so clients can log or reproduce requests
+without parsing stdout.
+
+Deployment Expectations
+-----------------------
+
+* ``GEODATA_DIR`` (default ``/geodata``) must contain the tiled rasters as GDAL
+  VRTs organized by dataset/year or similar hierarchy.
+* ``CATALOG_PATH`` can point to a text file containing newline-separated VRT
+  entries; the ``/catalog`` endpoint filters this list against
+  ``GEODATA_DIR``.
+* GDAL command line utilities (``gdalwarp``, ``gdalinfo``, ``gdal_translate``,
+  ``gdaldem``) must be on ``PATH``.
+* Temporary products are written to ``/dev/shm`` by default and removed via
+  FastAPI background tasks once responses complete.
+
+Example request::
+
+    GET /retrieve/fire/severity/2020?bbox=-117,47,-116.9,47.1&cellsize=30
+
+The response body contains the raster, while ``WMesque-Meta`` holds JSON
+metadata (base64-url encoded) describing the processing pipeline.
 """
 
 import subprocess
@@ -26,7 +52,7 @@ import logging
 import sys
 from uuid import uuid4
 from datetime import datetime
-from typing import List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any
 import asyncio
 
 
@@ -94,6 +120,8 @@ gdaldem_modes = tuple("hillshade slope aspect tri tpi roughness".split())
 
 
 def determine_band_type(vrt: str) -> Optional[str]:
+    """Return the GDAL data type name for the first band of ``vrt``."""
+
     ds = gdal.Open(vrt)
     if ds is None:
         return None
@@ -101,18 +129,22 @@ def determine_band_type(vrt: str) -> Optional[str]:
     return gdal.GetDataTypeName(band.DataType)
 
 def load_maps(geodata: str) -> List[str]:
+    """Load the dataset catalog and filter entries rooted under ``geodata``."""
+
     with open(_catalog) as f:
         maps = f.readlines()
     return [fn.strip() for fn in maps if fn.strip().startswith(geodata)]
 
-def raster_stats(src: str) -> dict:
+def raster_stats(src: str) -> Dict[str, float]:
+    """Calculate basic statistics for ``src`` by invoking ``gdalinfo -stats``."""
+
     cmd = ["gdalinfo", src, "-stats"]
     subprocess.run(cmd, capture_output=True, check=True)
     stat_fn = src + ".aux.xml"
     if not os.path.exists(stat_fn):
         raise FileNotFoundError(f"Statistics file not created: {stat_fn}")
 
-    d = {}
+    d: Dict[str, float] = {}
     tree = ET.parse(stat_fn)
     root = tree.getroot()
     for stat in root.iter("MDI"):
@@ -121,7 +153,9 @@ def raster_stats(src: str) -> dict:
         d[key] = value
     return d
 
-def format_convert(src: str, _format: str) -> Tuple[str, str]:
+def format_convert(src: str, _format: str) -> str:
+    """Convert ``src`` GeoTIFF to ``_format`` using ``gdal_translate``."""
+
     dst = src[:-4] + ext_d[_format]
     if _format == "ENVI":
         stats = raster_stats(src)
@@ -149,9 +183,12 @@ def process_raster(
     _format: str,
     gdaldem: Optional[str],
 ) -> Tuple[str, dict, List[str]]:
-    """
-    This is the main synchronous, blocking function that runs all the GDAL subprocesses.
-    It is designed to be run in a separate thread via asyncio.to_thread.
+    """Warp, optionally process, and format a dataset for a given ``bbox``.
+
+    Returns the final raster path, aggregated metadata payload, and a list of
+    temporary files that should be cleaned up after the response is sent.
+    Designed to run inside ``asyncio.to_thread`` so the FastAPI handler remains
+    responsive.
     """
     # 1. Path validation and setup
     parts = dataset.split("/")
@@ -251,6 +288,8 @@ app = FastAPI(
 )
 
 def parse_bbox(bbox: str = Query(..., description="Bounding box: left,bottom,right,top")) -> Tuple[float, float, float, float]:
+    """Validate and normalize the ``bbox`` query parameter."""
+
     try:
         coords = [float(c) for c in bbox.split(",")]
         if len(coords) != 4:
@@ -266,7 +305,7 @@ def parse_bbox(bbox: str = Query(..., description="Bounding box: left,bottom,rig
         )
 
 def cleanup_files(files: List[str]):
-    """Synchronous function to remove a list of files."""
+    """Delete ``files`` from disk, ignoring missing files."""
     for file in files:
         try:
             os.remove(file)

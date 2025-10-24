@@ -6,6 +6,19 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""WEPP Cloud climate extraction service for Daymet/PRISM datasets.
+
+The *metquery* Flask application provides endpoints to subset or interpolate
+climate rasters under ``/geodata``. Daily requests yield Daymet time series for
+either a bounding box (cropped NetCDF) or a single location (nearest-neighbor
+interpolation). Monthly requests expose PRISM, Daymet, and international
+climatologies. Helper endpoints publish dataset catalogs to aid discovery.
+
+Temporary products are written to ``/dev/shm`` (``SCRATCH_DIR``). Processing
+relies on GDAL, NCO, xarray, and NumPy; failures bubble up as JSON errors or
+plain-text messages to keep client debugging straightforward.
+"""
+
 import math
 import os
 from os.path import join as _join
@@ -48,6 +61,8 @@ gdal.UseExceptions()
 SCRATCH_DIR = '/dev/shm'
 
 def isint(x):
+    """Return ``True`` when ``x`` can be cleanly coerced to an integer."""
+
     # noinspection PyBroadException
     try:
         return float(int(x)) == float(x)
@@ -57,6 +72,8 @@ def isint(x):
 
 # example GDAL error handler function
 def gdal_error_handler(err_class, err_num, err_msg):
+    """Log GDAL errors with a simplified severity/type structure."""
+
     errtype = {
             gdal.CE_None:'None',
             gdal.CE_Debug:'Debug',
@@ -116,6 +133,7 @@ daily_catalog = {
 
 
 def crop_nc(nc, bbox, dst):
+    """Subset ``nc`` to ``bbox`` (WGS84) using ``ncks`` and write to ``dst``."""
 
     _wgs_2_lcc = GeoTransformer(src_proj4=wgs84_proj4,
                                 dst_proj4='+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 '
@@ -157,6 +175,7 @@ def crop_nc(nc, bbox, dst):
 
 
 def merge_nc(fn_list, dst):
+    """Stack NetCDF files in ``fn_list`` into a single file stored at ``dst``."""
 
     cmd = ['ncecat'] + fn_list + ['-O', dst]
 
@@ -172,28 +191,25 @@ def merge_nc(fn_list, dst):
 
 
 def safe_float_parse(x):
-    """
-    Tries to parse {x} as a float. Returns None if it fails.
-    """
+    """Return ``float(x)`` or ``None`` if conversion fails."""
+
     try:
         return float(x)
-    except:
+    except Exception:
         return None
 
 
 def parse_bbox(bbox):
-    """
-    Tries to parse the bbox argument supplied by the request
-    in a fault tolerate manner
-    """
+    """Parse a ``left,bottom,right,top`` bounding box string into floats."""
+
     try:
         coords = bbox.split(',')
-    except:
+    except Exception:
         return (None, None, None, None)
 
     n = len(coords)
     if n < 4:
-        coords.extend([None for i in range(4-n)])
+        coords.extend([None for _ in range(4 - n)])
     if n > 4:
         coords = coords[:4]
 
@@ -205,15 +221,16 @@ app = Flask(__name__)
 
 @app.route('/health')
 def health():
+    """Return a plain OK payload for health checks."""
+
     return jsonify("OK")
 
 
 @app.route('/daily/catalog')
 @app.route('/daily/catalog/')
 def query_daily_catalog():
-    """
-    https://wepp.cloud/webservices/metquery/daily/catalog/
-    """
+    """Return JSON metadata for the available Daymet daily datasets."""
+
     return jsonify(daily_catalog)
 
 
@@ -222,9 +239,7 @@ def query_daily_catalog():
 @app.route('/daily_singlepoint', methods=['GET', 'POST'])
 @app.route('/daily_singlepoint/', methods=['GET', 'POST'])
 def query_daily_singlepoint():
-    """
-    https://wepp.cloud/webservices/metquery/daily_singlepoint/?dataset=daymet/prcp&lon=-116&lat=47
-    """
+    """Return a Daymet daily series interpolated to the provided location."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 
@@ -275,6 +290,8 @@ def query_daily_singlepoint():
 
 
 def daily_worker(args):
+    """Crop a single year's dataset and return status plus path or error."""
+
     yr, dataset, bbox = args
 
     fname = glob(_join(geodata_dir, dataset, '*{}*.nc'.format(yr)))
@@ -302,10 +319,7 @@ def daily_worker(args):
 @app.route('/daily', methods=['GET', 'POST'])
 @app.route('/daily/', methods=['GET', 'POST'])
 def query_daily():
-    """
-    https://wepp.cloud/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2004
-    https://wepp.cloud/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2019
-    """
+    """Return Daymet daily NetCDF subsets cropped to the requested bbox."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 
@@ -402,20 +416,14 @@ def query_daily():
 @app.route('/monthly/catalog')
 @app.route('/monthly/catalog/')
 def query_monthly_catalog():
-    """
-    https://wepp.cloud/webservices/metquery/monthly/catalog/
-    """
+    """Return JSON metadata for the available monthly climatology datasets."""
     return jsonify(monthly_catalog)
 
 
 @app.route('/monthly', methods=['GET', 'POST'])
 @app.route('/monthly/', methods=['GET', 'POST'])
 def query_monthly():
-    """
-    https://wepp.cloud/webservices/metquery/monthly/?dataset=prism/ppt&lng=-116&lat=45
-    https://wepp.cloud/webservices/metquery/monthly/?dataset=daymet/prcp/mean&lng=-116&lat=45
-    https://wepp.cloud/webservices/metquery/monthly/?dataset=au/agdc/monthlies/rain&lng=146.80738449096683&lat=-37.69733638487025
-    """
+    """Return a monthly climatology NetCDF extracted for the requested location."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 

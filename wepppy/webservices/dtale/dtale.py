@@ -1,11 +1,29 @@
-"""
-D-Tale Wrapper Service for WEPP Cloud
-====================================
+"""Embedded D-Tale service tailored for WEPP Cloud run directories.
 
-This module embeds the upstream D-Tale Flask application inside a thin wrapper that
-understands WEPP Cloud run directories.  It exposes a small authenticated API for
-loading tabular outputs (Parquet, CSV, TSV, Feather, Pickle) into D-Tale instances and
-reuses in-memory sessions when files have not changed.
+`wepppy.webservices.dtale` wires the upstream `dtale` Flask application into the
+WEPPpy deployment so analysts can explore run outputs without leaving the
+browser. The wrapper:
+
+* resolves run-scoped file paths (`/runs/<runid>/<config>/...`) and guards
+  against traversal attacks
+* converts a range of tabular formats (Parquet, CSV/TSV, Feather, Pickle) into
+  pandas DataFrames with canonical identifier aliases (`TopazID`, `field_id`, …)
+* multiplexes datasets in-process by hashing the resolved path so that repeated
+  requests reuse cached D-Tale sessions when the underlying file has not
+  changed
+* registers run-aware GeoJSON overlays (watershed subcatchments, channels,
+  optional AgFields boundaries) so the D-Tale choropleth editor exposes useful
+  defaults
+
+Deployment knobs are driven by environment variables (`HOST`, `PORT`,
+`DTALE_BASE_URL`, `DTALE_INTERNAL_TOKEN`, `DTALE_MAX_FILE_MB`, `DTALE_MAX_ROWS`,
+etc.). The Flask app exposes two routes:
+
+* ``GET /health`` – liveness check returning ``{"status": "ok"}``
+* ``POST /internal/load`` – authenticated endpoint that loads a file into
+  D-Tale and returns the dataset ID plus viewer URL
+
+Clients must supply ``X-DTALE-TOKEN`` when `DTALE_INTERNAL_TOKEN` is configured.
 """
 
 from __future__ import annotations
@@ -48,6 +66,7 @@ logger = logging.getLogger(__name__)
 
 
 def _clean_prefix(value: str | None) -> str | None:
+    """Normalize a URL prefix by stripping slashes and returning ``None`` when blank."""
     if not value:
         return None
     stripped = value.strip()
@@ -110,16 +129,19 @@ _IDENTIFIER_STRING_ALIASES: tuple[tuple[str, str], ...] = (
 
 
 def _fingerprint(path: Path) -> str:
+    """Return a stable fingerprint for ``path`` using mtime and file size."""
     stats = path.stat()
     return f"{stats.st_mtime_ns}:{stats.st_size}"
 
 
 def _make_dataset_id(runid: str, config: str, rel_path: str) -> str:
+    """Derive a short dataset identifier from run context and relative path."""
     raw = f"{runid}|{config}|{rel_path}"
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:12]
 
 
 def _resolve_target(runid: str, rel_path: str, *, config: str | None = None) -> tuple[Path, Path]:
+    """Resolve ``rel_path`` inside the run directory, enforcing traversal safety."""
     wd = Path(get_wd(runid)).resolve()
     rel_candidates: list[Path] = [Path(rel_path)]
     if config:
@@ -136,11 +158,13 @@ def _resolve_target(runid: str, rel_path: str, *, config: str | None = None) -> 
 
 
 def _normalize_rel(rel_path: str) -> str:
+    """Convert ``rel_path`` to a forward-slash, root-less representation."""
     rel_path = rel_path.replace("\\", "/")
     return rel_path.lstrip("/")
 
 
 def _load_geojson(path: Path) -> dict | None:
+    """Return parsed GeoJSON from ``path`` or ``None`` if parsing fails."""
     try:
         with path.open("r", encoding="utf-8") as fp:
             return json.load(fp)
@@ -150,6 +174,7 @@ def _load_geojson(path: Path) -> dict | None:
 
 
 def _infer_featureidkey(properties: Iterable[str], preferred: Iterable[str] | None = None) -> str | None:
+    """Pick a feature identifier column from ``properties`` using preferred aliases."""
     prop_set = set(properties)
     candidates: list[str] = []
     if preferred:
@@ -190,6 +215,7 @@ def _register_geojson_asset(
     loc_candidates: Iterable[str] | None = None,
     property_aliases: Iterable[tuple[str, str]] | None = None,
 ) -> tuple[str | None, str | None]:
+    """Register a GeoJSON overlay with D-Tale, returning the key and feature id."""
     if dtale_custom_geojson is None:
         return (None, None)
     if not path:
@@ -286,6 +312,7 @@ def _register_geojson_asset(
 
 
 def _ensure_geojson_assets(runid: str, wd: Path, data_id: str | None) -> None:
+    """Populate default GeoJSON overlays for the given run/dataset combo."""
     if dtale_custom_geojson is None:
         return
     defaults_set = data_id in MAP_DEFAULTS if data_id else False
@@ -402,6 +429,7 @@ def _ensure_geojson_assets(runid: str, wd: Path, data_id: str | None) -> None:
 
 
 def _postprocess_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    """Normalize column names, dtypes, and identifier aliases for D-Tale."""
     df.columns = [str(col) for col in df.columns]
     try:
         df = df.convert_dtypes(dtype_backend="numpy_nullable")
@@ -417,21 +445,25 @@ def _postprocess_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _read_parquet(path: Path) -> pd.DataFrame:
+    """Read a Parquet file into a post-processed DataFrame."""
     df = pd.read_parquet(path)
     return _postprocess_dataframe(df)
 
 
 def _read_feather(path: Path) -> pd.DataFrame:
+    """Read a Feather/Arrow file into a post-processed DataFrame."""
     df = pd.read_feather(path)
     return _postprocess_dataframe(df)
 
 
 def _read_csv(path: Path, *, sep: str = ",", compression: str | None = None) -> pd.DataFrame:
+    """Load CSV/TSV data with optional compression and post-process the frame."""
     df = pd.read_csv(path, sep=sep, compression=compression)
     return _postprocess_dataframe(df)
 
 
 def _read_pickle(path: Path) -> pd.DataFrame:
+    """Load a pickle payload and coerce it into a DataFrame when necessary."""
     df = pd.read_pickle(path)
     return _postprocess_dataframe(pd.DataFrame(df) if not isinstance(df, pd.DataFrame) else df)
 
@@ -449,6 +481,7 @@ READERS: dict[str, Callable[[Path], pd.DataFrame]] = {
 
 
 def _load_dataframe(path: Path) -> pd.DataFrame:
+    """Dispatch to the appropriate reader for ``path`` based on suffix."""
     name = path.name.lower()
     if name.endswith(".csv.gz"):
         return _read_csv(path, compression="gzip")
@@ -461,6 +494,7 @@ def _load_dataframe(path: Path) -> pd.DataFrame:
 
 
 def _initialize_dtale_dataset(data_id: str, display_name: str, df: pd.DataFrame) -> DtaleData:
+    """Create or reuse a D-Tale instance for ``data_id`` and seed global state."""
     instance = startup(
         url=DTALE_BASE_URL,
         data=df,
@@ -657,10 +691,12 @@ app = build_app(reaper_on=False, app_root=APP_ROOT)
 
 @app.route("/health")
 def health():
+    """Return a simple liveness payload for monitoring."""
     return jsonify({"status": "ok"})
 
 
 def _verify_token() -> None:
+    """Abort requests when the ``X-DTALE-TOKEN`` does not match configuration."""
     if not DTALE_INTERNAL_TOKEN:
         return
     supplied = request.headers.get("X-DTALE-TOKEN", "")
@@ -669,6 +705,7 @@ def _verify_token() -> None:
 
 
 def _build_instance_response(data_id: str, instance: DtaleData, meta: DatasetMeta):
+    """Serialize a D-Tale instance into the JSON envelope expected by clients."""
     url = instance.build_main_url()
     if IS_PROXY and not url.startswith("/"):
         url = f"/{url}"
@@ -684,6 +721,7 @@ def _build_instance_response(data_id: str, instance: DtaleData, meta: DatasetMet
 
 @app.post("/internal/load")
 def load_into_dtale():
+    """Load the requested run-relative file into D-Tale and return viewer metadata."""
     _verify_token()
     payload = request.get_json(silent=True) or {}
     runid = payload.get("runid", "").strip()
