@@ -6,20 +6,16 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-# standard libraries
+"""Unit conversion helpers and a NoDb controller for renderer preferences."""
 
-import os
-from os.path import join as _join
-from os.path import exists as _exists
+from __future__ import annotations
 
 from collections import OrderedDict
-
-# non-standard
-
-# weppy submodules
-from .base import NoDbBase
+from typing import Callable, Dict, Mapping, Optional, OrderedDict as OrderedDictType
 
 from wepppy.all_your_base import isfloat, isnan
+
+from .base import NoDbBase
 
 __all__ = [
     'converters',
@@ -28,7 +24,12 @@ __all__ = [
     'Unitizer',
 ]
 
-converters = {
+ConverterFunc = Callable[[float], float]
+ConverterRegistry = Dict[str, Dict[tuple[str, str], ConverterFunc]]
+PrecisionRegistry = OrderedDictType[str, OrderedDictType[str, int]]
+
+
+converters: ConverterRegistry = {
     'temperature': {
         ('degf', 'degc'): lambda v: (v - 32.0) / 1.8,
         ('degc', 'degf'): lambda v: v * 1.8 + 32
@@ -170,7 +171,7 @@ converters = {
     }
 }
 
-precisions = OrderedDict([
+precisions: PrecisionRegistry = OrderedDict([
     ('temperature', OrderedDict([
         ('degc', 2),
         ('degf', 2)])
@@ -294,17 +295,25 @@ for _k in precisions:
 
 
 class UnitizerNoDbLockedException(Exception):
-    pass
+    """Legacy exception preserved for backwards compatibility."""
 
 
 class Unitizer(NoDbBase):
+    """Persisted unit preferences driving front-end unit toggles."""
+
     __name__ = 'Unitizer'
 
     filename = 'unitizer.nodb'
     
-    def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
+    def __init__(
+        self,
+        wd: str,
+        cfg_fn: str,
+        run_group: Optional[str] = None,
+        group_name: Optional[str] = None,
+    ) -> None:
         global precisions
-        super(Unitizer, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
+        super().__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
         is_english = self.config_get_bool('unitizer', 'is_english')
 
         with self.locked():
@@ -313,11 +322,15 @@ class Unitizer(NoDbBase):
                 {k: list(v.keys())[is_english] for k, v in precisions.items()}
 
     @property
-    def preferences(self):
+    def preferences(self) -> Dict[str, str]:
+        """Return the unit preference per measurement class."""
+
         return self._preferences
 
     @property
-    def is_english(self):
+    def is_english(self) -> Optional[bool]:
+        """Return ``True`` if all preferences use English units, ``False`` for metric."""
+
         global precisions
 
         selections = []
@@ -337,7 +350,13 @@ class Unitizer(NoDbBase):
 
         return None
 
-    def set_preferences(self, kwds):
+    def set_preferences(self, kwds: Mapping[str, object]) -> Dict[str, str]:
+        """Update unit preferences using key/value mappings.
+
+        ``kwds`` may contain scalars or iterables of candidate values; the last
+        item wins, mirroring existing template semantics.
+        """
+
         with self.locked():
             for key, raw_value in kwds.items():
                 if raw_value is None:
@@ -363,7 +382,7 @@ class Unitizer(NoDbBase):
         return self._preferences
 
     @staticmethod
-    def context_processor_package():
+    def context_processor_package() -> Dict[str, Callable[..., str]]:
         global converters, precisions
 
         def tostring(v, p):
@@ -588,10 +607,12 @@ class Unitizer(NoDbBase):
 
             return '<div class="unitizer-wrapper">{}</div>'.format(s)
 
-        return dict(cls_units=cls_units,
-                    str_units=str_units,
-                    unitizer=unitizer,
-                    sum=sum,
-                    mean=lambda x: sum(x) / len(x),
-                    unitizer_units=unitizer_units,
-                    unitizer_with_units=unitizer_with_units)
+        return {
+            'cls_units': cls_units,
+            'str_units': str_units,
+            'unitizer': unitizer,
+            'sum': sum,
+            'mean': lambda x: sum(x) / len(x),
+            'unitizer_units': unitizer_units,
+            'unitizer_with_units': unitizer_with_units,
+        }

@@ -55,14 +55,15 @@ REDIS_STATUS_DB: int
 REDIS_LOCK_DB: int
 REDIS_NODB_EXPIRY: int
 REDIS_LOG_LEVEL_DB: int
+_LEGACY_MODULE_REDIRECTS: dict[str, str]
 
 
 class LogLevel(IntEnum):
-    DEBUG: int
-    INFO: int
-    WARNING: int
-    ERROR: int
-    CRITICAL: int
+    DEBUG = 10
+    INFO = 20
+    WARNING = 30
+    ERROR = 40
+    CRITICAL = 50
 
     @staticmethod
     def parse(x: str) -> LogLevel: ...
@@ -111,19 +112,18 @@ def nodb_timed(
 
 
 class TriggerEvents(Enum):
-    ON_INIT_FINISH: int
-    LANDUSE_DOMLC_COMPLETE: int
-    LANDUSE_BUILD_COMPLETE: int
-    SOILS_BUILD_COMPLETE: int
-    PREPPING_PHOSPHORUS: int
-    WATERSHED_ABSTRACTION_COMPLETE: int
-    CLIMATE_BUILD_COMPLETE: int
-    WEPP_PREP_WATERSHED_COMPLETE: int
-    FORK_COMPLETE: int
+    ON_INIT_FINISH = 1
+    LANDUSE_DOMLC_COMPLETE = 2
+    LANDUSE_BUILD_COMPLETE = 5
+    SOILS_BUILD_COMPLETE = 3
+    PREPPING_PHOSPHORUS = 4
+    WATERSHED_ABSTRACTION_COMPLETE = 5
+    CLIMATE_BUILD_COMPLETE = 6
+    WEPP_PREP_WATERSHED_COMPLETE = 7
+    FORK_COMPLETE = 8
 
 
 class NoDbBase(object):
-    DEBUG: ClassVar[int]
     _js_decode_replacements: ClassVar[tuple[tuple[str, str], ...]]
     filename: ClassVar[Optional[str]]
     _legacy_module_redirects: ClassVar[dict[str, str]]
