@@ -64,4 +64,8 @@ Most files mirror the module they cover. For example, `tests/weppcloud/routes/te
 - Add or update pytest markers when you touch a test. Every test should declare a category (e.g., `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.routes`) and mark long-running cases with `@pytest.mark.slow`.
 - Check [`tests/AGENTS.md`](AGENTS.md) for guidance on fixtures, NoDb serialization patterns, and expectations when adding new suites.
 
+## Smoke Tests
+
+- Playwright smoke harness lives under `wepppy/weppcloud/static-src/tests/smoke`. See [`README.smoke_tests.md`](README.smoke_tests.md) for setup, environment variables, and provisioning/cleanup instructions (`npm run smoke`).
+
 Happy testing! Keep the muscles fresh by running `wctl run-pytest tests --maxfail=1` early and often.

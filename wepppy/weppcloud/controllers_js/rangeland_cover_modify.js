@@ -428,7 +428,7 @@ var RangelandCoverModify = (function () {
             lastSummaryKey = key;
             var requestId = ++summaryRequestToken;
 
-            return http.postJson("query/rangeland_cover/current_cover_summary/", {
+            return http.postJson(url_for_run("query/rangeland_cover/current_cover_summary/"), {
                 topaz_ids: normalized
             }, { form: formElement }).then(function (response) {
                 if (summaryRequestToken !== requestId) {
@@ -590,7 +590,7 @@ var RangelandCoverModify = (function () {
         }
 
         function loadSubcatchments() {
-            return http.getJson("resources/subcatchments.json", {
+            return http.getJson(url_for_run("resources/subcatchments.json"), {
                 params: { _: Date.now() },
                 form: formElement
             }).then(function (data) {
@@ -671,7 +671,7 @@ var RangelandCoverModify = (function () {
             var ne = bounds.getNorthEast();
             var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
 
-            http.postJson("tasks/sub_intersection/", { extent: extent }, { form: formElement })
+            http.postJson(url_for_run("tasks/sub_intersection/"), { extent: extent }, { form: formElement })
                 .then(function (response) {
                     handleSubIntersection(response.body);
                 })
@@ -829,7 +829,7 @@ var RangelandCoverModify = (function () {
                 }
             });
 
-            http.postJson("tasks/modify_rangeland_cover/", {
+            http.postJson(url_for_run("tasks/modify_rangeland_cover/"), {
                 topaz_ids: ids,
                 covers: coversResult.covers
             }, { form: formElement }).then(function (response) {

@@ -352,7 +352,7 @@ var Outlet = (function () {
                 jobId: null
             };
 
-            return http.request("rq/api/set_outlet", {
+            return http.request(url_for_run("rq/api/set_outlet"), {
                 method: "POST",
                 json: {
                     latitude: coordinates.lat,
@@ -501,7 +501,7 @@ var Outlet = (function () {
 
             var bust = { _: Date.now() };
 
-            var queryPromise = http.getJson("query/outlet/", { params: bust })
+            var queryPromise = http.getJson(url_for_run("query/outlet/"), { params: bust })
                 .then(function (response) {
                     if (!response || typeof response.lat !== "number" || typeof response.lng !== "number") {
                         setErrorStatus("Outlet location unavailable.");

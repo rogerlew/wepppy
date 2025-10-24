@@ -381,7 +381,7 @@ var RAP_TS = (function () {
                 controller.disconnect_status_stream(controller);
             }
 
-            http.postJson("rq/api/acquire_rap_ts", submission, { form: controller.form }).then(function (response) {
+            http.postJson(url_for_run("rq/api/acquire_rap_ts"), submission, { form: controller.form }).then(function (response) {
                 var body = response && response.body !== undefined ? response.body : response;
                 var normalized = body || {};
                 if (normalized.Success === true || normalized.success === true) {

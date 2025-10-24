@@ -338,7 +338,7 @@ var Baer = (function () {
                 }
             }
 
-            return http.request("tasks/set_firedate/", {
+            return http.request(url_for_run("tasks/set_firedate/"), {
                 method: "POST",
                 json: { fire_date: effectiveFireDate || null },
                 form: formElement
@@ -376,7 +376,7 @@ var Baer = (function () {
             emit("baer:upload:started", {});
             jobStarted("baer:upload", {});
 
-            return http.request("tasks/upload_sbs/", {
+            return http.request(url_for_run("tasks/upload_sbs/"), {
                 method: "POST",
                 body: formData,
                 form: formElement
@@ -413,7 +413,7 @@ var Baer = (function () {
             emit("baer:remove:started", {});
             jobStarted("baer:remove", {});
 
-            return http.request("tasks/remove_sbs", {
+            return http.request(url_for_run("tasks/remove_sbs"), {
                 method: "POST",
                 form: formElement
             })
@@ -474,7 +474,7 @@ var Baer = (function () {
             emit("baer:uniform:started", { value: severity });
             jobStarted("baer:uniform", { value: severity });
 
-            return http.request("tasks/build_uniform_sbs/" + severity, {
+            return http.request(url_for_run("tasks/build_uniform_sbs/") + severity, {
                 method: "POST",
                 form: formElement
             })
@@ -552,7 +552,7 @@ var Baer = (function () {
                 nodataVals = nodataField ? nodataField.value : null;
             }
 
-            return http.request("tasks/modify_burn_class", {
+            return http.request(url_for_run("tasks/modify_burn_class"), {
                 method: "POST",
                 json: { classes: classBreaks, nodata_vals: nodataVals },
                 form: formElement
@@ -594,7 +594,7 @@ var Baer = (function () {
                 colorMap[rgb] = select.value;
             });
 
-            return http.request("tasks/modify_color_map", {
+            return http.request(url_for_run("tasks/modify_color_map"), {
                 method: "POST",
                 json: { color_map: colorMap },
                 form: formElement
@@ -666,7 +666,7 @@ var Baer = (function () {
         }
 
         function loadLegend() {
-            return http.request("resources/legends/sbs/", {
+            return http.request(url_for_run("resources/legends/sbs/"), {
                 method: "GET"
             })
                 .then(function (result) {
@@ -708,7 +708,7 @@ var Baer = (function () {
                 console.warn("[Baer] Failed to clear existing SBS map overlay", err);
             }
 
-            return http.request("query/baer_wgs_map/", {
+            return http.request(url_for_run("query/baer_wgs_map/"), {
                 method: "GET"
             })
                 .then(function (result) {
@@ -734,7 +734,7 @@ var Baer = (function () {
                             emit("baer:map:shown", { bounds: bounds, imgurl: imgurl });
                         }
 
-                        return http.request("query/has_dem/", { method: "GET" })
+                        return http.request(url_for_run("query/has_dem/"), { method: "GET" })
                             .then(function (demResult) {
                                 var hasDem = demResult.body;
                                 if (hasDem === false && map && baer.baer_map && typeof map.flyToBounds === "function") {

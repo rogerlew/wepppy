@@ -569,7 +569,7 @@ var Ash = (function () {
                 }
             }
 
-            http.request("rq/api/run_ash", {
+            http.request(url_for_run("rq/api/run_ash"), {
                 method: "POST",
                 body: formData,
                 form: formElement
@@ -600,7 +600,7 @@ var Ash = (function () {
             var taskMsg = "Setting wind_transport(" + state + ")";
             resetStatus(taskMsg);
 
-            http.postJson("tasks/set_ash_wind_transport/", {
+            http.postJson(url_for_run("tasks/set_ash_wind_transport/"), {
                 run_wind_transport: Boolean(state)
             }, {
                 form: formElement

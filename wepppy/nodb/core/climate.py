@@ -1256,7 +1256,13 @@ class Climate(NoDbBase):
         
         with self.locked():
             watershed = self.watershed_instance
-            lng, lat = watershed.centroid
+            centroid = watershed.centroid
+            
+            if centroid is None:
+                self.logger.warning("Cannot find closest stations: watershed centroid is not set")
+                return None
+            
+            lng, lat = centroid
             station_manager = CligenStationsManager(version=self.cligen_db)
             results = station_manager.get_closest_stations((lng, lat), num_stations)
             self._closest_stations = results

@@ -104,7 +104,7 @@
 - `wepppy/weppcloud/templates/controls/map/wepp_hillslope_visualizations.htm`
 - `docs/ui-docs/control-ui-styling/control-components.md`
 - `docs/ui-docs/ui-style-guide.md`
-- `docs/ui-docs/control-ui-styling/final-implementation-blueprint.md`
+- `docs/work-packages/20251023_frontend_integration/notes/final-implementation-blueprint.md`
 
 ## 10. Next Steps
 - Confirm macro naming and placement (`_pure_macros.html` vs. dedicated map macro file).

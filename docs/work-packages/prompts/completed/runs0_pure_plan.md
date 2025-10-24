@@ -65,13 +65,13 @@ base_pure.htm
 ## 8. Risks / Mitigations
 - **Hybrid state confusion**: Document clearly which controls are Pure vs legacy, avoid mixing columns within a single section. Use placeholders with explicit comments to prevent accidental reliance on legacy markup inside the Pure skeleton.
 - **JS regressions**: Wrap initialisation logic so missing selectors on the Pure page do not crash controllers still awaiting migration.
-- **Layout drift**: Keep skeleton aligned with `final-implementation-blueprint.md` and update as spacing tokens evolve.
+- **Layout drift**: Keep skeleton aligned with `docs/work-packages/20251023_frontend_integration/notes/final-implementation-blueprint.md` and update as spacing tokens evolve.
 
 ## 9. References
 - `docs/ui-docs/control-ui-styling/control-components.md`
-- `docs/ui-docs/control-ui-styling/final-implementation-blueprint.md`
-- `docs/ui-docs/control-ui-styling/map_control_plan.md`
-- `docs/ui-docs/control-ui-styling/status_stacktrace_component_plan.md`
+- `docs/work-packages/20251023_frontend_integration/notes/final-implementation-blueprint.md`
+- `docs/work-packages/prompts/completed/map_control_plan.md`
+- `docs/work-packages/prompts/completed/status_stacktrace_component_plan.md`
 - `docs/ui-docs/control-ui-styling/control-inventory.md`
 
 ## 10. Next Actions

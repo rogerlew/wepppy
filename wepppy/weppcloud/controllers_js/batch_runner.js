@@ -1747,7 +1747,7 @@ var BatchRunner = (function () {
             }
 
             controller.http
-                .postJson(apiUrl("rq/api/run-batch"), {})
+                .postJson(apiUrl(url_for_run("rq/api/run-batch")), {})
                 .then(function (response) {
                     var payload = response.body || {};
                     if (!payload.success) {

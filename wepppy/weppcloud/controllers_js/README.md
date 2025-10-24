@@ -247,3 +247,62 @@ Keep this document updated when the bundling flow or controller contract changes
 - **Event surface**: `BatchRunner.getInstance().emitter = WCEvents.useEventMap([...])` emits `batch:upload:started`, `batch:upload:completed`, `batch:upload:failed`, `batch:template:validate-started`, `batch:template:validate-completed`, `batch:template:validate-failed`, `batch:run-directives:updated`, `batch:run-directives:update-failed`, `batch:run:started`, `batch:run:failed`, and `batch:run:completed`, alongside the inherited `controlBase` lifecycle events (`job:started`, `job:completed`, `job:error`). Subscribe to these events instead of scraping DOM state when dashboards or admin views need to react.
 - **Transport**: uploads stream `FormData` to `/batch/_/<name>/upload-geojson`; template checks post JSON to `/batch/_/<name>/validate-template`; directive toggles post JSON to `/batch/_/<name>/run-directives`; batch submissions post JSON to `/batch/_/<name>/rq/api/run-batch`. Flask routes now consume payloads via `parse_request_payload`, and `BatchRunner.update_run_directives` coerces stringy truths (`"true"`, `"false"`, `"on"`, `"off"`) to native booleans so NoDb state stays clean. Job telemetry requests hit `/weppcloud/rq/api/jobinfo` with the tracked job IDs managed by the controller.
 - **Testing**: Jest coverage in `controllers_js/__tests__/batch_runner.test.js` exercises upload/validate flows, directive persistence, run submission, event emission, and job-info polling. Backend expectations live in `tests/weppcloud/test_batch_runner_endpoints.py` (upload, validation, directives) and `tests/weppcloud/routes/test_rq_api_batch_runner.py` (queue wiring and error handling). Run `wctl run-npm test -- batch_runner`, rebuild the bundle (`python wepppy/weppcloud/controllers_js/build_controllers_js.py`), and execute `wctl run-pytest tests/weppcloud/test_batch_runner_endpoints.py tests/weppcloud/routes/test_rq_api_batch_runner.py` before handing off changes.
+
+## Run-Scoped URL Construction
+
+All API endpoints that operate within a run context **MUST** use `url_for_run()` from `utils.js`:
+
+```javascript
+// ✅ Correct - run-scoped endpoints
+http.postJson(url_for_run("rq/api/build_climate"), payload, { form: formElement })
+http.request(url_for_run("tasks/set_landuse_db"), { method: "POST", body: params })
+http.get(url_for_run("query/delineation_pass"))
+http.get(url_for_run("resources/subcatchments.json"))
+
+// ❌ Wrong - missing run context
+http.postJson("rq/api/build_climate", payload)
+http.get("resources/subcatchments.json")
+```
+
+**Why:** Flask routes expect `/runs/<runid>/<config>/...` structure. The helper reads `window.runId` and `window.config` to build proper paths.
+
+**Scope:** Applies to ALL endpoints under:
+- `rq/api/*` - Background job triggers (build_climate, run_wepp, build_landuse, etc.)
+- `tasks/*` - Task endpoints (set_*, acquire_*, modify_*, etc.)
+- `query/*` - Status/data queries (delineation_pass, outlet, wepp/phosphorus_opts, etc.)
+- `resources/*` - GeoJSON, legends, static data (subcatchments.json, netful.json, legends/sbs/, etc.)
+
+**Exceptions:** Endpoints that are NOT run-scoped:
+- `/batch/` routes (cross-run operations)
+- `/api/` global endpoints (user prefs, system status)
+- `/auth/` authentication routes
+- Root routes (`/`, `/index`, `/about`)
+
+### Bulk Fix Pattern
+
+When modernizing controllers or migrating to Pure templates, use this regex pattern to wrap unwrapped endpoints:
+
+```python
+import re
+from pathlib import Path
+
+# Pattern matches unwrapped endpoint strings (not already inside url_for_run())
+pattern = r'(?<!url_for_run\()"(rq/api/|tasks/|query/|resources/)([^"]+)"'
+replacement = r'url_for_run("\1\2")'
+
+content = path.read_text()
+new_content = re.sub(pattern, replacement, content)
+path.write_text(new_content)
+```
+
+**Verification:**
+```bash
+# Check for unwrapped endpoints
+grep -rh '"rq/api/\|"tasks/\|"query/\|"resources/' wepppy/weppcloud/controllers_js/*.js | grep -v url_for_run
+
+# After fixing, restart container to rebuild controllers.js
+wctl restart weppcloud
+
+# Verify rebuild
+docker logs weppcloud | grep "Building controllers"
+```

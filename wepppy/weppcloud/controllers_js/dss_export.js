@@ -451,7 +451,7 @@ var DssExport = (function () {
 
             controller.connect_status_stream(controller);
 
-            http.postJson("rq/api/post_dss_export_rq", payload, { form: controller.form }).then(function (response) {
+            http.postJson(url_for_run("rq/api/post_dss_export_rq"), payload, { form: controller.form }).then(function (response) {
                 var body = response && response.body ? response.body : response;
                 var normalized = body || {};
 

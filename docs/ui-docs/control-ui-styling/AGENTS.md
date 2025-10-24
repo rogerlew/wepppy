@@ -49,6 +49,13 @@ _Last updated: 2025-10-18_
 - Pure shell styling lives in `ui-foundation.css`; no inline styles in templates.
 - Checkbox/radio styling: reuse shared classes (`.wc-choice`, `.wc-choice--checkbox`, `.wc-run-header__toggle`) so accent colors and spacing stay consistent; blue system toggles mean the class is missing.
 - Dark mode is explicitly out-of-scope for this iteration; stay focused on polishing the light theme tokens and contrast ratios.
+- UI smoke tests: run `npm run smoke` from `wepppy/weppcloud/static-src` (requires `TEST_SUPPORT_ENABLED=true` on the backend. The harness can auto-provision runs via `POST /tests/api/create-run`; `GET /tests/api/ping` verifies availability). Useful environment variables:
+  - `SMOKE_CREATE_RUN` (default `true`) – auto-create a run via the test support endpoint.
+  - `SMOKE_RUN_CONFIG` (default `dev_unit_1`) – config slug for the generated run.
+  - `SMOKE_RUN_OVERRIDES` – JSON string of query overrides (e.g., `{ "general:dem_db": "ned1/2016" }`).
+  - `SMOKE_RUN_PATH` – reuse an existing run URL instead of provisioning a new one.
+  - `SMOKE_KEEP_RUN=true` – skip cleanup of the generated run.
+  - `SMOKE_BASE_URL`, `SMOKE_HEADLESS`, `SMOKE_RUN_PATH` – adjust backend origin, browser mode, or manually supplied run.
 - Run pages now bootstrap controllers via `WCControllerBootstrap`. Build a single `runContext` object (run metadata, job ids, `data.*` feature flags) and call `WCControllerBootstrap.bootstrapMany([...], runContext)` instead of poking controller internals. Controllers own their job wiring and report hydration via `instance.bootstrap(context)`.
 
 ## Near-Term Focus

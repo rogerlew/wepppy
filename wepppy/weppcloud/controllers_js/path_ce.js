@@ -10,7 +10,7 @@ var PathCE = (function () {
         config: "api/path_ce/config",
         status: "api/path_ce/status",
         results: "api/path_ce/results",
-        run: "tasks/path_cost_effective_run"
+        run: url_for_run("tasks/path_cost_effective_run")
     };
 
     var EVENT_NAMES = [

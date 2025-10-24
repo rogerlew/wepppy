@@ -326,7 +326,7 @@ var Team = (function () {
             emitter.emit("team:invite:started", { email: trimmed });
             team.triggerEvent("job:started", { task: "team:adduser", email: trimmed });
 
-            return http.postJson("tasks/adduser/", { email: trimmed }, { form: formElement })
+            return http.postJson(url_for_run("tasks/adduser/"), { email: trimmed }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body !== undefined ? result.body : result;
                     if (!response || response.Success !== true) {
@@ -401,7 +401,7 @@ var Team = (function () {
             emitter.emit("team:member:remove:started", { userId: normalisedId });
             team.triggerEvent("job:started", { task: "team:removeuser", userId: normalisedId });
 
-            return http.postJson("tasks/removeuser/", { user_id: normalisedId }, { form: formElement })
+            return http.postJson(url_for_run("tasks/removeuser/"), { user_id: normalisedId }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body !== undefined ? result.body : result;
                     if (!response || response.Success !== true) {

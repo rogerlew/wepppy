@@ -71,7 +71,8 @@
                 "ash": 'ash' in mods_list,
                 "omni": 'omni' in mods_list,
                 "rhem": 'rhem' in mods_list,
-                "dss_export": 'dss_export' in mods_list
+                "dss_export": 'dss_export' in mods_list,
+                "path_ce": 'path_ce' in mods_list
             }
         },
         "flags": {
@@ -145,6 +146,7 @@
     window.runid = runId;
     window.runId = runId;
     window.config = runConfig;
+    window.readonly = {{ ron.readonly | tojson }};
     window.WEPP_channel_critical_shear = null;
 
     function initUnitizers() {
@@ -202,7 +204,7 @@
         if (modFlags.ash) {
             add("ash", typeof Ash !== "undefined" ? Ash : null);
         }
-        if (typeof PathCE !== "undefined" && PathCE && typeof PathCE.getInstance === "function") {
+        if (modFlags.path_ce && typeof PathCE !== "undefined" && PathCE && typeof PathCE.getInstance === "function") {
             add("pathCe", PathCE);
         }
 

@@ -5,10 +5,10 @@ This note captures the current state of controller views and the `runs0` experie
 
 ## Existing Architecture Snapshot
 
-### Controller Rendering Pipeline
-- Controller-specific HTML lives in `wepppy/weppcloud/templates/controls/`, all extending `_base.htm` which defines the canonical status/summary/stacktrace blocks expected by the JS layer.【F:wepppy/weppcloud/templates/controls/_base.htm†L1-L19】
-- The `runs0` layout (`routes/run_0/templates/0.htm`) stitches the controller partials together, injects `controllers.js`, and hosts large inline CSS blocks for layout and color tweaks.【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L1-L194】
-- JavaScript controllers are singletons bundled into `controllers.js`. `control_base.js` provides orchestration helpers (job polling, summary/status writers, stacktrace rendering) that every controller mixes in.【F:wepppy/weppcloud/controllers_js/control_base.js†L5-L199】
+### Controller Rendering Pipeline (Current Status)
+- Controller-specific HTML now lives in `wepppy/weppcloud/templates/controls/*_pure.htm`, each using the `control_shell` macro to render status/summary/stacktrace slots. `_base.htm` is archived for legacy reference.【F:docs/work-packages/20251023_frontend_integration/notes/final-implementation-blueprint.md】
+- The `runs0` layout (`routes/run_0/templates/runs0_pure.htm`) composes the pure control partials, injects `controllers.js`, and delegates layout to `ui-foundation.css` tokens (`wc-page`, `.pure-g`). Legacy `0.htm` remains in the repo but is no longer part of the production flow.【F:wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm†L1-L120】
+- JavaScript controllers remain singletons bundled into `controllers.js`. `control_base.js` coordinates job polling, status/summary writers, stacktrace rendering, and StatusStream attachments across controls.【F:wepppy/weppcloud/controllers_js/control_base.js†L5-L199】
 
 ### Common Patterns
 - Standard controllers render static forms whose layout rarely changes. Some expose hidden sections (advanced toggles, mode-specific content) but still rely on server-rendered markup.

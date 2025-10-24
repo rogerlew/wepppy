@@ -304,7 +304,7 @@ var Treatments = (function () {
         }
 
         function postModeUpdate(normalized, selectionValue) {
-            return http.postJson("tasks/set_treatments_mode/", {
+            return http.postJson(url_for_run("tasks/set_treatments_mode/"), {
                 mode: normalized,
                 single_selection: selectionValue
             }, { form: formElement }).then(function (result) {
@@ -389,7 +389,7 @@ var Treatments = (function () {
 
             var formData = new FormData(formElement);
 
-            http.request("rq/api/build_treatments", {
+            http.request(url_for_run("rq/api/build_treatments"), {
                 method: "POST",
                 body: formData,
                 form: formElement

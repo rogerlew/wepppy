@@ -5,6 +5,14 @@
 ## Overview
 - All third-party browser libraries (Leaflet, Bootstrap, DataTables, jQuery, etc.) are now pulled in via `npm` from `wepppy/weppcloud/static-src`.
 - `npm run build:dev` produces readable development assets under `static-src/dist/`; `npm run build` produces minified production assets.
+- `npm run smoke` runs the Playwright smoke suite (requires the backend running and test support endpoints). Useful environment variables:
+  - `TEST_SUPPORT_ENABLED=true` on the backend to expose `/tests/api/*` endpoints.
+  - `SMOKE_CREATE_RUN` (`true` by default) to auto-provision a run via `/tests/api/create-run`.
+  - `SMOKE_RUN_CONFIG` (default `dev_unit_1`) selects the configuration used when provisioning.
+  - `SMOKE_RUN_OVERRIDES` optional JSON for config query params (e.g., `{ "general:dem_db": "ned1/2016" }`).
+  - `SMOKE_RUN_PATH` to point at an existing run (skips provisioning).
+  - `SMOKE_KEEP_RUN=true` keeps the provisioned run after the suite completes.
+  - `SMOKE_BASE_URL` and `SMOKE_HEADLESS=false` adjust backend origin and browser mode.
 - Docker builds copy the production bundle into `wepppy/weppcloud/static/vendor/` so images ship with everything baked in. The app entrypoint mirrors the bundle to `/srv/weppcloud/static` when `STATIC_ASSET_SYNC_DIR` is set (Compose prod does this for Caddy).
 
 ## Local Development

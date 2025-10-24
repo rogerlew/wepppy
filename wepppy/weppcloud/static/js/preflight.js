@@ -127,6 +127,8 @@ function updateLocks(lockStatuses) {
 
 
 function updateUI(checklist) {
+    var readonly = typeof window.readonly !== 'undefined' ? window.readonly : false;
+    
     for (var key in checklist) {
         if (!Object.prototype.hasOwnProperty.call(checklist, key)) {
             continue;

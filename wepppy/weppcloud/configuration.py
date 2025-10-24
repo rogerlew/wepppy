@@ -198,6 +198,9 @@ def config_app(app: Any):
     app.config["DEBUG"] = True
     app.config["SITE_PREFIX"] = site_prefix
 
+    test_support_enabled = os.getenv("TEST_SUPPORT_ENABLED", "false").strip().lower()
+    app.config["TEST_SUPPORT_ENABLED"] = test_support_enabled in {"1", "true", "yes"}
+
     # Flask-Security configuration
     app.config["SECRET_KEY"] = _require_env("SECRET_KEY")
     salt = _require_env("SECURITY_PASSWORD_SALT")

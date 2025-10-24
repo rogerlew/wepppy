@@ -351,23 +351,37 @@ var MapController = (function () {
             if (!mapStatusElement) {
                 return;
             }
-            var center = map.getCenter();
-            var lng = coordRound(center.lng);
-            var lat = coordRound(center.lat);
-            var zoom = map.getZoom();
-            var width = mapCanvasElement ? Math.round(mapCanvasElement.offsetWidth || 0) : 0;
-            dom.setText(mapStatusElement, "Center: " + lng + ", " + lat + " | Zoom: " + zoom + " ( Map Width:" + width + "px )");
+            try {
+                var center = map.getCenter();
+                var lng = coordRound(center.lng);
+                var lat = coordRound(center.lat);
+                var zoom = map.getZoom();
+                var width = mapCanvasElement ? Math.round(mapCanvasElement.offsetWidth || 0) : 0;
+                dom.setText(mapStatusElement, "Center: " + lng + ", " + lat + " | Zoom: " + zoom + " ( Map Width:" + width + "px )");
+            } catch (error) {
+                // Map not initialized yet - skip status update
+                dom.setText(mapStatusElement, "Map initializing...");
+            }
         }
 
         function buildViewportPayload() {
-            var center = map.getCenter();
-            var bounds = map.getBounds();
-            return {
-                center: { lat: center.lat, lng: center.lng },
-                zoom: map.getZoom(),
-                bounds: bounds,
-                bbox: bounds ? bounds.toBBoxString() : null
-            };
+            try {
+                var center = map.getCenter();
+                var bounds = map.getBounds();
+                return {
+                    center: { lat: center.lat, lng: center.lng },
+                    zoom: map.getZoom(),
+                    bounds: bounds,
+                    bbox: bounds ? bounds.toBBoxString() : null
+                };
+            } catch (error) {
+                return {
+                    center: { lat: 0, lng: 0 },
+                    zoom: 0,
+                    bounds: null,
+                    bbox: null
+                };
+            }
         }
 
         function handleCenterInputKey(event) {
@@ -850,10 +864,17 @@ var MapController = (function () {
             var center = mapContext && Array.isArray(mapContext.center) ? mapContext.center : null;
             var zoom = mapContext && typeof mapContext.zoom === "number" ? mapContext.zoom : null;
 
-            if (center && typeof map.setView === "function") {
-                map.setView(center, zoom !== null ? zoom : map.getZoom());
-            } else if (zoom !== null && typeof map.setZoom === "function") {
-                map.setZoom(zoom);
+            // Always set a view - Leaflet requires both center and zoom to be initialized
+            if (center && zoom !== null) {
+                // Both provided - use them
+                map.setView(center, zoom);
+            } else if (center) {
+                // Only center provided - use default zoom
+                map.setView(center, 13);
+            } else {
+                // No center (zoom-only or nothing) - use fallback
+                console.warn("Map bootstrap: No center provided in context, using default view [44.0, -116.0], zoom " + (zoom !== null ? zoom : 6));
+                map.setView([44.0, -116.0], zoom !== null ? zoom : 6);
             }
 
             if (typeof map.onMapChange === "function") {
@@ -908,7 +929,9 @@ var MapController = (function () {
             return map;
         };
 
-        emit("map:ready", buildViewportPayload());
+        // Note: Do NOT emit map:ready here - the bootstrap() method will emit it
+        // after properly setting center and zoom. Early emission causes
+        // "Set map center and zoom first" errors.
         updateMapStatus();
 
         return map;
@@ -917,6 +940,12 @@ var MapController = (function () {
     return {
         getInstance: function getInstance() {
             if (!instance) {
+                // Double-check container isn't already initialized before creating
+                var mapContainer = document.getElementById("mapid");
+                if (mapContainer && mapContainer._leaflet_id) {
+                    console.error("MapController.getInstance: Container already initialized but singleton instance is null. This indicates a previous initialization failed partway through.");
+                    throw new Error("Map container #mapid is already initialized but instance is missing. Cannot recover - page reload required.");
+                }
                 instance = createInstance();
             }
             return instance;

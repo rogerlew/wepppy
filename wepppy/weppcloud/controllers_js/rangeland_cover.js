@@ -319,7 +319,7 @@ var RangelandCover = (function () {
 
             rangeland.showHideControls(nextMode);
 
-            http.postJson("tasks/set_rangeland_cover_mode/", {
+            http.postJson(url_for_run("tasks/set_rangeland_cover_mode/"), {
                 mode: nextMode,
                 rap_year: rapYearValue
             }, { form: formElement }).then(function (result) {
@@ -363,7 +363,7 @@ var RangelandCover = (function () {
                 defaults: state.defaults
             });
 
-            http.postJson("tasks/build_rangeland_cover/", {
+            http.postJson(url_for_run("tasks/build_rangeland_cover/"), {
                 rap_year: state.rapYear,
                 defaults: state.defaults
             }, { form: formElement }).then(function (result) {

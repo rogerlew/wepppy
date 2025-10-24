@@ -213,7 +213,7 @@ var Soil = (function () {
 
             var params = forms.serializeForm(formElement, { format: "url" });
 
-            http.postForm("rq/api/build_soils", params, { form: formElement })
+            http.postForm(url_for_run("rq/api/build_soils"), params, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
@@ -253,7 +253,7 @@ var Soil = (function () {
             var taskMsg = "Setting ksflag (" + state + ")";
             resetStatus(taskMsg);
 
-            http.postJson("tasks/set_soils_ksflag/", { ksflag: Boolean(state) }, { form: formElement })
+            http.postJson(url_for_run("tasks/set_soils_ksflag/"), { ksflag: Boolean(state) }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
@@ -273,7 +273,7 @@ var Soil = (function () {
             var taskMsg = "Setting disturbed sol_ver to " + value;
             resetStatus(taskMsg);
 
-            http.postJson("tasks/set_disturbed_sol_ver/", { sol_ver: value }, { form: formElement })
+            http.postJson(url_for_run("tasks/set_disturbed_sol_ver/"), { sol_ver: value }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
@@ -304,7 +304,7 @@ var Soil = (function () {
             var taskMsg = "Setting Mode to " + resolvedMode;
             resetStatus(taskMsg);
 
-            http.postJson("tasks/set_soil_mode/", {
+            http.postJson(url_for_run("tasks/set_soil_mode/"), {
                 mode: resolvedMode,
                 soil_single_selection: singleSelection,
                 soil_single_dbselection: singleDbSelection

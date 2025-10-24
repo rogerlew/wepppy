@@ -241,7 +241,7 @@ var Rhem = (function () {
 
         function submitRunRequest() {
             var payload = forms.serializeForm(formElement, { format: "object" }) || {};
-            http.postJson("rq/api/run_rhem_rq", payload, { form: formElement })
+            http.postJson(url_for_run("rq/api/run_rhem_rq"), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && (response.Success === true || response.success === true)) {

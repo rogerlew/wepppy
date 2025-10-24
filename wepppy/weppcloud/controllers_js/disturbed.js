@@ -380,7 +380,7 @@ var Disturbed = (function () {
             emit("disturbed:lookup:reset", {});
             disturbed.triggerEvent("job:started", { task: "disturbed:lookup:reset" });
             return http
-                .request("tasks/reset_disturbed", {
+                .request(url_for_run("tasks/reset_disturbed"), {
                     method: "POST",
                     form: formElement || undefined
                 })
@@ -411,7 +411,7 @@ var Disturbed = (function () {
             emit("disturbed:lookup:extended", {});
             disturbed.triggerEvent("job:started", { task: "disturbed:lookup:extended" });
             return http
-                .request("tasks/load_extended_land_soil_lookup", {
+                .request(url_for_run("tasks/load_extended_land_soil_lookup"), {
                     method: "POST",
                     form: formElement || undefined
                 })
@@ -447,7 +447,7 @@ var Disturbed = (function () {
             disturbed.triggerEvent("job:started", { task: "disturbed:upload" });
             var formData = new window.FormData(formElement);
             return http
-                .request("tasks/upload_sbs/", {
+                .request(url_for_run("tasks/upload_sbs/"), {
                     method: "POST",
                     body: formData,
                     form: formElement
@@ -487,7 +487,7 @@ var Disturbed = (function () {
             emit("disturbed:remove:started", {});
             disturbed.triggerEvent("job:started", { task: "disturbed:remove" });
             return http
-                .request("tasks/remove_sbs", {
+                .request(url_for_run("tasks/remove_sbs"), {
                     method: "POST",
                     form: formElement || undefined
                 })
@@ -530,7 +530,7 @@ var Disturbed = (function () {
             emit("disturbed:uniform:started", { severity: severity });
             disturbed.triggerEvent("job:started", { task: "disturbed:uniform", severity: severity });
             return http
-                .request("tasks/build_uniform_sbs", {
+                .request(url_for_run("tasks/build_uniform_sbs"), {
                     method: "POST",
                     json: { value: severity },
                     form: formElement || undefined
@@ -582,7 +582,7 @@ var Disturbed = (function () {
             }
 
             return http
-                .request("tasks/set_firedate/", {
+                .request(url_for_run("tasks/set_firedate/"), {
                     method: "POST",
                     json: { fire_date: fireDate || null },
                     form: formElement || undefined

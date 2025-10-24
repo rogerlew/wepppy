@@ -1,0 +1,27 @@
+name: quick
+description: "Small US watershed for fast health checks"
+env:
+  SMOKE_CREATE_RUN: "true"
+  SMOKE_RUN_CONFIG: dev_unit_1
+  SMOKE_RUN_OVERRIDES:
+    general:dem_db: "ned1/2016"
+  SMOKE_RUN_ROOT: "/tmp/weppcloud_smoke"
+  SMOKE_KEEP_RUN: "false"
+  SMOKE_BASE_URL: "http://localhost:8080"
+steps:
+  - description: load runs0 page and ensure controllers render
+    spec: run-page-smoke.spec.js
+    tags: [core]
+  - description: map StatusStream sanity checks
+    spec: run-page-smoke.spec.js
+    focus: map tabs
+    tags: [map]
+  - description: landuse toggles
+    spec: run-page-smoke.spec.js
+    focus: landuse
+    tags: [landuse]
+  - description: treatments panel (if present)
+    spec: run-page-smoke.spec.js
+    focus: treatments
+    tags: [treatments]
+timeout: 120000

@@ -467,7 +467,7 @@ var ChannelDelineation = (function () {
         };
 
         channel.has_dem = function (onSuccessCallback) {
-            return http.getJson("query/has_dem/", { params: { _: Date.now() } })
+            return http.getJson(url_for_run("query/has_dem/"), { params: { _: Date.now() } })
                 .then(function (response) {
                     if (typeof onSuccessCallback === "function") {
                         onSuccessCallback(response);
@@ -510,7 +510,7 @@ var ChannelDelineation = (function () {
                 payload: payload
             });
 
-            return http.request("rq/api/fetch_dem_and_build_channels", {
+            return http.request(url_for_run("rq/api/fetch_dem_and_build_channels"), {
                 method: "POST",
                 json: payload,
                 form: formElement
@@ -559,45 +559,51 @@ var ChannelDelineation = (function () {
         channel.onMapChange = function () {
             var map = MapController.getInstance();
 
-            var center = map.getCenter();
-            var zoom = map.getZoom();
-            var bounds = map.getBounds();
-            var sw = bounds.getSouthWest();
-            var ne = bounds.getNorthEast();
-            var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
-            var distance = map.distance(ne, sw);
+            try {
+                var center = map.getCenter();
+                var zoom = map.getZoom();
+                var bounds = map.getBounds();
+                var sw = bounds.getSouthWest();
+                var ne = bounds.getNorthEast();
+                var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
+                var distance = map.distance(ne, sw);
 
-            if (mapCenterInput) {
-                mapCenterInput.value = [center.lng, center.lat].join(",");
-            }
-            if (mapZoomInput) {
-                mapZoomInput.value = zoom;
-            }
-            if (mapDistanceInput) {
-                mapDistanceInput.value = distance;
-            }
-            if (mapBoundsInput) {
-                mapBoundsInput.value = extent.join(",");
-            }
+                if (mapCenterInput) {
+                    mapCenterInput.value = [center.lng, center.lat].join(",");
+                }
+                if (mapZoomInput) {
+                    mapZoomInput.value = zoom;
+                }
+                if (mapDistanceInput) {
+                    mapDistanceInput.value = distance;
+                }
+                if (mapBoundsInput) {
+                    mapBoundsInput.value = extent.join(",");
+                }
 
-            var zoomOk = zoom >= channel.zoom_min;
-            var powerOverride = typeof window.ispoweruser !== "undefined" && window.ispoweruser;
-            var enabled = zoomOk || powerOverride;
+                var zoomOk = zoom >= channel.zoom_min;
+                var powerOverride = typeof window.ispoweruser !== "undefined" && window.ispoweruser;
+                var enabled = zoomOk || powerOverride;
 
-            if (!enabled) {
-                setBuildButtonEnabled(false, "Area is too large, zoom must be " + channel.zoom_min + ", current zoom is " + zoom + ".");
-            } else {
-                setBuildButtonEnabled(true, "");
+                if (!enabled) {
+                    setBuildButtonEnabled(false, "Area is too large, zoom must be " + channel.zoom_min + ", current zoom is " + zoom + ".");
+                } else {
+                    setBuildButtonEnabled(true, "");
+                }
+
+                channel.update_command_button_state(channel);
+
+                emit("channel:map:updated", {
+                    center: [center.lng, center.lat],
+                    zoom: zoom,
+                    distance: distance,
+                    extent: extent
+                });
+            } catch (error) {
+                // Map not initialized yet - this is normal during bootstrap
+                // Skip updating channel controls until map is ready
+                // (Map will call onMapChange again once it emits 'map:ready')
             }
-
-            channel.update_command_button_state(channel);
-
-            emit("channel:map:updated", {
-                center: [center.lng, center.lat],
-                zoom: zoom,
-                distance: distance,
-                extent: extent
-            });
         };
 
         var palette = [
@@ -611,7 +617,7 @@ var ChannelDelineation = (function () {
             var taskMsg = "Identifying topaz_pass";
             resetStatus(taskMsg);
 
-            return http.request("query/delineation_pass/", { params: { _: Date.now() } })
+            return http.request(url_for_run("query/delineation_pass/"), { params: { _: Date.now() } })
                 .then(function (result) {
                     var response = result.body;
                     var pass = parseInt(response, 10);
@@ -649,7 +655,7 @@ var ChannelDelineation = (function () {
                 statusAdapter.text(taskMsg + "…");
             }
 
-            http.getJson("resources/netful.json", { params: { _: Date.now() } })
+            http.getJson(url_for_run("resources/netful.json"), { params: { _: Date.now() } })
                 .then(function (fc) {
                     var map = MapController.getInstance();
                     channel.glLayer = L.glify.layer({
@@ -685,7 +691,7 @@ var ChannelDelineation = (function () {
                 statusAdapter.text("Displaying SUBWTA channels…");
             }
 
-            http.getJson("resources/channels.json", { params: { _: Date.now() } })
+            http.getJson(url_for_run("resources/channels.json"), { params: { _: Date.now() } })
                 .then(function (fc) {
                     var map = MapController.getInstance();
 

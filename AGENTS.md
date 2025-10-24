@@ -492,6 +492,24 @@ Consistent pytest markers keep the suite selectable (fast unit loops vs. full in
 
 Until the automated marker checker lands (`wctl check-test-markers` from the tooling spec), reviewers should manually ensure new/modified tests obey these conventions. Future work will wire the checker into CI so regressions are caught automatically.
 
+### Test Support Blueprint
+- Enable by exporting `TEST_SUPPORT_ENABLED=true` (disabled by default). When enabled, the app exposes `/tests/api/*` endpoints for automation harnesses.
+- `POST /tests/api/create-run` accepts JSON like `{ "config": "dev_unit_1", "overrides": { "general:dem_db": "ned1/2016" } }` and returns a freshly provisioned run URL.
+- `GET /tests/api/ping` returns a simple health payload so automation can verify the blueprint is active.
+- `DELETE /tests/api/run/<runid>` removes the run directory created by the smoke harness. Use this to keep test artifacts tidy.
+- Playwright smoke harness environment knobs:
+  - `SMOKE_CREATE_RUN` (default `true`) toggles auto-provisioning via `/tests/api/create-run`.
+  - `SMOKE_RUN_CONFIG` selects the configuration slug for provisioning; `SMOKE_RUN_OVERRIDES` (JSON) adds query overrides.
+  - `SMOKE_RUN_PATH` reuses an existing run; `SMOKE_KEEP_RUN=true` skips teardown.
+  - `SMOKE_RUN_ROOT` overrides the working directory (e.g., `/tmp/weppcloud_smoke`, `/dev/shm/weppcloud_smoke`) so you can profile different storage backends.
+  - `SMOKE_BASE_URL`, `SMOKE_HEADLESS`, `SMOKE_RUN_OVERRIDES` mirror the static-src README guidance.
+  - Future `wctl run-smoke --profile <name>` command will load profile YAMLs from `tests/smoke/profiles/` to apply these settings automatically.
+
+### UI Smoke Tests
+- Basic suite lives under `wepppy/weppcloud/static-src/tests/smoke`. Run via `npm run smoke` (requires Node 20+ plus Playwright dependencies).
+- Before running, ensure the backend is up and export `SMOKE_RUN_PATH=<base-url>/runs/<runid>/<config>` (optionally `SMOKE_BASE_URL`, `SMOKE_HEADLESS=false` for local debugging).
+- Recommended flow: call the test-support `create-run` endpoint, feed the returned URL into `SMOKE_RUN_PATH`, execute `npm run smoke`, then clean up with `DELETE /tests/api/run/<runid>`.
+
 ## Front-End Development
 
 ### Controller Bundling
@@ -531,6 +549,58 @@ The fixture stubs required globals so most templates render without additional s
 - Build command: `wctl build-static-assets`
 
 Caddy serves `/weppcloud/static/*` directly in both dev and production.
+
+### Run-Scoped URL Construction
+
+**Critical:** All API endpoints that operate within a run context MUST use `url_for_run()` from `utils.js`:
+
+```javascript
+// ✅ Correct - run-scoped endpoints
+http.postJson(url_for_run("rq/api/build_climate"), payload, { form: formElement })
+http.request(url_for_run("tasks/set_landuse_db"), { method: "POST", body: params })
+http.get(url_for_run("query/delineation_pass"))
+http.get(url_for_run("resources/subcatchments.json"))
+
+// ❌ Wrong - missing run context (will result in 404 errors)
+http.postJson("rq/api/build_climate", payload)
+http.get("resources/subcatchments.json")
+```
+
+**Why:** Flask routes expect `/runs/<runid>/<config>/...` structure. The `url_for_run()` helper reads `window.runId` and `window.config` from the page context to build proper paths automatically.
+
+**Scope - Apply url_for_run() to:**
+- `rq/api/*` - Background job triggers (build_climate, run_wepp, build_landuse, etc.)
+- `tasks/*` - Task endpoints (set_*, acquire_*, modify_*, etc.)
+- `query/*` - Status/data queries (delineation_pass, outlet, wepp/phosphorus_opts, etc.)
+- `resources/*` - GeoJSON, legends, static data (subcatchments.json, netful.json, etc.)
+
+**Exceptions - Do NOT use url_for_run() for:**
+- `/batch/` routes (cross-run batch operations)
+- `/api/` global endpoints (user preferences, system status)
+- `/auth/` authentication routes
+- Root routes (`/`, `/index`, `/about`)
+
+**Verification Pattern:**
+```bash
+# Find unwrapped run-scoped endpoints (potential bugs)
+grep -rh '"rq/api/\|"tasks/\|"query/\|"resources/' wepppy/weppcloud/controllers_js/*.js | grep -v url_for_run
+
+# After controller changes, restart to rebuild bundle
+wctl restart weppcloud
+
+# Verify rebuild succeeded
+docker logs weppcloud | grep "Building controllers"
+```
+
+**Bulk Fix Pattern (for migrations):**
+```python
+import re
+pattern = r'(?<!url_for_run\()"(rq/api/|tasks/|query/|resources/)([^"]+)"'
+replacement = r'url_for_run("\1\2")'
+new_content = re.sub(pattern, replacement, content)
+```
+
+See `wepppy/weppcloud/controllers_js/README.md` for comprehensive controller architecture documentation.
 
 ## Common Tasks
 
@@ -726,15 +796,130 @@ When resuming Kubernetes work:
 4. Use `git log` to understand change history
 5. Search codebase for similar functionality: `git grep "pattern"`
 
-### Extracting Documentation Snippets
-- Use the `markdown-extract` CLI (installed at `/usr/local/bin/markdown-extract`) to pull a single section out of a long Markdown file.
-  - Example: `markdown-extract "Test Marker" docs/dev-notes/test-tooling-spec.md`
-  - Patterns are regex-based and case-insensitive by default; pass `--case-sensitive` when needed.
-  - Add `--all` to print every matching section and `--no-print-matched-heading` to omit the heading line.
-- The command is pipeline-friendly—feel free to pipe to `head`, `less`, or redirect to a scratch file when you only need a quick excerpt.
-- Source lives in `/workdir/markdown-extract`; if you need new features (extra filters, formatting tweaks, etc.), update that crate and rebuild.
-- When writing docs, give each section a distinctive heading (for example `## 1. Test Isolation Checker`). Mention those sections using Markdown anchors when linking elsewhere, e.g. `docs/dev-notes/test-tooling-spec.md#1-test-isolation-checker-wctl-check-test-isolation`.
-- Handy when the doc is huge and you just want a specific section without scrolling.
+### Markdown Documentation Tools
+
+**Both `markdown-extract` and `markdown-edit` are pre-installed at `/usr/local/bin`.** These Rust-based tools provide semantic operations on Markdown documents, particularly valuable for AI agent workflows.
+
+Full reference: [`tools/README.markdown-tools.md`](tools/README.markdown-tools.md)
+
+#### markdown-extract: Reading Sections
+
+Extract sections from Markdown files by heading pattern to reduce context window usage:
+
+```bash
+# Extract a specific section
+markdown-extract "Installation" README.md
+
+# Extract all matching sections
+markdown-extract "Usage" docs.md --all
+
+# Get body only (omit heading line)
+markdown-extract "API Reference" docs.md --no-print-matched-heading
+
+# Case-sensitive matching
+markdown-extract "^Configuration$" guide.md --case-sensitive
+
+# Pipeline-friendly (read from stdin, pipe to other tools)
+cat docs.md | markdown-extract "Section" - | head -10
+```
+
+**Key features:**
+- Regex-based pattern matching (case-insensitive by default)
+- Handles both ATX (`#`) and Setext (underline) headings
+- Graceful broken pipe handling for `head`, `less`, etc.
+- Exit codes: 0 (success), 1 (no match), 2 (I/O error)
+
+**Agent workflow patterns:**
+```bash
+# Pre-filter knowledge bases for focused context
+markdown-extract "API.*Auth" knowledge-base.md > context.txt
+
+# Check if required sections exist (CI validation)
+markdown-extract "^License$" README.md || exit 1
+
+# Extract from HTTP responses
+curl -s https://api.example.com/docs | markdown-extract "Endpoints" -
+```
+
+#### markdown-edit: Modifying Sections
+
+Heading-aware editor for safe, atomic Markdown modifications:
+
+```bash
+# Preview changes before applying
+markdown-edit notes.md append-to "Today" \
+  --with-string "- Task completed\\n" \
+  --dry-run
+
+# Replace section body while keeping heading
+markdown-edit guide.md replace "Setup" \
+  --with-string "New content\\n" \
+  --keep-heading
+
+# Delete a section
+markdown-edit docs.md delete "Deprecated" --backup
+
+# Insert new section after a match
+markdown-edit README.md insert-after "Installation" \
+  --with updates.md
+```
+
+**Available operations:**
+- `replace <pattern>` - Replace entire section or body only (`--keep-heading`)
+- `delete <pattern>` - Remove matching section
+- `append-to <pattern>` - Append to section body
+- `prepend-to <pattern>` - Insert after heading, before existing content
+- `insert-after <pattern>` - Insert new section after match
+- `insert-before <pattern>` - Insert new section before match
+
+**Safety features:**
+- `--dry-run` shows diff preview without modifying files
+- `--backup` / `--no-backup` control automatic `.bak` creation (backup on by default)
+- `--allow-duplicate` to opt out of sibling heading collision checks
+- Atomic writes via temp file + fsync
+- Validates heading levels, payloads, and structure
+
+**Payload sources:**
+- `--with <path>` - Read content from file (or `-` for stdin)
+- `--with-string "text"` - Inline content with escapes (`\n`, `\t`, `\\`, `\"`)
+
+**Match control:**
+- `--all` - Apply to all matching sections (default: first match only)
+- `--max-matches N` - Cap number of sections modified
+- `--case-sensitive` - Exact pattern matching
+- `--quiet` - Suppress non-error output
+
+**Exit codes:**
+
+| Code | Meaning | Agent Response |
+|------|---------|----------------|
+| 0 | Success | Proceed with workflow |
+| 1 | Section not found | Check pattern, list headings with `markdown-extract ".*" file.md --all \| grep "^#"` |
+| 2 | Multiple matches (without `--all`) | Refine pattern or use `--all` |
+| 3 | Invalid arguments | Fix command syntax |
+| 4 | I/O failure | Check permissions |
+| 5 | Invalid content source | Verify `--with` file exists or `--with-string` escapes are valid |
+| 6 | Validation failure | Payload missing heading, level mismatch, or duplicate sibling |
+
+**Recommended workflow:**
+```bash
+# 1. Extract current section to understand context
+current=$(markdown-extract "Installation" README.md)
+
+# 2. Preview changes
+markdown-edit README.md replace "Installation" \
+  --with-string "## Installation\\n\\nNew content.\\n" \
+  --dry-run
+
+# 3. Apply if preview looks good
+markdown-edit README.md replace "Installation" \
+  --with-string "## Installation\\n\\nNew content.\\n"
+```
+
+**When writing docs:**
+- Give each section a distinctive heading for reliable extraction
+- Use Markdown anchors when linking: `docs/guide.md#section-name`
+- Handy when docs are large and you only need specific sections
 
 ### Common Pitfalls
 - **NoDb locking**: Always use `with self.locked()` for mutations

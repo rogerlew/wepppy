@@ -183,7 +183,7 @@ var DebrisFlow = (function () {
 
             debris.connect_status_stream(debris);
 
-            http.postJson("rq/api/run_debris_flow", {}, { form: formElement }).then(function (response) {
+            http.postJson(url_for_run("rq/api/run_debris_flow"), {}, { form: formElement }).then(function (response) {
                 var payload = response.body || {};
                 if (payload.Success === true || payload.success === true) {
                     statusAdapter.html("run_debris_flow_rq job submitted: " + payload.job_id);

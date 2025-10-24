@@ -602,7 +602,8 @@ function controlBase() {
             }
 
             if (!panelElement) {
-                console.warn("controlBase.attach_status_stream: panel element not found.");
+                // This is normal - controller can be instantiated without its panel on the page
+                // For example, batch_runner on a standard run page, or path_ce on pages without that mod
                 return null;
             }
 

@@ -473,7 +473,7 @@ var LanduseModify = (function () {
         }
 
         function loadSubcatchments() {
-            return http.getJson("resources/subcatchments.json", {
+            return http.getJson(url_for_run("resources/subcatchments.json"), {
                 params: { _: Date.now() },
                 form: formElement
             }).then(function (data) {
@@ -550,7 +550,7 @@ var LanduseModify = (function () {
             var ne = bounds.getNorthEast();
             var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
 
-            http.postJson("tasks/sub_intersection/", { extent: extent }, { form: formElement })
+            http.postJson(url_for_run("tasks/sub_intersection/"), { extent: extent }, { form: formElement })
                 .then(function (response) {
                     var payload = response.body;
                     handleSubIntersection(payload);
@@ -653,7 +653,7 @@ var LanduseModify = (function () {
                 payload: { topazIds: ids.slice(), landuse: landuseValue }
             });
 
-            http.postJson("tasks/modify_landuse/", {
+            http.postJson(url_for_run("tasks/modify_landuse/"), {
                 topaz_ids: ids,
                 landuse: landuseValue
             }, { form: formElement }).then(function (response) {

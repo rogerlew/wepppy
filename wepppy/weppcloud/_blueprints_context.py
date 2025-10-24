@@ -55,3 +55,6 @@ def register_blueprints(app):
     app.register_blueprint(batch_runner_bp)
     app.register_blueprint(interchange_bp)
     app.register_blueprint(ui_showcase_bp)
+    if app.config.get("TEST_SUPPORT_ENABLED") and 'test_bp' in globals():
+        if test_bp is not None:
+            app.register_blueprint(test_bp)

@@ -586,7 +586,7 @@ var Climate = (function () {
             if (catalogId !== undefined && catalogId !== null && catalogId !== "") {
                 payload.catalog_id = catalogId;
             }
-            return http.postJson("tasks/set_climate_mode/", payload, { form: formElement })
+            return http.postJson(url_for_run("tasks/set_climate_mode/"), payload, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
                     if (body.Success === true) {
@@ -624,7 +624,7 @@ var Climate = (function () {
 
             climate.events.emit("climate:station:mode", { mode: parsedMode, silent: false });
 
-            return http.postJson("tasks/set_climatestation_mode/", { mode: parsedMode }, { form: formElement })
+            return http.postJson(url_for_run("tasks/set_climatestation_mode/"), { mode: parsedMode }, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
                     if (body.Success === true) {
@@ -655,7 +655,7 @@ var Climate = (function () {
             infoAdapter.text("");
             stacktraceAdapter.text("");
 
-            return http.postJson("tasks/set_climate_spatialmode/", { spatialmode: parsedMode }, { form: formElement })
+            return http.postJson(url_for_run("tasks/set_climate_spatialmode/"), { spatialmode: parsedMode }, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
                     if (body.Success === true) {
@@ -685,13 +685,13 @@ var Climate = (function () {
 
             var endpoint = null;
             if (mode === 0) {
-                endpoint = "view/closest_stations/";
+                endpoint = url_for_run("view/closest_stations/");
             } else if (mode === 1) {
-                endpoint = "view/heuristic_stations/";
+                endpoint = url_for_run("view/heuristic_stations/");
             } else if (mode === 2) {
-                endpoint = "view/eu_heuristic_stations/";
+                endpoint = url_for_run("view/eu_heuristic_stations/");
             } else if (mode === 3) {
-                endpoint = "view/au_heuristic_stations/";
+                endpoint = url_for_run("view/au_heuristic_stations/");
             }
             if (!endpoint) {
                 return;
@@ -725,7 +725,7 @@ var Climate = (function () {
 
             climate.events.emit("climate:station:selected", { station: selectedStation });
 
-            http.postJson("tasks/set_climatestation/", { station: selectedStation }, { form: formElement })
+            http.postJson(url_for_run("tasks/set_climatestation/"), { station: selectedStation }, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
                     if (body.Success === true) {
@@ -744,7 +744,7 @@ var Climate = (function () {
                 return;
             }
             var project = window.Project && typeof window.Project.getInstance === "function" ? window.Project.getInstance() : null;
-            http.request("view/climate_monthlies/", { params: {} })
+            http.request(url_for_run("view/climate_monthlies/"), { params: {} })
                 .then(function (response) {
                     var body = response.body;
                     climate.monthliesContainer.innerHTML = typeof body === "string" ? body : "";
@@ -803,7 +803,7 @@ var Climate = (function () {
             var payload = forms.serializeForm(formElement, { format: "json" });
             climate.events.emit("climate:build:started", { payload: payload });
 
-            http.postJson("rq/api/build_climate", payload, { form: formElement })
+            http.postJson(url_for_run("rq/api/build_climate"), payload, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
                     if (body.Success === true) {
@@ -828,7 +828,7 @@ var Climate = (function () {
             stacktraceAdapter.text("");
 
             var formData = new FormData(formElement);
-            http.request("tasks/upload_cli/", {
+            http.request(url_for_run("tasks/upload_cli/"), {
                 method: "POST",
                 body: formData,
                 form: formElement
@@ -853,7 +853,7 @@ var Climate = (function () {
             statusAdapter.html("Setting use_gridmet_wind_when_applicable (" + normalizedState + ")...");
             stacktraceAdapter.text("");
 
-            http.postJson("tasks/set_use_gridmet_wind_when_applicable/", { state: normalizedState }, { form: formElement })
+            http.postJson(url_for_run("tasks/set_use_gridmet_wind_when_applicable/"), { state: normalizedState }, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
                     if (body.Success === true) {

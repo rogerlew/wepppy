@@ -214,7 +214,7 @@ var Wepp = (function () {
         };
 
         wepp.updatePhosphorus = function () {
-            http.getJson("query/wepp/phosphorus_opts/")
+            http.getJson(url_for_run("query/wepp/phosphorus_opts/"))
                 .then(function (response) {
                     if (!response) {
                         return;
@@ -248,7 +248,7 @@ var Wepp = (function () {
             }
             wepp.appendStatus(taskMsg + "...");
 
-            return http.postJson("tasks/set_run_wepp_routine/", { routine: routine, state: state }, { form: formElement })
+            return http.postJson(url_for_run("tasks/set_run_wepp_routine/"), { routine: routine, state: state }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
@@ -275,7 +275,7 @@ var Wepp = (function () {
             var formData = new FormData();
             formData.append("input_upload_cover_transform", file);
 
-            http.request("tasks/upload_cover_transform", {
+            http.request(url_for_run("tasks/upload_cover_transform"), {
                 method: "POST",
                 body: formData,
                 form: formElement
@@ -329,7 +329,7 @@ var Wepp = (function () {
                 weppEvents.emit("wepp:run:started", { payload: payload });
             }
 
-            http.postJson("rq/api/run_wepp", payload, { form: formElement })
+            http.postJson(url_for_run("rq/api/run_wepp"), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {

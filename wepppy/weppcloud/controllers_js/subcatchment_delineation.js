@@ -434,7 +434,7 @@ var SubcatchmentDelineation = (function () {
                 safeText(statusElement, "Loading " + label + " …");
             }
 
-            var targetUrl = "query/" + type + "/subcatchments/";
+            var targetUrl = url_for_run("query/" + type + "/subcatchments/");
 
             return requestJson(targetUrl)
                 .then(function (data) {
@@ -850,7 +850,7 @@ var SubcatchmentDelineation = (function () {
         function renderGriddedLoss() {
             removeGrid();
             var map = MapController.getInstance();
-            state.grid = L.leafletGeotiff("resources/flowpaths_loss.tif", {
+            state.grid = L.leafletGeotiff(url_for_run("resources/flowpaths_loss.tif"), {
                 band: 0,
                 displayMin: 0,
                 displayMax: 1,
@@ -1070,7 +1070,7 @@ var SubcatchmentDelineation = (function () {
 
         function showSubcatchments() {
             state.cmapMode = "default";
-            requestJson("resources/subcatchments.json", { params: { _: Date.now() } })
+            requestJson(url_for_run("resources/subcatchments.json"), { params: { _: Date.now() } })
                 .then(function (geojson) {
                     if (!geojson) {
                         return;
@@ -1136,7 +1136,7 @@ var SubcatchmentDelineation = (function () {
         }
 
         function renderCover() {
-            requestJson("query/landuse/cover/subcatchments")
+            requestJson(url_for_run("query/landuse/cover/subcatchments"))
                 .then(function (data) {
                     state.dataCover = data;
                     state.cmapMode = "cover";
@@ -1292,7 +1292,7 @@ var SubcatchmentDelineation = (function () {
         };
 
         function renderPhosphorus() {
-            requestJson("query/wepp/phosphorus/subcatchments/")
+            requestJson(url_for_run("query/wepp/phosphorus/subcatchments/"))
                 .then(function (data) {
                     state.dataPhosphorus = data;
                     state.cmapMode = "phosphorus";
@@ -1302,7 +1302,7 @@ var SubcatchmentDelineation = (function () {
         }
 
         function renderAshLoad() {
-            requestJson("query/ash/out/")
+            requestJson(url_for_run("query/ash/out/"))
                 .then(function (data) {
                     state.dataAshLoad = data;
                     state.cmapMode = "ash_load";
@@ -1313,7 +1313,7 @@ var SubcatchmentDelineation = (function () {
         }
 
         function renderAshTransport() {
-            requestJson("query/ash_out/")
+            requestJson(url_for_run("query/ash_out/"))
                 .then(function (data) {
                     state.dataAshTransport = data;
                     state.cmapMode = "ash_transport";
@@ -1326,7 +1326,7 @@ var SubcatchmentDelineation = (function () {
         }
 
         function renderRhemRunoff() {
-            requestJson("query/rhem/runoff/subcatchments/")
+            requestJson(url_for_run("query/rhem/runoff/subcatchments/"))
                 .then(function (data) {
                     state.dataRhemRunoff = data;
                     state.cmapMode = "rhem_runoff";
@@ -1336,7 +1336,7 @@ var SubcatchmentDelineation = (function () {
         }
 
         function renderRhemSedYield() {
-            requestJson("query/rhem/sed_yield/subcatchments/")
+            requestJson(url_for_run("query/rhem/sed_yield/subcatchments/"))
                 .then(function (data) {
                     state.dataRhemSedYield = data;
                     state.cmapMode = "rhem_sed_yield";
@@ -1346,7 +1346,7 @@ var SubcatchmentDelineation = (function () {
         }
 
         function renderRhemSoilLoss() {
-            requestJson("query/rhem/soil_loss/subcatchments/")
+            requestJson(url_for_run("query/rhem/soil_loss/subcatchments/"))
                 .then(function (data) {
                     state.dataRhemSoilLoss = data;
                     state.cmapMode = "rhem_soil_loss";
@@ -1377,7 +1377,7 @@ var SubcatchmentDelineation = (function () {
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
 
-            http.postJson("rq/api/build_subcatchments_and_abstract_watershed", payload, { form: formElement })
+            http.postJson(url_for_run("rq/api/build_subcatchments_and_abstract_watershed"), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {

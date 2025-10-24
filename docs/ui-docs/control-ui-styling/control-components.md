@@ -140,7 +140,7 @@ _Fixed console shell_
 
 ## 2. Layout Notes
 - Group related inputs into cards using `.wc-control__inputs` and spacing utilities instead of ad-hoc Bootstrap rows.
-- Consult `docs/ui-docs/control-ui-styling/final-implementation-blueprint.md` for broader layout guidance during the Pure migration.
+- Consult `docs/work-packages/20251023_frontend_integration/notes/final-implementation-blueprint.md` for broader layout guidance during the Pure migration.
 
 ### 2.1 Runs Page Layout
 - **Header**: fixed Pure header (run-specific variant includes name/scenario inputs, power user tools, readonly/public toggles).

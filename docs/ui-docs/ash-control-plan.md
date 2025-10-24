@@ -175,8 +175,8 @@
 ## References
 
 - `docs/ui-docs/control-ui-styling/control-inventory.md`
-- `docs/ui-docs/control-ui-styling/final-implementation-blueprint.md`
-- `docs/ui-docs/control-ui-styling/runs0_pure_plan.md`
+- `docs/work-packages/20251023_frontend_integration/notes/final-implementation-blueprint.md`
+- `docs/work-packages/prompts/completed/runs0_pure_plan.md`
 - `docs/ui-docs/ui-style-guide.md`
 - `wepppy/nodb/mods/ash_transport/README.md`
 

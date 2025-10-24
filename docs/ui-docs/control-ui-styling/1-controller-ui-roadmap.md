@@ -4,12 +4,12 @@ This note captures the current shape of WEPPcloud controller views, the JavaScri
 
 ## 1. Current Architecture Inventory
 
-### 1.1 Layout and Templates
-- Every controller template extends `_base.htm`, which hard-codes the form scaffold (title row, `<div id="rq_job">`, `<small id="status">`, `<div id="info">`, `<div id="stacktrace">`).【F:wepppy/weppcloud/templates/controls/_base.htm†L1-L19】
-- The runs0 page is server-rendered by `0.htm`; it still pulls in Bootstrap, Bootstrap-TOC, DataTables, and inline layout CSS to create the two-column table-of-contents + content layout.【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L1-L194】
-- The page assembles controller sections by including dozens of templates in a fixed order, with conditional blocks for optional mods (BAER, Omni, RHEM, etc.).【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L120-L179】
+- **Status (2025-02-24)**: Production now uses the Pure template stack (`control_shell` and friends). The notes below capture historical pain points so new work avoids falling back to the legacy patterns.
+- Every controller template extends `control_shell` (pure macros). `_base.htm` is archived for legacy reference only.【F:docs/work-packages/20251023_frontend_integration/notes/final-implementation-blueprint.md†L1-L40】
+- The runs0 page renders via `runs0_pure.htm`, which uses Pure CSS layout tokens (`wc-page`, `.pure-g`). Legacy `0.htm` remains archived but is not used in production.【F:wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm†L1-L120】
+- Controller sections are composed through the Pure template includes (map, landuse, soils, climate, etc.) with conditional blocks for optional mods (BAER, Omni, RHEM).
 
-### 1.2 JavaScript Control Infrastructure
+- ### 1.2 JavaScript Control Infrastructure
 - `control_base.js` is the shared mixin that every controller singleton imports. It wires RQ job polling, command button disable/enable logic, stacktrace rendering, and attaches the StatusStream via `controlBase.attach_status_stream` when a job is running.【F:wepppy/weppcloud/controllers_js/control_base.js†L5-L344】
 - Controllers register themselves as singletons (for example `Omni.getInstance()`), bind DOM handles, override `triggerEvent` when they need extra bookkeeping, and then rely on `set_rq_job_id` to start/stop polling and WebSocket streaming.【F:wepppy/weppcloud/controllers_js/omni.js†L5-L151】
 - Long-lived flows such as BatchRunner build richer state machines on top of `controlBase`, bolting on card-oriented DOM fragments, file uploads, and bespoke polling for child tasks while reusing the base job status and button management functions.【F:wepppy/weppcloud/controllers_js/batch_runner.js†L1-L158】
@@ -19,10 +19,10 @@ This note captures the current shape of WEPPcloud controller views, the JavaScri
 - `Ron` (the run object) captures locales from the config file during initialization, primes the required NoDb controllers, and ensures run metadata lives on disk and in Redis.【F:wepppy/nodb/core/ron.py†L307-L419】
 - Individual controllers read locale context through the NoDb facade; `NoDbBase.locales` falls back to a large conditional that hard-codes per-config overrides when `_locales` is absent, which illustrates how ad-hoc the current locale handling is.【F:wepppy/nodb/base.py†L1151-L1173】
 
-### 1.4 View Variants We Must Accommodate
-- Many controls are simple form grids, but several embed file uploads (e.g., climate `.cli` upload, BAER shapefiles) and toggle visibility based on run modes. Climate alone branches by locale, data source availability, and upload state within a single template.【F:wepppy/weppcloud/templates/controls/climate.htm†L1-L200】
-- Omni is a dynamic, JavaScript-driven scenario builder that serializes multiple FormData payloads, appends uploaded files, and triggers follow-on reporting when RQ broadcasts a completion event.【F:wepppy/weppcloud/controllers_js/omni.js†L32-L150】
-- BatchRunner behaves more like an application page: it renders data cards, tracks validation state, and streams progress for numerous subordinate jobs via custom WebSocket channels.【F:wepppy/weppcloud/controllers_js/batch_runner.js†L34-L139】
+- ### 1.4 View Variants We Must Accommodate
+- Many controls are simple form grids, but several embed file uploads (e.g., climate `.cli` upload, BAER shapefiles) and toggle visibility based on run modes. Climate alone branches by locale, data source availability, and upload state within a single template (Pure version lives at `controls/climate_pure.htm`).
+- Omni is a dynamic, JavaScript-driven scenario builder that serializes multiple FormData payloads, appends uploaded files, and triggers follow-on reporting when RQ broadcasts a completion event.
+- BatchRunner behaves more like an application page: it renders data cards, tracks validation state, and streams progress for numerous subordinate jobs via custom WebSocket channels.
 
 > **Status (2025-02-24):** Pure templates are now production; the notes below capture historical pain points so new work can avoid falling back to the legacy patterns.
 

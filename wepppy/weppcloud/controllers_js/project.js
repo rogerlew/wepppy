@@ -359,7 +359,7 @@ var Project = (function () {
             clearTimeout(project._nameDebounceTimer);
             project._nameDebounceTimer = null;
 
-            return http.postJson("tasks/setname/", { name: trimmed }).then(function (result) {
+            return http.postJson(url_for_run("tasks/setname/"), { name: trimmed }).then(function (result) {
                 var response = unpackResponse(result);
                 if (isSuccess(response)) {
                     var content = getContent(response);
@@ -447,7 +447,7 @@ var Project = (function () {
             clearTimeout(project._scenarioDebounceTimer);
             project._scenarioDebounceTimer = null;
 
-            return http.postJson("tasks/setscenario/", { scenario: trimmed }).then(function (result) {
+            return http.postJson(url_for_run("tasks/setscenario/"), { scenario: trimmed }).then(function (result) {
                 var response = unpackResponse(result);
                 if (isSuccess(response)) {
                     var content = getContent(response);
@@ -533,7 +533,7 @@ var Project = (function () {
             var desiredState = Boolean(stateValue);
             var previous = readToggleState(dom, READONLY_SELECTOR, state.readonly);
 
-            return http.postJson("tasks/set_readonly", { readonly: desiredState }).then(function (result) {
+            return http.postJson(url_for_run("tasks/set_readonly"), { readonly: desiredState }).then(function (result) {
                 var response = unpackResponse(result);
                 if (isSuccess(response)) {
                     syncToggleState(dom, READONLY_SELECTOR, desiredState);
@@ -586,7 +586,7 @@ var Project = (function () {
             var desiredState = Boolean(stateValue);
             var previous = readToggleState(dom, PUBLIC_SELECTOR, state.public);
 
-            return http.postJson("tasks/set_public", { public: desiredState }).then(function (result) {
+            return http.postJson(url_for_run("tasks/set_public"), { public: desiredState }).then(function (result) {
                 var response = unpackResponse(result);
                 if (isSuccess(response)) {
                     syncToggleState(dom, PUBLIC_SELECTOR, desiredState);
@@ -634,7 +634,7 @@ var Project = (function () {
         project.setPublic = project.set_public;
 
         project.clear_locks = function () {
-            return http.request("tasks/clear_locks", {
+            return http.request(url_for_run("tasks/clear_locks"), {
                 method: "GET",
                 params: { _: Date.now() }
             }).then(function (result) {
@@ -653,7 +653,7 @@ var Project = (function () {
         };
 
         project.migrate_to_omni = function () {
-            return http.getJson("tasks/omni_migration").then(function (response) {
+            return http.getJson(url_for_run("tasks/omni_migration")).then(function (response) {
                 if (response && response.Success === true) {
                     window.alert("Project has been migrated to Omni. Page will now refresh.");
                     window.location.reload();
@@ -669,7 +669,7 @@ var Project = (function () {
         };
 
         project.enable_path_cost_effective = function () {
-            return http.getJson("tasks/path_cost_effective_enable").then(function (response) {
+            return http.getJson(url_for_run("tasks/path_cost_effective_enable")).then(function (response) {
                 if (response && response.Success === true) {
                     window.alert("PATH Cost-Effective module enabled. Page will now refresh.");
                     window.location.reload();

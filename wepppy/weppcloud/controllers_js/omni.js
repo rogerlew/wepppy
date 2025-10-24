@@ -718,7 +718,7 @@ var Omni = (function () {
                 omniEvents.emit("omni:run:started", { scenarios: payload.scenarios });
             }
 
-            http.request("rq/api/run_omni", {
+            http.request(url_for_run("rq/api/run_omni"), {
                 method: "POST",
                 body: payload.formData,
                 form: formElement

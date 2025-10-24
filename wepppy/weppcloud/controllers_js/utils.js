@@ -8,10 +8,27 @@ function coordRound(v) {
 // utility function to be used by ControlBase subclasses to build URLs for pup runs.
 // not to be used elsewhere.
 function url_for_run(url) {
-    if (typeof pup_relpath === 'string' && pup_relpath && url.indexOf('pup=') === -1) {
-        url += (url.indexOf('?') === -1 ? '?' : '&') + 'pup=' + encodeURIComponent(pup_relpath);
+    // Build the full run-scoped path
+    var runPath = "";
+    if (typeof window.runId === "string" && window.runId && typeof window.config === "string" && window.config) {
+        runPath = "/runs/" + encodeURIComponent(window.runId) + "/" + encodeURIComponent(window.config) + "/";
     }
-    return url;
+    
+    // Normalize the URL to not start with /
+    var normalizedUrl = url;
+    if (normalizedUrl.charAt(0) === "/") {
+        normalizedUrl = normalizedUrl.substring(1);
+    }
+    
+    // Combine run path and URL
+    var fullUrl = runPath + normalizedUrl;
+    
+    // Add pup parameter if needed
+    if (typeof pup_relpath === 'string' && pup_relpath && fullUrl.indexOf('pup=') === -1) {
+        fullUrl += (fullUrl.indexOf('?') === -1 ? '?' : '&') + 'pup=' + encodeURIComponent(pup_relpath);
+    }
+    
+    return fullUrl;
 }
 
 function pass() {

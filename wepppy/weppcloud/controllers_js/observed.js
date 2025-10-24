@@ -248,7 +248,7 @@ var Observed = (function () {
         };
 
         controller.onWeppRunCompleted = function () {
-            http.getJson("query/climate_has_observed/").then(function (hasObserved) {
+            http.getJson(url_for_run("query/climate_has_observed/")).then(function (hasObserved) {
                 var available = false;
                 if (typeof hasObserved === "boolean") {
                     available = hasObserved;
@@ -319,7 +319,7 @@ var Observed = (function () {
 
             controller.connect_status_stream(controller);
 
-            http.postJson("tasks/run_model_fit/", submission, { form: controller.form }).then(function (response) {
+            http.postJson(url_for_run("tasks/run_model_fit/"), submission, { form: controller.form }).then(function (response) {
                 var body = response && response.body !== undefined ? response.body : response;
                 var normalized = body || {};
 

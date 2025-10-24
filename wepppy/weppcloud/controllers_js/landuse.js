@@ -327,7 +327,7 @@ var Landuse = (function () {
 
             var formData = new FormData(formElement);
 
-            http.request("rq/api/build_landuse", {
+            http.request(url_for_run("rq/api/build_landuse"), {
                 method: "POST",
                 body: formData,
                 form: formElement
@@ -349,7 +349,7 @@ var Landuse = (function () {
                 value: value
             };
 
-            http.postJson("tasks/modify_landuse_coverage/", payload, { form: formElement })
+            http.postJson(url_for_run("tasks/modify_landuse_coverage/"), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === false) {
@@ -365,7 +365,7 @@ var Landuse = (function () {
                 newdom: newDom
             };
 
-            http.postJson("tasks/modify_landuse_mapping/", payload, { form: formElement })
+            http.postJson(url_for_run("tasks/modify_landuse_mapping/"), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === false) {
@@ -446,7 +446,7 @@ var Landuse = (function () {
             var taskMsg = "Setting Mode to " + mode + " (" + (singleSelection || "") + ")";
             resetStatus(taskMsg);
 
-            http.postJson("tasks/set_landuse_mode/", {
+            http.postJson(url_for_run("tasks/set_landuse_mode/"), {
                 mode: mode,
                 landuse_single_selection: singleSelection
             }, { form: formElement }).then(function (result) {
@@ -487,7 +487,7 @@ var Landuse = (function () {
             var taskMsg = "Setting Landuse Db to " + value;
             resetStatus(taskMsg);
 
-            http.postJson("tasks/set_landuse_db/", { landuse_db: value }, { form: formElement })
+            http.postJson(url_for_run("tasks/set_landuse_db/"), { landuse_db: value }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
