@@ -83,7 +83,7 @@
 
 ## Recommended Next Steps
 1. Move the orphaned `_base` templates (and their advanced-option includes) into an archival folder under `docs/work-packages/20251023_frontend_integration/legacy_controls/` or delete them outright after doc updates.
-2. Regenerate `controllers.js` after template removal (`python wepppy/weppcloud/controllers_js/build_controllers_js.py`) and rerun the Pure controls render smoke test (`wctl run "pytest tests/weppcloud/routes/test_pure_controls_render.py"`).
+2. Regenerate `controllers.js` after template removal (`python wepppy/weppcloud/controllers_js/build_controllers_js.py`) and rerun the Pure controls render smoke test (`wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py`).
 3. Update the documentation set listed above so the control inventory reflects only live templates.
 4. Announce the cleanup in the work-package retrospective (`docs/work-packages/20251023_frontend_integration/lessons_learned.md`) once merged.
 

@@ -43,7 +43,7 @@ The controller modernization used a two-tier agent architecture:
 - Decompose large work (25 controllers) into atomic tasks
 - Track completion status across all subtasks
 - Write standardized prompts following this framework
-- **Iterate prompts with agent feedback** until "god-tier"
+- **Conceptual planning and iterating prompts with agent feedback** until "god-tier"
 - Validate worker output and catch regressions
 - Maintain architectural consistency
 - Update documentation and checklists
@@ -71,9 +71,15 @@ The "god-tier" prompt didn't emerge fully formed—it was **iteratively refined*
 - "What information is missing or ambiguous?"
 
 **2. Agent Feedback Loop:**
-- Draft initial prompt based on framework
-- Ask agent: "What would prevent you from completing this in one shot?"
-- Agent identifies gaps, ambiguities, missing context
+- Prompter and Lead agent discuss task to form initial prompt
+- Human Factors appied to AI Agents 
+  - _Summarize your experience completing the task?_
+  - _What were the highlights?_
+  - _What were the the painpoints?_
+  - _Do you have any suggestions on how this could be improved?_
+  - _Is this the correct strategy to implement the task?_
+  - _Is there anything else we should do?_
+- Prompter identifies gaps, ambiguities, missing context
 - **Agent suggests architectural improvements** (e.g., event-driven architecture)
 - Refine prompt based on feedback
 - Repeat until agent confirms: "Yes, I can execute this completely"
@@ -374,6 +380,8 @@ wctl run-pytest tests/weppcloud/routes/test_<name>_bp.py  # Backend integration
 # Optional validations (recommended)
 wctl run-pytest tests --maxfail=1          # Full suite (if time allows)
 ```
+
+> When adapting the checklists below to wepppy, replace bare `pytest …` invocations with the `wctl run-pytest …` wrapper so tests run inside the Docker environment.
 
 **Other Applications:**
 

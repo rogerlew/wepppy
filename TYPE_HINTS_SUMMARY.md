@@ -18,10 +18,10 @@ The table below captures the current status so we can see which modules are full
 | `wepppy/nodb/core/wepp.py` | 2706 | Complete | Complete | Present | Extensive module docstring outlining WEPP runs; `.pyi` captures enums, dataclasses, and controller surface. |
 | `wepppy/nodb/core/topaz.py` | 250 | Complete | Complete | Present | Module docstring documents TOPAZ preprocessing workflow; annotations and stub remain in sync. |
 | `wepppy/nodb/core/ron.py` | 897 | Complete | Complete | Present | Narrative docstring added for project bootstrap and external dependencies. |
-| `wepppy/nodb/base.py` | 1880 | Complete | Partial | Missing | Docstring now documents NoDb philosophy; additional annotations and a `.pyi` stub still outstanding. |
+| `wepppy/nodb/base.py` | 1880 | Complete | Partial | Present | Docstring now documents NoDb philosophy; annotations are still being backfilled to match the new `base.pyi` surface. |
 
 ## NoDb Mods
-Quick audit across 68 modules under `wepppy/nodb/mods` shows only **5/68** files currently ship with module docstrings and just **6/45** executable modules achieve full annotation coverage (no `.pyi` stubs exist yet). The table highlights the most frequently used mods so we can prioritize doc and typing work.
+Quick audit across 68 modules under `wepppy/nodb/mods` shows only **5/68** files currently ship with module docstrings and just **6/45** executable modules achieve full annotation coverage. Several high-traffic mods now ship `.pyi` stubs (for example `omni`, `ag_fields`, `ash_transport`, `baer`, `rangeland_cover`), but broad coverage remains a work in progress. The table highlights the most frequently used mods so we can prioritize doc and typing work.
 
 | Module | Documentation | Type Hints | `.pyi` Stub | Notes |
 | --- | --- | --- | --- | --- |
@@ -54,7 +54,7 @@ Quick audit across 68 modules under `wepppy/nodb/mods` shows only **5/68** files
   Disturbed, PathCE, Ash Transport, Rangeland Cover, RAP, and RHEM mods now include narrative docstrings; the aggregator (`wepppy.nodb.mods.__init__`) documents the lazy loader. The remaining high-traffic mods still need docstrings, annotations, and `.pyi` coverage.
 
 - **Base infrastructure**  
-  `wepppy.nodb.base` introduces a thorough docstring describing locking and Redis integration, yet its runtime annotations remain incomplete and no `.pyi` stub exists. It should be the next target so downstream controllers can rely on typed primitives.
+  `wepppy.nodb.base` introduces a thorough docstring describing locking and Redis integration, but its runtime annotations still lag portions of the new `base.pyi`. It should be the next target so downstream controllers can rely on typed primitives.
 
 ## Recommended Validation Workflow
 Whenever a module is updated, run the validation sequence from the template:
@@ -65,9 +65,9 @@ python tools/sync_stubs.py  # keep stubs/wepppy/ in sync with inline .pyi files
 ```
 
 ## Outstanding Work
-1. Expand type hints in `wepppy/nodb/base.py`, create a matching `.pyi`, and validate with `stubtest`.
+1. Finish rounding out type hints in `wepppy/nodb/base.py` and validate `base.pyi` with `stubtest`.
 2. Author module docstrings and add annotations for remaining priority mods.
-3. Introduce `.pyi` stubs for NoDb mods once runtime signatures stabilize; Disturbed, PathCE, and BAER now have complete annotations.
+3. Introduce `.pyi` stubs (or extend existing ones) for mod packages that still lack coverage; Disturbed, PathCE, and Treatments remain top candidates.
 4. Re-run `uk2us` on touched files to maintain American English spellings and repeat the validation workflow once base typing is complete.
 
 ## References
