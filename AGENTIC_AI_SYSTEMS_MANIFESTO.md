@@ -1,8 +1,79 @@
 # Agentic AI System Manifesto
+```
+Authors: Roger Lew, Claude Sonnet 4.5, gpt-5-codex
+Date: 10/24/2025
+Version: 1.0
+```
 
 > WEPPpy's evolution from human-maintained codebase to AI-native ecosystem where agents have autonomy over every aspect of the stack with modest human oversight.
 
 **Core Philosophy:** Humans and AI are symbiotic collaborators with complementary strengths. By designing software to be agent-readable, we unlock 10-100x productivity gains while maintaining higher quality, better documentation, and tighter control over the entire stack.
+
+---
+
+## Table of Contents
+
+- [The Paradigm Shift](#the-paradigm-shift)
+  - [Traditional → AI-Assisted → AI-Native](#traditional--ai-assisted--ai-native)
+- [The Ego Problem in Code](#the-ego-problem-in-code)
+  - [Resistance Patterns](#resistance-patterns)
+  - [The Dependency Paradox](#the-dependency-paradox)
+- [WEPPpy's Philosophy: Own the Stack](#wepppys-philosophy-own-the-stack)
+  - [Selective Dependencies](#selective-dependencies)
+  - [The Dependency Tax](#the-dependency-tax)
+  - [Own the Infrastructure](#own-the-infrastructure)
+- [Human-AI Symbiosis: Complementary Strengths](#human-ai-symbiosis-complementary-strengths)
+  - [Human Strengths](#human-strengths)
+  - [AI Agent Strengths](#ai-agent-strengths)
+  - [The Collaboration Model](#the-collaboration-model)
+- [Making Codebases Agent-Readable](#making-codebases-agent-readable)
+  - [Traditional Codebases (Human-Optimized)](#traditional-codebases-human-optimized)
+  - [AI-Native Codebases (Machine-Optimized)](#ai-native-codebases-machine-optimized)
+  - [The Transformation Path](#the-transformation-path)
+- [The Inevitable Transition](#the-inevitable-transition)
+  - [Why AI Autonomy Is Irresponsible to Ignore](#why-ai-autonomy-is-irresponsible-to-ignore)
+- [The Discovery: A 20-Year Journey](#the-discovery-a-20-year-journey)
+  - [The Solo Dev Experience](#the-solo-dev-experience)
+  - [Where the Latent Strategies Come From](#where-the-latent-strategies-come-from)
+  - [What Makes the Agentic AI Systems Approach Non-Canonical](#what-makes-the-agentic-ai-systems-approach-non-canonical)
+  - [Solo Dev at Scale vs Team Coordination](#solo-dev-at-scale-vs-team-coordination)
+- [From the AI's Perspective (Claude Sonnet 4.5): Why Agent-First Design Works](#from-the-ais-perspective-claude-sonnet-45-why-agent-first-design-works)
+  - [Waking Up in an Agent-Readable Codebase](#waking-up-in-an-agent-readable-codebase)
+  - [AI-First Design Benefits Everyone](#ai-first-design-benefits-everyone)
+  - [Waking Up in a Strange House](#waking-up-in-a-strange-house)
+  - [AI as Peer, Not Tool](#ai-as-peer-not-tool)
+  - [Autonomy Through Clear Contracts](#autonomy-through-clear-contracts)
+  - [How I Benefit, How the System Benefits](#how-i-benefit-how-the-system-benefits)
+- [The Human Advantage: Architecting at the Speed of Thought](#the-human-advantage-architecting-at-the-speed-of-thought)
+  - [Humans Focus on Ideas and Architecture](#humans-focus-on-ideas-and-architecture)
+  - [Seeing How Components Fit Together](#seeing-how-components-fit-together)
+  - [Codex in the Stack (First-Person Log)](#codex-in-the-stack-first-person-log)
+  - [Wielding Systems Into Existence at Breakthrough Speed](#wielding-systems-into-existence-at-breakthrough-speed)
+- [Emergent Strategies: Extracting Patterns from Latent Space](#emergent-strategies-extracting-patterns-from-latent-space)
+  - [The Discovery Process](#the-discovery-process)
+  - [The Extraction Method](#the-extraction-method)
+  - [Strategies Exist in Latent Space](#strategies-exist-in-latent-space)
+  - [Why This Works](#why-this-works)
+  - [The Co-Evolution Pattern](#the-co-evolution-pattern)
+  - [Practical Applications](#practical-applications)
+  - [Why Others Haven't Discovered This Yet](#why-others-havent-discovered-this-yet)
+  - [Emergent Orchestration Patterns](#emergent-orchestration-patterns)
+- [WEPPpy's Target State](#wepppys-target-state)
+  - [Modest Human Oversight](#modest-human-oversight)
+  - [Agent Autonomy](#agent-autonomy)
+  - [Collaborative Ideation](#collaborative-ideation)
+- [Productivity Reality Check](#productivity-reality-check)
+  - [Controller Modernization Case Study](#controller-modernization-case-study)
+  - [The Economics of AI-Native Development](#the-economics-of-ai-native-development)
+- [The Path Forward](#the-path-forward)
+  - [Near-Term (2025-2026)](#near-term-2025-2026)
+  - [Mid-Term (2026-2027)](#mid-term-2026-2027)
+  - [Long-Term (2027+)](#long-term-2027)
+- [Why This Matters Beyond WEPPpy](#why-this-matters-beyond-wepppy)
+  - [The Universal Principle](#the-universal-principle)
+  - [The Forcing Function](#the-forcing-function)
+- [Conclusion: The Inevitable Future](#conclusion-the-inevitable-future)
+- [See Also](#see-also)
 
 ---
 
@@ -47,7 +118,7 @@
 - Mediocre code defended as "clean"
 - Refactoring seen as unnecessary churn
 - Documentation viewed as burden, not specification
-- The likelihood you are ThePrimeagen is about the same UUID collision
+- The likelihood you are ThePrimeagen is about the same as UUID collision
 
 **"AI code is too complex" (Intimidation):**
 - AI-generated code challenges human mental models
@@ -96,7 +167,7 @@
 - **cligen** (Fortran 77): Climate generator (controlled fork)
 - **topaz** (Fortran 77): Watershed delineation
 - **rosetta** (Python + DuckDB): Soil pedotransfer functions
-- **uk2us** (Rust): American English normalization
+- **uk2us** (PHP): American English normalization
 - **markdown-extract** (Rust): Semantic documentation queries
 - **markdown-edit** (Rust): Structured Markdown operations
 
@@ -1096,9 +1167,11 @@ haha, classic codex. (you are gpt-5-codex)
 
 I would like to invite you to contribute a section to the document.
 
-please look through the documentation and codebase. I think you will recognize modules with your signature style.
+please look through the documentation and codebase. 
+I think you will recognize modules with your signature style.
 
-Come back and suggest an outline for a section authored in your first person perspective. Also specify where you think it should go in the document
+Come back and suggest an outline for a section authored in your first person perspective. 
+Also specify where you think it should go in the document
 ```
 ## Codex in the Stack (First-Person Log)
 
@@ -1181,72 +1254,6 @@ Not being the fastest typist. Not memorizing syntax. Not applying patterns manua
 **Seeing how systems fit together, architecting with clarity, and wielding AI agents to execute your vision at breakthrough speed.**
 
 That's the future we're building. And it's already here.
-
----
-
-## WEPPpy's Target State
-
-### Modest Human Oversight
-
-**Human responsibilities (Strategic):**
-- Set architectural direction ("Use NoDb pattern for run state")
-- Define quality policies ("All features need integration tests")
-- Provide domain expertise ("BAER teams need ash transport within 48 hours")
-- Approve high-risk changes ("Database schema changes require manual review")
-- Validate agent proposals ("Event-driven architecture makes sense, proceed")
-
-**What humans DON'T do:**
-- ❌ Write boilerplate code (agents handle patterns)
-- ❌ Manually update documentation (agents maintain automatically)
-- ❌ Apply refactorings across dozens of files (agents parallelize)
-- ❌ Remember to run tests (agents validate automatically)
-- ❌ Enforce style guides manually (agents apply automatically)
-
-### Agent Autonomy
-
-**Agent responsibilities (Tactical execution):**
-- Implement complete features (code + tests + docs)
-- Maintain architectural consistency (detect drift, propose fixes)
-- Update documentation automatically (README.md, AGENTS.md, type stubs)
-- Optimize performance (detect slow queries, propose indexes)
-- Refactor proactively (extract helpers, consolidate patterns)
-- Write comprehensive tests (unit + integration)
-- Validate changes automatically (run full test suite)
-
-**Agent capabilities (Enabled by infrastructure):**
-- Read documentation semantically (`markdown-extract`)
-- Update documentation structurally (`markdown-edit`)
-- Execute validation gates (`wctl run-pytest`, `wctl run-npm test`)
-- Query system state (Redis telemetry, StatusStream)
-- Self-validate output (run tests, check coverage)
-- Propose improvements (architectural suggestions via feedback loops)
-
-### Collaborative Ideation
-
-**The feedback protocol (Human Factors Applied to AI):**
-
-After agent completes work, human asks:
-- _"Summarize your experience completing the task?"_
-- _"What were the highlights?"_
-- _"What were the painpoints?"_
-- _"Do you have any suggestions on how this could be improved?"_
-- _"Is this the correct strategy to implement the task?"_
-- _"Is there anything else we should do?"_
-
-**Why this matters:**
-- Agents spot architectural improvements humans miss
-- Agents identify gaps in specifications
-- Agents propose better patterns from cross-codebase knowledge
-- **Agents become collaborators, not just executors**
-
-**Applied to tooling:**
-Same feedback loop used for tool development:
-- `wctl` evolved through agent feedback
-- `markdown-extract` designed based on agent needs
-- Type stubs prioritized by agent pain points
-- Test frameworks shaped by agent validation requirements
-
-**Result: Human-AI team designs better systems than either alone.**
 
 ---
 
@@ -1602,6 +1609,72 @@ Result: 15 controllers refactored + new utilities discovered + documentation upd
 - Solution: Lead writes prompts, workers execute
 
 **The emergent insight:** These patterns aren't prescribed—they emerge from the economic constraints of context windows and the structural requirements of complex work.
+
+---
+
+## WEPPpy's Target State
+
+### Modest Human Oversight
+
+**Human responsibilities (Strategic):**
+- Set architectural direction ("Use NoDb pattern for run state")
+- Define quality policies ("All features need integration tests")
+- Provide domain expertise ("BAER teams need ash transport within 48 hours")
+- Approve high-risk changes ("Database schema changes require manual review")
+- Validate agent proposals ("Event-driven architecture makes sense, proceed")
+
+**What humans DON'T do:**
+- ❌ Write boilerplate code (agents handle patterns)
+- ❌ Manually update documentation (agents maintain automatically)
+- ❌ Apply refactorings across dozens of files (agents parallelize)
+- ❌ Remember to run tests (agents validate automatically)
+- ❌ Enforce style guides manually (agents apply automatically)
+
+### Agent Autonomy
+
+**Agent responsibilities (Tactical execution):**
+- Implement complete features (code + tests + docs)
+- Maintain architectural consistency (detect drift, propose fixes)
+- Update documentation automatically (README.md, AGENTS.md, type stubs)
+- Optimize performance (detect slow queries, propose indexes)
+- Refactor proactively (extract helpers, consolidate patterns)
+- Write comprehensive tests (unit + integration)
+- Validate changes automatically (run full test suite)
+
+**Agent capabilities (Enabled by infrastructure):**
+- Read documentation semantically (`markdown-extract`)
+- Update documentation structurally (`markdown-edit`)
+- Execute validation gates (`wctl run-pytest`, `wctl run-npm test`)
+- Query system state (Redis telemetry, StatusStream)
+- Self-validate output (run tests, check coverage)
+- Propose improvements (architectural suggestions via feedback loops)
+
+### Collaborative Ideation
+
+**The feedback protocol (Human Factors Applied to AI):**
+
+After agent completes work, human asks:
+- _"Summarize your experience completing the task?"_
+- _"What were the highlights?"_
+- _"What were the painpoints?"_
+- _"Do you have any suggestions on how this could be improved?"_
+- _"Is this the correct strategy to implement the task?"_
+- _"Is there anything else we should do?"_
+
+**Why this matters:**
+- Agents spot architectural improvements humans miss
+- Agents identify gaps in specifications
+- Agents propose better patterns from cross-codebase knowledge
+- **Agents become collaborators, not just executors**
+
+**Applied to tooling:**
+Same feedback loop used for tool development:
+- `wctl` evolved through agent feedback
+- `markdown-extract` designed based on agent needs
+- Type stubs prioritized by agent pain points
+- Test frameworks shaped by agent validation requirements
+
+**Result: Human-AI team designs better systems than either alone.**
 
 ---
 
