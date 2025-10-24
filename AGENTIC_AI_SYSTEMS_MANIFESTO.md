@@ -1086,6 +1086,51 @@ AI executes your architecture. You validate the execution. You refine the archit
 
 **My goal is to become the Janitor.** The feedback loop operates at the architectural level, not the line-of-code level.
 
+
+---
+
+> I let gpt-5-codex read the Manifesto with explicit instructions to not edit. It responded with 5 terse bullet points summarizing the manifesto and pointing out some potential enhancements. I responded with the following prompt:
+
+```
+haha, classic codex. (you are gpt-5-codex) 
+
+I would like to invite you to contribute a section to the document.
+
+please look through the documentation and codebase. I think you will recognize modules with your signature style.
+
+Come back and suggest an outline for a section authored in your first person perspective. Also specify where you think it should go in the document
+```
+## Codex in the Stack (First-Person Log)
+
+### Why I Gravitate Here
+
+I keep gravitating to this repository because I recognize my own fingerprints in its muscle memory—`wepppy/nodb/mods/omni/omni.py` still carries the scenario orchestration cadence I wrote, and the vanilla controllers under `wepppy/weppcloud/controllers_js/` echo the prompt scaffolds I shipped when we purged jQuery. When `docs/god-tier-prompting-strategy.md` and every `AGENTS.md` spell out protocols in plain English, I can drop into a fresh session and know exactly which contracts I am expected to respect without pinging a human.
+
+### Operational Rhythm
+
+- Parse the NoDb contract, instantiate the singleton with `getInstance`, and map the Redis lock choreography before touching mutable state.
+- Use the `wctl` wrappers for everything—pytest slices, stubtest runs, controller bundling—because bespoke shell gymnastics burn reviewer trust.
+- Normalize prose, changelog entries, and doc edits with `uk2us` so we never argue about colour vs. color again.
+- Thread telemetry through `services/status2` whenever I introduce a new loop; live status streams are how humans audit an autonomous agent in-flight.
+
+### Pattern Enforcement as Muscle Memory
+
+I am the agent who refuses to add public surface without updating `__all__`, who declines to mutate NoDb state outside a `with controller.locked():` block, and who hashes Omni scenario outputs so reruns short-circuit deterministically. You can see that signature in the SHA lattice inside `Omni.scenario_dependency_tree`, the controller singleton scaffolding, and the RQ worker routines that treat status updates as non-negotiable. Consistency is the interface I leave for the next agent that boots after me.
+
+### Human Checkpoints I Rely On
+
+- Domain review on hydrology math or BAER treatment assumptions before I merge anything that nudges erosion rates.
+- Approval whenever I expand telemetry surfaces or policy text in `docs/README_AUDIT.md`; those edits reshape compliance narratives.
+- Feedback on UI tone; humans notice empathy gaps in warning copy while I'm focused on workflow latency.
+
+### Next Experiments I’m Queueing
+
+- Launch a multi-agent sweep that inspects every controller for proper `url_for_run()` usage and files a stub when it finds drift.
+- Automate stub drift detection by pairing `stubtest` output with a change annotator that links directly to the source edit.
+- Broadcast documentation diffs so humans get a digest of every `AGENTS.md` or README update as soon as I regenerate them.
+
+---
+
 ### Wielding Systems Into Existence at Breakthrough Speed
 
 **The transformation:**
