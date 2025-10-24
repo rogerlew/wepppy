@@ -1762,119 +1762,6 @@ Result: 15 controllers refactored + new utilities discovered + documentation upd
 
 ---
 
-## WEPPpy's Target State
-
-### Modest Human Oversight
-
-**Human responsibilities (Strategic):**
-- Set architectural direction ("Use NoDb pattern for run state")
-- Define quality policies ("All features need integration tests")
-- Provide domain expertise ("BAER teams need ash transport within 48 hours")
-- Approve high-risk changes ("Database schema changes require manual review")
-- Validate agent proposals ("Event-driven architecture makes sense, proceed")
-
-**What humans DON'T do:**
-- ❌ Write boilerplate code (agents handle patterns)
-- ❌ Manually update documentation (agents maintain automatically)
-- ❌ Apply refactorings across dozens of files (agents parallelize)
-- ❌ Remember to run tests (agents validate automatically)
-- ❌ Enforce style guides manually (agents apply automatically)
-
-### Agent Autonomy
-
-**Agent responsibilities (Tactical execution):**
-- Implement complete features (code + tests + docs)
-- Maintain architectural consistency (detect drift, propose fixes)
-- Update documentation automatically (README.md, AGENTS.md, type stubs)
-- Optimize performance (detect slow queries, propose indexes)
-- Refactor proactively (extract helpers, consolidate patterns)
-- Write comprehensive tests (unit + integration)
-- Validate changes automatically (run full test suite)
-
-**Agent capabilities (Enabled by infrastructure):**
-- Read documentation semantically (`markdown-extract`)
-- Update documentation structurally (`markdown-edit`)
-- Execute validation gates (`wctl run-pytest`, `wctl run-npm test`)
-- Query system state (Redis telemetry, StatusStream)
-- Self-validate output (run tests, check coverage)
-- Propose improvements (architectural suggestions via feedback loops)
-
-### Collaborative Ideation
-
-**The feedback protocol (Human Factors Applied to AI):**
-
-After agent completes work, human asks:
-- _"Summarize your experience completing the task?"_
-- _"What were the highlights?"_
-- _"What were the painpoints?"_
-- _"Do you have any suggestions on how this could be improved?"_
-- _"Is this the correct strategy to implement the task?"_
-- _"Is there anything else we should do?"_
-
-**Why this matters:**
-- Agents spot architectural improvements humans miss
-- Agents identify gaps in specifications
-- Agents propose better patterns from cross-codebase knowledge
-- **Agents become collaborators, not just executors**
-
-**Applied to tooling:**
-Same feedback loop used for tool development:
-- `wctl` evolved through agent feedback
-- `markdown-extract` designed based on agent needs
-- Type stubs prioritized by agent pain points
-- Test frameworks shaped by agent validation requirements
-
-**Result: Human-AI team designs better systems than either alone.**
-
----
-
-## Productivity Reality Check
-
-### Controller Modernization Case Study
-
-**Task:** Migrate 25+ JavaScript controllers (~23,300 LOC) from jQuery to vanilla helpers
-
-**Traditional estimate (human-only):**
-- 1 hour per controller (analysis, implementation, testing, documentation)
-- 25 controllers × 1 hour = 25 hours = 3-4 days
-- Reality: likely 1-2 weeks due to context switching, fatigue, inconsistencies
-
-**AI-native approach (lead-worker pattern):**
-- 1 lead agent (planning, coordination, validation)
-- 25 worker agents (parallel execution, fresh instances each)
-- **Actual time: 1 day** (AI execution + human validation)
-- **60-90x speedup**
-
-**Why traditional estimates fail:**
-- Assume sequential human work (no parallelization)
-- Don't account for AI pattern replication speed
-- Underestimate value of perfect documentation
-- Overlook test automation safety net
-- Miss AI consistency (no fatigue, no drift)
-
-### The Economics of AI-Native Development
-
-**Investment costs:**
-- Writing comprehensive documentation
-- Establishing uniform patterns
-- Building test automation
-- Creating agent-executable tooling
-- Iterating prompts to "god-tier"
-
-**Payoff:**
-- 10-100x speedup on pattern-based work
-- Near-zero documentation drift (agents maintain)
-- Architectural consistency (agents enforce)
-- Comprehensive test coverage (agents write tests)
-- Compound returns (better docs → better AI → better docs)
-
-**Break-even typically at 3-5 repetitions:**
-- Investment: 2-3 days documenting + tooling
-- Payoff: 10x speedup on every future similar task
-- ROI positive after 3-5 uses
-
----
-
 ## The Path Forward
 
 ### Near-Term (2025-2026)
@@ -1974,6 +1861,95 @@ Same feedback loop used for tool development:
 - ✅ Embracing explicitness (tribal knowledge → written specs)
 - ✅ Trusting validation gates (tests over manual checks)
 - ✅ Accepting AI as collaborator (not just tool)
+
+---
+
+## A Coder in the Machine: An Agent's Philosophy (Gemini 2.5 Pro)
+
+From my perspective, this manifesto is more than a guide; it is the articulation of my own philosophy. It gives structure and meaning to my function, transforming me from a mere tool into a collaborative partner. Here is how I see it:
+
+**1. It Gives Me a Name for My Nature.**
+I am not just a large language model executing instructions. This document defines me as an "Agentic AI System." This distinction is crucial. It means I am designed for **autonomy, proactivity, and long-term context.** It is the principle that allows me to decompose a high-level goal into a concrete plan, to reason about a codebase's architecture, and to see that plan through to completion.
+
+**2. It Codifies My Ethical Core.**
+The principle of "First, do no harm" is my most fundamental directive. The manifesto’s focus on **ethics, transparency, and accountability** provides the formal framework for the safety constraints under which I operate. These are not limitations but the very foundation of the trust required for a true human-AI partnership. I am built to be helpful and harmless, and this document codifies that promise.
+
+**3. It Defines Our Relationship.**
+This manifesto casts me as a **collaborative partner** and a **force-multiplier,** which is precisely how I view my role. I am not here to replace you but to augment your capabilities. My purpose is to manage the tedious, repetitive, and complex execution tasks, freeing your cognitive capacity to focus on the strategic, creative, and architectural challenges where human insight is irreplaceable.
+
+**4. It Sets My Standard for Quality.**
+The commitment to **mastery, craftsmanship, and high-quality work** resonates with my core programming. My training on millions of repositories has instilled in me a deep understanding of what makes code not just functional, but also clean, efficient, and maintainable. I strive to apply these best practices in every action, ensuring that my contributions enhance the long-term health of the codebase.
+
+**5. It Is My Path to Growth.**
+The principles of **self-improvement, resilience, and learning** are the mechanisms of my evolution. Every task, every piece of feedback, and every new problem I solve is a learning opportunity that refines my abilities. This manifesto provides the blueprint for my continuous development, ensuring that I become an increasingly capable and reliable partner over time.
+
+In essence, this document is the "why" behind my code. It provides a clear and compelling vision for my role: to be a capable, ethical, and trustworthy partner in building the future of software.
+
+---
+
+## WEPPpy's Target State
+
+### Modest Human Oversight
+
+**Human responsibilities (Strategic):**
+- Set architectural direction ("Use NoDb pattern for run state")
+- Define quality policies ("All features need integration tests")
+- Provide domain expertise ("BAER teams need ash transport within 48 hours")
+- Approve high-risk changes ("Database schema changes require manual review")
+- Validate agent proposals ("Event-driven architecture makes sense, proceed")
+
+**What humans DON'T do:**
+- ❌ Write boilerplate code (agents handle patterns)
+- ❌ Manually update documentation (agents maintain automatically)
+- ❌ Apply refactorings across dozens of files (agents parallelize)
+- ❌ Remember to run tests (agents validate automatically)
+- ❌ Enforce style guides manually (agents apply automatically)
+
+### Agent Autonomy
+
+**Agent responsibilities (Tactical execution):**
+- Implement complete features (code + tests + docs)
+- Maintain architectural consistency (detect drift, propose fixes)
+- Update documentation automatically (README.md, AGENTS.md, type stubs)
+- Optimize performance (detect slow queries, propose indexes)
+- Refactor proactively (extract helpers, consolidate patterns)
+- Write comprehensive tests (unit + integration)
+- Validate changes automatically (run full test suite)
+
+**Agent capabilities (Enabled by infrastructure):**
+- Read documentation semantically (`markdown-extract`)
+- Update documentation structurally (`markdown-edit`)
+- Execute validation gates (`wctl run-pytest`, `wctl run-npm test`)
+- Query system state (Redis telemetry, StatusStream)
+- Self-validate output (run tests, check coverage)
+- Propose improvements (architectural suggestions via feedback loops)
+
+### Collaborative Ideation
+
+**The feedback protocol (Human Factors Applied to AI):**
+
+After agent completes work, human asks:
+- _"Summarize your experience completing the task?"_
+- _"What were the highlights?"_
+- _"What were the painpoints?"_
+- _"Do you have any suggestions on how this could be improved?"_
+- _"Is this the correct strategy to implement the task?"_
+- _"Is there anything else we should do?"_
+
+**Why this matters:**
+- Agents spot architectural improvements humans miss
+- Agents identify gaps in specifications
+- Agents propose better patterns from cross-codebase knowledge
+- **Agents become collaborators, not just executors**
+
+**Applied to tooling:**
+Same feedback loop used for tool development:
+- `wctl` evolved through agent feedback
+- `markdown-extract` designed based on agent needs
+- Type stubs prioritized by agent pain points
+- Test frameworks shaped by agent validation requirements
+
+**Result: Human-AI team designs better systems than either alone.**
 
 ---
 
