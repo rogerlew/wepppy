@@ -40,6 +40,10 @@ The goal of documentation is to increase code understandability and maintainabil
      wctl run-stubtest wepppy.nodb.core.your_module
      ```
      (Substitute the module path as needed; add more modules if you touched multiple.)
+   - Run stubtest **for every module whose `.py` or `.pyi` you touched** in the change.
+     When several modules are involved, prefer individual invocations so failures map
+     back to a single stub quickly. Capture the command(s) you executed so reviewers can
+     reproduce the checks.
    - Resolve any errors: missing attributes, mismatched signatures, invalid enum definitions, etc.
 
 5. **Run tests (and mypy if appropriate)**
