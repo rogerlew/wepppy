@@ -5,11 +5,11 @@
 
 ## Task Board
 ### Ready / Backlog
-- [ ] Polish controller docs (control-ui-styling, AGENTS) to reflect bootstrap changes.
 - [ ] Evaluate automation tooling (Playwright/Cypress) for broader E2E coverage beyond the initial Playwright smoke seed.
 
 ### In Progress
-- None yet.
+- [ ] Sort out miscellaneous rendering bugs across controllers
+- [ ] Validate reports (WEPP reports, loss summaries, visualizations)
 
 ### Blocked
 - None.
@@ -21,6 +21,7 @@
 - [x] Confirmed treatments control runs on Pure scaffold with StatusStream helpers; documentation updated.
 - [x] Seed Playwright smoke run documented (full automation moved to 20251023_smoke_tests).
 - [x] Updated front-end guidance docs (control-ui-styling, AGENTS, tests README) to reflect new bootstrap flow and smoke hand-off.
+- [x] Controller documentation polished to reflect bootstrap changes.
 
 ## Decisions Log
 - *2025-02-24* – Use controller-defined bootstrap hooks and StatusStream emitters as the foundation for the new run-page bootstrap.

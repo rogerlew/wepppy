@@ -9,6 +9,8 @@
 
 ## Core References
 - `AGENTS.md` — canonical agent runbook covering architecture, conventions, and tooling (start here every session).
+- `PROJECT_TRACKER.md` — Kanban board showing active work packages, backlog, and vision items (check at session start).
+- `docs/work-packages/README.md` — Work package structure and guidelines for multi-step initiatives.
 - `ARCHITECTURE.md` — system topology, service boundaries, and cross-language touch points.
 - `docs/dev-notes/style-guide.md` — developer ergonomics and review checklist.
 - `readme.md` — human-facing overview suitable for sharing context with project stakeholders.

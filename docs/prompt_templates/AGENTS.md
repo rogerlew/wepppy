@@ -1,8 +1,24 @@
 # Prompt Templates Agent Guide
 
 ## Overview
-- This directory stores reusable prompt scaffolds that codify repeatable workflows (module documentation, README authoring, migration plans).
+- This directory stores reusable prompt scaffolds that codify repeatable workflows (module documentation, README authoring, migration plans, work packages).
 - Treat templates as shared tooling: changes ripple across multiple repos and agents. Review the target workflow end-to-end before editing.
+
+## Available Templates
+
+### Documentation Templates
+- `readme_authoring_template.md` — Standard structure for module/service README files
+- `agents_authoring_template.md` — Guide for creating AGENTS.md files in subdirectories
+
+### Workflow Templates
+- `module_documentation_workflow.prompt.md` — Process for improving docstrings, type hints, and `.pyi` coverage
+
+### Work Package Templates
+- `package_template.md` — Structure for work package brief (scope, objectives, success criteria)
+- `tracker_template.md` — Living document for tracking progress, decisions, and handoffs
+- `prompt_template.md` — Standardized format for work package prompts with validation gates
+
+See `docs/work-packages/README.md` for guidance on when and how to use work package templates.
 
 ## Using Templates
 - Reference templates when a task aligns with the documented workflow. Example: use `module_documentation_workflow.prompt.md` whenever improving docstrings, type hints, and `.pyi` coverage together.

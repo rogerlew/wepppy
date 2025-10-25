@@ -639,6 +639,51 @@ See `wepppy/weppcloud/controllers_js/README.md` for comprehensive controller arc
 4. Inspect `controlBase` event handlers in controllers.js
 5. Review NoDb logger output and handler chain
 
+### Creating a Work Package
+When an initiative will span multiple PRs, involve multiple agents, or require coordinated planning, create a work package:
+
+1. **Determine if a work package is warranted:**
+   - Multi-step features requiring sequential or parallel work
+   - High-risk migrations or refactoring efforts
+   - Cross-cutting concerns touching multiple subsystems
+   - Documentation overhauls or standardization efforts
+   - Experimental features requiring iteration and feedback
+   - **Not needed for:** Single-file edits, bug fixes, or straightforward additions
+
+2. **Create the package structure** (use Pacific timezone for date):
+   ```bash
+   # Format: YYYYMMDD_slug (e.g., 20251024_nodb_validation)
+   mkdir -p docs/work-packages/YYYYMMDD_slug/{prompts/{active,completed},notes,artifacts}
+   ```
+
+3. **Author the core documents** using templates from `docs/prompt_templates/`:
+   - `package.md` — Scope, objectives, stakeholders, success criteria, references
+   - `tracker.md` — Living status: task board (Kanban-style), decisions log, risks, verification checklist
+
+4. **Populate prompts as needed:**
+   - Drop reusable prompts/checklists in `prompts/active/`
+   - Move completed prompts to `prompts/completed/` with outcome summaries
+   - Reference `docs/god-tier-prompting-strategy.md` for crafting effective prompts
+
+5. **Update the root project tracker:**
+   - Add the work package to `PROJECT_TRACKER.md` so other agents can discover active initiatives
+   - Move between columns (Backlog → In Progress → Done) as the package progresses
+
+6. **Track progress in tracker.md:**
+   - Update the task board (use `[ ]` / `[x]` checkboxes or Kanban lists)
+   - Log decisions with timestamps so future agents understand why choices were made
+   - Document risks, blockers, and verification steps
+   - **Agent communication:** Timestamp entries when handing off work; note what's complete and what's next
+
+7. **Close the package when complete:**
+   - Mark status as "Closed" in `package.md` with completion date
+   - Archive prompts from `active/` to `completed/` with outcome notes
+   - Move the package to "Done" in `PROJECT_TRACKER.md`
+   - Summarize deliverables and any follow-up work in `package.md`
+   - Clean up temporary artifacts or note what's being retained for reference
+
+See `docs/work-packages/README.md` for full guidelines and `docs/work-packages/20251023_*/` for examples.
+
 ## Security Considerations
 
 ### Never Commit Secrets
