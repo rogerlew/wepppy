@@ -310,6 +310,22 @@ var Disturbed = (function () {
             setAdapterText(removeHintAdapter, "");
         }
 
+        function updateCurrentFilename(filename) {
+            if (!filename) {
+                return;
+            }
+            // Find the text display showing current SBS map filename
+            var displays = formElement ? formElement.querySelectorAll(".wc-field--display .wc-text-display") : [];
+            for (var i = 0; i < displays.length; i++) {
+                var display = displays[i];
+                var label = display.parentElement ? display.parentElement.querySelector(".wc-field__label") : null;
+                if (label && label.textContent && label.textContent.indexOf("Current SBS map") !== -1) {
+                    display.innerHTML = "<code>" + filename + "</code>";
+                    break;
+                }
+            }
+        }
+
         function clearUniformHints() {
             Object.keys(uniformHintAdapters).forEach(function (key) {
                 setAdapterText(uniformHintAdapters[key], "");
@@ -458,6 +474,13 @@ var Disturbed = (function () {
                         completeTask(taskMsg);
                         setAdapterText(uploadHintAdapter, "SBS raster uploaded successfully.");
                         updateHasSbs(true, "upload");
+                        
+                        // Update filename display if provided
+                        var content = data.Content || {};
+                        if (content.disturbed_fn) {
+                            updateCurrentFilename(content.disturbed_fn);
+                        }
+                        
                         emit("disturbed:upload:completed", { response: data });
                         disturbed.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
                         // Sync with baer controller
@@ -574,6 +597,13 @@ var Disturbed = (function () {
                         completeTask(taskMsg);
                         setUniformHint(severity, "Uniform SBS generated.");
                         updateHasSbs(true, "uniform");
+                        
+                        // Update filename display if provided
+                        var content = data.Content || {};
+                        if (content.disturbed_fn) {
+                            updateCurrentFilename(content.disturbed_fn);
+                        }
+                        
                         emit("disturbed:uniform:completed", {
                             response: data,
                             severity: severity

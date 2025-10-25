@@ -44,6 +44,9 @@ class Baer(NoDbBase):
     def baer_fn(self) -> Optional[str]: ...
 
     @property
+    def disturbed_fn(self) -> Optional[str]: ...
+
+    @property
     def has_map(self) -> bool: ...
 
     @property

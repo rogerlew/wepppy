@@ -264,8 +264,8 @@ def task_upload_sbs(runid: str, config: str) -> Response:
     ret, description = sbs_map_sanity_check(_join(baer.baer_dir, filename))
     if ret != 0:
         return exception_factory(description, runid=runid)
-    res = baer.validate(filename)
-    return success_factory(res)
+    baer.validate(filename)
+    return success_factory({'disturbed_fn': baer.disturbed_fn})
 
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/upload_cover_transform', methods=['POST'])
@@ -344,5 +344,5 @@ def task_build_uniform_sbs(runid: str, config: str, value: Optional[str] = None)
         return error_factory('value must be an integer')
 
     sbs_fn = disturbed.build_uniform_sbs(severity)
-    res = disturbed.validate(sbs_fn)
-    return success_factory()
+    disturbed.validate(sbs_fn)
+    return success_factory({'disturbed_fn': disturbed.disturbed_fn})

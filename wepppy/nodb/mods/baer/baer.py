@@ -124,6 +124,11 @@ class Baer(NoDbBase):
         return self._baer_fn
 
     @property
+    def disturbed_fn(self) -> Optional[str]:
+        """Alias for baer_fn for compatibility with Disturbed controller."""
+        return self._baer_fn
+
+    @property
     def has_map(self) -> bool:
         return self._baer_fn is not None
 
