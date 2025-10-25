@@ -549,6 +549,10 @@ var Baer = (function () {
                 var nodataField = dom.qs("#baer_nodata");
                 nodataVals = nodataField ? nodataField.value : null;
             }
+            // Normalize empty string to null (backend expects None or list/tuple)
+            if (nodataVals === "") {
+                nodataVals = null;
+            }
 
             var taskMsg = "Modifying Class Breaks";
             startTask(taskMsg);
@@ -584,20 +588,16 @@ var Baer = (function () {
             // Read form values BEFORE calling startTask (which clears the form)
             var container = infoElement || formElement || document;
             var selects = container.querySelectorAll("select[id^='baer_color_']");
-            console.log("[Baer] modifyColorMap found", selects.length, "select elements in", container);
             var colorMap = {};
             selects.forEach(function (select) {
                 var id = select.id || "";
                 if (!id) {
-                    console.warn("[Baer] Select element has no id:", select);
                     return;
                 }
                 var rgb = id.replace("baer_color_", "");
                 var value = select.value;
-                console.log("[Baer] Color mapping:", rgb, "->", value);
                 colorMap[rgb] = value;
             });
-            console.log("[Baer] Final colorMap:", colorMap);
 
             var taskMsg = "Modifying Class Breaks";
             startTask(taskMsg);

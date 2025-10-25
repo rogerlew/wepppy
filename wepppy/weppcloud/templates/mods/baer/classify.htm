@@ -1,20 +1,20 @@
 <div class="wc-baer-classify">
   {% if baer.ct is none %}
-    <h5>No color table detected &mdash; using pixel breaks to set burn severity.</h5>
+    <h5>Using pixel breaks to set burn severity.</h5>
     {% set sbs_class_pcts = baer.sbs_class_pcts %}
     {% set sbs_class_areas = baer.sbs_class_areas %}
-    <table class="wc-table wc-baer-classify__table">
+    <table class="wc-table wc-baer-classify__table wc-baer-classify__table--breaks">
       <thead>
         <tr>
-          <th scope="col">Class</th>
-          <th scope="col">Break</th>
-          <th scope="col">{{ unitizer_units('%') | safe }} of burned</th>
-          <th scope="col">{{ unitizer_units('ha') | safe }}</th>
+          <th scope="col">Severity class</th>
+          <th scope="col">Pixel value &le;</th>
+          <th scope="col" class="wc-text-right">{{ unitizer_units('%') | safe }}</th>
+          <th scope="col" class="wc-text-right">{{ unitizer_units('ha') | safe }}</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <th scope="row"><label for="baer_brk0">No burn &le;</label></th>
+          <td>Unburned</td>
           <td>
             <input
               id="baer_brk0"
@@ -23,11 +23,11 @@
               class="wc-baer-classify__input disable-readonly"
               value="{{ baer.breaks[0] }}">
           </td>
-          <td>&mdash;</td>
-          <td>{{ unitizer(sbs_class_areas.get('No Burn', 0), 'ha') | safe }}</td>
+          <td class="wc-text-right">&mdash;</td>
+          <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('No Burn', 0), 'ha') | safe }}</td>
         </tr>
         <tr>
-          <th scope="row"><label for="baer_brk1">Low severity fire &le;</label></th>
+          <td>Low severity</td>
           <td>
             <input
               id="baer_brk1"
@@ -36,11 +36,11 @@
               class="wc-baer-classify__input disable-readonly"
               value="{{ baer.breaks[1] }}">
           </td>
-          <td>{{ unitizer(sbs_class_pcts.get('Low Severity Burn', 0), '%') | safe }}</td>
-          <td>{{ unitizer(sbs_class_areas.get('Low Severity Burn', 0), 'ha') | safe }}</td>
+          <td class="wc-text-right">{{ unitizer(sbs_class_pcts.get('Low Severity Burn', 0), '%') | safe }}</td>
+          <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('Low Severity Burn', 0), 'ha') | safe }}</td>
         </tr>
         <tr>
-          <th scope="row"><label for="baer_brk2">Moderate severity fire &le;</label></th>
+          <td>Moderate severity</td>
           <td>
             <input
               id="baer_brk2"
@@ -49,11 +49,11 @@
               class="wc-baer-classify__input disable-readonly"
               value="{{ baer.breaks[2] }}">
           </td>
-          <td>{{ unitizer(sbs_class_pcts.get('Moderate Severity Burn', 0), '%') | safe }}</td>
-          <td>{{ unitizer(sbs_class_areas.get('Moderate Severity Burn', 0), 'ha') | safe }}</td>
+          <td class="wc-text-right">{{ unitizer(sbs_class_pcts.get('Moderate Severity Burn', 0), '%') | safe }}</td>
+          <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('Moderate Severity Burn', 0), 'ha') | safe }}</td>
         </tr>
         <tr>
-          <th scope="row"><label for="baer_brk3">High severity fire &le;</label></th>
+          <td>High severity</td>
           <td>
             <input
               id="baer_brk3"
@@ -62,27 +62,28 @@
               class="wc-baer-classify__input disable-readonly"
               value="{{ baer.breaks[3] }}">
           </td>
-          <td>{{ unitizer(sbs_class_pcts.get('High Severity Burn', 0), '%') | safe }}</td>
-          <td>{{ unitizer(sbs_class_areas.get('High Severity Burn', 0), 'ha') | safe }}</td>
+          <td class="wc-text-right">{{ unitizer(sbs_class_pcts.get('High Severity Burn', 0), '%') | safe }}</td>
+          <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('High Severity Burn', 0), 'ha') | safe }}</td>
         </tr>
         <tr>
-          <th scope="row"><label for="baer_nodata">No data =</label></th>
+          <td>No data</td>
           <td colspan="3">
             <input
               id="baer_nodata"
               name="baer_nodata"
               type="text"
               class="wc-baer-classify__input disable-readonly"
+              placeholder="(comma-separated values)"
               value="{{ baer.nodata_vals }}">
           </td>
         </tr>
       </tbody>
       <tfoot>
         <tr>
-          <th scope="row"><span class="wc-text-italic">Total burned</span></th>
+          <td><span class="wc-text-italic wc-text-bold">Total burned</span></td>
           <td></td>
           <td></td>
-          <td>
+          <td class="wc-text-right">
             {{ unitizer(
                  sbs_class_areas.get('Low Severity Burn', 0) +
                  sbs_class_areas.get('Moderate Severity Burn', 0) +

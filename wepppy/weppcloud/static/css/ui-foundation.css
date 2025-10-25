@@ -172,6 +172,31 @@ code * {
   margin-bottom: var(--wc-space-2xl);
 }
 
+/* Text utilities */
+.wc-text-right {
+  text-align: right;
+}
+
+.wc-text-center {
+  text-align: center;
+}
+
+.wc-text-left {
+  text-align: left;
+}
+
+.wc-text-italic {
+  font-style: italic;
+}
+
+.wc-text-bold {
+  font-weight: 600;
+}
+
+.wc-text-muted {
+  color: var(--wc-color-text-secondary);
+}
+
 /* Header */
 .wc-header {
   background: var(--wc-color-surface);
@@ -1790,8 +1815,16 @@ code * {
   max-width: 450px;
 }
 
+.wc-baer-classify__table--breaks {
+  max-width: 600px;
+}
+
 .wc-baer-classify__table th {
   text-align: left;
+}
+
+.wc-baer-classify__table th.wc-text-right {
+  text-align: right;
 }
 
 .wc-baer-classify__input {
