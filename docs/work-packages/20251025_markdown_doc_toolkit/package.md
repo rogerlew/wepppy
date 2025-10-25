@@ -461,3 +461,22 @@ When you link to `file.md#configuration`, which section do you get? The first? T
 
 - `mv` command is high-value for refactoring workflows
 - Agent autonomy: This tool should enable agents to maintain docs
+
+## Lead Developer Review (2025-10-30)
+
+### Observed Utility
+- `catalog`, `lint`, and `toc` give us the first automation loop that replaces manual doc sweeps, which is critical for gatekeeping submissions from agents and humans alike.
+- Template-driven `validate` enforces the README/AGENTS/work-package standards we already rely on, so we can trust contributors to adopt them without manual review.
+- `mv` plus `refs` closes the biggest current gap—safe refactors—by promising deterministic link updates instead of the brittle search/replace we run today.
+
+### MVP Shortcomings to Resolve
+- MVP scope still reads like a multi-quarter roadmap; we need a single vertical slice we can ship fast (for example: `catalog` + `lint broken-links` + config loader) with explicit acceptance tests and CLI UX.
+- "Zero false positives" on link linting still needs a tuning story—spell out ignore lists, downgradeable severities, or per-path exemptions so teams can manage known edge cases without patching the tool.
+- `validate` vs. `lint required-sections`: document that both read the same schema definitions (or explain the divergence) and describe the CLI messaging so contributors understand which command to run.
+- Concurrency story: confirm the plan is atomic temp-file writes plus Git conflict resolution (no global locks) and call that out so agents can safely script concurrent reads like `catalog`.
+
+### Operational Questions
+- How do we run the tool selectively (per directory, staged files, pre-commit)? Provide flag expectations so we can wire it into `wctl` and CI without scanning all 388 files every time.
+- What output formats do agents vs. humans consume (plain text, JSON, SARIF)? We need structured output guarantees before we give this to automation.
+- What is the fallback when configuration is missing or partially defined (inherit defaults, fail closed)? Spell out the configuration precedence to avoid divergent environments.
+- `search` appears in Phase 4, yet there is no acceptance metric (latency, ranking, snippet). Document expectations or defer entirely so we do not mis-prioritize indexing work.
