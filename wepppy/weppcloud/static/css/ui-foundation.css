@@ -1791,12 +1791,11 @@ code * {
 }
 
 #sbs_mode1_controls .wc-button-row {
-  width: 100%;
   margin-bottom: var(--wc-space-md);
 }
 
 #sbs_mode1_controls .wc-button-row .pure-button {
-  width: 100%;
+  min-width: 240px;
   justify-content: center;
 }
 
