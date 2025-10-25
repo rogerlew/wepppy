@@ -37,6 +37,23 @@
 - When you need to hide a side panel, pass "" (empty string) to the relevant override hook so the shell skips rendering it.
 - Inputs inside controls should use the field macros (`text_field`, `numeric_field`, `select_field`, `checkbox_field`, `radio_group`, `textarea_field`, `file_upload`) to keep labelling, helper text, and error state semantics aligned.
 - When a macro cannot express a layout detail (for example `<select>` elements with dynamic `<optgroup>` blocks), keep the markup minimal but wrap it in `.wc-field`, mirror the macro’s label/help pattern, and preserve IDs so the existing JavaScript bindings still resolve.
+- Control summary panes should default to the shared `.wc-summary-pane` pattern unless a control’s documentation specifies a different layout:
+  ```jinja
+  <div class="wc-summary-pane">
+    <dl class="wc-summary-pane__list">
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Extent (xmin, ymax, xmax, ymin)</dt>
+        <dd class="wc-summary-pane__definition">-116.427150301252, 45.226315684419845, -116.320333328386, 45.30166873028432</dd>
+      </div>
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Center (lon, lat)</dt>
+        <dd class="wc-summary-pane__definition">-116.373741814819, 45.264004709690184</dd>
+      </div>
+      <!-- additional items -->
+    </dl>
+  </div>
+  ```
+  The foundation stylesheet already handles spacing, borders, and responsive behavior for this structure. Document any deviations in `docs/ui-docs/control-ui-styling/` so future controls stay consistent.
 
 When adding or updating checkboxes/radio buttons, follow these conventions so spacing, colors, and accessibility stay predictable:
 

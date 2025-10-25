@@ -512,6 +512,8 @@ Until the automated marker checker lands (`wctl check-test-markers` from the too
 
 ## Front-End Development
 
+Consult `docs/ui-docs/ui-style-guide.md` for shared layout patterns (summary panes, panel spacing, typography tokens) and `docs/ui-docs/README.md` for the full index of UI documentation. Control-specific behavior should either live with the control or under `docs/ui-docs/control-ui-styling/` if a standalone note is needed.
+
 ### Controller Bundling
 Controllers live in `wepppy/weppcloud/controllers_js/` and export singletons:
 
@@ -641,6 +643,8 @@ See `wepppy/weppcloud/controllers_js/README.md` for comprehensive controller arc
 
 ### Creating a Work Package
 When an initiative will span multiple PRs, involve multiple agents, or require coordinated planning, create a work package:
+
+- For smaller, well-scoped efforts that still warrant light documentation (prompt drafts, retrospectives), use `docs/mini-work-packages/` instead of the full work-package template. Drop a markdown file in `mini-work-packages/` or `mini-work-packages/completed/` to capture context without the heavier structure.
 
 1. **Determine if a work package is warranted:**
    - Multi-step features requiring sequential or parallel work
