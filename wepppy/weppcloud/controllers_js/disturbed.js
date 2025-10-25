@@ -545,15 +545,40 @@ var Disturbed = (function () {
                         updateHasSbs(false, "remove");
                         emit("disturbed:remove:completed", { response: data });
                         disturbed.triggerEvent("SBS_REMOVE_TASK_COMPLETE", data);
-                        // Also trigger on baer form if baer controller exists
+                        
+                        // Remove map layer via baer controller
                         try {
                             var baer = typeof Baer !== "undefined" ? Baer.getInstance() : null;
-                            if (baer && typeof baer.triggerEvent === "function") {
-                                baer.triggerEvent("SBS_REMOVE_TASK_COMPLETE", data);
+                            if (baer) {
+                                // Trigger event on baer form
+                                if (typeof baer.triggerEvent === "function") {
+                                    baer.triggerEvent("SBS_REMOVE_TASK_COMPLETE", data);
+                                }
+                                // Remove the map layer directly
+                                try {
+                                    var map = typeof MapController !== "undefined" ? MapController.getInstance() : null;
+                                    if (map && baer.baer_map) {
+                                        if (typeof map.removeLayer === "function") {
+                                            map.removeLayer(baer.baer_map);
+                                        }
+                                        if (map.ctrls && typeof map.ctrls.removeLayer === "function") {
+                                            map.ctrls.removeLayer(baer.baer_map);
+                                        }
+                                        baer.baer_map = null;
+                                    }
+                                    // Clear the SBS legend
+                                    var legend = document.getElementById("sbs_legend");
+                                    if (legend) {
+                                        legend.innerHTML = "";
+                                    }
+                                } catch (mapErr) {
+                                    console.warn("[Disturbed] Failed to remove map layer", mapErr);
+                                }
                             }
                         } catch (e) {
-                            // Baer may not be loaded
+                            console.warn("[Disturbed] Failed to sync Baer controller", e);
                         }
+                        
                         disturbed.triggerEvent("job:completed", {
                             task: "disturbed:remove",
                             response: data
