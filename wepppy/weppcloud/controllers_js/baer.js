@@ -536,9 +536,7 @@ var Baer = (function () {
         }
 
         function modifyClasses() {
-            var taskMsg = "Modifying Class Breaks";
-            startTask(taskMsg);
-
+            // Read form values BEFORE calling startTask (which clears the form)
             var formValues = {};
             if (formElement && forms && typeof forms.serializeForm === "function") {
                 formValues = forms.serializeForm(formElement, { format: "object" }) || {};
@@ -551,6 +549,9 @@ var Baer = (function () {
                 var nodataField = dom.qs("#baer_nodata");
                 nodataVals = nodataField ? nodataField.value : null;
             }
+
+            var taskMsg = "Modifying Class Breaks";
+            startTask(taskMsg);
 
             return http.request(url_for_run("tasks/modify_burn_class"), {
                 method: "POST",
@@ -580,19 +581,26 @@ var Baer = (function () {
         }
 
         function modifyColorMap() {
-            var taskMsg = "Modifying Class Breaks";
-            startTask(taskMsg);
-
-            var selects = document.querySelectorAll("select[id^='baer_color_']");
+            // Read form values BEFORE calling startTask (which clears the form)
+            var container = infoElement || formElement || document;
+            var selects = container.querySelectorAll("select[id^='baer_color_']");
+            console.log("[Baer] modifyColorMap found", selects.length, "select elements in", container);
             var colorMap = {};
             selects.forEach(function (select) {
                 var id = select.id || "";
                 if (!id) {
+                    console.warn("[Baer] Select element has no id:", select);
                     return;
                 }
                 var rgb = id.replace("baer_color_", "");
-                colorMap[rgb] = select.value;
+                var value = select.value;
+                console.log("[Baer] Color mapping:", rgb, "->", value);
+                colorMap[rgb] = value;
             });
+            console.log("[Baer] Final colorMap:", colorMap);
+
+            var taskMsg = "Modifying Class Breaks";
+            startTask(taskMsg);
 
             return http.request(url_for_run("tasks/modify_color_map"), {
                 method: "POST",
