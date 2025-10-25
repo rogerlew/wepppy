@@ -97,6 +97,34 @@
 
 ---
 
+### 2025-10-25: Lead Developer Review Integrated
+
+**Decision:** Narrow MVP scope to single vertical slice: `catalog` + `lint broken-links` + config loader  
+**Rationale:**
+- Original Phase 1 was too broad (multi-quarter roadmap feel)
+- Single vertical slice proves end-to-end workflow faster
+- Enables early feedback before building additional rules
+
+**Changes made:**
+- Moved `toc` command to Phase 2 (not MVP-critical)
+- Added selective scanning flags (`--path`, `--staged`) to MVP scope
+- Specified output formats (plain text, JSON, SARIF) for agent/human/CI consumers
+- Added severity tuning system (ignore lists, downgradeable severities) to Phase 2
+- Clarified `validate` vs `lint required-sections` relationship
+- Documented concurrency safety (atomic temp-file writes, no global locks)
+- Added configuration precedence and fallback behavior
+- Deferred `search` command pending acceptance criteria (latency, ranking, snippet quality)
+- Updated milestones with concrete acceptance criteria
+
+**Implementation notes:**
+- `lint` and `validate` both read `[schemas]` config but serve different purposes
+- `lint`: Fast incremental checks (pre-commit suitable)
+- `validate`: Deep template conformance (CI gate for critical files)
+
+**Participants:** Roger, Claude (integrating codex feedback)
+
+---
+
 ## Risks & Issues
 
 ### Active Risks
@@ -147,10 +175,12 @@ When resuming this work:
 
 ### Open Questions
 
-- Should `catalog` include file metadata (size, last modified)?
-- Should `lint` support custom rules via plugins?
-- Should `mv` handle git mv automatically?
-- Should search support regex patterns?
+- Should `catalog` include file metadata (size, last modified)? — **Deferred to Phase 2**
+- Should `lint` support custom rules via plugins? — **Deferred, start with built-in rules**
+- Should `mv` handle git mv automatically? — **Deferred, manual git integration for now**
+- ~~Should search support regex patterns?~~ — **Answered: Search deferred pending acceptance criteria**
+- ~~How to handle false positives in lint?~~ — **Answered: Severity tuning + ignore lists in Phase 2**
+- ~~What output formats for CI/agents?~~ — **Answered: JSON and SARIF in MVP**
 
 ### Implementation Notes
 
@@ -180,12 +210,44 @@ When resuming this work:
 
 ---
 
+### 2025-10-25 16:00 PST - Codex Review Integration
+
+**Codex feedback received:**
+- MVP scope narrowed to single vertical slice (catalog + lint broken-links + config)
+- Added operational details: selective scanning, output formats, CI integration
+- Clarified `lint` vs `validate` command relationship
+- Documented concurrency safety model (atomic writes, no global locks)
+- Specified configuration precedence and fallback behavior
+- Deferred `search` command until acceptance criteria defined
+
+**Claude response:**
+- Integrated all feedback into package.md
+- Added "CLI Design and Integration" section with examples
+- Expanded configuration with severity tuning and ignore patterns
+- Updated deliverables to reflect MVP focus
+- Enhanced milestones with concrete acceptance criteria
+- Updated tracker.md with decision log
+
+**Status:** Specification complete with codex feedback integrated
+
+---
+
 ## Next Steps
 
-1. **Immediate:** Review with Roger to confirm scope/priorities
-2. **Week 1:** Begin architectural design document
-3. **Week 1-2:** Implement Phase 1 (foundation + catalog)
-4. **Week 2:** Demo `catalog` command for feedback
+1. ~~**Immediate:** Review with Roger to confirm scope/priorities~~ — **Done: Codex review integrated**
+2. **Week 1:** Begin MVP implementation (catalog + lint broken-links + config loader)
+   - Set up Rust project with Cargo.toml
+   - Implement config parser with defaults fallback
+   - Build catalog command with concurrent file reading
+   - Add selective scanning (`--path`, `--staged`) and JSON output
+3. **Week 1:** Implement lint broken-links with severity tuning
+   - Support ignore patterns from config
+   - JSON and SARIF output formats
+   - CLI acceptance tests
+4. **Week 2:** Performance validation and M1 milestone
+   - Benchmark catalog on 388 files (<5s target)
+   - Verify concurrent safety (atomic writes)
+   - Demo MVP to Roger for feedback
 
 ---
 

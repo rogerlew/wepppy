@@ -40,11 +40,12 @@ WEPPpy has substantial documentation (388+ markdown files) but managing it is be
 
 ### Success Criteria
 
-- [ ] Broken internal links detected in CI (zero false positives)
+- [ ] Broken internal links detected in CI with configurable severity (zero unintended false positives)
 - [ ] `DOC_CATALOG.md` auto-generated and always current
 - [ ] Files can be moved/renamed without breaking references
 - [ ] TOCs auto-update on file changes
 - [ ] Template validation enforced for AGENTS.md, README.md, work packages
+- [ ] **MVP acceptance:** `catalog` + `lint broken-links` working end-to-end with selective scanning and JSON output
 
 ### Non-Goals (Initial Release)
 
@@ -115,6 +116,22 @@ rules = [
 ]
 max_heading_depth = 4
 
+# Severity tuning (Phase 2)
+[lint.severity]
+broken-links = "error"
+broken-anchors = "error"
+duplicate-anchors = "warning"
+heading-hierarchy = "warning"
+
+# Per-path exemptions (Phase 2)
+[[lint.ignore]]
+path = "_legacy_*/**"
+rules = ["broken-links", "heading-hierarchy"]
+
+[[lint.ignore]]
+path = "tmp_*/**"
+rules = ["*"]  # Ignore all rules
+
 # Schema-based validation (optional, progressive enhancement)
 [schemas]
 
@@ -162,6 +179,15 @@ required_sections = [
 ]
 allow_additional = true
 ```
+
+### Configuration Precedence
+
+1. **Command-line flags** (highest priority) - e.g., `--config path/to/.markdown-doc.toml`
+2. **`.markdown-doc.toml` in current directory** - project-specific overrides
+3. **`.markdown-doc.toml` in git root** - repository-wide defaults
+4. **Built-in defaults** (lowest priority) - shipped with binary
+
+**Fallback behavior:** If no config file exists, tool operates with sensible defaults (lint all rules as errors, no exclusions, catalog to `DOC_CATALOG.md`). Partial configs merge with defaults (missing sections inherit built-in values, not fail-closed).
 
 ### Schema Philosophy
 
@@ -310,23 +336,51 @@ Last updated: 2025-10-25 14:32:00 PST
 
 **Usage:**
 ```bash
-# Generate catalog
+# Generate catalog (full scan)
 markdown-doc catalog
+
+# Selective scanning (faster for incremental updates)
+markdown-doc catalog --path docs/
+markdown-doc catalog --staged  # Only git staged files
 
 # Regenerate from scratch
 markdown-doc catalog --regen
 
 # Specify output location
 markdown-doc catalog --output DOCS_INDEX.md
+
+# Machine-readable output for agents
+markdown-doc catalog --format json > catalog.json
 ```
+
+**Output formats:**
+- **Plain text** (default): Human-readable markdown with TOCs
+- **JSON** (`--format json`): Structured data for agent consumption
+  ```json
+  {
+    "last_updated": "2025-10-25T14:32:00-07:00",
+    "file_count": 388,
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "headings": [
+          {"level": 1, "text": "Authorship", "anchor": "authorship"},
+          {"level": 2, "text": "Core Directives", "anchor": "core-directives"}
+        ]
+      }
+    ]
+  }
+  ```
 
 **Performance requirements:**
 
 - **Concurrent file reading:** Must read and parse files in parallel (not sequentially)
 - **Target performance:** Complete catalog generation for 388 files in <5 seconds
 - **Scalability:** Gracefully handle 1000+ files without linear slowdown
+- **Concurrency safety:** Atomic temp-file writes prevent race conditions when multiple processes run catalog simultaneously (e.g., concurrent CI jobs, agents)
+- **No global locks:** Git handles conflict resolution if multiple writers target the same output file
 
-**Rationale:** Sequential file reading would take 10-30 seconds for 388 files. Concurrent reading achieves <5 seconds, making catalog regeneration fast enough to run on every doc change (watch mode, CI, pre-commit hooks).
+**Rationale:** Sequential file reading would take 10-30 seconds for 388 files. Concurrent reading achieves <5 seconds, making catalog regeneration fast enough to run on every doc change (watch mode, CI, pre-commit hooks). Atomic writes ensure safe concurrent execution without coordination.
 
 ### 3. `markdown-doc lint` (Quality Gate)
 
@@ -373,28 +427,79 @@ When you link to `file.md#configuration`, which section do you get? The first? T
 ✅ 385 files validated, 3 errors, 1 warning
 ```
 
+**CLI flags for selective scanning:**
+```bash
+# Scan specific directory
+markdown-doc lint --path docs/
+
+# Scan only staged files (fast pre-commit check)
+markdown-doc lint --staged
+
+# JSON output for CI integration
+markdown-doc lint --format json > lint-report.json
+
+# SARIF format for GitHub Code Scanning
+markdown-doc lint --format sarif > results.sarif
+```
+
+**Structured output example (JSON):**
+```json
+{
+  "summary": {
+    "files_scanned": 385,
+    "errors": 3,
+    "warnings": 1
+  },
+  "violations": [
+    {
+      "rule": "broken-links",
+      "severity": "error",
+      "file": "docs/guide.md",
+      "line": 42,
+      "message": "Broken link to 'missing.md'"
+    }
+  ]
+}
+```
+
 ---
 
 ## Deliverables
 
-### Phase 1: Foundation
+### Phase 1: Foundation (MVP - Single Vertical Slice)
+
+**MVP Scope:** Ship `catalog` + `lint broken-links` + config loader as first working end-to-end workflow
 
 - [ ] Rust project scaffolding (Cargo.toml, CI setup)
-- [ ] Configuration parser (`.markdown-doc.toml`)
-- [ ] Shared markdown parsing utilities
+- [ ] Configuration parser (`.markdown-doc.toml`) with defaults fallback
+- [ ] Shared markdown parsing utilities (pulldown-cmark wrapper)
 - [ ] `catalog` command with concurrent file reading (required)
-- [ ] `toc` command (read/write TOC markers)
-- [ ] Performance benchmarks (verify <5s for 388 files)
+  - [ ] Selective scanning (--path, --staged flags for partial runs)
+  - [ ] Atomic temp-file writes (safe for concurrent access)
+  - [ ] JSON output mode (--format json for agent consumption)
+- [ ] `lint` command with broken-links rule only (deferred: other rules)
+  - [ ] Configurable severity (error/warning/ignore per pattern)
+  - [ ] Ignore lists for known edge cases (e.g., external refs, generated files)
+  - [ ] JSON/SARIF output for CI integration
+- [ ] CLI acceptance tests (verify exit codes, output formats, selective scanning)
+- [ ] Performance benchmarks (verify <5s for 388 files, concurrent safety)
 
 ### Phase 2: Quality Gates
 
-- [ ] `lint` command with broken-links rule
-- [ ] `lint` broken-anchors rule
-- [ ] `lint` duplicate-anchors rule
-- [ ] `lint` heading-hierarchy rule
-- [ ] `lint` required-sections rule
-- [ ] `validate` template checking
-- [ ] CI integration docs
+- [ ] `toc` command (read/write TOC markers) - moved from Phase 1
+- [ ] `lint` additional rules:
+  - [ ] broken-anchors rule
+  - [ ] duplicate-anchors rule
+  - [ ] heading-hierarchy rule
+  - [ ] required-sections rule (uses same schema definitions as `validate`)
+- [ ] `validate` command - template compliance checking
+  - [ ] Clarify relationship with `lint required-sections`: both read `[schemas]` config
+  - [ ] Different CLI messaging: `lint` for incremental checks, `validate` for full template conformance
+- [ ] Severity tuning system:
+  - [ ] Per-path exemptions (e.g., `_legacy_*` directories)
+  - [ ] Downgradeable severities (error → warning for specific rules)
+  - [ ] `.markdown-doc-ignore` file support (like .gitignore)
+- [ ] CI integration docs with selective scanning examples
 
 ### Phase 3: Refactoring Support
 
@@ -405,8 +510,13 @@ When you link to `file.md#configuration`, which section do you get? The first? T
 
 ### Phase 4: Intelligence
 
-- [ ] `search` command (full-text)
-- [ ] Index building/caching
+- [ ] `search` command (full-text) - **Deferred pending acceptance criteria**
+  - [ ] Required metrics before implementation:
+    - Latency target (e.g., <500ms for 388 files)
+    - Ranking algorithm (relevance scoring approach)
+    - Snippet extraction quality (context around matches)
+  - [ ] Decision: Index building strategy (incremental vs full rebuild)
+- [ ] Index building/caching (if search proceeds)
 - [ ] Performance optimization (>100 files)
 - [ ] Documentation and examples
 
@@ -441,10 +551,19 @@ When you link to `file.md#configuration`, which section do you get? The first? T
 
 ## Milestones
 
-- [ ] 1: Demo `catalog` command (verify concurrent reading works, <5s for 388 files)
-- [ ] 2: Run `lint` in CI
-- [ ] 3: Safe file moves working
-- [ ] 4: Full release
+- [ ] **M1: MVP vertical slice** - `catalog` + `lint broken-links` + config loader working end-to-end
+  - Acceptance: CLI can scan 388 files in <5s, output JSON, run selectively with `--path` flag
+  - Exit codes correct, error messages actionable
+  - Atomic temp-file writes verified (concurrent safety test)
+- [ ] **M2: CI integration** - Run `lint` in CI with zero false positives
+  - Acceptance: Pre-commit hook script, GitHub Actions workflow example
+  - Ignore lists tuned for wepppy's legacy directories
+  - SARIF output working with GitHub Code Scanning
+- [ ] **M3: Safe file moves** - `mv` command with atomic link updates working
+  - Acceptance: Can reorganize docs/ without breaking references
+  - Dry-run mode accurate, backups created
+- [ ] **M4: Full release** - All Phase 1-3 features complete
+  - Acceptance: Documentation complete, wctl integration, agent workflows documented
 
 ---
 
@@ -457,26 +576,141 @@ When you link to `file.md#configuration`, which section do you get? The first? T
 
 ---
 
+## CLI Design and Integration
+
+### Selective Scanning Modes
+
+All commands support selective scanning to avoid full repository scans:
+
+```bash
+# Scan specific directory
+markdown-doc <command> --path docs/work-packages/
+
+# Scan only git staged files (pre-commit workflow)
+markdown-doc <command> --staged
+
+# Scan specific files (space-separated)
+markdown-doc <command> file1.md file2.md
+
+# Full repository scan (default when no flags provided)
+markdown-doc <command>
+```
+
+**Use cases:**
+- **Pre-commit hooks:** `--staged` for fast incremental checks
+- **CI per-PR:** `--path` to scan only changed directories
+- **Full validation:** No flags for complete repository audit
+- **wctl integration:** `wctl doc-lint --staged` wraps `markdown-doc lint --staged`
+
+### Output Formats
+
+Commands support multiple output formats for different consumers:
+
+| Format | Flag | Consumer | Use Case |
+|--------|------|----------|----------|
+| Plain text | (default) | Humans | Terminal output, manual review |
+| JSON | `--format json` | Agents, scripts | Programmatic parsing, automation |
+| SARIF | `--format sarif` | GitHub Code Scanning | Security/quality dashboards |
+
+**Agent workflow example:**
+```bash
+# Agent checks for broken links before committing doc changes
+output=$(markdown-doc lint --staged --format json)
+if [ "$(echo $output | jq '.summary.errors')" -gt 0 ]; then
+  echo "Documentation validation failed"
+  echo $output | jq '.violations'
+  exit 1
+fi
+```
+
+### wctl Integration
+
+Add convenience wrappers to `wctl` for common workflows:
+
+```bash
+# Lint documentation
+wctl doc-lint              # Full scan
+wctl doc-lint --staged     # Pre-commit check
+wctl doc-lint --path PATH  # Selective scan
+
+# Regenerate catalog
+wctl doc-catalog           # markdown-doc catalog
+
+# Update TOC in specific file
+wctl doc-toc FILE          # markdown-doc toc FILE --update
+
+# Move file safely
+wctl doc-mv SRC DEST       # markdown-doc mv SRC DEST --dry-run (confirm) → mv
+```
+
+### CI Integration Examples
+
+**Pre-commit hook** (`.git/hooks/pre-commit`):
+```bash
+#!/bin/bash
+markdown-doc lint --staged --format json > /tmp/lint-result.json
+errors=$(jq '.summary.errors' /tmp/lint-result.json)
+if [ "$errors" -gt 0 ]; then
+  echo "❌ Documentation validation failed:"
+  jq '.violations[] | "\(.file):\(.line): \(.message)"' /tmp/lint-result.json
+  exit 1
+fi
+```
+
+**GitHub Actions workflow** (`.github/workflows/docs-lint.yml`):
+```yaml
+name: Documentation Quality
+
+on: [pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install markdown-doc
+        run: cargo install markdown-doc
+      - name: Validate documentation
+        run: markdown-doc lint --format sarif > results.sarif
+      - name: Upload results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+```
+
+### Configuration Relationship: `lint` vs `validate`
+
+Both commands read the same `[schemas]` configuration section but serve different purposes:
+
+**`markdown-doc lint`** - Incremental quality checks
+- Runs fast rule-based validations (broken links, heading hierarchy)
+- `required-sections` rule uses schema definitions for section checks
+- Suitable for pre-commit hooks and rapid feedback
+- Focus: Catch common mistakes quickly
+
+**`markdown-doc validate`** - Full template conformance
+- Deep structural validation against template schemas
+- Checks section order, nesting depth, content patterns
+- Slower, more comprehensive analysis
+- Focus: Enforce documentation standards for critical files (AGENTS.md, work packages)
+
+**CLI messaging difference:**
+```bash
+# lint - shows individual rule violations
+$ markdown-doc lint AGENTS.md
+❌ AGENTS.md:45: Missing required section 'Core Directives'
+
+# validate - shows template conformance status
+$ markdown-doc validate AGENTS.md --schema agents
+❌ AGENTS.md does not conform to 'agents' schema:
+   - Missing required section: 'Core Directives' (expected after 'Authorship')
+   - Section order violation: Found 'Repository Overview' before 'Core Directives'
+```
+
+---
+
 ## Notes
 
 - `mv` command is high-value for refactoring workflows
 - Agent autonomy: This tool should enable agents to maintain docs
-
-## Lead Developer Review (2025-10-30)
-
-### Observed Utility
-- `catalog`, `lint`, and `toc` give us the first automation loop that replaces manual doc sweeps, which is critical for gatekeeping submissions from agents and humans alike.
-- Template-driven `validate` enforces the README/AGENTS/work-package standards we already rely on, so we can trust contributors to adopt them without manual review.
-- `mv` plus `refs` closes the biggest current gap—safe refactors—by promising deterministic link updates instead of the brittle search/replace we run today.
-
-### MVP Shortcomings to Resolve
-- MVP scope still reads like a multi-quarter roadmap; we need a single vertical slice we can ship fast (for example: `catalog` + `lint broken-links` + config loader) with explicit acceptance tests and CLI UX.
-- "Zero false positives" on link linting still needs a tuning story—spell out ignore lists, downgradeable severities, or per-path exemptions so teams can manage known edge cases without patching the tool.
-- `validate` vs. `lint required-sections`: document that both read the same schema definitions (or explain the divergence) and describe the CLI messaging so contributors understand which command to run.
-- Concurrency story: confirm the plan is atomic temp-file writes plus Git conflict resolution (no global locks) and call that out so agents can safely script concurrent reads like `catalog`.
-
-### Operational Questions
-- How do we run the tool selectively (per directory, staged files, pre-commit)? Provide flag expectations so we can wire it into `wctl` and CI without scanning all 388 files every time.
-- What output formats do agents vs. humans consume (plain text, JSON, SARIF)? We need structured output guarantees before we give this to automation.
-- What is the fallback when configuration is missing or partially defined (inherit defaults, fail closed)? Spell out the configuration precedence to avoid divergent environments.
-- `search` appears in Phase 4, yet there is no acceptance metric (latency, ranking, snippet). Document expectations or defer entirely so we do not mis-prioritize indexing work.
+- **Review integrated:** Lead developer feedback (2025-10-30) has been incorporated throughout document
