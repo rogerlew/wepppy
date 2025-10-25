@@ -206,6 +206,8 @@ class Disturbed(NoDbBase):
             self._counts = None
             self._nodata_vals = None
             self._is256 = None
+            self._sbs_mode = 0
+            self._uniform_severity = None
 
             self.reset_land_soil_lookup()
 
@@ -324,6 +326,25 @@ class Disturbed(NoDbBase):
 
         return _join(self.disturbed_dir, self._disturbed_fn)
 
+    @property
+    def sbs_mode(self) -> int:
+        return int(getattr(self, '_sbs_mode', 0))
+
+    @sbs_mode.setter
+    @nodb_setter
+    def sbs_mode(self, value: int) -> None:
+        self._sbs_mode = int(value)
+
+    @property
+    def uniform_severity(self) -> Optional[int]:
+        severity = getattr(self, '_uniform_severity', None)
+        return None if severity is None else int(severity)
+
+    @uniform_severity.setter
+    @nodb_setter
+    def uniform_severity(self, value: Optional[int]) -> None:
+        self._uniform_severity = int(value) if value is not None else None
+
     def build_uniform_sbs(self, value: int = 4) -> str:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}({value})')
@@ -359,6 +380,14 @@ class Disturbed(NoDbBase):
             band.SetColorTable(color_table)
             band = None  # Dereference to make sure all data is written
             ds = None  # Dereference to make sure all data is written
+
+            try:
+                self.sbs_mode = 1
+                self.uniform_severity = value
+            except Exception:
+                # Fallback to direct assignment if setters are unavailable during init
+                self._sbs_mode = 1
+                self._uniform_severity = int(value)
 
             return sbs_fn
 
@@ -539,10 +568,13 @@ class Disturbed(NoDbBase):
         fn: str, 
         breaks: Optional[List[int]] = None, 
         nodata_vals: Optional[Union[List[int], Tuple[int, ...]]] = None, 
-        color_map: Optional[Dict[str, str]] = None
+        color_map: Optional[Dict[str, str]] = None,
+        *, 
+        mode: Optional[int] = None,
+        uniform_severity: Optional[int] = None
     ) -> None:
         func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name}(fn={fn}, breaks={breaks}, nodata_vals={nodata_vals}, color_map={color_map})')
+        self.logger.info(f'{self.class_name}.{func_name}(fn={fn}, breaks={breaks}, nodata_vals={nodata_vals}, color_map={color_map}, mode={mode}, uniform_severity={uniform_severity})')
 
         assert nodata_vals is None or isinstance(nodata_vals, (list, tuple)), nodata_vals
         assert not isinstance(nodata_vals, str), nodata_vals
@@ -572,6 +604,12 @@ class Disturbed(NoDbBase):
                 self._color_map = {'_'.join(str(x) for x in rgb): v for rgb, v in sbs.color_map.items()}
             self._breaks = sbs.breaks
             self._nodata_vals = sbs.nodata_vals
+            if mode is not None:
+                self._sbs_mode = int(mode)
+                if mode == 0 and uniform_severity is None:
+                    self._uniform_severity = None
+            if uniform_severity is not None:
+                self._uniform_severity = int(uniform_severity)
 
         try:
             prep = RedisPrep.getInstance(self.wd)

@@ -264,7 +264,7 @@ def task_upload_sbs(runid: str, config: str) -> Response:
     ret, description = sbs_map_sanity_check(_join(baer.baer_dir, filename))
     if ret != 0:
         return exception_factory(description, runid=runid)
-    baer.validate(filename)
+    baer.validate(filename, mode=0)
     return success_factory({'disturbed_fn': baer.disturbed_fn})
 
 
@@ -321,6 +321,7 @@ def task_build_uniform_sbs(runid: str, config: str, value: Optional[str] = None)
     """Generate a uniform SBS raster with the requested severity value."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    ron = Ron.getInstance(wd)
     disturbed = Disturbed.getInstance(wd)
     payload = parse_request_payload(request)
 
@@ -344,5 +345,19 @@ def task_build_uniform_sbs(runid: str, config: str, value: Optional[str] = None)
         return error_factory('value must be an integer')
 
     sbs_fn = disturbed.build_uniform_sbs(severity)
-    disturbed.validate(sbs_fn)
+    disturbed.validate(sbs_fn, mode=1, uniform_severity=severity)
+
+    if 'baer' in ron.mods:
+        baer = Baer.getInstance(wd)
+        try:
+            baer.validate(disturbed.disturbed_fn, mode=1, uniform_severity=severity)
+        except Exception:
+            # Fall back to direct assignments if validation fails on legacy runs
+            baer.sbs_mode = 1
+            baer.uniform_severity = severity
+            try:
+                baer._baer_fn = disturbed.disturbed_fn  # type: ignore[attr-defined]
+            except Exception:
+                pass
+
     return success_factory({'disturbed_fn': disturbed.disturbed_fn})

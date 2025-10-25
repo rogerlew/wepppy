@@ -41,7 +41,11 @@
         {% set ash_depth_mode = ash.ash_depth_mode %}
     {% endif %}
 
-    {% set climate_precip_mode = climate.precip_scaling_mode if climate.precip_scaling_mode is defined else None %}
+{% set climate_precip_mode = climate.precip_scaling_mode if climate.precip_scaling_mode is defined else None %}
+{% set disturbed_mode = disturbed.sbs_mode if disturbed is not none else 0 %}
+{% set disturbed_uniform = disturbed.uniform_severity if disturbed is not none else None %}
+{% set baer_mode = baer.sbs_mode if baer is not none else disturbed_mode %}
+{% set baer_uniform = baer.uniform_severity if baer is not none else disturbed_uniform %}
 
     var sitePrefix = {{ site_prefix | tojson }};
     var runId = {{ ron.runid | tojson }};
@@ -133,7 +137,8 @@
             "subcatchment": {"defaultColorMap": "slp_asp"},
             "project": {"readonly": ron.readonly},
             "outlet": {},
-            "baer": {"mode": 0}
+            "disturbed": {"mode": disturbed_mode, "uniformSeverity": disturbed_uniform},
+            "baer": {"mode": baer_mode, "uniformSeverity": baer_uniform}
         },
         "ui": {
             "tocTaskEmojis": toc_task_emojis

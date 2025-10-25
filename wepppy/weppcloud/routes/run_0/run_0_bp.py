@@ -18,6 +18,7 @@ from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
 from wepppy.nodb.mods.treatments import Treatments
 from wepppy.nodb.mods.ash_transport import Ash
+from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core.climate import Climate
@@ -172,6 +173,7 @@ def runs0(runid, config):
     rangeland_cover = RangelandCover.tryGetInstance(wd)
     rhem = Rhem.tryGetInstance(wd)
     disturbed = Disturbed.tryGetInstance(wd)
+    baer = Baer.tryGetInstance(wd) if 'baer' in ron.mods else None
     ash = Ash.tryGetInstance(wd)
     skid_trails = wepppy.nodb.mods.SkidTrails.tryGetInstance(wd)
     reveg = Revegetation.tryGetInstance(wd)
@@ -215,6 +217,7 @@ def runs0(runid, config):
                             wepp_bin_options=wepp_bin_options,
                             rhem=rhem,
                             disturbed=disturbed,
+                            baer=baer,
                             ash=ash,
                             skid_trails=skid_trails,
                             reveg=reveg,

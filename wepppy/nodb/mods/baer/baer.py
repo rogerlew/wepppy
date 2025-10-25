@@ -39,7 +39,7 @@ from os.path import join as _join
 
 from wepppy.all_your_base import isint
 from wepppy.all_your_base.geo import haversine, read_raster, wgs84_proj4
-from wepppy.nodb.base import NoDbBase, TriggerEvents
+from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.core.landuse import Landuse, LanduseMode
 from wepppy.nodb.core.ron import Ron
 from wepppy.nodb.core.soils import Soils, SoilsMode
@@ -102,6 +102,8 @@ class Baer(NoDbBase):
             self._counts: Optional[Dict[str, int]] = None
             self._nodata_vals: Optional[List[int]] = None
             self._is256: Optional[bool] = None
+            self._sbs_mode: int = 0
+            self._uniform_severity: Optional[int] = None
 
             self._legacy_mode: bool = self.config_get_bool('baer', 'legacy_mode')
 
@@ -135,6 +137,25 @@ class Baer(NoDbBase):
     @property
     def is256(self) -> bool:
         return self._is256 is not None
+
+    @property
+    def sbs_mode(self) -> int:
+        return int(getattr(self, '_sbs_mode', 0))
+
+    @sbs_mode.setter
+    @nodb_setter
+    def sbs_mode(self, value: int) -> None:
+        self._sbs_mode = int(value)
+
+    @property
+    def uniform_severity(self) -> Optional[int]:
+        severity = getattr(self, '_uniform_severity', None)
+        return None if severity is None else int(severity)
+
+    @uniform_severity.setter
+    @nodb_setter
+    def uniform_severity(self, value: Optional[int]) -> None:
+        self._uniform_severity = int(value) if value is not None else None
 
     @property
     def color_tbl_path(self) -> str:
@@ -378,7 +399,7 @@ class Baer(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def validate(self, fn: str) -> None:
+    def validate(self, fn: str, *, mode: Optional[int] = None, uniform_severity: Optional[int] = None) -> None:
         with self.locked():
             self._baer_fn = fn
             self._nodata_vals = None
@@ -452,6 +473,12 @@ class Baer(NoDbBase):
 
             self.write_color_table()
             self.build_color_map()
+            if mode is not None:
+                self._sbs_mode = int(mode)
+                if mode == 0 and uniform_severity is None:
+                    self._uniform_severity = None
+            if uniform_severity is not None:
+                self._uniform_severity = int(uniform_severity)
 
         try:
             prep = RedisPrep.getInstance(self.wd)

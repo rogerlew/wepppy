@@ -492,7 +492,7 @@ class Ron(NoDbBase):
 
                 with open(sbs_path, 'wb') as f:
                     f.write(r.content)
-                baer.validate(_split(sbs_path)[-1])
+                baer.validate(_split(sbs_path)[-1], mode=0)
             else:
                 from wepppy.nodb.mods import MODS_DIR
                 sbs_map = sbs_map.replace('MODS_DIR', MODS_DIR)
@@ -503,7 +503,7 @@ class Ron(NoDbBase):
 
                 shutil.copyfile(sbs_map, sbs_path)
 
-                baer.validate(_split(sbs_path)[-1])
+                baer.validate(_split(sbs_path)[-1], mode=0)
 
     @property
     def configname(self) -> str:

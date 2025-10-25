@@ -1299,7 +1299,7 @@ class Omni(NoDbBase):
             with self.timed(f'  {scenario_name}: build uniform sbs {sbs}'):
                 sbs_fn = disturbed.build_uniform_sbs(int(sbs))
             with self.timed(f'  {scenario_name}: validate sbs {sbs_fn}'):
-                disturbed.validate(sbs_fn)
+                disturbed.validate(sbs_fn, mode=1, uniform_severity=int(sbs))
             with self.timed(f'  {scenario_name}: build landuse and soils'):
                 landuse.build()
             with self.timed(f'  {scenario_name}: build soils'):
@@ -1332,7 +1332,7 @@ class Omni(NoDbBase):
                 os.remove(sbs_file_path)
 
             with self.timed(f'  {scenario_name}: validate sbs {sbs_fn}'):
-                disturbed.validate(sbs_fn)
+                disturbed.validate(sbs_fn, mode=0)
             with self.timed(f'  {scenario_name}: build landuse and soils'):
                 landuse.build()
             with self.timed(f'  {scenario_name}: build soils'):

@@ -17,6 +17,12 @@ var Disturbed = (function () {
         3: "#hint_high_sbs"
     };
 
+    var UNIFORM_LABELS = {
+        1: "Uniform Low SBS",
+        2: "Uniform Moderate SBS",
+        3: "Uniform High SBS"
+    };
+
     var EVENT_NAMES = [
         "disturbed:mode:changed",
         "disturbed:sbs:state",
@@ -238,15 +244,32 @@ var Disturbed = (function () {
         });
 
         var initialMode = 0;
+        var initialUniform = null;
         if (formElement) {
-            var checked = formElement.querySelector("input[name='sbs_mode']:checked");
-            initialMode = parseInteger(checked ? checked.value : 0, 0);
+            if (formElement.dataset) {
+                if (formElement.dataset.initialMode !== undefined) {
+                    initialMode = parseInteger(formElement.dataset.initialMode, 0);
+                }
+                if (formElement.dataset.initialUniform !== undefined) {
+                    var uniformValue = formElement.dataset.initialUniform;
+                    if (uniformValue === "" || uniformValue === null || uniformValue === undefined) {
+                        initialUniform = null;
+                    } else {
+                        initialUniform = parseInteger(uniformValue, null);
+                    }
+                }
+            }
+            if (!formElement.dataset || formElement.dataset.initialMode === undefined) {
+                var checked = formElement.querySelector("input[name='sbs_mode']:checked");
+                initialMode = parseInteger(checked ? checked.value : initialMode, initialMode);
+            }
         }
 
         var state = {
             mode: initialMode,
             hasSbs: undefined,
-            hasSbsRequest: null
+            hasSbsRequest: null,
+            uniformSeverity: initialUniform
         };
 
         function emit(name, payload) {
@@ -297,6 +320,12 @@ var Disturbed = (function () {
                     dom.hide(panel);
                 }
             });
+            if (formElement) {
+                var modeInput = formElement.querySelector("input[name='sbs_mode'][value='" + normalized + "']");
+                if (modeInput && !modeInput.checked) {
+                    modeInput.checked = true;
+                }
+            }
             if (shouldEmit) {
                 emit("disturbed:mode:changed", { mode: normalized });
             }
@@ -339,6 +368,41 @@ var Disturbed = (function () {
             }
             setAdapterText(uniformHintAdapters[key], text);
         }
+
+        function updateUniformSummary(severity) {
+            var display = formElement ? formElement.querySelector('[data-uniform-summary]') : null;
+            var nextSeverity;
+            if (severity === undefined) {
+                nextSeverity = state.uniformSeverity;
+            } else if (severity === null) {
+                nextSeverity = null;
+            } else {
+                nextSeverity = parseInteger(severity, null);
+            }
+            state.uniformSeverity = nextSeverity;
+            if (!display) {
+                return;
+            }
+            var summaryHtml;
+            if (nextSeverity === null || nextSeverity === undefined) {
+                summaryHtml = '<span class="wc-text-muted">Not set</span>';
+            } else {
+                summaryHtml = UNIFORM_LABELS[nextSeverity] || "Uniform " + nextSeverity + " SBS";
+            }
+            display.innerHTML = summaryHtml;
+        }
+
+        function syncModeFromServer(mode, severity, options) {
+            var opts = options || {};
+            if (mode !== undefined && mode !== null) {
+                setMode(mode, opts.emit !== false);
+            }
+            if (severity !== undefined) {
+                updateUniformSummary(severity);
+            }
+        }
+
+        updateUniformSummary(state.uniformSeverity);
 
         function updateHasSbs(value, source) {
             var next;
@@ -480,7 +544,9 @@ var Disturbed = (function () {
                         if (content.disturbed_fn) {
                             updateCurrentFilename(content.disturbed_fn);
                         }
-                        
+
+                        syncModeFromServer(0, null);
+
                         emit("disturbed:upload:completed", { response: data });
                         disturbed.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
                         // Sync with baer controller
@@ -628,7 +694,9 @@ var Disturbed = (function () {
                         if (content.disturbed_fn) {
                             updateCurrentFilename(content.disturbed_fn);
                         }
-                        
+
+                        syncModeFromServer(1, severity);
+
                         emit("disturbed:uniform:completed", {
                             response: data,
                             severity: severity
@@ -815,8 +883,13 @@ var Disturbed = (function () {
         disturbed.bootstrap = function bootstrap(context) {
             var ctx = context || {};
             var flags = ctx.flags || {};
+            var controllerContext = ctx.controllers && ctx.controllers.disturbed ? ctx.controllers.disturbed : {};
             if (flags.initialHasSbs !== undefined && typeof disturbed.set_has_sbs_cached === "function") {
                 disturbed.set_has_sbs_cached(Boolean(flags.initialHasSbs));
+            }
+
+            if (controllerContext.mode !== undefined || controllerContext.uniformSeverity !== undefined) {
+                syncModeFromServer(controllerContext.mode, controllerContext.uniformSeverity, { emit: false });
             }
             
             // Bootstrap baer controller if it exists and has initial SBS

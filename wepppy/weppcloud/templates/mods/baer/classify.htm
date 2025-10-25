@@ -1,4 +1,18 @@
 <div class="wc-baer-classify">
+  {% set mode = baer.sbs_mode if baer is not none else 0 %}
+  {% set severity = baer.uniform_severity if baer is not none else None %}
+  {% set severity_labels = {1: "Low", 2: "Moderate", 3: "High"} %}
+  <dl class="wc-summary">
+    {% if mode == 1 and severity in severity_labels %}
+      <dt>SBS Mode</dt>
+      <dd>Uniform {{ severity_labels[severity] }} Severity</dd>
+    {% else %}
+      <dt>SBS Raster</dt>
+      <dd><code>{{ baer.disturbed_fn or baer.baer_fn }}</code></dd>
+    {% endif %}
+    <dt>Status</dt>
+    <dd>Validated</dd>
+  </dl>
   {% if baer.ct is none %}
     <h5>Using pixel breaks to set burn severity.</h5>
     {% set sbs_class_pcts = baer.sbs_class_pcts %}

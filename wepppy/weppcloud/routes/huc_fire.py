@@ -61,7 +61,7 @@ def upload_sbs():
         return exception_factory('Could not save file')
 
     try:
-        res = disturbed.validate(filename)
+        res = disturbed.validate(filename, mode=0)
     except Exception:
         os.remove(file_path)
         return exception_factory('Failed validating file')

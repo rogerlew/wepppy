@@ -67,7 +67,19 @@ def disturbed_client(
         def modify_color_map(self, color_map) -> None:
             self.color_map_updates.append(color_map)
 
-        def validate(self, filename: str) -> Dict[str, str]:
+        def validate(self, filename: str, *args: Any, **kwargs: Any) -> Dict[str, str]:
+            mode = kwargs.get("mode")
+            severity = kwargs.get("uniform_severity")
+            if mode is not None:
+                self.sbs_mode = mode
+                if mode == 0 and severity is None:
+                    self.uniform_severity = None
+            if severity is not None:
+                self.uniform_severity = severity
+            if hasattr(self, "disturbed_fn"):
+                self.disturbed_fn = filename
+            if hasattr(self, "baer_fn"):
+                self.baer_fn = filename
             self.validated.append(filename)
             return {"validated": filename}
 
@@ -104,6 +116,10 @@ def disturbed_client(
             "sbs_removed": 0,
             "uniform_values": [],
             "validated": [],
+            "sbs_mode": 0,
+            "uniform_severity": None,
+            "disturbed_fn": None,
+            "baer_fn": None,
         }
 
         return singleton_factory(name, attrs=attrs, methods=methods, mixins=(LockedMixin,))
@@ -295,6 +311,11 @@ def test_task_build_uniform_sbs_runs_validation(disturbed_client):
     controller = DisturbedStub.getInstance(run_dir)
     assert controller.uniform_values[-1] == 7
     assert controller.validated[-1].endswith("uniform_7.tif")
+    assert controller.sbs_mode == 1
+    assert controller.uniform_severity == 7
+    baer_controller = BaerStub.getInstance(run_dir)
+    assert baer_controller.sbs_mode == 1
+    assert baer_controller.uniform_severity == 7
 
 
 def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
@@ -305,3 +326,8 @@ def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
     controller = DisturbedStub.getInstance(run_dir)
     assert controller.uniform_values[-1] == 9
     assert controller.validated[-1].endswith("uniform_9.tif")
+    assert controller.sbs_mode == 1
+    assert controller.uniform_severity == 9
+    baer_controller = BaerStub.getInstance(run_dir)
+    assert baer_controller.sbs_mode == 1
+    assert baer_controller.uniform_severity == 9
