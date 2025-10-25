@@ -766,19 +766,6 @@ var Disturbed = (function () {
                     if (baer && typeof baer.bootstrap === "function") {
                         baer.bootstrap(context);
                     }
-                    // Also trigger initial load directly as fallback
-                    if (baer) {
-                        setTimeout(function () {
-                            if (typeof baer.show_sbs === "function") {
-                                baer.show_sbs();
-                            }
-                        }, 0);
-                        setTimeout(function () {
-                            if (typeof baer.load_modify_class === "function") {
-                                baer.load_modify_class();
-                            }
-                        }, 0);
-                    }
                 } catch (e) {
                     console.warn("[Disturbed] Failed to bootstrap Baer controller", e);
                 }
