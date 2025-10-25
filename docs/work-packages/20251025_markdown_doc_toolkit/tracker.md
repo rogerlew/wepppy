@@ -9,28 +9,32 @@
 
 ### Backlog
 
-- [ ] **Design & Planning**
-  - [ ] Finalize CLI command surface (commands, flags, exit codes)
-  - [ ] Design `.markdown-doc.toml` schema
-  - [ ] Document link resolution algorithm
-  - [ ] Define template validation schema
-  - [ ] Write architectural design doc
-
-- [ ] **Phase 1: Foundation**
+- [ ] **Phase 1: MVP Implementation**
   - [ ] Set up Rust project structure (Cargo.toml, CI)
-  - [ ] Implement configuration parser
-  - [ ] Build shared markdown parser wrapper
-  - [ ] Implement `catalog` command (basic)
-  - [ ] Implement `toc` command (read/write)
-  - [ ] Write integration tests for catalog
+  - [ ] Implement configuration parser with defaults fallback
+  - [ ] Build shared markdown parser wrapper (pulldown-cmark)
+  - [ ] Implement `catalog` command with concurrent file reading
+    - [ ] Selective scanning (--path, --staged flags)
+    - [ ] Atomic temp-file writes
+    - [ ] JSON output mode
+  - [ ] Implement `lint broken-links` command
+    - [ ] Configurable severity (error/warning/ignore)
+    - [ ] Ignore lists for known edge cases
+    - [ ] JSON/SARIF output formats
+  - [ ] CLI acceptance tests (exit codes, output formats, selective scanning)
+  - [ ] Performance benchmarks (<5s for 388 files, concurrent safety)
 
 - [ ] **Phase 2: Quality Gates**
-  - [ ] Implement `lint` command skeleton
-  - [ ] Add broken-links lint rule
-  - [ ] Add heading-hierarchy lint rule
-  - [ ] Add required-sections lint rule
-  - [ ] Implement `validate` template checking
-  - [ ] Add CI integration examples
+  - [ ] Implement `toc` command (read/write TOC markers)
+  - [ ] Add additional lint rules:
+    - [ ] broken-anchors rule
+    - [ ] duplicate-anchors rule
+    - [ ] heading-hierarchy rule
+    - [ ] required-sections rule
+  - [ ] Implement `validate` command (template compliance)
+  - [ ] Severity tuning system (per-path exemptions, downgradeable severities)
+  - [ ] `.markdown-doc-ignore` file support
+  - [ ] CI integration docs with examples
 
 - [ ] **Phase 3: Refactoring Support**
   - [ ] Design link update engine
@@ -40,7 +44,8 @@
   - [ ] Add atomic operation guarantees
   - [ ] Write comprehensive move tests
 
-- [ ] **Phase 4: Intelligence**
+- [ ] **Phase 4: Intelligence (Deferred)**
+  - [ ] Define acceptance criteria (latency, ranking, snippet quality)
   - [ ] Design search index structure
   - [ ] Implement `search` command
   - [ ] Add index caching
@@ -54,7 +59,18 @@
 
 ### Done
 
-*(Nothing yet)*
+- [x] **Design & Planning**
+  - [x] Finalize CLI command surface (commands, flags, exit codes) - See package.md CLI Design section
+  - [x] Design `.markdown-doc.toml` schema - See Configuration Example in package.md
+  - [x] Document link resolution algorithm - Covered in initial-requirements.md
+  - [x] Define template validation schema - Schema Philosophy section complete
+  - [x] Clarify MVP scope vs post-MVP phases
+  - [x] Define output formats (plain text, JSON, SARIF)
+  - [x] Document concurrency model (atomic writes, no global locks)
+  - [x] Specify selective scanning modes (--path, --staged)
+  - [x] Clarify `lint` vs `validate` relationship
+  - [x] Define severity tuning approach (Phase 2)
+  - [x] Integrated codex review feedback
 
 ---
 
@@ -122,6 +138,24 @@
 - `validate`: Deep template conformance (CI gate for critical files)
 
 **Participants:** Roger, Claude (integrating codex feedback)
+
+---
+
+### 2025-10-25: Scope Boundaries Clarified
+
+**Decision:** Move post-MVP commands to "Out of Scope (Future Phases)" section  
+**Rationale:**
+- `search`, `mv`, `refs`, `toc`, `validate` appeared under "In Scope" but belong to Phase 2-4
+- Only `catalog` + `lint broken-links` + config loader constitute MVP/first release
+- Clearer separation prevents confusion about first milestone gates
+
+**Changes made:**
+- "In Scope" section now lists only MVP components
+- "Out of Scope" organized by phase (Phase 2: Quality Gates, Phase 3: Refactoring, Phase 4: Intelligence)
+- Success Criteria split into "MVP Exit" vs "Full Toolkit"
+- MVP exit criteria now accurately reflect first release scope (no Phase 2/3 features)
+
+**Participants:** Roger (review feedback), Claude
 
 ---
 

@@ -40,12 +40,21 @@ WEPPpy has substantial documentation (388+ markdown files) but managing it is be
 
 ### Success Criteria
 
-- [ ] Broken internal links detected in CI with configurable severity (zero unintended false positives)
-- [ ] `DOC_CATALOG.md` auto-generated and always current
-- [ ] Files can be moved/renamed without breaking references
-- [ ] TOCs auto-update on file changes
-- [ ] Template validation enforced for AGENTS.md, README.md, work packages
-- [ ] **MVP acceptance:** `catalog` + `lint broken-links` working end-to-end with selective scanning and JSON output
+**MVP Exit (First Release):**
+- [ ] `catalog` + `lint broken-links` working end-to-end with selective scanning and JSON output
+- [ ] Configuration loader with defaults fallback and precedence hierarchy
+- [ ] Broken internal links detected with configurable severity (zero unintended false positives via ignore lists)
+- [ ] `DOC_CATALOG.md` auto-generated in <5 seconds for 388 files
+- [ ] Concurrent safety verified (atomic temp-file writes, no race conditions)
+- [ ] CLI acceptance tests passing (exit codes, output formats, selective scanning)
+- [ ] Pre-commit hook and GitHub Actions examples documented
+
+**Full Toolkit (Post-MVP):**
+- [ ] Files can be moved/renamed without breaking references (`mv` command - Phase 3)
+- [ ] TOCs auto-update on file changes (`toc` command - Phase 2)
+- [ ] Template validation enforced for AGENTS.md, README.md, work packages (`validate` command - Phase 2)
+- [ ] All lint rules operational (broken-anchors, duplicate-anchors, heading-hierarchy, required-sections - Phase 2)
+- [ ] Severity tuning and per-path exemptions configured (Phase 2)
 
 ### Non-Goals (Initial Release)
 
@@ -58,28 +67,39 @@ WEPPpy has substantial documentation (388+ markdown files) but managing it is be
 
 ## Scope
 
-### In Scope
+### In Scope (MVP - First Release)
 
 **Core Commands:**
-- `markdown-doc lint` - Validate links, heading hierarchy, required sections
 - `markdown-doc catalog` - Generate/update `DOC_CATALOG.md`
-- `markdown-doc toc` - Generate/update table of contents
-- `markdown-doc refs` - Find references to files/sections
-- `markdown-doc search` - Search across all documentation
-- `markdown-doc mv` - Move/rename files with automatic link updates
-- `markdown-doc validate` - Check against templates
+- `markdown-doc lint` - Validate broken links (additional rules in Phase 2)
 
 **Infrastructure:**
-- `.markdown-doc.toml` configuration file
-- Shared parsing library (leverage existing markdown parser)
+- `.markdown-doc.toml` configuration file with defaults fallback
+- Shared markdown parsing library (pulldown-cmark wrapper)
 - Exit codes and error handling conventions
-- Agent-friendly output formats
+- Agent-friendly output formats (plain text, JSON, SARIF)
+- Selective scanning (`--path`, `--staged` flags)
+- Concurrent file reading with atomic writes
 
-### Out of Scope (Future Phases)
+### Out of Scope (Post-MVP / Future Phases)
 
-- Phase 2: `watch` mode, `stats`, `meta` commands
-- Phase 3: `sync`, `refactor`, `export` commands
-- Phase 4: AI context optimization features
+**Phase 2: Quality Gates**
+- `lint` additional rules (broken-anchors, duplicate-anchors, heading-hierarchy, required-sections)
+- `validate` - Template compliance checking
+- `toc` - Generate/update table of contents
+- Severity tuning and ignore lists
+
+**Phase 3: Refactoring Support**
+- `mv` - Move/rename files with automatic link updates
+- `refs` - Find references to files/sections
+
+**Phase 4: Intelligence (Deferred)**
+- `search` - Search across all documentation (pending acceptance criteria: latency, ranking, snippet quality)
+- `watch` mode - Auto-regenerate on file changes
+- `stats` - Documentation health metrics
+- `meta` - Cross-reference maintenance
+- `sync`, `refactor`, `export` commands
+- AI context optimization features
 
 ---
 
