@@ -519,6 +519,7 @@ var SubcatchmentDelineation = (function () {
                     console.warn("[Subcatchment] Failed to update layer control", err);
                 }
                 state.glLayer = null;
+                sub.glLayer = null;
             }
             if (state.labels) {
                 try {
@@ -789,6 +790,9 @@ var SubcatchmentDelineation = (function () {
                     }
                 }
             }).addTo(map);
+
+            // Expose glLayer on sub instance for external access (e.g., flash-and-find)
+            sub.glLayer = state.glLayer;
 
             map.ctrls.addOverlay(state.glLayer, "Subcatchments");
         }

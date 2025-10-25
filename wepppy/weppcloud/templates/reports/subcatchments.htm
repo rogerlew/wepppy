@@ -1,30 +1,40 @@
 <div>
-    <dl class="dl-horizontal">
-        <dt>Hillslope Count:</dt>
-        <dd>{{ watershed.sub_n }}  </dd>
-        <dt>Channel Count:</dt>
-        <dd>{{ watershed.chn_n }}</dd>
-        <dt>Total Area:</dt>
-        <dd>{{ unitizer_with_units(watershed.wsarea, 'm^2') | safe  }} &nbsp;</dd>
-    </dl>
+    <div class="wc-summary-pane">
+      <dl class="wc-summary-pane__list">
+        <div class="wc-summary-pane__item">
+          <dt class="wc-summary-pane__term">Hillslope Count</dt>
+          <dd class="wc-summary-pane__definition">{{ watershed.sub_n }}</dd>
+        </div>
+        <div class="wc-summary-pane__item">
+          <dt class="wc-summary-pane__term">Channel Count</dt>
+          <dd class="wc-summary-pane__definition">{{ watershed.chn_n }}</dd>
+        </div>
+        <div class="wc-summary-pane__item">
+          <dt class="wc-summary-pane__term">Total Area</dt>
+          <dd class="wc-summary-pane__definition">{{ unitizer_with_units(watershed.wsarea, 'm^2') | safe }} &nbsp;</dd>
+        </div>
+      </dl>
+    </div>
     {% if watershed.delineation_backend_is_taudem %}
-    <div>
-        <br/>
+    <div class="wc-summary-pane">
         <h6>Drop Analysis</h6>
         {{ watershed.pkcsa_drop_table_html | safe}}
-        <dl class="dl-horizontal">
-            <dt>Optimum Threshold:</dt>
-            <dd>{{ watershed.pkcsa_drop_analysis_threshold }}  </dd>
+        <dl class="wc-summary-pane__list">
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Optimum Threshold</dt>
+            <dd class="wc-summary-pane__definition">{{ watershed.pkcsa_drop_analysis_threshold }}</dd>
+          </div>
         </dl>
     </div>
     {% endif %}
     {% if watershed.edge_hillslopes %}
-    <div>
-        <br/>
+    <div class="wc-summary-pane">
         <h6>Caution: Subcatchments Extend Beyond Map Boundaries</h6>
-        <dl class="dl-horizontal">
-            <dt>Number of Edge Hillslopes:</dt>
-            <dd>{{ watershed.edge_hillslopes | length }}</dd>
+        <dl class="wc-summary-pane__list">
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Number of Edge Hillslopes</dt>
+            <dd class="wc-summary-pane__definition">{{ watershed.edge_hillslopes | length }}</dd>
+          </div>
         </dl>
     </div>
     {% endif %}

@@ -1,10 +1,20 @@
- <dl class="dl-horizontal">
-    <dt>Actual Outlet Location(lon, lat):</dt>
-    <dd>{{outlet.actual_loc[0]}}, {{outlet.actual_loc[1]}}</dd>
-    <dt>Pixel Coords (x, y):</dt>
-    <dd>{{outlet.pixel_coords[0]}}, {{outlet.pixel_coords[1]}}</dd>
-    <dt>Requested Location (lon, lat):</dt>
-    <dd>{{outlet.requested_loc[0]}}, {{outlet.requested_loc[1]}}</dd>
-    <dt>Distance between requested and actual:</dt>
-    <dd>{{ unitizer_with_units(outlet.distance_from_requested * ron.cellsize, 'm') | safe }}</dd>
-</dl>
+<div class="wc-summary-pane">
+  <dl class="wc-summary-pane__list">
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Actual Outlet Location (lon, lat)</dt>
+      <dd class="wc-summary-pane__definition">{{outlet.actual_loc[0]}}, {{outlet.actual_loc[1]}}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Pixel Coords (x, y)</dt>
+      <dd class="wc-summary-pane__definition">{{outlet.pixel_coords[0]}}, {{outlet.pixel_coords[1]}}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Requested Location (lon, lat)</dt>
+      <dd class="wc-summary-pane__definition">{{outlet.requested_loc[0]}}, {{outlet.requested_loc[1]}}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Distance between requested and actual</dt>
+      <dd class="wc-summary-pane__definition">{{ unitizer_with_units(outlet.distance_from_requested * ron.cellsize, 'm') | safe }}</dd>
+    </div>
+  </dl>
+</div>

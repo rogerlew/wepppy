@@ -1948,6 +1948,11 @@ code * {
   height: 100%;
 }
 
+/* Override Leaflet zoom control background for better visibility */
+.leaflet-control-zoom.leaflet-bar {
+  background: #fff;
+}
+
 .wc-map__resize-handle {
   position: absolute;
   right: var(--wc-space-sm);
@@ -2521,4 +2526,110 @@ body.wc-modal-open {
 .wc-table input[type="checkbox"]:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* =============================================================================
+   Summary pane components
+   ========================================================================== */
+
+.wc-summary-pane {
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  background: var(--wc-color-surface);
+  padding: var(--wc-space-md);
+  margin-bottom: var(--wc-space-lg);
+}
+
+.wc-summary-pane__list {
+  display: grid;
+  gap: var(--wc-space-sm);
+  margin: 0;
+}
+
+.wc-summary-pane__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2fr;
+  gap: var(--wc-space-md);
+  align-items: baseline;
+  padding: var(--wc-space-xs) 0;
+  border-bottom: 1px solid var(--wc-color-border);
+}
+
+.wc-summary-pane__item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.wc-summary-pane__term {
+  font-weight: 600;
+  color: var(--wc-color-text);
+  font-size: 0.9rem;
+}
+
+.wc-summary-pane__definition {
+  color: var(--wc-color-text);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.wc-summary-pane__link {
+  color: var(--wc-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  border: 1px solid var(--wc-color-primary);
+  border-radius: var(--wc-radius-sm);
+  padding: var(--wc-space-2xs) var(--wc-space-xs);
+  background: var(--wc-color-surface);
+  transition: all 0.15s ease;
+  display: inline-block;
+  margin-top: var(--wc-space-xs);
+}
+
+.wc-summary-pane__link:hover,
+.wc-summary-pane__link:focus {
+  color: var(--wc-color-surface);
+  background: var(--wc-color-primary);
+  text-decoration: none;
+  outline: 2px solid var(--wc-color-primary);
+  outline-offset: 2px;
+}
+
+.wc-summary-pane__link:active {
+  transform: translateY(1px);
+}
+
+.wc-summary-pane__note {
+  font-style: italic;
+  color: var(--wc-color-text-muted);
+  margin-bottom: var(--wc-space-xs);
+}
+
+.wc-summary-pane__actions {
+  margin-top: var(--wc-space-sm);
+  padding-top: var(--wc-space-sm);
+  border-top: 1px solid var(--wc-color-border);
+}
+
+/* Legacy support for existing dl-horizontal */
+.dl-horizontal {
+  margin: 0;
+}
+
+.dl-horizontal dt {
+  font-weight: 600;
+  color: var(--wc-color-text);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: var(--wc-space-xs);
+}
+
+.dl-horizontal dd {
+  color: var(--wc-color-text);
+  margin: 0 0 var(--wc-space-sm) 0;
+  font-size: 0.9rem;
+}
+
+.dl-horizontal dd:last-child {
+  margin-bottom: 0;
 }

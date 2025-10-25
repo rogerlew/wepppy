@@ -333,8 +333,14 @@ class Map(object):
         x0, y0 = self.lnglat_to_px(extent[0], extent[3])
         xend, yend = self.lnglat_to_px(extent[2], extent[1])
 
-        assert x0 < xend
-        assert y0 < yend
+        # Handle edge case: very small extents (e.g., 25-30m bbox from UI selections)
+        # can round to the same pixel or reversed coordinates due to int(round(...))
+        # in lnglat_to_px. Ensure we always have at least a 1-pixel window to query.
+        # This prevents AssertionError when users draw tiny selection boxes on the map.
+        if x0 >= xend:
+            xend = x0 + 1
+        if y0 >= yend:
+            yend = y0 + 1
 
         data, transform, proj = read_raster(raster_fn)
         the_set = set(data[x0:xend, y0:yend].flatten())

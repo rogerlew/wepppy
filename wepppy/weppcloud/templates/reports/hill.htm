@@ -1,46 +1,78 @@
-<dl class="dl-horizontal">
+<div class="wc-summary-pane">
+  <dl class="wc-summary-pane__list">
     {% if d.meta.hill_type == "Channel"%}
-    <dt>{{ d.meta.hill_type }} ID</dt>
-    <dd>TopazID: {{ d.meta.topaz_id }}, WEPP ID: {{ d.meta.wepp_id }}, ChnEnum: {{ d.meta.chn_enum }}</dd>
-    <dt>WEPP Width</dt>
-    <dd>{{ d.watershed.chn_wepp_width }} m</dd>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">{{ d.meta.hill_type }} ID</dt>
+      <dd class="wc-summary-pane__definition">TopazID: {{ d.meta.topaz_id }}, WEPP ID: {{ d.meta.wepp_id }}, ChnEnum: {{ d.meta.chn_enum }}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">WEPP Width</dt>
+      <dd class="wc-summary-pane__definition">{{ d.watershed.chn_wepp_width }} m</dd>
+    </div>
     {% else %}
-    <dt>{{ d.meta.hill_type }} ID</dt>
-    <dd>TopazID: {{ d.meta.topaz_id }}, WEPP ID: {{ d.meta.wepp_id }}</dd>
-    <dt>Width</dt>
-    <dd>{{ unitizer_with_units(d.watershed.width,"m") | safe }} &nbsp;</dd>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">{{ d.meta.hill_type }} ID</dt>
+      <dd class="wc-summary-pane__definition">TopazID: {{ d.meta.topaz_id }}, WEPP ID: {{ d.meta.wepp_id }}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Width</dt>
+      <dd class="wc-summary-pane__definition">{{ unitizer_with_units(d.watershed.width,"m") | safe }} &nbsp;</dd>
+    </div>
     {% endif %}
-    <dt>Length</dt>
-    <dd>{{ unitizer_with_units(d.watershed.length,"m") | safe }} &nbsp;</dd>
-    <dt>Area</dt>
-    <dd>{{ unitizer_with_units(d.watershed.area * 0.0001, "ha") | safe }} &nbsp;</dd>
-    <dt>Slope</dt>
-    <dd>{{ d.watershed.slope_scalar|round(3) }}</dd>
-    <dt>Aspect</dt>
-    <dd>{{ d.watershed.aspect|round(0) }}</dd>
-    <dt>Dominant Landuse</dt>
-    <dd>{% if d.landuse is not none %}
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Length</dt>
+      <dd class="wc-summary-pane__definition">{{ unitizer_with_units(d.watershed.length,"m") | safe }} &nbsp;</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Area</dt>
+      <dd class="wc-summary-pane__definition">{{ unitizer_with_units(d.watershed.area * 0.0001, "ha") | safe }} &nbsp;</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Slope</dt>
+      <dd class="wc-summary-pane__definition">{{ d.watershed.slope_scalar|round(3) }}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Aspect</dt>
+      <dd class="wc-summary-pane__definition">{{ d.watershed.aspect|round(0) }}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Dominant Landuse</dt>
+      <dd class="wc-summary-pane__definition">
+        {% if d.landuse is not none %}
         {{ d.landuse.desc }}
-        (<a href="view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)
+        (<a href="view/management/{{ d.landuse.key }}/" target="_blank" class="wc-summary-pane__link">{{ d.landuse.key }}</a>)
         {% endif %}
-    </dd>
-    <dt>Dominant Soil</dt>
-    <dd>{% if d.soil is not none %}
+      </dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Dominant Soil</dt>
+      <dd class="wc-summary-pane__definition">
+        {% if d.soil is not none %}
         {{ d.soil.desc }}
-        (<a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/' ~ d.soil.fname) }}" target="_blank">{{ d.soil.mukey }}</a>)
+        (<a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/' ~ d.soil.fname) }}" target="_blank" class="wc-summary-pane__link">{{ d.soil.mukey }}</a>)
         {% endif %}
-    </dd>
+      </dd>
+    </div>
     {% if d.meta.hill_type == "Channel"%}
-    <dt>Order</dt>
-    <dd>{{ d.watershed.order }}</dd>
-    <dt>Channel Type</dt>
-    <dd>
-        <a href="view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></dd>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Order</dt>
+      <dd class="wc-summary-pane__definition">{{ d.watershed.order }}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Channel Type</dt>
+      <dd class="wc-summary-pane__definition">
+        <a href="view/channel_def/{{ d.watershed.channel_type }}/" target="_blank" class="wc-summary-pane__link">{{ d.watershed.channel_type }}</a>
+      </dd>
+    </div>
     {% endif %}
     {% if 'ash' in ron.mods %}
-    <dt>Ash Transport Model (Experimental)</dt>
-    <dd>
-        <i>Must First Run WEPP for Watershed.</i><br>
-        <a href="hillslope/{{ d.meta.topaz_id }}/ash/" target="_blank">Run Ash Transport for Hillslope</a></dd>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Ash Transport Model (Experimental)</dt>
+      <dd class="wc-summary-pane__definition">
+        <span class="wc-summary-pane__note">Must First Run WEPP for Watershed.</span><br>
+        <a href="hillslope/{{ d.meta.topaz_id }}/ash/" target="_blank" class="wc-summary-pane__link">Run Ash Transport for Hillslope</a>
+      </dd>
+    </div>
     {% endif %}
-</dl>
+  </dl>
+</div>

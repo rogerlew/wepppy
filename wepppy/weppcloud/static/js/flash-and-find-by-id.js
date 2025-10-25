@@ -16,7 +16,16 @@
   };
 
   function featureMatches(feature, idType, value) {
-    return String(feature.properties[idType]) === String(value);
+    // Check both PascalCase and lowercase property names for backward compatibility
+    var propValue = feature.properties[idType];
+    if (propValue === undefined || propValue === null) {
+      // Try lowercase version (topaz_id, wepp_id)
+      var lowerKey = idType.replace(/([A-Z])/g, function(match, p1) {
+        return '_' + p1.toLowerCase();
+      }).replace(/^_/, '');
+      propValue = feature.properties[lowerKey];
+    }
+    return String(propValue) === String(value);
   }
 
   function flashFeatures(map, features, options) {
@@ -85,11 +94,20 @@
 
     for (var i = 0; i < layers.length; i += 1) {
       var layer = layers[i];
-      if (!layer.ctrl || !layer.ctrl.glLayer || !layer.ctrl.glLayer._shapes) {
+      
+      if (!layer.ctrl || !layer.ctrl.glLayer) {
         continue;
       }
 
-      var features = layer.ctrl.glLayer._shapes.features || [];
+      var features = [];
+      
+      // Try to get features from glify layer structure
+      if (layer.ctrl.glLayer._shapes && layer.ctrl.glLayer._shapes.features) {
+        features = layer.ctrl.glLayer._shapes.features;
+      } else if (layer.ctrl.glLayer._lines && layer.ctrl.glLayer._lines.features) {
+        features = layer.ctrl.glLayer._lines.features;
+      }
+
       hits = features.filter(function (f) {
         return featureMatches(f, idType, value);
       });

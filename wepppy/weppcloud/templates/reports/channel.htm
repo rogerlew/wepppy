@@ -1,10 +1,20 @@
- <dl class="dl-horizontal">
-    <dt>Extent (xmin, ymax, xmax, ymin):</dt>
-    <dd>{{map.extent[0]}}, {{map.extent[1]}}, {{map.extent[2]}}, {{map.extent[3]}}</dd>
-    <dt>Center (lon, lat):</dt>
-    <dd>{{map.center[0]}}, {{map.center[1]}}</dd>
-    <dt>UTM Zone:</dt>
-    <dd>{{map.utm_zone}} {{map.utm_letter}}</dd>
-    <dt>UTM Upper Left:</dt>
-    <dd>{{map.ul_x|round()}}, {{map.ul_y|round()}}</dd
-</dl>
+<div class="wc-summary-pane">
+  <dl class="wc-summary-pane__list">
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Extent (xmin, ymax, xmax, ymin)</dt>
+      <dd class="wc-summary-pane__definition">{{map.extent[0]}}, {{map.extent[1]}}, {{map.extent[2]}}, {{map.extent[3]}}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Center (lon, lat)</dt>
+      <dd class="wc-summary-pane__definition">{{map.center[0]}}, {{map.center[1]}}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">UTM Zone</dt>
+      <dd class="wc-summary-pane__definition">{{map.utm_zone}} {{map.utm_letter}}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">UTM Upper Left</dt>
+      <dd class="wc-summary-pane__definition">{{map.ul_x|round()}}, {{map.ul_y|round()}}</dd>
+    </div>
+  </dl>
+</div>
