@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2025-10-24  
-**Active Packages**: 2  
+**Last Updated**: 2025-10-25  
+**Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -79,36 +79,38 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### markdown-doc Toolkit
+**Created**: 2025-10-25  
+**Status**: Backlog - Requirements Complete  
+**Size**: Medium
+**Owner**: gpt-5-codex spec review and lead developer, github copilot (Claude 4.5 Sonnet) spec and testing
+**Link**: [docs/work-packages/20251025_markdown_doc_toolkit/](docs/work-packages/20251025_markdown_doc_toolkit/)  
+**Description**: Build comprehensive Rust CLI for documentation management: catalog generation, link validation, safe file moves, TOC maintenance, and search.
+
+**Scope**:
+- `catalog` - Generate `DOC_CATALOG.md` with file list + TOCs
+- `lint` - Validate links, heading hierarchy, required sections
+- `toc` - Generate/update table of contents
+- `mv` - Move/rename files with automatic link updates
+- `refs` - Find references to files/sections
+- `search` - Full-text search across documentation
+- `validate` - Template compliance checking
+
+**Strategic Value**: Reduces documentation maintenance burden by 80%, enables safe refactoring, prevents broken links in CI, improves discoverability for 388+ markdown files.
+
+**Dependencies**: None (leverages existing markdown-extract/markdown-edit patterns)
+
+**Next Steps**:
+- Finalize CLI command surface and exit codes
+- gpt-5-codex review
+- Design `.markdown-doc.toml` configuration schema
+- Handover to gpt-5-codex for MVP implementation (`catalog`, `toc`, `lint` broken-links)
+
 ---
 
 ## 🚧 In Progress
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
-
-### NoDb ACID Transaction Update
-**Started**: 2025-10-24  
-**Status**: Planning Complete - Implementation Ready  
-**Size**: Medium (4-6 weeks)  
-**Owner**: GitHub Copilot / Codex  
-**Link**: [docs/work-packages/20251024_nodb_acid_update/](docs/work-packages/20251024_nodb_acid_update/)  
-**Description**: Implement Redis-backed ACID transactions for NoDb controllers with intelligent event-driven cache invalidation.
-
-**Recent Progress**:
-- ✅ Work package structure created with detailed planning
-- ✅ cache_invalidation_rules.json schema defined
-- ✅ 3 implementation prompts created for Codex
-- ✅ Architectural decisions finalized (centralized rules, file-based primary)
-- ✅ Success criteria and deliverables specified
-- ✅ Cache invalidation strategy clarified (cache-only with user overrides)
-
-**Current Work**:
-- 🔧 Ready to begin implementation with Redis transaction wrapper
-
-**Next Steps**:
-- Implement Redis transaction wrapper in NoDb base class
-- Extend RedisPrep with cache invalidation methods
-- Update RQ API endpoints for automatic invalidation
-- Comprehensive testing and documentation
 
 ### Frontend Integration & Smoke Automation
 **Started**: 2025-02-24  
@@ -160,6 +162,23 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archive to History section after 30 days.
+
+### NoDb ACID Transaction Update
+**Completed**: 2025-10-25  
+**Duration**: 1 day (planning only)  
+**Status**: ❌ **CANCELLED - Unviable**  
+**Link**: [docs/work-packages/20251024_nodb_acid_update/](docs/work-packages/20251024_nodb_acid_update/)  
+**Description**: Proposed Redis-backed ACID transactions for NoDb controllers with intelligent event-driven cache invalidation.
+
+**Outcome**: After architectural review, the proposed specification was deemed unviable. The approach introduced excessive complexity without sufficient benefit. NoDb's existing file-based state management with Redis locking remains the architectural pattern.
+
+**Lessons Learned**:
+- Redis transactions don't provide the durability guarantees needed for NoDb's file-first architecture
+- Cache invalidation rules added complexity without addressing core concurrency patterns
+- File-based state with explicit locking is simpler and more maintainable
+- Future caching improvements should focus on read-through patterns, not transaction wrappers
+
+---
 
 ### StatusStream Telemetry Cleanup
 **Completed**: 2025-10-23  
@@ -218,13 +237,13 @@ Track how long packages take from start to completion:
 - **Current average**: [Calculate from recent completions]
 
 ### Work in Progress
-- **Current**: 2 packages
+- **Current**: 3 packages
 - **Target**: 2-4 packages
 - **Status**: ✅ Within target range
 
 ### Throughput
 Packages completed per month:
-- **October 2025**: 2 packages completed
+- **October 2025**: 3 packages (2 completed successfully, 1 cancelled as unviable)
 
 ### Lead Time
 Time from package creation to completion:
@@ -262,6 +281,7 @@ If this tracker format isn't working or you have suggestions:
 
 ### October 2025
 - ✅ StatusStream Telemetry Cleanup (completed 2025-10-23)
+- ❌ NoDb ACID Transaction Update (cancelled 2025-10-25 - unviable architecture)
 - ✅ Controller Modernization Documentation Backlog (completed 2025-02-14)
 
 ### [Month YYYY]
