@@ -2,168 +2,136 @@
   {% set mode = baer.sbs_mode if baer is not none else 0 %}
   {% set severity = baer.uniform_severity if baer is not none else None %}
   {% set severity_labels = {1: "Low", 2: "Moderate", 3: "High"} %}
-  <dl class="wc-summary">
-    {% if mode == 1 and severity in severity_labels %}
-      <dt>SBS Mode</dt>
-      <dd>Uniform {{ severity_labels[severity] }} Severity</dd>
-    {% else %}
-      <dt>SBS Raster</dt>
-      <dd><code>{{ baer.disturbed_fn or baer.baer_fn }}</code></dd>
-    {% endif %}
-    <dt>Status</dt>
-    <dd>Validated</dd>
+  {% if mode == 1 and severity in severity_labels %}
+  <dl class="wc-summary-pane__list">
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Current uniform selection</dt>
+      <dd class="wc-summary-pane__definition">Uniform {{ severity_labels[severity] }} SBS</dd>
+    </div>
   </dl>
-  {% if baer.ct is none %}
-    <h5>Using pixel breaks to set burn severity.</h5>
-    {% set sbs_class_pcts = baer.sbs_class_pcts %}
-    {% set sbs_class_areas = baer.sbs_class_areas %}
-    <table class="wc-table wc-baer-classify__table wc-baer-classify__table--breaks">
-      <thead>
-        <tr>
-          <th scope="col">Severity class</th>
-          <th scope="col">Pixel value &le;</th>
-          <th scope="col" class="wc-text-right">{{ unitizer_units('%') | safe }}</th>
-          <th scope="col" class="wc-text-right">{{ unitizer_units('ha') | safe }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Unburned</td>
-          <td>
-            <input
-              id="baer_brk0"
-              name="baer_brk0"
-              type="text"
-              class="wc-baer-classify__input disable-readonly"
-              value="{{ baer.breaks[0] }}">
-          </td>
-          <td class="wc-text-right">&mdash;</td>
-          <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('No Burn', 0), 'ha') | safe }}</td>
-        </tr>
-        <tr>
-          <td>Low severity</td>
-          <td>
-            <input
-              id="baer_brk1"
-              name="baer_brk1"
-              type="text"
-              class="wc-baer-classify__input disable-readonly"
-              value="{{ baer.breaks[1] }}">
-          </td>
-          <td class="wc-text-right">{{ unitizer(sbs_class_pcts.get('Low Severity Burn', 0), '%') | safe }}</td>
-          <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('Low Severity Burn', 0), 'ha') | safe }}</td>
-        </tr>
-        <tr>
-          <td>Moderate severity</td>
-          <td>
-            <input
-              id="baer_brk2"
-              name="baer_brk2"
-              type="text"
-              class="wc-baer-classify__input disable-readonly"
-              value="{{ baer.breaks[2] }}">
-          </td>
-          <td class="wc-text-right">{{ unitizer(sbs_class_pcts.get('Moderate Severity Burn', 0), '%') | safe }}</td>
-          <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('Moderate Severity Burn', 0), 'ha') | safe }}</td>
-        </tr>
-        <tr>
-          <td>High severity</td>
-          <td>
-            <input
-              id="baer_brk3"
-              name="baer_brk3"
-              type="text"
-              class="wc-baer-classify__input disable-readonly"
-              value="{{ baer.breaks[3] }}">
-          </td>
-          <td class="wc-text-right">{{ unitizer(sbs_class_pcts.get('High Severity Burn', 0), '%') | safe }}</td>
-          <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('High Severity Burn', 0), 'ha') | safe }}</td>
-        </tr>
-        <tr>
-          <td>No data</td>
-          <td colspan="3">
-            <input
-              id="baer_nodata"
-              name="baer_nodata"
-              type="text"
-              class="wc-baer-classify__input disable-readonly"
-              placeholder="(comma-separated values)"
-              value="{{ baer.nodata_vals }}">
-          </td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td><span class="wc-text-italic wc-text-bold">Total burned</span></td>
-          <td></td>
-          <td></td>
-          <td class="wc-text-right">
-            {{ unitizer(
-                 sbs_class_areas.get('Low Severity Burn', 0) +
-                 sbs_class_areas.get('Moderate Severity Burn', 0) +
-                 sbs_class_areas.get('High Severity Burn', 0),
-                 'ha'
-               ) | safe }}
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-    <div class="wc-button-row">
-      <button
-        type="button"
-        class="pure-button pure-button-primary disable-readonly"
-        data-baer-action="modify-classes">
-        Modify fire classes
-      </button>
-    </div>
-    <p id="hint_modify_baer_classes" class="wc-field__help" aria-live="polite"></p>
   {% else %}
-    <h5>Using color table to set burn severity.</h5>
-    <table class="wc-table wc-baer-classify__table">
-      <thead>
-        <tr>
-          <th scope="col">RGB values</th>
-          <th scope="col">Color</th>
-          <th scope="col">Assigned burn severity</th>
-        </tr>
-      </thead>
-      <tbody>
+  {% if baer.ct is none %}
+  <h5>Using pixel breaks to set burn severity.</h5>
+  {% set sbs_class_pcts = baer.sbs_class_pcts %}
+  {% set sbs_class_areas = baer.sbs_class_areas %}
+  <table class="wc-table wc-baer-classify__table wc-baer-classify__table--breaks">
+    <thead>
+      <tr>
+        <th scope="col">Severity class</th>
+        <th scope="col">Pixel value &le;</th>
+        <th scope="col" class="wc-text-right">{{ unitizer_units('%') | safe }}</th>
+        <th scope="col" class="wc-text-right">{{ unitizer_units('ha') | safe }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Unburned</td>
+        <td>
+          <input id="baer_brk0" name="baer_brk0" type="text" class="wc-baer-classify__input disable-readonly"
+            value="{{ baer.breaks[0] }}">
+        </td>
+        <td class="wc-text-right">&mdash;</td>
+        <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('No Burn', 0), 'ha') | safe }}</td>
+      </tr>
+      <tr>
+        <td>Low severity</td>
+        <td>
+          <input id="baer_brk1" name="baer_brk1" type="text" class="wc-baer-classify__input disable-readonly"
+            value="{{ baer.breaks[1] }}">
+        </td>
+        <td class="wc-text-right">{{ unitizer(sbs_class_pcts.get('Low Severity Burn', 0), '%') | safe }}</td>
+        <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('Low Severity Burn', 0), 'ha') | safe }}</td>
+      </tr>
+      <tr>
+        <td>Moderate severity</td>
+        <td>
+          <input id="baer_brk2" name="baer_brk2" type="text" class="wc-baer-classify__input disable-readonly"
+            value="{{ baer.breaks[2] }}">
+        </td>
+        <td class="wc-text-right">{{ unitizer(sbs_class_pcts.get('Moderate Severity Burn', 0), '%') | safe }}</td>
+        <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('Moderate Severity Burn', 0), 'ha') | safe }}</td>
+      </tr>
+      <tr>
+        <td>High severity</td>
+        <td>
+          <input id="baer_brk3" name="baer_brk3" type="text" class="wc-baer-classify__input disable-readonly"
+            value="{{ baer.breaks[3] }}">
+        </td>
+        <td class="wc-text-right">{{ unitizer(sbs_class_pcts.get('High Severity Burn', 0), '%') | safe }}</td>
+        <td class="wc-text-right">{{ unitizer(sbs_class_areas.get('High Severity Burn', 0), 'ha') | safe }}</td>
+      </tr>
+      <tr>
+        <td>No data</td>
+        <td colspan="3">
+          <input id="baer_nodata" name="baer_nodata" type="text" class="wc-baer-classify__input disable-readonly"
+            placeholder="(comma-separated values)" value="{{ baer.nodata_vals }}">
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><span class="wc-text-italic wc-text-bold">Total burned</span></td>
+        <td></td>
+        <td></td>
+        <td class="wc-text-right">
+          {{ unitizer(
+          sbs_class_areas.get('Low Severity Burn', 0) +
+          sbs_class_areas.get('Moderate Severity Burn', 0) +
+          sbs_class_areas.get('High Severity Burn', 0),
+          'ha'
+          ) | safe }}
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+  <div class="wc-button-row">
+    <button type="button" class="pure-button pure-button-primary disable-readonly" data-baer-action="modify-classes">
+      Modify fire classes
+    </button>
+  </div>
+  <p id="hint_modify_baer_classes" class="wc-field__help" aria-live="polite"></p>
+  {% else %}
+  <h5>Using color table to set burn severity.</h5>
+  <table class="wc-table wc-baer-classify__table">
+    <thead>
+      <tr>
+        <th scope="col">RGB values</th>
+        <th scope="col">Color</th>
+        <th scope="col">Assigned burn severity</th>
+      </tr>
+    </thead>
+    <tbody>
       {% if baer.color_to_severity_map is not none %}
-        {% for rgb, severity in baer.color_to_severity_map.items() %}
-          {% set rgb_text = '(' ~ rgb[0] ~ ', ' ~ rgb[1] ~ ', ' ~ rgb[2] ~ ')' %}
-          <tr>
-            <td>{{ rgb_text }}</td>
-            <td>
-              <span
-                class="wc-baer-classify__swatch"
-                style="--wc-baer-swatch: rgb({{ rgb[0] }}, {{ rgb[1] }}, {{ rgb[2] }});"
-                aria-label="Color swatch {{ rgb_text }}"></span>
-            </td>
-            <td>
-              <select
-                class="wc-baer-classify__select disable-readonly"
-                id="baer_color_{{ rgb[0] }}_{{ rgb[1] }}_{{ rgb[2] }}">
-                <option value="" {% if severity is none %}selected{% endif %}></option>
-                <option value="unburned" {% if severity == 'unburned' %}selected{% endif %}>unburned</option>
-                <option value="low" {% if severity == 'low' %}selected{% endif %}>low</option>
-                <option value="mod" {% if severity == 'mod' %}selected{% endif %}>moderate</option>
-                <option value="high" {% if severity == 'high' %}selected{% endif %}>high</option>
-              </select>
-            </td>
-          </tr>
-        {% endfor %}
+      {% for rgb, severity in baer.color_to_severity_map.items() %}
+      {% set rgb_text = '(' ~ rgb[0] ~ ', ' ~ rgb[1] ~ ', ' ~ rgb[2] ~ ')' %}
+      <tr>
+        <td>{{ rgb_text }}</td>
+        <td>
+          <span class="wc-baer-classify__swatch"
+            style="--wc-baer-swatch: rgb({{ rgb[0] }}, {{ rgb[1] }}, {{ rgb[2] }});"
+            aria-label="Color swatch {{ rgb_text }}"></span>
+        </td>
+        <td>
+          <select class="wc-baer-classify__select disable-readonly"
+            id="baer_color_{{ rgb[0] }}_{{ rgb[1] }}_{{ rgb[2] }}">
+            <option value="" {% if severity is none %}selected{% endif %}></option>
+            <option value="unburned" {% if severity=='unburned' %}selected{% endif %}>unburned</option>
+            <option value="low" {% if severity=='low' %}selected{% endif %}>low</option>
+            <option value="mod" {% if severity=='mod' %}selected{% endif %}>moderate</option>
+            <option value="high" {% if severity=='high' %}selected{% endif %}>high</option>
+          </select>
+        </td>
+      </tr>
+      {% endfor %}
       {% endif %}
-      </tbody>
-    </table>
-    <div class="wc-button-row">
-      <button
-        type="button"
-        class="pure-button pure-button-primary disable-readonly"
-        data-baer-action="modify-color-map">
-        Modify fire classes
-      </button>
-    </div>
-    <p id="hint_modify_baer_classes" class="wc-field__help" aria-live="polite"></p>
+    </tbody>
+  </table>
+  <div class="wc-button-row">
+    <button type="button" class="pure-button pure-button-primary disable-readonly" data-baer-action="modify-color-map">
+      Modify fire classes
+    </button>
+  </div>
+  <p id="hint_modify_baer_classes" class="wc-field__help" aria-live="polite"></p>
   {% endif %}
 
   <details class="wc-collapse wc-baer-classify__details">
@@ -182,15 +150,16 @@
           </tr>
         </thead>
         <tbody>
-        {% for x in baer.class_map %}
+          {% for x in baer.class_map %}
           <tr>
             <td>{{ x[0] }}</td>
             <td>{{ x[1] }}</td>
             <td>{{ x[2] }}</td>
           </tr>
-        {% endfor %}
+          {% endfor %}
         </tbody>
       </table>
     </div>
   </details>
+  {% endif %}
 </div>
