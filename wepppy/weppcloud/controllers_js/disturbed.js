@@ -460,20 +460,19 @@ var Disturbed = (function () {
                         updateHasSbs(true, "upload");
                         emit("disturbed:upload:completed", { response: data });
                         disturbed.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
-                        // Also trigger on baer form and call methods directly if baer controller exists
+                        // Sync with baer controller
                         try {
                             var baer = typeof Baer !== "undefined" ? Baer.getInstance() : null;
                             if (baer) {
+                                // Trigger event on baer form
                                 if (typeof baer.triggerEvent === "function") {
                                     baer.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
                                 }
-                                // Call baer methods directly as fallback
+                                // Call methods directly since forms are separate
                                 setTimeout(function () {
                                     if (typeof baer.show_sbs === "function") {
                                         baer.show_sbs();
                                     }
-                                }, 100);
-                                setTimeout(function () {
                                     if (typeof baer.load_modify_class === "function") {
                                         baer.load_modify_class();
                                     }
@@ -505,6 +504,7 @@ var Disturbed = (function () {
 
         function removeSbs() {
             var taskMsg = "Removing SBS";
+            clearUploadHint();
             clearRemoveHint();
             startTask(taskMsg);
             emit("disturbed:remove:started", {});
@@ -579,20 +579,19 @@ var Disturbed = (function () {
                             severity: severity
                         });
                         disturbed.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
-                        // Also trigger on baer form and call methods directly if baer controller exists
+                        // Sync with baer controller
                         try {
                             var baer = typeof Baer !== "undefined" ? Baer.getInstance() : null;
                             if (baer) {
+                                // Trigger event on baer form
                                 if (typeof baer.triggerEvent === "function") {
                                     baer.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
                                 }
-                                // Call baer methods directly as fallback
+                                // Call methods directly since forms are separate
                                 setTimeout(function () {
                                     if (typeof baer.show_sbs === "function") {
                                         baer.show_sbs();
                                     }
-                                }, 100);
-                                setTimeout(function () {
                                     if (typeof baer.load_modify_class === "function") {
                                         baer.load_modify_class();
                                     }

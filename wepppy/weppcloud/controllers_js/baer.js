@@ -428,11 +428,11 @@ var Baer = (function () {
                         try {
                             var map = MapController.getInstance();
                             if (baer.baer_map) {
-                                if (map && map.ctrls && typeof map.ctrls.removeLayer === "function") {
-                                    map.ctrls.removeLayer(baer.baer_map);
-                                }
                                 if (map && typeof map.removeLayer === "function") {
                                     map.removeLayer(baer.baer_map);
+                                }
+                                if (map && map.ctrls && typeof map.ctrls.removeLayer === "function") {
+                                    map.ctrls.removeLayer(baer.baer_map);
                                 }
                                 baer.baer_map = null;
                             }
@@ -704,13 +704,33 @@ var Baer = (function () {
             try {
                 var map = MapController.getInstance();
                 if (baer.baer_map) {
-                    if (map && map.ctrls && typeof map.ctrls.removeLayer === "function") {
-                        map.ctrls.removeLayer(baer.baer_map);
-                    }
                     if (map && typeof map.removeLayer === "function") {
                         map.removeLayer(baer.baer_map);
                     }
+                    if (map && map.ctrls && typeof map.ctrls.removeLayer === "function") {
+                        map.ctrls.removeLayer(baer.baer_map);
+                    }
                     baer.baer_map = null;
+                }
+                
+                // Clean up any orphaned "Burn Severity Map" entries from the layer control
+                if (map && map.ctrls && map.ctrls._layers) {
+                    var controlLayers = map.ctrls._layers;
+                    var layersToRemove = [];
+                    for (var layerId in controlLayers) {
+                        if (controlLayers.hasOwnProperty(layerId)) {
+                            var layerEntry = controlLayers[layerId];
+                            if (layerEntry && layerEntry.name === "Burn Severity Map") {
+                                layersToRemove.push(layerEntry.layer);
+                            }
+                        }
+                    }
+                    layersToRemove.forEach(function(layer) {
+                        map.ctrls.removeLayer(layer);
+                        if (typeof map.removeLayer === "function") {
+                            map.removeLayer(layer);
+                        }
+                    });
                 }
             } catch (err) {
                 console.warn("[Baer] Failed to clear existing SBS map overlay", err);
@@ -866,8 +886,10 @@ var Baer = (function () {
                 };
 
                 attach("SBS_UPLOAD_TASK_COMPLETE", function () {
-                    setTimeout(function () { baer.show_sbs(); }, 100);
-                    setTimeout(function () { baer.load_modify_class(); }, 100);
+                    // Note: show_sbs() is called directly by disturbed controller
+                    // Don't call it here to avoid duplicates
+                    // setTimeout(function () { baer.show_sbs(); }, 100);
+                    // setTimeout(function () { baer.load_modify_class(); }, 100);
                     try {
                         var disturbed = typeof Disturbed !== "undefined" ? Disturbed.getInstance() : null;
                         if (disturbed && typeof disturbed.set_has_sbs_cached === "function") {
