@@ -686,7 +686,6 @@ var Disturbed = (function () {
                     var data = result.body || {};
                     if (data.Success === true) {
                         completeTask(taskMsg);
-                        setUniformHint(severity, "Uniform SBS generated.");
                         updateHasSbs(true, "uniform");
                         
                         // Update filename display if provided

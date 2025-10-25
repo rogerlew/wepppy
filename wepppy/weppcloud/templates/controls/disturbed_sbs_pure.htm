@@ -64,13 +64,6 @@
          attrs={"data-auto-upload": "true"}
        ) }}
 
-    {% if sbs_controller is not none and sbs_controller.has_map %}
-      {{ ui.text_display(
-           label="Current SBS map",
-           content="<code>" ~ sbs_controller.disturbed_fn ~ "</code>"
-         ) }}
-    {% endif %}
-
     {% call button_row() %}
       {% if 'disturbed' in ron.mods or 'baer' in ron.mods %}
         <button
@@ -92,16 +85,6 @@
     <p class="wc-text-muted">
       Generate a uniform SBS raster for preliminary analysis when a detailed map is unavailable.
     </p>
-    <div id="uniform_selection_display" class="wc-field wc-field--display">
-      <span class="wc-field__label">Current uniform selection</span>
-      <div class="wc-text-display" data-uniform-summary>
-        {% if uniform_label %}
-          Uniform {{ uniform_label }} SBS
-        {% else %}
-          <span class="wc-text-muted">Not set</span>
-        {% endif %}
-      </div>
-    </div>
     {% call button_row() %}
       <button
         id="btn_uniform_low_sbs"

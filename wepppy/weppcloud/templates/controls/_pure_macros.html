@@ -340,7 +340,7 @@
 {% if extra_control_class %}
   {% set control_classes = control_classes + [extra_control_class] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}">
+<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <input class="{{ ' '.join(control_classes) }}"
          id="{{ field_id }}"
@@ -384,7 +384,7 @@
 {% if extra_control_class %}
   {% set control_classes = control_classes + [extra_control_class] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}">
+<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <select class="{{ ' '.join(control_classes) }}"
           id="{{ field_id }}"
@@ -445,6 +445,7 @@
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
 <div class="{{ ' '.join(field_classes) }}"
+     style="max-width: 650px;"
      {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}>
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <div class="wc-field__input-row">
@@ -506,7 +507,7 @@
 {% if extra_control_class %}
   {% set control_classes = control_classes + [extra_control_class] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}">
+<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <input class="{{ ' '.join(control_classes) }}"
          id="{{ field_id }}"
@@ -550,7 +551,7 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}">
+<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
   {% if label %}
   <span class="wc-field__label" id="{{ label_id }}">{{ label }}</span>
   {% endif %}
@@ -621,7 +622,7 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}">
+<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
   <label class="wc-choice wc-choice--checkbox">
     <input type="checkbox"
            id="{{ field_id }}"
@@ -690,7 +691,7 @@
 
 {% macro text_display(label=None, content='', variant=None, actions=None) -%}
 {% set actions = actions or [] %}
-<div class="wc-field wc-field--display">
+<div class="wc-field wc-field--display" style="max-width: 650px;">
   {% if label %}
   <span class="wc-field__label">{{ label }}</span>
   {% endif %}
