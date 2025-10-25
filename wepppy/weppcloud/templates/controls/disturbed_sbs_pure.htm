@@ -47,7 +47,8 @@
          "input_upload_sbs",
          "Upload SBS raster",
          accept=".tif,.img",
-         extra_control_class="disable-readonly"
+         extra_control_class="disable-readonly",
+         attrs={"data-auto-upload": "true"}
        ) }}
 
     {% if has_disturbed and disturbed.has_map %}
@@ -58,13 +59,6 @@
     {% endif %}
 
     {% call button_row() %}
-      <button
-        id="btn_upload_sbs"
-        type="button"
-        class="pure-button pure-button-primary disable-readonly"
-        data-sbs-action="upload">
-        Upload SBS
-      </button>
       {% if 'disturbed' in ron.mods %}
         <button
           id="btn_remove_sbs"

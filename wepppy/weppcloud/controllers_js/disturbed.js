@@ -701,6 +701,12 @@ var Disturbed = (function () {
                     }
                 });
 
+                dom.delegate(formElement, "change", "input[type='file'][data-auto-upload]", function (event, target) {
+                    if (target.files && target.files.length > 0) {
+                        uploadSbs();
+                    }
+                });
+
                 dom.delegate(formElement, "click", "[data-sbs-uniform]", function (event, target) {
                     event.preventDefault();
                     var uniformValue = target.getAttribute("data-sbs-uniform");
