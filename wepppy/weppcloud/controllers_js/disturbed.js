@@ -345,7 +345,7 @@ var Disturbed = (function () {
                 return state.hasSbsRequest;
             }
             var request = http
-                .request("api/disturbed/has_sbs/", {
+                .request(url_for_run("api/disturbed/has_sbs/"), {
                     method: "GET",
                     form: formElement || undefined
                 })
@@ -459,6 +459,29 @@ var Disturbed = (function () {
                         setAdapterText(uploadHintAdapter, "SBS raster uploaded successfully.");
                         updateHasSbs(true, "upload");
                         emit("disturbed:upload:completed", { response: data });
+                        disturbed.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
+                        // Also trigger on baer form and call methods directly if baer controller exists
+                        try {
+                            var baer = typeof Baer !== "undefined" ? Baer.getInstance() : null;
+                            if (baer) {
+                                if (typeof baer.triggerEvent === "function") {
+                                    baer.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
+                                }
+                                // Call baer methods directly as fallback
+                                setTimeout(function () {
+                                    if (typeof baer.show_sbs === "function") {
+                                        baer.show_sbs();
+                                    }
+                                }, 100);
+                                setTimeout(function () {
+                                    if (typeof baer.load_modify_class === "function") {
+                                        baer.load_modify_class();
+                                    }
+                                }, 100);
+                            }
+                        } catch (e) {
+                            console.warn("[Disturbed] Failed to sync Baer controller", e);
+                        }
                         disturbed.triggerEvent("job:completed", {
                             task: "disturbed:upload",
                             response: data
@@ -498,6 +521,16 @@ var Disturbed = (function () {
                         setAdapterText(removeHintAdapter, "SBS raster removed.");
                         updateHasSbs(false, "remove");
                         emit("disturbed:remove:completed", { response: data });
+                        disturbed.triggerEvent("SBS_REMOVE_TASK_COMPLETE", data);
+                        // Also trigger on baer form if baer controller exists
+                        try {
+                            var baer = typeof Baer !== "undefined" ? Baer.getInstance() : null;
+                            if (baer && typeof baer.triggerEvent === "function") {
+                                baer.triggerEvent("SBS_REMOVE_TASK_COMPLETE", data);
+                            }
+                        } catch (e) {
+                            // Baer may not be loaded
+                        }
                         disturbed.triggerEvent("job:completed", {
                             task: "disturbed:remove",
                             response: data
@@ -545,6 +578,29 @@ var Disturbed = (function () {
                             response: data,
                             severity: severity
                         });
+                        disturbed.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
+                        // Also trigger on baer form and call methods directly if baer controller exists
+                        try {
+                            var baer = typeof Baer !== "undefined" ? Baer.getInstance() : null;
+                            if (baer) {
+                                if (typeof baer.triggerEvent === "function") {
+                                    baer.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
+                                }
+                                // Call baer methods directly as fallback
+                                setTimeout(function () {
+                                    if (typeof baer.show_sbs === "function") {
+                                        baer.show_sbs();
+                                    }
+                                }, 100);
+                                setTimeout(function () {
+                                    if (typeof baer.load_modify_class === "function") {
+                                        baer.load_modify_class();
+                                    }
+                                }, 100);
+                            }
+                        } catch (e) {
+                            console.warn("[Disturbed] Failed to sync Baer controller", e);
+                        }
                         disturbed.triggerEvent("job:completed", {
                             task: "disturbed:uniform",
                             severity: severity,
@@ -702,6 +758,32 @@ var Disturbed = (function () {
             if (flags.initialHasSbs !== undefined && typeof disturbed.set_has_sbs_cached === "function") {
                 disturbed.set_has_sbs_cached(Boolean(flags.initialHasSbs));
             }
+            
+            // Bootstrap baer controller if it exists and has initial SBS
+            if (flags.initialHasSbs) {
+                try {
+                    var baer = typeof Baer !== "undefined" ? Baer.getInstance() : null;
+                    if (baer && typeof baer.bootstrap === "function") {
+                        baer.bootstrap(context);
+                    }
+                    // Also trigger initial load directly as fallback
+                    if (baer) {
+                        setTimeout(function () {
+                            if (typeof baer.show_sbs === "function") {
+                                baer.show_sbs();
+                            }
+                        }, 0);
+                        setTimeout(function () {
+                            if (typeof baer.load_modify_class === "function") {
+                                baer.load_modify_class();
+                            }
+                        }, 0);
+                    }
+                } catch (e) {
+                    console.warn("[Disturbed] Failed to bootstrap Baer controller", e);
+                }
+            }
+            
             return disturbed;
         };
 

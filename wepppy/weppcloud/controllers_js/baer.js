@@ -504,7 +504,7 @@ var Baer = (function () {
         }
 
         function loadModifyClass() {
-            return http.request("view/modify_burn_class", {
+            return http.request(url_for_run("view/modify_burn_class"), {
                 method: "GET"
             })
                 .then(function (result) {

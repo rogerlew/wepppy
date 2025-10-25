@@ -442,9 +442,6 @@
                 return false;
             }
             preferences.set(categoryKey, unitKey);
-            if (typeof console !== "undefined" && typeof console.log === "function") {
-                console.log("[UnitizerClient] setPreference", categoryKey, unitKey);
-            }
             return true;
         }
 
