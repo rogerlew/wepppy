@@ -49,17 +49,20 @@ Phase 1–3 of the `markdown-doc` toolkit are complete inside `/workdir/markdown
 | Phase 4 scope (`search`, `watch`, `stats`) | Product + Docs leads | Define acceptance metrics (latency, ranking, snippet quality) or defer to later quarter | 2025-11-08 |
 | CI surface area | Platform team | Decide whether markdown-doc benches run per PR or nightly | 2025-11-03 |
 | Release comms | Docs + Enablement | Determine channel (release notes, docs newsletter) and target audience | 2025-11-02 |
+| `.docker-data` permission strategy | Platform + Tooling | **Resolved 2025-10-31:** Adopt option (a); repository ships `.markdown-doc-ignore` with `.docker-data/**` so catalog/lint skip docker volumes. Retain `sudo wctl restore-docker-data-permissions` in troubleshooting docs. | ✅ |
 
 ## 6. Risks & Mitigations
 
 - **CI noise from legacy edge cases** – Leverage severity tuning + `.markdown-doc-ignore`; add targeted fixtures for known exceptions.  
 - **Concurrent adoption friction** – Command wrappers and documentation updates scheduled before enabling CI failure gates.  
 - **Scope creep into Phase 4 during integration** – Capture future enhancements in tracker; only land caching/indexing once telemetry justifies it.
+- **Permission failures when scanning `/workdir/wepppy/.docker-data/*`** – Mitigated by `.markdown-doc-ignore` entry that excludes docker volumes; keep restore command in troubleshooting for existing environments.
 
 ## 7. Rollout Checklist
 
 - [ ] Land CI updates (`fmt`, `clippy`, `test`, `markdown-doc lint`, `markdown-doc-bench`).
 - [ ] Publish `wctl` wrappers and developer quick start.  
+- [x] Resolve `.docker-data` permission workaround (commit `.markdown-doc-ignore` with `.docker-data/**`).
 - [ ] Document exit codes + automation patterns in tools README.  
 - [ ] Issue release notes / announce to agent maintainers.  
 - [ ] Confirm telemetry plan for Phase 4 decision gate.  
@@ -77,4 +80,3 @@ Phase 1–3 of the `markdown-doc` toolkit are complete inside `/workdir/markdown
 - `/workdir/markdown-extract/README.md` (canonical feature documentation)  
 - `tests/markdown-doc/refactor/complex/` (refactor regression fixtures)  
 - `/usr/local/bin/markdown-doc` (installed binary)
-

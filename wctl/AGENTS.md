@@ -43,6 +43,15 @@ Changes to any of these pieces must be reflected in this document.
      ```
    - For container commands, ensure the `weppcloud` service is up before testing.
    - Host commands should be exercised once (e.g., `wctl run-npm --version`) to validate binary detection.
+   - Exercise the markdown-doc wrappers when binaries are available:
+     ```bash
+     wctl doc-lint
+     wctl doc-catalog --path docs --format json
+     wctl doc-toc README.md --update
+     wctl doc-refs README.md --path docs
+     wctl doc-bench --path docs --warmup 0 --iterations 1
+     ```
+     For `doc-mv`, the repository currently blocks traversal of `.docker-data/redis`; use a docs subdirectory (for example files under `tests/tmp/`) or temporarily prepend a mock `markdown-doc` binary to `PATH` to validate the dry-run/prompt behaviour.
 
 6. **Backward compatibility**
    - When removing a command, note the change in `wctl/README.md` or release notes.
@@ -61,5 +70,13 @@ Changes to any of these pieces must be reflected in this document.
 - [ ] Re-run `./wctl/install.sh dev`.
 - [ ] Smoke-test new command(s) with `wctl …`.
 - [ ] Communicate changes if workflows shift (CLI release notes, PR summary).
+
+## markdown-doc Wrapper Notes
+
+- `doc-lint` injects `--staged --format json` when no arguments are provided and prints the effective command to stderr so stdout stays JSON-only.
+- `doc-catalog`, `doc-refs`, and `doc-bench` forward flags directly to the underlying binaries; prefer adding `--path docs` during local smoke tests until `.docker-data/redis` ignores land.
+- `doc-toc` converts positional Markdown paths to repeated `--path` flags before invoking `markdown-doc toc`, ensuring at least one target is supplied.
+- `doc-mv` always performs a dry-run first, prompts on `/dev/tty`, then applies the move unless `--dry-run-only` (skip apply) or `--force` (skip prompt) is used. The confirmation helper lives in `doc_mv_confirm()`.
+- To exercise the prompt flow in non-interactive harnesses, temporarily prepend a mock `markdown-doc` binary (for example under `/tmp/mock-md`) so the command can complete without scanning the full repository.
 
 Keep this guide accurate. It’s the authoritative checklist agents should follow to keep the user experience consistent whenever wctl evolves.

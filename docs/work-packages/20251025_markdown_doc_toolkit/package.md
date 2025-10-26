@@ -745,6 +745,7 @@ $ markdown-doc validate AGENTS.md --schema agents
 - Decide on link-graph caching and directory-move roadmap before scheduling Phase 4 (`search`, `watch`) work.
 - Publish release notes, command × exit-code quick reference, and incremental README polish as features evolve.
 - Coordinate adoption timeline with parent repo stakeholders (RFC review, go/no-go, post-integration telemetry plan).
+- Distribute `.markdown-doc-ignore` (includes `.docker-data/**`) with rollout notes so catalog/lint skip docker volumes; keep `sudo wctl restore-docker-data-permissions` documented for legacy environments.
 
 ---
 

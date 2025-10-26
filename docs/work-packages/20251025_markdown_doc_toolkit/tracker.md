@@ -199,6 +199,13 @@
 
 ## Agent Handoff Notes
 
+### 2025-10-26 — wctl markdown-doc integration handback
+- Implemented `wctl doc-*` wrappers via `install.sh` template (doc-lint, doc-catalog, doc-toc, doc-mv, doc-refs, doc-bench) and regenerated `wctl.sh`; added helper functions for binary checks, TOC argument translation, and `/dev/tty` prompts.
+- Updated `wctl/README.md`, `wctl/wctl.1`, and `wctl/AGENTS.md` with usage guidance, testing expectations, and maintenance notes for the new commands.
+- Smoke tests: `wctl doc-lint`, `wctl doc-lint --help`, `wctl doc-catalog --format json --path docs`, `wctl doc-toc README.md`, `wctl doc-refs README.md --path docs`, `wctl doc-bench --path docs --warmup 0 --iterations 1`, plus mocked `doc-mv` flows (`--dry-run-only`, prompt confirm, `--force`) using a temporary PATH shim.
+- Known issue: real `markdown-doc` commands attempt to index `.docker-data/redis`, triggering `Permission denied`; mitigation today is scoping with `--path docs` or using mocks. Follow-up needed to land repo-level `.markdown-doc-ignore` entries or adjust permissions per RFC rollout.
+- Update 2025-10-31: Added repo-level `.markdown-doc-ignore` with `.docker-data/**` so markdown-doc skips docker volumes; keep `sudo wctl restore-docker-data-permissions` in onboarding as a troubleshooting step.
+
 ### Context for Next Agent
 
 When resuming this work:

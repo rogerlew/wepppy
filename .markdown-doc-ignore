@@ -1,0 +1,2 @@
+# Ignore docker-managed volumes that collide with lint/catalog scans
+.docker-data/**

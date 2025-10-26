@@ -287,8 +287,209 @@ quote_args() {
   done
 }
 
+require_binary() {
+  local binary="$1"
+  local hint="${2:-}"
+  if ! command -v "${binary}" >/dev/null 2>&1; then
+    if [[ -n "${hint}" ]]; then
+      echo "${binary} is required for this command. ${hint}" >&2
+    else
+      echo "${binary} is required for this command." >&2
+    fi
+    exit 127
+  fi
+}
+
+doc_mv_confirm() {
+  local tty="/dev/tty"
+  if [[ ! -e "${tty}" || ! -r "${tty}" || ! -w "${tty}" ]]; then
+    echo "Unable to access ${tty} for confirmation. Use --force to bypass the prompt." >&2
+    return 1
+  fi
+  printf "Proceed with move? [y/N] " >"${tty}"
+  local answer
+  IFS= read -r answer <"${tty}"
+  if [[ "${answer}" == "y" || "${answer}" == "Y" ]]; then
+    return 0
+  fi
+  echo "Aborting move." >&2
+  return 1
+}
+
+doc_toc_command() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      -h|--help|-V|--version)
+        if ! markdown-doc toc "$@"; then
+          return $?
+        fi
+        return 0
+        ;;
+    esac
+  done
+
+  local -a forwarded=()
+  local -a targets=()
+  local positional_mode=0
+
+  while [[ $# -gt 0 ]]; do
+    arg="$1"
+    shift
+    if [[ ${positional_mode} -eq 1 ]]; then
+      targets+=("$arg")
+      forwarded+=("--path" "$arg")
+      continue
+    fi
+    case "$arg" in
+      --)
+        positional_mode=1
+        ;;
+      --path)
+        if [[ $# -eq 0 ]]; then
+          echo "doc-toc requires a value after --path." >&2
+          return 1
+        fi
+        local value="$1"
+        shift
+        targets+=("$value")
+        forwarded+=("--path" "$value")
+        ;;
+      --path=*)
+        local value="${arg#--path=}"
+        if [[ -z "${value}" ]]; then
+          echo "doc-toc requires a non-empty value for --path." >&2
+          return 1
+        fi
+        targets+=("${value}")
+        forwarded+=("$arg")
+        ;;
+      -*)
+        forwarded+=("$arg")
+        ;;
+      *)
+        targets+=("$arg")
+        forwarded+=("--path" "$arg")
+        ;;
+    esac
+  done
+
+  if [[ ${#targets[@]} -eq 0 ]]; then
+    echo "doc-toc requires at least one Markdown file or --path argument. Example: wctl doc-toc README.md --update" >&2
+    return 1
+  fi
+
+  if ! markdown-doc toc "${forwarded[@]}"; then
+    return $?
+  fi
+
+  return 0
+}
+
+doc_mv_command() {
+  local dry_run_only=false
+  local force=false
+  local -a doc_args=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --dry-run-only)
+        dry_run_only=true
+        ;;
+      --force)
+        force=true
+        ;;
+      *)
+        doc_args+=("$1")
+        ;;
+    esac
+    shift
+  done
+
+  if [[ ${#doc_args[@]} -lt 2 ]]; then
+    echo "doc-mv requires source and destination arguments. Example: wctl doc-mv docs/src.md docs/dest.md" >&2
+    return 1
+  fi
+
+  local -a dry_cmd=("markdown-doc" "mv" "--dry-run")
+  dry_cmd+=("${doc_args[@]}")
+  local -a live_cmd=("markdown-doc" "mv")
+  live_cmd+=("${doc_args[@]}")
+
+  if ! "${dry_cmd[@]}"; then
+    return $?
+  fi
+
+  if [[ "${dry_run_only}" == true ]]; then
+    return 0
+  fi
+
+  if [[ "${force}" != true ]]; then
+    if ! doc_mv_confirm; then
+      return 1
+    fi
+  fi
+
+  if ! "${live_cmd[@]}"; then
+    return $?
+  fi
+
+  return 0
+}
+
 if [[ $# -gt 0 ]]; then
   case "$1" in
+    doc-lint)
+      shift
+      require_binary "markdown-doc" "Install the markdown-doc toolkit to enable documentation workflows."
+      if [[ $# -eq 0 ]]; then
+        echo "Running default: markdown-doc lint --staged --format json" >&2
+        set -- --staged --format json
+      fi
+      if ! markdown-doc lint "$@"; then
+        exit $?
+      fi
+      exit 0
+      ;;
+    doc-catalog)
+      shift
+      require_binary "markdown-doc" "Install the markdown-doc toolkit to enable documentation workflows."
+      if ! markdown-doc catalog "$@"; then
+        exit $?
+      fi
+      exit 0
+      ;;
+    doc-toc)
+      shift
+      require_binary "markdown-doc" "Install the markdown-doc toolkit to enable documentation workflows."
+      if ! doc_toc_command "$@"; then
+        exit $?
+      fi
+      exit 0
+      ;;
+    doc-mv)
+      shift
+      require_binary "markdown-doc" "Install the markdown-doc toolkit to enable documentation workflows."
+      if ! doc_mv_command "$@"; then
+        exit $?
+      fi
+      exit 0
+      ;;
+    doc-refs)
+      shift
+      require_binary "markdown-doc" "Install the markdown-doc toolkit to enable documentation workflows."
+      if ! markdown-doc refs "$@"; then
+        exit $?
+      fi
+      exit 0
+      ;;
+    doc-bench)
+      shift
+      require_binary "markdown-doc-bench" "Install the markdown-doc bench binary to run documentation benchmarks."
+      if ! markdown-doc-bench "$@"; then
+        exit $?
+      fi
+      exit 0
+      ;;
     build-static-assets)
       shift
       if [[ ! -x "${STATIC_BUILDER}" ]]; then

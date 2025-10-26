@@ -1,10 +1,28 @@
 .\" Manual for wctl helper script
-.TH WCTL 1 "2024-10-16" "wepppy" "User Commands"
+.TH WCTL 1 "2025-10-26" "wepppy" "User Commands"
 .SH NAME
 wctl \- control helper for the WEPPcloud Docker Compose stacks
 .SH SYNOPSIS
 .B wctl
 [docker compose arguments...]
+.br
+.B wctl doc-lint
+[lint arguments...]
+.br
+.B wctl doc-catalog
+[catalog arguments...]
+.br
+.B wctl doc-toc
+[toc arguments...]
+.br
+.B wctl doc-mv
+[move arguments...]
+.br
+.B wctl doc-refs
+[refs arguments...]
+.br
+.B wctl doc-bench
+[bench arguments...]
 .br
 .B wctl build-static-assets
 [options]
@@ -41,6 +59,60 @@ flags.
 .PP
 Several helper commands are available and are listed below.
 .SH COMMANDS
+.TP
+.B wctl doc-lint
+Runs
+.BR "markdown-doc lint" .
+When called without additional arguments the wrapper executes
+.BR "markdown-doc lint --staged --format json"
+and prints a short notice to stderr before streaming the JSON result. Provide any arguments to override the defaults (for example
+.BR "--path docs --format sarif" ).
+.TP
+.B wctl doc-catalog
+Executes
+.BR "markdown-doc catalog" .
+All flags are forwarded. Use options like
+.BR "--path docs"
+to scope catalog generation when directories outside the documentation tree are inaccessible.
+.TP
+.B wctl doc-toc
+Synchronises table-of-contents blocks by translating positional Markdown paths into repeated
+.B --path
+flags before delegating to
+.BR "markdown-doc toc" .
+Requires at least one target path to avoid unexpected repository-wide updates; native flags such as
+.B --update
+and
+.B --diff
+are passed through.
+.TP
+.B wctl doc-mv
+Performs a guarded move workflow via
+.BR "markdown-doc mv" .
+The wrapper always runs a dry-run first, then prompts on
+.I /dev/tty
+before applying the live move. Use
+.B --dry-run-only
+to skip the apply step or
+.B --force
+to bypass the confirmation prompt while still executing the preview.
+.TP
+.B wctl doc-refs
+Calls
+.BR "markdown-doc refs"
+to list inbound references for a path, glob, or anchor. Combine with
+.B --path
+to restrict the search to accessible subdirectories.
+.TP
+.B wctl doc-bench
+Runs the
+.BR "markdown-doc-bench"
+helper. Flags such as
+.BR --path ,
+.BR --warmup ,
+and
+.BR --iterations
+are forwarded so documentation performance benchmarks can run from the same CLI.
 .TP
 .B wctl build-static-assets
 Runs the frontend build script at

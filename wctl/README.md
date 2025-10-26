@@ -23,6 +23,12 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 
 ### **Built-in Helpers**
 
+- `wctl doc-lint`: wraps `markdown-doc lint`. With no arguments it runs `markdown-doc lint --staged --format json`, prints a short notice to stderr, and streams the JSON result so tooling can parse it. Pass any arguments to override the defaults (for example `wctl doc-lint --path docs --format sarif`).
+- `wctl doc-catalog`: forwards directly to `markdown-doc catalog`. Use flags like `--path docs --format json` to regenerate scoped catalogs without touching restricted directories.
+- `wctl doc-toc`: accepts positional Markdown paths (converted to `--path` under the hood) plus the native flags such as `--update` or `--diff`. Requires at least one target so accidental repo-wide sweeps are avoided.
+- `wctl doc-mv`: performs a dry-run via `markdown-doc mv --dry-run …`, then prompts on `/dev/tty` before applying changes. Use `--dry-run-only` to skip the apply step or `--force` to bypass the confirmation prompt.
+- `wctl doc-refs`: wraps `markdown-doc refs` for locating inbound links or anchors ahead of refactors. Combine with `--path` to constrain the search space when large directories exist.
+- `wctl doc-bench`: proxies `markdown-doc-bench` so you can benchmark documentation operations (`--warmup`, `--iterations`, `--path`) from the same CLI.
 - `wctl build-static-assets`: runs the frontend build script (`static-src/build-static-assets.sh`) with the correct Compose profile baked into the arguments.
 - `sudo wctl restore-docker-data-permissions`: resets ownership and permissions for the directories under `.docker-data/`. Postgres data and backup paths are restored to `postgres:postgres` (UID/GID `999`), Redis gets `redis:redis` (also `999`), and the application log directory (`.docker-data/weppcloud/`) is aligned with the UID/GID specified in `docker/.env` (defaults to `33:993`). Use this whenever an accidental `chown` prevents the containers from writing to their bind mounts.
 - `wctl flask-db-upgrade`: executes `flask --app wepppy.weppcloud.app db upgrade` inside the running `weppcloud` container. Any additional arguments are forwarded, so `wctl flask-db-upgrade --tag current` works the same as the underlying Flask-Migrate command.
