@@ -40,7 +40,7 @@
 {% set selected_dataset = ns.selected_dataset %}
 {% set selected_catalog_id = ns.selected or '' %}
 {% set selected_mode = climate.climate_mode.value %}
-{% set selected_station_mode = climate.climatestation_mode.value if climate.has_climatestation_mode else 0 %}
+{% set selected_station_mode = climate.climatestation_mode.value %}
 {% set spatial_mode = climate.climate_spatialmode.value %}
 
 {% set month_names = [
@@ -104,6 +104,13 @@
   </section>
 
   {% set station_mode_options = [
+    {
+      "id": "climatestation_mode_auto",
+      "label": "Find Closest on Build",
+      "value": "-1",
+      "selected": selected_station_mode == -1,
+      "attrs": {"class": "disable-readonly", "data-mode-value": "-1", "data-climate-action": "station-mode"}
+    },
     {
       "id": "climatestation_mode0",
       "label": "Closest station",

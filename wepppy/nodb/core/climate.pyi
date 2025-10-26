@@ -67,7 +67,7 @@ class ClimateModeIsUndefinedError(Exception):
 class ClimateNoDbLockedException(Exception): ...
 
 class ClimateStationMode(IntEnum):
-    Undefined = -1
+    FindClosestAtRuntime = -1
     Closest = 0
     Heuristic = 1
     EUHeuristic = 2

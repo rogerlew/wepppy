@@ -22,7 +22,7 @@ class ClimateDataset:
     mods_required: Tuple[str, ...] = ()
     spatial_modes: Tuple[int, ...] = (0,)
     default_spatial_mode: int = 0
-    station_modes: Tuple[int, ...] = (0, 1)
+    station_modes: Tuple[int, ...] = (-1, 0, 1)
     inputs: Tuple[str, ...] = ()
     rap_compatible: bool = False
     dependencies: Tuple[str, ...] = ()
@@ -83,7 +83,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         help_text='Generates stochastic climates from CLIGEN station statistics.',
         spatial_modes=(0, 1),
         default_spatial_mode=0,
-        station_modes=(0, 1),
+        station_modes=(-1, 0, 1),
         inputs=("stochastic_years", "spatial_mode"),
     ),
     ClimateDataset(
@@ -94,7 +94,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         help_text='Recommended for BAER workflows when historic comparison is not required.',
         spatial_modes=(0, 1),
         default_spatial_mode=0,
-        station_modes=(0, 1),
+        station_modes=(-1, 0, 1),
         inputs=("stochastic_years", "spatial_mode"),
         rap_compatible=True,
         blocked_locales=_GHCN_ONLY_LOCALES,
@@ -107,7 +107,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         help_text='Use when observed historical data is required (streamflow calibration, RAP).',
         spatial_modes=(0, 1, 2),
         default_spatial_mode=0,
-        station_modes=(0, 1),
+        station_modes=(-1, 0, 1),
         inputs=("observed_years", "spatial_mode"),
         rap_compatible=True,
         metadata={"year_bounds": {"min": 1980, "max": 2023}},
@@ -121,7 +121,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         help_text='Recommended when real observed meteorology is available (e.g., RAP, streamflow studies).',
         spatial_modes=(0, 1, 2),
         default_spatial_mode=0,
-        station_modes=(0, 1),
+        station_modes=(-1, 0, 1),
         inputs=("observed_years", "spatial_mode"),
         rap_compatible=True,
         blocked_locales=_GHCN_ONLY_LOCALES,
@@ -134,7 +134,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         help_text='Use for high-resolution breakpoint data (2007–present).',
         spatial_modes=(0, 1),
         default_spatial_mode=0,
-        station_modes=(0, 1),
+        station_modes=(-1, 0, 1),
         inputs=("observed_years", "spatial_mode", "nexrad_overrides"),
         rap_compatible=False,
         blocked_locales=_GHCN_ONLY_LOCALES,
@@ -147,7 +147,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         help_text='Experimental future projections; requires specifying start/end years.',
         spatial_modes=(0, 1),
         default_spatial_mode=0,
-        station_modes=(0, 1),
+        station_modes=(-1, 0, 1),
         inputs=("future_years", "spatial_mode"),
         rap_compatible=False,
         blocked_locales=_GHCN_ONLY_LOCALES,
@@ -160,7 +160,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         help_text='Define date, precipitation amount, duration, and intensity profile for a single event.',
         spatial_modes=(0,),
         default_spatial_mode=0,
-        station_modes=(0, 1),
+        station_modes=(-1, 0, 1),
         inputs=("single_storm",),
     ),
     ClimateDataset(
@@ -171,7 +171,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         help_text='Provide multiple storm specifications (one per line) for batch execution.',
         spatial_modes=(0,),
         default_spatial_mode=0,
-        station_modes=(0, 1),
+        station_modes=(-1, 0, 1),
         inputs=("single_storm_batch",),
     ),
     ClimateDataset(
@@ -192,7 +192,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         label='Observed Climate Database',
         description='Pre-generated observed climate files packaged with the run configuration.',
         help_text='Select an observed `.cli` from the configured library.',
-        station_modes=(0,),
+        station_modes=(-1, 0),
         inputs=("observed_database",),
         ui_exposed=False,
     ),
@@ -202,7 +202,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         label='Future Climate Database',
         description='Pre-generated future climate files packaged with the run configuration.',
         help_text='Select a future `.cli` from the configured library.',
-        station_modes=(0,),
+        station_modes=(-1, 0),
         inputs=("future_database",),
         ui_exposed=False,
     ),
@@ -215,7 +215,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         allowed_locales=("eu",),
         spatial_modes=(0, 1),
         default_spatial_mode=1,
-        station_modes=(0, 1, 2),
+        station_modes=(-1, 0, 1, 2),
         inputs=("stochastic_years", "spatial_mode"),
         rap_compatible=False,
     ),
@@ -228,7 +228,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         allowed_locales=("au",),
         spatial_modes=(0, 1),
         default_spatial_mode=0,
-        station_modes=(0,),
+        station_modes=(-1, 0),
         ui_exposed=False,
     ),
 )

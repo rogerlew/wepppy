@@ -615,7 +615,11 @@ var ChannelDelineation = (function () {
 
         channel.show = function () {
             var taskMsg = "Identifying topaz_pass";
-            resetStatus(taskMsg);
+            // Only reset status (which clears info) if we haven't shown a report yet
+            // This prevents clearing the channel report when subcatchment bootstrap calls show()
+            if (!bootstrapState.reported) {
+                resetStatus(taskMsg);
+            }
 
             return http.request(url_for_run("query/delineation_pass/"), { params: { _: Date.now() } })
                 .then(function (result) {
@@ -810,12 +814,14 @@ var ChannelDelineation = (function () {
             var hasChannels = Boolean(watershed.hasChannels);
             var hasSubcatchments = Boolean(watershed.hasSubcatchments);
 
+            // Always show channel report when channels exist, regardless of subcatchment state
             if (hasChannels && !bootstrapState.reported && typeof channel.report === "function") {
                 channel.report();
                 bootstrapState.reported = true;
             }
 
-            if (hasChannels && !hasSubcatchments && !bootstrapState.shownWithoutSubcatchments && typeof channel.show === "function") {
+            // Always show appropriate map visualization when channels exist
+            if (hasChannels && !bootstrapState.shownWithoutSubcatchments && typeof channel.show === "function") {
                 channel.show();
                 bootstrapState.shownWithoutSubcatchments = true;
             }

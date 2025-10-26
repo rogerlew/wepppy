@@ -117,8 +117,8 @@ def query_watershed_summary_channels(runid, config):
     return jsonify(Watershed.getInstance(wd).chns_summary)
 
 
-@watershed_bp.route('/runs/<string:runid>/<config>/report/watershed')
-@watershed_bp.route('/runs/<string:runid>/<config>/report/watershed/')
+@watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments')
+@watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments/')
 @authorize_and_handle_with_exception_factory
 def query_watershed_summary(runid, config):
     ctx = load_run_context(runid, config)

@@ -1421,7 +1421,7 @@ var SubcatchmentDelineation = (function () {
                 safeText(stacktraceElement, "");
             }
 
-            http.request(url_for_run("report/watershed/"), {
+            http.request(url_for_run("report/subcatchments/"), {
                 method: "GET",
                 headers: { Accept: "text/html,application/xhtml+xml" }
             }).then(function (result) {

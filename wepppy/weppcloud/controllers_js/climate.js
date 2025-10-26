@@ -460,7 +460,7 @@ var Climate = (function () {
                     return value !== null && !Number.isNaN(value);
                 });
             if (!stationModes.length) {
-                stationModes = [0];
+                stationModes = [-1, 0];
             }
             var shouldShow = stationModes.some(function (value) {
                 return value !== 4;
@@ -481,7 +481,7 @@ var Climate = (function () {
                     return value !== null && !Number.isNaN(value);
                 });
             if (!allowed.length) {
-                allowed = [0];
+                allowed = [-1, 0];
             }
             var currentValue = parseInteger(getRadioValue(climate.stationModeRadios), allowed[0]);
             var nextValue = currentValue;

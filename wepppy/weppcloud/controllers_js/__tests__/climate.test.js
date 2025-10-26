@@ -28,7 +28,7 @@ describe("Climate controller", () => {
                             "climate_mode": 5,
                             "help_text": "Dataset A help",
                             "inputs": ["stochastic_years", "spatial_mode"],
-                            "station_modes": [0, 1],
+                            "station_modes": [-1, 0, 1],
                             "spatial_modes": [0, 1],
                             "rap_compatible": false
                         },
@@ -38,7 +38,7 @@ describe("Climate controller", () => {
                             "climate_mode": 3,
                             "description": "Dataset B description",
                             "inputs": ["stochastic_years"],
-                            "station_modes": [0, 1],
+                            "station_modes": [-1, 0, 1],
                             "spatial_modes": [0],
                             "rap_compatible": true
                         }
@@ -80,7 +80,11 @@ describe("Climate controller", () => {
                 </label>
 
                 <label class="wc-choice">
-                    <input type="radio" name="climatestation_mode" value="0" data-climate-action="station-mode" checked>
+                    <input type="radio" name="climatestation_mode" value="-1" data-climate-action="station-mode" checked>
+                    <span>Find Closest on Build</span>
+                </label>
+                <label class="wc-choice">
+                    <input type="radio" name="climatestation_mode" value="0" data-climate-action="station-mode">
                     <span>Closest</span>
                 </label>
                 <label class="wc-choice">
@@ -252,9 +256,9 @@ describe("Climate controller", () => {
         const listLoaded = jest.fn();
         climate.events.on("climate:station:list:loaded", listLoaded);
 
-        const stationRadios = document.querySelectorAll('input[name="climatestation_mode"]');
-        stationRadios[1].checked = true;
-        stationRadios[1].dispatchEvent(new Event("change", { bubbles: true }));
+        const heuristicRadio = document.querySelector('input[name="climatestation_mode"][value="1"]');
+        heuristicRadio.checked = true;
+        heuristicRadio.dispatchEvent(new Event("change", { bubbles: true }));
 
         await Promise.resolve();
         await Promise.resolve();

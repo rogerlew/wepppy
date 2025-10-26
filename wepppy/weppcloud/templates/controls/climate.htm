@@ -57,6 +57,12 @@
             <h5>Filter</h5>
         </div>
         {% if 'eu' not in ron.locales and 'au' not in ron.locales %}
+        <div class="col-sm-3">
+            <label class="radio-inline">
+            <input type="radio" value="-1" class="disable-readonly" id="climatestation_mode_auto"
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == -1] }} data-climate-action="station-mode">
+                Find Closest on Build</label>
+        </div>
         <div class="col-sm-2">
             <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"
@@ -70,6 +76,12 @@
                 Multi-Factor Ranking (Considers Distance, Elevation, and Climate)</label>
         </div>
         {% elif 'eu' in ron.locales %}
+        <div class="col-sm-3">
+            <label class="radio-inline">
+            <input type="radio" value="-1" class="disable-readonly" id="climatestation_mode_auto"
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == -1] }} data-climate-action="station-mode">
+                Find Closest on Build</label>
+        </div>
         <div class="col-sm-2">
             <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"
@@ -83,6 +95,12 @@
                 Multi-Factor Ranking (Considers Distance, Elevation, and Climate)</label>
         </div>
         {% elif 'au' in ron.locales %}
+        <div class="col-sm-3">
+            <label class="radio-inline">
+            <input type="radio" value="-1" class="disable-readonly" id="climatestation_mode_auto"
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == -1] }} data-climate-action="station-mode">
+                Find Closest on Build</label>
+        </div>
         <div class="col-sm-2">
             <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"

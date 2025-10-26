@@ -275,7 +275,7 @@ class ClimateNoDbLockedException(Exception):
 
 
 class ClimateStationMode(IntEnum):
-    Undefined = -1
+    FindClosestAtRuntime = -1
     Closest = 0
     Heuristic = 1
     EUHeuristic = 2
@@ -778,7 +778,7 @@ class Climate(NoDbBase):
 
         with self.locked():
             self._input_years = 100
-            self._climatestation_mode = ClimateStationMode.Undefined
+            self._climatestation_mode = ClimateStationMode.FindClosestAtRuntime
             self._climatestation = None
 
             locales = self.config_get_list('general', 'locales')
@@ -1061,7 +1061,7 @@ class Climate(NoDbBase):
     @property
     def has_climatestation_mode(self) -> bool:
         return self._climatestation_mode \
-               is not ClimateStationMode.Undefined
+               is not ClimateStationMode.FindClosestAtRuntime
 
     @climatestation_mode.setter
     @nodb_setter
@@ -1076,7 +1076,7 @@ class Climate(NoDbBase):
     # noinspection PyPep8Naming
     @property
     def onLoad_refreshStationSelection(self) -> str:
-        return json.dumps(self.climatestation_mode is not ClimateStationMode.Undefined)
+        return json.dumps(self.climatestation_mode is not ClimateStationMode.FindClosestAtRuntime)
 
     def available_catalog_datasets(self, include_hidden: bool = False) -> List[Any]:
         from wepppy.nodb.locales import available_climate_datasets

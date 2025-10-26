@@ -84,9 +84,9 @@
           Ash Transport And Risk estimation tool (WATAR). In the long term Disturbed is envisioned to replace the WEPPcloud-PEP interface.
         </p>
         <div class="wc-feature__actions">
-          <a class="pure-button" href="create/disturbed9002" title="disturbed9002" data-run-menu rel="nofollow">Start Disturbed Run (CONUS)</a>
-          <a class="pure-button" href="create/disturbed-hi" title="disturbed-hi" data-run-menu rel="nofollow">Start Disturbed-Hawaii Run (Experimental)</a>
-          <a class="pure-button" href="create/disturbed-ak" title="disturbed-ak" data-run-menu rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed9002') }}" title="disturbed9002" data-run-menu rel="nofollow">Start Disturbed Run (CONUS)</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed-hi') }}" title="disturbed-hi" data-run-menu rel="nofollow">Start Disturbed-Hawaii Run (Experimental)</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed-ak') }}" title="disturbed-ak" data-run-menu rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['disturbed_projects'] }} projects and {{ commafy(runs_counter['disturbed_hillruns']) }} hillslopes ({{ commafy(runs_counter['disturbed_ash_hillruns']) }} WATAR hillslopes) ran since January 1, 2024.
@@ -109,10 +109,10 @@
           and tree components following the fire event.
         </p>
         <div class="wc-feature__actions">
-          <a class="pure-button" href="create/reveg" title="reveg" data-run-menu rel="nofollow">Start Revegetation Run (CONUS)</a>
-          <a class="pure-button" href="create/reveg-mofe" title="reveg-mofe" data-run-menu rel="nofollow">Start Multiple OFE Revegetation Run (CONUS)</a>
-          <a class="pure-button" href="create/reveg-10m-mofe" title="reveg-10m-mofe" data-run-menu rel="nofollow">Start 10m Multiple OFE Revegetation Run (CONUS)</a>
-          <a class="pure-button pure-button-secondary" href="create/disturbed-ak" title="disturbed-ak" data-run-menu rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='reveg') }}" title="reveg" data-run-menu rel="nofollow">Start Revegetation Run (CONUS)</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='reveg-mofe') }}" title="reveg-mofe" data-run-menu rel="nofollow">Start Multiple OFE Revegetation Run (CONUS)</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='reveg-10m-mofe') }}" title="reveg-10m-mofe" data-run-menu rel="nofollow">Start 10m Multiple OFE Revegetation Run (CONUS)</a>
+          <a class="pure-button pure-button-secondary" href="{{ url_for('run_0.create', config='disturbed-ak') }}" title="disturbed-ak" data-run-menu rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['reveg_projects'] }} projects and {{ commafy(runs_counter['reveg_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -136,7 +136,7 @@
           This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 10100389.
         </p>
         <div class="wc-feature__actions">
-          <a class="pure-button" href="create/eu-disturbed" title="eu-disturbed" data-run-menu rel="nofollow">Start EU WEPPcloud-Disturbed Run</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='eu-disturbed') }}" title="eu-disturbed" data-run-menu rel="nofollow">Start EU WEPPcloud-Disturbed Run</a>
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['eu_projects'] }} EU projects and {{ commafy(runs_counter['eu_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -155,7 +155,7 @@
         <h2 id="section-au">WEPPcloud-AU</h2>
         <p>WEPPcloud for Australia assigns managements from the Land Use of Australia 2010-11 dataset and constructs soils from ASRIS data. U.S. climate stations are selected using AGDC monthly precipitation and temperature patterns.</p>
         <div class="wc-feature__actions">
-          <a class="pure-button" href="create/au-disturbed" title="au-disturbed" data-run-menu rel="nofollow">Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='au-disturbed') }}" title="au-disturbed" data-run-menu rel="nofollow">Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)</a>
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['au_projects'] }} EU projects and {{ commafy(runs_counter['au_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -177,7 +177,7 @@
           estimated from NLCD Shrubland 2016 data, while SURGO/STATSGO identifies soil textures.
         </p>
         <div class="wc-feature__actions">
-          <a class="pure-button" href="create/rhem" title="rhem" data-run-menu rel="nofollow">Start RHEM Run (Experimental)</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='rhem') }}" title="rhem" data-run-menu rel="nofollow">Start RHEM Run (Experimental)</a>
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['rhem_projects'] }} RHEM projects and {{ commafy(runs_counter['rhem_hillruns']) }} RHEM hillslopes ran since January 1, 2024.
@@ -233,8 +233,8 @@
         </p>
         <p><strong>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</strong></p>
         <div class="wc-feature__actions">
-          <a class="pure-button" href="create/0" rel="nofollow">Start WEPPcloud Run</a>
-          <a class="pure-button pure-button-secondary" href="create/13" rel="nofollow">10m (Experimental)</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='0') }}" rel="nofollow">Start WEPPcloud Run</a>
+          <a class="pure-button pure-button-secondary" href="{{ url_for('run_0.create', config='13') }}" rel="nofollow">10m (Experimental)</a>
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['0_projects'] }} projects and {{ commafy(runs_counter['0_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -259,7 +259,7 @@
         </p>
         <p><strong>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</strong></p>
         <div class="wc-feature__actions">
-          <a class="pure-button" href="create/baer" rel="nofollow">Start WEPPcloud Run</a>
+          <a class="pure-button" href="{{ url_for('run_0.create', config='baer') }}" rel="nofollow">Start WEPPcloud Run</a>
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['baer_projects'] }} projects and {{ commafy(runs_counter['baer_hillruns']) }} hillslopes ({{ commafy(runs_counter['baer_ash_hillruns']) }} WATAR hillslopes) ran since January 1, 2024.
