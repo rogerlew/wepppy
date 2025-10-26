@@ -1,6 +1,6 @@
 # Work Package: markdown-doc Toolkit
 
-**Status:** Backlog  
+**Status:** Phase 3 complete – integration pending  
 **Created:** 2025-10-25  
 **Owner:** Roger Lew  
 **Lead Agent:** TBD
@@ -29,6 +29,16 @@ WEPPpy has substantial documentation (388+ markdown files) but managing it is be
 
 ---
 
+## Status Update (2025-10-30)
+
+- Phase 1 (catalog + lint broken-links) and Phase 2 (quality gates, validate/toc, severity tuning) are complete and shipped in the `/workdir/markdown-extract` workspace.
+- Phase 3 refactor tooling (`markdown-doc mv`, `markdown-doc refs`, link graph core) is implemented with comprehensive tests (`cargo test --all`) and documented automation workflows.
+- Documentation (README + architecture notes) now covers catalog, lint, validate, toc, mv, refs, JSON outputs, safety guarantees, and agent integration patterns; complex refactor fixtures live under `tests/markdown-doc/refactor/complex/`.
+- Outstanding integration work: align markdown-doc CI with `/workdir/wepppy` pipelines (fmt/clippy/test/bench), decide on link-graph caching + directory-move roadmap, apply optional doc refinements (command × exit-code table, README polish), and scope Phase 4 (`search`/`watch`).
+- Release-ready binaries installed at `/usr/local/bin`; ready for parent repo adoption pending CI + RFC approval.
+
+---
+
 ## Objectives
 
 ### Primary Goals
@@ -41,20 +51,20 @@ WEPPpy has substantial documentation (388+ markdown files) but managing it is be
 ### Success Criteria
 
 **MVP Exit (First Release):**
-- [ ] `catalog` + `lint broken-links` working end-to-end with selective scanning and JSON output
-- [ ] Configuration loader with defaults fallback and precedence hierarchy
-- [ ] Broken internal links detected with configurable severity (zero unintended false positives via ignore lists)
-- [ ] `DOC_CATALOG.md` auto-generated in <5 seconds for 388 files
-- [ ] Concurrent safety verified (atomic temp-file writes, no race conditions)
-- [ ] CLI acceptance tests passing (exit codes, output formats, selective scanning)
-- [ ] Pre-commit hook and GitHub Actions examples documented
+- [x] `catalog` + `lint broken-links` working end-to-end with selective scanning and JSON output
+- [x] Configuration loader with defaults fallback and precedence hierarchy
+- [x] Broken internal links detected with configurable severity (zero unintended false positives via ignore lists)
+- [x] `DOC_CATALOG.md` auto-generated in <5 seconds for 388 files
+- [x] Concurrent safety verified (atomic temp-file writes, no race conditions)
+- [x] CLI acceptance tests passing (exit codes, output formats, selective scanning)
+- [x] Pre-commit hook and GitHub Actions examples documented
 
 **Full Toolkit (Post-MVP):**
-- [ ] Files can be moved/renamed without breaking references (`mv` command - Phase 3)
-- [ ] TOCs auto-update on file changes (`toc` command - Phase 2)
-- [ ] Template validation enforced for AGENTS.md, README.md, work packages (`validate` command - Phase 2)
-- [ ] All lint rules operational (broken-anchors, duplicate-anchors, heading-hierarchy, required-sections - Phase 2)
-- [ ] Severity tuning and per-path exemptions configured (Phase 2)
+- [x] Files can be moved/renamed without breaking references (`mv` command - Phase 3)
+- [x] TOCs auto-update on file changes (`toc` command - Phase 2)
+- [x] Template validation enforced for AGENTS.md, README.md, work packages (`validate` command - Phase 2)
+- [x] All lint rules operational (broken-anchors, duplicate-anchors, heading-hierarchy, required-sections - Phase 2)
+- [x] Severity tuning and per-path exemptions configured (Phase 2)
 
 ### Non-Goals (Initial Release)
 
@@ -490,43 +500,43 @@ markdown-doc lint --format sarif > results.sarif
 
 **MVP Scope:** Ship `catalog` + `lint broken-links` + config loader as first working end-to-end workflow
 
-- [ ] Rust project scaffolding (Cargo.toml, CI setup)
-- [ ] Configuration parser (`.markdown-doc.toml`) with defaults fallback
-- [ ] Shared markdown parsing utilities (pulldown-cmark wrapper)
-- [ ] `catalog` command with concurrent file reading (required)
-  - [ ] Selective scanning (--path, --staged flags for partial runs)
-  - [ ] Atomic temp-file writes (safe for concurrent access)
-  - [ ] JSON output mode (--format json for agent consumption)
-- [ ] `lint` command with broken-links rule only (deferred: other rules)
-  - [ ] Configurable severity (error/warning/ignore per pattern)
-  - [ ] Ignore lists for known edge cases (e.g., external refs, generated files)
-  - [ ] JSON/SARIF output for CI integration
-- [ ] CLI acceptance tests (verify exit codes, output formats, selective scanning)
-- [ ] Performance benchmarks (verify <5s for 388 files, concurrent safety)
+- [x] Rust project scaffolding (Cargo.toml, CI setup)
+- [x] Configuration parser (`.markdown-doc.toml`) with defaults fallback
+- [x] Shared markdown parsing utilities (pulldown-cmark wrapper)
+- [x] `catalog` command with concurrent file reading (required)
+  - [x] Selective scanning (--path, --staged flags for partial runs)
+  - [x] Atomic temp-file writes (safe for concurrent access)
+  - [x] JSON output mode (--format json for agent consumption)
+- [x] `lint` command with broken-links rule only (deferred: other rules)
+  - [x] Configurable severity (error/warning/ignore per pattern)
+  - [x] Ignore lists for known edge cases (e.g., external refs, generated files)
+  - [x] JSON/SARIF output for CI integration
+- [x] CLI acceptance tests (verify exit codes, output formats, selective scanning)
+- [x] Performance benchmarks (verify <5s for 388 files, concurrent safety)
 
 ### Phase 2: Quality Gates
 
-- [ ] `toc` command (read/write TOC markers) - moved from Phase 1
-- [ ] `lint` additional rules:
-  - [ ] broken-anchors rule
-  - [ ] duplicate-anchors rule
-  - [ ] heading-hierarchy rule
-  - [ ] required-sections rule (uses same schema definitions as `validate`)
-- [ ] `validate` command - template compliance checking
-  - [ ] Clarify relationship with `lint required-sections`: both read `[schemas]` config
-  - [ ] Different CLI messaging: `lint` for incremental checks, `validate` for full template conformance
-- [ ] Severity tuning system:
-  - [ ] Per-path exemptions (e.g., `_legacy_*` directories)
-  - [ ] Downgradeable severities (error → warning for specific rules)
-  - [ ] `.markdown-doc-ignore` file support (like .gitignore)
-- [ ] CI integration docs with selective scanning examples
+- [x] `toc` command (read/write TOC markers) - moved from Phase 1
+- [x] `lint` additional rules:
+  - [x] broken-anchors rule
+  - [x] duplicate-anchors rule
+  - [x] heading-hierarchy rule
+  - [x] required-sections rule (uses same schema definitions as `validate`)
+- [x] `validate` command - template compliance checking
+  - [x] Clarify relationship with `lint required-sections`: both read `[schemas]` config
+  - [x] Different CLI messaging: `lint` for incremental checks, `validate` for full template conformance
+- [x] Severity tuning system:
+  - [x] Per-path exemptions (e.g., `_legacy_*` directories)
+  - [x] Downgradeable severities (error → warning for specific rules)
+  - [x] `.markdown-doc-ignore` file support (like .gitignore)
+- [x] CI integration docs with selective scanning examples
 
 ### Phase 3: Refactoring Support
 
-- [ ] `mv` command (move/rename with link updates)
-- [ ] `refs` command (find references)
-- [ ] Link updating engine (core library)
-- [ ] Atomic operation guarantees
+- [x] `mv` command (move/rename with link updates)
+- [x] `refs` command (find references)
+- [x] Link updating engine (core library)
+- [x] Atomic operation guarantees
 
 ### Phase 4: Intelligence
 
@@ -571,19 +581,19 @@ markdown-doc lint --format sarif > results.sarif
 
 ## Milestones
 
-- [ ] **M1: MVP vertical slice** - `catalog` + `lint broken-links` + config loader working end-to-end
+- [x] **M1: MVP vertical slice** - `catalog` + `lint broken-links` + config loader working end-to-end
   - Acceptance: CLI can scan 388 files in <5s, output JSON, run selectively with `--path` flag
   - Exit codes correct, error messages actionable
   - Atomic temp-file writes verified (concurrent safety test)
-- [ ] **M2: CI integration** - Run `lint` in CI with zero false positives
+- [ ] **M2: CI integration** - Run `lint` in CI with zero false positives (pending `/workdir/wepppy` pipeline alignment)
   - Acceptance: Pre-commit hook script, GitHub Actions workflow example
   - Ignore lists tuned for wepppy's legacy directories
   - SARIF output working with GitHub Code Scanning
-- [ ] **M3: Safe file moves** - `mv` command with atomic link updates working
+- [x] **M3: Safe file moves** - `mv` command with atomic link updates working
   - Acceptance: Can reorganize docs/ without breaking references
   - Dry-run mode accurate, backups created
-- [ ] **M4: Full release** - All Phase 1-3 features complete
-  - Acceptance: Documentation complete, wctl integration, agent workflows documented
+- [ ] **M4: Full release** - All Phase 1-3 features complete and adopted in parent repo
+  - Acceptance: Documentation complete, wctl integration, agent workflows documented, markdown-doc wired into `/workdir/wepppy` CI
 
 ---
 
@@ -729,8 +739,17 @@ $ markdown-doc validate AGENTS.md --schema agents
 
 ---
 
+## Outstanding Work (2025-10-30)
+
+- Align markdown-doc CI with `/workdir/wepppy` automation (fmt, clippy, tests, benchmarks) and expose `wctl` wrappers.
+- Decide on link-graph caching and directory-move roadmap before scheduling Phase 4 (`search`, `watch`) work.
+- Publish release notes, command × exit-code quick reference, and incremental README polish as features evolve.
+- Coordinate adoption timeline with parent repo stakeholders (RFC review, go/no-go, post-integration telemetry plan).
+
+---
+
 ## Notes
 
-- `mv` command is high-value for refactoring workflows
-- Agent autonomy: This tool should enable agents to maintain docs
-- **Review integrated:** Lead developer feedback (2025-10-30) has been incorporated throughout document
+- `mv`/`refs` toolchain now ships with complex fixtures validating multi-file refactors.
+- Agents can rely on structured JSON/SARIF outputs and `.markdown-doc-ignore` for safe automation.
+- **Review integrated:** Lead developer feedback (2025-10-30) has been incorporated throughout the document.
