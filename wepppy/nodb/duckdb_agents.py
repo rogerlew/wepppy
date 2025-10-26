@@ -69,11 +69,13 @@ def _get_subs_summary(
         topaz_id_index = None
         columns = []
         
+        # CRITICAL: Do NOT break early - must collect ALL column names
+        # Breaking after finding topaz_id would result in missing columns like slope_scalar, aspect, etc.
         for i, desc in enumerate(con.description):
             columns.append(desc[0])
             if desc[0] in ('topaz_id', 'TopazID'):
                 topaz_id_index = i
-                break
+                # NOTE: Continue loop to collect remaining columns - do NOT break here
 
         if topaz_id_index is None:
             raise ValueError(f"Neither 'topaz_id' nor 'TopazID' column found in {parquet_fn}")

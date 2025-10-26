@@ -1186,8 +1186,7 @@ var SubcatchmentDelineation = (function () {
             if (!runSlug) {
                 return Promise.reject(new Error("Unable to resolve run identifier from the current URL."));
             }
-            var path = "/query-engine/runs/" + encodeURIComponent(runSlug) + "/query";
-            var targetUrl = url_for_run(path);
+            var targetUrl = "/query-engine/runs/" + encodeURIComponent(runSlug) + "/query";
             return http.postJson(targetUrl, payload, {
                 headers: { Accept: "application/json" }
             }).then(function (result) {
