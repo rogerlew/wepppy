@@ -1478,6 +1478,7 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 - Apply `.pure-table` or `.wc-table` for full-width, borderless tables with alternating row backgrounds for scanability.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L521-L545】
 - Pair `.wc-pagination` underneath multi-page datasets to keep navigation consistent and accessible (ARIA current markers, hover state).【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L804-L831】
 - Wrap wide tables in `.wc-table-wrapper` so they scroll horizontally on narrow viewports instead of overflowing.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L1090-L1094】
+- Right-align numeric columns with `.wc-text-right` so values line up visually and remain scannable in dense reports.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L176-L187】
 
 ### Panels & cards
 - Wrap feature areas inside `.wc-panel` or `.wc-card` to keep consistent padding and squared borders.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L357-L364】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L838-L842】

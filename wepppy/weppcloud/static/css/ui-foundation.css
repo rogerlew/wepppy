@@ -202,6 +202,26 @@ code * {
   color: var(--wc-color-text-secondary);
 }
 
+.unitizer-wrapper {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--wc-space-2xs);
+}
+
+.unitizer-wrapper .unitizer {
+  display: inline-block;
+}
+
+.wc-text-right .unitizer-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  width: 100%;
+}
+.wc-text-right {
+  text-align: right;
+}
+
 /* Header */
 .wc-header {
   background: var(--wc-color-surface);
@@ -1894,6 +1914,10 @@ code * {
 .wc-baer-classify__table td.wc-text-right .unitizer-wrapper {
   margin-left: auto;
   text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: var(--wc-space-2xs);
 }
 
 .wc-baer-classify__table td.wc-text-right .unitizer {
@@ -2679,12 +2703,13 @@ body.wc-modal-open {
   background: #fff;
 }
 
-.wc-table tbody th {
-  font-weight: var(--wc-font-weight-medium);
-}
-
 .wc-table tbody td {
   font-weight: var(--wc-font-weight-normal);
+}
+.wc-table td.wc-text-right,
+.wc-table th.wc-text-right {
+  display: table-cell;
+  text-align: right;
 }
 
 /* Border under units row instead of header */
