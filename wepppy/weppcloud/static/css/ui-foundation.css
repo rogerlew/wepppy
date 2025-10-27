@@ -1887,6 +1887,19 @@ code * {
   text-align: right;
 }
 
+.wc-baer-classify__table td.wc-text-right {
+  text-align: right;
+}
+
+.wc-baer-classify__table td.wc-text-right .unitizer-wrapper {
+  margin-left: auto;
+  text-align: right;
+}
+
+.wc-baer-classify__table td.wc-text-right .unitizer {
+  text-align: right;
+}
+
 .wc-baer-classify__input {
   width: 100%;
   max-width: 11rem;
@@ -2720,6 +2733,7 @@ body.wc-modal-open {
   background: var(--wc-color-surface);
   padding: var(--wc-space-md);
   margin-bottom: var(--wc-space-lg);
+  max-width: 650px;
 }
 
 .wc-summary-pane__list {
@@ -2814,4 +2828,153 @@ body.wc-modal-open {
 
 .dl-horizontal dd:last-child {
   margin-bottom: 0;
+}
+
+/* =============================================================================
+   Pattern Support Classes
+   
+   Minimal, token-driven styles for UI Style Guide patterns. Grayscale palette
+   respects Zero-Aesthetic/Calm Utility philosophy while enabling copy-paste
+   agent workflows.
+   
+   Documentation: docs/ui-docs/ui-style-guide.md
+   ========================================================================== */
+
+/* Advanced Options (Pattern #3) - Collapsible details sections */
+.wc-advanced-options {
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  background: var(--wc-color-surface);
+  margin-bottom: var(--wc-space-md);
+}
+
+.wc-advanced-options__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--wc-space-md);
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+  user-select: none;
+}
+
+.wc-advanced-options__summary::-webkit-details-marker {
+  display: none;
+}
+
+.wc-advanced-options__summary::after {
+  content: "▸";
+  font-size: 0.85rem;
+  color: var(--wc-color-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.wc-advanced-options[open] .wc-advanced-options__summary::after {
+  transform: rotate(90deg);
+}
+
+.wc-advanced-options__summary:hover {
+  background: var(--wc-color-surface-alt);
+}
+
+.wc-advanced-options__content {
+  padding: 0 var(--wc-space-md) var(--wc-space-md);
+  border-top: 1px solid var(--wc-color-border);
+}
+
+/* Pagination (Pattern #5) - Multi-page navigation */
+.wc-pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--wc-space-xs);
+  flex-wrap: wrap;
+  margin: var(--wc-space-md) 0;
+}
+
+.wc-pagination__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: var(--wc-space-xs) var(--wc-space-sm);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  background: var(--wc-color-surface);
+  color: var(--wc-color-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.wc-pagination__link:hover,
+.wc-pagination__link:focus {
+  background: var(--wc-color-surface-alt);
+  border-color: var(--wc-color-border-strong);
+  text-decoration: none;
+}
+
+.wc-pagination__link--current {
+  background: var(--wc-color-accent);
+  color: var(--wc-color-surface);
+  border-color: var(--wc-color-accent);
+  font-weight: 600;
+  cursor: default;
+  pointer-events: none;
+}
+
+.wc-pagination__link:disabled,
+.wc-pagination__link[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Status Chips (Pattern #7) - Job state indicators */
+.wc-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-space-xs);
+  padding: var(--wc-space-xs) var(--wc-space-sm);
+  border-radius: var(--wc-radius-pill);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--wc-color-border);
+  background: var(--wc-color-surface);
+  color: var(--wc-color-text);
+}
+
+.wc-status-chip[data-state="success"],
+.wc-status-chip[data-state="completed"] {
+  background: var(--wc-color-positive-soft);
+  border-color: var(--wc-color-positive);
+  color: var(--wc-color-positive);
+}
+
+.wc-status-chip[data-state="error"],
+.wc-status-chip[data-state="failed"] {
+  background: var(--wc-color-critical-soft);
+  border-color: var(--wc-color-critical);
+  color: var(--wc-color-critical);
+}
+
+.wc-status-chip[data-state="warning"],
+.wc-status-chip[data-state="queued"] {
+  background: var(--wc-color-attention-soft);
+  border-color: var(--wc-color-attention);
+  color: var(--wc-color-attention);
+}
+
+.wc-status-chip[data-state="info"],
+.wc-status-chip[data-state="running"] {
+  background: var(--wc-color-accent-soft);
+  border-color: var(--wc-color-accent);
+  color: var(--wc-color-accent);
+}
+
+.wc-status-chip__icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
 }

@@ -110,22 +110,16 @@
 
     <div class="wc-stack">
       <span class="wc-field__label">Valid treatment classes</span>
-      <table class="wc-table">
-        <thead>
-          <tr>
-            <th scope="col">Class Value</th>
-            <th scope="col">Description</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div class="wc-summary-pane">
+        <dl class="wc-summary-pane__list">
           {% for disturbed_class, class_value in treatments.treatments_lookup.items() %}
-          <tr>
-            <td>{{ class_value }}</td>
-            <td>{{ disturbed_class }}</td>
-          </tr>
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">{{ disturbed_class }}</dt>
+            <dd class="wc-summary-pane__definition">{{ class_value }}</dd>
+          </div>
           {% endfor %}
-        </tbody>
-      </table>
+        </dl>
+      </div>
       <p class="wc-field__help">
         Use these values when preparing your raster. Non-treatment values are ignored during processing.
       </p>
