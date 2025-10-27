@@ -38,6 +38,8 @@ var LanduseModify = (function () {
         fillOpacity: 0.0
     };
 
+    var DRILLDOWN_SUPPRESSION_TOKEN = "landuse-modify";
+
     function ensureHelpers() {
         var dom = window.WCDom;
         var forms = window.WCForms;
@@ -275,6 +277,7 @@ var LanduseModify = (function () {
         var selectionModeActive = false;
         var suppressSelectionSync = false;
         var suppressToggleSync = false;
+        var mapSuppressionApplied = false;
         var geoJsonData = null;
         var geoLayer = null;
         var selectionRectangle = null;
@@ -285,6 +288,9 @@ var LanduseModify = (function () {
         modify.data = geoJsonData;
         modify.glLayer = geoLayer;
         modify.selectionRect = selectionRectangle;
+        modify.isSelectionModeActive = function () {
+            return selectionModeActive;
+        };
 
         function updateSelectionRect(map, bounds) {
             if (!map || !bounds) {
@@ -573,6 +579,10 @@ var LanduseModify = (function () {
             if (!map) {
                 return;
             }
+            if (typeof map.suppressDrilldown === "function" && !mapSuppressionApplied) {
+                map.suppressDrilldown(DRILLDOWN_SUPPRESSION_TOKEN);
+                mapSuppressionApplied = true;
+            }
             map.boxZoom.disable();
             map.on("mousedown", onMapMouseDown);
             map.on("mousemove", onMapMouseMove);
@@ -595,6 +605,10 @@ var LanduseModify = (function () {
             modify.glLayer = null;
             layerIndex = Object.create(null);
             clearSelectionRect(map);
+            if (mapSuppressionApplied && typeof map.releaseDrilldown === "function") {
+                map.releaseDrilldown(DRILLDOWN_SUPPRESSION_TOKEN);
+                mapSuppressionApplied = false;
+            }
         }
 
         function setSelectionMode(enabled) {

@@ -1,0 +1,22 @@
+{% set modal_id = modal_id or 'teamModal' %}
+{% set modal_title = modal_title or 'Manage Project Team' %}
+<div class="wc-modal" id="{{ modal_id }}" data-modal hidden>
+  <div class="wc-modal__overlay" data-modal-dismiss></div>
+  <div class="wc-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="{{ modal_id }}Title">
+    <header class="wc-modal__header">
+      <h2 class="wc-modal__title" id="{{ modal_id }}Title">{{ modal_title }}</h2>
+      <button type="button"
+              class="wc-modal__close"
+              data-modal-dismiss
+              aria-label="Close team manager">
+        &times;
+      </button>
+    </header>
+    <div class="wc-modal__body">
+      {% include 'controls/team_pure.htm' %}
+    </div>
+    <footer class="wc-modal__footer">
+      <button type="button" class="pure-button pure-button-secondary" data-modal-dismiss>Close</button>
+    </footer>
+  </div>
+</div>

@@ -291,4 +291,27 @@ describe("Map controller", () => {
         });
         expect(onMapChangeSpy).toHaveBeenCalled();
     });
+
+    test("hillQuery respects drilldown suppression", () => {
+        const activateSpy = jest.spyOn(mapInstance.tabset, "activate");
+        requestMock.mockClear();
+
+        mapInstance.suppressDrilldown("landuse-modify");
+        mapInstance.hillQuery("report/sub_summary/1001/");
+
+        expect(mapInstance.isDrilldownSuppressed()).toBe(true);
+        expect(activateSpy).not.toHaveBeenCalled();
+        expect(requestMock).not.toHaveBeenCalled();
+
+        mapInstance.releaseDrilldown("landuse-modify");
+        activateSpy.mockClear();
+        mapInstance.hillQuery("report/sub_summary/1001/");
+
+        expect(mapInstance.isDrilldownSuppressed()).toBe(false);
+        expect(activateSpy).toHaveBeenCalledWith("drilldown", true);
+        expect(requestMock).toHaveBeenCalledWith("report/sub_summary/1001/", expect.objectContaining({
+            method: "GET",
+            headers: expect.objectContaining({ Accept: "text/html,application/xhtml+xml" })
+        }));
+    });
 });

@@ -109,20 +109,25 @@
        ) }}
 
     <div class="wc-stack">
-      <span class="wc-field__label">Valid treatment classes</span>
-      <div class="wc-summary-pane">
-        <dl class="wc-summary-pane__list">
-          {% for disturbed_class, class_value in treatments.treatments_lookup.items() %}
-          <div class="wc-summary-pane__item">
-            <dt class="wc-summary-pane__term">{{ disturbed_class }}</dt>
-            <dd class="wc-summary-pane__definition">{{ class_value }}</dd>
-          </div>
-          {% endfor %}
-        </dl>
-      </div>
-      <p class="wc-field__help">
-        Use these values when preparing your raster. Non-treatment values are ignored during processing.
-      </p>
+      {% call ui.collapsible_card(
+           title="Valid treatment classes",
+           expanded=False,
+           card_id="treatments_valid_classes"
+         ) %}
+        <div class="wc-summary-pane">
+          <dl class="wc-summary-pane__list">
+            {% for disturbed_class, class_value in treatments.treatments_lookup.items() %}
+            <div class="wc-summary-pane__item">
+              <dt class="wc-summary-pane__term">{{ disturbed_class }}</dt>
+              <dd class="wc-summary-pane__definition">{{ class_value }}</dd>
+            </div>
+            {% endfor %}
+          </dl>
+        </div>
+        <p class="wc-field__help">
+          Use these values when preparing your raster. Non-treatment values are ignored during processing.
+        </p>
+      {% endcall %}
     </div>
   </div>
 

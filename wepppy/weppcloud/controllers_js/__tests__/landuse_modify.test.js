@@ -69,7 +69,9 @@ describe("LanduseModify controller", () => {
             boxZoom: { disable: jest.fn(), enable: jest.fn() },
             on: jest.fn((event, handler) => { mapListeners[event] = handler; }),
             off: jest.fn((event) => { delete mapListeners[event]; }),
-            removeLayer: jest.fn()
+            removeLayer: jest.fn(),
+            suppressDrilldown: jest.fn(),
+            releaseDrilldown: jest.fn()
         };
         window.MapController = {
             getInstance: jest.fn(() => mapInstance)
@@ -116,6 +118,7 @@ describe("LanduseModify controller", () => {
                 report: jest.fn()
             }))
         };
+        global.url_for_run = jest.fn((path) => path);
 
         await import("../landuse_modify.js");
         landuseModify = window.LanduseModify.getInstance();
@@ -136,6 +139,7 @@ describe("LanduseModify controller", () => {
         delete window.SubcatchmentDelineation;
         delete window.Landuse;
         delete window.L;
+        delete global.url_for_run;
         if (global.WCDom) {
             delete global.WCDom;
         }
@@ -219,6 +223,22 @@ describe("LanduseModify controller", () => {
             expect.objectContaining({ form: formContainer })
         );
         expect(mapInstance.boxZoom.disable).toHaveBeenCalled();
+        expect(mapInstance.suppressDrilldown).toHaveBeenCalledWith("landuse-modify");
+        expect(landuseModify.isSelectionModeActive()).toBe(true);
+    });
+
+    test("disabling selection mode releases drilldown suppression", async () => {
+        checkboxEl.checked = true;
+        checkboxEl.dispatchEvent(new Event("change", { bubbles: true }));
+        await Promise.resolve();
+
+        checkboxEl.checked = false;
+        checkboxEl.dispatchEvent(new Event("change", { bubbles: true }));
+        await Promise.resolve();
+
+        expect(mapInstance.releaseDrilldown).toHaveBeenCalledWith("landuse-modify");
+        expect(mapInstance.boxZoom.enable).toHaveBeenCalled();
+        expect(landuseModify.isSelectionModeActive()).toBe(false);
     });
 
     test("manual textarea edits update selection and emit events", () => {

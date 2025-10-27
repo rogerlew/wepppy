@@ -312,6 +312,27 @@ var MapController = (function () {
         var mouseElevationHideTimer = null;
         var isFetchingElevation = false;
         var lastElevationAbort = null;
+        var drilldownSuppressionTokens = typeof Set === "function" ? new Set() : null;
+
+        function addDrilldownSuppression(token) {
+            if (!drilldownSuppressionTokens) {
+                return;
+            }
+            var key = token || "default";
+            drilldownSuppressionTokens.add(key);
+        }
+
+        function removeDrilldownSuppression(token) {
+            if (!drilldownSuppressionTokens) {
+                return;
+            }
+            var key = token || "default";
+            drilldownSuppressionTokens.delete(key);
+        }
+
+        function isDrilldownSuppressed() {
+            return drilldownSuppressionTokens ? drilldownSuppressionTokens.size > 0 : false;
+        }
 
         var encodedRunId = (typeof runid !== "undefined" && runid !== null) ? encodeURIComponent(runid) : null;
         var encodedConfig = (typeof config !== "undefined" && config !== null) ? encodeURIComponent(config) : null;
@@ -677,6 +698,9 @@ var MapController = (function () {
             if (!queryUrl) {
                 return;
             }
+            if (map.isDrilldownSuppressed && map.isDrilldownSuppressed()) {
+                return;
+            }
             if (map.tabset && typeof map.tabset.activate === "function") {
                 map.tabset.activate("drilldown", true);
             }
@@ -778,6 +802,18 @@ var MapController = (function () {
                     }
                 }
             });
+        };
+
+        map.suppressDrilldown = function (token) {
+            addDrilldownSuppression(token);
+        };
+
+        map.releaseDrilldown = function (token) {
+            removeDrilldownSuppression(token);
+        };
+
+        map.isDrilldownSuppressed = function () {
+            return isDrilldownSuppressed();
         };
 
         map.findByTopazId = function () {

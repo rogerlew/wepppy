@@ -32,6 +32,7 @@
 {% include 'command-bar.htm' %}
 {% include 'controls/poweruser_panel.htm' %}
 {% include 'controls/unitizer_modal.htm' %}
+{% include 'controls/team_modal.htm' %}
 
 <div class="wc-container wc-container--fluid">
   <div class="wc-run-layout">
@@ -77,7 +78,6 @@
         <li><a href="#debris-flow" class="nav-link">Debris Flow</a></li>
         {% endif %}
         <li><a href="#dss-export" class="nav-link">DSS Export</a></li>
-        <li><a href="#team" class="nav-link">Project Collaborators</a></li>
       </ul>
     </nav>
 
@@ -179,15 +179,6 @@
 
       <section id="dss-export" class="wc-stack">
         {% include 'controls/dss_export_pure.htm' %}
-      </section>
-
-      <section id="team" class="wc-stack">
-        {% include 'controls/team_pure.htm' %}
-      </section>
-
-      <section id="legacy-wepp" class="wc-stack">
-        <h2>Legacy WEPP Control</h2>
-        <p class="wc-text-muted">Legacy WEPP execution panel placeholder. The existing `_base.htm` version remains available on classic runs pages.</p>
       </section>
 
     </section>

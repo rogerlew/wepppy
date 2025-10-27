@@ -1,5 +1,7 @@
 """Routes for watershed blueprint extracted from app.py."""
 
+import math
+
 from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import Ron, Watershed
@@ -146,5 +148,23 @@ def sub_intersection(runid, config):
     ron = Ron.getInstance(wd)
     _map = ron.map
     subwta_fn = Watershed.getInstance(wd).subwta
-    topaz_ids = _map.raster_intersection(extent, raster_fn=subwta_fn, discard=(0,))
-    return jsonify(topaz_ids)
+    raw_ids = _map.raster_intersection(extent, raster_fn=subwta_fn, discard=(0,))
+
+    cleaned_ids = []
+    seen = set()
+    for value in raw_ids:
+        if value is None:
+            continue
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            continue
+        if not math.isfinite(numeric) or numeric < 1:
+            continue
+        integer_id = int(numeric)
+        if integer_id < 1 or integer_id in seen:
+            continue
+        seen.add(integer_id)
+        cleaned_ids.append(integer_id)
+
+    return jsonify(cleaned_ids)
