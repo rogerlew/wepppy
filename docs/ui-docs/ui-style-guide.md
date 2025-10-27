@@ -6,16 +6,16 @@
 
 <!-- toc -->
 - [Pattern Catalog](#pattern-catalog)
-  - [Pattern #1: Basic Control Shell](#pattern-1-basic-control-shell)
-  - [Pattern #2: Summary Pane](#pattern-2-summary-pane)
-  - [Pattern #3: Advanced Options (Collapsible)](#pattern-3-advanced-options-collapsible)
-  - [Pattern #4: Status Panel + WebSocket](#pattern-4-status-panel-websocket)
-  - [Pattern #5: Data Table + Pagination](#pattern-5-data-table-pagination)
-  - [Pattern #6: Form with Validation](#pattern-6-form-with-validation)
-  - [Pattern #7: Status Indicators](#pattern-7-status-indicators)
-  - [Pattern #8: Console Layout](#pattern-8-console-layout)
-  - [Pattern #9: File Upload + Progress](#pattern-9-file-upload-progress)
-  - [Pattern #10 (Beta): Modal/Drawer Overlay](#pattern-10-beta-modaldrawer-overlay)
+  - [Pattern #1: Zero-Chill Control Shell](#pattern-1-zero-chill-control-shell)
+  - [Pattern #2: Snapshot Summary Pane](#pattern-2-snapshot-summary-pane)
+  - [Pattern #3: Vault Hatch (Advanced Options)](#pattern-3-vault-hatch-advanced-options)
+  - [Pattern #4: Livewire Status Stream](#pattern-4-livewire-status-stream)
+  - [Pattern #5: Scrollproof Data Table](#pattern-5-scrollproof-data-table)
+  - [Pattern #6: Guardrail Form](#pattern-6-guardrail-form)
+  - [Pattern #7: Signal Chips](#pattern-7-signal-chips)
+  - [Pattern #8: Console Deck Layout](#pattern-8-console-deck-layout)
+  - [Pattern #9: Payload Dropzone](#pattern-9-payload-dropzone)
+  - [Pattern #10 (Beta): Orbit Overlay](#pattern-10-beta-orbit-overlay)
 - [Composition Rules](#composition-rules)
 - [Pattern Decision Tree](#pattern-decision-tree)
 - [Quick Reference Tables](#quick-reference-tables)
@@ -81,7 +81,7 @@ User: "Climate control with dropdown and status log"
       ↓
 Agent: control_shell + select + status_panel
       ↓
-Copy: Pattern #1 (Basic Control Shell)
+Copy: Pattern #1 (Zero-Chill Control Shell)
 Fill: title="Climate Data", options=[GridMET, Daymet, PRISM]
       ↓
 Done. No aesthetic decisions required.
@@ -91,20 +91,22 @@ Done. No aesthetic decisions required.
 
 | User Request Contains | Use Pattern | Pattern ID |
 |-----------------------|-------------|------------|
-| "control", "workflow", "climate", "landuse", "soils" | Basic Control Shell | #1 |
-| "summary", "read-only data", "metadata", "current settings" | Summary Pane | #2 |
-| "advanced options", "rarely used settings" | Advanced Options (Collapsible) | #3 |
-| "status log", "background task", "streaming" | Status Panel + WebSocket | #4 |
-| "table", "list", "pagination", "multi-page" | Data Table + Pagination | #5 |
-| "form", "input", "validation", "error messages" | Form with Validation | #6 |
-| "status", "success", "failed", "queued" | Status Indicators | #7 |
-| "dashboard", "console", "admin tool" | Console Layout | #8 |
-| "upload", "file", "attach", "import", "raster", "csv" | File Upload + Progress | #9 |
-| "modal", "dialog", "popup", "overlay", "drawer", "sidebar" | Modal/Drawer Overlay (Beta) | #10 |
+| "control", "workflow", "climate", "landuse", "soils" | Zero-Chill Control Shell | #1 |
+| "summary", "read-only data", "metadata", "current settings" | Snapshot Summary Pane | #2 |
+| "advanced options", "rarely used settings" | Vault Hatch (Advanced Options) | #3 |
+| "status log", "background task", "streaming" | Livewire Status Stream | #4 |
+| "table", "list", "pagination", "multi-page" | Scrollproof Data Table | #5 |
+| "form", "input", "validation", "error messages" | Guardrail Form | #6 |
+| "status", "success", "failed", "queued" | Signal Chips | #7 |
+| "dashboard", "console", "admin tool" | Console Deck Layout | #8 |
+| "upload", "file", "attach", "import", "raster", "csv" | Payload Dropzone | #9 |
+| "modal", "dialog", "popup", "overlay", "drawer", "sidebar" | Orbit Overlay (Beta) | #10 |
 
 ---
 
-### Pattern #1: Basic Control Shell
+### Pattern #1: Zero-Chill Control Shell
+
+> Formerly: Basic Control Shell
 
 **Trigger words:** control, workflow, climate, landuse, soils, wepp  
 **Use when:** Building any run workflow control  
@@ -156,7 +158,9 @@ Done. No aesthetic decisions required.
 
 ---
 
-### Pattern #2: Summary Pane
+### Pattern #2: Snapshot Summary Pane
+
+> Formerly: Summary Pane
 
 **Trigger words:** summary, read-only, metadata, current settings  
 **Use when:** Show state information that user cannot edit  
@@ -196,7 +200,9 @@ Done. No aesthetic decisions required.
 
 ---
 
-### Pattern #3: Advanced Options (Collapsible)
+### Pattern #3: Vault Hatch (Advanced Options)
+
+> Formerly: Advanced Options (Collapsible)
 
 **Trigger words:** advanced, rarely used, optional settings  
 **Use when:** Hiding settings that would clutter main form  
@@ -234,7 +240,9 @@ Done. No aesthetic decisions required.
 
 ---
 
-### Pattern #4: Status Panel + WebSocket
+### Pattern #4: Livewire Status Stream
+
+> Formerly: Status Panel + WebSocket
 
 **Trigger words:** status log, background task, streaming, progress  
 **Use when:** Long-running operations need live feedback  
@@ -281,7 +289,9 @@ status_panel(
 
 ---
 
-### Pattern #5: Data Table + Pagination
+### Pattern #5: Scrollproof Data Table
+
+> Formerly: Data Table + Pagination
 
 **Trigger words:** table, list, pagination, multi-page, dataset  
 **Use when:** Displaying tabular data with multiple pages  
@@ -350,7 +360,9 @@ status_panel(
 
 ---
 
-### Pattern #6: Form with Validation
+### Pattern #6: Guardrail Form
+
+> Formerly: Form with Validation
 
 **Trigger words:** form, input, validation, error messages  
 **Use when:** User input that needs validation and clear error messaging  
@@ -439,7 +451,9 @@ document.getElementById('{{FORM_ID}}').addEventListener('submit', function (e) {
 
 ---
 
-### Pattern #7: Status Indicators
+### Pattern #7: Signal Chips
+
+> Formerly: Status Indicators
 
 **Trigger words:** status, success, failed, queued, progress  
 **Use when:** Show job/task state inline or as banner
@@ -480,7 +494,9 @@ document.getElementById('{{FORM_ID}}').addEventListener('submit', function (e) {
 
 ---
 
-### Pattern #8: Console Layout
+### Pattern #8: Console Deck Layout
+
+> Formerly: Console Layout
 
 **Trigger words:** dashboard, console, admin tool  
 **Use when:** Administrative interfaces (archive dashboard, fork console, query tools)  
@@ -562,7 +578,9 @@ document.getElementById('{{FORM_ID}}').addEventListener('submit', function (e) {
 
 ---
 
-### Pattern #9: File Upload + Progress
+### Pattern #9: Payload Dropzone
+
+> Formerly: File Upload + Progress
 
 **Trigger words:** upload, file, attach, import, raster, shapefile, csv  
 **Use when:** User needs to upload files with size validation and progress feedback  
@@ -671,7 +689,9 @@ document.getElementById('{{FIELD_ID}}').addEventListener('change', function(e) {
 
 ---
 
-### Pattern #10 (Beta): Modal/Drawer Overlay
+### Pattern #10 (Beta): Orbit Overlay
+
+> Formerly: Modal/Drawer Overlay
 
 **Trigger words:** modal, dialog, popup, overlay, drawer, sidebar  
 **Use when:** Need overlay UI for confirmations, forms, or detail views  
@@ -865,49 +885,49 @@ console_page
 START: What does user want to build?
 
 1. Is it a run workflow control (Climate, Landuse, etc.)?
-   YES → Use Pattern #1 (Basic Control Shell)
+   YES → Use Pattern #1 (Zero-Chill Control Shell)
    NO → Go to 2
 
 2. Does it need read-only summary information?
-   YES → Use Pattern #2 (Summary Pane) inside control_shell
+   YES → Use Pattern #2 (Snapshot Summary Pane) inside control_shell
    NO → Go to 3
 
 3. Does it need rarely-used settings?
-   YES → Use Pattern #3 (Advanced Options) inside form
+   YES → Use Pattern #3 (Vault Hatch) inside form
    NO → Go to 4
 
 4. Does it need live progress/log streaming?
-   YES → Use Pattern #4 (Status Panel + WebSocket)
+   YES → Use Pattern #4 (Livewire Status Stream)
    NO → Go to 5
 
 5. Does it display tabular data with pagination?
-   YES → Use Pattern #5 (Data Table + Pagination)
+   YES → Use Pattern #5 (Scrollproof Data Table)
    NO → Go to 6
 
 6. Does it need validated user input?
-   YES → Use Pattern #6 (Form with Validation)
+   YES → Use Pattern #6 (Guardrail Form)
    NO → Go to 7
 
 7. Does it need to show task status (success/failed/queued)?
-   YES → Use Pattern #7 (Status Indicators)
+   YES → Use Pattern #7 (Signal Chips)
    NO → Go to 8
 
 8. Is it an admin dashboard/console?
-   YES → Use Pattern #8 (Console Layout)
+   YES → Use Pattern #8 (Console Deck Layout)
    NO → Go to 9
 
 9. Does it need file upload with progress tracking?
-   YES → Use Pattern #9 (File Upload + Progress)
+   YES → Use Pattern #9 (Payload Dropzone)
    NO → Go to 10
 
 10. Does it need overlay UI (modal/drawer)?
-    YES → Use Pattern #10 (Beta) (Modal/Drawer Overlay)
+    YES → Use Pattern #10 (Beta) (Orbit Overlay)
     NO → Check if user request is unclear, ask for clarification
 
 11. Multiple patterns needed?
     → Combine patterns following Composition Rules above
-    → Example: Control Shell (#1) + Summary Pane (#2) + Status Panel (#4)
-    → Example: Form (#6) + File Upload (#9) + Modal (#10 Beta)
+    → Example: Zero-Chill Control Shell (#1) + Snapshot Summary Pane (#2) + Livewire Status Stream (#4)
+    → Example: Guardrail Form (#6) + Payload Dropzone (#9) + Orbit Overlay (#10 Beta)
 ```
 
 ---
@@ -1088,7 +1108,7 @@ button.addEventListener('click', function(e) {
 
 **Purpose:** Real-world pattern implementations for reference and validation
 
-### Example 1: File Upload with Auto-Submit (Pattern #9)
+### Example 1: File Upload with Auto-Submit (Pattern #9 · Payload Dropzone)
 **Location:** `wepppy/weppcloud/templates/controls/disturbed_sbs_pure.htm` (lines 69-77)  
 **Use case:** Upload Soil Burn Severity raster with automatic processing
 
@@ -1141,7 +1161,7 @@ document.getElementById('input_upload_sbs').addEventListener('change', function(
 });
 ```
 
-### Example 2: Modal Dialog for Settings (Pattern #10 Beta)
+### Example 2: Modal Dialog for Settings (Pattern #10 Beta · Orbit Overlay)
 **Location:** `wepppy/weppcloud/templates/controls/unitizer_modal.htm` (lines 1-24)  
 **Use case:** Unitizer unit conversion settings in modal overlay
 
@@ -1188,7 +1208,7 @@ document.getElementById('input_upload_sbs').addEventListener('change', function(
 <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
 ```
 
-### Example 3: Status Panel + WebSocket (Pattern #4)
+### Example 3: Status Panel + WebSocket (Pattern #4 · Livewire Status Stream)
 **Location:** `wepppy/weppcloud/templates/controls/climate_pure.htm` (approximate pattern)  
 **Use case:** Live climate data build progress streaming
 
@@ -1225,7 +1245,7 @@ document.addEventListener('DOMContentLoaded', function() {
 - Channel name matches backend Redis pub/sub key
 - Auto-scrolls to bottom as messages arrive
 
-### Example 4: Form with Validation (Pattern #6)
+### Example 4: Form with Validation (Pattern #6 · Guardrail Form)
 **Location:** `wepppy/weppcloud/templates/controls/treatments_pure.htm` (inferred from pattern)  
 **Use case:** Treatment application form with date validation
 
@@ -1278,8 +1298,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 ## Design philosophy
 
-### The "Zero-Aesthetic" Reality
-**UI work is a time sink.** The developer wants to spend zero time on aesthetics and minimal time on layout. The goal: stand up usable, consistent UI functionality fast with minimal human intervention.
+### The "Zero-Aesthetic" Philosophy
+**Reality: UI work is a time sink.** The developer wants to spend zero time on aesthetics and minimal time on layout. The goal: stand up usable, consistent UI functionality fast with minimal human intervention.
 
 **Compositional patterns with zero degrees of freedom:**
 - **Grayscale only** - No color coordination bikeshedding. Black, white, grays. Done.
@@ -1294,15 +1314,18 @@ document.addEventListener('DOMContentLoaded', function() {
 - **Styling decisions per control:** 0 (patterns handle everything)
 - **Visual QA time:** <30 seconds (does it match other controls? Yes → ship)
 
-**Critical note:** Velocity constraints operate **alongside** accessibility and usability guardrails, not instead of them. The "zero aesthetic decisions" philosophy eliminates subjective styling choices (colors, fonts, spacing values) but preserves WCAG AA compliance, keyboard navigation, semantic HTML, and progressive enhancement. Speed through constraints, quality through standards.
-
-### Classic Design Principles (Still Apply)
+### Classic Design Principles
 - **Calm utility.** Prioritize legible data and workflows over decorative treatments. Pages should feel like professional tools: uncluttered backgrounds, strong hierarchy, and no ornamental gradients or corner rounding.
 - **Pure.css first.** Load the Pure.css core and grid on every page and layer site-specific tokens from `static/css/ui-foundation.css`. Reach for Bootstrap only when Pure lacks a ready-made solution (e.g., modal scaffolding, large tabular navigation, or complex ToCs).
 - **Zero-maintenance defaults.** Consolidate colors, type, spacing, and component rules inside the shared foundation stylesheet so individual pages do not need inline CSS. Prefer semantic HTML and Pure utility classes before hand-written overrides.
 - **Consistent framing.** Every screen should share a header, generous breathing room, and predictable spacing rhythm so tool-to-tool navigation feels seamless.
 - **Accessibility as baseline.** Follow WCAG AA contrast, ensure focus outlines remain visible, and keep interactive controls keyboard reachable without JavaScript dependencies.
 - **Consistent, unstyled, unpretentious, simple, maintenable** Keep things simple and use patterns known to render in predictable manner.
+
+**Critical note:** Velocity constraints operate **alongside** accessibility and usability guardrails, not instead of them. The "zero aesthetic decisions" philosophy contrains subjective styling choices (colors, fonts, spacing values) but preserves WCAG AA compliance, keyboard navigation, semantic HTML, and progressive enhancement. Speed through constraints, quality through standards.
+
+"Zero-Aesthetic" is a meta-design philosophy. "Calm" describes the approach to design. Together the are "Zero-Chill."
+
 
 ## Technology stack
 | Layer | Purpose | Notes |
@@ -1348,6 +1371,8 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
   ```
   The foundation stylesheet already handles spacing, borders, and responsive behavior for this structure. Document any deviations in `docs/ui-docs/control-ui-styling/` so future controls stay consistent.
+
+## Zero-Chill UI Patterns
 
 When adding or updating checkboxes/radio buttons, follow these conventions so spacing, colors, and accessibility stay predictable:
 
