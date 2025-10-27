@@ -30,7 +30,7 @@ Phase 1–3 of the `markdown-doc` toolkit are complete inside `/workdir/markdown
 1. **CI Alignment**  
    - Add `markdown-doc lint --staged --format json` to `wctl` wrappers.  
    - Extend GitHub Actions (or equivalent) to run `fmt`, `clippy`, `cargo test --all`, and lint/benchmark smoke (`markdown-doc-bench`).  
-   - Consume JSON/SARIF outputs for PR feedback (upload to Code Scanning dashboard).  
+   - ✅ `docs-quality.yml` workflow (self-hosted runner) now runs `wctl doc-lint` (SARIF + JSON) and `wctl doc-bench`, uploading SARIF results to Code Scanning. Next step: integrate Rust workspace checks.  
 
 2. **Developer Experience**  
    - Provide `wctl doc-{lint,catalog,toc,mv,refs}` aliases.  

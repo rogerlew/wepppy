@@ -747,6 +747,22 @@ $ markdown-doc validate AGENTS.md --schema agents
 - Coordinate adoption timeline with parent repo stakeholders (RFC review, go/no-go, post-integration telemetry plan).
 - Distribute `.markdown-doc-ignore` (includes `.docker-data/**`) with rollout notes so catalog/lint skip docker volumes; keep `sudo wctl restore-docker-data-permissions` documented for legacy environments.
 
+### Adoption Plan (Lead Tasks – 2025-11 Sprint)
+
+- **CI Integration (Week of Nov 3):**
+  - Extend GitHub Actions / wctl automation to run `cargo fmt --check`, `cargo clippy`, `cargo test --all`, `wctl doc-lint --format sarif`, and `wctl doc-bench --path docs --warmup 0 --iterations 1`.
+  - Surface lint JSON/SARIF results in PR checks and add gating thresholds (errors fail, warnings allowed temporarily).
+  - ✅ Established `docs-quality.yml` workflow on self-hosted runner; next step is to layer in Rust workspace checks.
+- **Lint Backlog Triage (Nov 4–7):**
+  - Bucket current 36 broken-link errors by category (missing files vs anchor drift) and assign fixes or ignore entries with justification.
+  - Track remediation progress in `tracker.md` (mark resolved vs deferred with rationale).
+- **Documentation & Comms (Nov 6–8):**
+  - Publish quick-start guide in `tools/README.markdown-tools.md` outlining new `wctl doc-*` flows and `.markdown-doc-ignore` usage.
+  - Issue release notes / adoption announcement referencing RFC decisions, install steps, and CI expectations.
+- **Phase 4 Decision Prep (by Nov 11):**
+  - Gather telemetry from lint runs (frequency, runtime, error rate) to inform caching/search scope.
+  - Present recommendation on link-graph caching vs. watch mode to stakeholders for Q1 2026 planning.
+
 ---
 
 ## Notes

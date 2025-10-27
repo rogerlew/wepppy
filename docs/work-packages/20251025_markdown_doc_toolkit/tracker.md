@@ -55,7 +55,18 @@
 
 ### In Progress
 
-*(Nothing yet)*
+- [ ] **CI Integration Sprint (Nov 3)**
+  - [ ] Wire `cargo fmt --check`, `cargo clippy`, `cargo test --all` into markdown-doc GitHub Actions
+  - [x] Add `wctl doc-lint --format sarif` and `wctl doc-bench --path docs --warmup 0 --iterations 1` to PR workflow (`docs-quality.yml`)
+  - [x] Publish SARIF results to Code Scanning dashboard with failure gates on errors (Docs Quality workflow uploads)
+- [ ] **Lint Backlog Triage (Nov 4–7)**
+  - [ ] Categorize existing `markdown-doc lint --path docs` findings
+  - [ ] Open issues/PBIs for doc fixes vs. intentional ignores
+  - [ ] Land initial remediation PR batch (target ≥50% reduction)
+- [ ] **Documentation & Comms (Nov 6–8)**
+  - [ ] Update `tools/README.markdown-tools.md` with wctl quick start
+  - [ ] Add `.markdown-doc-ignore` guidance to onboarding docs
+  - [ ] Draft release notes / announcement for internal channels
 
 ### Done
 

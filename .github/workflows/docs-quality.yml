@@ -1,0 +1,73 @@
+name: Docs Quality
+
+on:
+  pull_request:
+    paths:
+      - '**/*.md'
+      - 'wctl/**'
+      - '.markdown-doc-ignore'
+      - '.github/workflows/docs-quality.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - '**/*.md'
+      - 'wctl/**'
+      - '.markdown-doc-ignore'
+      - '.github/workflows/docs-quality.yml'
+
+jobs:
+  docs-quality:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare wctl wrapper
+        run: ./wctl/install.sh dev
+
+      - name: Verify markdown-doc tooling
+        run: |
+          set -euo pipefail
+          command -v markdown-doc >/dev/null || {
+            echo "markdown-doc binary not found. Install it on the self-hosted runner (see docs/work-packages/20251025_markdown_doc_toolkit/rfc_markdown_doc_adoption.md)." >&2
+            exit 127
+          }
+          command -v markdown-doc-bench >/dev/null || {
+            echo "markdown-doc-bench binary not found. Install it on the self-hosted runner." >&2
+            exit 127
+          }
+          markdown-doc --version
+          markdown-doc-bench --help >/dev/null
+
+      - name: Run markdown-doc lint (SARIF + JSON)
+        run: |
+          set -euo pipefail
+          status=0
+          ./wctl/wctl.sh doc-lint --format sarif > docs-lint.sarif || status=$?
+          ./wctl/wctl.sh doc-lint --format json > docs-lint.json || true
+          exit ${status}
+
+      - name: Run markdown-doc benchmarks
+        run: |
+          set -euo pipefail
+          ./wctl/wctl.sh doc-bench --path docs --warmup 0 --iterations 1
+
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: docs-lint.sarif
+
+      - name: Upload lint JSON artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docs-lint-json
+          path: docs-lint.json
