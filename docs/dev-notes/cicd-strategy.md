@@ -936,10 +936,17 @@ jobs:
         run: wctl doc-lint --format sarif > results.sarif
         continue-on-error: true
       
+      - name: Validate SARIF Output
+        run: |
+          if [ ! -s results.sarif ]; then
+            echo '{"version": "2.1.0", "runs": []}' > results.sarif
+          fi
+      
       - name: Upload SARIF Results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
+          category: documentation
 
   test-python:
     runs-on: [self-hosted, linux, homelab]
@@ -1007,10 +1014,17 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
       
+      - name: Validate Trivy SARIF
+        run: |
+          if [ ! -s trivy-results.sarif ]; then
+            echo '{"version": "2.1.0", "runs": []}' > trivy-results.sarif
+          fi
+      
       - name: Upload Trivy Results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
+          category: container-security
 ```
 
 ### Main Branch CI/CD Workflow
@@ -2712,6 +2726,172 @@ curl -f https://wepp.cloud/health
 # Monitor for 30 minutes
 watch -n 60 'curl -s https://wepp.cloud/health | jq'
 ```
+
+---
+
+## CodeQL Action v3 Migration & SARIF Handling
+
+### Background: CodeQL Action v2 Retirement (January 2025)
+
+The CodeQL Action v2, including the `upload-sarif` component, was officially retired on **January 10, 2025**, following:
+- Deprecation announcement in **January 2024**
+- Planned end-of-support date in **December 2024**
+
+**Retirement Rationale:**
+- **GHES Compatibility:** Aligned with deprecation of older GitHub Enterprise Server versions (e.g., GHES 3.11), where CodeQL bundles shipped with deprecated GHES releases are retired to maintain security and compatibility.
+- **Security & Maintenance:** Ensures users migrate to actively maintained versions that incorporate bug fixes, security enhancements, and performance improvements.
+- **Risk Reduction:** Eliminates exposure to unpatched vulnerabilities in unmaintained tooling.
+
+**Impact:** Workflows using v2 now fail with errors prompting updates to v3. No further updates or support are provided for v2.
+
+### CodeQL Action v3 Specification
+
+The v3 specification builds on v2 with several key updates focused on reliability, consistency, and enhanced SARIF upload handling:
+
+#### 1. SARIF Post-Processing Behavior (v3.31.0+)
+
+Post-processing steps (e.g., adding fingerprints for alert tracking across runs) are **always applied** to generated SARIF files during `analyze` or `upload-sarif` steps, regardless of whether an upload occurs.
+
+- **Previous Behavior (v2):** Post-processing was conditional on upload intent.
+- **New Behavior (v3):** Ensures more consistent file preparation, but may increase resource usage for custom workflows where uploads are skipped (e.g., via the `upload` input in `analyze`).
+- **Impact:** No direct change to `upload-sarif` itself, but workflows benefit from uniform file structure.
+
+#### 2. Handling Multiple SARIF Runs (Breaking Change - July 2025)
+
+Starting **July 22, 2025**, code scanning **no longer automatically combines** multiple SARIF runs within the same file if they share the same tool and category properties.
+
+- **Previous Behavior (v2):** Multiple runs with the same tool/category were automatically merged.
+- **New Behavior (v3):** Users must upload separate runs individually or adjust SARIF generation to avoid duplication.
+- **Error Message:** `"multiple SARIF runs with the same category"` if not handled correctly.
+- **Migration Strategy:** Review SARIF generation logic to ensure single-run files or unique categories per run.
+
+#### 3. CodeQL Bundle and Tooling Updates
+
+v3 bumps the minimum CodeQL CLI bundle to versions like **2.17.6** (with defaults up to **2.23.3**), incorporating:
+- Newer language support
+- Query improvements
+- Bug fixes
+- Enhanced analysis accuracy for recent programming languages and frameworks
+
+#### 4. New Experimental Features
+
+- **`setup-codeql` Action:** Installs the CodeQL CLI without database initialization, useful for custom tooling or non-production scenarios.
+
+#### 5. Permissions and Integration Requirements
+
+v3 enforces stricter permissions and provides better error handling:
+
+| Requirement | Details |
+|-------------|---------|
+| **Permissions** | `security_events: write` required for uploads |
+| **Upload Methods** | GitHub Actions, API, or CodeQL CLI |
+| **SARIF Format** | Must comply with SARIF 2.1.0 specification |
+| **Required Fields** | At least one `run` object, valid `commit_sha` and `ref` |
+| **Error Handling** | Clear error messages for "Resource not accessible" or "Not Found" (often due to missing repo settings or invalid SARIF structures) |
+
+#### 6. Migration Path from v2 to v3
+
+**Update Workflow YAML:**
+```yaml
+# Before (v2)
+      - name: Upload SARIF Results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+
+# After (v3)
+- name: Upload SARIF Results
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: results.sarif
+```
+
+**Testing Checklist:**
+- [ ] Validate SARIF output against SARIF 2.1.0 specification
+- [ ] Ensure single-run files or unique categories per run
+- [ ] Verify `commit_sha` and `ref` are correctly set
+- [ ] Test for breaking changes (post-processing, multi-run handling)
+- [ ] Review repository settings: Code Scanning must be enabled
+- [ ] Check permissions: `security_events: write` in workflow
+
+### SARIF Validation Best Practices
+
+To prevent upload failures, workflows should validate SARIF files before upload:
+
+```yaml
+- name: Generate SARIF Report
+  run: wctl doc-lint --format sarif > docs-lint.sarif
+  continue-on-error: true
+
+- name: Validate SARIF Output
+  run: |
+    # Check if file is empty or missing
+    if [ ! -s docs-lint.sarif ]; then
+      echo "Warning: SARIF file is empty or missing"
+      echo '{"version": "2.1.0", "runs": []}' > docs-lint.sarif
+    fi
+    
+    # Validate JSON syntax
+    if ! jq empty docs-lint.sarif 2>/dev/null; then
+      echo "Error: Invalid JSON in SARIF file"
+      echo '{"version": "2.1.0", "runs": []}' > docs-lint.sarif
+    fi
+
+- name: Upload SARIF to Code Scanning
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: docs-lint.sarif
+    category: documentation
+```
+
+**Key Validation Steps:**
+1. **File Existence:** Check if SARIF file exists and is non-empty (`[ ! -s file ]`)
+2. **JSON Syntax:** Validate with `jq empty` to catch malformed JSON
+3. **Minimal Valid SARIF:** Create fallback with `{"version": "2.1.0", "runs": []}` if generation fails
+4. **Category Uniqueness:** Assign unique `category` values to prevent merge conflicts
+
+### Third-Party Tool Compatibility
+
+When using third-party tools (e.g., Trivy, Anchore, ESLint) that generate SARIF:
+
+```yaml
+- name: Run Trivy Security Scan
+  uses: aquasecurity/trivy-action@master
+  with:
+    image-ref: 'weppcloud:latest'
+    format: 'sarif'
+    output: 'trivy-results.sarif'
+
+- name: Validate Trivy SARIF
+  run: |
+    if [ ! -s trivy-results.sarif ]; then
+      echo '{"version": "2.1.0", "runs": []}' > trivy-results.sarif
+    fi
+
+- name: Upload Trivy Results
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: trivy-results.sarif
+    category: container-security
+```
+
+**Common Issues:**
+- **Empty Runs:** Tool finds no issues but produces invalid SARIF (missing `runs` array)
+- **Category Conflicts:** Multiple scans with same category in single workflow
+- **Large Files:** SARIF files exceeding GitHub's size limits (10 MB recommended maximum)
+
+### Wepppy Implementation Status (2025-10-26)
+
+| Workflow | Status | Notes |
+|----------|--------|-------|
+| `docs-quality.yml` | ✅ Migrated to v3 | Includes SARIF validation (empty file handling) |
+| `pr.yml` (planned) | ⏳ Pending | Will use v3 from initial implementation |
+| `main.yml` (planned) | ⏳ Pending | Container scans will use v3 with Trivy |
+
+**References:**
+- [CodeQL Action Repository](https://github.com/github/codeql-action) - Clone available at `/workdir/codeql-action`
+- [SARIF 2.1.0 Specification](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html)
+- [GitHub Code Scanning Documentation](https://docs.github.com/en/code-security/code-scanning)
 
 ---
 

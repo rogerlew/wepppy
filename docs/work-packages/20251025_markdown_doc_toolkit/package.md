@@ -703,7 +703,7 @@ jobs:
       - name: Validate documentation
         run: markdown-doc lint --format sarif > results.sarif
       - name: Upload results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
 ```
