@@ -56,38 +56,13 @@ jobs:
           # Ensure SARIF exists (fallback placeholder when command fails before writing)
           if [ ! -s docs-lint.sarif ]; then
             echo "Warning: SARIF output is empty. Writing placeholder for upload." >&2
-            cat <<'EOF' > docs-lint.sarif
-{
-  "version": "2.1.0",
-  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-  "runs": [
-    {
-      "tool": {
-        "driver": {
-          "name": "markdown-doc",
-          "rules": []
-        }
-      },
-      "results": []
-    }
-  ]
-}
-EOF
+            printf '{\n  "version": "2.1.0",\n  "\\$schema": "https://json.schemastore.org/sarif-2.1.0.json",\n  "runs": [\n    {\n      "tool": {\n        "driver": {\n          "name": "markdown-doc",\n          "rules": []\n        }\n      },\n      "results": []\n    }\n  ]\n}\n' > docs-lint.sarif
           fi
 
           # Ensure JSON artifact exists (fallback placeholder)
           if [ ! -s docs-lint.json ]; then
             echo "Warning: JSON lint output is empty. Writing placeholder summary." >&2
-            cat <<'EOF' > docs-lint.json
-{
-  "summary": {
-    "files_scanned": 0,
-    "errors": 0,
-    "warnings": 0
-  },
-  "findings": []
-}
-EOF
+            printf '{\n  "summary": {\n    "files_scanned": 0,\n    "errors": 0,\n    "warnings": 0\n  },\n  "findings": []\n}\n' > docs-lint.json
           fi
 
           echo "LINT_STATUS=${status}" >> "${GITHUB_ENV}"
