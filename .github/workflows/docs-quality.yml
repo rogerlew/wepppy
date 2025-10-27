@@ -52,9 +52,19 @@ jobs:
       - name: Run markdown-doc lint (SARIF + JSON)
         run: |
           set -euo pipefail
+          # Run lint and capture exit code
           status=0
           wctl doc-lint --format sarif > docs-lint.sarif || status=$?
+          
+          # Also generate JSON for artifact (don't fail on this)
           wctl doc-lint --format json > docs-lint.json || true
+          
+          # Verify SARIF was created (empty file means command failed)
+          if [ ! -s docs-lint.sarif ]; then
+            echo "Error: SARIF output is empty. Lint command may have failed." >&2
+            echo '{"version": "2.1.0", "runs": []}' > docs-lint.sarif
+          fi
+          
           exit ${status}
 
       - name: Run markdown-doc benchmarks
@@ -63,7 +73,7 @@ jobs:
           wctl doc-bench --path docs --warmup 0 --iterations 1
 
       - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: docs-lint.sarif
