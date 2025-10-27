@@ -41,27 +41,31 @@ if _VAPID_PATH.exists():
         vapid = json.load(fp)
         VAPID_PUBLIC_KEY = vapid.get('publicKey', '')
 
+# Preflight TOC Emoji Mapping
+# Maps TOC anchor hrefs to TaskEnum members for emoji display.
+# TaskEnum.emoji() is the single source of truth for all task emojis.
+# See docs/ui-docs/control-ui-styling/preflight_behavior.md for architecture.
 TOC_TASK_ANCHOR_TO_TASK = {
     '#map': TaskEnum.fetch_dem,
-    '#soil-burn-severity': TaskEnum.init_sbs_map,
-    '#soil-burn-severity-optional': TaskEnum.init_sbs_map,
+    '#disturbed-sbs': TaskEnum.init_sbs_map,
     '#channel-delineation': TaskEnum.build_channels,
-    '#outlet': TaskEnum.set_outlet,
+    '#set-outlet': TaskEnum.set_outlet,
     '#subcatchments-delineation': TaskEnum.build_subcatchments,
-    '#landuse-options': TaskEnum.build_landuse,
-    '#landuse-report': TaskEnum.build_landuse,
-    '#soil-options': TaskEnum.build_soils,
+    '#rangeland-cover': TaskEnum.fetch_rap_ts,  # Using RAP TS emoji as placeholder
+    '#landuse': TaskEnum.build_landuse,
     '#climate': TaskEnum.build_climate,
-    '#rap-time-series-acquisition': TaskEnum.fetch_rap_ts,
+    '#rap-ts': TaskEnum.fetch_rap_ts,
+    '#soils': TaskEnum.build_soils,
+    '#treatments': TaskEnum.build_landuse,  # Using landuse emoji as placeholder
     '#wepp': TaskEnum.run_wepp_watershed,
-    '#observed-data-model-fit': TaskEnum.run_observed,
-    '#debris-flow-analysis': TaskEnum.run_debris,
-    '#wildfire-ash-transport-and-risk-watar': TaskEnum.run_watar,
+    '#ash': TaskEnum.run_watar,
     '#rhem': TaskEnum.run_rhem,
-    '#omni-scenario-runner': TaskEnum.run_omni_scenarios,
-    '#omni-contrast-definitions': TaskEnum.run_omni_contrasts,
-    '#partitioned-dss-export-for-hec': TaskEnum.dss_export,
-    '#export': TaskEnum.dss_export,
+    '#omni-scenarios': TaskEnum.run_omni_scenarios,
+    '#omni-contrasts': TaskEnum.run_omni_contrasts,
+    '#observed': TaskEnum.run_observed,
+    '#debris-flow': TaskEnum.run_debris,
+    '#dss-export': TaskEnum.dss_export,
+    '#team': TaskEnum.project_init,  # Using project init emoji as placeholder
 }
 
 TOC_TASK_EMOJI_MAP = {anchor: task.emoji() for anchor, task in TOC_TASK_ANCHOR_TO_TASK.items()}
@@ -198,7 +202,6 @@ def runs0(runid, config):
         ("user_cover_transform", "User-Defined Transform")
     ]
     wepp_bin_options = [(opt, opt) for opt in linux_wepp_bin_opts]
-
 
     _log_access(base_wd, current_user, request.remote_addr)
     timestamp = datetime.now()

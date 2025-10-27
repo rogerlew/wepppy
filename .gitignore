@@ -29,3 +29,4 @@ _legacy_weppcloud_controls/
 # External tools (managed separately)
 markdown-extract/
 actions-runner/
+telemetry/

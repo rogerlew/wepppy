@@ -247,6 +247,12 @@ Every module, service, and significant package should have a README.md that serv
 - The `wctl` utility (Docker command wrapper) is installed on the host and should be used to manage containers, execute commands (e.g., `wctl exec weppcloud bash`), and run tests (`wctl run-pytest …`). This keeps workflows aligned with the team’s tooling.
 - The host filesystem mirrors the dev container layout under `/workdir/<repo>`, so relative paths such as `/workdir/wepppy/...` are safe to reference.
 - The repository includes `docker/docker-compose.dev.yml`; expect it to exist and be the primary entry point for local orchestration.
+- **GitHub CLI (`gh`)** is available on the host and authenticated. Use it for creating issues, managing PRs, and querying repository metadata:
+  ```bash
+  gh issue create --title "Title" --body "Description"
+  gh issue list --label "work-package"
+  gh pr status
+  ```
 
 
 ## Development Workflow
@@ -669,9 +675,10 @@ When an initiative will span multiple PRs, involve multiple agents, or require c
    - Move completed prompts to `prompts/completed/` with outcome summaries
    - Reference `docs/god-tier-prompting-strategy.md` for crafting effective prompts
 
-5. **Update the root project tracker:**
-   - Add the work package to `PROJECT_TRACKER.md` so other agents can discover active initiatives
+5. **Update the root kanban board:**
+   - Add the work package to `PROJECT_TRACKER.md` (the root kanban board) so other agents can discover active initiatives
    - Move between columns (Backlog → In Progress → Done) as the package progresses
+   - Update status and progress notes as work proceeds
 
 6. **Track progress in tracker.md:**
    - Update the task board (use `[ ]` / `[x]` checkboxes or Kanban lists)
@@ -682,7 +689,7 @@ When an initiative will span multiple PRs, involve multiple agents, or require c
 7. **Close the package when complete:**
    - Mark status as "Closed" in `package.md` with completion date
    - Archive prompts from `active/` to `completed/` with outcome notes
-   - Move the package to "Done" in `PROJECT_TRACKER.md`
+   - Move the package to "Done" in `PROJECT_TRACKER.md` (kanban board)
    - Summarize deliverables and any follow-up work in `package.md`
    - Clean up temporary artifacts or note what's being retained for reference
 

@@ -700,6 +700,56 @@ code * {
   min-width: 220px;
 }
 
+/* ============================================================================
+   TOC Preflight Emoji Indicators
+   
+   Emojis appear in first column when tasks complete. Visibility controlled by
+   data-toc-emoji attribute set by preflight.js based on WebSocket updates.
+   
+   Architecture: docs/ui-docs/control-ui-styling/preflight_behavior.md
+   ============================================================================ */
+.wc-toc-with-emojis .wc-toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.wc-toc-with-emojis .wc-toc-list li {
+  margin-bottom: var(--wc-space-xs);
+}
+
+.wc-toc-with-emojis .nav-link {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: var(--wc-space-sm);
+  align-items: center;
+  padding: var(--wc-space-xs) 0;
+  text-decoration: none;
+  color: var(--wc-color-text);
+  transition: color 0.2s ease;
+}
+
+.wc-toc-with-emojis .nav-link:hover {
+  color: var(--wc-color-primary);
+}
+
+/* Task emoji - hidden by default */
+.wc-toc-with-emojis .nav-link::before {
+  content: attr(data-toc-emoji-value);
+  font-size: 1.25rem;
+  line-height: 1;
+  text-align: center;
+  grid-column: 1;
+  grid-row: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Show emoji when preflight task is complete */
+.wc-toc-with-emojis .nav-link[data-toc-emoji]:not([data-toc-emoji=""])::before {
+  opacity: 1;
+}
+
 .wc-run-layout__content {
   min-width: 0;
   display: grid;

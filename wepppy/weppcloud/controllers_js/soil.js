@@ -110,7 +110,7 @@ var Soil = (function () {
         var statusElement = dom.qs("#soil_form #status");
         var stacktraceElement = dom.qs("#soil_form #stacktrace");
         var rqJobElement = dom.qs("#soil_form #rq_job");
-        var hintElement = dom.qs("#hint_build_soil");
+        var hintElement = dom.qs("#soil_form #hint_build_soil");
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);

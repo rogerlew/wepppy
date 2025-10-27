@@ -962,6 +962,16 @@ var SubcatchmentDelineation = (function () {
             } else {
                 radio.removeAttribute("aria-disabled");
             }
+            
+            // Also toggle .is-disabled class on parent label for Pure controls
+            var label = radio.closest('label');
+            if (label) {
+                if (disabled) {
+                    label.classList.add('is-disabled');
+                } else {
+                    label.classList.remove('is-disabled');
+                }
+            }
         }
 
         sub.enableColorMap = function (cmapName) {
@@ -980,6 +990,32 @@ var SubcatchmentDelineation = (function () {
                     break;
                 default:
                     throw new Error("Map.enableColorMap received unexpected parameter: " + cmapName);
+            }
+        };
+
+        /**
+         * Enable map layer radios based on preflight checklist state
+         * Called on initialization and when preflight updates
+         */
+        sub.updateLayerAvailability = function () {
+            var checklist = window.lastPreflightChecklist;
+            if (!checklist) {
+                return;
+            }
+            
+            // Enable Slope/Aspect after subcatchments are built
+            if (checklist.subcatchments) {
+                disableRadio("sub_cmap_radio_slp_asp", false);
+            }
+            
+            // Enable Dominant Landcover after landuse acquisition
+            if (checklist.landuse) {
+                disableRadio("sub_cmap_radio_dom_lc", false);
+            }
+            
+            // Enable Dominant Soil after soil building
+            if (checklist.soils) {
+                disableRadio("sub_cmap_radio_dom_soil", false);
             }
         };
 
@@ -1465,7 +1501,8 @@ var SubcatchmentDelineation = (function () {
         var bootstrapState = {
             colorControlsInitialised: false,
             defaultColorMapEnabled: false,
-            reportLoaded: false
+            reportLoaded: false,
+            preflightListenerAttached: false
         };
 
         sub.bootstrap = function bootstrap(context) {
@@ -1531,10 +1568,25 @@ var SubcatchmentDelineation = (function () {
                     console.warn("[Subcatchment] Failed to toggle channel controller", err);
                 }
             }
+            
+            // Update layer availability based on preflight state
+            if (typeof sub.updateLayerAvailability === "function") {
+                sub.updateLayerAvailability();
+            }
+            
+            // Set up preflight listener (only once)
+            if (!bootstrapState.preflightListenerAttached && typeof document !== "undefined") {
+                document.addEventListener("preflight:update", function() {
+                    if (typeof sub.updateLayerAvailability === "function") {
+                        sub.updateLayerAvailability();
+                    }
+                });
+                bootstrapState.preflightListenerAttached = true;
+            }
 
             return sub;
         };
-
+        
         return sub;
     }
 

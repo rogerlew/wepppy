@@ -1,6 +1,12 @@
 /* ----------------------------------------------------------------------------
- * Baer
- * Doc: controllers_js/README.md — BAER Controller Reference (2025 helper migration)
+ * Baer Controller - BAER Soil Burn Severity (SBS) Management
+ * 
+ * Handles two modes: Upload (mode 0) and Uniform (mode 1)
+ * Communicates with Disturbed controller for dual-control scenarios
+ * 
+ * Documentation:
+ * - Architecture: controllers_js/README.md — BAER Controller Reference
+ * - Behavior: docs/ui-docs/control-ui-styling/sbs_controls_behavior.md
  * ----------------------------------------------------------------------------
  */
 var Baer = (function () {

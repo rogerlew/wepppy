@@ -407,6 +407,7 @@ function controlBase() {
             if (normalizedJobId === self.rq_job_id) {
                 if (!normalizedJobId) {
                     self.render_job_status(self);
+                    self.render_job_hint(self);
                     self.update_command_button_state(self);
                     self.manage_status_stream(self, null);
                     self.reset_status_spinner(self);
@@ -423,6 +424,7 @@ function controlBase() {
             self.reset_status_spinner(self);
             self.stop_job_status_polling(self);
             self.render_job_status(self);
+            self.render_job_hint(self);
             self.update_command_button_state(self);
 
             if (!self.rq_job_id) {
@@ -494,9 +496,6 @@ function controlBase() {
             const statusLabel = formatStatusLabel(statusObj.status || (self._job_status_error ? "unknown" : "checking"));
             const parts = [];
 
-            parts.push(
-                `<div>job_id: <a href="${jobDashboardUrl(self.rq_job_id)}" target="_blank">${escapeHtml(self.rq_job_id)}</a></div>`
-            );
             parts.push(`<div class="small text-muted">Status: ${escapeHtml(statusLabel)}</div>`);
 
             const timeline = [];
@@ -520,6 +519,20 @@ function controlBase() {
             }
 
             setHtmlContent(self.rq_job, parts.join(""));
+        },
+
+        render_job_hint: function render_job_hint(self) {
+            if (!self.hint) {
+                return;
+            }
+
+            if (!self.rq_job_id) {
+                self.hint.html("");
+                return;
+            }
+
+            const linkHtml = `job_id: <a href="${jobDashboardUrl(self.rq_job_id)}" target="_blank">${escapeHtml(self.rq_job_id)}</a>`;
+            self.hint.html(linkHtml);
         },
 
         schedule_job_status_poll: function schedule_job_status_poll(self) {
@@ -699,9 +712,9 @@ function controlBase() {
                     if (summarySetter) {
                         summarySetter(summary);
                     }
-                    if (hintSetter) {
-                        hintSetter(summary);
-                    }
+                    // Don't duplicate summary in hint - hints will show job link on completion
+                    // (removed hintSetter call to eliminate duplication)
+                    
                     if (onStatusCallback) {
                         try {
                             onStatusCallback({ summary: summary, detail: detail });

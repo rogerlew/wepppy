@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2025-10-25  
+**Last Updated**: 2025-10-26  
 **Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 2 packages
+**Current WIP**: 3 packages
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -79,32 +79,7 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-### markdown-doc Toolkit
-**Created**: 2025-10-25  
-**Status**: Backlog - Requirements Complete  
-**Size**: Medium
-**Owner**: gpt-5-codex spec review and lead developer, github copilot (Claude 4.5 Sonnet) spec and testing
-**Link**: [docs/work-packages/20251025_markdown_doc_toolkit/](docs/work-packages/20251025_markdown_doc_toolkit/)  
-**Description**: Build comprehensive Rust CLI for documentation management: catalog generation, link validation, safe file moves, TOC maintenance, and search.
-
-**Scope**:
-- `catalog` - Generate `DOC_CATALOG.md` with file list + TOCs
-- `lint` - Validate links, heading hierarchy, required sections
-- `toc` - Generate/update table of contents
-- `mv` - Move/rename files with automatic link updates
-- `refs` - Find references to files/sections
-- `search` - Full-text search across documentation
-- `validate` - Template compliance checking
-
-**Strategic Value**: Reduces documentation maintenance burden by 80%, enables safe refactoring, prevents broken links in CI, improves discoverability for 388+ markdown files.
-
-**Dependencies**: None (leverages existing markdown-extract/markdown-edit patterns)
-
-**Next Steps**:
-- Finalize CLI command surface and exit codes
-- gpt-5-codex review
-- Design `.markdown-doc.toml` configuration schema
-- Handover to gpt-5-codex for MVP implementation (`catalog`, `toc`, `lint` broken-links)
+### [No packages in backlog currently]
 
 ---
 
@@ -112,9 +87,53 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
+### markdown-doc Toolkit Integration
+**Started**: 2025-10-25  
+**Status**: Phase 3 Complete — Integration Active (Phase 4 pending telemetry + RFC decisions)  
+**Size**: Large (Phases 1-3: 6 days; Phase 4: TBD)  
+**Owner**: gpt-5-codex (Phase 1-3 implementation), GitHub Copilot (Claude 4.5 Sonnet - spec, testing, integration)  
+**Link**: [docs/work-packages/20251025_markdown_doc_toolkit/](docs/work-packages/20251025_markdown_doc_toolkit/)  
+**Description**: Comprehensive Rust CLI for documentation management with catalog generation, link validation, safe file moves, TOC maintenance, and reference finding. Phase 4 (search & indexing) pending go/no-go decision.
+
+**Completed Deliverables** (Phases 1-3):
+- ✅ `catalog` - Generate `DOC_CATALOG.md` with file list + TOCs
+- ✅ `lint` - Validate links (broken-links, anchors, hierarchy, required-sections modes)
+- ✅ `toc` - Generate/update table of contents with multiple styles
+- ✅ `mv` - Move/rename files with automatic link updates across workspace
+- ✅ `refs` - Find references to files/sections (file graph + forward/reverse links)
+- ✅ `validate` - Config-driven checks with severity tuning
+- ✅ wctl integration - 6 doc-* commands: doc-lint, doc-catalog, doc-toc, doc-mv, doc-refs, doc-bench
+- ✅ CI/CD integration - docs-quality.yml workflow with SARIF upload, Rust checks, telemetry
+- ✅ Comprehensive documentation - tools/README.markdown-tools.md, CI/CD strategy updates
+- ✅ Telemetry collection active (started 2025-10-31, logs to telemetry/docs-quality.jsonl)
+
+**Phase 4 Scope** (Pending Go/No-Go Decision 2025-11-18):
+- 🔮 `search` - Full-text search with TF-IDF ranking (<500ms target)
+- 🔮 Index builder with persistent caching (<5s rebuild target)
+- 🔮 JSON output mode for programmatic consumption
+
+**Current Status**:
+- **RFC Decision Gate** (Due 2025-11-08): 4 decisions pending (link graph caching, CI bench cadence, release comms, Phase 4 scope validation)
+- **Telemetry Collection** (Due 2025-11-18): Gathering baseline data (≥2 weeks from 2025-10-31) to validate Phase 4 justification
+- **Integration Finalization** (Due 2025-11-08): Onboarding docs, release notes, RFC outcomes
+
+**Strategic Value**: 
+- **Delivered** (Phases 1-3): Reduces doc maintenance by ~70%, prevents broken links in CI, enables safe refactoring, improves link graph visibility
+- **Potential** (Phase 4): Fast semantic search across 388+ docs, programmatic query support, reusable index for tooling integration
+
+**Dependencies**: 
+- Phase 4 blocked on: Telemetry data maturity (≥2 weeks), RFC decisions, Phase 4 open questions resolution
+
+**Next Steps**:
+1. **Immediate** (Nov 2-8): Resolve RFC decisions (4 decisions), finalize integration (onboarding docs, release notes)
+2. **Phase 4 Gate** (Nov 18): Review telemetry data, resolve Phase 4 open questions (index storage, watch mode, UI integration, search patterns), make go/no-go decision
+3. **If Phase 4 Greenlit**: Create Phase 4 work package structure, draft agent prompts, assign ownership, schedule M1 target (~Dec 6)
+
+---
+
 ### Frontend Integration & Smoke Automation
 **Started**: 2025-02-24  
-**Status**: ~90% complete, smoke automation split to separate package  
+**Status**: ~85% complete, 7 specific issues identified and documented  
 **Size**: Medium (3-4 weeks)  
 **Owner**: Multiple agents  
 **Link**: [docs/work-packages/20251023_frontend_integration/](docs/work-packages/20251023_frontend_integration/)  
@@ -125,17 +144,26 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 - ✅ Bootstrap refactored to use helper-driven initialization
 - ✅ Map race condition and preflight script issues resolved
 - ✅ URL construction pattern (`url_for_run()`) fixed and documented
-- ⏩ Smoke automation moved to separate package
+- ✅ **2025-10-27**: Seven outstanding issues analyzed and fully documented with implementation specs
 
-**Current Work**:
-- 🔧 Sort out miscellaneous rendering bugs across controllers
-- 🔧 Validate reports (WEPP reports, loss summaries, visualizations)
+**Current Work** (7 prioritized issues):
+1. 🔧 **Legend visual styling**: 2-column layout with color swatches for map legends
+2. 🔧 **Report table styling**: Standardize `.wc-table-wrapper` + `.wc-table` classes across all reports
+3. 🔧 **Preflight TOC indicators**: Add `data-toc-emoji-value` attributes for completion checkmarks
+4. ✅ **Control ordering**: Verify landuse appears before soils (appears correct, needs final validation)
+5. 🔧 **Map layer radio enablement**: Wire to `window.lastPreflightChecklist` for dynamic enabling
+6. 🔧 **Inline help icons**: Migrate to Pure macro `inline_help` parameter (affects 16+ instances)
+7. 🔧 **Controller hint deduplication**: Show job dashboard link in hints, remove from status cards, eliminate message duplication (11 controllers affected)
 
 **Next Steps**:
-- Complete rendering bug fixes and visual validation
-- Polish controller documentation
-- Finalize verification checklist
-- Close package when all reports validated and rendering stable
+- Implement hint deduplication (Issue 7) - improves UX across all controllers
+- Implement legend styling (Issue 1) - straightforward CSS + markup pattern
+- Standardize report tables (Issue 2) - grep survey + template updates
+- Restore TOC indicators (Issue 3) - add attributes to runs0_pure.htm
+- Wire map layer state (Issue 5) - JS logic in subcatchment_delineation.js
+- Enhance Pure macros for inline help (Issue 6) - macro updates + lightweight tooltip handler
+- Final visual validation and smoke test integration
+- Close package when all 7 issues resolved and rendering stable
 
 ---
 
@@ -191,7 +219,7 @@ Recently completed work packages. Archive to History section after 30 days.
 ---
 
 ### Controller Modernization Documentation Backlog
-**Completed**: 2025-02-14  
+**Completed**: 2025-10-23 
 **Duration**: 1 week  
 **Link**: [docs/work-packages/20251023_controller_modernization/](docs/work-packages/20251023_controller_modernization/)  
 **Description**: Consolidated controller modernization documentation after WSClient removal and helper-first migration.
@@ -243,7 +271,7 @@ Track how long packages take from start to completion:
 
 ### Throughput
 Packages completed per month:
-- **October 2025**: 3 packages (2 completed successfully, 1 cancelled as unviable)
+- **October 2025**: 3 packages completed/closed (2 completed successfully, 1 cancelled as unviable); 1 package advanced to Phase 3 complete (markdown-doc toolkit)
 
 ### Lead Time
 Time from package creation to completion:
@@ -291,8 +319,8 @@ If this tracker format isn't working or you have suggestions:
 
 ## 🔧 Tracker Maintenance
 
-**Last reviewed**: 2025-10-24  
-**Next review**: 2025-11-24 (monthly)
+**Last reviewed**: 2025-10-26  
+**Next review**: 2025-11-26 (monthly)
 
 **Review checklist**:
 - [ ] Move stale Done items to History

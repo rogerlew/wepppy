@@ -1,3 +1,15 @@
+/**
+ * Preflight System - Real-time Task Completion Tracker
+ * 
+ * Architecture:
+ * - Connects to Go WebSocket service (preflight2) for live updates
+ * - Updates TOC emoji indicators when tasks complete
+ * - Emits CustomEvent('preflight:update') for controller integration
+ * - Stores state in window.lastPreflightChecklist for global access
+ * 
+ * For detailed documentation see:
+ * docs/ui-docs/control-ui-styling/preflight_behavior.md
+ */
 "use strict";
 
 var preflight_ws;
@@ -143,6 +155,12 @@ function updateUI(checklist) {
 
     var selector = getSelectorForKey("sbs_map");
     if (!selector) {
+        // Dispatch preflight update event for controllers to react
+        if (typeof document !== 'undefined' && typeof CustomEvent !== 'undefined') {
+            document.dispatchEvent(new CustomEvent('preflight:update', { 
+                detail: checklist 
+            }));
+        }
         return;
     }
 
@@ -157,24 +175,31 @@ function updateUI(checklist) {
             $(selector).addClass('unburned').removeClass('burned');
         }
     }
+    
+    // Dispatch preflight update event for controllers to react
+    if (typeof document !== 'undefined' && typeof CustomEvent !== 'undefined') {
+        document.dispatchEvent(new CustomEvent('preflight:update', { 
+            detail: checklist 
+        }));
+    }
 }
 
 // Map keys from the checklist to their corresponding CSS selectors
 function getSelectorForKey(key) {
     var mapping = {
-        "sbs_map": 'a[href^="#soil-burn-severity-optional"]',
+        "sbs_map": 'a[href="#disturbed-sbs"]',
         "channels": 'a[href="#channel-delineation"]',
-        "outlet": 'a[href="#outlet"]',
+        "outlet": 'a[href="#set-outlet"]',
         "subcatchments": 'a[href="#subcatchments-delineation"]',
-        "landuse": 'a[href="#landuse-options"], a[href="#landuse"]',
-        "soils": 'a[href="#soil-options"], a[href="#soils"]',
-        "climate": 'a[href="#climate-options"]',
-        "rap_ts": 'a[href="#rap-time-series-acquisition"]',
+        "landuse": 'a[href="#landuse"]',
+        "soils": 'a[href="#soils"]',
+        "climate": 'a[href="#climate"]',
+        "rap_ts": 'a[href="#rap-ts"]',
         "wepp": 'a[href="#wepp"]',
-        "observed": 'a[href="#observed-data-model-fit"]',
-        "debris": 'a[href="#debris-flow-analysis"]',
-        "watar": 'a[href="#wildfire-ash-transport-and-risk-watar"]',
-        "dss_export": 'a[href="#partitioned-dss-export-for-hec"]'
+        "observed": 'a[href="#observed"]',
+        "debris": 'a[href="#debris-flow"]',
+        "watar": 'a[href="#ash"]',
+        "dss_export": 'a[href="#dss-export"]'
     };
 
     return mapping[key];

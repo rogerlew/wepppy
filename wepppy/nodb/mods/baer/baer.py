@@ -9,6 +9,10 @@ Responsibilities:
 * Validate and reproject SBS rasters for map display and watershed alignment.
 * Derive landuse/soil replacements from burn severity classes.
 * Trigger optional RRED cost-effectiveness analyses.
+
+See also:
+    - docs/ui-docs/control-ui-styling/sbs_controls_behavior.md - Frontend SBS control architecture
+    - wepppy/weppcloud/controllers_js/README.md - Controller system documentation
 """
 
 from __future__ import annotations

@@ -27,6 +27,10 @@ Typical Usage:
     >>> with disturbed.locked():
     ...     disturbed.apply_disturbance('fire_2024.tif')
     ...     disturbed.dump_and_unlock()
+
+See also:
+    - docs/ui-docs/control-ui-styling/sbs_controls_behavior.md - Frontend SBS control architecture
+    - wepppy/weppcloud/controllers_js/README.md - Controller system documentation
 """
 
 import os

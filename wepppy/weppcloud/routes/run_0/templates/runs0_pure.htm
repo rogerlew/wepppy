@@ -2,6 +2,13 @@
 
 {% block title %}{{ ron.configname }}{% if ron.name %} - {{ ron.name }}{% endif %}{% endblock %}
 
+{#
+  Preflight TOC Navigation:
+  - Emojis sourced from TaskEnum.emoji() in wepppy/nodb/redis_prep.py
+  - Visibility controlled by preflight checklist via WebSocket
+  - See docs/ui-docs/control-ui-styling/preflight_behavior.md for architecture
+#}
+
 {% block head_extras %}
 {{ super() }}
 <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
@@ -29,49 +36,49 @@
 <div class="wc-container wc-container--fluid">
   <div class="wc-run-layout">
     <nav id="toc"
-         class="wc-run-layout__toc"
+         class="wc-run-layout__toc wc-toc-with-emojis"
          aria-label="Run controls navigation">
       <h4>Preflight and Navigation</h4>
-      <ol>
-        <li><a href="#map">Map &amp; Analysis</a></li>
+      <ul class="wc-toc-list">
+        <li><a href="#map" class="nav-link">Map &amp; Analysis</a></li>
         {% if ('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods %}
-        <li><a href="#disturbed-sbs">Soil Burn Severity</a></li>
+        <li><a href="#disturbed-sbs" class="nav-link">Soil Burn Severity</a></li>
         {% endif %}
-        <li><a href="#channel-delineation">Channel Delineation</a></li>
-        <li><a href="#set-outlet">Outlet</a></li>
-        <li><a href="#subcatchments-delineation">Subcatchments Delineation</a></li>
+        <li><a href="#channel-delineation" class="nav-link">Channel Delineation</a></li>
+        <li><a href="#set-outlet" class="nav-link">Outlet</a></li>
+        <li><a href="#subcatchments-delineation" class="nav-link">Subcatchments Delineation</a></li>
         {% if 'rangeland_cover' in ron.mods %}
-        <li><a href="#rangeland-cover">Rangeland Cover</a></li>
+        <li><a href="#rangeland-cover" class="nav-link">Rangeland Cover</a></li>
         {% endif %}
-        <li><a href="#landuse">Landuse</a></li>
-        <li><a href="#climate">Climate</a></li>
+        <li><a href="#landuse" class="nav-link">Landuse</a></li>
+        <li><a href="#soils" class="nav-link">Soils</a></li>
+        <li><a href="#climate" class="nav-link">Climate</a></li>
         {% if 'rap_ts' in ron.mods %}
-        <li><a href="#rap-ts">RAP Time Series</a></li>
+        <li><a href="#rap-ts" class="nav-link">RAP Time Series</a></li>
         {% endif %}
-        <li><a href="#soils">Soils</a></li>
         {% if 'treatments' in ron.mods %}
-        <li><a href="#treatments">Treatments</a></li>
+        <li><a href="#treatments" class="nav-link">Treatments</a></li>
         {% endif %}
-        <li><a href="#wepp">WEPP</a></li>
+        <li><a href="#wepp" class="nav-link">WEPP</a></li>
         {% if 'ash' in ron.mods %}
-        <li><a href="#ash">Ash Transport</a></li>
+        <li><a href="#ash" class="nav-link">Ash Transport</a></li>
         {% endif %}
         {% if 'rhem' in ron.mods %}
-        <li><a href="#rhem">RHEM</a></li>
+        <li><a href="#rhem" class="nav-link">RHEM</a></li>
         {% endif %}
         {% if 'omni' in ron.mods %}
-        <li><a href="#omni-scenarios">Omni Scenarios</a></li>
-        <li><a href="#omni-contrasts">Omni Contrasts</a></li>
+        <li><a href="#omni-scenarios" class="nav-link">Omni Scenarios</a></li>
+        <li><a href="#omni-contrasts" class="nav-link">Omni Contrasts</a></li>
         {% endif %}
         {% if observed is not none %}
-        <li><a href="#observed">Observed Data</a></li>
+        <li><a href="#observed" class="nav-link">Observed Data</a></li>
         {% endif %}
         {% if 'debris_flow' in ron.mods and user.has_role('PowerUser') %}
-        <li><a href="#debris-flow">Debris Flow</a></li>
+        <li><a href="#debris-flow" class="nav-link">Debris Flow</a></li>
         {% endif %}
-        <li><a href="#dss-export">DSS Export</a></li>
-        <li><a href="#team">Project Collaborators</a></li>
-      </ol>
+        <li><a href="#dss-export" class="nav-link">DSS Export</a></li>
+        <li><a href="#team" class="nav-link">Project Collaborators</a></li>
+      </ul>
     </nav>
 
     <section class="wc-run-layout__content">
@@ -107,6 +114,10 @@
         {% include 'controls/landuse_pure.htm' %}
       </section>
 
+      <section id="soils" class="wc-stack">
+        {% include 'controls/soil_pure.htm' %}
+      </section>
+
       <section id="climate" class="wc-stack">
         {% include 'controls/climate_pure.htm' %}
       </section>
@@ -116,10 +127,6 @@
         {% include 'controls/rap_ts_pure.htm' %}
       </section>
       {% endif %}
-
-      <section id="soils" class="wc-stack">
-        {% include 'controls/soil_pure.htm' %}
-      </section>
 
       {% if 'treatments' in ron.mods %}
       <section id="treatments" class="wc-stack">

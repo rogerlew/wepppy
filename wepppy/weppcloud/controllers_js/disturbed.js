@@ -1,6 +1,12 @@
 /* ----------------------------------------------------------------------------
- * Disturbed
- * Doc: controllers_js/README.md — Disturbed Controller Reference (2025 helper migration)
+ * Disturbed Controller - Soil Burn Severity (SBS) Management
+ * 
+ * Handles two modes: Upload (mode 0) and Uniform (mode 1)
+ * Communicates with Baer controller for dual-control scenarios
+ * 
+ * Documentation:
+ * - Architecture: controllers_js/README.md — Disturbed Controller Reference
+ * - Behavior: docs/ui-docs/control-ui-styling/sbs_controls_behavior.md
  * ----------------------------------------------------------------------------
  */
 var Disturbed = (function () {
