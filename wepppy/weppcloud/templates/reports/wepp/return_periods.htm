@@ -317,37 +317,41 @@
       </summary>
       <div class="wc-collapse__content">
         <form id="excludeMonthsForm" class="wc-stack">
-      <label class="wc-inline">
-        <input type="checkbox" id="gringortenCheckbox"{% if gringorten_correction %} checked{% endif %}>
-        <span>Apply Gringorten correction</span>
-      </label>
-      <p class="wc-text-muted">
-        Uses plotting position <code>T = (N + 0.12) / (m − 0.44)</code> to bias-correct ranks and improve tail behavior.
-      </p>
+          <label class="wc-choice wc-choice--checkbox">
+            <input type="checkbox" id="gringortenCheckbox"{% if gringorten_correction %} checked{% endif %}>
+            <span class="wc-choice__body">
+              <span class="wc-choice__label">Apply Gringorten correction</span>
+            </span>
+          </label>
+          <p class="wc-text-muted">
+            Uses plotting position <code>T = (N + 0.12) / (m − 0.44)</code> to bias-correct ranks and improve tail behavior.
+          </p>
 
-      <fieldset class="wc-stack">
-        <legend class="wc-text-muted">Exclude months from analysis</legend>
-        <div class="wc-inline" style="flex-wrap: wrap;">
-          {% set months = [
-            (1,'Jan'),(2,'Feb'),(3,'Mar'),(4,'Apr'),
-            (5,'May'),(6,'Jun'),(7,'Jul'),(8,'Aug'),
-            (9,'Sep'),(10,'Oct'),(11,'Nov'),(12,'Dec')
-          ] %}
-          {% for num,abbr in months %}
-            <label class="wc-inline" style="gap: var(--wc-space-2xs);">
-              <input type="checkbox" id="m{{ num }}" value="{{ num }}">
-              <span>{{ abbr }}</span>
-            </label>
-          {% endfor %}
-        </div>
-      </fieldset>
+          <fieldset class="wc-stack">
+            <legend class="wc-text-muted">Exclude months from analysis</legend>
+            <div class="wc-choice-group">
+              {% set months = [
+                (1,'January'),(2,'February'),(3,'March'),(4,'April'),
+                (5,'May'),(6,'June'),(7,'July'),(8,'August'),
+                (9,'September'),(10,'October'),(11,'November'),(12,'December')
+              ] %}
+              {% for num,label in months %}
+                <label class="wc-choice wc-choice--checkbox">
+                  <input type="checkbox" id="m{{ num }}" value="{{ num }}">
+                  <span class="wc-choice__body">
+                    <span class="wc-choice__label">{{ label }}</span>
+                  </span>
+                </label>
+              {% endfor %}
+            </div>
+          </fieldset>
 
-      <div class="wc-inline" style="flex-wrap: wrap;">
-        <button type="submit" class="pure-button pure-button-secondary">Run report</button>
-        <button type="button" class="pure-button pure-button-link" id="clearMonths">Clear all</button>
-        <button type="button" class="pure-button pure-button-link" id="selectAllMonths">Select all</button>
-      </div>
-    </form>
+          <div class="wc-inline" style="flex-wrap: wrap;">
+            <button type="submit" class="pure-button pure-button-secondary">Run report</button>
+            <button type="button" class="pure-button pure-button-link" id="clearMonths">Clear all</button>
+            <button type="button" class="pure-button pure-button-link" id="selectAllMonths">Select all</button>
+          </div>
+        </form>
       </div>
     </details>
   </div>
