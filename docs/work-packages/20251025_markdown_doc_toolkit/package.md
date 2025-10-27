@@ -752,7 +752,7 @@ $ markdown-doc validate AGENTS.md --schema agents
 - **CI Integration (Week of Nov 3):**
   - Extend GitHub Actions / wctl automation to run `cargo fmt --check`, `cargo clippy`, `cargo test --all`, `wctl doc-lint --format sarif`, and `wctl doc-bench --path docs --warmup 0 --iterations 1`.
   - Surface lint JSON/SARIF results in PR checks and add gating thresholds (errors fail, warnings allowed temporarily).
-  - ✅ Established `docs-quality.yml` workflow on self-hosted runner; next step is to layer in Rust workspace checks.
+  - ✅ `docs-quality.yml` workflow on self-hosted runner now executes doc-lint/doc-bench and conditionally runs Rust checks when `MARKDOWN_DOC_WORKSPACE` (or known workspace paths) expose a Cargo project; follow-up: set the env var on the runner so fmt/clippy/test always execute.
 - **Lint Backlog Triage (Nov 4–7):**
   - Bucket current 36 broken-link errors by category (missing files vs anchor drift) and assign fixes or ignore entries with justification.
   - Track remediation progress in `tracker.md` (mark resolved vs deferred with rationale).

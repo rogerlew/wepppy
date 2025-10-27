@@ -56,7 +56,7 @@
 ### In Progress
 
 - [ ] **CI Integration Sprint (Nov 3)**
-  - [ ] Wire `cargo fmt --check`, `cargo clippy`, `cargo test --all` into markdown-doc GitHub Actions
+  - [x] Wire `cargo fmt --check`, `cargo clippy`, `cargo test --all` into markdown-doc GitHub Actions (conditional step looks for `MARKDOWN_DOC_WORKSPACE` or common install paths; configure runner env to enable enforcement)
   - [x] Add `wctl doc-lint --format sarif` and `wctl doc-bench --path docs --warmup 0 --iterations 1` to PR workflow (`docs-quality.yml`)
   - [x] Publish SARIF results to Code Scanning dashboard with failure gates on errors (Docs Quality workflow uploads)
 - [ ] **Lint Backlog Triage (Nov 4–7)**

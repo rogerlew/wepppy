@@ -83,6 +83,39 @@ jobs:
           
           exit ${status}
 
+      - name: Run markdown-doc Rust checks
+        run: |
+          set -euo pipefail
+
+          discover_workspace() {
+            if [ -n "${MARKDOWN_DOC_WORKSPACE:-}" ] && [ -f "${MARKDOWN_DOC_WORKSPACE}/Cargo.toml" ]; then
+              echo "${MARKDOWN_DOC_WORKSPACE}"
+              return
+            fi
+            for candidate in markdown-extract /usr/local/src/markdown-extract /workdir/markdown-extract /opt/markdown-extract; do
+              if [ -f "${GITHUB_WORKSPACE}/${candidate}/Cargo.toml" ]; then
+                echo "${GITHUB_WORKSPACE}/${candidate}"
+                return
+              elif [ -f "${candidate}/Cargo.toml" ]; then
+                echo "${candidate}"
+                return
+              fi
+            done
+          }
+
+          WORKSPACE="$(discover_workspace || true)"
+          if [ -z "${WORKSPACE}" ]; then
+            echo "markdown-doc workspace not found (set MARKDOWN_DOC_WORKSPACE or ensure Cargo project is available). Skipping Rust checks." >&2
+            exit 0
+          fi
+
+          echo "Using markdown-doc workspace: ${WORKSPACE}"
+          cd "${WORKSPACE}"
+
+          cargo fmt --all --check
+          cargo clippy --all-targets --all-features -- -D warnings
+          cargo test --all --locked
+
       - name: Run markdown-doc benchmarks
         run: |
           set -euo pipefail
