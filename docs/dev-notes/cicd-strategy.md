@@ -877,7 +877,7 @@ wctl run-pytest tests --maxfail=1
 
 | Workflow | File | Trigger | Runner | Notes |
 |----------|------|---------|--------|-------|
-| Docs Quality | `.github/workflows/docs-quality.yml` | PRs and pushes touching Markdown/wctl | `self-hosted`, `Linux`, `X64`, `homelab` | Executes `wctl doc-lint` (SARIF/JSON), `wctl doc-bench`, and runs `cargo fmt/clippy/test` when the markdown-doc workspace is present (set `MARKDOWN_DOC_WORKSPACE` on the runner). Requires markdown-doc binaries pre-installed; uploads SARIF to Code Scanning and archives JSON results. |
+| Docs Quality | `.github/workflows/docs-quality.yml` | PRs and pushes touching Markdown/wctl | `self-hosted`, `Linux`, `X64`, `homelab` | Executes `wctl doc-lint` scoped to docs-related paths (avoids `.docker-data`), `wctl doc-bench`, normalizes SARIF to CodeQL v3 schema, and runs `cargo fmt/clippy/test` when the markdown-doc workspace is present (`MARKDOWN_DOC_WORKSPACE`). Requires markdown-doc binaries pre-installed; uploads SARIF to Code Scanning and archives JSON results. |
 
 ### Workflow Structure
 

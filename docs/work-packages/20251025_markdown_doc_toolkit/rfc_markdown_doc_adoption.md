@@ -30,7 +30,7 @@ Phase 1–3 of the `markdown-doc` toolkit are complete inside `/workdir/markdown
 1. **CI Alignment**  
    - Add `markdown-doc lint --staged --format json` to `wctl` wrappers.  
    - Extend GitHub Actions (or equivalent) to run `fmt`, `clippy`, `cargo test --all`, and lint/benchmark smoke (`markdown-doc-bench`).  
-   - ✅ `docs-quality.yml` workflow (self-hosted runner) now runs `wctl doc-lint` (SARIF + JSON), `wctl doc-bench`, and conditionally executes `cargo fmt/clippy/test` when a markdown-doc workspace is available (`MARKDOWN_DOC_WORKSPACE` env or common install paths). Action item: set the env var on homelab runners so Rust checks always enforce.  
+   - ✅ `docs-quality.yml` workflow (self-hosted runner) now runs `wctl doc-lint` (SARIF + JSON) scoped to documentation paths, normalizes the SARIF file to CodeQL v3 schema, executes `wctl doc-bench`, and conditionally runs `cargo fmt/clippy/test` when a markdown-doc workspace is available (`MARKDOWN_DOC_WORKSPACE` env or common install paths). Action item: set the env var on homelab runners so Rust checks always enforce.  
 
 2. **Developer Experience**  
    - Provide `wctl doc-{lint,catalog,toc,mv,refs}` aliases.  

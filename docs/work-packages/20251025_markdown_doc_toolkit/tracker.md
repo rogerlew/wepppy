@@ -58,7 +58,7 @@
 - [ ] **CI Integration Sprint (Nov 3)**
   - [x] Wire `cargo fmt --check`, `cargo clippy`, `cargo test --all` into markdown-doc GitHub Actions (conditional step looks for `MARKDOWN_DOC_WORKSPACE` or common install paths; configure runner env to enable enforcement)
   - [x] Add `wctl doc-lint --format sarif` and `wctl doc-bench --path docs --warmup 0 --iterations 1` to PR workflow (`docs-quality.yml`)
-  - [x] Publish SARIF results to Code Scanning dashboard with failure gates on errors (Docs Quality workflow uploads)
+  - [x] Publish SARIF results to Code Scanning dashboard with failure gates on errors (Docs Quality workflow uploads); SARIF is normalized to v3 schema post-lint, and lint scope excludes `.docker-data` via explicit path list.
 - [ ] **Lint Backlog Triage (Nov 4–7)**
   - [ ] Categorize existing `markdown-doc lint --path docs` findings
   - [ ] Open issues/PBIs for doc fixes vs. intentional ignores
