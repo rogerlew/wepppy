@@ -71,6 +71,12 @@ The `wctl` wrappers keep `markdown-doc` ergonomics consistent and run inside the
 - `.markdown-doc-ignore` tracks content we intentionally skip (for example `.docker-data/**`). Update this file alongside any large restructures so lint stays quiet.
 - For local or ad-hoc checks, pipe the JSON from `wctl doc-lint` into `jq` or attach SARIF to PRs: `wctl doc-lint --path docs --format sarif > docs-lint.sarif`.
 
+### Telemetry
+
+- docs-quality appends lint telemetry after every run to `telemetry/docs-quality.jsonl` (JSON lines with timestamp, commit, duration, errors, warnings) and uploads the artifact `docs-quality-telemetry` for inspection.
+- Logging is best-effort; workflow continues even if telemetry write fails. Keep the directory ignored locally (`telemetry/` in `.gitignore`).
+- Downstream tooling can aggregate the JSONL file to track lint/error trends and inform future caching decisions.
+
 ---
 
 ## Usage
