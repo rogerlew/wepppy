@@ -152,6 +152,10 @@
     const span = document.createElement('span');
     span.className = 'sortable-indicator';
     span.setAttribute('aria-hidden', 'true');
+    span.style.display = 'inline-block';
+    span.style.minWidth = '1.25em';
+    span.style.textAlign = 'center';
+    span.style.pointerEvents = 'none';
     span.textContent = '↕';
     return span;
   }
