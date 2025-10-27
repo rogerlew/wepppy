@@ -9,6 +9,7 @@
   - Runs `cargo fmt/clippy/test` via `MARKDOWN_DOC_WORKSPACE` GitHub secret pointing to `/workdir/markdown-extract`.
 - `.markdown-doc-ignore` excludes `.docker-data/**`; lint is clean (0 open errors).
 - wctl quick-start + exit code table documented in `tools/README.markdown-tools.md`.
+- docs-quality telemetry logging enabled (2025-10-31); JSON lines appended to `telemetry/docs-quality.jsonl` and published as artifact `docs-quality-telemetry` each run.
 
 ## Outstanding Items Before Phase 4 Planning
 1. **Telemetry approach** — capture lint runtime + error count per docs-quality run (simple JSON log or weekly summary). Decision still pending.
