@@ -1,8 +1,10 @@
-<dl class="row">
-    {% for key, desc, color in legend %}
-    <dt class="col-sm-3" style="height: 34px; width=54px;">
-        <div style="height: 30px; width=50px; background: {{ color }}; padding: 2px;"></div>
-    </dt>
-    <dd class="col-sm-9">{{ desc }} ({{ key }})</dd>
-    {% endfor %}
-</dl>
+<div class="wc-legend">
+  {% for key, desc, color in legend %}
+  <div class="wc-legend-item">
+    <span class="wc-legend-item__swatch" 
+          style="--legend-color: {{ color }};" 
+          aria-label="Color swatch for {{ desc }}"></span>
+    <span class="wc-legend-item__label">{{ desc }} ({{ key }})</span>
+  </div>
+  {% endfor %}
+</div>

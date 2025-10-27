@@ -17,16 +17,98 @@ This note captures the patterns we just introduced while modernizing the WEPP re
 - Use the standard modal partials (`controls/unitizer_modal.htm`, `controls/poweruser_panel.htm`). `ModalManager` binds any button with `data-modal-open`/`data-modal-dismiss` so the shared header triggers continue to function without Bootstrap.
 
 ## Tables
+
+### Base table structure
+- All tables use `.wc-table` for consistent styling (full width, border-collapse, proper padding)
+- Headers (`thead th`) are bold (700 weight) with white backgrounds
+- The visual separator appears as a 1px solid black border **under the units row** (the `tbody tr[data-sort-position="top"]` row), not under the header
+- Table headers should be semantic `<th>` elements; data cells use `<td>`
+
+### Table modifiers
+Apply these modifier classes to adjust table appearance based on content:
+
+- **`.wc-table--striped`**: Adds alternating row backgrounds (even rows get surface-alt color) for improved readability. Use this for most multi-row data tables.
+- **`.wc-table--dense`**: Reduces padding for compact layouts when vertical space is constrained
+- **`.wc-table--compact`**: Sets `width: auto` with `min-width: 50%` instead of full width. **Use this for tables with only a few columns** (2-4 columns) so they don't stretch unnecessarily across the full page width. Examples: simple return period tables, outlet summary metrics, metadata tables.
+
+Combine modifiers as needed: `class="wc-table wc-table--compact wc-table--striped sortable"` for a narrow, striped, sortable table.
+
+### Wrapper classes
+- **`.wc-table-wrapper`**: Standard full-width wrapper for tables
+- **`.wc-table-wrapper--compact`**: Constrains wrapper width for narrow tables; pair with `.wc-table--compact` on the table itself
+
+### Sorting
 - All sortable tables should add the `sortable` class and rely on `static/js/sorttable.js`. The new sorter honors `sorttable_customkey`, `data-sort-type`, and `data-sort-default` without Bootstrap dependencies.
-- Use `data-sort-position="top"` or `"bottom"` on rows you need to keep anchored (e.g., the unit row).
-- Table markup uses the shared `.wc-table` classes; units belong in `unitizer_units()` rows rather than bespoke spans.
-- When a column needs to stay visually associated with the highlighted metric (e.g., return period tables), add `.wc-return-period__measure` to the `<th>` and `<td>` cells so styling stays consistent. See `wepppy/weppcloud/templates/reports/wepp/return_periods.htm` for the reference.
+- Use `data-sort-position="top"` on the units row to keep it anchored at the top (below headers, above data rows)
+- Use `data-sort-position="bottom"` on summary/total rows that should stay at the bottom
+- Sorting indicators are handled automatically by CSS (`.sortable-indicator`); no extra markup required
+
+### Units row placement
+- Units always belong in a dedicated `<tbody>` row with `data-sort-position="top"` 
+- Use the `unitizer_units()` Jinja macro to generate unit cells consistently
+- This row receives the black border-bottom that visually separates headers from data
 
 ### Scalar metrics
-- Render scalar callouts (e.g., outlet totals) using `.wc-table-wrapper--compact` with a nested `.wc-table.wc-table--dense.wc-table--compact`. The wrapper constrains width while the compact modifier disables zebra striping.
-- Continue to run values through `unitizer(...)` and `unitizer_units(...)` so unitizer preferences apply in lockstep with tabular data.
-- Keep headings in `<th scope="row">` cells to preserve semantics for screen readers.
-- See `wepppy/weppcloud/templates/reports/wepp/sediment_characteristics.htm` for a complete example that mixes scalar metrics with sortable tables and CSV actions.
+- Render scalar callouts (e.g., outlet totals) using `.wc-table-wrapper--compact` with a nested `.wc-table.wc-table--dense.wc-table--compact`
+- Continue to run values through `unitizer(...)` and `unitizer_units(...)` so unitizer preferences apply in lockstep with tabular data
+- Keep headings in `<th scope="row">` cells to preserve semantics for screen readers
+- See `wepppy/weppcloud/templates/reports/wepp/sediment_characteristics.htm` for a complete example that mixes scalar metrics with sortable tables and CSV actions
+
+### Example: narrow table
+```jinja
+<div class="wc-table-wrapper--compact">
+  <table class="wc-table wc-table--compact wc-table--striped">
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-sort-position="top">
+        <td></td>
+        <td>{{ unitizer_units('runoff') }}</td>
+      </tr>
+      <tr>
+        <th scope="row">Annual Runoff</th>
+        <td>{{ unitizer(avg_annual_runoff, 'runoff') }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+### Example: wide data table
+```jinja
+<div class="wc-table-wrapper">
+  <table class="wc-table wc-table--striped sortable">
+    <thead>
+      <tr>
+        <th>Hillslope</th>
+        <th>Length</th>
+        <th>Area</th>
+        <th>Sediment</th>
+        <th>Runoff</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-sort-position="top">
+        <td></td>
+        {{ unitizer_units('length', 'area', 'sediment', 'runoff') }}
+      </tr>
+      {% for row in hillslopes %}
+      <tr>
+        <td>{{ row.wepp_id }}</td>
+        <td>{{ unitizer(row.length, 'length') }}</td>
+        <td>{{ unitizer(row.area, 'area') }}</td>
+        <td>{{ unitizer(row.sediment, 'sediment') }}</td>
+        <td>{{ unitizer(row.runoff, 'runoff') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+```
 
 ## CSV exports
 - Every report table should expose a subtle download action. Use:

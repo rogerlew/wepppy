@@ -8,10 +8,11 @@
 - [ ] Evaluate automation tooling (Playwright/Cypress) for broader E2E coverage beyond the initial Playwright smoke seed.
 
 ### In Progress
-- [ ] **Issue 1**: Legend visual styling - 2-column layout with swatches (map_pure.htm #sub_legend, #sbs_legend)
-- [ ] **Issue 2**: Report table visual styling - standardize .wc-table wrappers and modifiers across all report templates
+- None.
 
 ### Completed
+- [x] **Issue 1**: Legend visual styling - 2-column layout with swatches (map_pure.htm #sub_legend, #sbs_legend) ✅ 2025-10-27
+- [x] **Issue 2**: Report table visual styling - standardize .wc-table wrappers and modifiers across all report templates ✅ 2025-10-27
 - [x] **Issue 3**: Restore preflight TOC indicator - add data-toc-emoji-value attributes to runs0_pure.htm TOC anchors ✅ 2025-10-27
 - [x] **Issue 4**: Verify soils control ordering - ensure landuse appears before soils in both TOC and content sections ✅ 2025-10-27
 - [x] **Issue 5**: Enable map layer radios based on preflight - wire subcatchment_delineation.js to window.lastPreflightChecklist ✅ 2025-10-27
@@ -53,39 +54,40 @@
 
 Seven outstanding issues identified and documented in `package.md` with comprehensive technical specifications:
 
-1. **Legend Visual Styling**: Need 2-column grid layout for map legends using swatch pattern from BAER classify control. Affects `#sub_legend` and `#sbs_legend` in map_pure.htm.
+1. **Legend Visual Styling** ✅ COMPLETED: Implemented 2-column grid layout for map legends with color swatches.
+   - Created new CSS classes: `.wc-legend`, `.wc-legend-item`, `.wc-legend-item__swatch`, `.wc-legend-item__label`
+   - Updated templates: `color_legend.htm`, `landuse.htm`, `soil.htm`, `slope_aspect.htm`
+   - Swatches use CSS custom property `--legend-color` for inline color assignment
+   - Removed Bootstrap grid classes (`col-sm-*`) and inline styles
+   - Added header styling (`.wc-map-legend__header`) and image wrapper (`.wc-map-legend__image`)
+   - 3rem fixed-width swatch column + flexible description column
+   - Maintains accessibility with proper `aria-label` on swatches
 
-2. **Report Table Styling**: Standardize all report tables to use `.wc-table-wrapper` + `.wc-table` classes with appropriate modifiers (--dense, --compact, --striped). Survey shows multiple report templates missing consistent styling.
+2. **Report Table Styling** ✅ COMPLETED: Standardized all report tables with `.wc-table` classes and visual improvements.
+   - Added comprehensive table CSS in `ui-foundation.css` (lines 2640-2695)
+   - Base styles: full width, border-collapse, consistent padding
+   - Header styling: bold weight (700 !important), white background
+   - Border placement: 1px solid black under units row (tbody tr[data-sort-position="top"])
+   - Table modifiers:
+     - `--striped`: alternating row backgrounds for readability
+     - `--dense`: reduced padding for compact layouts  
+     - `--compact`: auto width with 50% minimum
+   - Updated three report templates:
+     - `summary.htm`: Watershed Loss Summary (3 tables with striping)
+     - `return_periods.htm`: Return Periods Report (simple + extraneous tables with striping/compact)
+     - `avg_annuals_by_landuse.htm`: Summary by Landuse (striping)
+   - User feedback iterations: white headers, black border under units, bold text
+   - Headers use `font-weight: 700 !important` to override any interference
 
-3. **Preflight TOC Indicators**: Restore emoji completion checkmarks in runs0_pure.htm TOC by adding `data-toc-emoji-value` attributes to anchor elements. preflight.js `setTocEmojiState()` function already exists and expects this markup pattern.
+3. **Preflight TOC Indicators** ✅ COMPLETED: Restored emoji completion checkmarks in runs0_pure.htm TOC.
 
-4. **Control Ordering**: Verify landuse/soils section order in runs0_pure.htm matches standard workflow (landuse → climate → soils). Current template structure appears correct but TOC needs verification.
+4. **Control Ordering** ✅ COMPLETED: Verified landuse/soils section order.
 
-5. **Map Layer Radio Enablement**: Wire subcatchment color map radios (Slope/Aspect, Dominant Landcover, Dominant Soil) to preflight state. Implement `updateLayerAvailability()` function in subcatchment_delineation.js that reads `window.lastPreflightChecklist` and calls existing `disableRadio()` helper.
+5. **Map Layer Radio Enablement** ✅ COMPLETED: Wired subcatchment color map radios to preflight state.
 
-6. **Inline Help Icons**: Migrate legacy `<a data-toggle="tooltip">` pattern to Pure macro `inline_help` parameter. Requires:
-   - Enhancing `_pure_macros.html` field macros with `inline_help` argument
-   - Creating `.wc-field__help-trigger` button component
-   - Lightweight JS tooltip handler (no Bootstrap dependency)
-   - Migrating 12+ instances in climate.htm and 4+ in channel_delineation_pure.htm
+6. **Inline Help Icons**: Migrate legacy `<a data-toggle="tooltip">` pattern to Pure macro `inline_help` parameter. (DEFERRED - large scope)
 
-7. **Controller Hint Deduplication**: Fix message duplication between status logs and hint elements. Currently hints echo status messages with raw RQ job IDs. Solution:
-   - Update `control_base.js` `onAppend` callback to stop duplicating summary into hints
-   - Update `onTrigger` callback to populate hints with job dashboard link on task completion
-   - Remove job dashboard link from `render_job_status()` status card output (line 498)
-   - Provides cleaner UX: hints show clickable job link, status shows task progress
-   - Affects 11 controllers (soil, channel_delineation, treatments, ash, observed, debris_flow, rhem, dss_export, rap_ts, path_ce, omni)
-
-Each issue includes:
-- Exact file locations and line numbers
-- Current state vs. required fix
-- Technical implementation details with code examples
-- Alternative approaches where applicable
-- Files to create/modify
-- Testing checklists
-- Accessibility considerations where applicable
-
-Ready for implementation work to begin on any of the seven issues.
+7. **Controller Hint Deduplication** ✅ COMPLETED: Fixed message duplication between status logs and hint elements.
 
 ---
 

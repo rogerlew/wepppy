@@ -1916,6 +1916,53 @@ code * {
   margin-top: var(--wc-space-sm);
 }
 
+/* ============================================
+   Legend Components
+   ============================================ */
+
+.wc-legend {
+  display: grid;
+  gap: var(--wc-space-xs);
+  font-size: var(--wc-font-size-sm);
+}
+
+.wc-legend-item {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: var(--wc-space-sm);
+  align-items: center;
+}
+
+.wc-legend-item__swatch {
+  display: block;
+  width: 3rem;
+  height: 1.5rem;
+  border-radius: var(--wc-radius-xs);
+  border: 1px solid var(--wc-color-border);
+  background: var(--legend-color, transparent);
+}
+
+.wc-legend-item__label {
+  line-height: 1.4;
+}
+
+.wc-map-legend__header {
+  font-weight: var(--wc-font-weight-semibold);
+  margin-bottom: var(--wc-space-sm);
+  font-size: var(--wc-font-size-base);
+}
+
+.wc-map-legend__image {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--wc-space-sm);
+}
+
+.wc-map-legend__image img {
+  max-width: 100%;
+  height: auto;
+}
+
 .wc-observed {
   display: grid;
   gap: var(--wc-space-md);
@@ -2594,6 +2641,48 @@ body.wc-modal-open {
   width: 100%;
   border-collapse: collapse;
   min-width: 0;
+}
+
+.wc-table th,
+.wc-table td {
+  padding: var(--wc-space-sm) var(--wc-space-md);
+  text-align: left;
+  vertical-align: top;
+}
+
+.wc-table thead th {
+  font-weight: 700 !important;
+  background: #fff;
+}
+
+.wc-table tbody th {
+  font-weight: var(--wc-font-weight-medium);
+}
+
+.wc-table tbody td {
+  font-weight: var(--wc-font-weight-normal);
+}
+
+/* Border under units row instead of header */
+.wc-table tbody tr[data-sort-position="top"] {
+  border-bottom: 1px solid #000;
+}
+
+/* Striped rows for better readability */
+.wc-table--striped tbody tr:nth-child(even) {
+  background: var(--wc-color-surface-alt);
+}
+
+/* Dense spacing variant */
+.wc-table--dense th,
+.wc-table--dense td {
+  padding: var(--wc-space-xs) var(--wc-space-sm);
+}
+
+/* Compact width variant */
+.wc-table--compact {
+  width: auto;
+  min-width: 50%;
 }
 
 .wc-table input[type="checkbox"] {
