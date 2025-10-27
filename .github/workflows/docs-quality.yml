@@ -47,11 +47,21 @@ jobs:
         run: |
           set -euo pipefail
 
+          TARGETS=(
+            --path docs
+            --path docs/work-packages
+            --path AGENTS.md
+            --path README.md
+            --path PROJECT_TRACKER.md
+            --path CONTRIBUTING_AGENTS.md
+            --path TYPE_HINTS_SUMMARY.md
+          )
+
           status=0
-          wctl doc-lint --format sarif > docs-lint.sarif || status=$?
+          wctl doc-lint "${TARGETS[@]}" --format sarif > docs-lint.sarif || status=$?
 
           # Also generate JSON for artifact (don't fail on this)
-          wctl doc-lint --format json > docs-lint.json || true
+          wctl doc-lint "${TARGETS[@]}" --format json > docs-lint.json || true
 
           # Ensure SARIF exists (fallback placeholder when command fails before writing)
           if [ ! -s docs-lint.sarif ]; then
