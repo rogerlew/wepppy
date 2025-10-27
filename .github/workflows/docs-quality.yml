@@ -29,8 +29,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare wctl wrapper
-        run: ./wctl/install.sh dev
+      - name: Copy .env from host
+        run: |
+          # Self-hosted runner has access to /workdir/wepppy/docker/.env
+          cp /workdir/wepppy/docker/.env docker/.env
+        shell: bash
 
       - name: Verify markdown-doc tooling
         run: |
@@ -50,14 +53,14 @@ jobs:
         run: |
           set -euo pipefail
           status=0
-          ./wctl/wctl.sh doc-lint --format sarif > docs-lint.sarif || status=$?
-          ./wctl/wctl.sh doc-lint --format json > docs-lint.json || true
+          wctl doc-lint --format sarif > docs-lint.sarif || status=$?
+          wctl doc-lint --format json > docs-lint.json || true
           exit ${status}
 
       - name: Run markdown-doc benchmarks
         run: |
           set -euo pipefail
-          ./wctl/wctl.sh doc-bench --path docs --warmup 0 --iterations 1
+          wctl doc-bench --path docs --warmup 0 --iterations 1
 
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v2
