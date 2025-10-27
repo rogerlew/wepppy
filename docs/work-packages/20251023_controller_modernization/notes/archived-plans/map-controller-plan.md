@@ -1,7 +1,7 @@
 # Map Controller Migration Plan
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
-> Scoping notes for refactoring `map.js` to the helper-based controller architecture. Review with [`controller_foundations.md`](./controller_foundations.md) and the shared [`module_refactor_workflow.md`](./module_refactor_workflow.md).
+> Scoping notes for refactoring `map.js` to the helper-based controller architecture. Review with [`controller_foundations.md`](../../../../dev-notes/controller_foundations.md) and the shared [`module_refactor_workflow.md`](../../../../dev-notes/module_refactor_workflow.md).
 
 ## Current State (Discovery)
 - **Controller surface**: Singleton wraps a Leaflet map instance (`L.map("mapid")`) and augments it with custom methods (`goToEnteredLocation`, `findById`, `hillQuery`, etc.). Heavy reliance on jQuery for DOM access (`$("#mouseelev")`, `$("#input_centerloc")`), event binding (`.on("click")`, `.on("keydown")`), DOM mutation (`.text()`, `.html()`, `.fadeOut()`), and network calls (`$.ajax`, `$.get`).

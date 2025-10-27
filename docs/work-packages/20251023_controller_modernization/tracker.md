@@ -7,4 +7,4 @@
 - Adjusted prompts/workflows to reference the new documentation.
 
 ## 2025-10-23
-- Authored the NoDb API route-to-singleton map in [wepppy/weppcloud/routes/nodb_api/README.md](../../../../wepppy/weppcloud/routes/nodb_api/README.md) so controller work packages can link each endpoint to its backing singleton, helpers, and tests.
+- Authored the NoDb API route-to-singleton map in [wepppy/weppcloud/routes/nodb_api/README.md](../../../wepppy/weppcloud/routes/nodb_api/README.md) so controller work packages can link each endpoint to its backing singleton, helpers, and tests.

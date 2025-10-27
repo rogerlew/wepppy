@@ -1,5 +1,5 @@
 # Outlet Controller Modernization Plan
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
 > Working note capturing scope, decisions, and follow-ups while migrating the outlet control to the helper-first architecture.
 

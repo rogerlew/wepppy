@@ -1,5 +1,5 @@
 # Rangeland Cover Controller Plan
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
 > Helper-first modernization notes and post-migration contract for the rangeland cover control.
 

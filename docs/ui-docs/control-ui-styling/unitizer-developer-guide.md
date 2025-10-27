@@ -376,7 +376,7 @@ wctl restart weppcloud
 
 - [Control Components Spec](./control-components.md)
 - [UI Style Guide](../ui-style-guide.md) - Modal patterns
-- [AGENTS.unitizer.md](./AGENTS.unitizer.md) - Original task brief
+- [AGENTS.md](./AGENTS.md) - Original task brief
 - Backend NoDb pattern: `wepppy/nodb/base.py`
 
 ## Changelog

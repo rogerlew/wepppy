@@ -599,7 +599,7 @@ markdown-doc lint --format sarif > results.sarif
 
 ## References
 
-- [tools/README.markdown-tools.md](../../tools/README.markdown-tools.md) - Existing markdown tools
+- [tools/README.markdown-tools.md](../../../tools/README.markdown-tools.md) - Existing markdown tools
 - [docs/prompt_templates/](../../prompt_templates/) - Template definitions
 - [AGENTS.md](../../../AGENTS.md) - Documentation patterns
 - [docs/god-tier-prompting-strategy.md](../../god-tier-prompting-strategy.md) - Agent workflows

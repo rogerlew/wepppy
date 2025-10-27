@@ -5,7 +5,7 @@ title: Omni Controller Modernization Plan
 > Quick-reference contract for the helper-based Omni scenario runner. Use this alongside `docs/dev-notes/controller_foundations.md` whenever extending scenarios, templates, or backend routes.
 
 ## Overview
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
 - Omni now relies entirely on the shared helper stack (`WCDom`, `WCHttp`, `WCForms`, `WCEvents`, `controlBase`). jQuery dependencies and inline scripts have been removed.
 - Scenario cards are rendered dynamically by `omni.js`; templates only declare markup shells (`#scenario-container`, buttons with `data-omni-action`) while the controller injects inputs per scenario definition.

@@ -1,7 +1,7 @@
 # Team Controller Plan
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
-> Helper-first contract recap for project collaborator management. See also: [docs/dev-notes/controller_foundations.md](controller_foundations.md) for the shared modernization vision.
+> Helper-first contract recap for project collaborator management. See also: [docs/dev-notes/controller_foundations.md](../../../../dev-notes/controller_foundations.md) for the shared modernization vision.
 
 ## Overview
 - Coordinates the Team run-control (`wepppy/weppcloud/controllers_js/team.js`), collaborator templates (`wepppy/weppcloud/templates/controls/team*.htm` and `templates/reports/users.htm`), and project blueprint endpoints (`project_bp.task_adduser`, `project_bp.task_removeuser`).

@@ -1,7 +1,7 @@
 # Landuse Modify Controller Plan
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
-> Scoping notes for the helper migration of `landuse_modify.js`. Review alongside [`docs/dev-notes/controller_foundations.md`](./controller_foundations.md) and the module refactor workflow.
+> Scoping notes for the helper migration of `landuse_modify.js`. Review alongside [`docs/dev-notes/controller_foundations.md`](../../../../dev-notes/controller_foundations.md) and the module refactor workflow.
 
 ## Current State (Discovery)
 - **Controller surface**: Singleton wraps `#modify_landuse_form`, relies heavily on jQuery (`$`, `.on`, `.post`, `.get`) for DOM lookup, event binding, and AJAX. Map selection toggles call into `MapController`, `SubcatchmentDelineation`, and optionally `Landuse` after a successful modification.

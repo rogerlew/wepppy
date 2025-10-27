@@ -1,5 +1,5 @@
 # Landuse Controller Migration Plan
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
 > Information-gathering checklist for the upcoming `landuse.js` refactor. Review `docs/dev-notes/controller_foundations.md` first so this plan stays aligned with the shared controller strategy.
 

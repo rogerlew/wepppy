@@ -2958,10 +2958,10 @@ When using third-party tools (e.g., Trivy, Anchore, ESLint) that generate SARIF:
 ## References
 
 - [GitHub Actions: Self-hosted runners](https://docs.github.com/en/actions/hosting-your-own-runners)
-- [Docker Compose Production Guide](docker/README.md)
-- [Test Suite Documentation](../tests/README.md)
-- [Agent Development Manifesto](../AGENTIC_AI_SYSTEMS_MANIFESTO.md)
-- [Work Packages: Documentation Tooling](../docs/work-packages/20251025_markdown_doc_toolkit/)
+- [Docker Compose Production Guide](../../docker/README.md)
+- [Test Suite Documentation](../../tests/README.md)
+- [Agent Development Manifesto](../../AGENTIC_AI_SYSTEMS_MANIFESTO.md)
+- [Work Packages: Documentation Tooling](../work-packages/20251025_markdown_doc_toolkit/)
 
 ---
 

@@ -1,5 +1,5 @@
 # DSS Export Controller Modernization Plan
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
 > Working notes for migrating `dss_export.js` and its paired routes/templates to the helper-first controller stack.
 

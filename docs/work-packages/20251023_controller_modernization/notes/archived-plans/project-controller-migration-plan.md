@@ -1,5 +1,5 @@
 ## Project Controller Migration Plan
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
 > Reference contract for the modernized Project run control. Keep this doc in sync with `controllers_js/project.js`, the paired Flask routes, and associated templates.
 
@@ -50,6 +50,6 @@ Corresponding NoDb setters (`Ron.name`, `Ron.scenario`, and `Unitizer.set_prefer
 Jest coverage lives in `controllers_js/__tests__/project.test.js`; extend it whenever you touch events, data hooks, or error flows.
 
 ### Related docs
-- [controllers_js/README.md](../../wepppy/weppcloud/controllers_js/README.md)
-- [controllers_js/AGENTS.md](../../wepppy/weppcloud/controllers_js/AGENTS.md)
-- [docs/dev-notes/controller_foundations.md](controller_foundations.md)
+- [controllers_js/README.md](../../../../../wepppy/weppcloud/controllers_js/README.md)
+- [controllers_js/AGENTS.md](../../../../../wepppy/weppcloud/controllers_js/AGENTS.md)
+- [docs/dev-notes/controller_foundations.md](../../../../dev-notes/controller_foundations.md)

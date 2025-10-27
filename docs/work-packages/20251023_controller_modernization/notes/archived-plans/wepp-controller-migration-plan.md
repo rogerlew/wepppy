@@ -1,7 +1,7 @@
 # WEPP Controller Migration Plan
-> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](./controllers_js_jquery_retro.md).
+> Status: Completed (helper-first controller migration). See [controllers_js Modernization Retrospective](../../../../dev-notes/controllers_js_jquery_retro.md).
 
-> Checklist and findings for migrating `wepp.js` and related routes to the helper-driven architecture. Pair this with [docs/dev-notes/controller_foundations.md](controller_foundations.md) for shared UI and payload guidance.
+> Checklist and findings for migrating `wepp.js` and related routes to the helper-driven architecture. Pair this with [docs/dev-notes/controller_foundations.md](../../../../dev-notes/controller_foundations.md) for shared UI and payload guidance.
 
 ## Controller Surface Audit
 - Replace legacy DOM hooks (`addEventListener`, inline scripts, jQuery-era adapters) with helper delegates:
