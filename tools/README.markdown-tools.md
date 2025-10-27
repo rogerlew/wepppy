@@ -17,6 +17,7 @@ These tools are designed specifically for AI agent workflows. You can invoke the
 
 - **`markdown-extract`** - Read sections from Markdown files by heading pattern
 - **`markdown-edit`** - Modify Markdown files with heading-aware operations (replace, append, insert, delete)
+- **`wctl doc-*`** – wrappers around `markdown-doc` for repo-wide documentation upkeep (lint, catalog, toc, refs, move, benchmarks)
 
 **Key benefits for agents:**
 - ✅ Semantic operations on document structure (no brittle line numbers)
@@ -38,6 +39,37 @@ markdown-edit guide.md replace "Setup" --with-string "New content\\n" --keep-hea
 ```
 
 See full documentation below for complete reference and advanced workflows.
+
+---
+
+## wctl doc-* quick start
+
+The `wctl` wrappers keep `markdown-doc` ergonomics consistent and run inside the same Docker/project context as the rest of the tooling. They are available on self-hosted runners and local environments after `./wctl/install.sh`.
+
+| Command | Default behaviour | Common overrides |
+|---------|-------------------|------------------|
+| `wctl doc-lint` | `markdown-doc lint --staged --format json` (JSON to stdout) | `wctl doc-lint --path docs --format sarif` for full sweeps; `--format sarif > results.sarif` when you need Code Scanning artifacts |
+| `wctl doc-catalog` | Regenerates `DOC_CATALOG.md` respecting `.markdown-doc.toml` | `--path docs/work-packages` for scoped indexes |
+| `wctl doc-toc FILE` | Updates TOC markers in-place (`markdown-doc toc FILE --update`) | `--dry-run` to preview diffs |
+| `wctl doc-mv SRC DEST` | Dry-run via `markdown-doc mv --dry-run`; prompts on `/dev/tty` before apply | `--dry-run-only` for audit logs, `--force` for scripted refactors |
+| `wctl doc-refs TARGET` | Lists inbound references to files or headings | Combine with `--path` to narrow scanners |
+| `wctl doc-bench` | Runs `markdown-doc-bench` against docs/ (default warmup=1, iterations=5) | `--path docs/work-packages --iterations 1` for targeted timing |
+
+**Exit codes** (shared by `markdown-doc` and all wrappers):
+
+| Code | Meaning |
+|------|---------|
+| `0`  | Success |
+| `1`  | Validation failure (lint errors, schema mismatch) |
+| `2`  | File or pattern not found |
+| `3`  | Bad CLI arguments/configuration |
+| `4`  | I/O error (permissions, disk) |
+
+**Workflow notes**
+
+- `.github/workflows/docs-quality.yml` runs `wctl doc-lint`/`doc-bench` on every PR using the `MARKDOWN_DOC_WORKSPACE` secret so cargo `fmt/clippy/test` execute inside the markdown-doc workspace. Keep that secret pointing at the active checkout (currently `/workdir/markdown-extract`).
+- `.markdown-doc-ignore` tracks content we intentionally skip (for example `.docker-data/**`). Update this file alongside any large restructures so lint stays quiet.
+- For local or ad-hoc checks, pipe the JSON from `wctl doc-lint` into `jq` or attach SARIF to PRs: `wctl doc-lint --path docs --format sarif > docs-lint.sarif`.
 
 ---
 
@@ -494,6 +526,196 @@ The action version corresponds to the version of the tool.
 5. **Documentation diffing**: Compare sections across versions or files
 6. **Selective archiving**: Extract and save specific documentation sections for compliance
 
+## wctl Quick Start: markdown-doc Toolkit Integration
+
+> **🎯 For wepppy repository users:** The `wctl` wrapper provides ergonomic access to the full `markdown-doc` toolkit. All commands are pre-installed at `/usr/local/bin` on the host.
+
+The wepppy repository has adopted the `markdown-doc` toolkit (Rust-based documentation orchestration) with wrapper commands integrated into `wctl`. These tools enforce documentation quality gates in CI/CD workflows and provide safe refactoring operations.
+
+### Available Commands
+
+| Command | Purpose | Default Behavior | Common Flags |
+|---------|---------|------------------|--------------|
+| `wctl doc-lint` | Validate documentation quality | `--staged --format json` (when no args) | `--path`, `--format sarif`, `--severity error` |
+| `wctl doc-catalog` | Generate documentation catalog | Pass-through to `markdown-doc catalog` | `--path docs`, `--format json`, `--output DOC_CATALOG.md` |
+| `wctl doc-toc` | Update table of contents | Requires explicit file paths | `--update`, `--diff`, `--path` |
+| `wctl doc-mv` | Move/rename with link updates | Dry-run preview + confirmation prompt | `--dry-run-only`, `--force` |
+| `wctl doc-refs` | Find references to files/anchors | Pass-through to `markdown-doc refs` | `--path`, `--target`, `--format json` |
+| `wctl doc-bench` | Benchmark doc operations | Pass-through to `markdown-doc-bench` | `--path`, `--warmup 0`, `--iterations 1` |
+
+### Usage Examples
+
+**Lint staged changes (default human workflow):**
+```bash
+# Lint only git-staged Markdown files
+wctl doc-lint
+
+# Output: JSON to stdout with notice to stderr
+# Running default: markdown-doc lint --staged --format json
+# {"summary":{"files_scanned":2,"errors":0,"warnings":1},...}
+```
+
+**Lint specific paths (CI/CD workflow):**
+```bash
+# Lint all documentation with SARIF output for Code Scanning
+wctl doc-lint --path docs --path AGENTS.md --format sarif > docs-lint.sarif
+
+# Enforce error-only severity (warnings won't fail CI)
+wctl doc-lint --path docs --severity error
+```
+
+**Generate documentation catalog:**
+```bash
+# Regenerate DOC_CATALOG.md covering docs/ directory
+wctl doc-catalog --path docs
+
+# Export as JSON for programmatic use
+wctl doc-catalog --path docs --format json > catalog.json
+```
+
+**Update table of contents:**
+```bash
+# Preview TOC changes without writing
+wctl doc-toc README.md --diff
+
+# Update TOC in-place
+wctl doc-toc README.md --update
+
+# Process multiple files
+wctl doc-toc docs/*.md --update
+```
+
+**Move files safely (with link updates):**
+```bash
+# Preview what would change (dry-run only)
+wctl doc-mv docs/old-name.md docs/new-name.md --dry-run-only
+
+# Interactive prompt (default: shows diff, then asks confirmation)
+wctl doc-mv docs/old-name.md docs/new-name.md
+
+# Skip confirmation prompt (force apply)
+wctl doc-mv docs/old-name.md docs/new-name.md --force
+```
+
+**Find references before refactoring:**
+```bash
+# Find all documents linking to a file
+wctl doc-refs --target docs/api.md
+
+# Find documents using a specific anchor
+wctl doc-refs --target docs/guide.md#installation
+
+# Constrain search to specific directory
+wctl doc-refs --target docs/api.md --path docs/work-packages
+```
+
+**Benchmark documentation operations:**
+```bash
+# Quick benchmark (no warmup, single iteration)
+wctl doc-bench --path docs --warmup 0 --iterations 1
+
+# Thorough benchmark (multiple iterations)
+wctl doc-bench --path docs --warmup 2 --iterations 5
+```
+
+### Exit Codes
+
+All `markdown-doc` commands (and their `wctl` wrappers) follow consistent exit code conventions:
+
+| Exit Code | Meaning | Agent Response |
+|-----------|---------|----------------|
+| 0 | Success | Proceed with workflow |
+| 1 | Validation failure | Lint errors found, broken links detected, or operation rejected |
+| 2 | Not found | Target file/section missing, or no matches for pattern |
+| 3 | Invalid arguments | Bad command syntax, missing required flags, or invalid flag combinations |
+| 4 | I/O error | File read/write failure, permission denied, or invalid UTF-8 |
+
+**Error handling in automation:**
+```bash
+#!/bin/bash
+# Safe lint with exit code inspection
+
+if wctl doc-lint --path docs --severity error; then
+  echo "Documentation validation passed"
+else
+  case $? in
+    1) echo "ERROR: Lint validation failed (broken links or quality issues)" ;;
+    2) echo "ERROR: Target not found" ;;
+    3) echo "ERROR: Invalid arguments" ;;
+    4) echo "ERROR: I/O failure" ;;
+    *) echo "ERROR: Unknown failure" ;;
+  esac
+  exit 1
+fi
+```
+
+### CI/CD Integration
+
+The `docs-quality` workflow (`.github/workflows/docs-quality.yml`) demonstrates production usage:
+
+**Automated Quality Gates:**
+- Runs `wctl doc-lint` with explicit `--path` targets covering key documentation
+- Uploads SARIF results to GitHub Code Scanning for integration with pull request checks
+- Executes Rust checks (`cargo fmt`, `cargo clippy`, `cargo test`) when `MARKDOWN_DOC_WORKSPACE` secret is set
+- Runs `wctl doc-bench` to detect performance regressions
+
+**Workflow Triggers:**
+- Pull requests touching `**/*.md`, `wctl/**`, `.markdown-doc-ignore`, or the workflow itself
+- Pushes to `master` branch with same path filters
+
+**Key Configuration:**
+```yaml
+env:
+  MARKDOWN_DOC_WORKSPACE: ${{ secrets.MARKDOWN_DOC_WORKSPACE }}
+
+steps:
+  - run: wctl doc-lint --path docs --path AGENTS.md --format sarif > docs-lint.sarif
+  - uses: github/codeql-action/upload-sarif@v3
+    with:
+      sarif_file: docs-lint.sarif
+  - run: wctl doc-bench --path docs --warmup 0 --iterations 1
+```
+
+### Ignore File Management
+
+The `.markdown-doc-ignore` file (in repository root) uses gitignore-style patterns to exclude paths from scans:
+
+```plaintext
+# Ignore docker-managed volumes that collide with lint/catalog scans
+.docker-data/**
+
+# Ignore build artifacts
+**/node_modules/**
+**/__pycache__/**
+```
+
+**Agent Responsibilities:**
+- Keep `.markdown-doc-ignore` tidy when reorganizing documentation
+- Add patterns for generated files, build artifacts, or vendored dependencies
+- Document non-obvious exclusions with inline comments
+
+**When to update:**
+- Moving documentation directories (adjust patterns to match new structure)
+- Adding generated documentation (exclude to prevent false positives)
+- Discovering false positives from third-party vendored docs
+
+### Further Documentation
+
+For comprehensive guidance on the `markdown-doc` toolkit architecture, lint rules, refactoring workflows, and agent integration patterns:
+
+**Primary References:**
+- **Work Package:** [`docs/work-packages/20251025_markdown_doc_toolkit/package.md`](../docs/work-packages/20251025_markdown_doc_toolkit/package.md) - Project overview, phases, and status
+- **RFC:** [`docs/work-packages/20251025_markdown_doc_toolkit/rfc_markdown_doc_adoption.md`](../docs/work-packages/20251025_markdown_doc_toolkit/rfc_markdown_doc_adoption.md) - Adoption strategy and migration plan
+- **wctl Guide:** [`wctl/README.md`](../wctl/README.md) - Complete wctl documentation including all doc-* commands
+- **wctl Agents Guide:** [`wctl/AGENTS.md`](../wctl/AGENTS.md) - Agent-specific guidance for wctl automation
+
+**Implementation Details:**
+- Rust workspace: `/workdir/markdown-extract` (or value of `MARKDOWN_DOC_WORKSPACE` secret in CI)
+- Installed binaries: `/usr/local/bin/markdown-doc`, `/usr/local/bin/markdown-doc-bench`
+- Configuration: `.markdown-doc.toml` (optional, falls back to defaults)
+
+---
+
 ## AI Agent Tooling
 
 > **🤖 Both `markdown-extract` and `markdown-edit` are installed at `/usr/local/bin`.** Use them directly in your workflows.
@@ -567,4 +789,3 @@ markdown-edit config.md append-to "Configuration" \
 - Python scripts using `subprocess.run()` to dynamically fetch relevant sections
 - Bash orchestration for multi-agent systems with specialized knowledge domains
 - CI validation ensuring documentation completeness before agent deployment
-
