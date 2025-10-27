@@ -79,7 +79,27 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-### [No packages in backlog currently]
+### Jinja Template Lint Error Resolution
+**Proposed**: 2025-10-27  
+**Size**: Small (1-2 days)  
+**Priority**: Low (cosmetic, doesn't affect functionality)  
+**Description**: Resolve TypeScript/JavaScript linter false positives when parsing Jinja template syntax (`{{ ... | tojson }}`) inside `<script>` tags in `.htm` templates.
+
+**Scope**:
+- Move dynamic values from inline Jinja expressions to HTML data attributes
+- Refactor JavaScript to read from data attributes instead of Jinja-injected constants
+- Eliminate lint errors while maintaining template functionality
+- Pattern applies to: `_base_report.htm`, potentially other report templates
+
+**Strategic Value**: 
+- Cleaner CI lint output
+- Better developer experience (no false positive noise)
+- More maintainable separation of template data and JavaScript logic
+- Standard pattern for future template development
+
+**Dependencies**: None
+
+**Next Steps**: Create work package when bandwidth available; not blocking any current work
 
 ---
 

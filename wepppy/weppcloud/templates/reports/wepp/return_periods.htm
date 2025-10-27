@@ -310,13 +310,13 @@
     </label>
     {% endif %}
 
-    <button type="button" class="pure-button pure-button-secondary" id="advancedOptionsToggle" data-open="false">
-      Show advanced options
-    </button>
-  </div>
-
-  <div class="wc-stack" id="advancedOptionsSection" hidden>
-    <form id="excludeMonthsForm" class="wc-stack">
+    <details class="wc-collapse" id="advancedOptionsCollapse">
+      <summary class="wc-collapse__summary">
+        <span class="wc-collapse__icon"></span>
+        <span class="wc-collapse__title">Advanced options</span>
+      </summary>
+      <div class="wc-collapse__content">
+        <form id="excludeMonthsForm" class="wc-stack">
       <label class="wc-inline">
         <input type="checkbox" id="gringortenCheckbox"{% if gringorten_correction %} checked{% endif %}>
         <span>Apply Gringorten correction</span>
@@ -348,6 +348,8 @@
         <button type="button" class="pure-button pure-button-link" id="selectAllMonths">Select all</button>
       </div>
     </form>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -435,21 +437,6 @@
     return (sp.get('gringorten_correction') || 'false').toLowerCase() === 'true';
   }
 
-  function setAdvancedVisibility(showIt) {
-    const section = document.getElementById('advancedOptionsSection');
-    const toggle = document.getElementById('advancedOptionsToggle');
-    if (!section || !toggle) return;
-    if (showIt) {
-      section.removeAttribute('hidden');
-      toggle.dataset.open = 'true';
-      toggle.textContent = 'Hide advanced options';
-    } else {
-      section.setAttribute('hidden', 'hidden');
-      toggle.dataset.open = 'false';
-      toggle.textContent = 'Show advanced options';
-    }
-  }
-
   function submitAdvancedOpts(e) {
     e.preventDefault();
     const checkedMonths = Array.from(
@@ -480,7 +467,10 @@
     const grChk = document.getElementById('gringortenCheckbox');
     if (grChk) grChk.checked = gring;
 
-    setAdvancedVisibility(months.length > 0 || gring);
+    const advancedCollapse = document.getElementById('advancedOptionsCollapse');
+    if (advancedCollapse && (months.length > 0 || gring)) {
+      advancedCollapse.setAttribute('open', 'open');
+    }
 
     const form = document.getElementById('excludeMonthsForm');
     if (form) {
@@ -490,14 +480,6 @@
       if (clearBtn) clearBtn.addEventListener('click', () => boxes().forEach(cb => cb.checked = false));
       if (allBtn) allBtn.addEventListener('click', () => boxes().forEach(cb => cb.checked = true));
       form.addEventListener('submit', submitAdvancedOpts);
-    }
-
-    const toggleAdvanced = document.getElementById('advancedOptionsToggle');
-    if (toggleAdvanced) {
-      toggleAdvanced.addEventListener('click', () => {
-        const isOpen = toggleAdvanced.dataset.open === 'true';
-        setAdvancedVisibility(!isOpen);
-      });
     }
 
     const sel = document.getElementById('yearSelection');

@@ -70,30 +70,6 @@
             {% endif %}
           </div>
         </details>
-          </details>
-          <div class="wc-run-header__actions">
-            <a class="pure-button pure-button-secondary"
-               href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
-               target="_blank"
-               rel="noopener">
-              README
-            </a>
-            {% if not pup_relpath %}
-            <a class="pure-button pure-button-secondary"
-               href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
-               target="_blank"
-               rel="noopener">
-              FORK
-            </a>
-            <a class="pure-button pure-button-secondary"
-               href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
-               target="_blank"
-               rel="noopener">
-              ARCHIVE
-            </a>
-            {% endif %}
-          </div>
-        </div>
       </div>
     </div>
   </div>
