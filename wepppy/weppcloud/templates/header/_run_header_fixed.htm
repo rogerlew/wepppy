@@ -4,9 +4,9 @@
     <div class="wc-run-header__inner">
       <div class="wc-run-header__title-row">
         <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
-        <span class="wc-run-header__descriptor">
+        <a class="wc-run-header__descriptor" href="{{ url_for_run('run_0.runs0', runid=current_ron.runid, config=current_ron.config_stem) }}">
           {{ current_ron.runid }} {{ current_ron.config_stem }}
-        </span>
+        </a>
       </div>
       <div class="wc-run-header__content">
         <div class="wc-run-header__fields">

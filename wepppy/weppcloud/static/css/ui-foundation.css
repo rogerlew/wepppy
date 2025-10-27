@@ -5,6 +5,11 @@
  * typography, colors, spacing, and core components when using Pure.css.
  * The goal is a neutral, low-maintenance visual baseline that can be layered
  * on top of existing templates without introducing new dependencies.
+ *
+ * IMPORTANT: Before modifying this file, review docs/ui-docs/ui-style-guide.md
+ * for component patterns, design tokens, spacing conventions, and best practices.
+ * The style guide documents the rationale behind these choices and helps maintain
+ * consistency across the application.
  */
 
 :root {
@@ -251,6 +256,12 @@ code * {
   font-weight: 600;
   color: var(--wc-color-text-muted);
   letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.wc-run-header__descriptor:hover {
+  color: var(--wc-color-text);
+  text-decoration: underline;
 }
 
 .wc-run-header__content {

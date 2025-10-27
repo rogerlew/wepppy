@@ -374,16 +374,18 @@
       values, and <em>m</em> is the event rank.
     </p>
   {% endif %}
-  <dl class="wc-inline" style="flex-wrap: wrap;">
-    <div>
-      <dt class="wc-text-muted">Years in simulation</dt>
-      <dd>{{ report.years }}</dd>
-    </div>
-    <div>
-      <dt class="wc-text-muted">Events in simulation</dt>
-      <dd>{{ report.num_events }}</dd>
-    </div>
-  </dl>
+  <div class="wc-summary-pane">
+    <dl class="wc-summary-pane__list">
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Years in simulation</dt>
+        <dd class="wc-summary-pane__definition">{{ report.years }}</dd>
+      </div>
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Events in simulation</dt>
+        <dd class="wc-summary-pane__definition">{{ report.num_events }}</dd>
+      </div>
+    </dl>
+  </div>
   <p class="wc-text-muted">
     Post-disturbance runs (e.g., prescribed fire, wildfire, thinning) represent recurrences for the first year
     following the disturbance. A 20-year peak discharge of 5&nbsp;m³/s denotes a 5&nbsp;% probability that peak
