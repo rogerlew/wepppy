@@ -23,6 +23,8 @@ jobs:
       - Linux
       - X64
       - homelab
+    env:
+      MARKDOWN_DOC_WORKSPACE: ${{ secrets.MARKDOWN_DOC_WORKSPACE }}
     timeout-minutes: 20
 
     steps:
