@@ -30,7 +30,7 @@ Phase 1–3 of the `markdown-doc` toolkit are complete inside `/workdir/markdown
 1. **CI Alignment**  
    - Add `markdown-doc lint --staged --format json` to `wctl` wrappers.  
    - Extend GitHub Actions (or equivalent) to run `fmt`, `clippy`, `cargo test --all`, and lint/benchmark smoke (`markdown-doc-bench`).  
-   - ✅ `docs-quality.yml` workflow (self-hosted runner) now runs `wctl doc-lint` (SARIF + JSON) scoped to documentation paths, normalizes the SARIF file to CodeQL v3 schema, executes `wctl doc-bench`, and conditionally runs `cargo fmt/clippy/test` when a markdown-doc workspace is available (`MARKDOWN_DOC_WORKSPACE` env or common install paths). Action item: set the env var on homelab runners so Rust checks always enforce.  
+   - ✅ `docs-quality.yml` workflow (self-hosted runner) now runs `wctl doc-lint` (SARIF + JSON) on documentation paths, uploads SARIF directly (formatter emits camelCase fields), executes `wctl doc-bench`, and conditionally runs `cargo fmt/clippy/test` when a markdown-doc workspace is available (`MARKDOWN_DOC_WORKSPACE` env or common install paths). Action item: set the env var on homelab runners so Rust checks always enforce.  
 
 2. **Developer Experience**  
    - Provide `wctl doc-{lint,catalog,toc,mv,refs}` aliases.  
@@ -49,6 +49,7 @@ Phase 1–3 of the `markdown-doc` toolkit are complete inside `/workdir/markdown
 | Phase 4 scope (`search`, `watch`, `stats`) | Product + Docs leads | Define acceptance metrics (latency, ranking, snippet quality) or defer to later quarter | 2025-11-08 |
 | CI surface area | Platform team | Decide whether markdown-doc benches run per PR or nightly | 2025-11-03 |
 | Release comms | Docs + Enablement | Determine channel (release notes, docs newsletter) and target audience | 2025-11-02 |
+| SARIF schema compliance | markdown-doc maintainers | ✅ Formatter emits camelCase fields (e.g., `ruleId`, `physicalLocation`, `fullDescription`); docs-quality workflow no longer performs normalization | ✅ |
 | `.docker-data` permission strategy | Platform + Tooling | **Resolved 2025-10-31:** Adopt option (a); repository ships `.markdown-doc-ignore` with `.docker-data/**` so catalog/lint skip docker volumes. Retain `sudo wctl restore-docker-data-permissions` in troubleshooting docs. | ✅ |
 
 ## 6. Risks & Mitigations
@@ -56,6 +57,7 @@ Phase 1–3 of the `markdown-doc` toolkit are complete inside `/workdir/markdown
 - **CI noise from legacy edge cases** – Leverage severity tuning + `.markdown-doc-ignore`; add targeted fixtures for known exceptions.  
 - **Concurrent adoption friction** – Command wrappers and documentation updates scheduled before enabling CI failure gates.  
 - **Scope creep into Phase 4 during integration** – Capture future enhancements in tracker; only land caching/indexing once telemetry justifies it.
+- **SARIF uploads** – Formatter now outputs CodeQL-compliant camelCase fields; docs-quality ships SARIF without extra normalization.  
 - **Permission failures when scanning `/workdir/wepppy/.docker-data/*`** – Mitigated by `.markdown-doc-ignore` entry that excludes docker volumes; keep restore command in troubleshooting for existing environments.
 
 ## 7. Rollout Checklist

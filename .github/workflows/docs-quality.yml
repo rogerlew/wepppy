@@ -47,17 +47,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          PATHS=(--path docs)
-          while IFS= read -r file; do
-            file="${file#./}"
-            PATHS+=(--path "${file}")
-          done < <(find . -maxdepth 1 -type f -name '*.md' -print)
-
           status=0
-          wctl doc-lint "${PATHS[@]}" --format sarif > docs-lint.sarif || status=$?
+          wctl doc-lint --format sarif > docs-lint.sarif || status=$?
 
           # Also generate JSON for artifact (don't fail on this)
-          wctl doc-lint "${PATHS[@]}" --format json > docs-lint.json || true
+          wctl doc-lint --format json > docs-lint.json || true
 
           # Ensure SARIF exists (fallback placeholder when command fails before writing)
           if [ ! -s docs-lint.sarif ]; then
@@ -73,56 +67,6 @@ jobs:
 
           echo "LINT_STATUS=${status}" >> "${GITHUB_ENV}"
           exit 0
-
-      - name: Normalize SARIF for CodeQL v3
-        run: |
-          set -euo pipefail
-          if [ ! -f docs-lint.sarif ]; then
-            echo "docs-lint.sarif missing; nothing to normalize." >&2
-            exit 0
-          fi
-          python - <<'PY'
-import json
-from pathlib import Path
-
-path = Path("docs-lint.sarif")
-try:
-    data = json.loads(path.read_text(encoding="utf-8"))
-except json.JSONDecodeError as exc:
-    raise SystemExit(f"Failed to parse SARIF: {exc}")
-
-runs = data.get("runs", [])
-for run in runs:
-    driver = run.get("tool", {}).get("driver", {})
-    for rule in driver.get("rules", []) or []:
-        if "full_description" in rule:
-            rule["fullDescription"] = rule.pop("full_description")
-        if "short_description" in rule:
-            rule["shortDescription"] = rule.pop("short_description")
-    for result in run.get("results", []) or []:
-        if "rule_id" in result:
-            result["ruleId"] = result.pop("rule_id")
-        if "rule_index" in result:
-            result["ruleIndex"] = result.pop("rule_index")
-        if "locations" in result:
-            for location in result["locations"]:
-                if "physical_location" in location:
-                    phys = location.pop("physical_location")
-                    if "artifact_location" in phys:
-                        art = phys.pop("artifact_location")
-                        if "uri_base_id" in art:
-                            art["uriBaseId"] = art.pop("uri_base_id")
-                        phys["artifactLocation"] = art
-                    if "region" in phys and isinstance(phys["region"], dict):
-                        region = phys["region"]
-                        if "start_line" in region:
-                            region["startLine"] = region.pop("start_line")
-                        if "end_line" in region:
-                            region["endLine"] = region.pop("end_line")
-                    location["physicalLocation"] = phys
-
-path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-PY
 
       - name: Run markdown-doc Rust checks
         run: |
