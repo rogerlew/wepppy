@@ -56,43 +56,13 @@ jobs:
           # Ensure SARIF exists (fallback placeholder when command fails before writing)
           if [ ! -s docs-lint.sarif ]; then
             echo "Warning: SARIF output is empty. Writing placeholder for upload." >&2
-            python - <<'PY'
-import json
-from pathlib import Path
-
-placeholder = {
-    "version": "2.1.0",
-    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-    "runs": [
-        {
-            "tool": {"driver": {"name": "markdown-doc", "rules": []}},
-            "results": []
-        }
-    ]
-}
-
-Path('docs-lint.sarif').write_text(json.dumps(placeholder, indent=2) + '\n', encoding='utf-8')
-PY
+            python -c "import json, pathlib; pathlib.Path('docs-lint.sarif').write_text(json.dumps({'version':'2.1.0','$schema':'https://json.schemastore.org/sarif-2.1.0.json','runs':[{'tool':{'driver':{'name':'markdown-doc','rules':[]}},'results':[]}]} , indent=2)+'\n', encoding='utf-8')"
           fi
 
           # Ensure JSON artifact exists (fallback placeholder)
           if [ ! -s docs-lint.json ]; then
             echo "Warning: JSON lint output is empty. Writing placeholder summary." >&2
-            python - <<'PY'
-import json
-from pathlib import Path
-
-placeholder = {
-    "summary": {
-        "files_scanned": 0,
-        "errors": 0,
-        "warnings": 0
-    },
-    "findings": []
-}
-
-Path('docs-lint.json').write_text(json.dumps(placeholder, indent=2) + '\n', encoding='utf-8')
-PY
+            python -c "import json, pathlib; pathlib.Path('docs-lint.json').write_text(json.dumps({'summary':{'files_scanned':0,'errors':0,'warnings':0},'findings':[]} , indent=2)+'\n', encoding='utf-8')"
           fi
 
           echo "LINT_STATUS=${status}" >> "${GITHUB_ENV}"
