@@ -14,6 +14,8 @@
   - [Pattern #6: Form with Validation](#pattern-6-form-with-validation)
   - [Pattern #7: Status Indicators](#pattern-7-status-indicators)
   - [Pattern #8: Console Layout](#pattern-8-console-layout)
+  - [Pattern #9: File Upload + Progress](#pattern-9-file-upload-progress)
+  - [Pattern #10 (Beta): Modal/Drawer Overlay](#pattern-10-beta-modaldrawer-overlay)
 - [Composition Rules](#composition-rules)
 - [Pattern Decision Tree](#pattern-decision-tree)
 - [Quick Reference Tables](#quick-reference-tables)
@@ -97,6 +99,8 @@ Done. No aesthetic decisions required.
 | "form", "input", "validation", "error messages" | Form with Validation | #6 |
 | "status", "success", "failed", "queued" | Status Indicators | #7 |
 | "dashboard", "console", "admin tool" | Console Layout | #8 |
+| "upload", "file", "attach", "import", "raster", "csv" | File Upload + Progress | #9 |
+| "modal", "dialog", "popup", "overlay", "drawer", "sidebar" | Modal/Drawer Overlay (Beta) | #10 |
 
 ---
 
@@ -383,6 +387,7 @@ status_panel(
     id="{{FIELD_ID}}" 
     name="{{NAME}}"
     required
+    data-error-target="{{FIELD_ID}}-error"
     aria-describedby="{{FIELD_ID}}-help {{FIELD_ID}}-error"
   >
   <small id="{{FIELD_ID}}-help" class="wc-help-text">
@@ -396,18 +401,31 @@ status_panel(
 
 **Validation JavaScript:**
 ```javascript
-document.getElementById('{{FORM_ID}}').addEventListener('submit', function(e) {
-  const input = document.getElementById('{{FIELD_ID}}');
-  const errorDiv = document.getElementById('{{FIELD_ID}}-error');
-  
-  if (!input.checkValidity()) {
+document.getElementById('{{FORM_ID}}').addEventListener('submit', function (e) {
+  let firstInvalid = null;
+
+  this.querySelectorAll('[data-error-target]').forEach((input) => {
+    const errorId = input.getAttribute('data-error-target');
+    const errorDiv = errorId ? document.getElementById(errorId) : null;
+    if (!errorDiv) {
+      return;
+    }
+
+    if (!input.checkValidity()) {
+      if (!firstInvalid) {
+        firstInvalid = input;
+      }
+      errorDiv.hidden = false;
+      input.setAttribute('aria-invalid', 'true');
+    } else {
+      errorDiv.hidden = true;
+      input.removeAttribute('aria-invalid');
+    }
+  });
+
+  if (firstInvalid) {
     e.preventDefault();
-    errorDiv.hidden = false;
-    input.setAttribute('aria-invalid', 'true');
-    input.focus();
-  } else {
-    errorDiv.hidden = true;
-    input.removeAttribute('aria-invalid');
+    firstInvalid.focus();
   }
 });
 ```
@@ -417,6 +435,7 @@ document.getElementById('{{FORM_ID}}').addEventListener('submit', function(e) {
 - `role="alert"` announces errors to screen readers
 - `aria-invalid` marks invalid fields
 - Required fields marked visually and semantically
+- Supports multiple fields per form (script iterates over every element with `data-error-target`)
 
 ---
 
@@ -543,6 +562,253 @@ document.getElementById('{{FORM_ID}}').addEventListener('submit', function(e) {
 
 ---
 
+### Pattern #9: File Upload + Progress
+
+**Trigger words:** upload, file, attach, import, raster, shapefile, csv  
+**Use when:** User needs to upload files with size validation and progress feedback  
+**Template variables:** `{{FIELD_ID}}`, `{{LABEL}}`, `{{ACCEPT}}`, `{{MAX_SIZE_MB}}`, `{{FORMAT_DESCRIPTION}}`, `{{TASK_NAME}}`
+
+```jinja
+{% from "controls/_pure_macros.html" import file_upload %}
+
+{{ file_upload(
+  field_id="{{FIELD_ID}}",
+  label="{{LABEL}}",
+  accept="{{ACCEPT}}",
+  help="Maximum file size: {{MAX_SIZE_MB}} MB. {{FORMAT_DESCRIPTION}}"
+) }}
+
+<!-- Progress indicator (hidden until upload starts) -->
+<div id="{{FIELD_ID}}-progress" class="wc-upload-progress" hidden>
+  <div class="wc-upload-progress__bar">
+    <div class="wc-upload-progress__fill" style="width: 0%"></div>
+  </div>
+  <p class="wc-upload-progress__status">Uploading: 0%</p>
+</div>
+```
+
+**JavaScript upload handler:**
+```javascript
+<script>
+document.getElementById('{{FIELD_ID}}').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  // Validate file size
+  const maxBytes = {{MAX_SIZE_MB}} * 1024 * 1024;
+  if (file.size > maxBytes) {
+    alert(`File exceeds maximum size of {{MAX_SIZE_MB}} MB`);
+    e.target.value = '';
+    return;
+  }
+  
+  // Show progress UI
+  const progressContainer = document.getElementById('{{FIELD_ID}}-progress');
+  const progressFill = progressContainer.querySelector('.wc-upload-progress__fill');
+  const progressStatus = progressContainer.querySelector('.wc-upload-progress__status');
+  progressContainer.hidden = false;
+  
+  // Prepare form data
+  const formData = new FormData();
+  formData.append('{{FIELD_ID}}', file);
+  
+  // Upload with progress tracking
+  const xhr = new XMLHttpRequest();
+  
+  xhr.upload.addEventListener('progress', function(event) {
+    if (event.lengthComputable) {
+      const percent = Math.round((event.loaded / event.total) * 100);
+      progressFill.style.width = percent + '%';
+      progressStatus.textContent = `Uploading: ${percent}%`;
+    }
+  });
+  
+  xhr.addEventListener('load', function() {
+    if (xhr.status === 200) {
+      progressStatus.textContent = 'Upload complete!';
+      // Handle success response
+      const response = JSON.parse(xhr.responseText);
+      console.log('Uploaded:', response);
+    } else {
+      progressStatus.textContent = 'Upload failed';
+      alert('Upload error: ' + xhr.statusText);
+    }
+  });
+  
+  xhr.addEventListener('error', function() {
+    progressStatus.textContent = 'Upload failed';
+    alert('Network error during upload');
+  });
+  
+  xhr.open('POST', "{{ url_for_run('tasks/upload_' ~ TASK_NAME) }}");
+  xhr.send(formData);
+});
+</script>
+```
+
+**Example fill:**
+- `{{FIELD_ID}}` → `"input_upload_sbs"`
+- `{{LABEL}}` → `"Upload Soil Burn Severity Map"`
+- `{{ACCEPT}}` → `".tif,.img"`
+- `{{MAX_SIZE_MB}}` → `100`
+- `{{FORMAT_DESCRIPTION}}` → `"GeoTIFF or IMG format"`
+- `{{TASK_NAME}}` → `"sbs_map"`
+
+**Features:**
+- File size validation before upload
+- Progress bar with percentage
+- XHR-based upload (allows progress tracking)
+- Error handling for network/server failures
+- Accepts only specified file types
+
+**Critical notes:**
+- Use `XMLHttpRequest` not `fetch()` to track upload progress
+- Always validate file size client-side before upload
+- Server must accept FormData with file key matching `{{FIELD_ID}}`
+- Progress bar uses inline `style="width: X%"` for dynamic updates
+- Ensure `TASK_NAME` matches the server task slug (e.g., `"sbs_map"`) so the upload endpoint resolves correctly
+- `.wc-upload-progress*` classes are defined in `ui-foundation.css`
+
+---
+
+### Pattern #10 (Beta): Modal/Drawer Overlay
+
+**Trigger words:** modal, dialog, popup, overlay, drawer, sidebar  
+**Use when:** Need overlay UI for confirmations, forms, or detail views  
+**Template variables:** `{{MODAL_ID}}`, `{{TITLE}}`, `{{CONTENT}}`
+
+**Modal (center overlay):**
+```jinja
+<!-- Trigger button -->
+<button class="pure-button" data-modal-open="{{MODAL_ID}}">
+  {{TRIGGER_TEXT}}
+</button>
+
+<!-- Modal content -->
+<div class="wc-modal" id="{{MODAL_ID}}" data-modal hidden>
+  <div class="wc-modal__overlay" data-modal-dismiss></div>
+  <div class="wc-modal__content">
+    <header class="wc-modal__header">
+      <h2 class="wc-modal__title">{{TITLE}}</h2>
+      <button class="wc-modal__close" data-modal-dismiss aria-label="Close">
+        ×
+      </button>
+    </header>
+    <div class="wc-modal__body">
+      {{CONTENT}}
+    </div>
+    <footer class="wc-modal__footer">
+      {% call button_row() %}
+        <button type="button" class="pure-button pure-button-primary" data-modal-dismiss>
+          {{PRIMARY_ACTION}}
+        </button>
+        <button type="button" class="pure-button pure-button-secondary" data-modal-dismiss>
+          Cancel
+        </button>
+      {% endcall %}
+    </footer>
+  </div>
+</div>
+```
+
+**Drawer (side overlay):**
+```jinja
+<!-- Trigger button -->
+<button class="pure-button" data-drawer-open="{{DRAWER_ID}}">
+  {{TRIGGER_TEXT}}
+</button>
+
+<!-- Drawer content -->
+<div class="wc-drawer" id="{{DRAWER_ID}}" data-drawer hidden>
+  <div class="wc-drawer__overlay" data-drawer-dismiss></div>
+  <div class="wc-drawer__panel">
+    <header class="wc-drawer__header">
+      <h2 class="wc-drawer__title">{{TITLE}}</h2>
+      <button class="wc-drawer__close" data-drawer-dismiss aria-label="Close">
+        ×
+      </button>
+    </header>
+    <div class="wc-drawer__body">
+      {{CONTENT}}
+    </div>
+  </div>
+</div>
+```
+
+**JavaScript initialization:**
+```javascript
+<script src="{{ url_for('static', filename='js/modal.js') }}"></script>
+<script>
+// Modal system auto-initializes via data-modal-open/dismiss attributes
+// No additional JavaScript required unless custom behavior needed
+
+// Optional: Programmatic control
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.removeAttribute('hidden');
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.setAttribute('hidden', '');
+}
+</script>
+```
+
+**Example fill (Confirmation modal):**
+```jinja
+<button class="pure-button" data-modal-open="delete-confirm">
+  Delete Project
+</button>
+
+<div class="wc-modal" id="delete-confirm" data-modal hidden>
+  <div class="wc-modal__overlay" data-modal-dismiss></div>
+  <div class="wc-modal__content">
+    <header class="wc-modal__header">
+      <h2 class="wc-modal__title">Confirm Deletion</h2>
+      <button class="wc-modal__close" data-modal-dismiss aria-label="Close">×</button>
+    </header>
+    <div class="wc-modal__body">
+      <p>Are you sure you want to delete this project? This action cannot be undone.</p>
+    </div>
+    <footer class="wc-modal__footer">
+      {% call button_row() %}
+        <button type="button" class="pure-button pure-button-primary" 
+                onclick="deleteProject()" data-modal-dismiss>
+          Delete
+        </button>
+        <button type="button" class="pure-button pure-button-secondary" data-modal-dismiss>
+          Cancel
+        </button>
+      {% endcall %}
+    </footer>
+  </div>
+</div>
+```
+
+**Features:**
+- Escape key closes modal/drawer
+- Click overlay to dismiss
+- Focus trap (Tab stays within modal)
+- Accessible (ARIA labels, role=dialog)
+- Zero JavaScript for basic usage (data attributes handle behavior)
+
+**Critical notes:**
+- Modal uses `modal.js` controller (must be loaded)
+- `data-modal` attribute marks container
+- `data-modal-open="id"` on trigger button
+- `data-modal-dismiss` on close button and overlay
+- Drawer pattern similar but slides from side
+- **Beta status:** Overlay stack is stable for buttons, forms, and focus loops (validated in `unitizer_modal.htm` and `poweruser_panel.htm`). Run the interaction QA checklist before shipping new flows and flag regressions to UI maintainers.
+
+**CSS Support:**
+- `.wc-modal` / `.wc-drawer` base styles exist in `ui-foundation.css`
+- Backdrop overlay uses `position: fixed` with semi-transparent background
+- Content panel positioned via flexbox (modal: center, drawer: right edge)
+- Transitions use existing `--wc-duration-*` tokens
+
+---
+
 ## Composition Rules
 
 **Valid nesting (what goes inside what):**
@@ -628,11 +894,20 @@ START: What does user want to build?
 
 8. Is it an admin dashboard/console?
    YES → Use Pattern #8 (Console Layout)
-   NO → Check if user request is unclear, ask for clarification
+   NO → Go to 9
 
-9. Multiple patterns needed?
-   → Combine patterns following Composition Rules above
-   → Example: Control Shell (#1) + Summary Pane (#2) + Status Panel (#4)
+9. Does it need file upload with progress tracking?
+   YES → Use Pattern #9 (File Upload + Progress)
+   NO → Go to 10
+
+10. Does it need overlay UI (modal/drawer)?
+    YES → Use Pattern #10 (Beta) (Modal/Drawer Overlay)
+    NO → Check if user request is unclear, ask for clarification
+
+11. Multiple patterns needed?
+    → Combine patterns following Composition Rules above
+    → Example: Control Shell (#1) + Summary Pane (#2) + Status Panel (#4)
+    → Example: Form (#6) + File Upload (#9) + Modal (#10 Beta)
 ```
 
 ---
@@ -806,6 +1081,182 @@ button.addEventListener('click', function(e) {
   </div>
 </details>
 ```
+
+---
+
+## Usage Examples from Codebase
+
+**Purpose:** Real-world pattern implementations for reference and validation
+
+### Example 1: File Upload with Auto-Submit (Pattern #9)
+**Location:** `wepppy/weppcloud/templates/controls/disturbed_sbs_pure.htm` (lines 69-77)  
+**Use case:** Upload Soil Burn Severity raster with automatic processing
+
+```jinja
+{{ ui.file_upload(
+     "input_upload_sbs",
+     "Upload SBS raster",
+     accept=".tif,.img",
+     extra_control_class="disable-readonly",
+     attrs={"data-auto-upload": "true"}
+   ) }}
+
+<p id="hint_upload_sbs" class="wc-field__help" aria-live="polite"></p>
+```
+
+**Key features:**
+- `accept=".tif,.img"` restricts file types to GeoTIFF/IMG
+- `data-auto-upload="true"` triggers automatic processing on file selection
+- Hint paragraph with `aria-live="polite"` announces status changes to screen readers
+- `extra_control_class="disable-readonly"` prevents upload during read-only mode
+
+**JavaScript controller pattern:**
+```javascript
+// disturbed.js handles upload via event delegation
+document.getElementById('input_upload_sbs').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  // Validate file size (100 MB limit for SBS maps)
+  if (file.size > 100 * 1024 * 1024) {
+    alert('File exceeds 100 MB limit');
+    return;
+  }
+  
+  // Upload via FormData
+  const formData = new FormData();
+  formData.append('input_upload_sbs', file);
+  
+  fetch(url_for_run('tasks/upload_sbs'), {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    document.getElementById('hint_upload_sbs').textContent = 'Upload complete';
+  })
+  .catch(error => {
+    document.getElementById('hint_upload_sbs').textContent = 'Upload failed';
+  });
+});
+```
+
+### Example 2: Modal Dialog for Settings (Pattern #10 Beta)
+**Location:** `wepppy/weppcloud/templates/controls/unitizer_modal.htm` (lines 1-24)  
+**Use case:** Unitizer unit conversion settings in modal overlay
+
+```jinja
+{% set modal_id = 'unitizerModal' %}
+{% set modal_title = modal_title or 'Unitizer Controls' %}
+<div class="wc-modal" id="{{ modal_id }}" data-modal hidden>
+  <div class="wc-modal__overlay" data-modal-dismiss></div>
+  <div class="wc-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="{{ modal_id }}Title">
+    <header class="wc-modal__header">
+      <h2 class="wc-modal__title" id="{{ modal_id }}Title">{{ modal_title }}</h2>
+      <button type="button"
+              class="wc-modal__close"
+              data-modal-dismiss
+              aria-label="Close Unitizer">
+        &times;
+      </button>
+    </header>
+    <div class="wc-modal__body">
+      {% include 'controls/unitizer.htm' %}
+    </div>
+    <footer class="wc-modal__footer">
+      <button type="button" class="pure-button pure-button-secondary" data-modal-dismiss>Close</button>
+    </footer>
+  </div>
+</div>
+```
+
+**Key features:**
+- `data-modal` attribute marks container for modal.js controller
+- `data-modal-dismiss` on overlay and close button allows dismissal
+- `role="dialog"` and `aria-modal="true"` for accessibility
+- `aria-labelledby` links title to dialog for screen readers
+- Includes nested control (`unitizer.htm`) via Jinja include
+
+**Trigger pattern:**
+```jinja
+<!-- Somewhere in the parent template -->
+<button class="pure-button" data-modal-open="unitizerModal">
+  Open Unit Converter
+</button>
+
+<!-- modal.js auto-initializes via data-modal-open attribute -->
+<script src="{{ url_for('static', filename='js/modal.js') }}"></script>
+```
+
+### Example 3: Status Panel + WebSocket (Pattern #4)
+**Location:** `wepppy/weppcloud/templates/controls/climate_pure.htm` (approximate pattern)  
+**Use case:** Live climate data build progress streaming
+
+```jinja
+{% call control_shell(
+    form_id="climate-form",
+    title="Climate Data",
+    summary_panel_override=summary_html
+) %}
+  <!-- Form content -->
+  <fieldset>
+    <!-- climate controls -->
+  </fieldset>
+
+  {{ status_panel(id="climate-status", height="300px") }}
+{% endcall %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const controller = ClimateController.getInstance();
+  
+  controller.attachStatusStream('climate-status', {
+    channel: 'climate',
+    runId: window.runid
+  });
+});
+</script>
+```
+
+**Key features:**
+- Status panel with unique ID for WebSocket attachment
+- `height="300px"` creates scrollable log area
+- Controller attaches WebSocket stream to panel ID
+- Channel name matches backend Redis pub/sub key
+- Auto-scrolls to bottom as messages arrive
+
+### Example 4: Form with Validation (Pattern #6)
+**Location:** `wepppy/weppcloud/templates/controls/treatments_pure.htm` (inferred from pattern)  
+**Use case:** Treatment application form with date validation
+
+```jinja
+<div class="wc-field">
+  <label for="treatment_date">
+    Treatment Date
+    <span class="wc-field__required">*</span>
+  </label>
+  <input 
+    type="date" 
+    id="treatment_date" 
+    name="treatment_date"
+    required
+    aria-describedby="treatment_date-help treatment_date-error"
+  >
+  <small id="treatment_date-help" class="wc-field__help">
+    Date when treatment was applied
+  </small>
+  <div id="treatment_date-error" class="wc-field__message wc-field__message--error" role="alert" hidden>
+    Invalid date: must be after fire date
+  </div>
+</div>
+```
+
+**Key features:**
+- `required` attribute for HTML5 validation
+- `aria-describedby` links help text and error message
+- Error div with `role="alert"` announces validation failures
+- Hidden error initially, shown via JavaScript on validation
+- Red asterisk indicates required field visually
 
 ---
 

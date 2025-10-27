@@ -125,6 +125,34 @@ Added 159 lines at end of `ui-foundation.css` (after line 2832)
 
 ---
 
+### 4. Upload Progress (`.wc-upload-progress`)
+
+**Purpose:** Visual feedback during file uploads driven by Pattern #9.  
+**Element:** `<div hidden>` container revealed when upload starts.
+
+**Classes:**
+- `.wc-upload-progress` – Grid container to space the bar and status text.
+- `.wc-upload-progress__bar` – Track for the progress fill (rounded pill).
+- `.wc-upload-progress__fill` – Inline element whose width is driven by JS.
+- `.wc-upload-progress__status` – Textual progress indicator (percentage / final state).
+
+**Features:**
+- Token-based spacing (`space-sm`/`space-md`) and max width (32rem).
+- Border + surface-alt background for track, accent color fill with 0.2 s ease transition.
+- Status text uses muted color to avoid competing with primary content.
+
+**Token Usage:**
+- Colors: surface-alt, border, accent, text-muted.  
+- Spacing: space-sm, space-md.  
+- Radius: radius-pill.
+
+**Notes:**
+- Designed to pair with Pattern #9's XHR progress handler.  
+- Works in combination with `hidden` attribute toggles (native progressive enhancement).  
+- No JS dependencies beyond the pattern's example code.
+
+---
+
 ## Design Principles Applied
 
 ### Zero-Aesthetic / Calm Utility Compliance

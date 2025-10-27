@@ -2953,14 +2953,16 @@ body.wc-modal-open {
 }
 
 .wc-status-chip[data-state="error"],
-.wc-status-chip[data-state="failed"] {
+.wc-status-chip[data-state="failed"],
+.wc-status-chip[data-state="critical"] {
   background: var(--wc-color-critical-soft);
   border-color: var(--wc-color-critical);
   color: var(--wc-color-critical);
 }
 
 .wc-status-chip[data-state="warning"],
-.wc-status-chip[data-state="queued"] {
+.wc-status-chip[data-state="queued"],
+.wc-status-chip[data-state="attention"] {
   background: var(--wc-color-attention-soft);
   border-color: var(--wc-color-attention);
   color: var(--wc-color-attention);
@@ -2977,4 +2979,37 @@ body.wc-modal-open {
   display: inline-flex;
   align-items: center;
   font-size: 1rem;
+}
+
+/* Upload Progress (Pattern #9) - File upload indicators */
+.wc-upload-progress {
+  display: grid;
+  gap: var(--wc-space-sm);
+  margin-top: var(--wc-space-md);
+  max-width: 32rem;
+}
+
+.wc-upload-progress__bar {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+  border-radius: var(--wc-radius-pill);
+  background: var(--wc-color-surface-alt);
+  overflow: hidden;
+  border: 1px solid var(--wc-color-border);
+}
+
+.wc-upload-progress__fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: var(--wc-color-accent);
+  transition: width 0.2s ease;
+}
+
+.wc-upload-progress__status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--wc-color-text-muted);
 }
