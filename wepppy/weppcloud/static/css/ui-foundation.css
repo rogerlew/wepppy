@@ -6,10 +6,14 @@
  * The goal is a neutral, low-maintenance visual baseline that can be layered
  * on top of existing templates without introducing new dependencies.
  *
- * IMPORTANT: Before modifying this file, review docs/ui-docs/ui-style-guide.md
- * for component patterns, design tokens, spacing conventions, and best practices.
- * The style guide documents the rationale behind these choices and helps maintain
- * consistency across the application.
+ * IMPORTANT: Before modifying this file, review:
+ * - docs/ui-docs/ui-style-guide.md — Component patterns, design tokens, spacing conventions
+ * - docs/ui-docs/theme-system.md — Theme integration, adding VS Code themes, WCAG compliance
+ *
+ * THEME SYSTEM: The CSS variables below define the default "system" theme (light grayscale).
+ * Users can select from 11 additional themes via the theme switcher. Themes override these
+ * variables using :root[data-theme="..."] selectors loaded from static/css/themes/all-themes.css.
+ * See theme-system.md for complete documentation on adding themes and configurable mapping.
  */
 
 :root {

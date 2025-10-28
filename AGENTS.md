@@ -520,6 +520,8 @@ Until the automated marker checker lands (`wctl check-test-markers` from the too
 
 Consult `docs/ui-docs/ui-style-guide.md` for shared layout patterns (summary panes, panel spacing, typography tokens) and `docs/ui-docs/README.md` for the full index of UI documentation. Control-specific behavior should either live with the control or under `docs/ui-docs/control-ui-styling/` if a standalone note is needed.
 
+**Theme System:** WEPPcloud supports VS Code theme integration with 11 production themes. See `docs/ui-docs/theme-system.md` for adding themes, configurable mapping, and WCAG AA compliance. Controls remain theme-agnostic via CSS variables.
+
 ### Controller Bundling
 Controllers live in `wepppy/weppcloud/controllers_js/` and export singletons:
 

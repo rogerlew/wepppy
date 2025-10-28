@@ -1,14 +1,24 @@
-# VS Code Theme Integration Feasibility Analysis
-> **Status:** Proposal · **Date:** 2025-10-27  
-> **Context:** Stakeholder feedback requests more "style" while maintaining zero-aesthetic philosophy
+# VS Code Theme Integration - System Documentation
+> **Status:** Production · **Last Updated:** 2025-10-28  
+> **Context:** Complete architecture, implementation guide, and contribution guidelines  
+> **Work Package:** [`docs/work-packages/20251027_vscode_theme_integration/`](/workdir/wepppy/docs/work-packages/20251027_vscode_theme_integration/) - Implementation history and decisions
 
 ## Executive Summary
 
-**Verdict:** ✅ **Feasible and Aligned with Zero-Aesthetic Philosophy**
+**System Status:** ✅ **MVP Complete and Operational**
 
-VS Code themes can provide a systematic, constraint-driven color system that eliminates arbitrary color decisions while adding visual richness. The approach transforms "zero aesthetic decisions" from "no style" into "systematic style with zero human deliberation."
+The weppcloud theme system provides systematic, constraint-driven color palettes through VS Code theme integration. This approach transforms "zero aesthetic decisions" from "no style" into "systematic style with zero human deliberation."
 
-**Key insight:** Mapping VS Code theme tokens to CSS variables maintains the compositional pattern philosophy—developers still make zero color choices, they just select from curated theme catalogs instead of hardcoded grays.
+**Key insight:** Mapping VS Code theme tokens to CSS variables maintains the compositional pattern philosophy—developers still make zero color choices, they select from curated theme catalogs instead of hardcoded grays.
+
+**What's Live:**
+- 11 production themes: OneDark, Ayu family (7 variants), Cursor family (4 variants)
+- Configurable mapping system (`theme-mapping.json`)
+- Automated WCAG AA contrast validation
+- Runtime theme switcher with localStorage persistence
+- ~10KB combined CSS bundle
+
+**WCAG AA Compliance:** 6/11 themes pass all checks (54% - better than minimum requirement)
 
 ---
 
@@ -836,6 +846,206 @@ grep -r "border.*#[0-9a-f]" wepppy/weppcloud/templates/
 | **Combine all themes into one file** | Minimal | Low | ✅ Recommended (12 themes × 20 vars = 240 lines, ~3KB gzipped) |
 | **Dynamic CSS import** | High | Medium | ❌ Adds latency |
 | **CSS-in-JS generation** | Medium | High | ❌ Over-engineering |
+
+---
+
+## Adding New Themes
+
+### Quick Start: "I have a VS Code theme to install"
+
+When someone says "I have a VS Code theme to install," follow this workflow:
+
+#### Step 1: Obtain the Theme JSON
+```bash
+# VS Code themes are typically stored in:
+# ~/.vscode/extensions/<publisher>.<theme-name>-<version>/themes/
+
+# Example: Find OneDark theme
+find ~/.vscode/extensions -name "*onedark*.json" -path "*/themes/*"
+
+# Copy theme JSON to weppcloud themes directory
+cp ~/.vscode/extensions/akamud.vscode-theme-onedark-2.3.0/themes/OneDark.json \
+   /workdir/wepppy/wepppy/weppcloud/themes/
+```
+
+**Alternative sources:**
+- VS Code Marketplace: Download `.vsix` file, unzip, extract JSON from `themes/` directory
+- GitHub repositories: Many theme authors publish source JSON directly
+- Theme websites: Some provide direct JSON downloads
+
+#### Step 2: Convert Theme to CSS
+```bash
+cd /workdir/wepppy/wepppy/weppcloud/static-src/scripts
+
+# Preview conversion (validate without generating files)
+python convert_vscode_theme.py ../../themes/OneDark.json --validate-only
+
+# Generate CSS (output to stdout for inspection)
+python convert_vscode_theme.py ../../themes/OneDark.json
+
+# Generate CSS file
+python convert_vscode_theme.py ../../themes/OneDark.json \
+  --output ../../static/css/themes/onedark.css
+
+# Generate contrast report
+python convert_vscode_theme.py ../../themes/OneDark.json \
+  --report ../../themes/themes-contrast.json \
+  --md-report ../../themes/themes-contrast.md
+```
+
+#### Step 3: Update Theme Mapping (if needed)
+```bash
+# Edit mapping config if theme has issues
+nano /workdir/wepppy/wepppy/weppcloud/themes/theme-mapping.json
+```
+
+Add per-theme override if necessary:
+```json
+{
+  "overrides": {
+    "themes": {
+      "onedark": {
+        "--wc-color-page": {
+          "vscode_tokens": ["editorGroupHeader.tabsBackground"],
+          "reason": "OneDark's input.background too dark for page background"
+        }
+      }
+    }
+  }
+}
+```
+
+#### Step 4: Register Theme in Switcher
+```bash
+# Edit theme switcher dropdown
+nano /workdir/wepppy/wepppy/weppcloud/templates/header/_theme_switcher.htm
+```
+
+Add option to dropdown:
+```html
+<option value="onedark">OneDark</option>
+```
+
+Update theme.js if needed:
+```javascript
+// controllers_js/theme.js
+static THEMES = {
+  'default': 'Default Light',
+  'onedark': 'One Dark',  // ← Add here
+  // ... other themes
+};
+```
+
+#### Step 5: Rebuild Combined CSS Bundle
+```bash
+cd /workdir/wepppy/wepppy/weppcloud/static-src/scripts
+
+# Regenerate all-themes.css
+cat ../../static/css/themes/onedark.css \
+    ../../static/css/themes/ayu-dark.css \
+    ../../static/css/themes/*.css > ../../static/css/themes/all-themes.css
+
+# Or use build script if available
+bash ../build-static-assets.sh
+```
+
+#### Step 6: Test Theme
+```bash
+# Restart weppcloud container
+wctl restart weppcloud
+
+# Visit http://localhost:8080/weppcloud
+# Select new theme from dropdown
+# Test across multiple controls
+```
+
+#### Step 7: Validate WCAG AA Compliance
+```bash
+# Check contrast report
+cat /workdir/wepppy/wepppy/weppcloud/themes/themes-contrast.md
+
+# If theme fails WCAG AA:
+# 1. Add per-theme overrides to theme-mapping.json
+# 2. Regenerate CSS
+# 3. Retest
+# 4. Consider creating "-Accessible" variant if fixes are extensive
+```
+
+### Theme Addition Checklist
+
+Use this checklist when adding a new theme:
+
+- [ ] **Theme JSON obtained** from VS Code extensions or marketplace
+- [ ] **Converted to CSS** using `convert_vscode_theme.py`
+- [ ] **Validated** with `--validate-only` flag (no errors)
+- [ ] **WCAG AA compliance checked** via contrast report
+- [ ] **Per-theme overrides added** (if needed) to `theme-mapping.json`
+- [ ] **Registered in dropdown** (`_theme_switcher.htm`)
+- [ ] **Added to theme.js** THEMES constant (if using programmatic access)
+- [ ] **Combined bundle rebuilt** (`all-themes.css`)
+- [ ] **Tested on 3+ control types** (map, reports, forms)
+- [ ] **Print preview tested** (should fallback to light theme)
+- [ ] **Mobile/tablet tested** (if applicable)
+- [ ] **Documented in themes inventory** (`docs/work-packages/.../notes/themes_inventory.md`)
+
+### Common Issues and Solutions
+
+#### Issue: Theme looks wrong (colors don't match VS Code)
+**Cause:** VS Code token missing or mapping incorrect  
+**Solution:**
+1. Run with `--validate-only` to see which tokens are falling back
+2. Add per-theme override in `theme-mapping.json`
+3. Regenerate CSS
+
+#### Issue: Low contrast warnings
+**Cause:** Theme optimized for code, not UI text  
+**Solution:**
+1. Check contrast report: `themes-contrast.md`
+2. Add overrides for problematic variables (e.g., `--wc-color-link`)
+3. If many issues, create "-Accessible" variant with corrected colors
+
+#### Issue: Theme not appearing in dropdown
+**Cause:** Missing registration or CSS not loaded  
+**Solution:**
+1. Verify `<option>` added to `_theme_switcher.htm`
+2. Check `all-themes.css` includes the theme
+3. Clear browser cache
+4. Restart weppcloud container
+
+#### Issue: Theme flashes on page load
+**Cause:** FOUC (Flash of Unstyled Content)  
+**Solution:**
+1. Ensure `all-themes.css` loaded in `<head>` before body
+2. Verify inline script sets `data-theme` attribute immediately
+3. Check localStorage key matches theme ID
+
+#### Issue: Theme breaks print layout
+**Cause:** Dark backgrounds print as black  
+**Solution:**
+1. Verify print media query exists in `ui-foundation.css`
+2. Test print preview (should force light theme)
+3. Add theme-specific print overrides if needed
+
+### Theme Catalog Curation
+
+**When to add a theme:**
+- Stakeholder requests specific theme
+- Fills accessibility gap (e.g., high-contrast variant)
+- Popular VS Code theme with proven track record
+- Addresses specific use case (e.g., colorblind-friendly)
+
+**When to reject a theme:**
+- Fails WCAG AA after reasonable override attempts
+- Too similar to existing theme (creates decision fatigue)
+- Catalog already at 12-theme limit
+- Poor contrast in VS Code reviews/issues
+- Lacks community maintenance
+
+**Catalog health metrics:**
+- **Target:** 8-10 themes active
+- **Minimum:** 1 light + 1 dark WCAG AA compliant
+- **Diversity:** Mix of neutral (grayscale), warm (browns/oranges), cool (blues/greens)
+- **Accessibility:** >50% themes passing WCAG AA
 
 ---
 

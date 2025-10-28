@@ -2,7 +2,8 @@
 
 > **For AI Agents:** This document is agent training material, not human documentation.  
 > **Quick Start:** Scroll to [Pattern Catalog](#pattern-catalog) for copy-paste templates.  
-> **Deep Dive:** Scroll to [Design Philosophy](#design-philosophy) for rationale and technical details.
+> **Deep Dive:** Scroll to [Design Philosophy](#design-philosophy) for rationale and technical details.  
+> **Theme System:** See [`theme-system.md`](theme-system.md) for VS Code theme integration and color customization.
 
 <!-- toc -->
 - [Pattern Catalog](#pattern-catalog)
@@ -1432,6 +1433,9 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 ## Tokens, colors, and typography
 
 ### Color palette
+
+> **Theme System:** WEPPcloud now supports VS Code theme integration. See [`theme-system.md`](theme-system.md) for details on how themes override these default colors, adding new themes, and WCAG AA compliance requirements.
+
 | Token | Hex | Usage |
 | --- | --- | --- |
 | `--wc-color-text` | `#1f2328` | Primary text, icon fills.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L23-L34】|
@@ -1446,7 +1450,7 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 | `--wc-color-attention` | `#9a6700` | Pending/queued states.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L31-L34】|
 | `--wc-color-critical` | `#cf222e` | Error panels, destructive actions.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L33-L34】|
 
-**Theme:** WEPPcloud ships a single light palette; dark mode overrides are intentionally not supported.
+**Default Theme:** The values above represent the default "system" theme (light grayscale). Users can select from 11 additional themes via the theme switcher dropdown. All themes use the same CSS variable names, so controls remain theme-agnostic.
 
 ### Typography & spacing
 - Font stacks: sans-serif UI text uses `Source Sans 3` with system fallbacks; monospace uses `Source Code Pro` family.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L10-L147】
