@@ -15,7 +15,7 @@
   - [Pattern #7: Signal Chips](#pattern-7-signal-chips)
   - [Pattern #8: Console Deck Layout](#pattern-8-console-deck-layout)
   - [Pattern #9: Payload Dropzone](#pattern-9-payload-dropzone)
-  - [Pattern #10 (Beta): Orbit Overlay](#pattern-10-beta-orbit-overlay)
+  - [Pattern #10: Orbit Overlay](#pattern-10-orbit-overlay)
 - [Composition Rules](#composition-rules)
 - [Pattern Decision Tree](#pattern-decision-tree)
 - [Quick Reference Tables](#quick-reference-tables)
@@ -100,7 +100,7 @@ Done. No aesthetic decisions required.
 | "status", "success", "failed", "queued" | Signal Chips | #7 |
 | "dashboard", "console", "admin tool" | Console Deck Layout | #8 |
 | "upload", "file", "attach", "import", "raster", "csv" | Payload Dropzone | #9 |
-| "modal", "dialog", "popup", "overlay", "drawer", "sidebar" | Orbit Overlay (Beta) | #10 |
+| "modal", "dialog", "popup", "overlay", "drawer", "sidebar" | Orbit Overlay | #10 |
 
 ---
 
@@ -689,7 +689,7 @@ document.getElementById('{{FIELD_ID}}').addEventListener('change', function(e) {
 
 ---
 
-### Pattern #10 (Beta): Orbit Overlay
+### Pattern #10: Orbit Overlay
 
 > Formerly: Modal/Drawer Overlay
 
@@ -819,7 +819,7 @@ function closeModal(modalId) {
 - `data-modal-open="id"` on trigger button
 - `data-modal-dismiss` on close button and overlay
 - Drawer pattern similar but slides from side
-- **Beta status:** Overlay stack is stable for buttons, forms, and focus loops (validated in `unitizer_modal.htm` and `poweruser_panel.htm`). Run the interaction QA checklist before shipping new flows and flag regressions to UI maintainers.
+- **QA expectation:** Overlay stack is stable for buttons, forms, and focus loops (validated in `unitizer_modal.htm` and `poweruser_panel.htm`). Run the interaction QA checklist before shipping new flows and flag regressions to UI maintainers.
 
 **CSS Support:**
 - `.wc-modal` / `.wc-drawer` base styles exist in `ui-foundation.css`
@@ -921,13 +921,13 @@ START: What does user want to build?
    NO → Go to 10
 
 10. Does it need overlay UI (modal/drawer)?
-    YES → Use Pattern #10 (Beta) (Orbit Overlay)
+    YES → Use Pattern #10 (Orbit Overlay)
     NO → Check if user request is unclear, ask for clarification
 
 11. Multiple patterns needed?
     → Combine patterns following Composition Rules above
     → Example: Zero-Chill Control Shell (#1) + Snapshot Summary Pane (#2) + Livewire Status Stream (#4)
-    → Example: Guardrail Form (#6) + Payload Dropzone (#9) + Orbit Overlay (#10 Beta)
+    → Example: Guardrail Form (#6) + Payload Dropzone (#9) + Orbit Overlay (#10)
 ```
 
 ---
@@ -1161,7 +1161,7 @@ document.getElementById('input_upload_sbs').addEventListener('change', function(
 });
 ```
 
-### Example 2: Modal Dialog for Settings (Pattern #10 Beta · Orbit Overlay)
+### Example 2: Modal Dialog for Settings (Pattern #10 · Orbit Overlay)
 **Location:** `wepppy/weppcloud/templates/controls/unitizer_modal.htm` (lines 1-24)  
 **Use case:** Unitizer unit conversion settings in modal overlay
 
@@ -1472,6 +1472,7 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 ### Forms
 - Prefer Pure’s stacked form markup (`.pure-form`, `.pure-control-group`). All fields inherit zero-radius borders and accessible focus outlines from the foundation stylesheet.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L317-L360】
 - Group supporting text beneath inputs using muted text color (`var(--wc-color-text-muted)`).
+- Use `unitized_numeric_group()` for paired metric/imperial numeric fields. Pass `metric`/`imperial` dictionaries with a `fields` list; each item shares the `numeric_field` surface (`id`, `label`, `value`, `attrs`, conversion metadata). The helper renders `.unitizer-wrapper` containers, keeps labels aligned, and wires conversion targets via the supplied `data-convert-*` attributes.【F:wepppy/wepppy/weppcloud/templates/controls/_pure_macros.html†L544-L607】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L237-L245】
 - Authentication views use the shared `.wc-auth-card` container and `.pure-form-aligned` layout; reuse the Jinja macros in `security/_macros.html` so labels, inline messages, and controls stay consistent.【F:wepppy/wepppy/weppcloud/templates/security/_layout.html†L5-L20】【F:wepppy/wepppy/weppcloud/templates/security/_macros.html†L1-L46】
 
 ### Tables
@@ -1481,7 +1482,8 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 - Right-align numeric columns with `.wc-text-right` so values line up visually and remain scannable in dense reports.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L176-L187】
 
 ### Panels & cards
-- Wrap feature areas inside `.wc-panel` or `.wc-card` to keep consistent padding and squared borders.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L357-L364】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L838-L842】
+- Wrap feature areas inside `.wc-panel` or `.wc-card` to keep consistent padding and squared borders.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L357-L364】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L623-L680】
+- Use the `card()` macro for non-collapsible groupings inside a control. Arguments cover `title`, optional `description`, `meta`, `footer`, extra `classes`, `body_class`, and arbitrary `attrs`. The body defaults to `.wc-stack`, so nested fields inherit the shared `--wc-space-lg` gap without additional wrappers; add modifiers such as `wc-card--muted` through the `classes` parameter when an alternate surface is required.【F:wepppy/wepppy/weppcloud/templates/controls/_pure_macros.html†L271-L307】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L623-L680】
 
 ### Status & alerts
 - `.wc-status` blocks provide consistent accenting for queued, success, and failure states without custom CSS per page. Pair them with iconography or concise labels so state isn’t communicated by color alone.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L551-L605】

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/purecss/pure-min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/purecss/grids-responsive-min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-foundation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes/all-themes.css') }}">
     {% block head_extras %}{% endblock %}
   </head>
   <body class="wc-page">
@@ -20,7 +21,9 @@
           {% block header_nav %}{% endblock %}
         </div>
         <div class="wc-header__tools">
-          {% block header_tools %}{% endblock %}
+          {% block header_tools %}
+            {% include 'header/_theme_switcher.htm' %}
+          {% endblock %}
         </div>
       </div>
     </header>

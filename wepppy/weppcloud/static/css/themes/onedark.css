@@ -1,0 +1,28 @@
+/* Generated from OneDark.json on 2025-10-28T03:44:31.898164+00:00 */
+:root[data-theme="onedark"] {
+  --wc-color-accent: #528BFF;
+  --wc-color-accent-soft: rgba(82, 139, 255, 0.180);
+  --wc-color-attention: #528BFF;
+  --wc-color-attention-soft: rgba(82, 139, 255, 0.220);
+  --wc-color-border: #181A1F;
+  --wc-color-border-strong: #0F1115;
+  --wc-color-critical: #FFFFFF;
+  --wc-color-critical-soft: rgba(255, 255, 255, 0.200);
+  --wc-color-link: #528BFF;
+  --wc-color-link-hover: #528BFF;
+  --wc-color-page: #21252B;
+  --wc-color-positive: #2C313A;
+  --wc-color-positive-soft: rgba(44, 49, 58, 0.180);
+  --wc-color-primary: #528BFF;
+  --wc-color-primary-dark: #426FCC;
+  --wc-color-surface: #282C34;
+  --wc-color-surface-alt: #21252B;
+  --wc-color-text: #ABB2BF;
+  --wc-color-text-muted: #636D83;
+  --wc-shadow-md: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --wc-shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+:root[data-theme="onedark"] .wc-card, :root[data-theme="onedark"] .wc-control, :root[data-theme="onedark"] .wc-panel {
+  border-color: transparent;
+  box-shadow: none;
+}

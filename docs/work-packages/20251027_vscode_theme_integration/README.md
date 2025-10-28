@@ -1,6 +1,6 @@
 # VS Code Theme Integration Work Package
 
-**Status:** 🚧 In Progress (Phase 0)  
+**Status:** 🚧 In Progress (Phase 1)  
 **Created:** 2025-10-27  
 **Priority:** 🔴 **CRITICAL PATH** - Frontend Modernization Blocker
 
@@ -11,6 +11,7 @@
 - **Package Scope:** [package.md](package.md)
 - **Progress Tracker:** [tracker.md](tracker.md)
 - **Feasibility Analysis:** [artifacts/vscode-themes-feasibility.md](artifacts/vscode-themes-feasibility.md)
+- **Theme Mapping Guide:** [notes/theme_mapping.md](notes/theme_mapping.md)
 
 ---
 
@@ -52,6 +53,7 @@ VS Code Theme JSON → theme-mapping.json → convert_vscode_theme.py → CSS Va
 2. **Dynamic Converter** (`static-src/scripts/convert_vscode_theme.py`)
    - Reads mapping config (not hardcoded)
    - `--validate-only` mode for safety
+   - `--report` / `--md-report` emit JSON + Markdown contrast reports
    - `--reset-mapping` restores defaults
    - Detailed output comments
 
@@ -75,8 +77,8 @@ VS Code Theme JSON → theme-mapping.json → convert_vscode_theme.py → CSS Va
 
 | Phase | Duration | Status | Deliverable |
 |-------|----------|--------|-------------|
-| **Phase 0** | 1 day | 🔴 Not Started | Configurable mapping system |
-| **Phase 1** | 1-2 days | ⏸️ Pending | OneDark POC + theme switcher |
+| **Phase 0** | 1 day | 🟢 Complete | Configurable mapping system |
+| **Phase 1** | 1-2 days | 🟡 In Progress | OneDark POC + theme switcher |
 | **Phase 2** | 2-3 days | ⏸️ Pending | 6 themes + WCAG validation |
 | **Phase 3** | 1 day | ⏸️ Pending | User persistence |
 | **Phase 4** | 1 day | ⏸️ Pending | Documentation |
@@ -128,15 +130,16 @@ Colors come from **external sources** (VS Code ecosystem), not developer design 
 - ✅ Configurable mapping architecture designed
 - ✅ 5-phase implementation plan drafted
 - ✅ Added to kanban board (marked critical path)
+- ✅ Phase 0 deliverables shipped (mapping JSON, converter tooling, stakeholder guide, validation/reset workflow)
+- ✅ Runtime theme switcher (header select + localStorage) and initial CSS bundle integration
 
 ### In Progress
-- 🔄 Phase 0 preparation
+- 🔄 Expand curated theme preview + documentation (Phase 1 follow-up)
 
 ### Next Steps
-1. Create `theme-mapping.json` with default mappings
-2. Update converter script for dynamic mapping
-3. Add validation and reset flags
-4. Document stakeholder editing guide
+1. Capture screenshots / preview assets for the new themes
+2. Add WCAG contrast validation harness for upcoming catalog
+3. Document user-facing theme switcher usage and update UI style guide
 
 ---
 
@@ -160,9 +163,9 @@ Colors come from **external sources** (VS Code ecosystem), not developer design 
 ## Key Artifacts
 
 ### Phase 0
-- [ ] `themes/theme-mapping.json`
-- [ ] `static-src/scripts/convert_vscode_theme.py`
-- [ ] Stakeholder mapping guide
+- [x] `themes/theme-mapping.json`
+- [x] `static-src/scripts/convert_vscode_theme.py`
+- [x] Stakeholder mapping guide
 
 ### Phase 1
 - [ ] `static/css/themes/onedark.css`

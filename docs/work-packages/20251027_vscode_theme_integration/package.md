@@ -15,12 +15,12 @@ Implement configurable VS Code theme integration to satisfy stakeholder demands 
 ## Objectives
 
 ### Primary Goals (MVP)
-1. ✅ Implement configurable theme mapping system (`theme-mapping.json`)
-2. ✅ Build dynamic theme converter with validation and reset capabilities
-3. ✅ Ship 6 curated themes (Default Light/Dark, OneDark, GitHub Dark, Solarized Light/Dark)
-4. ✅ Add theme switcher UI with localStorage persistence
-5. ✅ Ensure at least 1 light and 1 dark theme meet WCAG AA compliance
-6. ✅ Enable stakeholder customization without code changes
+- [x] Implement configurable theme mapping system (`theme-mapping.json`)
+- [x] Build dynamic theme converter with validation and reset capabilities
+- [ ] Ship 6 curated themes (Default Light/Dark, OneDark, GitHub Dark, Solarized Light/Dark)
+- [x] Add theme switcher UI with localStorage persistence
+- [ ] Ensure at least 1 light and 1 dark theme meet WCAG AA compliance
+- [ ] Enable stakeholder customization without code changes
 
 ### Post-MVP Goals
 7. ⏭️ Cross-device theme sync for logged-in users (Phase 3)
@@ -253,7 +253,7 @@ wepppy/weppcloud/
 6. Build theme gallery page with accessibility badges
 
 **Deliverables:**
-- [ ] 6 production-ready themes
+- [ ] 6 proof of concept themes
 - [ ] Theme preview UI
 - [ ] Accessibility audit passed for Default Light + Default Dark
 - [ ] Contrast metrics documented for all themes
@@ -474,9 +474,7 @@ No color picker, no design reviews, no aesthetic decisions.
 - [ ] Contrast validation report
 
 ### Phase 2
-- [ ] 6 production-ready theme CSS files
-- [ ] Theme preview thumbnails
-- [ ] Theme gallery page
+- [ ] 6 proof of concept theme CSS files
 
 ### Phase 3 (Post-MVP)
 - [ ] `/api/theme/preference` endpoint
@@ -487,11 +485,6 @@ No color picker, no design reviews, no aesthetic decisions.
 - [ ] `docs/ui-docs/theme-system.md`
 - [ ] Build pipeline integration
 - [ ] User help documentation
-
-### Phase 5
-- [ ] Analytics dashboard
-- [ ] Feedback collection mechanism
-- [ ] Quarterly review process
 
 ---
 

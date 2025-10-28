@@ -1,0 +1,28 @@
+/* Generated from ayu-dark.json on 2025-10-28T03:44:31.922960+00:00 */
+:root[data-theme="ayu-dark"] {
+  --wc-color-accent: #e6b450b3;
+  --wc-color-accent-soft: rgba(230, 180, 80, 0.180);
+  --wc-color-attention: #e6b45033;
+  --wc-color-attention-soft: rgba(230, 180, 80, 0.220);
+  --wc-color-border: #171A1F;
+  --wc-color-border-strong: #101217;
+  --wc-color-critical: #0d1017;
+  --wc-color-critical-soft: rgba(13, 16, 23, 0.200);
+  --wc-color-link: #e6b450;
+  --wc-color-link-hover: #E6B450;
+  --wc-color-page: #0b0e14;
+  --wc-color-positive: #565b6633;
+  --wc-color-positive-soft: rgba(86, 91, 102, 0.180);
+  --wc-color-primary: #e6b450b3;
+  --wc-color-primary-dark: #B89040B3;
+  --wc-color-surface: #0b0e14;
+  --wc-color-surface-alt: #0f131a;
+  --wc-color-text: #bfbdb6;
+  --wc-color-text-muted: #6c738099;
+  --wc-shadow-md: none;
+  --wc-shadow-sm: none;
+}
+:root[data-theme="ayu-dark"] .wc-card, :root[data-theme="ayu-dark"] .wc-control, :root[data-theme="ayu-dark"] .wc-panel {
+  border-color: transparent;
+  box-shadow: none;
+}

@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "meta": {
+    "description": "Maps VS Code workbench tokens to WEPPcloud UI variables. Edit `theme-mapping.json`, not this defaults file.",
+    "updated": "2025-10-27",
+    "defaults": {
+      "themes_dir": "wepppy/weppcloud/themes",
+      "output_dir": "wepppy/weppcloud/static/css/themes",
+      "combined_file": "all-themes.css"
+    },
+    "notes": [
+      "Tokens are evaluated in order. The first token found in a theme file is used.",
+      "If no tokens resolve, the fallback value is applied.",
+      "Per-theme overrides can force specific values or opt-in to extra CSS behaviours."
+    ]
+  },
+  "themes": {
+    "onedark": {
+      "label": "OneDark",
+      "source": "OneDark.json",
+      "variant": "dark",
+      "description": "Atom-inspired dark theme by akamud.",
+      "options": {
+        "flat_cards": true,
+        "suppress_shadows": true
+      },
+      "overrides": {
+        "--wc-shadow-sm": "0 6px 18px rgba(0, 0, 0, 0.35)",
+        "--wc-shadow-md": "0 18px 48px rgba(0, 0, 0, 0.45)",
+        "--wc-color-border": "#181A1F",
+        "--wc-color-border-strong": "#0F1115"
+      }
+    }
+  },
+  "variables": {
+    "--wc-color-page": {
+      "description": "Body background behind control shells and layout chrome.",
+      "fallback": "#f6f8fa",
+      "tokens": [
+        "titleBar.inactiveBackground",
+        "sideBar.background",
+        "editorGroupHeader.tabsBackground",
+        "editor.background"
+      ]
+    },
+    "--wc-color-surface": {
+      "description": "Primary surface color for cards, panels, and control shells.",
+      "fallback": "#ffffff",
+      "tokens": [
+        "editor.background",
+        "titleBar.activeBackground",
+        "sideBar.background"
+      ]
+    },
+    "--wc-color-surface-alt": {
+      "description": "Alternate surface color used for secondary panels and tables.",
+      "fallback": "#eef1f4",
+      "tokens": [
+        "editorGroup.background",
+        "statusBar.background",
+        "titleBar.activeBackground",
+        "sideBarSectionHeader.background"
+      ]
+    },
+    "--wc-color-border": {
+      "description": "Default border color used throughout the UI.",
+      "fallback": "#d0d7de",
+      "tokens": [
+        "dropdown.border",
+        "editorGroup.border",
+        "tab.border"
+      ]
+    },
+    "--wc-color-border-strong": {
+      "description": "Stronger border color for separators and hover states.",
+      "fallback": "#afb8c1",
+      "tokens": [
+        "editorWidget.border",
+        "pickerGroup.border",
+        "statusBarItem.hoverBackground"
+      ]
+    },
+    "--wc-color-text": {
+      "description": "Default foreground text color.",
+      "fallback": "#1f2328",
+      "tokens": [
+        "editor.foreground",
+        "activityBar.foreground",
+        "list.activeSelectionForeground"
+      ]
+    },
+    "--wc-color-text-muted": {
+      "description": "Muted foreground text color for helper copy.",
+      "fallback": "#4b5563",
+      "tokens": [
+        "editorLineNumber.foreground",
+        "list.inactiveSelectionForeground",
+        "editorInlayHint.foreground"
+      ]
+    },
+    "--wc-color-link": {
+      "description": "Interactive link color.",
+      "fallback": "#1f2328",
+      "tokens": [
+        "textLink.foreground",
+        "focusBorder",
+        "activityBarBadge.background"
+      ]
+    },
+    "--wc-color-link-hover": {
+      "description": "Link hover/active color.",
+      "fallback": "#111418",
+      "tokens": [
+        {
+          "token": "textLink.activeForeground"
+        },
+        {
+          "token": "focusBorder"
+        },
+        {
+          "token": "activityBarBadge.background",
+          "darken": 0.1
+        }
+      ]
+    },
+    "--wc-color-accent": {
+      "description": "Primary accent color for buttons and highlights.",
+      "fallback": "#24292f",
+      "tokens": [
+        "focusBorder",
+        "activityBarBadge.background",
+        "extensionButton.prominentBackground"
+      ]
+    },
+    "--wc-color-accent-soft": {
+      "description": "Soft accent background used for subtle emphasis.",
+      "fallback": "#e6e8eb",
+      "tokens": [
+        {
+          "token": "focusBorder",
+          "alpha": 0.18
+        },
+        {
+          "token": "activityBarBadge.background",
+          "alpha": 0.18
+        }
+      ]
+    },
+    "--wc-color-positive": {
+      "description": "Success/positive accent color.",
+      "fallback": "#1a7f37",
+      "tokens": [
+        "statusBarItem.hoverBackground",
+        "list.highlightForeground"
+      ]
+    },
+    "--wc-color-positive-soft": {
+      "description": "Soft positive background for alerts.",
+      "fallback": "#e6f4ea",
+      "tokens": [
+        {
+          "token": "statusBarItem.hoverBackground",
+          "alpha": 0.18
+        }
+      ]
+    },
+    "--wc-color-attention": {
+      "description": "Warning/attention accent color.",
+      "fallback": "#9a6700",
+      "tokens": [
+        "badge.background",
+        "list.hoverBackground"
+      ]
+    },
+    "--wc-color-attention-soft": {
+      "description": "Soft attention background for alerts.",
+      "fallback": "#fceec7",
+      "tokens": [
+        {
+          "token": "badge.background",
+          "alpha": 0.22
+        }
+      ]
+    },
+    "--wc-color-critical": {
+      "description": "Error/critical accent color.",
+      "fallback": "#cf222e",
+      "tokens": [
+        "statusBar.debuggingForeground",
+        "activityBarBadge.background"
+      ]
+    },
+    "--wc-color-critical-soft": {
+      "description": "Soft error background for alerts.",
+      "fallback": "#fce0e2",
+      "tokens": [
+        {
+          "token": "statusBar.debuggingForeground",
+          "alpha": 0.2
+        }
+      ]
+    },
+    "--wc-color-primary": {
+      "description": "Primary link/interaction color.",
+      "fallback": "#24292f",
+      "tokens": [
+        "focusBorder",
+        "activityBarBadge.background"
+      ]
+    },
+    "--wc-color-primary-dark": {
+      "description": "Stronger variant of the primary color for hover states.",
+      "fallback": "#111418",
+      "tokens": [
+        {
+          "token": "focusBorder",
+          "darken": 0.2
+        },
+        {
+          "token": "activityBarBadge.background",
+          "darken": 0.2
+        }
+      ]
+    },
+    "--wc-shadow-sm": {
+      "description": "Small drop shadow token.",
+      "fallback": "0 1px 2px rgba(15, 23, 42, 0.08)",
+      "tokens": []
+    },
+    "--wc-shadow-md": {
+      "description": "Medium drop shadow token.",
+      "fallback": "0 6px 18px rgba(15, 23, 42, 0.12)",
+      "tokens": []
+    }
+  }
+}

@@ -16,16 +16,16 @@
 ---
 
 ### 🟢 Ready
-- [ ] **Phase 0.1** - Create `theme-mapping.json` with default mappings
-- [ ] **Phase 0.2** - Update converter script for dynamic mapping
-- [ ] **Phase 0.3** - Add `--reset-mapping` and `--validate-only` flags
-- [ ] **Phase 0.4** - Document stakeholder mapping guide
-- [ ] **Phase 0.5** - Test override mechanism
+*No ready tasks – awaiting Phase 1 breakdown*
 
 ---
 
-### ✅ Done
-*No completed tasks yet*
+- [x] **Phase 1.1** - Implement runtime theme switcher (OneDark/Ayu POC)
+- [x] **Phase 0.1** - Create `theme-mapping.json` with default mappings
+- [x] **Phase 0.2** - Update converter script for dynamic mapping
+- [x] **Phase 0.3** - Add `--reset-mapping` and `--validate-only` flags
+- [x] **Phase 0.4** - Document stakeholder mapping guide
+- [x] **Phase 0.5** - Test override mechanism (Onedark flat-card overrides)
 
 ---
 

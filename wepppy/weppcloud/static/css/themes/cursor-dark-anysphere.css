@@ -1,0 +1,28 @@
+/* Generated from Cursor-Dark-Anysphere-color-theme.json on 2025-10-28T03:44:31.926220+00:00 */
+:root[data-theme="cursor-dark-anysphere"] {
+  --wc-color-accent: #30373a;
+  --wc-color-accent-soft: rgba(48, 55, 58, 0.180);
+  --wc-color-attention: #88C0D0;
+  --wc-color-attention-soft: rgba(136, 192, 208, 0.220);
+  --wc-color-border: #2A2A2A;
+  --wc-color-border-strong: #2A2A2A00;
+  --wc-color-critical: #D8DEE9;
+  --wc-color-critical-soft: rgba(216, 222, 233, 0.200);
+  --wc-color-link: #81A1C1;
+  --wc-color-link-hover: #81A1C1;
+  --wc-color-page: #141414;
+  --wc-color-positive: #404040;
+  --wc-color-positive-soft: rgba(64, 64, 64, 0.180);
+  --wc-color-primary: #30373a;
+  --wc-color-primary-dark: #262C2E;
+  --wc-color-surface: #1a1a1a;
+  --wc-color-surface-alt: #141414;
+  --wc-color-text: #D8DEE9;
+  --wc-color-text-muted: #505050;
+  --wc-shadow-md: none;
+  --wc-shadow-sm: none;
+}
+:root[data-theme="cursor-dark-anysphere"] .wc-card, :root[data-theme="cursor-dark-anysphere"] .wc-control, :root[data-theme="cursor-dark-anysphere"] .wc-panel {
+  border-color: transparent;
+  box-shadow: none;
+}

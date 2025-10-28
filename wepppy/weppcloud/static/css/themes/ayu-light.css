@@ -1,0 +1,24 @@
+/* Generated from ayu-light.json on 2025-10-28T03:44:31.924076+00:00 */
+:root[data-theme="ayu-light"] {
+  --wc-color-accent: #ffaa33b3;
+  --wc-color-accent-soft: rgba(255, 170, 51, 0.180);
+  --wc-color-attention: #ffaa3333;
+  --wc-color-attention-soft: rgba(255, 170, 51, 0.220);
+  --wc-color-border: #8a919945;
+  --wc-color-border-strong: #6b7d8f1f;
+  --wc-color-critical: #fcfcfc;
+  --wc-color-critical-soft: rgba(252, 252, 252, 0.200);
+  --wc-color-link: #ffaa33;
+  --wc-color-link-hover: #FFAA33;
+  --wc-color-page: #f8f9fa;
+  --wc-color-positive: #8a919933;
+  --wc-color-positive-soft: rgba(138, 145, 153, 0.180);
+  --wc-color-primary: #ffaa33b3;
+  --wc-color-primary-dark: #CC8829B3;
+  --wc-color-surface: #f8f9fa;
+  --wc-color-surface-alt: #f3f4f5;
+  --wc-color-text: #5c6166;
+  --wc-color-text-muted: #8a919966;
+  --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
+  --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+}

@@ -1,0 +1,27 @@
+/* Generated from Cursor-Light-color-theme.json on 2025-10-28T03:44:31.927899+00:00 */
+:root[data-theme="cursor-light"] {
+  --wc-color-accent: #FCFCFC00;
+  --wc-color-accent-soft: rgba(252, 252, 252, 0.180);
+  --wc-color-attention: #F3F3F4;
+  --wc-color-attention-soft: rgba(243, 243, 244, 0.220);
+  --wc-color-border: #0B0B2D0A;
+  --wc-color-border-strong: #1616181A;
+  --wc-color-critical: #0E0E2A47;
+  --wc-color-critical-soft: rgba(14, 14, 42, 0.200);
+  --wc-color-link: #3173A7;
+  --wc-color-link-hover: #3173A7;
+  --wc-color-page: #F3F3F4;
+  --wc-color-positive: #0B0B2D11;
+  --wc-color-positive-soft: rgba(11, 11, 45, 0.180);
+  --wc-color-primary: #FCFCFC00;
+  --wc-color-primary-dark: #CACACA00;
+  --wc-color-surface: #FCFCFC;
+  --wc-color-surface-alt: #F3F3F4;
+  --wc-color-text: #15151DEB;
+  --wc-color-text-muted: #0E0E2A47;
+  --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
+  --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+:root[data-theme="cursor-light"] .wc-card, :root[data-theme="cursor-light"] .wc-control, :root[data-theme="cursor-light"] .wc-panel {
+  box-shadow: none;
+}

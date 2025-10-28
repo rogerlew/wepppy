@@ -1,0 +1,27 @@
+/* Generated from ayu-dark-bordered.json on 2025-10-28T03:44:31.923592+00:00 */
+:root[data-theme="ayu-dark-bordered"] {
+  --wc-color-accent: #e6b450b3;
+  --wc-color-accent-soft: rgba(230, 180, 80, 0.180);
+  --wc-color-attention: #e6b45033;
+  --wc-color-attention-soft: rgba(230, 180, 80, 0.220);
+  --wc-color-border: #565b6645;
+  --wc-color-border-strong: #11151c;
+  --wc-color-critical: #0d1017;
+  --wc-color-critical-soft: rgba(13, 16, 23, 0.200);
+  --wc-color-link: #e6b450;
+  --wc-color-link-hover: #E6B450;
+  --wc-color-page: #0b0e14;
+  --wc-color-positive: #565b6633;
+  --wc-color-positive-soft: rgba(86, 91, 102, 0.180);
+  --wc-color-primary: #e6b450b3;
+  --wc-color-primary-dark: #B89040B3;
+  --wc-color-surface: #0d1017;
+  --wc-color-surface-alt: #0f131a;
+  --wc-color-text: #bfbdb6;
+  --wc-color-text-muted: #6c738099;
+  --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
+  --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+:root[data-theme="ayu-dark-bordered"] .wc-card, :root[data-theme="ayu-dark-bordered"] .wc-control, :root[data-theme="ayu-dark-bordered"] .wc-panel {
+  box-shadow: none;
+}
