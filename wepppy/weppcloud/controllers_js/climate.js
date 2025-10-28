@@ -263,6 +263,10 @@ var Climate = (function () {
         climate.sectionNodes = dom.qsa("[data-climate-section]", formElement);
         climate.precipSections = dom.qsa("[data-precip-section]", formElement);
 
+        climate.parDetails = dom.qs("[data-climate-par]", formElement);
+        climate.parBody = climate.parDetails ? climate.parDetails.querySelector("[data-climate-par-body]") : null;
+        climate._parLoaded = false;
+
         climate.catalogData = ensureArray(parseJsonScript("climate_catalog_data"));
         climate.datasetMap = {};
         climate.catalogData.forEach(function (dataset) {
@@ -295,6 +299,47 @@ var Climate = (function () {
                 statusElement.innerHTML = message;
             }
         };
+
+        climate.resetParPreview = function () {
+            climate._parLoaded = false;
+            if (climate.parBody) {
+                climate.parBody.innerHTML = '<p class="wc-text-muted">Expand to load the active station PAR file.</p>';
+            }
+            if (climate.parDetails) {
+                climate.parDetails.removeAttribute("open");
+            }
+        };
+
+        climate.loadParPreview = function () {
+            if (!climate.parBody) {
+                return;
+            }
+            climate.parBody.innerHTML = '<p class="wc-text-muted">Loading station PAR…</p>';
+            http.request(url_for_run("view/par/"), { method: "GET" })
+                .then(function (response) {
+                    var text = response && response.body ? String(response.body) : "";
+                    var pre = document.createElement("pre");
+                    pre.className = "wc-pre";
+                    pre.textContent = text || "No PAR contents available for the active station.";
+                    climate.parBody.innerHTML = "";
+                    climate.parBody.appendChild(pre);
+                    climate._parLoaded = true;
+                })
+                .catch(function (error) {
+                    console.error("[Climate] Failed to load PAR contents:", error);
+                    climate.parBody.innerHTML = '<p class="wc-text-critical">Failed to load PAR contents.</p>';
+                });
+        };
+
+        if (climate.parDetails && climate.parBody) {
+            climate.parDetails.addEventListener("toggle", function () {
+                if (climate.parDetails.open && !climate._parLoaded) {
+                    climate.loadParPreview();
+                }
+            });
+        }
+
+        climate.resetParPreview();
 
         climate.attachStatusStream = function () {
             climate.detach_status_stream(climate);
@@ -533,6 +578,7 @@ var Climate = (function () {
             climate.updateSpatialModes(dataset, options || {});
             climate.updateStationModes(dataset, options || {});
             climate.updateStationVisibility(dataset);
+            climate.resetParPreview();
             climate.events.emit("climate:dataset:mode", {
                 catalogId: dataset.catalog_id,
                 climateMode: dataset.climate_mode
@@ -682,6 +728,7 @@ var Climate = (function () {
 
             infoAdapter.text("");
             stacktraceAdapter.text("");
+            climate.resetParPreview();
 
             var endpoint = null;
             if (mode === 0) {
@@ -730,6 +777,7 @@ var Climate = (function () {
                     var body = response.body || {};
                     if (body.Success === true) {
                         climate.triggerEvent("CLIMATE_SETSTATION_TASK_COMPLETED", body);
+                        climate.resetParPreview();
                         return;
                     }
                     climate.pushResponseStacktrace(climate, body);

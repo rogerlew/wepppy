@@ -34,7 +34,7 @@
     <span class="wc-control__summary-icon" aria-hidden="true"></span>
   </summary>
 {% else %}
-<div class="wc-control">
+<div class="wc-control wc-control--static">
   <div class="wc-control__summary wc-control__summary--static">
     <div class="wc-control__summary-text">
       <h2 class="wc-control__title">{{ title }}</h2>
@@ -268,6 +268,44 @@
 </details>
 {%- endmacro %}
 
+{% macro card(title, description=None, meta=None, footer=None, classes=None, body_class='wc-stack', attrs=None) -%}
+{% set class_tokens = ['wc-card'] %}
+{% if classes %}
+  {% for token in classes.split() %}
+    {% if token %}
+      {% set class_tokens = class_tokens + [token] %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{% set attrs = attrs.copy() if attrs else {} %}
+<section class="{{ ' '.join(class_tokens) }}"
+         {% for attr_key, attr_val in attrs.items() %}
+           {% if attr_val is true or attr_val is none or attr_val == '' %}
+             {{ attr_key }}
+           {% else %}
+             {{ attr_key }}="{{ attr_val }}"
+           {% endif %}
+         {% endfor %}>
+  <header class="wc-card__header">
+    <h3 class="wc-card__title">{{ title }}</h3>
+    {% if meta %}
+    <div class="wc-card__meta">{{ meta|safe }}</div>
+    {% endif %}
+  </header>
+  {% if description %}
+  <p class="wc-card__description">{{ description|safe }}</p>
+  {% endif %}
+  <div class="wc-card__body{% if body_class %} {{ body_class }}{% endif %}">
+    {{ caller() }}
+  </div>
+  {% if footer %}
+  <footer class="wc-card__footer">
+    {{ footer|safe }}
+  </footer>
+  {% endif %}
+</section>
+{%- endmacro %}
+
 {% macro tabset(tabs) -%}
 {% set tabs = tabs or [] %}
 {% if tabs %}
@@ -426,7 +464,7 @@
 </label>
 {%- endmacro %}
 
-{% macro numeric_field(field_id, label, value='', unit_label=None, help=None, precision=None, min=None, max=None, required=False, nullable=False, attrs=None, error=None, unit_category=None, unit_name=None) -%}
+{% macro numeric_field(field_id, label, value='', unit_label=None, help=None, precision=None, min=None, max=None, required=False, nullable=False, attrs=None, error=None, unit_category=None, unit_name=None, extra_control_class=None, field_extra_class=None, max_width='650px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -444,16 +482,34 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
+{% if field_extra_class %}
+  {% for cls in field_extra_class.split() %}
+    {% if cls %}
+      {% set field_classes = field_classes + [cls] %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{% set control_classes = ['wc-field__control', 'wc-field__control--number'] %}
+{% if extra_control_class %}
+  {% for cls in extra_control_class.split() %}
+    {% if cls %}
+      {% set control_classes = control_classes + [cls] %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{% if attrs.pop('class', None) %}
+  {# external class overrides are discouraged; use extra_control_class instead #}
+{% endif %}
 <div class="{{ ' '.join(field_classes) }}"
-     style="max-width: 650px;"
+     style="max-width: {{ max_width }};"
      {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}>
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <div class="wc-field__input-row">
-    <input class="wc-field__control wc-field__control--number"
+    <input class="{{ ' '.join(control_classes) }}"
            id="{{ field_id }}"
            name="{{ field_id }}"
            type="number"
-           value="{{ value }}"
+            value="{{ value }}"
            {% if precision is not none %}step="{{ precision }}"{% endif %}
            {% if precision is not none %}data-precision="{{ precision }}"{% endif %}
            {% if min is not none %}min="{{ min }}"{% endif %}
@@ -479,10 +535,75 @@
   {% if help %}
   <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
   {% endif %}
-  {% if error %}
+{% if error %}
   <p id="{{ error_id }}" class="wc-field__message wc-field__message--error" role="alert">{{ error }}</p>
+{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro unitized_numeric_group(metric, imperial, wrapper_extra_class=None) -%}
+{% set metric_fields = metric.get('fields', []) if metric else [] %}
+{% set imperial_fields = imperial.get('fields', []) if imperial else [] %}
+{% if metric_fields or imperial_fields %}
+<div class="unitizer-wrapper{% if wrapper_extra_class %} {{ wrapper_extra_class }}{% endif %}">
+  {% if metric_fields %}
+  <div class="unitizer {{ metric.get('unit_class', 'units-m') }}">
+    <div class="wc-stack">
+      {% for field in metric_fields %}
+        {% set attrs = field.get('attrs') or {} %}
+        {{ numeric_field(
+             field.get('id'),
+             field.get('label'),
+             value=field.get('value', ''),
+             unit_label=field.get('unit_label'),
+             help=field.get('help'),
+             precision=field.get('precision'),
+             min=field.get('min'),
+             max=field.get('max'),
+             required=field.get('required', False),
+             nullable=field.get('nullable', False),
+             attrs=attrs,
+             error=field.get('error'),
+             unit_category=field.get('unit_category'),
+             unit_name=field.get('unit_name'),
+             extra_control_class=field.get('extra_control_class'),
+             field_extra_class=field.get('field_extra_class'),
+             max_width=field.get('max_width', '650px')
+        ) }}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% if imperial_fields %}
+  <div class="unitizer {{ imperial.get('unit_class', 'units-ft') }}">
+    <div class="wc-stack">
+      {% for field in imperial_fields %}
+        {% set attrs = field.get('attrs') or {} %}
+        {{ numeric_field(
+             field.get('id'),
+             field.get('label'),
+             value=field.get('value', ''),
+             unit_label=field.get('unit_label'),
+             help=field.get('help'),
+             precision=field.get('precision'),
+             min=field.get('min'),
+             max=field.get('max'),
+             required=field.get('required', False),
+             nullable=field.get('nullable', False),
+             attrs=attrs,
+             error=field.get('error'),
+             unit_category=field.get('unit_category'),
+             unit_name=field.get('unit_name'),
+             extra_control_class=field.get('extra_control_class'),
+             field_extra_class=field.get('field_extra_class'),
+             max_width=field.get('max_width', '650px')
+        ) }}
+      {% endfor %}
+    </div>
+  </div>
   {% endif %}
 </div>
+{% endif %}
 {%- endmacro %}
 
 {% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None, extra_control_class=None) -%}
@@ -531,7 +652,7 @@
 </div>
 {%- endmacro %}
 
-{% macro radio_group(name, label=None, layout='vertical', options=None, help=None, mode_help=None, attrs=None, error=None) -%}
+{% macro radio_group(name, label=None, layout='vertical', options=None, help=None, mode_help=None, attrs=None, error=None, grid_columns=None) -%}
 {% set options = options or [] %}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = name ~ "_help" %}
@@ -551,15 +672,31 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
+{% set layout = (layout or 'vertical') | lower %}
+{% set group_classes = ['wc-choice-group', 'wc-choice-group--' ~ layout] %}
+{% set group_style = attrs.pop('style', '') if attrs.get('style') else '' %}
+{% if layout == 'grid' %}
+  {% set columns = grid_columns if grid_columns is not none else 3 %}
+  {% set grid_style = 'grid-template-columns: repeat(' ~ columns ~ ', minmax(0, 1fr));' %}
+  {% if group_style %}
+    {% set group_style = group_style.rstrip(';') ~ '; ' ~ grid_style %}
+  {% else %}
+    {% set group_style = grid_style %}
+  {% endif %}
+{% endif %}
+{% if attrs.get('style') %}
+  {% set _ = attrs.pop('style') %}
+{% endif %}
 <div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
   {% if label %}
   <span class="wc-field__label" id="{{ label_id }}">{{ label }}</span>
   {% endif %}
-  <div class="wc-choice-group wc-choice-group--{{ layout }}"
+  <div class="{{ ' '.join(group_classes) }}"
        role="radiogroup"
        {% if label %}aria-labelledby="{{ label_id }}"{% endif %}
        {% if error %}aria-invalid="true"{% endif %}
        {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
+       {% if group_style %}style="{{ group_style }}"{% endif %}
        {% for attr_key, attr_val in attrs.items() %}
          {{ attr_key }}="{{ attr_val }}"
        {% endfor %}>

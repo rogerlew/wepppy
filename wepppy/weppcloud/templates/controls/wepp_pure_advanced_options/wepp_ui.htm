@@ -1,7 +1,5 @@
 {% import "controls/_pure_macros.html" as ui %}
 
-<section class="wc-stack" id="wepp_hourly_seepage">
-  <h4 class="wc-heading wc-heading--sm">Hourly Seepage</h4>
   <p class="wc-text-muted">
     Computes hourly instead of daily seepage calculations. Applies to projects with 7778 soils (not WEPP-PEP).
   </p>
@@ -11,4 +9,3 @@
        checked=wepp.run_wepp_ui,
        attrs={"class": "disable-readonly", "data-wepp-routine": "wepp_ui"}
      ) }}
-</section>

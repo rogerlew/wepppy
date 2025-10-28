@@ -38,22 +38,52 @@
 
   {% call ui.collapsible_card(title="Advanced options", expanded=False, card_id="wepp_advanced_options") %}
     <div class="wc-stack" data-wepp-advanced>
+      {% call ui.card("WEPP UI - Hourly Seepage", attrs={"id": "wepp_hourly_seepage"}) %}
       {% include "controls/wepp_pure_advanced_options/wepp_ui.htm" %}
+      {% endcall %}
+      {% call ui.card("Potential ET (PMET)", attrs={"id": "wepp_pmet_options"}) %}
       {% include "controls/wepp_pure_advanced_options/pmet.htm" %}
+      {% endcall %}
+      {% call ui.card("Frost", attrs={"id": "wepp_frost_options"}) %}
       {% include "controls/wepp_pure_advanced_options/frost.htm" %}
+      {% endcall %}
+      {% call ui.card("Snow", attrs={"id": "wepp_snow_options"}) %}
       {% include "controls/wepp_pure_advanced_options/snow.htm" %}
+      {% endcall %}
+      {% call ui.card("Baseflow Processing", attrs={"id": "wepp_baseflow_options"}) %}
       {% include "controls/wepp_pure_advanced_options/baseflow.htm" %}
+      {% endcall %}
+      {% call ui.card("Channel Inputs (chan.inp)", attrs={"id": "wepp_chan_inp_options"}) %}
       {% include "controls/wepp_pure_advanced_options/chan_inp.htm" %}
+      {% endcall %}
+      {% call ui.card("Channel Parameters", attrs={"id": "wepp_channel_parameters"}) %}
       {% include "controls/wepp_pure_advanced_options/channels.htm" %}
+      {% endcall %}
+      {% call ui.card("Flowpaths (Experimental)", attrs={"id": "wepp_flowpaths_options"}) %}
       {% include "controls/wepp_pure_advanced_options/flowpaths.htm" %}
+      {% endcall %}
+      {% call ui.card("Bedrock", attrs={"id": "wepp_bedrock_options"}) %}
       {% include "controls/wepp_pure_advanced_options/bedrock.htm" %}
+      {% endcall %}
+      {% call ui.card("Clip Hillslopes", attrs={"id": "wepp_clip_hillslopes"}) %}
       {% include "controls/wepp_pure_advanced_options/clip_hillslopes.htm" %}
+      {% endcall %}
+      {% call ui.card("Soil Options", attrs={"id": "wepp_soil_options"}) %}
       {% include "controls/wepp_pure_advanced_options/clip_soils_depth.htm" %}
+      {% endcall %}
+      {% call ui.card("Phosphorus", attrs={"id": "wepp_phosphorus_options"}) %}
       {% include "controls/wepp_pure_advanced_options/phosphorus.htm" %}
+      {% endcall %}
+      {% call ui.card("Export Configuration", attrs={"id": "wepp_export_configuration"}) %}
       {% include "controls/wepp_pure_advanced_options/prep_details.htm" %}
+      {% endcall %}
+      {% call ui.card("WEPP Version", attrs={"id": "wepp_binary_selection"}) %}
       {% include "controls/wepp_pure_advanced_options/wepp_bin.htm" %}
+      {% endcall %}
       {% if reveg %}
-        {% include "controls/wepp_pure_advanced_options/revegetation.htm" %}
+        {% call ui.card("Revegetation Scenarios", attrs={"id": "wepp_revegetation_options"}) %}
+          {% include "controls/wepp_pure_advanced_options/revegetation.htm" %}
+        {% endcall %}
       {% endif %}
     </div>
   {% endcall %}

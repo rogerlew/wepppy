@@ -3,7 +3,8 @@
 
 {% call ui.control_shell(
      form_id="build_channels_form",
-     title="Channel Delineation"
+     title="Channel Delineation",
+     collapsible=False
    ) %}
 
   <input type="hidden" id="map_center" name="map_center">
@@ -34,187 +35,169 @@
          ]
        ) }}
 
-    <div id="map_bounds_text_group" class="wc-field" style="display: none;">
-      <label class="wc-field__label" for="map_bounds_text">Manual extent (south, west, north, east)</label>
-      <input
-        id="map_bounds_text"
-        name="map_bounds_text"
-        class="wc-field__control disable-readonly"
-        type="text"
-        value="{{ watershed.map_bounds_text }}"
-        placeholder="-122.52, 44.16, -122.41, 44.23"
-        aria-label="south, west, north, east">
+    <div id="map_bounds_text_group" style="display: none;">
+      {{ ui.text_field(
+           "map_bounds_text",
+           "Manual extent (south, west, north, east)",
+           value=watershed.map_bounds_text,
+           placeholder="-122.52, 44.16, -122.41, 44.23",
+           attrs={"aria-label": "south, west, north, east"},
+           extra_control_class="disable-readonly"
+      ) }}
     </div>
   </div>
 
-  <div class="unitizer-wrapper">
-    <div class="unitizer units-m">
-      {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
-      <div class="wc-stack">
-        <div class="wc-field">
-          <label class="wc-field__label" for="input_mcl">
-            Minimum channel length (m)
-            <a data-toggle="tooltip"
-               data-placement="top"
-               title="Recommended to use default value.">
-              <img src="{{ url_for('static', filename='images/61692-200-24.png') }}" alt="Help">
-            </a>
-          </label>
-          <input
-            id="input_mcl"
-            name="mcl"
-            class="wc-field__control disable-readonly"
-            type="text"
-            value="{{ watershed.mcl | round | int }}"
-            data-convert-target="#input_mcl_en"
-            data-convert-func="m_to_ft"
-            data-convert-decimals="2">
-        </div>
-
-        <div class="wc-field">
-          <label class="wc-field__label" for="input_csa">
-            Critical source area (ha)
-            <a data-toggle="tooltip"
-               data-placement="top"
-               title="The minimum drainage area below which a permanent channel forms.">
-              <img src="{{ url_for('static', filename='images/61692-200-24.png') }}" alt="Help">
-            </a>
-          </label>
-          <input
-            id="input_csa"
-            name="csa"
-            class="wc-field__control disable-readonly"
-            type="text"
-            value="{{ watershed.csa | round | int }}"
-            data-convert-target="#input_csa_en"
-            data-convert-func="ha_to_ac"
-            data-convert-decimals="2">
-        </div>
-      </div>
-      {% else %}
+  <div class="wc-stack">
+    {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
+      {{ ui.unitized_numeric_group(
+           metric={
+             'unit_class': 'units-m',
+             'fields': [
+               {
+                 'id': 'input_mcl',
+                 'label': 'Minimum channel length',
+                 'unit_label': 'm',
+                 'value': watershed.mcl | round | int,
+                 'help': 'Recommended to use default value.',
+                 'extra_control_class': 'disable-readonly',
+                 'attrs': {
+                   'data-convert-target': '#input_mcl_en',
+                   'data-convert-func': 'm_to_ft',
+                   'data-convert-decimals': '2'
+                 },
+                 'max_width': '300px',
+                 'precision': '0.01'
+               }
+             ]
+           },
+           imperial={
+             'unit_class': 'units-ft',
+             'fields': [
+               {
+                 'id': 'input_mcl_en',
+                 'label': 'Minimum channel length',
+                 'unit_label': 'ft',
+                 'value': (watershed.mcl * 3.28084) | round | int,
+                 'help': 'Recommended to use default value.',
+                 'extra_control_class': 'disable-readonly',
+                 'attrs': {
+                   'data-convert-target': '#input_mcl',
+                   'data-convert-func': 'ft_to_m',
+                   'data-convert-decimals': '2'
+                 },
+                 'max_width': '300px',
+                 'precision': '0.01'
+               }
+             ]
+           }
+      ) }}
+      {{ ui.unitized_numeric_group(
+           metric={
+             'unit_class': 'units-ha',
+             'fields': [
+               {
+                 'id': 'input_csa',
+                 'label': 'Critical source area',
+                 'unit_label': 'ha',
+                 'value': watershed.csa | round | int,
+                 'help': 'The minimum drainage area below which a permanent channel forms.',
+                 'extra_control_class': 'disable-readonly',
+                 'attrs': {
+                   'data-convert-target': '#input_csa_en',
+                   'data-convert-func': 'ha_to_ac',
+                   'data-convert-decimals': '2'
+                 },
+                 'max_width': '300px',
+                 'precision': '0.01'
+               }
+             ]
+           },
+           imperial={
+             'unit_class': 'units-acre',
+             'fields': [
+               {
+                 'id': 'input_csa_en',
+                 'label': 'Critical source area',
+                 'unit_label': 'acre',
+                 'value': (watershed.csa * 2.47105) | round | int,
+                 'help': 'The minimum drainage area below which a permanent channel forms.',
+                 'extra_control_class': 'disable-readonly',
+                 'attrs': {
+                   'data-convert-target': '#input_csa',
+                   'data-convert-func': 'ac_to_ha',
+                   'data-convert-decimals': '2'
+                 },
+                 'max_width': '300px',
+                 'precision': '0.01'
+               }
+             ]
+           }
+      ) }}
+    {% else %}
       <input type="hidden" id="input_mcl" value="-1" name="mcl">
-      <div class="wc-field">
-        <label class="wc-field__label" for="input_csa">
-          Critical source area
-          <a data-toggle="tooltip"
-             data-placement="top"
-             title="The minimum drainage area below which a permanent channel forms.">
-            <img src="{{ url_for('static', filename='images/61692-200-24.png') }}" alt="Help">
-          </a>
-        </label>
-        <input
-          id="input_csa"
-          name="csa"
-          class="wc-field__control disable-readonly"
-          type="text"
-          value="{{ watershed.pkcsa }}">
-      </div>
-      {% endif %}
-    </div>
-
-    <div class="unitizer units-ft">
-      {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
-      <div class="wc-stack">
-        <div class="wc-field">
-          <label class="wc-field__label" for="input_mcl_en">
-            Minimum channel length (ft)
-            <a data-toggle="tooltip"
-               data-placement="top"
-               title="Recommended to use default value.">
-              <img src="{{ url_for('static', filename='images/61692-200-24.png') }}" alt="Help">
-            </a>
-          </label>
-          <input
-            id="input_mcl_en"
-            name="mcl_en"
-            class="wc-field__control disable-readonly"
-            type="text"
-            value="{{ (watershed.mcl * 3.28084) | round | int }}"
-            data-convert-target="#input_mcl"
-            data-convert-func="ft_to_m"
-            data-convert-decimals="2">
-        </div>
-
-        <div class="wc-field">
-          <label class="wc-field__label" for="input_csa_en">
-            Critical source area (acre)
-            <a data-toggle="tooltip"
-               data-placement="top"
-               title="The minimum drainage area below which a permanent channel forms.">
-              <img src="{{ url_for('static', filename='images/61692-200-24.png') }}" alt="Help">
-            </a>
-          </label>
-          <input
-            id="input_csa_en"
-            name="csa_en"
-            class="wc-field__control disable-readonly"
-            type="text"
-            value="{{ (watershed.csa * 2.47105) | round | int }}"
-            data-convert-target="#input_csa"
-            data-convert-func="ac_to_ha"
-            data-convert-decimals="2">
-        </div>
-      </div>
-      {% else %}
       <input type="hidden" id="input_mcl_en" value="-1" name="mcl_en">
-      <div class="wc-field">
-        <label class="wc-field__label" for="input_csa_en">
-          Critical source area
-          <a data-toggle="tooltip"
-             data-placement="top"
-             title="The minimum drainage area below which a permanent channel forms.">
-            <img src="{{ url_for('static', filename='images/61692-200-24.png') }}" alt="Help">
-          </a>
-        </label>
-        <input
-          id="input_csa_en"
-          name="csa_en"
-          class="wc-field__control disable-readonly"
-          type="text"
-          value="{{ watershed.pkcsa }}">
-      </div>
-      {% endif %}
-    </div>
+      {{ ui.unitized_numeric_group(
+           metric={
+             'unit_class': 'units-ha',
+             'fields': [
+               {
+                 'id': 'input_csa',
+                 'label': 'Critical source area',
+                 'unit_label': 'ha',
+                 'value': watershed.pkcsa,
+                'help': 'The minimum drainage area below which a permanent channel forms.',
+                 'extra_control_class': 'disable-readonly',
+                 'max_width': '300px',
+                 'precision': '0.01'
+               }
+             ]
+           },
+           imperial={
+             'unit_class': 'units-acre',
+             'fields': [
+               {
+                 'id': 'input_csa_en',
+                 'label': 'Critical source area',
+                 'unit_label': 'acre',
+                 'value': watershed.pkcsa,
+                'help': 'The minimum drainage area below which a permanent channel forms.',
+                 'extra_control_class': 'disable-readonly',
+                 'max_width': '300px',
+                 'precision': '0.01'
+               }
+             ]
+           }
+      ) }}
+    {% endif %}
   </div>
 
   {% if watershed.delineation_backend_is_wbt %}
   <div class="wc-stack">
-    <div class="wc-field">
-      <label class="wc-field__label" for="input_wbt_fill_or_breach">
-        Depression smoothing algorithm
-        <a data-toggle="tooltip"
-           data-placement="top"
-           title="Specify whether DEM should be filled or breached.">
-          <img src="{{ url_for('static', filename='images/61692-200-24.png') }}" alt="Help">
-        </a>
-      </label>
-      <select
-        id="input_wbt_fill_or_breach"
-        name="wbt_fill_or_breach"
-        class="wc-field__control disable-readonly"
-        data-channel-role="wbt-fill">
-        <option value="fill" {% if watershed.wbt_fill_or_breach=='fill' %}selected{% endif %}>Fill</option>
-        <option value="breach" {% if watershed.wbt_fill_or_breach=='breach' %}selected{% endif %}>Breach</option>
-        <option value="breach_least_cost" {% if watershed.wbt_fill_or_breach=='breach_least_cost' %}selected{% endif %}>Breach (Least Cost)</option>
-      </select>
-    </div>
+    {{ ui.select_field(
+         "input_wbt_fill_or_breach",
+         "Depression smoothing algorithm",
+         [
+           ("fill", "Fill"),
+           ("breach", "Breach"),
+           ("breach_least_cost", "Breach (Least Cost)")
+         ],
+         selected=watershed.wbt_fill_or_breach,
+         help="Specify whether the DEM should be filled or breached before channel extraction.",
+         attrs={"data-channel-role": "wbt-fill"},
+         extra_control_class="disable-readonly"
+    ) }}
 
-    <div id="wbt_blc_dist_container" class="wc-field">
-      <label class="wc-field__label" for="wbt_blc_dist">
-        Breach least cost distance (m)
-        <a data-toggle="tooltip"
-           data-placement="top"
-           title="Recommended to use default value.">
-          <img src="{{ url_for('static', filename='images/61692-200-24.png') }}" alt="Help">
-        </a>
-      </label>
-      <input
-        id="wbt_blc_dist"
-        name="wbt_blc_dist"
-        class="wc-field__control disable-readonly"
-        type="text"
-        value="{{ watershed.wbt_blc_dist }}"
-        aria-label="Breach least cost distance">
+    <div id="wbt_blc_dist_container">
+      {{ ui.numeric_field(
+           'wbt_blc_dist',
+           'Breach least cost distance',
+           value=watershed.wbt_blc_dist,
+           unit_label='m',
+           help='Recommended to use default value.',
+           extra_control_class='disable-readonly',
+           max_width='300px',
+           precision='0.01'
+      ) }}
     </div>
   </div>
   {% endif %}

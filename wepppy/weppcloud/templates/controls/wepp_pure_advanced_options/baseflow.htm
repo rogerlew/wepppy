@@ -1,7 +1,5 @@
 {% import "controls/_pure_macros.html" as ui %}
 
-<section class="wc-stack" id="wepp_baseflow_options">
-  <h4 class="wc-heading wc-heading--sm">Baseflow Processing</h4>
   <p class="wc-text-muted">
     Baseflow is not implemented for single-storm climates.
     <a href="https://github.com/rogerlew/wepppy/issues/312" target="_blank" rel="noopener noreferrer">Discussion</a>
@@ -30,4 +28,3 @@
        value=wepp.baseflow_opts.bfthreshold,
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
-</section>

@@ -163,47 +163,6 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### UI Style Guide Refresh
-**Started**: 2025-10-27  
-**Status**: In Progress - Awaiting Review  
-**Size**: Small (1-2 days)  
-**Owner**: Claude Sonnet 4.5, GPT-5-Codex (review)  
-**Link**: [docs/work-packages/20251027_ui_style_guide_refresh/](docs/work-packages/20251027_ui_style_guide_refresh/)  
-**Description**: Merge UI documentation into single agent-training guide with pattern catalog for rapid control construction. Enable <5 minute control creation with zero aesthetic decisions.
-
-**Objective**: Transform UI development from time sink into mechanical pattern-matching workflow.
-
-**Deliverables**:
-- ✅ Merged `ui-style-guide.md` (1151 lines)
-- ✅ Pattern Catalog (8 copy-paste templates)
-- ✅ Quick Reference Tables, Troubleshooting, Testing Checklist
-- ✅ "Zero-Aesthetic" design philosophy integration
-- ✅ TOC generated via `markdown-doc toc`
-- ⏳ GPT-5-Codex review (awaiting feedback)
-
-**Strategic Value**:
-- Agents can build UI mechanically: user request → pattern match → template fill → done
-- Developer spends zero time on aesthetics, <5 minutes per control
-- Patterns enforce consistency automatically (no style drift)
-- Foundation for future agent auto-generation system
-
-**Current Status**:
-- Pattern catalog complete with 8 patterns (Control Shell, Summary Pane, Advanced Options, Status Panel + WebSocket, Data Table + Pagination, Form with Validation, Status Indicators, Console Layout)
-- Composition rules, decision tree, quick reference tables documented
-- Review request sent to GPT-5-Codex for technical validation
-- Awaiting feedback on pattern accuracy, completeness, composition rules
-
-**Dependencies**: Blocked on GPT-5-Codex review completion
-
-**Next Steps**:
-1. Receive Codex review feedback
-2. Address technical corrections
-3. Add missing patterns if identified
-4. Update TOC if structure changes
-5. Close package
-
----
-
 ### markdown-doc Toolkit Integration
 **Started**: 2025-10-25  
 **Status**: Phase 3 Complete — Integration Active (Phase 4 pending telemetry + RFC decisions)  
@@ -252,9 +211,6 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
-## ✅ Done
-
-Recently completed work packages. Archived immediately upon completion.
 
 ### UI Style Guide Refresh
 **Completed**: 2025-10-27  

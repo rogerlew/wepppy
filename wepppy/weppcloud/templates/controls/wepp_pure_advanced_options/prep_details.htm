@@ -1,7 +1,5 @@
 {% import "controls/_pure_macros.html" as ui %}
 
-<section class="wc-stack" id="wepp_export_configuration">
-  <h4 class="wc-heading wc-heading--sm">Export Configuration</h4>
   <p class="wc-text-muted">Choose export products to generate when a WEPP run completes.</p>
   {{ ui.checkbox_field(
        "prep_details_on_run_completion",
@@ -21,4 +19,3 @@
        checked=wepp.legacy_arc_export_on_run_completion,
        attrs={"class": "disable-readonly"}
      ) }}
-</section>

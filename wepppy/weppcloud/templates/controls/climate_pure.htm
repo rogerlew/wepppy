@@ -152,7 +152,8 @@
     {{ ui.radio_group(
          "climatestation_mode",
          label="Station selection mode",
-         layout="horizontal",
+         layout="grid",
+         grid_columns=3,
          options=station_mode_options,
          help="Select how stations should be filtered for this dataset."
        ) }}
@@ -169,9 +170,15 @@
         </select>
         <p id="climate_station_hint" class="wc-field__help">Station list updates when the selection mode changes.</p>
       </div>
-      <div class="wc-field">
-        <a href="view/par/" target="_blank" class="pure-button pure-button-secondary disable-readonly">View PAR</a>
-      </div>
+      {% call ui.collapsible_card(
+           "Station PAR preview",
+           expanded=False,
+           attrs={"data-climate-par": ""}
+         ) %}
+        <div data-climate-par-body>
+          <p class="wc-text-muted">Expand to load the active station PAR file.</p>
+        </div>
+      {% endcall %}
     </div>
   </section>
 

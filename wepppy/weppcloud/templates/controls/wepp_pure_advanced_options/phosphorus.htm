@@ -1,11 +1,10 @@
 {% import "controls/_pure_macros.html" as ui %}
 
-<section class="wc-stack" id="wepp_phosphorus_options">
   {% if "lt" in ron.mods %}
-  <h4 class="wc-heading wc-heading--sm">Phosphorus Processing</h4>
+  <h5 class="wc-heading wc-heading--xs">Phosphorus Processing</h5>
   <p class="wc-text-muted">Phosphorus coefficients are determined by the Lake Tahoe module.</p>
   {% else %}
-  <h4 class="wc-heading wc-heading--sm">Pollutant Processing (Optional)</h4>
+  <h5 class="wc-heading wc-heading--xs">Pollutant Processing (Optional)</h5>
   {% endif %}
   {% set surf_val = wepp.phosphorus_opts.surf_runoff if isfloat(wepp.phosphorus_opts.surf_runoff) else None %}
   {% set lat_val = wepp.phosphorus_opts.lateral_flow if isfloat(wepp.phosphorus_opts.lateral_flow) else None %}
@@ -35,4 +34,3 @@
        value="{:.0f}".format(sed_val) if sed_val is not none else '',
        attrs={"class": "disable-readonly", "placeholder": "e.g. 800", "inputmode": "numeric"}
      ) }}
-</section>

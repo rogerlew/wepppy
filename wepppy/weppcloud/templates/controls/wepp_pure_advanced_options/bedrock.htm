@@ -1,11 +1,8 @@
 {% import "controls/_pure_macros.html" as ui %}
 
-<section class="wc-stack" id="wepp_bedrock_options">
-  <h4 class="wc-heading wc-heading--sm">Bedrock</h4>
   {{ ui.text_field(
        "kslast",
        "Hydraulic conductivity for restrictive layer (kslast)",
        value=wepp.kslast,
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
-</section>

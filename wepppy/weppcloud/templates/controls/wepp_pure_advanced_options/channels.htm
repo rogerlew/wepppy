@@ -1,7 +1,5 @@
 {% import "controls/_pure_macros.html" as ui %}
 
-<section class="wc-stack" id="wepp_channel_parameters">
-  <h4 class="wc-heading wc-heading--sm">Channel Parameters</h4>
   {{ ui.checkbox_field(
        "checkbox_wepp_tcr",
        "Use variable channel critical shear as a function of channel slope (tcr.txt)",
@@ -83,4 +81,3 @@
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
   {% endif %}
-</section>

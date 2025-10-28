@@ -14,19 +14,24 @@ Implement configurable VS Code theme integration to satisfy stakeholder demands 
 
 ## Objectives
 
-### Primary Goals
+### Primary Goals (MVP)
 1. ✅ Implement configurable theme mapping system (`theme-mapping.json`)
 2. ✅ Build dynamic theme converter with validation and reset capabilities
 3. ✅ Ship 6 curated themes (Default Light/Dark, OneDark, GitHub Dark, Solarized Light/Dark)
 4. ✅ Add theme switcher UI with localStorage persistence
-5. ✅ Ensure WCAG AA compliance for all shipped themes
+5. ✅ Ensure at least 1 light and 1 dark theme meet WCAG AA compliance
 6. ✅ Enable stakeholder customization without code changes
+
+### Post-MVP Goals
+7. ⏭️ Cross-device theme sync for logged-in users (Phase 3)
 
 ### Success Criteria
 - [ ] Stakeholders can edit `theme-mapping.json` without developer assistance
 - [ ] Theme conversion takes <30 minutes (JSON → CSS)
 - [ ] Zero changes to existing pattern templates
-- [ ] All themes pass WCAG AA contrast validation
+- [ ] At least 1 light theme meets WCAG AA contrast validation
+- [ ] At least 1 dark theme meets WCAG AA contrast validation
+- [ ] All themes include contrast metrics in documentation
 - [ ] Page load impact <50ms
 - [ ] CSS bundle size <10KB (all themes combined)
 - [ ] `--reset-mapping` restores defaults after failed experiments
@@ -50,36 +55,53 @@ Implement configurable VS Code theme integration to satisfy stakeholder demands 
   - Detailed CSS comments showing source tokens
   
 - **Theme Catalog**
-  - Default Light (current gray palette)
-  - Default Dark (OS `prefers-color-scheme` fallback)
-  - OneDark (popular dark theme)
-  - GitHub Dark (familiar to GitHub users)
-  - Solarized Light (high contrast champion)
-  - Solarized Dark (low contrast alternative)
+  - Default Light (current gray palette - WCAG AA compliant)
+  - Default Dark (OS `prefers-color-scheme` fallback - WCAG AA compliant)
+  - OneDark (popular dark theme - contrast metrics documented)
+  - GitHub Dark (familiar to GitHub users - contrast metrics documented)
+  - Solarized Light (high contrast - likely WCAG AA compliant)
+  - Solarized Dark (low contrast - contrast metrics documented)
   
-- **User Interface**
+- **Accessibility & Validation**
+  - Mandatory WCAG AA compliance for 1 light + 1 dark theme (Default Light/Dark)
+  - Automated contrast checking for all themes
+  - Contrast metrics documented in theme metadata
+  - Focus outlines and status colors validated across all themes
+  - Non-compliant themes shipped with accessibility warnings
   - Theme switcher (dropdown or settings panel)
   - Theme preview thumbnails
-  - localStorage persistence
+  - localStorage persistence (primary storage)
   - Cookie fallback for logged-out users
-  - Optional user preference sync (logged-in users)
+  
+- **User Persistence (Post-MVP)**
+  - Optional cross-device sync for logged-in users
+  - Postgres storage via user preferences model
+  - `/api/theme/preference` endpoint for server sync
   
 - **Validation & Safety**
-  - Automated WCAG AA contrast checking
+  - Automated WCAG AA contrast checking (4.5:1 normal text, 3:1 large text)
   - Print style overrides (force light theme)
   - FOUC prevention (inline critical CSS)
   - Fallback values for missing tokens
+  - Accessibility warnings for non-compliant themes
 
 ### Out of Scope
 - Custom theme uploads (advanced users can edit localStorage)
 - More than 12 themes in catalog (prevent choice paralysis)
 - Syntax highlighting token mapping (not needed for weppcloud)
 - Runtime theme generation (build-time only)
-- Theme versioning system (Phase 2 feature)
+- Theme versioning system (future feature)
+
+### Post-MVP / Future Enhancements
+- Cross-device theme sync (Phase 3 - deferred from MVP)
+- User preference backend storage (Postgres)
+- `/api/theme/preference` endpoint
+- Theme versioning and migration system
 
 ### Constraints
 - **Maximum 12 themes** in production catalog
-- **WCAG AA compliance mandatory** for all shipped themes
+- **WCAG AA compliance mandatory** for Default Light + Default Dark themes only
+- **Contrast metrics documented** for all other themes (informational)
 - **Zero template changes** to existing controls
 - **No new Python dependencies** beyond standard library
 - **Stakeholder-editable** mapping config (JSON, not code)
@@ -224,52 +246,57 @@ wepppy/weppcloud/
 
 **Tasks:**
 1. Convert 6 themes (Default Light/Dark, OneDark, GitHub Dark, Solarized Light/Dark)
-2. Run automated contrast checks
-3. Fix failing themes (add "-Accessible" variants if needed)
-4. Create theme preview thumbnails
-5. Build theme gallery page
+2. Run automated contrast checks on all themes
+3. Validate Default Light + Default Dark meet WCAG AA (mandatory)
+4. Document contrast metrics for remaining themes (informational)
+5. Create theme preview thumbnails
+6. Build theme gallery page with accessibility badges
 
 **Deliverables:**
 - [ ] 6 production-ready themes
 - [ ] Theme preview UI
-- [ ] Accessibility audit passed
+- [ ] Accessibility audit passed for Default Light + Default Dark
+- [ ] Contrast metrics documented for all themes
 - [ ] Theme selection criteria documented
 
 **Acceptance Criteria:**
-- All 6 themes pass WCAG AA for text contrast
-- All 6 themes pass WCAG AA for interactive elements
+- Default Light passes WCAG AA for text contrast (4.5:1 normal, 3:1 large)
+- Default Dark passes WCAG AA for text contrast (4.5:1 normal, 3:1 large)
+- Default Light + Dark pass WCAG AA for interactive elements (3:1)
 - Focus outlines visible in all themes
 - Status colors distinguishable in all themes
+- Other themes include contrast report (informational, not blocking)
+- Themes with known contrast issues include accessibility warnings in UI
 
 ---
 
-### Phase 3: User Persistence (1 day)
-**Status:** Not Started
+### Phase 3: User Persistence (1 day) ⏭️ **POST-MVP**
+**Status:** Deferred (not blocking critical path)
 
 **Goals:**
 - ✅ Save theme preference per user
 - ✅ Sync across devices (if logged in)
-- ✅ Cookie fallback for anonymous users
+- ✅ Optional backend storage for logged-in users
 
 **Tasks:**
 1. Add theme field to user preferences model
-2. Implement `/api/theme/preference` endpoint
-3. Update theme switcher to save preference
-4. Add cookie fallback for logged-out users
-5. Implement OS `prefers-color-scheme` fallback
+2. Implement `/api/theme/preference` endpoint (GET/POST)
+3. Update theme switcher to optionally sync with backend
+4. Keep localStorage as primary storage (immediate persistence)
+5. Backend acts as sync layer for cross-device consistency
 
 **Deliverables:**
-- [ ] Persistent theme selection
 - [ ] Cross-device sync (logged in users)
-- [ ] Cookie storage (logged out users)
-- [ ] OS preference detection
+- [ ] Backend preference storage (Postgres)
+- [ ] Optional API integration in theme.js
 
 **Acceptance Criteria:**
-- Theme persists across page reloads
-- Theme syncs across browser tabs
-- Logged-in users see same theme on different devices
-- Logged-out users see theme from cookie
-- OS dark mode preference respected when no theme set
+- Theme persists across page reloads (localStorage)
+- Logged-in users can optionally sync across devices
+- Backend storage does not block theme switching
+- Falls back gracefully if backend unavailable
+
+**MVP Note:** localStorage + cookie provides sufficient persistence for critical path. Cross-device sync is valuable but not blocking frontend modernization approval.
 
 ---
 
@@ -373,8 +400,8 @@ No color picker, no design reviews, no aesthetic decisions.
 
 | Risk | Likelihood | Impact | Mitigation | Status |
 |------|------------|--------|------------|--------|
-| **Contrast failures** | High | High | Automated validation, fallback variants | Mitigated |
-| **User confusion** | Medium | Low | Clear previews, sensible defaults | Mitigated |
+| **Contrast failures in popular themes** | High | Medium | Document metrics, provide accessible defaults | Mitigated |
+| **User confusion about accessibility** | Medium | Low | Clear badges, accessible defaults pre-selected | Mitigated |
 | **Maintenance burden** | Low | Medium | Strict 12-theme limit | Mitigated |
 | **Performance impact** | Low | Low | Combined CSS bundle <10KB | Mitigated |
 | **Theme conflicts** | Medium | Medium | Thorough testing, override system | Mitigated |
@@ -385,10 +412,11 @@ No color picker, no design reviews, no aesthetic decisions.
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| **Stakeholder expectation creep** | High | Strict 12-theme catalog limit |
-| **"Can we have theme X?" requests** | Medium | Document contribution process |
+| **Stakeholder expectation creep** | High | Strict 12-theme catalog limit, clear accessibility policy |
+| **"Can we have theme X?" requests** | Medium | Document contribution process with accessibility requirements |
 | **Broken custom themes** | Low | No custom uploads initially |
 | **Mapping config corruption** | Low | `--reset-mapping` safety net |
+| **Accessibility complaints** | Medium | Provide 2 WCAG AA compliant defaults, document all metrics |
 
 **Overall risk:** **Low** - Benefits outweigh risks with proper implementation
 
@@ -405,7 +433,7 @@ No color picker, no design reviews, no aesthetic decisions.
 - No changes to existing pattern templates
 - No changes to controller JavaScript
 - Minimal changes to base templates (theme switcher UI)
-- Optional: User preferences model update (Phase 3)
+- Optional: User preferences model update (Phase 3 - post-MVP)
 
 ---
 
@@ -419,14 +447,16 @@ No color picker, no design reviews, no aesthetic decisions.
 
 ### User Metrics
 - **Theme adoption rate:** Target 40% use non-default within 1 month
-- **User-reported contrast issues:** <5% of theme uses
+- **User-reported contrast issues:** <5% of theme uses (excluding documented non-compliant themes)
 - **Theme switch frequency:** Track to ensure stability (low = good)
 - **Feedback sentiment:** Positive on "more style" request
+- **Accessible theme usage:** Track adoption of WCAG AA compliant themes
 
 ### System Metrics
 - **Page load impact:** <50ms added latency
 - **CSS bundle size:** <10KB for all themes combined
-- **WCAG AA compliance:** 100% of shipped themes
+- **WCAG AA compliance:** 100% of default themes (Light + Dark)
+- **WCAG AA documentation:** 100% of themes have contrast metrics
 - **Print compatibility:** 100% (force light theme)
 
 ---
@@ -448,10 +478,10 @@ No color picker, no design reviews, no aesthetic decisions.
 - [ ] Theme preview thumbnails
 - [ ] Theme gallery page
 
-### Phase 3
+### Phase 3 (Post-MVP)
 - [ ] `/api/theme/preference` endpoint
 - [ ] Updated user preferences model
-- [ ] Cookie storage implementation
+- [ ] Cross-device sync implementation
 
 ### Phase 4
 - [ ] `docs/ui-docs/theme-system.md`
@@ -482,23 +512,25 @@ No color picker, no design reviews, no aesthetic decisions.
 
 ## Timeline & Milestones
 
-**Total Estimated Duration:** 6-8 days
+**Total Estimated Duration (MVP):** 4-6 days  
+**Post-MVP Extension:** +1 day (Phase 3)
 
-### Sprint 1 (Days 1-2)
+### Sprint 1 (Days 1-2) - MVP Critical Path
 - **M1:** Phase 0 Complete - Configurable mapping system operational
 - **M2:** Phase 1 Complete - OneDark theme working
 
-### Sprint 2 (Days 3-5)
+### Sprint 2 (Days 3-5) - MVP Critical Path
 - **M3:** Phase 2 Complete - 6 themes shipped, all pass WCAG AA
-- **M4:** Phase 3 Complete - User persistence working
+- **M4:** Phase 4 Complete - Documentation finalized
 
-### Sprint 3 (Days 6-7)
-- **M5:** Phase 4 Complete - Documentation finalized
-- **M6:** Phase 5 Started - Analytics active, feedback mechanism live
+### Sprint 3 (Days 6-7) - MVP Complete
+- **M5:** Phase 5 Started - Analytics active, feedback mechanism live
+- **M6:** MVP Delivery - Theme system operational, stakeholder approval
 
-### Post-Launch
-- **M7:** 1-month adoption metrics (target 40% non-default usage)
-- **M8:** Quarterly catalog review process established
+### Post-MVP (Optional)
+- **M7:** Phase 3 Complete - Cross-device sync for logged-in users
+- **M8:** 1-month adoption metrics (target 40% non-default usage)
+- **M9:** Quarterly catalog review process established
 
 ---
 
@@ -516,9 +548,11 @@ No color picker, no design reviews, no aesthetic decisions.
 | Phase 0 | Frontend Agent | Stakeholder | Tech Lead |
 | Phase 1 | Frontend Agent | UI Agent | QA |
 | Phase 2 | Frontend Agent | Accessibility Agent | Stakeholder |
-| Phase 3 | Backend Agent | Frontend Agent | Tech Lead |
+| Phase 3 ⏭️ | Backend Agent | Frontend Agent | Tech Lead |
 | Phase 4 | Documentation Agent | Frontend Agent | All |
 | Phase 5 | Product Team | Frontend Agent | Analytics |
+
+**Note:** Phase 3 is post-MVP and can be staffed after critical path delivery.
 
 ---
 
@@ -549,6 +583,17 @@ No color picker, no design reviews, no aesthetic decisions.
 **Rationale:** Empowers stakeholders to fine-tune mappings without code changes; provides safety via `--reset-mapping`  
 **Impact:** Additional Phase 0 work but significantly reduces friction for stakeholder customization
 
+### 2025-10-27: Pragmatic WCAG AA Approach
+**Decision:** Mandate WCAG AA compliance for default themes only (Default Light + Default Dark); document contrast metrics for all other themes but do not block shipping  
+**Rationale:** VS Code themes are not universally WCAG AA compliant (many use 3:1 in editor vs 4.5:1 requirement); requiring compliance for all themes would eliminate popular options. Users have accessible defaults available while retaining aesthetic choice.  
+**Impact:** Reduces validation burden; allows shipping of popular themes like OneDark/GitHub Dark with documented contrast metrics; provides clear accessible fallbacks for users who need them  
+**Reference:** VS Code default themes use 3:1 minimum in editor (below WCAG AA 4.5:1); high-contrast themes meet 7:1; third-party themes vary widely
+
+### 2025-10-27: MVP Scope - Defer Cross-Device Sync
+**Decision:** Move Phase 3 (User Persistence via backend) to post-MVP  
+**Rationale:** localStorage provides sufficient persistence for critical path; cross-device sync is valuable but not blocking stakeholder approval  
+**Impact:** Reduces MVP timeline from 6-8 days to 4-6 days; Phase 3 can be implemented after frontend modernization approval
+
 ### 2025-10-27: Strict Theme Catalog Limit
 **Decision:** Maximum 12 themes in production catalog  
 **Rationale:** Prevent choice paralysis; maintain curation quality; avoid maintenance burden  
@@ -562,10 +607,12 @@ No color picker, no design reviews, no aesthetic decisions.
 This work package is marked **critical path** for frontend modernization because:
 
 1. **Stakeholder blocker:** Zero-aesthetic strategy review requested more visual options
-2. **Low implementation cost:** 6-8 days for configurable system with stakeholder self-service
+2. **Low implementation cost:** 4-6 days for MVP (localStorage persistence only)
 3. **High stakeholder value:** Addresses "not enough style" concern without ongoing developer burden
 4. **Preserves zero-aesthetic:** Developers still make zero color decisions
 5. **Enables self-service:** Stakeholders tune mappings without developer involvement
+
+**MVP Scope:** localStorage + cookie persistence sufficient for stakeholder approval. Cross-device sync (Phase 3) deferred to post-MVP to reduce critical path timeline.
 
 Without this work, frontend modernization may stall due to stakeholder dissatisfaction with visual design.
 

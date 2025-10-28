@@ -1,7 +1,5 @@
 {% import "controls/_pure_macros.html" as ui %}
 
-<section class="wc-stack" id="wepp_snow_options">
-  <h4 class="wc-heading wc-heading--sm">Snow</h4>
   <p class="wc-text-muted">Adjustments for snow routines. Internal defaults apply if <code>snow.txt</code> is not written.</p>
   {{ ui.checkbox_field(
        "checkbox_wepp_snow",
@@ -27,4 +25,3 @@
        value=wepp.snow_opts.ssd,
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
-</section>
