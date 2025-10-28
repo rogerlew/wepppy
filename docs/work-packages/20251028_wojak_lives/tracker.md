@@ -1,8 +1,24 @@
 # Wojak Lives: Implementation Tracker
 
-**Status:** Critical Path Analysis  
-**Last Updated:** 2025-10-28  
-**Owner:** Alpha Team (Roger)
+**Status:** Ready for Implementation — Codex Handoff  
+**Last Updated:** 2025-10-28 (GitHub Copilot added Getting Started section)  
+**Owner:** Codex
+
+---
+
+## Recent Updates
+
+**2025-10-28 (GitHub Copilot):**
+- ✅ Added comprehensive "Getting Started for Codex" section to package.md (260+ lines)
+- ✅ Documented completed mini work package context (CAO integration foundation)
+- ✅ Locked architecture decisions (Redis pub/sub, metadata discovery, JWT isolation, PyO3 bindings, status2 reuse, MCP modules, client-side markdown)
+- ✅ Documented known issues and workarounds (CAO API query params limitation)
+- ✅ Created dependencies checklist (Backend Python, CAO service, Frontend JavaScript, Infrastructure)
+- ✅ Mapped Day 1 implementation roadmap with 4 phases (JWT 1.5h, MCP 3h, Flask+RQ 2h, Bootstrap 1.5h)
+- ✅ Listed expected deliverables and checkpoints
+- ✅ Added quick reference for key file paths and common questions
+
+**Ready for Codex:** Fresh agent can start implementation immediately with full context from Getting Started section.
 
 ---
 
@@ -20,6 +36,10 @@
 
 ### Completed
 - [x] Work package creation and scoping (2025-10-28)
+- [x] Architecture decision lock (Redis pub/sub, metadata discovery, JWT isolation, PyO3 bindings)
+- [x] Getting Started section for Codex with comprehensive bootstrap context (2025-10-28)
+- [x] Mini work package integration (CAO foundation documented)
+- [x] Day 1 implementation roadmap with phases and checkpoints
 
 ---
 

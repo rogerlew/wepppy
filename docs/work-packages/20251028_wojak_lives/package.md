@@ -99,6 +99,309 @@ CAO (CLI Agent Orchestrator) provides multi-agent orchestration infrastructure. 
 
 ## Technical Approach
 
+### Getting Started for Codex
+
+**Welcome, Codex!** This section provides comprehensive bootstrap context to begin implementation. All architecture decisions are locked, prerequisite CAO work is complete, and the critical path is mapped. Your first session should focus on **Day 1: Backend Foundation (8h)**.
+
+---
+
+#### What's Already Done (Mini Work Package: 20251028_cao_integration)
+
+The CAO integration mini work package (completed 2025-10-28) established foundation infrastructure:
+
+✅ **CAO Service Integration:**
+- CAO relocated to `services/cao/` with full source tree
+- Codex CLI provider implemented (`providers/codex.py`)
+- Installation via `uv pip install -e services/cao` (editable install)
+- PyO3 bindings installed: `markdown_extract_py`, `markdown_edit_py`, `markdown_doc_py` (50× faster than subprocess)
+- End-to-end validation completed (tmux sessions, API, agent launching)
+
+✅ **Documentation:**
+- `services/cao/README.md` — Comprehensive rewrite (~850 lines) with architecture diagrams, command walkthroughs, tmux workflow integration
+- `services/cao/AGENTS.md` — Development guide authored by Codex
+- `services/cao/cao-potential-applications.md` — 22 cataloged use cases including this Wojak integration
+
+✅ **Legal Compliance:**
+- Proper Apache-2.0 attribution to awslabs/cli-agent-orchestrator
+- LICENSE and NOTICE file preservation
+- Derivative work copyright notice (University of Idaho)
+
+**Key takeaway:** CAO infrastructure is production-ready. Focus on Flask routes, MCP modules, and command-bar.js integration.
+
+---
+
+#### Architecture Decision Summary
+
+These decisions are **locked** (no need to reconsider):
+
+1. **Redis Pub/Sub (not WebSocket):**
+   - **Why:** Flask/gunicorn workers cannot hold persistent WebSocket connections (blocks worker pool)
+   - **How:** Flask routes publish to Redis, RQ worker spawns CAO, status2 forwards responses
+   - **Benefit:** Non-blocking Flask workers, horizontal scaling via RQ
+
+2. **Metadata-Driven File Discovery (not exhaustive lists):**
+   - **Why:** Some WEPP runs have 40,000+ climate files (hillslope-per-file architecture)
+   - **How:** `describe_run_contents(category)` returns structured summaries (count, pattern, sample files) instead of full listings
+   - **Example:** Instead of listing 40k files, return `{"climate": {"count": 40123, "pattern": "*.cli", "sample": ["hill_001.cli", "hill_002.cli", "hill_003.cli"]}}`
+
+3. **JWT Isolation (never sent to browser):**
+   - **Why:** Zero-trust security posture for Wojak tier
+   - **How:** JWT generated in Flask, passed to CAO via RQ job environment, validated per MCP tool call
+   - **Scope:** Token encodes user_id + runid + config + tier ("wojak")
+
+4. **PyO3 Bindings (not subprocess):**
+   - **Why:** 50× faster (10μs vs 5-10ms per operation)
+   - **How:** `markdown_extract_py`, `markdown_edit_py`, `markdown_doc_py` already installed in CAO venv
+   - **Benefit:** Native Python exceptions, structured return types (Section/EditResult/TocResult objects)
+
+5. **status2 Reuse (not new WebSocket service):**
+   - **Why:** status2 already provides Redis → WebSocket bridge for WEPP progress updates
+   - **How:** Subscribe to `agent:response:*` pattern, forward to browser clients
+   - **Benefit:** Zero new infrastructure, proven reliability
+
+6. **MCP Modules (not separate FastAPI services):**
+   - **Why:** Tight integration with wepppy controllers, simpler deployment
+   - **How:** Python packages `wepppy.mcp.report_files`, `wepppy.mcp.report_editor`
+   - **Pattern:** Decorator-based JWT validation (`@mcp_tool(tier="wojak")`)
+
+7. **Client-Side Markdown Rendering (not server-side):**
+   - **Why:** Enables real-time streaming, 1ms parse time with marked.js
+   - **How:** Browser receives markdown text, renders incrementally as chunks arrive
+   - **Benefit:** No additional server load, smooth UX for long responses
+
+---
+
+#### Known Issues & Workarounds
+
+**CAO API Limitation (query params only):**
+- **Problem:** CAO `POST /sessions` endpoint currently ignores JSON request bodies—only accepts query parameters for environment variables
+- **Impact:** JWT handoff requires either query string (`?JWT_TOKEN=...`) or Redis-based bridge
+- **Workaround Options:**
+  1. **Query string (MVP):** `POST /sessions?JWT_TOKEN=eyJ...&RUNID=abc123&SESSION_ID=xyz`
+     - ⚠️ Security concern: JWT in URL may leak in logs (mitigated by short-lived tokens, internal-only deployment)
+  2. **Redis bridge (preferred):** Store JWT in Redis with TTL, CAO bootstrap script retrieves from `agent:env:<session_id>`
+     - ✅ No token in URL, better security posture
+  3. **CAO API extension:** Modify CAO to accept JSON body with `env` object (requires upstream change)
+
+**Current recommendation:** Use option 1 (query string) for MVP since Roger is the only user and deployment is internal. Document upgrade path to option 2 for production rollout.
+
+---
+
+#### Dependencies Checklist
+
+Before starting implementation, verify these are available:
+
+**Backend (Python):**
+- [ ] `flask-jwt-extended` installed (`pip list | grep flask-jwt-extended`)
+- [ ] Redis client available (`import redis` works)
+- [ ] RQ installed and workers running (`rq info` shows active workers)
+- [ ] CAO venv active with PyO3 bindings:
+  ```bash
+  cd /workdir/wepppy/services/cao
+  uv sync  # Install dependencies
+  maturin develop  # Build PyO3 bindings
+  python -c "import markdown_extract_py; print('✓ PyO3 bindings available')"
+  ```
+
+**CAO Service:**
+- [ ] CAO server running: `lsof -i :9889` shows listener
+- [ ] Codex CLI provider working: `cao launch codex --profile reviewer` spawns tmux session
+- [ ] tmux ≥ 3.3 installed: `tmux -V`
+
+**Frontend (JavaScript):**
+- [ ] `marked.js` available in `wepppy/weppcloud/static/vendor/`
+- [ ] `command-bar.js` exists and loads on run pages
+- [ ] status2 WebSocket connection functional (test with WEPP progress updates)
+
+**Infrastructure:**
+- [ ] Redis DB 2 accessible (`redis-cli -n 2 PING` returns PONG)
+- [ ] status2 service running: `systemctl status status2` or `ps aux | grep status2`
+- [ ] PostgreSQL available for Flask session storage (if needed)
+
+---
+
+#### Day 1 Implementation Roadmap (8 hours)
+
+**Phase 1: JWT Token System (1.5h)**
+1. Create `wepppy/weppcloud/utils/agent_auth.py`:
+   - `generate_agent_token(user_id, runid, config) -> str`
+   - Configure Flask-JWT-Extended in `app.py` (secret key, algorithm)
+2. Test token generation in Flask shell:
+   ```python
+   from wepppy.weppcloud.utils.agent_auth import generate_agent_token
+   token = generate_agent_token("root", "test123", "dev")
+   print(token)  # Should print JWT string
+   ```
+
+**Phase 2: MCP Base Infrastructure (3h)**
+1. Create `wepppy/mcp/__init__.py` package
+2. Create `wepppy/mcp/base.py`:
+   - `@mcp_tool(tier)` decorator with JWT validation
+   - Extract `_jwt_claims` from environment variable `JWT_TOKEN`
+   - Raise `UnauthorizedError` if token invalid or tier mismatch
+3. Create `wepppy/mcp/report_files.py`:
+   - `describe_run_contents(runid, category=None, _jwt_claims=None) -> dict`
+   - `read_run_file(runid, path, _jwt_claims=None) -> str`
+   - Path validation (prevent `../` traversal)
+   - Size limits (default 10MB)
+4. Create `wepppy/mcp/report_editor.py`:
+   - `list_report_sections(runid, report_id, _jwt_claims=None) -> List[str]`
+   - `read_report_section(runid, report_id, pattern, _jwt_claims=None) -> str`
+   - `replace_report_section(runid, report_id, pattern, content, _jwt_claims=None) -> bool`
+   - Use PyO3 bindings (`markdown_extract_py`, `markdown_edit_py`)
+5. Test MCP modules in Python shell:
+   ```python
+   import os
+   os.environ['JWT_TOKEN'] = 'eyJ...'  # Valid token
+   from wepppy.mcp.report_files import describe_run_contents
+   result = describe_run_contents("test123")
+   print(result)  # Should return metadata dict
+   ```
+
+**Phase 3: Flask Routes + RQ Job (2h)**
+1. Create `wepppy/weppcloud/routes/agent.py` blueprint:
+   - `POST /runs/<runid>/<config>/agent/chat` — Initialize session, return session_id
+   - `POST /runs/<runid>/<config>/agent/chat/<session_id>` — Publish user message to Redis
+   - `DELETE /runs/<runid>/<config>/agent/chat/<session_id>` — Terminate session
+2. Create `wepppy/rq/agent_rq.py`:
+   - `@job('default') spawn_wojak_session(runid, config, session_id, jwt_token, user_id)`
+   - Call CAO API to spawn tmux session with JWT in query params (MVP workaround)
+3. Register blueprint in `wepppy/weppcloud/app.py`
+4. Test routes with curl:
+   ```bash
+   # Initialize session
+   curl -X POST http://localhost:8080/runs/test123/dev/agent/chat \
+     -H "Content-Type: application/json" \
+     -d '{"initial_message": "Hello Wojak"}'
+   # Should return {"session_id": "abc123", "status": "initializing"}
+   ```
+
+**Phase 4: CAO Bootstrap Script (1.5h)**
+1. Create `services/cao/scripts/wojak_bootstrap.py`:
+   - Read JWT_TOKEN, RUNID, SESSION_ID from environment
+   - Subscribe to Redis: `agent:chat:<runid>:<session_id>`
+   - On message: execute Codex with MCP tool context
+   - Publish responses to Redis: `agent:response:<runid>:<session_id>`
+   - Handle termination signal gracefully
+2. Test bootstrap script manually:
+   ```bash
+   cd /workdir/wepppy/services/cao
+   export JWT_TOKEN="eyJ..."
+   export RUNID="test123"
+   export SESSION_ID="abc123"
+   python scripts/wojak_bootstrap.py &
+   redis-cli -n 2 PUBLISH agent:chat:test123:abc123 '{"text": "Hello"}'
+   # Should see response in agent:response:test123:abc123
+   ```
+
+**Checkpoint:** At end of Day 1, you should be able to:
+- Generate valid JWT tokens in Flask shell
+- Call MCP tools with JWT validation
+- Trigger RQ job that spawns CAO session
+- Manually publish to Redis and see agent response
+
+---
+
+#### Expected Deliverables After Day 1
+
+**Code:**
+- [ ] `wepppy/weppcloud/utils/agent_auth.py` (JWT generation)
+- [ ] `wepppy/mcp/base.py` (decorator + validation)
+- [ ] `wepppy/mcp/report_files.py` (file access tools)
+- [ ] `wepppy/mcp/report_editor.py` (markdown tools with PyO3)
+- [ ] `wepppy/weppcloud/routes/agent.py` (3 Flask routes)
+- [ ] `wepppy/rq/agent_rq.py` (RQ job)
+- [ ] `services/cao/scripts/wojak_bootstrap.py` (Redis bridge)
+
+**Tests:**
+- [ ] JWT token generation/validation
+- [ ] MCP tool path traversal prevention
+- [ ] Flask route returns 200 with valid session_id
+- [ ] RQ job spawns without errors
+
+**Documentation:**
+- [ ] Update `wepppy/mcp/README.md` with tool usage examples
+- [ ] Add JWT generation notes to `wepppy/weppcloud/routes/README.md`
+
+---
+
+#### Day 2-3 Preview (Frontend + Integration)
+
+**Day 2: Frontend (6h)**
+- Extend `command-bar.js` with agent chat panel
+- Integrate marked.js for markdown rendering
+- Subscribe to status2 WebSocket for agent responses
+- Typing indicators and error states
+
+**Day 3: Testing + Polish (8h)**
+- End-to-end smoke test with Roger
+- Security review (JWT validation, path traversal)
+- Session cleanup verification
+- Documentation updates
+
+**Total timeline:** 14-20 hours over 2-3 days
+
+---
+
+#### Quick Reference: Key File Paths
+
+**Backend:**
+- `wepppy/weppcloud/utils/agent_auth.py` — JWT generation
+- `wepppy/mcp/base.py` — MCP tool decorator
+- `wepppy/mcp/report_files.py` — File access tools
+- `wepppy/mcp/report_editor.py` — Markdown editing tools
+- `wepppy/weppcloud/routes/agent.py` — Flask routes
+- `wepppy/rq/agent_rq.py` — RQ job
+
+**CAO:**
+- `services/cao/scripts/wojak_bootstrap.py` — Redis bridge
+- `services/cao/README.md` — CAO architecture and commands
+- `services/cao/providers/codex.py` — Codex CLI provider
+
+**Frontend:**
+- `wepppy/weppcloud/controllers_js/command-bar.js` — Command bar integration
+- `wepppy/weppcloud/static/vendor/marked.js` — Markdown rendering
+- `wepppy/weppcloud/templates/run.html` — Run page template
+
+**Documentation:**
+- `docs/work-packages/20251028_wojak_lives/package.md` — This file
+- `docs/work-packages/20251028_wojak_lives/tracker.md` — Task board
+- `docs/mini-work-packages/completed/20251028_cao_integration/tracker.md` — CAO integration context
+
+---
+
+#### Questions? Start Here:
+
+1. **"How do I verify CAO is working?"**
+   - Run `cao launch codex --profile reviewer` and attach to tmux session
+   - Should see Codex agent initializing with prompt
+
+2. **"Where's the PyO3 bindings documentation?"**
+   - `services/cao/cao-potential-applications.md` has API examples
+   - Run `python -c "help(markdown_extract_py.extract)"` for function signatures
+
+3. **"How do I test Redis pub/sub?"**
+   ```bash
+   # Terminal 1
+   redis-cli -n 2 SUBSCRIBE agent:response:test123:abc123
+   # Terminal 2
+   redis-cli -n 2 PUBLISH agent:response:test123:abc123 '{"text": "Hello"}'
+   ```
+
+4. **"Where's the existing status2 WebSocket code?"**
+   - `services/status2/cmd/status2/main.go` — Go service
+   - `wepppy/weppcloud/controllers_js/controlBase.js` — JavaScript client
+
+5. **"What if I need to modify CAO?"**
+   - Check `services/cao/AGENTS.md` for development patterns
+   - All CAO changes should be backward-compatible (don't break existing flows)
+
+---
+
+**Ready to start?** Begin with Phase 1 (JWT Token System) and work through the Day 1 roadmap. Update `tracker.md` as you complete tasks. Roger is available for questions and will smoke test at the end of Day 1.
+
+Good luck, Codex! 🚀
+
 ### Architecture Overview
 
 **Why Redis Pub/Sub instead of direct WebSocket:**
@@ -338,7 +641,7 @@ def terminate_agent_session(runid, config, session_id):
 #### 4. RQ Job (CAO Session Spawner)
 ```python
 # wepppy/rq/agent_rq.py
-from rq import job
+from rq.decorators import job
 from redis import Redis
 import requests
 import json
@@ -928,10 +1231,10 @@ def replace_report_section(runid: str, report_id: str, heading_pattern: str,
 
 ## References
 
-- [CAO README.md](../../services/cao/README.md) — CAO architecture and API reference
-- [CAO Potential Applications](../../services/cao/cao-potential-applications.md) — Wojak tier design and MCP architecture
-- [PyO3 Bindings API Reference](/workdir/markdown-extract/docs/work-packages/20251028_pyo3_bindings/PYTHON_API_REFERENCE.md) — markdown_extract_py, markdown_edit_py, markdown_doc_py
-- [Command Bar Source](../../wepppy/weppcloud/static-src/command-bar/) — Existing command bar implementation
+- [CAO README.md](../../../services/cao/README.md) — CAO architecture and API reference
+- [CAO Potential Applications](../../../services/cao/cao-potential-applications.md) — Wojak tier design and MCP architecture
+- PyO3 Bindings API Reference — available in the companion `markdown-extract` repository (`docs/work-packages/20251028_pyo3_bindings/PYTHON_API_REFERENCE.md`)
+- [Command Bar Source](../../../wepppy/weppcloud/routes/command_bar/static/command-bar.js) — Existing command bar implementation
 - [Flask-JWT-Extended Docs](https://flask-jwt-extended.readthedocs.io/) — JWT library documentation
 
 ## Notes
