@@ -126,6 +126,31 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 
 **Next Steps**: Create work package when bandwidth available; not blocking any current work
 
+---
+
+### Rename markdown-extract Repo to markdown-toolkit
+**Proposed**: 2025-10-28  
+**Size**: Small (1 hour)  
+**Priority**: Low  
+**Description**: Rename the `rogerlew/markdown-extract` repository to `rogerlew/markdown-toolkit` to reflect that it now includes three tools: `markdown-extract`, `markdown-edit`, and `markdown-doc`.
+
+**Scope**:
+- Rename GitHub repository via Settings → Rename
+- Update README.md to reflect new name
+- Update any documentation/references in wepppy that point to the old repo name
+- GitHub automatically redirects old URLs, so existing links remain functional
+- Update `tools/README.markdown-tools.md` references if needed
+
+**Strategic Value**: 
+- Accurate branding reflects toolkit nature (not just extraction)
+- Clearer communication to users about available tools
+- Better positioning for future tools (e.g., markdown-validate, markdown-toc)
+- GitHub redirects preserve all existing links
+
+**Dependencies**: None (safe operation, GitHub handles redirects)
+
+**Next Steps**: Quick rename when convenient; very low risk
+
 
 ### Kubernetes Migration (Pending)
 When resuming Kubernetes work:
