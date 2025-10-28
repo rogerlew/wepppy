@@ -1,6 +1,7 @@
 # Wojak Lives: Interactive Agent Integration
 > Created 2025-10-28 to establish Wojak agent integration with WEPPcloud command bar
-> **Status:** Active
+> **Status:** Approved — Implementation Ready
+> **Owner:** Codex
 > **Purpose:** Demonstrates production-ready architecture for secure, run-scoped interactive agent assistance in scientific modeling workflows. Establishes patterns for zero-trust agent integration, non-blocking pub/sub messaging, and JWT-based capability isolation that stakeholders can extend to broader user populations.
 
 ## Context
@@ -395,6 +396,8 @@ def spawn_wojak_session(runid: str, config: str, session_id: str,
     
     return cao_response.json()
 ```
+
+> **Implementation note:** The current CAO API only reads query parameters. We recommend adding optional JSON support (e.g., `{"env": {...}}`) so JWTs and channel metadata can be handed off explicitly. Until that lands, a temporary workaround (stashing the token in Redis for the bootstrap script) remains possible but carries more moving parts.
 
 #### 5. CAO Bootstrap Script (Redis Bridge)
 ```python
@@ -948,5 +951,6 @@ def replace_report_section(runid: str, report_id: str, heading_pattern: str,
 ---
 
 **Created:** 2025-10-28  
-**Owner:** Alpha Team (Roger)  
-**Status:** Active — Critical path analysis in progress
+**Approved:** 2025-10-28  
+**Owner:** Codex  
+**Status:** Approved — Ready for implementation

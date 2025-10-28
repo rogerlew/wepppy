@@ -55,6 +55,8 @@ CAO Wojak Agent (GitHub Copilot free tier)
       ├─ append_interaction_log
       └─ get_session_history (24hr coherence)
 ```
+> **Implementation note:** CAO currently ignores JSON bodies on `POST /sessions`; only query parameters are accepted. Extending the API to accept an optional `env` object keeps JWT/metadata handoff declarative. Until that lands, document any Redis-based fallback explicitly.
+
 
 **Python MCP Shim Implementation:**
 
@@ -67,9 +69,9 @@ import os
 from pathlib import Path
 
 @mcp_tool(tier="wojak")
-def list_report_files(runid: str, glob_pattern: str = "*") -> list[str]:
+def list_report_files(runid: str, glob_pattern: str = "*", _jwt_claims=None) -> list[str]:
     """List files in run directory matching glob pattern."""
-    validate_runid(runid)  # checks JWT token in context
+    validate_runid(runid, _jwt_claims)
     run_dir = Path(f"/geodata/weppcloud_runs/{runid}")
     if not run_dir.exists():
         raise ValueError(f"Run {runid} not found")
@@ -82,9 +84,9 @@ def list_report_files(runid: str, glob_pattern: str = "*") -> list[str]:
     return sorted(files)
 
 @mcp_tool(tier="wojak")
-def read_run_file(runid: str, path: str) -> str:
+def read_run_file(runid: str, path: str, _jwt_claims=None) -> str:
     """Read file content from run directory (max 1MB)."""
-    validate_runid(runid)
+    validate_runid(runid, _jwt_claims)
     run_dir = Path(f"/geodata/weppcloud_runs/{runid}")
     file_path = (run_dir / path).resolve()
     

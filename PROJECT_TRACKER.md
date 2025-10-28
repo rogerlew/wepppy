@@ -81,8 +81,11 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 
 ### Wojak Lives: Interactive Agent Integration
 **Proposed**: 2025-10-28  
-**Size**: Medium (2-3 days)  
+**Approved**: 2025-10-28  
+**Owner**: Codex  
+**Size**: Medium (2-3 days, 14-20h)  
 **Priority**: High  
+**Status**: **Approved — Implementation Ready**  
 **Package**: [docs/work-packages/20251028_wojak_lives/](docs/work-packages/20251028_wojak_lives/)  
 **Description**: Establish minimal viable path for Wojak agent (zero-trust public-facing tier) integration with WEPPcloud command bar.
 
