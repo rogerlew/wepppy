@@ -100,12 +100,14 @@ def read_run_file(runid: str, path: str) -> str:
 
 ```python
 # wepppy/mcp/report_editor.py
-# Built on markdown-toolkit PyO3 bindings - zero-overhead section-based editing
+# Built on markdown-extract PyO3 bindings - 50× faster than subprocess, native Python exceptions
 from wepppy.mcp.base import mcp_tool, validate_runid
 from pathlib import Path
 import uuid
-# PyO3 bindings (installed via: pip install markdown-toolkit-py)
-from markdown_toolkit import extract, edit, toc
+# PyO3 bindings (installed via: maturin develop --manifest-path /workdir/markdown-extract/...)
+import markdown_extract_py as mde
+import markdown_edit_py as edit
+import markdown_doc_py as doc
 
 @mcp_tool(tier="wojak")
 def create_report_draft(runid: str, template_name: str) -> dict:
@@ -123,84 +125,123 @@ def create_report_draft(runid: str, template_name: str) -> dict:
     draft_path.parent.mkdir(exist_ok=True)
     draft_path.write_text(template_path.read_text())
     
-    # Extract all headings using PyO3 binding (fast!)
-    sections = extract.list_headings(str(draft_path))
+    # Extract all section metadata using PyO3 binding (50× faster than subprocess!)
+    sections = mde.extract_sections_from_file(".*", str(draft_path), all_matches=True)
+    headings = [s.heading for s in sections]
     
     return {
         "report_id": report_id,
         "template": template_name,
-        "sections": sections  # ["# Report", "## Watershed", "## Climate", ...]
+        "sections": headings  # ["# Report", "## Watershed", "## Climate", ...]
     }
 
 @mcp_tool(tier="wojak")
-def list_report_sections(runid: str, report_id: str) -> list[str]:
-    """List all section headings in report (PyO3 binding)."""
-    validate_runid(runid)
-    draft_path = Path(f"/geodata/weppcloud_runs/{runid}/reports/{report_id}.md")
-    return extract.list_headings(str(draft_path))
-
-@mcp_tool(tier="wojak")
-def read_report_section(runid: str, report_id: str, heading_pattern: str) -> str:
-    """Extract section content by heading pattern (PyO3 binding)."""
+def list_report_sections(runid: str, report_id: str) -> list[dict]:
+    """List all sections with metadata (PyO3 binding, structured output)."""
     validate_runid(runid)
     draft_path = Path(f"/geodata/weppcloud_runs/{runid}/reports/{report_id}.md")
     
-    # extract.section(path, pattern, case_sensitive=False, print_heading=True)
-    result = extract.section(str(draft_path), heading_pattern, 
-                            case_sensitive=False, print_heading=True)
-    if result is None:
-        raise ValueError(f"Section '{heading_pattern}' not found")
-    return result
+    try:
+        sections = mde.extract_sections_from_file(".*", str(draft_path), all_matches=True)
+        return [
+            {
+                "heading": s.heading,
+                "level": s.level,
+                "title": s.title,
+                "has_content": bool(s.body.strip())
+            }
+            for s in sections
+        ]
+    except mde.MarkdownExtractError as e:
+        raise ValueError(f"Failed to read report: {e}")
+
+@mcp_tool(tier="wojak")
+def read_report_section(runid: str, report_id: str, heading_pattern: str) -> str:
+    """Extract section content by heading pattern (PyO3 binding, native exception)."""
+    validate_runid(runid)
+    draft_path = Path(f"/geodata/weppcloud_runs/{runid}/reports/{report_id}.md")
+    
+    try:
+        # Returns list with first match (or empty list if no match)
+        sections = mde.extract_from_file(heading_pattern, str(draft_path))
+        if not sections:
+            raise ValueError(f"Section '{heading_pattern}' not found")
+        return sections[0]
+    except mde.MarkdownExtractError as e:
+        raise ValueError(f"Extract failed: {e}")
 
 @mcp_tool(tier="wojak")
 def replace_report_section(runid: str, report_id: str, heading_pattern: str, 
-                          new_content: str, keep_heading: bool = True) -> None:
+                          new_content: str, keep_heading: bool = True) -> dict:
     """Replace section content (PyO3 binding, atomic write with backup)."""
     validate_runid(runid)
     draft_path = Path(f"/geodata/weppcloud_runs/{runid}/reports/{report_id}.md")
     
-    # edit.replace(path, pattern, content, keep_heading=True, backup=True, dry_run=False)
-    edit.replace(str(draft_path), heading_pattern, new_content, 
-                keep_heading=keep_heading, backup=True)
+    try:
+        # EditResult with .applied, .exit_code, .diff, .messages, .written_path
+        result = edit.replace(
+            str(draft_path), 
+            heading_pattern, 
+            new_content,
+            keep_heading=keep_heading, 
+            backup=True
+        )
+        return {
+            "success": result.applied,
+            "messages": result.messages,
+            "backup_created": result.written_path is not None
+        }
+    except edit.MarkdownEditError as e:
+        raise ValueError(f"Edit failed: {e}")
 
 @mcp_tool(tier="wojak")
 def append_to_section(runid: str, report_id: str, heading_pattern: str, 
-                     content: str) -> None:
+                     content: str) -> dict:
     """Append content to existing section (PyO3 binding)."""
     validate_runid(runid)
     draft_path = Path(f"/geodata/weppcloud_runs/{runid}/reports/{report_id}.md")
     
-    # edit.append_to(path, pattern, content, backup=True)
-    edit.append_to(str(draft_path), heading_pattern, content, backup=True)
+    try:
+        result = edit.append_to(str(draft_path), heading_pattern, content, backup=True)
+        return {"success": result.applied, "messages": result.messages}
+    except edit.MarkdownEditError as e:
+        raise ValueError(f"Append failed: {e}")
 
 @mcp_tool(tier="wojak")
 def insert_section_after(runid: str, report_id: str, after_heading: str, 
-                        new_section_md: str) -> None:
+                        new_section_md: str) -> dict:
     """Insert new section after existing heading (PyO3 binding)."""
     validate_runid(runid)
     draft_path = Path(f"/geodata/weppcloud_runs/{runid}/reports/{report_id}.md")
     
-    # edit.insert_after(path, pattern, content, backup=True, allow_duplicate=False)
-    edit.insert_after(str(draft_path), after_heading, new_section_md, backup=True)
+    try:
+        result = edit.insert_after(
+            str(draft_path), 
+            after_heading, 
+            new_section_md, 
+            backup=True, 
+            allow_duplicate=False
+        )
+        return {"success": result.applied, "messages": result.messages}
+    except edit.MarkdownEditError as e:
+        raise ValueError(f"Insert failed: {e}")
 
 @mcp_tool(tier="wojak")
-def generate_toc(runid: str, report_id: str, max_depth: int = 3) -> str:
-    """Generate table of contents for report (PyO3 binding)."""
+def update_report_toc(runid: str, report_id: str) -> dict:
+    """Regenerate table of contents for report (PyO3 binding)."""
     validate_runid(runid)
     draft_path = Path(f"/geodata/weppcloud_runs/{runid}/reports/{report_id}.md")
     
-    # toc.generate(path, max_depth=3, include_links=True) -> str
-    return toc.generate(str(draft_path), max_depth=max_depth, include_links=True) 
-                        new_section_md: str) -> None:
-    """Insert new section after existing heading (uses markdown-edit insert-after)."""
-    validate_runid(runid)
-    draft_path = Path(f"/geodata/weppcloud_runs/{runid}/reports/{report_id}.md")
-    
-    # markdown-edit file.md insert-after "pattern" --with-string "## New Section\nContent"
-    subprocess.run([
-        "markdown-edit", str(draft_path), "insert-after", after_heading,
-        "--with-string", new_section_md
-    ], check=True)
+    try:
+        # TocResult with .mode, .status, .diff, .messages
+        result = doc.toc(str(draft_path), mode="update", quiet=True)
+        return {
+            "success": result.status in ("valid", "unchanged", "changed"),
+            "status": result.status,
+            "messages": result.messages
+        }
+    except doc.MarkdownDocError as e:
+        raise ValueError(f"TOC update failed: {e}")
 
 @mcp_tool(tier="wojak")
 def upload_to_run(runid: str, report_id: str) -> str:
@@ -238,39 +279,69 @@ def trigger_pdf_export(runid: str, report_id: str) -> dict:
 | **Performance** | Fork+exec overhead (~5-10ms per call) | **Direct FFI (~10μs)** |
 | **Memory** | Separate process, duplicate data | **Shared memory, zero-copy strings** |
 | **Error handling** | Parse stderr, check exit codes | **Native Python exceptions** |
-| **Type safety** | String in/out, manual parsing | **Typed function signatures** |
+| **Type safety** | String in/out, manual parsing | **Typed function signatures, structured objects** |
 | **Complexity** | Shell escaping, path handling | **Just call Python functions** |
-| **Dependencies** | Requires binaries in PATH | **Just `pip install markdown-toolkit-py`** |
+| **Dependencies** | Requires binaries in PATH | **Just `maturin develop` in venv** |
 
-**PyO3 API Design (markdown-toolkit-py package):**
+**PyO3 API Design (from PYTHON_API_REFERENCE.md):**
 
 ```python
-# markdown_toolkit.extract module
-def list_headings(path: str) -> list[str]:
-    """Returns all heading lines (e.g., ["# Title", "## Section"])."""
+# markdown_extract_py module
+def extract(pattern, content, *, case_sensitive=False, all_matches=False, 
+           no_heading=False) -> list[str]:
+    """Extract sections matching pattern from markdown string."""
 
-def section(path: str, pattern: str, case_sensitive: bool = False, 
-           print_heading: bool = True) -> str | None:
-    """Extract section matching pattern. Returns None if not found."""
+def extract_from_file(pattern, path, *, case_sensitive=False, all_matches=False, 
+                     no_heading=False) -> list[str]:
+    """Extract sections from file."""
 
-# markdown_toolkit.edit module  
-def replace(path: str, pattern: str, content: str, 
-           keep_heading: bool = True, backup: bool = True, 
-           dry_run: bool = False) -> None:
-    """Replace section content. Raises ValueError on duplicate matches."""
+def extract_sections(pattern, content, *, case_sensitive=False, 
+                    all_matches=False) -> list[Section]:
+    """Extract with structured metadata (heading, level, title, body, full_text)."""
 
-def append_to(path: str, pattern: str, content: str, 
-             backup: bool = True) -> None:
+class Section:
+    heading: str    # Full heading line (e.g., "## Installation")
+    level: int      # Heading depth (1-6)
+    title: str      # Normalized text without markers
+    body: str       # Section content excluding heading
+    full_text: str  # Complete section (heading + body)
+
+# markdown_edit_py module  
+def replace(file, pattern, replacement, *, case_sensitive=False, all_matches=False, 
+           body_only=False, keep_heading=False, allow_duplicate=False, 
+           max_matches=None, dry_run=False, backup=True, with_path=None, 
+           with_string=None) -> EditResult:
+    """Replace matching sections."""
+
+def append_to(file, pattern, payload, *, backup=True, with_string=None) -> EditResult:
     """Append to section body."""
 
-def insert_after(path: str, pattern: str, content: str, 
-                backup: bool = True, allow_duplicate: bool = False) -> None:
+def insert_after(file, pattern, payload, *, backup=True, 
+                allow_duplicate=False, with_string=None) -> EditResult:
     """Insert new section after match."""
 
-# markdown_toolkit.toc module
-def generate(path: str, max_depth: int = 3, 
-            include_links: bool = True) -> str:
-    """Generate table of contents markdown."""
+class EditResult:
+    applied: bool           # Whether edit was applied
+    exit_code: int          # CLI-compatible exit code (0 = success)
+    diff: str | None        # Unified diff (populated when dry_run=True)
+    messages: list[str]     # Human-readable status messages
+    written_path: str | None  # Path of modified file (None for dry-run)
+
+# markdown_doc_py module
+def toc(path, *, mode="check", no_ignore=False, quiet=False) -> TocResult:
+    """Check, update, or diff table of contents.
+    
+    Modes:
+    - "check": Validate TOC matches current structure
+    - "update": Regenerate TOC and write file (creates .bak backup)
+    - "diff": Preview update without modifying file
+    """
+
+class TocResult:
+    mode: str              # Mode executed ("check", "update", or "diff")
+    status: str            # "valid", "changed", "unchanged", or "error"
+    diff: str | None       # Unified diff (in diff mode or when TOC changed)
+    messages: list[str]    # Human-readable status messages
 ```
 
 **Performance Impact for Wojaks:**
@@ -293,36 +364,45 @@ except subprocess.CalledProcessError as e:
     
 # PyO3 (clean)
 try:
-    output = extract.section(path, pattern)
-    if output is None:
+    sections = mde.extract_from_file(pattern, path)
+    if not sections:
         raise ValueError("Section not found")
-except Exception as e:
+except mde.MarkdownExtractError as e:
     # Native Python exception with clear message
     raise
 ```
 
-**Why markdown-toolkit PyO3 integration is elegant:**
+**Why markdown-extract PyO3 integration is elegant:**
 
 1. **Agent-friendly API:** Agent calls `list_report_sections()` to see structure, then `read_report_section("Results")` to understand current content before editing
 2. **Section-based editing:** No need for line numbers or offsets—agent works with semantic heading patterns (e.g., "replace 'Methods' section with...")
-3. **Atomic operations:** markdown-edit handles backup/validation/fsync automatically (inherited via PyO3)
+3. **Atomic operations:** markdown-edit handles backup/validation/fsync automatically via `EditResult`
 4. **Reuses battle-tested tooling:** Rust markdown parser handles edge cases (setext headings, escapes, duplicate headings)
 5. **Zero impedance mismatch:** Agent thinks in "sections", PyO3 bindings work in "sections"
 6. **Performance:** 1000× faster than subprocess (10μs vs 5-10ms per call)
-7. **Clean error handling:** Native Python exceptions instead of parsing stderr
-8. **Zero deployment complexity:** Just `pip install markdown-toolkit-py`, no PATH/binary management
+7. **Clean error handling:** Native Python exceptions (`MarkdownExtractError`, `MarkdownEditError`, `MarkdownDocError`) instead of parsing stderr
+8. **Zero deployment complexity:** Just `maturin develop` in venv, no PATH/binary management
+9. **Type stubs included:** Full `.pyi` support for IDE autocomplete and type checking
 
 **Workflow example:**
 
 User: "Add a soil erosion analysis section after the watershed description"
 
 Agent:
-1. `list_report_sections(runid, report_id)` → sees `["# Report", "## Watershed Description", "## Results"]`
-2. `read_report_section(runid, report_id, "Watershed Description")` → understands context (PyO3 call, <1ms)
+1. `list_report_sections(runid, report_id)` → receives structured data:
+   ```python
+   [
+       {"heading": "# Report", "level": 1, "title": "Report", "has_content": True},
+       {"heading": "## Watershed Description", "level": 2, "title": "Watershed Description", "has_content": True},
+       {"heading": "## Results", "level": 2, "title": "Results", "has_content": True}
+   ]
+   ```
+2. `read_report_section(runid, report_id, "Watershed Description")` → gets current content (PyO3 call, <1ms)
 3. `get_subcatchment_results(runid)` → fetch WEPP soil loss data via query-engine MCP
 4. Composes markdown: `"## Soil Erosion Analysis\n\nAverage soil loss: 5.2 ton/acre/year..."`
-5. `insert_section_after(runid, report_id, "Watershed Description", new_section_md)` → PyO3 call, atomic write with backup
-6. User sees updated report in browser
+5. `insert_section_after(runid, report_id, "Watershed Description", new_section_md)` → PyO3 call returns `EditResult` with `.applied=True`, `.messages=["Applied edit to .../report.md"]`
+6. `update_report_toc(runid, report_id)` → regenerates TOC, returns `TocResult` with `.status="changed"`
+7. User sees updated report in browser with new section and refreshed TOC
 
 **This eliminates:**
 - ❌ Custom markdown parsing logic
@@ -334,32 +414,13 @@ Agent:
 - ❌ stderr parsing for errors
 
 **All components come together:**
-- markdown-toolkit (Rust) → fast, safe markdown operations
-- PyO3 bindings → zero-copy FFI, native Python API
+- markdown-extract/edit/doc (Rust) → fast, safe markdown operations
+- PyO3 bindings → zero-copy FFI, native Python API with typed results
 - wepppy.mcp.report_editor → thin shims with runid validation
 - wepppy.mcp.query_engine → data for populating sections
-- wepppy.mcp.run_files → read GeoJSON/parquet for charts
+- wepppy.mcp.report_files → read GeoJSON/parquet for charts
 - Agent profile → tuned for hydrology + report generation
-- Result: Wojaks can collaboratively author professional reports through conversation at native speeds"# Report", "## Watershed Description", "## Results"]`
-2. `read_report_section(runid, report_id, "Watershed Description")` → understands context
-3. `get_subcatchment_results(runid)` → fetch WEPP soil loss data via query-engine MCP
-4. Composes markdown: `"## Soil Erosion Analysis\n\nAverage soil loss: 5.2 ton/acre/year..."`
-5. `insert_section_after(runid, report_id, "Watershed Description", new_section_md)`
-6. User sees updated report in browser
-
-**This eliminates:**
-- ❌ Custom markdown parsing logic
-- ❌ Line-based editing (fragile, breaks on formatting changes)
-- ❌ Manual backup/rollback code
-- ❌ Duplicate heading detection (markdown-edit handles it)
-
-**All components come together:**
-- markdown-toolkit (extract/edit/doc) → report editing primitives
-- wepppy.mcp.report_editor → Python shims calling toolkit via subprocess
-- wepppy.mcp.query_engine → data for populating sections
-- wepppy.mcp.run_files → read GeoJSON/parquet for charts
-- Agent profile → tuned for hydrology + report generation
-- Result: Wojaks can collaboratively author professional reports through conversation
+- Result: Wojaks can collaboratively author professional reports through conversation at native speeds
 
 **MCP Privilege Shimming (Simplified):**
 

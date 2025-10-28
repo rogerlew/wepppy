@@ -470,6 +470,8 @@ When tests need to isolate heavy modules (e.g., `wepppy.all_your_base`, `wepppy.
 
 **Fix:** Added `isint` to both stubs to match `wepppy.all_your_base.__all__`. See `tests/AGENTS.md` for detailed stub management guidance.
 
+**Control implementation plans:** Comprehensive migration blueprints for Ash and Omni controls (capturing UI inventory, JavaScript behavior, backend mapping, and migration steps) are archived under `docs/work-packages/20251023_controller_modernization/notes/archived-plans/` for reference. These plans document the transition from legacy Bootstrap/jQuery patterns to the Pure stack.
+
 Run `wctl check-test-stubs` before committing test changes to automatically verify stub completeness.
 
 ### Test Marker Guidelines

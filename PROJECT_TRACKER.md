@@ -79,6 +79,37 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### Wojak Lives: Interactive Agent Integration
+**Proposed**: 2025-10-28  
+**Size**: Medium (2-3 days)  
+**Priority**: High  
+**Package**: [docs/work-packages/20251028_wojak_lives/](docs/work-packages/20251028_wojak_lives/)  
+**Description**: Establish minimal viable path for Wojak agent (zero-trust public-facing tier) integration with WEPPcloud command bar.
+
+**Scope**:
+- JWT authentication scoped to user + run context
+- MCP modules for file access (`report_files`) and markdown editing (`report_editor`) using PyO3 bindings
+- Flask route to spawn CAO sessions with JWT injection
+- Command bar UI integration with WebSocket bridge for bi-directional chat
+- Security validation (path traversal prevention, JWT verification)
+- Manual smoke testing with root user (Roger)
+
+**Strategic Value**:
+- Enables interactive agent assistance for WEPP run exploration
+- Demonstrates CAO integration with WEPPcloud UI
+- Establishes security patterns for future agent tiers
+- Leverages PyO3 markdown bindings for 50× performance improvement over subprocess calls
+
+**Dependencies**: 
+- CAO server running on localhost:9889
+- PyO3 bindings installed in CAO venv (markdown_extract_py, markdown_edit_py, markdown_doc_py)
+- Flask-JWT-Extended library
+- Sample run directory with markdown reports for testing
+
+**Codex Review Gate**: Pause after Phase 1 (Backend Foundation) if effort exceeds 12 hours for architecture validation before frontend work.
+
+---
+
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  

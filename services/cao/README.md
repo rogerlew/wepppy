@@ -168,6 +168,8 @@ codex --version
 
 ### Install CAO
 
+#### Option 1: System-wide Install (Recommended for Production)
+
 From the wepppy repository root:
 
 ```bash
@@ -180,6 +182,59 @@ cao-server --help
 ```
 
 This registers the `cao` and `cao-server` entry points and installs dependencies (FastAPI, libtmux, watchdog, etc.).
+
+#### Option 2: Virtual Environment Install (Recommended for Development)
+
+For isolated development with full control over dependencies:
+
+```bash
+# Navigate to CAO directory
+cd /workdir/wepppy/services/cao
+
+# Create virtual environment with uv
+uv venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Install CAO and all dependencies
+uv sync
+
+# Optional: Install markdown-extract Python bindings for enhanced documentation tools
+# (Required if using markdown manipulation features in agent workflows)
+maturin develop --manifest-path /workdir/markdown-extract/crates/markdown_extract_py/Cargo.toml --release
+
+# Verify installation
+cao --version
+cao-server --help
+```
+
+**What `uv sync` installs:**
+- Core dependencies: FastAPI (0.117.1), libtmux (0.46.2), uvicorn (0.37.0)
+- MCP integration: fastmcp (2.12.4), mcp (1.15.0)
+- Scheduling: APScheduler (3.11.0)
+- File watching: watchdog (6.0.0), aiofiles (24.1.0)
+- Testing: pytest (8.4.2), pytest-asyncio, pytest-cov, pytest-mock, pytest-xdist
+- Code quality: black (25.9.0), isort (6.0.1), mypy (1.18.2)
+- CLI framework: cyclopts (3.24.0), rich (14.1.0)
+- 93 total packages (see `pyproject.toml` for complete dependency tree)
+
+**What `maturin develop` does:**
+- Compiles Rust-based `markdown-extract` Python bindings (`markdown_extract_py`) in release mode
+- Installs as editable package in the virtual environment
+- Provides `markdown_extract` module for programmatic Markdown manipulation (heading extraction, section editing)
+- Used by advanced agent workflows that need to parse/modify documentation files
+
+**Virtual environment benefits:**
+- Dependency isolation from system Python
+- Reproducible builds via `uv.lock`
+- Easy cleanup (`rm -rf .venv`)
+- Compatible with IDE tooling (VS Code, PyCharm)
+
+**Deactivating:**
+```bash
+deactivate
+```
 
 ---
 
