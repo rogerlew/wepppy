@@ -229,24 +229,88 @@ def trigger_pdf_export(runid: str, report_id: str) -> dict:
         "job_id": job.id,
         "status_url": f"/runs/{runid}/reports/{report_id}/status"
     }
-
-def _list_sections(md_path: Path) -> list[str]:
-    """Helper: extract all section headings using markdown-extract."""
-    result = subprocess.run(
-        ["markdown-extract", ".*", str(md_path), "--all"],
-        capture_output=True, text=True
-    )
-    # Parse heading lines from output
-    return [line for line in result.stdout.split('\n') if line.startswith('#')]
 ```
 
-**Why markdown-toolkit integration is elegant:**
+**Why PyO3 bindings are superior to subprocess:**
 
-1. **Agent-friendly API:** Agent can `list_report_sections()` to see structure, then `read_report_section("Results")` to understand current content before editing
+| Aspect | Subprocess | PyO3 Bindings |
+|--------|-----------|---------------|
+| **Performance** | Fork+exec overhead (~5-10ms per call) | **Direct FFI (~10μs)** |
+| **Memory** | Separate process, duplicate data | **Shared memory, zero-copy strings** |
+| **Error handling** | Parse stderr, check exit codes | **Native Python exceptions** |
+| **Type safety** | String in/out, manual parsing | **Typed function signatures** |
+| **Complexity** | Shell escaping, path handling | **Just call Python functions** |
+| **Dependencies** | Requires binaries in PATH | **Just `pip install markdown-toolkit-py`** |
+
+**PyO3 API Design (markdown-toolkit-py package):**
+
+```python
+# markdown_toolkit.extract module
+def list_headings(path: str) -> list[str]:
+    """Returns all heading lines (e.g., ["# Title", "## Section"])."""
+
+def section(path: str, pattern: str, case_sensitive: bool = False, 
+           print_heading: bool = True) -> str | None:
+    """Extract section matching pattern. Returns None if not found."""
+
+# markdown_toolkit.edit module  
+def replace(path: str, pattern: str, content: str, 
+           keep_heading: bool = True, backup: bool = True, 
+           dry_run: bool = False) -> None:
+    """Replace section content. Raises ValueError on duplicate matches."""
+
+def append_to(path: str, pattern: str, content: str, 
+             backup: bool = True) -> None:
+    """Append to section body."""
+
+def insert_after(path: str, pattern: str, content: str, 
+                backup: bool = True, allow_duplicate: bool = False) -> None:
+    """Insert new section after match."""
+
+# markdown_toolkit.toc module
+def generate(path: str, max_depth: int = 3, 
+            include_links: bool = True) -> str:
+    """Generate table of contents markdown."""
+```
+
+**Performance Impact for Wojaks:**
+
+With PyO3, a typical report generation session:
+- **Before (subprocess):** 15-20 calls × 5-10ms = 75-200ms overhead
+- **After (PyO3):** 15-20 calls × 10μs = 0.15-0.2ms overhead
+- **~1000× faster**, eliminates subprocess latency
+
+More importantly: **simpler error handling**
+```python
+# Subprocess (fragile)
+try:
+    result = subprocess.run([...], check=True, capture_output=True)
+    output = result.stdout
+except subprocess.CalledProcessError as e:
+    # Parse stderr to understand what went wrong
+    if "not found" in e.stderr:
+        raise ValueError("Section not found")
+    
+# PyO3 (clean)
+try:
+    output = extract.section(path, pattern)
+    if output is None:
+        raise ValueError("Section not found")
+except Exception as e:
+    # Native Python exception with clear message
+    raise
+```
+
+**Why markdown-toolkit PyO3 integration is elegant:**
+
+1. **Agent-friendly API:** Agent calls `list_report_sections()` to see structure, then `read_report_section("Results")` to understand current content before editing
 2. **Section-based editing:** No need for line numbers or offsets—agent works with semantic heading patterns (e.g., "replace 'Methods' section with...")
-3. **Atomic operations:** markdown-edit handles backup/validation/fsync automatically
-4. **Reuses battle-tested tooling:** markdown-extract/edit already handle edge cases (setext headings, escapes, duplicate headings)
-5. **Zero impedance mismatch:** Agent thinks in "sections", tools work in "sections"
+3. **Atomic operations:** markdown-edit handles backup/validation/fsync automatically (inherited via PyO3)
+4. **Reuses battle-tested tooling:** Rust markdown parser handles edge cases (setext headings, escapes, duplicate headings)
+5. **Zero impedance mismatch:** Agent thinks in "sections", PyO3 bindings work in "sections"
+6. **Performance:** 1000× faster than subprocess (10μs vs 5-10ms per call)
+7. **Clean error handling:** Native Python exceptions instead of parsing stderr
+8. **Zero deployment complexity:** Just `pip install markdown-toolkit-py`, no PATH/binary management
 
 **Workflow example:**
 
@@ -254,6 +318,29 @@ User: "Add a soil erosion analysis section after the watershed description"
 
 Agent:
 1. `list_report_sections(runid, report_id)` → sees `["# Report", "## Watershed Description", "## Results"]`
+2. `read_report_section(runid, report_id, "Watershed Description")` → understands context (PyO3 call, <1ms)
+3. `get_subcatchment_results(runid)` → fetch WEPP soil loss data via query-engine MCP
+4. Composes markdown: `"## Soil Erosion Analysis\n\nAverage soil loss: 5.2 ton/acre/year..."`
+5. `insert_section_after(runid, report_id, "Watershed Description", new_section_md)` → PyO3 call, atomic write with backup
+6. User sees updated report in browser
+
+**This eliminates:**
+- ❌ Custom markdown parsing logic
+- ❌ Line-based editing (fragile, breaks on formatting changes)
+- ❌ Manual backup/rollback code
+- ❌ Subprocess overhead (fork/exec latency)
+- ❌ Shell escaping complexity
+- ❌ Exit code interpretation
+- ❌ stderr parsing for errors
+
+**All components come together:**
+- markdown-toolkit (Rust) → fast, safe markdown operations
+- PyO3 bindings → zero-copy FFI, native Python API
+- wepppy.mcp.report_editor → thin shims with runid validation
+- wepppy.mcp.query_engine → data for populating sections
+- wepppy.mcp.run_files → read GeoJSON/parquet for charts
+- Agent profile → tuned for hydrology + report generation
+- Result: Wojaks can collaboratively author professional reports through conversation at native speeds"# Report", "## Watershed Description", "## Results"]`
 2. `read_report_section(runid, report_id, "Watershed Description")` → understands context
 3. `get_subcatchment_results(runid)` → fetch WEPP soil loss data via query-engine MCP
 4. Composes markdown: `"## Soil Erosion Analysis\n\nAverage soil loss: 5.2 ton/acre/year..."`
