@@ -786,7 +786,7 @@ Located in `deps/linux/` or system-installed:
 - `topaz` - Watershed delineation
 - Input/output via file I/O (no direct bindings)
 
-### WhiteboxTools Integration
+### Weppcloud-WBT (WhiteboxTools hard fork) Integration
 Rust-based geospatial tools via `wepppy/topo/wbt/`:
 - Exposed via Python subprocess calls
 - Custom hillslope TOPAZ implementation
@@ -798,28 +798,6 @@ Python calls Rust binary for watershed abstraction:
 from wepppy.topo.peridot.runner import run_peridot
 run_peridot(wd, config)
 ```
-
-## Deployment Notes
-
-### Kubernetes Migration (Pending)
-When resuming Kubernetes work:
-- Duplicate static build stage for proxy image
-- Use init containers for shared assets
-- Eliminate shared volume mounts
-- Configure Redis keyspace notifications in ConfigMap
-- Set resource limits based on profiling
-
-### Health Checks
-- Endpoint: `/health`
-- Returns 200 OK when ready
-- Checks Redis connectivity
-- Use for liveness/readiness probes
-
-### Logging in Production
-- Structured logs to stdout (captured by Docker/K8s)
-- Per-run logs in working directory
-- Centralized aggregation via Loki/ELK if needed
-- Redis status messages ephemeral (72-hour retention)
 
 ## Further Reading
 

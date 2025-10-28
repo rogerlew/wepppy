@@ -79,6 +79,31 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### Deprecate and Remove TauDEM Backend
+**Proposed**: 2025-10-27  
+**Size**: Medium (3-5 days)  
+**Priority**: Medium  
+**Description**: The `TauDEM` watershed delineation backend is deprecated and should be removed from the codebase to reduce complexity and maintenance overhead.
+
+**Scope**:
+- Remove all code paths related to `DelineationBackend.TauDEM` in `wepppy/nodb/core/watershed.py`.
+- Delete any TauDEM-specific scripts, configuration, or workflow files.
+- Ensure the `WBT` (WhiteboxTools) backend is the default and fully functional replacement for all use cases.
+- Update documentation (e.g., `cicd-strategy.md`, `nodb-project-build.md`) to remove any references to TauDEM.
+
+**Strategic Value**:
+- Reduces technical debt and code complexity.
+- Simplifies the watershed delineation logic and configuration.
+- Lowers the maintenance burden for both developers and agents.
+- Focuses testing and development efforts on the modern `WBT` backend.
+
+**Dependencies**: Confirmation that the `WBT` backend fully covers all necessary functionality previously provided by `TauDEM`.
+
+**Next Steps**: Create a work package to analyze the full impact of removal, verify WBT feature parity, and execute the removal.
+
+---
+
+
 ### Jinja Template Lint Error Resolution
 **Proposed**: 2025-10-27  
 **Size**: Small (1-2 days)  
@@ -100,6 +125,27 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 **Dependencies**: None
 
 **Next Steps**: Create work package when bandwidth available; not blocking any current work
+
+
+### Kubernetes Migration (Pending)
+When resuming Kubernetes work:
+- Duplicate static build stage for proxy image
+- Use init containers for shared assets
+- Eliminate shared volume mounts
+- Configure Redis keyspace notifications in ConfigMap
+- Set resource limits based on profiling
+
+**Health Checks**:
+- Endpoint: `/health`
+- Returns 200 OK when ready
+- Checks Redis connectivity
+- Use for liveness/readiness probes
+
+**Logging in Production**:
+- Structured logs to stdout (captured by Docker/K8s)
+- Per-run logs in working directory
+- Centralized aggregation via Loki/ELK if needed
+- Redis status messages ephemeral (72-hour retention)
 
 ---
 
