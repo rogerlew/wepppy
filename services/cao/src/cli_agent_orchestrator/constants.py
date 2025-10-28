@@ -46,7 +46,7 @@ DATABASE_FILE = DB_DIR / "cli-agent-orchestrator.db"
 DATABASE_URL = f"sqlite:///{DATABASE_FILE}"
 
 # Server configuration
-SERVER_HOST = "localhost"
+SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 9889
 SERVER_VERSION = "0.1.0"
 API_BASE_URL = f"http://{SERVER_HOST}:{SERVER_PORT}"

@@ -26,6 +26,546 @@
         'clear nodb_cache    - Clear Redis NoDb cache entries'
     ];
 
+    class AgentChat {
+        constructor(commandBar) {
+            this.commandBar = commandBar;
+            this.container = null;
+            this.statusEl = null;
+            this.startButton = null;
+            this.stopButton = null;
+            this.messagesEl = null;
+            this.typingEl = null;
+            this.composerEl = null;
+            this.inputEl = null;
+            this.sendButton = null;
+            this.logEl = null;
+
+            this.runId = null;
+            this.config = null;
+            this.sessionData = null;
+            this.statusStream = null;
+            this.isStarting = false;
+            this.markedConfigured = false;
+
+            this.handleStartClick = null;
+            this.handleStopClick = null;
+            this.handleSendClick = null;
+            this.handleInputKeydown = null;
+        }
+
+        init() {
+            this.container = this.commandBar.getAgentChatContainer();
+            if (!this.container) {
+                return;
+            }
+
+            const context = this.commandBar.getRunContextFromPath();
+            if (!context) {
+                this.container.hidden = true;
+                return;
+            }
+
+            this.runId = context.runId;
+            this.config = context.config;
+
+            this.statusEl = this.container.querySelector('[data-agent-status]');
+            this.startButton = this.container.querySelector('[data-agent-start]');
+            this.stopButton = this.container.querySelector('[data-agent-stop]');
+            this.messagesEl = this.container.querySelector('[data-agent-messages]');
+            this.typingEl = this.container.querySelector('[data-agent-typing]');
+            this.composerEl = this.container.querySelector('[data-agent-composer]');
+            this.inputEl = this.container.querySelector('[data-agent-input]');
+            this.sendButton = this.container.querySelector('[data-agent-send]');
+            this.logEl = this.container.querySelector('[data-agent-log]');
+
+            if (!this.statusEl || !this.startButton || !this.stopButton || !this.messagesEl || !this.composerEl || !this.inputEl || !this.sendButton || !this.logEl) {
+                console.warn('AgentChat: missing required elements; disabling agent chat UI.');
+                this.container.hidden = true;
+                return;
+            }
+
+            this.container.hidden = false;
+            this.stopButton.hidden = true;
+            this.composerEl.hidden = true;
+            this.hideTypingIndicator();
+            this.clearMessages();
+
+            this.handleStartClick = () => this.startSession();
+            this.handleStopClick = () => this.terminateSession();
+            this.handleSendClick = () => this.handleSend();
+            this.handleInputKeydown = (event) => {
+                if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                    event.preventDefault();
+                    this.handleSend();
+                }
+            };
+
+            this.startButton.addEventListener('click', this.handleStartClick);
+            this.stopButton.addEventListener('click', this.handleStopClick);
+            this.sendButton.addEventListener('click', this.handleSendClick);
+            this.inputEl.addEventListener('keydown', this.handleInputKeydown);
+
+            this.setStatus('Wojak assistant is idle.');
+        }
+
+        destroy() {
+            this.cleanupSession();
+            if (this.startButton && this.handleStartClick) {
+                this.startButton.removeEventListener('click', this.handleStartClick);
+            }
+            if (this.stopButton && this.handleStopClick) {
+                this.stopButton.removeEventListener('click', this.handleStopClick);
+            }
+            if (this.sendButton && this.handleSendClick) {
+                this.sendButton.removeEventListener('click', this.handleSendClick);
+            }
+            if (this.inputEl && this.handleInputKeydown) {
+                this.inputEl.removeEventListener('keydown', this.handleInputKeydown);
+            }
+            this.container = null;
+        }
+
+        setStatus(text) {
+            if (this.statusEl) {
+                this.statusEl.textContent = text;
+            }
+        }
+
+        showTypingIndicator() {
+            if (this.typingEl) {
+                this.typingEl.hidden = false;
+            }
+        }
+
+        hideTypingIndicator() {
+            if (this.typingEl) {
+                this.typingEl.hidden = true;
+            }
+        }
+
+        configureMarked() {
+            if (this.markedConfigured || typeof window === 'undefined' || typeof window.marked !== 'function') {
+                return;
+            }
+            try {
+                window.marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    mangle: false,
+                    headerIds: false,
+                    smartypants: true
+                });
+            } catch (error) {
+                console.warn('AgentChat: failed to configure marked options', error);
+            }
+            this.markedConfigured = true;
+        }
+
+        escapeHtml(value) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        renderPlain(text) {
+            const escaped = this.escapeHtml(text);
+            return escaped.replace(/\r?\n/g, '<br>');
+        }
+
+        sanitizeHtml(html) {
+            if (!html) {
+                return '';
+            }
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                doc.querySelectorAll('script, style, iframe, object, embed, link, meta, form').forEach((node) => node.remove());
+                doc.body.querySelectorAll('*').forEach((element) => {
+                    [...element.attributes].forEach((attr) => {
+                        if (attr.name && attr.name.startsWith('on')) {
+                            element.removeAttribute(attr.name);
+                        }
+                    });
+                    if (element.tagName === 'A') {
+                        element.setAttribute('rel', 'noopener noreferrer');
+                        if (!element.getAttribute('target')) {
+                            element.setAttribute('target', '_blank');
+                        }
+                    }
+                });
+                return doc.body.innerHTML || '';
+            } catch (error) {
+                console.warn('AgentChat: sanitizeHtml failed', error);
+                return this.renderPlain(html);
+            }
+        }
+
+        renderMarkdown(markdown) {
+            if (markdown === null || markdown === undefined) {
+                return '';
+            }
+            const text = String(markdown);
+            if (!text.trim()) {
+                return '';
+            }
+            if (typeof window === 'undefined' || typeof window.marked !== 'function') {
+                return this.renderPlain(text);
+            }
+            this.configureMarked();
+            try {
+                const html = window.marked.parse(text);
+                return this.sanitizeHtml(html);
+            } catch (error) {
+                console.warn('AgentChat: markdown render failed', error);
+                return this.renderPlain(text);
+            }
+        }
+
+        clearMessages() {
+            if (this.messagesEl) {
+                this.messagesEl.innerHTML = '';
+            }
+        }
+
+        formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        normalizeTimestamp(value) {
+            if (typeof value === 'number' && !Number.isNaN(value)) {
+                if (value > 1e12) {
+                    return value;
+                }
+                return value * 1000;
+            }
+            return Date.now();
+        }
+
+        buildRunUrl(path) {
+            const url = this.commandBar.buildRunScopedUrl(path);
+            if (!url) {
+                throw new Error('Run context is unavailable for agent chat.');
+            }
+            return url;
+        }
+
+        async parseResponse(response) {
+            if (response.ok) {
+                const contentType = response.headers.get('Content-Type') || '';
+                if (contentType.includes('application/json')) {
+                    return response.json();
+                }
+                return response.text();
+            }
+
+            let message = response.statusText || 'Request failed';
+            try {
+                const data = await response.json();
+                if (data && (data.error || data.message)) {
+                    message = data.error || data.message;
+                }
+            } catch (error) {
+                try {
+                    const text = await response.text();
+                    if (text) {
+                        message = text;
+                    }
+                } catch {
+                    // ignore secondary failures
+                }
+            }
+            throw new Error(message);
+        }
+
+        async startSession() {
+            if (this.isStarting || this.sessionData) {
+                return;
+            }
+            this.isStarting = true;
+            this.setStatus('Starting Wojak session…');
+            this.startButton.disabled = true;
+            this.clearMessages();
+            this.hideTypingIndicator();
+
+            try {
+                const response = await fetch(this.buildRunUrl('agent/chat'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+                const payload = await this.parseResponse(response);
+                this.sessionData = payload;
+                this.appendMessage('system', 'Agent session initializing…', Date.now(), { label: 'System' });
+
+                this.ensureStatusStream(payload.redis_channel);
+                this.setStatus('Wojak session initialized.');
+                this.startButton.hidden = true;
+                this.stopButton.hidden = false;
+                this.stopButton.disabled = false;
+                this.composerEl.hidden = false;
+                this.sendButton.disabled = false;
+                this.resetComposer();
+            } catch (error) {
+                this.setStatus(`Failed to start Wojak: ${error.message}`);
+                this.startButton.disabled = false;
+                this.sessionData = null;
+            } finally {
+                this.isStarting = false;
+            }
+        }
+
+        resetComposer() {
+            if (this.inputEl) {
+                this.inputEl.value = '';
+                this.inputEl.focus();
+            }
+        }
+
+        async handleSend() {
+            if (!this.sessionData) {
+                this.setStatus('Start a Wojak session before sending messages.');
+                return;
+            }
+            if (this.sendButton && this.sendButton.disabled) {
+                return;
+            }
+            const message = this.inputEl.value.trim();
+            if (!message) {
+                return;
+            }
+            this.appendMessage('user', message, Date.now(), { label: 'You' });
+            this.showTypingIndicator();
+            this.sendButton.disabled = true;
+            try {
+                const response = await fetch(this.buildRunUrl(`agent/chat/${encodeURIComponent(this.sessionData.session_id)}`), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+                await this.parseResponse(response);
+                this.setStatus('Message sent to Wojak.');
+                this.resetComposer();
+            } catch (error) {
+                this.hideTypingIndicator();
+                this.appendMessage('error', `Failed to send message: ${error.message}`, Date.now(), { label: 'Error' });
+                this.setStatus(`Send failed: ${error.message}`);
+            } finally {
+                this.sendButton.disabled = false;
+            }
+        }
+
+        appendMessage(role, content, timestamp, meta) {
+            if (!this.messagesEl || !content) {
+                return null;
+            }
+            const messageEl = document.createElement('div');
+            messageEl.className = 'command-bar-agent__message';
+            messageEl.dataset.role = role;
+            messageEl.dataset.timestamp = String(timestamp);
+
+            switch (role) {
+            case 'agent':
+                messageEl.classList.add('command-bar-agent__message--agent');
+                break;
+            case 'user':
+                messageEl.classList.add('command-bar-agent__message--user');
+                break;
+            case 'error':
+                messageEl.classList.add('command-bar-agent__message--error');
+                break;
+            case 'system':
+                messageEl.classList.add('command-bar-agent__message--system');
+                break;
+            default:
+                break;
+            }
+
+            const bodyEl = document.createElement('div');
+            bodyEl.className = 'command-bar-agent__message-body';
+            bodyEl.setAttribute('data-message-content', 'true');
+            if (role === 'agent' || role === 'system') {
+                bodyEl.innerHTML = this.renderMarkdown(content);
+            } else {
+                bodyEl.innerHTML = this.renderPlain(content);
+            }
+
+            const label = meta && meta.label ? meta.label : role.charAt(0).toUpperCase() + role.slice(1);
+            const metaEl = document.createElement('div');
+            metaEl.className = 'command-bar-agent__message-meta';
+            metaEl.textContent = `${label} • ${this.formatTime(timestamp)}`;
+
+            messageEl.appendChild(bodyEl);
+            messageEl.appendChild(metaEl);
+            this.messagesEl.appendChild(messageEl);
+            this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+            return messageEl;
+        }
+
+        appendAgentContent(content, timestamp) {
+            if (!this.messagesEl) {
+                return;
+            }
+            const html = this.renderMarkdown(content);
+            if (!html) {
+                return;
+            }
+            const last = this.messagesEl.lastElementChild;
+            if (last && last.dataset && last.dataset.role === 'agent') {
+                const body = last.querySelector('[data-message-content]');
+                if (body) {
+                    const fragment = document.createElement('div');
+                    fragment.innerHTML = html;
+                    while (fragment.firstChild) {
+                        body.appendChild(fragment.firstChild);
+                    }
+                }
+                const metaEl = last.querySelector('.command-bar-agent__message-meta');
+                if (metaEl) {
+                    metaEl.textContent = `Wojak • ${this.formatTime(timestamp)}`;
+                }
+                this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+                return;
+            }
+            this.appendMessage('agent', content, timestamp, { label: 'Wojak' });
+        }
+
+        ensureStatusStream(channel) {
+            this.disconnectStatusStream();
+            if (!channel) {
+                return;
+            }
+            if (typeof window === 'undefined' || typeof window.StatusStream === 'undefined') {
+                this.setStatus('StatusStream unavailable; agent responses will not stream.');
+                return;
+            }
+            try {
+                this.statusStream = window.StatusStream.attach({
+                    element: this.container,
+                    logElement: this.logEl,
+                    channel: channel,
+                    runId: this.runId,
+                    logLimit: 500,
+                    formatter: (value) => value,
+                    onAppend: (event) => {
+                        const raw = event && (event.raw !== undefined ? event.raw : event.message);
+                        this.handleStreamPayload(raw);
+                    }
+                });
+            } catch (error) {
+                console.warn('AgentChat: failed to attach StatusStream', error);
+                this.setStatus('Failed to subscribe to agent stream.');
+            }
+        }
+
+        disconnectStatusStream() {
+            if (this.statusStream && typeof window !== 'undefined' && window.StatusStream) {
+                window.StatusStream.disconnect(this.statusStream);
+            }
+            this.statusStream = null;
+        }
+
+        handleStreamPayload(raw) {
+            this.hideTypingIndicator();
+            if (raw === null || raw === undefined) {
+                return;
+            }
+
+            let payload = raw;
+            if (typeof raw === 'string') {
+                const trimmed = raw.trim();
+                if (!trimmed) {
+                    return;
+                }
+                try {
+                    payload = JSON.parse(trimmed);
+                } catch (error) {
+                    payload = { type: 'system', content: trimmed };
+                }
+            }
+
+            if (typeof payload !== 'object' || payload === null) {
+                payload = { type: 'system', content: String(payload) };
+            }
+
+            const messageType = payload.type || 'system';
+            const timestamp = this.normalizeTimestamp(payload.timestamp);
+            const content = payload.content ? String(payload.content) : '';
+
+            switch (messageType) {
+            case 'agent_output':
+                if (content) {
+                    this.appendAgentContent(content, timestamp);
+                }
+                break;
+            case 'error':
+                if (content) {
+                    this.appendMessage('error', content, timestamp, { label: 'Error' });
+                    this.setStatus(content);
+                }
+                break;
+            case 'system':
+            default:
+                if (content) {
+                    this.appendMessage('system', content, timestamp, { label: 'System' });
+                    this.setStatus(content);
+                }
+                break;
+            }
+        }
+
+        async terminateSession() {
+            if (!this.sessionData) {
+                return;
+            }
+            this.stopButton.disabled = true;
+            try {
+                const response = await fetch(this.buildRunUrl(`agent/chat/${encodeURIComponent(this.sessionData.session_id)}`), {
+                    method: 'DELETE'
+                });
+                await this.parseResponse(response);
+                this.setStatus('Wojak session terminated.');
+            } catch (error) {
+                this.appendMessage('error', `Failed to terminate session: ${error.message}`, Date.now(), { label: 'Error' });
+                this.setStatus(`Termination failed: ${error.message}`);
+            } finally {
+                this.cleanupSession();
+            }
+        }
+
+        cleanupSession() {
+            this.disconnectStatusStream();
+            this.sessionData = null;
+            this.hideTypingIndicator();
+            this.clearMessages();
+            if (this.startButton) {
+                this.startButton.hidden = false;
+                this.startButton.disabled = false;
+            }
+            if (this.stopButton) {
+                this.stopButton.hidden = true;
+                this.stopButton.disabled = false;
+            }
+            if (this.composerEl) {
+                this.composerEl.hidden = true;
+            }
+            if (this.sendButton) {
+                this.sendButton.disabled = false;
+            }
+            this.setStatus('Wojak assistant is idle.');
+        }
+    }
+
     class CommandBar {
         constructor(container) {
             this.container = container;
@@ -52,6 +592,7 @@
             this.commandChannelUrl = this.getCommandChannelUrl();
             this.commandChannelShouldReconnect = false;
             this.destroyed = false;
+            this.agentChat = null;
 
             this.handleDocumentKeyDown = this.handleDocumentKeyDown.bind(this);
             this.handleInputKeyDown = this.handleInputKeyDown.bind(this);
@@ -89,6 +630,9 @@
 
             this.handleVisibilityChange = this.onVisibilityChange;
             document.addEventListener('visibilitychange', this.handleVisibilityChange);
+
+            this.agentChat = new AgentChat(this);
+            this.agentChat.init();
         }
 
         destroy() {
@@ -125,6 +669,11 @@
             this.commandChannelShouldReconnect = false;
             this.clearCommandChannelReconnect();
             this.disconnectCommandChannel();
+
+            if (this.agentChat) {
+                this.agentChat.destroy();
+                this.agentChat = null;
+            }
 
             if (this.container && this.container[INSTANCE_DATA_KEY] === this) {
                 delete this.container[INSTANCE_DATA_KEY];
@@ -591,6 +1140,18 @@
             this.showResult(sections.join('\n\n'));
         }
 
+        buildRunScopedUrl(segment) {
+            const base = this.getProjectBaseUrl();
+            if (!base) {
+                return null;
+            }
+            if (!segment) {
+                return base;
+            }
+            const normalized = String(segment).replace(/^\/+/, '');
+            return `${base}${normalized}`;
+        }
+
         getProjectBaseUrl() {
             const match = window.location.pathname.match(/^(?:\/weppcloud)?\/runs\/[^\/]+\/[^\/]+\//);
             return match ? match[0] : null;
@@ -615,6 +1176,13 @@
             const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
             const host = window.location.host;
             return `${protocol}://${host}/weppcloud-microservices/status/${context.runId}:command`;
+        }
+
+        getAgentChatContainer() {
+            if (!this.container) {
+                return null;
+            }
+            return this.container.querySelector('[data-agent-chat]');
         }
 
         connectCommandChannel() {

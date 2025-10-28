@@ -85,6 +85,7 @@ from .admin import admin_bp
 from .archive_dashboard import archive_bp
 from .combined_watershed_viewer import combined_watershed_viewer_bp
 from .command_bar import command_bar_bp
+from .agent import agent_bp
 from .export import export_bp
 from .fork_console import fork_bp
 from .diff import diff_bp
@@ -116,6 +117,7 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     archive_bp,
     climate_bp,
     command_bar_bp,
+    agent_bp,
     interchange_bp,
     debris_flow_bp,
     diff_bp,
@@ -161,6 +163,7 @@ __all__ = [
     'climate_bp',
     'combined_watershed_viewer_bp',
     'command_bar_bp',
+    'agent_bp',
     'debris_flow_bp',
     'disturbed_bp',
     'interchange_bp',

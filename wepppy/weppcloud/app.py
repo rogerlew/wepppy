@@ -41,6 +41,7 @@ from wtforms import StringField
 
 from wepppy.nodb.core import Ron
 from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.weppcloud.utils.agent_auth import init_agent_jwt
 from wepppy.weppcloud.utils.oauth import utc_now
 
 import logging
@@ -54,6 +55,7 @@ config_logging(logging.INFO)
 
 app = Flask(__name__)
 config_app(app)
+init_agent_jwt(app)
 
 # Flask 3 removed the legacy attribute that older extensions (Flask-Session)
 # still reference; reintroduce it for compatibility.

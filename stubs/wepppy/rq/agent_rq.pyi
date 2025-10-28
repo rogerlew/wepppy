@@ -1,0 +1,3 @@
+from typing import Any, Dict
+
+def spawn_wojak_session(runid: str, config: str, session_id: str, jwt_token: str, user_id: str, jwt_secret: str) -> Dict[str, Any]: ...

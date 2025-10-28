@@ -125,6 +125,117 @@
   margin: 0;
   padding-left: 18px;
 }
+@keyframes command-bar-agent-typing {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+.command-bar-agent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--wc-color-border);
+  border-radius: 4px;
+  background: var(--wc-color-page);
+}
+.command-bar-agent__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.command-bar-agent__status {
+  color: var(--wc-color-text-muted, #6c757d);
+}
+.command-bar-agent__actions {
+  display: flex;
+  gap: 6px;
+}
+.command-bar-agent__button {
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--wc-color-border-strong, #343a40);
+  background: var(--wc-color-accent, #0d6efd);
+  color: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.command-bar-agent__button--danger {
+  background: #dc3545;
+  border-color: #dc3545;
+}
+.command-bar-agent__button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.command-bar-agent__messages {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--wc-font-sans);
+  font-size: 0.8rem;
+}
+.command-bar-agent__message {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid var(--wc-color-border);
+  background: var(--wc-color-page);
+}
+.command-bar-agent__message--agent {
+  border-color: #0d6efd;
+  background: rgba(13, 110, 253, 0.08);
+}
+.command-bar-agent__message--user {
+  border-color: #198754;
+  background: rgba(25, 135, 84, 0.08);
+  align-self: flex-end;
+}
+.command-bar-agent__message--system {
+  border-style: dashed;
+  color: var(--wc-color-text-muted, #6c757d);
+}
+.command-bar-agent__message--error {
+  border-color: #dc3545;
+  background: rgba(220, 53, 69, 0.08);
+}
+.command-bar-agent__message-meta {
+  font-size: 0.7rem;
+  color: var(--wc-color-text-muted, #6c757d);
+}
+.command-bar-agent__typing {
+  font-style: italic;
+  color: var(--wc-color-text-muted, #6c757d);
+  font-size: 0.75rem;
+  animation: command-bar-agent-typing 1.4s ease-in-out infinite;
+}
+.command-bar-agent__composer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.command-bar-agent__input {
+  width: 100%;
+  min-height: 48px;
+  padding: 4px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--wc-color-border);
+  font-family: var(--wc-font-sans);
+  font-size: 0.8rem;
+  resize: vertical;
+}
+.command-bar-agent__log[hidden] {
+  display: none !important;
+}
 </style>
 <div class="command-bar-container" data-command-bar>
   <div data-command-tip>Tip: Press ':' to activate the command bar, type ':help' for help</div>
@@ -132,7 +243,26 @@
     <input type="text" class="command-bar-input" placeholder="Enter command..." data-command-input autocomplete="off">
   </div>
   <div class="command-bar-result" data-command-result hidden></div>
+  <div class="command-bar-agent" data-agent-chat hidden>
+    <div class="command-bar-agent__header">
+      <span class="command-bar-agent__status" data-agent-status>Wojak assistant is idle.</span>
+      <div class="command-bar-agent__actions">
+        <button type="button" class="command-bar-agent__button" data-agent-start>Start Chat</button>
+        <button type="button" class="command-bar-agent__button command-bar-agent__button--danger" data-agent-stop hidden>End</button>
+      </div>
+    </div>
+    <div class="command-bar-agent__messages" data-agent-messages></div>
+    <div class="command-bar-agent__typing" data-agent-typing hidden>Wojak is thinking…</div>
+    <div class="command-bar-agent__composer" data-agent-composer hidden>
+      <textarea class="command-bar-agent__input" rows="2" placeholder="Ask Wojak about this run…" data-agent-input></textarea>
+      <div class="command-bar-agent__actions">
+        <button type="button" class="command-bar-agent__button" data-agent-send>Send</button>
+      </div>
+    </div>
+    <div class="command-bar-agent__log" data-agent-log hidden data-status-log></div>
+  </div>
 </div>
+<script type="text/javascript" src="{{ url_for('command_bar.static', filename='vendor/marked.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('command_bar.static', filename='command-bar.js') }}"></script>
 <script>
   if (typeof window.initializeCommandBar === 'function') {

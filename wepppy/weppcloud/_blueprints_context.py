@@ -30,6 +30,7 @@ def register_blueprints(app):
     app.register_blueprint(admin_bp)
     app.register_blueprint(archive_bp)
     app.register_blueprint(command_bar_bp)
+    app.register_blueprint(agent_bp)
     app.register_blueprint(debris_flow_bp)
     app.register_blueprint(disturbed_bp)
     app.register_blueprint(export_bp)

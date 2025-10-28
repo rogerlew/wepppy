@@ -1,7 +1,7 @@
 import importlib
 
 
-_LAZY_SUBMODULES = {"rq", "climates"}
+_LAZY_SUBMODULES = {"rq", "climates", "mcp"}
 
 
 def __getattr__(name):

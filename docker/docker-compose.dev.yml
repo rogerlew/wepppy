@@ -14,6 +14,8 @@ x-wepppy-service: &wepppy-service
     DATABASE_URL: ${DATABASE_URL}
     SITE_PREFIX: /weppcloud
     WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET}
+    AGENT_JWT_SECRET: ${AGENT_JWT_SECRET_KEY}
+    CAO_BASE_URL: ${CAO_BASE_URL:-http://host.docker.internal:9889}
     OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
     DTALE_SERVICE_URL: ${DTALE_SERVICE_URL:-http://dtale:9010}
     DTALE_INTERNAL_TOKEN: ${DTALE_INTERNAL_TOKEN:-dtale-dev}
@@ -30,6 +32,8 @@ x-wepppy-service: &wepppy-service
     - ${WC1_DIR}:/wc1
     - ${GEODATA_DIR}:/geodata
     - /var/run/docker.sock:/var/run/docker.sock
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
 
 services:
   weppcloud:
@@ -293,6 +297,7 @@ services:
       - wepppy.rq.WepppyRqWorker
       - default
     environment:
+      <<: *wepppy-env
       LOGLEVEL: DEBUG
       RQ_LOGGING_LEVEL: DEBUG
       REDIS_HOST: redis
