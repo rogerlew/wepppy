@@ -77,6 +77,8 @@ describe("PathCE controller", () => {
         jest.spyOn(window, "setInterval").mockImplementation(() => 1);
         jest.spyOn(window, "clearInterval").mockImplementation(() => {});
 
+        global.url_for_run = jest.fn((path) => path);
+
         await import("../path_ce.js");
     });
 
@@ -98,6 +100,7 @@ describe("PathCE controller", () => {
         if (global.WCDom) {
             delete global.WCDom;
         }
+        delete global.url_for_run;
         document.body.innerHTML = "";
     });
 

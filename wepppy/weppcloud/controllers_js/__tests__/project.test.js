@@ -139,6 +139,8 @@ describe("Project controller", () => {
             ready: jest.fn(() => Promise.resolve(unitizerClient))
         };
 
+        global.url_for_run = jest.fn((path) => path);
+
         await import("../events.js");
         await import("../project.js");
         project = window.Project.getInstance();
@@ -160,6 +162,7 @@ describe("Project controller", () => {
         delete global.runid;
         delete global.config;
         delete global.initializeCommandBar;
+        delete global.url_for_run;
         delete global.setGlobalUnitizerPreference;
 
         document.body.innerHTML = "";

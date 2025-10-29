@@ -51,7 +51,7 @@ describe("Observed controller", () => {
         }));
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
-        window.url_for_run = jest.fn((path) => "/weppcloud/" + path);
+        window.url_for_run = jest.fn((path) => path);
 
         await import("../observed.js");
         observed = window.Observed.getInstance();
@@ -80,6 +80,14 @@ describe("Observed controller", () => {
         await Promise.resolve();
     }
 
+    function getUrlFor(path) {
+        const callIndex = window.url_for_run.mock.calls.findIndex(([arg]) => arg === path);
+        expect(callIndex).toBeGreaterThan(-1);
+        const result = window.url_for_run.mock.results[callIndex];
+        expect(result).toBeDefined();
+        return result.value;
+    }
+
     test("run_model_fit posts CSV payload and reports success", async () => {
         const events = [];
         observed.events.on("observed:model:fit", (payload) => events.push(payload.status));
@@ -89,8 +97,9 @@ describe("Observed controller", () => {
 
         await flushPromises();
 
+        expect(window.url_for_run).toHaveBeenCalledWith("tasks/run_model_fit/");
         expect(httpMock.postJson).toHaveBeenCalledWith(
-            "tasks/run_model_fit/",
+            getUrlFor("tasks/run_model_fit/"),
             {
                 data: expect.stringContaining("Date,Streamflow (mm)")
             },
@@ -112,7 +121,8 @@ describe("Observed controller", () => {
         expect(statusNode.innerHTML).toBe(STATUS_DONE);
 
         const infoNode = document.getElementById("info");
-        expect(infoNode.innerHTML).toContain("/weppcloud/report/observed/");
+        expect(window.url_for_run).toHaveBeenCalledWith("report/observed/");
+        expect(infoNode.innerHTML).toContain(getUrlFor("report/observed/"));
         expect(infoNode.innerHTML).toContain("View Model Fit Results");
     });
 
@@ -152,7 +162,8 @@ describe("Observed controller", () => {
         await observed.onWeppRunCompleted();
         await flushPromises();
 
-        expect(httpMock.getJson).toHaveBeenCalledWith("query/climate_has_observed/");
+        expect(window.url_for_run).toHaveBeenCalledWith("query/climate_has_observed/");
+        expect(httpMock.getJson).toHaveBeenCalledWith(getUrlFor("query/climate_has_observed/"));
         expect(document.getElementById("observed_section").hidden).toBe(false);
         expect(states).toContain(false);
         expect(states).toContain(true);

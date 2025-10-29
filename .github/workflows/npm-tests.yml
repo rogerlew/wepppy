@@ -1,26 +1,26 @@
-name: Stubtest
+name: NPM Tests
 
 on:
   pull_request:
     paths:
-      - 'wepppy/**/*.py'
-      - 'wepppy/**/*.pyi'
-      - 'stubs/**/*.pyi'
-      - 'tools/sync_stubs.py'
-      - '.github/workflows/stubtest.yml'
+      - 'wepppy/weppcloud/static-src/**'
+      - 'wepppy/weppcloud/controllers_js/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/npm-tests.yml'
   push:
     branches:
       - master
     paths:
-      - 'wepppy/**/*.py'
-      - 'wepppy/**/*.pyi'
-      - 'stubs/**/*.pyi'
-      - 'tools/sync_stubs.py'
-      - '.github/workflows/stubtest.yml'
+      - 'wepppy/weppcloud/static-src/**'
+      - 'wepppy/weppcloud/controllers_js/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/npm-tests.yml'
   workflow_dispatch:
 
 jobs:
-  stubtest:
+  npm-tests:
     runs-on:
       - self-hosted
       - Linux
@@ -32,7 +32,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          clean: false # avoid git clean hitting root-owned artifacts on the runner
+          clean: false # self-hosted runner has root-owned artifacts under _work
 
       - name: Verify wctl tooling
         run: |
@@ -42,17 +42,12 @@ jobs:
             exit 127
           fi
 
-      - name: Run stubtest suite
+      - name: Install npm dependencies
         run: |
           set -euo pipefail
-          wctl run-stubtest
+          wctl run-npm install
 
-      - name: Check pytest stubs completeness
+      - name: Run npm tests
         run: |
           set -euo pipefail
-          wctl check-test-stubs
-
-      - name: Check pytest isolation
-        run: |
-          set -euo pipefail
-          wctl check-test-isolation
+          wctl run-npm test

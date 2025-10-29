@@ -77,6 +77,8 @@ describe("DssExport controller", () => {
 
         window.site_prefix = "/weppcloud";
 
+        global.url_for_run = jest.fn((path) => path);
+
         await import("../dss_export.js");
         dss = window.DssExport.getInstance();
     });
@@ -87,6 +89,7 @@ describe("DssExport controller", () => {
         delete global.WCHttp;
         delete global.controlBase;
         delete window.site_prefix;
+        delete global.url_for_run;
         if (global.WCDom) {
             delete global.WCDom;
         }

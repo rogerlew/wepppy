@@ -369,11 +369,11 @@ describe("Climate controller", () => {
 
     test("attaches status stream using controlBase helper", () => {
         expect(controlBaseInstance.attach_status_stream).toHaveBeenCalledWith(
-            controlBaseInstance,
+            climate,
             expect.objectContaining({
                 form: expect.any(HTMLFormElement),
                 channel: "climate",
-                autoConnect: true
+                autoConnect: false
             })
         );
         expect(controlBaseInstance.detach_status_stream).toHaveBeenCalled();

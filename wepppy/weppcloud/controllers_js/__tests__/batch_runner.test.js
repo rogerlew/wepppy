@@ -185,6 +185,8 @@ describe("BatchRunner controller", () => {
 
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
+        global.url_for_run = jest.fn((path) => path);
+
         await import("../events.js");
         await import("../batch_runner.js");
         controller = window.BatchRunner.getInstance();
@@ -213,6 +215,7 @@ describe("BatchRunner controller", () => {
         delete global.WCHttp;
         delete global.controlBase;
         delete global.site_prefix;
+        delete global.url_for_run;
 
         document.body.innerHTML = "";
     });

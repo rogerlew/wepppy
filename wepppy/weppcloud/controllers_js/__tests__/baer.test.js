@@ -126,6 +126,8 @@ describe("Baer controller", () => {
             imageOverlay: jest.fn(() => overlayMock),
         };
 
+        global.url_for_run = jest.fn((path) => path);
+
         await import("../baer.js");
     });
 
@@ -139,6 +141,7 @@ describe("Baer controller", () => {
         delete global.SubcatchmentDelineation;
         delete global.WCEvents;
         delete global.L;
+        delete global.url_for_run;
         if (global.WCDom) {
             delete global.WCDom;
         }
@@ -236,12 +239,26 @@ describe("Baer controller", () => {
 
     test("bootstrap syncs SBS state and hooks events", () => {
         jest.useFakeTimers();
+        const capturedTimers = [];
+        const setTimeoutSpy = jest.spyOn(global, "setTimeout").mockImplementation((fn, delay, ...args) => {
+            capturedTimers.push({ fn, delay, args });
+            return 0;
+        });
+
         const baer = getController();
         const showSpy = jest.spyOn(baer, "show_sbs").mockImplementation(() => {});
         const loadSpy = jest.spyOn(baer, "load_modify_class").mockImplementation(() => {});
 
-        baer.bootstrap({ flags: { initialHasSbs: true } });
-        jest.runOnlyPendingTimers();
+        const flags = { initialHasSbs: true };
+        const disturbedInstance = {
+            set_has_sbs_cached: jest.fn()
+        };
+        global.Disturbed = {
+            getInstance: jest.fn(() => disturbedInstance)
+        };
+
+        baer.bootstrap({ flags });
+        capturedTimers.filter((call) => call.delay === 0).forEach((call) => call.fn(...call.args));
 
         expect(showSpy).toHaveBeenCalled();
         expect(loadSpy).toHaveBeenCalled();
@@ -250,11 +267,14 @@ describe("Baer controller", () => {
         loadSpy.mockClear();
 
         baer.form.dispatchEvent(new CustomEvent("SBS_UPLOAD_TASK_COMPLETE"));
-        jest.runOnlyPendingTimers();
+        expect(global.Disturbed.getInstance).toHaveBeenCalled();
+        expect(disturbedInstance.set_has_sbs_cached).toHaveBeenCalledWith(true);
+        expect(flags.initialHasSbs).toBe(true);
+        expect(showSpy).not.toHaveBeenCalled();
+        expect(loadSpy).not.toHaveBeenCalled();
 
-        expect(showSpy).toHaveBeenCalled();
-        expect(loadSpy).toHaveBeenCalled();
-
+        delete global.Disturbed;
+        setTimeoutSpy.mockRestore();
         jest.useRealTimers();
     });
 });

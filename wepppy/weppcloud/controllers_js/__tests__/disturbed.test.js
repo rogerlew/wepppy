@@ -68,6 +68,8 @@ describe("Disturbed controller", () => {
         }));
         global.controlBase = jest.fn(() => Object.assign({}, controlBaseInstance));
 
+        global.url_for_run = jest.fn((path) => path);
+
         await import("../disturbed.js");
     });
 
@@ -78,6 +80,7 @@ describe("Disturbed controller", () => {
         delete global.WCForms;
         delete global.controlBase;
         delete global.WCEvents;
+        delete global.url_for_run;
         if (global.WCDom) {
             delete global.WCDom;
         }

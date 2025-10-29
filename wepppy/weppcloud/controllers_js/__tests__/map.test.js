@@ -28,6 +28,7 @@ describe("Map controller", () => {
                 return panes[name];
             }),
             getPane: jest.fn((name) => panes[name]),
+            getContainer: jest.fn(() => document.getElementById("mapid")),
             on: jest.fn((event, handler) => {
                 handlers[event] = handlers[event] || [];
                 handlers[event].push(handler);

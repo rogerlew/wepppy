@@ -156,6 +156,8 @@ describe("RangelandCoverModify controller", () => {
             }))
         };
 
+        global.url_for_run = jest.fn((path) => path);
+
         await import("../rangeland_cover_modify.js");
         rangelandModify = window.RangelandCoverModify.getInstance();
 
@@ -186,6 +188,7 @@ describe("RangelandCoverModify controller", () => {
         delete window.SubcatchmentDelineation;
         delete window.RangelandCover;
         delete window.L;
+        delete global.url_for_run;
         if (global.WCDom) {
             delete global.WCDom;
         }

@@ -59,6 +59,8 @@ describe("RAP_TS controller", () => {
         }));
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
+        global.url_for_run = jest.fn((path) => path);
+
         await import("../rap_ts.js");
         const rapFactory = globalThis.RAP_TS || (typeof window !== "undefined" ? window.RAP_TS : undefined);
         if (!rapFactory) {
@@ -81,6 +83,7 @@ describe("RAP_TS controller", () => {
         if (global.WCEvents) {
             delete global.WCEvents;
         }
+        delete global.url_for_run;
         document.body.innerHTML = "";
     });
 
