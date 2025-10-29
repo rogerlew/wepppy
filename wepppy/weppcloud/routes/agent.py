@@ -120,7 +120,7 @@ def send_agent_message(runid: str, config: str, session_id: str) -> Response:
 
     chat_channel = f"agent_chat-{session_id}"
     _publish(
-        chat_channel,
+        f"{runid}:{chat_channel}",
         {
             "type": "user_message",
             "content": message,
@@ -141,7 +141,7 @@ def terminate_agent_session(runid: str, config: str, session_id: str) -> Respons
     """
 
     _publish(
-        f"agent_chat-{session_id}",
+        f"{runid}:agent_chat-{session_id}",
         {
             "type": "terminate",
             "user_id": current_user.get_id(),

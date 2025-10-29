@@ -10,6 +10,7 @@ import requests
 from rq.decorators import job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.weppcloud.utils.helpers import get_wd
 
 CAO_BASE_URL = os.getenv("CAO_BASE_URL", "http://localhost:9889")
 CAO_AGENT_PROFILE = os.getenv("WOJAK_AGENT_PROFILE", "wojak_interactive")
@@ -102,6 +103,8 @@ def spawn_wojak_session(
     chat_channel = REDIS_CHAT_TEMPLATE.format(session_id=session_id)
     response_channel = REDIS_RESPONSE_TEMPLATE.format(session_id=session_id)
 
+    run_dir = get_wd(runid)
+
     env_payload = {
         "AGENT_JWT_TOKEN": jwt_token,
         "AGENT_JWT_SECRET": jwt_secret,
@@ -112,7 +115,7 @@ def spawn_wojak_session(
         "USER_ID": user_id,
         "REDIS_CHAT_CHANNEL": chat_channel,
         "REDIS_RESPONSE_CHANNEL": response_channel,
-        "WOJAK_CODEX_COMMAND": 'script -q -c "codex --full-auto" /dev/null',
+        "RUN_DIR": run_dir,
     }
     env_key = _store_env(session_id, env_payload)
 
@@ -131,7 +134,7 @@ def spawn_wojak_session(
         response.raise_for_status()
     except requests.RequestException as exc:
         _publish(
-            response_channel,
+            f"{runid}:{response_channel}",
             {
                 "type": "error",
                 "content": f"Failed to spawn agent session: {exc}",
@@ -140,8 +143,9 @@ def spawn_wojak_session(
         raise
 
     terminal_info = response.json()
+    full_response_channel = f"{runid}:{response_channel}"
     _publish(
-        response_channel,
+        full_response_channel,
         {
             "type": "system",
             "content": "Agent session initialized. Connecting Wojak...",
@@ -164,7 +168,7 @@ def spawn_wojak_session(
             _start_bootstrap(terminal_id, command)
         except requests.RequestException as exc:
             _publish(
-                response_channel,
+                full_response_channel,
                 {
                     "type": "error",
                     "content": f"Failed to launch Wojak bootstrap: {exc}",

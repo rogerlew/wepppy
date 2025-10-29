@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import base64
 import logging
+import os
 import re
 import shlex
 from typing import Optional
@@ -49,15 +51,25 @@ class CodexProvider(BaseProvider):
         if not wait_for_shell(tmux_client, self.session_name, self.window_name, timeout=10.0):
             raise TimeoutError("Shell initialization timed out after 10 seconds")
 
-        command_parts = ["codex", "--full-auto"]
+        # For headless mode we expose the system prompt via environment and leave the pane idle.
         if self._profile and self._profile.system_prompt:
-            sanitized = _sanitize_prompt(self._profile.system_prompt)
-            if sanitized:
-                command_parts.append(shlex.quote(sanitized))
+            prompt_bytes = self._profile.system_prompt.encode("utf-8")
+            prompt_b64 = base64.b64encode(prompt_bytes).decode("ascii")
+            export_cmd = f"export WOJAK_SYSTEM_PROMPT_B64={shlex.quote(prompt_b64)}"
+            tmux_client.send_keys(self.session_name, self.window_name, export_cmd)
+            logger.info(
+                "Loaded Wojak system prompt into environment for terminal %s (base64 payload)",
+                self.terminal_id,
+            )
 
-        command = " ".join(command_parts)
-        tmux_client.send_keys(self.session_name, self.window_name, command)
-        logger.info("Started Codex CLI for terminal %s with command: %s", self.terminal_id, command)
+        # Advertise headless readiness so downstream tooling knows no interactive CLI is present.
+        if not os.getenv("WOJAK_HEADLESS_READY"):
+            tmux_client.send_keys(self.session_name, self.window_name, "export WOJAK_HEADLESS_READY=1")
+
+        logger.info(
+            "Terminal %s initialised for headless Codex exec; waiting for bootstrap input",
+            self.terminal_id,
+        )
         self._update_status(TerminalStatus.IDLE)
         return True
 

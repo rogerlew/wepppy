@@ -1,14 +1,55 @@
 # Wojak Lives: Implementation Tracker
 
-**Status:** In Progress — Backend MVP Complete, Codex CLI Blocking  
-**Last Updated:** 2025-10-28 (Codex Session 1 Summary)  
+**Status:** In Progress — Backend Shipping, UI Polish + Smoke Test Remaining  
+**Last Updated:** 2025-10-28 (Codex Session 2 Complete, Session 3 Next)  
 **Owner:** Codex
 
 ---
 
 ## Recent Updates
 
-**2025-10-28 (Codex Session 1 — Backend MVP Complete):**
+**2025-10-28 (Codex Session 2 — Headless Integration Complete):**
+
+**✅ Core Changes Shipped:**
+- **Headless bridge operational:**
+  - RQ job injects run directory & JWT into CAO environment
+  - `services/cao/scripts/wojak_bootstrap.py` launches `codex exec --json --full-auto --skip-git-repo-check`
+  - Tracks thread ID and streams JSON events (`thread.*`, `item.*`, `turn.*`, `error`) to `agent_response-<session>` with `runid:` prefix
+  - status2 forwards events to browser via WebSocket
+- **Wojak profile complete:**
+  - Added `agent_store/wojak_interactive.md` with hydrology domain expertise
+  - CodexProvider configured to stay idle (exports base64 prompt instead of opening TUI)
+- **Command bar JSON parsing:**
+  - Panel now parses JSON payloads from StatusStream
+  - Distinguishes system/agent/error events
+  - Tool calls render with simple summary
+  - Typing indicator and markdown still functional
+
+**✅ Connectivity Verified:**
+- WebSocket `wss://…/status/<runid>:agent_response-<session>` shows full event flow
+- Redis logs confirm Codex runs headless successfully (git check bypassed)
+- No more ping-pong only; real agent output streaming
+
+**🎯 Remaining for MVP:**
+- **UI polish** (Session 3):
+  - Refine JSON renderer: icons for reasoning/tool deltas
+  - Better tool-call formatting (function name + args)
+  - Ensure typing indicator clears on `turn.completed`
+  - Responsive layout verification (mobile)
+  - Light/dark theme checks
+- **Smoke test** (Session 3):
+  - End-to-end: Ask hydrology question → read run file → edit markdown
+  - Record results in tracker
+  - Validate security checklist (path traversal, JWT validation, size limits)
+- **Documentation** (Session 3):
+  - Capture headless flow (bootstrap behavior, JSON schema) in work package notes
+  - Update package.md with Session 2 outcomes
+
+**Key Achievement:** Backend shipping; Codex CLI headless integration functional. UI polish and final validation remain before MVP closure.
+
+---
+
+**2025-10-28 (Codex Session 1 — Backend + Frontend MVP):**
 
 **✅ Backend Foundations Complete:**
 - Agent JWT plumbing implemented
@@ -34,19 +75,30 @@
 - CAO server runs separately: `uv run cao-server --host 0.0.0.0 --port 9889`
 - Workers and weppcloud need restarts after env changes
 
-**🚫 Current Blockers:**
-- **Critical:** Codex refuses `--full-auto` inside bootstrap (stdout not a terminal)
-- Launches under `script`, but terminates immediately
-- No agent stdout is relayed to Redis channels
-- Need profile-aware non-TUI command (e.g., `codex exec --json`) or better pseudo-TTY approach
-- Command bar shows ping/pong until Codex emits real output
+**🚫 Current Focus:**
+- Wire JSON-aware command-bar renderer (reasoning, tool call playback, typing state)
+- Run full smoke test (chat, file read, markdown edit) once UI renders agent output
+- QA responsive/theming for agent panel (light/dark modes)
 
-**Next Steps:**
-1. Decide on headless Codex invocation (`codex exec --json` or custom profile)
-2. Create `agent_store/wojak_interactive.md` (optional) to tailor system prompt
-3. Finish front-end polish: responsive styling, keyboard shortcuts, theme check
-4. Update tracker once Codex streaming works end-to-end
-5. Schedule full smoke test (agent chat + markdown edit)
+**Recent Progress (Session 2):**
+- ✅ Pivoted bootstrap to headless `codex exec --json --full-auto --skip-git-repo-check`
+- ✅ Streams JSON events to Redis (`agent_response-<session>` with `runid:` prefix)
+- ✅ Normalized channel names (dash style) across Flask/RQ/bootstrap/status2
+- ✅ Injected run directory and JWT env vars for Codex CLI
+- ✅ Authored Wojak agent profile (`agent_store/wojak_interactive.md`)
+- ✅ Updated command bar to parse structured JSON events (system/tool/agent/error)
+- ✅ Verified connectivity: WebSocket shows full event flow, Redis logs confirm headless execution
+- ✅ CodexProvider idle mode: exports base64 prompt instead of opening TUI
+
+**Outstanding Tasks (Session 3 — UI Polish + Smoke):**
+- ☐ Add icons/formatting for reasoning/tool deltas in JSON renderer
+- ☐ Improve tool-call display (function name + args, not just summary)
+- ☐ Ensure typing indicator clears on `turn.completed` event
+- ☐ Responsive layout check (desktop ✅, mobile pending)
+- ☐ Light/dark theme verification for agent panel
+- ☐ End-to-end smoke test: hydrology question → file read → markdown edit
+- ☐ Security validation: path traversal, JWT tampering, file size limits
+- ☐ Document headless flow (bootstrap behavior, JSON schema) in package notes
 
 ---
 
@@ -76,7 +128,10 @@
 - [x] **Frontend MVP** — Command bar panel, StatusStream subscription, markdown rendering (Codex Session 1 ✅)
 - [x] **Environment Setup** — Docker compose, CAO server wiring (Codex Session 1 ✅)
 - [x] **Critical Blocker Resolution** — Pivot to `codex exec --json` headless flow (2025-10-28 ✅)
-- [ ] **Headless Integration** — Bootstrap change set (codex exec, JSON parsing, event streaming)
+- [x] **Headless Integration** — Bootstrap, JSON parsing, event streaming (Codex Session 2 ✅)
+- [ ] **UI Polish** — Icons, formatting, typing indicator, responsive/theme checks (Session 3)
+- [ ] **Smoke Test** — End-to-end validation with security checklist (Session 3)
+- [ ] **Documentation** — Headless flow notes, Session 2 retrospective (Session 3)
 
 ### Completed
 - [x] Work package creation and scoping (2025-10-28)
@@ -87,45 +142,44 @@
 
 ---
 
-### Phase 5: Headless Integration (Estimated 3 hours)
+### Phase 5: Headless Integration (In Progress)
 
-**Status:** Next session priority (Session 2)
+#### 5.1 Bootstrap Command Update
+**Status:** ✅ Completed (Session 2)
 
-#### 5.1 Bootstrap Command Update (1 hour)
-**Dependencies:** Codex CLI exec mode, CAO bootstrap script
+**Delivered:**
+- `services/cao/scripts/wojak_bootstrap.py` implements headless flow
+- Command: `codex exec --json --full-auto --skip-git-repo-check`
+- Injects run directory, JWT token, session ID via environment
+- CodexProvider stays idle (base64 prompt export, no TUI)
 
-**Tasks:**
-- [ ] Replace `script -c "codex --full-auto"` with `codex exec --json <prompt>`
-- [ ] Construct prompt from user message + agent profile context
-- [ ] Update CAO bootstrap script to handle JSON Lines stdout
-- [ ] Remove `script` wrapper dependency
-- [ ] Test: Verify Codex launches headless without TTY
+#### 5.2 JSON Lines Event Parsing
+**Status:** ✅ Completed (Session 2)
 
-**Deliverable:** Bootstrap spawns Codex in headless mode
+**Delivered:**
+- Parses JSON events: `thread.*`, `item.*`, `turn.*`, `error`
+- Streams to Redis channel `agent_response-<session>` with `runid:` prefix
+- Buffer management for multi-line JSON objects
+- Error handling for malformed JSON
 
-#### 5.2 JSON Lines Event Parsing (1.5 hours)
-**Dependencies:** Codex JSON output format specification
+#### 5.3 Frontend JSON Rendering
+**Status:** 🔄 Partially Complete (Session 2) — Polish Pending
 
-**Tasks:**
-- [ ] Document expected JSON Lines event schema (content, tool_call, error, done)
-- [ ] Implement JSON Lines parser in bootstrap script
-- [ ] Stream parsed events to `agent_response-<session>` Redis channel
-- [ ] Handle multi-line JSON objects (buffer incomplete lines)
-- [ ] Add error handling for malformed JSON
+**Completed:**
+- [x] Parse JSON payloads from StatusStream
+- [x] Distinguish system/agent/error events
+- [x] Tool call summaries render
+- [x] Markdown rendering preserved for agent content
+- [x] Typing indicator functional
 
-**Deliverable:** Bootstrap relays Codex JSON events to Redis
+**Remaining (Session 3):**
+- [ ] Add icons for reasoning/tool deltas (🧠 reasoning, 🔧 tool)
+- [ ] Improve tool-call formatting (function name + args)
+- [ ] Clear typing indicator on `turn.completed` event
+- [ ] Responsive layout verification (mobile)
+- [ ] Light/dark theme checks
 
-#### 5.3 Frontend JSON Rendering (0.5 hours)
-**Dependencies:** Command bar message rendering
-
-**Tasks:**
-- [ ] Update command bar to parse JSON Lines format from Redis
-- [ ] Extract `content` field for display (or tool call summaries)
-- [ ] Pretty-print tool calls (e.g., "🔧 read_run_file(config.toml)")
-- [ ] Handle error events with distinct styling
-- [ ] Preserve markdown rendering for `content` field
-
-**Deliverable:** Command bar displays Codex responses from JSON events
+**Deliverable:** Polished command bar JSON renderer ⏳
 
 ---
 
@@ -351,21 +405,23 @@
 
 ### Active Risks
 
-**🚨 Critical: Codex CLI Headless Invocation (2025-10-28) — RESOLVED**
+**🚨 Critical: Codex CLI Headless Invocation (2025-10-28) — ✅ RESOLVED (Session 2)**
 - **Issue:** Codex refuses `--full-auto` inside bootstrap (stdout not a terminal)
 - **Root Cause:** TUI requirement intentional—`--full-auto` requires real TTY for interactive steering
-- **Impact:** Backend/frontend complete but no agent responses flow through pipeline
-- **Resolution:** Pivot to headless flow using `codex exec --json` instead of `--full-auto`
-- **New Approach:**
-  1. Use `codex exec --json` (or SDK) for JSON Lines over stdout/stderr (no TTY required)
-  2. Bootstrap streams JSON events back over `agent_response-<session>`
-  3. Command bar parses/pretty-prints JSON events
-- **Owner:** Codex (change set implementation)
-- **Status:** Solution identified, implementation next session
-- **Decision Rationale:** "Fighting the TUI is a losing battle" — use headless exec flow instead
+- **Resolution:** Implemented `codex exec --json --full-auto --skip-git-repo-check` in `wojak_bootstrap.py`
+- **Outcome:**
+  - JSON event streaming functional (`thread.*`, `item.*`, `turn.*`, `error`)
+  - WebSocket connectivity verified (no more ping-pong only)
+  - Redis logs confirm headless execution successful
+  - Git repo check bypassed to avoid unnecessary validation in containerized environment
+- **Status:** ✅ Complete (Session 2)
+- **Decision Rationale:** "Fighting the TUI is a losing battle" — use headless exec flow with `--skip-git-repo-check`
 
 ### Resolved Risks
-None yet
+
+**✅ Codex CLI Headless Invocation (2025-10-28)**
+- Resolved via `codex exec --json --full-auto --skip-git-repo-check`
+- Bootstrap now functional; events streaming to browser
 
 ### Blockers
 None currently identified
@@ -373,6 +429,23 @@ None currently identified
 ---
 
 ## Decisions Log
+
+### 2025-10-28: Session 2 Complete — Headless Integration Shipped
+**Decision:** Codex exec headless flow fully implemented and operational  
+**Rationale:** Session 2 delivered complete JSON streaming pipeline (bootstrap → Redis → status2 → browser)  
+**Implementation Details:**
+- Command: `codex exec --json --full-auto --skip-git-repo-check`
+- CodexProvider idle mode: exports base64 prompt instead of opening TUI
+- JSON events: `thread.*`, `item.*`, `turn.*`, `error` parsed and streamed
+- Channel naming: `agent_response-<session>` with `runid:` prefix for status2 forwarding
+- Environment injection: run directory, JWT token, session ID passed to Codex CLI
+**Impact:**
+- Backend shipping; WebSocket connectivity verified end-to-end
+- Redis logs confirm headless execution successful
+- Command bar renders agent responses with JSON parsing
+- UI polish and smoke test remaining for MVP closure
+**Participants:** Codex (implementation), Alpha Team (testing/validation)  
+**Next Steps:** Session 3 focuses on UI polish (icons, formatting, responsive) + comprehensive smoke test
 
 ### 2025-10-28: Pivot to Codex Exec Headless Flow
 **Decision:** Replace `codex --full-auto` with `codex exec --json` for headless operation  
@@ -430,6 +503,33 @@ None currently identified
 - Command bar integration must not break existing shortcuts
 - JWT stored in memory only (not localStorage) for security
 - Session cleanup on disconnect critical to prevent orphaned tmux sessions
+
+### 2025-10-28: Codex Session 2 Retrospective
+- **What Worked:**
+  - Headless integration completed in single session (3 hours estimated, delivered same day)
+  - `codex exec --json --full-auto --skip-git-repo-check` bypasses TUI and git validation
+  - JSON event streaming functional: `thread.*`, `item.*`, `turn.*`, `error` parsed correctly
+  - CodexProvider idle mode clean: base64 prompt export avoids TUI launch
+  - WebSocket connectivity verified end-to-end (Redis logs + browser dev tools)
+  - Command bar JSON parsing robust (system/agent/error event distinction)
+  - Channel naming with `runid:` prefix enables status2 forwarding
+- **What Was Refined:**
+  - Git repo check needed `--skip-git-repo-check` flag (containerized environment lacks .git)
+  - JSON event types matched actual Codex output (not spec assumptions)
+  - Bootstrap buffer management for multi-line JSON objects working
+- **What Remains:**
+  - UI polish: icons for reasoning/tool deltas, improved tool-call formatting
+  - Typing indicator clear on `turn.completed` event
+  - Responsive layout verification (mobile)
+  - Light/dark theme checks
+  - End-to-end smoke test with security validation
+  - Documentation: headless flow notes, JSON schema reference
+- **Next Session Focus:**
+  - Session 3: UI polish (icons, formatting, responsive/theme)
+  - Comprehensive smoke test: hydrology question → file read → markdown edit
+  - Security checklist validation (path traversal, JWT tampering, size limits)
+  - Document headless flow architecture in package notes
+  - Declare MVP complete if all tests pass
 
 ### 2025-10-28: Codex Session 1 Retrospective
 - **What Worked:**

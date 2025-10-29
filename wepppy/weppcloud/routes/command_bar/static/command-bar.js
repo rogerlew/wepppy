@@ -416,6 +416,12 @@
             if (!this.messagesEl) {
                 return;
             }
+            if (typeof content === 'object' && content !== null) {
+                content = content.text || '';
+            }
+            if (typeof content !== 'string') {
+                content = String(content);
+            }
             const html = this.renderMarkdown(content);
             if (!html) {
                 return;
@@ -500,27 +506,46 @@
 
             const messageType = payload.type || 'system';
             const timestamp = this.normalizeTimestamp(payload.timestamp);
-            const content = payload.content ? String(payload.content) : '';
+            const content = payload.content || '';
+
+            if (payload.tool_call && typeof payload.tool_call === 'object') {
+                const summary = this.renderToolCall(payload.tool_call);
+                if (summary) {
+                    this.appendMessage('system', summary, timestamp, { label: 'Tool' });
+                }
+            }
 
             switch (messageType) {
             case 'agent_output':
-                if (content) {
+                if (typeof content === 'string' && content) {
                     this.appendAgentContent(content, timestamp);
                 }
                 break;
             case 'error':
-                if (content) {
+                if (typeof content === 'string' && content) {
                     this.appendMessage('error', content, timestamp, { label: 'Error' });
                     this.setStatus(content);
                 }
                 break;
             case 'system':
             default:
-                if (content) {
+                if (typeof content === 'string' && content) {
                     this.appendMessage('system', content, timestamp, { label: 'System' });
                     this.setStatus(content);
                 }
                 break;
+            }
+        }
+
+        renderToolCall(toolCall) {
+            try {
+                const name = toolCall.tool || toolCall.tool_name || 'tool';
+                const args = toolCall.arguments;
+                const argsStr = args ? JSON.stringify(args, null, 2) : '{}';
+                return `🔧 ${this.escapeHtml(name)}\n<pre>${this.escapeHtml(argsStr)}</pre>`;
+            } catch (error) {
+                console.warn('AgentChat: failed to render tool call', error);
+                return null;
             }
         }
 
