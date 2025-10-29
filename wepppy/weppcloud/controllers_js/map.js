@@ -626,6 +626,45 @@ var MapController = (function () {
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
         });
 
+        var DARK_THEME_SLUGS = new Set([
+            "onedark",
+            "ayu-dark",
+            "ayu-dark-bordered",
+            "ayu-mirage",
+            "ayu-mirage-bordered",
+            "cursor-dark-anysphere",
+            "cursor-dark-midnight",
+            "cursor-dark-high-contrast"
+        ]);
+
+        function isDarkTheme(theme) {
+            if (!theme || theme === "default") {
+                return false;
+            }
+            if (DARK_THEME_SLUGS.has(theme)) {
+                return true;
+            }
+            var lower = theme.toLowerCase();
+            return lower.indexOf("dark") !== -1 || lower.indexOf("midnight") !== -1 || lower.indexOf("mirage") !== -1;
+        }
+
+        function getCurrentTheme() {
+            var root = window.document && window.document.documentElement;
+            if (!root) {
+                return "default";
+            }
+            return root.getAttribute("data-theme") || "default";
+        }
+
+        function syncMapTheme(theme) {
+            var container = map.getContainer();
+            if (!container) {
+                return;
+            }
+            var dark = isDarkTheme(theme);
+            container.classList.toggle("wc-map--invert-base", dark);
+        }
+
         map.baseMaps = {
             "Satellite": map.googleSat,
             "Terrain": map.googleTerrain
@@ -637,10 +676,15 @@ var MapController = (function () {
         };
 
         map.googleSat.addTo(map);
-        map.googleTerrain.addTo(map);
+        syncMapTheme(getCurrentTheme());
 
         map.ctrls = L.control.layers(map.baseMaps, map.overlayMaps);
         map.ctrls.addTo(map);
+
+        window.document.addEventListener("wc-theme:change", function (event) {
+            var theme = event && event.detail && event.detail.theme ? event.detail.theme : "default";
+            syncMapTheme(theme);
+        });
 
         if (overlayRegistry) {
             overlayRegistry.set(map.usgs_gage, "USGS Gage Locations");

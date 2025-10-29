@@ -1,4 +1,4 @@
-/* Generated from ayu-dark.json on 2025-10-28T03:44:31.922960+00:00 */
+/* Generated from ayu-dark.json on 2025-10-29T04:02:48.049548+00:00 */
 :root[data-theme="ayu-dark"] {
   --wc-color-accent: #e6b450b3;
   --wc-color-accent-soft: rgba(230, 180, 80, 0.180);
@@ -10,6 +10,7 @@
   --wc-color-critical-soft: rgba(13, 16, 23, 0.200);
   --wc-color-link: #e6b450;
   --wc-color-link-hover: #E6B450;
+  --wc-color-on-primary: #0b0e14;
   --wc-color-page: #0b0e14;
   --wc-color-positive: #565b6633;
   --wc-color-positive-soft: rgba(86, 91, 102, 0.180);

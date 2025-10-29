@@ -1,4 +1,4 @@
-/* Generated from Cursor-Dark-Midnight-color-theme.json on 2025-10-28T03:44:31.926745+00:00 */
+/* Generated from Cursor-Dark-Midnight-color-theme.json on 2025-10-29T04:02:48.054458+00:00 */
 :root[data-theme="cursor-dark-midnight"] {
   --wc-color-accent: #00000000;
   --wc-color-accent-soft: rgba(0, 0, 0, 0.180);
@@ -10,11 +10,12 @@
   --wc-color-critical-soft: rgba(216, 222, 233, 0.200);
   --wc-color-link: #8fbcbb;
   --wc-color-link-hover: #8FBCBB;
+  --wc-color-on-primary: #1E2127;
   --wc-color-page: #191c22;
   --wc-color-positive: #434c5e;
   --wc-color-positive-soft: rgba(67, 76, 94, 0.180);
-  --wc-color-primary: #00000000;
-  --wc-color-primary-dark: #00000000;
+  --wc-color-primary: #8FBCBB;
+  --wc-color-primary-dark: #6DA1A6;
   --wc-color-surface: #1e2127;
   --wc-color-surface-alt: #191c22;
   --wc-color-text: #7b88a1;

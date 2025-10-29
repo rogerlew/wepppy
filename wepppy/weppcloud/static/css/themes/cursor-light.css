@@ -1,4 +1,4 @@
-/* Generated from Cursor-Light-color-theme.json on 2025-10-28T03:44:31.927899+00:00 */
+/* Generated from Cursor-Light-color-theme.json on 2025-10-29T04:02:48.055992+00:00 */
 :root[data-theme="cursor-light"] {
   --wc-color-accent: #FCFCFC00;
   --wc-color-accent-soft: rgba(252, 252, 252, 0.180);
@@ -10,11 +10,12 @@
   --wc-color-critical-soft: rgba(14, 14, 42, 0.200);
   --wc-color-link: #3173A7;
   --wc-color-link-hover: #3173A7;
+  --wc-color-on-primary: #FCFCFC;
   --wc-color-page: #F3F3F4;
   --wc-color-positive: #0B0B2D11;
   --wc-color-positive-soft: rgba(11, 11, 45, 0.180);
-  --wc-color-primary: #FCFCFC00;
-  --wc-color-primary-dark: #CACACA00;
+  --wc-color-primary: #3173A7;
+  --wc-color-primary-dark: #245C85;
   --wc-color-surface: #FCFCFC;
   --wc-color-surface-alt: #F3F3F4;
   --wc-color-text: #15151DEB;

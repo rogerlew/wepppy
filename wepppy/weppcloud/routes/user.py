@@ -134,16 +134,21 @@ def _collect_metas_for_runs(runs) -> List[dict]:
     return [meta for meta in metas if meta]
 
 
-def _meta_sort_key(field: str):
-    """Generate a key function for sorting metadata dictionaries."""
+def _sort_metas(metas: List[dict], field: str, is_desc: bool) -> List[dict]:
+    """Sort metadata dictionaries while keeping None values at the end."""
+    if not metas:
+        return []
 
-    def _key(meta: dict):
-        value = meta.get(field, "")
+    def _sort_value(meta: dict):
+        value = meta.get(field)
         if isinstance(value, str):
             return value.casefold()
-        return value or ""
+        return value
 
-    return _key
+    non_null = [meta for meta in metas if meta.get(field) is not None]
+    nulls = [meta for meta in metas if meta.get(field) is None]
+    non_null.sort(key=_sort_value, reverse=is_desc)
+    return [*non_null, *nulls]
 
 
 def _slice_for_page(items: List[dict], page: int, per_page: int):
@@ -215,6 +220,7 @@ def runs():
             Run.query
             .join(runs_users)
             .filter(runs_users.c.user_id == current_user.id)
+            .order_by(Run.last_modified.desc().nullslast(), Run.id.desc())
         )
 
         pagination = None
@@ -222,15 +228,21 @@ def runs():
 
         if sort_param in DB_SORT_FIELDS:
             column = getattr(Run, sort_param)
-            order_expr = column.desc() if is_desc else column.asc()
+            query = base_query.order_by(None)
+
+            if sort_param in {'last_modified', 'date_created'}:
+                order_expr = column.desc().nullslast() if is_desc else column.asc().nullslast()
+            else:
+                order_expr = column.desc() if is_desc else column.asc()
+
             secondary_expr = Run.id.desc() if is_desc else Run.id.asc()
-            query = base_query.order_by(order_expr, secondary_expr)
+            query = query.order_by(order_expr, secondary_expr)
             pagination = query.paginate(page=page, per_page=per_page, error_out=False)
             metas = _collect_metas_for_runs(pagination.items)
         else:
             runs_all = base_query.all()
             metas_all = _collect_metas_for_runs(runs_all)
-            metas_all.sort(key=_meta_sort_key(sort_param), reverse=is_desc)
+            metas_all = _sort_metas(metas_all, sort_param, is_desc)
             metas, pagination = _slice_for_page(metas_all, page, per_page)
 
         format_param = (request.args.get('format') or request.args.get('fomat') or '').lower()

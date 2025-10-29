@@ -1,20 +1,21 @@
-/* Generated from Cursor-Dark-High-Contrast-color-theme.json on 2025-10-28T03:44:31.927311+00:00 */
+/* Generated from Cursor-Dark-High-Contrast-color-theme.json on 2025-10-29T04:02:48.055167+00:00 */
 :root[data-theme="cursor-dark-high-contrast"] {
-  --wc-color-accent: #00000000;
-  --wc-color-accent-soft: rgba(0, 0, 0, 0.180);
+  --wc-color-accent: #88C0D0;
+  --wc-color-accent-soft: rgba(136, 192, 208, 0.22);
   --wc-color-attention: #88C0D0;
   --wc-color-attention-soft: rgba(136, 192, 208, 0.220);
   --wc-color-border: #2A2A2A;
   --wc-color-border-strong: #404040;
   --wc-color-critical: #D8DEE9;
   --wc-color-critical-soft: rgba(216, 222, 233, 0.200);
-  --wc-color-link: #00000000;
-  --wc-color-link-hover: #00000000;
+  --wc-color-link: #88C0D0;
+  --wc-color-link-hover: #ECEFF4;
+  --wc-color-on-primary: #0A0A0A;
   --wc-color-page: #0A0A0A;
   --wc-color-positive: #404040;
   --wc-color-positive-soft: rgba(64, 64, 64, 0.180);
-  --wc-color-primary: #00000000;
-  --wc-color-primary-dark: #00000000;
+  --wc-color-primary: #88C0D0;
+  --wc-color-primary-dark: #6FA7B8;
   --wc-color-surface: #0A0A0A;
   --wc-color-surface-alt: #0A0A0A;
   --wc-color-text: #D8DEE9;

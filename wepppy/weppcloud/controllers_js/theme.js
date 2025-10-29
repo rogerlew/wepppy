@@ -9,6 +9,14 @@
     var SELECTOR = "[data-theme-select]";
     var root = global.document ? global.document.documentElement : null;
 
+    function emitThemeChange(theme) {
+        if (!global.document) {
+            return;
+        }
+        var detail = { theme: theme && theme !== "" ? theme : "default" };
+        global.document.dispatchEvent(new CustomEvent("wc-theme:change", { detail: detail }));
+    }
+
     function getStoredTheme() {
         try {
             return global.localStorage.getItem(STORAGE_KEY);
@@ -59,6 +67,7 @@
         applyTheme(theme);
         storeTheme(theme);
         syncSelects(theme);
+        emitThemeChange(theme);
     }
 
     function init() {
@@ -74,6 +83,7 @@
         var initial = stored || root.getAttribute("data-theme") || "default";
         applyTheme(initial);
         syncSelects(initial);
+        emitThemeChange(initial);
 
         global.document.addEventListener("change", handleChange, { passive: true });
     }

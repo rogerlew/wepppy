@@ -72,8 +72,8 @@
             <td>
               <a class="pure-button pure-button-secondary" href="{{ site_prefix }}/runs/{{ meta.runid }}/{{ meta.config }}/" target="_blank" rel="noopener">Open</a>
             </td>
-            <td>{{ meta.date_created }}</td>
-            <td>{{ meta.last_modified }}</td>
+            <td>{% if meta.date_created %}{{ meta.date_created }}{% else %}&mdash;{% endif %}</td>
+            <td>{% if meta.last_modified %}{{ meta.last_modified }}{% else %}&mdash;{% endif %}</td>
             <td>
               <input type="checkbox" value="{{ meta.runid }}" {% if meta.readonly %}disabled{% endif %} aria-label="Select {{ meta.runid }}">
             </td>
