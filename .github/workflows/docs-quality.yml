@@ -113,7 +113,21 @@ jobs:
 
           cargo fmt --all --check
           cargo clippy --all-targets --all-features -- -D warnings
-          cargo test --all --locked
+
+          # Skip PyO3 bindings crates during CI because the self-hosted runner lacks libpython dev headers.
+          # The workspace still gets full coverage locally (see docs/work-packages/20251025_markdown_doc_toolkit/).
+          EXCLUDES=(
+            markdown_extract_py
+            markdown_edit_py
+            markdown_doc_py
+          )
+
+          TEST_ARGS=(--workspace --locked)
+          for crate in "${EXCLUDES[@]}"; do
+            TEST_ARGS+=("--exclude" "${crate}")
+          done
+
+          cargo test "${TEST_ARGS[@]}"
 
       - name: Run markdown-doc benchmarks
         run: |
