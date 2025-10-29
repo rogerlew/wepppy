@@ -44,6 +44,9 @@ PAYLOAD_BYTES=${STATUS2_SMOKE_PAYLOAD_BYTES:-256}
 CLIENTS=${STATUS2_SMOKE_CLIENTS:-1}
 RECEIVE_TIMEOUT=${STATUS2_SMOKE_RECEIVE_TIMEOUT:-10s}
 OVERALL_TIMEOUT=${STATUS2_SMOKE_TIMEOUT:-10s}
+STATUS2_SMOKE_LOG=${STATUS2_SMOKE_LOG:-telemetry/status2-smoke.log}
+mkdir -p "$(dirname "${STATUS2_SMOKE_LOG}")"
+: > "${STATUS2_SMOKE_LOG}"
 
 status_was_running=0
 redis_was_running=0
@@ -76,4 +79,4 @@ trap cleanup EXIT
 
 "${COMPOSE[@]}" up -d redis status >/dev/null
 
-"${COMPOSE[@]}" run --rm status-build sh -lc "cd /workspace/tests/tools/status2_smoke && PATH=/usr/local/go/bin:\$PATH go run . --ws '${WS_URL}' --redis '${REDIS_URL}' --run '${RUN_ID}' --channel '${CHANNEL}' --samples ${SAMPLES} --payload-bytes ${PAYLOAD_BYTES} --clients ${CLIENTS} --receive-timeout ${RECEIVE_TIMEOUT} --timeout ${OVERALL_TIMEOUT}"
+"${COMPOSE[@]}" run --rm status-build sh -lc "cd /workspace/tests/tools/status2_smoke && PATH=/usr/local/go/bin:\$PATH go run . --ws '${WS_URL}' --redis '${REDIS_URL}' --run '${RUN_ID}' --channel '${CHANNEL}' --samples ${SAMPLES} --payload-bytes ${PAYLOAD_BYTES} --clients ${CLIENTS} --receive-timeout ${RECEIVE_TIMEOUT} --timeout ${OVERALL_TIMEOUT}" | tee "${STATUS2_SMOKE_LOG}"

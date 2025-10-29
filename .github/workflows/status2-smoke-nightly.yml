@@ -22,3 +22,11 @@ jobs:
         run: |
           set -euo pipefail
           scripts/run-status2-smoke.sh
+
+      - name: Upload status2 smoke log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: status2-smoke-log
+          path: telemetry/status2-smoke.log
+          if-no-files-found: warn
