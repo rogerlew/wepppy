@@ -1,0 +1,278 @@
+/* ----------------------------------------------------------------------------
+ * WEPPcloud Markdown Theme
+ * ----------------------------------------------------------------------------
+ * Applies WEPPcloud design tokens to rendered Markdown content.
+ */
+.markdown-body {
+  color: var(--wc-color-text);
+  background: transparent;
+  font-family: var(--wc-font-sans);
+  font-size: 1rem;
+  line-height: var(--wc-line-height);
+  word-break: break-word;
+}
+
+.markdown-body > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body p,
+.markdown-body blockquote,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body dl,
+.markdown-body table,
+.markdown-body pre {
+  margin: 0 0 var(--wc-space-xl);
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  font-weight: 700;
+  line-height: 1.25;
+  margin: var(--wc-space-2xl) 0 var(--wc-space-md);
+  color: var(--wc-color-text);
+  scroll-margin-top: 5rem;
+}
+
+.markdown-body h1 {
+  font-size: 2rem;
+  border-bottom: 1px solid var(--wc-color-border);
+  padding-bottom: var(--wc-space-sm);
+}
+
+.markdown-body h2 {
+  font-size: 1.6rem;
+  border-bottom: 1px solid var(--wc-color-border);
+  padding-bottom: var(--wc-space-sm);
+}
+
+.markdown-body h3 {
+  font-size: 1.35rem;
+}
+
+.markdown-body h4 {
+  font-size: 1.15rem;
+}
+
+.markdown-body h5 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.markdown-body h6 {
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  color: var(--wc-color-text-muted);
+  text-transform: uppercase;
+}
+
+.markdown-body a {
+  color: var(--wc-color-link);
+  text-decoration: underline;
+}
+
+.markdown-body a:hover,
+.markdown-body a:focus-visible {
+  color: var(--wc-color-link-hover);
+  text-decoration-thickness: 2px;
+  text-decoration-color: currentColor;
+}
+
+.markdown-body strong {
+  font-weight: 700;
+}
+
+.markdown-body em {
+  font-style: italic;
+}
+
+.markdown-body blockquote {
+  margin-inline: 0;
+  padding: var(--wc-space-md) var(--wc-space-lg);
+  border-inline-start: 4px solid var(--wc-color-attention);
+  border-radius: var(--wc-radius-sm);
+  background:
+    color-mix(in srgb, var(--wc-color-attention-soft) 65%, transparent);
+  color: var(--wc-color-text);
+}
+
+.markdown-body blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid var(--wc-color-border);
+  margin: var(--wc-space-2xl) 0;
+}
+
+.markdown-body code {
+  font-family: var(--wc-font-mono);
+  font-size: 0.95em;
+  background: var(--wc-color-surface-alt);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--wc-radius-sm);
+  border: 1px solid color-mix(in srgb, var(--wc-color-border) 80%, transparent);
+}
+
+.markdown-body pre {
+  font-family: var(--wc-font-mono);
+  font-size: 0.95em;
+  line-height: 1.6;
+  background: var(--wc-color-surface-alt);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  padding: var(--wc-space-lg);
+  overflow: auto;
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
+  border: 0;
+  font-size: inherit;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-inline-start: 1.5rem;
+}
+
+.markdown-body ul ul,
+.markdown-body ul ol,
+.markdown-body ol ul,
+.markdown-body ol ol {
+  margin-bottom: 0;
+}
+
+.markdown-body li {
+  margin-top: var(--wc-space-xs);
+}
+
+.markdown-body li + li {
+  margin-top: var(--wc-space-sm);
+}
+
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  overflow: hidden;
+  box-shadow: var(--wc-shadow-sm);
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  padding: var(--wc-space-sm) var(--wc-space-md);
+  border-bottom: 1px solid var(--wc-color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-body table th {
+  background: color-mix(in srgb, var(--wc-color-surface-alt) 85%, transparent);
+  font-weight: 600;
+}
+
+.markdown-body table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--wc-color-surface-alt) 60%, transparent);
+}
+
+.markdown-body table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--wc-radius-sm);
+  box-shadow: var(--wc-shadow-sm);
+}
+
+.markdown-body img[align="right"] {
+  margin-left: var(--wc-space-lg);
+}
+
+.markdown-body img[align="left"] {
+  margin-right: var(--wc-space-lg);
+}
+
+.markdown-body figure {
+  margin: 0 0 var(--wc-space-xl);
+}
+
+.markdown-body figure figcaption {
+  margin-top: var(--wc-space-xs);
+  font-size: 0.85rem;
+  color: var(--wc-color-text-muted);
+  text-align: center;
+}
+
+.markdown-body kbd {
+  display: inline-block;
+  padding: 0.2rem 0.35rem;
+  font-family: var(--wc-font-mono);
+  font-size: 0.85em;
+  line-height: 1;
+  color: var(--wc-color-text);
+  background: var(--wc-color-surface);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--wc-color-border) 85%, transparent);
+}
+
+.markdown-body sup,
+.markdown-body sub {
+  font-size: 0.75em;
+}
+
+.markdown-body details {
+  margin-bottom: var(--wc-space-lg);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  background: var(--wc-color-surface);
+  padding: var(--wc-space-sm) var(--wc-space-md);
+}
+
+.markdown-body summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.markdown-body summary:focus-visible {
+  outline: 2px solid var(--wc-color-accent);
+  outline-offset: 2px;
+}
+
+.markdown-body abbr[title] {
+  border-bottom: 1px dotted var(--wc-color-border);
+  text-decoration: none;
+  cursor: help;
+}
+
+.markdown-body .highlight {
+  background: var(--wc-color-surface);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  padding: var(--wc-space-sm);
+}
+
+.markdown-body .highlight pre {
+  margin: 0;
+  padding: var(--wc-space-sm);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}

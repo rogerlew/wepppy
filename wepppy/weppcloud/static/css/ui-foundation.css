@@ -105,15 +105,15 @@ body {
   box-sizing: border-box;
 }
 
-a,
-a:visited {
+a:not(.pure-button),
+a:visited:not(.pure-button) {
   color: var(--wc-color-link) !important;
   text-decoration: none !important;
   background-color: transparent !important;
 }
 
-a:hover,
-a:focus {
+a:hover:not(.pure-button),
+a:focus-visible:not(.pure-button) {
   color: var(--wc-color-link-hover) !important;
   text-decoration: underline !important;
 }
