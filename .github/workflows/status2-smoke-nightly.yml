@@ -1,0 +1,24 @@
+name: Status2 Smoke
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  status2-smoke:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run status2 smoke test
+        run: |
+          set -euo pipefail
+          scripts/run-status2-smoke.sh

@@ -103,24 +103,41 @@ A lightweight Go harness lives at `tests/tools/status2_smoke/`. It exercises the
 status2 WebSocket fan-out from inside the dev stack:
 
 ```bash
-# with the dev stack running (`wctl up`)
-wctl run status-build sh -lc "cd /workspace/tests/tools/status2_smoke && PATH=/usr/local/go/bin:\$PATH go run . \\
-  --ws ws://status:9002 \\
-  --redis redis://redis:6379/2 \\
-  --run smoke-test \\
-  --channel climate \\
-  --samples 5 \\
-  --payload-bytes 256"
+wctl run status-build sh -lc 'cd /workspace/tests/tools/status2_smoke && PATH=/usr/local/go/bin:$PATH go run . \
+  --ws ws://status:9002 \
+  --redis redis://redis:6379/2 \
+  --run smoke-test \
+  --channel climate \
+  --samples 5 \
+  --payload-bytes 256 \
+  --clients 1 \
+  --receive-timeout 10s \
+  --timeout 10s'
 ```
 
 Flags:
 
 - `--samples` – number of publish/receive cycles to measure (default `1`)
 - `--payload-bytes` – bytes of additional payload appended to each message (default `0`)
+- `--clients` – number of concurrent WebSocket clients to run (default `1`)
+- `--receive-timeout` – per-message receive timeout (default `8s`)
 - `--timeout` – overall deadline for the run (default `10s`)
 
 The tool publishes payload(s) to Redis and waits for matching `status` frames
-over the WebSocket connection. The output prints per-sample latencies plus a
-summary (min/median/mean/p95/max) in milliseconds, making it easy to spot
-regressions. Use `--ws`/`--redis` to point at alternate hosts (the defaults
-target `127.0.0.1` from inside the container).
+over the WebSocket connection. When `--clients > 1`, each client runs in
+parallel with its own WebSocket connection; all latencies are aggregated into a
+single summary (min/median/mean/p95/max in milliseconds). Use `--ws`/`--redis`
+to point at alternate hosts (the defaults target `127.0.0.1` from inside the
+container).
+
+### CI/Nightly Helper
+
+To avoid orphan containers and prep dependencies automatically, use the helper
+script:
+
+```bash
+scripts/run-status2-smoke.sh
+```
+
+Override defaults via environment variables (for example
+`STATUS2_SMOKE_CLIENTS=4 STATUS2_SMOKE_TIMEOUT=60s scripts/run-status2-smoke.sh`).
