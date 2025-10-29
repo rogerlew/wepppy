@@ -341,16 +341,33 @@ var Climate = (function () {
 
         climate.resetParPreview();
 
-        climate.attachStatusStream = function () {
+        climate.attachStatusStream = function (options) {
+            var opts = options ? Object.assign({}, options) : {};
+
             climate.detach_status_stream(climate);
 
             if (!climate.statusSpinnerEl && climate.statusPanelEl) {
                 climate.statusSpinnerEl = climate.statusPanelEl.querySelector("#braille");
             }
 
-            var stacktraceConfig = climate.stacktracePanelEl ? { element: climate.stacktracePanelEl } : null;
+            var stacktraceConfig;
+            if (Object.prototype.hasOwnProperty.call(opts, "stacktrace")) {
+                stacktraceConfig = opts.stacktrace;
+                delete opts.stacktrace;
+            } else if (climate.stacktracePanelEl) {
+                stacktraceConfig = { element: climate.stacktracePanelEl };
+            } else {
+                stacktraceConfig = null;
+            }
 
-            climate.attach_status_stream(climate, {
+            var autoConnect = Object.prototype.hasOwnProperty.call(opts, "autoConnect")
+                ? Boolean(opts.autoConnect)
+                : false;
+            if (Object.prototype.hasOwnProperty.call(opts, "autoConnect")) {
+                delete opts.autoConnect;
+            }
+
+            var streamConfig = Object.assign({
                 element: climate.statusPanelEl,
                 form: formElement,
                 channel: "climate",
@@ -358,8 +375,10 @@ var Climate = (function () {
                 logLimit: 400,
                 stacktrace: stacktraceConfig,
                 spinner: climate.statusSpinnerEl,
-                autoConnect: true
-            });
+                autoConnect: autoConnect
+            }, opts);
+
+            climate.attach_status_stream(climate, streamConfig);
 
             return climate.statusStream;
         };
@@ -842,6 +861,11 @@ var Climate = (function () {
         };
 
         climate.build = function () {
+            if (!climate._statusStreamHandle) {
+                climate.attachStatusStream({ autoConnect: false });
+            }
+            climate.connect_status_stream(climate);
+
             var taskMsg = "Building climate";
             infoAdapter.text("");
             statusAdapter.html(taskMsg + "...");
@@ -1072,7 +1096,7 @@ var Climate = (function () {
             climate.setBuildMode(initialBuildMode, { skipStationMode: true });
         }
 
-        climate.attachStatusStream();
+        climate.attachStatusStream({ autoConnect: false });
         climate.refreshStationSelection();
         climate.viewStationMonthlies();
 
