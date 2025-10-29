@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          clean: false # root-owned docker artifacts block git clean on self-hosted runner
 
       - name: Verify markdown-doc tooling
         run: |

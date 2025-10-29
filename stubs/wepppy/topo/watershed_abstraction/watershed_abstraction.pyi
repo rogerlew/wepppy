@@ -12,6 +12,7 @@ __all__ = [
     "weighted_slope_average_from_fps",
     "ChannelRoutingError",
     "WatershedAbstraction",
+    "WeppTopTranslator",
 ]
 
 def transform_px_to_wgs(args): ...

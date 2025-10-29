@@ -22,6 +22,7 @@ class LanduseMode(IntEnum):
     Undefined = -1
     Gridded = 0
     Single = 1
+    Vanilla = 1
     RRED_Unburned = 2
     RRED_Burned = 3
     UserDefined = 4

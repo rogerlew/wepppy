@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -22,6 +22,10 @@ __all__ = [
     "polygonize_bound",
     "polygonize_subcatchments",
     "identify_edge_hillslopes",
+    "CentroidSummary",
+    "HillSummary",
+    "ChannelSummary",
+    "FlowpathSummary",
 ]
 
 def is_channel(topaz_id: Union[int, str]) -> bool: ...
@@ -72,3 +76,73 @@ def polygonize_bound(bound_fn: str, dst_fn: str) -> None: ...
 def polygonize_subcatchments(subwta_fn: str, dst_fn: str, dst_fn2: str | None = ...) -> None: ...
 
 def identify_edge_hillslopes(raster_path: str, logger=None): ...
+
+
+class CentroidSummary:
+    px: Tuple[int, int]
+    lnglat: Tuple[float, float]
+    def __init__(self, **kwds: Any) -> None: ...
+
+
+class SummaryBase:
+    topaz_id: Optional[int]
+    wepp_id: Optional[int]
+    length: float
+    width: float
+    area: float
+    aspect: float
+    direction: float
+    slope_scalar: float
+    color: str
+    centroid: Any
+    distance_p: Tuple[float, ...]
+    w_slopes: Optional[Tuple[float, ...]]
+    slopes: Optional[Tuple[float, ...]]
+    _max_points: int
+    def __init__(self, **kwds: Any) -> None: ...
+    @property
+    def num_points(self) -> int: ...
+    @property
+    def max_points(self) -> int: ...
+    @property
+    def profile(self) -> str: ...
+    def as_dict(self) -> Dict[str, Any]: ...
+
+
+class HillSummary(SummaryBase):
+    pourpoint: Optional[Tuple[int, int]]
+    fp_longest: Any
+    fp_longest_length: Any
+    fp_longest_slope: Any
+    def __init__(self, **kwds: Any) -> None: ...
+    @property
+    def fname(self) -> str: ...
+    @property
+    def pourpoint_coord(self) -> str: ...
+
+
+class ChannelSummary(SummaryBase):
+    slopes: Tuple[float, ...]
+    isoutlet: bool
+    head: Tuple[float, float]
+    tail: Tuple[float, float]
+    chn_enum: int
+    order: Optional[int]
+    channel_type: str
+    def __init__(self, **kwds: Any) -> None: ...
+    @property
+    def head_coord(self) -> str: ...
+    @property
+    def tail_coord(self) -> str: ...
+    @property
+    def fname(self) -> str: ...
+    @property
+    def chn_wepp_width(self) -> int: ...
+
+
+class FlowpathSummary(SummaryBase):
+    slopes: Tuple[float, ...]
+    coords: Any
+    def __init__(self, **kwds: Any) -> None: ...
+    @property
+    def fname(self) -> str: ...
