@@ -464,9 +464,10 @@ input[type="file"]:disabled::-webkit-file-upload-button {
   font: inherit;
   font-weight: 600;
   line-height: 1.4;
-  color: var(--wc-button-primary-text) !important;
-  background-color: var(--wc-button-primary-bg);
-  border: 1px solid var(--wc-button-primary-bg);
+  color: var(--wc-button-primary-text, var(--wc-color-on-primary, #ffffff)) !important;
+  background-color: var(--wc-button-primary-bg, var(--wc-color-primary, var(--wc-color-accent)));
+  border: 1px solid transparent;
+  border-color: var(--wc-button-primary-bg, var(--wc-color-primary, var(--wc-color-accent)));
   border-radius: var(--wc-radius-sm);
   cursor: pointer;
   text-decoration: none;
@@ -483,9 +484,9 @@ input[type="file"]:disabled::-webkit-file-upload-button {
 
 .pure-button:hover:not(:disabled):not(.pure-button-disabled),
 .pure-button:focus-visible:not(:disabled):not(.pure-button-disabled) {
-  background-color: var(--wc-button-primary-bg-hover);
-  border-color: var(--wc-button-primary-bg-hover);
-  color: var(--wc-button-primary-text);
+  background-color: var(--wc-button-primary-bg-hover, var(--wc-color-primary-dark, var(--wc-color-primary, var(--wc-color-accent))));
+  border-color: var(--wc-button-primary-bg-hover, var(--wc-color-primary-dark, var(--wc-color-primary, var(--wc-color-accent))));
+  color: var(--wc-button-primary-text, var(--wc-color-on-primary, #ffffff));
   box-shadow: var(--wc-button-shadow-hover);
 }
 

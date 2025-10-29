@@ -6,16 +6,17 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
 <title>{{ filename }} - {{ runid }}</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown-light.css" integrity="sha512-CxC9MO8FBaaq8vl9yaXHjgWd7uXqx3pWMSBP3daioTTI0gpXijlypuMV67NoE1bPYMzj7ZSNNS0o+jFFdFodgA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ui-foundation.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/themes/all-themes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/markdown-theme.css') }}">
+<script src="{{ url_for('static', filename='js/controllers.js') }}" defer></script>
 <style>
-  :root {
-    color-scheme: light;
-  }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    background: #f6f8fa;
-    padding-top: 52px;
+    font-family: var(--wc-font-sans);
+    background: var(--wc-color-page);
+    color: var(--wc-color-text);
+    padding-top: 60px;
     padding-bottom: 80px;
   }
   header {
@@ -23,36 +24,41 @@
     top: 0;
     left: 0;
     width: 100%;
-    background-color: #343a40;
-    color: #ecf0f1;
-    padding: 10px 16px;
+    background-color: var(--wc-color-surface);
+    color: var(--wc-color-text);
+    padding: 12px 20px;
     box-sizing: border-box;
     z-index: 1000;
-    font-size: 13px;
+    font-size: 0.85rem;
     display: flex;
     gap: 12px;
     align-items: center;
+    border-bottom: 1px solid var(--wc-color-border);
+    box-shadow: var(--wc-shadow-sm);
   }
   header .file-path {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-family: monospace;
+    font-family: var(--wc-font-mono);
+  }
+  main {
+    margin: 0 auto;
+    width: min(980px, calc(100% - 32px));
   }
   .markdown-body {
     box-sizing: border-box;
-    width: calc(100% - 32px);
-    margin: 0 16px;
+    margin: 0 auto;
     padding: 32px 32px 48px;
-    background: #ffffff;
-    border-radius: 6px;
-    box-shadow: 0 1px 2px rgba(27, 31, 35, 0.1);
-    overflow-x: auto;
+    background: var(--wc-color-surface);
+    border-radius: var(--wc-radius-sm);
+    border: 1px solid var(--wc-color-border);
+    box-shadow: var(--wc-shadow-sm);
   }
   @media (max-width: 768px) {
     body {
-      padding-top: 60px;
+      padding-top: 64px;
     }
     .markdown-body {
       width: calc(100% - 24px);
