@@ -1,0 +1,46 @@
+name: Stubtest
+
+on:
+  pull_request:
+    paths:
+      - 'wepppy/**/*.py'
+      - 'wepppy/**/*.pyi'
+      - 'stubs/**/*.pyi'
+      - 'tools/sync_stubs.py'
+      - '.github/workflows/stubtest.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'wepppy/**/*.py'
+      - 'wepppy/**/*.pyi'
+      - 'stubs/**/*.pyi'
+      - 'tools/sync_stubs.py'
+      - '.github/workflows/stubtest.yml'
+  workflow_dispatch:
+
+jobs:
+  stubtest:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          clean: false # avoid git clean hitting root-owned artifacts on the runner
+
+      - name: Run stubtest suite
+        run: |
+          set -euo pipefail
+
+          if ! command -v wctl >/dev/null; then
+            echo "wctl command not found on the runner. Install wctl (see docs/work-packages/20251025_markdown_doc_toolkit/)." >&2
+            exit 127
+          fi
+
+          wctl run-stubtest
