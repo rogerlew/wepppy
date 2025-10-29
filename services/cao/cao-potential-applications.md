@@ -736,6 +736,14 @@ This hierarchy balances automation efficiency with safety:
 
 ## Development Lifecycle & Quality
 
+### CI Samurai (Nightly Test Maintenance & Bug Fixing) — **Normie**
+- **Idea:** Nightly scheduled agent swarm that analyzes test failures, diagnoses root causes, and takes action based on diagnostic confidence. High confidence cases (clear root cause) → autonomous fix with comprehensive report + PR. Low confidence cases (ambiguous, requires domain expertise) → detailed investigation + issue with `ci-samurai-needs-guidance` label.
+- **Why:** Leverages GPT-5-Codex "lead developer" reasoning to fix both test maintenance AND production bugs overnight. Team wakes up to ready-to-review PRs or well-researched issues. Maximizes autonomous resolution while escalating genuinely hard problems.
+- **Key Innovation:** Quality through transparency (detailed reports) rather than artificial scope restrictions. Agents fix what they understand, escalate what they don't.
+- **Deployment:** GitHub Actions nightly workflow (~3am PST) on self-hosted Proxmox VPS runner. Clean workspace cycle per run prevents state contamination.
+- **Safety:** Path allowlist (pilot phase), comprehensive re-validation, human review gates, regression detection, confidence calibration feedback loop.
+- **Status:** Proposed. See [`ci-samurai.md`](ci-samurai.md) for complete specification including workflow, templates, rollout plan, and metrics.
+
 ### Coordinated Work Package Execution — **Normie**
 - **Idea:** Software development teams carry out work-packages in a coordinated manner. Supervisor agent delegates tasks from work package tracker to specialized worker agents (developer, reviewer, documenter, tester). Each agent updates the shared tracker.md with progress. Handoff pattern ensures sequential dependencies are respected while assign pattern enables parallel work streams.
 - **Why:** Complex features require coordination across multiple specialties. Automated task delegation reduces planning overhead. Shared tracker provides visibility for human oversight and agent handoffs.
