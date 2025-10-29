@@ -104,6 +104,23 @@ var ChannelDelineation = (function () {
         return Math.trunc(parsed);
     }
 
+    function coalesceNumeric(raw, keys) {
+        if (!raw) {
+            return null;
+        }
+        for (var i = 0; i < keys.length; i += 1) {
+            var key = keys[i];
+            if (!Object.prototype.hasOwnProperty.call(raw, key)) {
+                continue;
+            }
+            var value = toFloat(raw[key]);
+            if (value !== null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
     function parseNumericList(value, expectedLength) {
         if (value === null || value === undefined) {
             return null;
@@ -344,8 +361,8 @@ var ChannelDelineation = (function () {
             var bounds = parseNumericList(raw.map_bounds, 4);
             var zoom = toFloat(raw.map_zoom);
             var distance = toFloat(raw.map_distance);
-            var mcl = toFloat(raw.mcl);
-            var csa = toFloat(raw.csa);
+            var mcl = coalesceNumeric(raw, ["mcl", "input_mcl"]);
+            var csa = coalesceNumeric(raw, ["csa", "input_csa"]);
             var setExtentMode = toInteger(raw.set_extent_mode);
             var wbtFill = raw.wbt_fill_or_breach || null;
             var wbtBreachDistance = toInteger(raw.wbt_blc_dist);

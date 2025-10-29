@@ -6,29 +6,46 @@
 {% block header_container_class %}wc-container wc-container--fluid{% endblock %}
 
 {% block body %}
-{% macro sortable_header(label, field) %}
+{% macro sortable_header(label, field) -%}
   {% set current_sort = sort | default('last_modified', true) %}
   {% set current_direction = direction | default('desc', true) %}
   {% set is_active = (current_sort == field) %}
   {% set asc_active = is_active and current_direction == 'asc' %}
   {% set desc_active = is_active and current_direction == 'desc' %}
   {% set per_page_value = per_page | default(100, true) %}
-  <div class="wc-sortable-header">
-    <span class="wc-sortable-header__label">{{ label }}</span>
-    <span class="wc-sortable-header__controls" role="group" aria-label="Sort {{ label }}">
-      <a
-        class="wc-sortable-header__control {{ 'is-active' if asc_active }}"
-        href="{{ url_for('user.runs', page=1, sort=field, direction='asc', per_page=per_page_value) }}"
-        aria-label="Sort {{ label }} ascending"
-      >&#9650;</a>
-      <a
-        class="wc-sortable-header__control {{ 'is-active' if desc_active }}"
-        href="{{ url_for('user.runs', page=1, sort=field, direction='desc', per_page=per_page_value) }}"
-        aria-label="Sort {{ label }} descending"
-      >&#9660;</a>
-    </span>
-  </div>
-{% endmacro %}
+  {% if asc_active %}
+    {% set indicator = '▲' %}
+    {% set aria_sort = 'ascending' %}
+  {% elif desc_active %}
+    {% set indicator = '▼' %}
+    {% set aria_sort = 'descending' %}
+  {% else %}
+    {% set indicator = '↕' %}
+    {% set aria_sort = 'none' %}
+  {% endif %}
+  {% if is_active %}
+    {% if current_direction == 'asc' %}
+      {% set next_direction = 'desc' %}
+    {% else %}
+      {% set next_direction = 'asc' %}
+    {% endif %}
+  {% else %}
+    {% set next_direction = 'asc' %}
+  {% endif %}
+  {% set next_direction_label = 'descending' if next_direction == 'desc' else 'ascending' %}
+  <th scope="col"
+      class="sortable-header"
+      data-sort-direction="{{ current_direction if is_active else 'none' }}"
+      aria-sort="{{ aria_sort }}">
+    <a class="wc-server-sort"
+       href="{{ url_for('user.runs', page=1, sort=field, direction=next_direction, per_page=per_page_value) }}"
+       aria-label="Sort {{ label }} {{ next_direction_label }}"
+       data-next-direction="{{ next_direction }}">
+      <span class="wc-server-sort__label">{{ label }}</span>
+      <span class="sortable-indicator" aria-hidden="true">{{ indicator }}</span>
+    </a>
+  </th>
+{%- endmacro %}
 
 {% include 'command-bar.htm' %}
 
@@ -51,13 +68,13 @@
         <thead>
           <tr>
             {% if show_owner %}<th scope="col">Owner</th>{% endif %}
-            <th scope="col">{{ sortable_header('Project name', 'name') }}</th>
-            <th scope="col">{{ sortable_header('Scenario', 'scenario') }}</th>
-            <th scope="col">{{ sortable_header('Run ID', 'runid') }}</th>
-            <th scope="col">{{ sortable_header('Config', 'config') }}</th>
+            {{ sortable_header('Project name', 'name') }}
+            {{ sortable_header('Scenario', 'scenario') }}
+            {{ sortable_header('Run ID', 'runid') }}
+            {{ sortable_header('Config', 'config') }}
             <th scope="col">Link</th>
-            <th scope="col">{{ sortable_header('Creation date', 'date_created') }}</th>
-            <th scope="col">{{ sortable_header('Last modified', 'last_modified') }}</th>
+            {{ sortable_header('Creation date', 'date_created') }}
+            {{ sortable_header('Last modified', 'last_modified') }}
             <th scope="col" class="wc-text-muted" title="Do not add columns that normalize casing in headers.">Select</th>
           </tr>
         </thead>
@@ -92,31 +109,36 @@
       {% set sort_value = sort | default('last_modified', true) %}
       {% set direction_value = direction | default('desc', true) %}
       <nav aria-label="Runs pagination" class="wc-pagination-nav">
-        <ul class="wc-pagination">
-          <li>
-            {% if pagination.has_prev %}
-              <a href="{{ url_for('user.runs', page=pagination.prev_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}" aria-label="Previous">&laquo;</a>
-            {% else %}
-              <span aria-hidden="true">&laquo;</span>
-            {% endif %}
-          </li>
-          {% for p in range(max(1, pagination.page - 2), min(pagination.pages, pagination.page + 2) + 1) %}
-            <li>
-              {% if p == pagination.page %}
-                <span aria-current="page">{{ p }}</span>
-              {% else %}
-                <a href="{{ url_for('user.runs', page=p, sort=sort_value, direction=direction_value, per_page=per_page_value) }}">{{ p }}</a>
-              {% endif %}
-            </li>
-          {% endfor %}
-          <li>
-            {% if pagination.has_next %}
-              <a href="{{ url_for('user.runs', page=pagination.next_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}" aria-label="Next">&raquo;</a>
-            {% else %}
-              <span aria-hidden="true">&raquo;</span>
-            {% endif %}
-          </li>
-        </ul>
+        {% if pagination.has_prev %}
+          <a class="wc-pagination__link"
+             href="{{ url_for('user.runs', page=pagination.prev_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}"
+             aria-label="Previous page">
+            &laquo;
+          </a>
+        {% else %}
+          <span class="wc-pagination__link" aria-hidden="true" aria-disabled="true">&laquo;</span>
+        {% endif %}
+
+        {% for p in range(max(1, pagination.page - 2), min(pagination.pages, pagination.page + 2) + 1) %}
+          {% if p == pagination.page %}
+            <span class="wc-pagination__link wc-pagination__link--current" aria-current="page">{{ p }}</span>
+          {% else %}
+            <a class="wc-pagination__link"
+               href="{{ url_for('user.runs', page=p, sort=sort_value, direction=direction_value, per_page=per_page_value) }}">
+              {{ p }}
+            </a>
+          {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+          <a class="wc-pagination__link"
+             href="{{ url_for('user.runs', page=pagination.next_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}"
+             aria-label="Next page">
+            &raquo;
+          </a>
+        {% else %}
+          <span class="wc-pagination__link" aria-hidden="true" aria-disabled="true">&raquo;</span>
+        {% endif %}
       </nav>
     {% endif %}
   </section>
@@ -169,4 +191,9 @@
     updateDeleteState();
   }
 </script>
+{% endblock %}
+
+{% block script_extras %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/controllers.js') }}" defer></script>
 {% endblock %}

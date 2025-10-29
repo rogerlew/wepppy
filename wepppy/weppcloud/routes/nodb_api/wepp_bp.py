@@ -541,16 +541,21 @@ def report_wepp_loss(runid, config):
         else:
             abort(400, description=f"Unknown summary table '{table_key}'")
 
-    return render_template('reports/wepp/summary.htm', runid=runid, config=config,
-                        ron=ron,
-                        extraneous=extraneous,
-                        out_rpt=out_rpt,
-                        hill_rpt=hill_rpt,
-                        chn_rpt=chn_rpt,
-                        unitizer_nodb=unitizer,
-                        precisions=wepppy.nodb.unitizer.precisions,
-                        is_singlestorm=is_singlestorm,
-                        user=current_user)
+    return render_template(
+        'reports/wepp/summary.htm',
+        runid=runid,
+        config=config,
+        ron=ron,
+        current_ron=ron,
+        extraneous=extraneous,
+        out_rpt=out_rpt,
+        hill_rpt=hill_rpt,
+        chn_rpt=chn_rpt,
+        unitizer_nodb=unitizer,
+        precisions=wepppy.nodb.unitizer.precisions,
+        is_singlestorm=is_singlestorm,
+        user=current_user,
+    )
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal')

@@ -19,6 +19,11 @@
 {% set uniform_severity = sbs_controller.uniform_severity if sbs_controller is not none else None %}
 {% set uniform_labels = {1: "Low", 2: "Moderate", 3: "High"} %}
 {% set uniform_label = uniform_labels.get(uniform_severity) if uniform_severity is not none else None %}
+{% if sbs_controller is not none %}
+  {% set current_sbs_fn = sbs_controller.disturbed_fn %}
+{% else %}
+  {% set current_sbs_fn = None %}
+{% endif %}
 {% set mode_options = [
   {
     "id": "sbs_mode0",
@@ -73,6 +78,14 @@
          extra_control_class="disable-readonly",
          attrs={"data-auto-upload": "true"}
        ) }}
+
+    {% if current_sbs_fn %}
+      {% set current_sbs_content %}<code>{{ current_sbs_fn }}</code>{% endset %}
+      {{ ui.text_display(
+           label="Current SBS map",
+           content=current_sbs_content
+      ) }}
+    {% endif %}
 
     {% call button_row() %}
       {% if 'disturbed' in ron.mods or 'baer' in ron.mods %}
