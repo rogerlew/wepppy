@@ -112,6 +112,28 @@
       gap: var(--wc-space-sm);
     }
 
+    /* Make the entire row clickable by stretching the anchor */
+    .pu-link-list li {
+      margin: 0;
+    }
+
+    .pu-link-list a {
+      display: block;
+      width: 100%;
+      padding: var(--wc-space-xs) var(--wc-space-sm);
+      border-radius: var(--wc-radius-sm);
+      border: 1px solid transparent;
+    }
+
+    .pu-link-list a:hover,
+    .pu-link-list a:focus-visible {
+      background: var(--wc-color-surface-alt);
+      border-color: var(--wc-color-border);
+      outline: 2px solid var(--wc-color-focus, var(--wc-color-accent));
+      outline-offset: 1px;
+      text-decoration: none; /* keep wc-link--file hover behavior consistent */
+    }
+
     .pu-action-list {
       display: flex;
       flex-direction: column;

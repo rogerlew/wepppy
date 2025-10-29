@@ -326,14 +326,29 @@ var Outlet = (function () {
 
             outlet.connect_status_stream(outlet);
 
+            // Brief visual feedback: flash a temporary marker with a popup
             try {
                 var map = MapController.getInstance();
-                outlet.popup
-                    .setLatLng(latlng)
-                    .setContent("finding nearest channel...")
-                    .openOn(map);
+                var flashMarker = L.circleMarker(latlng, {
+                    radius: 6,
+                    color: '#1a73e8',
+                    weight: 2,
+                    fillColor: '#1a73e8',
+                    fillOpacity: 0.5,
+                    pane: 'markerCustomPane',
+                    interactive: false
+                }).addTo(map);
+                flashMarker.bindPopup('Setting outlet…', {
+                    closeButton: false,
+                    autoClose: true,
+                    closeOnClick: false,
+                    offset: [0, -6]
+                }).openPopup();
+                window.setTimeout(function () {
+                    try { map.removeLayer(flashMarker); } catch (e) { /* no-op */ }
+                }, 1500);
             } catch (err) {
-                console.warn("Failed to display outlet popup.", err);
+                console.warn("Failed to display outlet feedback marker.", err);
             }
 
             setCursorSelection(false);

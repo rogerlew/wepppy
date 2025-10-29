@@ -675,7 +675,8 @@ var MapController = (function () {
             "SNOTEL Locations": map.snotel_locations
         };
 
-        map.googleSat.addTo(map);
+        // Default to Terrain base layer instead of Satellite
+        map.googleTerrain.addTo(map);
         syncMapTheme(getCurrentTheme());
 
         map.ctrls = L.control.layers(map.baseMaps, map.overlayMaps);

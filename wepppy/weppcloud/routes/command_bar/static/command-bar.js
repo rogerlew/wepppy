@@ -1162,7 +1162,11 @@
 
             sections.push(keyboardShortcuts);
 
-            this.showResult(sections.join('\n\n'));
+            // Render help output with a smaller font via a dedicated element
+            const pre = document.createElement('pre');
+            pre.className = 'command-bar-help';
+            pre.textContent = sections.join('\n\n');
+            this.showResult(pre);
         }
 
         buildRunScopedUrl(segment) {

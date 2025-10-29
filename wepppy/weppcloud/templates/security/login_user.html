@@ -52,13 +52,13 @@
             {% endif %}
           {% endset %}
           {% if enabled %}
-            <a class="pure-button {{ base_classes }}"
+            <a class="{{ base_classes }}"
                href="{{ login_href }}">
               {{ icon|trim|safe }}
               <span class="wc-oauth-label">Continue with {{ provider_name }}</span>
             </a>
           {% else %}
-            <span class="pure-button {{ base_classes }} wc-oauth-button--disabled" role="button" aria-disabled="true">
+            <span class="{{ base_classes }} wc-oauth-button--disabled" role="button" aria-disabled="true">
               {{ icon|trim|safe }}
               <span class="wc-oauth-label">Continue with {{ provider_name }}</span>
             </span>

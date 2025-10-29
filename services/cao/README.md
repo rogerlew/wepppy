@@ -197,12 +197,8 @@ uv venv .venv
 # Activate virtual environment
 source .venv/bin/activate
 
-# Install CAO and all dependencies
-uv sync
-
-# Optional: Install markdown-extract Python bindings for enhanced documentation tools
-# (Required if using markdown manipulation features in agent workflows)
-maturin develop --manifest-path /workdir/markdown-extract/crates/markdown_extract_py/Cargo.toml --release
+# Install CAO, dependencies, and Rust bindings in one step
+bash services/cao/scripts/setup_venv.sh
 
 # Verify installation
 cao --version
@@ -224,6 +220,12 @@ cao-server --help
 - Installs as editable package in the virtual environment
 - Provides `markdown_extract` module for programmatic Markdown manipulation (heading extraction, section editing)
 - Used by advanced agent workflows that need to parse/modify documentation files
+
+---
+
+### Single-Worker Requirement
+
+Run the API with a single worker. Multiple workers will duplicate background daemons (flow scheduler) and file watchers (inbox observer), and each process maintains its own in-memory provider registry and tmux state handles. This can cause duplicate flow execution and inconsistent terminal state. The provided systemd unit enforces `--workers 1`.
 
 **Virtual environment benefits:**
 - Dependency isolation from system Python
