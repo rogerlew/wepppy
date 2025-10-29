@@ -157,7 +157,10 @@ install_node_tools() {
     return
   fi
   echo "==> Installing npm and global tools"
-  DEBIAN_FRONTEND=noninteractive apt-get install -y npm
+  sudo apt remove -y nodejs npm
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+  sudo apt install -y nodejs
+
   # npx is included with npm >=5.2; install explicitly per notes
   npm install -g npx @openai/codex || true
 }
