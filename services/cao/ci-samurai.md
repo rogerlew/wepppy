@@ -36,11 +36,13 @@ Each nightly run follows a strict hygiene cycle to prevent state contamination:
      wctl run-npm test > npm-output.txt 2>&1
      ```
    - Capture exit codes, stdout, stderr for each suite
+   - Automatically rerun failing tests once to separate true regressions from suspected flakes; tag reruns that pass as `flake_candidate` for triage
    - Parse output to extract structured failure data (file, line, error type, stack trace)
 
 3. **Failure Triage**
    - Supervisor agent receives failure list
    - Assigns each failure to worker agent for parallel diagnosis
+   - Worker reruns the failing test or suite in isolation to confirm reproduction; non-reproducible failures flow into flake handling instead of fix attempts
    - Workers analyze root cause and assess confidence (High/Medium/Low)
 
 4. **Action Dispatch**
@@ -135,6 +137,12 @@ Each nightly run checks for regressions introduced by previous agent PRs:
 - **No auto-merge:** All PRs require human approval before merging
 - **Review checklist:** Reviewer confirms each required section is present and accurate
 - **Feedback loop:** Reviewer marks PR outcome (merge-as-is / merge-with-edits / reject) for confidence calibration
+
+### 6. Flake Handling
+
+- Single automatic rerun attempts to confirm flake suspicion before work begins; failures that pass on rerun are tagged and excluded from fix queues.
+- Supervisor tracks recurring flakes with counters; once a threshold triggers (default: 3 occurrences in 7 days) the system files an issue tagged `ci-samurai-flake` for human prioritization.
+- Flake-tagged tests remain visible in nightly summaries so humans can spot growing instability trends.
 
 ## Confidence Calibration System
 
@@ -487,6 +495,21 @@ sudo ./svc.sh start
 2. Stand up a minimal supervisor prototype that enforces the hygiene loop and allowlist while delegating to mocked worker agents.
 3. Validate GitHub permissions and PAT scope for the telemetry branch before the first pilot run.
 
+## Benchmark-Informed Roadmap
+
+### MVP Integrations
+
+- **Compatibility telemetry:** Capture per-pattern success metrics (change type, files touched, confidence) so the supervisor can emulate Dependabot-style compatibility scores during the calibration phase.
+- **Repairnator loop:** Treat reproduction → fix → full revalidation as a hard gate before a worker can submit a PR, ensuring every patch is backed by a clean rerun.
+- **Dr.CI summary comment:** Have the supervisor post a concise comment on each PR summarizing failures addressed, validation commands, and links to logs to match the clarity bar set by PyTorch’s Dr.CI.
+- **Flake quarantine:** Apply the single rerun + tagging workflow above and auto-file `ci-samurai-flake` issues once the recurrence threshold hits, so humans have a triage backlog.
+
+### Nice-to-Have Enhancements
+
+- **Speculative merge validation:** Borrow from Mergify/Bors by validating fixes on a merge-commit against latest `origin/master` for extra safety before PR creation.
+- **Failure fingerprint clustering:** Use Sheriff-o-Matic-style stack-trace signatures to group related breakages and prioritize systemic issues.
+- **Stability windows for risky domains:** Inspired by Renovate, require N consecutive green validations before allowing the agent to touch newly unlocked directories (e.g., WEPP integrations).
+- **Automated owner suggestions:** Enrich PR comments with likely reviewers/owners based on failure history, mirroring Prow’s triage helpers.
 ## References
 
 - Agent prompt: [`agent-prompt.md`](ci-samurai/agent-prompt.md)
