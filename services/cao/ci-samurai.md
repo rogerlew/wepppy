@@ -11,6 +11,13 @@ CI Samurai is an autonomous agent swarm that analyzes test failures, diagnoses r
 
 **Key principle:** Agents fix what they understand confidently and escalate what they don't, rather than artificially restricting scope to test-only changes. Quality comes from transparency (detailed reports) rather than permission boundaries.
 
+## System Roles
+
+- **Supervisor agent** orchestrates the nightly run: enforces hygiene, distributes failures, reviews worker output, and handles GitHub interactions (PR/issue creation, summary notifications).
+- **Worker agents** focus on individual failures: run diagnostics, implement fixes within the allowlist, draft reports, and return artifacts to the supervisor.
+- **Telemetry pipeline** captures run metadata, PR outcomes, and reviewer feedback so confidence thresholds can be tuned over time.
+- **Human reviewers** remain the merge gate, ensuring every proposed fix is scrutinized before landing in mainline.
+
 ## Workflow
 
 ### Agent Execution Cycle
@@ -19,7 +26,7 @@ Each nightly run follows a strict hygiene cycle to prevent state contamination:
 
 1. **Clean Workspace Setup**
    - Clone fresh repository to isolated workspace (`/tmp/ci-samurai-YYYYMMDD-HHMMSS/`)
-   - Checkout master branch
+   - Checkout `master` branch and hard reset to `origin/master` to ensure the run begins from a pristine tree
    - Verify Docker dev stack is healthy (`wctl up -d --wait`)
 
 2. **Test Execution**
@@ -92,7 +99,7 @@ During calibration, agents operate under path allowlists to prevent high-risk mo
 - `docker/**` (infrastructure config)
 - `.github/workflows/**` (CI/CD)
 
-Agents attempting to modify denied paths automatically escalate to issue, regardless of confidence.
+Agents attempting to modify denied paths automatically escalate to issue, regardless of confidence. The supervisor validates every diff against the allowlist before a worker can open a PR, preventing local git tricks from bypassing policy.
 
 **Post-calibration:** Allowlist expands as telemetry proves agent safety in each domain.
 
@@ -322,6 +329,7 @@ jobs:
           cd $WORKSPACE
           git clone https://github.com/rogerlew/wepppy.git .
           git checkout master
+          git reset --hard origin/master
       
       - name: Verify Docker stack
         run: |
@@ -334,6 +342,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CAO_ADMIN_TOKEN: ${{ secrets.CAO_ADMIN_TOKEN }}
+          CI_SAMURAI_TELEMETRY_TOKEN: ${{ secrets.CI_SAMURAI_TELEMETRY_TOKEN }}
         run: |
           cd $WORKSPACE/services/cao/ci-samurai
           python orchestrator.py \
@@ -346,11 +355,17 @@ jobs:
         if: always()
         run: |
           cd $WORKSPACE
+          TELEMETRY_BRANCH=ci-samurai-telemetry
           mkdir -p telemetry/ci-samurai/runs/$(date +%Y-%m-%d)
           cp ci-samurai-output/* telemetry/ci-samurai/runs/$(date +%Y-%m-%d)/
+          git init
+          git config user.name "ci-samurai-bot"
+          git config user.email "ci-samurai@wepppy.dev"
+          git checkout -b $TELEMETRY_BRANCH
           git add telemetry/
           git commit -m "CI Samurai telemetry: $(date +%Y-%m-%d)"
-          git push origin master
+          git remote add origin https://x-access-token:${CI_SAMURAI_TELEMETRY_TOKEN}@github.com/rogerlew/wepppy.git
+          git push --force origin $TELEMETRY_BRANCH
       
       - name: Cleanup workspace
         if: always()
@@ -365,6 +380,8 @@ jobs:
             -H 'Content-Type: application/json' \
             -d @$WORKSPACE/ci-samurai-output/summary.json
 ```
+
+> **Telemetry note:** The workflow pushes run artifacts to a dedicated `ci-samurai-telemetry` branch using a fine-scoped personal access token stored as `CI_SAMURAI_TELEMETRY_TOKEN`. This avoids protected-branch conflicts and keeps audit history separate from application code.
 
 ### Self-Hosted Runner Setup
 
@@ -464,9 +481,16 @@ sudo ./svc.sh start
 - **Test coverage analysis:** Suggest new tests for uncovered code paths
 - **Dependency update automation:** Detect outdated packages causing test failures
 
+## Immediate Next Steps
+
+1. Run GPT-5 comparison research on existing public CI-maintenance agents to benchmark playbooks, confidence heuristics, and telemetry strategies worth adopting.
+2. Stand up a minimal supervisor prototype that enforces the hygiene loop and allowlist while delegating to mocked worker agents.
+3. Validate GitHub permissions and PAT scope for the telemetry branch before the first pilot run.
+
 ## References
 
 - Agent prompt: [`agent-prompt.md`](ci-samurai/agent-prompt.md)
+- Benchmark research: [`benchmark-research.md`](ci-samurai/benchmark-research.md)
 - CAO architecture: [`README.md`](README.md)
 - wepppy coding conventions: [`../../AGENTS.md`](../../AGENTS.md)
 - Test suite guidelines: [`../../tests/AGENTS.md`](../../tests/AGENTS.md)
