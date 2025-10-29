@@ -59,12 +59,6 @@ jobs:
             --path TYPE_HINTS_SUMMARY.md
           )
 
-          start_ms=$(python - <<'PY'
-import time
-print(int(time.time() * 1000))
-PY
-)
-
           status=0
           wctl doc-lint "${TARGETS[@]}" --format sarif > docs-lint.sarif || status=$?
 
@@ -83,27 +77,8 @@ PY
             python -c 'import json, pathlib; pathlib.Path("docs-lint.json").write_text(json.dumps({"summary":{"files_scanned":0,"errors":0,"warnings":0},"findings":[]} , indent=2)+"\n", encoding="utf-8")'
           fi
 
-          end_ms=$(python - <<'PY'
-import time
-print(int(time.time() * 1000))
-PY
-)
-          duration_ms=$((end_ms - start_ms))
-          if [ "${duration_ms}" -lt 0 ]; then
-            duration_ms=0
-          fi
-
           echo "LINT_STATUS=${status}" >> "${GITHUB_ENV}"
-          echo "LINT_DURATION_MS=${duration_ms}" >> "${GITHUB_ENV}"
           exit 0
-
-      - name: Log docs-quality telemetry
-        if: always()
-        run: |
-          set -euo pipefail
-          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          DURATION="${LINT_DURATION_MS:-0}"
-          node scripts/docs_quality_telemetry.js docs-lint.json telemetry/docs-quality.jsonl "${GITHUB_SHA}" "${DURATION}" "${TIMESTAMP}" || true
 
       - name: Run markdown-doc Rust checks
         run: |
@@ -155,14 +130,6 @@ PY
         with:
           name: docs-lint-json
           path: docs-lint.json
-
-      - name: Upload telemetry artifact
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: docs-quality-telemetry
-          path: telemetry/docs-quality.jsonl
-          if-no-files-found: ignore
 
       - name: Fail on lint errors
         if: env.LINT_STATUS != '0'
