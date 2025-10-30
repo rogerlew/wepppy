@@ -133,12 +133,16 @@ def apply_patch_and_open_pr(nuc2: str, repo: str, patch_text: str, branch: str, 
     tmp.write_text(patch_text, encoding="utf-8")
     remote_tmp = "/tmp/ci_patch.diff"
     scp_to(nuc2, tmp, remote_tmp)
+    # Determine default base branch on remote (master/main)
+    head_branch_cmd = f"cd {shlex.quote(repo)} && git remote show origin | sed -n 's/.*HEAD branch: \\([^ ]*\\)/\\1/p'"
+    head = ssh(nuc2, head_branch_cmd)
+    base_branch = (head.stdout.strip() or "master").splitlines()[0]
     git_cmds = [
-        f"cd {shlex.quote(repo)} && git fetch origin && git checkout -B {shlex.quote(branch)} origin/master",
+        f"cd {shlex.quote(repo)} && git fetch origin && git checkout -B {shlex.quote(branch)} origin/{shlex.quote(base_branch)}",
         f"cd {shlex.quote(repo)} && git apply --index {shlex.quote(remote_tmp)} || (git apply {shlex.quote(remote_tmp)} && git add -A)",
         f"cd {shlex.quote(repo)} && git commit -m {shlex.quote(title)} || true",
         f"cd {shlex.quote(repo)} && git push -u origin {shlex.quote(branch)}",
-        f"cd {shlex.quote(repo)} && gh pr create -B master -H {shlex.quote(branch)} -t {shlex.quote(title)} -b {shlex.quote(body)} -l ci-samurai -l auto-fix",
+        f"cd {shlex.quote(repo)} && gh pr create -B {shlex.quote(base_branch)} -H {shlex.quote(branch)} -t {shlex.quote(title)} -b {shlex.quote(body)} -l ci-samurai -l auto-fix",
     ]
     for cmd in git_cmds:
         res = ssh(nuc2, cmd)
@@ -200,18 +204,21 @@ def main() -> int:
         message = "\n\n".join(message_parts)
 
         session_name = f"ci-fix-{int(time.time())}"
+        print(f"Creating CAO session at {args.cao_base} (profile=ci_samurai_fixer, name={session_name})")
         term = create_session(args.cao_base, "ci_samurai_fixer", session_name)
         terminal_id = term.get("id")
         session_full_name = term.get("session_name", session_name)
         if not terminal_id:
             print("Failed to create CAO session: missing terminal id")
             break
+        print(f"Created terminal: id={terminal_id} name={session_full_name}")
         send_inbox_message(args.cao_base, terminal_id, "gha", message)
 
         # Poll for output
         deadline = time.time() + args.poll_seconds
         result_json: Optional[Dict[str, Any]] = None
         patch_text: Optional[str] = None
+        print(f"Polling for agent RESULT_JSON for up to {args.poll_seconds}s...")
         while time.time() < deadline and result_json is None:
             out = get_output_tail(args.cao_base, terminal_id)
             rj, pt = parse_result_and_patch(out)
@@ -226,6 +233,7 @@ def main() -> int:
 
         # Validate claims
         handled_tests = result_json.get("handled_tests") or [primary.test]
+        print(f"Validating handled tests on {args.nuc2}: {handled_tests}")
         val_results = validate_tests(args.nuc2, args.repo, handled_tests)
         all_green = all(val_results.values())
 

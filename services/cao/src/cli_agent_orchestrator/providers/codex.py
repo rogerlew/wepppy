@@ -62,12 +62,15 @@ class CodexProvider(BaseProvider):
                 self.terminal_id,
             )
 
-        # Advertise headless readiness so downstream tooling knows no interactive CLI is present.
+        # Advertise headless readiness so downstream tooling knows env is prepared.
         if not os.getenv("WOJAK_HEADLESS_READY"):
             tmux_client.send_keys(self.session_name, self.window_name, "export WOJAK_HEADLESS_READY=1")
 
+        # Start Codex CLI interactively so inbox-delivered prompts can be typed into it.
+        # If Codex is not installed, the log will show a shell error for easy diagnosis.
+        tmux_client.send_keys(self.session_name, self.window_name, "codex")
         logger.info(
-            "Terminal %s initialised for headless Codex exec; waiting for bootstrap input",
+            "Launched Codex CLI in tmux for terminal %s; awaiting prompts via inbox",
             self.terminal_id,
         )
         self._update_status(TerminalStatus.IDLE)

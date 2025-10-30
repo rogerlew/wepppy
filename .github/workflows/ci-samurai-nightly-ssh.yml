@@ -69,6 +69,13 @@ jobs:
           echo "Parsing failures from $TRIAGE"
           python services/cao/ci-samurai/parse_pytest_log.py "$TRIAGE" > failures.jsonl || true
           echo "Parsed $(wc -l < failures.jsonl || echo 0) failures"
+          echo "--- failures.jsonl (head) ---" && head -n 20 failures.jsonl || true
+
+      - name: Diagnose logs (quick summary)
+        if: ${{ steps.package.outputs.latest_dir != '' }}
+        run: |
+          set -euo pipefail
+          python services/cao/ci-samurai/diagnose_artifact.py ci-samurai-logs.tgz || true
 
       - name: Upload failures list
         if: ${{ steps.package.outputs.latest_dir != '' }}
@@ -76,6 +83,15 @@ jobs:
         with:
           name: ci-samurai-failures
           path: failures.jsonl
+
+      - name: Check CAO health (forest)
+        run: |
+          set -euo pipefail
+          curl -fsS "${CAO_BASE_URL}/health" || {
+            echo "CAO server not reachable at ${CAO_BASE_URL}/health" >&2
+            exit 1
+          }
+          echo "CAO health OK"
 
       - name: Run fixer loop (per-error agents)
         if: ${{ steps.package.outputs.latest_dir != '' }}
@@ -95,7 +111,18 @@ jobs:
             --nuc2 "${NUC2}" \
             --repo "${REPO}" \
             --cao-base "${CAO_BASE_URL}" \
-            --max-failures 100
+            --max-failures 100 \
+            --poll-seconds 300
+
+      - name: List agent logs
+        if: ${{ steps.package.outputs.latest_dir != '' }}
+        run: |
+          set -euo pipefail
+          if [ -d agent_logs ]; then
+            echo "Agent logs present:" && find agent_logs -maxdepth 1 -type f -printf "%f\n" | sed 's/^/ - /'
+          else
+            echo "No agent_logs directory produced"
+          fi
 
       - name: Upload agent logs
         if: ${{ steps.package.outputs.latest_dir != '' }}
@@ -103,17 +130,13 @@ jobs:
         with:
           name: ci-samurai-agent-logs
           path: agent_logs
-
-      - name: Check CAO health (forest)
-        run: |
-          set -euo pipefail
-          curl -fsS "${CAO_BASE_URL}/health" || {
-            echo "CAO server not reachable at ${CAO_BASE_URL}/health" >&2
-            exit 1
-          }
-          echo "CAO health OK"
+          if-no-files-found: warn
 
       - name: GH CLI smoke on nuc2
         run: |
           set -euo pipefail
           ssh "${NUC2}" "gh --version || true"
+          echo "Checking GH auth status on ${NUC2}"
+          ssh "${NUC2}" "gh auth status || true"
+          echo "Checking GH repo access on ${NUC2}"
+          ssh "${NUC2}" "cd ${REPO} && gh repo view || true"

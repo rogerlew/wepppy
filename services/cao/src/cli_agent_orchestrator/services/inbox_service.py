@@ -67,7 +67,22 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
     # Get provider and check status
     provider = provider_manager.get_provider(terminal_id)
     status = provider.get_status(tail_lines=INBOX_SERVICE_TAIL_LINES)
-    
+
+    # Special-case: allow first delivery for Codex provider even if idle pattern
+    # not seen yet, as initialize() just launched the CLI and log may be empty.
+    if status not in (TerminalStatus.IDLE, TerminalStatus.COMPLETED):
+        try:
+            from cli_agent_orchestrator.providers.codex import CodexProvider  # local import to avoid cycles
+            if isinstance(provider, CodexProvider):
+                tail = _get_log_tail(terminal_id, lines=INBOX_SERVICE_TAIL_LINES)
+                if not tail.strip():
+                    logger.debug(
+                        f"Terminal {terminal_id} (codex) has empty log; treating as initial IDLE for first inbox delivery"
+                    )
+                    status = TerminalStatus.IDLE
+        except Exception:
+            pass
+
     if status not in (TerminalStatus.IDLE, TerminalStatus.COMPLETED):
         logger.debug(f"Terminal {terminal_id} not ready (status={status})")
         return False
