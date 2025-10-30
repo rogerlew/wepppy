@@ -37,10 +37,14 @@ jobs:
             exit 0
           fi
           echo "latest_dir=${LATEST_DIR}" >> $GITHUB_OUTPUT
-          DIR=$(dirname "${LATEST_DIR}")
+          echo "Packaging from ${LATEST_DIR}"
+          DEST=ci-samurai-logs
+          rm -rf "$DEST"
+          mkdir -p "$DEST"
+          # Copy the directory tree locally, then archive on the runner
+          scp -r "${NUC1}:${LATEST_DIR}" "$DEST/"
           NAME=$(basename "${LATEST_DIR}")
-          # Stream tar over SSH and gzip locally to avoid remote tar -z compatibility issues
-          ssh "${NUC1}" bash -lc "tar -C \"${DIR}\" -cf - \"${NAME}\"" | gzip -c > ci-samurai-logs.tgz
+          tar -czf ci-samurai-logs.tgz -C "$DEST" "$NAME"
 
       - name: Upload logs artifact
         if: ${{ steps.package.outputs.latest_dir != '' }}
