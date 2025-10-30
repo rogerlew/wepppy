@@ -76,7 +76,8 @@ def send_inbox_message(cao_base: str, terminal_id: str, sender: str, message: st
 
 def get_output_tail(cao_base: str, terminal_id: str) -> str:
     url = f"{cao_base}/terminals/{terminal_id}/output"
-    params = {"mode": "TAIL"}
+    # API expects OutputMode enum values: full | last
+    params = {"mode": "last"}
     r = requests.get(url, params=params, timeout=30)
     r.raise_for_status()
     obj = r.json()
