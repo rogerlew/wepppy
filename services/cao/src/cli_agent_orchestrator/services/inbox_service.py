@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 
+import base64
 from cli_agent_orchestrator.clients.database import get_pending_messages, update_message_status
 from cli_agent_orchestrator.models.inbox import MessageStatus
 from cli_agent_orchestrator.models.terminal import TerminalStatus
@@ -64,32 +65,39 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
     
     message = messages[0]
     
-    # Get provider and check status
+    # Get provider
     provider = provider_manager.get_provider(terminal_id)
-    status = provider.get_status(tail_lines=INBOX_SERVICE_TAIL_LINES)
 
-    # Special-case: allow first delivery for Codex provider even if idle pattern
-    # not seen yet, as initialize() just launched the CLI and log may be empty.
-    if status not in (TerminalStatus.IDLE, TerminalStatus.COMPLETED):
-        try:
-            from cli_agent_orchestrator.providers.codex import CodexProvider  # local import to avoid cycles
-            if isinstance(provider, CodexProvider):
-                tail = _get_log_tail(terminal_id, lines=INBOX_SERVICE_TAIL_LINES)
-                if not tail.strip():
-                    logger.debug(
-                        f"Terminal {terminal_id} (codex) has empty log; treating as initial IDLE for first inbox delivery"
-                    )
-                    status = TerminalStatus.IDLE
-        except Exception:
-            pass
+    # For Codex provider, we run non-interactive 'codex exec --json' and skip idle gating.
+    # For other providers, require IDLE/COMPLETED to avoid interleaving input.
+    try:
+        from cli_agent_orchestrator.providers.codex import CodexProvider  # local import to avoid cycles
+        is_codex = isinstance(provider, CodexProvider)
+    except Exception:
+        is_codex = False
 
-    if status not in (TerminalStatus.IDLE, TerminalStatus.COMPLETED):
-        logger.debug(f"Terminal {terminal_id} not ready (status={status})")
-        return False
+    if not is_codex:
+        status = provider.get_status(tail_lines=INBOX_SERVICE_TAIL_LINES)
+        if status not in (TerminalStatus.IDLE, TerminalStatus.COMPLETED):
+            logger.debug(f"Terminal {terminal_id} not ready (status={status})")
+            return False
     
     # Send message
     try:
-        terminal_service.send_input(terminal_id, message.message)
+        payload = message.message
+        if is_codex:
+            # Build a single-line shell command that base64-encodes the payload and pipes it to codex exec
+            b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")
+            cmd = (
+                "export CAO_MSG_B64='" + b64 + "'; "
+                "tmp=$(mktemp -t cao_msg.XXXX); "
+                "echo \"$CAO_MSG_B64\" | base64 -d > \"$tmp\"; "
+                "codex exec --json --full-auto --skip-git-repo-check \"$(cat \"$tmp\")\"; "
+                "rm -f \"$tmp\""
+            )
+            terminal_service.send_input(terminal_id, cmd)
+        else:
+            terminal_service.send_input(terminal_id, payload)
         update_message_status(message.id, MessageStatus.DELIVERED)
         logger.info(f"Delivered message {message.id} to terminal {terminal_id}")
         return True

@@ -228,7 +228,16 @@ def main() -> int:
             time.sleep(4)
 
         if not result_json:
-            print(f"No RESULT_JSON received for {primary.test}; skipping")
+            print(f"No RESULT_JSON received for {primary.test}; capturing transcript and skipping")
+            try:
+                agent_logs_dir = Path("agent_logs")
+                agent_logs_dir.mkdir(exist_ok=True)
+                slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", primary.test)
+                base = f"{session_full_name}-{terminal_id}-{slug}-noresult"
+                full_out = get_output_full(args.cao_base, terminal_id)
+                (agent_logs_dir / f"{base}.log").write_text(full_out, encoding="utf-8")
+            except Exception as e:
+                print(f"Warn: failed to persist agent logs (noresult): {e}")
             continue
 
         # Validate claims

@@ -77,7 +77,23 @@ jobs:
         run: |
           set -euo pipefail
           if command -v python >/dev/null 2>&1; then PY=python; else PY=python3; fi
-          "$PY" services/cao/ci-samurai/diagnose_artifact.py ci-samurai-logs.tgz || true
+          "$PY" services/cao/ci-samurai/diagnose_artifact.py ci-samurai-logs.tgz | tee diagnose_summary.txt || true
+
+      - name: Upload extracted logs
+        if: ${{ steps.package.outputs.latest_dir != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-samurai-logs-extracted
+          path: logs_extract
+          if-no-files-found: warn
+
+      - name: Upload diagnose summary
+        if: ${{ steps.package.outputs.latest_dir != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-samurai-diagnose
+          path: diagnose_summary.txt
+          if-no-files-found: warn
 
       - name: Upload failures list
         if: ${{ steps.package.outputs.latest_dir != '' }}

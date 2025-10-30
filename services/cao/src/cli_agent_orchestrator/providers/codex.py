@@ -66,13 +66,20 @@ class CodexProvider(BaseProvider):
         if not os.getenv("WOJAK_HEADLESS_READY"):
             tmux_client.send_keys(self.session_name, self.window_name, "export WOJAK_HEADLESS_READY=1")
 
-        # Start Codex CLI interactively so inbox-delivered prompts can be typed into it.
-        # If Codex is not installed, the log will show a shell error for easy diagnosis.
-        tmux_client.send_keys(self.session_name, self.window_name, "codex")
-        logger.info(
-            "Launched Codex CLI in tmux for terminal %s; awaiting prompts via inbox",
-            self.terminal_id,
-        )
+        # For interactive profiles (e.g., wojak_interactive), launch Codex CLI.
+        # For CI Samurai fixer, we rely on non-interactive 'codex exec --json' via inbox_service.
+        if (self._agent_profile_name or "").startswith("wojak"):
+            tmux_client.send_keys(self.session_name, self.window_name, "codex")
+            logger.info(
+                "Launched Codex CLI in tmux for terminal %s; awaiting interactive prompts",
+                self.terminal_id,
+            )
+        else:
+            logger.info(
+                "Codex provider initialised for %s (profile=%s) without launching interactive CLI",
+                self.terminal_id,
+                self._agent_profile_name,
+            )
         self._update_status(TerminalStatus.IDLE)
         return True
 
