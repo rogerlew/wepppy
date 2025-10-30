@@ -23,6 +23,9 @@ jobs:
       - Linux
       - X64
       - homelab
+    permissions:
+      contents: read
+      security-events: write
     env:
       MARKDOWN_DOC_WORKSPACE: ${{ secrets.MARKDOWN_DOC_WORKSPACE }}
     timeout-minutes: 20
