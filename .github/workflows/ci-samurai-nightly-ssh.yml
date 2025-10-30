@@ -43,7 +43,7 @@ jobs:
           ssh "${NUC1}" bash -lc "tar -C \"${DIR}\" -cf - \"${NAME}\"" | gzip -c > ci-samurai-logs.tgz
 
       - name: Upload logs artifact
-        if: steps.package.outputs.latest_dir != ''
+        if: ${{ steps.package.outputs.latest_dir != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: ci-samurai-logs
