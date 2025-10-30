@@ -11,18 +11,28 @@ from pathlib import Path
 from typing import Iterable, List, Tuple
 
 
+ANSI_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 SUMMARY_RE = re.compile(r"^(FAILED|ERROR)\s+(\S+::\S+)(?:\s+-\s+(.*))?$")
+PROGRESS_RE = re.compile(r"^(\S+::\S+)\s+(FAILED|ERROR)\b(?:\s+-\s+(.*))?$")
+
+
+def _strip_ansi(s: str) -> str:
+    return ANSI_RE.sub("", s)
 
 
 def iter_failures(lines: Iterable[str]) -> List[Tuple[str, str, str]]:
     seen = set()
     out: List[Tuple[str, str, str]] = []
     for raw in lines:
-        line = raw.rstrip("\n")
+        line = _strip_ansi(raw.rstrip("\n"))
         m = SUMMARY_RE.match(line)
-        if not m:
-            continue
-        kind, nodeid, tail = m.groups()
+        if m:
+            kind, nodeid, tail = m.groups()
+        else:
+            m2 = PROGRESS_RE.match(line)
+            if not m2:
+                continue
+            nodeid, kind, tail = m2.groups()
         if nodeid in seen:
             continue
         seen.add(nodeid)
@@ -60,7 +70,13 @@ def main() -> int:
             except Exception:
                 pass
             fails = iter_failures(triage_nodb.read_text(encoding="utf-8", errors="ignore").splitlines())
+            # Also show raw FAILED/ERROR counts to help diagnose
             print(f"Parsed failures: {len(fails)}")
+            raw = triage_nodb.read_text(encoding="utf-8", errors="ignore").splitlines()
+            noansi = [ANSI_RE.sub("", l) for l in raw]
+            raw_failed = sum(1 for l in noansi if " FAILED" in l or l.startswith("FAILED "))
+            raw_error = sum(1 for l in noansi if " ERROR" in l or l.startswith("ERROR "))
+            print(f"Raw markers — FAILED lines: {raw_failed}, ERROR lines: {raw_error}")
             for i, (kind, nodeid, msg) in enumerate(fails[:10], 1):
                 print(f"  {i:02d}. {kind.upper()} {nodeid} - {msg}")
         else:
@@ -101,4 +117,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

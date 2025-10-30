@@ -21,6 +21,9 @@ from pathlib import Path
 from typing import Iterable
 
 
+# ANSI escape removal
+ANSI_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+
 # Matches pytest summary lines like:
 #   FAILED tests/path/test_file.py::test_name - AssertionError: ...
 SUMMARY_RE = re.compile(r"^(FAILED|ERROR)\s+(\S+::\S+)(?:\s+-\s+(.*))?$")
@@ -31,10 +34,14 @@ SUMMARY_RE = re.compile(r"^(FAILED|ERROR)\s+(\S+::\S+)(?:\s+-\s+(.*))?$")
 PROGRESS_RE = re.compile(r"^(\S+::\S+)\s+(FAILED|ERROR)\b(?:\s+-\s+(.*))?$")
 
 
+def _strip_ansi(s: str) -> str:
+    return ANSI_RE.sub("", s)
+
+
 def iter_failures(lines: Iterable[str]):
     seen = set()
     for raw in lines:
-        line = raw.rstrip("\n")
+        line = _strip_ansi(raw.rstrip("\n"))
         m = SUMMARY_RE.match(line)
         if m:
             kind, nodeid, tail = m.groups()

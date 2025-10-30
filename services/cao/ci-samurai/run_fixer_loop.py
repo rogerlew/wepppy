@@ -282,15 +282,8 @@ def main() -> int:
     args = ap.parse_args()
 
     failures = read_failures(Path(args.failures))
-    if not failures:
-        print("No failures to process")
-        return 0
-    if args.max_failures and args.max_failures > 0:
-        failures = failures[: args.max_failures]
 
-    repo_root = Path(args.repo_root).resolve()
-
-    # Optional: run infrastructure validation agent once up front
+    # Optional: run infrastructure validation agent once up front (even if no failures)
     if args.infra_run:
         try:
             def _run_infra() -> None:
@@ -344,6 +337,14 @@ def main() -> int:
             _run_infra()
         except Exception as e:
             print(f"Infra validation step failed: {e}")
+
+    if not failures:
+        print("No failures to process")
+        return 0
+    if args.max_failures and args.max_failures > 0:
+        failures = failures[: args.max_failures]
+
+    repo_root = Path(args.repo_root).resolve()
 
     # Build remaining queue (in-memory for pilot)
     remaining: List[Failure] = failures.copy()

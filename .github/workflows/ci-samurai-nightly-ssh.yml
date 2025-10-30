@@ -71,6 +71,9 @@ jobs:
           "$PY" services/cao/ci-samurai/parse_pytest_log.py "$TRIAGE" > failures.jsonl || true
           echo "Parsed $(wc -l < failures.jsonl || echo 0) failures"
           echo "--- failures.jsonl (head) ---" && head -n 20 failures.jsonl || true
+          if [ "$(wc -l < failures.jsonl || echo 0)" = "0" ]; then
+            echo "--- triage tail (200) ---" && tail -n 200 "$TRIAGE" || true
+          fi
 
       - name: Diagnose logs (quick summary)
         if: ${{ steps.package.outputs.latest_dir != '' }}
