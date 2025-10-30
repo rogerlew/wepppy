@@ -16,7 +16,6 @@ jobs:
       REPO: /workdir/wepppy
       WC1: /wc1
       LOOPS: '3'
-      SCOPE: '--nodb-only'
       CAO_BASE_URL: http://forest:9889
     steps:
       - name: Checkout
@@ -69,10 +68,13 @@ jobs:
           fi
           echo "Parsing failures from $TRIAGE"
           "$PY" services/cao/ci-samurai/parse_pytest_log.py "$TRIAGE" > failures.jsonl || true
-          echo "Parsed $(wc -l < failures.jsonl || echo 0) failures"
-          echo "--- failures.jsonl (head) ---" && head -n 20 failures.jsonl || true
-          if [ "$(wc -l < failures.jsonl || echo 0)" = "0" ]; then
+          FAILURE_COUNT=$(wc -l < failures.jsonl || echo 0)
+          echo "Parsed $FAILURE_COUNT failures"
+          if [ "$FAILURE_COUNT" = "0" ]; then
+            echo "✅ No test failures detected - all tests passed!"
             echo "--- triage tail (200) ---" && tail -n 200 "$TRIAGE" || true
+          else
+            echo "--- failures.jsonl (head) ---" && head -n 20 failures.jsonl || true
           fi
 
       - name: Diagnose logs (quick summary)
@@ -124,9 +126,11 @@ jobs:
           set -euo pipefail
           if command -v python >/dev/null 2>&1; then PY=python; else PY=python3; fi
           if [ ! -s failures.jsonl ]; then
-            echo "No failures.jsonl; nothing to fix"
+            echo "✅ No failures.jsonl to process - skipping fixer loop (all tests passed)"
             exit 0
           fi
+          FAILURE_COUNT=$(wc -l < failures.jsonl || echo 0)
+          echo "🔧 Processing $FAILURE_COUNT test failures with CAO fixer agents..."
           "$PY" services/cao/ci-samurai/run_fixer_loop.py \
             --failures failures.jsonl \
             --repo-root . \
