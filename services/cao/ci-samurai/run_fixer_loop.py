@@ -63,14 +63,27 @@ def create_session(cao_base: str, agent_profile: str, session_name: str) -> Dict
 
 
 def send_inbox_message(cao_base: str, terminal_id: str, sender: str, message: str) -> None:
-    """Send message using JSON body; server also supports query fallback."""
+    """Send message using JSON body first; fallback to query params if server is older.
+
+    Older CAO builds only accept query params (sender_id, message) and will
+    emit a 422 complaining about missing query fields if JSON is used. We
+    fallback to query only when the payload is small to avoid URL length issues.
+    """
     url = f"{cao_base}/terminals/{terminal_id}/inbox/messages"
     r = requests.post(url, json={"sender_id": sender, "message": message}, timeout=60)
+    if r.status_code == 422 and len(message) < 1500:
+        # Fallback for older servers that only accept query params
+        r = requests.post(url, params={"sender_id": sender, "message": message}, timeout=60)
     try:
         r.raise_for_status()
     except requests.HTTPError as e:
-        # Surface server response for easier debugging in CI logs
-        raise requests.HTTPError(f"{e}\nResponse: {r.text}") from e
+        hint = ""
+        if r.status_code == 422:
+            hint = (
+                "\nHint: CAO server may require an update to accept JSON body. "
+                "If message is large, query fallback may exceed URL limits."
+            )
+        raise requests.HTTPError(f"{e}\nResponse: {r.text}{hint}") from e
 
 
 def get_output_tail(cao_base: str, terminal_id: str) -> str:
