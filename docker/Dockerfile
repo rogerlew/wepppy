@@ -179,7 +179,7 @@ RUN set -euxo pipefail; \
     else \
         useradd --no-log-init -r -g "${GROUP_NAME}" -u "${APP_UID}" -m "${APP_USER}"; \
     fi; \
-    chown -R "${APP_USER}:${GROUP_NAME}" /workdir /opt/vendor /opt/venv /var/log/wepppy /var/lib/wepppy /tmp
+    chown -R "${APP_USER}:${GROUP_NAME}" /workdir /opt/vendor /opt/venv /var/log/wepppy /var/lib/wepppy
 
 USER ${APP_USER}
 

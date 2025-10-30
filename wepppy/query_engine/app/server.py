@@ -168,12 +168,17 @@ async def run_info(request: StarletteRequest) -> Response:
 
     catalog_entries = context.catalog.entries()
     runid_str = str(run_path)
+    slug = runid_param.strip("/") or runid_param
+    schema_path = str(request.app.url_path_for("run_schema", runid=slug))
+    query_path = str(request.app.url_path_for("run_query_endpoint", runid=slug))
     return TEMPLATES.TemplateResponse(
         "run_info.html",
         {
             "request": request,
             "runid": runid_str,
             "runid_slug": runid_str.lstrip("/"),
+            "schema_path": schema_path,
+            "query_path": query_path,
             "entry_count": len(catalog_entries),
             "catalog_entries": catalog_entries,
         },
@@ -232,8 +237,8 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
     run_name = slug_parts[0] if slug_parts else runid_param
     config_name = slug_parts[1] if len(slug_parts) > 1 else 'cfg'
     run_link = f"/weppcloud/runs/{run_name}/{config_name}"
-    post_url = f"/query/runs/{slug}/query"
-    activate_url = f"/query/runs/{slug}/activate"
+    post_path = str(request.app.url_path_for("run_query_endpoint", runid=slug))
+    activate_path = str(request.app.url_path_for("activate_run", runid=slug))
 
     return TEMPLATES.TemplateResponse(
         "query_console.html",
@@ -246,9 +251,10 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
             "catalog_entries": catalog_entries[:20],
             "catalog_ready": catalog_ready,
             "default_payload": default_payload,
-            "activate_url": activate_url,
+            "activate_url": activate_path,
             "query_presets": QUERY_PRESETS,
-            "post_url": post_url,
+            "post_url": post_path,
+            "post_url_display": post_path,
         },
     )
 
@@ -404,13 +410,18 @@ def create_app() -> Starlette:
             health,
             methods=['GET']
         ),
-        Route("/", homepage),
-        Route("/runs/{runid:path}/activate", activate_run, methods=["GET", "POST"]),
-        Route("/runs/{runid:path}/schema", run_schema, methods=["GET"]),
-        Route("/runs/{runid:path}/query", make_query_endpoint, methods=["GET"]),
-        Route("/runs/{runid:path}/query", run_query_endpoint, methods=["POST"]),
-        Route("/runs/{runid:path}", run_info, methods=["GET"]),
-        Route("/docs/mcp_openapi.yaml", mcp_openapi_spec, methods=["GET"]),
+        Route("/", homepage, name="homepage"),
+        Route("/runs/{runid:path}/activate", activate_run, methods=["GET", "POST"], name="activate_run"),
+        Route("/runs/{runid:path}/activate/", activate_run, methods=["GET", "POST"], name="activate_run_slash"),
+        Route("/runs/{runid:path}/schema", run_schema, methods=["GET"], name="run_schema"),
+        Route("/runs/{runid:path}/schema/", run_schema, methods=["GET"], name="run_schema_slash"),
+        Route("/runs/{runid:path}/query", make_query_endpoint, methods=["GET"], name="run_query_console"),
+        Route("/runs/{runid:path}/query", run_query_endpoint, methods=["POST"], name="run_query_endpoint"),
+        Route("/runs/{runid:path}/query/", make_query_endpoint, methods=["GET"], name="run_query_console_slash"),
+        Route("/runs/{runid:path}/query/", run_query_endpoint, methods=["POST"], name="run_query_endpoint_slash"),
+        Route("/runs/{runid:path}", run_info, methods=["GET"], name="run_info"),
+        Route("/runs/{runid:path}/", run_info, methods=["GET"], name="run_info_slash"),
+        Route("/docs/mcp_openapi.yaml", mcp_openapi_spec, methods=["GET"], name="mcp_openapi_spec"),
     ]
 
     exception_handlers = {
