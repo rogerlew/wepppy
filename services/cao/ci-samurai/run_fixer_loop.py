@@ -278,6 +278,7 @@ def main() -> int:
     ap.add_argument("--infra-sample-test", default=None, help="Optional pytest node id for smoke on remote")
     ap.add_argument("--infra-branch-prefix", default="ci/infra", help="Branch prefix for infra PRs")
     ap.add_argument("--infra-profile", default="ci_samurai_infra", help="Agent profile name for infra validator")
+    ap.add_argument("--infra-cao-base", default=None, help="Override CAO base URL for infra agent (e.g., http://nuc2.local:9889)")
     args = ap.parse_args()
 
     failures = read_failures(Path(args.failures))
@@ -306,20 +307,21 @@ def main() -> int:
                 ]
                 message = "\n".join(message_parts)
                 session_name = f"infra-{int(time.time())}"
-                print(f"Creating CAO session at {args.cao_base} (profile={args.infra_profile}, name={session_name})")
-                term = create_session(args.cao_base, args.infra_profile, session_name)
+                infra_cao = args.infra_cao_base or args.cao_base
+                print(f"Creating CAO session at {infra_cao} (profile={args.infra_profile}, name={session_name})")
+                term = create_session(infra_cao, args.infra_profile, session_name)
                 terminal_id = term.get("id")
                 session_full_name = term.get("session_name", session_name)
                 if not terminal_id:
                     print("Failed to create CAO session for infra validation: missing terminal id")
                     return
                 print(f"Created terminal: id={terminal_id} name={session_full_name}")
-                send_inbox_message(args.cao_base, terminal_id, "gha", message)
+                send_inbox_message(infra_cao, terminal_id, "gha", message)
                 deadline = time.time() + args.poll_seconds
                 result_json: Optional[Dict[str, Any]] = None
                 patch_text: Optional[str] = None
                 while time.time() < deadline and result_json is None:
-                    out = get_output_full(args.cao_base, terminal_id)
+                    out = get_output_full(infra_cao, terminal_id)
                     rj, pt = parse_result_and_patch(out)
                     if rj:
                         result_json, patch_text = rj, pt
@@ -330,7 +332,7 @@ def main() -> int:
                     agent_logs_dir = Path("agent_logs")
                     agent_logs_dir.mkdir(exist_ok=True)
                     base = f"{session_full_name}-{terminal_id}-infra"
-                    full_out = get_output_full(args.cao_base, terminal_id)
+                    full_out = get_output_full(infra_cao, terminal_id)
                     (agent_logs_dir / f"{base}.log").write_text(full_out, encoding="utf-8")
                     if result_json:
                         (agent_logs_dir / f"{base}.result.json").write_text(json.dumps(result_json, indent=2), encoding="utf-8")
@@ -414,13 +416,31 @@ def main() -> int:
         all_green = all(val_results.values())
 
         if result_json.get("action") == "pr" and all_green and patch_text:
+            # Enforce allowlist/denylist on proposed patch before PR
+            paths = _extract_patch_paths(patch_text)
+            ok_paths, why = _paths_allowed(paths, args.allowlist, args.denylist)
             pr = result_json.get("pr", {})
             branch = pr.get("branch") or f"ci/fix/{int(time.time())}"
             title = pr.get("title") or f"Fix: {primary.test}"
             body = pr.get("body") or "CI Samurai auto-fix"
-            ok = apply_patch_and_open_pr(args.nuc2, args.repo, patch_text, branch, title, body)
-            if ok:
-                handled.extend(handled_tests)
+            if ok_paths:
+                ok = apply_patch_and_open_pr(args.nuc2, args.repo, patch_text, branch, title, body)
+                if ok:
+                    handled.extend(handled_tests)
+            else:
+                # Open issue instead, citing blocked paths
+                issues = result_json.get("issues") or []
+                if not issues:
+                    issues = [{
+                        "title": f"CI Samurai: patch blocked by policy for {primary.test}",
+                        "body": f"Patch touched disallowed paths. Details: {why}\n\nPaths: {paths}"
+                    }]
+                for iss in issues:
+                    title2 = iss.get("title", f"CI Samurai: {primary.test}")
+                    body2 = iss.get("body", "")
+                    cmd = f"cd {shlex.quote(args.repo)} && gh issue create -t {shlex.quote(title2)} -b {shlex.quote(body2)} -l ci-samurai"
+                    ssh(args.nuc2, cmd)
+                handled.extend([t for t, ok in val_results.items() if ok])
         else:
             # Open issues for each handled test that failed or for action=issue
             issues = result_json.get("issues") or []

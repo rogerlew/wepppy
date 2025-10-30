@@ -7,6 +7,8 @@ from pathlib import Path
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 
 import base64
+import os
+import shlex
 from cli_agent_orchestrator.clients.database import get_pending_messages, update_message_status
 from cli_agent_orchestrator.models.inbox import MessageStatus
 from cli_agent_orchestrator.models.terminal import TerminalStatus
@@ -86,13 +88,33 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
     try:
         payload = message.message
         if is_codex:
+            # Build codex exec flags with optional sandbox and working directory
+            sandbox = os.getenv("CAO_CODEX_SANDBOX_MODE", "").strip()
+            # Per-profile override: CAO_SANDBOX_<profile>
+            try:
+                profile = getattr(provider, "_agent_profile_name", None) or ""
+            except Exception:
+                profile = ""
+            if profile:
+                override = os.getenv(f"CAO_SANDBOX_{profile}", "").strip()
+                if override:
+                    sandbox = override
+            cwd = os.getenv("CAO_CODEX_CWD", "").strip()
+
+            flags = ["--json", "--full-auto", "--skip-git-repo-check"]
+            if cwd:
+                flags += ["--cd", cwd]
+            if sandbox:
+                flags += ["--sandbox", sandbox]
+            flags_str = " ".join(shlex.quote(f) for f in flags)
+
             # Build a single-line shell command that base64-encodes the payload and pipes it to codex exec
             b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")
             cmd = (
                 "export CAO_MSG_B64='" + b64 + "'; "
                 "tmp=$(mktemp -t cao_msg.XXXX); "
                 "echo \"$CAO_MSG_B64\" | base64 -d > \"$tmp\"; "
-                "codex exec --json --full-auto --skip-git-repo-check \"$(cat \"$tmp\")\"; "
+                f"codex exec {flags_str} \"$(cat \"$tmp\")\"; "
                 "rm -f \"$tmp\""
             )
             terminal_service.send_input(terminal_id, cmd)
