@@ -10,6 +10,9 @@
 
 [![Stubtest](https://github.com/rogerlew/wepppy/actions/workflows/stubtest.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/stubtest.yml)
 
+[![CI Samurai Nightly](https://github.com/rogerlew/wepppy/actions/workflows/ci-samurai-nightly-ssh.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/ci-samurai-nightly-ssh.yml)
+
+
 ## Overview
 
 wepppy is the core library powering **WEPPcloud**, automating Water Erosion Prediction Project (WEPP) simulations, wildfire response analytics, and watershed-scale geospatial preprocessing. The system glues together legacy FORTRAN 77 executables, modern Python services, and Rust-accelerated tooling to deliver repeatable, high-throughput erosion and hydrology simulations for fire teams, land managers, and research scientists.
