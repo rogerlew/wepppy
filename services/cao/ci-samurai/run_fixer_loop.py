@@ -17,7 +17,10 @@ import fnmatch
 import requests
 
 
-RESULT_JSON_RE = re.compile(r"RESULT_JSON[\s\S]*?```(?:json)?\n([\s\S]*?)\n```", re.IGNORECASE)
+RESULT_JSON_RE = re.compile(
+    r"```RESULT_JSON\s*\n([\s\S]*?)\n```|RESULT_JSON[\s\S]*?```(?:json)?\n([\s\S]*?)\n```",
+    re.IGNORECASE,
+)
 PATCH_RE = re.compile(r"```patch\n([\s\S]*?)\n```", re.IGNORECASE)
 
 
@@ -147,10 +150,12 @@ def parse_result_and_patch(output: str) -> tuple[Optional[Dict[str, Any]], Optio
     patch_text: Optional[str] = None
     m = RESULT_JSON_RE.search(output)
     if m:
-        try:
-            result_json = json.loads(m.group(1))
-        except Exception:
-            result_json = None
+        json_blob = m.group(1) or m.group(2)
+        if json_blob:
+            try:
+                result_json = json.loads(json_blob)
+            except Exception:
+                result_json = None
     m2 = PATCH_RE.search(output)
     if m2:
         patch_text = m2.group(1)
