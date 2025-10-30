@@ -95,7 +95,6 @@ During calibration, agents operate under path allowlists to prevent high-risk mo
 
 **Denied paths (require human escalation):**
 - `wepppy/wepp/**` (WEPP model file generators - fragile)
-- `wepppy/topo/peridot/**` (Rust watershed abstraction - high risk)
 - `wepppy/nodb/base.py` (NoDb core - affects all controllers)
 - `deps/linux/**` (FORTRAN binaries)
 - `docker/**` (infrastructure config)

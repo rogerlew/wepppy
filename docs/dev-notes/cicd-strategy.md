@@ -2910,7 +2910,7 @@ WEPPcloud uses **RQ (Redis Queue)** for background job processing, with a distri
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                  forest1 (Test-Prod Primary)                    │
-│  • Full weppcloud stack (Flask app, Redis, PostgreSQL, Caddy)  │
+│  • Full weppcloud stack (Flask app, Redis, PostgreSQL, Caddy)   │
 │  • RQ worker container(s)                                       │
 │  • NFS server: /wc1 (runs + geodata)                            │
 │  • Exposed as wc-prod.bearhive.duckdns.org                      │
@@ -2929,11 +2929,12 @@ WEPPcloud uses **RQ (Redis Queue)** for background job processing, with a distri
          │                    │                  │
          └────────────────────┼──────────────────┘
                               │
-                    ┌─────────▼─────────┐
+                    ┌─────────▼──────────┐
                     │ Shared NFS Storage │
                     │ /wc1 & /geodata    │
-                    │ (10.0.0.x network) │
-                    └───────────────────┘
+                    │      10.0.0.x      │
+                    │     192.168.1.x    │
+                    └────────────────────┘
 ```
 
 **Key Components:**
