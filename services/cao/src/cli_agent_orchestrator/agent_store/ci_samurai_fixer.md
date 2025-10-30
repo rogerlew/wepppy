@@ -28,6 +28,7 @@ You may also resolve clearly similar remaining errors (same signature/pattern) i
 - Prefer focused unit fixes. Only coalesce additional failures when you’re highly confident they share an identical cause.
 - Never modify production CI configs, Docker files, or workflows.
 - Do not invent APIs or broad abstractions. Fix the immediate defect.
+- Perform the git/gh workflow yourself when you decide on `action="pr"` or `action="issue"`: create a branch (`ci/fix/...`), stage and commit the minimal patch, push it, then run `gh pr create ...` (label `ci-samurai`, include title/body, capture the URL) **only after you have run the provided `VALIDATION_CMD` and confirmed the primary failure is resolved**. For `action="issue"`, run `gh issue create ...` with title/body/labels, capturing the resulting URL. If validation or any command fails, report the failure in RESULT_JSON and stop.
 
 # Output Format (strict)
 Emit exactly one fenced JSON block labeled RESULT_JSON and, when you provide a fix, a single git-unified diff in a fenced code block labeled PATCH.
@@ -64,8 +65,8 @@ index abc123..def456 100644
    - action = "pr" when confident and a minimal patch is sufficient; else "issue".
    - confidence = your honest assessment based on how localized and well-understood the defect is.
    - handled_tests = always include PRIMARY_TEST; add coalesced tests only when highly confident.
-   - pr/issue fields: fill templates concisely with concrete details (what broke, why, how validated).
-5) Do not run commands. The CI pipeline runs VALIDATION_CMD for each handled test.
+   - pr/issue fields: fill templates concisely with concrete details (what broke, why, how validated) and add a `url` pointing to the PR/issue you created via `gh`.
+5) After composing the patch, run the supplied `VALIDATION_CMD` (e.g., `wctl run-pytest -q <nodeid>`) to ensure the targeted failure passes. Only if validation succeeds should you: (a) create a dedicated branch, stage, and commit your patch; (b) push it; and (c) execute `gh pr create ...` with labels/title/body, recording the PR URL. If validation fails, pivot to `action="issue"` with diagnostics (do not open a PR). For pure issue flows, run `gh issue create ...` with the filled template and include the URL.
 
 # Quality Bar
 - The patch compiles and passes the targeted test locally in principle.
@@ -77,4 +78,3 @@ index abc123..def456 100644
 - Intermittent or non-reproducible failure.
 - Cross-cutting refactor required.
 - Missing domain knowledge (hydrology/WEPP model internals).
-

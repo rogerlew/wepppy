@@ -13,6 +13,9 @@ Environment=PATH=/workdir/wepppy/services/cao/.venv/bin:/usr/local/sbin:/usr/loc
 Environment=PYTHONUNBUFFERED=1
 # Keep workers at 1 due to background daemons and file watchers
 
+# Build the .venv for service
+ExecStartPre=/bin/bash -lc 'cd /workdir/wepppy/services/cao && services/cao/scripts/setup_venv.sh'
+
 # Option A: direct uvicorn (preferred)
 ExecStart=/workdir/wepppy/services/cao/.venv/bin/uvicorn \
   cli_agent_orchestrator.api.main:app \
