@@ -4,8 +4,16 @@ from pathlib import Path
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from cli_agent_orchestrator.models.flow import Flow
-from cli_agent_orchestrator.services import flow_service
+try:
+    from cli_agent_orchestrator.models.flow import Flow
+    from cli_agent_orchestrator.services import flow_service
+except ModuleNotFoundError as exc:
+    missing = getattr(exc, "name", "")
+    if missing in {"cli_agent_orchestrator", "frontmatter", "apscheduler"}:
+        from wepppy.cli_agent_orchestrator.models.flow import Flow
+        from wepppy.cli_agent_orchestrator.services import flow_service
+    else:
+        raise
 
 
 def _write_flow_file(path: Path, body: str) -> Path:

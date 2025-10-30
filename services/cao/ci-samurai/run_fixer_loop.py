@@ -310,7 +310,7 @@ def main() -> int:
                     return
                 print(f"Created terminal: id={terminal_id} name={session_full_name}")
                 send_inbox_message(infra_cao, terminal_id, "gha", message)
-                deadline = time.time() + args.poll_seconds
+                deadline = time.time() + 120.0
                 result_json: Optional[Dict[str, Any]] = None
                 patch_text: Optional[str] = None
                 while time.time() < deadline and result_json is None:
