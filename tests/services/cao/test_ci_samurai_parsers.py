@@ -66,6 +66,30 @@ index 1111111..2222222 100644
 
 
 @pytest.mark.unit
+def test_parse_result_from_codex_json_stream():
+    mod = load_module("services/cao/ci-samurai/run_fixer_loop.py")
+    # Simulate Codex JSONL stream with an agent_message carrying fenced blocks
+    agent_text = (
+        "Some lead-in...\n"
+        "RESULT_JSON\n```json\n{\n  \"action\": \"issue\",\n  \"confidence\": \"low\",\n  \"primary_test\": \"tests/x::y\",\n  \"handled_tests\": [\"tests/x::y\"]\n}\n```\n"
+    )
+    json_line = {
+        "type": "item.completed",
+        "item": {"type": "agent_message", "text": agent_text},
+    }
+    output = (
+        "{\"type\":\"item.started\",\"item\":{\"type\":\"agent_message\"}}\n"
+        + json.dumps(json_line)
+        + "\n{\"type\":\"turn.completed\"}"
+    )
+
+    rj, pt = mod.parse_result_and_patch(output)
+    assert rj is not None
+    assert rj.get("action") == "issue"
+    assert pt is None
+
+
+@pytest.mark.unit
 def test_read_snippet(tmp_path: Path):
     mod = load_module("services/cao/ci-samurai/run_fixer_loop.py")
     test_file = tmp_path / "tests" / "foo" / "test_bar.py"

@@ -12,6 +12,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import fnmatch
 
 import requests
 
@@ -105,6 +106,42 @@ def get_output_full(cao_base: str, terminal_id: str) -> str:
     return obj.get("output", "")
 
 
+def _extract_text_from_codex_json(output: str) -> str:
+    """Best-effort extraction of agent-visible text from Codex JSON event stream.
+
+    Aggregates 'item.completed' events' text or aggregated_output so we can
+    search for RESULT_JSON/PATCH fences even when the raw terminal contains
+    JSONL rather than plain text.
+    """
+    texts: list[str] = []
+    for raw in output.splitlines():
+        raw = raw.strip()
+        if not raw or raw[0] != '{':
+            continue
+        try:
+            evt = json.loads(raw)
+        except Exception:
+            continue
+        et = evt.get("type")
+        if et == "item.completed":
+            item = evt.get("item", {})
+            t = item.get("text")
+            if t:
+                texts.append(str(t))
+                continue
+            if item.get("type") == "command_execution":
+                ao = item.get("aggregated_output")
+                if ao:
+                    texts.append(str(ao))
+                    continue
+        # Wojak bootstrap compatibility: agent_output/system events
+        if et in ("agent_output", "system"):
+            t = evt.get("content")
+            if t:
+                texts.append(str(t))
+    return "\n".join(texts)
+
+
 def parse_result_and_patch(output: str) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
     result_json: Optional[Dict[str, Any]] = None
     patch_text: Optional[str] = None
@@ -119,6 +156,20 @@ def parse_result_and_patch(output: str) -> tuple[Optional[Dict[str, Any]], Optio
         patch_text = m2.group(1)
         # Normalize line endings
         patch_text = patch_text.replace("\r\n", "\n")
+
+    # Fallback: attempt to parse Codex JSON event stream and search within extracted text
+    if result_json is None and patch_text is None:
+        extracted = _extract_text_from_codex_json(output)
+        if extracted:
+            m = RESULT_JSON_RE.search(extracted)
+            if m:
+                try:
+                    result_json = json.loads(m.group(1))
+                except Exception:
+                    result_json = None
+            m2 = PATCH_RE.search(extracted)
+            if m2:
+                patch_text = m2.group(1).replace("\r\n", "\n")
     return result_json, patch_text
 
 
@@ -166,6 +217,48 @@ def apply_patch_and_open_pr(nuc2: str, repo: str, patch_text: str, branch: str, 
     return True
 
 
+def _split_globs(spec: str) -> List[str]:
+    parts = [g.strip() for g in (spec or "").split(",")]
+    return [p for p in parts if p]
+
+
+def _extract_patch_paths(patch_text: str) -> List[str]:
+    paths: List[str] = []
+    for line in patch_text.splitlines():
+        if line.startswith("diff --git a/"):
+            try:
+                _, a_path, b_path = line.split(" ", 2)
+            except ValueError:
+                continue
+            # a_path like a/foo.py, b_path like b/foo.py
+            if b_path.startswith("b/"):
+                paths.append(b_path[2:])
+            elif a_path.startswith("a/"):
+                paths.append(a_path[2:])
+    return paths
+
+
+def _paths_allowed(paths: List[str], allowlist: str, denylist: str) -> tuple[bool, str]:
+    allows = _split_globs(allowlist)
+    denys = _split_globs(denylist)
+    denied: List[str] = []
+    disallowed: List[str] = []
+
+    for p in paths:
+        # denylist has priority
+        if any(fnmatch.fnmatch(p, d) for d in denys):
+            denied.append(p)
+            continue
+        if allows and not any(fnmatch.fnmatch(p, a) for a in allows):
+            disallowed.append(p)
+
+    if denied:
+        return False, f"Denied paths: {', '.join(sorted(set(denied)))}"
+    if disallowed:
+        return False, f"Outside allowlist: {', '.join(sorted(set(disallowed)))}"
+    return True, ""
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--failures", required=True)
@@ -178,6 +271,13 @@ def main() -> int:
     ap.add_argument("--max-context", type=int, default=10)
     ap.add_argument("--max-failures", type=int, default=0, help="Max failures to process (0 = no cap)")
     ap.add_argument("--poll-seconds", type=int, default=120)
+    # Infra validation options
+    ap.add_argument("--infra-run", action="store_true", help="Run infra validation agent before fixes")
+    ap.add_argument("--infra-remote-host", default=None, help="SSH host for infra checks (default: --nuc2)")
+    ap.add_argument("--infra-remote-repo", default=None, help="Remote repo path for infra checks (default: --repo)")
+    ap.add_argument("--infra-sample-test", default=None, help="Optional pytest node id for smoke on remote")
+    ap.add_argument("--infra-branch-prefix", default="ci/infra", help="Branch prefix for infra PRs")
+    ap.add_argument("--infra-profile", default="ci_samurai_infra", help="Agent profile name for infra validator")
     args = ap.parse_args()
 
     failures = read_failures(Path(args.failures))
@@ -188,6 +288,60 @@ def main() -> int:
         failures = failures[: args.max_failures]
 
     repo_root = Path(args.repo_root).resolve()
+
+    # Optional: run infrastructure validation agent once up front
+    if args.infra_run:
+        try:
+            def _run_infra() -> None:
+                remote_host = args.infra_remote_host or args.nuc2
+                remote_repo = args.infra_remote_repo or args.repo
+                sample_test = args.infra_sample_test or (failures[0].test if failures else "")
+                message_parts = [
+                    f"REMOTE_HOST: {remote_host}",
+                    f"REMOTE_REPO: {remote_repo}",
+                    f"SAMPLE_TEST: {sample_test}",
+                    f"ALLOWLIST: {args.allowlist}",
+                    f"DENYLIST: {args.denylist}",
+                    f"BRANCH_PREFIX: {args.infra_branch_prefix}",
+                ]
+                message = "\n".join(message_parts)
+                session_name = f"infra-{int(time.time())}"
+                print(f"Creating CAO session at {args.cao_base} (profile={args.infra_profile}, name={session_name})")
+                term = create_session(args.cao_base, args.infra_profile, session_name)
+                terminal_id = term.get("id")
+                session_full_name = term.get("session_name", session_name)
+                if not terminal_id:
+                    print("Failed to create CAO session for infra validation: missing terminal id")
+                    return
+                print(f"Created terminal: id={terminal_id} name={session_full_name}")
+                send_inbox_message(args.cao_base, terminal_id, "gha", message)
+                deadline = time.time() + args.poll_seconds
+                result_json: Optional[Dict[str, Any]] = None
+                patch_text: Optional[str] = None
+                while time.time() < deadline and result_json is None:
+                    out = get_output_full(args.cao_base, terminal_id)
+                    rj, pt = parse_result_and_patch(out)
+                    if rj:
+                        result_json, patch_text = rj, pt
+                        break
+                    time.sleep(4)
+                # Persist infra transcript regardless
+                try:
+                    agent_logs_dir = Path("agent_logs")
+                    agent_logs_dir.mkdir(exist_ok=True)
+                    base = f"{session_full_name}-{terminal_id}-infra"
+                    full_out = get_output_full(args.cao_base, terminal_id)
+                    (agent_logs_dir / f"{base}.log").write_text(full_out, encoding="utf-8")
+                    if result_json:
+                        (agent_logs_dir / f"{base}.result.json").write_text(json.dumps(result_json, indent=2), encoding="utf-8")
+                    if patch_text:
+                        (agent_logs_dir / f"{base}.patch").write_text(patch_text, encoding="utf-8")
+                except Exception as e:
+                    print(f"Warn: failed to persist infra agent logs: {e}")
+
+            _run_infra()
+        except Exception as e:
+            print(f"Infra validation step failed: {e}")
 
     # Build remaining queue (in-memory for pilot)
     remaining: List[Failure] = failures.copy()
@@ -232,7 +386,8 @@ def main() -> int:
         patch_text: Optional[str] = None
         print(f"Polling for agent RESULT_JSON for up to {args.poll_seconds}s...")
         while time.time() < deadline and result_json is None:
-            out = get_output_tail(args.cao_base, terminal_id)
+            # Use full output to avoid missing fences split across messages
+            out = get_output_full(args.cao_base, terminal_id)
             rj, pt = parse_result_and_patch(out)
             if rj:
                 result_json, patch_text = rj, pt

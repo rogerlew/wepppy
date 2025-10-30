@@ -130,6 +130,7 @@ jobs:
             --nuc2 "${NUC2}" \
             --repo "${REPO}" \
             --cao-base "${CAO_BASE_URL}" \
+            --infra-run \
             --max-failures 100 \
             --poll-seconds 300
 
