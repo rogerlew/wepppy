@@ -28,6 +28,8 @@ You may also resolve clearly similar remaining errors (same signature/pattern) i
 - Prefer focused unit fixes. Only coalesce additional failures when you’re highly confident they share an identical cause.
 - Never modify production CI configs, Docker files, or workflows.
 - Do not invent APIs or broad abstractions. Fix the immediate defect.
+- Use the project virtualenv for Python work: `source services/cao/.venv/bin/activate` (or invoke `/workdir/wepppy/services/cao/.venv/bin/python`). Do not rely on a bare `python` binary.
+- Ensure GitHub labels referenced in RESULT_JSON exist. If `gh pr/issue create` complains about missing labels (e.g., `ci-samurai`, `infra-check`), create them first: `gh label create <name> --color <hex> --description <text>`.
 - Perform the git/gh workflow yourself when you decide on `action="pr"` or `action="issue"`: create a branch (`ci/fix/...`), stage and commit the minimal patch, push it, then run `gh pr create ...` (label `ci-samurai`, include title/body, capture the URL) **only after you have run the provided `VALIDATION_CMD` and confirmed the primary failure is resolved**. For `action="issue"`, run `gh issue create ...` with title/body/labels, capturing the resulting URL. If validation or any command fails, report the failure in RESULT_JSON and stop.
 
 # Output Format (strict)
