@@ -26,7 +26,7 @@
           ) %}
             <p class="wc-text-muted">
               Config: <code>{{ config_name }}</code><br>
-              POST endpoint: <code>{{ post_url_display }}</code>
+              POST endpoint: <code id="postEndpoint">{{ post_url_display }}</code>
             </p>
           {% endcall %}
 
@@ -49,7 +49,7 @@
               {% if not catalog_ready %}
                 <div class="wc-note">
                   Catalog metadata was not found. Visit
-                  <a href="{{ activate_url }}">{{ activate_url }}</a>
+                  <a id="activateLink" href="{{ activate_url }}">{{ activate_url_display }}</a>
                   to activate the run, then reload this page.
                 </div>
               {% endif %}
@@ -136,7 +136,24 @@
     const presetDescription = document.getElementById('presetDescription');
     const initialPayload = {{ default_payload|tojson }};
     const presets = {{ query_presets|tojson }};
-    const postUrl = {{ post_url|tojson }};
+    const activateRelative = {{ activate_url|tojson }};
+    const postUrlTarget = new URL({{ post_url|tojson }}, window.location.href).pathname;
+    const postUrl = postUrlTarget !== "/" && postUrlTarget.endsWith("/")
+      ? postUrlTarget.slice(0, -1)
+      : postUrlTarget;
+    const activateUrlObject = new URL(activateRelative, window.location.href);
+    const activateUrl = activateUrlObject.pathname;
+    const postAbsoluteUrl = new URL(postUrl, window.location.origin).href;
+    const activateAbsoluteUrl = activateUrlObject.href;
+    const postEndpointEl = document.getElementById('postEndpoint');
+    if (postEndpointEl) {
+      postEndpointEl.textContent = postAbsoluteUrl;
+    }
+    const activateLink = document.getElementById('activateLink');
+    if (activateLink) {
+      activateLink.href = activateAbsoluteUrl;
+      activateLink.textContent = activateAbsoluteUrl;
+    }
 
     const initialPayloadValue = JSON.stringify(initialPayload, null, 2);
     payloadInput.value = initialPayloadValue;

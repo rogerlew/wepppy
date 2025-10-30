@@ -237,8 +237,21 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
     run_name = slug_parts[0] if slug_parts else runid_param
     config_name = slug_parts[1] if len(slug_parts) > 1 else 'cfg'
     run_link = f"/weppcloud/runs/{run_name}/{config_name}"
-    post_path = str(request.app.url_path_for("run_query_endpoint", runid=slug))
-    activate_path = str(request.app.url_path_for("activate_run", runid=slug))
+    current_path = request.url.path.rstrip("/") or request.url.path or "/"
+    if current_path.endswith("/query"):
+        base_root = current_path[: -len("/query")] or "/"
+        post_display = f"{base_root.rstrip('/') or ''}/query" if base_root != "/" else "/query"
+    else:
+        base_root = current_path.rsplit("/", 1)[0] or "/"
+        post_display = current_path or "/"
+
+    base_root_clean = base_root.rstrip("/")
+    if base_root_clean and not base_root_clean.startswith("/"):
+        base_root_clean = "/" + base_root_clean
+    activate_display = f"{base_root_clean}/activate" if base_root_clean else "/activate"
+    
+    # Construct post_url to preserve the full path including /query-engine prefix
+    post_url = current_path if current_path else ""
 
     return TEMPLATES.TemplateResponse(
         "query_console.html",
@@ -251,10 +264,11 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
             "catalog_entries": catalog_entries[:20],
             "catalog_ready": catalog_ready,
             "default_payload": default_payload,
-            "activate_url": activate_path,
+            "activate_url": "../activate",
+            "activate_url_display": activate_display,
             "query_presets": QUERY_PRESETS,
-            "post_url": post_path,
-            "post_url_display": post_path,
+            "post_url": post_url,
+            "post_url_display": post_display,
         },
     )
 

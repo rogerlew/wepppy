@@ -14,8 +14,8 @@
     <h1>Run: {{ runid }}</h1>
     <p>Catalog entries: {{ entry_count }}</p>
     <p>
-      Schema endpoint: <code>{{ schema_path }}</code><br />
-      Query endpoint: <code>{{ query_path }}</code>
+      Schema endpoint: <code id="schemaEndpoint">{{ schema_path }}</code><br />
+      Query endpoint: <code id="queryEndpoint">{{ query_path }}</code>
     </p>
     <table>
       <thead>
@@ -37,5 +37,23 @@
         {% endfor %}
       </tbody>
     </table>
+    <script>
+      (function () {
+        const ensureTrailingSlash = (url) => {
+          return url.endsWith("/") ? url : url + "/";
+        };
+        const baseUrl = ensureTrailingSlash(window.location.href);
+        const schemaEl = document.getElementById("schemaEndpoint");
+        if (schemaEl) {
+          const schemaUrl = new URL("./schema", baseUrl);
+          schemaEl.textContent = schemaUrl.href;
+        }
+        const queryEl = document.getElementById("queryEndpoint");
+        if (queryEl) {
+          const queryUrl = new URL("./query", baseUrl);
+          queryEl.textContent = queryUrl.href;
+        }
+      })();
+    </script>
   </body>
 </html>
