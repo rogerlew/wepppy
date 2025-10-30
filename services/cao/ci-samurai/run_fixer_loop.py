@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import os
+import re
+import shlex
+import subprocess
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import requests
+
+
+RESULT_JSON_RE = re.compile(r"RESULT_JSON[\s\S]*?```(?:json)?\n([\s\S]*?)\n```", re.IGNORECASE)
+PATCH_RE = re.compile(r"```patch\n([\s\S]*?)\n```", re.IGNORECASE)
+
+
+@dataclass
+class Failure:
+    kind: str
+    test: str
+    error: str
+
+
+def read_failures(path: Path) -> List[Failure]:
+    out: List[Failure] = []
+    if not path.exists():
+        return out
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+            out.append(Failure(kind=obj.get("kind", "failed"), test=obj["test"], error=obj.get("error", "")))
+        except Exception:
+            continue
+    return out
+
+
+def read_snippet(repo_root: Path, test_nodeid: str, max_lines: int = 120) -> str:
+    # Use the test file as a cheap context snippet
+    test_path = test_nodeid.split("::", 1)[0]
+    p = repo_root / test_path
+    if not p.exists():
+        return ""
+    lines = p.read_text(encoding="utf-8", errors="ignore").splitlines()
+    head = lines[:max_lines]
+    return "\n".join(head)
+
+
+def create_session(cao_base: str, agent_profile: str, session_name: str) -> Dict[str, Any]:
+    url = f"{cao_base}/sessions"
+    params = {"provider": "codex", "agent_profile": agent_profile, "session_name": session_name}
+    r = requests.post(url, params=params, timeout=30)
+    r.raise_for_status()
+    return r.json()
+
+
+def send_inbox_message(cao_base: str, terminal_id: str, sender: str, message: str) -> None:
+    url = f"{cao_base}/terminals/{terminal_id}/inbox/messages"
+    data = {"sender_id": sender, "message": message}
+    r = requests.post(url, data=data, timeout=30)
+    r.raise_for_status()
+
+
+def get_output_tail(cao_base: str, terminal_id: str) -> str:
+    url = f"{cao_base}/terminals/{terminal_id}/output"
+    params = {"mode": "TAIL"}
+    r = requests.get(url, params=params, timeout=30)
+    r.raise_for_status()
+    obj = r.json()
+    return obj.get("output", "")
+
+
+def parse_result_and_patch(output: str) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
+    result_json: Optional[Dict[str, Any]] = None
+    patch_text: Optional[str] = None
+    m = RESULT_JSON_RE.search(output)
+    if m:
+        try:
+            result_json = json.loads(m.group(1))
+        except Exception:
+            result_json = None
+    m2 = PATCH_RE.search(output)
+    if m2:
+        patch_text = m2.group(1)
+        # Normalize line endings
+        patch_text = patch_text.replace("\r\n", "\n")
+    return result_json, patch_text
+
+
+def ssh(host: str, cmd: str) -> subprocess.CompletedProcess:
+    return subprocess.run(["ssh", host, cmd], capture_output=True, text=True)
+
+
+def scp_to(host: str, local_path: Path, remote_path: str) -> subprocess.CompletedProcess:
+    return subprocess.run(["scp", str(local_path), f"{host}:{remote_path}"], capture_output=True, text=True)
+
+
+def validate_tests(nuc2: str, repo: str, tests: List[str]) -> Dict[str, bool]:
+    results: Dict[str, bool] = {}
+    for t in tests:
+        cmd = f"cd {shlex.quote(repo)} && wctl run-pytest -q {shlex.quote(t)}"
+        res = ssh(nuc2, cmd)
+        results[t] = res.returncode == 0
+    return results
+
+
+def apply_patch_and_open_pr(nuc2: str, repo: str, patch_text: str, branch: str, title: str, body: str) -> bool:
+    # Write patch to a temp file locally, copy to nuc2, and apply in repo
+    tmp = Path("/tmp/ci_patch.diff")
+    tmp.write_text(patch_text, encoding="utf-8")
+    remote_tmp = "/tmp/ci_patch.diff"
+    scp_to(nuc2, tmp, remote_tmp)
+    git_cmds = [
+        f"cd {shlex.quote(repo)} && git fetch origin && git checkout -B {shlex.quote(branch)} origin/master",
+        f"cd {shlex.quote(repo)} && git apply --index {shlex.quote(remote_tmp)} || (git apply {shlex.quote(remote_tmp)} && git add -A)",
+        f"cd {shlex.quote(repo)} && git commit -m {shlex.quote(title)} || true",
+        f"cd {shlex.quote(repo)} && git push -u origin {shlex.quote(branch)}",
+        f"cd {shlex.quote(repo)} && gh pr create -B master -H {shlex.quote(branch)} -t {shlex.quote(title)} -b {shlex.quote(body)} -l ci-samurai -l auto-fix",
+    ]
+    for cmd in git_cmds:
+        res = ssh(nuc2, cmd)
+        if res.returncode != 0:
+            # surface error for debugging
+            print(res.stdout)
+            print(res.stderr)
+            return False
+    return True
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--failures", required=True)
+    ap.add_argument("--repo-root", default=".")
+    ap.add_argument("--nuc2", required=True)
+    ap.add_argument("--repo", required=True, help="Remote repo path on nuc2 (e.g., /workdir/wepppy)")
+    ap.add_argument("--cao-base", required=True)
+    ap.add_argument("--allowlist", default="tests/**, wepppy/**/*.py")
+    ap.add_argument("--denylist", default="wepppy/wepp/**, wepppy/nodb/base.py, docker/**, .github/workflows/**, deps/linux/**")
+    ap.add_argument("--max-context", type=int, default=10)
+    ap.add_argument("--max-failures", type=int, default=0, help="Max failures to process (0 = no cap)")
+    ap.add_argument("--poll-seconds", type=int, default=120)
+    args = ap.parse_args()
+
+    failures = read_failures(Path(args.failures))
+    if not failures:
+        print("No failures to process")
+        return 0
+    if args.max_failures and args.max_failures > 0:
+        failures = failures[: args.max_failures]
+
+    repo_root = Path(args.repo_root).resolve()
+
+    # Build remaining queue (in-memory for pilot)
+    remaining: List[Failure] = failures.copy()
+    handled: List[str] = []
+
+    processed = 0
+    while remaining:
+        primary = remaining.pop(0)
+        context_errors = remaining[: args.max_context]
+
+        # Prepare message
+        snippet = read_snippet(repo_root, primary.test)
+        remaining_lines = [f"- {f.test} :: {f.error}" for f in context_errors]
+        validation_cmd = f"ssh {args.nuc2} \"cd {args.repo} && wctl run-pytest -q {primary.test}\""
+        message_parts = [
+            f"PRIMARY_TEST: {primary.test}",
+            f"STACK: {primary.error}",
+            "SNIPPET:\n" + snippet,
+            "REMAINING_ERRORS:\n" + ("\n".join(remaining_lines) if remaining_lines else "<none>"),
+            f"ALLOWLIST: {args.allowlist}",
+            f"DENYLIST: {args.denylist}",
+            f"VALIDATION_CMD: {validation_cmd}",
+            "PR_TEMPLATE:\n## Problem\n...\n\n## Root Cause\n...\n\n## Solution\n...\n\n## Testing\n...\n\n## Edge Cases\n...\n\n**Agent Confidence:** ...",
+            "ISSUE_TEMPLATE:\n## Symptoms\n...\n\n## Hypotheses\n...\n\n## Why I'm Stuck\n...\n\n## Next Steps\n...\n\n## Reproduction\n...",
+        ]
+        message = "\n\n".join(message_parts)
+
+        session_name = f"ci-fix-{int(time.time())}"
+        term = create_session(args.cao_base, "ci_samurai_fixer", session_name)
+        terminal_id = term.get("id")
+        if not terminal_id:
+            print("Failed to create CAO session: missing terminal id")
+            break
+        send_inbox_message(args.cao_base, terminal_id, "gha", message)
+
+        # Poll for output
+        deadline = time.time() + args.poll_seconds
+        result_json: Optional[Dict[str, Any]] = None
+        patch_text: Optional[str] = None
+        while time.time() < deadline and result_json is None:
+            out = get_output_tail(args.cao_base, terminal_id)
+            rj, pt = parse_result_and_patch(out)
+            if rj:
+                result_json, patch_text = rj, pt
+                break
+            time.sleep(4)
+
+        if not result_json:
+            print(f"No RESULT_JSON received for {primary.test}; skipping")
+            continue
+
+        # Validate claims
+        handled_tests = result_json.get("handled_tests") or [primary.test]
+        val_results = validate_tests(args.nuc2, args.repo, handled_tests)
+        all_green = all(val_results.values())
+
+        if result_json.get("action") == "pr" and all_green and patch_text:
+            pr = result_json.get("pr", {})
+            branch = pr.get("branch") or f"ci/fix/{int(time.time())}"
+            title = pr.get("title") or f"Fix: {primary.test}"
+            body = pr.get("body") or "CI Samurai auto-fix"
+            ok = apply_patch_and_open_pr(args.nuc2, args.repo, patch_text, branch, title, body)
+            if ok:
+                handled.extend(handled_tests)
+        else:
+            # Open issues for each handled test that failed or for action=issue
+            issues = result_json.get("issues") or []
+            if not issues:
+                issues = [{"title": f"CI Samurai: {primary.test}", "body": json.dumps(result_json, indent=2)}]
+            for iss in issues:
+                title = iss.get("title", f"CI Samurai: {primary.test}")
+                body = iss.get("body", "")
+                cmd = f"cd {shlex.quote(args.repo)} && gh issue create -t {shlex.quote(title)} -b {shlex.quote(body)} -l ci-samurai"
+                ssh(args.nuc2, cmd)
+            handled.extend([t for t, ok in val_results.items() if ok])
+
+        processed += 1
+        if args.max_failures and processed >= args.max_failures:
+            break
+
+    print(f"Handled tests: {handled}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

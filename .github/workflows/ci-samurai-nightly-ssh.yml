@@ -17,6 +17,7 @@ jobs:
       WC1: /wc1
       LOOPS: '3'
       SCOPE: '--nodb-only'
+      CAO_BASE_URL: http://forest:9889
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,3 +53,60 @@ jobs:
         with:
           name: ci-samurai-logs
           path: ci-samurai-logs.tgz
+
+      - name: Parse failures from triage log
+        if: ${{ steps.package.outputs.latest_dir != '' }}
+        run: |
+          set -euo pipefail
+          rm -rf logs_extract
+          mkdir -p logs_extract
+          tar -xzf ci-samurai-logs.tgz -C logs_extract
+          TRIAGE=$(find logs_extract -type f -name triage_nodb.txt | head -1 || true)
+          if [ -z "$TRIAGE" ]; then
+            echo "No triage_nodb.txt found in artifact; skipping parse" >&2
+            exit 0
+          fi
+          echo "Parsing failures from $TRIAGE"
+          python services/cao/ci-samurai/parse_pytest_log.py "$TRIAGE" > failures.jsonl || true
+          echo "Parsed $(wc -l < failures.jsonl || echo 0) failures"
+
+      - name: Upload failures list
+        if: ${{ steps.package.outputs.latest_dir != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-samurai-failures
+          path: failures.jsonl
+
+      - name: Run fixer loop (per-error agents)
+        if: ${{ steps.package.outputs.latest_dir != '' }}
+        env:
+          NUC2: ${{ env.NUC2 }}
+          REPO: ${{ env.REPO }}
+          CAO_BASE_URL: ${{ env.CAO_BASE_URL }}
+        run: |
+          set -euo pipefail
+          if [ ! -s failures.jsonl ]; then
+            echo "No failures.jsonl; nothing to fix"
+            exit 0
+          fi
+          python services/cao/ci-samurai/run_fixer_loop.py \
+            --failures failures.jsonl \
+            --repo-root . \
+            --nuc2 "${NUC2}" \
+            --repo "${REPO}" \
+            --cao-base "${CAO_BASE_URL}" \
+            --max-failures 100
+
+      - name: Check CAO health (forest)
+        run: |
+          set -euo pipefail
+          curl -fsS "${CAO_BASE_URL}/health" || {
+            echo "CAO server not reachable at ${CAO_BASE_URL}/health" >&2
+            exit 1
+          }
+          echo "CAO health OK"
+
+      - name: GH CLI smoke on nuc2
+        run: |
+          set -euo pipefail
+          ssh "${NUC2}" "gh --version || true"
