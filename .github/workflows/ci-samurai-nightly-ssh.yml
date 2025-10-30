@@ -16,7 +16,7 @@ jobs:
       REPO: /workdir/wepppy
       WC1: /wc1
       LOOPS: '3'
-      CAO_BASE_URL: http://forest:9889
+      CAO_BASE_URL: http://nuc2.local:9889
     steps:
       - name: Checkout
         uses: actions/checkout@v4
