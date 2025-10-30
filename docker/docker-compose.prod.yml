@@ -226,14 +226,15 @@ services:
       <<: *wepppy-env
       LOGLEVEL: INFO
       RQ_LOGGING_LEVEL: INFO
-      REDIS_URL: redis://redis:6379/9
+      # Prefer explicit RQ_REDIS_URL when running workers on external hosts
+      REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
     command:
       - rq
       - worker-pool
       - -n
       - "4"
       - -u
-      - redis://redis:6379/9
+      - ${RQ_REDIS_URL:-redis://redis:6379/9}
       - --logging-level
       - INFO
       - --worker-class

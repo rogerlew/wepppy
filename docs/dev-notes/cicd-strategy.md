@@ -2895,6 +2895,512 @@ When using third-party tools (e.g., Trivy, Anchore, ESLint) that generate SARIF:
 
 ---
 
+## Distributed RQ Worker Infrastructure
+
+### Overview
+
+WEPPcloud uses **RQ (Redis Queue)** for background job processing, with a distributed worker farm across multiple hosts for horizontal scaling. The architecture supports:
+- **Shared storage** via NFS-mounted `/wc1` and `/geodata` for consistent file access
+- **Centralized Redis** (DB 9) for job queue and coordination
+- **Multiple worker containers** across NUCs for parallel processing
+- **Production-like topology** in test-prod environment mirroring real deployment
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  forest1 (Test-Prod Primary)                    │
+│  • Full weppcloud stack (Flask app, Redis, PostgreSQL, Caddy)  │
+│  • RQ worker container(s)                                       │
+│  • NFS server: /wc1 (runs + geodata)                            │
+│  • Exposed as wc-prod.bearhive.duckdns.org                      │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                 ┌────────────┴─────────┐
+                 │   Redis DB 9 Queue   │ (Central coordination)
+                 └────────────┬─────────┘
+                              │
+         ┌────────────────────┼──────────────────┐
+         │                    │                  │
+    ┌────▼────┐         ┌────▼────┐      ┌─────▼────┐
+    │  nuc1   │         │  nuc2   │      │   nuc3   │
+    │ Worker  │         │ Worker  │      │  Worker  │
+    └─────────┘         └─────────┘      └──────────┘
+         │                    │                  │
+         └────────────────────┼──────────────────┘
+                              │
+                    ┌─────────▼─────────┐
+                    │ Shared NFS Storage │
+                    │ /wc1 & /geodata    │
+                    │ (10.0.0.x network) │
+                    └───────────────────┘
+```
+
+**Key Components:**
+- **forest1:** Primary server with full stack + NFS server for `/wc1` array storage
+- **nuc1, nuc2, nuc3:** Dedicated worker nodes mounting `/wc1` and `/geodata` via NFS
+- **Redis (DB 9):** Job queue accessible from all nodes
+- **10 Gbps P2P network:** `10.0.0.x` range between forest and forest1 for low-latency NFS
+
+### Production Deployment Strategy
+
+The test-prod topology **directly mirrors** the University of Idaho production cluster configuration:
+- **Centralized job queue** (Redis DB 9) on primary server
+- **Distributed workers** across multiple compute nodes
+- **Shared storage** for consistent file access
+- **Docker Compose deployment** (current standard until Kubernetes migration)
+
+**Future:** The architecture is designed to support a clean migration to Kubernetes:
+- `RQ_REDIS_URL` environment variable for flexible Redis endpoints
+- Volume mounts (`/wc1`, `/geodata`) map directly to PersistentVolumeClaims
+- Worker containers are stateless and horizontally scalable
+- Same `docker-compose.prod.yml` semantics transfer to Kustomize/Helm charts
+
+### NFS Storage Configuration
+
+**Mount Shared Storage on Worker Nodes:**
+
+```bash
+# /etc/fstab on nuc1, nuc2, nuc3
+10.0.0.2:/           /wc1       nfs4  rw,noatime,nolock,tcp,soft,rsize=32768,wsize=32768,_netdev 0 0
+10.0.0.2:/geodata    /geodata   nfs4  rw,noatime,nolock,tcp,soft,rsize=32768,wsize=32768,_netdev 0 0
+```
+
+**Optional Stability Enhancements:**
+```bash
+# Add automount and timeout for boot resilience
+10.0.0.2:/ /wc1 nfs4 rw,noatime,nolock,tcp,soft,rsize=32768,wsize=32768,_netdev,x-systemd.automount,timeo=600 0 0
+```
+
+**Ownership Alignment:**
+```bash
+# Ensure matching UID/GID across all nodes (critical for file permissions)
+sudo chown -R roger:docker /wc1 /geodata
+
+# Verify consistency
+ls -la /wc1 /geodata | head
+```
+
+**NFS Performance Characteristics:**
+- **Workload:** WEPP model runs (write-heavy: `.wepp`, `.slope`, `.cli` files)
+- **Access Pattern:** Sequential writes, random reads during post-processing
+- **Tolerance:** `soft` mount ensures writes don't block indefinitely if NFS stalls
+- **Buffer Size:** `rsize=32768,wsize=32768` optimizes throughput for typical file sizes (1-100 KB)
+
+### RQ Worker Configuration
+
+**1. Redis Connection Setup**
+
+Workers use `RQ_REDIS_URL` environment variable to connect to the central Redis instance:
+
+```yaml
+# docker/.env on worker nodes
+RQ_REDIS_URL=redis://forest1:6379/9   # Point to forest1 Redis
+WEPP_RUNS_ROOT=/wc1/runs               # Shared runs directory
+UID=1000                                # Match file ownership across nodes
+GID=1234                                # Match file ownership across nodes
+```
+
+**`docker-compose.prod.yml` Worker Service:**
+
+```yaml
+wepppy-rq-worker:
+  image: ${WEPPCLOUD_IMAGE:-ghcr.io/rogerlew/wepppy:latest}
+  command: >
+    rq worker 
+    --url ${RQ_REDIS_URL:-redis://redis:6379/9}
+    --name ${HOSTNAME:-worker}
+    --burst
+  environment:
+    - REDIS_URL=${RQ_REDIS_URL:-redis://redis:6379/9}
+    - WEPP_RUNS_ROOT=/wc1/runs
+    - GEODATA_ROOT=/geodata
+  volumes:
+    - /wc1:/wc1
+    - /geodata:/geodata
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        cpus: '2.0'
+        memory: 4G
+```
+
+**Flexible Redis Configuration:**
+- **Local Development:** `redis://redis:6379/9` (default, uses compose network)
+- **Distributed Workers:** `redis://forest1:6379/9` (explicit hostname)
+- **Production:** `redis://wepp1-redis.internal:6379/9` (DNS-resolvable endpoint)
+
+**2. Starting Workers**
+
+**On nuc2 (single worker):**
+```bash
+ssh nuc2.local
+cd /workdir/wepppy
+
+# Start worker pointing to forest1 Redis
+RQ_REDIS_URL=redis://forest1:6379/9 \
+  docker compose --env-file docker/.env -f docker/docker-compose.prod.yml \
+  up -d wepppy-rq-worker
+```
+
+**On nuc3 (scaled to 3 workers):**
+```bash
+ssh nuc3.local
+cd /workdir/wepppy
+
+# Scale to 3 worker instances
+RQ_REDIS_URL=redis://forest1:6379/9 \
+  docker compose --env-file docker/.env -f docker/docker-compose.prod.yml \
+  up -d --scale wepppy-rq-worker=3 wepppy-rq-worker
+```
+
+**Makefile Automation (for convenience):**
+
+```bash
+# Start worker on remote host
+make prod-workers-up HOST=nuc2.local RQ_REDIS_URL=redis://forest1:6379/9
+
+# Scale workers on host
+make prod-workers-scale HOST=nuc3.local COUNT=3 RQ_REDIS_URL=redis://forest1:6379/9
+
+# View logs
+make prod-workers-logs HOST=nuc2.local
+
+# Stop workers
+make prod-workers-down HOST=nuc2.local
+```
+
+### Verification & Monitoring
+
+**1. Worker Registration Check**
+
+```bash
+# SSH to primary server (forest1)
+ssh forest1
+
+# Check connected clients to Redis DB 9
+docker compose --env-file docker/.env -f docker/docker-compose.prod.yml \
+  exec wepppy-redis redis-cli -n 9 INFO | grep connected_clients
+
+# List active workers
+docker compose --env-file docker/.env -f docker/docker-compose.prod.yml \
+  exec wepppy-redis redis-cli -n 9 SMEMBERS rq:workers
+
+# Expected output:
+# rq:worker:nuc2.worker.12345
+# rq:worker:nuc3.worker.67890
+# rq:worker:nuc3.worker.11111
+```
+
+**2. Worker Health Check**
+
+```bash
+# View worker logs on remote node
+ssh nuc2.local "docker logs -f wepppy-rq-worker | head -n 50"
+
+# Check for job processing
+ssh nuc2.local "docker logs wepppy-rq-worker | grep 'Job OK'"
+
+# Monitor worker resource usage
+ssh nuc2.local "docker stats wepppy-rq-worker --no-stream"
+```
+
+**3. Job Queue Inspection**
+
+```bash
+# Check pending jobs
+docker compose --env-file docker/.env -f docker/docker-compose.prod.yml \
+  exec wepppy-redis redis-cli -n 9 LLEN rq:queue:default
+
+# View job details
+docker compose --env-file docker/.env -f docker/docker-compose.prod.yml \
+  exec wepppy-redis redis-cli -n 9 LRANGE rq:queue:default 0 5
+```
+
+**4. End-to-End Job Test**
+
+```bash
+# Trigger a test job via app endpoint
+curl -X POST https://wc-prod.bearhive.duckdns.org/tests/api/create-run \
+  -H "Content-Type: application/json" \
+  -d '{"config": "vanilla"}'
+
+# Monitor worker logs for job pickup
+ssh nuc2.local "docker logs -f wepppy-rq-worker | grep 'Processing'"
+
+# Verify job completion in Redis
+docker compose --env-file docker/.env -f docker/docker-compose.prod.yml \
+  exec wepppy-redis redis-cli -n 9 ZCARD rq:finished
+
+# Cleanup test run
+curl -X DELETE https://wc-prod.bearhive.duckdns.org/tests/api/run/<runid>
+```
+
+### Resource Management
+
+**1. Worker Resource Limits**
+
+Prevent individual workers from monopolizing host resources:
+
+```yaml
+# docker-compose.prod.yml
+wepppy-rq-worker:
+  deploy:
+    resources:
+      limits:
+        cpus: '1.0'      # Max 1 core per worker
+        memory: 2G       # Max 2 GB RAM per worker
+      reservations:
+        cpus: '0.5'      # Guaranteed 0.5 cores
+        memory: 512M     # Guaranteed 512 MB RAM
+```
+
+**Benefits:**
+- **Fair Scheduling:** Multiple workers share host resources equitably
+- **Stability:** Runaway jobs can't exhaust host memory
+- **Predictability:** Job runtime variance is reduced
+
+**2. Worker Concurrency Tuning**
+
+```yaml
+wepppy-rq-worker:
+  command: >
+    rq worker 
+    --url ${RQ_REDIS_URL}
+    --burst                    # Exit after queue is empty (for batch jobs)
+    --max-jobs 100             # Restart worker after 100 jobs (memory leak prevention)
+    --with-scheduler           # Run scheduled jobs (if needed)
+```
+
+**Concurrency Strategies:**
+- **Low Memory Hosts (4-8 GB):** 1-2 workers per host
+- **Medium Hosts (16 GB):** 3-4 workers per host
+- **High Memory Hosts (32+ GB):** 6-8 workers per host
+
+**3. Job Prioritization (Optional)**
+
+```python
+# wepppy/rq/project_rq.py
+from rq import Queue
+from redis import Redis
+
+redis_conn = Redis.from_url(os.getenv('RQ_REDIS_URL', 'redis://localhost:6379/9'))
+high_priority_queue = Queue('high', connection=redis_conn)
+default_queue = Queue('default', connection=redis_conn)
+low_priority_queue = Queue('low', connection=redis_conn)
+
+# Enqueue critical jobs to high-priority queue
+high_priority_queue.enqueue('wepppy.rq.project_rq.run_wepp', runid, ...)
+```
+
+**Worker Setup for Priorities:**
+```bash
+# Start workers for specific queues
+rq worker high default --url redis://forest1:6379/9   # Processes high first
+rq worker low --url redis://forest1:6379/9            # Only processes low-priority
+```
+
+### Deployment Coordination
+
+**Sequential Worker Deployment (Avoid Downtime):**
+
+```bash
+# 1. Deploy to nuc2, verify before proceeding
+make prod-workers-up HOST=nuc2.local RQ_REDIS_URL=redis://forest1:6379/9
+sleep 30  # Wait for startup
+make prod-workers-logs HOST=nuc2.local | grep "Listening on"
+
+# 2. Deploy to nuc3 only if nuc2 is healthy
+if [ $? -eq 0 ]; then
+  make prod-workers-up HOST=nuc3.local RQ_REDIS_URL=redis://forest1:6379/9
+  make prod-workers-scale HOST=nuc3.local COUNT=3 RQ_REDIS_URL=redis://forest1:6379/9
+else
+  echo "❌ nuc2 deployment failed, aborting nuc3 deployment"
+  exit 1
+fi
+
+# 3. Verify all workers registered
+ssh forest1 "docker compose -f /opt/wepppy/docker/docker-compose.prod.yml \
+  exec wepppy-redis redis-cli -n 9 SMEMBERS rq:workers | wc -l"
+# Expected: 5+ workers (1 on forest1, 1 on nuc2, 3 on nuc3)
+```
+
+**Makefile Batch Deployment Target:**
+
+```makefile
+# Makefile
+.PHONY: deploy-all-workers
+deploy-all-workers:
+	@echo "🚀 Deploying RQ workers across cluster..."
+	$(MAKE) prod-workers-up HOST=nuc2.local RQ_REDIS_URL=redis://forest1:6379/9
+	sleep 30
+	$(MAKE) prod-workers-up HOST=nuc3.local RQ_REDIS_URL=redis://forest1:6379/9
+	$(MAKE) prod-workers-scale HOST=nuc3.local COUNT=3 RQ_REDIS_URL=redis://forest1:6379/9
+	@echo "✅ Worker deployment complete"
+	$(MAKE) verify-workers
+
+.PHONY: verify-workers
+verify-workers:
+	@echo "📊 Verifying worker registration..."
+	ssh forest1 "docker compose -f /opt/wepppy/docker/docker-compose.prod.yml \
+	  exec -T wepppy-redis redis-cli -n 9 SMEMBERS rq:workers"
+```
+
+### Troubleshooting
+
+**Worker Can't Connect to Redis:**
+
+```bash
+# Symptom: Worker logs show "Connection refused" or "Timeout"
+
+# Check Redis reachability from worker node
+ssh nuc2.local "docker run --rm redis:7 redis-cli -h forest1 -p 6379 PING"
+# Expected: "PONG"
+
+# If timeout, check firewall rules on forest1
+ssh forest1 "sudo iptables -L INPUT -n | grep 6379"
+
+# Ensure Redis is bound to all interfaces (not just localhost)
+ssh forest1 "docker compose -f /opt/wepppy/docker/docker-compose.prod.yml \
+  exec wepppy-redis redis-cli CONFIG GET bind"
+# Expected: "bind * -::*" (all interfaces)
+```
+
+**NFS Mount Issues:**
+
+```bash
+# Symptom: Worker can't access /wc1 or /geodata
+
+# Verify NFS mount on worker node
+ssh nuc2.local "mount | grep wc1"
+# Expected: "10.0.0.2:/ on /wc1 type nfs4 ..."
+
+# Test NFS write access
+ssh nuc2.local "touch /wc1/test_write && rm /wc1/test_write"
+# If permission denied, check ownership and exports on NFS server
+
+# Check NFS exports on forest1
+ssh forest1 "sudo exportfs -v"
+# Ensure /wc1 is exported to worker subnet (e.g., 10.0.0.0/24)
+```
+
+**File Ownership Mismatches:**
+
+```bash
+# Symptom: Worker can't write files, "Permission denied" in logs
+
+# Check UID/GID in docker/.env on all nodes
+ssh nuc2.local "grep -E '(UID|GID)' /workdir/wepppy/docker/.env"
+ssh forest1 "grep -E '(UID|GID)' /opt/wepppy/docker/.env"
+
+# Ensure consistency across all nodes
+# UID/GID must match the owning user/group on NFS server
+
+# Fix ownership if mismatched
+ssh forest1 "sudo chown -R 1000:1234 /wc1 /geodata"
+```
+
+**Worker Crashes or Memory Issues:**
+
+```bash
+# Symptom: Worker container restarts frequently
+
+# Check memory usage
+ssh nuc2.local "docker stats wepppy-rq-worker --no-stream"
+
+# Review OOM (out-of-memory) kills
+ssh nuc2.local "dmesg | grep -i 'killed process'"
+
+# Lower memory limits or reduce worker count
+# Edit docker-compose.prod.yml:
+#   limits:
+#     memory: 1.5G  # Reduce from 2G
+
+# Or scale down workers
+make prod-workers-scale HOST=nuc2.local COUNT=1 RQ_REDIS_URL=redis://forest1:6379/9
+```
+
+### Kubernetes Migration Path
+
+The current Docker Compose setup is designed to **mirror Kubernetes semantics** for a seamless transition:
+
+**Compose Equivalents to K8s Resources:**
+
+| Docker Compose | Kubernetes Equivalent | Migration Notes |
+|----------------|----------------------|-----------------|
+| `wepppy-rq-worker` service | `Deployment` with `replicas: 3` | Scale workers via `kubectl scale` |
+| `RQ_REDIS_URL` env var | `ConfigMap` or `Secret` | Centralized Redis endpoint config |
+| `/wc1` volume | `PersistentVolumeClaim` (NFS) | Same NFS server, different mount syntax |
+| `--scale wepppy-rq-worker=3` | `replicas: 3` in `deployment.yaml` | Declarative scaling |
+| `restart: unless-stopped` | `restartPolicy: Always` | Built-in to Deployments |
+| `deploy.resources.limits` | `resources.limits` in container spec | Direct translation |
+
+**Example Kubernetes Deployment:**
+
+```yaml
+# k8s/wepppy-rq-worker-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wepppy-rq-worker
+  namespace: weppcloud-prod
+spec:
+  replicas: 5  # Total workers across cluster
+  selector:
+    matchLabels:
+      app: wepppy-rq-worker
+  template:
+    metadata:
+      labels:
+        app: wepppy-rq-worker
+    spec:
+      containers:
+      - name: worker
+        image: ghcr.io/rogerlew/wepppy:prod-latest
+        command: ["rq", "worker", "--url", "$(RQ_REDIS_URL)", "--burst", "--max-jobs", "100"]
+        env:
+        - name: RQ_REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: wepppy-config
+              key: redis_url
+        - name: WEPP_RUNS_ROOT
+          value: "/wc1/runs"
+        volumeMounts:
+        - name: wc1
+          mountPath: /wc1
+        - name: geodata
+          mountPath: /geodata
+        resources:
+          limits:
+            cpu: "1000m"    # 1 core
+            memory: "2Gi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+      volumes:
+      - name: wc1
+        persistentVolumeClaim:
+          claimName: wc1-nfs-pvc
+      - name: geodata
+        persistentVolumeClaim:
+          claimName: geodata-nfs-pvc
+```
+
+**Migration Preparation:**
+1. Document current resource limits and worker counts
+2. Create K8s `ConfigMap` for environment variables
+3. Setup NFS `PersistentVolume` and `PersistentVolumeClaim`
+4. Test worker deployment in homelab K8s cluster
+5. Implement rolling update strategy (replace compose stack incrementally)
+6. Validate job processing during transition
+7. Decommission Compose workers after K8s validation
+
+**Timeline:** Kubernetes migration is deferred until University of Idaho cluster is available. Compose deployment must remain viable until then.
+
+---
+
 ## Summary & Next Steps
 
 ### Current State → Target State

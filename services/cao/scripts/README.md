@@ -49,6 +49,22 @@ Run a cross-host dry run using nuc1/nuc2/nuc3 defaults:
 bash services/cao/scripts/ci_samurai_dryrun.sh
 ```
 
+Start worker-only containers on a remote host pointing at a central Redis (forest1):
+
+```bash
+# Example: start on nuc2, connecting to Redis on forest1:6379 DB 9
+make prod-workers-up HOST=nuc2.local RQ_REDIS_URL=redis://forest1:6379/9
+
+# Scale to 3 workers on nuc3
+make prod-workers-scale HOST=nuc3.local COUNT=3 RQ_REDIS_URL=redis://forest1:6379/9
+
+# Tail logs
+make prod-workers-logs HOST=nuc2.local
+
+# Stop workers
+make prod-workers-down HOST=nuc2.local
+```
+
 ## Script: weppcloud_deploy.sh
 
 Purpose: Prepare a dev runner with local `/wc1`, clone/update repos into `/workdir`, install toolchains (uv, rustup, npm globals), and optionally install the CAO systemd service.
@@ -130,6 +146,10 @@ bash services/cao/scripts/ci_samurai_dryrun.sh --nuc1 dev-a --nuc2 dev-b --nuc3 
 - If triage commands fail due to environment, check `docker/.env` on nuc2 and copy from nuc1 using the `--env-file` flag for the deploy script.
 - DuckDNS updates are handled by pfSense; the scripts do not call DuckDNS endpoints.
 - If `wctl` is not found after deploy, open a new shell or add it to your PATH per your host’s `wctl` installer output.
+- For remote workers, ensure:
+  - `/wc1` and `/geodata` are mounted on the worker hosts (NFS to forest1).
+  - `RQ_REDIS_URL` reaches forest1’s Redis (port 6379 must be reachable from NUCs).
+  - `docker/.env` exists on each host and `UID/GID` match forest1 to avoid permission drift.
 
 ## References
 
