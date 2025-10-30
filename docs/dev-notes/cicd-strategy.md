@@ -1256,8 +1256,8 @@ DEBUG=true
 
 ```bash
 # /opt/wepppy/docker/.env
-UID=33  # www-data
-GID=1234  # webgroup
+UID=1000  # roger
+GID=993  # docker
 POSTGRES_PASSWORD=<from_github_secrets>
 SECRET_KEY=<from_github_secrets>
 SECURITY_PASSWORD_SALT=<from_github_secrets>
@@ -1283,8 +1283,8 @@ WEPPCLOUD_IMAGE=ghcr.io/rogerlew/wepppy:master-<sha>
 
 ```bash
 # /opt/wepppy/docker/.env
-UID=33
-GID=1234
+UID=1000
+GID=993
 POSTGRES_PASSWORD=<vault_secret>
 SECRET_KEY=<vault_secret>
 SECURITY_PASSWORD_SALT=<vault_secret>

@@ -349,10 +349,10 @@ docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --buil
 # 3. Visit http://localhost:8080/weppcloud once the services report "ready".
 ```
 
-By default the containers inherit your host UID/GID so any files written to the bind mounts stay editable from the host. To run everything as a service account such as `www-data:webgroup`, set those ids explicitly in `docker/.env`:
+By default the containers run as `roger:docker` (uid `1000`, gid `993`) so artifacts match the GitLab runner and CI images. If your host uses different ids, update `docker/.env` accordingly—for example:
 
 ```env
-UID=33            # www-data
+UID=1000          # roger
 GID=993           # output of `getent group docker | cut -d: -f3`
 ```
 

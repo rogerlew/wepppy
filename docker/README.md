@@ -17,7 +17,7 @@ POSTGRES_PASSWORD=localdev
 EOF
 ```
 
-> To run everything as `www-data:docker` set `UID=33` and `GID=<webgroup gid>` (retrieve the latter with `getent group docker`). Ensure the group exists on the host; Compose passes numeric ids straight through.
+> To run everything as `roger:docker`, set `UID=1000` and `GID=$(getent group docker | cut -d: -f3)` (typically `993`). Ensure the group exists on the host; Compose passes numeric ids straight through.
 
 Start or rebuild the stack with:
 
@@ -69,7 +69,7 @@ wctl logs weppcloud
 - The `weppcloudr` container binds the R service repo (`../weppcloudR`), the legacy template repo (`../WEPPcloudR`), run storage mounts (`${GEODATA_DIR}`, `${WC1_DIR}`), and a persistent `weppcloudr-renv-cache` volume for R package caches.
 
 ## Runtime User and Group
-The shared Compose anchor sets `user: "${UID:-1000}:${GID:-1000}"`, so every service runs with the numeric ids from `docker/.env`. This prevents root-owned artifacts on the host and lets you align container perms with whichever account manages the repository.
+The shared Compose anchor sets `user: "${UID:-1000}:${GID:-993}"`, so by default every service runs as `roger` (uid `1000`) and `docker` (gid `993`). Adjust `docker/.env` if your host uses different ids or you prefer to inherit the active shell user.
 
 ### Switching to `www-data:webgroup`
 1. Confirm the ids on the host:  

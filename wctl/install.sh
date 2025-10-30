@@ -190,7 +190,7 @@ restore_docker_data_permissions() {
   app_uid="$(env_value UID "${TEMP_ENV}")"
   app_gid="$(env_value GID "${TEMP_ENV}")"
   if [[ -z "${app_uid}" ]]; then
-    app_uid="33"
+    app_uid="1000"
   fi
   if [[ -z "${app_gid}" ]]; then
     app_gid="993"

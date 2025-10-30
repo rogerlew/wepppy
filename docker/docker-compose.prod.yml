@@ -4,9 +4,9 @@ x-wepppy-image: &wepppy-image
     context: ..
     dockerfile: docker/Dockerfile
     args:
-      APP_USER: www-data
+      APP_USER: roger
       APP_GROUP: docker
-      APP_UID: "33"
+      APP_UID: "1000"
       APP_GID: "993"
 
 x-wepppy-env: &wepppy-env

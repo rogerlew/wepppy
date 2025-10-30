@@ -12,6 +12,7 @@ from typing import Any
 
 import yaml
 from starlette.applications import Starlette
+from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import (
     HTMLResponse,
@@ -431,4 +432,14 @@ def create_app() -> Starlette:
         LOGGER.info("WEPP_MCP_JWT_SECRET not configured; MCP API disabled")
 
     app = Starlette(debug=False, routes=routes, exception_handlers=exception_handlers)
+    
+    # Add CORS middleware to allow cross-origin requests
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Allow all origins in development
+        allow_credentials=True,
+        allow_methods=["*"],  # Allow all methods (GET, POST, OPTIONS, etc.)
+        allow_headers=["*"],  # Allow all headers
+    )
+    
     return app

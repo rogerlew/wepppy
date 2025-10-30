@@ -309,7 +309,7 @@ wctl down && wctl build --no-cache && wctl up -d
 **Production Stack** (`docker/docker-compose.prod.yml`):
 - Vendors all dependencies directly into the image
 - Minimal bind mounts (only data volumes)
-- Non-root `www-data` user for security
+- Non-root `roger` user (uid 1000) to match CI runners
 - Health checks at `/health`
 
 ### File Structure Navigation

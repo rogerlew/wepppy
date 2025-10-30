@@ -4,7 +4,7 @@ x-wepppy-service: &wepppy-service
     dockerfile: docker/Dockerfile.dev
   image: wepppy-dev
   init: true
-  user: "${UID:-33}:${GID:-993}"
+  user: "${UID:-1000}:${GID:-993}"
   working_dir: /workdir/wepppy
   environment: &wepppy-env
     PYTHONUNBUFFERED: "1"
@@ -324,7 +324,7 @@ services:
     image: wepppy-f-esri
     container_name: wepppy-f-esri
     init: true
-    user: "${UID:-33}:${GID:-993}"
+    user: "${UID:-1000}:${GID:-993}"
     working_dir: /workdir/wepppy
     command: ["tail", "-f", "/dev/null"]
     volumes:
