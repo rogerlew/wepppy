@@ -21,7 +21,14 @@ from pathlib import Path
 from typing import Iterable
 
 
+# Matches pytest summary lines like:
+#   FAILED tests/path/test_file.py::test_name - AssertionError: ...
 SUMMARY_RE = re.compile(r"^(FAILED|ERROR)\s+(\S+::\S+)(?:\s+-\s+(.*))?$")
+
+# Matches in-line progress lines like:
+#   tests/path/test_file.py::test_name FAILED
+#   tests/path/test_file.py::test_name ERROR
+PROGRESS_RE = re.compile(r"^(\S+::\S+)\s+(FAILED|ERROR)\b(?:\s+-\s+(.*))?$")
 
 
 def iter_failures(lines: Iterable[str]):
@@ -29,9 +36,13 @@ def iter_failures(lines: Iterable[str]):
     for raw in lines:
         line = raw.rstrip("\n")
         m = SUMMARY_RE.match(line)
-        if not m:
-            continue
-        kind, nodeid, tail = m.groups()
+        if m:
+            kind, nodeid, tail = m.groups()
+        else:
+            m2 = PROGRESS_RE.match(line)
+            if not m2:
+                continue
+            nodeid, kind, tail = m2.groups()
         if nodeid in seen:
             continue
         seen.add(nodeid)
@@ -58,4 +69,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

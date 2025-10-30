@@ -58,16 +58,17 @@ jobs:
         if: ${{ steps.package.outputs.latest_dir != '' }}
         run: |
           set -euo pipefail
+          if command -v python >/dev/null 2>&1; then PY=python; else PY=python3; fi
           rm -rf logs_extract
           mkdir -p logs_extract
           tar -xzf ci-samurai-logs.tgz -C logs_extract
-          TRIAGE=$(find logs_extract -type f -name triage_nodb.txt | head -1 || true)
+          TRIAGE=$(find logs_extract -type f \( -name triage_nodb.txt -o -name triage_wepp.txt \) | head -1 || true)
           if [ -z "$TRIAGE" ]; then
-            echo "No triage_nodb.txt found in artifact; skipping parse" >&2
+            echo "No triage_nodb.txt or triage_wepp.txt found in artifact; skipping parse" >&2
             exit 0
           fi
           echo "Parsing failures from $TRIAGE"
-          python services/cao/ci-samurai/parse_pytest_log.py "$TRIAGE" > failures.jsonl || true
+          "$PY" services/cao/ci-samurai/parse_pytest_log.py "$TRIAGE" > failures.jsonl || true
           echo "Parsed $(wc -l < failures.jsonl || echo 0) failures"
           echo "--- failures.jsonl (head) ---" && head -n 20 failures.jsonl || true
 
@@ -75,7 +76,8 @@ jobs:
         if: ${{ steps.package.outputs.latest_dir != '' }}
         run: |
           set -euo pipefail
-          python services/cao/ci-samurai/diagnose_artifact.py ci-samurai-logs.tgz || true
+          if command -v python >/dev/null 2>&1; then PY=python; else PY=python3; fi
+          "$PY" services/cao/ci-samurai/diagnose_artifact.py ci-samurai-logs.tgz || true
 
       - name: Upload failures list
         if: ${{ steps.package.outputs.latest_dir != '' }}
@@ -101,11 +103,12 @@ jobs:
           CAO_BASE_URL: ${{ env.CAO_BASE_URL }}
         run: |
           set -euo pipefail
+          if command -v python >/dev/null 2>&1; then PY=python; else PY=python3; fi
           if [ ! -s failures.jsonl ]; then
             echo "No failures.jsonl; nothing to fix"
             exit 0
           fi
-          python services/cao/ci-samurai/run_fixer_loop.py \
+          "$PY" services/cao/ci-samurai/run_fixer_loop.py \
             --failures failures.jsonl \
             --repo-root . \
             --nuc2 "${NUC2}" \
