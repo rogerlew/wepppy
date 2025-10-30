@@ -1,1 +1,13 @@
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Additional attribution for derivative work in this repository:
+
+- Portions of this software are derived from the open‑source project
+  "awslabs/cli-agent-orchestrator" (Apache License 2.0).
+
+- The wepppy project has adapted and extended the CLI Agent Orchestrator to
+  integrate with the wepppy stack (Codex provider, CI Samurai flows, scripts,
+  and workflow glue). These modifications are distributed under the Apache
+  License 2.0 as documented in services/cao/LICENSE.
+
+This NOTICE file is for informational purposes and does not modify the License.

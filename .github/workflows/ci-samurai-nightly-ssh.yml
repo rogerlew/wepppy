@@ -97,6 +97,13 @@ jobs:
             --cao-base "${CAO_BASE_URL}" \
             --max-failures 100
 
+      - name: Upload agent logs
+        if: ${{ steps.package.outputs.latest_dir != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-samurai-agent-logs
+          path: agent_logs
+
       - name: Check CAO health (forest)
         run: |
           set -euo pipefail

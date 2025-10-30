@@ -84,6 +84,15 @@ def get_output_tail(cao_base: str, terminal_id: str) -> str:
     return obj.get("output", "")
 
 
+def get_output_full(cao_base: str, terminal_id: str) -> str:
+    url = f"{cao_base}/terminals/{terminal_id}/output"
+    params = {"mode": "full"}
+    r = requests.get(url, params=params, timeout=30)
+    r.raise_for_status()
+    obj = r.json()
+    return obj.get("output", "")
+
+
 def parse_result_and_patch(output: str) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
     result_json: Optional[Dict[str, Any]] = None
     patch_text: Optional[str] = None
@@ -193,6 +202,7 @@ def main() -> int:
         session_name = f"ci-fix-{int(time.time())}"
         term = create_session(args.cao_base, "ci_samurai_fixer", session_name)
         terminal_id = term.get("id")
+        session_full_name = term.get("session_name", session_name)
         if not terminal_id:
             print("Failed to create CAO session: missing terminal id")
             break
@@ -238,6 +248,23 @@ def main() -> int:
                 cmd = f"cd {shlex.quote(args.repo)} && gh issue create -t {shlex.quote(title)} -b {shlex.quote(body)} -l ci-samurai"
                 ssh(args.nuc2, cmd)
             handled.extend([t for t, ok in val_results.items() if ok])
+
+        # Persist agent transcript for observability
+        try:
+            agent_logs_dir = Path("agent_logs")
+            agent_logs_dir.mkdir(exist_ok=True)
+            slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", primary.test)
+            base = f"{session_full_name}-{terminal_id}-{slug}"
+            # Full transcript
+            full_out = get_output_full(args.cao_base, terminal_id)
+            (agent_logs_dir / f"{base}.log").write_text(full_out, encoding="utf-8")
+            # Result JSON copy
+            (agent_logs_dir / f"{base}.result.json").write_text(json.dumps(result_json, indent=2), encoding="utf-8")
+            # Patch copy if present
+            if patch_text:
+                (agent_logs_dir / f"{base}.patch").write_text(patch_text, encoding="utf-8")
+        except Exception as e:
+            print(f"Warn: failed to persist agent logs: {e}")
 
         processed += 1
         if args.max_failures and processed >= args.max_failures:
