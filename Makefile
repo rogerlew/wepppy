@@ -3,9 +3,9 @@
 # Defaults (override on command line, e.g., `make ci-dryrun NUC1=dev-a`)
 ENV_FILE ?= docker/.env
 WITH_CAO ?= 1
-NUC1 ?= nuc1
-NUC2 ?= nuc2
-NUC3 ?= nuc3
+NUC1 ?= nuc1.local
+NUC2 ?= nuc2.local
+NUC3 ?= nuc3.local
 REPO ?= /workdir/wepppy
 WC1 ?= /wc1
 LOOPS ?= 10

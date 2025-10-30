@@ -66,15 +66,15 @@ copy_from_remote() {
 }
 
 echo "==> Triage on $NUC1"
-run_remote "$NUC1" "bash -lc 'cd $REPO && wctl up -d --wait || true'" || true
+run_remote "$NUC1" "REPO='$REPO' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl up -d --wait || true; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up -d || true; fi'" || true
 
 if [[ "$RUN_NODB" == "1" ]]; then
-  run_remote "$NUC1" "bash -lc 'cd $REPO && wctl run-pytest tests/nodb --tb=short --maxfail=20 | tee /tmp/triage_nodb.txt'"
+  run_remote "$NUC1" "REPO='$REPO' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest tests/nodb --tb=short --maxfail=20 | tee /tmp/triage_nodb.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest tests/nodb --tb=short --maxfail=20 | tee /tmp/triage_nodb.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest tests/nodb --tb=short --maxfail=20 | tee /tmp/triage_nodb.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest tests/nodb --tb=short --maxfail=20 | tee /tmp/triage_nodb.txt; fi'"
   copy_from_remote "$NUC1" "/tmp/triage_nodb.txt" "$LOCAL_OUT/triage_nodb.txt"
 fi
 
 if [[ "$RUN_WEPP" == "1" ]]; then
-  run_remote "$NUC1" "bash -lc 'cd $REPO && wctl run-pytest tests/wepp --tb=short --maxfail=20 | tee /tmp/triage_wepp.txt'"
+  run_remote "$NUC1" "REPO='$REPO' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest tests/wepp --tb=short --maxfail=20 | tee /tmp/triage_wepp.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest tests/wepp --tb=short --maxfail=20 | tee /tmp/triage_wepp.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest tests/wepp --tb=short --maxfail=20 | tee /tmp/triage_wepp.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest tests/wepp --tb=short --maxfail=20 | tee /tmp/triage_wepp.txt; fi'"
   copy_from_remote "$NUC1" "/tmp/triage_wepp.txt" "$LOCAL_OUT/triage_wepp.txt"
 fi
 
@@ -90,25 +90,31 @@ echo "First failing test: ${FIRST_FAIL:-<none>}"
 
 if [[ -n "$FIRST_FAIL" ]]; then
   echo "==> Single rerun on $NUC1 to check for flake"
-  run_remote "$NUC1" "bash -lc 'cd $REPO && wctl run-pytest -q ${FIRST_FAIL} || true'"
-  run_remote "$NUC1" "bash -lc 'cd $REPO && printf "%s\n" "${FIRST_FAIL}" > /tmp/first_fail.txt'"
+  run_remote "$NUC1" "REPO='$REPO' FIRST_FAIL='$FIRST_FAIL' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest -q "${FIRST_FAIL}" || true; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest -q "${FIRST_FAIL}" || true; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest -q "${FIRST_FAIL}" || true; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest -q "${FIRST_FAIL}" || true; fi'"
+  run_remote "$NUC1" "FIRST_FAIL='$FIRST_FAIL' bash -lc 'printf "%s\\n" "${FIRST_FAIL}" > /tmp/first_fail.txt'"
   copy_from_remote "$NUC1" "/tmp/first_fail.txt" "$LOCAL_OUT/first_fail.txt"
 fi
 
 echo "==> Validation on $NUC2"
-run_remote "$NUC2" "bash -lc 'cd $REPO && git reset --hard origin/master && git clean -xfd'" || true
+run_remote "$NUC2" "REPO='$REPO' bash -lc 'cd "${REPO}" && git reset --hard origin/master && git clean -xfd -e .docker-data -e .docker-data/ -e docker/.env -e wctl/wctl.sh'" || true
+
+# Ensure docker/.env exists on nuc2 (copy from nuc1 if missing)
+if ! ssh "$NUC2" "test -f '${REPO}/docker/.env'" >/dev/null 2>&1; then
+  echo "==> docker/.env missing on $NUC2; copying from $NUC1"
+  scp -q "${NUC1}:${REPO}/docker/.env" "${NUC2}:${REPO}/docker/.env" || true
+fi
 if [[ -n "$FIRST_FAIL" ]]; then
-  run_remote "$NUC2" "bash -lc 'cd $REPO && wctl run-pytest -q ${FIRST_FAIL} | tee /tmp/validate_first.txt'" || true
+  run_remote "$NUC2" "REPO='$REPO' FIRST_FAIL='$FIRST_FAIL' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest -q "${FIRST_FAIL}" | tee /tmp/validate_first.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest -q "${FIRST_FAIL}" | tee /tmp/validate_first.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest -q "${FIRST_FAIL}" | tee /tmp/validate_first.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest -q "${FIRST_FAIL}" | tee /tmp/validate_first.txt; fi'" || true
   copy_from_remote "$NUC2" "/tmp/validate_first.txt" "$LOCAL_OUT/validate_first.txt"
 else
   # fallback minimal validation
-  run_remote "$NUC2" "bash -lc 'cd $REPO && wctl run-pytest tests/nodb -q --maxfail=1 | tee /tmp/validate_min.txt'" || true
+  run_remote "$NUC2" "REPO='$REPO' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest tests/nodb -q --maxfail=1 | tee /tmp/validate_min.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest tests/nodb -q --maxfail=1 | tee /tmp/validate_min.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest tests/nodb -q --maxfail=1 | tee /tmp/validate_min.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest tests/nodb -q --maxfail=1 | tee /tmp/validate_min.txt; fi'" || true
   copy_from_remote "$NUC2" "/tmp/validate_min.txt" "$LOCAL_OUT/validate_min.txt"
 fi
 
 if [[ -n "$FIRST_FAIL" ]]; then
   echo "==> Flake loop on $NUC3 ($LOOPS runs)"
-  run_remote "$NUC3" "bash -lc 'cd $REPO && for i in \\$(seq 1 $LOOPS); do echo RUN \\${i}; wctl run-pytest -q ${FIRST_FAIL} || true; done | tee /tmp/flake_loop.txt'" || true
+  run_remote "$NUC3" "REPO='$REPO' FIRST_FAIL='$FIRST_FAIL' LOOPS='$LOOPS' bash -lc 'cd "${REPO}" && for i in \$(seq 1 "${LOOPS}"); do echo RUN \$i; if command -v wctl >/dev/null 2>&1; then wctl run-pytest -q "${FIRST_FAIL}" || true; else ./wctl/wctl.sh run-pytest -q "${FIRST_FAIL}" || true; fi; done | tee /tmp/flake_loop.txt'" || true
   copy_from_remote "$NUC3" "/tmp/flake_loop.txt" "$LOCAL_OUT/flake_loop.txt"
 fi
 
@@ -119,4 +125,3 @@ scp -q "$LOCAL_OUT"/* "${NUC1}:${DEST_REMOTE_DIR}/" || true
 echo "==> Local artifacts: $LOCAL_OUT"
 echo "==> Remote artifacts: ${NUC1}:${DEST_REMOTE_DIR}"
 echo "Done."
-
