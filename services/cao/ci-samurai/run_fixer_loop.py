@@ -63,10 +63,15 @@ def create_session(cao_base: str, agent_profile: str, session_name: str) -> Dict
 
 
 def send_inbox_message(cao_base: str, terminal_id: str, sender: str, message: str) -> None:
+    """Send message via query params to match FastAPI signature (no Body/Form)."""
     url = f"{cao_base}/terminals/{terminal_id}/inbox/messages"
-    data = {"sender_id": sender, "message": message}
-    r = requests.post(url, data=data, timeout=30)
-    r.raise_for_status()
+    params = {"sender_id": sender, "message": message}
+    r = requests.post(url, params=params, timeout=30)
+    try:
+        r.raise_for_status()
+    except requests.HTTPError as e:
+        # Surface server response for easier debugging in CI logs
+        raise requests.HTTPError(f"{e}\nResponse: {r.text}") from e
 
 
 def get_output_tail(cao_base: str, terminal_id: str) -> str:
