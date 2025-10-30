@@ -4,7 +4,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 from typing import List, Dict, Optional, Annotated
-from fastapi import FastAPI, HTTPException, status, Path
+from fastapi import FastAPI, HTTPException, status, Path, Body
 from pydantic import BaseModel, Field, field_validator
 
 from watchdog.observers.polling import PollingObserver
@@ -240,20 +240,42 @@ async def delete_terminal(terminal_id: TerminalId) -> Dict:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to delete terminal: {str(e)}")
 
 
+class InboxCreatePayload(BaseModel):
+    sender_id: str
+    message: str
+
+
 @app.post("/terminals/{receiver_id}/inbox/messages")
-async def create_inbox_message_endpoint(receiver_id: TerminalId, sender_id: str, message: str) -> Dict:
-    """Create inbox message and attempt immediate delivery."""
+async def create_inbox_message_endpoint(
+    receiver_id: TerminalId,
+    sender_id: str | None = None,
+    message: str | None = None,
+    payload: InboxCreatePayload | None = Body(default=None),
+) -> Dict:
+    """Create inbox message and attempt immediate delivery.
+
+    Accepts either query parameters (sender_id, message) or a JSON body
+    with the same fields. This allows large messages without URL limits.
+    """
     try:
+        if payload:
+            sender_id = sender_id or payload.sender_id
+            message = message or payload.message
+        if not sender_id or not message:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="sender_id and message are required")
+
         inbox_msg = create_inbox_message(sender_id, receiver_id, message)
         inbox_service.check_and_send_pending_messages(receiver_id)
-        
+
         return {
             "success": True,
             "message_id": inbox_msg.id,
             "sender_id": inbox_msg.sender_id,
             "receiver_id": inbox_msg.receiver_id,
-            "created_at": inbox_msg.created_at.isoformat()
+            "created_at": inbox_msg.created_at.isoformat(),
         }
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except Exception as e:

@@ -63,10 +63,9 @@ def create_session(cao_base: str, agent_profile: str, session_name: str) -> Dict
 
 
 def send_inbox_message(cao_base: str, terminal_id: str, sender: str, message: str) -> None:
-    """Send message via query params to match FastAPI signature (no Body/Form)."""
+    """Send message using JSON body; server also supports query fallback."""
     url = f"{cao_base}/terminals/{terminal_id}/inbox/messages"
-    params = {"sender_id": sender, "message": message}
-    r = requests.post(url, params=params, timeout=30)
+    r = requests.post(url, json={"sender_id": sender, "message": message}, timeout=60)
     try:
         r.raise_for_status()
     except requests.HTTPError as e:

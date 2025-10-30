@@ -69,30 +69,10 @@ class TmuxClient:
             
             pane = window.active_pane
             if pane:
-                # Split keys into chunks of ~100 characters at whitespace boundaries
-                chunks = []
-                start = 0
-                
-                while start < len(keys):
-                    target_pos = start + 100
-                    
-                    if target_pos >= len(keys):
-                        chunks.append(keys[start:])
-                        break
-                    
-                    # Look forward from target position to find next whitespace
-                    match = re.search(r'\s', keys[target_pos:])
-                    
-                    if match:
-                        split_pos = target_pos + match.start()
-                        chunks.append(keys[start:split_pos])
-                        start = split_pos
-                    else:
-                        chunks.append(keys[start:])
-                        break
-                
-                # Send chunks with delay between them
-                for chunk in chunks:
+                # Split keys into fixed-size chunks to avoid tmux/libtmux limits on long sends
+                CHUNK_SIZE = 200
+                for i in range(0, len(keys), CHUNK_SIZE):
+                    chunk = keys[i:i+CHUNK_SIZE]
                     pane.send_keys(chunk, enter=False)
                     time.sleep(SEND_KEYS_CHUNK_INTERVAL)
                 
