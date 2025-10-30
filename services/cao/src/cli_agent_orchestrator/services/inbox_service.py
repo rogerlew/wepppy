@@ -88,6 +88,15 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
     try:
         payload = message.message
         if is_codex:
+            # Prefix payload with the agent profile's system prompt when available so the Codex
+            # run receives the role instructions that define the workflow contract.
+            system_prompt = None
+            profile = getattr(provider, "_profile", None)
+            if profile is not None:
+                system_prompt = getattr(profile, "system_prompt", None)
+            if system_prompt:
+                payload = f"{system_prompt.strip()}\n\n{payload.lstrip()}"
+
             # Build codex exec flags with optional sandbox and working directory
             sandbox = os.getenv("CAO_CODEX_SANDBOX_MODE", "").strip()
             # Per-profile override: CAO_SANDBOX_<profile>
