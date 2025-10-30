@@ -10,9 +10,9 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 120
     env:
-      NUC1: ${NUC1_HOSTNAME:-nuc1.local}
-      NUC2: ${NUC2_HOSTNAME:-nuc2.local}
-      NUC3: ${NUC3_HOSTNAME:-nuc3.local}
+      NUC1: nuc1.local
+      NUC2: nuc2.local
+      NUC3: nuc3.local
       REPO: /workdir/wepppy
       WC1: /wc1
       LOOPS: '10'
