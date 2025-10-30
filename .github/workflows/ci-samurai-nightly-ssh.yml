@@ -61,9 +61,9 @@ jobs:
           rm -rf logs_extract
           mkdir -p logs_extract
           tar -xzf ci-samurai-logs.tgz -C logs_extract
-          TRIAGE=$(find logs_extract -type f \( -name triage_nodb.txt -o -name triage_wepp.txt \) | head -1 || true)
+          TRIAGE=$(find logs_extract -type f -name triage.txt | head -1 || true)
           if [ -z "$TRIAGE" ]; then
-            echo "No triage_nodb.txt or triage_wepp.txt found in artifact; skipping parse" >&2
+            echo "No triage.txt found in artifact; skipping parse" >&2
             exit 0
           fi
           echo "Parsing failures from $TRIAGE"

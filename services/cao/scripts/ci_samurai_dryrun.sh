@@ -3,7 +3,7 @@ set -euo pipefail
 
 # ci_samurai_dryrun.sh — Orchestrate a CI Samurai dry run across nuc1/nuc2/nuc3
 #
-# Runs triage on nuc1 (NoDb + WEPP pytest), validates on nuc2, and exercises
+# Runs triage on nuc1 (full pytest suite by default), validates on nuc2, and exercises
 # flaky reproduction loops on nuc3. Collects artifacts locally then publishes
 # them into nuc1:/wc1/ci-samurai/logs/<timestamp>/.
 #
@@ -29,8 +29,7 @@ NUC3=${NUC3:-nuc3}
 REPO=${REPO:-/workdir/wepppy}
 WC1=${WC1:-/wc1}
 LOOPS=${LOOPS:-10}
-RUN_NODB=1
-RUN_WEPP=1
+TEST_SCOPE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -40,8 +39,8 @@ while [[ $# -gt 0 ]]; do
     --repo) REPO="$2"; shift 2;;
     --wc1)  WC1="$2"; shift 2;;
     --loops) LOOPS="$2"; shift 2;;
-    --nodb-only) RUN_WEPP=0; shift;;
-    --wepp-only) RUN_NODB=0; shift;;
+    --nodb-only) TEST_SCOPE="tests/nodb"; shift;;
+    --wepp-only) TEST_SCOPE="tests/wepp"; shift;;
     *) echo "Unknown arg: $1"; exit 1;;
   esac
 done
@@ -53,6 +52,7 @@ DEST_REMOTE_DIR="${WC1}/ci-samurai/logs/${TS}"
 echo "==> Config"
 echo "NUC1=$NUC1 NUC2=$NUC2 NUC3=$NUC3"
 echo "REPO=$REPO WC1=$WC1 LOOPS=$LOOPS"
+echo "TEST_SCOPE=${TEST_SCOPE:-full suite}"
 echo "LOCAL_OUT=$LOCAL_OUT"
 
 run_remote() {
@@ -68,23 +68,14 @@ copy_from_remote() {
 echo "==> Triage on $NUC1"
 run_remote "$NUC1" "REPO='$REPO' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl up -d --wait || true; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up -d || true; fi'" || true
 
-if [[ "$RUN_NODB" == "1" ]]; then
-  run_remote "$NUC1" "REPO='$REPO' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest tests/nodb --tb=short --maxfail=20 | tee /tmp/triage_nodb.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest tests/nodb --tb=short --maxfail=20 | tee /tmp/triage_nodb.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest tests/nodb --tb=short --maxfail=20 | tee /tmp/triage_nodb.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest tests/nodb --tb=short --maxfail=20 | tee /tmp/triage_nodb.txt; fi'"
-  copy_from_remote "$NUC1" "/tmp/triage_nodb.txt" "$LOCAL_OUT/triage_nodb.txt"
-fi
-
-if [[ "$RUN_WEPP" == "1" ]]; then
-  run_remote "$NUC1" "REPO='$REPO' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest tests/wepp --tb=short --maxfail=20 | tee /tmp/triage_wepp.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest tests/wepp --tb=short --maxfail=20 | tee /tmp/triage_wepp.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest tests/wepp --tb=short --maxfail=20 | tee /tmp/triage_wepp.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest tests/wepp --tb=short --maxfail=20 | tee /tmp/triage_wepp.txt; fi'"
-  copy_from_remote "$NUC1" "/tmp/triage_wepp.txt" "$LOCAL_OUT/triage_wepp.txt"
-fi
+# Run pytest with optional scope (default: full suite)
+run_remote "$NUC1" "REPO='$REPO' TEST_SCOPE='$TEST_SCOPE' bash -lc 'cd \"\${REPO}\" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest \${TEST_SCOPE} --tb=short --maxfail=20 | tee /tmp/triage.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest \${TEST_SCOPE} --tb=short --maxfail=20 | tee /tmp/triage.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest \${TEST_SCOPE} --tb=short --maxfail=20 | tee /tmp/triage.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest \${TEST_SCOPE} --tb=short --maxfail=20 | tee /tmp/triage.txt; fi'"
+copy_from_remote "$NUC1" "/tmp/triage.txt" "$LOCAL_OUT/triage.txt"
 
 echo "==> Extract first failing test from nuc1 logs"
 FIRST_FAIL=""
-if [[ -f "$LOCAL_OUT/triage_nodb.txt" ]]; then
-  FIRST_FAIL=$(grep -Eo 'tests/nodb/[^ ]+::[A-Za-z0-9_]+' "$LOCAL_OUT/triage_nodb.txt" | head -n1 || true)
-fi
-if [[ -z "$FIRST_FAIL" && -f "$LOCAL_OUT/triage_wepp.txt" ]]; then
-  FIRST_FAIL=$(grep -Eo 'tests/wepp/[^ ]+::[A-Za-z0-9_]+' "$LOCAL_OUT/triage_wepp.txt" | head -n1 || true)
+if [[ -f "$LOCAL_OUT/triage.txt" ]]; then
+  FIRST_FAIL=$(grep -Eo 'tests/[^ ]+::[A-Za-z0-9_]+' "$LOCAL_OUT/triage.txt" | head -n1 || true)
 fi
 echo "First failing test: ${FIRST_FAIL:-<none>}"
 
@@ -107,8 +98,8 @@ if [[ -n "$FIRST_FAIL" ]]; then
   run_remote "$NUC2" "REPO='$REPO' FIRST_FAIL='$FIRST_FAIL' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest -q "${FIRST_FAIL}" | tee /tmp/validate_first.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest -q "${FIRST_FAIL}" | tee /tmp/validate_first.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest -q "${FIRST_FAIL}" | tee /tmp/validate_first.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest -q "${FIRST_FAIL}" | tee /tmp/validate_first.txt; fi'" || true
   copy_from_remote "$NUC2" "/tmp/validate_first.txt" "$LOCAL_OUT/validate_first.txt"
 else
-  # fallback minimal validation
-  run_remote "$NUC2" "REPO='$REPO' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest tests/nodb -q --maxfail=1 | tee /tmp/validate_min.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest tests/nodb -q --maxfail=1 | tee /tmp/validate_min.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest tests/nodb -q --maxfail=1 | tee /tmp/validate_min.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest tests/nodb -q --maxfail=1 | tee /tmp/validate_min.txt; fi'" || true
+  # fallback minimal validation - run quick smoke test
+  run_remote "$NUC2" "REPO='$REPO' bash -lc 'cd "${REPO}" && if command -v wctl >/dev/null 2>&1; then wctl run-pytest tests/test_0_imports.py -q --maxfail=1 | tee /tmp/validate_min.txt; elif [ -x ./wctl/wctl.sh ]; then ./wctl/wctl.sh run-pytest tests/test_0_imports.py -q --maxfail=1 | tee /tmp/validate_min.txt; elif [ -x ./wctl/install.sh ]; then ./wctl/install.sh dev && ./wctl/wctl.sh run-pytest tests/test_0_imports.py -q --maxfail=1 | tee /tmp/validate_min.txt; else docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec -T weppcloud pytest tests/test_0_imports.py -q --maxfail=1 | tee /tmp/validate_min.txt; fi'" || true
   copy_from_remote "$NUC2" "/tmp/validate_min.txt" "$LOCAL_OUT/validate_min.txt"
 fi
 
