@@ -15,7 +15,7 @@ jobs:
       NUC3: nuc3.local
       REPO: /workdir/wepppy
       WC1: /wc1
-      LOOPS: '10'
+      LOOPS: '3'
       SCOPE: '--nodb-only'
     steps:
       - name: Checkout
@@ -39,8 +39,8 @@ jobs:
           echo "latest_dir=${LATEST_DIR}" >> $GITHUB_OUTPUT
           DIR=$(dirname "${LATEST_DIR}")
           NAME=$(basename "${LATEST_DIR}")
-          ssh "${NUC1}" bash -lc "tar -C \"${DIR}\" -czf /tmp/ci-samurai-logs.tgz \"${NAME}\""
-          scp "${NUC1}:/tmp/ci-samurai-logs.tgz" ./ci-samurai-logs.tgz
+          # Stream tar over SSH and gzip locally to avoid remote tar -z compatibility issues
+          ssh "${NUC1}" bash -lc "tar -C \"${DIR}\" -cf - \"${NAME}\"" | gzip -c > ci-samurai-logs.tgz
 
       - name: Upload logs artifact
         if: steps.package.outputs.latest_dir != ''
