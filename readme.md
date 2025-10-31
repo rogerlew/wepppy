@@ -4,8 +4,6 @@
 
 > **See also:** [AGENTS.md](AGENTS.md) for AI agent coding guide and development conventions
 
-[![Status2 Smoke](https://github.com/rogerlew/wepppy/actions/workflows/status2-smoke-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/status2-smoke-nightly.yml)
-
 [![Docs Quality](https://github.com/rogerlew/wepppy/actions/workflows/docs-quality.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/docs-quality.yml)
 
 [![Stubtest](https://github.com/rogerlew/wepppy/actions/workflows/stubtest.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/stubtest.yml)
@@ -54,7 +52,7 @@ wepppy is the core library powering **WEPPcloud**, automating Water Erosion Pred
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                      User Request (Web UI / API)                            │
-└────────────────────────────────┬────────────────────────────────────────────┘
+└────────────────────────────────┬────────────────────────────────────────────┘                                │
                                  │
                                  ▼
 ┌────────────────────────────────────────────────────────────────────────────┐

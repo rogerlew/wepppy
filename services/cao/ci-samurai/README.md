@@ -2,7 +2,7 @@
 > Automated regression fixer for WEPPcloud test suite
 > **Status: Functional Beta** | **Trigger: Nightly GitHub Actions** | **Architecture: CAO Multi-Agent Orchestrator**
 
-**See also:** [AGENTS.md](../../AGENTS.md#ci-samurai-agents) for CAO integration details
+**See also:** [AGENTS.md](AGENTS.md) (local) and [global AGENTS.md](../../AGENTS.md#ci-samurai-agents) for CAO integration details
 
 ## Overview
 
