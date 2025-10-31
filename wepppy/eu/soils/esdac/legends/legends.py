@@ -13,7 +13,7 @@ _thisdir = os.path.dirname(__file__)
 
 def _load_ptrdb_legends():
     # read the file
-    with open(_join(_thisdir, 'ptrdb.dat'), 'r+', encoding="utf-8") as fp:
+    with open(_join(_thisdir, 'ptrdb.dat'), 'r', encoding="utf-8") as fp:
         lines = fp.readlines()
 
     # determine breaks based on the horizontal rules (e.g. -------)
@@ -47,7 +47,7 @@ def _load_ptrdb_legends():
 
 def _load_sgdpe_legends():
     # read the file
-    with open(_join(_thisdir, 'sgdpe.dat'), 'r+', encoding="utf-8") as fp:
+    with open(_join(_thisdir, 'sgdpe.dat'), 'r', encoding="utf-8") as fp:
         lines = fp.readlines()
 
     # determine breaks based on the horizontal rules (e.g. -------)
@@ -124,4 +124,3 @@ def get_legend(attr):
             return sgdpe[k]
 
     raise KeyError(attr)
-
