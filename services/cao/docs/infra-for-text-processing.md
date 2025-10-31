@@ -2,6 +2,8 @@
 
 > Multi-agent orchestration strategy for converting 10s of millions of tokens of technical procedures (with ASCII diagrams and image-based tables) into structured JSON using CAO-coordinated AI agents.
 
+> **See also:** [Agentic AI Systems Manifesto](../../../AGENTIC_AI_SYSTEMS_MANIFESTO.md) for foundational principles on agent collaboration patterns, stop criteria, and human-AI symbiosis.
+
 **Context:** Engineering and operating procedures spanning decades with inconsistent formatting, ASCII flow diagrams, image-based tables, and evolved terminology. Target is structured JSON with flexible schema accommodating one-off variations.
 
 ---
@@ -9,6 +11,12 @@
 ## Overview
 
 This document describes the ideal infrastructure environment, tooling, and pipeline strategies for an AI agent (or swarm of agents) working within a CAO-orchestrated workflow to transform unstructured technical text into validated JSON documents.
+
+**Agentic AI principles applied:**
+- **Agent-readable specifications:** Complete documentation and clear success criteria enable autonomous execution
+- **Complementary agent deployment:** Diagnostic agents (exploration) prepare specifications for execution agents (implementation)
+- **Stop criteria enforcement:** Agents escalate when uncertain rather than thrashing through iterations
+- **Lead-worker parallelization:** Supervisor coordinates independent extraction tasks across worker agents
 
 **Core assumptions:**
 - Source material: PDFs → extracted text + metadata
@@ -77,37 +85,55 @@ This document describes the ideal infrastructure environment, tooling, and pipel
 
 ### 3. Agent Roles and CAO Profiles
 
+**Agent deployment strategy follows complementary capabilities** (see [Manifesto: Agent Behavioral Patterns](../../../AGENTIC_AI_SYSTEMS_MANIFESTO.md#agent-behavioral-patterns-stop-criteria-and-diagnostic-approaches)):
+
 **Supervisor Agent (`extractor-supervisor`):**
+- **Type:** Diagnostic agent (exploration, specification refinement)
 - Reads work queue (list of procedures needing extraction)
+- **Forms hypotheses** about procedure families and extraction patterns
 - Assigns work to extractor workers via CAO `assign()` tool
 - Aggregates results from workers
-- Flags edge cases for human review (confidence < threshold)
+- **Enforces stop criteria:** Flags edge cases for human review (confidence < threshold)
 - Generates summary reports
+- **Knows when to escalate:** Requests human input for ambiguous architectural decisions
 
 **Extractor Worker Agent (`extractor-worker`):**
+- **Type:** Execution agent (pattern-based implementation)
 - Specializes in one procedure family or era
-- Receives text + metadata from supervisor
-- Applies few-shot prompts specific to procedure type
+- Receives **complete specification** from supervisor (text + metadata + few-shot examples)
+- Applies template-driven extraction (no exploratory work)
 - Outputs draft JSON + confidence score + parse notes
-- Reports back to supervisor via `send_message()`
+- **Reports back deterministically:** Success/failure with diagnostic data
+- **Stop criteria:** Escalates after 2 failed attempts with same approach
 
 **Validator Agent (`validator-agent`):**
+- **Type:** Diagnostic agent (hypothesis-driven debugging)
 - Runs linter on draft JSON
 - Cross-references original text (catches hallucinations)
 - Checks for missing required fields, type mismatches
-- Generates validation report with line-number references
-- Handoff to human if validation fails
+- **Generates hypothesis about errors:** "Step 3 description doesn't match quoted text span"
+- **Explicit about uncertainty:** Requests human validation when ambiguous
+- Produces structured validation report
 
 **Schema Evolver Agent (`schema-evolver`):**
+- **Type:** Diagnostic + execution hybrid
 - Monitors validation failures across corpus
 - Identifies patterns requiring schema extensions
-- Proposes schema updates via Git branch + PR
-- Documents rationale in PR description
+- **Proposes architectural changes** via Git branch + PR
+- Documents rationale and impact analysis
+- **Requires human approval** before schema updates
 
 **ASCII Diagram Specialist (`diagram-parser`):**
+- **Type:** Execution agent (specialized pattern recognition)
 - Focused on converting ASCII flowcharts to structured graphs
 - Uses vision-language reasoning (GPT-4o, Claude 3.5) to interpret box-drawing characters
 - Outputs Mermaid/Graphviz intermediate, then converts to JSON
+- **Well-defined success criteria:** Valid graph structure + semantic labels
+
+**Key insight from Manifesto:** 
+> "Diagnostic agents make problems executable. Execution agents make solutions inevitable."
+
+Supervisor (diagnostic) explores ambiguous procedures and refines specifications. Workers (execution) implement from those complete specifications with high success rates. This separation prevents thrashing and ensures quality.
 
 ### 4. Data Storage and State Management
 
@@ -274,24 +300,32 @@ python tools/ascii-diagram-parser.py extracted/proc-123.txt --section "Flow Diag
 
 ## Pipeline Strategies to Combat Context Size
 
+**Agentic approach:** Apply [lead-worker parallelization pattern](../../../AGENTIC_AI_SYSTEMS_MANIFESTO.md#emergent-orchestration-patterns) to scale extraction across 10M+ token corpus while keeping individual agent context manageable.
+
 ### 1. Hierarchical Decomposition
 
 **Problem:** 10M+ token corpus won't fit in any context window.
 
-**Solution:** Supervisor/worker pattern with chunking.
+**Solution:** Supervisor/worker pattern with chunking (Manifesto: Lead-Worker Pattern).
 
 ```
-Supervisor Agent
+Supervisor Agent (diagnostic, persistent context)
   ↓
-  ├─ assign(worker-1, "Procedures 1-50")
-  ├─ assign(worker-2, "Procedures 51-100")
-  ├─ assign(worker-3, "Procedures 101-150")
+  ├─ assign(worker-1, "Procedures 1-50")    # Complete specification per batch
+  ├─ assign(worker-2, "Procedures 51-100")   # Workers execute in parallel
+  ├─ assign(worker-3, "Procedures 101-150")  # No coordination overhead
   └─ ...
   ↓
-Workers extract in parallel, report back
+Workers extract in parallel, report back with confidence scores
   ↓
 Supervisor aggregates, flags outliers for human review
 ```
+
+**Context economics** (from Manifesto work package methodology):
+- Supervisor context: ~50k tokens (reused across planning sessions)
+- Worker prompts: ~65% of context window (complete specification + few-shot examples)
+- Workers are single-use (stateless, parallel execution)
+- **Parallelization limited only by cost, not coordination**
 
 **Chunking strategy:**
 - By procedure family (electrical, mechanical, safety)
@@ -303,6 +337,11 @@ Supervisor aggregates, flags outliers for human review
 - Few-shot examples for that family (~5-10K tokens)
 - Schema definition (~2-5K tokens)
 - **Total:** 20-70K tokens per worker (well within GPT-4/Claude limits)
+
+**Agent behavioral contracts** (Manifesto: Stop Criteria):
+- Workers escalate after 2 failed extraction attempts
+- Supervisor monitors for thrashing patterns (same error across workers)
+- Human validation gates for low-confidence batches (<80%)
 
 ### 2. Incremental Streaming Pattern
 
@@ -361,9 +400,11 @@ Supervisor aggregates, flags outliers for human review
 
 ## Pipeline Strategies to Combat Hallucinations
 
+**Agentic principle:** Agents with clear validation gates and stop criteria produce higher-quality output than agents without boundaries (see [Manifesto: Why Stop Criteria Matter](../../../AGENTIC_AI_SYSTEMS_MANIFESTO.md#why-stop-criteria-matter-at-scale)).
+
 ### 1. Text Span Anchoring
 
-**Technique:** Every assertion in JSON must reference original text.
+**Technique:** Every assertion in JSON must reference original text (observable contract).
 
 **Implementation:**
 - JSON schema includes `text_span` fields:
@@ -381,13 +422,23 @@ Supervisor aggregates, flags outliers for human review
 - Validator checks: `original_text[1234:1267] == "Open valve A to 50%"`
 - Flags hallucinations: Description doesn't match quoted text
 
-**Agent prompt guidance:**
+**Agent behavioral contract** (embedded in prompt):
 ```
 When extracting step descriptions, ALWAYS:
 1. Copy exact text from source document
 2. Include start/end character positions
 3. If paraphrasing necessary, mark with "paraphrased": true and provide original quote
+
+**Stop criteria:** If text span cannot be located after 2 attempts, escalate with:
+- The description you're trying to anchor
+- The search strategy you attempted
+- Hypothesis about why span is missing (OCR error? Formatting issue?)
 ```
+
+**Why this prevents hallucinations:**
+- Agent must ground every claim in source text (no invention)
+- Validator automatically catches span mismatches
+- Human reviews flagged mismatches (targeted oversight)
 
 ### 2. Multi-Pass Validation
 
@@ -441,34 +492,53 @@ For each procedure:
 
 ### 4. Adversarial Validator
 
-**Concept:** Separate agent tries to find errors in extraction.
+**Concept:** Separate agent tries to find errors in extraction (diagnostic agent as gatekeeper).
 
-**Workflow:**
+**Workflow (Agent Chaining Pattern from Manifesto):**
 1. Extractor worker produces draft JSON
 2. Adversarial validator receives: original text + draft JSON (NOT the extractor's reasoning)
 3. Validator attempts to:
    - Find statements in JSON not supported by text
    - Find information in text missing from JSON
    - Identify type/format errors
-4. Validator produces error report
+4. Validator produces error report with **hypothesis about root cause**
 5. If errors found, handoff back to extractor for revision
 6. Iterate until validator approves or max rounds exceeded (then human review)
 
-**CAO orchestration:**
+**Stop criteria embedded in workflow:**
+```yaml
+# Validator agent behavioral contract
+stop_criteria:
+  - Same error type appears 3+ times across different procedures
+  - Extractor makes same mistake in revision (no learning)
+  - Validator confidence drops below 0.7 (ambiguous validation)
+  
+escalation_protocol:
+  - State error pattern detected
+  - Provide hypothesis about systemic issue (e.g., OCR quality, template mismatch)
+  - Request human input: "Should we adjust extraction strategy or improve source quality?"
+```
+
+**CAO orchestration (Manifesto: Hybrid Pattern):**
 ```python
-# Supervisor agent
+# Supervisor agent (diagnostic)
 result = handoff("extractor-worker", f"Extract {procedure_id}")
 validation = handoff("validator-agent", f"Validate {result}")
 
 if validation.status == "APPROVED":
     commit_to_git(procedure_id)
 elif validation.status == "ERRORS" and validation.round < 3:
-    # Retry with validator feedback
+    # Retry with validator feedback (agent chaining)
     result = handoff("extractor-worker", f"Re-extract {procedure_id} addressing: {validation.errors}")
 else:
-    # Flag for human
+    # Stop criteria triggered: escalate to human
     create_pr_for_review(procedure_id, result, validation)
 ```
+
+**Key insight from Manifesto:**
+> "The difference between 'AI-assisted chaos' and 'AI-native engineering' is stop criteria."
+
+Adversarial validation with explicit stop conditions prevents infinite revision loops.
 
 ### 5. Human Spot Checks with Active Learning
 
@@ -490,6 +560,8 @@ Extraction → Human review → Correction notes → Prompt update → Re-extrac
 
 ## Orchestration Workflow Example
 
+**Applying Manifesto principles:** Lead-worker parallelization + stop criteria + human oversight gates.
+
 ### Batch Processing Flow
 
 **Goal:** Extract 500 procedures (era: 2000s, family: electrical safety)
@@ -499,16 +571,27 @@ Extraction → Human review → Correction notes → Prompt update → Re-extrac
 2. Divides into 10 batches of 50 procedures each
 3. Creates Git branch: `extraction/2000s-electrical-batch1`
 
-**Execution:**
+**Execution (Lead-Worker Pattern):**
 ```python
-# Supervisor agent (pseudo-code from agent's perspective)
+# Supervisor agent (diagnostic, persistent context)
 
-# 1. Assign work to workers
+# 1. Assign work to workers (parallel execution)
 workers = []
 for batch_id in range(1, 11):
     terminal_id = assign(
         agent_profile="extractor-worker-electrical",
-        message=f"Extract procedures {batch_id*50-49} to {batch_id*50} from era 2000s",
+        message=f"""Extract procedures {batch_id*50-49} to {batch_id*50} from era 2000s.
+        
+        Complete specification attached:
+        - Few-shot examples (3 samples)
+        - Schema definition (core-v1 + era-2000s extensions)
+        - Success criteria (confidence > 0.8, all text spans validated)
+        
+        Stop criteria:
+        - After 2 failed extraction attempts on same procedure, report diagnostic data
+        - If OCR quality suspected, escalate with sample text
+        - If template doesn't match, propose new template pattern
+        """,
         callback_message="Report extraction complete with confidence scores"
     )
     workers.append(terminal_id)
@@ -522,42 +605,71 @@ for worker_id in workers:
     result = get_terminal_output(worker_id)
     results.append(result)
 
-# 4. Identify edge cases
+# 4. Identify edge cases (stop criteria enforcement)
 low_confidence = [r for r in results if r.confidence < 0.80]
+thrashing_detected = [r for r in results if r.attempts > 2]
 
-# 5. Validator review for low confidence
-for proc in low_confidence:
+# 5. Diagnostic analysis for edge cases
+for proc in low_confidence + thrashing_detected:
+    # Agent chaining: spawn diagnostic worker
     validation = handoff(
         agent_profile="validator-agent",
-        message=f"Validate {proc.id}: confidence was {proc.confidence}"
+        message=f"""Validate {proc.id}: confidence was {proc.confidence}, attempts: {proc.attempts}
+        
+        Diagnostic questions:
+        1. Is this an OCR quality issue?
+        2. Is this a template mismatch?
+        3. Is this missing domain knowledge?
+        
+        Provide hypothesis and recommended action.
+        """
     )
+    
     if validation.approved:
         proc.confidence = validation.new_confidence
+    elif validation.hypothesis == "systemic_issue":
+        # Stop criteria: escalate entire batch
+        escalate_to_human(f"Batch has systemic issue: {validation.root_cause}")
+        break
     else:
         flag_for_human_review(proc)
 
 # 6. Commit approved extractions
 git_commit_all_approved()
-create_pr("Batch 1: 500 procedures, 92% auto-validated")
+create_pr(f"Batch 1: {len(approved)} procedures, {approval_rate}% auto-validated")
 
-# 7. Notify human
-send_slack_message("Batch 1 complete. PR ready for review: <link>")
+# 7. Notify human with diagnostic summary
+send_notification(f"""Batch 1 complete. PR ready: <link>
+    
+    Metrics:
+    - {len(high_confidence)} procedures auto-approved (>0.95)
+    - {len(medium_confidence)} procedures validator-approved (0.80-0.95)
+    - {len(flagged)} procedures need review (<0.80)
+    - {len(thrashing_detected)} procedures hit stop criteria (>2 attempts)
+    
+    Systemic issues detected: {systemic_issues}
+    """)
 ```
 
-**Human review:**
-- Opens PR, sees dashboard with:
-  - 460 procedures auto-approved (confidence > 0.95)
-  - 30 procedures validator-approved (confidence 0.80-0.95)
-  - 10 procedures flagged for review (confidence < 0.80)
-- Spot-checks 5 random auto-approved (all look good)
-- Reviews 10 flagged procedures (makes corrections inline)
+**Human review (strategic oversight):**
+- Opens PR, sees dashboard with metrics
+- Spot-checks 5 random auto-approved (validation sampling)
+- Reviews flagged procedures (targeted oversight)
+- Evaluates systemic issues (architectural decisions)
 - Approves PR, merges to `main`
 
-**Iteration:**
-- Supervisor launches next batch (batch 2)
-- Schema evolver notices 3 procedures in batch 1 required new extension fields
-- Schema evolver opens PR proposing schema update
-- After human approval, supervisor re-runs affected procedures with new schema
+**Iteration (self-improving system):**
+- Supervisor launches next batch (batch 2) with lessons learned
+- If systemic issue found (e.g., new template needed), update few-shot library
+- Schema evolver proposes extensions if patterns emerge
+- Human approves schema updates, system continues
+
+**Key Manifesto principles applied:**
+1. **Lead-worker parallelization:** 10 batches execute simultaneously (no coordination overhead)
+2. **Stop criteria enforcement:** Agents escalate after 2 attempts instead of thrashing
+3. **Diagnostic approach:** Validator analyzes failures, proposes hypotheses
+4. **Human oversight gates:** Strategic decisions (schema, templates) require approval
+5. **Self-improvement:** Feedback loops refine specifications and agent capabilities
 
 ---
 
@@ -614,7 +726,7 @@ duckdb.sql("""
 
 ## Infrastructure Summary
 
-**Minimum viable setup:**
+**Minimum viable setup (aligned with Manifesto: Own the Stack):**
 - CAO server running on single machine (systemd service)
 - Git repository for corpus and schemas
 - Python 3.11+ with libraries: `jsonschema`, `jq`, `ripgrep`
@@ -636,6 +748,15 @@ duckdb.sql("""
 - For >50 agents, consider distributed CAO (multiple servers with shared database)
 - For >1M procedures, use message queue (RabbitMQ, Redis Streams) instead of CAO inbox
 - For teams >5 humans, add role-based access control to web dashboard
+
+**Agentic AI principles applied:**
+1. **Agent-readable specifications:** Complete docs enable autonomous execution
+2. **Observable boundaries:** Clear contracts (schemas, APIs, validation gates)
+3. **Automated validation:** Tests as safety net (agents self-check)
+4. **Stop criteria enforcement:** Agents escalate when stuck (prevent thrashing)
+5. **Feedback loops:** System improves through agent-human collaboration
+
+See [AGENTIC_AI_SYSTEMS_MANIFESTO.md](../../../AGENTIC_AI_SYSTEMS_MANIFESTO.md) for comprehensive treatment of these principles and their application to large-scale software systems.
 
 ---
 
@@ -738,29 +859,40 @@ If ERRORS, report back to supervisor with error count and severity breakdown.
 - [Flow Examples](../examples/) — Scheduled automation patterns
 
 **Wepppy docs:**
+- [Agentic AI Systems Manifesto](../../../AGENTIC_AI_SYSTEMS_MANIFESTO.md) — Foundational principles for agent collaboration, stop criteria, and human-AI symbiosis
 - [God-Tier Prompting Strategy](../../../docs/god-tier-prompting-strategy.md) — Prompt engineering principles
 - [Work Packages](../../../docs/work-packages/) — Multi-agent coordination examples
+
+**Key Manifesto sections for this use case:**
+- [Agent Behavioral Patterns](../../../AGENTIC_AI_SYSTEMS_MANIFESTO.md#agent-behavioral-patterns-stop-criteria-and-diagnostic-approaches) — Stop criteria and diagnostic approaches
+- [Emergent Orchestration Patterns](../../../AGENTIC_AI_SYSTEMS_MANIFESTO.md#emergent-orchestration-patterns) — Lead-worker and agent chaining patterns
+- [Work Package Methodology](../../../AGENTIC_AI_SYSTEMS_MANIFESTO.md#work-package-methodology-empirical-results) — Empirical results from 10 completed work packages
 
 ---
 
 ## Conclusion
 
-This infrastructure leverages CAO's strengths:
+This infrastructure leverages CAO's strengths and Agentic AI Systems principles:
 - **Isolation:** Each agent works on manageable chunks (20-70K tokens)
 - **Coordination:** Supervisor orchestrates without centralizing all context
 - **Observability:** Tmux access + telemetry + Git history provide full audit trail
 - **Human oversight:** Approval gates at batch boundaries, not per-procedure (reduces bottleneck)
+- **Stop criteria:** Agents escalate when uncertain instead of thrashing (prevents quality degradation)
+- **Complementary deployment:** Diagnostic agents prepare specifications, execution agents implement them
 
-**Key anti-patterns to avoid:**
+**Key anti-patterns to avoid (from Manifesto):**
 - ❌ Single agent processing entire corpus (context explosion)
 - ❌ No validation layer (hallucinations proliferate)
 - ❌ Schema rigidity (forces bad fits instead of evolving)
 - ❌ No human feedback loop (agents repeat same errors)
+- ❌ Missing stop criteria (agents thrash through iterations)
+- ❌ Misapplying execution agents to exploratory work (Codex needs complete specs)
 
 **Success metrics:**
 - 95%+ auto-validation rate (only 5% need human review)
 - <0.5% hallucination rate (caught by text span validation)
 - Schema covers 90%+ of procedures without one-off hacks
 - Human review time <10 minutes per 50 procedures
+- <3 iterations before agent escalation (stop criteria working)
 
-This approach is tractable for 10M+ token corpus with current LLM capabilities, assuming proper tooling and orchestration discipline.
+This approach is tractable for 10M+ token corpus with current LLM capabilities, assuming proper tooling, orchestration discipline, and adherence to agentic AI principles. The Manifesto provides the theoretical foundation; this document provides the practical implementation blueprint.
