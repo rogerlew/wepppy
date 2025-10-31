@@ -178,12 +178,19 @@ def parse_result_and_patch(output: str) -> tuple[Optional[Dict[str, Any]], Optio
     return result_json, patch_text
 
 
+SSH_OPTIONS = ["-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"]
+
+
 def ssh(host: str, cmd: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["ssh", host, cmd], capture_output=True, text=True)
+    return subprocess.run(["ssh", *SSH_OPTIONS, host, cmd], capture_output=True, text=True)
 
 
 def scp_to(host: str, local_path: Path, remote_path: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["scp", str(local_path), f"{host}:{remote_path}"], capture_output=True, text=True)
+    return subprocess.run(
+        ["scp", *SSH_OPTIONS, str(local_path), f"{host}:{remote_path}"],
+        capture_output=True,
+        text=True,
+    )
 
 
 def validate_tests(nuc2: str, repo: str, tests: List[str]) -> Dict[str, bool]:

@@ -518,6 +518,12 @@ Until the automated marker checker lands (`wctl check-test-markers` from the too
 - Before running, ensure the backend is up and export `SMOKE_RUN_PATH=<base-url>/runs/<runid>/<config>` (optionally `SMOKE_BASE_URL`, `SMOKE_HEADLESS=false` for local debugging).
 - Recommended flow: call the test-support `create-run` endpoint, feed the returned URL into `SMOKE_RUN_PATH`, execute `npm run smoke`, then clean up with `DELETE /tests/api/run/<runid>`.
 
+### CI Samurai Agents
+- **Execution environment:** CAO infra/fixer agents already run on `nuc2.local` inside the full docker-compose stack. `/workdir/wepppy` is the live workspace—never `ssh` back into the same host or attempt to manage the OS Python.
+- **Tooling:** Activate `services/cao/.venv` (or call its `python` directly) and use `wctl` wrappers for tests and container orchestration. Avoid bare `pytest`, `pip install`, or `docker compose` commands.
+- **Network & GitHub:** Codex sessions bypass sandboxes; `gh` must succeed. If labels (`ci-samurai`, `infra-check`, confidence tags) are missing, create them with `gh label create` instead of editing config by hand.
+- **Changes:** Keep edits within allowlisted paths, do not uninstall dependencies to “make tests pass,” and surface blockers as issues with diagnostics when the workflow cannot safely remediate them.
+
 ## Front-End Development
 
 Consult `docs/ui-docs/ui-style-guide.md` for shared layout patterns (summary panes, panel spacing, typography tokens) and `docs/ui-docs/README.md` for the full index of UI documentation. Control-specific behavior should either live with the control or under `docs/ui-docs/control-ui-styling/` if a standalone note is needed.

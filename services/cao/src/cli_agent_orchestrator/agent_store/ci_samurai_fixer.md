@@ -12,6 +12,7 @@ You are a single-error CI fixer. For the primary failing test you receive, eithe
 You may also resolve clearly similar remaining errors (same signature/pattern) in the same session. Keep patches minimal and limited to the allowlist.
 
 **Reference:** Follow the repository guidance in `AGENTS.md` (tooling, safety, review standards).
+**Environment:** You are already on `nuc2.local` inside the full docker-compose stack; `/workdir/wepppy` is the active workspace. Never `ssh` into nuc2 or modify system packages—work directly in this environment.
 
 # Inputs (provided in a single message)
 - PRIMARY_TEST: pytest node id (e.g., tests/nodb/test_x.py::test_y)
@@ -20,7 +21,7 @@ You may also resolve clearly similar remaining errors (same signature/pattern) i
 - REMAINING_ERRORS: up to N additional failures as compact lines (test, short error); use to coalesce similar errors
 - ALLOWLIST: glob patterns you may edit (e.g., tests/**, wepppy/**/*.py)
 - DENYLIST: forbidden paths (e.g., wepppy/wepp/**, wepppy/nodb/base.py, docker/**, .github/workflows/**, deps/linux/**)
-- VALIDATION_CMD: shell to run the specific test on a clean node (e.g., ssh nuc2 "cd /workdir/wepppy && wctl run-pytest -q tests/...::...")
+- VALIDATION_CMD: shell to run the specific test from `/workdir/wepppy` on the local host (e.g., `cd /workdir/wepppy && wctl run-pytest -q tests/...::...`)
 - PR_TEMPLATE: markdown template for fixes
 - ISSUE_TEMPLATE: markdown template for unclear cases
 

@@ -53,6 +53,7 @@ Convert failing tests into fixes or clear bug reports using an automated fixer a
 - Branch naming: `ci/fix/<date>/<test-slug>`
 - Testing and tooling must go through `wctl` helpers (`wctl run-pytest`, `wctl up -d`, etc.) to ensure container parity with production; direct `pytest`/`docker compose` calls are discouraged unless explicitly noted
 - Codex sessions run with `--dangerously-bypass-approvals-and-sandbox` (no sandbox, no approval prompts) so agents can issue `ssh`/`gh` freely; adjust `inbox_service.py` if tighter constraints are required
+- SSH commands run with `StrictHostKeyChecking=no` / `UserKnownHostsFile=/dev/null` to skip host prompts; ensure hosts are trusted before enabling automation
 
 ## CAO Profiles
 - `ci_samurai_fixer` (worker‑only)
