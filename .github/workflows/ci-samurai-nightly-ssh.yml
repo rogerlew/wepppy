@@ -107,7 +107,7 @@ jobs:
           name: ci-samurai-failures
           path: failures.jsonl
 
-      - name: Check CAO health (forest)
+      - name: Check CAO health (nuc2)
         run: |
           set -euo pipefail
           curl -fsS "${CAO_BASE_URL}/health" || {
