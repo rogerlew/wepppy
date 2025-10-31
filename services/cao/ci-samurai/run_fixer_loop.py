@@ -276,72 +276,9 @@ def main() -> int:
     ap.add_argument("--max-context", type=int, default=10)
     ap.add_argument("--max-failures", type=int, default=0, help="Max failures to process (0 = no cap)")
     ap.add_argument("--poll-seconds", type=int, default=120)
-    # Infra validation options
-    ap.add_argument("--infra-run", action="store_true", help="Run infra validation agent before fixes")
-    ap.add_argument("--infra-remote-host", default=None, help="SSH host for infra checks (default: --nuc2)")
-    ap.add_argument("--infra-remote-repo", default=None, help="Remote repo path for infra checks (default: --repo)")
-    ap.add_argument("--infra-sample-test", default=None, help="Optional pytest node id for smoke on remote")
-    ap.add_argument("--infra-branch-prefix", default="ci/infra", help="Branch prefix for infra PRs")
-    ap.add_argument("--infra-profile", default="ci_samurai_infra", help="Agent profile name for infra validator")
-    ap.add_argument("--infra-cao-base", default=None, help="Override CAO base URL for infra agent (e.g., http://nuc2.local:9889)")
     args = ap.parse_args()
 
     failures = read_failures(Path(args.failures))
-
-    # Optional: run infrastructure validation agent once up front (even if no failures)
-    if args.infra_run:
-        try:
-            def _run_infra() -> None:
-                remote_host = args.infra_remote_host or args.nuc2
-                remote_repo = args.infra_remote_repo or args.repo
-                sample_test = args.infra_sample_test or (failures[0].test if failures else "")
-                message_parts = [
-                    f"REMOTE_HOST: {remote_host}",
-                    f"REMOTE_REPO: {remote_repo}",
-                    f"SAMPLE_TEST: {sample_test}",
-                    f"ALLOWLIST: {args.allowlist}",
-                    f"DENYLIST: {args.denylist}",
-                    f"BRANCH_PREFIX: {args.infra_branch_prefix}",
-                ]
-                message = "\n".join(message_parts)
-                session_name = f"infra-{int(time.time())}"
-                infra_cao = args.infra_cao_base or args.cao_base
-                print(f"Creating CAO session at {infra_cao} (profile={args.infra_profile}, name={session_name})")
-                term = create_session(infra_cao, args.infra_profile, session_name)
-                terminal_id = term.get("id")
-                session_full_name = term.get("session_name", session_name)
-                if not terminal_id:
-                    print("Failed to create CAO session for infra validation: missing terminal id")
-                    return
-                print(f"Created terminal: id={terminal_id} name={session_full_name}")
-                send_inbox_message(infra_cao, terminal_id, "gha", message)
-                deadline = time.time() + 120.0
-                result_json: Optional[Dict[str, Any]] = None
-                patch_text: Optional[str] = None
-                while time.time() < deadline and result_json is None:
-                    out = get_output_full(infra_cao, terminal_id)
-                    rj, pt = parse_result_and_patch(out)
-                    if rj:
-                        result_json, patch_text = rj, pt
-                        break
-                    time.sleep(4)
-                # Persist infra transcript regardless
-                try:
-                    agent_logs_dir = Path("agent_logs")
-                    agent_logs_dir.mkdir(exist_ok=True)
-                    base = f"{session_full_name}-{terminal_id}-infra"
-                    full_out = get_output_full(infra_cao, terminal_id)
-                    (agent_logs_dir / f"{base}.log").write_text(full_out, encoding="utf-8")
-                    if result_json:
-                        (agent_logs_dir / f"{base}.result.json").write_text(json.dumps(result_json, indent=2), encoding="utf-8")
-                    if patch_text:
-                        (agent_logs_dir / f"{base}.patch").write_text(patch_text, encoding="utf-8")
-                except Exception as e:
-                    print(f"Warn: failed to persist infra agent logs: {e}")
-
-            _run_infra()
-        except Exception as e:
-            print(f"Infra validation step failed: {e}")
 
     if not failures:
         print("No failures to process")
