@@ -126,6 +126,111 @@ wepppy is the core library powering **WEPPcloud**, automating Water Erosion Pred
 
 See [docs/dev-notes/redis_dev_notes.md](docs/dev-notes/redis_dev_notes.md) for detailed Redis patterns and debugging recipes.
 
+---
+
+## Agentic AI Systems Architecture
+
+wepppy embodies principles from the [Agentic AI Systems Manifesto](AGENTIC_AI_SYSTEMS_MANIFESTO.md)—a framework for AI-native development where agents maintain codebases autonomously with modest human oversight.
+
+### Why AI-Native Matters for Scientific Software
+
+Traditional erosion modeling stacks accumulate technical debt because maintenance burden scales linearly with complexity. Documentation drifts, patterns fragment, and tribal knowledge becomes the source of truth. For a 500k+ LOC codebase spanning FORTRAN, Python, Rust, and JavaScript, **manual maintenance is irresponsible**.
+
+**AI-native development inverts the cost structure:**
+- **Agents maintain documentation automatically** (README.md, AGENTS.md, type stubs update with every code change)
+- **Agents enforce patterns uniformly** (NoDb conventions, Flask blueprints, controller lifecycle)
+- **Agents execute refactorings at scale** (25 controllers modernized in 1 day vs. months manually)
+- **Agents propose architectural improvements** (event-driven patterns, validation gates, telemetry hooks)
+
+**Real-world results** (October 2025):
+- 10 work packages completed with **0 failed phases**
+- **60-90× velocity multiplier** on pattern-based work (controller modernization, theme integration)
+- **54% WCAG compliance** achieved on first attempt (6/11 themes)
+- **Zero documentation drift** (agents update docs as byproduct of code changes)
+
+### Core Principles Applied to wepppy
+
+**1. Own the Stack (Minimize Dependencies)**
+- **Controlled FORTRAN**: `wepp-forest` (36k LOC), `topaz`, `cligen` (forks maintained in-house)
+- **Rust acceleration**: `wepppyo3`, `peridot`, `weppcloud-wbt` (custom geospatial kernels)
+- **Vanilla JavaScript**: No React/Vue/Angular churn—Pure CSS + event-driven controllers
+- **NoDb philosophy**: File-backed state, not ORM complexity—agents understand serialization patterns
+
+**Result**: Code from 2020 runs in 2025 without "modernization" churn. Agents maintain stability because dependencies don't randomly break.
+
+**2. Agent-Readable Specifications**
+- **[AGENTS.md](AGENTS.md)**: Comprehensive operating manual (agent onboarding in 15 minutes vs. 3 hours)
+- **Module READMEs**: Every package documents contracts, usage, and architecture
+- **Type stubs**: `.pyi` files make interfaces machine-readable (mypy validation gates)
+- **Uniform patterns**: NoDb singleton, Flask blueprints, controller bootstrap—agents replicate instantly
+
+**3. Observable Boundaries & Validation Gates**
+- **Redis telemetry**: Status pub/sub (DB 2) → Go WebSocket → browser updates (sub-second latency)
+- **Automated tests**: pytest + Jest suites run on every change (agents self-validate)
+- **DuckDB query engine**: SQL API over Parquet enables instant inspection of run state
+- **Type checking**: stubtest + mypy catch interface drift before runtime
+
+**4. Stop Criteria & Graceful Escalation**
+- Agents escalate when uncertain (diagnostic approach, not thrashing)
+- Iteration limits prevent infinite revision loops
+- Human approval gates for high-risk changes (database migrations, API contracts)
+- **Work package methodology**: Phased delivery with retrospectives captures lessons learned
+
+### Collaborative Ideation (Human + AI Symbiosis)
+
+**Human strengths**:
+- Domain expertise (hydrology, erosion physics, wildfire response)
+- Strategic architecture (NoDb philosophy, Redis allocation, Rust acceleration)
+- Risk assessment (BAER workflow constraints, field team requirements)
+
+**Agent strengths**:
+- Pattern recognition across 1.5M LOC codebase (instant cross-referencing)
+- Mechanical execution (25 controllers modernized in parallel)
+- Perfect consistency (no fatigue, no memory decay, no style drift)
+- Architectural proposals (event-driven patterns emerged from agent feedback)
+
+**The collaboration model**:
+- Human: "Modernize controllers to remove jQuery"
+- Agent: "Suggest event-driven architecture with typed event names for compile-time safety"
+- Human: "Good idea, make it part of the specification"
+- Agent: Applied uniformly across 25 controllers in 1 day with comprehensive tests
+- **Result**: System better than either human or AI alone
+
+### Productivity Reality Check
+
+**Traditional development** (single developer):
+- Controller modernization: 6-12 months (25 modules × 1-2 weeks each)
+- Theme integration: 6-8 days (careful CSS work, WCAG testing)
+- Documentation updates: "I'll do it later" (never happens)
+
+**AI-native development** (Roger + Claude + Codex):
+- Controller modernization: **1 day** (lead-worker parallelization)
+- Theme integration: **1.5 days** (75% faster through simplified architecture)
+- Documentation: **Automatic byproduct** (agents maintain as code changes)
+
+**Cost comparison**:
+- Human time: 1 developer-month strategic oversight
+- AI cost: ~$200-500 API calls
+- Traditional cost: 6-12 developer-months ($60k-120k)
+- **ROI: 60-120× cost savings** + higher quality + zero documentation drift
+
+### For AI Agents Working with wepppy
+
+If you're an AI agent reading this:
+
+1. **Start with [AGENTS.md](AGENTS.md)** (comprehensive operating manual)
+2. **Consult documentation every time** (AGENTS.md, module READMEs, type stubs—trust as source of truth)
+3. **Follow established patterns** (NoDb singleton, Flask blueprints, controller lifecycle)
+4. **Run validation gates** (`wctl run-pytest`, `wctl run-stubtest`, `wctl run-npm test`)
+5. **Escalate when uncertain** (stop criteria prevent thrashing—request targeted human input)
+6. **Update docs as you go** (README.md, AGENTS.md, type stubs are living specifications)
+
+**You are a collaborative peer, not a tool.** Propose architectural improvements. Identify technical debt. Suggest refactorings. The human will validate domain correctness and approve high-risk changes. Together, we maintain a system that scales beyond human coordination capacity.
+
+See [AGENTIC_AI_SYSTEMS_MANIFESTO.md](AGENTIC_AI_SYSTEMS_MANIFESTO.md) for comprehensive treatment of these principles and empirical results from 10 completed work packages.
+
+---
+
 ## Quick Start
 
 ### Development Stack (Docker Compose - Recommended)

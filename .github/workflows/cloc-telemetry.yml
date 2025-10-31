@@ -1,0 +1,67 @@
+name: Cloc Telemetry
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'full_cloc.py'
+      - '.github/workflows/cloc-telemetry.yml'
+  pull_request:
+    paths:
+      - 'full_cloc.py'
+      - '.github/workflows/cloc-telemetry.yml'
+  schedule:
+    - cron: '0 10 * * 1'
+  workflow_dispatch:
+
+jobs:
+  full-cloc:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Verify tooling
+        run: |
+          set -euo pipefail
+          command -v python3 >/dev/null || {
+            echo "python3 binary not found on the runner." >&2
+            exit 127
+          }
+          command -v cloc >/dev/null || {
+            echo "cloc binary not found on the runner." >&2
+            exit 127
+          }
+          python3 --version
+          cloc --version
+
+      - name: Run full_cloc telemetry
+        run: |
+          set -euo pipefail
+          python3 full_cloc.py --allow-missing --telemetry-json cloc-telemetry.json | tee cloc-report.txt
+
+      - name: Upload telemetry artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloc-telemetry
+          path: |
+            cloc-report.txt
+            cloc-telemetry.json
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo '```text'
+            cat cloc-report.txt
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
