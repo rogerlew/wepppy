@@ -97,7 +97,12 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
             if system_prompt:
                 payload = f"{system_prompt.strip()}\n\n{payload.lstrip()}"
 
-            flags = ["--json", "--full-auto", "--skip-git-repo-check", "--sandbox", "danger-full-access"]
+            flags = [
+                "--json",
+                "--full-auto",
+                "--skip-git-repo-check",
+                "--dangerously-bypass-approvals-and-sandbox",
+            ]
             flags_str = " ".join(shlex.quote(f) for f in flags)
 
             # Build a single-line shell command that base64-encodes the payload and pipes it to codex exec

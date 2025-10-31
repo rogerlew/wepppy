@@ -58,7 +58,7 @@ Convert failing tests into fixes or clear bug reports using a two-stage agent lo
 - Infra step runs once per workflow; fixer gets one attempt per failure—unresolved errors generate issues
 - Branch naming: `ci/fix/<date>/<test-slug>` (fixer) and `ci/infra/<timestamp>` (infra PRs)
 - Testing and tooling must go through `wctl` helpers (`wctl run-pytest`, `wctl up -d`, etc.) to ensure container parity with production; direct `pytest`/`docker compose` calls are discouraged unless explicitly noted
-- Codex sessions always run with `--sandbox danger-full-access` so agents can issue `ssh`/`gh` without prompts; tighten behavior by editing `inbox_service.py` rather than via environment variables
+- Codex sessions run with `--dangerously-bypass-approvals-and-sandbox` (no sandbox, no approval prompts) so agents can issue `ssh`/`gh` freely; adjust `inbox_service.py` if tighter constraints are required
 
 ## CAO Profiles
 - `ci_samurai_infra` (per-run validation)
