@@ -30,7 +30,7 @@ CI Samurai is an autonomous test failure remediation system that converts failin
 1. **Automated Triage** across distributed hosts (nuc1 → nuc2 → nuc3)
 2. **Failure Parsing** extracts test failures AND collection errors from pytest output
 3. **Agent-Per-Error** model spawns fresh GPT-5-Codex sessions for each failure
-4. **Validation-Before-Merge** runs test on clean node (nuc2) before opening PR
+4. **Validation-Before-Merge** re-runs targeted tests on a clean nuc2 checkout before pushing any PR branch
 5. **Policy Enforcement** via allowlist/denylist prevents dangerous edits
 6. **Observability** with full agent transcripts, RESULT_JSON artifacts, and GitHub labels
 
@@ -41,21 +41,21 @@ CI Samurai is an autonomous test failure remediation system that converts failin
 ### High-Level Flow
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│ GitHub Actions (self-hosted runner on forest.local)                 │
-│                                                                      │
-│  1. Checkout repo                                                   │
-│  2. SSH to nuc1 → Run full pytest suite → triage.txt               │
-│  3. Parse triage.txt → failures.jsonl (test failures + collection)  │
-│  4. For each failure in failures.jsonl:                             │
+┌────────────────────────────────────────────────────────────────────────────┐
+│ GitHub Actions (self-hosted runner on forest.local)                        │
+│                                                                            │
+│  1. Checkout repo                                                          │
+│  2. SSH to nuc1 → Run full pytest suite → triage.txt                       │
+│  3. Parse triage.txt → failures.jsonl (test failures + collection)         │
+│  4. For each failure in failures.jsonl:                                    │
 │     ├─ Create CAO session (`CAO_BASE_URL`, default http://nuc2.local:9889) │
-│     ├─ Send structured message to ci_samurai_fixer agent           │
-│     ├─ Poll for RESULT_JSON (default 120s; nightly workflow uses 300s) │
-│     ├─ Agent validates fix on nuc2 via SSH + wctl run-pytest       │
-│     ├─ Agent opens PR (success) or issue (blocked/uncertain)       │
-│     └─ Persist agent transcript to agent_logs/                     │
-│  5. Upload artifacts: logs, failures.jsonl, agent transcripts       │
-└─────────────────────────────────────────────────────────────────────┘
+│     ├─ Send structured message to ci_samurai_fixer agent                   │
+│     ├─ Poll for RESULT_JSON (default 120s; nightly workflow uses 300s)     │
+│     ├─ Agent validates fix on nuc2 via SSH + wctl run-pytest               │
+│     ├─ Agent opens PR (success) or issue (blocked/uncertain)               │
+│     └─ Persist agent transcript to agent_logs/                             │
+│  5. Upload artifacts: logs, failures.jsonl, agent transcripts              │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Component Architecture
@@ -66,7 +66,7 @@ CI Samurai is an autonomous test failure remediation system that converts failin
 | **Makefile** | `Makefile` (target: `ci-dryrun`) | Coordinates multi-host execution |
 | **Dryrun Script** | `services/cao/scripts/ci_samurai_dryrun.sh` | Runs triage/validate/flake checks |
 | **Parser** | `services/cao/ci-samurai/parse_pytest_log.py` | Converts pytest logs → JSONL |
-| **Fixer Loop** | `services/cao/ci-samurai/run_fixer_loop.py` | Agent orchestration + validation |
+| **Fixer Loop** | `services/cao/ci-samurai/run_fixer_loop.py` | Agent orchestration, policy enforcement, validation |
 | **Agent Profiles** | `services/cao/src/cli_agent_orchestrator/agent_store/` | CAO agent behavior definitions |
 | **CAO Server** | `CAO_BASE_URL` (default `http://nuc2.local:9889`) | CLI Agent Orchestrator endpoint |
 
@@ -79,7 +79,7 @@ failures.jsonl (test failures + collection errors)
   ↓ run_fixer_loop.py
 CAO session per failure
   ↓ agent produces RESULT_JSON + optional PATCH
-Validation on nuc2 (SSH + wctl run-pytest)
+Validation on nuc2 (SSH + wctl run-pytest via fixer loop)
   ↓ success → PR | failure → Issue
 GitHub PR/Issue + agent transcript artifacts
 ```
@@ -117,6 +117,8 @@ python3 services/cao/ci-samurai/run_fixer_loop.py \
   --max-failures 3 \
   --poll-seconds 120
 ```
+
+> ℹ️ Use the same `--cao-base` value that your CAO server advertises in the nightly workflow (`CAO_BASE_URL`); override it when testing against a staging endpoint.
 
 ### Trigger Nightly Workflow
 
@@ -394,7 +396,7 @@ All PRs/issues are tagged with:
 - Review agent transcript: `cat agent_logs/*-noresult.log`
 - Check for stuck reasoning loops or approval prompts
 - Verify `--full-auto` flag in workflow
-- Increase `--poll-seconds` if agent needs more time
+- Increase `--poll-seconds` if agent needs more time (nightly workflow uses 300s instead of the CLI default 120s)
 
 **3. PR validation fails on nuc2**
 
@@ -448,26 +450,6 @@ ssh nuc1.local 'echo ok'
 - **English-only agent prompts** - no i18n support
 - **CAO inbox service compatibility** - older CAO builds omitted system prompts; deploy the patched `inbox_service.py` (Oct 2025) or agents lose contract context
 
-### Planned Enhancements
-
-#### Phase 1 (Q1 2026)
-- [ ] Parallel agent execution (3-5 concurrent sessions)
-- [ ] Persistent failure tracking (Redis DB for cross-run state)
-- [ ] Auto-merge for high-confidence PRs (CI checks pass + validation success)
-- [ ] Slack notifications with PR/issue summaries
-
-#### Phase 2 (Q2 2026)
-- [ ] `ci_samurai_merge` agent profile (bundle related fixes)
-- [ ] Flaky test quarantine system
-- [ ] Agent learning from PR review feedback
-- [ ] Extended test scope: `tests/wepp`, `tests/weppcloud`
-
-#### Phase 3 (Q3 2026)
-- [ ] Multi-repo support
-- [ ] Custom validation pipelines per test type
-- [ ] Integration with D-Tale for data-driven failures
-- [ ] Agent confidence calibration (ML-based scoring)
-
 ---
 
 ## Contributing
@@ -507,7 +489,7 @@ When modifying CI Samurai components:
 **Institution:** University of Idaho  
 **License:** BSD-3-Clause  
 **Status:** Functional Beta (Oct 2025)  
-**Contact:** `roger.lew@<institution>.edu`
+**Contact:** `rogerlew@gmail.com`
 
 ---
 
