@@ -4,6 +4,53 @@ from pathlib import Path
 
 from cli_agent_orchestrator import __version__
 
+
+def _resolve_cao_home() -> Path:
+    """Find a writable CAO state directory and ensure log folders exist."""
+    candidates = [
+        Path.home() / ".wepppy" / "cao",
+        Path.cwd() / ".wepppy" / "cao",
+    ]
+
+    for candidate in candidates:
+        try:
+            (candidate / "logs" / "terminal").mkdir(parents=True, exist_ok=True)
+        except PermissionError:
+            continue
+        else:
+            return candidate
+
+    raise PermissionError("Unable to initialise CAO home directory")
+
+
+def _ensure_dir(path: Path) -> None:
+    """Create a directory tree if possible, ignoring permission issues."""
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        pass
+
+
+def _resolve_codex_prompts_dir() -> Path:
+    """Locate a writable Codex prompts directory."""
+    candidates = [
+        Path.home() / ".codex" / "prompts",
+        Path.cwd() / ".codex" / "prompts",
+    ]
+
+    for candidate in candidates:
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+        except PermissionError:
+            continue
+        else:
+            return candidate
+
+    # Fall back to the final candidate even if creation previously failed.
+    fallback = candidates[-1]
+    fallback.mkdir(parents=True, exist_ok=True)
+    return fallback
+
 # Session configuration
 SESSION_PREFIX = "cao-"
 
@@ -20,11 +67,11 @@ TERMINAL_HISTORY_LINES = 200
 STATUS_CHECK_LINES = 100
 
 # Application directories
-CAO_HOME_DIR = Path.home() / ".wepppy" / "cao"
+CAO_HOME_DIR = _resolve_cao_home()
 DB_DIR = CAO_HOME_DIR / "db"
 LOG_DIR = CAO_HOME_DIR / "logs"
 TERMINAL_LOG_DIR = LOG_DIR / "terminal"
-TERMINAL_LOG_DIR.mkdir(parents=True, exist_ok=True)
+_ensure_dir(DB_DIR)
 
 # Terminal log configuration
 INBOX_POLLING_INTERVAL = 5  # Seconds between polling for log file changes
@@ -39,9 +86,8 @@ AGENT_CONTEXT_DIR = CAO_HOME_DIR / "agent-context"
 LOCAL_AGENT_STORE_DIR = CAO_HOME_DIR / "agent-store"
 
 # Codex directories
-CODEX_HOME_DIR = Path.home() / ".codex"
-CODEX_PROMPTS_DIR = CODEX_HOME_DIR / "prompts"
-CODEX_PROMPTS_DIR.mkdir(parents=True, exist_ok=True)
+CODEX_PROMPTS_DIR = _resolve_codex_prompts_dir()
+CODEX_HOME_DIR = CODEX_PROMPTS_DIR.parent
 
 # Database configuration
 DATABASE_FILE = DB_DIR / "cli-agent-orchestrator.db"

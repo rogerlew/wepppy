@@ -4,8 +4,13 @@ import logging
 import os
 import re
 import time
-from typing import List, Dict, Optional
-import libtmux
+from typing import List, Dict, Optional, Any
+
+try:  # pragma: no cover - exercised via provider/unit tests
+    import libtmux  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - environments without tmux
+    libtmux = None  # type: ignore[assignment]
+
 from cli_agent_orchestrator.constants import TMUX_HISTORY_LINES
 
 logger = logging.getLogger(__name__)
@@ -18,6 +23,8 @@ class TmuxClient:
     """Simplified tmux client for basic operations."""
     
     def __init__(self):
+        if libtmux is None:  # pragma: no cover - guarded by tmux_client stub
+            raise RuntimeError("libtmux is not available; cannot create tmux client")
         self.server = libtmux.Server()
     
     def create_session(self, session_name: str, window_name: str, terminal_id: str) -> str:
@@ -218,5 +225,15 @@ class TmuxClient:
             raise
 
 
+class _MissingTmuxClient:
+    """Fallback shim when libtmux is not installed."""
+
+    def __getattr__(self, name: str) -> Any:  # pragma: no cover - error path
+        raise RuntimeError(
+            "libtmux is required for tmux interactions; install libtmux "
+            "or patch cli_agent_orchestrator.clients.tmux.tmux_client in tests."
+        )
+
+
 # Module-level singleton
-tmux_client = TmuxClient()
+tmux_client = TmuxClient() if libtmux is not None else _MissingTmuxClient()

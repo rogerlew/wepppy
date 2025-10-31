@@ -4,7 +4,24 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from watchdog.events import FileSystemEventHandler, FileModifiedEvent
+
+try:
+    from watchdog.events import FileSystemEventHandler, FileModifiedEvent  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - exercised in minimal test envs
+    class FileSystemEventHandler:  # type: ignore[too-many-ancestors]
+        """Fallback base handler when watchdog is unavailable."""
+
+        def on_modified(self, event):  # pragma: no cover - tests monkeypatch
+            raise RuntimeError(
+                "watchdog is required for inbox log monitoring; install watchdog "
+                "or stub FileSystemEventHandler in tests."
+            )
+
+    class FileModifiedEvent:  # pragma: no cover - sentinel event
+        """Placeholder for watchdog FileModifiedEvent."""
+
+        def __init__(self, src_path: str):
+            self.src_path = src_path
 
 import base64
 import os
@@ -72,16 +89,9 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
 
     # For Codex/Gemini providers we run non-interactive commands directly and skip idle gating.
     # For other providers, require IDLE/COMPLETED to avoid interleaving input.
-    try:
-        from cli_agent_orchestrator.providers.codex import CodexProvider  # local import to avoid cycles
-        is_codex = isinstance(provider, CodexProvider)
-    except Exception:
-        is_codex = False
-    try:
-        from cli_agent_orchestrator.providers.gemini import GeminiProvider  # local import to avoid cycles
-        is_gemini = isinstance(provider, GeminiProvider)
-    except Exception:
-        is_gemini = False
+    provider_mro = type(provider).mro()
+    is_codex = any(cls.__name__ == "CodexProvider" for cls in provider_mro)
+    is_gemini = any(cls.__name__ == "GeminiProvider" for cls in provider_mro)
 
     if not (is_codex or is_gemini):
         status = provider.get_status(tail_lines=INBOX_SERVICE_TAIL_LINES)

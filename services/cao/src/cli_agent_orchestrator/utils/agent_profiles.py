@@ -1,8 +1,20 @@
 """Agent profile utilities."""
 
-import frontmatter
 from importlib import resources
 from pathlib import Path
+
+try:
+    import frontmatter  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - exercised in minimal test envs
+    class _MissingFrontMatter:
+        def loads(self, *_args, **_kwargs):
+            raise RuntimeError(
+                "The 'frontmatter' package is required to parse agent profiles. "
+                "Install python-frontmatter or monkeypatch load_agent_profile in tests."
+            )
+
+    frontmatter = _MissingFrontMatter()  # type: ignore[assignment]
+
 from cli_agent_orchestrator.models.agent_profile import AgentProfile
 from cli_agent_orchestrator.constants import LOCAL_AGENT_STORE_DIR
 
