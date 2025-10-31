@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+from cli_agent_orchestrator import __version__
+
 # Session configuration
 SESSION_PREFIX = "cao-"
 
@@ -48,6 +50,6 @@ DATABASE_URL = f"sqlite:///{DATABASE_FILE}"
 # Server configuration
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 9889
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = __version__
 API_BASE_URL = f"http://{SERVER_HOST}:{SERVER_PORT}"
 CORS_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]

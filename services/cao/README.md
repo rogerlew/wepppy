@@ -958,7 +958,7 @@ Create `tests/` directory under `services/cao/` and follow wepppy test conventio
 ### Running in Production
 
 **Deployment checklist:**
-1. Run `cao-server` as a systemd service (or supervisord)
+1. Run `cao-server` as a systemd service (or supervisord). Use `services/cao/scripts/install_cao_server_as_service.sh` to sync the project to `/workdir/cao`, bootstrap the virtualenv, write the VERSION file, and install the unit under `/etc/systemd/system/cao-server.service`.
 2. Configure log rotation for `~/.wepppy/cao/logs/`
 3. Monitor health endpoint: `curl http://localhost:9889/health`
 4. Set up alerts for flow execution failures (check logs)
@@ -973,9 +973,13 @@ After=network.target
 
 [Service]
 Type=simple
-User=wepppy
-WorkingDirectory=/workdir/wepppy
-ExecStart=/home/wepppy/.local/bin/cao-server
+User=roger
+Group=docker
+WorkingDirectory=/workdir/cao
+Environment=PATH=/workdir/cao/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=PYTHONUNBUFFERED=1
+ExecStartPre=/bin/bash -lc 'cd /workdir/cao && ./scripts/setup_venv.sh'
+ExecStart=/workdir/cao/.venv/bin/uvicorn cli_agent_orchestrator.api.main:app --host 0.0.0.0 --port 9889 --workers 1
 Restart=on-failure
 RestartSec=10
 
@@ -988,7 +992,7 @@ WantedBy=multi-user.target
 **Health checks:**
 ```bash
 curl http://localhost:9889/health
-# Expected: {"status": "ok", "service": "cli-agent-orchestrator"}
+# Expected: {"status": "ok", "service": "cli-agent-orchestrator", "version": "<installed version>"}
 ```
 
 **Inspect database:**
