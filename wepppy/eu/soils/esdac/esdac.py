@@ -227,7 +227,7 @@ class ESDAC:
 
         return d
 
-    def build_wepp_soil(self, lng, lat, soils_dir, res_lyr_ksat_threshold=2.0, ksflag=0):
+    def build_wepp_soil(self, lng, lat, soils_dir='./', res_lyr_ksat_threshold=2.0, ksflag=0):
         """
         Build wepp soil from ESDAC data
 
@@ -434,4 +434,3 @@ class ESDAC:
 if __name__ == "__main__":
     esd = ESDAC()
     esd.build_wepp_soil(-6.309, 43.140013)
-

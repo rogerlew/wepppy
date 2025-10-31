@@ -70,15 +70,20 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
     # Get provider
     provider = provider_manager.get_provider(terminal_id)
 
-    # For Codex provider, we run non-interactive 'codex exec --json' and skip idle gating.
+    # For Codex/Gemini providers we run non-interactive commands directly and skip idle gating.
     # For other providers, require IDLE/COMPLETED to avoid interleaving input.
     try:
         from cli_agent_orchestrator.providers.codex import CodexProvider  # local import to avoid cycles
         is_codex = isinstance(provider, CodexProvider)
     except Exception:
         is_codex = False
+    try:
+        from cli_agent_orchestrator.providers.gemini import GeminiProvider  # local import to avoid cycles
+        is_gemini = isinstance(provider, GeminiProvider)
+    except Exception:
+        is_gemini = False
 
-    if not is_codex:
+    if not (is_codex or is_gemini):
         status = provider.get_status(tail_lines=INBOX_SERVICE_TAIL_LINES)
         if status not in (TerminalStatus.IDLE, TerminalStatus.COMPLETED):
             logger.debug(f"Terminal {terminal_id} not ready (status={status})")
@@ -107,6 +112,30 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
                 "tmp=$(mktemp -t cao_msg.XXXX); "
                 "echo \"$CAO_MSG_B64\" | base64 -d > \"$tmp\"; "
                 f"codex exec {flags_str} \"$(cat \"$tmp\")\"; "
+                "rm -f \"$tmp\""
+            )
+            terminal_service.send_input(terminal_id, cmd)
+        elif is_gemini:
+            system_prompt = None
+            profile = getattr(provider, "_profile", None)
+            if profile is not None:
+                system_prompt = getattr(profile, "system_prompt", None)
+            if system_prompt:
+                payload = f"{system_prompt.strip()}\n\n{payload.lstrip()}"
+
+            flags = ["--approval-mode=yolo", "--output-format", "text"]
+            flags_str = " ".join(shlex.quote(f) for f in flags)
+
+            b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")
+            gemini_cmd = f"gemini -p \"$(cat \"$tmp\")\""
+            if flags_str:
+                gemini_cmd = f"{gemini_cmd} {flags_str}"
+
+            cmd = (
+                "export CAO_MSG_B64='" + b64 + "'; "
+                "tmp=$(mktemp -t cao_msg.XXXX); "
+                "echo \"$CAO_MSG_B64\" | base64 -d > \"$tmp\"; "
+                f"{gemini_cmd}; "
                 "rm -f \"$tmp\""
             )
             terminal_service.send_input(terminal_id, cmd)

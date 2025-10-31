@@ -6,6 +6,7 @@ from typing import Dict, Optional
 from cli_agent_orchestrator.clients.database import get_terminal_metadata
 from cli_agent_orchestrator.providers.base import BaseProvider
 from cli_agent_orchestrator.providers.codex import CodexProvider
+from cli_agent_orchestrator.providers.gemini import GeminiProvider
 
 logger = logging.getLogger(__name__)
 
@@ -19,14 +20,17 @@ class ProviderManager:
                        tmux_window: str, agent_profile: str = None) -> BaseProvider:
         """Create and store provider instance."""
         try:
-            if provider_type == "codex":
+            normalized = (provider_type or "").lower()
+            if normalized == "codex":
                 provider = CodexProvider(terminal_id, tmux_session, tmux_window, agent_profile)
+            elif normalized == "gemini":
+                provider = GeminiProvider(terminal_id, tmux_session, tmux_window, agent_profile)
             else:
                 raise ValueError(f"Unknown provider type: {provider_type}")
             
             # Store in direct mapping
             self._providers[terminal_id] = provider
-            logger.info(f"Created {provider_type} provider for terminal: {terminal_id}")
+            logger.info(f"Created {normalized} provider for terminal: {terminal_id}")
             return provider
             
         except Exception as e:

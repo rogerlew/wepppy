@@ -96,7 +96,11 @@ app = FastAPI(
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "service": "cli-agent-orchestrator"}
+    return {
+        "status": "ok",
+        "service": "cli-agent-orchestrator",
+        "version": SERVER_VERSION,
+    }
 
 
 @app.post("/sessions", response_model=Terminal, status_code=status.HTTP_201_CREATED)

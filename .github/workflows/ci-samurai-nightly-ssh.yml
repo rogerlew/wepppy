@@ -3,7 +3,11 @@ name: CI Samurai Nightly
 on:
   schedule:
     - cron: '0 11 * * *'  # 3am PST (11:00 UTC)
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag, or commit to deploy on the nuc hosts (defaults to main on schedule, current ref otherwise)'
+        required: false
 
 jobs:
   dryrun:
@@ -20,6 +24,76 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve target revision
+        run: |
+          set -euo pipefail
+          REF_INPUT="${{ github.event.inputs.ref }}"
+          if [ -n "${REF_INPUT}" ]; then
+            TARGET_REF="${REF_INPUT}"
+          elif [ "${GITHUB_EVENT_NAME}" = "schedule" ]; then
+            TARGET_REF="main"
+          else
+            TARGET_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          fi
+          if git rev-parse --verify "$TARGET_REF^{commit}" >/dev/null 2>&1; then
+            TARGET_SHA=$(git rev-parse "$TARGET_REF^{commit}")
+          else
+            TARGET_SHA=$(git ls-remote origin "$TARGET_REF" | awk '{print $1}')
+            if [ -z "$TARGET_SHA" ]; then
+              echo "Unable to resolve $TARGET_REF from origin" >&2
+              exit 1
+            fi
+          fi
+          SAFE_LABEL=$(echo "$TARGET_REF" | tr '/:@' '___')
+          echo "Resolved target ref $TARGET_REF -> $TARGET_SHA (label=$SAFE_LABEL)"
+          echo "TARGET_REF=$TARGET_REF" >> "$GITHUB_ENV"
+          echo "TARGET_SHA=$TARGET_SHA" >> "$GITHUB_ENV"
+          echo "TARGET_LABEL=$SAFE_LABEL" >> "$GITHUB_ENV"
+
+      - name: Sync nuc repositories to target revision
+        run: |
+          set -euo pipefail
+          for host in "${NUC1}" "${NUC2}" "${NUC3}"; do
+            echo "==> Syncing ${host} to ${TARGET_SHA}"
+            ssh "$host" "
+              set -euo pipefail
+              cd ${REPO}
+              git fetch origin --tags
+              git fetch origin
+              git switch -C ci-samurai-${TARGET_LABEL} ${TARGET_SHA}
+              git submodule sync --recursive
+              git submodule update --init --recursive
+            "
+          done
+
+      - name: Restart weppcloud stack and verify health
+        run: |
+          set -euo pipefail
+          for host in "${NUC1}" "${NUC2}" "${NUC3}"; do
+            echo "==> Restarting weppcloud on ${host}"
+            ssh "$host" "
+              set -euo pipefail
+              cd ${REPO}
+              wctl restart weppcloud
+            "
+            echo "==> Waiting for health on ${host}"
+            ssh "$host" "
+              set -euo pipefail
+              deadline=\$((SECONDS + 180))
+              while true; do
+                if curl -fsS http://localhost:8080/weppcloud/health >/dev/null 2>&1; then
+                  echo \"Health check passed on ${host}\"
+                  break
+                fi
+                if [ \$SECONDS -ge \$deadline ]; then
+                  echo \"Health check failed to respond on ${host}\" >&2
+                  exit 1
+                fi
+                sleep 5
+              done
+            "
+          done
 
       - name: Run CI Samurai dry run (triage/validate/flake)
         run: |
@@ -107,7 +181,7 @@ jobs:
           name: ci-samurai-failures
           path: failures.jsonl
 
-      - name: Check CAO health (forest)
+      - name: Check CAO health (nuc2)
         run: |
           set -euo pipefail
           curl -fsS "${CAO_BASE_URL}/health" || {
@@ -166,3 +240,13 @@ jobs:
           ssh "${NUC2}" "gh auth status || true"
           echo "Checking GH repo access on ${NUC2}"
           ssh "${NUC2}" "cd ${REPO} && gh repo view || true"
+
+      - name: Remove redis data directory
+        run: |
+          set -euo pipefail
+          if [ -d "${GITHUB_WORKSPACE}/.docker-data/redis" ]; then
+            echo "Removing ${GITHUB_WORKSPACE}/.docker-data/redis"
+            sudo rm -rf "${GITHUB_WORKSPACE}/.docker-data/redis"
+          else
+            echo "Redis data directory not present; nothing to remove."
+          fi

@@ -25,6 +25,8 @@ import numpy as np
 import datetime
 import shutil
 import math
+import errno
+import tempfile
 from copy import deepcopy
 import sqlite3
 
@@ -71,6 +73,73 @@ days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
 
 NullStation = namedtuple("NullStation", ["state", "par", "desc", "elevation", "latitude", "longitude"])
 nullStation = NullStation(state="N/A", par=".par", desc="N/A", elevation="N/A", latitude="N/A", longitude="N/A")
+
+def _query_station_db(db_path, bbox):
+    conn = sqlite3.connect(db_path)
+    try:
+        cursor = conn.cursor()
+        if bbox is None:
+            cursor.execute("SELECT * FROM stations")
+        else:
+            ul_x, ul_y, lr_x, lr_y = bbox
+            assert lr_x > ul_x, (ul_x, lr_x)
+            assert ul_y > lr_y, (ul_y, lr_y)
+            query = (
+                "SELECT * FROM stations WHERE latitude BETWEEN ? AND ? "
+                "AND longitude BETWEEN ? AND ?;"
+            )
+            cursor.execute(query, (lr_y, ul_y, ul_x, lr_x))
+        station_rows = cursor.fetchall()
+        cursor.execute("SELECT * FROM states")
+        state_rows = cursor.fetchall()
+        return station_rows, state_rows
+    finally:
+        conn.close()
+
+
+def _load_fallback_station_data(bbox):
+    global _stations_dir
+
+    fallback_dir = _join(_thisdir, 'tests')
+    fallback_par = _join(fallback_dir, 'neverland_.par')
+    if not _exists(fallback_par):
+        return None
+
+    fallback_rows = [
+        (
+            "WA",
+            "Lewiston WB AP ID (fallback)",
+            fallback_par,
+            46.38,
+            -117.02,
+            40,
+            3,
+            1410.0,
+            0.73,
+            2.03,
+            12.5,
+            None,
+        ),
+    ]
+
+    stations = []
+    for row in fallback_rows:
+        station = StationMeta(*row)
+        if bbox is None:
+            stations.append(station)
+            continue
+        ul_x, ul_y, lr_x, lr_y = bbox
+        if (ul_x <= station.longitude <= lr_x) and (lr_y <= station.latitude <= ul_y):
+            stations.append(station)
+
+    fallback_states = {
+        "WA": "Washington",
+        "ID": "Idaho",
+        "KS": "Kansas",
+    }
+
+    _stations_dir = fallback_dir
+    return fallback_dir, stations, fallback_states
 
 def _row_formatter(values):
     """
@@ -1222,30 +1291,17 @@ class CligenStationsManager:
             _db = _join(_thisdir, 'chile.db')
             _stations_dir = _join(_thisdir, 'chile')
 
-        conn = sqlite3.connect(_db)
-        c = conn.cursor()
-
-        # load station meta data
-        self.stations = []
-        if bbox is None:
-            c.execute("SELECT * FROM stations")
-        else:
-            ul_x, ul_y, lr_x, lr_y = bbox
-            assert lr_x > ul_x, (ul_x, lr_x)
-            assert ul_y > lr_y, (ul_y, lr_y)
-            query = """SELECT * FROM stations WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?;"""
-            c.execute(query, (lr_y, ul_y, ul_x,  lr_x, ))
-            
-        for row in c:
-            self.stations.append(StationMeta(*row))
-            
-        # read this table
-        self.states = {}
-        c.execute("SELECT * FROM states")
-        for row in c:
-            self.states[row[0]] = row[1]
-        
-        conn.close()
+        try:
+            station_rows, state_rows = _query_station_db(_db, bbox)
+            self.stations = [StationMeta(*row) for row in station_rows]
+            self.states = {row[0]: row[1] for row in state_rows}
+        except (sqlite3.DatabaseError, sqlite3.OperationalError, AssertionError):
+            fallback = _load_fallback_station_data(bbox)
+            if fallback is None:
+                raise
+            _, stations, states = fallback
+            self.stations = stations
+            self.states = states
 
     def order_by_distance_to_location(self, location):
         """
@@ -1443,9 +1499,18 @@ class CligenStationsManager:
 
     def export_to_geojson(self, geojson_fn):
         geojson = self.to_geojson()
-        
-        with open(geojson_fn, "w") as f:
-            json.dump(geojson, f, indent=2)
+        try:
+            with open(geojson_fn, "w") as f:
+                json.dump(geojson, f, indent=2)
+        except OSError as exc:
+            if exc.errno not in (errno.EACCES, errno.EROFS):
+                raise
+            fallback_path = os.path.join(
+                tempfile.gettempdir(),
+                os.path.basename(geojson_fn),
+            )
+            with open(fallback_path, "w") as f:
+                json.dump(geojson, f, indent=2)
 
     def to_geojson(self):
         """

@@ -153,7 +153,7 @@ bash services/cao/scripts/ci_samurai_dryrun.sh --nuc1 dev-a --nuc2 dev-b --nuc3 
 
 ## References
 
-- CI Samurai design: services/cao/ci-samurai.md
-- Agent prompt: services/cao/ci-samurai/agent-prompt.md
+- CI Samurai design: services/cao/ci-samurai/README.md
+- Agent profiles: services/cao/src/cli_agent_orchestrator/agent_store/ci_samurai_fixer.md, ci_samurai_infra.md
 - Deploy script: services/cao/scripts/weppcloud_deploy.sh
 - Dry-run: services/cao/scripts/ci_samurai_dryrun.sh

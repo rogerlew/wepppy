@@ -7,24 +7,24 @@ Wants=network-online.target
 Type=simple
 User=roger
 Group=docker
-WorkingDirectory=/workdir/wepppy/services/cao
+WorkingDirectory=/workdir/cao
 # Ensure the venv is first on PATH
-Environment=PATH=/workdir/wepppy/services/cao/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=PATH=/workdir/cao/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 Environment=PYTHONUNBUFFERED=1
 # Keep workers at 1 due to background daemons and file watchers
 
 # Build the .venv for service
-ExecStartPre=/bin/bash -lc 'cd /workdir/wepppy/services/cao && services/cao/scripts/setup_venv.sh'
+ExecStartPre=/bin/bash -lc 'cd /workdir/cao && ./scripts/setup_venv.sh'
 
 # Option A: direct uvicorn (preferred)
-ExecStart=/workdir/wepppy/services/cao/.venv/bin/uvicorn \
+ExecStart=/workdir/cao/.venv/bin/uvicorn \
   cli_agent_orchestrator.api.main:app \
   --host 0.0.0.0 \
   --port 9889 \
   --workers 1
 
 # Option B: console script entrypoint (also uvicorn under the hood)
-# ExecStart=/workdir/wepppy/services/cao/.venv/bin/cao-server
+# ExecStart=/workdir/cao/.venv/bin/cao-server
 
 Restart=on-failure
 RestartSec=3
