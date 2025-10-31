@@ -1,14 +1,14 @@
 # CI Samurai
 > Automated regression fixer for WEPPcloud test suite
-> **Status: Functional Beta** | **Trigger: Nightly GitHub Actions** | **Architecture: Multi-Agent + Redis Queue**
+> **Status: Functional Beta** | **Trigger: Nightly GitHub Actions** | **Architecture: CAO Multi-Agent Orchestrator**
 
-**See also:** [AGENTS.md](/workdir/wepppy/AGENTS.md#ci-samurai-agents) for CAO integration details
+**See also:** [AGENTS.md](../../AGENTS.md#ci-samurai-agents) for CAO integration details
 
 ## Overview
 
-CI Samurai is an autonomous test failure remediation system that converts failing pytest tests into validated fixes (via pull requests) or structured diagnostic reports (via GitHub issues). Operating as a nightly GitHub Actions workflow with distributed agent orchestration, it bridges CI infrastructure across three build hosts (nuc1, nuc2, nuc3) and leverages GPT-5-Codex agents through the CLI Agent Orchestrator (CAO) to analyze, fix, and validate test failures—all without human intervention.
+CI Samurai is an autonomous test failure remediation system that converts failing pytest tests into validated fixes (via pull requests) or structured diagnostic reports (via GitHub issues). Operating as a nightly GitHub Actions workflow with distributed agent orchestration, it bridges CI infrastructure across three on-premise hosts (nuc1, nuc2, nuc3) and leverages GPT-5-Codex agents through the CLI Agent Orchestrator (CAO) to analyze, fix, and validate test failures—all without human intervention.
 
-**Key Innovation**: Fresh agent per failure with strict safety policies (allowlist/denylist, validation-before-merge, auto-rollback on validation failure).
+**Key Innovation**: Fresh agent per failure with strict safety policies (allowlist/denylist, validation-before-merge, open-issue fallback when validation fails).
 
 ### What Problem Does This Solve?
 
@@ -48,9 +48,9 @@ CI Samurai is an autonomous test failure remediation system that converts failin
 │  2. SSH to nuc1 → Run full pytest suite → triage.txt               │
 │  3. Parse triage.txt → failures.jsonl (test failures + collection)  │
 │  4. For each failure in failures.jsonl:                             │
-│     ├─ Create CAO session (http://forest:9889)                     │
+│     ├─ Create CAO session (`CAO_BASE_URL`, default http://nuc2.local:9889) │
 │     ├─ Send structured message to ci_samurai_fixer agent           │
-│     ├─ Poll for RESULT_JSON (timeout: 120s)                        │
+│     ├─ Poll for RESULT_JSON (default 120s; nightly workflow uses 300s) │
 │     ├─ Agent validates fix on nuc2 via SSH + wctl run-pytest       │
 │     ├─ Agent opens PR (success) or issue (blocked/uncertain)       │
 │     └─ Persist agent transcript to agent_logs/                     │
@@ -68,7 +68,7 @@ CI Samurai is an autonomous test failure remediation system that converts failin
 | **Parser** | `services/cao/ci-samurai/parse_pytest_log.py` | Converts pytest logs → JSONL |
 | **Fixer Loop** | `services/cao/ci-samurai/run_fixer_loop.py` | Agent orchestration + validation |
 | **Agent Profiles** | `services/cao/src/cli_agent_orchestrator/agent_store/` | CAO agent behavior definitions |
-| **CAO Server** | `http://forest:9889` (main), `http://nuc2:9889` (infra) | CLI Agent Orchestrator endpoints |
+| **CAO Server** | `CAO_BASE_URL` (default `http://nuc2.local:9889`) | CLI Agent Orchestrator endpoint |
 
 ### Data Flow
 
@@ -90,9 +90,9 @@ GitHub PR/Issue + agent transcript artifacts
 
 ### Prerequisites
 
-- Self-hosted GitHub Actions runner on `forest.local`
+- Self-hosted GitHub Actions runner on `forest.local` (or equivalent on-prem host)
 - SSH access to nuc1, nuc2, nuc3 (passwordless keys)
-- CAO server running on `http://forest:9889`
+- CAO server reachable at `CAO_BASE_URL` (nightly workflow default: `http://nuc2.local:9889`)
 - GitHub CLI (`gh`) authenticated on nuc2
 - Docker + `wctl` utility on all hosts
 
@@ -113,7 +113,7 @@ python3 services/cao/ci-samurai/run_fixer_loop.py \
   --repo-root . \
   --nuc2 nuc2.local \
   --repo /workdir/wepppy \
-  --cao-base http://forest:9889 \
+  --cao-base http://nuc2.local:9889 \
   --max-failures 3 \
   --poll-seconds 120
 ```
@@ -146,7 +146,7 @@ env:
   WC1: /wc1                     # Working directory on nuc1
   LOOPS: '3'                    # Flake loop iterations
   SCOPE: ''                     # Test scope (empty = full suite)
-  CAO_BASE_URL: http://forest:9889  # CAO server endpoint
+  CAO_BASE_URL: http://nuc2.local:9889  # CAO server endpoint
 ```
 
 ### Safety Policies
@@ -289,7 +289,7 @@ Modify `run_fixer_loop.py`:
 3. Define role, inputs, rules, output format
 4. Test with manual CAO session:
    ```bash
-   curl -X POST http://forest:9889/sessions \
+   curl -X POST http://nuc2.local:9889/sessions \
      -d "provider=codex&agent_profile=my_agent&session_name=test-$(date +%s)"
    ```
 
@@ -297,10 +297,10 @@ Modify `run_fixer_loop.py`:
 
 ```bash
 # List recent CAO sessions
-curl http://forest:9889/terminals | jq '.terminals[] | select(.session_name | contains("ci-fix"))'
+curl http://nuc2.local:9889/terminals | jq '.terminals[] | select(.session_name | contains("ci-fix"))'
 
 # Get full agent transcript
-curl http://forest:9889/terminals/<terminal_id>/output?mode=full > agent_output.log
+curl http://nuc2.local:9889/terminals/<terminal_id>/output?mode=full > agent_output.log
 
 # Parse for RESULT_JSON
 grep -A 50 'RESULT_JSON' agent_output.log
@@ -412,7 +412,7 @@ All PRs/issues are tagged with:
 **Solution:**
 ```bash
 # Check CAO health
-curl http://forest:9889/health
+curl http://nuc2.local:9889/health
 
 # Restart CAO (systemd)
 sudo systemctl restart cao-server
@@ -446,7 +446,7 @@ ssh nuc1.local 'echo ok'
 - **No cross-run state** - each nightly run is independent
 - **Manual label management** - agents must create missing GitHub labels
 - **English-only agent prompts** - no i18n support
-- **CAO inbox service bug** - system prompt not included (requires manual workaround or fix in `inbox_service.py`)
+- **CAO inbox service compatibility** - older CAO builds omitted system prompts; deploy the patched `inbox_service.py` (Oct 2025) or agents lose contract context
 
 ### Planned Enhancements
 
@@ -495,7 +495,7 @@ When modifying CI Samurai components:
 
 - **[AGENTS.md](../../AGENTS.md)** - Core directives for AI coding agents
 - **[CAO Documentation](../src/cli_agent_orchestrator/README.md)** - CLI Agent Orchestrator architecture
-- **[Workflow Configuration](.github/workflows/ci-samurai-nightly-ssh.yml)** - GitHub Actions setup
+- **[Workflow Configuration](../../.github/workflows/ci-samurai-nightly-ssh.yml)** - GitHub Actions setup
 - **[Agent Profiles](../src/cli_agent_orchestrator/agent_store/)** - Codex behavior definitions
 - **[Testing Guide](../../tests/README.md)** - pytest conventions and fixtures
 
