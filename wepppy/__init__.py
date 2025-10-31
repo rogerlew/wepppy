@@ -1,4 +1,12 @@
 import importlib
+from pathlib import Path
+
+
+_CAO_SHIM_PATH = (
+    Path(__file__).resolve().parent.parent / "services" / "cao" / "wepppy"
+)
+if _CAO_SHIM_PATH.is_dir():
+    __path__.append(str(_CAO_SHIM_PATH))
 
 
 _LAZY_SUBMODULES = {"rq", "climates", "mcp"}
