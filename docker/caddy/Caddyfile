@@ -44,6 +44,9 @@ http://:8080 {
 
     handle_path /query-engine* {
         reverse_proxy query-engine:8041 {
+            header_up X-Forwarded-Prefix /query-engine
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
             transport http {
                 read_timeout 3m
             }

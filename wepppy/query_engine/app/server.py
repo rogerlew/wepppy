@@ -220,7 +220,11 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
         context = resolve_run_context(str(run_path), auto_activate=False)
         catalog_entries = context.catalog.entries()
         if catalog_entries:
-            sample_dataset = catalog_entries[0].path
+            # Use first parquet file, skip JSON/other metadata files
+            for entry in catalog_entries:
+                if entry.path.endswith('.parquet'):
+                    sample_dataset = entry.path
+                    break
     except FileNotFoundError:
         catalog_ready = False
     except Exception:  # pragma: no cover - defensive logging
@@ -249,9 +253,10 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
     if base_root_clean and not base_root_clean.startswith("/"):
         base_root_clean = "/" + base_root_clean
     activate_display = f"{base_root_clean}/activate" if base_root_clean else "/activate"
-    
-    # Construct post_url to preserve the full path including /query-engine prefix
-    post_url = current_path if current_path else ""
+
+    # Construct full POST URL including any proxy prefix (e.g., /query-engine)
+    forwarded_prefix = request.headers.get("X-Forwarded-Prefix", "").rstrip("/")
+    full_post_url = f"{forwarded_prefix}{current_path}" if forwarded_prefix else current_path
 
     return TEMPLATES.TemplateResponse(
         "query_console.html",
@@ -267,7 +272,7 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
             "activate_url": "../activate",
             "activate_url_display": activate_display,
             "query_presets": QUERY_PRESETS,
-            "post_url": post_url,
+            "post_url": full_post_url,
             "post_url_display": post_display,
         },
     )

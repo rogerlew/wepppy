@@ -33,7 +33,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     }
                 ],
                 "columns": [
-                    "landuse.topaz_id",
+                    "landuse.TopazId",
                     "landuse.key",
                 ],
                 "limit": 25,
@@ -73,7 +73,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     }
                 ],
                 "columns": [
-                    "landuse.topaz_id AS topaz_id",
+                    "landuse.TopazId AS topaz_id",
                     "landuse.key AS landuse_key",
                     "landuse.cancov AS canopy_cover",
                 ],
@@ -81,7 +81,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     {"column": "landuse.key", "operator": "=", "value": 43},
                     {"column": "landuse.cancov", "operator": "<", "value": 0.6},
                 ],
-                "order_by": ["landuse.topaz_id"],
+                "order_by": ["landuse.TopazId"],
                 "limit": 50,
                 "include_schema": True,
                 "include_sql": True,
@@ -98,7 +98,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                 "filters": [
                     {"column": "landuse.key", "operator": "IN", "value": [105, 118]},
                 ],
-                "order_by": ["landuse.topaz_id"],
+                "order_by": ["landuse.TopazId"],
                 "limit": 100,
                 "include_schema": True,
                 "include_sql": True,
@@ -119,7 +119,7 @@ QUERY_PRESETS: Dict[str, List[QueryPreset]] = OrderedDict({
                     {"left": "landuse", "right": "soils", "on": ["topaz_id"]},
                 ],
                 "columns": [
-                    "landuse.topaz_id AS topaz_id",
+                    "landuse.TopazId AS topaz_id",
                     "landuse.desc AS landuse_desc",
                     "soils.simple_texture AS soil_texture",
                 ],

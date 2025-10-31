@@ -7,7 +7,7 @@
 - Scope (pilot): tests/nodb (expand to tests/wepp)
 
 ## Objective
-Convert failing tests into fixes or clear bug reports using a two-stage agent loop (infrastructure validation + fixer) with strict safety rules.
+Convert failing tests into fixes or clear bug reports using an automated fixer agent loop with strict safety rules.
 
 ## Operating Model
 - Fresh agent per error: one short‑lived GPT‑5‑Codex session per failure.
@@ -20,8 +20,8 @@ Convert failing tests into fixes or clear bug reports using a two-stage agent lo
   - Repository on NUCs: `/workdir/wepppy`
   - CAO API endpoints on each NUC (e.g., `http://nuc2.local:9889`)
 - Outputs
-  - PRs labeled `ci-samurai` (and `infra-check` when infra agent succeeds) with validation evidence
-  - Issues labeled `ci-samurai`/`infra-check` describing failures, blocked checks, or missing dependencies
+  - PRs labeled `ci-samurai` with validation evidence
+  - Issues labeled `ci-samurai` describing failures, blocked checks, or missing dependencies
   - Logs + JSON queues under `/wc1/ci-samurai/logs/<ts>/` plus `agent_logs/` transcripts
 
 ## Nightly Workflow
@@ -33,13 +33,7 @@ Convert failing tests into fixes or clear bug reports using a two-stage agent lo
    - Convert triage log → `failures.jsonl` (fields: `test`, `file`, `error`, `signature?`)
    - Initialize `remaining.jsonl` from `failures.jsonl`; create empty `handled.jsonl`
 
-3) Infra validation (nuc2)
-   - Create CAO session (profile: `ci_samurai_infra`) with `REMOTE_HOST`, `REMOTE_REPO`, `SAMPLE_TEST`, allow/deny lists, and branch prefix
-   - Agent executes six checks in order (SSH, repo cleanliness, tooling, `wctl run-pytest` smoke, git remote/branch, `gh auth status`)
-   - On success, agent may apply minimal fixes (within allowlist) and open a PR using `gh pr create --label ci-samurai --label infra-check`
-   - On failure, agent files a labeled issue (`gh issue create --label ci-samurai --label infra-check`) capturing blocked checks; fixer loop still runs but treats infrastructure as degraded
-
-4) Fixer loop (serial; add small parallel factor later)
+3) Fixer loop (serial; add small parallel factor later)
    - Pop `primary` from `remaining.jsonl`
    - Create CAO session (profile: `ci_samurai_fixer`) and send one structured message:
      - PRIMARY_TEST, STACK/SNIPPET, up to N REMAINING_ERRORS, ALLOWLIST/DENYLIST, VALIDATION_CMD, PR/Issue templates
@@ -54,15 +48,13 @@ Convert failing tests into fixes or clear bug reports using a two-stage agent lo
 - Allowlist (pilot): `tests/**`, `wepppy/**/*.py`
 - Denylist: `wepppy/nodb/base.py`, `docker/**`, `.github/workflows/**`, `deps/linux/**`
 - Agents must operate from the project virtualenv (`services/cao/.venv`); bare `python` is not assumed
-- Required GitHub labels (`ci-samurai`, `infra-check`, confidence tags) must exist or be created before PR/issue submission
-- Infra step runs once per workflow; fixer gets one attempt per failure—unresolved errors generate issues
-- Branch naming: `ci/fix/<date>/<test-slug>` (fixer) and `ci/infra/<timestamp>` (infra PRs)
+- Required GitHub labels (`ci-samurai`, confidence tags) must exist or be created before PR/issue submission
+- Fixer gets one attempt per failure—unresolved errors generate issues
+- Branch naming: `ci/fix/<date>/<test-slug>`
 - Testing and tooling must go through `wctl` helpers (`wctl run-pytest`, `wctl up -d`, etc.) to ensure container parity with production; direct `pytest`/`docker compose` calls are discouraged unless explicitly noted
 - Codex sessions run with `--dangerously-bypass-approvals-and-sandbox` (no sandbox, no approval prompts) so agents can issue `ssh`/`gh` freely; adjust `inbox_service.py` if tighter constraints are required
 
 ## CAO Profiles
-- `ci_samurai_infra` (per-run validation)
-  - Ensures SSH connectivity, repo health, tooling availability, smoke tests, git/gh access; may apply trivial infra fixes and open PR/issue
 - `ci_samurai_fixer` (worker‑only)
   - Single-error prompt; RESULT_JSON schema; strict allowlist; must validate with `wctl run-pytest` before opening a PR
 - (`ci_samurai_merge` deferred) – not active in current rollout
@@ -106,5 +98,4 @@ Convert failing tests into fixes or clear bug reports using a two-stage agent lo
 ```
 
 **Notes**
-- Infra RESULT_JSON follows the same schema; when the agent cannot complete checks (e.g., DNS failure), it emits `action: "issue"` with diagnostics.
 - CI trusts the recorded URLs and does not re-create PRs or issues—agents must report fatal command failures in the JSON payload so the loop can fall back gracefully.
