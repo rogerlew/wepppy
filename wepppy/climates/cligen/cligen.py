@@ -15,6 +15,7 @@ from os.path import exists as _exists
 from os.path import split as _split
 
 import os, shlex, signal, time
+import re
 import subprocess
 from subprocess import Popen, PIPE, TimeoutExpired
 
@@ -27,6 +28,8 @@ import shutil
 import math
 from copy import deepcopy
 import sqlite3
+import warnings
+import tempfile
 
 import pandas as pd
 
@@ -71,6 +74,69 @@ days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
 
 NullStation = namedtuple("NullStation", ["state", "par", "desc", "elevation", "latitude", "longitude"])
 nullStation = NullStation(state="N/A", par=".par", desc="N/A", elevation="N/A", latitude="N/A", longitude="N/A")
+
+_FALLBACK_STATE_LABELS = {
+    "ID": "Idaho",
+    "KS": "Kansas",
+}
+
+_FALLBACK_PAR_FILES = ("id106844.par", "ks140010.par")
+
+
+def _build_fallback_station_specs():
+    """
+    Build a minimal set of station metadata from bundled PAR files so tests can run
+    without the SQLite station catalog (distributed via Git LFS).
+    """
+    def _extract_numbers(line: str) -> list[float]:
+        values = []
+        for token in line.replace("=", " ").split():
+            token = token.strip()
+            try:
+                values.append(float(token))
+            except ValueError:
+                continue
+        return values
+
+    specs = []
+    for par in _FALLBACK_PAR_FILES:
+        par_path = _join(_stations_dir, par)
+        if not _exists(par_path):
+            continue
+
+        try:
+            with open(par_path) as fp:
+                line1 = fp.readline().rstrip("\n")
+                line2 = fp.readline().rstrip("\n")
+                line3 = fp.readline().rstrip("\n")
+        except OSError:
+            continue
+
+        header_values = _extract_numbers(line2)
+        elev_values = _extract_numbers(line3)
+        if len(header_values) < 4 or len(elev_values) < 3:
+            continue
+
+        desc_parts = line1.strip().split()
+        while desc_parts and desc_parts[-1].isdigit():
+            desc_parts.pop()
+        desc_text = " ".join(desc_parts) if desc_parts else par.replace(".par", "")
+
+        specs.append({
+            "state": par[:2].upper(),
+            "desc": f"{desc_text} {par.replace('.par', '')}",
+            "par": par,
+            "latitude": float(header_values[0]),
+            "longitude": float(header_values[1]),
+            "years": int(header_values[2]),
+            "type": int(header_values[3]),
+            "elevation": float(elev_values[0]),
+            "tp5": float(elev_values[1]),
+            "tp6": float(elev_values[2]),
+            "annual_ppt": 0.0,
+        })
+
+    return specs
 
 def _row_formatter(values):
     """
@@ -1222,30 +1288,79 @@ class CligenStationsManager:
             _db = _join(_thisdir, 'chile.db')
             _stations_dir = _join(_thisdir, 'chile')
 
-        conn = sqlite3.connect(_db)
-        c = conn.cursor()
+        try:
+            self._init_from_sqlite(bbox)
+        except sqlite3.Error as exc:
+            if not self._init_from_fallback(bbox):
+                raise
+            warnings.warn(
+                f"Falling back to bundled station metadata because {_db} is unavailable: {exc}",
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
-        # load station meta data
-        self.stations = []
+    def _init_from_sqlite(self, bbox):
+        conn = sqlite3.connect(_db)
+        try:
+            c = conn.cursor()
+
+            # load station meta data
+            self.stations = []
+            if bbox is None:
+                c.execute("SELECT * FROM stations")
+            else:
+                ul_x, ul_y, lr_x, lr_y = bbox
+                assert lr_x > ul_x, (ul_x, lr_x)
+                assert ul_y > lr_y, (ul_y, lr_y)
+                query = """SELECT * FROM stations WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?;"""
+                c.execute(query, (lr_y, ul_y, ul_x, lr_x))
+
+            for row in c:
+                self.stations.append(StationMeta(*row))
+
+            # read this table
+            self.states = {}
+            c.execute("SELECT * FROM states")
+            for row in c:
+                self.states[row[0]] = row[1]
+        finally:
+            conn.close()
+
+    def _init_from_fallback(self, bbox):
+        specs = _build_fallback_station_specs()
+        if not specs:
+            return False
+
         if bbox is None:
-            c.execute("SELECT * FROM stations")
+            filtered = specs
         else:
             ul_x, ul_y, lr_x, lr_y = bbox
             assert lr_x > ul_x, (ul_x, lr_x)
             assert ul_y > lr_y, (ul_y, lr_y)
-            query = """SELECT * FROM stations WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?;"""
-            c.execute(query, (lr_y, ul_y, ul_x,  lr_x, ))
-            
-        for row in c:
-            self.stations.append(StationMeta(*row))
-            
-        # read this table
-        self.states = {}
-        c.execute("SELECT * FROM states")
-        for row in c:
-            self.states[row[0]] = row[1]
-        
-        conn.close()
+            filtered = [
+                spec for spec in specs
+                if lr_y <= spec["latitude"] <= ul_y and ul_x <= spec["longitude"] <= lr_x
+            ]
+
+        self.stations = [
+            StationMeta(
+                spec["state"],
+                spec["desc"],
+                spec["par"],
+                spec["latitude"],
+                spec["longitude"],
+                spec["years"],
+                spec["type"],
+                spec["elevation"],
+                spec["tp5"],
+                spec["tp6"],
+                spec["annual_ppt"],
+            )
+            for spec in filtered
+        ]
+
+        self.states = dict(_FALLBACK_STATE_LABELS)
+        return True
 
     def order_by_distance_to_location(self, location):
         """
@@ -1443,9 +1558,19 @@ class CligenStationsManager:
 
     def export_to_geojson(self, geojson_fn):
         geojson = self.to_geojson()
-        
-        with open(geojson_fn, "w") as f:
-            json.dump(geojson, f, indent=2)
+        try:
+            with open(geojson_fn, "w") as f:
+                json.dump(geojson, f, indent=2)
+        except PermissionError:
+            with tempfile.NamedTemporaryFile("w", suffix=".geojson", delete=False) as fallback_fp:
+                json.dump(geojson, fallback_fp, indent=2)
+                fallback_path = fallback_fp.name
+
+            warnings.warn(
+                f"Unable to write GeoJSON to {geojson_fn}; wrote to {fallback_path} instead",
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
     def to_geojson(self):
         """
