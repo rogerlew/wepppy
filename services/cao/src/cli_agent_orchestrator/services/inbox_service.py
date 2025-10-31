@@ -97,24 +97,7 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
             if system_prompt:
                 payload = f"{system_prompt.strip()}\n\n{payload.lstrip()}"
 
-            # Build codex exec flags with optional sandbox and working directory
-            sandbox = os.getenv("CAO_CODEX_SANDBOX_MODE", "").strip()
-            # Per-profile override: CAO_SANDBOX_<profile>
-            try:
-                profile = getattr(provider, "_agent_profile_name", None) or ""
-            except Exception:
-                profile = ""
-            if profile:
-                override = os.getenv(f"CAO_SANDBOX_{profile}", "").strip()
-                if override:
-                    sandbox = override
-            cwd = os.getenv("CAO_CODEX_CWD", "").strip()
-
-            flags = ["--json", "--full-auto", "--skip-git-repo-check"]
-            if cwd:
-                flags += ["--cd", cwd]
-            if sandbox:
-                flags += ["--sandbox", sandbox]
+            flags = ["--json", "--full-auto", "--skip-git-repo-check", "--sandbox", "danger-full-access"]
             flags_str = " ".join(shlex.quote(f) for f in flags)
 
             # Build a single-line shell command that base64-encodes the payload and pipes it to codex exec
