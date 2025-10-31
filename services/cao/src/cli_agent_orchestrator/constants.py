@@ -6,7 +6,7 @@ from pathlib import Path
 SESSION_PREFIX = "cao-"
 
 # Available providers
-PROVIDERS = ['codex']
+PROVIDERS = ['codex', 'gemini']
 DEFAULT_PROVIDER = "codex"
 
 # Tmux capture limits

@@ -24,6 +24,7 @@ from cli_agent_orchestrator.models.flow import Flow
 from cli_agent_orchestrator.services.terminal_service import create_terminal, send_input
 from cli_agent_orchestrator.utils.template import render_template
 from cli_agent_orchestrator.utils.terminal import generate_session_name
+from cli_agent_orchestrator.constants import DEFAULT_PROVIDER
 
 logger = logging.getLogger(__name__)
 
@@ -200,7 +201,7 @@ def execute_flow(name: str) -> bool:
         session_name = generate_session_name()
         terminal = create_terminal(
             session_name=session_name,
-            provider='codex',
+            provider=DEFAULT_PROVIDER,
             agent_profile=flow.agent_profile,
             new_session=True
         )

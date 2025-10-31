@@ -292,7 +292,7 @@ Modify `run_fixer_loop.py`:
 4. Test with manual CAO session:
    ```bash
    curl -X POST http://nuc2.local:9889/sessions \
-     -d "provider=codex&agent_profile=my_agent&session_name=test-$(date +%s)"
+     -d "provider=gemini&agent_profile=my_agent&session_name=test-$(date +%s)"
    ```
 
 ### Debugging Agent Sessions

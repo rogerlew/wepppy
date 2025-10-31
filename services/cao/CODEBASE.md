@@ -34,14 +34,16 @@
            │ Clients │               │Providers │
            ├─────────┤               ├──────────┤
            │ • tmux  │               │ • codex  │
-           │ • db    │               └──────────┘
-           │                    └────┬─────┘
-         ┌──────┴──────┐                  │
+           │ • db    │               │ • gemini │
+           └─────────┘               └────┬─────┘
+                                        │
+         ┌──────┴──────┐                │
          │             │                  │
     ┌────▼────┐  ┌─────▼─────┐     ┌─────▼──────┐
     │  Tmux   │  │  SQLite   │     │ CLI Tools  │
     │ Sessions│  │  Database │     │• Codex CLI │
-    └─────────┘  └───────────┘     └────────────┘
+    └─────────┘  └───────────┘     │• Gemini CLI│
+                                   └────────────┘
 ```
 
 ## Directory Structure
@@ -67,7 +69,8 @@ src/cli_agent_orchestrator/
 ├── providers/             # Provider Layer: CLI tool integration
 │   ├── base.py            # Abstract provider interface
 │   ├── manager.py         # Maps terminal_id → provider
-│   └── codex.py           # Codex CLI provider (codex)
+│   ├── codex.py           # Codex CLI provider (codex)
+│   └── gemini.py          # Gemini CLI provider (gemini)
 ├── models/                # Data models
 │   ├── terminal.py        # Terminal, TerminalStatus
 │   ├── session.py         # Session model

@@ -106,6 +106,7 @@ CAO follows a layered architecture where CLI commands and MCP tools interact wit
 **Provider Layer:**
 - `base.py` — Abstract interface for CLI tool integration
 - `codex.py` — Codex CLI provider with regex-based status detection
+- `gemini.py` — Gemini CLI provider with system-prompt injection and status heuristics
 - `manager.py` — Maps terminal IDs to provider instances
 
 ### Data Storage
@@ -122,7 +123,9 @@ All state lives under `~/.wepppy/cao/`:
 └── agent-context/                   # Agent profile working directory
 ```
 
-Agent profiles are mirrored to `~/.codex/prompts/` so Codex CLI can discover them.
+Agent profiles are mirrored to `~/.codex/prompts/` so Codex CLI can discover them. When a Gemini
+terminal launches, its system prompt is written to `~/.wepppy/cao/agent-context/<terminal-id>/system.md`
+and exposed to Gemini CLI via `GEMINI_SYSTEM_MD`.
 
 ### Terminal Identity and Status
 
@@ -301,10 +304,12 @@ cao launch --agents developer --headless
 ```
 
 **What `cao launch` does:**
-1. Sends `POST /sessions` to the CAO server with provider=codex and agent_profile
+1. Sends `POST /sessions` to the CAO server with the requested `provider` (default `codex`) and `agent_profile`
 2. Server creates a new tmux session (name format: `cao-<random>`)
 3. Server creates a terminal within the session and assigns a unique `CAO_TERMINAL_ID`
-4. Codex provider initializes: waits for shell, runs `codex --full-auto <system-prompt>`, waits for IDLE
+4. Provider initializes:
+   - **Codex:** waits for shell, loads Wojak prompts, runs `codex` for interactive mode
+   - **Gemini:** waits for shell, writes `system.md`, exports `GEMINI_SYSTEM_MD`, launches `gemini`
 5. Inbox service registers the terminal for message delivery
 6. If not headless, attaches your terminal to the tmux session
 
@@ -372,19 +377,22 @@ cao-server
 Creates a new agent session with the specified profile.
 
 ```bash
-cao launch --agents <profile-name> [--session-name <name>] [--headless] [--provider codex]
+cao launch --agents <profile-name> [--session-name <name>] [--headless] [--provider {codex|gemini}]
 ```
 
 **Arguments:**
 - `--agents` (required): Agent profile name (must be previously installed via `cao install`)
 - `--session-name` (optional): Custom tmux session name (default: auto-generated `cao-<uuid>`)
 - `--headless` (flag): Launch in background without attaching to tmux session
-- `--provider` (optional): Provider to use (default: `codex`; currently only Codex supported)
+- `--provider` (optional): Provider to use (default: `codex`; options: `codex`, `gemini`)
 
 **Example:**
 ```bash
 # Interactive session
 cao launch --agents code_supervisor
+
+# Gemini CLI session (e.g., for PDF to Markdown workflows)
+cao launch --agents developer --provider gemini
 
 # Background session with custom name
 cao launch --agents developer --session-name dev-agent-001 --headless
@@ -392,13 +400,13 @@ cao launch --agents developer --session-name dev-agent-001 --headless
 
 **What happens internally:**
 1. Validates provider and agent profile
-2. Sends `POST http://localhost:9889/sessions?provider=codex&agent_profile=<name>[&session_name=<name>]`
-3. Server creates tmux session/window, assigns `CAO_TERMINAL_ID`, initializes Codex CLI
+2. Sends `POST http://localhost:9889/sessions?provider=<provider>&agent_profile=<name>[&session_name=<name>]`
+3. Server creates tmux session/window, assigns `CAO_TERMINAL_ID`, and initializes the selected CLI provider
 4. If not headless, runs `tmux attach-session -t <session-name>`
 
 **Errors:**
 - `Failed to connect to cao-server`: Ensure `cao-server` is running
-- `Invalid provider`: Only `codex` is supported in this fork
+- `Invalid provider`: Provider must be one of `codex`, `gemini`
 - `Failed to create session`: Check `~/.wepppy/cao/logs/cao.log` for details
 
 ### cao shutdown
@@ -854,7 +862,7 @@ The HTTP API powers both CLI commands and MCP tools. Complete documentation avai
 **Example: Create session via API**
 
 ```bash
-curl -X POST "http://localhost:9889/sessions?provider=codex&agent_profile=developer" \
+curl -X POST "http://localhost:9889/sessions?provider=gemini&agent_profile=developer" \
   | jq
 ```
 
@@ -865,7 +873,7 @@ curl -X POST "http://localhost:9889/sessions?provider=codex&agent_profile=develo
   "session_name": "cao-e5f6g7h8",
   "window_name": "developer-a1b2",
   "name": "developer-a1b2",
-  "provider": "codex",
+  "provider": "gemini",
   "status": "IDLE",
   "agent_profile": "developer"
 }
@@ -890,7 +898,7 @@ TERMINAL_LOG_DIR = CAO_HOME / "logs" / "terminal"
 DATABASE_PATH = CAO_HOME / "db" / "cli-agent-orchestrator.db"
 
 # Providers
-PROVIDERS = ["codex"]  # Only Codex supported in this fork
+PROVIDERS = ["codex", "gemini"]
 CODEX_PROMPT_DIR = Path.home() / ".codex" / "prompts"
 
 # Timings
