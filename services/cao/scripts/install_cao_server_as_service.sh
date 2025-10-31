@@ -20,12 +20,6 @@ rsync -a --delete \
   --exclude '__pycache__/' \
   "${PROJECT_ROOT}/" "${TARGET_ROOT}/"
 
-echo "[CAO installer] Bootstrapping virtualenv"
-(
-  cd "${TARGET_ROOT}"
-  ./scripts/setup_venv.sh
-)
-
 echo "[CAO installer] Resolving project version"
 VERSION=$(
   python - <<'PY' "${TARGET_ROOT}/pyproject.toml"

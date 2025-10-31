@@ -958,7 +958,7 @@ Create `tests/` directory under `services/cao/` and follow wepppy test conventio
 ### Running in Production
 
 **Deployment checklist:**
-1. Run `cao-server` as a systemd service (or supervisord). Use `services/cao/scripts/install_cao_server_as_service.sh` to sync the project to `/workdir/cao`, bootstrap the virtualenv, write the VERSION file, and install the unit under `/etc/systemd/system/cao-server.service`.
+1. Run `cao-server` as a systemd service (or supervisord). Use `services/cao/scripts/install_cao_server_as_service.sh` to sync the project to `/workdir/cao`, record the VERSION file, and install the unit under `/etc/systemd/system/cao-server.service`. The systemd `ExecStartPre` hook runs `./scripts/setup_venv.sh`, so the virtualenv is built on service start.
 2. Configure log rotation for `~/.wepppy/cao/logs/`
 3. Monitor health endpoint: `curl http://localhost:9889/health`
 4. Set up alerts for flow execution failures (check logs)

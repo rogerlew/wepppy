@@ -240,3 +240,13 @@ jobs:
           ssh "${NUC2}" "gh auth status || true"
           echo "Checking GH repo access on ${NUC2}"
           ssh "${NUC2}" "cd ${REPO} && gh repo view || true"
+
+      - name: Remove redis data directory
+        run: |
+          set -euo pipefail
+          if [ -d "${GITHUB_WORKSPACE}/.docker-data/redis" ]; then
+            echo "Removing ${GITHUB_WORKSPACE}/.docker-data/redis"
+            sudo rm -rf "${GITHUB_WORKSPACE}/.docker-data/redis"
+          else
+            echo "Redis data directory not present; nothing to remove."
+          fi
