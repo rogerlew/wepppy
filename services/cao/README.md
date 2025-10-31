@@ -689,6 +689,7 @@ See [examples/assign](examples/assign) for a complete working example.
 - `PollingObserver` watches `~/.wepppy/cao/logs/terminal/` directory
 - When a log file changes, `LogFileHandler` reads the tail
 - If provider's idle pattern is detected, `check_and_send_pending_messages()` is called
+- Codex and Gemini terminals execute queued work via non-interactive CLI invocations (`codex exec …`, `gemini -p … --approval-mode=yolo`)
 - All `PENDING` messages for that terminal are sent via `tmux send-keys`
 - Message status updated to `DELIVERED` in database
 
