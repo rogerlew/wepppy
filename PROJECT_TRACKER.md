@@ -123,7 +123,6 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 - Remove all code paths related to `DelineationBackend.TauDEM` in `wepppy/nodb/core/watershed.py`.
 - Delete any TauDEM-specific scripts, configuration, or workflow files.
 - Ensure the `WBT` (WhiteboxTools) backend is the default and fully functional replacement for all use cases.
-- Update documentation (e.g., `cicd-strategy.md`, `nodb-project-build.md`) to remove any references to TauDEM.
 
 **Strategic Value**:
 - Reduces technical debt and code complexity.
