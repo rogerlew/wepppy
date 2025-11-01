@@ -152,6 +152,7 @@ RUN set -euxo pipefail; \
 RUN set -euxo pipefail; \
     SITE_PACKAGES=$(/opt/venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'); \
     printf "/workdir/wepppy/\n" > "${SITE_PACKAGES}/wepppy.pth"; \
+    printf "/workdir/wepppy/services/cao/src/\n" > "${SITE_PACKAGES}/cao.pth"; \
     printf "/workdir/wepppy2/\n" > "${SITE_PACKAGES}/wepp_runner.pth"; \
     printf "/workdir/weppcloud2/\n" > "${SITE_PACKAGES}/weppcloud2.pth"; \
     printf "/workdir/weppcloud-wbt/WBT/\n" > "${SITE_PACKAGES}/wbt.pth"; \

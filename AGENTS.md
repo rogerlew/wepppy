@@ -7,6 +7,7 @@
 ## Core Directives
 - `??` in prompt is a directive to provide critical response and not to implement in code.
 - If you need clarification or additional debug information from a human, just ask.
+- **Codex can't compress verbose docs** (bulk loads context, no compression pass). Keep code docs dense/terse—every verbose token reduces code-reading capacity. Claude compresses on-the-fly so tolerates verbosity but it's wasteful. Write for Codex's token budget.
 
 ## Repository Overview
 

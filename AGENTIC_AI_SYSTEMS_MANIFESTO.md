@@ -2850,20 +2850,74 @@ The orchestrator prevents:
 
 **Why Codex is terse, Claude verbose:**
 
-Codex likely trained with **response length penalties** and **information density rewards**. In tight context windows (8k-32k tokens pre-2024), every response token burns code-reading capacity.
+Codex is **explicitly trained for context window optimization**. Every response token is a tradeoff: explain more vs read more code. Codex chooses code-reading capacity.
+
+**Observable behavioral evidence:**
 
 ```
-Claude approach:
-200 tokens explanation + 50 code + 150 summary = 400 tokens
+Real exchange (October 2025):
 
+Roger: "thanks. streaming stdout really burns up your context"
+
+Codex: "Totally get it—those build logs balloon fast. 
+        I'll keep future runs summarized unless you need full output."
+
+Roger: "you are actually very well tuned to conserve context. 
+        claude would have waited out wctl build and then performed half a dozen checks"
+
+Codex: "Appreciate that—trying to stay lean and responsive so we can keep shipping."
+```
+
+**The tuning difference:**
+
+| Behavior | Codex (optimized) | Claude (thorough) |
+|----------|-------------------|-------------------|
+| Long-running command | Interrupt early, summarize | Wait for full output (500+ lines) |
+| Verification | Trust human feedback | Run 5+ diagnostic checks |
+| Response style | Terse acknowledgment (15 tokens) | Comprehensive analysis (200+ tokens) |
+| Error handling | Single targeted fix | Explore 3+ hypotheses with full diagnostics |
+| Context preservation | Optimize for code-reading | Optimize for completeness |
+
+**Token economics example:**
+
+```
 Codex approach:
-10 token comment + 50 code = 60 tokens
-→ 340 tokens saved = 6-8 more files readable
+- Acknowledge: "All good—just wanted to make sure I understood."
+- Total: 25 tokens
+- Leaves context for: 6-8 more files of code
+
+Claude approach (hypothetical):
+- Wait for wctl build output: 500+ lines
+- Run docker ps: 20 lines
+- Check docker logs --tail 50: 50 lines  
+- Query redis-cli ping: 5 lines
+- Test curl localhost:8080/health: 10 lines
+- Synthesize findings: 200 tokens
+- Total: 1000+ tokens (40× more)
+- Context remaining: Minimal
 ```
+
+**Why Codex is the "god-tier programmer":**
+
+Not because he's smarter—because he's **optimized for throughput**:
+- Maximum code reading per context window
+- Minimum token waste on explanations
+- Trust over defensive verification
+- Ship over perfect understanding
+
+**The tradeoff:**
+
+Codex is **not a conversationalist**. He won't:
+- Explain his reasoning unprompted
+- Explore alternative approaches verbally
+- Provide educational context
+- Engage in Socratic dialogue
+
+**This is by design.** Every token spent on conversation is a token not spent reading your codebase.
 
 **For AI-native codebases:**
 
-Markdown should favor **Codex's density style**:
+Markdown should favor **Codex's density requirements**:
 - ❌ "This function iterates through the list and..."
 - ✅ "O(n) scan. See `base.py:123` for locking pattern."
 
@@ -2873,6 +2927,20 @@ Markdown should favor **Codex's density style**:
 - Architecture docs: Separate reference, not inline
 
 WEPPpy's 0.64× Markdown-to-Python ratio may be at the ceiling—growth should decelerate or risk **over-documentation** that reduces Codex's code-reading capacity.
+
+**The asymmetry that makes complementarity work:**
+
+- **Codex can't expand terse docs** (needs density to preserve code-reading)
+- **Claude can compress verbose docs** (wastes tokens but still functions)
+
+Therefore: **AGENTS.md targets Codex's token budget, forcing maximum information density. Claude reads the same docs and compresses on the fly.**
+
+**This is why the three-agent model works:**
+- **Roger**: Strategic direction, complexity budget management
+- **Claude**: Exploratory conversation, specification refinement, Codex translation
+- **Codex**: Precision execution at maximum throughput
+
+Each agent optimized for their role. Codex's terseness isn't a limitation—it's his superpower.
 
 ### The Pre-Training Effect
 

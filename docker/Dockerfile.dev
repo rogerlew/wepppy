@@ -80,11 +80,15 @@ RUN /opt/venv/bin/python -c "import duckdb; \
                con.close()"
 
 # Mirror historical conda .pth injections so sibling repos resolve in development.
-COPY docker/pth_files/*.pth /tmp/pth/
-RUN for f in /tmp/pth/*.pth; do \
-        cp "$f" /opt/venv/lib/python3.10/site-packages/; \
-    done
-
+RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write(site.getsitepackages()[0])')" && \
+    printf '/workdir/wepppy/\n' > "${SITE_PACKAGES}/wepppy.pth" && \
+    printf '/workdir/wepppy/services/cao/src/\n' > "${SITE_PACKAGES}/cao.pth" && \
+    printf '/workdir/wepppy2/\n' > "${SITE_PACKAGES}/wepp_runner.pth" && \
+    printf '/workdir/weppcloud2/\n' > "${SITE_PACKAGES}/weppcloud2.pth" && \
+    printf '/workdir/weppcloud-wbt/WBT/\n' > "${SITE_PACKAGES}/wbt.pth" && \
+    printf '/workdir/f-esri/\n' > "${SITE_PACKAGES}/f_esri.pth" && \
+    printf '/workdir/wepppyo3/release/linux/py310-wepppy310-env/\n' > "${SITE_PACKAGES}/wepppyo3.pth"
+    
 # Vendor Rosetta directly from GitHub into site-packages, including LFS assets.
 RUN git clone --depth=1 https://github.com/rogerlew/rosetta /tmp/rosetta && \
     cd /tmp/rosetta && \
