@@ -3,10 +3,19 @@
 import logging
 from typing import Dict, Optional
 
-from cli_agent_orchestrator.clients.database import get_terminal_metadata
 from cli_agent_orchestrator.providers.base import BaseProvider
 from cli_agent_orchestrator.providers.codex import CodexProvider
 from cli_agent_orchestrator.providers.gemini import GeminiProvider
+
+try:
+    from cli_agent_orchestrator.clients.database import get_terminal_metadata
+except ModuleNotFoundError as exc:
+    missing_sqlalchemy = (exc.name and exc.name.startswith("sqlalchemy")) or "sqlalchemy" in str(exc)
+    if missing_sqlalchemy:
+        def get_terminal_metadata(*_args, **_kwargs):
+            raise RuntimeError("Database backend is unavailable: SQLAlchemy is not installed.")
+    else:
+        raise
 
 logger = logging.getLogger(__name__)
 
