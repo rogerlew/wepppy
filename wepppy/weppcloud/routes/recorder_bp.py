@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from ._common import Blueprint, Response, jsonify, request, current_app, current_user
 from wepppy.profile_recorder import get_profile_recorder
 
-recorder_bp = Blueprint("recorder", __name__, url_prefix="/weppcloud")
+recorder_bp = Blueprint("recorder", __name__)
 
 
 def _normalise_events(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
