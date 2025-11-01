@@ -49,6 +49,10 @@
         if (candidate.startsWith("JID")) {
             return candidate.slice(3);
         }
+        // Strip rq: prefix if present (status messages use "rq:<uuid>" format)
+        if (candidate.startsWith("rq:")) {
+            return candidate.slice(3);
+        }
         return candidate;
     }
 

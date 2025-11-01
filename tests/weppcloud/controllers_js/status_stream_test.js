@@ -214,13 +214,19 @@ async function runTests() {
   assert.strictEqual(triggerCalls.length, 1);
   assert.strictEqual(triggerCalls[0].event, "FORK_COMPLETE");
 
-  // Stacktrace handling
+  // Stacktrace handling - JID prefix
   socket.emitMessage(JSON.stringify({ type: "status", data: "JID123 EXCEPTION Failure" }));
   await new Promise((resolve) => setImmediate(resolve));
   assert.strictEqual(stacktraceFetches[0], "123");
   assert.strictEqual(stacktracePanel.hidden, false);
   assert.strictEqual(stacktracePanel.open, true);
   assert.strictEqual(stacktraceBody.textContent, "STACK:123");
+
+  // Stacktrace handling - rq: prefix
+  socket.emitMessage(JSON.stringify({ type: "status", data: "rq:b94b574f-7b1f-456a-93ab-b6a5c797d9dd EXCEPTION build_soils failed" }));
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.strictEqual(stacktraceFetches[1], "b94b574f-7b1f-456a-93ab-b6a5c797d9dd", "Should strip rq: prefix");
+  assert.strictEqual(stacktraceBody.textContent, "STACK:b94b574f-7b1f-456a-93ab-b6a5c797d9dd");
 
   // Reconnect on close
   socket.close();
