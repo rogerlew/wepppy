@@ -1,10 +1,53 @@
-from datetime import datetime, timezone
-from types import SimpleNamespace
 import base64
+import os
 import shlex
+import sys
+import types
+from datetime import datetime, timezone
+from pathlib import Path
+from types import SimpleNamespace
+
+_TEST_HOME = Path("/tmp/wepppy-test-home")
+_TEST_HOME.mkdir(parents=True, exist_ok=True)
+os.environ["HOME"] = str(_TEST_HOME)
+
+if "libtmux" not in sys.modules:
+    libtmux_stub = types.ModuleType("libtmux")
+
+    class _Server:  # pragma: no cover - ensured via provider imports
+        def __init__(self, *args, **kwargs) -> None:  # noqa: D401, ANN001
+            pass
+
+    libtmux_stub.Server = _Server  # type: ignore[attr-defined]
+    sys.modules["libtmux"] = libtmux_stub
+
+if "frontmatter" not in sys.modules:
+    frontmatter_stub = types.ModuleType("frontmatter")
+
+    def _loads(text: str):
+        return types.SimpleNamespace(metadata={}, content=text)
+
+    frontmatter_stub.loads = _loads  # type: ignore[attr-defined]
+    sys.modules["frontmatter"] = frontmatter_stub
+
+if "watchdog.events" not in sys.modules:
+    watchdog_stub = types.ModuleType("watchdog")
+    watchdog_events_stub = types.ModuleType("watchdog.events")
+
+    class _FileSystemEventHandler:  # pragma: no cover - used for import wiring
+        pass
+
+    class _FileModifiedEvent:
+        def __init__(self, src_path: str = "") -> None:
+            self.src_path = src_path
+
+    watchdog_events_stub.FileSystemEventHandler = _FileSystemEventHandler  # type: ignore[attr-defined]
+    watchdog_events_stub.FileModifiedEvent = _FileModifiedEvent  # type: ignore[attr-defined]
+    watchdog_stub.events = watchdog_events_stub  # type: ignore[attr-defined]
+    sys.modules["watchdog"] = watchdog_stub
+    sys.modules["watchdog.events"] = watchdog_events_stub
 
 import pytest
-
 try:
     from cli_agent_orchestrator.models.inbox import InboxMessage, MessageStatus
     from cli_agent_orchestrator.services import inbox_service
@@ -22,7 +65,7 @@ except ModuleNotFoundError as exc:
 
 
 @pytest.mark.unit
-def test_gemini_inbox_delivery_builds_non_interactive_command(monkeypatch, tmp_path):
+def collection_error(monkeypatch, tmp_path):
     terminal_id = "abcd1234"
     message = InboxMessage(
         id=1,
@@ -84,3 +127,6 @@ def test_gemini_inbox_delivery_builds_non_interactive_command(monkeypatch, tmp_p
         "rm -f \"$tmp\""
     )
     assert sent_inputs[0][1] == expected_command
+
+
+test_gemini_inbox_delivery_builds_non_interactive_command = collection_error
