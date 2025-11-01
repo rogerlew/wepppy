@@ -4,16 +4,34 @@ import logging
 from enum import Enum
 from typing import Dict
 from cli_agent_orchestrator.clients.tmux import tmux_client
-from cli_agent_orchestrator.clients.database import (
-    create_terminal as db_create_terminal,
-    get_terminal_metadata,
-    update_last_active,
-    delete_terminal as db_delete_terminal
-)
 from cli_agent_orchestrator.providers.manager import provider_manager
 from cli_agent_orchestrator.utils.terminal import generate_terminal_id, generate_session_name, generate_window_name
 from cli_agent_orchestrator.models.terminal import Terminal
 from cli_agent_orchestrator.constants import SESSION_PREFIX, TERMINAL_LOG_DIR
+
+try:
+    from cli_agent_orchestrator.clients.database import (
+        create_terminal as db_create_terminal,
+        get_terminal_metadata,
+        update_last_active,
+        delete_terminal as db_delete_terminal
+    )
+except ModuleNotFoundError as exc:
+    missing_sqlalchemy = (exc.name and exc.name.startswith("sqlalchemy")) or "sqlalchemy" in str(exc)
+    if missing_sqlalchemy:
+        def db_create_terminal(*_args, **_kwargs):
+            raise RuntimeError("Database backend is unavailable: SQLAlchemy is not installed.")
+
+        def get_terminal_metadata(*_args, **_kwargs):
+            raise RuntimeError("Database backend is unavailable: SQLAlchemy is not installed.")
+
+        def update_last_active(*_args, **_kwargs):
+            raise RuntimeError("Database backend is unavailable: SQLAlchemy is not installed.")
+
+        def db_delete_terminal(*_args, **_kwargs):
+            raise RuntimeError("Database backend is unavailable: SQLAlchemy is not installed.")
+    else:
+        raise
 
 logger = logging.getLogger(__name__)
 

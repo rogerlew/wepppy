@@ -9,12 +9,30 @@ from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 import base64
 import os
 import shlex
-from cli_agent_orchestrator.clients.database import get_pending_messages, update_message_status
 from cli_agent_orchestrator.models.inbox import MessageStatus
 from cli_agent_orchestrator.models.terminal import TerminalStatus
 from cli_agent_orchestrator.providers.manager import provider_manager
 from cli_agent_orchestrator.services import terminal_service
 from cli_agent_orchestrator.constants import TERMINAL_LOG_DIR, INBOX_SERVICE_TAIL_LINES
+
+try:
+    from cli_agent_orchestrator.clients import database as database_client
+except ModuleNotFoundError as exc:
+    missing_sqlalchemy = (exc.name and exc.name.startswith("sqlalchemy")) or "sqlalchemy" in str(exc)
+    if missing_sqlalchemy:
+        database_client = None
+    else:
+        raise
+
+if database_client is not None:
+    get_pending_messages = database_client.get_pending_messages
+    update_message_status = database_client.update_message_status
+else:
+    def get_pending_messages(*_args, **_kwargs):
+        raise RuntimeError("Database backend is unavailable: SQLAlchemy is not installed.")
+
+    def update_message_status(*_args, **_kwargs):
+        raise RuntimeError("Database backend is unavailable: SQLAlchemy is not installed.")
 
 logger = logging.getLogger(__name__)
 
