@@ -80,10 +80,47 @@
         return String(message);
     }
 
+    function extractStacktrace(payload) {
+        if (!payload) {
+            return null;
+        }
+        if (payload.exc_info) {
+            return payload.exc_info;
+        }
+        if (payload.description) {
+            return payload.description;
+        }
+        try {
+            return JSON.stringify(payload, null, 2);
+        } catch (err) {
+            return String(payload);
+        }
+    }
+
     function defaultStacktraceFetcher(jobId) {
-        if (!jobId || typeof fetch !== "function") {
+        if (!jobId) {
             return Promise.resolve(null);
         }
+
+        var http = global.WCHttp;
+        if (http && typeof http.getJson === "function") {
+            return http.getJson("/weppcloud/rq/api/jobinfo/" + encodeURIComponent(jobId))
+                .then(function (payload) {
+                    return extractStacktrace(payload);
+                })
+                .catch(function (error) {
+                    if (http.isHttpError && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+                        return null;
+                    }
+                    console.warn("StatusStream stacktrace fetch failed:", error);
+                    return null;
+                });
+        }
+
+        if (typeof fetch !== "function") {
+            return Promise.resolve(null);
+        }
+
         var origin = global.location && global.location.origin ? global.location.origin : "";
         var url = origin.replace(/\/$/, "") + "/weppcloud/rq/api/jobinfo/" + encodeURIComponent(jobId);
         return fetch(url, { credentials: "same-origin" })
@@ -94,16 +131,7 @@
                 return response.json();
             })
             .then(function (payload) {
-                if (!payload) {
-                    return null;
-                }
-                if (payload.exc_info) {
-                    return payload.exc_info;
-                }
-                if (payload.description) {
-                    return payload.description;
-                }
-                return JSON.stringify(payload, null, 2);
+                return extractStacktrace(payload);
             })
             .catch(function (error) {
                 console.warn("StatusStream stacktrace fetch failed:", error);

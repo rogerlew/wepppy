@@ -39,6 +39,7 @@ PRIORITY_MODULES: Final[List[str]] = [
     "events.js",
     "forms.js",
     "http.js",
+    "recorder_interceptor.js",
     "utils.js",
     "modal.js",
     "unitizer_client.js",

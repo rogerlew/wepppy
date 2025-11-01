@@ -47,6 +47,7 @@ def register_blueprints(app):
     app.register_blueprint(rangeland_cover_bp)
     app.register_blueprint(weppcloudr_bp)
     app.register_blueprint(path_ce_bp)
+    app.register_blueprint(recorder_bp)
     app.register_blueprint(locations_bp)
     app.register_blueprint(rq_job_dashboard_bp)
     app.register_blueprint(readme_bp)
