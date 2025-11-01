@@ -6,7 +6,8 @@ import json
 
 import pytest
 
-from wepppy.profile_recorder.service import ProfileRecorder
+from wepppy.profile_recorder.config import RecorderConfig
+from wepppy.profile_recorder.profile_recorder import ProfileRecorder
 
 
 @pytest.mark.unit
@@ -15,12 +16,10 @@ def test_append_event_writes_audit_and_draft(tmp_path, monkeypatch):
     run_dir.mkdir()
 
     data_repo = tmp_path / "data"
-    fallback = tmp_path / "fallback"
-
-    recorder = ProfileRecorder(data_repo_root=data_repo, fallback_root=fallback)
+    recorder = ProfileRecorder(config=RecorderConfig(data_repo_root=data_repo, assembler_enabled=True))
 
     monkeypatch.setattr(
-        "wepppy.profile_recorder.service.get_wd",
+        "wepppy.profile_recorder.profile_recorder.get_wd",
         lambda runid: run_dir,
     )
 

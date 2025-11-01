@@ -40,3 +40,7 @@ def config_app(app, logger=None):
         app.config['PROFILE_DATA_ROOT'] = os.getenv('PROFILE_DATA_ROOT', '/workdir/wepppy-test-engine-data')
     if 'PROFILE_RECORDER_GLOBAL_ROOT' not in app.config:
         app.config['PROFILE_RECORDER_GLOBAL_ROOT'] = os.getenv('PROFILE_RECORDER_GLOBAL_ROOT')
+    app.config.setdefault(
+        'PROFILE_RECORDER_ASSEMBLER_ENABLED',
+        app.config.get('PROFILE_RECORDER_ENABLED', True),
+    )

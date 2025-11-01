@@ -10,7 +10,7 @@
     var recorder = global.WCRecorder || (function () {
         var queue = [];
         var flushTimer = null;
-        var DEFAULT_ENDPOINT = "/weppcloud/recorder/events";
+        var DEFAULT_ENDPOINT = "recorder/events";
         var DEFAULT_BATCH_SIZE = 10;
         var DEFAULT_FLUSH_INTERVAL_MS = 200;
         var rand = Math.random().toString(36).slice(2);
@@ -43,12 +43,53 @@
             return true;
         }
 
-        function getEndpoint() {
-            var endpoint = recorderConfig.endpoint || DEFAULT_ENDPOINT;
-            if (typeof endpoint !== "string" || !endpoint) {
-                return DEFAULT_ENDPOINT;
+        function resolveSitePrefix() {
+            var prefix = typeof global.site_prefix === "string" ? global.site_prefix : "";
+            if (!prefix) {
+                return "";
             }
-            return endpoint;
+            if (prefix.charAt(0) !== "/") {
+                prefix = "/" + prefix;
+            }
+            return prefix.replace(/\/+$/, "");
+        }
+
+        function buildRunScopedEndpoint(endpoint) {
+            if (typeof endpoint !== "string" || !endpoint) {
+                endpoint = DEFAULT_ENDPOINT;
+            }
+
+            if (/^https?:\/\//i.test(endpoint) || endpoint.charAt(0) === "/") {
+                return endpoint;
+            }
+
+            var scoped = endpoint;
+            if (typeof global.url_for_run === "function") {
+                try {
+                    var candidate = global.url_for_run(endpoint);
+                    if (candidate) {
+                        scoped = candidate;
+                    }
+                } catch (err) {
+                    /* noop */
+                }
+            }
+            if (scoped.charAt(0) !== "/") {
+                scoped = "/" + scoped;
+            }
+            var prefix = resolveSitePrefix();
+            if (prefix && scoped.indexOf(prefix + "/") !== 0) {
+                scoped = prefix + scoped;
+            }
+            return scoped;
+        }
+
+        function getEndpoint() {
+            var endpoint = recorderConfig.endpoint;
+            if (typeof endpoint !== "string" || !endpoint) {
+                endpoint = DEFAULT_ENDPOINT;
+            }
+            return buildRunScopedEndpoint(endpoint);
         }
 
         function normaliseBlob(payload) {
