@@ -5,6 +5,7 @@ import argparse
 import base64
 import json
 import os
+import random
 import re
 import shlex
 import subprocess
@@ -297,6 +298,7 @@ def main() -> int:
 
     # Build remaining queue (in-memory for pilot)
     remaining: List[Failure] = failures.copy()
+    random.shuffle(remaining)
     handled: List[str] = []
 
     processed = 0
