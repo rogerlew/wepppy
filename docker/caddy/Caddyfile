@@ -26,6 +26,9 @@ http://:8080 {
         reverse_proxy profile-playback:8070 {
             header_up X-Forwarded-Proto {scheme}
             header_up Host {host}
+            transport http {
+                read_timeout 100m
+            }
         }
     }
 

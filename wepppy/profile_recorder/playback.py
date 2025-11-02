@@ -39,20 +39,27 @@ class PlaybackSession:
         self.execute = execute
         self.base_url = base_url.rstrip("/")
         self.capture_dir = profile_root / "capture"
+        self.session = session or requests.Session()
+        self.verbose = verbose
+        self._logger = logger
+
+        if self.verbose:
+            self._log(f"PlaybackSession created (execute={self.execute}, verbose={self.verbose})")
+
         if not self.capture_dir.exists():
             raise FileNotFoundError(f"Capture directory not found: {self.capture_dir}")
 
         self.events = self._load_events(self.capture_dir / "events.jsonl")
         self.run_id = self._detect_run_id(self.events) or profile_root.name
+        self._log(f"Loaded {len(self.events)} events from {self.capture_dir}")
+        self._log(f"Resolved run id: {self.run_id}")
 
         if run_dir is not None:
             self.run_dir = run_dir
+            self._log(f"Using existing run directory: {self.run_dir}")
         else:
             self.run_dir = self._clone_run(profile_root, self.run_id)
-
-        self.session = session or requests.Session()
-        self.verbose = verbose
-        self._logger = logger
+            self._log(f"Cloned run snapshot to: {self.run_dir}")
 
         self.requests = self._index_requests(self.events)
         self.results: List[Tuple[str, str]] = []
@@ -105,6 +112,7 @@ class PlaybackSession:
         return requests
 
     def run(self) -> None:
+        self._log("Beginning playback")
         for event in self.events:
             if event.get("stage") != "response":
                 continue
@@ -130,10 +138,12 @@ class PlaybackSession:
 
             if method not in ("GET", "POST"):
                 self.results.append((request_id, f"{path}: unsupported method {method}"))
+                self._log(f"Skipping {request_id}: unsupported method {method}")
                 continue
 
             if method == "POST" and json_payload is None:
                 self.results.append((request_id, f"{path}: unsupported payload type"))
+                self._log(f"Skipping {request_id}: unsupported payload type")
                 continue
 
             expected_status = self._expected_status(event)
@@ -180,6 +190,7 @@ class PlaybackSession:
         for request_id, status in self.results:
             lines.append(f"  - {request_id}: {status}")
         lines.append(f"Playback run directory: {self.run_dir}")
+        self._log("Playback complete")
         return "\n".join(lines)
 
     def _execute_request(
@@ -197,12 +208,30 @@ class PlaybackSession:
         if method == "POST" and json_payload is not None:
             kwargs["json"] = json_payload
 
+        response = self.session.request(method, url, **kwargs)
+
+        if method == "POST" and self.execute:
+            if self.verbose:
+                self._log(f"{path} response content-type {response.headers.get('Content-Type', '')}")
+                try:
+                    preview = response.text[:200]
+                except Exception:
+                    preview = "<unavailable>"
+                self._log(f"{path} response preview {preview}")
+            job_id = self._extract_job_id(response)
+            if job_id:
+                if self.verbose:
+                    self._log(f"job {job_id} enqueued by {path}")
+                self._wait_for_job(job_id)
+            elif self.verbose:
+                self._log(f"no job id detected in {path} response")
+
         if self._should_wait_for_completion(method, path, expected_status):
             if self.verbose:
                 self._log("waiting for task completion")
             return self._poll_for_completion(url, params, expected_status)
 
-        return self.session.request(method, url, **kwargs)
+        return response
 
     def _poll_for_completion(
         self,
@@ -215,6 +244,8 @@ class PlaybackSession:
     ) -> requests.Response:
         end_time = time.time() + timeout
         last_response: Optional[requests.Response] = None
+        last_status: Optional[int] = None
+        attempt = 0
         while True:
             try:
                 response = self.session.get(url, params=params or None, timeout=60)
@@ -229,11 +260,17 @@ class PlaybackSession:
                     self._log("wait complete")
                 return response
             if response.status_code not in (401, 403, 404):
+                if self.verbose:
+                    self._log(f"wait aborted on status {response.status_code}")
                 return response
             if time.time() >= end_time:
+                if self.verbose:
+                    self._log(f"wait timed out after {attempt + 1} attempts (last status {response.status_code})")
                 return response
-            if self.verbose:
+            if self.verbose and (attempt == 0 or response.status_code != last_status):
                 self._log(f"waiting... status {response.status_code}")
+            last_status = response.status_code
+            attempt += 1
             time.sleep(interval)
 
     def _expected_status(self, event: Event) -> int:
@@ -265,6 +302,72 @@ class PlaybackSession:
             self._logger.info(message)
         else:
             print(f"[playback] {message}")
+
+    def _extract_job_id(self, response: requests.Response) -> Optional[str]:
+        content_type = response.headers.get("content-type", "")
+        if "application/json" not in content_type.lower():
+            return None
+        try:
+            payload = response.json()
+        except ValueError:
+            if self.verbose:
+                self._log("response JSON decode failed when extracting job id")
+            return None
+        if isinstance(payload, dict):
+            job_id = payload.get("job_id") or payload.get("jobId")
+            if isinstance(job_id, str) and job_id.strip():
+                return job_id.strip()
+            if self.verbose:
+                self._log("response JSON did not include job_id")
+        return None
+
+    def _wait_for_job(
+        self,
+        job_id: str,
+        *,
+        timeout: int = 900,
+        interval: float = 2.0,
+    ) -> None:
+        status_url = self._build_url(f"/rq/api/jobstatus/{job_id}")
+        end_time = time.time() + timeout
+        last_status: Optional[str] = None
+
+        while True:
+            try:
+                response = self.session.get(status_url, params={"_": int(time.time() * 1000)}, timeout=60)
+            except requests.RequestException as exc:
+                if self.verbose:
+                    self._log(f"job {job_id} status request failed: {exc}")
+                time.sleep(interval)
+                if time.time() >= end_time:
+                    raise RuntimeError(f"Timeout waiting for job {job_id}") from exc
+                continue
+
+            if response.status_code == 200:
+                try:
+                    payload = response.json()
+                except ValueError:
+                    payload = {}
+                status = str(payload.get("status") or "").lower()
+                if self.verbose and status and status != last_status:
+                    self._log(f"job {job_id} status {status}")
+                last_status = status or last_status
+                if status in {"finished"}:
+                    return
+                if status in {"failed", "stopped", "canceled"}:
+                    raise RuntimeError(f"Job {job_id} ended with status {status}")
+            elif response.status_code == 404:
+                if self.verbose:
+                    self._log(f"job {job_id} status endpoint returned 404; assuming complete")
+                return
+            else:
+                if self.verbose:
+                    self._log(f"job {job_id} status HTTP {response.status_code}")
+
+            if time.time() >= end_time:
+                raise RuntimeError(f"Timeout waiting for job {job_id}")
+
+            time.sleep(interval)
 
 
 def main(argv: Optional[List[str]] = None) -> int:
