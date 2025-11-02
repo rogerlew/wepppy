@@ -49,7 +49,9 @@
 4. **Runner Workflow**
    - CLI command: `wctl run-test-profile <slug>` (host-side helper).
    - Helper calls the `profile_playback` FastAPI microservice which clones the promoted profile snapshot into `PROFILE_PLAYBACK_RUN_ROOT/<runid>` and replays the captured HTTP traffic with `PlaybackSession`.
+   - POST requests that enqueue RQ tasks are tracked by job id; the runner polls `/rq/api/jobstatus/<job_id>` until each job completes before continuing through the recorded sequence, mirroring the UI.
    - The service logs in automatically with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `docker/.env` when no cookie is supplied, so authenticated routes continue to pass.
+   - Verbose mode streams step-by-step logging (clone source, run directory, job status updates) through the playback service so operators can follow along with `wctl logs profile_playback -f`.
    - Produces a structured JSON report (HTTP status per step, final run directory) that callers can persist or parse in follow-up tooling.
 5. **Pytest Integration**
    - Fixture `profile_runner` exposes the same engine, enabling tests such as:

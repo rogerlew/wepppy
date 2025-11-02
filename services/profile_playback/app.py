@@ -13,7 +13,8 @@ from wepppy.profile_recorder.playback import PlaybackSession
 
 
 PROFILE_ROOT = Path(os.environ.get("PROFILE_PLAYBACK_ROOT", "/workdir/wepppy-test-engine-data/profiles"))
-DEFAULT_BASE_URL = os.environ.get("PROFILE_PLAYBACK_BASE_URL", "http://weppcloud:8000/weppcloud")
+DEFAULT_BASE_URL = os.environ.get("PROFILE_PLAYBACK_BASE_URL", "https://wc.bearhive.duckdns.org/weppcloud")
+INTERNAL_BASE_URL = os.environ.get("PROFILE_PLAYBACK_INTERNAL_BASE_URL")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 
@@ -66,7 +67,8 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
     if not profile_root.exists():
         raise HTTPException(status_code=404, detail=f"Profile not found: {profile_root}")
 
-    base_url = (payload.base_url or DEFAULT_BASE_URL).rstrip("/")
+    login_base_url = (payload.base_url or DEFAULT_BASE_URL).rstrip("/")
+    playback_base_url = INTERNAL_BASE_URL.rstrip("/") if INTERNAL_BASE_URL else login_base_url
 
     session = requests.Session()
     if payload.cookie:
@@ -76,22 +78,23 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
             raise HTTPException(status_code=500, detail="ADMIN_EMAIL/ADMIN_PASSWORD must be configured for playback authentication")
         try:
             _RUNNER_LOGGER.info("Authenticating playback session for %s", profile)
-            _perform_login(session, base_url, ADMIN_EMAIL, ADMIN_PASSWORD)
+            _perform_login(session, login_base_url, ADMIN_EMAIL, ADMIN_PASSWORD)
         except Exception as exc:
             _RUNNER_LOGGER.exception("Playback authentication failed for %s", profile)
             raise HTTPException(status_code=502, detail=f"Login failed: {exc}") from exc
         else:
-            _log_auth_success(profile, base_url)
+            _log_auth_success(profile, login_base_url)
+            _mirror_cookies(session, login_base_url, playback_base_url)
 
     _RUNNER_LOGGER.info("Starting playback for %s (dry_run=%s)", profile, payload.dry_run)
 
     playback = PlaybackSession(
         profile_root=profile_root,
-        base_url=base_url,
+        base_url=playback_base_url,
         execute=not payload.dry_run,
         session=session,
-        verbose=True,
-        logger=_RUNNER_LOGGER,
+        verbose=payload.verbose,
+        logger=_RUNNER_LOGGER if payload.verbose else None,
     )
 
     await run_in_threadpool(playback.run)
@@ -102,7 +105,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
         profile=profile,
         run_id=getattr(playback, "run_id", profile),
         dry_run=payload.dry_run,
-        base_url=base_url,
+        base_url=playback_base_url,
         run_dir=str(playback.run_dir),
         report=playback.report(),
         requests=request_log,
@@ -134,6 +137,24 @@ def _log_auth_success(profile: str, base_url: str) -> None:
 
     logger = logging.getLogger("profile_playback")
     logger.info("Authenticated playback for profile %s against %s", profile, base_url)
+
+
+def _mirror_cookies(session: requests.Session, source_base: str, target_base: str) -> None:
+    from urllib.parse import urlparse
+
+    if not target_base:
+        return
+
+    source_host = urlparse(source_base).hostname if source_base else None
+    target_host = urlparse(target_base).hostname if target_base else None
+
+    if not source_host or not target_host or source_host == target_host:
+        return
+
+    for name in ("session", "remember_token"):
+        value = session.cookies.get(name, domain=source_host)
+        if value:
+            session.cookies.set(name, value, domain=target_host, path="/")
 
 
 def _extract_csrf_token(html: str) -> Optional[str]:

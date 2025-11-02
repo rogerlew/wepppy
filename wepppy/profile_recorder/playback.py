@@ -222,7 +222,7 @@ class PlaybackSession:
             if job_id:
                 if self.verbose:
                     self._log(f"job {job_id} enqueued by {path}")
-                self._wait_for_job(job_id)
+                self._wait_for_job(job_id, task=path)
             elif self.verbose:
                 self._log(f"no job id detected in {path} response")
 
@@ -268,7 +268,18 @@ class PlaybackSession:
                     self._log(f"wait timed out after {attempt + 1} attempts (last status {response.status_code})")
                 return response
             if self.verbose and (attempt == 0 or response.status_code != last_status):
-                self._log(f"waiting... status {response.status_code}")
+                msg = f"waiting... status {response.status_code}"
+                content_type = response.headers.get("Content-Type", "")
+                if content_type.startswith("application/json"):
+                    try:
+                        msg += f" body={response.json()}"
+                    except ValueError:
+                        msg += " body=<invalid json>"
+                else:
+                    snippet = response.text[:300] if response.text else ""
+                    if snippet:
+                        msg += f" body={snippet}"
+                self._log(msg)
             last_status = response.status_code
             attempt += 1
             time.sleep(interval)
@@ -327,6 +338,7 @@ class PlaybackSession:
         *,
         timeout: int = 900,
         interval: float = 2.0,
+        task: Optional[str] = None,
     ) -> None:
         status_url = self._build_url(f"/rq/api/jobstatus/{job_id}")
         end_time = time.time() + timeout
@@ -350,7 +362,10 @@ class PlaybackSession:
                     payload = {}
                 status = str(payload.get("status") or "").lower()
                 if self.verbose and status and status != last_status:
-                    self._log(f"job {job_id} status {status}")
+                    msg = f"job {job_id} status {status}"
+                    if task:
+                        msg += f" ({task})"
+                    self._log(msg)
                 last_status = status or last_status
                 if status in {"finished"}:
                     return
