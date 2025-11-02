@@ -22,6 +22,13 @@ http://:8080 {
         reverse_proxy preflight:9001
     }
 
+    handle_path /profile-playback* {
+        reverse_proxy profile-playback:8070 {
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+        }
+    }
+
     handle_path /webservices/metquery* {
         reverse_proxy metquery:8004
     }

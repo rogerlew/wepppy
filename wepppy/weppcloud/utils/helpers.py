@@ -48,7 +48,9 @@ try:
 except Exception as e:
     print(f'Error connecting to Redis: {e}')
     redis_wd_cache_client = None
-    
+
+_PLAYBACK_USE_CLONE = os.getenv("PROFILE_PLAYBACK_USE_CLONE", "false").lower() in {"1", "true", "yes", "on"}
+
 
 def get_wd(runid: str, *, prefer_active: bool = True) -> str:
     """
@@ -87,6 +89,8 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
     path = None
 
+    playback_root = os.environ.get("PROFILE_PLAYBACK_RUN_ROOT") if _PLAYBACK_USE_CLONE else None
+    playback_candidate: Optional[str] = None
     if playback_root:
         playback_candidate = _join(playback_root, runid)
         if _exists(playback_candidate):
@@ -110,10 +114,8 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
     if context_override:
         path = context_override
 
-    if playback_root and (not path or not _exists(path)):
-        playback_candidate = _join(playback_root, runid)
-        if _exists(playback_candidate):
-            path = playback_candidate
+    if playback_root and playback_candidate and (not path or not _exists(path)):
+        path = playback_candidate
 
     # 3. Store the determined path in the cache for future requests
     if redis_wd_cache_client:
