@@ -20,6 +20,7 @@ x-wepppy-service: &wepppy-service
     DTALE_SERVICE_URL: ${DTALE_SERVICE_URL:-http://dtale:9010}
     DTALE_INTERNAL_TOKEN: ${DTALE_INTERNAL_TOKEN:-dtale-dev}
     TEST_SUPPORT_ENABLED: ${TEST_SUPPORT_ENABLED:-false}
+    PROFILE_PLAYBACK_RUN_ROOT: ${PROFILE_PLAYBACK_RUN_ROOT:-/workdir/wepppy-test-engine-data/playback_runs}
   env_file:
     - ${WEPPPY_ENV_FILE:-docker/.env}
   volumes:
@@ -131,6 +132,25 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+
+  profile_playback:
+    <<: *wepppy-service
+    container_name: profile-playback
+    command:
+      - uvicorn
+      - services.profile_playback.app:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8070"
+    environment:
+      PROFILE_PLAYBACK_BASE_URL: ${PROFILE_PLAYBACK_BASE_URL:-http://weppcloud:8000/weppcloud}
+      PROFILE_PLAYBACK_ROOT: ${PROFILE_PLAYBACK_ROOT:-/workdir/wepppy-test-engine-data/profiles}
+    ports:
+      - "8070:8070"
+    depends_on:
+      weppcloud:
+        condition: service_started
 
   browse:
     <<: *wepppy-service

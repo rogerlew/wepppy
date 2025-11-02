@@ -38,6 +38,7 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 - `wctl run-stubtest`: runs `stubtest` inside the container with the appropriate environment (defaults to `wepppy.nodb.core`). Provide module names to narrow the check.
 - `wctl run-npm`: runs `npm` on the host with `--prefix wepppy/weppcloud/static-src`. Example: `wctl run-npm lint`, `wctl run-npm test`, or `wctl run-npm check`.
 - `wctl run-stubgen`: regenerates the local `stubs/` tree via `python tools/sync_stubs.py`.
+- `wctl run-test-profile <slug>`: calls the `profile_playback` FastAPI service to replay a promoted profile (stored under `/workdir/wepppy-test-engine-data/profiles/`). Supports `--dry-run`, `--base-url`, `--service-url`, and cookie injection via `--cookie` or `--cookie-file` for authenticated scenarios.
 - `wctl check-test-stubs`: executes `python tools/check_stubs.py` inside the container to ensure sys.modules stubs match their public APIs.
 - `wctl check-test-isolation`: launches `python tools/check_test_isolation.py` inside the container. Supports all script flags (`--quick`, `--strict`, `--iterations`, `--json`, etc.) and surfaces order-dependent failures plus leaked global state before they surprise downstream suites.
 - `wctl run-status-tests`: compiles and runs the Go unit/integration tests for `services/status2` using the compose-managed `status-build` helper (golang:1.25-alpine). The helper runs `go mod tidy` before `go test`; extra arguments after the command are forwarded to `go test`.

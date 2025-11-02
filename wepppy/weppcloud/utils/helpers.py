@@ -83,13 +83,22 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
             print(f"Warning: Redis connection error during GET. Falling back to filesystem. Error: {e}")
 
 
-    if ';;' in runid:
+    playback_root = os.environ.get("PROFILE_PLAYBACK_RUN_ROOT")
+
+    path = None
+
+    if playback_root:
+        playback_candidate = _join(playback_root, runid)
+        if _exists(playback_candidate):
+            path = playback_candidate
+
+    if path is None and ';;' in runid:
         _group, _name, _runid = runid.split(';;')
         if _group == 'batch':
             path = get_batch_run_wd(_name, _runid)
         else:
             raise ValueError(f'Unknown group prefix: {_group}')
-    else:
+    elif path is None:
         # Check the primary, non-prefixed location first
         path = _join('/geodata/weppcloud_runs', runid)
 
@@ -100,6 +109,11 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
             
     if context_override:
         path = context_override
+
+    if playback_root and (not path or not _exists(path)):
+        playback_candidate = _join(playback_root, runid)
+        if _exists(playback_candidate):
+            path = playback_candidate
 
     # 3. Store the determined path in the cache for future requests
     if redis_wd_cache_client:
