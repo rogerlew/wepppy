@@ -7,7 +7,8 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
-from urllib.parse import urlparse
+import time
+from urllib.parse import parse_qsl, urljoin, urlparse
 
 import requests
 
@@ -30,6 +31,7 @@ class PlaybackSession:
         execute: bool = False,
         run_dir: Optional[Path] = None,
         session: Optional[requests.Session] = None,
+        verbose: bool = False,
     ) -> None:
         self.profile_root = profile_root
         self.execute = execute
@@ -47,6 +49,7 @@ class PlaybackSession:
             self.run_dir = self._clone_run(profile_root, self.run_id)
 
         self.session = session or requests.Session()
+        self.verbose = verbose
 
         self.requests = self._index_requests(self.events)
         self.results: List[Tuple[str, str]] = []
@@ -130,13 +133,28 @@ class PlaybackSession:
                 self.results.append((request_id, f"{path}: unsupported payload type"))
                 continue
 
+            expected_status = self._expected_status(event)
+            params = self._extract_query_params(event)
+            url = self._build_url(path)
+
+            if self.verbose:
+                msg = f"{method} {path}"
+                if params:
+                    msg += f" params={dict(params)}"
+                if json_payload is not None:
+                    msg += " body=json"
+                self._log(msg)
+
             if self.execute:
-                url = f"{self.base_url}{path}"
                 try:
-                    response = self.session.request(method, url, json=json_payload, timeout=60)
+                    response = self._execute_request(method, url, params, json_payload, expected_status, path)
                     self.results.append((request_id, f"{path}: HTTP {response.status_code}"))
+                    if self.verbose:
+                        self._log(f"→ HTTP {response.status_code}")
                 except requests.RequestException as exc:
                     self.results.append((request_id, f"{path}: error {exc}"))
+                    if self.verbose:
+                        self._log(f"→ error {exc}")
             else:
                 action = f"{method} {path}"
                 if json_payload is not None:
@@ -161,6 +179,87 @@ class PlaybackSession:
         lines.append(f"Playback run directory: {self.run_dir}")
         return "\n".join(lines)
 
+    def _execute_request(
+        self,
+        method: str,
+        url: str,
+        params: List[Tuple[str, str]],
+        json_payload: Optional[dict],
+        expected_status: int,
+        path: str,
+    ) -> requests.Response:
+        kwargs: Dict[str, object] = {"timeout": 60}
+        if params:
+            kwargs["params"] = params
+        if method == "POST" and json_payload is not None:
+            kwargs["json"] = json_payload
+
+        if self._should_wait_for_completion(method, path, expected_status):
+            if self.verbose:
+                self._log("waiting for task completion")
+            return self._poll_for_completion(url, params, expected_status)
+
+        return self.session.request(method, url, **kwargs)
+
+    def _poll_for_completion(
+        self,
+        url: str,
+        params: List[Tuple[str, str]],
+        expected_status: int,
+        *,
+        timeout: int = 300,
+        interval: float = 2.0,
+    ) -> requests.Response:
+        end_time = time.time() + timeout
+        last_response: Optional[requests.Response] = None
+        while True:
+            try:
+                response = self.session.get(url, params=params or None, timeout=60)
+            except requests.RequestException as exc:
+                if last_response is not None:
+                    return last_response
+                raise exc
+
+            last_response = response
+            if response.status_code == expected_status:
+                if self.verbose:
+                    self._log("wait complete")
+                return response
+            if response.status_code not in (401, 403, 404):
+                return response
+            if time.time() >= end_time:
+                return response
+            if self.verbose:
+                self._log(f"waiting... status {response.status_code}")
+            time.sleep(interval)
+
+    def _expected_status(self, event: Event) -> int:
+        status = event.get("status")
+        if isinstance(status, int):
+            return status
+        if event.get("ok") is True:
+            return 200
+        return 400
+
+    def _extract_query_params(self, event: Event) -> List[Tuple[str, str]]:
+        endpoint = str(event.get("endpoint") or "")
+        parsed = urlparse(endpoint)
+        if parsed.query:
+            return parse_qsl(parsed.query, keep_blank_values=True)
+        return []
+
+    def _build_url(self, path: str) -> str:
+        base = self.base_url.rstrip("/")
+        return urljoin(f"{base}/", path.lstrip("/"))
+
+    def _should_wait_for_completion(self, method: str, path: str, expected_status: int) -> bool:
+        if method != "GET" or expected_status != 200:
+            return False
+        return any(path.endswith(suffix) for suffix in _WAIT_SUFFIXES)
+
+    def _log(self, message: str) -> None:
+        print(f"[playback] {message}")
+
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Replay recorder events against WEPPcloud.")
@@ -170,6 +269,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--execute", action="store_true", help="Execute HTTP requests (default is dry-run).")
     parser.add_argument("--cookie", help="Raw Cookie header to send with each request (for authenticated playback).")
     parser.add_argument("--cookie-file", type=Path, help="Read Cookie header from file (overrides --cookie).")
+    parser.add_argument("--verbose", action="store_true", help="Print progress information while replaying.")
 
     args = parser.parse_args(argv)
 
@@ -187,6 +287,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         execute=args.execute,
         run_dir=args.run_dir,
         session=session,
+        verbose=args.verbose,
     )
     session.run()
     print(session.report())
@@ -195,3 +296,11 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+_WAIT_SUFFIXES: Tuple[str, ...] = (
+    "/query/delineation_pass/",
+    "/resources/subcatchments.json",
+    "/report/subcatchments/",
+    "/report/channel",
+)

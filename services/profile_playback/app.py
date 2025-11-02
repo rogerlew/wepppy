@@ -29,6 +29,7 @@ class ProfileRunRequest(BaseModel):
         default=None,
         description="Optional Cookie header forwarded with every request to WEPPcloud.",
     )
+    verbose: bool = Field(False, description="Emit progress logs during replay.")
 
 
 class ProfileRunResult(BaseModel):
@@ -77,6 +78,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
         base_url=base_url,
         execute=not payload.dry_run,
         session=session,
+        verbose=payload.verbose,
     )
 
     await run_in_threadpool(playback.run)
