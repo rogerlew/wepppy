@@ -685,6 +685,45 @@ var Project = (function () {
             });
         };
 
+        project.promote_recorder_profile = function () {
+            if (typeof runid === "undefined" || !runid) {
+                window.alert("Run ID is not available for promotion.");
+                return Promise.resolve(null);
+            }
+
+            var defaultSlug = runid;
+            var slug = window.prompt("Enter profile slug", defaultSlug);
+            if (slug === null) {
+                return Promise.resolve(null);
+            }
+
+            slug = (slug || "").trim();
+            var payload = {};
+            if (slug) {
+                payload.slug = slug;
+            }
+
+            return http.postJson(url_for_run("recorder/promote"), payload).then(function (result) {
+                var response = result && result.body ? result.body : result;
+                if (response && response.success) {
+                    var profileRoot = response.profile && response.profile.profile_root;
+                    var message = "Profile draft promoted.";
+                    if (profileRoot) {
+                        message += "\nSaved to: " + profileRoot;
+                    }
+                    window.alert(message);
+                } else {
+                    var errorMessage = response && (response.message || response.error) || "Error promoting profile draft.";
+                    window.alert(errorMessage);
+                }
+                return response;
+            }).catch(function (error) {
+                notifyError("Error promoting profile draft", error);
+                window.alert("Error promoting profile draft.");
+                return null;
+            });
+        };
+
         project.handleGlobalUnitPreference = function (pref) {
             var numericPref = Number(pref);
             if (Number.isNaN(numericPref)) {
@@ -880,6 +919,8 @@ var Project = (function () {
                 project.migrate_to_omni();
             } else if (action === "enable-path-ce") {
                 project.enable_path_cost_effective();
+            } else if (action === "recorder-promote") {
+                project.promote_recorder_profile();
             }
         });
 

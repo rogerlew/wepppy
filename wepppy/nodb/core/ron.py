@@ -417,6 +417,8 @@ class Ron(NoDbBase):
             # Landuse
             self._enable_landuse_change = self.config_get_bool('landuse', 'enable_landuse_change')
 
+            self._profile_recorder_assembler_enabled = self.config_get_bool('recorder', 'profile_recorder_assembler_enabled', False)
+
             # Project
             self._name = ''
             self._scenario = ''
@@ -470,6 +472,15 @@ class Ron(NoDbBase):
         
         activate_query_engine(self.wd, run_interchange=False)
         self.trigger(TriggerEvents.ON_INIT_FINISH)
+
+    @property
+    def profile_recorder_assembler_enabled(self) -> bool:
+        return getattr(self, '_profile_recorder_assembler_enabled', False)
+
+    @profile_recorder_assembler_enabled.setter
+    @nodb_setter
+    def profile_recorder_assembler_enabled(self, value: bool) -> None:
+        self._profile_recorder_assembler_enabled = value
 
     def clean_export_dir(self) -> None:
         with self.timed("Cleaning export directory"):

@@ -29,6 +29,7 @@ x-wepppy-service: &wepppy-service
     - ../../peridot:/workdir/peridot
     - ../../weppcloud-wbt:/workdir/weppcloud-wbt
     - ../../wepppyo3:/workdir/wepppyo3
+    - ../../wepppy-test-engine-data:/workdir/wepppy-test-engine-data
     - ${WC1_DIR}:/wc1
     - ${GEODATA_DIR}:/geodata
     - /var/run/docker.sock:/var/run/docker.sock

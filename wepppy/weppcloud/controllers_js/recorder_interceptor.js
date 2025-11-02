@@ -240,7 +240,9 @@
         if (options.json !== undefined) {
             summary.hasBody = true;
             try {
-                summary.bodyPreview = JSON.stringify(options.json).slice(0, 256);
+                var serialised = JSON.stringify(options.json);
+                summary.bodyPreview = serialised.slice(0, 256);
+                summary.jsonPayload = serialised;
             } catch (err) {
                 summary.bodyPreview = "[unserializable json]";
             }

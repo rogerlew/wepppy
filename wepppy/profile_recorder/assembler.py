@@ -2,12 +2,29 @@ from __future__ import annotations
 
 import json
 import logging
+import shutil
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from .utils import sanitise_component
 
 LOGGER = logging.getLogger(__name__)
+
+TASK_RULES: Dict[str, Dict[str, Any]] = {
+    "rq/api/fetch_dem_and_build_channels": {
+        "expected_files": ["dem/dem.tif"],
+        "ron_property": ("has_dem", {"equals": True}),
+    },
+    "rq/api/set_outlet": {
+        "ron_property": ("watershed_instance.outlet", {"exists": True}),
+    },
+    "rq/api/build_subcatchments_and_abstract_watershed": {
+        "expected_files": ["dem/channels.shp", "dem/subwta.shp"],
+    },
+    "rq/api/build_landuse": {
+        "ron_property": ("landuse_instance.domlc_d", {"exists": True}),
+    },
+}
 
 
 class ProfileAssembler:
@@ -28,12 +45,15 @@ class ProfileAssembler:
         capture_id: Optional[str],
         event: Dict[str, Any],
         run_dir: Optional[Path],
+        *,
+        file_hints: Optional[Dict[str, Path]] = None,
     ) -> None:
         try:
             run_key = sanitise_component(run_id or "global")
             capture_key = sanitise_component(capture_id or "stream")
             draft_root = self.data_repo_root / "profiles" / "_drafts" / run_key / capture_key
             draft_root.mkdir(parents=True, exist_ok=True)
+
             events_path = draft_root / "events.jsonl"
             with events_path.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(event, separators=(",", ":")) + "\n")
@@ -42,5 +62,165 @@ class ProfileAssembler:
                 pointer_path = draft_root / "run_dir.txt"
                 if not pointer_path.exists():
                     pointer_path.write_text(str(run_dir), encoding="utf-8")
+
+            stage = event.get("stage")
+            if stage and stage.lower() != "response":
+                return
+            if event.get("ok") is False:
+                return
+
+            if file_hints:
+                seed_root = draft_root / "seed"
+                seed_root.mkdir(parents=True, exist_ok=True)
+                for label, candidate in file_hints.items():
+                    self._snapshot_candidate(seed_root, label, candidate)
+
+            endpoint = self._normalise_endpoint(event)
+            if endpoint:
+                rules = TASK_RULES.get(endpoint)
+                if rules:
+                    self._apply_task_rules(
+                        draft_root,
+                        run_id,
+                        run_dir,
+                        endpoint,
+                        rules,
+                    )
         except Exception as exc:
             LOGGER.debug("ProfileAssembler handle_event encountered an error: %s", exc)
+
+    def promote_draft(
+        self,
+        run_id: str,
+        capture_id: str = "stream",
+        *,
+        slug: Optional[str] = None,
+    ) -> Dict[str, str]:
+        run_key = sanitise_component(run_id or "global")
+        capture_key = sanitise_component(capture_id or "stream")
+        draft_root = self.data_repo_root / "profiles" / "_drafts" / run_key / capture_key
+        if not draft_root.exists():
+            raise FileNotFoundError(f"Draft not found for run '{run_id}' ({capture_id})")
+
+        slug_key = sanitise_component(slug or run_id or "profile")
+        profile_root = self.data_repo_root / "profiles" / slug_key
+        capture_target = profile_root / "capture"
+        capture_target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(draft_root, capture_target, dirs_exist_ok=True)
+
+        run_src = None
+        run_pointer = draft_root / "run_dir.txt"
+        if run_pointer.exists():
+            run_src = Path(run_pointer.read_text().strip())
+            if run_src.exists():
+                shutil.copytree(run_src, profile_root / "run", dirs_exist_ok=True)
+
+        return {
+            "profile_root": str(profile_root),
+            "capture_path": str(capture_target),
+            "run_source": str(run_src) if run_src else "",
+        }
+
+    @staticmethod
+    def _snapshot_candidate(seed_root: Path, label: str, candidate: Path) -> None:
+        safe_label = sanitise_component(label)
+        target = seed_root / safe_label
+
+        try:
+            if candidate.exists():
+                if candidate.is_dir():
+                    (target.with_suffix(".dir.exists")).touch(exist_ok=True)
+                else:
+                    target = target.with_suffix(candidate.suffix)
+                    if not target.exists():
+                        shutil.copy2(candidate, target)
+            else:
+                (seed_root / f"{safe_label}.missing").touch(exist_ok=True)
+        except Exception as exc:
+            LOGGER.debug("Failed to snapshot %s (%s): %s", label, candidate, exc)
+
+    @staticmethod
+    def _normalise_endpoint(event: Dict[str, Any]) -> Optional[str]:
+        endpoint = event.get("endpoint")
+        if not endpoint or not isinstance(endpoint, str):
+            return None
+        # If the endpoint contains a run-scoped prefix, strip it.
+        parts = endpoint.split("/rq/", 1)
+        if len(parts) == 2:
+            return "rq/" + parts[1]
+        # Fall back to stripping leading slash.
+        return endpoint.lstrip("/")
+
+    def _apply_task_rules(
+        self,
+        draft_root: Path,
+        run_id: str,
+        run_dir: Optional[Path],
+        endpoint: str,
+        rules: Dict[str, Any],
+    ) -> None:
+        notes = []
+
+        expected_files = rules.get("expected_files", [])
+        if run_dir and expected_files:
+            seed_root = draft_root / "seed"
+            seed_root.mkdir(parents=True, exist_ok=True)
+            for rel_path in expected_files:
+                candidate = run_dir / rel_path
+                label = f"{endpoint}:{rel_path}"
+                if candidate.exists():
+                    self._snapshot_candidate(seed_root, label, candidate)
+                else:
+                    note = f"[files] missing {rel_path}"
+                    notes.append(note)
+                    self._snapshot_candidate(seed_root, label, candidate)
+
+        ron_prop = rules.get("ron_property")
+        if ron_prop:
+            attr, expectation = ron_prop
+            try:
+                from wepppy.nodb.core.ron import Ron
+
+                ron = Ron.getInstanceFromRunID(run_id, ignore_lock=True)
+            except Exception as exc:
+                notes.append(f"[ron] failed to read {attr}: {exc}")
+            else:
+                match = self._evaluate_ron_expectation(ron, attr, expectation)
+                if match is not None:
+                    notes.append(match)
+
+        if notes:
+            note_path = draft_root / "validation.log"
+            with note_path.open("a", encoding="utf-8") as handle:
+                for note in notes:
+                    handle.write(f"{endpoint}: {note}\n")
+
+    @staticmethod
+    def _evaluate_ron_expectation(ron: Any, attr: str, expectation: Dict[str, Any]) -> Optional[str]:
+        if ron is None:
+            return f"[ron] {attr} unavailable"
+
+        current = ron
+        for token in attr.split("."):
+            if not token:
+                continue
+            current = getattr(current, token, None)
+
+        if "equals" in expectation:
+            expected_value = expectation["equals"]
+            if current != expected_value:
+                return f"[ron] {attr} expected {expected_value!r}, got {current!r}"
+            return None
+
+        if expectation.get("exists"):
+            if current in (None, False, {}, [], ""):
+                return f"[ron] {attr} missing or empty"
+            return None
+
+        return None
+
+        if notes:
+            note_path = draft_root / "validation.log"
+            with note_path.open("a", encoding="utf-8") as handle:
+                for note in notes:
+                    handle.write(f"{endpoint}: {note}\n")

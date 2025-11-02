@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterable, Optional
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -14,6 +14,15 @@ from .utils import sanitise_component
 
 LOGGER = logging.getLogger(__name__)
 
+KNOWN_FILE_KEYS: Iterable[str] = (
+    "files_created",
+    "files_removed",
+    "output_files",
+    "output_path",
+    "input_files",
+    "upload_files",
+)
+
 
 class ProfileRecorder:
     """Persist recorder events to per-run audit logs and forward them to the assembler."""
@@ -22,7 +31,13 @@ class ProfileRecorder:
         self.config = config
         self.assembler = ProfileAssembler(self.config.data_repo_root)
 
-    def append_event(self, event: Dict[str, Any], *, user: Any = None) -> None:
+    def append_event(
+        self,
+        event: Dict[str, Any],
+        *,
+        user: Any = None,
+        assembler_override: Optional[bool] = None,
+    ) -> None:
         record = dict(event)
         record.setdefault("received_at", datetime.now(timezone.utc).isoformat())
 
@@ -38,9 +53,22 @@ class ProfileRecorder:
         audit_path = self._audit_log_path(run_dir, run_id)
         self._append_jsonl(audit_path, record)
 
-        if self.config.assembler_enabled:
+        assembler_enabled = (
+            self.config.assembler_enabled
+            if assembler_override is None
+            else assembler_override
+        )
+
+        if assembler_enabled:
+            file_hints = self._extract_file_candidates(record, run_dir)
             try:
-                self.assembler.handle_event(run_id or "global", capture_id, record, run_dir)
+                self.assembler.handle_event(
+                    run_id or "global",
+                    capture_id,
+                    record,
+                    run_dir,
+                    file_hints=file_hints,
+                )
             except Exception as exc:
                 LOGGER.debug("Profile assembler failed for event %s: %s", run_id, exc)
 
@@ -66,6 +94,46 @@ class ProfileRecorder:
             audit_dir = self.config.data_repo_root / "audit" / safe
         audit_dir.mkdir(parents=True, exist_ok=True)
         return audit_dir / "profile.events.jsonl"
+
+    def _extract_file_candidates(
+        self,
+        event: Dict[str, Any],
+        run_dir: Optional[Path],
+    ) -> Dict[str, Path]:
+        if not run_dir:
+            return {}
+
+        candidates: Dict[str, Path] = {}
+        for key in KNOWN_FILE_KEYS:
+            if key not in event:
+                continue
+            raw = event[key]
+            if raw is None:
+                continue
+
+            if isinstance(raw, str):
+                self._maybe_add_candidate(candidates, key, run_dir, raw)
+            elif isinstance(raw, (list, tuple, set)):
+                for idx, entry in enumerate(raw):
+                    self._maybe_add_candidate(candidates, f"{key}[{idx}]", run_dir, entry)
+            elif isinstance(raw, dict):
+                for subkey, entry in raw.items():
+                    self._maybe_add_candidate(candidates, f"{key}.{subkey}", run_dir, entry)
+        return candidates
+
+    @staticmethod
+    def _maybe_add_candidate(
+        bucket: Dict[str, Path],
+        label: str,
+        run_dir: Path,
+        entry: Any,
+    ) -> None:
+        if not entry or not isinstance(entry, str):
+            return
+        candidate = Path(entry)
+        if not candidate.is_absolute():
+            candidate = run_dir / candidate
+        bucket[label] = candidate
 
     @staticmethod
     def _append_jsonl(path: Path, record: Dict[str, Any]) -> None:
