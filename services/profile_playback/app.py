@@ -1,4 +1,5 @@
 
+import logging
 import os
 from pathlib import Path
 from typing import List, Optional
@@ -45,6 +46,9 @@ class ProfileRunResult(BaseModel):
 
 
 app = FastAPI(title="WEPPcloud Profile Playback", version="0.1.0")
+_RUNNER_LOGGER = logging.getLogger("profile_playback.runner")
+if not _RUNNER_LOGGER.handlers:
+    _RUNNER_LOGGER.setLevel(logging.INFO)
 
 
 @app.get("/health")
@@ -67,11 +71,18 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
         if not ADMIN_EMAIL or not ADMIN_PASSWORD:
             raise HTTPException(status_code=500, detail="ADMIN_EMAIL/ADMIN_PASSWORD must be configured for playback authentication")
         try:
+            if payload.verbose:
+                _RUNNER_LOGGER.info("Authenticating playback session for %s", profile)
             _perform_login(session, base_url, ADMIN_EMAIL, ADMIN_PASSWORD)
         except Exception as exc:
+            if payload.verbose:
+                _RUNNER_LOGGER.exception("Playback authentication failed for %s", profile)
             raise HTTPException(status_code=502, detail=f"Login failed: {exc}") from exc
         else:
             _log_auth_success(profile, base_url)
+
+    if payload.verbose:
+        _RUNNER_LOGGER.info("Starting playback for %s (dry_run=%s)", profile, payload.dry_run)
 
     playback = PlaybackSession(
         profile_root=profile_root,
@@ -79,6 +90,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
         execute=not payload.dry_run,
         session=session,
         verbose=payload.verbose,
+        logger=_RUNNER_LOGGER,
     )
 
     await run_in_threadpool(playback.run)
@@ -94,6 +106,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
         report=playback.report(),
         requests=request_log,
     )
+
 
 
 def _perform_login(session: requests.Session, base_url: str, email: str, password: str) -> None:

@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import shutil
 import tempfile
+import time
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
-import time
 from urllib.parse import parse_qsl, urljoin, urlparse
 
 import requests
@@ -32,6 +33,7 @@ class PlaybackSession:
         run_dir: Optional[Path] = None,
         session: Optional[requests.Session] = None,
         verbose: bool = False,
+        logger: Optional[logging.Logger] = None,
     ) -> None:
         self.profile_root = profile_root
         self.execute = execute
@@ -50,6 +52,7 @@ class PlaybackSession:
 
         self.session = session or requests.Session()
         self.verbose = verbose
+        self._logger = logger
 
         self.requests = self._index_requests(self.events)
         self.results: List[Tuple[str, str]] = []
@@ -138,7 +141,7 @@ class PlaybackSession:
             url = self._build_url(path)
 
             if self.verbose:
-                msg = f"{method} {path}"
+                msg = f"{request_id} {method} {path}"
                 if params:
                     msg += f" params={dict(params)}"
                 if json_payload is not None:
@@ -150,11 +153,11 @@ class PlaybackSession:
                     response = self._execute_request(method, url, params, json_payload, expected_status, path)
                     self.results.append((request_id, f"{path}: HTTP {response.status_code}"))
                     if self.verbose:
-                        self._log(f"→ HTTP {response.status_code}")
+                        self._log(f"{request_id} → HTTP {response.status_code}")
                 except requests.RequestException as exc:
                     self.results.append((request_id, f"{path}: error {exc}"))
                     if self.verbose:
-                        self._log(f"→ error {exc}")
+                        self._log(f"{request_id} → error {exc}")
             else:
                 action = f"{method} {path}"
                 if json_payload is not None:
@@ -258,7 +261,10 @@ class PlaybackSession:
         return any(path.endswith(suffix) for suffix in _WAIT_SUFFIXES)
 
     def _log(self, message: str) -> None:
-        print(f"[playback] {message}")
+        if self._logger is not None:
+            self._logger.info(message)
+        else:
+            print(f"[playback] {message}")
 
 
 def main(argv: Optional[List[str]] = None) -> int:
