@@ -69,6 +69,8 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
             _perform_login(session, base_url, ADMIN_EMAIL, ADMIN_PASSWORD)
         except Exception as exc:
             raise HTTPException(status_code=502, detail=f"Login failed: {exc}") from exc
+        else:
+            _log_auth_success(profile, base_url)
 
     playback = PlaybackSession(
         profile_root=profile_root,
@@ -107,6 +109,15 @@ def _perform_login(session: requests.Session, base_url: str, email: str, passwor
     post = session.post(login_url, data=payload, timeout=30, allow_redirects=False)
     if post.status_code not in (200, 302, 303):
         raise RuntimeError(f"HTTP {post.status_code}")
+    if "session" not in session.cookies:
+        raise RuntimeError(f"session cookie missing after login (cookies={session.cookies.get_dict()})")
+
+
+def _log_auth_success(profile: str, base_url: str) -> None:
+    import logging
+
+    logger = logging.getLogger("profile_playback")
+    logger.info("Authenticated playback for profile %s against %s", profile, base_url)
 
 
 def _extract_csrf_token(html: str) -> Optional[str]:

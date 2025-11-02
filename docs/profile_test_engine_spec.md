@@ -47,10 +47,10 @@
    - Emits a JSONL audit stream under each run working directory for accountability regardless of capture state; when profile recording is enabled the same events are mirrored into the assembler pipeline.
    - Generates a draft YAML + seed snapshot for manual review when a capture is closed.
 4. **Runner Workflow**
-   - CLI command: `wctl run-profile <slug>`.
-   - Spins up docker compose stack, ensures RQ worker is available, clones seed into a temp run directory.
-   - Replays steps via the same HTTP endpoints used by the front end (using Playwright or a thin HTTP client).
-   - Produces a structured run report (pass/fail, timings, artifacts touched).
+   - CLI command: `wctl run-test-profile <slug>` (host-side helper).
+   - Helper calls the `profile_playback` FastAPI microservice which clones the promoted profile snapshot into `PROFILE_PLAYBACK_RUN_ROOT/<runid>` and replays the captured HTTP traffic with `PlaybackSession`.
+   - The service logs in automatically with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `docker/.env` when no cookie is supplied, so authenticated routes continue to pass.
+   - Produces a structured JSON report (HTTP status per step, final run directory) that callers can persist or parse in follow-up tooling.
 5. **Pytest Integration**
    - Fixture `profile_runner` exposes the same engine, enabling tests such as:
      ```python
@@ -144,10 +144,10 @@ comparisons:
 - How to anonymize sensitive user data when recording profiles?
 
 ## Next Steps
-1. Stand up `/workdir/wepppy-test-engine-data` to host seed/baseline assets and agree on its directory layout.
-2. Build the recorder prototype (frontend interceptors + backend collector) and refine the profile schema as capture details emerge (see recorder blueprint appendices).
-3. Implement the CLI runner and publish initial “happy path” profile (referencing assets from the data repo).
-4. Expand documentation (Recorder how-to, profile authoring guide, data repo usage).
+1. Harden recorder coverage (multipart payload capture, RQ completion polling, richer validations) while keeping the existing WEPPcloud blueprint in place.
+2. Extend the playback FastAPI service to support multipart replays and post-run assertions; wire results into pytest fixtures for automated validation.
+3. Curate a baseline profile catalog (`sharing-mobilization`, `us-watershed-small`, etc.) and document promotion + playback workflows for collaborators.
+4. Expand documentation (Recorder how-to, profile authoring guide, data repo usage) as capabilities mature.
 
 ## Recorder Blueprint
 ### Objectives
@@ -171,6 +171,11 @@ comparisons:
   - Maintains lightweight metadata files (e.g., `_logs/profile.captures.json`) indicating capture boundaries and notes.
   - Mirrors capture-specific slices into `/workdir/wepppy-test-engine-data/profiles/_drafts/<slug>/events.jsonl` when a profile is recorded (data repo is bind-mounted into the container).
   - Exposes a filesystem “tail” API so the assembler can react to each event immediately (used to snapshot assets before users overwrite them with later uploads).
+- **Playback Service (FastAPI):**
+  - Runs alongside WEPPcloud (`docker-compose.dev` service: `profile_playback`).
+  - Resolves promoted profiles under `/workdir/wepppy-test-engine-data/profiles/<slug>`, clones their `run/` snapshot into `PROFILE_PLAYBACK_RUN_ROOT/<runid>`, and replays the event stream.
+  - Authenticates with WEPPcloud using the admin credentials from `docker/.env` when a cookie is not provided, keeping the primary app’s authorization rules intact.
+  - Exposes `/run/{profile}` for automation plus `/health` for monitoring; responses include the final run directory so downstream checks know which cloned workspace to inspect.
 
 ### Event Model
 - Each recorded event includes:
