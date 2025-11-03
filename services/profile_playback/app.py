@@ -1,20 +1,24 @@
 
+import asyncio
+import json
 import logging
 import os
+from queue import Queue
 from pathlib import Path
 from typing import List, Optional
 
 import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from starlette.responses import StreamingResponse
 from starlette.concurrency import run_in_threadpool
 
 from wepppy.profile_recorder.playback import PlaybackSession
+from uuid import uuid4
 
 
 PROFILE_ROOT = Path(os.environ.get("PROFILE_PLAYBACK_ROOT", "/workdir/wepppy-test-engine-data/profiles"))
 DEFAULT_BASE_URL = os.environ.get("PROFILE_PLAYBACK_BASE_URL", "https://wc.bearhive.duckdns.org/weppcloud")
-INTERNAL_BASE_URL = os.environ.get("PROFILE_PLAYBACK_INTERNAL_BASE_URL")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 
@@ -61,8 +65,43 @@ async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/run/{profile}", response_model=ProfileRunResult)
-async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunResult:
+class _QueueLogHandler(logging.Handler):
+    def __init__(self, queue: Queue) -> None:
+        super().__init__()
+        self.queue = queue
+
+    def emit(self, record: logging.LogRecord) -> None:  # pragma: no cover - simple queue push
+        msg = self.format(record)
+        self.queue.put(msg)
+
+
+def _results_root() -> Path:
+    root = PROFILE_ROOT / "_runs"
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def _store_result(token: str, payload: ProfileRunResult) -> Path:
+    path = _results_root() / f"{token}.json"
+    path.write_text(json.dumps(payload.model_dump(), indent=2), encoding="utf-8")
+    return path
+
+
+async def _stream_run_result(token: str, queue: Queue, worker_future) -> StreamingResponse:
+    async def generator():
+        loop = asyncio.get_running_loop()
+        while True:
+            line = await loop.run_in_executor(None, queue.get)
+            if line is None:
+                break
+            yield (line + "\n").encode("utf-8")
+        await worker_future
+
+    return StreamingResponse(generator(), media_type="text/plain")
+
+
+@app.post("/run/{profile}")
+async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResponse:
     profile_root = PROFILE_ROOT / profile
     if not profile_root.exists():
         raise HTTPException(status_code=404, detail=f"Profile not found: {profile_root}")
@@ -88,28 +127,59 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
 
     _RUNNER_LOGGER.info("Starting playback for %s (dry_run=%s)", profile, payload.dry_run)
 
-    playback = PlaybackSession(
-        profile_root=profile_root,
-        base_url=playback_base_url,
-        execute=not payload.dry_run,
-        session=session,
-        verbose=payload.verbose,
-        logger=_RUNNER_LOGGER if payload.verbose else None,
-    )
+    log_queue: Queue[str | None] = Queue()
+    session_token = uuid4().hex
 
-    await run_in_threadpool(playback.run)
+    def playback_worker() -> None:
+        session_logger = logging.getLogger(f"profile_playback.session.{session_token}")
+        session_logger.setLevel(logging.INFO)
+        session_logger.propagate = False
 
-    request_log = [{"id": request_id, "status": status} for request_id, status in playback.results]
+        handler = _QueueLogHandler(log_queue)
+        handler.setFormatter(logging.Formatter("%(asctime)s [profile_playback] %(levelname)s %(message)s"))
+        session_logger.addHandler(handler)
 
-    return ProfileRunResult(
-        profile=profile,
-        run_id=getattr(playback, "run_id", profile),
-        dry_run=payload.dry_run,
-        base_url=playback_base_url,
-        run_dir=str(playback.run_dir),
-        report=playback.report(),
-        requests=request_log,
-    )
+        try:
+            playback = PlaybackSession(
+                profile_root=profile_root,
+                base_url=playback_base_url,
+                execute=not payload.dry_run,
+                session=session,
+                verbose=True,
+                logger=session_logger,
+            )
+            playback.run()
+            request_log = [{"id": request_id, "status": status} for request_id, status in playback.results]
+            result = ProfileRunResult(
+                profile=profile,
+                run_id=getattr(playback, "run_id", profile),
+                dry_run=payload.dry_run,
+                base_url=playback_base_url,
+                run_dir=str(playback.run_dir),
+                report=playback.report(),
+                requests=request_log,
+            )
+            _store_result(session_token, result)
+            log_queue.put(json.dumps({"event": "result", "token": session_token, "data": result.model_dump()}))
+        except Exception as exc:  # pragma: no cover - defensive logging
+            log_queue.put(json.dumps({"event": "error", "token": session_token, "data": {"detail": str(exc)}}))
+        finally:
+            log_queue.put(None)
+            session_logger.removeHandler(handler)
+            handler.close()
+
+    loop = asyncio.get_running_loop()
+    worker_future = loop.run_in_executor(None, playback_worker)
+    return await _stream_run_result(session_token, log_queue, worker_future)
+
+
+@app.get("/run/result/{token}", response_model=ProfileRunResult)
+async def run_result(token: str) -> ProfileRunResult:
+    path = _results_root() / f"{token}.json"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"Result not found for token {token}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return ProfileRunResult(**data)
 
 
 

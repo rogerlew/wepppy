@@ -52,6 +52,7 @@
    - During replay every request is rewritten to `/runs/profile;;tmp;;<runid>/...`, letting WEPPcloud resolve the temp run via `PROFILE_PLAYBACK_USE_CLONE=true` instead of touching the production directory.
    - Each run boots from a clean workspace: the assembler stores the active `.cfg` and `_defaults.toml` in the profile seed, and playback copies those into an empty run directory before reissuing the recorded requests.
    - Authentication remains anchored to the public HTTPS base URL so the secure `session` cookie survives; requests reuse that cookie while targeting the internal host.
+   - The playback endpoint streams log lines back to the caller; the final line is a JSON blob (`{"event":"result","token":...,"data":{...}}`). `wctl run-test-profile` always emits this stream so reverse proxies never time out, and callers can `GET /run/result/{token}` later to retrieve the stored `ProfileRunResult`.
    - POST requests that enqueue RQ tasks are tracked by job id; subsequent GETs defer until the queued jobs report `finished` via `/rq/api/jobstatus/<job_id>`, keeping playback aligned with the UI’s job lifecycle.
    - The service logs in automatically with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `docker/.env` when no cookie is supplied, so authenticated routes continue to pass.
    - Verbose mode streams step-by-step logging (clone source, run directory, job status updates) through the playback service so operators can follow along with `wctl logs profile_playback -f`.
