@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'Branch, tag, or commit to deploy on the nuc hosts (defaults to main on schedule, current ref otherwise)'
+        description: 'Branch, tag, or commit to deploy on the nuc hosts (defaults to master on schedule, current ref otherwise)'
         required: false
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
           if [ -n "${REF_INPUT}" ]; then
             TARGET_REF="${REF_INPUT}"
           elif [ "${GITHUB_EVENT_NAME}" = "schedule" ]; then
-            TARGET_REF="main"
+            TARGET_REF="master"
           else
             TARGET_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
           fi
