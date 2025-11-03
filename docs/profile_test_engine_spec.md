@@ -48,10 +48,11 @@
    - Generates a draft YAML + seed snapshot for manual review when a capture is closed.
 4. **Runner Workflow**
    - CLI command: `wctl run-test-profile <slug>` (host-side helper).
-   - Helper calls the `profile_playback` FastAPI microservice which clones the promoted profile snapshot into `PROFILE_PLAYBACK_RUN_ROOT/<runid>` (default `/workdir/wepppy-test-engine-data/playback_runs/<runid>`) and replays the captured HTTP traffic with `PlaybackSession`.
-   - During replay every request is rewritten to `/runs/profile;;tmp;;<runid>/...`, letting WEPPcloud resolve the temp run via `PROFILE_PLAYBACK_USE_CLONE=true` instead of touching the production directory.
-   - Each run boots from a clean workspace: the assembler stores the active `.cfg` and `_defaults.toml` in the profile seed, and playback copies those into an empty run directory before reissuing the recorded requests.
-   - Authentication remains anchored to the public HTTPS base URL so the secure `session` cookie survives; requests reuse that cookie while targeting the internal host.
+- Helper calls the `profile_playback` FastAPI microservice which clones the promoted profile snapshot into `PROFILE_PLAYBACK_RUN_ROOT/<runid>` (default `/workdir/wepppy-test-engine-data/playback_runs/<runid>`) and replays the captured HTTP traffic with `PlaybackSession`.
+- During replay every request is rewritten to `/runs/profile;;tmp;;<runid>/...`, letting WEPPcloud resolve the temp run via `PROFILE_PLAYBACK_USE_CLONE=true` instead of touching the production directory.
+- Each run boots from a clean workspace seeded with the original snapshot: playback clones `profiles/<slug>/run/` into the temporary run directory and then overlays the captured configuration defaults (`active_config.txt`, `.cfg`, `_defaults.toml`) so the cloned workspace matches the promoted draft.
+- Multipart uploads (landuse `.tif`, SBS rasters, etc.) look for canonical files under `capture/seed/uploads/`; when those seeds are missing the runner falls back to the cloned `run/` snapshot (`run/landuse`, `run/disturbed`, `run/baer`) to source the same assets that were used during recording.
+- Authentication remains anchored to the public HTTPS base URL so the secure `session` cookie survives; requests reuse that cookie while targeting the internal host.
    - The playback endpoint streams log lines back to the caller; the final line is a JSON blob (`{"event":"result","token":...,"data":{...}}`). `wctl run-test-profile` always emits this stream so reverse proxies never time out, and callers can `GET /run/result/{token}` later to retrieve the stored `ProfileRunResult`.
    - POST requests that enqueue RQ tasks are tracked by job id; subsequent GETs defer until the queued jobs report `finished` via `/rq/api/jobstatus/<job_id>`, keeping playback aligned with the UI’s job lifecycle.
    - The service logs in automatically with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `docker/.env` when no cookie is supplied, so authenticated routes continue to pass.
@@ -154,6 +155,7 @@ comparisons:
 2. Extend the playback FastAPI service to support multipart replays and post-run assertions; wire results into pytest fixtures for automated validation.
 3. Curate a baseline profile catalog (`sharing-mobilization`, `us-watershed-small`, etc.) and document promotion + playback workflows for collaborators.
 4. Expand documentation (Recorder how-to, profile authoring guide, data repo usage) as capabilities mature.
+5. Manually verify SBS/landuse uploads by running `wctl run-test-profile <slug>` against at least one promoted profile that exercises those endpoints (`rattlesnake-w-landuse-map`) and confirm the cloned run workspace contains the replayed rasters.
 
 ## Recorder Blueprint
 ### Objectives

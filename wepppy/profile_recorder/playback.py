@@ -42,6 +42,7 @@ class PlaybackSession:
         self.execute = execute
         self.base_url = base_url.rstrip("/")
         self.capture_dir = profile_root / "capture"
+        self.profile_run_root = profile_root / "run"
         self.session = session or requests.Session()
         self.verbose = verbose
         self._logger = logger
@@ -81,8 +82,17 @@ class PlaybackSession:
         if target.exists():
             shutil.rmtree(target)
         target.mkdir(parents=True, exist_ok=True)
+        self._copy_run_snapshot(target)
         self._hydrate_seed_files(target)
         return target
+
+    def _copy_run_snapshot(self, target: Path) -> None:
+        if not self.profile_run_root.exists():
+            return
+        try:
+            shutil.copytree(self.profile_run_root, target, dirs_exist_ok=True)
+        except Exception as exc:
+            self._log(f"Failed to copy run snapshot from {self.profile_run_root}: {exc}")
 
     @staticmethod
     def _detect_run_id(events: Iterable[Event]) -> Optional[str]:
@@ -437,6 +447,10 @@ class PlaybackSession:
             fallback = Path(self.run_dir) / "landuse" / "nlcd.tif"
             if fallback.exists():
                 candidates = [fallback]
+            else:
+                snapshot = self.profile_run_root / "landuse" / "nlcd.tif"
+                if snapshot.exists():
+                    candidates = [snapshot]
         if candidates:
             files["input_upload_landuse"] = (candidates[0], "application/octet-stream")
 
@@ -447,12 +461,19 @@ class PlaybackSession:
     ) -> None:
         upload_dir = self.seed_upload_root / "sbs"
         candidates = sorted(upload_dir.glob("input_upload_sbs*")) if upload_dir.exists() else []
+        search_roots: List[Path] = []
         if not candidates:
-            fallback_root = Path(self.run_dir) / "disturbed"
-            candidates = sorted(fallback_root.glob("*.tif"))
-            if not candidates:
-                fallback_root = Path(self.run_dir) / "baer"
-                candidates = sorted(fallback_root.glob("*.tif"))
+            search_roots.extend([
+                Path(self.run_dir) / "disturbed",
+                Path(self.run_dir) / "baer",
+                self.profile_run_root / "disturbed",
+                self.profile_run_root / "baer",
+            ])
+            for root in search_roots:
+                if root.is_dir():
+                    for candidate in sorted(root.glob("*.tif")):
+                        if candidate not in candidates:
+                            candidates.append(candidate)
         if candidates:
             files["input_upload_sbs"] = (candidates[0], "application/octet-stream")
 

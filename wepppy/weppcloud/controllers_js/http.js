@@ -5,6 +5,7 @@
     var DEFAULT_ACCEPT = "application/json, text/plain;q=0.9";
     var DEFAULT_TIMEOUT_MS = 0;
     var doc = global.document;
+    var http = {};
 
     function isAbsoluteUrl(url) {
         return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
@@ -328,7 +329,7 @@
     }
 
     function getJson(url, options) {
-        return request(url, options || {}).then(function (result) {
+        return http.request(url, options || {}).then(function (result) {
             var body = result.body;
             if (body === null || body === undefined) {
                 return body;
@@ -355,7 +356,7 @@
         var opts = options ? Object.assign({}, options) : {};
         opts.method = opts.method || "POST";
         opts.json = payload;
-        return request(url, opts);
+        return http.request(url, opts);
     }
 
     function formDataToParams(formData) {
@@ -415,16 +416,16 @@
         var opts = options ? Object.assign({}, options) : {};
         opts.method = opts.method || "POST";
         opts.body = params;
-        return request(url, opts);
+        return http.request(url, opts);
     }
 
-    global.WCHttp = {
-        request: request,
-        getJson: getJson,
-        postJson: postJson,
-        postForm: postForm,
-        HttpError: HttpError,
-        isHttpError: isHttpError,
-        getCsrfToken: getCsrfToken
-    };
+    http.request = request;
+    http.getJson = getJson;
+    http.postJson = postJson;
+    http.postForm = postForm;
+    http.HttpError = HttpError;
+    http.isHttpError = isHttpError;
+    http.getCsrfToken = getCsrfToken;
+
+    global.WCHttp = http;
 })(typeof window !== "undefined" ? window : this);
