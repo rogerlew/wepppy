@@ -134,7 +134,7 @@ services:
       redis:
         condition: service_healthy
 
-  profile_playback:
+  profile-playback:
     <<: *wepppy-service
     container_name: profile-playback
     command:
