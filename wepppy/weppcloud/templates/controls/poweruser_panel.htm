@@ -258,7 +258,7 @@
                 Enable PATH Cost-Effective
               </button>
             {% endif %}
-            {% if ron.profile_recorder_assembler_enabled %}
+            {% if ron.profile_recorder_assembler_enabled and current_user.has_role('Admin') %}
               <button type="button"
                       class="pure-button pure-button-secondary"
                       data-project-action="recorder-promote">
