@@ -13,6 +13,8 @@ from urllib.parse import parse_qsl, urljoin, urlparse
 
 import requests
 
+from wepppy.nodb.core.ron import Ron
+
 Event = Dict[str, object]
 
 
@@ -43,6 +45,8 @@ class PlaybackSession:
         self.verbose = verbose
         self._logger = logger
         self._pending_jobs: deque[Tuple[str, str]] = deque()
+        self.seed_root = profile_root / "capture" / "seed"
+        self.seed_config_stem: Optional[str] = None
 
         if self.verbose:
             self._log(f"PlaybackSession created (execute={self.execute}, verbose={self.verbose})")
@@ -62,22 +66,20 @@ class PlaybackSession:
             self.run_dir = run_dir
             self._log(f"Using existing run directory: {self.run_dir}")
         else:
-            self.run_dir = self._clone_run(profile_root, self.run_id)
-            self._log(f"Cloned run snapshot to: {self.run_dir}")
+            self.run_dir = self._prepare_run_directory(profile_root, self.run_id)
+            self._log(f"Prepared clean playback workspace at: {self.run_dir}")
 
         self.requests = self._index_requests(self.events)
         self.results: List[Tuple[str, str]] = []
 
-    def _clone_run(self, profile_root: Path, run_id: str) -> Path:
-        source = profile_root / "run"
-        if not source.exists():
-            raise FileNotFoundError(f"Run snapshot not found at {source}")
+    def _prepare_run_directory(self, profile_root: Path, run_id: str) -> Path:
         playback_root = Path(os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", "/workdir/wepppy-test-engine-data/playback_runs"))
         playback_root.mkdir(parents=True, exist_ok=True)
         target = playback_root / run_id
         if target.exists():
             shutil.rmtree(target)
-        shutil.copytree(source, target)
+        target.mkdir(parents=True, exist_ok=True)
+        self._hydrate_seed_files(target)
         return target
 
     @staticmethod
@@ -349,6 +351,34 @@ class PlaybackSession:
         if path == f"/runs/{self.original_run_id}":
             return f"/runs/{self.playback_run_id}"
         return path
+
+    def _hydrate_seed_files(self, target: Path) -> None:
+        if not self.seed_root.exists():
+            return
+        config_seed = self.seed_root / "config"
+        if config_seed.is_dir():
+            active_marker = config_seed / "active_config.txt"
+            if active_marker.exists():
+                try:
+                    active_text = active_marker.read_text(encoding="utf-8").strip()
+                except Exception as exc:
+                    self._log(f"Failed to read active config seed {active_marker}: {exc}")
+                else:
+                    if active_text:
+                        self.seed_config_stem = Path(active_text).stem
+            for item in config_seed.iterdir():
+                if item.name == "active_config.txt":
+                    continue
+                if item.is_file():
+                    try:
+                        shutil.copy2(item, target / item.name)
+                    except Exception as exc:
+                        self._log(f"Failed to copy seed config {item}: {exc}")
+        if self.seed_config_stem:
+            try:
+                Ron(str(target), f"{self.seed_config_stem}.cfg")
+            except Exception as exc:
+                self._log(f"Failed to initialize Ron with seed config {self.seed_config_stem}: {exc}")
 
     def _extract_job_id(self, response: requests.Response) -> Optional[str]:
         content_type = response.headers.get("content-type", "")

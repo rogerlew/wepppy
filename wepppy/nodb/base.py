@@ -110,6 +110,7 @@ __all__ = [
     'try_redis_set_log_level',
     'createProcessPoolExecutor',
     'get_config_dir',
+    'get_default_config_path',
     'CaseSensitiveRawConfigParser',
     'get_configs',
     'get_legacy_configs',
@@ -496,6 +497,12 @@ def get_config_dir() -> str:
     """Return the on-disk directory that houses default NoDb configs."""
 
     return _config_dir
+
+
+def get_default_config_path() -> str:
+    """Return the default configuration seed path."""
+
+    return _default_config
 
 
 class CaseSensitiveRawConfigParser(RawConfigParser):
@@ -1491,10 +1498,10 @@ class NoDbBase(object):
     def _configparser(self):
         _config = self._config.split('?')
 
-        cfg = _join(_config_dir, _config[0])
+        cfg = self._resolve_config_path(_config[0])
 
         parser = CaseSensitiveRawConfigParser(allow_no_value=True)
-        with open(_default_config) as fp:
+        with open(self._resolve_defaults_path()) as fp:
             parser.read_file(fp)
 
         with open(cfg) as fp:
@@ -1514,6 +1521,23 @@ class NoDbBase(object):
             parser.read_dict(overrides_d)
 
         return parser
+
+    def _resolve_config_path(self, filename: str) -> str:
+        path = Path(filename)
+        if not path.suffix:
+            path = path.with_suffix('.cfg')
+        if not path.is_absolute():
+            candidate = Path(self.wd) / path.name
+            if candidate.exists():
+                return str(candidate)
+            path = Path(_config_dir) / path.name
+        return str(path)
+
+    def _resolve_defaults_path(self) -> str:
+        candidate = Path(self.wd) / Path(_default_config).name
+        if candidate.exists():
+            return str(candidate)
+        return _default_config
 
     def _load_mods(self):
         config_parser = self._configparser

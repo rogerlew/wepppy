@@ -145,6 +145,7 @@ services:
       - --port
       - "8070"
     environment:
+      <<: *wepppy-env
       PROFILE_PLAYBACK_BASE_URL: ${PROFILE_PLAYBACK_BASE_URL:-http://weppcloud:8000/weppcloud}
       PROFILE_PLAYBACK_ROOT: ${PROFILE_PLAYBACK_ROOT:-/workdir/wepppy-test-engine-data/profiles}
     ports:

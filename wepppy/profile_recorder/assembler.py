@@ -5,6 +5,9 @@ import logging
 import shutil
 from pathlib import Path
 from typing import Any, Dict, Optional
+from urllib.parse import urlparse
+
+from wepppy.nodb import base as nodb_base
 
 from .utils import sanitise_component
 
@@ -62,6 +65,10 @@ class ProfileAssembler:
                 pointer_path = draft_root / "run_dir.txt"
                 if not pointer_path.exists():
                     pointer_path.write_text(str(run_dir), encoding="utf-8")
+
+            config_slug = self._extract_config_slug(event)
+            if config_slug:
+                self._ensure_config_seed(draft_root, config_slug, run_dir)
 
             stage = event.get("stage")
             if stage and stage.lower() != "response":
@@ -194,6 +201,73 @@ class ProfileAssembler:
             with note_path.open("a", encoding="utf-8") as handle:
                 for note in notes:
                     handle.write(f"{endpoint}: {note}\n")
+
+    @staticmethod
+    def _extract_config_slug(event: Dict[str, Any]) -> Optional[str]:
+        endpoint = event.get("endpoint")
+        if not endpoint or not isinstance(endpoint, str):
+            return None
+        path = urlparse(endpoint).path or endpoint
+        segments = [part for part in path.split("/") if part]
+        if "runs" not in segments:
+            return None
+        try:
+            idx = segments.index("runs")
+            return segments[idx + 2]
+        except (ValueError, IndexError):
+            return None
+
+    def _ensure_config_seed(
+        self,
+        draft_root: Path,
+        config_slug: str,
+        run_dir: Optional[Path],
+    ) -> None:
+        config_dir = draft_root / "seed" / "config"
+        config_dir.mkdir(parents=True, exist_ok=True)
+
+        filename = (
+            config_slug if config_slug.endswith(".cfg") else f"{config_slug}.cfg"
+        )
+
+        target_cfg = config_dir / filename
+        if not target_cfg.exists():
+            candidates = []
+            if run_dir is not None:
+                candidates.append(run_dir / filename)
+            candidates.append(Path(nodb_base.get_config_dir()) / filename)
+
+            for candidate in candidates:
+                if candidate.exists():
+                    try:
+                        shutil.copy2(candidate, target_cfg)
+                    except Exception as exc:
+                        LOGGER.debug(
+                            "Failed to copy config seed %s from %s: %s",
+                            filename,
+                            candidate,
+                            exc,
+                        )
+                    break
+
+        active_path = config_dir / "active_config.txt"
+        try:
+            active_path.write_text(config_slug, encoding="utf-8")
+        except Exception as exc:
+            LOGGER.debug("Failed to write active config seed %s: %s", config_slug, exc)
+
+        defaults_target = config_dir / Path(nodb_base.get_default_config_path()).name
+        if not defaults_target.exists():
+            defaults_source = Path(nodb_base.get_default_config_path())
+            if defaults_source.exists():
+                try:
+                    shutil.copy2(defaults_source, defaults_target)
+                except Exception as exc:
+                    LOGGER.debug(
+                        "Failed to copy default config seed from %s: %s",
+                        defaults_source,
+                        exc,
+                    )
 
     @staticmethod
     def _evaluate_ron_expectation(ron: Any, attr: str, expectation: Dict[str, Any]) -> Optional[str]:
