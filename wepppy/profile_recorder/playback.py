@@ -5,8 +5,8 @@ import json
 import logging
 import os
 import shutil
-import tempfile
 import time
+from collections import deque
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 from urllib.parse import parse_qsl, urljoin, urlparse
@@ -42,6 +42,7 @@ class PlaybackSession:
         self.session = session or requests.Session()
         self.verbose = verbose
         self._logger = logger
+        self._pending_jobs: deque[Tuple[str, str]] = deque()
 
         if self.verbose:
             self._log(f"PlaybackSession created (execute={self.execute}, verbose={self.verbose})")
@@ -51,8 +52,11 @@ class PlaybackSession:
 
         self.events = self._load_events(self.capture_dir / "events.jsonl")
         self.run_id = self._detect_run_id(self.events) or profile_root.name
+        self.original_run_id = self.run_id
+        self.playback_run_id = f"profile;;tmp;;{self.original_run_id}"
         self._log(f"Loaded {len(self.events)} events from {self.capture_dir}")
-        self._log(f"Resolved run id: {self.run_id}")
+        self._log(f"Resolved run id: {self.original_run_id}")
+        self._log(f"Using playback run id: {self.playback_run_id}")
 
         if run_dir is not None:
             self.run_dir = run_dir
@@ -68,7 +72,7 @@ class PlaybackSession:
         source = profile_root / "run"
         if not source.exists():
             raise FileNotFoundError(f"Run snapshot not found at {source}")
-        playback_root = Path(os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", tempfile.gettempdir()))
+        playback_root = Path(os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", "/workdir/wepppy-test-engine-data/playback_runs"))
         playback_root.mkdir(parents=True, exist_ok=True)
         target = playback_root / run_id
         if target.exists():
@@ -127,31 +131,35 @@ class PlaybackSession:
             method = str(req.get("method", "GET")).upper()
             endpoint = str(req.get("endpoint", ""))
             path = self._normalise_path(endpoint)
+            effective_path = self._remap_run_path(path)
             summary = req.get("requestMeta") or {}
             json_payload: Optional[dict] = None
             if isinstance(summary, dict) and summary.get("jsonPayload"):
                 try:
                     json_payload = json.loads(summary["jsonPayload"])
                 except json.JSONDecodeError:
-                    self.results.append((request_id, f"{path}: invalid JSON payload"))
+                    self.results.append((request_id, f"{effective_path}: invalid JSON payload"))
                     continue
 
             if method not in ("GET", "POST"):
-                self.results.append((request_id, f"{path}: unsupported method {method}"))
+                self.results.append((request_id, f"{effective_path}: unsupported method {method}"))
                 self._log(f"Skipping {request_id}: unsupported method {method}")
                 continue
 
             if method == "POST" and json_payload is None:
-                self.results.append((request_id, f"{path}: unsupported payload type"))
+                self.results.append((request_id, f"{effective_path}: unsupported payload type"))
                 self._log(f"Skipping {request_id}: unsupported payload type")
                 continue
 
             expected_status = self._expected_status(event)
             params = self._extract_query_params(event)
-            url = self._build_url(path)
+            url = self._build_url(effective_path)
 
             if self.verbose:
-                msg = f"{request_id} {method} {path}"
+                display_path = effective_path
+                if effective_path != path:
+                    display_path = f"{effective_path} (source {path})"
+                msg = f"{request_id} {method} {display_path}"
                 if params:
                     msg += f" params={dict(params)}"
                 if json_payload is not None:
@@ -159,20 +167,31 @@ class PlaybackSession:
                 self._log(msg)
 
             if self.execute:
+                if method == "GET":
+                    self._await_pending_jobs()
                 try:
-                    response = self._execute_request(method, url, params, json_payload, expected_status, path)
-                    self.results.append((request_id, f"{path}: HTTP {response.status_code}"))
+                    response = self._execute_request(
+                        method,
+                        url,
+                        params,
+                        json_payload,
+                        expected_status,
+                        effective_path,
+                    )
+                    self.results.append((request_id, f"{effective_path}: HTTP {response.status_code}"))
                     if self.verbose:
                         self._log(f"{request_id} → HTTP {response.status_code}")
                 except requests.RequestException as exc:
-                    self.results.append((request_id, f"{path}: error {exc}"))
+                    self.results.append((request_id, f"{effective_path}: error {exc}"))
                     if self.verbose:
                         self._log(f"{request_id} → error {exc}")
             else:
-                action = f"{method} {path}"
+                action = f"{method} {effective_path}"
                 if json_payload is not None:
                     action += f" payload={json_payload}"
                 self.results.append((request_id, f"dry-run {action}"))
+        if self.execute:
+            self._await_pending_jobs()
 
     @staticmethod
     def _normalise_path(endpoint: str) -> str:
@@ -222,7 +241,7 @@ class PlaybackSession:
             if job_id:
                 if self.verbose:
                     self._log(f"job {job_id} enqueued by {path}")
-                self._wait_for_job(job_id, task=path)
+                self._pending_jobs.append((job_id, path))
             elif self.verbose:
                 self._log(f"no job id detected in {path} response")
 
@@ -313,6 +332,21 @@ class PlaybackSession:
             self._logger.info(message)
         else:
             print(f"[playback] {message}")
+
+    def _await_pending_jobs(self) -> None:
+        while self._pending_jobs:
+            job_id, task_path = self._pending_jobs.popleft()
+            if self.verbose:
+                self._log(f"waiting for job {job_id} ({task_path}) to finish")
+            self._wait_for_job(job_id, task=task_path)
+
+    def _remap_run_path(self, path: str) -> str:
+        prefix = f"/runs/{self.original_run_id}/"
+        if path.startswith(prefix):
+            return path.replace(prefix, f"/runs/{self.playback_run_id}/", 1)
+        if path == f"/runs/{self.original_run_id}":
+            return f"/runs/{self.playback_run_id}"
+        return path
 
     def _extract_job_id(self, response: requests.Response) -> Optional[str]:
         content_type = response.headers.get("content-type", "")

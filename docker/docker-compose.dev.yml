@@ -21,6 +21,7 @@ x-wepppy-service: &wepppy-service
     DTALE_INTERNAL_TOKEN: ${DTALE_INTERNAL_TOKEN:-dtale-dev}
     TEST_SUPPORT_ENABLED: ${TEST_SUPPORT_ENABLED:-false}
     PROFILE_PLAYBACK_RUN_ROOT: ${PROFILE_PLAYBACK_RUN_ROOT:-/workdir/wepppy-test-engine-data/playback_runs}
+    PROFILE_PLAYBACK_USE_CLONE: ${PROFILE_PLAYBACK_USE_CLONE:-true}
   env_file:
     - ${WEPPPY_ENV_FILE:-docker/.env}
   volumes:

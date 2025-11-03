@@ -85,24 +85,28 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
             print(f"Warning: Redis connection error during GET. Falling back to filesystem. Error: {e}")
 
 
-    playback_root = os.environ.get("PROFILE_PLAYBACK_RUN_ROOT")
-
     path = None
 
-    playback_root = os.environ.get("PROFILE_PLAYBACK_RUN_ROOT") if _PLAYBACK_USE_CLONE else None
-    playback_candidate: Optional[str] = None
-    if playback_root:
-        playback_candidate = _join(playback_root, runid)
-        if _exists(playback_candidate):
-            path = playback_candidate
-
-    if path is None and ';;' in runid:
-        _group, _name, _runid = runid.split(';;')
+    if ';;' in runid:
+        parts = runid.split(';;')
+        if len(parts) != 3:
+            raise ValueError(f'Invalid grouped run identifier: {runid}')
+        _group, _name, _runid = parts
         if _group == 'batch':
             path = get_batch_run_wd(_name, _runid)
+        elif _group == 'profile' and _name == 'tmp':
+            playback_root = os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", "/workdir/wepppy-test-engine-data/playback_runs")
+            path = _join(playback_root, _runid)
         else:
             raise ValueError(f'Unknown group prefix: {_group}')
     elif path is None:
+        playback_root = os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", "/workdir/wepppy-test-engine-data/playback_runs") if _PLAYBACK_USE_CLONE else None
+        if playback_root:
+            playback_candidate = _join(playback_root, runid)
+            if _exists(playback_candidate):
+                path = playback_candidate
+
+    if path is None:
         # Check the primary, non-prefixed location first
         path = _join('/geodata/weppcloud_runs', runid)
 
@@ -113,9 +117,6 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
             
     if context_override:
         path = context_override
-
-    if playback_root and playback_candidate and (not path or not _exists(path)):
-        path = playback_candidate
 
     # 3. Store the determined path in the cache for future requests
     if redis_wd_cache_client:
