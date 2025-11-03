@@ -8,19 +8,18 @@
 {% block auth_subheading %}<p>Enter your WEPPcloud credentials to access tools and projects.</p>{% endblock %}
 
 {% block content %}
-  {% if oauth_providers %}
+  {% if enabled_oauth_providers %}
     <div class="wc-oauth-container">
       <p class="wc-oauth-intro">Sign in with a connected account:</p>
       <div class="wc-oauth-actions">
         {% set next_param = request.args.get('next') %}
-        {% for provider_id, provider in oauth_providers|dictsort %}
+        {% for provider_id, provider in enabled_oauth_providers|dictsort %}
           {% set provider_slug = provider_id | replace('_', '-') %}
           {% set provider_name = provider.name or provider_id|capitalize %}
           {% set provider_lower = provider_id|lower %}
           {% set is_github = provider_lower == 'github' %}
           {% set is_google = provider_lower == 'google' %}
           {% set is_orcid = provider_lower == 'orcid' %}
-          {% set enabled = provider.enabled %}
           {% set base_classes = 'wc-oauth-button' %}
           {% if is_github %}{% set base_classes = base_classes ~ ' wc-oauth-button--secondary' %}{% endif %}
           {% set base_classes = base_classes ~ ' wc-oauth-' ~ provider_slug %}
@@ -51,18 +50,11 @@
               </span>
             {% endif %}
           {% endset %}
-          {% if enabled %}
-            <a class="{{ base_classes }}"
-               href="{{ login_href }}">
-              {{ icon|trim|safe }}
-              <span class="wc-oauth-label">Continue with {{ provider_name }}</span>
-            </a>
-          {% else %}
-            <span class="{{ base_classes }} wc-oauth-button--disabled" role="button" aria-disabled="true">
-              {{ icon|trim|safe }}
-              <span class="wc-oauth-label">Continue with {{ provider_name }}</span>
-            </span>
-          {% endif %}
+          <a class="{{ base_classes }}"
+             href="{{ login_href }}">
+            {{ icon|trim|safe }}
+            <span class="wc-oauth-label">Continue with {{ provider_name }}</span>
+          </a>
         {% endfor %}
         <div class="wc-auth-separator wc-auth-separator--inline" aria-hidden="true">or use your password below</div>
       </div>

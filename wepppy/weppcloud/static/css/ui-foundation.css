@@ -105,15 +105,15 @@ body {
   box-sizing: border-box;
 }
 
-a:not(.pure-button),
-a:visited:not(.pure-button) {
+a:not(.pure-button):not(.wc-oauth-button),
+a:visited:not(.pure-button):not(.wc-oauth-button) {
   color: var(--wc-color-link) !important;
   text-decoration: none !important;
   background-color: transparent !important;
 }
 
-a:hover:not(.pure-button),
-a:focus-visible:not(.pure-button) {
+a:hover:not(.pure-button):not(.wc-oauth-button),
+a:focus-visible:not(.pure-button):not(.wc-oauth-button) {
   color: var(--wc-color-link-hover) !important;
   text-decoration: underline !important;
 }
@@ -1770,29 +1770,32 @@ h5:first-child {
   padding: var(--wc-space-md) var(--wc-space-lg);
   width: 100%;
   border: 1px solid var(--wc-color-border);
-  background: var(--wc-color-surface);
-  color: var(--wc-color-text);
+  border-radius: 4px;
+  background: var(--wc-color-surface) !important;
+  color: var(--wc-color-text) !important;
   font-weight: 600;
-  text-decoration: none;
+  text-decoration: none !important;
   transition: all 0.15s ease;
 }
 
 .wc-oauth-button:hover {
-  background: var(--wc-color-surface-alt);
+  background: var(--wc-color-surface-alt) !important;
   border-color: var(--wc-color-border-strong);
   transform: none;
+  text-decoration: none !important;
 }
 
 .wc-oauth-button--secondary {
-  background: var(--wc-color-accent);
-  color: var(--wc-color-surface);
+  background: var(--wc-color-accent) !important;
+  color: var(--wc-color-surface) !important;
   border-color: var(--wc-color-accent);
 }
 
 .wc-oauth-button--secondary:hover {
-  background: var(--wc-color-link-hover);
+  background: var(--wc-color-link-hover) !important;
   border-color: var(--wc-color-link-hover);
-  color: var(--wc-color-surface);
+  color: var(--wc-color-surface) !important;
+  text-decoration: none !important;
 }
 
 .wc-oauth-button--disabled {
