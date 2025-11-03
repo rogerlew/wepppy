@@ -82,17 +82,8 @@ class PlaybackSession:
         if target.exists():
             shutil.rmtree(target)
         target.mkdir(parents=True, exist_ok=True)
-        self._copy_run_snapshot(target)
         self._hydrate_seed_files(target)
         return target
-
-    def _copy_run_snapshot(self, target: Path) -> None:
-        if not self.profile_run_root.exists():
-            return
-        try:
-            shutil.copytree(self.profile_run_root, target, dirs_exist_ok=True)
-        except Exception as exc:
-            self._log(f"Failed to copy run snapshot from {self.profile_run_root}: {exc}")
 
     @staticmethod
     def _detect_run_id(events: Iterable[Event]) -> Optional[str]:
@@ -147,6 +138,13 @@ class PlaybackSession:
             path = self._normalise_path(endpoint)
             effective_path = self._remap_run_path(path)
 
+            if method == "GET" and "/rq/api/jobstatus/" in effective_path:
+                self.results.append((request_id, f"{effective_path}: skipped recorded jobstatus poll"))
+                continue
+            if method == "GET" and "/elevationquery/" in effective_path:
+                self.results.append((request_id, f"{effective_path}: skipped recorded elevation query"))
+                continue
+
             summary = req.get("requestMeta") or {}
             json_payload: Optional[dict] = None
             if isinstance(summary, dict) and summary.get("jsonPayload"):
@@ -159,11 +157,6 @@ class PlaybackSession:
             if method not in ("GET", "POST"):
                 self.results.append((request_id, f"{effective_path}: unsupported method {method}"))
                 self._log(f"Skipping {request_id}: unsupported method {method}")
-                continue
-
-            if method == "POST" and json_payload is None and summary.get("bodyType") != "form-data":
-                self.results.append((request_id, f"{effective_path}: unsupported payload type"))
-                self._log(f"Skipping {request_id}: unsupported payload type")
                 continue
 
             expected_status = self._expected_status(event)
@@ -184,7 +177,7 @@ class PlaybackSession:
                 self._log(msg)
 
             if self.execute:
-                if method == "GET":
+                if self._pending_jobs:
                     self._await_pending_jobs()
                 try:
                     response = self._execute_request(
@@ -242,25 +235,31 @@ class PlaybackSession:
     ) -> requests.Response:
         kwargs: Dict[str, object] = {"timeout": 60}
         files_stack = ExitStack()
+        form_data: Dict[str, Any] = {}
+        files_info: Dict[str, Tuple[Path, str]] = {}
         if params:
             kwargs["params"] = params
+        if method == "POST":
+            form_data, files_info = self._build_form_request(path, request_meta)
         if method == "POST" and json_payload is not None:
             kwargs["json"] = json_payload
         elif method == "POST" and request_meta.get("bodyType") == "form-data":
-            data, files_info = self._build_form_request(path, request_meta)
-            if data:
-                kwargs["data"] = data
+            if form_data:
+                kwargs["data"] = form_data
             if files_info:
                 prepared_files: Dict[str, Tuple[str, Any, str]] = {}
                 for field, (file_path, mime) in files_info.items():
                     file_handle = files_stack.enter_context(open(file_path, "rb"))
                     prepared_files[field] = (os.path.basename(file_path), file_handle, mime)
                 kwargs["files"] = prepared_files
-            elif json_payload is None:
+            else:
                 self.results.append(("form-data", f"{path}: missing upload payload"))
                 files_stack.close()
                 raise requests.RequestException("missing form-data payload")
-        if method == "POST" and json_payload is None and request_meta.get("bodyType") != "form-data":
+        elif method == "POST" and form_data:
+            kwargs["data"] = form_data
+
+        if method == "POST" and json_payload is None and not form_data and not files_info and request_meta.get("bodyType") != "form-data":
             if self.verbose:
                 self._log(f"{path}: unsupported payload type")
             self.results.append(("unsupported", f"{path}: unsupported payload type"))
@@ -403,12 +402,47 @@ class PlaybackSession:
         try:
             if normalized.endswith("rq/api/build_landuse"):
                 self._populate_landuse_form(data, files)
+            elif normalized.endswith("rq/api/build_treatments"):
+                self._populate_landuse_form(data, files)
+            elif normalized.endswith("rq/api/build_soils"):
+                self._populate_soils_form(data)
             elif normalized.endswith("tasks/upload_sbs"):
                 self._populate_sbs_form(data, files)
+            elif normalized.endswith("tasks/upload_cover_transform"):
+                self._populate_cover_transform_form(files)
+            elif normalized.endswith("tasks/upload_cli"):
+                self._populate_cli_form(files)
+            elif normalized.endswith("rq/api/run_ash"):
+                self._populate_ash_form(data, files)
+            elif normalized.endswith("rq/api/run_omni"):
+                self._populate_omni_form(data, files)
         except Exception as exc:
             self._log(f"Failed to build form-data payload for {path}: {exc}")
 
         return data, files
+
+    def _populate_soils_form(
+        self,
+        data: Dict[str, Any],
+    ) -> None:
+        from wepppy.nodb.core.soils import Soils
+
+        soils = Soils.getInstance(self.run_dir)
+        initial_sat = getattr(soils, "initial_sat", None)
+        if initial_sat is not None:
+            data["initial_sat"] = self._format_number(initial_sat)
+
+        mods = getattr(soils, "mods", [])
+        if "disturbed" in mods:
+            try:
+                from wepppy.nodb.mods.disturbed import Disturbed
+                disturbed = Disturbed.getInstance(self.run_dir)
+                sol_ver = getattr(disturbed, "sol_ver", None)
+                if sol_ver is not None:
+                    data["sol_ver"] = self._format_number(sol_ver)
+            except Exception as exc:
+                if self.verbose:
+                    self._log(f"Failed to load Disturbed for soils form: {exc}")
 
     def _populate_landuse_form(
         self,
@@ -477,6 +511,128 @@ class PlaybackSession:
         if candidates:
             files["input_upload_sbs"] = (candidates[0], "application/octet-stream")
 
+    def _populate_cover_transform_form(
+        self,
+        files: Dict[str, Tuple[Path, str]],
+    ) -> None:
+        upload_dir = self.seed_upload_root / "revegetation"
+        candidates = sorted(upload_dir.glob("input_upload_cover_transform*")) if upload_dir.exists() else []
+        if not candidates:
+            fallback_root = self.profile_run_root / "revegetation"
+            if fallback_root.exists():
+                candidates = sorted(fallback_root.glob("*.csv"))
+        if candidates:
+            files["input_upload_cover_transform"] = (candidates[0], "text/csv")
+
+    def _populate_cli_form(
+        self,
+        files: Dict[str, Tuple[Path, str]],
+    ) -> None:
+        upload_dir = self.seed_upload_root / "climate"
+        candidates = sorted(upload_dir.glob("input_upload_cli*")) if upload_dir.exists() else []
+        if not candidates:
+            fallback_root = self.profile_run_root / "climate"
+            if fallback_root.exists():
+                candidates = sorted(fallback_root.glob("*.cli"))
+        if candidates:
+            files["input_upload_cli"] = (candidates[0], "text/plain")
+
+    def _populate_ash_form(
+        self,
+        data: Dict[str, Any],
+        files: Dict[str, Tuple[Path, str]],
+    ) -> None:
+        from wepppy.nodb.mods.ash_transport import Ash
+
+        ash = Ash.getInstance(str(self.run_dir))
+        mode = int(getattr(ash, "ash_depth_mode", 1))
+        data["ash_depth_mode"] = str(mode)
+
+        fire_date = getattr(ash, "fire_date", None)
+        if fire_date is not None:
+            formatted = self._format_yearless_date(fire_date)
+            if formatted:
+                data["fire_date"] = formatted
+
+        # Always include current bulk densities so backend stays in sync.
+        data["field_black_bulkdensity"] = self._format_number(getattr(ash, "field_black_ash_bulkdensity", 0.0))
+        data["field_white_bulkdensity"] = self._format_number(getattr(ash, "field_white_ash_bulkdensity", 0.0))
+
+        if mode == 0:
+            data["ini_black_load"] = self._format_number(getattr(ash, "ini_black_ash_load", 0.0))
+            data["ini_white_load"] = self._format_number(getattr(ash, "ini_white_ash_load", 0.0))
+        elif mode == 1:
+            data["ini_black_depth"] = self._format_number(getattr(ash, "ini_black_ash_depth_mm", 0.0))
+            data["ini_white_depth"] = self._format_number(getattr(ash, "ini_white_ash_depth_mm", 0.0))
+
+        if getattr(ash, "run_wind_transport", False):
+            data["checkbox_run_wind_transport"] = "on"
+
+        model = getattr(ash, "model", None)
+        if model:
+            data["ash_model"] = str(model)
+            data["ash_model_select"] = str(model)
+
+        transport_mode = getattr(ash, "transport_mode", None)
+        if transport_mode:
+            data["ash_transport_mode_select"] = str(transport_mode)
+
+        upload_dir = self.seed_upload_root / "ash"
+        seed_candidates = sorted(upload_dir.glob("input_upload_ash_load*")) if upload_dir.exists() else []
+        if not seed_candidates:
+            load_path = getattr(ash, "ash_load_fn", None)
+            if load_path:
+                load_candidate = Path(load_path)
+                if load_candidate.exists():
+                    seed_candidates = [load_candidate]
+        if seed_candidates:
+            files["input_upload_ash_load"] = (seed_candidates[0], "application/octet-stream")
+
+        type_candidates = sorted(upload_dir.glob("input_upload_ash_type_map*")) if upload_dir.exists() else []
+        if not type_candidates:
+            type_path = getattr(ash, "ash_type_map_fn", None)
+            if type_path:
+                type_candidate = Path(type_path)
+                if type_candidate.exists():
+                    type_candidates = [type_candidate]
+        if type_candidates:
+            files["input_upload_ash_type_map"] = (type_candidates[0], "application/octet-stream")
+
+    def _populate_omni_form(
+        self,
+        data: Dict[str, Any],
+        files: Dict[str, Tuple[Path, str]],
+    ) -> None:
+        from wepppy.nodb.mods.omni import Omni
+
+        omni = Omni.getInstance(str(self.run_dir))
+        scenarios = list(getattr(omni, "scenarios", []))
+        payload_defs: List[Dict[str, Any]] = []
+
+        for idx, scenario in enumerate(scenarios):
+            if not isinstance(scenario, dict):
+                continue
+            scenario_type = scenario.get("type")
+            payload_def: Dict[str, Any] = {}
+            for key, value in scenario.items():
+                if key in {"sbs_file_path"}:
+                    continue
+                payload_def[key] = value
+
+            if scenario_type == "sbs_map":
+                original_path = scenario.get("sbs_file_path") or scenario.get("sbs_file")
+                candidate = self._resolve_omni_sbs_seed(idx, original_path)
+                if candidate is not None:
+                    payload_def["sbs_file"] = candidate.name
+                    files[f"scenarios[{idx}][sbs_file]"] = (candidate, "application/octet-stream")
+                else:
+                    self._log(f"Omni SBS scenario {idx} missing seed file; playback may fail")
+
+            payload_defs.append(payload_def)
+
+        if payload_defs:
+            data["scenarios"] = json.dumps(payload_defs)
+
     def _hydrate_seed_files(self, target: Path) -> None:
         if not self.seed_root.exists():
             return
@@ -504,6 +660,56 @@ class PlaybackSession:
                 Ron(str(target), f"{self.seed_config_stem}.cfg")
             except Exception as exc:
                 self._log(f"Failed to initialize Ron with seed config {self.seed_config_stem}: {exc}")
+
+    def _format_yearless_date(self, value: Any) -> Optional[str]:
+        try:
+            month = getattr(value, "month", None)
+            day = getattr(value, "day", None)
+            if month is not None and day is not None:
+                return f"{int(month)}/{int(day)}"
+        except Exception:
+            pass
+        try:
+            return str(value)
+        except Exception:
+            return None
+
+    def _format_number(self, value: Any) -> str:
+        try:
+            numeric = float(value)
+        except Exception:
+            return str(value)
+        return f"{numeric:.6g}"
+
+    def _resolve_omni_sbs_seed(self, idx: int, original_path: Optional[str]) -> Optional[Path]:
+        candidates: List[Path] = []
+        seed_dir = self.seed_upload_root / "omni" / "_limbo"
+        if seed_dir.exists():
+            candidates.extend(sorted(seed_dir.rglob("*")))
+
+        if original_path:
+            original_name = Path(original_path).name
+            for candidate in candidates:
+                if candidate.is_file() and candidate.name == original_name:
+                    return candidate
+
+        if not candidates:
+            fallback = self.profile_run_root / "omni" / "_limbo"
+            if fallback.exists():
+                for candidate in sorted(fallback.rglob("*")):
+                    if candidate.is_file():
+                        candidates.append(candidate)
+
+        if original_path:
+            original_name = Path(original_path).name
+            for candidate in candidates:
+                if candidate.is_file() and candidate.name == original_name:
+                    return candidate
+
+        for candidate in candidates:
+            if candidate.is_file():
+                return candidate
+        return None
 
     def _extract_job_id(self, response: requests.Response) -> Optional[str]:
         content_type = response.headers.get("content-type", "")

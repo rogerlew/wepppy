@@ -160,9 +160,9 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
                 requests=request_log,
             )
             _store_result(session_token, result)
-            log_queue.put(json.dumps({"event": "result", "token": session_token, "data": result.model_dump()}))
+            log_queue.put(f"[profile_playback] result token={session_token} stored at {_results_root() / (session_token + '.json')}")
         except Exception as exc:  # pragma: no cover - defensive logging
-            log_queue.put(json.dumps({"event": "error", "token": session_token, "data": {"detail": str(exc)}}))
+            log_queue.put(f"[profile_playback] error token={session_token}: {exc}")
         finally:
             log_queue.put(None)
             session_logger.removeHandler(handler)

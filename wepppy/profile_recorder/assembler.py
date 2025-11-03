@@ -222,6 +222,16 @@ class ProfileAssembler:
             self._snapshot_landuse_upload(seed_root, Path(run_dir))
         elif endpoint.endswith("tasks/upload_sbs"):
             self._snapshot_sbs_upload(seed_root, Path(run_dir))
+        elif endpoint.endswith("tasks/upload_cover_transform"):
+            self._snapshot_cover_transform_upload(seed_root, Path(run_dir))
+        elif endpoint.endswith("tasks/upload_cli"):
+            self._snapshot_cli_upload(seed_root, Path(run_dir))
+        elif endpoint == "rq/api/build_treatments":
+            self._snapshot_landuse_upload(seed_root, Path(run_dir))
+        elif endpoint == "rq/api/run_ash":
+            self._snapshot_ash_upload(seed_root, Path(run_dir))
+        elif endpoint == "rq/api/run_omni":
+            self._snapshot_omni_upload(seed_root, Path(run_dir))
 
     def _snapshot_landuse_upload(self, seed_root: Path, run_dir: Path) -> None:
         try:
@@ -293,6 +303,101 @@ class ProfileAssembler:
         canonical = target_dir / f"input_upload_sbs{candidates[0].suffix}"
         if not canonical.exists():
             self._copy_seed_file(candidates[0], canonical)
+
+    def _snapshot_cover_transform_upload(self, seed_root: Path, run_dir: Path) -> None:
+        try:
+            from wepppy.nodb.mods.revegetation import Revegetation
+        except Exception as exc:
+            LOGGER.debug("Revegetation import failed while capturing upload: %s", exc)
+            return
+
+        try:
+            reveg = Revegetation.getInstance(str(run_dir))
+        except Exception as exc:
+            LOGGER.debug("Failed to instantiate Revegetation for upload capture: %s", exc)
+            return
+
+        target_dir = seed_root / "revegetation"
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        path = Path(getattr(reveg, "cover_transform_path", ""))
+        if path.exists():
+            self._copy_seed_file(path, target_dir / path.name)
+            canonical = target_dir / f"input_upload_cover_transform{path.suffix or '.csv'}"
+            if not canonical.exists():
+                self._copy_seed_file(path, canonical)
+
+    def _snapshot_cli_upload(self, seed_root: Path, run_dir: Path) -> None:
+        try:
+            from wepppy.nodb.core.climate import Climate
+        except Exception as exc:
+            LOGGER.debug("Climate import failed while capturing CLI upload: %s", exc)
+            return
+
+        try:
+            climate = Climate.getInstance(str(run_dir))
+        except Exception as exc:
+            LOGGER.debug("Failed to instantiate Climate for CLI capture: %s", exc)
+            return
+
+        cli_path = Path(climate.orig_cli_fn or "")
+        if not cli_path.exists():
+            cli_path = Path(climate.cli_dir) / Path(cli_path.name or "")
+        if not cli_path.exists():
+            return
+
+        target_dir = seed_root / "climate"
+        target_dir.mkdir(parents=True, exist_ok=True)
+        self._copy_seed_file(cli_path, target_dir / cli_path.name)
+        canonical = target_dir / f"input_upload_cli{cli_path.suffix or '.cli'}"
+        if not canonical.exists():
+            self._copy_seed_file(cli_path, canonical)
+
+    def _snapshot_ash_upload(self, seed_root: Path, run_dir: Path) -> None:
+        try:
+            from wepppy.nodb.mods.ash_transport import Ash
+        except Exception as exc:
+            LOGGER.debug("Ash import failed while capturing ash upload: %s", exc)
+            return
+
+        try:
+            ash = Ash.getInstance(str(run_dir))
+        except Exception as exc:
+            LOGGER.debug("Failed to instantiate Ash for upload capture: %s", exc)
+            return
+
+        target_dir = seed_root / "ash"
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        load_path = getattr(ash, "ash_load_fn", None)
+        if load_path:
+            load_path = Path(load_path)
+            if load_path.exists():
+                self._copy_seed_file(load_path, target_dir / load_path.name)
+                canonical = target_dir / f"input_upload_ash_load{load_path.suffix or '.tif'}"
+                if not canonical.exists():
+                    self._copy_seed_file(load_path, canonical)
+
+        type_path = getattr(ash, "ash_type_map_fn", None)
+        if type_path:
+            type_path = Path(type_path)
+            if type_path.exists():
+                self._copy_seed_file(type_path, target_dir / type_path.name)
+                canonical_type = target_dir / f"input_upload_ash_type_map{type_path.suffix or '.tif'}"
+                if not canonical_type.exists():
+                    self._copy_seed_file(type_path, canonical_type)
+
+    def _snapshot_omni_upload(self, seed_root: Path, run_dir: Path) -> None:
+        omni_seed = seed_root / "omni"
+        omni_seed.mkdir(parents=True, exist_ok=True)
+
+        limbo_src = run_dir / "omni" / "_limbo"
+        if limbo_src.exists():
+            limbo_dest = omni_seed / "_limbo"
+            try:
+                shutil.copytree(limbo_src, limbo_dest, dirs_exist_ok=True)
+            except Exception as exc:
+                LOGGER.debug("Failed to copy omni limbo directory: %s", exc)
 
     @staticmethod
     def _copy_seed_file(source: Path, target: Path) -> None:
