@@ -76,6 +76,9 @@ class ProfileAssembler:
             if event.get("ok") is False:
                 return
 
+            if stage == "response" and event.get("category") == "file_upload":
+                self._capture_file_upload(event, draft_root, run_dir)
+
             if file_hints:
                 seed_root = draft_root / "seed"
                 seed_root.mkdir(parents=True, exist_ok=True)
@@ -201,6 +204,104 @@ class ProfileAssembler:
             with note_path.open("a", encoding="utf-8") as handle:
                 for note in notes:
                     handle.write(f"{endpoint}: {note}\n")
+
+    def _capture_file_upload(
+        self,
+        event: Dict[str, Any],
+        draft_root: Path,
+        run_dir: Optional[Path],
+    ) -> None:
+        if run_dir is None:
+            return
+
+        endpoint = self._normalise_endpoint(event) or ""
+        seed_root = draft_root / "seed" / "uploads"
+        seed_root.mkdir(parents=True, exist_ok=True)
+
+        if endpoint == "rq/api/build_landuse":
+            self._snapshot_landuse_upload(seed_root, Path(run_dir))
+        elif endpoint.endswith("tasks/upload_sbs"):
+            self._snapshot_sbs_upload(seed_root, Path(run_dir))
+
+    def _snapshot_landuse_upload(self, seed_root: Path, run_dir: Path) -> None:
+        try:
+            from wepppy.nodb.core.landuse import Landuse
+        except Exception as exc:
+            LOGGER.debug("Landuse import failed while capturing upload: %s", exc)
+            return
+
+        try:
+            landuse = Landuse.getInstance(str(run_dir))
+        except Exception as exc:
+            LOGGER.debug("Failed to instantiate Landuse for upload capture: %s", exc)
+            return
+
+        target_dir = seed_root / "landuse"
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        lc_fn = Path(landuse.lc_fn)
+        if lc_fn.exists():
+            self._copy_seed_file(lc_fn, target_dir / lc_fn.name)
+            meta = Path(str(lc_fn) + ".meta")
+            if meta.exists():
+                self._copy_seed_file(meta, target_dir / meta.name)
+
+            canonical = target_dir / f"input_upload_landuse{lc_fn.suffix}"
+            if not canonical.exists():
+                self._copy_seed_file(lc_fn, canonical)
+
+    def _snapshot_sbs_upload(self, seed_root: Path, run_dir: Path) -> None:
+        candidates: list[Path] = []
+
+        try:
+            from wepppy.nodb.mods.disturbed import Disturbed
+            disturbed = Disturbed.getInstance(str(run_dir))
+            disturbed_path = disturbed.disturbed_path
+            if disturbed_path:
+                path = Path(disturbed_path)
+                if path.exists():
+                    candidates.append(path)
+        except Exception:
+            pass
+
+        try:
+            from wepppy.nodb.mods.baer import Baer
+            baer = Baer.getInstance(str(run_dir))
+            baer_path = baer.baer_path
+            if baer_path:
+                path = Path(baer_path)
+                if path.exists():
+                    candidates.append(path)
+        except Exception:
+            pass
+
+        search_roots = [run_dir / "disturbed", run_dir / "baer"]
+        for root in search_roots:
+            if root.is_dir():
+                for candidate in root.glob("*.tif"):
+                    if candidate not in candidates:
+                        candidates.append(candidate)
+
+        if not candidates:
+            return
+
+        target_dir = seed_root / "sbs"
+        target_dir.mkdir(parents=True, exist_ok=True)
+        for src in candidates:
+            self._copy_seed_file(src, target_dir / src.name)
+
+        canonical = target_dir / f"input_upload_sbs{candidates[0].suffix}"
+        if not canonical.exists():
+            self._copy_seed_file(candidates[0], canonical)
+
+    @staticmethod
+    def _copy_seed_file(source: Path, target: Path) -> None:
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if source.exists():
+                shutil.copy2(source, target)
+        except Exception as exc:
+            LOGGER.debug("Failed to copy seed file %s -> %s: %s", source, target, exc)
 
     @staticmethod
     def _extract_config_slug(event: Dict[str, Any]) -> Optional[str]:

@@ -5,10 +5,11 @@ import json
 import logging
 import os
 import shutil
+from contextlib import ExitStack
 import time
 from collections import deque
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import parse_qsl, urljoin, urlparse
 
 import requests
@@ -46,6 +47,7 @@ class PlaybackSession:
         self._logger = logger
         self._pending_jobs: deque[Tuple[str, str]] = deque()
         self.seed_root = profile_root / "capture" / "seed"
+        self.seed_upload_root = self.seed_root / "uploads"
         self.seed_config_stem: Optional[str] = None
 
         if self.verbose:
@@ -134,6 +136,7 @@ class PlaybackSession:
             endpoint = str(req.get("endpoint", ""))
             path = self._normalise_path(endpoint)
             effective_path = self._remap_run_path(path)
+
             summary = req.get("requestMeta") or {}
             json_payload: Optional[dict] = None
             if isinstance(summary, dict) and summary.get("jsonPayload"):
@@ -148,7 +151,7 @@ class PlaybackSession:
                 self._log(f"Skipping {request_id}: unsupported method {method}")
                 continue
 
-            if method == "POST" and json_payload is None:
+            if method == "POST" and json_payload is None and summary.get("bodyType") != "form-data":
                 self.results.append((request_id, f"{effective_path}: unsupported payload type"))
                 self._log(f"Skipping {request_id}: unsupported payload type")
                 continue
@@ -181,6 +184,7 @@ class PlaybackSession:
                         json_payload,
                         expected_status,
                         effective_path,
+                        summary,
                     )
                     self.results.append((request_id, f"{effective_path}: HTTP {response.status_code}"))
                     if self.verbose:
@@ -224,14 +228,39 @@ class PlaybackSession:
         json_payload: Optional[dict],
         expected_status: int,
         path: str,
+        request_meta: Dict[str, Any],
     ) -> requests.Response:
         kwargs: Dict[str, object] = {"timeout": 60}
+        files_stack = ExitStack()
         if params:
             kwargs["params"] = params
         if method == "POST" and json_payload is not None:
             kwargs["json"] = json_payload
+        elif method == "POST" and request_meta.get("bodyType") == "form-data":
+            data, files_info = self._build_form_request(path, request_meta)
+            if data:
+                kwargs["data"] = data
+            if files_info:
+                prepared_files: Dict[str, Tuple[str, Any, str]] = {}
+                for field, (file_path, mime) in files_info.items():
+                    file_handle = files_stack.enter_context(open(file_path, "rb"))
+                    prepared_files[field] = (os.path.basename(file_path), file_handle, mime)
+                kwargs["files"] = prepared_files
+            elif json_payload is None:
+                self.results.append(("form-data", f"{path}: missing upload payload"))
+                files_stack.close()
+                raise requests.RequestException("missing form-data payload")
+        if method == "POST" and json_payload is None and request_meta.get("bodyType") != "form-data":
+            if self.verbose:
+                self._log(f"{path}: unsupported payload type")
+            self.results.append(("unsupported", f"{path}: unsupported payload type"))
+            files_stack.close()
+            raise requests.RequestException("unsupported payload type")
 
-        response = self.session.request(method, url, **kwargs)
+        try:
+            response = self.session.request(method, url, **kwargs)
+        finally:
+            files_stack.close()
 
         if method == "POST" and self.execute:
             if self.verbose:
@@ -351,6 +380,81 @@ class PlaybackSession:
         if path == f"/runs/{self.original_run_id}":
             return f"/runs/{self.playback_run_id}"
         return path
+
+    def _build_form_request(
+        self,
+        path: str,
+        request_meta: Dict[str, Any],
+    ) -> Tuple[Dict[str, Any], Dict[str, Tuple[Path, str]]]:
+        data: Dict[str, Any] = {}
+        files: Dict[str, Tuple[Path, str]] = {}
+        normalized = path.rstrip("/")
+
+        try:
+            if normalized.endswith("rq/api/build_landuse"):
+                self._populate_landuse_form(data, files)
+            elif normalized.endswith("tasks/upload_sbs"):
+                self._populate_sbs_form(data, files)
+        except Exception as exc:
+            self._log(f"Failed to build form-data payload for {path}: {exc}")
+
+        return data, files
+
+    def _populate_landuse_form(
+        self,
+        data: Dict[str, Any],
+        files: Dict[str, Tuple[Path, str]],
+    ) -> None:
+        from wepppy.nodb.core.landuse import Landuse, LanduseMode
+        from wepppy.nodb.mods.disturbed import Disturbed
+
+        landuse = Landuse.getInstance(self.run_dir)
+        mode = int(landuse.mode)
+        data["landuse_mode"] = str(mode)
+
+        nlcd_db = getattr(landuse, "nlcd_db", None)
+        if nlcd_db:
+            data["landuse_db"] = str(nlcd_db)
+
+        single_selection = getattr(landuse, "_single_selection", None)
+        if single_selection is not None:
+            data["landuse_single_selection"] = str(single_selection)
+
+        mapping = landuse.mapping
+        if mapping:
+            data["landuse_management_mapping_selection"] = mapping
+
+        if "disturbed" in landuse.mods:
+            disturbed = Disturbed.getInstance(self.run_dir)
+            burn_shrubs = getattr(disturbed, "burn_shrubs", False)
+            burn_grass = getattr(disturbed, "burn_grass", False)
+            data["checkbox_burn_shrubs"] = "true" if burn_shrubs else "false"
+            data["checkbox_burn_grass"] = "true" if burn_grass else "false"
+
+        upload_dir = self.seed_upload_root / "landuse"
+        candidates = sorted(upload_dir.glob("input_upload_landuse*")) if upload_dir.exists() else []
+        if not candidates:
+            fallback = Path(self.run_dir) / "landuse" / "nlcd.tif"
+            if fallback.exists():
+                candidates = [fallback]
+        if candidates:
+            files["input_upload_landuse"] = (candidates[0], "application/octet-stream")
+
+    def _populate_sbs_form(
+        self,
+        data: Dict[str, Any],
+        files: Dict[str, Tuple[Path, str]],
+    ) -> None:
+        upload_dir = self.seed_upload_root / "sbs"
+        candidates = sorted(upload_dir.glob("input_upload_sbs*")) if upload_dir.exists() else []
+        if not candidates:
+            fallback_root = Path(self.run_dir) / "disturbed"
+            candidates = sorted(fallback_root.glob("*.tif"))
+            if not candidates:
+                fallback_root = Path(self.run_dir) / "baer"
+                candidates = sorted(fallback_root.glob("*.tif"))
+        if candidates:
+            files["input_upload_sbs"] = (candidates[0], "application/octet-stream")
 
     def _hydrate_seed_files(self, target: Path) -> None:
         if not self.seed_root.exists():
