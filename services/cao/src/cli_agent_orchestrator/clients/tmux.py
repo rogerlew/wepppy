@@ -4,9 +4,20 @@ import logging
 import os
 import re
 import time
-from typing import List, Dict, Optional
-import libtmux
+from typing import Dict, List, Optional
+
 from cli_agent_orchestrator.constants import TMUX_HISTORY_LINES
+
+try:
+    import libtmux  # type: ignore[import]
+except ModuleNotFoundError:  # pragma: no cover - exercised via tests without libtmux
+    libtmux = None  # type: ignore[assignment]
+    _IMPORT_ERROR: Optional[ModuleNotFoundError] = ModuleNotFoundError(
+        "libtmux is required for tmux operations; install it via `uv pip install libtmux` "
+        "or ensure the dependency bundle is present."
+    )
+else:
+    _IMPORT_ERROR = None
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +29,8 @@ class TmuxClient:
     """Simplified tmux client for basic operations."""
     
     def __init__(self):
+        if libtmux is None:
+            raise _IMPORT_ERROR or ModuleNotFoundError("libtmux is not installed")
         self.server = libtmux.Server()
     
     def create_session(self, session_name: str, window_name: str, terminal_id: str) -> str:
@@ -219,4 +232,13 @@ class TmuxClient:
 
 
 # Module-level singleton
-tmux_client = TmuxClient()
+if libtmux is None:
+    class _UnavailableTmuxClient:
+        """Stub that surfaces dependency issues when tmux is accessed."""
+
+        def __getattr__(self, _name: str):
+            raise _IMPORT_ERROR or ModuleNotFoundError("libtmux is not installed")
+
+    tmux_client = _UnavailableTmuxClient()
+else:
+    tmux_client = TmuxClient()

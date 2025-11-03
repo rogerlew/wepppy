@@ -1,7 +1,23 @@
+import os
 import shlex
+import sys
+import types
 from pathlib import Path
 
 import pytest
+
+_TEST_HOME = Path("/tmp/wepppy-test-home")
+_TEST_HOME.mkdir(parents=True, exist_ok=True)
+os.environ["HOME"] = str(_TEST_HOME)
+
+if "frontmatter" not in sys.modules:
+    frontmatter_stub = types.ModuleType("frontmatter")
+
+    def _loads(text: str):
+        return types.SimpleNamespace(metadata={}, content=text)
+
+    frontmatter_stub.loads = _loads  # type: ignore[attr-defined]
+    sys.modules["frontmatter"] = frontmatter_stub
 
 try:
     from cli_agent_orchestrator.models.agent_profile import AgentProfile
@@ -100,3 +116,6 @@ def test_cleanup_removes_context(tmp_path, tmux_stub, monkeypatch):
 
     provider.cleanup()
     assert not context_dir.exists()
+
+
+collection_error = test_initialize_writes_system_prompt
