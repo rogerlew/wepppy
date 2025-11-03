@@ -159,7 +159,9 @@ class PlaybackSession:
                 display_path = effective_path
                 if effective_path != path:
                     display_path = f"{effective_path} (source {path})"
-                msg = f"{request_id} {method} {display_path}"
+                msg = f"{request_id} {method} {url}"
+                if display_path != effective_path:
+                    msg += f" [{display_path}]"
                 if params:
                     msg += f" params={dict(params)}"
                 if json_payload is not None:

@@ -50,6 +50,7 @@
    - CLI command: `wctl run-test-profile <slug>` (host-side helper).
    - Helper calls the `profile_playback` FastAPI microservice which clones the promoted profile snapshot into `PROFILE_PLAYBACK_RUN_ROOT/<runid>` (default `/workdir/wepppy-test-engine-data/playback_runs/<runid>`) and replays the captured HTTP traffic with `PlaybackSession`.
    - During replay every request is rewritten to `/runs/profile;;tmp;;<runid>/...`, letting WEPPcloud resolve the temp run via `PROFILE_PLAYBACK_USE_CLONE=true` instead of touching the production directory.
+   - Authentication remains anchored to the public HTTPS base URL so the secure `session` cookie survives; requests reuse that cookie while targeting the internal host.
    - POST requests that enqueue RQ tasks are tracked by job id; subsequent GETs defer until the queued jobs report `finished` via `/rq/api/jobstatus/<job_id>`, keeping playback aligned with the UI’s job lifecycle.
    - The service logs in automatically with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `docker/.env` when no cookie is supplied, so authenticated routes continue to pass.
    - Verbose mode streams step-by-step logging (clone source, run directory, job status updates) through the playback service so operators can follow along with `wctl logs profile_playback -f`.

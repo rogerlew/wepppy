@@ -68,7 +68,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> ProfileRunRes
         raise HTTPException(status_code=404, detail=f"Profile not found: {profile_root}")
 
     login_base_url = (payload.base_url or DEFAULT_BASE_URL).rstrip("/")
-    playback_base_url = INTERNAL_BASE_URL.rstrip("/") if INTERNAL_BASE_URL else login_base_url
+    playback_base_url = login_base_url
 
     session = requests.Session()
     if payload.cookie:
