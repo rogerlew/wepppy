@@ -212,7 +212,7 @@ jobs:
             --repo "${REPO}" \
             --cao-base "${CAO_BASE_URL}" \
             --max-failures 100 \
-            --poll-seconds 300
+            --poll-seconds 1800
 
       - name: List agent logs
         if: ${{ steps.package.outputs.latest_dir != '' }}
