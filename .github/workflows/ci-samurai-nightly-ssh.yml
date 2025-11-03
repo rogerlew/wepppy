@@ -75,7 +75,7 @@ jobs:
             ssh "$host" "
               set -euo pipefail
               cd ${REPO}
-              wctl down weppcloud && wctl up -d --build
+              wctl down --remove-orphans && wctl up -d --build
             "
             echo "==> Waiting for health on ${host}"
             ssh "$host" "
