@@ -15,7 +15,7 @@
     <div>Configuration: <code>{{ config }}</code></div>
     {% endif %}
     {% if job_id %}
-    <div>Job ID: <code>{{ job_id }}</code>{% if job_status_url %} · <a href="{{ job_status_url }}" target="_blank" rel="noopener">Inspect job status</a>{% endif %}</div>
+    <div>Job ID: <code>{{ job_id }}</code>{% if job_dashboard_url %} · <a href="{{ job_dashboard_url }}" target="_blank" rel="noopener">Inspect job status</a>{% endif %}</div>
     {% endif %}
     <div>This page refreshes automatically once the render finishes.</div>
   </div>
@@ -66,11 +66,13 @@
   const statusSpinner = document.getElementById("statusSpinner");
   const statusNote = document.getElementById("statusNote");
   const POLL_INTERVAL_MS = 800;
+  const MAX_POLL_ERRORS = 5;
   const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
   let pollTimer = null;
   let spinnerTimer = null;
   let spinnerIndex = 0;
   let lastState = initialStatus || "queued";
+  let consecutiveErrors = 0;
 
   function updateSpinner(active) {
     if (!statusSpinner) {
@@ -136,8 +138,16 @@
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
+      
+      // Check if response is actually JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Expected JSON response, got ${contentType || 'unknown content type'}`);
+      }
+      
       const payload = await response.json();
       const state = payload.status || payload.job_status || 'unknown';
+      consecutiveErrors = 0; // Reset error counter on successful poll
       if (state === lastState) {
         return;
       }
@@ -159,9 +169,19 @@
       }
     } catch (error) {
       console.error('Failed to poll job status', error);
-      handleFailure('failed', 'Unable to reach the job status endpoint.');
-      if (pollTimer) {
-        window.clearInterval(pollTimer);
+      consecutiveErrors += 1;
+      
+      // Only fail permanently after multiple consecutive errors
+      if (consecutiveErrors >= MAX_POLL_ERRORS) {
+        handleFailure('failed', `Unable to reach the job status endpoint after ${MAX_POLL_ERRORS} attempts. ${error.message || ''}`);
+        if (pollTimer) {
+          window.clearInterval(pollTimer);
+        }
+      } else {
+        // Show a transient error but keep polling
+        if (statusText) {
+          statusText.textContent = `Connection issue (attempt ${consecutiveErrors}/${MAX_POLL_ERRORS}). Retrying…`;
+        }
       }
     }
   }

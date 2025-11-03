@@ -118,6 +118,7 @@ var Wepp = (function () {
         var statusElement = dom.qs("#wepp_form #status");
         var stacktraceElement = dom.qs("#wepp_form #stacktrace");
         var rqJobElement = dom.qs("#wepp_form #rq_job");
+        var hintElement = dom.qs("#hint_run_wepp");
         var resultsContainer = dom.qs("#wepp-results");
         var revegSelect = dom.qs("#reveg_scenario");
         var coverTransformContainer = dom.qs("#user_defined_cover_transform_container");
@@ -126,12 +127,14 @@ var Wepp = (function () {
         var statusAdapter = createLegacyAdapter(statusElement);
         var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
         var rqJobAdapter = createLegacyAdapter(rqJobElement);
+        var hintAdapter = createLegacyAdapter(hintElement);
 
         wepp.form = formElement;
         wepp.info = infoAdapter;
         wepp.status = statusAdapter;
         wepp.stacktrace = stacktraceAdapter;
         wepp.rq_job = rqJobAdapter;
+        wepp.hint = hintAdapter;
         wepp.command_btn_id = "btn_run_wepp";
 
         wepp.statusPanelEl = dom.qs("#wepp_status_panel");
