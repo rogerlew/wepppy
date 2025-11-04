@@ -10,6 +10,7 @@
 
 [![CI Samurai Nightly](https://github.com/rogerlew/wepppy/actions/workflows/ci-samurai-nightly-ssh.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/ci-samurai-nightly-ssh.yml)
 
+[![Pytest Coverage Nightly](https://github.com/rogerlew/wepppy/actions/workflows/pytest-coverage-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/pytest-coverage-nightly.yml)
 
 ## Overview
 
