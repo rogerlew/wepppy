@@ -6,29 +6,48 @@ The docker-compose.dev.yml configuration uses `GID=${GID:-993}` to ensure contai
 
 ## Affected Systems
 
-- forest1
+- forest1.local
 - nuc1.local
 - nuc2.local
 - nuc3.local
 
 ## Usage
 
-### Check all systems (read-only)
+**This script must be run locally as root on each system separately.**
+
+### Check current system (read-only)
 ```bash
-./scripts/ensure_docker_gid_993.sh check
+sudo ./scripts/ensure_docker_gid_993.sh check
 ```
 
-### Fix systems that need adjustment
+### Fix current system if needed
 ```bash
-./scripts/ensure_docker_gid_993.sh fix
+sudo ./scripts/ensure_docker_gid_993.sh fix
+```
+
+### Run on all systems
+Copy the script to each system and run:
+```bash
+# On forest1.local
+sudo /path/to/ensure_docker_gid_993.sh fix
+
+# On nuc1.local
+sudo /path/to/ensure_docker_gid_993.sh fix
+
+# On nuc2.local
+sudo /path/to/ensure_docker_gid_993.sh fix
+
+# On nuc3.local
+sudo /path/to/ensure_docker_gid_993.sh fix
 ```
 
 ## What the fix does
 
-1. Stops docker service (containers will stop)
-2. Changes docker group GID to 993 using `groupmod`
-3. Restarts docker service
-4. Verifies the change
+1. Checks if running as root (required)
+2. Stops docker service (containers will stop)
+3. Changes docker group GID to 993 using `groupmod`
+4. Restarts docker service
+5. Verifies the change
 
 ## Manual verification
 
