@@ -38,6 +38,40 @@ check_docker_gid() {
 fix_docker_gid() {
     echo "Fixing docker GID on $(hostname -f)..."
     
+    # Check if target GID is already in use by another group
+    if existing_group=$(getent group "$REQUIRED_GID" 2>/dev/null | cut -d: -f1); then
+        if [ "$existing_group" != "docker" ]; then
+            echo ""
+            echo "  ⚠ WARNING: GID $REQUIRED_GID is already assigned to group '$existing_group'"
+            echo ""
+            echo "  Options:"
+            echo "    1. Move '$existing_group' to a different GID (recommended)"
+            echo "    2. Abort and manually resolve the conflict"
+            echo ""
+            read -p "  Move '$existing_group' to an unused GID? (yes/no): " move_confirm
+            
+            if [ "$move_confirm" = "yes" ]; then
+                # Find an unused GID
+                new_gid=$REQUIRED_GID
+                while getent group "$new_gid" >/dev/null 2>&1; do
+                    ((new_gid++))
+                done
+                
+                echo "  Moving group '$existing_group' from GID $REQUIRED_GID to GID $new_gid..."
+                groupmod -g "$new_gid" "$existing_group"
+                echo "  ✓ Moved '$existing_group' to GID $new_gid"
+            else
+                echo "  Aborted. Please manually resolve GID conflict."
+                echo ""
+                echo "  To manually fix:"
+                echo "    1. Find unused GID: for i in {994..1100}; do getent group \$i || { echo \$i; break; }; done"
+                echo "    2. Move conflicting group: sudo groupmod -g <new_gid> $existing_group"
+                echo "    3. Re-run this script: sudo $0 fix"
+                exit 1
+            fi
+        fi
+    fi
+    
     echo "  Stopping docker service..."
     systemctl stop docker.socket docker.service
     
