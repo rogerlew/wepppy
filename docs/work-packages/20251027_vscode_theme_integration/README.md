@@ -11,7 +11,7 @@
 
 ## Quick Links
 
-- **[📖 Official Documentation](/workdir/wepppy/docs/ui-docs/theme-system.md)** - Complete theme system reference (moved from artifacts/)
+- **[📖 Official Documentation](../../ui-docs/theme-system.md)** - Complete theme system reference (moved from artifacts/)
 - **[📊 Themes Inventory](notes/themes_inventory.md)** - Current catalog and WCAG audit
 - **[📋 Package Details](package.md)** - Comprehensive scope and implementation notes
 - **[✅ Progress Tracker](tracker.md)** - Live status and lessons learned

@@ -256,5 +256,5 @@
 
 - [package.md](../package.md) — Full work package specification
 - [tracker.md](../tracker.md) — Detailed task board with hours tracking
-- [CAO README](../../../services/cao/README.md) — CAO architecture
-- [PyO3 API Reference](/workdir/markdown-extract/docs/work-packages/20251028_pyo3_bindings/PYTHON_API_REFERENCE.md)
+- [CAO README](../../../../services/cao/README.md) — CAO architecture
+- [PyO3 API Reference](https://github.com/rogerlew/markdown-extract/blob/master/docs/work-packages/20251028_pyo3_bindings/PYTHON_API_REFERENCE.md)

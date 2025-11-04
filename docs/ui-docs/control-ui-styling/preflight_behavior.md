@@ -560,9 +560,9 @@ docker logs -f preflight2
 ## Related Documentation
 
 - [UI Style Guide](../ui-style-guide.md) - General UI patterns and conventions
-- [Control UI Styling](./README.md) - Control-specific styling patterns
+- [Control UI Styling Patterns](control-components.md) - Control-specific styling patterns
 - [README: preflight2 service](../../../services/preflight2/README.md) - Go WebSocket service details
-- [AGENTS.md](../../AGENTS.md) - Development guidelines and architecture
+- [AGENTS.md](../../../AGENTS.md) - Development guidelines and architecture
 
 ---
 
