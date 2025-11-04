@@ -14,6 +14,16 @@
          data-project-path="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}"
          data-user-anonymous="{{ 'true' if user.is_anonymous else 'false' }}">
 {% endif %}
+  <div data-archive-dashboard-config
+       data-runid="{{ runid }}"
+       data-config="{{ config }}"
+       data-archives-url="{{ url_for_run('archive.rq_archive_list', runid=runid, config=config) }}"
+       data-archive-api-url="{{ url_for_run('rq_api.api_archive', runid=runid, config=config) }}"
+       data-restore-api-url="{{ url_for_run('rq_api.api_restore_archive', runid=runid, config=config) }}"
+       data-delete-api-url="{{ url_for_run('rq_api.api_delete_archive', runid=runid, config=config) }}"
+       data-project-path="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}"
+       data-user-anonymous="{{ 'true' if user.is_anonymous else 'false' }}"
+       hidden></div>
   <div class="wc-stack">
     {% call ui.control_shell(
          form_id="archive_form",

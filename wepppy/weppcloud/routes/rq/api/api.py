@@ -1207,8 +1207,8 @@ def api_run_ash(runid, config):
                 except ValueError as exc:
                     return exception_factory(str(exc), runid=runid)
 
-        if ash.ash_load_fn is None:
-            return exception_factory('Expecting ashload map"', runid=runid)
+            if ash.ash_load_fn is None:
+                return exception_factory('Expecting ashload map"', runid=runid)
 
         ash.ash_depth_mode = ash_depth_mode
 

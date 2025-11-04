@@ -3,6 +3,17 @@
 
   var MAX_STATUS_MESSAGES = 3000;
 
+  function readDataset(element) {
+    var data = {};
+    if (!element || !element.dataset) {
+      return data;
+    }
+    Object.keys(element.dataset).forEach(function (key) {
+      data[key] = element.dataset[key];
+    });
+    return data;
+  }
+
   function ready(fn) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", fn);
@@ -17,7 +28,12 @@
     }
     container.__archiveConsoleInit = true;
 
-    var dataset = container.dataset || {};
+    var configNode = container.querySelector("[data-archive-dashboard-config]");
+    var dataset = readDataset(configNode);
+    var containerData = readDataset(container);
+    Object.keys(containerData).forEach(function (key) {
+      dataset[key] = containerData[key];
+    });
     var runId = dataset.runid || dataset.runId || "";
     var archivesUrl = dataset.archivesUrl || dataset.archivesurl || "";
     var archiveApiUrl = dataset.archiveApiUrl || dataset.archiveapiurl || "";

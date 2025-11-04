@@ -34,6 +34,8 @@ write_unitizer_module = _builder_module.write_unitizer_module
 
 TEMPLATES_DIR: Final[Path] = MODULE_DIR / "templates"
 OUTPUT_PATH: Final[Path] = ROOT / "static" / "js" / "controllers.js"
+STATUS_STREAM_SOURCE: Final[Path] = MODULE_DIR / "status_stream.js"
+STATUS_STREAM_OUTPUT: Final[Path] = ROOT / "static" / "js" / "status_stream.js"
 PRIORITY_MODULES: Final[List[str]] = [
     "dom.js",
     "events.js",
@@ -88,6 +90,19 @@ def write_output(contents: str, *, output_path: Path = OUTPUT_PATH) -> None:
     output_path.write_text(contents, encoding="utf-8")
 
 
+def render_status_stream_bundle() -> str:
+    source = STATUS_STREAM_SOURCE.read_text(encoding="utf-8")
+    header = (
+        "/* ----------------------------------------------------------------------------\n"
+        " * StatusStream standalone bundle\n"
+        " * NOTE: Generated via build_controllers_js.py from\n"
+        f" *       {STATUS_STREAM_SOURCE.relative_to(project_root)}\n"
+        " * ----------------------------------------------------------------------------\n"
+        " */\n"
+    )
+    return header + source
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Render controllers.js from controllers_js templates",
@@ -107,10 +122,21 @@ def main() -> None:
             "(defaults to static/js/unitizer_map.js)"
         ),
     )
+    parser.add_argument(
+        "--status-stream-output",
+        type=Path,
+        default=STATUS_STREAM_OUTPUT,
+        help=(
+            "Override output path for the standalone StatusStream bundle "
+            "(defaults to static/js/status_stream.js)"
+        ),
+    )
     args = parser.parse_args()
 
     contents = render_controllers()
     write_output(contents, output_path=args.output)
+    status_stream_bundle = render_status_stream_bundle()
+    write_output(status_stream_bundle, output_path=args.status_stream_output)
     write_unitizer_module(output_path=args.unitizer_output)
 
 
