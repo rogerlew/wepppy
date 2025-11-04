@@ -1,8 +1,12 @@
 """Constants for CLI Agent Orchestrator application."""
 
+import logging
+import tempfile
 from pathlib import Path
 
 from cli_agent_orchestrator import __version__
+
+logger = logging.getLogger(__name__)
 
 # Session configuration
 SESSION_PREFIX = "cao-"
@@ -19,12 +23,34 @@ TMUX_HISTORY_LINES = 200
 TERMINAL_HISTORY_LINES = 200
 STATUS_CHECK_LINES = 100
 
+
+def _ensure_directory(path: Path, *, fallback: Path | None = None) -> Path:
+    """Create directory if missing, falling back when permissions block access."""
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+    except PermissionError as exc:
+        if fallback is None:
+            raise
+        fallback.mkdir(parents=True, exist_ok=True)
+        logger.debug(
+            "Directory %s unavailable (%s); using fallback %s", path, exc, fallback
+        )
+        return fallback
+
+
 # Application directories
-CAO_HOME_DIR = Path.home() / ".wepppy" / "cao"
-DB_DIR = CAO_HOME_DIR / "db"
+_DEFAULT_CAO_HOME = Path.home() / ".wepppy" / "cao"
+_FALLBACK_CAO_HOME = Path(tempfile.gettempdir()) / "wepppy" / "cao"
+CAO_HOME_DIR = _ensure_directory(_DEFAULT_CAO_HOME, fallback=_FALLBACK_CAO_HOME)
 LOG_DIR = CAO_HOME_DIR / "logs"
-TERMINAL_LOG_DIR = LOG_DIR / "terminal"
-TERMINAL_LOG_DIR.mkdir(parents=True, exist_ok=True)
+TERMINAL_LOG_DIR = _ensure_directory(
+    LOG_DIR / "terminal",
+    fallback=_FALLBACK_CAO_HOME / "logs" / "terminal",
+)
+LOG_DIR = TERMINAL_LOG_DIR.parent
+CAO_HOME_DIR = LOG_DIR.parent
+DB_DIR = CAO_HOME_DIR / "db"
 
 # Terminal log configuration
 INBOX_POLLING_INTERVAL = 5  # Seconds between polling for log file changes
@@ -39,9 +65,14 @@ AGENT_CONTEXT_DIR = CAO_HOME_DIR / "agent-context"
 LOCAL_AGENT_STORE_DIR = CAO_HOME_DIR / "agent-store"
 
 # Codex directories
-CODEX_HOME_DIR = Path.home() / ".codex"
-CODEX_PROMPTS_DIR = CODEX_HOME_DIR / "prompts"
-CODEX_PROMPTS_DIR.mkdir(parents=True, exist_ok=True)
+_DEFAULT_CODEX_HOME = Path.home() / ".codex"
+_FALLBACK_CODEX_HOME = Path(tempfile.gettempdir()) / "codex"
+CODEX_HOME_DIR = _ensure_directory(_DEFAULT_CODEX_HOME, fallback=_FALLBACK_CODEX_HOME)
+CODEX_PROMPTS_DIR = _ensure_directory(
+    CODEX_HOME_DIR / "prompts",
+    fallback=_FALLBACK_CODEX_HOME / "prompts",
+)
+CODEX_HOME_DIR = CODEX_PROMPTS_DIR.parent
 
 # Database configuration
 DATABASE_FILE = DB_DIR / "cli-agent-orchestrator.db"

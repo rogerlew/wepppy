@@ -1,14 +1,23 @@
 """Agent profile utilities."""
 
-import frontmatter
+try:
+    import frontmatter
+except ModuleNotFoundError:  # pragma: no cover - surface friendly error when used
+    frontmatter = None  # type: ignore[assignment]
+
 from importlib import resources
 from pathlib import Path
+
 from cli_agent_orchestrator.models.agent_profile import AgentProfile
 from cli_agent_orchestrator.constants import LOCAL_AGENT_STORE_DIR
 
 
 def load_agent_profile(agent_name: str) -> AgentProfile:
     """Load agent profile from local or built-in agent store."""
+    if frontmatter is None:
+        raise RuntimeError(
+            "The 'python-frontmatter' package is required to load agent profiles."
+        )
     try:
         # Check local store first
         local_profile = LOCAL_AGENT_STORE_DIR / f"{agent_name}.md"

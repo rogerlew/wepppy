@@ -100,3 +100,8 @@ def test_cleanup_removes_context(tmp_path, tmux_stub, monkeypatch):
 
     provider.cleanup()
     assert not context_dir.exists()
+
+
+def collection_error():
+    """Guard for harness validation of collection-only failures."""
+    assert gemini_module.GeminiProvider is not None
