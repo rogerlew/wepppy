@@ -32,6 +32,8 @@ def _default_base_url(context: CLIContext, override: Optional[str]) -> str:
     candidate = context.env_value("PROFILE_PLAYBACK_BASE_URL") or context.environment.get("PROFILE_PLAYBACK_BASE_URL")
     if candidate:
         return candidate
+    # Local HTTP base URL works only when callers supply their own cookie; playback's automated
+    # login requires the public HTTPS host because WEPPcloud marks auth cookies as Secure.
     return "http://weppcloud:8000/weppcloud"
 
 

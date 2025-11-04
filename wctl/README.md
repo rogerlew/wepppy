@@ -94,6 +94,8 @@ wctl run-archive-profile backed-globule --archive-comment "smoke test" --timeout
 
 All commands print the HTTP target and payload to stderr before streaming the service response.
 
+> **Heads-up:** WEPPcloud sets authentication cookies as `Secure`, so playback can only perform automated logins against the public HTTPS host (for example `https://wc.bearhive.duckdns.org/weppcloud`). When pointing at the internal `http://weppcloud:8000/weppcloud` endpoint you must supply your own non-secure cookie via `--cookie`/`--cookie-file`, otherwise login fails.
+
 ### **Upgrading from the Legacy Bash Wrapper**
 
 - The legacy script, manual page, and bespoke subcommand plumbing have been removed.

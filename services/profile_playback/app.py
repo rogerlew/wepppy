@@ -20,6 +20,8 @@ from wepppy.profile_recorder.playback import PlaybackSession
 
 
 PROFILE_ROOT = Path(os.environ.get("PROFILE_PLAYBACK_ROOT", "/workdir/wepppy-test-engine-data/profiles"))
+# NOTE: WEPPcloud authentication cookies are flagged Secure, so playback must target HTTPS;
+#       the default honours that requirement to avoid silent login failures on http://weppcloud:8000.
 DEFAULT_BASE_URL = os.environ.get("PROFILE_PLAYBACK_BASE_URL", "https://wc.bearhive.duckdns.org/weppcloud")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
