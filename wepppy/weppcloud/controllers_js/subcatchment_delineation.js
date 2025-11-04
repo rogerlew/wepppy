@@ -1222,7 +1222,16 @@ var SubcatchmentDelineation = (function () {
             if (!runSlug) {
                 return Promise.reject(new Error("Unable to resolve run identifier from the current URL."));
             }
-            var targetUrl = "/query-engine/runs/" + encodeURIComponent(runSlug) + "/query";
+            var origin = "";
+            if (window && window.location) {
+                if (window.location.origin) {
+                    origin = window.location.origin;
+                } else if (window.location.protocol && window.location.host) {
+                    origin = window.location.protocol + "//" + window.location.host;
+                }
+            }
+            var targetPath = "/query-engine/runs/" + encodeURIComponent(runSlug) + "/query";
+            var targetUrl = origin ? origin.replace(/\/+$/, "") + targetPath : targetPath;
             return http.postJson(targetUrl, payload, {
                 headers: { Accept: "application/json" }
             }).then(function (result) {
