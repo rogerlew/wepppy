@@ -204,6 +204,8 @@ class PlaybackSession:
                     self.results.append((request_id, f"{effective_path}: HTTP {response.status_code}"))
                     if self.verbose:
                         self._log(f"{request_id} → HTTP {response.status_code}")
+                    # Add delay after each request to prevent race conditions
+                    time.sleep(1.0)
                 except requests.RequestException as exc:
                     self.results.append((request_id, f"{effective_path}: error {exc}"))
                     if self.verbose:
