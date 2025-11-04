@@ -18,10 +18,14 @@
 
     container.__forkConsoleInit = true;
 
+    var configReader = window.WCConsoleConfig && typeof window.WCConsoleConfig.readConfig === "function"
+      ? window.WCConsoleConfig.readConfig
+      : null;
+    var dataset = configReader ? configReader(container, "[data-fork-console-config]") : (container.dataset || {});
+
     var origin = window.location.origin;
-    var dataset = container.dataset || {};
     var runId = dataset.runid || dataset.runId || "";
-    var initialUndisturbify = String(dataset.undisturbify || "").toLowerCase() === "true";
+    var initialUndisturbify = Boolean(dataset.undisturbify);
 
     var form = container.querySelector("#fork_form");
     var runIdInput = container.querySelector("#runid_input");

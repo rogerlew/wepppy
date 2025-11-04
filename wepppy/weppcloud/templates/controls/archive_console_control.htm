@@ -1,6 +1,7 @@
 {% from "shared/console_macros.htm" import button_row %}
 {% import "controls/_pure_macros.html" as ui %}
 
+{# Front-end config guidance: see wepppy/weppcloud/AGENTS.md ("Front-end bundles") #}
 {% set wrap = archive_console_wrap if archive_console_wrap is defined else True %}
 {% if wrap %}
 <section class="wc-stack"

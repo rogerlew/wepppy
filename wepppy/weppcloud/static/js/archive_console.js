@@ -3,17 +3,6 @@
 
   var MAX_STATUS_MESSAGES = 3000;
 
-  function readDataset(element) {
-    var data = {};
-    if (!element || !element.dataset) {
-      return data;
-    }
-    Object.keys(element.dataset).forEach(function (key) {
-      data[key] = element.dataset[key];
-    });
-    return data;
-  }
-
   function ready(fn) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", fn);
@@ -28,19 +17,17 @@
     }
     container.__archiveConsoleInit = true;
 
-    var configNode = container.querySelector("[data-archive-dashboard-config]");
-    var dataset = readDataset(configNode);
-    var containerData = readDataset(container);
-    Object.keys(containerData).forEach(function (key) {
-      dataset[key] = containerData[key];
-    });
+    var configReader = window.WCConsoleConfig && typeof window.WCConsoleConfig.readConfig === "function"
+      ? window.WCConsoleConfig.readConfig
+      : null;
+    var dataset = configReader ? configReader(container, "[data-archive-dashboard-config]") : {};
     var runId = dataset.runid || dataset.runId || "";
     var archivesUrl = dataset.archivesUrl || dataset.archivesurl || "";
     var archiveApiUrl = dataset.archiveApiUrl || dataset.archiveapiurl || "";
     var restoreApiUrl = dataset.restoreApiUrl || dataset.restoreapiurl || "";
     var deleteApiUrl = dataset.deleteApiUrl || dataset.deleteapiurl || "";
     var projectPath = dataset.projectPath || dataset.projectpath || "";
-    var isUserAnonymous = String(dataset.userAnonymous || dataset.useranonymous || "").toLowerCase() === "true";
+    var isUserAnonymous = Boolean(dataset.userAnonymous || dataset.useranonymous);
 
     var statusPanel = container.querySelector("#archive_status_panel");
     var statusLog = container.querySelector("#archive_status_log");

@@ -20,3 +20,10 @@ Caddy fronts the app with `handle_path /weppcloud*`, which **strips the `/weppcl
 - [ ] `curl -i http://127.0.0.1:8000/runs/test/config/...` from inside the container to verify the route answers before testing externally.
 
 Keep this doc handy—future you will thank you.
+
+## Front-end bundles
+- Rebuild `controllers.js` with `python3 wepppy/weppcloud/controllers_js/build_controllers_js.py` whenever you touch files under `controllers_js/` (this now also emits `static/js/status_stream.js`).
+- Pages that only need StatusStream logging should load `static/js/status_stream.js`; reserve the full `controllers.js` bundle for screens that rely on the modern controller stack.
+- Any console-style control must supply its own config node (hidden `<div data-*-config …>`) so scripts can read run-scoped URLs even when optional wrappers are skipped—do not rely on side effects from other bundles.
+- Front-end scripts can call `WCConsoleConfig.readConfig(container, "[data-*-config]")` (provided by `static/js/console_utils.js`) to merge the hidden config node with the wrapper’s dataset and coerce boolean flags.
+- When wiring a new control, add a quick smoke step (Playwright, controller unit test, or manual checklist) to click primary actions and confirm the expected fetch fires; missing config or wrong bundle choice will surface immediately.
