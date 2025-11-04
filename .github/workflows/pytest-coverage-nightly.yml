@@ -1,0 +1,42 @@
+name: Pytest Coverage Nightly
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  pytest-coverage:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run pytest coverage suite
+        run: |
+          set -euo pipefail
+          scripts/run-pytest-coverage.sh
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-coverage
+          path: coverage
+          if-no-files-found: warn
+
+      - name: Remove redis data directory
+        run: |
+          set -euo pipefail
+          if [ -d "${GITHUB_WORKSPACE}/.docker-data/redis" ]; then
+            echo "Removing ${GITHUB_WORKSPACE}/.docker-data/redis"
+            sudo rm -rf "${GITHUB_WORKSPACE}/.docker-data/redis"
+          else
+            echo "Redis data directory not present; nothing to remove."
+          fi
