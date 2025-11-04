@@ -12,6 +12,8 @@ PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 WCTL_DIR="${SCRIPT_DIR}"
 WCTL_SCRIPT="${WCTL_DIR}/wctl.sh"
 SYMLINK_PATH="${WCTL_SYMLINK_PATH:-/usr/local/bin/wctl}"
+WCTL2_SCRIPT="${WCTL_DIR}/wctl2.sh"
+WCTL2_SYMLINK="${WCTL2_SYMLINK_PATH:-/usr/local/bin/wctl2}"
 
 if [[ ! -d "${WCTL_DIR}" ]]; then
   echo "Expected wctl directory at ${WCTL_DIR}" >&2
@@ -31,7 +33,47 @@ print(os.path.realpath(sys.argv[1]))
 PY
 }
 
-ENVIRONMENT="${1:-dev}"
+show_usage() {
+  cat <<'USAGE' >&2
+Usage:
+  ./wctl/install.sh [dev|prod] [--new-cli]
+
+Options:
+  --new-cli         Install the experimental wctl2 shim alongside the legacy CLI.
+USAGE
+}
+
+ENVIRONMENT=""
+INSTALL_NEW_CLI=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    dev|prod)
+      if [[ -n "${ENVIRONMENT}" ]]; then
+        show_usage
+        exit 1
+      fi
+      ENVIRONMENT="$1"
+      ;;
+    --new-cli)
+      INSTALL_NEW_CLI=true
+      ;;
+    -h|--help)
+      show_usage
+      exit 0
+      ;;
+    *)
+      show_usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [[ -z "${ENVIRONMENT}" ]]; then
+  ENVIRONMENT="dev"
+fi
+
 case "${ENVIRONMENT}" in
   dev)
     COMPOSE_RELATIVE_PATH="docker/docker-compose.dev.yml"
@@ -40,11 +82,7 @@ case "${ENVIRONMENT}" in
     COMPOSE_RELATIVE_PATH="docker/docker-compose.prod.yml"
     ;;
   *)
-    cat <<'USAGE' >&2
-Usage:
-  ./wctl/install.sh dev    # configure wctl for docker-compose.dev.yml
-  ./wctl/install.sh prod   # configure wctl for docker-compose.prod.yml
-USAGE
+    show_usage
     exit 1
     ;;
 esac
@@ -668,6 +706,77 @@ fi
 
 MANPAGE_DEST="${WCTL_MAN_PATH:-/usr/local/share/man/man1/wctl.1}"
 MANPAGE_SOURCE_FILE="${WCTL_DIR}/wctl.1"
+
+if [[ "${INSTALL_NEW_CLI}" == true ]]; then
+  cat > "${WCTL2_SCRIPT}" <<'EOF_SCRIPT'
+#!/bin/bash
+
+set -euo pipefail
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "python3 is required to run wctl2." >&2
+  exit 1
+fi
+
+resolve_realpath() {
+  python3 - "$1" <<'PY'
+import os
+import sys
+print(os.path.realpath(sys.argv[1]))
+PY
+}
+
+SCRIPT_PATH="$(resolve_realpath "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+cd "${PROJECT_DIR}"
+
+export WCTL_COMPOSE_FILE="__COMPOSE_FILE_RELATIVE__"
+export PYTHONPATH="${PROJECT_DIR}/tools"
+
+python3 -m wctl2 "$@"
+EOF_SCRIPT
+
+  python3 - "${WCTL2_SCRIPT}" "${COMPOSE_RELATIVE_PATH}" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+compose_relative = sys.argv[2]
+text = path.read_text()
+text = text.replace("__COMPOSE_FILE_RELATIVE__", compose_relative)
+path.write_text(text)
+PY
+
+  chmod +x "${WCTL2_SCRIPT}"
+  echo "wctl2 shim generated for ${COMPOSE_RELATIVE_PATH}."
+
+  TARGET_WCTL2_REALPATH="$(resolve_realpath "${WCTL2_SCRIPT}")"
+  WCTL2_SYMLINK_UPDATED=false
+
+  if [[ -n "${WCTL2_SYMLINK}" ]]; then
+    if [[ -L "${WCTL2_SYMLINK}" ]]; then
+      EXISTING_WCTL2_REALPATH="$(resolve_realpath "${WCTL2_SYMLINK}")"
+      if [[ "${EXISTING_WCTL2_REALPATH}" == "${TARGET_WCTL2_REALPATH}" ]]; then
+        echo "wctl2 symlink already up to date at ${WCTL2_SYMLINK}."
+        WCTL2_SYMLINK_UPDATED=true
+      fi
+    fi
+
+    if [[ "${WCTL2_SYMLINK_UPDATED}" == false ]]; then
+      if [[ -e "${WCTL2_SYMLINK}" && ! -L "${WCTL2_SYMLINK}" ]]; then
+        echo "Cannot create wctl2 symlink at ${WCTL2_SYMLINK}: path exists and is not a symlink." >&2
+      else
+        if ln -sfn "${WCTL2_SCRIPT}" "${WCTL2_SYMLINK}"; then
+          echo "Symlink created at ${WCTL2_SYMLINK} -> ${WCTL2_SCRIPT}."
+        else
+          echo "Failed to create wctl2 symlink at ${WCTL2_SYMLINK}. Try running with elevated permissions or set WCTL2_SYMLINK_PATH." >&2
+        fi
+      fi
+    fi
+  fi
+fi
 
 if [[ -n "${MANPAGE_DEST}" ]]; then
   if [[ ! -f "${MANPAGE_SOURCE_FILE}" ]]; then

@@ -67,6 +67,14 @@ and
 flags.
 .PP
 Several helper commands are available and are listed below.
+.PP
+An accompanying Typer-based CLI,
+.B wctl2 ,
+is available for side-by-side testing. Install it with
+.B "./wctl/install.sh dev --new-cli"
+to exercise the Python implementation while keeping this legacy wrapper in place. Both CLIs share parity for doc helpers, playback commands, and docker compose passthrough (including the canonical
+.I backed-globule
+smoke profile).
 .SH COMMANDS
 .TP
 .B wctl doc-lint

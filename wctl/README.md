@@ -46,6 +46,56 @@ docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
 - `wctl run-status-tests`: compiles and runs the Go unit/integration tests for `services/status2` using the compose-managed `status-build` helper (golang:1.25-alpine). The helper runs `go mod tidy` before `go test`; extra arguments after the command are forwarded to `go test`.
 - `wctl run-preflight-tests`: same workflow as above but scoped to `services/preflight2`. Use flags like `-tags=integration ./internal/server` to exercise the Redis/WebSocket harness.
 
+### **wctl2 (Preview Typer CLI)**
+
+The Python port of the control CLI lives under `tools/wctl2/` and is installable alongside the legacy Bash wrapper:
+
+```bash
+./wctl/install.sh dev --new-cli
+```
+
+Highlights:
+
+- `CLIContext` (see `tools/wctl2/context.py`) generates the sanitised env file, exposes compose defaults, and writes `WEPPPY_ENV_FILE` before each command executes.
+- Passthrough invocations are logged up front (`INFO:wctl2:docker compose up --help`) so you can see how Typer translated the request.
+- Playback helpers target the canonical `backed-globule` profile during smokes, keeping service, base URL, and timeout defaults aligned with the shell script.
+
+Sample help text:
+
+```text
+$ wctl2 --help
+Usage: wctl2 [OPTIONS] COMMAND [ARGS]...
+
+wctl2 – Python-based control wrapper for the WEPPcloud docker compose stack.
+
+Options:
+  --compose-file, -f   Compose file relative to project root.
+  --project-dir        Override the detected project directory.
+  --log-level          Logging level (default: INFO).
+  -h, --help           Show this message and exit.
+
+Commands:
+  doc-lint                doc tooling wrappers
+  run-npm                 host npm helper
+  run-test-profile        profile playback smoke trigger
+  docker compose …        passthrough for any unhandled command
+```
+
+Playback and passthrough examples after installation:
+
+```text
+$ wctl2 run-test-profile backed-globule --dry-run
+[wctl] POST https://wc.bearhive.duckdns.org/profile-playback/run/backed-globule
+[wctl] payload: {"dry_run": true, "verbose": true, "base_url": "https://wc.bearhive.duckdns.org/weppcloud"}
+…
+
+$ wctl2 docker compose config --help
+INFO:wctl2:docker compose config --help
+Usage:  docker compose config [OPTIONS] [SERVICE...]
+```
+
+All legacy flags continue to work. For example, `wctl2 -f docker/docker-compose.prod.yml up --detach` selects the production stack, and `wctl2 compose ps` trims the redundant prefix before reaching `docker compose`.
+
 ### **Host Environment Overrides**
 
 If a `.env` file exists at the project root, wctl automatically merges it on top of the required `docker/.env` when generating the temporary environment passed to docker compose. Keys defined in the host file override the defaults from `docker/.env`, making it easy to keep machine-specific values out of version control.  
