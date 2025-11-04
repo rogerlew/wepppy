@@ -246,6 +246,7 @@ main() {
   clone_or_update https://github.com/wepp-in-the-woods/wepppyo3  "$WORKDIR/wepppyo3"
   clone_or_update https://github.com/rogerlew/rosetta        "$WORKDIR/rosetta"
   clone_or_update https://github.com/rogerlew/weppcloud-wbt  "$WORKDIR/weppcloud-wbt"
+  clone_or_update https://github.com/rogerlew/f-esri         "$WORKDIR/f-esri"
   clone_or_update https://github.com/rogerlew/markdown-extract   "$WORKDIR/markdown-extract"
   clone_or_update https://github.com/rogerlew/rq-dashboard   "$WORKDIR/rq-dashboard"
 
@@ -270,4 +271,3 @@ main() {
 }
 
 main "$@"
-
