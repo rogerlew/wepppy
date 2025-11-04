@@ -192,6 +192,7 @@ class PlaybackSession:
                 if self._pending_jobs:
                     self._await_pending_jobs()
                 try:
+                    start_time = time.time()
                     response = self._execute_request(
                         method,
                         url,
@@ -201,15 +202,17 @@ class PlaybackSession:
                         effective_path,
                         summary,
                     )
-                    self.results.append((request_id, f"{effective_path}: HTTP {response.status_code}"))
+                    response_time_ms = int((time.time() - start_time) * 1000)
+                    self.results.append((request_id, f"{effective_path}: HTTP {response.status_code} ({response_time_ms}ms)"))
                     if self.verbose:
-                        self._log(f"{request_id} → HTTP {response.status_code}")
+                        self._log(f"{request_id} → HTTP {response.status_code} ({response_time_ms}ms)")
                     # Add delay after each request to prevent race conditions
                     time.sleep(1.0)
                 except requests.RequestException as exc:
-                    self.results.append((request_id, f"{effective_path}: error {exc}"))
+                    response_time_ms = int((time.time() - start_time) * 1000) if 'start_time' in locals() else 0
+                    self.results.append((request_id, f"{effective_path}: error {exc} ({response_time_ms}ms)"))
                     if self.verbose:
-                        self._log(f"{request_id} → error {exc}")
+                        self._log(f"{request_id} → error {exc} ({response_time_ms}ms)")
             else:
                 action = f"{method} {effective_path}"
                 if json_payload is not None:
