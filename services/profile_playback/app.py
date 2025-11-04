@@ -3,9 +3,12 @@ import asyncio
 import json
 import logging
 import os
+import shutil
+import time
 from queue import Queue
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
+from uuid import uuid4
 
 import requests
 from fastapi import FastAPI, HTTPException
@@ -14,13 +17,22 @@ from starlette.responses import StreamingResponse
 from starlette.concurrency import run_in_threadpool
 
 from wepppy.profile_recorder.playback import PlaybackSession
-from uuid import uuid4
 
 
 PROFILE_ROOT = Path(os.environ.get("PROFILE_PLAYBACK_ROOT", "/workdir/wepppy-test-engine-data/profiles"))
 DEFAULT_BASE_URL = os.environ.get("PROFILE_PLAYBACK_BASE_URL", "https://wc.bearhive.duckdns.org/weppcloud")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+
+
+def _sandbox_root(env_key: str, default_subdir: str) -> Path:
+    base = Path(os.environ.get("PROFILE_PLAYBACK_BASE", "/workdir/wepppy-test-engine-data/playback"))
+    return Path(os.environ.get(env_key, str(base / default_subdir)))
+
+
+PLAYBACK_RUN_ROOT = _sandbox_root("PROFILE_PLAYBACK_RUN_ROOT", "runs")
+PLAYBACK_FORK_ROOT = _sandbox_root("PROFILE_PLAYBACK_FORK_ROOT", "fork")
+PLAYBACK_ARCHIVE_ROOT = _sandbox_root("PROFILE_PLAYBACK_ARCHIVE_ROOT", "archive")
 
 
 class ProfileRunRequest(BaseModel):
@@ -48,6 +60,73 @@ class ProfileRunResult(BaseModel):
     run_dir: str
     report: str
     requests: List[dict]
+
+
+class ProfileForkRequest(BaseModel):
+    undisturbify: bool = Field(False, description="Request undisturbify processing during fork.")
+    target_runid: Optional[str] = Field(
+        default=None,
+        description="Override the fork destination run id. Defaults to a generated profile prefix.",
+    )
+    base_url: Optional[str] = Field(
+        default=None,
+        description="Override the target WEPPcloud base URL. Defaults to PROFILE_PLAYBACK_BASE_URL or http://weppcloud:8000/weppcloud.",
+    )
+    cookie: Optional[str] = Field(
+        default=None,
+        description="Optional Cookie header forwarded with every request to WEPPcloud.",
+    )
+    timeout_seconds: int = Field(
+        600,
+        ge=1,
+        le=3600,
+        description="Seconds to wait for the fork RQ job to finish before timing out.",
+    )
+
+
+class ProfileForkResult(BaseModel):
+    profile: str
+    source_run_id: str
+    sandbox_run_id: str
+    new_run_id: str
+    job_id: str
+    status: str
+    run_dir: str
+    fork_dir: Optional[str]
+
+
+class ProfileArchiveRequest(BaseModel):
+    comment: Optional[str] = Field(
+        default=None,
+        description="Optional comment stored with the archive.",
+        max_length=200,
+    )
+    base_url: Optional[str] = Field(
+        default=None,
+        description="Override the target WEPPcloud base URL. Defaults to PROFILE_PLAYBACK_BASE_URL or http://weppcloud:8000/weppcloud.",
+    )
+    cookie: Optional[str] = Field(
+        default=None,
+        description="Optional Cookie header forwarded with every request to WEPPcloud.",
+    )
+    timeout_seconds: int = Field(
+        600,
+        ge=1,
+        le=3600,
+        description="Seconds to wait for the archive RQ job to finish before timing out.",
+    )
+
+
+class ProfileArchiveResult(BaseModel):
+    profile: str
+    run_id: str
+    sandbox_run_id: str
+    job_id: str
+    status: str
+    run_dir: str
+    archive_dir: str
+    archives: List[str]
+    comment: Optional[str] = None
 
 
 app = FastAPI(title="WEPPcloud Profile Playback", version="0.1.0")
@@ -85,6 +164,214 @@ def _store_result(token: str, payload: ProfileRunResult) -> Path:
     path = _results_root() / f"{token}.json"
     path.write_text(json.dumps(payload.model_dump(), indent=2), encoding="utf-8")
     return path
+
+
+class ProfileOperationError(RuntimeError):
+    """Raised when profile playback helper operations fail."""
+
+
+def _normalize_base_url(value: Optional[str]) -> str:
+    base = value or DEFAULT_BASE_URL
+    return base.rstrip("/")
+
+
+def _detect_profile_run_id(profile_root: Path) -> str:
+    events_path = profile_root / "capture" / "events.jsonl"
+    if not events_path.exists():
+        raise ProfileOperationError(f"Capture log not found: {events_path}")
+
+    with events_path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ProfileOperationError(f"Invalid capture entry: {line}") from exc
+            if event.get("stage") != "request":
+                continue
+            endpoint = str(event.get("endpoint", ""))
+            path = PlaybackSession._normalise_path(endpoint)  # reuse helper
+            parts = [segment for segment in path.split("/") if segment]
+            if "runs" in parts:
+                idx = parts.index("runs")
+                if idx + 1 < len(parts):
+                    return parts[idx + 1]
+    raise ProfileOperationError("Unable to determine run id from capture events.")
+
+
+def _prepare_sandbox_run(profile_root: Path, run_id: str) -> Path:
+    source = profile_root / "run"
+    if not source.exists():
+        raise ProfileOperationError(f"Profile run snapshot missing: {source}")
+
+    PLAYBACK_RUN_ROOT.mkdir(parents=True, exist_ok=True)
+    target = PLAYBACK_RUN_ROOT / run_id
+    if target.exists():
+        shutil.rmtree(target)
+    shutil.copytree(source, target)
+    return target
+
+
+def _read_active_config(run_dir: Path) -> str:
+    config_path = run_dir / "active_config.txt"
+    if config_path.exists():
+        content = config_path.read_text(encoding="utf-8").strip()
+        if content:
+            return content
+    return "cfg"
+
+
+def _ensure_session(base_url: str, cookie: Optional[str], *, logger: logging.Logger) -> requests.Session:
+    session = requests.Session()
+    login_base_url = base_url.rstrip("/")
+    if cookie:
+        session.headers.update({"Cookie": cookie})
+    else:
+        if not ADMIN_EMAIL or not ADMIN_PASSWORD:
+            raise ProfileOperationError("ADMIN_EMAIL and ADMIN_PASSWORD must be configured for playback authentication")
+        logger.info("Authenticating playback session against %s", login_base_url)
+        try:
+            _perform_login(session, login_base_url, ADMIN_EMAIL, ADMIN_PASSWORD)
+        except Exception as exc:
+            raise ProfileOperationError(f"Login failed: {exc}") from exc
+        _log_auth_success("playback", login_base_url)
+        _mirror_cookies(session, login_base_url, base_url)
+    return session
+
+
+def _poll_job_completion(
+    session: requests.Session,
+    base_url: str,
+    job_id: str,
+    timeout_seconds: int,
+    *,
+    logger: logging.Logger,
+    interval: float = 2.0,
+) -> Dict[str, object]:
+    if not job_id:
+        raise ProfileOperationError("Fork/archive response did not include a job identifier")
+
+    jobinfo_url = f"{base_url.rstrip('/')}/rq/api/jobinfo/{job_id}"
+    deadline = time.monotonic() + timeout_seconds
+    last_payload: Dict[str, object] = {}
+    while True:
+        response = session.get(jobinfo_url, timeout=60)
+        response.raise_for_status()
+        payload = response.json()
+        last_payload = payload
+        status = str(payload.get("status", "unknown")).lower()
+        if status in {"finished", "failed", "stopped"}:
+            return payload
+        if time.monotonic() >= deadline:
+            raise ProfileOperationError(
+                f"Job {job_id} did not finish within {timeout_seconds}s (last status: {status})"
+            )
+        logger.debug("Job %s status=%s; polling again in %.1fs", job_id, status, interval)
+        time.sleep(interval)
+
+
+def fork_profile(profile: str, payload: ProfileForkRequest, logger: Optional[logging.Logger] = None) -> ProfileForkResult:
+    log = logger or _RUNNER_LOGGER
+    profile_root = PROFILE_ROOT / profile
+    if not profile_root.exists():
+        raise ProfileOperationError(f"Profile not found: {profile_root}")
+
+    run_id = _detect_profile_run_id(profile_root)
+    sandbox_run_id = f"profile;;tmp;;{run_id}"
+    sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
+
+    base_url = _normalize_base_url(payload.base_url)
+    session = _ensure_session(base_url, payload.cookie, logger=log)
+    config_slug = _read_active_config(sandbox_run_dir)
+
+    target_runid = payload.target_runid or f"profile;;fork;;{run_id}-{uuid4().hex[:8]}"
+    fork_url = f"{base_url}/runs/{sandbox_run_id}/{config_slug}/rq/api/fork"
+    form_data = {
+        "undisturbify": "true" if payload.undisturbify else "false",
+        "target_runid": target_runid,
+    }
+
+    log.info("Submitting fork job for profile=%s run=%s -> %s", profile, sandbox_run_id, target_runid)
+    response = session.post(fork_url, data=form_data, timeout=payload.timeout_seconds)
+    response.raise_for_status()
+    body = response.json()
+    if not body.get("Success"):
+        raise ProfileOperationError(body.get("Error") or "Fork request failed")
+
+    job_id = body.get("job_id")
+    new_run_id = body.get("new_runid") or target_runid
+    job_info = _poll_job_completion(session, base_url, job_id, payload.timeout_seconds, logger=log)
+
+    fork_suffix = new_run_id.split(";;")[-1]
+    PLAYBACK_FORK_ROOT.mkdir(parents=True, exist_ok=True)
+    fork_dir = PLAYBACK_FORK_ROOT / fork_suffix
+
+    return ProfileForkResult(
+        profile=profile,
+        source_run_id=run_id,
+        sandbox_run_id=sandbox_run_id,
+        new_run_id=new_run_id,
+        job_id=job_id,
+        status=str(job_info.get("status", "unknown")),
+        run_dir=str(sandbox_run_dir),
+        fork_dir=str(fork_dir),
+    )
+
+
+def archive_profile(profile: str, payload: ProfileArchiveRequest, logger: Optional[logging.Logger] = None) -> ProfileArchiveResult:
+    log = logger or _RUNNER_LOGGER
+    profile_root = PROFILE_ROOT / profile
+    if not profile_root.exists():
+        raise ProfileOperationError(f"Profile not found: {profile_root}")
+
+    run_id = _detect_profile_run_id(profile_root)
+    sandbox_run_id = f"profile;;tmp;;{run_id}"
+    sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
+
+    base_url = _normalize_base_url(payload.base_url)
+    session = _ensure_session(base_url, payload.cookie, logger=log)
+    config_slug = _read_active_config(sandbox_run_dir)
+
+    archive_url = f"{base_url}/runs/{sandbox_run_id}/{config_slug}/rq/api/archive"
+    body_payload: Dict[str, object] = {}
+    if payload.comment is not None:
+        body_payload["comment"] = payload.comment
+
+    log.info("Submitting archive job for profile=%s run=%s", profile, sandbox_run_id)
+    response = session.post(archive_url, json=body_payload, timeout=payload.timeout_seconds)
+    response.raise_for_status()
+    body = response.json()
+    if not body.get("Success"):
+        raise ProfileOperationError(body.get("Error") or "Archive request failed")
+
+    job_id = body.get("job_id")
+    job_info = _poll_job_completion(session, base_url, job_id, payload.timeout_seconds, logger=log)
+
+    archives_dir = sandbox_run_dir / "archives"
+    archive_target = PLAYBACK_ARCHIVE_ROOT / run_id
+    archive_target.parent.mkdir(parents=True, exist_ok=True)
+    if archive_target.exists():
+        shutil.rmtree(archive_target)
+    archives: List[str] = []
+    if archives_dir.exists():
+        shutil.copytree(archives_dir, archive_target)
+        archives = sorted(p.name for p in archive_target.iterdir())
+    else:
+        archive_target.mkdir(parents=True, exist_ok=True)
+
+    return ProfileArchiveResult(
+        profile=profile,
+        run_id=run_id,
+        sandbox_run_id=sandbox_run_id,
+        job_id=job_id,
+        status=str(job_info.get("status", "unknown")),
+        run_dir=str(sandbox_run_dir),
+        archive_dir=str(archive_target),
+        archives=archives,
+        comment=payload.comment,
+    )
 
 
 async def _stream_run_result(token: str, queue: Queue, worker_future) -> StreamingResponse:
@@ -180,6 +467,22 @@ async def run_result(token: str) -> ProfileRunResult:
         raise HTTPException(status_code=404, detail=f"Result not found for token {token}")
     data = json.loads(path.read_text(encoding="utf-8"))
     return ProfileRunResult(**data)
+
+
+@app.post("/fork/{profile}", response_model=ProfileForkResult)
+async def fork_profile_route(profile: str, payload: ProfileForkRequest) -> ProfileForkResult:
+    try:
+        return await run_in_threadpool(fork_profile, profile, payload, _RUNNER_LOGGER)
+    except ProfileOperationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/archive/{profile}", response_model=ProfileArchiveResult)
+async def archive_profile_route(profile: str, payload: ProfileArchiveRequest) -> ProfileArchiveResult:
+    try:
+        return await run_in_threadpool(archive_profile, profile, payload, _RUNNER_LOGGER)
+    except ProfileOperationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 

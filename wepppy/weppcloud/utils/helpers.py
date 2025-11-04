@@ -102,6 +102,12 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
         elif _group == 'profile' and _name == 'tmp':
             playback_root = _playback_path("PROFILE_PLAYBACK_RUN_ROOT", "runs")
             path = _join(playback_root, _runid)
+        elif _group == 'profile' and _name == 'fork':
+            playback_root = _playback_path("PROFILE_PLAYBACK_FORK_ROOT", "fork")
+            path = _join(playback_root, _runid)
+        elif _group == 'profile' and _name == 'archive':
+            playback_root = _playback_path("PROFILE_PLAYBACK_ARCHIVE_ROOT", "archive")
+            path = _join(playback_root, _runid)
         else:
             raise ValueError(f'Unknown group prefix: {_group}')
     elif path is None:

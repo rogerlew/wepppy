@@ -562,6 +562,51 @@ if [[ $# -gt 0 ]]; then
       python3 "${PROJECT_DIR}/tools/sync_stubs.py" "$@"
       exit 0
       ;;
+    run-test-profile)
+      shift
+      DEFAULT_SERVICE_URL="$(env_value PROFILE_PLAYBACK_URL "${TEMP_ENV}" 2>/dev/null || true)"
+      if [[ -z "${DEFAULT_SERVICE_URL}" ]]; then
+        DEFAULT_SERVICE_URL="http://127.0.0.1:8070"
+      fi
+      DEFAULT_BASE_URL="$(env_value PROFILE_PLAYBACK_BASE_URL "${TEMP_ENV}" 2>/dev/null || true)"
+      if [[ -z "${DEFAULT_BASE_URL}" ]]; then
+        DEFAULT_BASE_URL="http://weppcloud:8000/weppcloud"
+      fi
+      PROFILE_PLAYBACK_DEFAULT_SERVICE_URL="${DEFAULT_SERVICE_URL}" \
+      PROFILE_PLAYBACK_DEFAULT_BASE_URL="${DEFAULT_BASE_URL}" \
+        python3 "${PROJECT_DIR}/tools/profile_playback_cli.py" run-test-profile "$@"
+      exit $?
+      ;;
+    run-fork-profile)
+      shift
+      DEFAULT_SERVICE_URL="$(env_value PROFILE_PLAYBACK_URL "${TEMP_ENV}" 2>/dev/null || true)"
+      if [[ -z "${DEFAULT_SERVICE_URL}" ]]; then
+        DEFAULT_SERVICE_URL="http://127.0.0.1:8070"
+      fi
+      DEFAULT_BASE_URL="$(env_value PROFILE_PLAYBACK_BASE_URL "${TEMP_ENV}" 2>/dev/null || true)"
+      if [[ -z "${DEFAULT_BASE_URL}" ]]; then
+        DEFAULT_BASE_URL="http://weppcloud:8000/weppcloud"
+      fi
+      PROFILE_PLAYBACK_DEFAULT_SERVICE_URL="${DEFAULT_SERVICE_URL}" \
+      PROFILE_PLAYBACK_DEFAULT_BASE_URL="${DEFAULT_BASE_URL}" \
+        python3 "${PROJECT_DIR}/tools/profile_playback_cli.py" run-fork-profile "$@"
+      exit $?
+      ;;
+    run-archive-profile)
+      shift
+      DEFAULT_SERVICE_URL="$(env_value PROFILE_PLAYBACK_URL "${TEMP_ENV}" 2>/dev/null || true)"
+      if [[ -z "${DEFAULT_SERVICE_URL}" ]]; then
+        DEFAULT_SERVICE_URL="http://127.0.0.1:8070"
+      fi
+      DEFAULT_BASE_URL="$(env_value PROFILE_PLAYBACK_BASE_URL "${TEMP_ENV}" 2>/dev/null || true)"
+      if [[ -z "${DEFAULT_BASE_URL}" ]]; then
+        DEFAULT_BASE_URL="http://weppcloud:8000/weppcloud"
+      fi
+      PROFILE_PLAYBACK_DEFAULT_SERVICE_URL="${DEFAULT_SERVICE_URL}" \
+      PROFILE_PLAYBACK_DEFAULT_BASE_URL="${DEFAULT_BASE_URL}" \
+        python3 "${PROJECT_DIR}/tools/profile_playback_cli.py" run-archive-profile "$@"
+      exit $?
+      ;;
     check-test-stubs)
       shift
       compose_exec_weppcloud "cd /workdir/wepppy && python tools/check_stubs.py"

@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 
 from os.path import join as _join
 from os.path import split as _split
@@ -1448,7 +1449,13 @@ def api_fork(runid, config):
         undisturbify = undisturbify_str.lower() == "true"
 
         print(f'undisturbify={undisturbify}')
-            
+
+        requested_runid = request.form.get("target_runid")
+        if requested_runid:
+            requested_runid = requested_runid.strip()
+            if not requested_runid:
+                requested_runid = None
+
         owners = get_run_owners(runid)
         should_abort = True
 
@@ -1471,31 +1478,45 @@ def api_fork(runid, config):
 
         dir_created = False
         while not dir_created:
-            new_runid = awesome_codename.generate_codename().replace(' ', '-')
+            if requested_runid:
+                new_runid = requested_runid
+            else:
+                new_runid = awesome_codename.generate_codename().replace(' ', '-')
 
-            email = getattr(current_user, 'email', '')
-            if email.startswith('rogerlew@'):
-                new_runid = 'rlew-' + new_runid
-            elif email.startswith('mdobre@'):
-                new_runid = 'mdobre-' + new_runid
-            elif email.startswith('srivas42@'):
-                new_runid = 'srivas42-' + new_runid
-            elif request.remote_addr == '127.0.0.1':
-                new_runid = 'devvm-' + new_runid
+                email = getattr(current_user, 'email', '')
+                if email.startswith('rogerlew@'):
+                    new_runid = 'rlew-' + new_runid
+                elif email.startswith('mdobre@'):
+                    new_runid = 'mdobre-' + new_runid
+                elif email.startswith('srivas42@'):
+                    new_runid = 'srivas42-' + new_runid
+                elif request.remote_addr == '127.0.0.1':
+                    new_runid = 'devvm-' + new_runid
 
-            new_wd = get_wd(new_runid)
+            new_wd = get_wd(new_runid, prefer_active=False)
+
+            if requested_runid:
+                dir_created = True
+            else:
+                if _exists(new_wd):
+                    continue
+                if has_archive(runid):
+                    continue
+                dir_created = True
+
+        if requested_runid:
+            parent_dir = os.path.dirname(new_wd.rstrip('/'))
+            if parent_dir:
+                os.makedirs(parent_dir, exist_ok=True)
             if _exists(new_wd):
-                continue
-
-            if has_archive(runid):
-                continue
-
-            dir_created = True
-
-        assert not _exists(new_wd), new_wd
+                shutil.rmtree(new_wd)
+            os.makedirs(new_wd, exist_ok=True)
+        else:
+            assert not _exists(new_wd), new_wd
 
         # add run to database
-        if not current_user.is_anonymous:
+        register_run = not new_runid.startswith('profile;;')
+        if register_run and not current_user.is_anonymous:
             try:
                 user_datastore.create_run(new_runid, config, current_user)
             except Exception:

@@ -1,5 +1,5 @@
 .\" Manual for wctl helper script
-.TH WCTL 1 "2025-10-26" "wepppy" "User Commands"
+.TH WCTL 1 "2025-10-27" "wepppy" "User Commands"
 .SH NAME
 wctl \- control helper for the WEPPcloud Docker Compose stacks
 .SH SYNOPSIS
@@ -37,6 +37,15 @@ wctl \- control helper for the WEPPcloud Docker Compose stacks
 .br
 .B wctl update-stub-requirements
 [options]
+.br
+.B wctl run-test-profile
+profile [options]
+.br
+.B wctl run-fork-profile
+profile [options]
+.br
+.B wctl run-archive-profile
+profile [options]
 .SH DESCRIPTION
 .PP
 The
@@ -191,6 +200,39 @@ This helper ensures frontend tooling executes from the correct project directory
 .B wctl run-stubgen
 Regenerates the local stub tree via
 .BR "python tools/sync_stubs.py" .
+.TP
+.B wctl run-test-profile
+Calls the profile playback FastAPI service to replay a promoted profile located under
+.IR /workdir/wepppy-test-engine-data/profiles .
+Supports
+.BR --dry-run ,
+.BR --base-url ,
+.BR --service-url ,
+.BR --cookie ,
+.BR --cookie-file ,
+and related options; the command streams the service response so local runs and CI workflows behave identically.
+.TP
+.B wctl run-fork-profile
+Exercises the sandbox fork workflow by copying the recorded profile into the playback run directory and issuing the standard fork API request. Options include
+.BR --undisturbify ,
+.BR --target-runid ,
+.BR --base-url ,
+.BR --service-url ,
+.BR --cookie ,
+.BR --cookie-file ,
+and
+.BR --timeout .
+.TP
+.B wctl run-archive-profile
+Submits an archive job against the sandbox copy of a profile run, mirroring the production archive endpoint. Accepts
+.BR --archive-comment ,
+.BR --base-url ,
+.BR --service-url ,
+.BR --cookie ,
+.BR --cookie-file ,
+and
+.BR --timeout
+flags; the resulting archive metadata is printed as JSON.
 .TP
 .B wctl check-test-stubs
 Runs
