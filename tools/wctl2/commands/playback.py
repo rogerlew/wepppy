@@ -46,11 +46,35 @@ def _raise_for_status(response: requests.Response) -> None:
 
 
 def _stream_post(url: str, payload: dict, headers: dict) -> None:
-    with requests.post(url, json=payload, headers=headers, stream=True, timeout=None) as response:
-        _raise_for_status(response)
-        for chunk in response.iter_lines():
-            if chunk:
-                typer.echo(chunk.decode("utf-8"))
+    try:
+        with requests.post(url, json=payload, headers=headers, stream=True, timeout=None) as response:
+            _raise_for_status(response)
+            received_any = False
+            try:
+                for chunk in response.iter_lines():
+                    if chunk:
+                        typer.echo(chunk.decode("utf-8"))
+                        received_any = True
+            except requests.exceptions.ChunkedEncodingError as exc:
+                if not received_any:
+                    raise
+                typer.echo(
+                    f"[wctl] Streaming finished with chunked-encoding warning ({exc}); continuing without fallback.",
+                    err=True,
+                )
+                return
+    except Exception as exc:
+        # Handle chunked transfer encoding issues by falling back to non-streaming
+        typer.echo(f"[wctl] Streaming failed ({exc.__class__.__name__}: {exc}), falling back to non-streaming...", err=True)
+        try:
+            response = requests.post(url, json=payload, headers=headers, stream=False, timeout=None)
+            _raise_for_status(response)
+            # Output the response text line by line to simulate streaming
+            for line in response.text.splitlines():
+                typer.echo(line)
+        except Exception as fallback_exc:
+            typer.echo(f"[wctl] Fallback also failed: {fallback_exc}", err=True)
+            raise typer.Exit(1) from fallback_exc
 
 
 def _post_json(url: str, payload: dict, headers: dict) -> None:
@@ -90,7 +114,7 @@ def register(app: typer.Typer) -> None:
         if resolved_cookie:
             payload["cookie"] = resolved_cookie
 
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json", "Accept-Encoding": "identity"}
         if resolved_cookie:
             headers["Cookie"] = resolved_cookie
 

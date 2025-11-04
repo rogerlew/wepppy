@@ -383,6 +383,7 @@ services:
   postgres:
     image: postgres:16
     container_name: wepppy-postgres
+    stop_grace_period: 120s
     environment:
       POSTGRES_DB: wepppy
       POSTGRES_USER: wepppy

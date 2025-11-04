@@ -5,7 +5,7 @@
 # add backend rule: http-request set-header X-Forwarded-Proto https if { ssl_fc }
 
 http://:8080 {
-    encode gzip
+
 
     handle_path /health* {
         respond "OK"
@@ -24,10 +24,14 @@ http://:8080 {
 
     handle_path /profile-playback* {
         reverse_proxy profile-playback:8070 {
+            flush_interval -1
             header_up X-Forwarded-Proto {scheme}
             header_up Host {host}
+            header_up Accept-Encoding identity
+            header_down Content-Length {http.response.header.Content-Length}
             transport http {
                 read_timeout 100m
+                response_header_timeout 100m
             }
         }
     }

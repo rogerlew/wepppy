@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
 from starlette.concurrency import run_in_threadpool
 
+from wepppy.nodb.base import clear_locks
 from wepppy.profile_recorder.playback import PlaybackSession
 
 
@@ -216,6 +217,24 @@ def _prepare_sandbox_run(profile_root: Path, run_id: str) -> Path:
     return target
 
 
+def _clear_sandbox_locks(runid: str, logger: logging.Logger, extra_runids: Optional[List[str]] = None) -> None:
+    targets = {runid}
+    if extra_runids:
+        targets.update(extra_runids)
+    try:
+        total_cleared = 0
+        for candidate in targets:
+            cleared = clear_locks(candidate)
+            total_cleared += len(cleared)
+            if cleared:
+                logger.info("Cleared %d lock(s) for %s", len(cleared), candidate)
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.warning("Unable to clear locks for %s: %s", ", ".join(sorted(targets)), exc)
+        return
+    if total_cleared == 0:
+        logger.info("No locks cleared for %s", ", ".join(sorted(targets)))
+
+
 def _read_active_config(run_dir: Path) -> str:
     config_path = run_dir / "active_config.txt"
     if config_path.exists():
@@ -283,6 +302,7 @@ def fork_profile(profile: str, payload: ProfileForkRequest, logger: Optional[log
     run_id = _detect_profile_run_id(profile_root)
     sandbox_run_id = f"profile;;tmp;;{run_id}"
     sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
+    _clear_sandbox_locks(sandbox_run_id, log, extra_runids=[run_id])
 
     base_url = _normalize_base_url(payload.base_url)
     session = _ensure_session(base_url, payload.cookie, logger=log)
@@ -331,6 +351,7 @@ def archive_profile(profile: str, payload: ProfileArchiveRequest, logger: Option
     run_id = _detect_profile_run_id(profile_root)
     sandbox_run_id = f"profile;;tmp;;{run_id}"
     sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
+    _clear_sandbox_locks(sandbox_run_id, log, extra_runids=[run_id])
 
     base_url = _normalize_base_url(payload.base_url)
     session = _ensure_session(base_url, payload.cookie, logger=log)

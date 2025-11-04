@@ -5,8 +5,9 @@ import json
 import logging
 import os
 import shutil
-from contextlib import ExitStack
 import time
+import textwrap
+from contextlib import ExitStack
 from collections import deque
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -14,6 +15,7 @@ from urllib.parse import parse_qsl, urljoin, urlparse
 
 import requests
 
+from wepppy.nodb.base import clear_locks
 from wepppy.nodb.core.ron import Ron
 
 
@@ -70,12 +72,17 @@ class PlaybackSession:
         self._log(f"Resolved run id: {self.original_run_id}")
         self._log(f"Using playback run id: {self.playback_run_id}")
 
+        self._clear_playback_locks(stage="pre-seed")
+
         if run_dir is not None:
             self.run_dir = run_dir
             self._log(f"Using existing run directory: {self.run_dir}")
         else:
             self.run_dir = self._prepare_run_directory(profile_root, self.run_id)
             self._log(f"Prepared clean playback workspace at: {self.run_dir}")
+
+        self._retag_run_group()
+        self._clear_playback_locks(stage="post-setup")
 
         self.requests = self._index_requests(self.events)
         self.results: List[Tuple[str, str]] = []
@@ -146,7 +153,7 @@ class PlaybackSession:
             if method == "GET" and "/rq/api/jobstatus/" in effective_path:
                 self.results.append((request_id, f"{effective_path}: skipped recorded jobstatus poll"))
                 continue
-            if method == "GET" and "/elevationquery/" in effective_path:
+            if "/elevationquery/" in effective_path:
                 self.results.append((request_id, f"{effective_path}: skipped recorded elevation query"))
                 continue
 
@@ -666,7 +673,7 @@ class PlaybackSession:
                         self._log(f"Failed to copy seed config {item}: {exc}")
         if self.seed_config_stem:
             try:
-                Ron(str(target), f"{self.seed_config_stem}.cfg")
+                Ron(str(target), f"{self.seed_config_stem}.cfg", run_group="profile", group_name="tmp")
             except Exception as exc:
                 self._log(f"Failed to initialize Ron with seed config {self.seed_config_stem}: {exc}")
 
@@ -720,6 +727,49 @@ class PlaybackSession:
                 return candidate
         return None
 
+    def _clear_playback_locks(self, *, stage: str) -> None:
+        identifiers = {self.playback_run_id}
+        if self.original_run_id:
+            identifiers.add(self.original_run_id)
+        total_cleared = 0
+        for runid in identifiers:
+            try:
+                cleared = clear_locks(runid)
+            except Exception as exc:
+                if self.verbose:
+                    self._log(f"[locks:{stage}] Failed to clear locks for {runid}: {exc}")
+                continue
+            total_cleared += len(cleared)
+            if self.verbose and cleared:
+                self._log(f"[locks:{stage}] Cleared {len(cleared)} locks for {runid}")
+        if self.verbose and total_cleared == 0:
+            self._log(f"[locks:{stage}] No locks cleared")
+
+    def _retag_run_group(self) -> None:
+        group = "profile"
+        group_name = "tmp"
+        run_path = Path(self.run_dir)
+        for nodb_path in run_path.rglob("*.nodb"):
+            try:
+                content = nodb_path.read_text(encoding="utf-8")
+                data = json.loads(content)
+            except Exception as exc:
+                if self.verbose:
+                    self._log(f"Skipping run-group retag for {nodb_path}: {exc}")
+                continue
+            state = data.get("py/state")
+            if not isinstance(state, dict):
+                continue
+            if state.get("_run_group") == group and state.get("_group_name") == group_name:
+                continue
+            state["_run_group"] = group
+            state["_group_name"] = group_name
+            try:
+                nodb_path.write_text(json.dumps(data), encoding="utf-8")
+            except Exception as exc:
+                if self.verbose:
+                    self._log(f"Failed to write retagged run-group for {nodb_path}: {exc}")
+
     def _extract_job_id(self, response: requests.Response) -> Optional[str]:
         content_type = response.headers.get("content-type", "")
         if "application/json" not in content_type.lower():
@@ -737,6 +787,45 @@ class PlaybackSession:
             if self.verbose:
                 self._log("response JSON did not include job_id")
         return None
+
+    def _describe_job_failure(self, job_id: str) -> Optional[str]:
+        info_url = self._build_url(f"/rq/api/jobinfo/{job_id}")
+        try:
+            response = self.session.get(info_url, timeout=60)
+            response.raise_for_status()
+            payload = response.json()
+        except Exception as exc:  # pragma: no cover - defensive logging
+            if self.verbose:
+                self._log(f"Failed to fetch job info for {job_id}: {exc}")
+            return None
+
+        if not isinstance(payload, dict):
+            return None
+
+        def render(node: dict, depth: int = 0) -> List[str]:
+            lines: List[str] = []
+            prefix = "  " * depth
+            job_identifier = node.get("id") or "<unknown>"
+            description = node.get("description") or ""
+            status = node.get("status") or ""
+            header = f"{prefix}{job_identifier}"
+            if status:
+                header += f" [{status}]"
+            if description:
+                header += f": {description}"
+            lines.append(header)
+            exc_info = node.get("exc_info")
+            if isinstance(exc_info, str) and exc_info.strip():
+                lines.append(textwrap.indent(exc_info.strip(), prefix + "    "))
+            children = node.get("children") or {}
+            for order_key in sorted(children):
+                for child in children[order_key] or []:
+                    if child:
+                        lines.extend(render(child, depth + 1))
+            return lines
+
+        rendered = render(payload)
+        return "\n".join(rendered) if rendered else None
 
     def _wait_for_job(
         self,
@@ -776,7 +865,14 @@ class PlaybackSession:
                 if status in {"finished"}:
                     return
                 if status in {"failed", "stopped", "canceled"}:
-                    raise RuntimeError(f"Job {job_id} ended with status {status}")
+                    detail = self._describe_job_failure(job_id)
+                    if detail and self.verbose:
+                        for line in detail.splitlines():
+                            self._log(line)
+                    message = f"Job {job_id} ended with status {status}"
+                    if detail:
+                        message = f"{message}\n{detail}"
+                    raise RuntimeError(message)
             elif response.status_code == 404:
                 if self.verbose:
                     self._log(f"job {job_id} status endpoint returned 404; assuming complete")
