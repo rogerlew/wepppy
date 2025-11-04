@@ -158,7 +158,7 @@ pillow==10.3.0
 pint==0.23
 platformdirs==2.5.1
 plotnine==0.13.6
-pluggy==0.13.0
+pluggy==1.6.0
 ply==3.11
 pooch==1.8.1
 prometheus-client==0.9.0
@@ -184,7 +184,9 @@ pyproj==3.7.1
 pyproject-hooks==1.2.0
 pyrsistent==0.18.1
 pysocks==1.7.1
-pytest==6.2.5
+pytest==8.4.2
+pytest-cov==7.0.0
+pytest-reportlog==0.4.0
 python-dotenv==1.0.1
 python-frontmatter==1.1.0
 pythran==0.10.0

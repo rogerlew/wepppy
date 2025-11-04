@@ -283,7 +283,7 @@ def main() -> int:
     ap.add_argument("--denylist", default="wepppy/wepp/**, wepppy/nodb/base.py, docker/**, .github/workflows/**, deps/linux/**")
     ap.add_argument("--max-context", type=int, default=10)
     ap.add_argument("--max-failures", type=int, default=0, help="Max failures to process (0 = no cap)")
-    ap.add_argument("--poll-seconds", type=int, default=1800)
+    ap.add_argument("--poll-seconds", type=int, default=7200)
     args = ap.parse_args()
 
     failures = read_failures(Path(args.failures))
