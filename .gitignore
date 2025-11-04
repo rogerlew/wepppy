@@ -27,7 +27,7 @@ out
 _legacy_weppcloud_controls/
 wepppy/soils/ssurgo/tests/testsoils/
 .coverage
-coverage/coverage.xml
+coverage/
 
 # External tools (managed separately)
 markdown-extract/
