@@ -31,6 +31,12 @@ check_docker_gid() {
         return 0
     else
         echo "  ✗ GID needs to be changed from $current_gid to $REQUIRED_GID"
+        
+        # Check if target GID is already in use
+        if existing_group=$(getent group "$REQUIRED_GID" 2>/dev/null | cut -d: -f1); then
+            echo "  ⚠ Note: GID $REQUIRED_GID is currently assigned to group '$existing_group'"
+        fi
+        
         return 1
     fi
 }
