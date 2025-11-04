@@ -10,6 +10,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, Future
 from typing import List, Callable, Any, Optional, Dict
 from unittest.mock import patch
+from pathlib import Path
 
 from wepppy.nodb.base import NoDbBase, NoDbAlreadyLockedError, redis_lock_client
 
@@ -132,6 +133,46 @@ class LockContentionSimulator:
             thread.join(timeout=5)
             
         return instances
+
+
+def ensure_climate_stub(wd: str, cfg_name: str = "test.cfg") -> None:
+    """
+    Create a lightweight ``climate.nodb`` payload for tests that exercise
+    locking behaviour without needing the full Climate configuration stack.
+    """
+    from wepppy.nodb.core.climate import Climate
+
+    path = Path(wd)
+    path.mkdir(parents=True, exist_ok=True)
+
+    cfg_path = path / cfg_name
+    if not cfg_path.exists():
+        cfg_path.write_text(
+            "[general]\n"
+            "dem_db = test\n"
+            "[climate]\n"
+            "cligen_db = dummy\n"
+            "observed_clis_wc = dummy\n"
+            "future_clis_wc = dummy\n"
+            "use_gridmet_wind_when_applicable = true\n"
+        )
+
+    original_init = Climate.__init__
+
+    def lightweight_init(self, wd: str, cfg_fn: str, run_group: Optional[str] = None, group_name: Optional[str] = None) -> None:
+        NoDbBase.__init__(self, wd, cfg_fn, run_group=run_group, group_name=group_name)
+
+    try:
+        Climate.__init__ = lightweight_init
+        climate = Climate(wd, cfg_name)
+        climate.lock()
+        climate.dump()
+        climate.unlock()
+    finally:
+        Climate.__init__ = original_init
+
+    if hasattr(Climate, '_instances'):
+        Climate._instances.clear()
 
 
 @contextlib.contextmanager

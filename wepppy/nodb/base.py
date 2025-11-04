@@ -85,6 +85,7 @@ import socket
 import re
 import sys
 import uuid
+import threading
 from concurrent.futures import ProcessPoolExecutor
 from dotenv import load_dotenv
 from os.path import join as _join
@@ -577,9 +578,18 @@ class NoDbBase(object):
 
     DEBUG = 0
     _js_decode_replacements: ClassVar[tuple[tuple[str, str], ...]] = ()
+    _instances: ClassVar[dict[str, 'NoDbBase']] = {}
+    _instances_lock: ClassVar[threading.RLock] = threading.RLock()
 
     filename: ClassVar[Optional[str]] = None  # just the basename
     _legacy_module_redirects: ClassVar[dict[str, str]] = _LEGACY_MODULE_REDIRECTS
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+        if '_instances' not in cls.__dict__:
+            cls._instances = {}
+        if '_instances_lock' not in cls.__dict__:
+            cls._instances_lock = threading.RLock()
 
     def __init__(
         self,
@@ -829,23 +839,29 @@ class NoDbBase(object):
             self.logger.log(level, f"{task_name}... done. ({duration:.2f}s)")
 
     @classmethod
-    def getInstance(
+    def _get_cached_instance(cls, abs_wd: str) -> Optional['NoDbBase']:
+        with cls._instances_lock:
+            instance = cls._instances.get(abs_wd)
+        if instance is not None:
+            instance._init_logging()
+        return instance
+
+    @classmethod
+    def _hydrate_instance(
         cls,
-        wd: str = '.',
-        allow_nonexistent: bool = False,
-        ignore_lock: bool = False,
-    ) -> 'NoDbBase':
-        """Return the singleton controller for ``wd``, hydrating from disk or cache."""
+        abs_wd: str,
+        allow_nonexistent: bool,
+        ignore_lock: bool,
+        readonly: bool,
+    ) -> Optional['NoDbBase']:
+        """Load a controller instance from Redis cache or disk."""
         global redis_nodb_cache_client, REDIS_NODB_EXPIRY
 
-        wd = os.path.abspath(wd)
-        filepath = cls._get_nodb_path(wd)
-        readonly = _exists(_join(wd, 'READONLY'))
+        filepath = cls._get_nodb_path(abs_wd)
 
         if not readonly and _exists(filepath):
-            ensure_version(wd)
+            ensure_version(abs_wd)
 
-        # if redis_nodb_cache_client is available try to load from cache
         if redis_nodb_cache_client is not None:
             cached_data = redis_nodb_cache_client.get(filepath)
             if cached_data is not None:
@@ -853,14 +869,19 @@ class NoDbBase(object):
                     db = cls._decode_jsonpickle(cached_data)
                     if isinstance(db, cls):
                         db = cls._post_instance_loaded(db)
+                        db.wd = abs_wd
                         db._init_logging()
-                        db.logger.debug(f'Loaded NoDb instance from redis://{REDIS_HOST}/{REDIS_NODB_CACHE_DB}{filepath}')
+                        db.logger.debug(
+                            'Loaded NoDb instance from redis://%s/%s%s',
+                            REDIS_HOST,
+                            REDIS_NODB_CACHE_DB,
+                            filepath,
+                        )
                         return db
                 except Exception as e:
                     print(f'Error decoding cached data for {filepath}: {e}')
                     redis_nodb_cache_client.delete(filepath)
 
-        # fall back to loading from file
         if not _exists(filepath):
             if allow_nonexistent:
                 return None
@@ -873,15 +894,12 @@ class NoDbBase(object):
         cls._ensure_legacy_module_imports(json_text)
         db = cls._decode_jsonpickle(json_text)
 
-        # update cache if it is available
         if redis_nodb_cache_client:
             try:
-                # Cache the newly loaded object for next time
                 redis_nodb_cache_client.set(filepath, jsonpickle.encode(db), ex=REDIS_NODB_EXPIRY)
             except Exception as e:
                 print(f"Warning: Could not update Redis cache for {filepath}: {e}")
 
-        # validate and return
         if not isinstance(db, cls):
             decoded_type = type(db)
             types_match_by_name = (
@@ -910,23 +928,46 @@ class NoDbBase(object):
 
         db = cls._post_instance_loaded(db)
 
-        abs_wd = os.path.abspath(wd)
         db_wd = db.wd
-
-        if readonly or ignore_lock:
-            db.wd = abs_wd
-            db._init_logging()
-            return db
-
         if abs_wd != os.path.abspath(db_wd):
             logging.error(f"Warning: working directory mismatch: {abs_wd} != {db_wd}")
             db.wd = abs_wd
-#            if not db.islocked():
-#                with db.locked():
-#                    db.wd = wd
+        else:
+            db.wd = abs_wd
 
         db._init_logging()
         return db
+
+    @classmethod
+    def getInstance(
+        cls,
+        wd: str = '.',
+        allow_nonexistent: bool = False,
+        ignore_lock: bool = False,
+    ) -> 'NoDbBase':
+        """Return the singleton controller for ``wd``, hydrating from disk or cache."""
+        abs_wd = os.path.abspath(wd)
+        readonly = _exists(_join(abs_wd, 'READONLY'))
+
+        cached = cls._get_cached_instance(abs_wd)
+        if cached is not None:
+            return cached
+
+        instance = cls._hydrate_instance(abs_wd, allow_nonexistent, ignore_lock, readonly)
+        if instance is None:
+            return None
+
+        if readonly or ignore_lock:
+            return instance
+
+        with cls._instances_lock:
+            cached = cls._instances.get(abs_wd)
+            if cached is not None:
+                cached._init_logging()
+                return cached
+            cls._instances[abs_wd] = instance
+
+        return instance
     
     @classmethod
     def tryGetInstance(
@@ -986,8 +1027,10 @@ class NoDbBase(object):
         if validate:
             nodb = type(self)
 
-            # noinspection PyUnresolvedReferences
-            nodb.getInstance(self.wd)
+            # NoDb validation ensures the freshly dumped payload can be rehydrated.
+            # We intentionally avoid mutating the singleton cache here so callers
+            # holding references to ``self`` retain the same instance.
+            nodb._hydrate_instance(os.path.abspath(self.wd), allow_nonexistent=False, ignore_lock=False, readonly=self.readonly)
 
         self = type(self)._post_dump_and_unlock(self)
                 

@@ -12,7 +12,7 @@ from unittest.mock import patch, MagicMock
 
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core.climate import Climate
-from tests.nodb.lock_contention_utils import LockContentionSimulator, short_lock_ttl
+from tests.nodb.lock_contention_utils import LockContentionSimulator, short_lock_ttl, ensure_climate_stub
 
 
 @pytest.fixture
@@ -27,6 +27,8 @@ def climate_wd(tmp_path):
 [general]
 dem_db = topaz
 """)
+
+    ensure_climate_stub(wd)
     
     return wd
 
@@ -46,19 +48,21 @@ def clean_climate_instances():
 class TestBuildClimateRaceCondition:
     """Test the specific race condition that caused 504 Gateway Timeout."""
     
-    def test_reproduce_original_bug_scenario(self, climate_wd, clean_climate_instances):
-        """Reproduce the exact scenario that caused the 504 timeout."""
+    def test_regression_profile_playback_without_delays(self, climate_wd, clean_climate_instances):
+        """Ensure rapid sequential requests serialize cleanly without explicit delays."""
         
         # Mock parse_inputs to avoid file system dependencies
         original_parse_inputs = None
         if hasattr(Climate, 'parse_inputs'):
             original_parse_inputs = Climate.parse_inputs
             
+        original_parse_inputs = getattr(Climate, 'parse_inputs', None)
+
         def mock_parse_inputs(self):
             """Mock parse_inputs with realistic timing."""
             # Simulate the heavy operation that was taking too long
             time.sleep(2.0)  # 2 seconds - enough to cause contention
-            
+        
         Climate.parse_inputs = mock_parse_inputs
         
         try:
@@ -73,23 +77,20 @@ class TestBuildClimateRaceCondition:
             
             # Analyze results
             successful_requests = [r for r in results if r["status"] == "success"]
-            failed_requests = [r for r in results if r["status"] == "lock_error"]
+            lock_errors = [r for r in results if r["status"] == "lock_error"]
             
-            # Should have exactly 1 success and 4 failures due to lock contention
-            assert len(successful_requests) == 1, f"Expected 1 success, got {len(successful_requests)}"
-            assert len(failed_requests) == 4, f"Expected 4 lock errors, got {len(failed_requests)}"
+            # Regression: sequential requests should now all succeed
+            assert len(successful_requests) == len(results), (
+                f"Expected all {len(results)} requests to succeed, got {len(successful_requests)}"
+            )
+            assert not lock_errors, f"Did not expect lock errors, saw {lock_errors}"
             
-            # The successful request should take at least 2 seconds
-            success_duration = successful_requests[0]["duration"]
-            assert success_duration >= 2.0, f"Expected >= 2s duration, got {success_duration:.2f}s"
-            
-            # Failed requests should fail quickly (< 0.1s)
-            for failed_req in failed_requests:
-                assert failed_req["duration"] < 0.1, f"Lock error should be fast, took {failed_req['duration']:.2f}s"
+            # Validate timing stayed near the simulated operation duration
+            for record in successful_requests:
+                assert record["duration"] >= 2.0, f"Expected >=2s duration, got {record['duration']:.2f}s"
                 
         finally:
-            # Restore original method
-            if original_parse_inputs:
+            if original_parse_inputs is not None:
                 Climate.parse_inputs = original_parse_inputs
             elif hasattr(Climate, 'parse_inputs'):
                 delattr(Climate, 'parse_inputs')
@@ -98,6 +99,8 @@ class TestBuildClimateRaceCondition:
         """Test that mitigation delays prevent the race condition."""
         
         # Mock parse_inputs with shorter duration since we'll add delays
+        original_parse_inputs = getattr(Climate, 'parse_inputs', None)
+
         def mock_parse_inputs_fast(self):
             time.sleep(0.5)  # Shorter operation
             
@@ -130,12 +133,16 @@ class TestBuildClimateRaceCondition:
             assert len(successful_requests) == 3, f"Expected all 3 to succeed with delays, got {len(successful_requests)}"
             
         finally:
-            if hasattr(Climate, 'parse_inputs'):
+            if original_parse_inputs is not None:
+                Climate.parse_inputs = original_parse_inputs
+            elif hasattr(Climate, 'parse_inputs'):
                 delattr(Climate, 'parse_inputs')
                 
     def test_gateway_timeout_threshold(self, climate_wd, clean_climate_instances):
         """Test operations that exceed 30-second gateway timeout."""
         
+        original_parse_inputs = getattr(Climate, 'parse_inputs', None)
+
         def mock_parse_inputs_slow(self):
             # Simulate operation that would cause 504 timeout
             time.sleep(35.0)  # Exceeds 30s gateway timeout
@@ -159,12 +166,16 @@ class TestBuildClimateRaceCondition:
             # Our test validates the operation completes but takes too long
             
         finally:
-            if hasattr(Climate, 'parse_inputs'):
+            if original_parse_inputs is not None:
+                Climate.parse_inputs = original_parse_inputs
+            elif hasattr(Climate, 'parse_inputs'):
                 delattr(Climate, 'parse_inputs')
                 
     def test_concurrent_build_climate_requests(self, climate_wd, clean_climate_instances):
         """Test concurrent requests like those from RQ workers + HTTP requests."""
         
+        original_parse_inputs = getattr(Climate, 'parse_inputs', None)
+
         def mock_parse_inputs_medium(self):
             time.sleep(1.0)  # 1 second operation
             
@@ -186,7 +197,9 @@ class TestBuildClimateRaceCondition:
             assert len(failed_threads) == 2, f"Expected 2 lock errors, got {len(failed_threads)}"
             
         finally:
-            if hasattr(Climate, 'parse_inputs'):
+            if original_parse_inputs is not None:
+                Climate.parse_inputs = original_parse_inputs
+            elif hasattr(Climate, 'parse_inputs'):
                 delattr(Climate, 'parse_inputs')
 
 
@@ -198,6 +211,8 @@ class TestProfilePlaybackScenarios:
         """Simulate PlaybackSession making rapid requests."""
         
         # Mock the heavy operation
+        original_parse_inputs = getattr(Climate, 'parse_inputs', None)
+
         def mock_heavy_operation(self):
             time.sleep(0.5)
             
@@ -236,21 +251,23 @@ class TestProfilePlaybackScenarios:
                         "interval": interval
                     })
                     
-            # First request should succeed, others should fail quickly
-            assert results[0]["status"] == "success", "First request should succeed"
-            
-            for result in results[1:]:
-                assert result["status"] == "lock_error", f"Request {result['request_id']} should fail due to lock"
-                assert result["duration"] < 0.1, f"Lock error should be immediate, took {result['duration']:.2f}s"
+            # Regression: all playback-triggered requests should succeed with minimal delay
+            assert all(result["status"] == "success" for result in results), results
+            for result in results:
+                assert result["duration"] >= 0.5, f"Expected >=0.5s duration, got {result['duration']:.2f}s"
                 
         finally:
-            if hasattr(Climate, 'parse_inputs'):
+            if original_parse_inputs is not None:
+                Climate.parse_inputs = original_parse_inputs
+            elif hasattr(Climate, 'parse_inputs'):
                 delattr(Climate, 'parse_inputs')
                 
     def test_playback_with_job_queueing(self, climate_wd, clean_climate_instances):
         """Test scenario where HTTP requests trigger RQ jobs."""
         
         # Mock both HTTP endpoint and RQ job operations
+        original_parse_inputs = getattr(Climate, 'parse_inputs', None)
+
         def mock_http_operation(self):
             time.sleep(0.2)  # Quick HTTP response
             
@@ -300,7 +317,9 @@ class TestProfilePlaybackScenarios:
                     assert results[1]["duration"] < 0.1, "RQ lock failure should be immediate"
                     
         finally:
-            if hasattr(Climate, 'parse_inputs'):
+            if original_parse_inputs is not None:
+                Climate.parse_inputs = original_parse_inputs
+            elif hasattr(Climate, 'parse_inputs'):
                 delattr(Climate, 'parse_inputs')
 
 
@@ -313,6 +332,7 @@ class TestLockTTLScenarios:
         """Test that operations exceeding TTL can cause state corruption."""
         
         with short_lock_ttl(2):  # 2-second TTL
+            original_parse_inputs = getattr(Climate, 'parse_inputs', None)
             
             def mock_long_operation(self):
                 time.sleep(5.0)  # Exceeds 2-second TTL
@@ -347,7 +367,9 @@ class TestLockTTLScenarios:
                     "Expected either corruption detection or successful second acquisition"
                     
             finally:
-                if hasattr(Climate, 'parse_inputs'):
+                if original_parse_inputs is not None:
+                    Climate.parse_inputs = original_parse_inputs
+                elif hasattr(Climate, 'parse_inputs'):
                     delattr(Climate, 'parse_inputs')
 
 
