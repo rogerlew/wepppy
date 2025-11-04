@@ -350,33 +350,39 @@ database_defs = [
     ),
 ]
 
-state_codes = None
-for db_def in database_defs:
-    build_db(**db_def)
-    state_codes = db_def['state_code_wildcards']
+def main() -> int:
+    """Entry point for building station databases from PAR files."""
+    state_codes = None
+    for db_def in database_defs:
+        build_db(**db_def)
+        state_codes = db_def['state_code_wildcards']
 
-sys.exit(0)      
+    if state_codes is None:
+        return 0
+
+    # All this is code to build the state_code_wildcards dictionaries
+    filtered_states = set()
+    for state in all_state_codes:
+        found = 0
+        for state_code, _ in state_codes.items():
+            if state.startswith(state_code):
+                found = 1
+                break
+
+        if not found:
+            filtered_states.add(state)
+
+    for j, state in enumerate(sorted(filtered_states)):
+        print(state)
+        for i, desc in enumerate(state_descriptions[state]):
+            print('  ', desc)
+            if i > 10:
+                break
+
+        print()
+
+    return 0
 
 
-## All this is code to build the state_code_wildcards dictionaries
-
-filtered_states = set()
-for state in all_state_codes:
-    found = 0
-    for state_code, state_name in state_codes.items():
-        if state.startswith(state_code):
-            found = 1
-            break
-        
-    if not found:
-        filtered_states.add(state)
-        
-            
-
-for j, state in enumerate(sorted(filtered_states)):
-    print(state)
-    for i, desc in enumerate(state_descriptions[state]):
-        print('  ', desc)
-        if i > 10: break
-        
-    print()
+if __name__ == '__main__':
+    sys.exit(main())

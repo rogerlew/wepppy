@@ -7,12 +7,60 @@ from os.path import exists as _exists
 from subprocess import Popen, PIPE
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from cligen import ClimateFile, CligenStationsManager, df_to_prn, _bin_dir
+CLIGEN_MISSING_MESSAGE = (
+    "The cligen package is required for gridmet MACA climate building. "
+    "Install cligen to enable this functionality."
+)
+
+
+try:
+    from cligen import ClimateFile, CligenStationsManager, df_to_prn, _bin_dir
+    _CLIGEN_IMPORT_ERROR = None
+except ModuleNotFoundError as exc:
+    _CLIGEN_IMPORT_ERROR = exc
+
+    if TYPE_CHECKING:  # pragma: no cover - type checker hint only
+        from cligen import ClimateFile, CligenStationsManager  # type: ignore
+
+    def _raise_missing_cligen() -> None:
+        raise ModuleNotFoundError(CLIGEN_MISSING_MESSAGE) from exc
+
+    class _MissingBinDir:
+        def __fspath__(self) -> str:
+            _raise_missing_cligen()
+
+    ClimateFile = None  # type: ignore[assignment]
+    CligenStationsManager = None  # type: ignore[assignment]
+
+    def df_to_prn(*args, **kwargs):  # type: ignore[override]
+        _raise_missing_cligen()
+
+    _bin_dir = _MissingBinDir()  # type: ignore[assignment]
+
+
+def _require_cligen() -> None:
+    if _CLIGEN_IMPORT_ERROR is not None:
+        raise ModuleNotFoundError(CLIGEN_MISSING_MESSAGE) from _CLIGEN_IMPORT_ERROR
+
+
+def _require_pandas() -> None:
+    if _PANDAS_IMPORT_ERROR is not None:
+        raise ModuleNotFoundError(
+            "pandas is required for gridmet MACA climate building."
+        ) from _PANDAS_IMPORT_ERROR
 
 from datetime import datetime
 import requests
-import pandas as pd
+
+try:
+    import pandas as pd
+    _PANDAS_IMPORT_ERROR = None
+except ModuleNotFoundError as exc:
+    pd = None  # type: ignore[assignment]
+    _PANDAS_IMPORT_ERROR = exc
+
 
 
 IS_WINDOWS = os.name == 'nt'
@@ -174,6 +222,8 @@ def _retrieve(lng, lat, start_date, end_date, model, scenario, variable_name, ve
 
 def retrieve_timeseries(lng, lat, start_date, end_date,
                         model='GFDL-ESM2G', scenario='rcp85_2006_2099', verbose=True):
+    _require_pandas()
+
     result = None
     for variable_name in variables_d:
         df = _retrieve(lng, lat, start_date, end_date, 
@@ -200,6 +250,7 @@ def retrieve_timeseries(lng, lat, start_date, end_date,
     return result
 
 def build_climate(lng, lat, start_date, end_date, model, scenario, identifier=None, cli_dir='./'):
+    _require_cligen()
 
     stationManager = CligenStationsManager(version=2015)
     stationmeta = stationManager.get_closest_station((lng, lat))
