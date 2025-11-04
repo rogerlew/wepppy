@@ -25,6 +25,7 @@ wctl/wctl.sh
 out
 .mypy_cache/
 _legacy_weppcloud_controls/
+wepppy/soils/ssurgo/tests/testsoils/
 
 # External tools (managed separately)
 markdown-extract/
