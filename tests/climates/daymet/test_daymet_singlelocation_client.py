@@ -73,24 +73,31 @@ if not hasattr(whitebox_module, "WhiteboxTools"):
 
     whitebox_module.WhiteboxTools = _WhiteboxTools
 
-if "shapely" not in sys.modules:
-    shapely_module = types.ModuleType("shapely")
-    sys.modules["shapely"] = shapely_module
+try:
+    import shapely  # type: ignore  # noqa: F401
+    from shapely import geometry as _shapely_geometry  # noqa: F401
+except Exception:
+    if "shapely" not in sys.modules:
+        shapely_module = types.ModuleType("shapely")
+        sys.modules["shapely"] = shapely_module
 
-if "shapely.geometry" not in sys.modules:
-    geometry_module = types.ModuleType("shapely.geometry")
+    if "shapely.geometry" not in sys.modules:
+        geometry_module = types.ModuleType("shapely.geometry")
 
-    class _FakePolygon:
-        def __init__(self, *args, **kwargs):
-            pass
+        class _FakePolygon:
+            def __init__(self, *args, **kwargs):
+                pass
 
-    class _FakePoint:
-        def __init__(self, *args, **kwargs):
-            pass
+        class _FakePoint:
+            def __init__(self, *args, **kwargs):
+                pass
 
-    geometry_module.Polygon = _FakePolygon
-    geometry_module.Point = _FakePoint
-    sys.modules["shapely.geometry"] = geometry_module
+            def within(self, *_args, **_kwargs):
+                return False
+
+        geometry_module.Polygon = _FakePolygon
+        geometry_module.Point = _FakePoint
+        sys.modules["shapely.geometry"] = geometry_module
 
 if "rasterio" not in sys.modules:
     rasterio_module = types.ModuleType("rasterio")
@@ -165,6 +172,8 @@ if "flask" not in sys.modules:
     flask_module.url_for = lambda *args, **kwargs: ""
     flask_module.Blueprint = _FakeFlask
     sys.modules["flask"] = flask_module
+else:
+    flask_module = sys.modules["flask"]
 
 if "werkzeug" not in sys.modules:
     sys.modules["werkzeug"] = types.ModuleType("werkzeug")
@@ -172,10 +181,21 @@ if "werkzeug.exceptions" not in sys.modules:
     exceptions_module = types.ModuleType("werkzeug.exceptions")
 
     class _HTTPException(Exception):
-        pass
+        def __init__(self, code=None, description=None):
+            super().__init__(description or "HTTPException")
+            self.code = code
+            self.description = description
 
     exceptions_module.HTTPException = _HTTPException
     sys.modules["werkzeug.exceptions"] = exceptions_module
+else:
+    exceptions_module = sys.modules["werkzeug.exceptions"]
+
+if not hasattr(flask_module, "abort"):
+    def _abort(status_code=None, description=None, **kwargs):
+        raise exceptions_module.HTTPException(code=status_code, description=description)
+
+    flask_module.abort = _abort
 if "requests_toolbelt" not in sys.modules:
     requests_toolbelt_module = types.ModuleType("requests_toolbelt")
     requests_toolbelt_module.__path__ = []

@@ -49,6 +49,8 @@ def _normalize_severity(value: Any) -> Optional[List[str]]:
 
 
 def _normalize_treatment_options(options: Any) -> List[Dict[str, Any]]:
+    if isinstance(options, dict):
+        options = [options]
     if not isinstance(options, list):
         return []
     normalized: List[Dict[str, Any]] = []

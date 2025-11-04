@@ -14,6 +14,13 @@ logger = logging.getLogger(__name__)
 SEND_KEYS_CHUNK_INTERVAL = 0.5
 
 
+def _ensure_libtmux() -> None:
+    if _LIBTMUX_IMPORT_ERROR is not None:
+        raise ModuleNotFoundError(
+            "libtmux is required for tmux client operations."
+        ) from _LIBTMUX_IMPORT_ERROR
+
+
 class TmuxClient:
     """Simplified tmux client for basic operations."""
     

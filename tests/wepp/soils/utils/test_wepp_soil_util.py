@@ -1,10 +1,11 @@
-import sys
-import shutil
-import types
 import importlib.util
+import math
+import shutil
+import sys
+import types
+import uuid
 from pathlib import Path
 from typing import NamedTuple
-import uuid
 
 import yaml as pyyaml
 
@@ -84,10 +85,26 @@ def _stub_isint(value):
         return False
 
 
+def _stub_isnan(value):
+    try:
+        return math.isnan(float(value))
+    except Exception:
+        return False
+
+
+def _stub_isinf(value):
+    try:
+        return math.isinf(float(value))
+    except Exception:
+        return False
+
+
 all_your_base_stub.try_parse = _stub_try_parse
 all_your_base_stub.try_parse_float = _stub_try_parse_float
 all_your_base_stub.isfloat = _stub_isfloat
 all_your_base_stub.isint = _stub_isint
+all_your_base_stub.isnan = _stub_isnan
+all_your_base_stub.isinf = _stub_isinf
 all_your_base_stub.NCPU = 1
 class _StubRGBA(NamedTuple):
     red: int

@@ -79,9 +79,14 @@ def omni_module():
     def _clear_locks_stub(*args, **kwargs):
         return None
 
+    class _Ron:
+        def __init__(self, *args, **kwargs):
+            pass
+
     core_stub.clear_nodb_file_cache = _clear_cache_stub
     core_stub.clear_locks = _clear_locks_stub
-    core_stub.__all__ = ["clear_nodb_file_cache", "clear_locks"]
+    core_stub.Ron = _Ron
+    core_stub.__all__ = ["clear_nodb_file_cache", "clear_locks", "Ron"]
     sys.modules["wepppy.nodb.core"] = core_stub
 
     base_stub = types.ModuleType("wepppy.nodb.base")

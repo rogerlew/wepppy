@@ -1,6 +1,5 @@
 # /workdir/wepppy/run_rq_dashboard.py
 
-import dotenv
 from flask import Flask
 from rq_dashboard import blueprint
 import os

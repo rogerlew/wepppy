@@ -1526,12 +1526,19 @@ class NoDbBase(object):
         path = Path(filename)
         if not path.suffix:
             path = path.with_suffix('.cfg')
-        if not path.is_absolute():
-            candidate = Path(self.wd) / path.name
-            if candidate.exists():
-                return str(candidate)
-            path = Path(_config_dir) / path.name
-        return str(path)
+        if path.is_absolute():
+            return str(path)
+
+        candidate = Path(self.wd) / path.name
+        if candidate.exists():
+            return str(candidate)
+
+        nested = Path(_config_dir) / path
+        if nested.exists():
+            return str(nested)
+
+        fallback = Path(_config_dir) / path.name
+        return str(fallback)
 
     def _resolve_defaults_path(self) -> str:
         candidate = Path(self.wd) / Path(_default_config).name

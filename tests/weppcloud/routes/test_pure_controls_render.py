@@ -6,7 +6,8 @@ from types import SimpleNamespace
 import pytest
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 
-TEMPLATE_ROOT = Path("wepppy/weppcloud/templates")
+REPO_ROOT = Path(__file__).resolve().parents[3]
+TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "templates"
 PURE_TEMPLATES = [
     "controls/path_cost_effective_pure.htm",
 ]

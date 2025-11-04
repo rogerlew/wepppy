@@ -6,7 +6,6 @@ from datetime import datetime
 from typing import Any, Dict, List, MutableMapping, Sequence, Tuple
 
 import redis
-from dotenv import load_dotenv
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
 from rq.utils import utcnow
@@ -16,8 +15,6 @@ from wepppy.config.redis_settings import (
     redis_connection_kwargs,
     redis_host,
 )
-
-load_dotenv()
 
 REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)

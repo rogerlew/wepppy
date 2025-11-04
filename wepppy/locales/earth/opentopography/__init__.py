@@ -8,9 +8,6 @@ from wepppy.all_your_base.geo import utm_raster_transform
 import requests
 from requests.exceptions import HTTPError
 
-from dotenv import load_dotenv
-_thisdir = os.path.dirname(__file__)
-load_dotenv(_join(_thisdir, '.env'))
 OPENTOPOGRAPHY_API_KEY = os.environ.get('OPENTOPOGRAPHY_API_KEY', None)
 
 

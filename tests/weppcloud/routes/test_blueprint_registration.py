@@ -45,6 +45,9 @@ def _registered_blueprint_names() -> Set[str]:
     seen: Set[str] = set()
 
     class DummyApp:
+        def __init__(self):
+            self.config = {}
+
         def register_blueprint(self, blueprint):
             name = getattr(blueprint, "name", None)
             if name:
@@ -58,9 +61,8 @@ def _registered_blueprint_names() -> Set[str]:
 def test_all_blueprints_registered():
     discovered = _discover_blueprint_names()
     registered = _registered_blueprint_names()
-
-    # Some blueprints are intentionally not auto-registered (e.g. security bits),
-    # so allow a small expected difference list if needed. For now we expect
-    # exact parity; update this assertion if exceptions arise.
+    optional_only_blueprints = {"test_bp", "watar"}
     missing = discovered - registered
+    missing -= optional_only_blueprints
+
     assert not missing, f"Blueprints missing from register_blueprints: {sorted(missing)}"

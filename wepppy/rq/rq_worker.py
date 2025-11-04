@@ -26,10 +26,6 @@ from rq.exceptions import NoSuchJobError
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.nodb.status_messenger import StatusMessenger
 
-from dotenv import load_dotenv
-_thisdir = os.path.dirname(__file__)
-
-load_dotenv(_join(_thisdir, '.env'))
 
 REDIS_HOST = redis_host()
 RQ_DB = int(RedisDB.RQ)

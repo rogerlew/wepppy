@@ -17,6 +17,7 @@ class SoilsMode(IntEnum):
     Gridded = 0
     Single = 1
     SingleDb = 2
+    UserDefined = 2
     RRED_Unburned = 3
     RRED_Burned = 4
     SpatialAPI = 9

@@ -105,3 +105,10 @@ def _import_nodb_base() -> None:
         setattr(nodb_pkg, "base", base_module)
     except Exception:
         pass
+
+    try:
+        profile_pkg = importlib.import_module("wepppy.profile_recorder")
+        root_pkg = importlib.import_module("wepppy")
+        setattr(root_pkg, "profile_recorder", profile_pkg)
+    except Exception:
+        pass

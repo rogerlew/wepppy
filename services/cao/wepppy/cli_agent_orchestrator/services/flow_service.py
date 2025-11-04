@@ -13,6 +13,11 @@ from typing import Dict, Tuple
 from wepppy.cli_agent_orchestrator.models.flow import Flow
 
 
+def db_create_flow(*_args, **_kwargs):
+    """Placeholder overridden by tests to avoid touching the real database."""
+    raise NotImplementedError("db_create_flow is a shim and must be monkeypatched in tests")
+
+
 def _get_next_run_time(cron_expression: str) -> datetime:
     """Placeholder next-run calculator.
 
@@ -99,4 +104,3 @@ def add_flow(file_path: str) -> Flow:
         raise ValueError(f"Flow '{name}' already exists") from exc
 
     return flow
-

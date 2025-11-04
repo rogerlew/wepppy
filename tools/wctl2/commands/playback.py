@@ -20,7 +20,7 @@ def _context(ctx: typer.Context) -> CLIContext:
 def _default_service_url(context: CLIContext, override: Optional[str]) -> str:
     if override:
         return override
-    candidate = context.environment.get("PROFILE_PLAYBACK_URL") or context.env_value("PROFILE_PLAYBACK_URL")
+    candidate = context.env_value("PROFILE_PLAYBACK_URL") or context.environment.get("PROFILE_PLAYBACK_URL")
     if candidate:
         return candidate
     return "http://127.0.0.1:8070"
@@ -29,7 +29,7 @@ def _default_service_url(context: CLIContext, override: Optional[str]) -> str:
 def _default_base_url(context: CLIContext, override: Optional[str]) -> str:
     if override:
         return override
-    candidate = context.environment.get("PROFILE_PLAYBACK_BASE_URL") or context.env_value("PROFILE_PLAYBACK_BASE_URL")
+    candidate = context.env_value("PROFILE_PLAYBACK_BASE_URL") or context.environment.get("PROFILE_PLAYBACK_BASE_URL")
     if candidate:
         return candidate
     return "http://weppcloud:8000/weppcloud"

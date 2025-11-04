@@ -11,12 +11,8 @@ from os.path import join as _join
 from os.path import split as _split
 from typing import Dict, Optional
 
-from dotenv import load_dotenv
 from wepppy.config.redis_settings import RedisDB, redis_client
 
-_thisdir = os.path.dirname(__file__)
-
-load_dotenv(_join(_thisdir, '.env'))
 
 class TaskEnum(Enum):
     """Enumerate workflow tasks mirrored into Redis progress keys."""
