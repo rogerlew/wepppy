@@ -30,3 +30,13 @@ jobs:
           name: npm-coverage
           path: coverage/npm
           if-no-files-found: warn
+
+      - name: Remove redis data directory
+        run: |
+          set -euo pipefail
+          if [ -d "${GITHUB_WORKSPACE}/.docker-data/redis" ]; then
+            echo "Removing ${GITHUB_WORKSPACE}/.docker-data/redis"
+            sudo rm -rf "${GITHUB_WORKSPACE}/.docker-data/redis"
+          else
+            echo "Redis data directory not present; nothing to remove."
+          fi

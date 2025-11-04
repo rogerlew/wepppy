@@ -117,6 +117,29 @@ services:
     expose:
       - "9010"
 
+  profile-playback:
+    <<: *wepppy-service
+    command:
+      - uvicorn
+      - services.profile_playback.app:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8070"
+    environment:
+      <<: *wepppy-env
+      PROFILE_PLAYBACK_BASE_URL: ${PROFILE_PLAYBACK_BASE_URL:-http://weppcloud:8000/weppcloud}
+      PROFILE_PLAYBACK_ROOT: ${PROFILE_PLAYBACK_ROOT:-/workdir/wepppy-test-engine-data/profiles}
+    volumes:
+      - /wc1:/wc1
+      - /geodata:/geodata
+      - ${PROFILE_PLAYBACK_DATA_DIR:-/workdir/wepppy-test-engine-data}:/workdir/wepppy-test-engine-data
+    expose:
+      - "8070"
+    depends_on:
+      weppcloud:
+        condition: service_healthy
+
   elevationquery:
     <<: *wepppy-service
     command:
@@ -306,6 +329,8 @@ services:
         condition: service_started
       dtale:
         condition: service_started
+      profile-playback:
+        condition: service_started
       weppcloudr:
         condition: service_started
     networks:
@@ -354,7 +379,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 30
+      start_period: 300s
     networks:
       - backend
 

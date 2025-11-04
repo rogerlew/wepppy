@@ -155,6 +155,9 @@ services:
     depends_on:
       weppcloud:
         condition: service_started
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
 
   browse:
     <<: *wepppy-service
@@ -392,7 +395,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 30
+      start_period: 300s
 
   postgres-backup:
     image: postgres:16
@@ -474,6 +478,7 @@ services:
       - dtale
       - weppcloudr
       - rq-dashboard
+      - profile-playback
 
 networks:
   default:
