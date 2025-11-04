@@ -108,7 +108,7 @@ Exit codes: `0` (clean), `1` (issues detected), `2` (tool error).
      exit 0
      ;;
    ```
-   Document in `wctl/README.md` and `wctl/wctl.1` during implementation.
+   Document in `wctl/README.md` during implementation.
 9. **Performance targets** – default run ≈2 minutes on dev hardware; `--quick` <1 minute (pre-commit), `--strict` reserved for nightly CI (~5+ minutes).
 10. **Future enhancements** – integrate with the planned marker checker (skip certain categories by default), allow custom ignore lists, optional `psutil` integration for orphaned subprocess detection.
 

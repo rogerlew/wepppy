@@ -6,40 +6,37 @@
 
 ## Scope
 The `wctl` toolset is composed of:
-- `wctl/install.sh` — installer that generates `wctl.sh` and writes the man page.
-- `wctl/wctl.sh` — runtime wrapper script that users execute.
-- `wctl/wctl.1` — manual page.
-- `wctl/README.md` — human-facing quick reference.
+- `wctl/install.sh` — installer that generates the shim (`wctl.sh`) and optional symlink.
+- `wctl/wctl.sh` — lightweight wrapper that resolves the project root, exports `WCTL_COMPOSE_FILE`, and invokes `python -m wctl2`.
+- `wctl/README.md` — human-facing quick reference for the Typer CLI.
 
-Changes to any of these pieces must be reflected in this document.
+The legacy man page has been retired; Typer help (`wctl --help`) is now the canonical documentation. Changes to any of the pieces above must be reflected in this document.
 
 ## Requirements When Adding or Removing Commands
 
 1. **Update all touch points**
-   - `install.sh`: generator logic must emit the new command branch.
-   - `wctl.sh`: ensure the generated script includes the same command implementation.
-   - `wctl.1`: document the command in the “COMMANDS” section with synopsis and description.
+   - `install.sh`: ensure the shim exposes the correct compose file and environment to `wctl2`.
+   - `wctl.sh`: verify the generated script matches the intended defaults (usually dev compose).
    - `wctl/README.md`: add/remove bullet(s) describing the command with example usage.
 
 2. **Prefer host vs container clarity**
-   - Host commands (e.g., `run-npm`) should check for required binaries (`npm`, etc.) and exit with a clear message if missing.
-   - Container commands must go through `docker compose … exec` (use `compose_exec_weppcloud` helper).
+   - Host commands (e.g., `run-npm`) should continue to check for required binaries (`npm`, etc.) inside the Typer command implementations.
+   - Container commands must route through the compose helpers in `tools/wctl2/docker.py` so that context logging stays consistent.
 
 3. **Environment handling**
-   - Any command that writes to the temporary env file must respect the existing merge order: `docker/.env` → optional host override (`.env` or `WCTL_HOST_ENV`) → exported shell variables → command-specific tweaks.
+   - `CLIContext` already merges `docker/.env` → optional host override (`.env` or `WCTL_HOST_ENV`) → shell overrides. New commands should reuse the context instead of re-opening env files.
    - Avoid leaking secrets to stdout/stderr. Mask or omit sensitive values.
 
 4. **Error handling & exit codes**
-   - Fail fast (`set -euo pipefail` already enabled).
+   - The shim still runs with `set -euo pipefail`; Typer commands should raise `typer.Exit` with appropriate codes.
    - Provide actionable error messages (e.g., “npm is required for run-npm”).
-   - Return zero on success, non-zero on failure.
 
 5. **Testing Expectations**
    - After modifying wctl, run:
      ```bash
      ./wctl/install.sh dev
-     wctl --version 2>/dev/null || true
-     wctl man --no-pager >/dev/null
+     wctl --help
+     wctl docker compose ps
      ```
    - For container commands, ensure the `weppcloud` service is up before testing.
    - Host commands should be exercised once (e.g., `wctl run-npm --version`) to validate binary detection.
@@ -54,17 +51,15 @@ Changes to any of these pieces must be reflected in this document.
      For `doc-mv`, the repository currently blocks traversal of `.docker-data/redis`; use a docs subdirectory (for example files under `tests/tmp/`) or temporarily prepend a mock `markdown-doc` binary to `PATH` to validate the dry-run/prompt behaviour.
 
 6. **Backward compatibility**
-   - When removing a command, note the change in `wctl/README.md` or release notes.
-   - Provide migration guidance if the workflow changes (e.g., new flags or renamed commands).
+   - When removing or renaming a command, note the change in `wctl/README.md` or release notes and provide Typer-friendly migration guidance (`wctl <command> --help`).
 
 7. **Documentation style**
    - README bullet list stays short and example-driven.
-   - Man page entries follow existing groff formatting (use `.TP`, `.B`, `.BR` patterns).
+   - No man page is generated; rely on Typer help text. If a command needs longer guidance, update both the README and the command docstring/help string.
 
 ## Release Checklist for wctl Changes
 
 - [ ] Update `install.sh`, regenerate `wctl.sh`.
-- [ ] Update manual (`wctl.1`).
 - [ ] Update `wctl/README.md`.
 - [ ] Reflect expectations here (`wctl/AGENTS.md`).
 - [ ] Re-run `./wctl/install.sh dev`.

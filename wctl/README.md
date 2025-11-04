@@ -1,151 +1,113 @@
-## **wctl (weppcloud control)**
+## **wctl (Typer CLI for WEPPcloud)**
 
 ### **Overview**
 
-wctl is a command-line wrapper script designed to simplify the management of the wepppy Docker Compose development environment.  
-The primary purpose of this tool is to provide a global command that executes docker compose with the project-specific configuration files, regardless of the user's current working directory. It eliminates the need to repeatedly cd into the project folder (/workdir/wepppy) and type the full docker compose command with its environment and file flags.
+`wctl` is now a Typer-powered Python CLI that orchestrates the WEPPcloud Docker Compose stacks and the companion tooling that lives in `tools/wctl2`. The thin shell shim installed by `./wctl/install.sh` simply resolves the project root, pins the desired compose file, exports `PYTHONPATH`/`WCTL_COMPOSE_FILE`, and defers to `python -m wctl2`. Typer’s rich help/auto-completion replaces the legacy Bash wrapper and man page while keeping command names and behaviour familiar.
 
-### **How It Works**
+Key design points:
+- A shared `CLIContext` (see `tools/wctl2/context.py`) merges `docker/.env`, optional host overrides (`WCTL_HOST_ENV`), and any shell-provided overrides into a temporary env file that every command reuses.
+- All first-class helpers are implemented as Typer subcommands, so `wctl <command> --help` shows usage, defaults, and options without maintaining a separate manual page.
+- Anything that is not recognised as a Typer subcommand is forwarded to `docker compose`, with support for common prefixes (`wctl docker compose ps`, `wctl compose up`, etc.) and INFO-level logging so you can see the exact call.
 
-The wctl script is a simple yet powerful Bash script that performs the following actions in sequence:
-
-1. **Sets Project Directory:** The script derives the project root dynamically based on the location of the wctl directory.  
-2. **Changes Directory:** It immediately changes its execution context to that project directory so that all relative paths within the compose file resolve correctly.  
-3. **Executes Docker Compose:** It runs docker compose using a generated env file that starts with `docker/.env` and, if present, merges in overrides from the project root `.env` (or the path supplied via `WCTL_HOST_ENV`). The compose file selected during installation (dev or prod) is used for all commands.  
-4. **Forwards Arguments:** Any arguments or commands you pass to wctl (e.g., up \-d, down, logs) are appended to the end of the docker compose command using the $@ shell parameter.
-
-This allows a command like wctl ps to be translated seamlessly into:
-
-```Bash
-# (executed from within the /workdir/wepppy directory)  
-docker compose \--env-file docker/.env \-f docker/docker-compose.dev.yml ps
-```
-
-### **Built-in Helpers**
-
-- `wctl doc-lint`: wraps `markdown-doc lint`. With no arguments it runs `markdown-doc lint --staged --format json`, prints a short notice to stderr, and streams the JSON result so tooling can parse it. Pass any arguments to override the defaults (for example `wctl doc-lint --path docs --format sarif`).
-- `wctl doc-catalog`: forwards directly to `markdown-doc catalog`. Use flags like `--path docs --format json` to regenerate scoped catalogs without touching restricted directories.
-- `wctl doc-toc`: accepts positional Markdown paths (converted to `--path` under the hood) plus the native flags such as `--update` or `--diff`. Requires at least one target so accidental repo-wide sweeps are avoided.
-- `wctl doc-mv`: performs a dry-run via `markdown-doc mv --dry-run …`, then prompts on `/dev/tty` before applying changes. Use `--dry-run-only` to skip the apply step or `--force` to bypass the confirmation prompt.
-- `wctl doc-refs`: wraps `markdown-doc refs` for locating inbound links or anchors ahead of refactors. Combine with `--path` to constrain the search space when large directories exist.
-- `wctl doc-bench`: proxies `markdown-doc-bench` so you can benchmark documentation operations (`--warmup`, `--iterations`, `--path`) from the same CLI.
-- `wctl build-static-assets`: runs the frontend build script (`static-src/build-static-assets.sh`) with the correct Compose profile baked into the arguments.
-- `sudo wctl restore-docker-data-permissions`: resets ownership and permissions for the directories under `.docker-data/`. Postgres data and backup paths are restored to `postgres:postgres` (UID/GID `999`), Redis gets `redis:redis` (also `999`), and the application log directory (`.docker-data/weppcloud/`) is aligned with the UID/GID specified in `docker/.env` (defaults to `1000:993`). Use this whenever an accidental `chown` prevents the containers from writing to their bind mounts.
-- `wctl flask-db-upgrade`: executes `flask --app wepppy.weppcloud.app db upgrade` inside the running `weppcloud` container. Any additional arguments are forwarded, so `wctl flask-db-upgrade --tag current` works the same as the underlying Flask-Migrate command.
-- `wctl man` (or `man wctl` after installation): displays the wctl manual page. Additional arguments are passed through to `man`, so `wctl man --no-pager` works as expected.
-- `wctl update-stub-requirements`: runs `tools/update_stub_requirements.py` to analyse mypy output and refresh `docker/requirements-stubs-uv.txt`. Pass any script flags (for example `--no-verify`) after the command.
-- `wctl run-pytest`: executes `pytest` inside the `weppcloud` container (defaults to `pytest tests`). Pass extra arguments to forward them to pytest; for example, `wctl run-pytest tests/weppcloud/routes/test_climate_bp.py`.
-- `wctl run-stubtest`: runs `stubtest` inside the container with the appropriate environment (defaults to `wepppy.nodb.core`). Provide module names to narrow the check.
-- `wctl run-npm`: runs `npm` on the host with `--prefix wepppy/weppcloud/static-src`. Example: `wctl run-npm lint`, `wctl run-npm test`, or `wctl run-npm check`.
-- `wctl run-stubgen`: regenerates the local `stubs/` tree via `python tools/sync_stubs.py`.
-- `wctl run-test-profile <slug>`: calls the `profile_playback` FastAPI service to replay a promoted profile (stored under `/workdir/wepppy-test-engine-data/profiles/`). Supports `--dry-run`, `--base-url`, `--service-url`, cookie injection via `--cookie`/`--cookie-file`, and `--verbose` for progress output.
-- `wctl run-fork-profile <slug>`: provisions a sandbox copy of the profile run, issues `rq/api/fork`, and streams the JSON response. Accepts flags like `--undisturbify`, `--target-runid`, `--timeout`, and the same connection overrides as `run-test-profile`.
-- `wctl run-archive-profile <slug>`: mirrors `rq/api/archive` against the sandboxed run with optional `--archive-comment`, `--timeout`, and connection flags. Outputs archive metadata as JSON for CI pipelines.
-- `wctl check-test-stubs`: executes `python tools/check_stubs.py` inside the container to ensure sys.modules stubs match their public APIs.
-- `wctl check-test-isolation`: launches `python tools/check_test_isolation.py` inside the container. Supports all script flags (`--quick`, `--strict`, `--iterations`, `--json`, etc.) and surfaces order-dependent failures plus leaked global state before they surprise downstream suites.
-- `wctl run-status-tests`: compiles and runs the Go unit/integration tests for `services/status2` using the compose-managed `status-build` helper (golang:1.25-alpine). The helper runs `go mod tidy` before `go test`; extra arguments after the command are forwarded to `go test`.
-- `wctl run-preflight-tests`: same workflow as above but scoped to `services/preflight2`. Use flags like `-tags=integration ./internal/server` to exercise the Redis/WebSocket harness.
-
-### **wctl2 (Preview Typer CLI)**
-
-The Python port of the control CLI lives under `tools/wctl2/` and is installable alongside the legacy Bash wrapper:
+### **Quick Start**
 
 ```bash
-./wctl/install.sh dev --new-cli
+cd /workdir/wepppy
+./wctl/install.sh dev    # pin docker/docker-compose.dev.yml (default)
+# or
+./wctl/install.sh prod   # pin docker/docker-compose.prod.yml
+
+# optional: install to a custom bin directory
+WCTL_SYMLINK_PATH="$HOME/.local/bin/wctl" ./wctl/install.sh dev
 ```
 
-Highlights:
+After installation you can explore the CLI via:
 
-- `CLIContext` (see `tools/wctl2/context.py`) generates the sanitised env file, exposes compose defaults, and writes `WEPPPY_ENV_FILE` before each command executes.
-- Passthrough invocations are logged up front (`INFO:wctl2:docker compose up --help`) so you can see how Typer translated the request.
-- Playback helpers target the canonical `backed-globule` profile during smokes, keeping service, base URL, and timeout defaults aligned with the shell script.
-
-Sample help text:
-
-```text
-$ wctl2 --help
-Usage: wctl2 [OPTIONS] COMMAND [ARGS]...
-
-wctl2 – Python-based control wrapper for the WEPPcloud docker compose stack.
-
-Options:
-  --compose-file, -f   Compose file relative to project root.
-  --project-dir        Override the detected project directory.
-  --log-level          Logging level (default: INFO).
-  -h, --help           Show this message and exit.
-
-Commands:
-  doc-lint                doc tooling wrappers
-  run-npm                 host npm helper
-  run-test-profile        profile playback smoke trigger
-  docker compose …        passthrough for any unhandled command
+```bash
+wctl --help
+wctl run-test-profile --help
+wctl docker compose config --help
 ```
 
-Playback and passthrough examples after installation:
+### **Available Commands**
 
-```text
-$ wctl2 run-test-profile backed-globule --dry-run
-[wctl] POST https://wc.bearhive.duckdns.org/profile-playback/run/backed-globule
-[wctl] payload: {"dry_run": true, "verbose": true, "base_url": "https://wc.bearhive.duckdns.org/weppcloud"}
-…
+All commands mirror the legacy behaviour, but now live under the Typer dispatcher:
 
-$ wctl2 docker compose config --help
-INFO:wctl2:docker compose config --help
-Usage:  docker compose config [OPTIONS] [SERVICE...]
+- `wctl doc-lint` / `doc-catalog` / `doc-toc` / `doc-mv` / `doc-refs` / `doc-bench` – wrappers around the `markdown-doc` toolkit with argument parity.
+- `wctl build-static-assets` – calls `wepppy/weppcloud/static-src/build-static-assets.sh`, adding `--prod` automatically when the installer targets the production compose file.
+- `wctl restore-docker-data-permissions` – repairs ownership for `.docker-data/*` using the UID/GID from the active env file.
+- `wctl run-npm` – runs host-side npm/Yarn scripts with `--prefix wepppy/weppcloud/static-src` (plain npm commands like `install`, `test`, `lint`, etc.).
+- `wctl run-pytest` – executes pytest inside the running `weppcloud` container (`pytest tests` by default).
+- `wctl run-stubtest` – runs stubtest from the container (default target `wepppy.nodb.core`).
+- `wctl run-stubgen` – regenerates stubs (`python tools/sync_stubs.py`).
+- `wctl check-test-stubs` / `check-test-isolation` – launch the diagnostic scripts inside the container.
+- `wctl run-test-profile` / `run-fork-profile` / `run-archive-profile` – drive the profile playback FastAPI service, defaulting to the canonical `backed-globule` smoke profile when no overrides are supplied.
+
+Every command supports `--help`, so discovery is as simple as `wctl run-pytest --help`.
+
+### **Docker Compose Passthrough**
+
+If Typer cannot match the first argument to a registered command, the shim trims optional `docker compose` prefixes and delegates to Docker Compose with the context-managed env file:
+
+```bash
+wctl ps
+wctl compose ps
+wctl docker compose logs weppcloud
 ```
 
-All legacy flags continue to work. For example, `wctl2 -f docker/docker-compose.prod.yml up --detach` selects the production stack, and `wctl2 compose ps` trims the redundant prefix before reaching `docker compose`.
+Each passthrough call is logged (for example, `INFO:wctl2:docker compose ps`) so you can see the exact command that was executed.
+
+### **Environment Handling**
+
+- The generated temp env file always starts with `docker/.env` and merges an optional host override.
+- Set `WCTL_HOST_ENV` (absolute or project-relative) to point at an additional `.env` file that should be layered on top.
+- Any shell environment variables referenced in the active compose file act as the final overrides – for example export `POSTGRES_PASSWORD` before calling `wctl up`.
+- `WCTL_COMPOSE_FILE` is exported by the shim so Typer can reuse the selected compose file without requiring extra flags on every invocation.
+
+### **Testing & Tooling Workflow**
+
+Use the Typer helpers instead of crafting long `docker compose exec` commands manually:
+
+```bash
+wctl run-pytest tests/weppcloud/routes/test_climate_bp.py
+wctl run-pytest tests --maxfail=1
+wctl run-stubtest wepppy.nodb.core
+wctl check-test-stubs
+wctl run-npm lint
+```
+
+Because the commands execute inside the running containers (or with the correct host prefix for npm), they reflect the same environment used in production deployments.
 
 ### **Host Environment Overrides**
 
-If a `.env` file exists at the project root, wctl automatically merges it on top of the required `docker/.env` when generating the temporary environment passed to docker compose. Keys defined in the host file override the defaults from `docker/.env`, making it easy to keep machine-specific values out of version control.  
-Set the `WCTL_HOST_ENV` environment variable (absolute or project-relative path) before invoking wctl if you need to use a different host-side env file.
+When a project-root `.env` exists, the CLI automatically merges it on top of `docker/.env`. Relative paths provided via `WCTL_HOST_ENV` are resolved against the project directory by `CLIContext`. Temporary overrides can be added by exporting shell variables before running `wctl`.
 
-After the files are merged, wctl scans the active docker compose file for `${VAR}` placeholders and, when a matching variable is defined in the current shell environment, copies that value into the generated env file as the final override. This lets you keep secrets in exported environment variables (or injected by tools like `direnv`) without committing them anywhere.
+### **Profile Playback Smokes**
 
-### **pytest Workflow**
-
-- Keep `docker/.env` populated with the stack-wide defaults (UID/GID, secrets, hostnames). Wctl always starts there so the containers boot with predictable values.
-- Add a project-root `.env` (gitignored) or point `WCTL_HOST_ENV` at a private file for local overrides such as API keys, database URLs, and filesystem mount points.
-- For temporary values (CI, ad-hoc debugging), simply export environment variables before running `wctl`; the wrapper pulls them into the generated env file automatically.
-- Run targeted suites aggressively:
-  ```bash
-  wctl run-pytest tests/weppcloud/routes/test_climate_bp.py
-  wctl run-pytest tests/weppcloud/routes  # package-level smoke
-  wctl run-pytest tests --maxfail=1        # full run before handoff
-  ```
-- Make `wctl run-pytest …` part of your default workflow anytime routes, controllers, or shared utilities change. The command exercises the code inside the real container image, so failures mirror production.
-
-### **Running Type Checks / Stubtest**
-
-Because the development Docker image installs the stub wheels listed in `docker/requirements-stubs-uv.txt`, run static checks inside the container so the environment matches production. The helpers above take care of the `/tmp` working directory, `PYTHONPATH`, and cache location for you:
+The playback helpers stream directly from the `services/profile_playback` FastAPI service. Typical smokes look like:
 
 ```bash
-wctl run-pytest                      # pytest tests
-wctl run-stubtest wepppy.nodb.core   # stubtest target
-wctl run-stubgen                     # rebuild stubs/wepppy/
+wctl run-test-profile backed-globule --dry-run
+wctl run-fork-profile backed-globule --timeout 120
+wctl run-archive-profile backed-globule --archive-comment "smoke test" --timeout 120
 ```
 
-Use `wctl update-stub-requirements` before rebuilding the image when new dependencies require additional stub packages.
+All commands print the HTTP target and payload to stderr before streaming the service response.
 
-### **Installation**
+### **Upgrading from the Legacy Bash Wrapper**
 
-1. **Configure the target compose file.**  
-   Run the installer (located in the wctl directory) from the project root to select the compose file that wctl should use.  
-   Ensure `python3` is on your PATH before running these commands.
-   ```Bash
-   cd /workdir/wepppy
-   ./wctl/install.sh dev    # use docker/docker-compose.dev.yml
-   ./wctl/install.sh prod   # use docker/docker-compose.prod.yml
-   ```
-   You can re-run the installer at any time to switch environments.
+- The legacy script, manual page, and bespoke subcommand plumbing have been removed.
+- Any existing symlinks pointing at the old `wctl.sh` should be refreshed by re-running `./wctl/install.sh <env>`.
+- Documentation and help are now delivered directly by Typer (`wctl --help`), so no additional man page is required.
 
-2. **(Optional) Adjust the symlink location.**  
-   The installer ensures a symlink exists at `/usr/local/bin/wctl` (or at the path specified by the `WCTL_SYMLINK_PATH` environment variable).  
-   If the default location requires elevated privileges, re-run the installer with `sudo` or choose a writable directory:
-   ```Bash
-   WCTL_SYMLINK_PATH="$HOME/.local/bin/wctl" ./wctl/install.sh dev
-   ```
-   Verify the installation with `which wctl`; it should resolve to your chosen path.
+### **Troubleshooting**
 
-   The installer also attempts to place the manual page at `/usr/local/share/man/man1/wctl.1`. If you lack permissions there, rerun with `sudo` or set `WCTL_MAN_PATH` to a writable location (for example `"$HOME/.local/share/man/man1/wctl.1"`), then refresh your `MANPATH`.
+- Ensure `python3` is available and matches the runtime used inside the Docker images (3.11+).
+- If Python cannot locate the Typer package, confirm the shim was installed via `./wctl/install.sh` so that `PYTHONPATH` includes both the repository root and `tools/`.
+- For compose passthrough issues, re-run with `wctl --log-level DEBUG docker compose …` to surface more detail (Typer accepts the global `--log-level` option before the command name).
+
+### **Next Steps**
+
+- Integrate the new CLI into CI pipelines (`wctl run-pytest`, `wctl docker compose config --quiet`, etc.).
+- Remove any downstream references to the legacy `profile_playback_cli.py` helpers; the Typer commands are the new canonical interface.
+- Keep an eye on `tools/wctl2/SPEC.md` for additional enhancements (command grouping, completion scripts, richer logging).

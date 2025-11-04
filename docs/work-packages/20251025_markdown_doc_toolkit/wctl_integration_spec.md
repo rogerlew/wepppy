@@ -57,7 +57,6 @@ Define the changes required to expose the `markdown-doc` CLI suite through `wctl
 
 5. **Documentation updates**  
    - `wctl/README.md`: Add succinct bullets for each `doc-*` command with example usage (staged lint, catalog regen, mv dry-run, etc.).
-   - `wctl/wctl.1`: Extend the COMMANDS section using the existing groff style, documenting defaults and noteworthy flags.
    - `wctl/AGENTS.md`: Record checklist items specific to these wrappers (binary checks, prompt behaviour, default JSON output).
 
 6. **Testing expectations**  
@@ -89,4 +88,3 @@ Define the changes required to expose the `markdown-doc` CLI suite through `wctl
 - Should benchmark runs live in CI per-PR or nightly? (Tracked in adoption RFC.)
 
 Document owners should update this spec if behaviour deviates or additional helpers are introduced.
-

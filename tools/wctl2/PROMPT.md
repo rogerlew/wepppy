@@ -3,7 +3,7 @@
 ## Anchor Documents
 - [`tools/wctl2/SPEC.md`](../wctl2/SPEC.md) — architecture, module plan, testing expectations
 - [`wctl/README.md`](../../wctl/README.md) — current CLI behaviour and user expectations
-- [`wctl/install.sh`](../../wctl/install.sh) — existing installer logic (understanding how `wctl.sh` is generated)
+- [`wctl/install.sh`](../../wctl/install.sh) — installer that generates the `wctl` shim
 
 ## Working Set
 - **Create:**  
@@ -21,9 +21,8 @@
   - `tools/wctl2/commands/passthrough.py`  
   - Tests under `tools/wctl2/tests/` (at minimum smoke coverage for playback and passthrough).
 - **Modify:**  
-  - `wctl/install.sh` (add option to install `wctl2` shim alongside legacy CLI)  
-  - `wctl/README.md` (document `wctl2` parallel usage)  
-  - `wctl/wctl.1` (mention `wctl2` testing path)  
+  - `wctl/install.sh` (ensure shim delegates to Typer CLI)  
+  - `wctl/README.md` (document the Typer-based workflow)  
 - **Avoid:** Do not delete or destabilise existing `wctl.sh` until final rollout; we need both CLIs available.
 
 ## Deliverables
@@ -39,8 +38,8 @@
      - Python task wrappers (`python_tasks.py`)
      - Playback commands (`playback.py`), reusing the logic currently in `tools/profile_playback_cli.py`
      - Fallback passthrough (`passthrough.py`) for unknown invocations.
-2. **Refreshed installer** to symlink both `wctl` and `wctl2`, allowing side-by-side testing.
-3. **Documentation updates** explaining how to install and validate `wctl2`.
+2. **Refreshed installer** to generate the `wctl` shim that delegates to the Typer app.
+3. **Documentation updates** explaining how to install and validate the Typer CLI.
 4. **Smoke tests**:
    - Unit coverage for playback command (mocked requests).
    - CLI smoke invoking Typer runner for `run-npm --help`, playback commands (with `backed-globule` profile), and passthrough (e.g., `docker compose ps` dry run).
@@ -49,14 +48,14 @@
 Run from project root unless noted:
 1. `python tools/wctl2/tests/run_smoke.py` (or equivalent test harness you introduce) — must pass.
 2. `pytest tools/wctl2/tests` — ensure new unit tests succeed.
-3. `./wctl/install.sh dev --new-cli` (you can add a flag) — verify symlinks create both `wctl` and `wctl2`.
+3. `./wctl/install.sh dev` — verify the shim points at the Typer CLI.
 4. Manual smoke:
-   - `wctl2 run-test-profile backed-globule --dry-run`
-   - `wctl2 run-fork-profile backed-globule --undisturbify --timeout 120`
-   - `wctl2 run-archive-profile backed-globule --archive-comment "smoke test" --timeout 120`
-   - `wctl2 run-npm --help`
-   - `wctl2 doc-toc --help`
-   - `wctl2 docker compose config --help` (ensure passthrough works)
+   - `wctl run-test-profile backed-globule --dry-run`
+   - `wctl run-fork-profile backed-globule --undisturbify --timeout 120`
+   - `wctl run-archive-profile backed-globule --archive-comment "smoke test" --timeout 120`
+   - `wctl run-npm --help`
+   - `wctl doc-toc --help`
+   - `wctl docker compose config --help` (ensure passthrough works)
 
 ## Observable Outputs
 - Example CLI usage outputs documenting new command behaviour (include in README updates).

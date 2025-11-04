@@ -12,7 +12,7 @@ Expose the markdown-doc CLI suite through `wctl`, keeping the generated tooling 
 - `docs/work-packages/20251025_markdown_doc_toolkit/wctl_integration_spec.md`
 - `wctl/AGENTS.md`
 - Existing `wctl/install.sh` template and generated `wctl/wctl.sh`
-- Documentation surfaces: `wctl/README.md`, `wctl/wctl.1`
+- Documentation surfaces: `wctl/README.md`
 
 ## Preconditions
 - `markdown-doc`, `markdown-doc-bench`, and companion binaries are installed at `/usr/local/bin`.
@@ -34,7 +34,6 @@ Expose the markdown-doc CLI suite through `wctl`, keeping the generated tooling 
    - `doc-bench`: wrap `markdown-doc-bench`, providing a helpful error if the binary is unavailable and defaulting to the standard benchmark suite.
 4. **Documentation updates**
    - Expand `wctl/README.md` with concise entries and usage snippets for each new command (defaults, sample invocations, prompt behaviour).
-   - Update the man page `wctl/wctl.1` in the COMMANDS section using existing groff formatting to describe the wrappers and key flags.
    - Update `wctl/AGENTS.md` with maintenance notes: binary checks, regeneration workflow, prompt expectations, lint defaults, and how to validate changes.
 5. **Validation & smoke tests**
    - Run `./wctl/install.sh dev` after changes.
@@ -58,7 +57,7 @@ Run the regenerated `wctl` against safe targets (temp files / staged changes):
 
 ## Deliverables
 - Updated `wctl` generator/runtime source (`install.sh`, generated `wctl.sh`) featuring the six `doc-*` wrappers.
-- Documentation refresh for `wctl/README.md`, `wctl/wctl.1`, and `wctl/AGENTS.md` aligned with new behaviour.
+- Documentation refresh for `wctl/README.md` and `wctl/AGENTS.md` aligned with new behaviour.
 - Smoke-test confirmation with commands executed and outcomes recorded in the handoff summary.
 
 ## Out of Scope

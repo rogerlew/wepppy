@@ -3,7 +3,7 @@
 Background references:
 - `AGENTS.md` -> "Type Stub Management" section
 - `docs/dev-notes/style-guide.md` -> Python conventions and docstring expectations
-- `wctl/README.md` and `wctl/wctl.1` -> helper commands (`run-pytest`, `run-stubtest`, `run-stubgen`)
+- `wctl/README.md` -> helper commands (`run-pytest`, `run-stubtest`, `run-stubgen`)
 - Runtime source tree under `wepppy/...` (especially the target module)
 
 When asked to document or modernize a module (or when planning the work yourself), follow this sequence:
