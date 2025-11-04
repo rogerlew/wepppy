@@ -362,7 +362,11 @@ class PlaybackSession:
 
     def _build_url(self, path: str) -> str:
         base = self.base_url.rstrip("/")
-        return urljoin(f"{base}/", path.lstrip("/"))
+        normalized_path = path.lstrip("/")
+        if normalized_path.startswith("query-engine/") or normalized_path == "query-engine":
+            origin = urljoin(f"{base}/", "/")
+            return urljoin(origin, normalized_path)
+        return urljoin(f"{base}/", normalized_path)
 
     def _should_wait_for_completion(self, method: str, path: str, expected_status: int) -> bool:
         if method != "GET" or expected_status != 200:
