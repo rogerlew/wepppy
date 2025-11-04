@@ -16,6 +16,11 @@ import requests
 
 from wepppy.nodb.core.ron import Ron
 
+
+def _playback_run_root() -> Path:
+    base = os.environ.get("PROFILE_PLAYBACK_BASE", "/workdir/wepppy-test-engine-data/playback")
+    return Path(os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", os.path.join(base, "runs")))
+
 Event = Dict[str, object]
 
 
@@ -76,7 +81,7 @@ class PlaybackSession:
         self.results: List[Tuple[str, str]] = []
 
     def _prepare_run_directory(self, profile_root: Path, run_id: str) -> Path:
-        playback_root = Path(os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", "/workdir/wepppy-test-engine-data/playback_runs"))
+        playback_root = _playback_run_root()
         playback_root.mkdir(parents=True, exist_ok=True)
         target = playback_root / run_id
         if target.exists():

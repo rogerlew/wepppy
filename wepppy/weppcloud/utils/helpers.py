@@ -52,6 +52,11 @@ except Exception as e:
 _PLAYBACK_USE_CLONE = os.getenv("PROFILE_PLAYBACK_USE_CLONE", "false").lower() in {"1", "true", "yes", "on"}
 
 
+def _playback_path(env_var: str, subdir: str) -> str:
+    base = os.environ.get("PROFILE_PLAYBACK_BASE", "/workdir/wepppy-test-engine-data/playback")
+    return os.environ.get(env_var, _join(base, subdir))
+
+
 def get_wd(runid: str, *, prefer_active: bool = True) -> str:
     """
     Gets the working directory path for a given run ID, using a Redis cache
@@ -95,12 +100,12 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
         if _group == 'batch':
             path = get_batch_run_wd(_name, _runid)
         elif _group == 'profile' and _name == 'tmp':
-            playback_root = os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", "/workdir/wepppy-test-engine-data/playback_runs")
+            playback_root = _playback_path("PROFILE_PLAYBACK_RUN_ROOT", "runs")
             path = _join(playback_root, _runid)
         else:
             raise ValueError(f'Unknown group prefix: {_group}')
     elif path is None:
-        playback_root = os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", "/workdir/wepppy-test-engine-data/playback_runs") if _PLAYBACK_USE_CLONE else None
+        playback_root = _playback_path("PROFILE_PLAYBACK_RUN_ROOT", "runs") if _PLAYBACK_USE_CLONE else None
         if playback_root:
             playback_candidate = _join(playback_root, runid)
             if _exists(playback_candidate):

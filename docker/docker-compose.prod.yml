@@ -24,7 +24,7 @@ x-wepppy-env: &wepppy-env
   OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
   DTALE_SERVICE_URL: ${DTALE_SERVICE_URL:-http://dtale:9010}
   DTALE_INTERNAL_TOKEN: ${DTALE_INTERNAL_TOKEN:-change-me}
-  PROFILE_PLAYBACK_RUN_ROOT: ${PROFILE_PLAYBACK_RUN_ROOT:-/workdir/wepppy-test-engine-data/playback_runs}
+  PROFILE_PLAYBACK_RUN_ROOT: ${PROFILE_PLAYBACK_RUN_ROOT:-/workdir/wepppy-test-engine-data/playback/runs}
   PROFILE_PLAYBACK_USE_CLONE: ${PROFILE_PLAYBACK_USE_CLONE:-true}
 
 x-wepppy-service: &wepppy-service

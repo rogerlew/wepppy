@@ -48,7 +48,7 @@
    - Generates a draft YAML + seed snapshot for manual review when a capture is closed.
 4. **Runner Workflow**
    - CLI command: `wctl run-test-profile <slug>` (host-side helper).
-   - Helper calls the `profile_playback` FastAPI microservice which provisions an empty workspace under `PROFILE_PLAYBACK_RUN_ROOT/<runid>` (default `/workdir/wepppy-test-engine-data/playback_runs/<runid>`) and replays the captured HTTP traffic with `PlaybackSession`.
+   - Helper calls the `profile_playback` FastAPI microservice which provisions an empty workspace under `PROFILE_PLAYBACK_RUN_ROOT/<runid>` (default `/workdir/wepppy-test-engine-data/playback/runs/<runid>`) and replays the captured HTTP traffic with `PlaybackSession`.
    - During replay every request is rewritten to `/runs/profile;;tmp;;<runid>/...`, letting WEPPcloud resolve the temp run via `PROFILE_PLAYBACK_USE_CLONE=true` instead of touching the production directory.
    - Each run boots from a clean slate. Playback copies the captured configuration defaults (`active_config.txt`, `.cfg`, `_defaults.toml`) into the scratch directory, re-initialises Ron, and relies on captured events + seed uploads to restore state. No prior run snapshot is cloned.
    - Multipart uploads (landuse `.tif`, SBS rasters, etc.) must exist under `capture/seed/uploads/`; playback depends on those seeds (or the recorded request payload) to rebuild FormData without touching the original run. Recorded `elevationquery` requests are ignored during replay because coverage is regenerated as downstream tasks execute.
@@ -156,6 +156,7 @@ comparisons:
 3. Curate a baseline profile catalog (`sharing-mobilization`, `us-watershed-small`, etc.) and document promotion + playback workflows for collaborators.
 4. Expand documentation (Recorder how-to, profile authoring guide, data repo usage) as capabilities mature.
 5. Manually verify SBS/landuse uploads by running `wctl run-test-profile <slug>` against at least one promoted profile that exercises those endpoints (`rattlesnake-w-landuse-map`) and confirm the playback workspace produces the expected rasters.
+6. Extend the playback service with `POST /run/{profile}`, `POST /fork/{profile}`, and `POST /archive/{profile}` endpoints that map to isolated sandboxes under `/workdir/wepppy-test-engine-data/playback/<action>/`. Each endpoint copies the recorded seed into its sandbox, calls the corresponding WEPPcloud API as an admin user (propagating flags such as `undisturbify` for forks and `comment` for archives), and polls until the RQ task finishes. This validates fork/archive flows end-to-end, even though the DOM isn’t involved, and keeps results hermetic with prefixes like `profile;;tmp;;<slug>` and `profile;;fork;;<slug>` handled by `get_wd`.
 
 ## Recorder Blueprint
 ### Objectives
