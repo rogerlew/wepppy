@@ -1,4 +1,4 @@
-# Add Profile Run Template
+# Add Profile Run
 
 Use this template to add a new nightly profile test workflow and update the readme.
 
@@ -7,30 +7,13 @@ Use this template to add a new nightly profile test workflow and update the read
 ```
 Add a new profile run workflow with the following details:
 
-- **Title**: [workflow title, e.g., "Profile Run - Earth Small"]
-- **Profile name**: [profile identifier, e.g., "earth-in-bc-ca-w-daymet"]
-- **Description**: [human-readable description, e.g., "Earth OpenTopography API, with ISRIC soil building, DAYMET in Canada with GHCN Station Database"]
-- **Run time**: [Pacific time, e.g., "05:30 AM"] (choose next available 15-minute slot after existing workflows)
-
-Tasks:
-1. Create `.github/workflows/profile-run-[slug].yml` based on existing profile workflow patterns
-2. Update `readme.md` Dev Server Nightly Profile Tests table with new entry (maintain chronological order by run time)
-3. Set cron schedule to match the specified Pacific time (convert to UTC, accounting for daylight saving offset)
-4. Use existing workflow structure (health check, wctl run-test-profile, artifact upload, redis cleanup)
-```
-
-## Example Usage
-
-```
-Add a new profile run workflow with the following details:
-
 - **Title**: Profile Run - Earth Small
 - **Profile name**: earth-in-bc-ca-w-daymet
-- **Description**: Earth OpenTopography API, with ISRIC soil building, DAYMET in Canada with GHCN Station Database
-- **Run time**: 05:30 AM (or next available slot)
+- **Description**: "Earth OpenTopography API, with ISRIC soil building, DAYMET in Canada with GHCN Station Database"
+- **Run time**: next available 10-minute slot after existing workflows
 
 Tasks:
-1. Create `.github/workflows/profile-run-earth-small.yml` based on existing profile workflow patterns
+1. Create `.github/workflows/profile-run-[slug].yml` based on existing profile workflow patterns and the title (not the profile name)
 2. Update `readme.md` Dev Server Nightly Profile Tests table with new entry (maintain chronological order by run time)
 3. Set cron schedule to match the specified Pacific time (convert to UTC, accounting for daylight saving offset)
 4. Use existing workflow structure (health check, wctl run-test-profile, artifact upload, redis cleanup)
