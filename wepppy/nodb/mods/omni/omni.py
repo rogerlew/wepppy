@@ -51,6 +51,11 @@ from wepppy.nodb.base import NoDbBase, clear_locks, clear_nodb_file_cache, nodb_
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.version import copy_version_for_clone
 
+try:
+    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
+except Exception:  # pragma: no cover - optional dependency
+    _update_catalog_entry = None
+
 __all__ = [
     'OMNI_REL_DIR',
     'LOGGER',
@@ -512,6 +517,21 @@ class Omni(NoDbBase):
             self._contrast_dependency_tree = {}
             self._scenario_run_state = []
 
+    def _refresh_catalog(self, rel_path: Optional[str] = None) -> None:
+        """Best-effort catalog refresh for Omni artifacts."""
+        if _update_catalog_entry is None:
+            return
+        target = rel_path or OMNI_REL_DIR
+        try:
+            _update_catalog_entry(self.wd, target)
+        except Exception:  # pragma: no cover - catalog refresh best effort
+            LOGGER.warning(
+                "Failed to refresh catalog for Omni artifacts in %s (target=%s)",
+                self.wd,
+                target,
+                exc_info=True,
+            )
+
     @property
     def scenarios(self) -> List[Dict[str, Any]]:
         return getattr(self, '_scenarios', []) or []
@@ -967,6 +987,7 @@ class Omni(NoDbBase):
         combined = pd.concat(dfs, ignore_index=True)
         out_path = _join(self.wd, OMNI_REL_DIR, 'contrasts.out.parquet')
         combined.to_parquet(out_path)
+        self._refresh_catalog()
 
         return combined
     
@@ -1503,6 +1524,7 @@ class Omni(NoDbBase):
         combined = pd.concat(dfs, ignore_index=True)
         out_path = _join(self.wd, OMNI_REL_DIR, 'scenarios.out.parquet')
         combined.to_parquet(out_path)
+        self._refresh_catalog()
 
         return combined
     
@@ -1548,6 +1570,7 @@ class Omni(NoDbBase):
 
         out_path = _join(self.wd, OMNI_REL_DIR, 'scenarios.hillslope_summaries.parquet')
         combined.to_parquet(out_path)
+        self._refresh_catalog()
 
         return combined
 
@@ -1582,6 +1605,7 @@ class Omni(NoDbBase):
 
         out_path = _join(self.wd, OMNI_REL_DIR, 'scenarios.channel_summaries.parquet')
         combined.to_parquet(out_path)
+        self._refresh_catalog()
 
         return combined
 

@@ -101,6 +101,7 @@ from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.query_engine import update_catalog_entry
 
 from wepppy.nodb.duckdb_agents import (
     get_watershed_subs_summary,
@@ -1072,6 +1073,11 @@ class Watershed(NoDbBase):
             translator = self.translator_factory()
             translator.build_structure(network, pickle_fn=structure_fn)
             self._structure = structure_fn
+
+            try:
+                update_catalog_entry(self.wd, 'watershed')
+            except Exception as exc:
+                self.logger.warning("Failed to refresh catalog for watershed outputs: %s", exc)
 
     @property
     def sub_area(self) -> float:

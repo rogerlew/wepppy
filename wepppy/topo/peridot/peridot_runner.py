@@ -1,3 +1,4 @@
+import logging
 import os
 from os.path import join as _join
 from os.path import split as _split
@@ -11,6 +12,13 @@ import pandas as pd
 from subprocess import Popen, PIPE
 
 from.flowpath import PeridotFlowpath, PeridotHillslope, PeridotChannel
+
+try:
+    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
+except Exception:  # pragma: no cover - optional catalog support
+    _update_catalog_entry = None
+
+LOGGER = logging.getLogger(__name__)
 
 
 _thisdir = os.path.dirname(__file__)
@@ -143,6 +151,12 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     os.remove(_join(wd, 'watershed/channels.csv')) 
     os.remove(_join(wd, 'watershed/flowpaths.csv'))
 
+    if _update_catalog_entry is not None:
+        try:
+            _update_catalog_entry(wd, 'watershed')
+        except Exception:  # pragma: no cover - catalog refresh best effort
+            LOGGER.warning("Failed to refresh catalog for watershed outputs in %s", wd, exc_info=True)
+
     ws_centroid = float(np.mean(lngs)), float(np.mean(lats))
     return sub_area, chn_area, ws_centroid, sub_ids, chn_ids
 
@@ -219,6 +233,12 @@ def post_abstract_sub_fields(wd: str, verbose: bool = True):
 
     os.remove(_join(wd, 'ag_fields/sub_fields/field_flowpaths.csv'))
     os.remove(_join(wd, 'ag_fields/sub_fields/fields.csv'))
+
+    if _update_catalog_entry is not None:
+        try:
+            _update_catalog_entry(wd, 'ag_fields/sub_fields')
+        except Exception:  # pragma: no cover - catalog refresh best effort
+            LOGGER.warning("Failed to refresh catalog for ag_fields/sub_fields in %s", wd, exc_info=True)
 
     return len(field_df), len(fps_df)
 

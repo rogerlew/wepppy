@@ -1,3 +1,4 @@
+import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -9,6 +10,13 @@ from .watershed_loss_interchange import run_wepp_watershed_loss_interchange
 from .watershed_pass_interchange import run_wepp_watershed_pass_interchange
 from .watershed_soil_interchange import run_wepp_watershed_soil_interchange
 from .versioning import remove_incompatible_interchange, write_version_manifest
+
+try:
+    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
+except Exception:  # pragma: no cover - optional dependency
+    _update_catalog_entry = None
+
+LOGGER = logging.getLogger(__name__)
 
 
 def run_wepp_watershed_interchange(wepp_output_dir: Path | str, *, start_year: int | None = None) -> Path:
@@ -46,4 +54,15 @@ def run_wepp_watershed_interchange(wepp_output_dir: Path | str, *, start_year: i
                 raise RuntimeError(f"Watershed interchange task {func.__name__} failed") from exc
 
     write_version_manifest(interchange_dir)
+
+    if _update_catalog_entry is not None:
+        try:
+            run_root = base.parents[1]
+        except IndexError:
+            run_root = base
+        try:
+            _update_catalog_entry(run_root, str(interchange_dir))
+        except Exception:  # pragma: no cover - best effort catalog sync
+            LOGGER.warning("Failed to refresh query engine catalog for %s", run_root, exc_info=True)
+
     return interchange_dir

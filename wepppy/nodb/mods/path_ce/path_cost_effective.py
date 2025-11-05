@@ -20,6 +20,11 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+try:
+    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
+except Exception:  # pragma: no cover - optional dependency
+    _update_catalog_entry = None
+
 from wepppy.wepp.interchange.schema_utils import pa_field
 from wepppy.nodb.base import NoDbBase, nodb_setter
 
@@ -382,6 +387,16 @@ class PathCostEffective(NoDbBase):
         pq.write_table(_dataframe_to_table(inputs.data), analysis_path)
         pq.write_table(_dataframe_to_table(result.hillslopes_sdyd), sdyd_path)
         pq.write_table(_dataframe_to_table(result.untreatable_sdyd), untreatable_path)
+
+        if _update_catalog_entry is not None:
+            try:
+                relative_dir = str(self.path_dir.relative_to(self.wd))
+            except ValueError:
+                relative_dir = self.path_dir.name
+            try:
+                _update_catalog_entry(self.wd, relative_dir)
+            except Exception:  # pragma: no cover - best effort
+                LOGGER.warning("Failed to refresh catalog for PATH CE artifacts in %s", self.wd, exc_info=True)
 
         return {
             "analysis": str(analysis_path.relative_to(self.wd)),

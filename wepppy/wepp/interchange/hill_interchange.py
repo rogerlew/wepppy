@@ -1,4 +1,6 @@
+import logging
 from pathlib import Path
+
 from .hill_ebe_interchange import run_wepp_hillslope_ebe_interchange
 from .hill_element_interchange import run_wepp_hillslope_element_interchange
 from .hill_loss_interchange import run_wepp_hillslope_loss_interchange
@@ -6,6 +8,13 @@ from .hill_pass_interchange import run_wepp_hillslope_pass_interchange
 from .hill_soil_interchange import run_wepp_hillslope_soil_interchange
 from .hill_wat_interchange import run_wepp_hillslope_wat_interchange
 from .versioning import remove_incompatible_interchange, write_version_manifest
+
+try:
+    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
+except Exception:  # pragma: no cover - optional dependency
+    _update_catalog_entry = None
+
+LOGGER = logging.getLogger(__name__)
 
 def run_wepp_hillslope_interchange(wepp_output_dir: Path | str, *, start_year: int | None = None) -> Path:
     base = Path(wepp_output_dir)
@@ -29,4 +38,15 @@ def run_wepp_hillslope_interchange(wepp_output_dir: Path | str, *, start_year: i
     run_wepp_hillslope_wat_interchange(base)
 
     write_version_manifest(interchange_dir)
+
+    if _update_catalog_entry is not None:
+        try:
+            run_root = base.parents[1]
+        except IndexError:
+            run_root = base
+        try:
+            _update_catalog_entry(run_root, str(interchange_dir))
+        except Exception:  # pragma: no cover - best effort catalog sync
+            LOGGER.warning("Failed to refresh query engine catalog for %s", run_root, exc_info=True)
+
     return interchange_dir

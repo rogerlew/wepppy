@@ -44,6 +44,11 @@ from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 
+try:
+    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
+except Exception:  # pragma: no cover - optional dependency
+    _update_catalog_entry = None
+
 __all__ = [
     'AgFieldsNoDbLockedException',
     'AgFields',
@@ -184,6 +189,16 @@ class AgFields(NoDbBase):
 
         # dump attributes to parquet
         df.to_parquet(self.rotation_schedule_parquet, index=False)
+
+        if _update_catalog_entry is not None:
+            try:
+                relative_path = os.path.relpath(self.rotation_schedule_parquet, self.wd)
+            except ValueError:
+                relative_path = 'ag_fields'
+            try:
+                _update_catalog_entry(self.wd, relative_path)
+            except Exception as exc:  # pragma: no cover - best effort
+                self.logger.warning("Failed to refresh catalog for rotation schedule: %s", exc)
 
         geojson_hash = None
         with open(canonical_path, "rb") as fp:

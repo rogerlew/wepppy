@@ -11,6 +11,7 @@ from wepppy.all_your_base.geo import read_raster, get_utm_zone, utm_srid
 
 # standard library
 import os
+import logging
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -31,6 +32,13 @@ from wepppy.all_your_base import NumpyEncoder
 from wepppy.all_your_base.geo import GeoTransformer
 
 import numpy as np
+
+try:
+    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
+except Exception:  # pragma: no cover - optional dependency
+    _update_catalog_entry = None
+
+LOGGER = logging.getLogger(__name__)
 
 __all__ = [
     'SkidTrailsNoDbLockedException',
@@ -346,6 +354,12 @@ class SkidTrails(NoDbBase):
         js = convert_to_geojson(self.skidtrails)
         with open(_join(self.skid_trails_dir, 'skid_trails0.geojson'), 'w') as fp:
             fp.write(js)
+
+        if _update_catalog_entry is not None:
+            try:
+                _update_catalog_entry(self.wd, 'skid_trails')
+            except Exception:  # pragma: no cover - catalog refresh best effort
+                LOGGER.warning("Failed to refresh catalog for skid trails in %s", self.wd, exc_info=True)
 
         with self.locked():
             self.skidtrails = skidtrails
