@@ -19,11 +19,11 @@
 
 | Badge | Profile Name | Description |
 | ----- | ------------ | ----------- |
-| [![Profile Run - Rattlesnake](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml) | rattlesnake-topaz-vanilla-wepp-watar | Nightly playback test of Rattlesnake - TOPAZ, Vanilla Cligent, WEPP, WATAR (Alex) |
-| [![Profile Run - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Nightly playback test of the US Small Watershed (WBT, Daymet RAP, WEPP) |
-| [![Profile Fork - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Nightly fork test of the US Small Watershed |
-| [![Profile Fork - Rattlesnake (Undisturbify)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-rattlesnake-undisturbify.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-rattlesnake-undisturbify.yml) | rattlesnake-topaz-vanilla-wepp-watar | Nightly undisturbify fork test of Rattlesnake |
-| [![Profile Archive - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-archive-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-archive-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Nightly archive test of the US Small Watershed |
+| [![Profile Run - Rattlesnake](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml) | rattlesnake-topaz-vanilla-wepp-watar | Playback test of Rattlesnake - TOPAZ, Vanilla Cligent, WEPP, WATAR (Alex) |
+| [![Profile Run - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Playback test of the US Small Watershed (WBT, Daymet RAP, WEPP) |
+| [![Profile Fork - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml) | us-small-wbt-daymet-rap-wepp  |Fork test of the US Small Watershed |
+| [![Profile Fork - Rattlesnake (Undisturbify)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-rattlesnake-undisturbify.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-rattlesnake-undisturbify.yml) | rattlesnake-topaz-vanilla-wepp-watar | Undisturbify fork test of Rattlesnake |
+| [![Profile Archive - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-archive-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-archive-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Archive test of the US Small Watershed |
 
 
 ## Overview

@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 import shutil
 import time
 from queue import Queue
@@ -134,9 +135,132 @@ class ProfileArchiveResult(BaseModel):
 
 app = FastAPI(title="WEPPcloud Profile Playback", version="0.1.0")
 _RUNNER_LOGGER = logging.getLogger("profile_playback.runner")
+
+
+def _color_output_enabled() -> bool:
+    override = os.environ.get("PROFILE_PLAYBACK_COLOR")
+    if override is not None:
+        return override.lower() not in {"0", "false", "no", "off"}
+    return os.environ.get("NO_COLOR") is None
+
+
+_COLOR_OUTPUT = _color_output_enabled()
+
+
+class _PlaybackLogFormatter(logging.Formatter):
+    """Formatter that injects ANSI colour codes into playback logs."""
+
+    _RESET = "\033[0m"
+    _MAGENTA = "\033[95m"
+    _GREEN = "\033[92m"
+    _RED = "\033[91m"
+    _DODGER_BLUE2 = "\033[38;5;27m"
+    _PURPLE3 = "\033[38;5;99m"
+
+    _HTTP_STATUS_PATTERN = re.compile(r"HTTP (\d{3})")
+    _URL_PATTERN = re.compile(r"https?://[^\s]+")
+    _JOB_PATTERN = re.compile(r"\bjob ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})", re.IGNORECASE)
+
+    def __init__(self, colorize: bool = True) -> None:
+        super().__init__("%(asctime)s [profile_playback] %(levelname)s %(message)s")
+        self._colorize = colorize
+
+    def format(self, record: logging.LogRecord) -> str:
+        rendered = super().format(record)
+        if not self._colorize:
+            return rendered
+        return self._apply_colours(rendered)
+
+    def _wrap(self, text: str, colour: str) -> str:
+        return f"{colour}{text}{self._RESET}"
+
+    def _apply_colours(self, text: str) -> str:
+        text = self._colour_prefix(text)
+        text = self._colour_job_tokens(text)
+        text = self._colour_http_status(text)
+        text = self._colour_urls(text)
+        text = self._colour_json_blocks(text)
+        return text
+
+    def _colour_prefix(self, text: str) -> str:
+        tag_token = " [profile_playback]"
+        idx = text.find(tag_token)
+        if idx == -1:
+            return text
+        timestamp = text[:idx]
+        remainder = text[idx:]
+        coloured_timestamp = self._wrap(timestamp, self._MAGENTA)
+        coloured_remainder = remainder.replace("[profile_playback]", self._wrap("[profile_playback]", self._MAGENTA), 1)
+        return f"{coloured_timestamp}{coloured_remainder}"
+
+    def _colour_http_status(self, text: str) -> str:
+        def repl(match: re.Match[str]) -> str:
+            code = match.group(1)
+            colour = self._GREEN if code.startswith("2") else self._RED
+            return self._wrap(f"HTTP {code}", colour)
+
+        return self._HTTP_STATUS_PATTERN.sub(repl, text)
+
+    def _colour_job_tokens(self, text: str) -> str:
+        def repl(match: re.Match[str]) -> str:
+            job_token = match.group(0)
+            return self._wrap(job_token, self._PURPLE3)
+
+        return self._JOB_PATTERN.sub(repl, text)
+
+    def _colour_urls(self, text: str) -> str:
+        def repl(match: re.Match[str]) -> str:
+            url = match.group(0)
+            # Avoid colouring trailing punctuation that is not part of the URL.
+            stripped = url.rstrip(").,]}>\"'")
+            suffix = url[len(stripped):]
+            return f"{self._wrap(stripped, self._DODGER_BLUE2)}{suffix}"
+
+        return self._URL_PATTERN.sub(repl, text)
+
+    def _colour_json_blocks(self, text: str) -> str:
+        lines = text.splitlines()
+        if len(lines) == 1 and "{" not in text:
+            return text
+
+        coloured_lines: List[str] = []
+        inside_json = False
+        brace_balance = 0
+
+        for line in lines:
+            new_line = line
+            stripped = line.lstrip()
+            starts_json = stripped.startswith(("{", "[", '"'))
+            if inside_json or "response preview" in line or starts_json:
+                if not inside_json:
+                    brace_index = line.find("{")
+                    if brace_index != -1:
+                        prefix = line[:brace_index]
+                        suffix = line[brace_index:]
+                        new_line = prefix + self._wrap(suffix, self._GREEN)
+                        brace_balance = suffix.count("{") - suffix.count("}")
+                        inside_json = brace_balance > 0
+                    else:
+                        new_line = self._wrap(line, self._GREEN)
+                        brace_balance = line.count("{") - line.count("}")
+                        inside_json = brace_balance > 0
+                else:
+                    new_line = self._wrap(line, self._GREEN)
+                    brace_balance += line.count("{") - line.count("}")
+                    inside_json = brace_balance > 0
+
+            if brace_balance <= 0:
+                brace_balance = 0
+                inside_json = False
+
+            coloured_lines.append(new_line)
+
+        return "\n".join(coloured_lines)
+
+
 if not _RUNNER_LOGGER.handlers:
     handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s [profile_playback] %(levelname)s %(message)s"))
+    handler.setFormatter(_PlaybackLogFormatter(colorize=_COLOR_OUTPUT))
     _RUNNER_LOGGER.addHandler(handler)
 _RUNNER_LOGGER.setLevel(logging.INFO)
 _RUNNER_LOGGER.propagate = False
@@ -446,7 +570,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
         session_logger.propagate = False
 
         handler = _QueueLogHandler(log_queue)
-        handler.setFormatter(logging.Formatter("%(asctime)s [profile_playback] %(levelname)s %(message)s"))
+        handler.setFormatter(_PlaybackLogFormatter(colorize=_COLOR_OUTPUT))
         session_logger.addHandler(handler)
 
         try:
@@ -469,10 +593,10 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
                 report=playback.report(),
                 requests=request_log,
             )
-            _store_result(session_token, result)
-            log_queue.put(f"[profile_playback] result token={session_token} stored at {_results_root() / (session_token + '.json')}")
-        except Exception as exc:  # pragma: no cover - defensive logging
-            log_queue.put(f"[profile_playback] error token={session_token}: {exc}")
+            result_path = _store_result(session_token, result)
+            session_logger.info("result token=%s stored at %s", session_token, result_path)
+        except Exception:  # pragma: no cover - defensive logging
+            session_logger.exception("Playback error token=%s", session_token)
         finally:
             log_queue.put(None)
             session_logger.removeHandler(handler)

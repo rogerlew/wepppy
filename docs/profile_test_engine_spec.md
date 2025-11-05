@@ -1,228 +1,126 @@
 # Profile Test Engine Specification
-> Draft high-level plan for recording and replaying WEPPcloud user workflows.
+> Current behaviour of the WEPPcloud profile recording, assembly, and playback toolchain.
 
-## Purpose
-- Capture realistic, end-to-end WEPPcloud interactions as reusable “profiles”.
-- Replay those profiles automatically to validate NoDb controllers, RQ jobs, and UI-driven flows.
-- Provide an auditable record of how complex or edge-case runs are performed.
-- Keep orchestration code close to the main application while hosting bulky profile assets in a sibling data repository.
+## Overview
+- Capture backend-visible WEPPcloud activity into per-run audit logs.
+- Promote curated slices of those logs into portable “profiles” with seed assets.
+- Rehydrate a sandbox and replay captured requests through the `profile_playback` service.
+- Drive the pipeline from `wctl` commands so engineers and CI can exercise real workflows.
 
-## Audience
-- Product owners deciding which flows to cover first.
-- Engineers implementing the recorder, profile store, and runner.
-- QA and support staff curating profiles from field reports.
+The stack favors append-only JSONL streams and direct filesystem snapshots over bespoke schemas. Profiles live alongside the application code while bulky run assets are mirrored into a sibling data repository.
 
-## Goals
-- Mirror real-world sequences (UI clicks, API calls, RQ tasks) without custom shims.
-- Keep profile assets versioned inside the repository for repeatability and review.
-- Make it simple to record a profile in the interface and replay it in automation.
+## Data Roots
+- `PROFILE_DATA_ROOT` (Flask config, default `/workdir/wepppy-test-engine-data`) anchors recorder output.
+- Recorder audit logs land under `<run_dir>/_logs/profile.events.jsonl`. When the working directory is unknown, events fall back to `PROFILE_DATA_ROOT/audit/<sanitised-run>/profile.events.jsonl`.
+- Draft profiles and promoted captures live under `PROFILE_DATA_ROOT/profiles/**`.
+- Playback workspaces default to `/workdir/wepppy-test-engine-data/playback/runs/<runid>` and may be overridden via `PROFILE_PLAYBACK_BASE` / `PROFILE_PLAYBACK_RUN_ROOT`.
 
-## Out of Scope
-- Low-level unit coverage for individual controllers (handled separately).
-- Live analytics dashboards for profile executions; basic log output is sufficient for MVP.
-- Parallel execution or sharding profiles across multiple hosts.
+## Recorder Pipeline
+1. `ProfileRecorder.append_event` accepts JSON events emitted by WEPPcloud middleware.
+2. Events are normalised with UTC timestamps and optional user metadata.
+3. The recorder resolves the run working directory (when possible) and appends the event to `_logs/profile.events.jsonl`.
+4. When the assembler is enabled (`PROFILE_RECORDER_ASSEMBLER_ENABLED`, default `True`) the same event is forwarded for draft construction alongside file hints extracted from known payload keys.
 
-## Personas & Use Cases
-- **Support Engineer:** Records a troublesome user workflow, submits it as a regression profile, and reruns it after fixes.
-- **QA Analyst:** Builds a library of “happy path” and “edge” profiles that run nightly to guard releases.
-- **Developer:** Replays a profile locally to verify bug fixes stay green.
+Event payloads intentionally match what the playback runner expects: `stage` (`request` or `response`), `id`, `endpoint`, `method`, status data, and `requestMeta` for payload inspection.
 
-## Core Concepts
-- **Profile:** Named recipe combining input assets, ordered actions, and expected checkpoints.
-- **Recorder Mode:** UI-assisted capture that watches user actions and serializes them into a profile draft.
-- **Profile Runner:** Tool that hydrates inputs, replays actions, and checks results (CLI + pytest fixture).
-- **Baseline Artifacts:** Minimal set of files/logs kept under version control for regression comparisons.
+## Streaming Assembler
+- Drafts are created under `profiles/_drafts/<run>/<capture>` where `<capture>` defaults to `stream`.
+- Every event is appended to `events.jsonl`; the assembler also stores the source run directory pointer (`run_dir.txt`) on first sight.
+- File hints and upload events snapshot seed assets into `seed/`:
+  - `seed/uploads/<type>/...` for landuse, SBS, CLI, cover transform, ash, and omni artefacts.
+  - Task-driven rules (`TASK_RULES`) also capture derived outputs (DEM tiles, channel shapefiles) and record RON expectations in `validation.log`.
+- `promote_draft(run_id, capture_id="stream", slug=Optional[str])` materialises a profile by copying the draft tree into `profiles/<slug>/capture` and cloning the run snapshot into `profiles/<slug>/run`.
+- The assembler currently focuses on preservation. Higher-level YAML manifests or curated step lists do not exist yet; consumers read the JSONL stream directly.
 
-## MVP Feature Set
-1. **Profile Schema**
-   - Human-readable YAML stored under `profiles/<slug>/profile.yaml`.
-   - Sections: metadata, prerequisites, ordered steps, expected outputs, notes.
-2. **Seed Assets**
-   - Each profile owns a `seed/` directory (e.g., uploaded shapefiles, small DEM snippets).
-   - Optional `baseline/` folder capturing essential outputs (hashes, JSON summaries).
-3. **Recorder Workflow**
-   - Recorder runs globally to preserve an audit trail for every interaction; users can mark the start and end of a profile capture in the UI (or leave the pipeline dormant by not starting a capture).
-   - Captures run id, configuration slug, session metadata (browser, window size), and every request that reaches the backend (HTTP endpoints, RQ task enqueues).
-   - Fine-grained DOM/UI events are out of scope for the first version; focus stays on backend interactions that exercise NoDb and RQ.
-   - Emits a JSONL audit stream under each run working directory for accountability regardless of capture state; when profile recording is enabled the same events are mirrored into the assembler pipeline.
-   - Generates a draft YAML + seed snapshot for manual review when a capture is closed.
-4. **Runner Workflow**
-   - CLI command: `wctl run-test-profile <slug>` (host-side helper).
-   - Helper calls the `profile_playback` FastAPI microservice which provisions an empty workspace under `PROFILE_PLAYBACK_RUN_ROOT/<runid>` (default `/workdir/wepppy-test-engine-data/playback/runs/<runid>`) and replays the captured HTTP traffic with `PlaybackSession`.
-   - During replay every request is rewritten to `/runs/profile;;tmp;;<runid>/...`, letting WEPPcloud resolve the temp run via `PROFILE_PLAYBACK_USE_CLONE=true` instead of touching the production directory.
-   - Each run boots from a clean slate. Playback copies the captured configuration defaults (`active_config.txt`, `.cfg`, `_defaults.toml`) into the scratch directory, re-initialises Ron, and relies on captured events + seed uploads to restore state. No prior run snapshot is cloned.
-   - Multipart uploads (landuse `.tif`, SBS rasters, etc.) must exist under `capture/seed/uploads/`; playback depends on those seeds (or the recorded request payload) to rebuild FormData without touching the original run. Recorded `elevationquery` requests are ignored during replay because coverage is regenerated as downstream tasks execute.
-   - Authentication remains anchored to the public HTTPS base URL because the `session` cookie is marked `Secure`; playback cannot authenticate against `http://weppcloud:8000/weppcloud` and must log in through the public domain before replaying requests.
-   - The playback endpoint streams log lines back to the caller; once the run finishes it prints a human-readable message with the stored result token (the JSON payload is written to disk under `profiles/_runs/<token>.json`). `wctl run-test-profile` keeps the stream open so reverse proxies never time out, and callers can `GET /run/result/{token}` later to retrieve the structured `ProfileRunResult`.
-   - POST requests that enqueue RQ tasks are tracked by job id; playback waits for each new job to finish before issuing dependent calls (recorded `/rq/api/jobstatus/<id>` polls are skipped during replay).
-   - The service logs in automatically with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `docker/.env` when no cookie is supplied, so authenticated routes continue to pass.
-   - Verbose mode streams step-by-step logging (clone source, run directory, job status updates) through the playback service so operators can follow along with `wctl logs profile_playback -f`.
-   - Produces a structured JSON report (HTTP status per step, final run directory) that callers can persist or parse in follow-up tooling.
-5. **Pytest Integration**
-   - Fixture `profile_runner` exposes the same engine, enabling tests such as:
-     ```python
-     @pytest.mark.microservice
-     def test_small_watershed(profile_runner):
-         result = profile_runner.run("us-small")
-         result.expect_completed("run_wepp")
-     ```
-6. **Baseline Comparison**
-   - After replay, diff selected files against `baseline/` using configurable comparators (exact hash, raster statistics, tabular diff, etc.).
-   - Warn when individual artifacts approach 50 MB and require review for anything larger; block files over 100 MB unless routed through Git LFS.
-   - On mismatch, output human-friendly diagnostics and keep artifacts for inspection.
-
-## Nice-to-Have Enhancements (Post-MVP)
-- Profile tagging (e.g., climate-builder, wildfire-response) with targeted selectors.
-- Web UI to browse profile catalog, inspect last run status, and download artifacts.
-- Differential recording: auto-highlight deltas when re-recording an existing profile.
-- Parallel runner orchestrator for nightly suites.
-- CI integration that uploads run reports to central dashboard.
-- Toggle to run without RQ (direct controller invocation) for faster “unitized” checks.
-- Optional environment overlays (e.g., staging dataset vs. public dataset) per profile.
-
-## Profile Lifecycle
-1. **Record**
-   - Mark capture boundaries in the UI; recorder writes a draft under `profiles/_drafts/`.
-2. **Curate**
-   - Review draft YAML for clarity.
-   - Trim seed directory to required inputs only.
-   - Define expected outputs (file list, log snippets, status flags).
-   - Move curated profile into `profiles/<slug>/`.
-3. **Commit**
-   - Commit YAML + assets alongside short README snippet explaining the scenario.
-   - Include baseline diff summary in PR for reviewer context.
-4. **Replay**
-   - Run locally via CLI or `pytest -k profile`.
-   - CI picks up profiles based on markers or explicit job configuration.
-5. **Maintain**
-   - When legitimate changes alter outputs, rerun `wctl update-profile <slug>` to refresh baselines after review.
-   - Deprecate stale profiles by moving them to `profiles/archived/` with rationale.
-
-## Step Execution Model
-- **Action Types:** HTTP POST (form submission), HTTP GET (status polling), RQ enqueue (if not automatically detected), waiting for status conditions, file upload.
-- **Guards & Assertions:** Each step can declare wait conditions (e.g., “wait until run status is COMPLETE”), timeouts, and expected log phrases.
-- **Error Handling:** Runner halts on first failure, captures diagnostic bundle (logs, responses, key files).
-
-## Infrastructure Expectations
-- Orchestration code lives in the main `wepppy` repository; large profile assets reside in `/workdir/wepppy-test-engine-data`.
-- Profiles run inside the standard docker dev stack via `wctl`, with an optional flag pointing to the shared data repo.
-- RQ worker remains enabled for MVP; CLI verifies worker health before starting.
-- Temp run directories live under `/tmp/weppcloud_profiles/<slug>/<timestamp>/`.
-- Artifacts from failed runs stored under `profiles/results/<slug>/<timestamp>/` (with heavy outputs written to the data repo when necessary).
-
-## Reporting
-- Runner outputs a concise summary:
-  - Profile name, duration, result (pass/fail), failing step (if any).
-  - Path to diagnostics bundle.
-- Optional JSON report for CI consumption (`profiles/results/latest.json`).
-
-## Profile YAML Snapshot
-```yaml
-metadata:
-  slug: us-small-watershed
-  rq_required: true
-  data_repo: ../wepppy-test-engine-data
-  seed_dir: profiles/us-small-watershed/seed
-  baseline_dir: profiles/us-small-watershed/baseline
-
-steps:
-  - id: run-wepp
-    action: enqueue_rq
-    job: tasks.run_wepp
-    payload:
-      runid: "{{run_id}}"
-    wait:
-      type: status_poll
-      endpoint: rq/status
-      success_state: finished
-
-comparisons:
-  - target: wepp/output/run/summary.json
-    method: json_exact
-  - target: wepp/output/run/soil_loss.tif
-    method: raster_stats
-    params:
-      tolerance:
-        mean: 0.05
-        max: 0.10
+## Profile Layout
+```
+profiles/<slug>/
+  capture/
+    events.jsonl          # ordered response stream (requests are embedded via ids)
+    seed/                 # uploads and task artefacts
+      uploads/...
+      <task-label>.missing/.dir.exists markers
+    validation.log        # optional task-rule notes
+    run_dir.txt           # optional pointer back to originating run
+  run/                    # sandbox-friendly copy of the original working directory snapshot
 ```
 
-## Open Questions
-- How to anonymize sensitive user data when recording profiles?
+Playback also looks for `capture/seed/uploads/<type>` when rebuilding multipart requests.
 
-## Next Steps
-1. Harden recorder coverage (multipart payload capture, RQ completion polling, richer validations) while keeping the existing WEPPcloud blueprint in place.
-2. Extend the playback FastAPI service to support multipart replays and post-run assertions; wire results into pytest fixtures for automated validation.
-3. Curate a baseline profile catalog (`sharing-mobilization`, `us-watershed-small`, etc.) and document promotion + playback workflows for collaborators.
-4. Expand documentation (Recorder how-to, profile authoring guide, data repo usage) as capabilities mature.
-5. Manually verify SBS/landuse uploads by running `wctl run-test-profile <slug>` against at least one promoted profile that exercises those endpoints (`rattlesnake-w-landuse-map`) and confirm the playback workspace produces the expected rasters.
-6. Extend the playback service with `POST /run/{profile}`, `POST /fork/{profile}`, and `POST /archive/{profile}` endpoints that map to isolated sandboxes under `/workdir/wepppy-test-engine-data/playback/<action>/` (run, fork, archive). Each endpoint copies the recorded seed into its sandbox, calls the corresponding WEPPcloud API as an admin user (propagating flags such as `undisturbify` for forks and `comment` for archives), and polls until the RQ task finishes. This validates fork/archive flows end-to-end, even though the DOM isn’t involved, and keeps results hermetic with prefixes like `profile;;tmp;;<slug>` and `profile;;fork;;<slug>` handled by `get_wd`. Environment knobs: `PROFILE_PLAYBACK_RUN_ROOT`, `PROFILE_PLAYBACK_FORK_ROOT`, and `PROFILE_PLAYBACK_ARCHIVE_ROOT` now default to `/workdir/wepppy-test-engine-data/playback/{runs|fork|archive}` but may be overridden per CI runner.
+## Playback Service (`services/profile_playback/app.py`)
+- FastAPI app exposing:
+  - `GET /health` – liveness check.
+  - `POST /run/{profile}` – stream playback logs as plain text.
+  - `GET /run/result/{token}` – retrieve structured results persisted to `profiles/_runs/<token>.json`.
+  - `POST /fork/{profile}` – run the WEPPcloud fork flow inside the sandbox run (waits for RQ job completion).
+  - `POST /archive/{profile}` – trigger archive jobs against a sandbox run.
+- Environment knobs:
+  - `PROFILE_PLAYBACK_ROOT` – profile library root (defaults to `/workdir/wepppy-test-engine-data/profiles`).
+  - `PROFILE_PLAYBACK_RUN_ROOT`, `PROFILE_PLAYBACK_FORK_ROOT`, `PROFILE_PLAYBACK_ARCHIVE_ROOT` – sandbox destinations for run, fork, and archive artefacts.
+  - `PROFILE_PLAYBACK_BASE_URL` – default WEPPcloud origin (`https://wc.bearhive.duckdns.org/weppcloud`).
+  - `PROFILE_PLAYBACK_COLOR` / `NO_COLOR` – toggle ANSI colour output (`True` by default unless `NO_COLOR` is set).
+  - `ADMIN_EMAIL` / `ADMIN_PASSWORD` – required for automated authentication when a raw cookie is not supplied.
+- Streaming output arrives via an asyncio queue; each log line is formatted with ANSI colours:
+  - Timestamps and `[profile_playback]` tag: bright magenta.
+  - `HTTP 2xx`: bright green; non-2xx statuses: bright red.
+  - `job <uuid>` tokens: purple3.
+  - URLs: dodger_blue2.
+  - Captured JSON payloads or response previews: bright green.
+  - Users can opt out with `PROFILE_PLAYBACK_COLOR=0` or by exporting `NO_COLOR`.
 
-## Recorder Blueprint
-### Objectives
-- Capture every backend-facing event (HTTP requests, uploads, RQ enqueues) with timestamps.
-- Allow operators to mark the start/end of a profile capture while recording continues in the background for auditing.
-- Produce a draft profile package (YAML + seed assets manifest) ready for curation.
+## Playback Session Semantics (`wepppy/profile_recorder/playback.py`)
+- Profiles are rooted at `<data_root>/profiles/<slug>`; playback requires `capture/events.jsonl` and optionally `run/`.
+- Run discovery:
+  - The runner reads `events.jsonl` (line-delimited JSON).
+  - First request event containing `/runs/<runid>/` establishes the original run id.
+  - Playback uses `profile;;tmp;;<runid>` to isolate mutations from the source snapshot.
+- Workspace preparation:
+  - If `profiles/<slug>/run/` exists it is copied into the sandbox location before requests execute.
+  - Seed assets from `capture/seed/**` hydrate expected uploads (landuse, SBS, CLI, cover transform, ash, omni) and config defaults.
+  - `clear_locks` is called for both the sandbox and original run ids to avoid stale Redis locks.
+- Request replay rules:
+  - Only 2xx response events with matching request metadata are executed.
+  - Supports GET and POST (JSON or known form-data). Unsupported payloads are logged and recorded as failures.
+  - Paths are remapped from `/runs/<original>/...` to `/runs/profile;;tmp;;<original>/...`.
+  - Elevation queries and recorded `rq/api/jobstatus/` polls are skipped; playback polls real jobs instead.
+  - After each POST, the runner inspects the JSON response for `job_id` and waits for completion via `/rq/api/jobinfo/<id>` before proceeding.
+  - Additional polling is performed for GETs ending with known work-complete suffixes (`_WAIT_SUFFIXES`).
+  - Responses are summarised in `PlaybackSession.results`, exposed through the streamed log and persisted run report.
+  - Verbose mode logs request line, parameters, payload hints, status codes, response previews, and job tracking messages.
 
-### Components
-- **Recorder Service (Frontend):**
-  - Toggle control in the WEPPcloud interface (start/stop capture marker).
-  - Interceptor wrapping the existing HTTP client helpers to log every request/response pair sent to the backend (including body metadata when safe).
-  - Hook into RQ enqueue helpers to capture task name, payload, and resulting job id.
-  - Metadata collector capturing session info (user id hash, theme, viewport) for the draft.
-  - Buffer flushing mechanism to send events to backend in batches (debounced to avoid flooding).
-- **Recorder API (Backend):**
-  - Endpoints to accept event batches, persist raw logs, and snapshot relevant assets.
-  - Hooks into existing RQ enqueue logic to tag jobs with recorder metadata.
-  - Storage of capture state (active profile id, start/end markers, user notes).
-- **Recorder Store (File-first):**
-  - Appends every event to a JSONL log under the run working directory (for example `_logs/profile.events.jsonl`).
-  - Maintains lightweight metadata files (e.g., `_logs/profile.captures.json`) indicating capture boundaries and notes.
-  - Mirrors capture-specific slices into `/workdir/wepppy-test-engine-data/profiles/_drafts/<slug>/events.jsonl` when a profile is recorded (data repo is bind-mounted into the container).
-  - Exposes a filesystem “tail” API so the assembler can react to each event immediately (used to snapshot assets before users overwrite them with later uploads).
-- **Playback Service (FastAPI):**
-  - Runs alongside WEPPcloud (`docker-compose.dev` service: `profile_playback`).
-  - Resolves promoted profiles under `/workdir/wepppy-test-engine-data/profiles/<slug>`, provisions an empty workspace in `PROFILE_PLAYBACK_RUN_ROOT/<runid>`, hydrates seeds, and replays the event stream.
-  - Authenticates with WEPPcloud using the admin credentials from `docker/.env` when a cookie is not provided, keeping the primary app’s authorization rules intact.
-  - Exposes `/run/{profile}` for automation plus `/health` for monitoring; responses include the final run directory so downstream checks know which fresh workspace to inspect.
+## `wctl` Integration (`tools/wctl2/commands/playback.py`)
+- `wctl run-test-profile <slug>`:
+  - Resolves `PROFILE_PLAYBACK_URL` (default `http://127.0.0.1:8070`), base URL, and optional cookie.
+  - Prints the request context to `stderr` and streams the FastAPI response to `stdout`.
+  - Falls back to a non-streaming POST when chunked encoding fails (rare on misconfigured proxies).
+- Additional helpers: `wctl run-fork-profile` and `wctl run-archive-profile` front the `/fork/` and `/archive/` endpoints and emit JSON responses.
 
-### Event Model
-- Each recorded event includes:
-  - `timestamp` (ISO-8601, UTC)
-  - `category` (`http_request`, `rq_enqueue`, `file_upload`, `system_log`)
-  - `payload` (sanitized details such as endpoint, params, task payload summaries)
-  - `session` metadata (user hash, browser, viewport)
-  - `run_context` (run id, config slug)
-- Events flagged as sensitive (e.g., containing raw user identifiers) are hashed or redacted.
+## Authentication & Session Handling
+- When a cookie is provided, it is forwarded verbatim to both playback and WEPPcloud.
+- Otherwise the service logs in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` against the HTTPS host to honor the `Secure` cookie flag, mirrors cookies across hosts if required, and reuses the authenticated `requests.Session`.
+- Playback exposes login successes as INFO logs so streaming callers can confirm authentication state.
 
-### Capture Workflow
-1. User clicks “Mark Profile Start” in UI; backend stores capture boundary.
-2. Recorder continues ingesting backend events (it was already running globally), tagging those between start/end markers inside the JSONL audit log.
-3. User completes workflow and clicks “Mark Profile End”, optionally adding notes.
-4. Background assembler (streaming):
-   - Watches the JSONL audit file in near real-time, ingesting new events as they land.
-   - For every event, snapshots referenced inputs/outputs immediately (preventing later uploads from overwriting seeds) and appends incremental state to the draft-in-progress.
-   - Maintains an event ledger so the final profile can be reconstructed without reprocessing.
-5. When the capture ends, the assembler finalizes the YAML (metadata, steps, comparisons placeholders) and writes the complete draft bundle for curation.
+## Result Storage & Retrieval
+- Every successful playback stores a `ProfileRunResult` JSON file under `profiles/_runs/<token>.json` containing profile slug, resolved run ids, run directory, report, and per-request outcome list.
+- The streamed log includes the token and result path for quick lookup.
 
-### UI Considerations
-- Recorder status indicator (running, capturing, paused) visible in the header.
-- Modal summarizing captured actions before commit (preview step list, ability to redact items).
-- Access control: only authorized roles can export drafts; everyone sees audit log replay.
+## Fork and Archive Helpers
+- `POST /fork/{profile}`:
+  - Copies the profile run snapshot into the sandbox.
+  - Authenticates, submits `/rq/api/fork`, waits for the job via `/rq/api/jobinfo/<id>`, and copies resulting fork artefacts into `PROFILE_PLAYBACK_FORK_ROOT`.
+- `POST /archive/{profile}`:
+  - Repeats the sandbox copy/authentication flow, submits `/rq/api/archive`, waits for completion, and mirrors generated archives into `PROFILE_PLAYBACK_ARCHIVE_ROOT/<runid>`.
+- Both endpoints reuse the colourised log formatter so their status messages integrate cleanly with the streaming output.
 
-### Performance & Storage
-- Event buffering designed to avoid blocking UI (use WebSocket or fetch with exponential backoff).
-- JSONL audit files live alongside run logs; housekeeping tasks periodically trim or compress dormant runs.
-- Draft retention policy (e.g., auto-expire uncurated drafts after 30 days, with notification).
+## Limitations & Backlog
+- Recorder does not yet expose explicit “start/stop capture” signals in the UI; it streams all backend events continuously.
+- Profile assembly stops at event preservation plus seed snapshots; higher level manifests (`profile.yaml`, ordered step descriptions, diff baselines) are future work.
+- Playback expects the data repository to provide required seed uploads; missing artefacts are reported but not regenerated.
+- Parallel playback runs share global Redis locks; queuing long-running profiles may require coordination.
+- Fork/Archive helpers assume RQ job APIs remain stable; additional error surface (e.g., transient failures) should be captured in future revisions.
 
-### Next Steps for Recorder
-1. Implement frontend HTTP/RQ interceptors and start/end marker controls.
-2. Build backend collector endpoints with storage schema.
-3. Implement streaming assembler job to transform raw events into draft profiles as they arrive.
-4. Add basic draft review UI and CLI command to export a draft.
-
-## Recorder Output & Storage Model
-- **Audit stream:** `_logs/profile.events.jsonl` inside each run working directory contains every backend interaction with capture metadata. This file is always written, even when profile capture is inactive, providing traceability.
-- **Capture manifest:** `_logs/profile.captures.json` records user-initiated capture windows (start/end timestamps, notes, optional slug hints). Empty when the recorder is effectively “off.”
-- **Draft staging:** As events stream in, the assembler writes seed/baseline candidates into `/workdir/wepppy-test-engine-data/profiles/_drafts/<slug>/seed/<timestamp>-<hash>/...`, ensuring uploads are preserved even if the user replaces files later. When a capture closes, the assembler finalizes `events.jsonl`, `profile.yaml`, and supporting manifests under the same directory. The data repo is mounted read/write into the container.
-- **Assembler entry point:** `profile_assembler_rq.py` (name TBD) reads the capture manifest, consumes the JSONL slice, generates `profile.yaml`, seeds, and baseline candidates, and drops a status record so curators know the draft is ready.
+## Operational Checklist
+- Ensure `wepppy-test-engine-data` (or custom `PROFILE_DATA_ROOT`) is mounted read/write in the environment hosting WEPPcloud and the playback service.
+- Export admin credentials in the playback service environment or provide cookies via `wctl`.
+- Keep profile directories under version control (or a synced data repository) so CI/CD can run the same captures.
+- Use `NO_COLOR=1` when streaming logs to sinks that cannot parse ANSI escape codes.
