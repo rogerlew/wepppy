@@ -52,14 +52,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p telemetry
-          wctl run-fork-profile us-small-wbt-daymet-rap-wepp 2>&1 | tee telemetry/us-small-profile-run.log
+          wctl run-fork-profile us-small-wbt-daymet-rap-wepp 2>&1 | tee telemetry/us-small-profile-fork.log
 
       - name: Upload profile playback log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: us-small-profile-log
-          path: telemetry/us-small-profile-run.log
+          path: telemetry/us-small-profile-fork.log
           if-no-files-found: warn
 
       - name: Remove redis data directory

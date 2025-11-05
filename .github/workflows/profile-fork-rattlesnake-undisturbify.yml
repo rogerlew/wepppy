@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  us-small-profile:
+  rattlesnake-profile:
     runs-on:
       - self-hosted
       - Linux
@@ -48,18 +48,18 @@ jobs:
             sleep 5
           done
 
-      - name: Fork US small profile
+      - name: Fork Rattlesnake profile (Undisturbify)
         run: |
           set -euo pipefail
           mkdir -p telemetry
-          wctl run-fork-profile rattlesnake-topaz-vanilla-wepp-watar --undisturbify 2>&1 | tee telemetry/us-small-profile-run.log
+          wctl run-fork-profile rattlesnake-topaz-vanilla-wepp-watar --undisturbify=true 2>&1 | tee telemetry/rattlesnake-profile-fork.log
 
       - name: Upload profile playback log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: us-small-profile-log
-          path: telemetry/us-small-profile-run.log
+          name: rattlesnake-profile-log
+          path: telemetry/rattlesnake-profile-fork.log
           if-no-files-found: warn
 
       - name: Remove redis data directory
