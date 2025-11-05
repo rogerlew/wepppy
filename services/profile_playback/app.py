@@ -164,12 +164,15 @@ class _PlaybackLogFormatter(logging.Formatter):
     _MAGENTA = "\033[95m"
     _GREEN = "\033[92m"
     _RED = "\033[91m"
+    _YELLOW = "\033[93m"
     _DODGER_BLUE2 = "\033[38;5;27m"
     _PURPLE3 = "\033[38;5;99m"
 
     _HTTP_STATUS_PATTERN = re.compile(r"HTTP (\d{3})")
     _URL_PATTERN = re.compile(r"https?://[^\s]+")
     _JOB_PATTERN = re.compile(r"\bjob ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})", re.IGNORECASE)
+    _DURATION_PATTERN = re.compile(r"\((\d+)ms\)")
+    _SECONDS_PATTERN = re.compile(r"\b\d+\.\d{3}s\b")
 
     def __init__(self, colorize: bool = True) -> None:
         super().__init__("%(asctime)s [profile_playback] %(levelname)s %(message)s")
@@ -188,6 +191,8 @@ class _PlaybackLogFormatter(logging.Formatter):
         text = self._colour_prefix(text)
         text = self._colour_job_tokens(text)
         text = self._colour_http_status(text)
+        text = self._colour_durations(text)
+        text = self._colour_seconds(text)
         text = self._colour_urls(text)
         text = self._colour_json_blocks(text)
         return text
@@ -217,6 +222,29 @@ class _PlaybackLogFormatter(logging.Formatter):
             return self._wrap(job_token, self._PURPLE3)
 
         return self._JOB_PATTERN.sub(repl, text)
+
+    def _colour_durations(self, text: str) -> str:
+        def repl(match: re.Match[str]) -> str:
+            raw_value = match.group(1)
+            try:
+                value = int(raw_value)
+            except ValueError:
+                return match.group(0)
+            if value < 400:
+                colour = self._GREEN
+            elif value < 1000:
+                colour = self._YELLOW
+            else:
+                colour = self._RED
+            return self._wrap(match.group(0), colour)
+
+        return self._DURATION_PATTERN.sub(repl, text)
+
+    def _colour_seconds(self, text: str) -> str:
+        def repl(match: re.Match[str]) -> str:
+            return self._wrap(match.group(0), self._PURPLE3)
+
+        return self._SECONDS_PATTERN.sub(repl, text)
 
     def _colour_urls(self, text: str) -> str:
         def repl(match: re.Match[str]) -> str:

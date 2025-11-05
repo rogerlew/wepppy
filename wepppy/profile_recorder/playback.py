@@ -794,7 +794,7 @@ class PlaybackSession:
                 self._log("response JSON did not include job_id")
         return None
 
-    def _describe_job_failure(self, job_id: str) -> Optional[str]:
+    def _fetch_job_info(self, job_id: str) -> Optional[dict]:
         info_url = self._build_url(f"/rq/api/jobinfo/{job_id}")
         try:
             response = self.session.get(info_url, timeout=60)
@@ -807,6 +807,17 @@ class PlaybackSession:
 
         if not isinstance(payload, dict):
             return None
+
+        return payload
+
+    def _describe_job_failure(self, job_id: str, job_info: Optional[dict] = None) -> Optional[str]:
+        if job_info is None:
+            job_info = self._fetch_job_info(job_id)
+
+        if not isinstance(job_info, dict):
+            return None
+
+        payload = job_info
 
         def render(node: dict, depth: int = 0) -> List[str]:
             lines: List[str] = []
@@ -832,6 +843,48 @@ class PlaybackSession:
 
         rendered = render(payload)
         return "\n".join(rendered) if rendered else None
+
+    def _log_job_elapsed(
+        self,
+        job_id: str,
+        status: Optional[str],
+        task: Optional[str],
+        job_info: Optional[dict] = None,
+    ) -> None:
+        if not self.verbose:
+            return
+
+        if job_info is None:
+            job_info = self._fetch_job_info(job_id)
+
+        if not isinstance(job_info, dict):
+            return
+
+        elapsed = job_info.get("elapsed_s")
+        if elapsed is None:
+            return
+
+        try:
+            elapsed_value = float(elapsed)
+        except (TypeError, ValueError):
+            return
+
+        status_normalized = (status or "completed").lower()
+        if status_normalized == "finished":
+            verb = "finished"
+            preposition = "in"
+        elif status_normalized in {"failed", "stopped", "canceled"}:
+            verb = status_normalized
+            preposition = "after"
+        else:
+            verb = status_normalized
+            preposition = "in"
+
+        message = f"job {job_id} {verb}"
+        if task:
+            message += f" ({task})"
+        message += f" {preposition} {elapsed_value:.3f}s"
+        self._log(message)
 
     def _wait_for_job(
         self,
@@ -869,9 +922,13 @@ class PlaybackSession:
                     self._log(msg)
                 last_status = status or last_status
                 if status in {"finished"}:
+                    job_info = self._fetch_job_info(job_id)
+                    self._log_job_elapsed(job_id, status, task, job_info)
                     return
                 if status in {"failed", "stopped", "canceled"}:
-                    detail = self._describe_job_failure(job_id)
+                    job_info = self._fetch_job_info(job_id)
+                    detail = self._describe_job_failure(job_id, job_info)
+                    self._log_job_elapsed(job_id, status, task, job_info)
                     if detail and self.verbose:
                         for line in detail.splitlines():
                             self._log(line)
@@ -882,6 +939,8 @@ class PlaybackSession:
             elif response.status_code == 404:
                 if self.verbose:
                     self._log(f"job {job_id} status endpoint returned 404; assuming complete")
+                job_info = self._fetch_job_info(job_id)
+                self._log_job_elapsed(job_id, "completed", task, job_info)
                 return
             else:
                 if self.verbose:
