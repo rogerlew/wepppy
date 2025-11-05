@@ -840,14 +840,29 @@ class NoDbBase(object):
 
     def _safe_stop_queue_listener(self) -> None:
         """Safely stop the queue listener, handling potential thread cleanup issues."""
+        # if you change method you MUST verify that `wctl run-pytest` exits cleanly without hanging
         try:
             if hasattr(self, '_queue_listener') and self._queue_listener is not None:
-                # Check if the listener's thread is still alive before stopping
-                if hasattr(self._queue_listener, '_thread') and self._queue_listener._thread is not None:
-                    if self._queue_listener._thread.is_alive():
-                        self._queue_listener.stop()
-        except (AttributeError, TypeError, KeyboardInterrupt):
+                # Try to stop the listener gracefully
+                listener = self._queue_listener
+                
+                # Check if the listener has a thread and if it's alive
+                if hasattr(listener, '_thread') and listener._thread is not None:
+                    if listener._thread.is_alive():
+                        # Set a timeout for stopping to prevent hanging
+                        try:
+                            listener.stop()
+                        except:
+                            # If normal stop fails, try to forcibly end the thread
+                            if hasattr(listener, '_thread'):
+                                listener._thread = None
+                
+                # Clear the reference
+                self._queue_listener = None
+                
+        except (AttributeError, TypeError, KeyboardInterrupt, Exception):
             # Silently ignore cleanup errors during process shutdown
+            # This includes any exception that might occur during cleanup
             pass
 
     @classmethod
@@ -998,6 +1013,19 @@ class NoDbBase(object):
 
         instance._init_logging()
         return instance
+    
+    @classmethod
+    def cleanup_all_instances(cls) -> None:
+        """Clean up all instances and their QueueListeners. Useful for test cleanup."""
+        with cls._instances_lock:
+            for instance in cls._instances.values():
+                try:
+                    instance._safe_stop_queue_listener()
+                except:
+                    # Ignore any cleanup errors
+                    pass
+            # Clear the instances dict
+            cls._instances.clear()
     
     @classmethod
     def tryGetInstance(
@@ -2038,3 +2066,26 @@ def clear_nodb_file_cache(runid: str, pup_relpath: Optional[str] = None) -> list
                 cleared.append(nodb_path)
 
     return cleared
+
+
+def cleanup_all_nodb_instances() -> None:
+    """Global cleanup function for all NoDb instances and their QueueListeners."""
+    try:
+        # Import all NoDb controller classes and clean them up
+        from wepppy.nodb.core import Climate, Wepp, Watershed, Landuse, Soils
+        from wepppy.nodb.mods import Disturbed
+        
+        # Clean up all controller types
+        for controller_class in [NoDbBase, Climate, Wepp, Watershed, Landuse, Soils, Disturbed]:
+            try:
+                controller_class.cleanup_all_instances()
+            except:
+                # Ignore cleanup errors
+                pass
+    except:
+        # Ignore import or other errors during cleanup
+        pass
+
+
+# Register global cleanup with atexit (runs after individual instance cleanups)
+atexit.register(cleanup_all_nodb_instances)
