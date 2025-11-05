@@ -366,7 +366,12 @@ def _print_options_panel(
 
         # Column for a metavar, if we have one
         metavar = Text(style=STYLE_METAVAR, overflow="fold")
-        metavar_str = param.make_metavar()
+        try:
+            # Try with ctx argument first (newer click versions >= 8.2)
+            metavar_str = param.make_metavar(ctx)
+        except TypeError:
+            # Fall back to no arguments (older click versions < 8.2)
+            metavar_str = param.make_metavar()
 
         # Do it ourselves if this is a positional argument
         if (
