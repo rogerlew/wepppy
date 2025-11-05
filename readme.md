@@ -24,6 +24,8 @@
 | [![Profile Fork - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Fork test of the US Small Watershed | 04:55 AM |
 | [![Profile Archive - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-archive-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-archive-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Archive test of the US Small Watershed | 05:05 AM |
 | [![Profile Fork - Rattlesnake (Undisturbify)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-rattlesnake-undisturbify.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-rattlesnake-undisturbify.yml) | rattlesnake-topaz-vanilla-wepp-watar | Undisturbify fork test of Rattlesnake | 05:15 AM |
+| [![Profile Run - Earth Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-earth-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-earth-small.yml) | earth-in-bc-ca-w-daymet | Earth OpenTopography API, with ISRIC soil building, DAYMET in Canada with GHCN Station Database | 05:25 AM |
+
 
 
 ## Overview
