@@ -366,6 +366,8 @@ class Disturbed(NoDbBase):
                 out_meta.update(dtype=rasterio.uint8, count=1, nodata=255)
 
                 # Create the output raster data as a numpy array
+                # Pixel values: 1=low, 2=moderate, 3=high
+                # Color table maps these to standard SBS codes via ct_classify
                 out_arr = np.full_like(dem, fill_value=value, dtype=rasterio.uint8)
 
                 # Write the output raster data to a new geotiff file

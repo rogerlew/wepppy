@@ -222,6 +222,22 @@ def raster_stacker(src_fn, match_fn, dst_fn, resample='near'):
                 dst_crs=match.crs,
                 resampling=resampling_methods[resample]
             )
+    
+    # 4. Preserve color table if present in source raster
+    # rasterio doesn't handle color tables, so we use GDAL for this
+    src_ds = gdal.Open(src_fn, gdal.GA_ReadOnly)
+    src_band = src_ds.GetRasterBand(1)
+    src_color_table = src_band.GetRasterColorTable()
+    
+    if src_color_table is not None:
+        dst_ds = gdal.Open(dst_fn, gdal.GA_Update)
+        dst_band = dst_ds.GetRasterBand(1)
+        dst_band.SetRasterColorTable(src_color_table)
+        dst_band = None
+        dst_ds = None
+    
+    src_band = None
+    src_ds = None
 
 
 @deprecated
