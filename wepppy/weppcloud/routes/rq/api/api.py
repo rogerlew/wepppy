@@ -549,40 +549,60 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
     try:
         wd = get_wd(runid)
         watershed = Watershed.getInstance(wd)
-        wepp = Watershed.getInstance(wd)
+
+        updates: dict[str, Any] = {}
 
         if clip_hillslopes is not None:
-            watershed.clip_hillslopes = clip_hillslopes
+            updates['clip_hillslopes'] = clip_hillslopes
 
         if walk_flowpaths is not None:
-            watershed.walk_flowpaths = walk_flowpaths
+            updates['walk_flowpaths'] = walk_flowpaths
 
         if clip_hillslope_length is not None:
-            watershed.clip_hillslope_length = clip_hillslope_length
+            updates['clip_hillslope_length'] = clip_hillslope_length
 
         if mofe_target_length is not None:
-            watershed.mofe_target_length = mofe_target_length
+            updates['mofe_target_length'] = mofe_target_length
 
         if mofe_buffer is not None:
-            watershed.mofe_buffer = mofe_buffer
+            updates['mofe_buffer'] = mofe_buffer
 
         if mofe_buffer_length is not None:
-            watershed.mofe_buffer_length = mofe_buffer_length
+            updates['mofe_buffer_length'] = mofe_buffer_length
 
         if bieger2015_widths is not None:
-            watershed.bieger2015_widths = bieger2015_widths
+            updates['bieger2015_widths'] = bieger2015_widths
 
         if watershed.run_group == 'batch':
+            with watershed.locked():
+                if 'clip_hillslopes' in updates:
+                    watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
+                if 'walk_flowpaths' in updates:
+                    watershed._walk_flowpaths = bool(updates['walk_flowpaths'])  # type: ignore[attr-defined]
+                if 'clip_hillslope_length' in updates:
+                    watershed._clip_hillslope_length = float(updates['clip_hillslope_length'])  # type: ignore[attr-defined]
+                if 'mofe_target_length' in updates:
+                    watershed._mofe_target_length = float(updates['mofe_target_length'])  # type: ignore[attr-defined]
+                if 'mofe_buffer' in updates:
+                    watershed._mofe_buffer = bool(updates['mofe_buffer'])  # type: ignore[attr-defined]
+                if 'mofe_buffer_length' in updates:
+                    watershed._mofe_buffer_length = float(updates['mofe_buffer_length'])  # type: ignore[attr-defined]
+                if 'bieger2015_widths' in updates:
+                    watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
             return success_factory('Set watershed inputs for batch processing')
-        
-        try:    
+
+        try:
             prep = RedisPrep.getInstance(wd)
             prep.remove_timestamp(TaskEnum.abstract_watershed)
             prep.remove_timestamp(TaskEnum.build_subcatchments)
 
             with _redis_conn() as redis_conn:
                 q = Queue(connection=redis_conn)
-                job = q.enqueue_call(build_subcatchments_and_abstract_watershed_rq, (runid,), timeout=TIMEOUT)
+                job = q.enqueue_call(
+                    build_subcatchments_and_abstract_watershed_rq,
+                    (runid, updates),
+                    timeout=TIMEOUT,
+                )
                 prep.set_rq_job_id('build_subcatchments_and_abstract_watershed_rq', job.id)
         except Exception as e:
             if isinstance(e, WatershedBoundaryTouchesEdgeError):

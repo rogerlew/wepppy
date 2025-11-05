@@ -1085,10 +1085,10 @@ class NoDbBase(object):
         if validate:
             nodb = type(self)
 
-            # NoDb validation ensures the freshly dumped payload can be rehydrated.
-            # We intentionally avoid mutating the singleton cache here so callers
-            # holding references to ``self`` retain the same instance.
-            nodb._hydrate_instance(os.path.abspath(self.wd), allow_nonexistent=False, ignore_lock=False, readonly=self.readonly)
+            # Rely on getInstance() to sanity-check serialization while preserving
+            # the cached singleton. This avoids an unnecessary full rehydrate on
+            # every setter while still surfacing decode errors when they occur.
+            nodb.getInstance(self.wd)
 
         self = type(self)._post_dump_and_unlock(self)
                 

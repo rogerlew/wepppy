@@ -117,7 +117,7 @@ class WhiteboxToolsTopazEmulator:
         self,
         wbt_wd: str,
         dem_fn: Optional[str] = None,
-        verbose: bool = True,
+        verbose: bool = False,
         raise_on_error: bool = True,
         logger: Optional[logging.Logger] = None,
     ) -> None:

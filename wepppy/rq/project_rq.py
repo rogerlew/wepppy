@@ -523,7 +523,7 @@ def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def build_subcatchments_rq(runid: str) -> None:
+def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) -> None:
     """Delineate subcatchments after channel extraction is complete.
 
     Args:
@@ -539,6 +539,22 @@ def build_subcatchments_rq(runid: str) -> None:
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         watershed = Watershed.getInstance(wd)
+        if updates:
+            with watershed.locked():
+                if 'clip_hillslopes' in updates:
+                    watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
+                if 'walk_flowpaths' in updates:
+                    watershed._walk_flowpaths = bool(updates['walk_flowpaths'])  # type: ignore[attr-defined]
+                if 'clip_hillslope_length' in updates:
+                    watershed._clip_hillslope_length = float(updates['clip_hillslope_length'])  # type: ignore[attr-defined]
+                if 'mofe_target_length' in updates:
+                    watershed._mofe_target_length = float(updates['mofe_target_length'])  # type: ignore[attr-defined]
+                if 'mofe_buffer' in updates:
+                    watershed._mofe_buffer = bool(updates['mofe_buffer'])  # type: ignore[attr-defined]
+                if 'mofe_buffer_length' in updates:
+                    watershed._mofe_buffer_length = float(updates['mofe_buffer_length'])  # type: ignore[attr-defined]
+                if 'bieger2015_widths' in updates:
+                    watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
         watershed.build_subcatchments()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         time.sleep(1)
@@ -576,7 +592,10 @@ def abstract_watershed_rq(runid: str) -> None:
         raise
 
 
-def build_subcatchments_and_abstract_watershed_rq(runid: str) -> None:
+def build_subcatchments_and_abstract_watershed_rq(
+    runid: str,
+    updates: dict[str, Any] | None = None,
+) -> None:
     """Enqueue subcatchment building followed by watershed abstraction.
 
     Args:
@@ -595,7 +614,11 @@ def build_subcatchments_and_abstract_watershed_rq(runid: str) -> None:
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
             
-            ajob = q.enqueue_call(build_subcatchments_rq, (runid,), timeout=TIMEOUT)
+            ajob = q.enqueue_call(
+                build_subcatchments_rq,
+                (runid, updates or {}),
+                timeout=TIMEOUT,
+            )
             job.meta['jobs:0,func:build_subcatchments_rq'] = ajob.id
             job.save()
 

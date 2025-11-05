@@ -540,6 +540,20 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
     if not profile_root.exists():
         raise HTTPException(status_code=404, detail=f"Profile not found: {profile_root}")
 
+    # Detect run ID and prepare clean sandbox
+    try:
+        run_id = _detect_profile_run_id(profile_root)
+        sandbox_run_id = f"profile;;tmp;;{run_id}"
+    except ProfileOperationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    # Clean up any existing sandbox. The playback session itself will clear
+    # locks at the appropriate stages, so we avoid doing it twice here.
+    try:
+        sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
+    except ProfileOperationError as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to prepare sandbox: {exc}") from exc
+
     login_base_url = (payload.base_url or DEFAULT_BASE_URL).rstrip("/")
     playback_base_url = login_base_url
 
@@ -578,6 +592,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
                 profile_root=profile_root,
                 base_url=playback_base_url,
                 execute=not payload.dry_run,
+                run_dir=sandbox_run_dir,  # Use pre-cleaned sandbox
                 session=session,
                 verbose=True,
                 logger=session_logger,

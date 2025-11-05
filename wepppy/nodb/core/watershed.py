@@ -224,28 +224,28 @@ class Watershed(NoDbBase):
                 "watershed", "delineation_backend"
             )
             if delineation_backend.lower().startswith("taudem"):
-                self._delineation_backend: DelineationBackend = DelineationBackend.TauDEM
+                self._delineation_backend = DelineationBackend.TauDEM
                 taudem_wd = self.taudem_wd
                 if not _exists(taudem_wd):
                     os.mkdir(taudem_wd)
 
-                self._csa: float = self.config_get_float("taudem", "csa")
-                self._pkcsa: str = self.config_get_str("taudem", "pkcsa")
+                self._csa = self.config_get_float("taudem", "csa")
+                self._pkcsa = self.config_get_str("taudem", "pkcsa")
 
             elif delineation_backend.lower().startswith("wbt"):
                 self._delineation_backend = DelineationBackend.WBT
                 wbt_dir = self.wbt_wd
                 if not _exists(wbt_dir):
                     os.mkdir(wbt_dir)
-                self._wbt: Optional[WhiteboxToolsTopazEmulator] = None
                 self._csa = self.config_get_float("watershed.wbt", "csa", 5)
-                self._mcl: float = self.config_get_float("watershed.wbt", "mcl", 60)
-                self._wbt_fill_or_breach: str = self.config_get_str(
+                self._mcl = self.config_get_float("watershed.wbt", "mcl", 60)
+                self._wbt_fill_or_breach = self.config_get_str(
                     "watershed.wbt", "fill_or_breach", "breach_least_cost"
                 )
-                self._wbt_blc_dist: int = self.config_get_int(
+                self._wbt_blc_dist = self.config_get_int(
                     "watershed.wbt", "blc_dist", 1000
                 )
+                self._wbt: Optional[WhiteboxToolsTopazEmulator] = None
 
             else:
                 self._delineation_backend = DelineationBackend.TOPAZ
@@ -492,6 +492,19 @@ class Watershed(NoDbBase):
             return False
         return delineation_backend == DelineationBackend.WBT
 
+    def _ensure_wbt(self) -> WhiteboxToolsTopazEmulator:
+        if not self.delineation_backend_is_wbt:
+            raise RuntimeError("WhiteboxTools emulator requested for non-WBT backend")
+        wbt = getattr(self, "_wbt", None)
+        if wbt is None:
+            wbt = WhiteboxToolsTopazEmulator(
+                self.wbt_wd,
+                self.dem_fn,
+                logger=self.logger,
+            )
+            self._wbt = wbt
+        return wbt
+
     @property
     def is_abstracted(self) -> bool:
         return self._subs_summary is not None and self._chns_summary is not None
@@ -507,16 +520,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "SUBWTA.ARC")
         elif self.delineation_backend_is_wbt:
-            wbt = self.wbt
-            if wbt is None:
-                # Create WBT instance lazily when subwta path is needed
-                wbt = WhiteboxToolsTopazEmulator(
-                    self.wbt_wd,
-                    self.dem_fn,
-                    logger=self.logger,
-                )
-                self.wbt = wbt
-            return wbt.subwta
+            return _join(self.wbt_wd, "subwta.tif")
         else:
             return _join(self.taudem_wd, "subwta.tif")
 
@@ -525,10 +529,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "DISCHA.ARC")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.discha
-            else:
-                return None
+            return _join(self.wbt_wd, "discha.tif")
         else:
             raise NotImplementedError("taudem distance to channel map not specified")
 
@@ -537,10 +538,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "SUBCATCHMENTS.WGS.JSON")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.subcatchments_wgs_json
-            else:
-                return None
+            return _join(self.wbt_wd, "subcatchments.WGS.geojson")
         else:
             return _join(self.taudem_wd, "subcatchments.WGS.geojson")
 
@@ -549,10 +547,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "SUBCATCHMENTS.JSON")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.subcatchments_json
-            else:
-                return None
+            return _join(self.wbt_wd, "subcatchments.geojson")
         else:
             return _join(self.taudem_wd, "subcatchments.geojson")
 
@@ -561,10 +556,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "BOUND.ARC")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.bound
-            else:
-                return None
+            return _join(self.wbt_wd, "bound.tif")
         else:
             return _join(self.taudem_wd, "bound.tif")
 
@@ -573,10 +565,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "BOUND.WGS.JSON")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.bound_wgs_json
-            else:
-                return None
+            return _join(self.wbt_wd, "bound.WGS.geojson")
         else:
             return _join(self.taudem_wd, "bound.WGS.geojson")
 
@@ -592,10 +581,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "NETFUL.ARC")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.netful
-            else:
-                return None
+            return _join(self.wbt_wd, "netful.tif")
         else:
             return _join(self.taudem_wd, "src.tif")
 
@@ -604,10 +590,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "NETFUL.WGS.JSON")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.netful_wgs_json
-            else:
-                return None
+            return _join(self.wbt_wd, "netful.WGS.geojson")
         else:
             return _join(self.taudem_wd, "netful.WGS.geojson")
 
@@ -616,10 +599,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "NETFUL.JSON")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.netful_json
-            else:
-                return None
+            return _join(self.wbt_wd, "netful.geojson")
         else:
             return _join(self.taudem_wd, "netful.geojson")
 
@@ -628,10 +608,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "CHANNELS.WGS.JSON")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.channels_wgs_json
-            else:
-                return None
+            return _join(self.wbt_wd, "channels.WGS.geojson")
         else:
             return _join(self.taudem_wd, "net.WGS.geojson")
 
@@ -640,10 +617,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "CHANNELS.JSON")
         elif self.delineation_backend_is_wbt:
-            if self.wbt is not None:
-                return self.wbt.channels_json
-            else:
-                return None
+            return _join(self.wbt_wd, "channels.geojson")
         else:
             return _join(self.taudem_wd, "net.geojson")
 
@@ -755,9 +729,6 @@ class Watershed(NoDbBase):
 
     @property
     def has_channels(self) -> bool:
-        if self.delineation_backend_is_wbt and self.wbt is None:
-            return False
-
         netful_path = self.netful
         if netful_path is None:
             return False
@@ -765,9 +736,6 @@ class Watershed(NoDbBase):
 
     @property
     def has_subcatchments(self) -> bool:
-        if self.delineation_backend_is_wbt and self.wbt is None:
-            return False
-
         return _exists(self.subwta)
 
     @property
@@ -778,8 +746,11 @@ class Watershed(NoDbBase):
     def relief(self) -> Optional[float]:
         if self.delineation_backend_is_topaz:
             return Topaz.getInstance(self.wd).relief
-        elif self.wbt is not None:
-            return self.wbt.relief
+        elif self.delineation_backend_is_wbt:
+            relief_path = _join(self.wbt_wd, "relief.tif")
+            if _exists(relief_path):
+                return relief_path
+            return None
 
         return None
 
@@ -835,7 +806,7 @@ class Watershed(NoDbBase):
                 blc_dist=self.wbt_blc_dist,
                 logger=self.logger,
             )
-            self.wbt = wbt
+            self._wbt = wbt
 
       
         if _exists(self.subwta):
@@ -852,9 +823,7 @@ class Watershed(NoDbBase):
     def find_outlet(self, watershed_feature: WatershedFeature) -> None:
         assert self.delineation_backend_is_wbt, "find_outlet only works with WBT delineation backend"
         
-        wbt = self.wbt
-        if wbt is None:
-            raise ValueError("WBT instance is None")
+        wbt = self._ensure_wbt()
 
         # build raster mask from watershed feature
         watershed_feature.build_raster_mask(
@@ -875,17 +844,6 @@ class Watershed(NoDbBase):
             prep.timestamp(TaskEnum.find_outlet)
         except FileNotFoundError:
             pass
-
-    @property
-    def wbt(self) -> Optional[WhiteboxToolsTopazEmulator]:
-        return self._wbt
-
-    @wbt.setter
-    @nodb_setter
-    def wbt(self, value: Optional[WhiteboxToolsTopazEmulator]) -> None:
-        if value is not None and not isinstance(value, WhiteboxToolsTopazEmulator):
-            raise TypeError("Expected WhiteboxToolsTopazEmulator or None for wbt")
-        self._wbt = value
 
     #
     # set outlet
@@ -913,19 +871,11 @@ class Watershed(NoDbBase):
             self.outlet = _outlet
         elif self.delineation_backend_is_wbt:
             self.logger.info(f' delineation_backend_is_wbt')
-            wbt = self.wbt
-            if wbt is None:
-                self.logger.info(f' Creating WBT instance for outlet setting')
-                wbt = WhiteboxToolsTopazEmulator(
-                    self.wbt_wd,
-                    self.dem_fn,
-                    logger=self.logger,
-                )
-                self.wbt = wbt
+            wbt = self._ensure_wbt()
             _outlet = wbt.set_outlet(lng=lng, lat=lat, logger=self.logger)
             if _outlet is None:
                 raise ValueError("Failed to set outlet in WBT")
-            
+
             with self.locked():
                 self._outlet = _outlet
                 self._wbt = wbt
@@ -955,15 +905,7 @@ class Watershed(NoDbBase):
             Topaz.getInstance(self.wd).build_subcatchments()
         elif self.delineation_backend_is_wbt:
             self.logger.info(f' delineation_backend_is_wbt')
-            wbt = self.wbt
-            if wbt is None:
-                self.logger.info(f' Creating WBT instance for subcatchment delineation')
-                wbt = WhiteboxToolsTopazEmulator(
-                    self.wbt_wd,
-                    self.dem_fn,
-                    logger=self.logger,
-                )
-                self.wbt = wbt
+            wbt = self._ensure_wbt()
             wbt.delineate_subcatchments(self.logger)
             self.identify_edge_hillslopes()
         else:

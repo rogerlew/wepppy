@@ -1,9 +1,9 @@
 # WBT Instance Initialization Fix
 
-> **Fix for "ValueError: WBT instance is None" in profile playback**  
-> **Date:** November 4, 2025  
-> **Issue:** `build_subcatchments_rq` failing during profile playback  
-> **Root Cause:** WBT instance not created when `build_subcatchments` called without prior `build_channels`
+> **Historical note (Nov 5,  2025):** This document described the lazy-initialization approach when `self.wbt` was cached on the controller. The current implementation no longer retains a long-lived WBT instance—each worker job instantiates WhiteboxTools on demand, so the API layer is never responsible for spinning it up.
+
+> **Original context:** "ValueError: WBT instance is None" in profile playback  
+> **Issue date:** November 4, 2025
 
 ---
 
