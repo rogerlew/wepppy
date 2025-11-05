@@ -17,6 +17,7 @@ import pytest
 import threading
 import time
 import uuid
+import jsonpickle
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Optional
@@ -597,6 +598,30 @@ class TestLockRecoveryMechanisms:
         # Should be able to lock again
         controller.lock()
         controller.unlock()
+
+
+@pytest.mark.nodb
+def test_getinstance_refreshes_after_external_dump(temp_wd, mock_controller_class, monkeypatch):
+    """Cached instances should refresh when the backing .nodb file changes on disk."""
+    monkeypatch.setattr('wepppy.nodb.base.redis_nodb_cache_client', None)
+
+    controller = mock_controller_class.getInstance(temp_wd)
+
+    with controller.locked():
+        controller.some_value = "initial"
+
+    nodb_path = Path(temp_wd) / mock_controller_class.filename
+    loaded = jsonpickle.decode(nodb_path.read_text())
+    loaded.some_value = "updated"
+    nodb_path.write_text(jsonpickle.encode(loaded))
+
+    new_time = time.time() + 1
+    os.utime(nodb_path, (new_time, new_time))
+
+    refreshed = mock_controller_class.getInstance(temp_wd)
+    assert refreshed is controller
+    assert refreshed.some_value == "updated"
+    mock_controller_class._instances.clear()
         
     def test_clear_locks_cleanup(self, temp_wd, mock_controller_class):
         """Test clear_locks can clean up stuck locks."""
