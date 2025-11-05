@@ -60,6 +60,14 @@ class ProfileRunResult(BaseModel):
 
     profile: str
     run_id: str
+    sandbox_run_id: Optional[str] = Field(
+        default=None,
+        description="Sandbox run identifier used for playback (profile;;tmp;;<uuid>).",
+    )
+    source_run_id: Optional[str] = Field(
+        default=None,
+        description="Original run identifier detected from the capture log.",
+    )
     dry_run: bool
     base_url: str
     run_dir: str
@@ -329,14 +337,14 @@ def _detect_profile_run_id(profile_root: Path) -> str:
     raise ProfileOperationError("Unable to determine run id from capture events.")
 
 
-def _prepare_sandbox_run(profile_root: Path, run_id: str) -> Path:
+def _prepare_sandbox_run(profile_root: Path, run_id: str) -> tuple[str, Path]:
     source_run_dir = profile_root / "run"
     if not source_run_dir.exists():
         raise ProfileOperationError(f"Profile run snapshot missing: {source_run_dir}")
 
     sandbox_uuid = uuid4().hex
-    sandbox_root = PLAYBACK_RUN_ROOT / run_id
-    sandbox_run_dir = sandbox_root / sandbox_uuid
+    PLAYBACK_RUN_ROOT.mkdir(parents=True, exist_ok=True)
+    sandbox_run_dir = PLAYBACK_RUN_ROOT / sandbox_uuid
 
     shutil.rmtree(sandbox_run_dir, ignore_errors=True)
     sandbox_run_dir.mkdir(parents=True, exist_ok=True)
@@ -397,7 +405,26 @@ def _prepare_sandbox_run(profile_root: Path, run_id: str) -> Path:
             profile_root,
         )
 
-    return sandbox_run_dir
+    return sandbox_uuid, sandbox_run_dir
+
+
+def _prepare_sandbox_clone(profile_root: Path, run_id: str) -> tuple[str, Path]:
+    source_run_dir = profile_root / "run"
+    if not source_run_dir.exists():
+        raise ProfileOperationError(f"Profile run snapshot missing: {source_run_dir}")
+
+    sandbox_uuid = uuid4().hex
+    PLAYBACK_RUN_ROOT.mkdir(parents=True, exist_ok=True)
+    sandbox_run_dir = PLAYBACK_RUN_ROOT / sandbox_uuid
+
+    shutil.rmtree(sandbox_run_dir, ignore_errors=True)
+
+    try:
+        shutil.copytree(source_run_dir, sandbox_run_dir)
+    except OSError as exc:
+        raise ProfileOperationError(f"Failed to clone profile run snapshot: {exc}") from exc
+
+    return sandbox_uuid, sandbox_run_dir
 
 
 def _clear_sandbox_locks(runid: str, logger: logging.Logger, extra_runids: Optional[List[str]] = None) -> None:
@@ -483,8 +510,8 @@ def fork_profile(profile: str, payload: ProfileForkRequest, logger: Optional[log
         raise ProfileOperationError(f"Profile not found: {profile_root}")
 
     run_id = _detect_profile_run_id(profile_root)
-    sandbox_run_id = f"profile;;tmp;;{run_id}"
-    sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
+    sandbox_uuid, sandbox_run_dir = _prepare_sandbox_clone(profile_root, run_id)
+    sandbox_run_id = f"profile;;tmp;;{sandbox_uuid}"
     _clear_sandbox_locks(sandbox_run_id, log, extra_runids=[run_id])
 
     base_url = _normalize_base_url(payload.base_url)
@@ -532,8 +559,8 @@ def archive_profile(profile: str, payload: ProfileArchiveRequest, logger: Option
         raise ProfileOperationError(f"Profile not found: {profile_root}")
 
     run_id = _detect_profile_run_id(profile_root)
-    sandbox_run_id = f"profile;;tmp;;{run_id}"
-    sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
+    sandbox_uuid, sandbox_run_dir = _prepare_sandbox_clone(profile_root, run_id)
+    sandbox_run_id = f"profile;;tmp;;{sandbox_uuid}"
     _clear_sandbox_locks(sandbox_run_id, log, extra_runids=[run_id])
 
     base_url = _normalize_base_url(payload.base_url)
@@ -602,16 +629,17 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
     # Detect run ID and prepare clean sandbox
     try:
         run_id = _detect_profile_run_id(profile_root)
-        sandbox_run_id = f"profile;;tmp;;{run_id}"
     except ProfileOperationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     # Clean up any existing sandbox. The playback session itself will clear
     # locks at the appropriate stages, so we avoid doing it twice here.
     try:
-        sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
+        sandbox_uuid, sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
     except ProfileOperationError as exc:
         raise HTTPException(status_code=500, detail=f"Failed to prepare sandbox: {exc}") from exc
+
+    sandbox_run_id = f"profile;;tmp;;{sandbox_uuid}"
 
     login_base_url = (payload.base_url or DEFAULT_BASE_URL).rstrip("/")
     playback_base_url = login_base_url
@@ -655,12 +683,15 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
                 session=session,
                 verbose=True,
                 logger=session_logger,
+                playback_run_id=sandbox_run_id,
             )
             playback.run()
             request_log = [{"id": request_id, "status": status} for request_id, status in playback.results]
             result = ProfileRunResult(
                 profile=profile,
                 run_id=getattr(playback, "run_id", profile),
+                sandbox_run_id=getattr(playback, "playback_run_id", sandbox_run_id),
+                source_run_id=getattr(playback, "original_run_id", run_id),
                 dry_run=payload.dry_run,
                 base_url=playback_base_url,
                 run_dir=str(playback.run_dir),

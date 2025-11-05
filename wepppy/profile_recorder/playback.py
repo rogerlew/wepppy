@@ -44,6 +44,7 @@ class PlaybackSession:
         session: Optional[requests.Session] = None,
         verbose: bool = False,
         logger: Optional[logging.Logger] = None,
+        playback_run_id: Optional[str] = None,
     ) -> None:
         self.profile_root = profile_root
         self.execute = execute
@@ -67,7 +68,7 @@ class PlaybackSession:
         self.events = self._load_events(self.capture_dir / "events.jsonl")
         self.run_id = self._detect_run_id(self.events) or profile_root.name
         self.original_run_id = self.run_id
-        self.playback_run_id = f"profile;;tmp;;{self.original_run_id}"
+        self.playback_run_id = playback_run_id or f"profile;;tmp;;{self.original_run_id}"
         self._log(f"Loaded {len(self.events)} events from {self.capture_dir}")
         self._log(f"Resolved run id: {self.original_run_id}")
         self._log(f"Using playback run id: {self.playback_run_id}")
