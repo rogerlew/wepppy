@@ -68,16 +68,16 @@ def get_sbs_color_table(fn, color_to_severity_map=None):
 
     return d, counts, color_map
 
-def make_hashable(v, breaks, nodata_vals, offset, nodata_val):
-    return (v, tuple(breaks), tuple(nodata_vals) if nodata_vals is not None else None, offset, nodata_val)
+def make_hashable(v, breaks, nodata_vals, offset):
+    return (v, tuple(breaks), tuple(nodata_vals) if nodata_vals is not None else None, offset)
 
 @lru_cache(maxsize=None)
 def memoized_classify(args):
-    v, breaks, nodata_vals, offset, nodata_val = args
-    return _classify(v, breaks, nodata_vals, offset, nodata_val)
+    v, breaks, nodata_vals, offset = args
+    return _classify(v, breaks, nodata_vals, offset)
 
 
-def _classify(v, breaks, nodata_vals, offset=0, nodata_val=255):
+def _classify(v, breaks, nodata_vals, offset=0):
     i = 0
 
     if nodata_vals is not None:
@@ -90,14 +90,14 @@ def _classify(v, breaks, nodata_vals, offset=0, nodata_val=255):
             break
     return i + offset
 
-def classify(v, breaks, nodata_vals=None, offset=0, nodata_val=255):
-    args = make_hashable(v, breaks, nodata_vals, offset, nodata_val)
+def classify(v, breaks, nodata_vals=None, offset=0):
+    args = make_hashable(v, breaks, nodata_vals, offset)
     return memoized_classify(args)
 
 
-def make_hashable_ct(v, ct, offset, nodata_val):
+def make_hashable_ct(v, ct, offset, nodata_vals):
     ct_tuple = tuple((key, tuple(values)) for key, values in ct.items())
-    return (v, ct_tuple, offset, nodata_val)
+    return (v, ct_tuple, offset, tuple(nodata_vals) if nodata_vals is not None else None)
 
 @lru_cache(maxsize=None)
 def _get_ct_classification_code(v, ct_tuple):
@@ -116,17 +116,30 @@ def _get_ct_classification_code(v, ct_tuple):
     return None  # Return None for unclassified values
 
 
-def ct_classify(v, ct, offset=0, nodata_val=255):
+def ct_classify(v, ct, offset=0, nodata_vals=None):
     """
     Classifies a pixel value `v` based on the color table dictionary `ct`.
-    This function is now a safe, non-mutating wrapper.
+    
+    Args:
+        v: Pixel value to classify
+        ct: Color table dictionary mapping severity classes to pixel value lists
+        offset: Offset to add to classification code (default 0, use 130 for burn classes)
+        nodata_vals: List of nodata values that should map to offset + 0
+        
+    Returns:
+        Classification code (0-3 + offset for valid classes, offset for nodata, 255 for unknown)
     """
+    # Check if value is in nodata_vals first
+    if nodata_vals is not None:
+        for _no_data in nodata_vals:
+            if int(v) == int(_no_data):
+                return offset  # Return offset for nodata (e.g., 130 for unburned)
+    
     ct_tuple = tuple(sorted((k, tuple(sorted(v))) for k, v in ct.items()))
-
     code = _get_ct_classification_code(v, ct_tuple)
 
     if code is None:
-        return nodata_val
+        return 255  # Unknown colors get 255
     else:
         return code + offset
     
@@ -278,14 +291,13 @@ class SoilBurnSeverityMap(LandcoverMap):
             for i in range(n):
                 for j in range(m):
                     data[i, j] = classify(data[i, j], breaks,
-                                           nodata_vals, offset=130,
-                                           nodata_val=130)
+                                           nodata_vals, offset=130)
         else:
             for i in range(n):
                 for j in range(m):
                     data[i, j] = ct_classify(data[i, j], ct,
                                               offset=130,
-                                              nodata_val=130)
+                                              nodata_vals=nodata_vals)
 
         self._data = data
         return data
@@ -351,9 +363,9 @@ class SoilBurnSeverityMap(LandcoverMap):
         class_map = []
         for v, cnt in self.counts:
             if ct is None:
-                k = classify(v, breaks, nodata_vals, offset=130, nodata_val=255)
+                k = classify(v, breaks, nodata_vals, offset=130)
             else:
-                k = ct_classify(v, ct, offset=130, nodata_val=255)
+                k = ct_classify(v, ct, offset=130, nodata_vals=nodata_vals)
 
             sev = _map[str(k)]
             class_map.append((int(v), sev, cnt))
@@ -369,9 +381,9 @@ class SoilBurnSeverityMap(LandcoverMap):
         class_map = {}
         for v, cnt in self.counts:
             if ct is None:
-                k = classify(v, breaks, nodata_vals, offset=130, nodata_val=255)
+                k = classify(v, breaks, nodata_vals, offset=130)
             else:
-                k = ct_classify(v, ct, offset=130, nodata_val=255)
+                k = ct_classify(v, ct, offset=130, nodata_vals=nodata_vals)
 
             _v = str(v)
             if _v.endswith('.0'):
@@ -395,7 +407,7 @@ class SoilBurnSeverityMap(LandcoverMap):
 
             with open(color_tbl_path, 'w') as fp:
                 for v, cnt in self.counts:
-                    k = classify(v, breaks, nodata_vals, offset=130,  nodata_val=255)
+                    k = classify(v, breaks, nodata_vals, offset=130)
                     fp.write('{} {}\n'.format(v, _map[str(k)]))
                 fp.write("nv 0 0 0 0\n")
         else:
@@ -467,7 +479,7 @@ class SoilBurnSeverityMap(LandcoverMap):
         else:
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = ct_classify(_data[i, j], ct)
+                    data[i, j] = ct_classify(_data[i, j], ct, nodata_vals=self.nodata_vals)
 
         src_ds = gdal.Open(fname)
         wkt = src_ds.GetProjection()
