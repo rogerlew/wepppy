@@ -1,0 +1,85 @@
+name: Profile Run - US Small
+
+on:
+  schedule:
+    # 04:45 Pacific == 11:45 UTC during daylight saving; adjust if the target window changes.
+    - cron: "45 11 * * *"
+  workflow_dispatch:
+
+jobs:
+  us-small-profile:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 120
+    env:
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Verify wctl tooling
+        run: |
+          set -euo pipefail
+          if ! command -v wctl >/dev/null; then
+            echo "wctl command not found on the runner. Install wctl before rerunning this workflow." >&2
+            exit 127
+          fi
+
+      - name: Start profile playback stack
+        run: |
+          set -euo pipefail
+          wctl compose up -d profile-playback
+
+      - name: Wait for profile playback service
+        run: |
+          set -euo pipefail
+          deadline=$((SECONDS + 300))
+          while true; do
+            if curl -fsS http://127.0.0.1:8070/health >/dev/null; then
+              echo "Profile playback service is healthy."
+              break
+            fi
+            if [ "${SECONDS}" -ge "${deadline}" ]; then
+              echo "Timed out waiting for profile playback service to become healthy." >&2
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Run US small profile
+        run: |
+          set -euo pipefail
+          mkdir -p telemetry
+          wctl run-test-profile us-small-wbt-daymet-rap-wepp 2>&1 | tee telemetry/us-small-profile-run.log
+
+      - name: Upload profile playback log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: us-small-profile-log
+          path: telemetry/us-small-profile-run.log
+          if-no-files-found: warn
+
+      - name: Tear down profile playback stack
+        if: always()
+        run: |
+          set -euo pipefail
+          wctl down --remove-orphans
+
+      - name: Remove redis data directory
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -d "${GITHUB_WORKSPACE}/.docker-data/redis" ]; then
+            echo "Removing ${GITHUB_WORKSPACE}/.docker-data/redis"
+            sudo rm -rf "${GITHUB_WORKSPACE}/.docker-data/redis"
+          else
+            echo "Redis data directory not present; nothing to remove."
+          fi
