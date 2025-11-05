@@ -127,11 +127,11 @@ wctl run-pytest tests/nodb/ -m slow -v
 
 ### Individual Scenarios
 ```bash
-# Test thundering herd
-wctl run-pytest tests/nodb/test_lock_race_conditions.py::TestRapidSequentialLockAcquisition::test_thundering_herd_lock_acquisition -v
+# Lock cache refresh regression
+wctl run-pytest tests/nodb/test_lock_race_conditions.py::test_getinstance_refreshes_after_external_dump -v
 
-# Test original bug
-wctl run-pytest tests/nodb/test_build_climate_race_conditions.py::TestBuildClimateRaceCondition::test_reproduce_original_bug_scenario -v
+# Rapid sequential requests with mitigation
+wctl run-pytest tests/nodb/test_build_climate_race_conditions.py::TestBuildClimateRaceCondition::test_regression_profile_playback_without_delays -v
 ```
 
 ### Manual Debugging
@@ -179,6 +179,14 @@ controller.unlock('--force')
 # Clear all locks for runid
 clear_locks(runid)
 ```
+
+### 5. Singleton Cache Refresh
+Ensure cached controllers pick up on-disk changes:
+- `test_getinstance_refreshes_after_external_dump` verifies cached instances merge refreshed state
+- `test_getinstance_ignore_lock_bypasses_cache` confirms `ignore_lock=True` rehydrates without polluting the cache
+- `test_getinstance_readonly_not_cached` ensures READONLY runs never populate `_instances`
+
+Use these tests as guardrails when modifying `wepppy/nodb/base.py` caching logic.
 
 ## Test Markers
 

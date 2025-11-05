@@ -22,7 +22,8 @@ The latest commit successfully resolves all identified NoDb distributed locking 
 
 ## Commit Analysis
 
-### Files Modified (5 files, +817 lines, -67 lines)
+### Files Modified (5 files, +817 lines, -67 lines)  
+**Follow-up (November 5, 2025):** Added regression coverage in `tests/nodb/test_lock_race_conditions.py` for the refreshed singleton cache behaviour (`test_getinstance_refreshes_after_external_dump`, `test_getinstance_ignore_lock_bypasses_cache`, `test_getinstance_readonly_not_cached`).
 
 #### **1. wepppy/nodb/base.py** - Core Implementation Changes
 
