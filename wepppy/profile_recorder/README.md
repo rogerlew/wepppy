@@ -2,7 +2,7 @@
 
 > End-to-end testing framework that captures, assembles, and replays real WEPPcloud user sessions to enable regression testing, workflow validation, and reproducible scenario creation for erosion modeling runs.
 
-> **See also:** [AGENTS.md](AGENTS.md) for developer onboarding and implementation patterns, [docs/profile_test_engine_spec.md](../../docs/profile_test_engine_spec.md) for detailed technical specifications. This document is intended for humans.
+> **See also:** [AGENTS.md](AGENTS.md) for developer onboarding and implementation patterns, [PROFILE_TEST_ENGINE_SPEC.md](PROFILE_TEST_ENGINE_SPEC.md) for detailed technical specifications. This document is intended for humans.
 
 ## Overview
 
@@ -449,7 +449,7 @@ Profiles grow quickly (typical capture: 1-5 MB for `events.jsonl`, 50-200 MB for
 ## Further Reading
 
 - **[AGENTS.md](AGENTS.md)** – Developer onboarding, upload implementation checklist, multipart inventory
-- **[docs/profile_test_engine_spec.md](../../docs/profile_test_engine_spec.md)** – Detailed technical specification covering event schemas, playback semantics, authentication flows
+- **[PROFILE_TEST_ENGINE_SPEC.md](PROFILE_TEST_ENGINE_SPEC.md)** – Detailed technical specification covering event schemas, playback semantics, authentication flows
 - **[tools/wctl2/README.md](../../tools/wctl2/README.md)** – wctl CLI documentation, command reference
 - **[wepppy/weppcloud/controllers_js/README.md](../../wepppy/weppcloud/controllers_js/README.md)** – Frontend controller architecture, HTTP abstraction patterns
 - **[services/status2/README.md](../../services/status2/README.md)** – WebSocket streaming architecture (similar pattern used for playback logs)

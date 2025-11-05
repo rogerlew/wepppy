@@ -20,7 +20,7 @@ When adding support for a new multipart/form-data workflow:
 - **Playback rebuild:** Extend `_build_form_request()` in `playback.py` with helper(s) that locate the seeded file. Playback starts from a clean workspace, so seeds must contain everything needed to rebuild the upload payload. Ensure the mime type matches what the original controller submitted.
 - **Config state:** If the upload toggles NoDb state (checkboxes, selection lists), read those values from the controller instance in playback so the reconstructed form mirrors the original request.
 - **Tests / verification:** Capture a profile that exercises the new upload, promote it, and run `wctl run-test-profile <slug>` to confirm the playback pipeline succeeds end-to-end.
-- **Documentation:** Record any special handling (e.g., temporary directories, additional derived files) here or in the spec (`docs/profile_test_engine_spec.md`) so future agents know the expectations.
+- **Documentation:** Record any special handling (e.g., temporary directories, additional derived files) here or in the spec (`PROFILE_TEST_ENGINE_SPEC.md`) so future agents know the expectations.
 
 ## Operational Notes
 - Playback always initialises a clean workspace; never assume prior run assets are restored. Keep the capture seeds authoritative for every upload/config dependency.
