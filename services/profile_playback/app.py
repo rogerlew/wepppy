@@ -18,6 +18,7 @@ from starlette.responses import StreamingResponse
 from starlette.concurrency import run_in_threadpool
 
 from wepppy.nodb.base import clear_locks
+from wepppy.nodb.core import Ron
 from wepppy.profile_recorder.playback import PlaybackSession
 
 
@@ -329,16 +330,74 @@ def _detect_profile_run_id(profile_root: Path) -> str:
 
 
 def _prepare_sandbox_run(profile_root: Path, run_id: str) -> Path:
-    source = profile_root / "run"
-    if not source.exists():
-        raise ProfileOperationError(f"Profile run snapshot missing: {source}")
+    source_run_dir = profile_root / "run"
+    if not source_run_dir.exists():
+        raise ProfileOperationError(f"Profile run snapshot missing: {source_run_dir}")
 
-    PLAYBACK_RUN_ROOT.mkdir(parents=True, exist_ok=True)
-    target = PLAYBACK_RUN_ROOT / run_id
-    if target.exists():
-        shutil.rmtree(target)
-    shutil.copytree(source, target)
-    return target
+    sandbox_uuid = uuid4().hex
+    sandbox_root = PLAYBACK_RUN_ROOT / run_id
+    sandbox_run_dir = sandbox_root / sandbox_uuid
+
+    shutil.rmtree(sandbox_run_dir, ignore_errors=True)
+    sandbox_run_dir.mkdir(parents=True, exist_ok=True)
+
+    config_candidates = [
+        source_run_dir / "config",
+        profile_root / "capture" / "seed" / "config",
+    ]
+
+    selected_config_dir: Optional[Path] = None
+    config_files: List[Path] = []
+    active_config_slug: Optional[str] = None
+
+    for candidate in config_candidates:
+        if not candidate.is_dir():
+            continue
+        cfgs = sorted(candidate.glob("*.cfg"))
+        if not cfgs:
+            continue
+        selected_config_dir = candidate
+        config_files = cfgs
+        active_marker = candidate / "active_config.txt"
+        if active_marker.exists():
+            try:
+                active_text = active_marker.read_text(encoding="utf-8").strip()
+            except OSError as exc:
+                _RUNNER_LOGGER.warning("Unable to read active config marker %s: %s", active_marker, exc)
+            else:
+                if active_text:
+                    active_config_slug = Path(active_text).stem
+        break
+
+    if selected_config_dir:
+        for item in sorted(selected_config_dir.iterdir()):
+            if item.name == "active_config.txt":
+                continue
+            target_path = sandbox_run_dir / item.name
+            if item.is_dir():
+                shutil.copytree(item, target_path, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, target_path)
+
+        primary_cfg = config_files[0]
+        config_slug = active_config_slug or primary_cfg.stem
+
+        try:
+            (sandbox_run_dir / "active_config.txt").write_text(config_slug, encoding="utf-8")
+        except OSError as exc:
+            _RUNNER_LOGGER.warning("Unable to write active config marker for %s: %s", sandbox_run_dir, exc)
+
+        Ron(str(sandbox_run_dir), f"{config_slug}.cfg", run_group="profile", group_name="tmp")
+    else:
+        # Fallback: profile lacks usable config seeds; clone the recorded run snapshot
+        shutil.rmtree(sandbox_run_dir, ignore_errors=True)
+        shutil.copytree(source_run_dir, sandbox_run_dir)
+        _RUNNER_LOGGER.warning(
+            "Profile %s missing config seeds; using snapshot copy for playback",
+            profile_root,
+        )
+
+    return sandbox_run_dir
 
 
 def _clear_sandbox_locks(runid: str, logger: logging.Logger, extra_runids: Optional[List[str]] = None) -> None:
