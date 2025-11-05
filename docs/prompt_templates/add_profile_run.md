@@ -7,9 +7,9 @@ Use this template to add a new nightly profile test workflow and update the read
 ```
 Add a new profile run workflow with the following details:
 
-- **Title**: Profile Run - Earth Small
-- **Profile name**: earth-in-bc-ca-w-daymet
-- **Description**: "Earth OpenTopography API, with ISRIC soil building, DAYMET in Canada with GHCN Station Database"
+- **Title**: Profile Run - SBS NoCT
+- **Profile name**: eaton-noct-gridmet-wepp-2chaninp-watar-anu
+- **Description**: "Eaton Fire (no CT), gridmet, wepp, 2 channels of interest, WATAR (Anurag)"
 - **Run time**: next available 10-minute slot after existing workflows
 
 Tasks:
