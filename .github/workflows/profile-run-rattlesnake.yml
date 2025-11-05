@@ -32,22 +32,17 @@ jobs:
             exit 127
           fi
 
-      - name: Start profile playback stack
-        run: |
-          set -euo pipefail
-          wctl compose up -d profile-playback
-
-      - name: Wait for profile playback service
+      - name: Health check dev weppcloud service
         run: |
           set -euo pipefail
           deadline=$((SECONDS + 300))
           while true; do
-            if curl -fsS http://127.0.0.1:8070/health >/dev/null; then
-              echo "Profile playback service is healthy."
+            if curl -fsS https://wc.bearhive.duckdns.org/health >/dev/null; then
+              echo "weppcloud service is healthy."
               break
             fi
             if [ "${SECONDS}" -ge "${deadline}" ]; then
-              echo "Timed out waiting for profile playback service to become healthy." >&2
+              echo "Timed out waiting for weppcloud service to become healthy." >&2
               exit 1
             fi
             sleep 5
@@ -66,12 +61,6 @@ jobs:
           name: rattlesnake-profile-log
           path: telemetry/profile-run.log
           if-no-files-found: warn
-
-      - name: Tear down profile playback stack
-        if: always()
-        run: |
-          set -euo pipefail
-          wctl down --remove-orphans
 
       - name: Remove redis data directory
         if: always()
