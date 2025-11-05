@@ -605,6 +605,7 @@ def test_getinstance_refreshes_after_external_dump(temp_wd, mock_controller_clas
     """Cached instances should refresh when the backing .nodb file changes on disk."""
     monkeypatch.setattr('wepppy.nodb.base.redis_nodb_cache_client', None)
 
+    mock_controller_class._instances.clear()
     controller = mock_controller_class.getInstance(temp_wd)
 
     with controller.locked():
@@ -622,6 +623,74 @@ def test_getinstance_refreshes_after_external_dump(temp_wd, mock_controller_clas
     assert refreshed is controller
     assert refreshed.some_value == "updated"
     mock_controller_class._instances.clear()
+
+
+@pytest.mark.nodb
+def test_getinstance_ignore_lock_bypasses_cache(temp_wd, mock_controller_class, monkeypatch):
+    """ignore_lock=True should bypass the cached singleton and hydrate fresh state."""
+    monkeypatch.setattr('wepppy.nodb.base.redis_nodb_cache_client', None)
+
+    mock_controller_class._instances.clear()
+    primary = mock_controller_class.getInstance(temp_wd)
+
+    with primary.locked():
+        primary.some_value = "cached"
+
+    nodb_path = Path(temp_wd) / mock_controller_class.filename
+    loaded = jsonpickle.decode(nodb_path.read_text())
+    loaded.some_value = "disk"
+    nodb_path.write_text(jsonpickle.encode(loaded))
+    os.utime(nodb_path, None)
+
+    fresh = mock_controller_class.getInstance(temp_wd, ignore_lock=True)
+    assert fresh is not primary
+    assert fresh.some_value == "disk"
+
+    cached = mock_controller_class.getInstance(temp_wd)
+    assert cached is primary
+    assert cached.some_value == "disk"
+    mock_controller_class._instances.clear()
+
+
+@pytest.mark.nodb
+def test_getinstance_readonly_not_cached(temp_wd, mock_controller_class, monkeypatch):
+    """Readonly runs should not populate the singleton cache."""
+    monkeypatch.setattr('wepppy.nodb.base.redis_nodb_cache_client', None)
+
+    readonly_wd = Path(temp_wd) / "readonly_run"
+    readonly_wd.mkdir()
+    cfg_path = readonly_wd / "test.cfg"
+    cfg_path.write_text("[general]\ndem_db = test\n")
+
+    mock_controller_class._instances.clear()
+    controller = mock_controller_class(str(readonly_wd))
+    controller.lock()
+    controller.dump()
+    controller.unlock()
+    mock_controller_class._instances.clear()
+
+    readonly_flag = readonly_wd / "READONLY"
+    readonly_flag.write_text("")
+
+    nodb_path = readonly_wd / mock_controller_class.filename
+    base_obj = jsonpickle.decode(nodb_path.read_text())
+    base_obj.some_value = "initial"
+    nodb_path.write_text(jsonpickle.encode(base_obj))
+
+    inst1 = mock_controller_class.getInstance(str(readonly_wd))
+    assert inst1.some_value == "initial"
+
+    updated_obj = jsonpickle.decode(nodb_path.read_text())
+    updated_obj.some_value = "updated"
+    nodb_path.write_text(jsonpickle.encode(updated_obj))
+    os.utime(nodb_path, None)
+
+    inst2 = mock_controller_class.getInstance(str(readonly_wd))
+    assert inst2 is not inst1
+    assert inst2.some_value == "updated"
+
+    cache_after = mock_controller_class._instances
+    assert str(readonly_wd) not in cache_after
         
     def test_clear_locks_cleanup(self, temp_wd, mock_controller_class):
         """Test clear_locks can clean up stuck locks."""
