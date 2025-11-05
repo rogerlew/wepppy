@@ -52,7 +52,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p telemetry
-          wctl run-fork-profile rattlesnake-topaz-vanilla-wepp-watar --undisturbify=true 2>&1 | tee telemetry/rattlesnake-profile-fork.log
+          wctl run-fork-profile rattlesnake-topaz-vanilla-wepp-watar --undisturbify > telemetry/rattlesnake-profile-fork.log 2>&1
 
       - name: Upload profile playback log
         if: always()
