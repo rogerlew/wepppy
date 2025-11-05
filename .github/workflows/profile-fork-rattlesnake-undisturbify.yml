@@ -1,9 +1,9 @@
-name: Profile Archive - US Small
+name: Profile Fork - Rattlesnake (Undisturbify)
 
 on:
   schedule:
-    # 05:05 Pacific == 12:05 UTC during daylight saving; adjust if the target window changes.
-    - cron: "5 12 * * *"
+    # 05:15 Pacific == 12:15 UTC during daylight saving; adjust if the target window changes.
+    - cron: "15 12 * * *"
   workflow_dispatch:
 
 jobs:
@@ -48,11 +48,11 @@ jobs:
             sleep 5
           done
 
-      - name: Archive US small profile
+      - name: Fork US small profile
         run: |
           set -euo pipefail
           mkdir -p telemetry
-          wctl run-archive-profile us-small-wbt-daymet-rap-wepp 2>&1 | tee telemetry/us-small-profile-run.log
+          wctl run-fork-profile rattlesnake-topaz-vanilla-wepp-watar --undisturbify 2>&1 | tee telemetry/us-small-profile-run.log
 
       - name: Upload profile playback log
         if: always()

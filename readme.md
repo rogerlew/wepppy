@@ -21,9 +21,11 @@
 
 | Badge | Profile Name | Description |
 | ----- | ------------ | ----------- |
-| [![Profile Run - Rattlesnake](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml) | rattlesnake-topaz-vanilla-wepp-watar | Nightly playback of Rattlesnake - TOPAZ, Vanilla Cligent, WEPP, WATAR (Alex) |
-| [![Profile Run - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Nightly playback of the US Small Watershed (WBT Delineaatin, Daymet RAP, WEPP) |
-| [![Profile Fork - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Nightly fork of the US Small Watershed (WBT Delineaatin, Daymet RAP, WEPP) |
+| [![Profile Run - Rattlesnake](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml) | rattlesnake-topaz-vanilla-wepp-watar | Nightly playback test of Rattlesnake - TOPAZ, Vanilla Cligent, WEPP, WATAR (Alex) |
+| [![Profile Run - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Nightly playback test of the US Small Watershed (WBT Delineaatin, Daymet RAP, WEPP) |
+| [![Profile Fork - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Nightly fork test of the US Small Watershed (WBT Delineaatin, Daymet RAP, WEPP) |
+| [![Profile Archive - US Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-archive-us-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-archive-us-small.yml) | us-small-wbt-daymet-rap-wepp  | Nightly archive test of the US Small Watershed (WBT Delineaatin, Daymet RAP, WEPP) |
+
 
 ## Overview
 
