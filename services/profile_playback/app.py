@@ -134,6 +134,7 @@ class ProfileArchiveResult(BaseModel):
     profile: str
     run_id: str
     sandbox_run_id: str
+    archive_run_id: str
     job_id: str
     status: str
     run_dir: str
@@ -518,7 +519,8 @@ def fork_profile(profile: str, payload: ProfileForkRequest, logger: Optional[log
     session = _ensure_session(base_url, payload.cookie, logger=log)
     config_slug = _read_active_config(sandbox_run_dir)
 
-    target_runid = payload.target_runid or f"profile;;fork;;{run_id}-{uuid4().hex[:8]}"
+    fork_uuid = uuid4().hex
+    target_runid = payload.target_runid or f"profile;;fork;;{fork_uuid}"
     fork_url = f"{base_url}/runs/{sandbox_run_id}/{config_slug}/rq/api/fork"
     form_data = {
         "undisturbify": "true" if payload.undisturbify else "false",
@@ -536,7 +538,8 @@ def fork_profile(profile: str, payload: ProfileForkRequest, logger: Optional[log
     new_run_id = body.get("new_runid") or target_runid
     job_info = _poll_job_completion(session, base_url, job_id, payload.timeout_seconds, logger=log)
 
-    fork_suffix = new_run_id.split(";;")[-1]
+    fork_identifier = new_run_id or target_runid
+    fork_suffix = fork_identifier.split(";;")[-1]
     PLAYBACK_FORK_ROOT.mkdir(parents=True, exist_ok=True)
     fork_dir = PLAYBACK_FORK_ROOT / fork_suffix
 
@@ -563,6 +566,9 @@ def archive_profile(profile: str, payload: ProfileArchiveRequest, logger: Option
     sandbox_run_id = f"profile;;tmp;;{sandbox_uuid}"
     _clear_sandbox_locks(sandbox_run_id, log, extra_runids=[run_id])
 
+    archive_uuid = uuid4().hex
+    archive_run_id = f"profile;;archive;;{archive_uuid}"
+
     base_url = _normalize_base_url(payload.base_url)
     session = _ensure_session(base_url, payload.cookie, logger=log)
     config_slug = _read_active_config(sandbox_run_dir)
@@ -583,7 +589,7 @@ def archive_profile(profile: str, payload: ProfileArchiveRequest, logger: Option
     job_info = _poll_job_completion(session, base_url, job_id, payload.timeout_seconds, logger=log)
 
     archives_dir = sandbox_run_dir / "archives"
-    archive_target = PLAYBACK_ARCHIVE_ROOT / run_id
+    archive_target = PLAYBACK_ARCHIVE_ROOT / archive_uuid
     archive_target.parent.mkdir(parents=True, exist_ok=True)
     if archive_target.exists():
         shutil.rmtree(archive_target)
@@ -598,6 +604,7 @@ def archive_profile(profile: str, payload: ProfileArchiveRequest, logger: Option
         profile=profile,
         run_id=run_id,
         sandbox_run_id=sandbox_run_id,
+    archive_run_id=archive_run_id,
         job_id=job_id,
         status=str(job_info.get("status", "unknown")),
         run_dir=str(sandbox_run_dir),
