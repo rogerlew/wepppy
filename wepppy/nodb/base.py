@@ -782,7 +782,7 @@ class NoDbBase(object):
                 self._console_handler
             )
             self._queue_listener.start()
-            atexit.register(self._queue_listener.stop)
+            atexit.register(self._safe_stop_queue_listener)
 
             self.runid_logger.setLevel(logging.ERROR)
             self.runid_logger.propagate = True  # allow propagation to root logger
@@ -837,6 +837,18 @@ class NoDbBase(object):
             end_time = perf_counter()
             duration = end_time - start_time
             self.logger.log(level, f"{task_name}... done. ({duration:.2f}s)")
+
+    def _safe_stop_queue_listener(self) -> None:
+        """Safely stop the queue listener, handling potential thread cleanup issues."""
+        try:
+            if hasattr(self, '_queue_listener') and self._queue_listener is not None:
+                # Check if the listener's thread is still alive before stopping
+                if hasattr(self._queue_listener, '_thread') and self._queue_listener._thread is not None:
+                    if self._queue_listener._thread.is_alive():
+                        self._queue_listener.stop()
+        except (AttributeError, TypeError, KeyboardInterrupt):
+            # Silently ignore cleanup errors during process shutdown
+            pass
 
     @classmethod
     def _hydrate_instance(
