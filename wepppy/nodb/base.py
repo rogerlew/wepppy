@@ -839,14 +839,6 @@ class NoDbBase(object):
             self.logger.log(level, f"{task_name}... done. ({duration:.2f}s)")
 
     @classmethod
-    def _get_cached_instance(cls, abs_wd: str) -> Optional['NoDbBase']:
-        with cls._instances_lock:
-            instance = cls._instances.get(abs_wd)
-        if instance is not None:
-            instance._init_logging()
-        return instance
-
-    @classmethod
     def _hydrate_instance(
         cls,
         abs_wd: str,
@@ -936,6 +928,10 @@ class NoDbBase(object):
             db.wd = abs_wd
 
         db._init_logging()
+        try:
+            db._nodb_mtime = os.path.getmtime(filepath)
+        except OSError:
+            db._nodb_mtime = None
         return db
 
     @classmethod
@@ -947,11 +943,27 @@ class NoDbBase(object):
     ) -> 'NoDbBase':
         """Return the singleton controller for ``wd``, hydrating from disk or cache."""
         abs_wd = os.path.abspath(wd)
+        filepath = cls._get_nodb_path(abs_wd)
         readonly = _exists(_join(abs_wd, 'READONLY'))
 
-        cached = cls._get_cached_instance(abs_wd)
-        if cached is not None:
-            return cached
+        stale_cached_instance: Optional['NoDbBase'] = None
+        with cls._instances_lock:
+            cached = cls._instances.get(abs_wd)
+
+        if cached is not None and not ignore_lock:
+            refresh_needed = False
+            if not readonly:
+                try:
+                    file_mtime = os.path.getmtime(filepath)
+                except OSError:
+                    file_mtime = None
+                cached_mtime = getattr(cached, '_nodb_mtime', None)
+                if file_mtime is not None and cached_mtime != file_mtime:
+                    refresh_needed = True
+            if not refresh_needed:
+                cached._init_logging()
+                return cached
+            stale_cached_instance = cached
 
         instance = cls._hydrate_instance(abs_wd, allow_nonexistent, ignore_lock, readonly)
         if instance is None:
@@ -963,10 +975,16 @@ class NoDbBase(object):
         with cls._instances_lock:
             cached = cls._instances.get(abs_wd)
             if cached is not None:
+                if stale_cached_instance is cached:
+                    cached.__dict__.clear()
+                    cached.__dict__.update(instance.__dict__)
+                    cached._init_logging()
+                    return cached
                 cached._init_logging()
                 return cached
             cls._instances[abs_wd] = instance
 
+        instance._init_logging()
         return instance
     
     @classmethod
@@ -1052,6 +1070,10 @@ class NoDbBase(object):
             fp.write(js)
             fp.flush()                 # flush Python’s userspace buffer
             os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
+            try:
+                self._nodb_mtime = os.fstat(fp.fileno()).st_mtime
+            except OSError:
+                self._nodb_mtime = None
 
         write_version(self.wd, CURRENT_VERSION)
 

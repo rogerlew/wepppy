@@ -508,7 +508,13 @@ class Watershed(NoDbBase):
         elif self.delineation_backend_is_wbt:
             wbt = self.wbt
             if wbt is None:
-                raise ValueError("WBT instance is None")
+                # Create WBT instance lazily when subwta path is needed
+                wbt = WhiteboxToolsTopazEmulator(
+                    self.wbt_wd,
+                    self.dem_fn,
+                    logger=self.logger,
+                )
+                self.wbt = wbt
             return wbt.subwta
         else:
             return _join(self.taudem_wd, "subwta.tif")
@@ -806,7 +812,9 @@ class Watershed(NoDbBase):
                 if mcl is not None:
                     self._mcl = mcl
 
-        if self.outlet is not None:
+        # Preserve outlet information during channel building
+        preserved_outlet = self.outlet
+        if preserved_outlet is not None:
             self.remove_outlet()
 
         if self.delineation_backend_is_topaz:
@@ -898,14 +906,28 @@ class Watershed(NoDbBase):
             self.logger.info(f' delineation_backend_is_topaz')
             topaz = Topaz.getInstance(self.wd)
             topaz.set_outlet(lng=lng, lat=lat, da=da)
-            self.outlet = topaz.outlet
+            _outlet = topaz.outlet
+            if _outlet is None:
+                raise ValueError("Failed to set outlet in Topaz")
+            self.outlet = _outlet
         elif self.delineation_backend_is_wbt:
             self.logger.info(f' delineation_backend_is_wbt')
             wbt = self.wbt
             if wbt is None:
-                raise ValueError("WBT instance is None")
-            self.outlet = wbt.set_outlet(lng=lng, lat=lat, logger=self.logger)
-            self.wbt = wbt
+                self.logger.info(f' Creating WBT instance for outlet setting')
+                wbt = WhiteboxToolsTopazEmulator(
+                    self.wbt_wd,
+                    self.dem_fn,
+                    logger=self.logger,
+                )
+                self.wbt = wbt
+            _outlet = wbt.set_outlet(lng=lng, lat=lat, logger=self.logger)
+            if _outlet is None:
+                raise ValueError("Failed to set outlet in WBT")
+            
+            with self.locked():
+                self._outlet = _outlet
+                self._wbt = wbt
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.set_outlet)
@@ -934,7 +956,13 @@ class Watershed(NoDbBase):
             self.logger.info(f' delineation_backend_is_wbt')
             wbt = self.wbt
             if wbt is None:
-                raise ValueError("WBT instance is None")
+                self.logger.info(f' Creating WBT instance for subcatchment delineation')
+                wbt = WhiteboxToolsTopazEmulator(
+                    self.wbt_wd,
+                    self.dem_fn,
+                    logger=self.logger,
+                )
+                self.wbt = wbt
             wbt.delineate_subcatchments(self.logger)
             self.identify_edge_hillslopes()
         else:
