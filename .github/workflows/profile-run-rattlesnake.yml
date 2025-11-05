@@ -32,34 +32,34 @@ jobs:
             exit 127
           fi
 
-      - name: Health check dev weppcloud service
+      - name: Health check WEPPcloud service
         run: |
           set -euo pipefail
           deadline=$((SECONDS + 300))
           while true; do
             if curl -fsS https://wc.bearhive.duckdns.org/health >/dev/null; then
-              echo "weppcloud service is healthy."
+              echo "WEPPcloud service is healthy."
               break
             fi
             if [ "${SECONDS}" -ge "${deadline}" ]; then
-              echo "Timed out waiting for weppcloud service to become healthy." >&2
+              echo "Timed out waiting for WEPPcloud service to become healthy." >&2
               exit 1
             fi
             sleep 5
           done
 
-      - name: Run rattlesnake profile
+      - name: Run Rattlesnake profile
         run: |
           set -euo pipefail
           mkdir -p telemetry
-          wctl run-test-profile rattlesnake-topaz-vanilla-wepp-watar 2>&1 | tee telemetry/profile-run.log
+          wctl run-test-profile rattlesnake-topaz-vanilla-wepp-watar 2>&1 | tee telemetry/rattlesnake-profile-run.log
 
       - name: Upload profile playback log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rattlesnake-profile-log
-          path: telemetry/profile-run.log
+          name: rattlesnake-profile-run-log
+          path: telemetry/rattlesnake-profile-run.log
           if-no-files-found: warn
 
       - name: Remove redis data directory

@@ -15,9 +15,7 @@
 | [![NPM Coverage Nightly](https://github.com/rogerlew/wepppy/actions/workflows/npm-coverage-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/npm-coverage-nightly.yml) | 2:30 AM PT Jest run covering the `static-src` controllers with coverage reports. |
 
 
-
-
-### Nightly Profile Tests
+### Dev Server Nightly Profile Tests
 
 | Badge | Profile Name | Description |
 | ----- | ------------ | ----------- |
