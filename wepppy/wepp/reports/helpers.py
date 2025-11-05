@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -8,7 +9,14 @@ from typing import Any, Iterable, Mapping, Sequence
 import pandas as pd
 import pyarrow as pa
 
-from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
+from wepppy.query_engine import (
+    activate_query_engine,
+    resolve_run_context,
+    run_query,
+    update_catalog_entry,
+)
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -47,6 +55,24 @@ class ReportQueryContext:
 
     def ensure_datasets(self, *dataset_paths: str) -> None:
         missing = [path for path in dataset_paths if not self.catalog.has(path)]
+        if missing:
+            refreshed = False
+            for path in missing:
+                dataset = Path(self.run_directory, path)
+                if dataset.exists():
+                    try:
+                        update_catalog_entry(self.run_directory, path)
+                        refreshed = True
+                    except Exception:  # pragma: no cover - best effort catalog repair
+                        LOGGER.warning(
+                            "Failed to refresh catalog entry for %s under %s",
+                            path,
+                            self.run_directory,
+                            exc_info=True,
+                        )
+            if refreshed:
+                self._context = None
+                missing = [path for path in dataset_paths if not self.catalog.has(path)]
         if missing:
             formatted = ", ".join(sorted(missing))
             raise FileNotFoundError(f"Missing dataset(s) for report {formatted}")
