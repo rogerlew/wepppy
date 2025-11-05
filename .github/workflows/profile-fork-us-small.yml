@@ -2,8 +2,8 @@ name: Profile Fork - US Small
 
 on:
   schedule:
-    # 04:45 Pacific == 11:45 UTC during daylight saving; adjust if the target window changes.
-    - cron: "45 11 * * *"
+    # 04:55 Pacific == 11:55 UTC during daylight saving; adjust if the target window changes.
+    - cron: "55 11 * * *"
   workflow_dispatch:
 
 jobs:
