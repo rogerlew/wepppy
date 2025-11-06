@@ -24,7 +24,7 @@ When adding support for a new multipart/form-data workflow:
 
 ## Operational Notes
 - Playback always initialises a clean workspace; never assume prior run assets are restored. Keep the capture seeds authoritative for every upload/config dependency.
-- Replay rewrites `/runs/<original>/<config>/...` → `/runs/profile;;tmp;;<original>/<config>/...` so production runs remain untouched.
+- Replay rewrites `/runs/<original>/<config>/...` → `/runs/{playback_run_id}/<config>/...`; the FastAPI service generates playback run IDs as `profile;;tmp;;<sandbox_uuid>` so production runs remain untouched while tracking the source identifier for reporting.
 - Recorded `/rq/api/jobstatus/<id>` polls and `elevationquery` requests are skipped during replay; the runner waits on the fresh job IDs emitted by each POST response instead.
 - Authentication defaults to automated login using `ADMIN_EMAIL` / `ADMIN_PASSWORD` (see `docker/.env`). If a profile needs user-scoped permissions, record with the appropriate account and capture the session cookie for playback (`--cookie-file`).
 - The recorder runs globally even when not actively capturing profiles; audit logs under each run’s `_logs/` folder always append new events. Promotion copies only the slice under `_drafts/<run>/<capture>/`.

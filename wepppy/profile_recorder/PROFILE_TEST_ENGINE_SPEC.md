@@ -13,7 +13,7 @@ The stack favors append-only JSONL streams and direct filesystem snapshots over 
 - `PROFILE_DATA_ROOT` (Flask config, default `/workdir/wepppy-test-engine-data`) anchors recorder output.
 - Recorder audit logs land under `<run_dir>/_logs/profile.events.jsonl`. When the working directory is unknown, events fall back to `PROFILE_DATA_ROOT/audit/<sanitised-run>/profile.events.jsonl`.
 - Draft profiles and promoted captures live under `PROFILE_DATA_ROOT/profiles/**`.
-- Playback workspaces default to `/workdir/wepppy-test-engine-data/playback/runs/<runid>` and may be overridden via `PROFILE_PLAYBACK_BASE` / `PROFILE_PLAYBACK_RUN_ROOT`.
+- Playback workspaces default to `/workdir/wepppy-test-engine-data/playback/runs/<sandbox_uuid>` and may be overridden via `PROFILE_PLAYBACK_BASE` / `PROFILE_PLAYBACK_RUN_ROOT`.
 
 ## Recorder Pipeline
 1. `ProfileRecorder.append_event` accepts JSON events emitted by WEPPcloud middleware.
@@ -73,7 +73,7 @@ Playback also looks for `capture/seed/uploads/<type>` when rebuilding multipart 
 - Run discovery:
   - The runner reads `events.jsonl` (line-delimited JSON).
   - First request event containing `/runs/<runid>/` establishes the original run id.
-  - Playback uses `profile;;tmp;;<runid>` to isolate mutations from the source snapshot.
+  - Playback uses `profile;;tmp;;<sandbox_uuid>` run IDs (minted by the FastAPI service) to isolate mutations from the source snapshot while retaining the original identifier for reporting; standalone CLI usage without the service falls back to `profile;;tmp;;<original>`.
 - Workspace preparation:
   - If `profiles/<slug>/run/` exists it is copied into the sandbox location before requests execute.
   - Seed assets from `capture/seed/**` hydrate expected uploads (landuse, SBS, CLI, cover transform, ash, omni) and config defaults.
@@ -81,7 +81,7 @@ Playback also looks for `capture/seed/uploads/<type>` when rebuilding multipart 
 - Request replay rules:
   - Only 2xx response events with matching request metadata are executed.
   - Supports GET and POST (JSON or known form-data). Unsupported payloads are logged and recorded as failures.
-  - Paths are remapped from `/runs/<original>/...` to `/runs/profile;;tmp;;<original>/...`.
+  - Paths are remapped from `/runs/<original>/...` to `/runs/{playback_run_id}/...`, ensuring NoDb resolves the sandbox workspace.
   - Elevation queries and recorded `rq/api/jobstatus/` polls are skipped; playback polls real jobs instead.
   - After each POST, the runner inspects the JSON response for `job_id` and waits for completion via `/rq/api/jobinfo/<id>` before proceeding.
   - Additional polling is performed for GETs ending with known work-complete suffixes (`_WAIT_SUFFIXES`).

@@ -76,8 +76,8 @@ A FastAPI microservice that rehydrates sandboxed runs and replays captured traff
 - `POST /archive/{profile}` – Submits archive jobs and polls until archives materialize
 
 **Playback semantics:**
-- Hydrates `profiles/<slug>/run/` snapshot into clean sandbox workspace (`/workdir/wepppy-test-engine-data/playback/runs/<runid>`)
-- Rewrites URLs from `/runs/<original>/` to `/runs/profile;;tmp;;<original>/` to isolate sandbox mutations
+- Hydrates `profiles/<slug>/run/` snapshot into clean sandbox workspace (`/workdir/wepppy-test-engine-data/playback/runs/<sandbox_uuid>`)
+- Rewrites URLs from `/runs/<original>/` to `/runs/{playback_run_id}/`; the FastAPI service issues playback run IDs in the form `profile;;tmp;;<sandbox_uuid>` so sandbox runs stay isolated while the original ID remains available for reporting
 - Skips recorded elevation queries and jobstatus polls (replays generate fresh job IDs)
 - Automatically rebuilds multipart form-data payloads using seed assets (landuse, SBS, CLI, ash, omni uploads)
 - Polls new job IDs until completion via `/rq/api/jobinfo/<id>`, parses hierarchical job trees on failures
@@ -140,7 +140,7 @@ wctl run-test-profile <slug>
 POST /run/{profile} (FastAPI service)
   ↓ Thread pool
 PlaybackSession.run()
-  ├─→ Hydrate sandbox: playback/runs/<runid>/
+  ├─→ Hydrate sandbox: playback/runs/<sandbox_uuid>/
   ├─→ Replay requests against WEPPcloud
   ├─→ Poll RQ jobs until completion
   └─→ Stream logs + store result JSON
@@ -211,9 +211,9 @@ Playback expects `capture/events.jsonl` and optionally `run/` for complete works
 |----------|---------|-------------|
 | `PROFILE_PLAYBACK_ROOT` | `/workdir/wepppy-test-engine-data/profiles` | Profile library location |
 | `PROFILE_PLAYBACK_BASE` | `/workdir/wepppy-test-engine-data/playback` | Sandbox parent directory |
-| `PROFILE_PLAYBACK_RUN_ROOT` | `$BASE/runs` | Clean workspace destination for replays |
-| `PROFILE_PLAYBACK_FORK_ROOT` | `$BASE/fork` | Fork artifact storage |
-| `PROFILE_PLAYBACK_ARCHIVE_ROOT` | `$BASE/archive` | Archive output storage |
+| `PROFILE_PLAYBACK_RUN_ROOT` | `$BASE/runs` | Clean workspace destination for replays (UUID-named sandboxes) |
+| `PROFILE_PLAYBACK_FORK_ROOT` | `$BASE/fork` | Fork artifact storage (UUID suffix from generated run id) |
+| `PROFILE_PLAYBACK_ARCHIVE_ROOT` | `$BASE/archive` | Archive output storage (per-archive UUID) |
 | `PROFILE_PLAYBACK_BASE_URL` | `https://wc.bearhive.duckdns.org/weppcloud` | Target WEPPcloud instance |
 | `ADMIN_EMAIL` | *(required)* | Admin credentials for automated login |
 | `ADMIN_PASSWORD` | *(required)* | Admin credentials for automated login |
@@ -283,7 +283,7 @@ wctl run-archive-profile backed-globule \
   --timeout 300
 ```
 
-Both commands return JSON with job IDs, status, and artifact locations. Fork creates new run under `playback/fork/`, archive materializes zip files under `playback/archive/<runid>/`.
+Both commands return JSON with job IDs, status, and artifact locations. Fork creates new run under `playback/fork/<fork_uuid>/`, archive materializes zip files under `playback/archive/<archive_uuid>/`.
 
 ### CI Pipeline Integration
 
