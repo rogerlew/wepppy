@@ -86,6 +86,21 @@ def _load_mod_attribute(name: str):
         if hasattr(module, name):
             return getattr(module, name)
 
+    for stem, module_path in _LEGACY_MODULE_REDIRECTS.items():
+        if '.mods.' not in module_path:
+            continue
+        module = importlib.import_module(module_path)
+        exported = getattr(module, '__all__', ())
+        try:
+            iterator = iter(exported)
+        except TypeError:
+            continue
+        for item in iterator:
+            if isinstance(item, str) and item == name:
+                if hasattr(module, name):
+                    return getattr(module, name)
+                break
+
     raise AttributeError(f"module 'wepppy.nodb.mods' has no attribute '{name}'")
 
 

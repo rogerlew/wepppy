@@ -91,7 +91,7 @@ class TaskEnum(Enum):
             TaskEnum.build_landuse: '🌲',
             TaskEnum.build_soils: '🪱',
             TaskEnum.build_climate: '☁️',
-            TaskEnum.fetch_rap_ts: '🗺️',
+            TaskEnum.fetch_rap_ts: '🐮',
             TaskEnum.run_wepp_hillslopes: '💧',
             TaskEnum.run_wepp_watershed: '🏃',
             TaskEnum.run_observed: '📊',

@@ -374,7 +374,9 @@ def read_arc(fn, dtype=np.float64):
 
     ds = rasterio.open(fn)
     transform = ds.transform.to_gdal()
-    proj = ds.crs.to_proj4()
+    proj = None
+    if ds.crs:
+        proj = ds.crs.to_proj4()
 
     with open(fn) as fp:
         data = fp.readlines()

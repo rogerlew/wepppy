@@ -83,14 +83,14 @@ describe("RangelandCover controller", () => {
                 <div id="rangeland_cover_rap_year_div" data-rangeland-rap-section>
                     <input id="rap_year" name="rap_year" value="2020" data-rangeland-input="rap-year">
                 </div>
-                <input id="input_bunchgrass_cover" name="bunchgrass_cover" value="10">
-                <input id="input_forbs_cover" name="forbs_cover" value="20">
-                <input id="input_sodgrass_cover" name="sodgrass_cover" value="30">
-                <input id="input_shrub_cover" name="shrub_cover" value="40">
-                <input id="input_basal_cover" name="basal_cover" value="15">
-                <input id="input_rock_cover" name="rock_cover" value="5">
-                <input id="input_litter_cover" name="litter_cover" value="25">
-                <input id="input_cryptogams_cover" name="cryptogams_cover" value="5">
+                <input id="input_bunchgrass_cover" name="input_bunchgrass_cover" value="10">
+                <input id="input_forbs_cover" name="input_forbs_cover" value="20">
+                <input id="input_sodgrass_cover" name="input_sodgrass_cover" value="30">
+                <input id="input_shrub_cover" name="input_shrub_cover" value="40">
+                <input id="input_basal_cover" name="input_basal_cover" value="15">
+                <input id="input_rock_cover" name="input_rock_cover" value="5">
+                <input id="input_litter_cover" name="input_litter_cover" value="25">
+                <input id="input_cryptogams_cover" name="input_cryptogams_cover" value="5">
                 <button id="btn_build_rangeland_cover" type="button" data-rangeland-action="build">
                     Build
                 </button>
@@ -293,5 +293,111 @@ describe("RangelandCover controller", () => {
         const failedEvent = eventLog.find((item) => item.event === "rangeland:run:failed");
         expect(failedEvent).toBeDefined();
         expect(document.querySelector("#status").textContent).toContain("Failed to build rangeland cover.");
+    });
+});
+
+describe("RangelandCover legacy compatibility", () => {
+    let eventLog;
+
+    beforeEach(async () => {
+        jest.resetModules();
+        eventLog = [];
+
+        document.body.innerHTML = `
+            <form id="rangeland_cover_form">
+                <div id="info"></div>
+                <div id="status"></div>
+                <div id="stacktrace"></div>
+                <div id="rq_job"></div>
+                <input type="radio" name="rangeland_cover_mode" value="0" checked>
+                <input id="rap_year" name="rap_year" value="2021">
+                <input id="bunchgrass" name="bunchgrass_cover" value="12">
+                <input id="forbs" name="forbs_cover" value="8">
+                <input id="sodgrass" name="sodgrass_cover" value="18">
+                <input id="shrub" name="shrub_cover" value="28">
+                <input id="basal" name="basal_cover" value="14">
+                <input id="rock" name="rock_cover" value="6">
+                <input id="litter" name="litter_cover" value="22">
+                <input id="cryptogams" name="cryptogams_cover" value="4">
+                <button id="btn_build_rangeland_cover" type="button" data-rangeland-action="build"></button>
+            </form>
+            <p id="hint_build_rangeland_cover"></p>
+        `;
+
+        await import("../dom.js");
+        await import("../forms.js");
+
+        global.WCEvents = {
+            useEventMap: jest.fn((events, emitter) => emitter),
+            createEmitter: () => {
+                const listeners = {};
+                return {
+                    emit(event, payload) {
+                        eventLog.push({ event, payload });
+                        const bucket = listeners[event] || [];
+                        bucket.slice().forEach((fn) => fn(payload));
+                        return bucket.length > 0;
+                    },
+                    on(event, handler) {
+                        (listeners[event] = listeners[event] || []).push(handler);
+                        return () => {
+                            listeners[event] = (listeners[event] || []).filter((fn) => fn !== handler);
+                        };
+                    }
+                };
+            }
+        };
+
+        const { base: baseInstance } = createControlBaseStub({
+            pushResponseStacktrace: jest.fn(),
+            pushErrorStacktrace: jest.fn(),
+            triggerEvent: jest.fn(),
+            set_rq_job_id: jest.fn()
+        });
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
+        global.WCHttp = {
+            request: jest.fn(() => Promise.resolve({ body: "" })),
+            postJson: jest.fn(() => Promise.resolve({ body: { Success: true } })),
+            isHttpError: jest.fn(() => false)
+        };
+        global.url_for_run = jest.fn((path) => path);
+
+        await import("../rangeland_cover.js");
+        window.RangelandCover.getInstance();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        delete window.RangelandCover;
+        delete global.controlBase;
+        delete global.url_for_run;
+        delete global.WCHttp;
+        delete global.WCEvents;
+        if (global.WCDom) {
+            delete global.WCDom;
+        }
+        if (global.WCForms) {
+            delete global.WCForms;
+        }
+        document.body.innerHTML = "";
+    });
+
+    test("reads defaults from legacy cover field names", () => {
+        const configEvent = eventLog.find((item) => item.event === "rangeland:config:loaded");
+        expect(configEvent).toBeDefined();
+        expect(configEvent.payload).toEqual({
+            mode: 0,
+            rapYear: 2021,
+            defaults: {
+                bunchgrass: 12,
+                forbs: 8,
+                sodgrass: 18,
+                shrub: 28,
+                basal: 14,
+                rock: 6,
+                litter: 22,
+                cryptogams: 4
+            }
+        });
     });
 });

@@ -152,17 +152,30 @@ var RangelandCover = (function () {
         return value;
     }
 
+    function resolveFieldValue(values, keys) {
+        if (!values) {
+            return undefined;
+        }
+        for (var i = 0; i < keys.length; i += 1) {
+            var key = keys[i];
+            if (Object.prototype.hasOwnProperty.call(values, key)) {
+                return values[key];
+            }
+        }
+        return undefined;
+    }
+
     function readFormState(forms, formElement) {
         var values = forms.serializeForm(formElement, { format: "json" }) || {};
         var defaults = {
-            bunchgrass: parseCoverValue(values.bunchgrass_cover),
-            forbs: parseCoverValue(values.forbs_cover),
-            sodgrass: parseCoverValue(values.sodgrass_cover),
-            shrub: parseCoverValue(values.shrub_cover),
-            basal: parseCoverValue(values.basal_cover),
-            rock: parseCoverValue(values.rock_cover),
-            litter: parseCoverValue(values.litter_cover),
-            cryptogams: parseCoverValue(values.cryptogams_cover)
+            bunchgrass: parseCoverValue(resolveFieldValue(values, ["input_bunchgrass_cover", "bunchgrass_cover"])),
+            forbs: parseCoverValue(resolveFieldValue(values, ["input_forbs_cover", "forbs_cover"])),
+            sodgrass: parseCoverValue(resolveFieldValue(values, ["input_sodgrass_cover", "sodgrass_cover"])),
+            shrub: parseCoverValue(resolveFieldValue(values, ["input_shrub_cover", "shrub_cover"])),
+            basal: parseCoverValue(resolveFieldValue(values, ["input_basal_cover", "basal_cover"])),
+            rock: parseCoverValue(resolveFieldValue(values, ["input_rock_cover", "rock_cover"])),
+            litter: parseCoverValue(resolveFieldValue(values, ["input_litter_cover", "litter_cover"])),
+            cryptogams: parseCoverValue(resolveFieldValue(values, ["input_cryptogams_cover", "cryptogams_cover"]))
         };
 
         return {

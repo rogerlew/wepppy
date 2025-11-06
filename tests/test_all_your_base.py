@@ -3,6 +3,7 @@ import stat
 from pathlib import Path
 
 import pytest
+import numpy as np
 
 from wepppy.all_your_base.all_your_base import (
     RGBA,
@@ -24,6 +25,7 @@ from wepppy.all_your_base.all_your_base import (
     try_parse_float,
 )
 from wepppy.all_your_base.all_your_base import RowData
+from wepppy.all_your_base.geo import read_raster
 
 
 def test_rgba_fields_are_instance_specific() -> None:
@@ -121,3 +123,28 @@ def test_parse_name_units_and_rowdata_iteration() -> None:
     assert list(row) == [(42, "m3/s"), (1.2, None)]
     with pytest.raises(KeyError):
         _ = row["missing"]
+
+
+def test_read_arc_handles_missing_crs(tmp_path: Path) -> None:
+    grid = tmp_path / "grid.asc"
+    grid.write_text(
+        "\n".join(
+            [
+                "ncols        2",
+                "nrows        2",
+                "xllcorner    0",
+                "yllcorner    0",
+                "cellsize     1",
+                "nodata_value -9999",
+                "1 2",
+                "3 4",
+            ]
+        ),
+        encoding="ascii",
+    )
+
+    data, transform, proj = read_raster(str(grid), dtype=np.float32)
+
+    assert data.shape == (2, 2)
+    assert transform[1] == 1
+    assert proj is None

@@ -27,7 +27,7 @@ class ShrublandMap:
         self.fname = fname
 
         data, transform, proj = read_raster(fname, dtype=np.int32)
-        data = np.array(data, dtype=np.float)
+        data = np.array(data, dtype=np.float64)
         if 'height' in fname:
             data = np.ma.masked_greater(data, 997)
         else:
