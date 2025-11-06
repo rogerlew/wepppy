@@ -9,6 +9,10 @@
   - See docs/ui-docs/control-ui-styling/preflight_behavior.md for architecture
 #}
 
+{% set hide_landuse_wepp = 'rhem' in ron.mods %}
+
+{% set disabled_controllers = ['landuse', 'landuseModify', 'wepp'] if hide_landuse_wepp else [] %}
+
 {% block head_extras %}
 {{ super() }}
 <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
@@ -51,7 +55,9 @@
         {% if 'rangeland_cover' in ron.mods %}
         <li><a href="#rangeland-cover" class="nav-link">Rangeland Cover</a></li>
         {% endif %}
+        {% if not hide_landuse_wepp %}
         <li><a href="#landuse" class="nav-link">Landuse</a></li>
+        {% endif %}
         <li><a href="#soils" class="nav-link">Soils</a></li>
         <li><a href="#climate" class="nav-link">Climate</a></li>
         {% if 'rap_ts' in ron.mods %}
@@ -60,7 +66,9 @@
         {% if 'treatments' in ron.mods %}
         <li><a href="#treatments" class="nav-link">Treatments</a></li>
         {% endif %}
+        {% if not hide_landuse_wepp %}
         <li><a href="#wepp" class="nav-link">WEPP</a></li>
+        {% endif %}
         {% if 'ash' in ron.mods %}
         <li><a href="#ash" class="nav-link">Ash Transport</a></li>
         {% endif %}
@@ -110,9 +118,11 @@
       </section>
       {% endif %}
 
+      {% if not hide_landuse_wepp %}
       <section id="landuse" class="wc-stack">
         {% include 'controls/landuse_pure.htm' %}
       </section>
+      {% endif %}
 
       <section id="soils" class="wc-stack">
         {% include 'controls/soil_pure.htm' %}
@@ -134,9 +144,11 @@
       </section>
       {% endif %}
 
+      {% if not hide_landuse_wepp %}
       <section id="wepp" class="wc-stack">
         {% include 'controls/wepp_pure.htm' %}
       </section>
+      {% endif %}
 
       {% if 'ash' in ron.mods %}
       <section id="ash" class="wc-stack">

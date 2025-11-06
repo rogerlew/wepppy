@@ -29,6 +29,7 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		"soils":           false,
 		"climate":         false,
 		"rap_ts":          false,
+		"rhem":            false,
 		"wepp":            false,
 		"observed":        false,
 		"debris":          false,
@@ -43,12 +44,14 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 	check["landuse"] = safeGT(prep["timestamps:build_landuse"], prep["timestamps:abstract_watershed"])
 
 	buildSoils := prep["timestamps:build_soils"]
-	check["soils"] = safeGT(buildSoils, prep["timestamps:abstract_watershed"]) &&
-		safeGT(buildSoils, prep["timestamps:build_landuse"])
+	if safeGT(buildSoils, prep["timestamps:abstract_watershed"]) {
+		afterLanduse := safeGT(buildSoils, prep["timestamps:build_landuse"])
+		afterRangeland := safeGT(buildSoils, prep["timestamps:build_rangeland_cover"])
+		check["soils"] = afterLanduse || afterRangeland
+	}
 
 	buildRangeland := prep["timestamps:build_rangeland_cover"]
-	check["rangeland_cover"] = safeGT(buildRangeland, prep["timestamps:abstract_watershed"]) &&
-		safeGT(buildRangeland, prep["timestamps:build_landuse"])
+	check["rangeland_cover"] = buildRangeland != ""
 
 	check["climate"] = safeGT(prep["timestamps:build_climate"], prep["timestamps:abstract_watershed"])
 	check["rap_ts"] = safeGT(prep["timestamps:build_rap_ts"], prep["timestamps:build_climate"])
@@ -72,6 +75,8 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		safeGT(prep["timestamps:run_watar"], prep["timestamps:build_soils"]) &&
 		safeGT(prep["timestamps:run_watar"], prep["timestamps:build_climate"]) &&
 		safeGT(prep["timestamps:run_watar"], runWepp)
+
+	check["rhem"] = prep["timestamps:run_rhem"] != ""
 
 	check["dss_export"] = safeGT(prep["timestamps:dss_export"], runWepp)
 

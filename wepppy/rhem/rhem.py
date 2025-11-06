@@ -181,13 +181,14 @@ def make_parameter_file(scn_name,
         kss_seg_shrub_0 = pow(10, kss_seg_shrub_0)
 
     # 2) CALCULATE AVERAGE KSS WHEN TOTAL FOLIAR COVER IS CLOSE TO 0
+    kss_average = None
     if 0 > totalcover < 0.02:
         kss_average = totalcover/0.02 * ((shrubs_cover/totalcover) * kss_seg_shrub +
                                          (sodgrass_cover/totalcover) * kss_seg_sod +
                                          (bunchgrass_cover/totalcover) * kss_seg_bunch +
                                          (forbs_cover/totalcover) * kss_seg_forbs) + \
                       (0.02 - totalcover)/0.02 * kss_seg_shrub_0
-    else:
+    elif totalcover >= 0.02:
         kss_average = (shrubs_cover/totalcover) * kss_seg_shrub + \
                        (sodgrass_cover/totalcover) * kss_seg_sod + \
                        (bunchgrass_cover/totalcover) * kss_seg_bunch + \

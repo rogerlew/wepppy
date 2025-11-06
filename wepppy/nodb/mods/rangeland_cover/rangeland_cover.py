@@ -324,7 +324,11 @@ class RangelandCover(NoDbBase):
                     shrub_normalized = rap_data.shrub_normalized
                     tree_normalized = rap_data.tree_normalized
 
-                    annual_fraction = annual_forb_and_grass_normalized / (annual_forb_and_grass_normalized + perennial_forb_and_grass_normalized)
+                    try:
+                        annual_fraction = annual_forb_and_grass_normalized / (annual_forb_and_grass_normalized + perennial_forb_and_grass_normalized)
+                    except ZeroDivisionError:
+                        annual_fraction = 0.0
+
                     perennial_fraction = 1.0 - annual_fraction
 
                     # assuming forb / (annual_grass + perenial_grass) = annual_forb / annual_grass = perennial_forb / perennial_grass

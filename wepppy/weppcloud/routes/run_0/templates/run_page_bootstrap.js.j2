@@ -46,6 +46,7 @@
 {% set disturbed_uniform = disturbed.uniform_severity if disturbed is not none else None %}
 {% set baer_mode = baer.sbs_mode if baer is not none else disturbed_mode %}
 {% set baer_uniform = baer.uniform_severity if baer is not none else disturbed_uniform %}
+{% set hide_landuse_wepp = 'rhem' in mods_list %}
 
     var sitePrefix = {{ site_prefix | tojson }};
     var runId = {{ ron.runid | tojson }};
@@ -76,7 +77,8 @@
                 "omni": 'omni' in mods_list,
                 "rhem": 'rhem' in mods_list,
                 "dss_export": 'dss_export' in mods_list,
-                "path_ce": 'path_ce' in mods_list
+                "path_ce": 'path_ce' in mods_list,
+                "debris_flow": 'debris_flow' in mods_list
             }
         },
         "flags": {
@@ -141,7 +143,8 @@
             "baer": {"mode": baer_mode, "uniformSeverity": baer_uniform}
         },
         "ui": {
-            "tocTaskEmojis": toc_task_emojis
+            "tocTaskEmojis": toc_task_emojis,
+            "disabledControllers": disabled_controllers
         }
     } | tojson }};
 
@@ -164,10 +167,17 @@
         }
     }
 
-    function createBootstrapEntries(modFlags) {
+    function createBootstrapEntries(context) {
+        var modFlags = context.mods && context.mods.flags ? context.mods.flags : {};
+        var disabledControllers = new Set(
+            (context.ui && Array.isArray(context.ui.disabledControllers)) ? context.ui.disabledControllers : []
+        );
         var entries = [];
 
         function add(name, symbol) {
+            if (disabledControllers.has(name)) {
+                return;
+            }
             if (!symbol || typeof symbol.getInstance !== "function") {
                 return;
             }
@@ -187,7 +197,9 @@
         add("observed", typeof Observed !== "undefined" ? Observed : null);
         add("wepp", typeof Wepp !== "undefined" ? Wepp : null);
         add("dssExport", typeof DssExport !== "undefined" ? DssExport : null);
-        add("debrisFlow", typeof DebrisFlow !== "undefined" ? DebrisFlow : null);
+        if (modFlags.debris_flow) {
+            add("debrisFlow", typeof DebrisFlow !== "undefined" ? DebrisFlow : null);
+        }
         add("rapTs", typeof RAP_TS !== "undefined" ? RAP_TS : null);
 
         if (modFlags.disturbed || modFlags.baer) {
@@ -218,7 +230,7 @@
 
     function bootstrapControllers(context) {
         var helper = window.WCControllerBootstrap || null;
-        var entries = createBootstrapEntries(context.mods && context.mods.flags ? context.mods.flags : {});
+        var entries = createBootstrapEntries(context);
 
         if (helper && typeof helper.setContext === "function") {
             helper.setContext(context);

@@ -46,8 +46,8 @@ def report_rhem_run_summary(runid, config):
 
         return render_template(
             'reports/rhem_run_summary.htm',
-            runid,
-            config,
+            runid=runid,
+            config=config,
             subs_n=subs_n,
             rhempost=rhempost,
             ron=ron,
@@ -69,8 +69,8 @@ def report_rhem_avg_annuals(runid, config):
 
         return render_template(
             'reports/rhem/avg_annual_summary.htm',
-            runid,
-            config,
+            runid=runid,
+            config=config,
             rhempost=rhempost,
             ron=ron,
             unitizer_nodb=unitizer,
@@ -94,8 +94,8 @@ def report_rhem_return_periods(runid, config):
 
         return render_template(
             'reports/rhem/return_periods.htm',
-            runid,
-            config,
+            runid=runid,
+            config=config,
             unitizer_nodb=unitizer,
             precisions=UNITIZER_PRECISIONS,
             rhempost=rhempost,

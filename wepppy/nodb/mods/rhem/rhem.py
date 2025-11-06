@@ -16,7 +16,6 @@ Key inputs:
 Outputs and integrations:
 * Parameter, storm, and run files inside `rhem/runs`.
 * RHEM output summaries (`*.sum`) in `rhem/output` consumed by `RhemPost`.
-* Optional WEPP hillslope runs triggered via `run_wepp_hillslopes`.
 """
 
 from __future__ import annotations
@@ -33,7 +32,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple, Uni
 
 from wepppy.all_your_base import NCPU
 from wepppy.nodb.base import NoDbBase
-from wepppy.nodb.core import Climate, Soils, Watershed, Wepp
+from wepppy.nodb.core import Climate, Soils, Watershed
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.rhem import make_hillslope_run, make_parameter_file, run_hillslope
 from wepppy.topo.watershed_abstraction import SlopeFile
@@ -289,15 +288,8 @@ class Rhem(NoDbBase):
         rhempost = RhemPost.getInstance(self.wd)
         rhempost.run_post()
 
-        arc_export(self.wd)
-
     def report_loss(self) -> None:
         raise NotImplementedError
 
     def report_return_periods(self) -> None:
         raise NotImplementedError
-
-    def run_wepp_hillslopes(self) -> None:
-        wepp = Wepp.getInstance(self.wd)
-        wepp.prep_hillslopes()
-        wepp.run_hillslopes()
