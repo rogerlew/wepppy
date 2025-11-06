@@ -693,10 +693,12 @@ var Climate = (function () {
                 .then(function (response) {
                     var body = response.body || {};
                     if (body.Success === true) {
-                        climate.triggerEvent("CLIMATE_SETSTATIONMODE_TASK_COMPLETED", body);
-                        if (!opts.skipRefresh) {
-                            climate.refreshStationSelection();
-                        }
+                        var eventPayload = Object.assign({}, body, {
+                            mode: parsedMode,
+                            skipRefresh: Boolean(opts.skipRefresh),
+                            skipMonthlies: Boolean(opts.skipMonthlies)
+                        });
+                        climate.triggerEvent("CLIMATE_SETSTATIONMODE_TASK_COMPLETED", eventPayload);
                         return body;
                     }
                     climate.pushResponseStacktrace(climate, body);
@@ -1000,8 +1002,14 @@ var Climate = (function () {
         climate.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "CLIMATE_SETSTATIONMODE_TASK_COMPLETED") {
-                climate.refreshStationSelection();
-                climate.viewStationMonthlies();
+                var skipRefresh = payload && payload.skipRefresh;
+                var skipMonthlies = payload && payload.skipMonthlies;
+                if (!skipRefresh) {
+                    climate.refreshStationSelection();
+                }
+                if (!skipMonthlies) {
+                    climate.viewStationMonthlies();
+                }
             } else if (normalized === "CLIMATE_SETSTATION_TASK_COMPLETED") {
                 climate.viewStationMonthlies();
             } else if (normalized === "CLIMATE_BUILD_TASK_COMPLETED" || normalized === "CLIMATE_BUILD_COMPLETE") {

@@ -1144,7 +1144,10 @@ class StationMeta:
         self.longitude = longitude
         self.years = years
         self.type = _type
-        self.elevation = elevation
+        try:
+            self.elevation = float(elevation)
+        except (TypeError, ValueError):
+            self.elevation = None
         self.tp5 = tp5
         self.tp6 = tp6
         self.annual_ppt = annual_ppt
@@ -1327,6 +1330,27 @@ class CligenStationsManager:
                 return station
         return None
 
+    @staticmethod
+    def _resolve_station_elevation(station: StationMeta) -> float:
+        """
+        Return the best available elevation estimate for a station.
+        Prefers the value stored in the station metadata (populated from the
+        SQLite databases). Falls back to elevationquery only when the station
+        lacks an embedded elevation.
+        """
+        if station.elevation is not None and not math.isnan(station.elevation):
+            return station.elevation
+
+        try:
+            resolved = elevationquery(station.longitude, station.latitude)
+        except Exception:
+            return np.nan
+
+        try:
+            return float(resolved)
+        except (TypeError, ValueError):
+            return np.nan
+
     def get_station_heuristic_search(self, location, pool=10):
         return self.get_stations_heuristic_search(location, pool=pool)[0]
 
@@ -1339,11 +1363,13 @@ class CligenStationsManager:
         lat_ranks = sorted(lat_ranks, key=lambda x: x[1])
 
         elev = elevationquery(*location)
-        stations_elevs = np.array([elevationquery(s.longitude, s.latitude)
-                                   for s in stations])
-        stations_elevs -= elev
-        stations_elevs = np.abs(stations_elevs)
-        elev_ranks = [(i, err) for i, err in enumerate(stations_elevs)]
+        stations_elevs = np.array(
+            [self._resolve_station_elevation(s) for s in stations],
+            dtype=float
+        )
+        elev_diffs = np.abs(stations_elevs - elev)
+        elev_diffs = np.where(np.isnan(elev_diffs), np.inf, elev_diffs)
+        elev_ranks = [(i, err) for i, err in enumerate(elev_diffs)]
         elev_ranks = sorted(elev_ranks, key=lambda x: x[1])
 
         ppts = get_prism_monthly_ppt(*location, units='inch')
@@ -1381,11 +1407,13 @@ class CligenStationsManager:
                      for i, s in enumerate(stations)]
         lat_ranks = sorted(lat_ranks, key=lambda x: x[1])
 
-        stations_elevs = np.array([elevationquery(s.longitude, s.latitude)
-                                   for s in stations])
-        stations_elevs -= elev
-        stations_elevs = np.abs(stations_elevs)
-        elev_ranks = [(i, err) for i, err in enumerate(stations_elevs)]
+        stations_elevs = np.array(
+            [self._resolve_station_elevation(s) for s in stations],
+            dtype=float
+        )
+        elev_diffs = np.abs(stations_elevs - elev)
+        elev_diffs = np.where(np.isnan(elev_diffs), np.inf, elev_diffs)
+        elev_ranks = [(i, err) for i, err in enumerate(elev_diffs)]
         elev_ranks = sorted(elev_ranks, key=lambda x: x[1])
 
         ppts = get_eobs_monthly_ppt(*location, units='inch')
@@ -1436,11 +1464,13 @@ class CligenStationsManager:
                      for i, s in enumerate(stations)]
         lat_ranks = sorted(lat_ranks, key=lambda x: x[1])
 
-        stations_elevs = np.array([elevationquery(s.longitude, s.latitude)
-                                   for s in stations])
-        stations_elevs -= elev
-        stations_elevs = np.abs(stations_elevs)
-        elev_ranks = [(i, err) for i, err in enumerate(stations_elevs)]
+        stations_elevs = np.array(
+            [self._resolve_station_elevation(s) for s in stations],
+            dtype=float
+        )
+        elev_diffs = np.abs(stations_elevs - elev)
+        elev_diffs = np.where(np.isnan(elev_diffs), np.inf, elev_diffs)
+        elev_ranks = [(i, err) for i, err in enumerate(elev_diffs)]
         elev_ranks = sorted(elev_ranks, key=lambda x: x[1])
 
         ppts = get_agdc_monthly_ppt(*location, units='inch')

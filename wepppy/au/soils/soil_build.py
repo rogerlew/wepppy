@@ -90,6 +90,7 @@ def build_asris_soils(orders, soil_dir, status_channel=None):
     soils = {}
 
     for topaz_id, (lng, lat) in orders:
+        topaz_id = str(topaz_id)
         
         d = query_asris(lng, lat)
 

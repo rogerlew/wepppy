@@ -46,6 +46,8 @@ def build_esdac_soils(orders, soils_dir, res_lyr_ksat_threshold=2.0, status_chan
     soils = {}
     domsoil_d = {}
     for topaz_id, key, h0, desc in results:
+        topaz_id = str(topaz_id)
+        key = str(key)
         if key not in soils:
             fname = key + '.sol'
             soils[key] = SoilSummary(

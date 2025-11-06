@@ -1288,7 +1288,7 @@ class Disturbed(NoDbBase):
                 if (int(topaz_id) - 4) % 10 == 0:
                     continue
 
-                disturbed_mukey = self.modify_soil(topaz_id, landuse, soils, _land_soil_replacements_d)
+                disturbed_mukey = self.modify_soil(str(topaz_id), landuse, soils, _land_soil_replacements_d)
                 assert disturbed_mukey is not None, topaz_id
 
                 soils.domsoil_d[topaz_id] = disturbed_mukey
