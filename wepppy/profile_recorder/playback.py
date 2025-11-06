@@ -157,6 +157,11 @@ class PlaybackSession:
             if "/elevationquery/" in effective_path:
                 self.results.append((request_id, f"{effective_path}: skipped recorded elevation query"))
                 continue
+            if "/recorder/promote" in effective_path:
+                self.results.append((request_id, f"{effective_path}: skipped recorder promote event"))
+                if self.verbose:
+                    self._log(f"{request_id} skipped recorder promote")
+                continue
 
             summary = req.get("requestMeta") or {}
             json_payload: Optional[dict] = None

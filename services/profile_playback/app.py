@@ -407,6 +407,17 @@ def _prepare_sandbox_run(profile_root: Path, run_id: str) -> tuple[str, Path]:
         break
 
     if selected_config_dir:
+        available_config_slugs = sorted(cfg.stem for cfg in config_files)
+        if not available_config_slugs:
+            raise ProfileOperationError(
+                f"Profile seed config missing .cfg files in {selected_config_dir}"
+            )
+        if active_config_slug and active_config_slug not in available_config_slugs:
+            raise ProfileOperationError(
+                "Profile seed active_config.txt references "
+                f"'{active_config_slug}.cfg' but only {available_config_slugs} exist"
+            )
+
         for item in sorted(selected_config_dir.iterdir()):
             if item.name == "active_config.txt":
                 continue
@@ -416,13 +427,18 @@ def _prepare_sandbox_run(profile_root: Path, run_id: str) -> tuple[str, Path]:
             else:
                 shutil.copy2(item, target_path)
 
-        primary_cfg = config_files[0]
-        config_slug = active_config_slug or primary_cfg.stem
+        config_slug = active_config_slug or available_config_slugs[0]
 
         try:
             (sandbox_run_dir / "active_config.txt").write_text(config_slug, encoding="utf-8")
         except OSError as exc:
             _RUNNER_LOGGER.warning("Unable to write active config marker for %s: %s", sandbox_run_dir, exc)
+
+        config_path = sandbox_run_dir / f"{config_slug}.cfg"
+        if not config_path.exists():
+            raise ProfileOperationError(
+                f"Profile seed config failed to copy {config_slug}.cfg into sandbox {sandbox_run_dir}"
+            )
 
         Ron(str(sandbox_run_dir), f"{config_slug}.cfg", run_group="profile", group_name="tmp")
     else:

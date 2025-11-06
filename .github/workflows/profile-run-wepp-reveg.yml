@@ -52,7 +52,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p telemetry
-          wctl run-test-profile daymet-reveg 2>&1 | tee telemetry/wepp-reveg-profile-run.log
+          wctl run-test-profile us-reveg 2>&1 | tee telemetry/wepp-reveg-profile-run.log
 
       - name: Upload profile playback log
         if: always()
