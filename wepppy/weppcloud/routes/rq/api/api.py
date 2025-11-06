@@ -522,7 +522,7 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
         except (TypeError, ValueError):
             return None
 
-    def _to_bool(value, default=False):
+    def _to_bool(value, default=None):
         if value is None:
             return default
         if isinstance(value, bool):
@@ -537,14 +537,23 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
             return bool(value)
         return default
 
-    pkcsa = _to_float(payload.get('pkcsa'))
-    clip_hillslope_length = _to_float(payload.get('clip_hillslope_length'))
-    walk_flowpaths = _to_bool(payload.get('walk_flowpaths'))
-    clip_hillslopes = _to_bool(payload.get('clip_hillslopes'))
-    mofe_target_length = _to_float(payload.get('mofe_target_length'))
-    mofe_buffer = _to_bool(payload.get('mofe_buffer'))
-    bieger2015_widths = _to_bool(payload.get('bieger2015_widths'))
-    mofe_buffer_length = _to_float(payload.get('mofe_buffer_length'))
+    def _apply_watershed_updates(target: Watershed, updates: dict[str, Any]) -> None:
+        if not updates:
+            return
+        if 'clip_hillslopes' in updates:
+            target.clip_hillslopes = bool(updates['clip_hillslopes'])
+        if 'walk_flowpaths' in updates:
+            target.walk_flowpaths = bool(updates['walk_flowpaths'])
+        if 'clip_hillslope_length' in updates:
+            target.clip_hillslope_length = float(updates['clip_hillslope_length'])
+        if 'mofe_target_length' in updates:
+            target.mofe_target_length = float(updates['mofe_target_length'])
+        if 'mofe_buffer' in updates:
+            target.mofe_buffer = bool(updates['mofe_buffer'])
+        if 'mofe_buffer_length' in updates:
+            target.mofe_buffer_length = float(updates['mofe_buffer_length'])
+        if 'bieger2015_widths' in updates:
+            target.bieger2015_widths = bool(updates['bieger2015_widths'])
 
     try:
         wd = get_wd(runid)
@@ -552,44 +561,46 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
 
         updates: dict[str, Any] = {}
 
-        if clip_hillslopes is not None:
-            updates['clip_hillslopes'] = clip_hillslopes
+        if 'clip_hillslopes' in payload:
+            value = _to_bool(payload.get('clip_hillslopes'))
+            if value is not None:
+                updates['clip_hillslopes'] = value
 
-        if walk_flowpaths is not None:
-            updates['walk_flowpaths'] = walk_flowpaths
+        if 'walk_flowpaths' in payload:
+            value = _to_bool(payload.get('walk_flowpaths'))
+            if value is not None:
+                updates['walk_flowpaths'] = value
 
-        if clip_hillslope_length is not None:
-            updates['clip_hillslope_length'] = clip_hillslope_length
+        if 'clip_hillslope_length' in payload:
+            value = _to_float(payload.get('clip_hillslope_length'))
+            if value is not None:
+                updates['clip_hillslope_length'] = value
 
-        if mofe_target_length is not None:
-            updates['mofe_target_length'] = mofe_target_length
+        if 'mofe_target_length' in payload:
+            value = _to_float(payload.get('mofe_target_length'))
+            if value is not None:
+                updates['mofe_target_length'] = value
 
-        if mofe_buffer is not None:
-            updates['mofe_buffer'] = mofe_buffer
+        if 'mofe_buffer' in payload:
+            value = _to_bool(payload.get('mofe_buffer'))
+            if value is not None:
+                updates['mofe_buffer'] = value
 
-        if mofe_buffer_length is not None:
-            updates['mofe_buffer_length'] = mofe_buffer_length
+        if 'mofe_buffer_length' in payload:
+            value = _to_float(payload.get('mofe_buffer_length'))
+            if value is not None:
+                updates['mofe_buffer_length'] = value
 
-        if bieger2015_widths is not None:
-            updates['bieger2015_widths'] = bieger2015_widths
+        if 'bieger2015_widths' in payload:
+            value = _to_bool(payload.get('bieger2015_widths'))
+            if value is not None:
+                updates['bieger2015_widths'] = value
 
         if watershed.run_group == 'batch':
-            with watershed.locked():
-                if 'clip_hillslopes' in updates:
-                    watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
-                if 'walk_flowpaths' in updates:
-                    watershed._walk_flowpaths = bool(updates['walk_flowpaths'])  # type: ignore[attr-defined]
-                if 'clip_hillslope_length' in updates:
-                    watershed._clip_hillslope_length = float(updates['clip_hillslope_length'])  # type: ignore[attr-defined]
-                if 'mofe_target_length' in updates:
-                    watershed._mofe_target_length = float(updates['mofe_target_length'])  # type: ignore[attr-defined]
-                if 'mofe_buffer' in updates:
-                    watershed._mofe_buffer = bool(updates['mofe_buffer'])  # type: ignore[attr-defined]
-                if 'mofe_buffer_length' in updates:
-                    watershed._mofe_buffer_length = float(updates['mofe_buffer_length'])  # type: ignore[attr-defined]
-                if 'bieger2015_widths' in updates:
-                    watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
+            _apply_watershed_updates(watershed, updates)
             return success_factory('Set watershed inputs for batch processing')
+
+        _apply_watershed_updates(watershed, updates)
 
         try:
             prep = RedisPrep.getInstance(wd)
@@ -600,7 +611,7 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
                 q = Queue(connection=redis_conn)
                 job = q.enqueue_call(
                     build_subcatchments_and_abstract_watershed_rq,
-                    (runid, updates),
+                    (runid,),
                     timeout=TIMEOUT,
                 )
                 prep.set_rq_job_id('build_subcatchments_and_abstract_watershed_rq', job.id)

@@ -135,7 +135,9 @@ def test_report_rhem_run_summary_provides_context(rhem_client):
     assert response.get_data(as_text=True) == "render:reports/rhem_run_summary.htm"
     template, args, kwargs = latest_render(captured)
     assert template == "reports/rhem_run_summary.htm"
-    assert args == (RUN_ID, CONFIG)
+    assert args == ()
+    assert kwargs["runid"] == RUN_ID
+    assert kwargs["config"] == CONFIG
     assert kwargs["subs_n"] == 2
     assert isinstance(kwargs["rhempost"], DummyRhemPost)
     assert kwargs["ron"].wd.endswith(RUN_ID)
