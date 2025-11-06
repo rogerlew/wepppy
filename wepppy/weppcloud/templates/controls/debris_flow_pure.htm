@@ -7,6 +7,10 @@
     Runs the Cannon et&nbsp;al. (2010) debris-flow probability model for the current watershed.
     Results may differ from newer formulations such as Staley (2016, 2017).
   </p>
+  <p class="wc-text-muted">
+    Optional overrides let you fine-tune the soil parameters or select a precipitation datasource.
+    Leave fields blank to use the values derived from the Soils controller and the default datasource order.
+  </p>
 {% endset %}
 
 {% set status_panel_override %}
@@ -27,6 +31,7 @@
      title="Debris Flow Analysis",
      collapsible=False,
      description=description,
+     form_attrs={"data-debris-has-results": "true" if debris_flow.volume is not none else "false"},
      status_panel_override=status_panel_override,
      summary_panel_override=ui.legacy_summary_panel(),
      stacktrace_panel_override=ui.stacktrace_panel(
@@ -39,9 +44,66 @@
    ) %}
 
   <section class="wc-debris-flow">
+    {% set default_clay = none %}
+    {% if soils is defined and soils is not none %}
+      {% if soils.clay_pct is defined and soils.clay_pct is not none %}
+        {% set default_clay = soils.clay_pct %}
+      {% endif %}
+    {% endif %}
+    {% set default_ll = none %}
+    {% if soils is defined and soils is not none %}
+      {% if soils.liquid_limit is defined and soils.liquid_limit is not none %}
+        {% set default_ll = soils.liquid_limit %}
+      {% endif %}
+    {% endif %}
+
+    {{ ui.numeric_field(
+         'clay_pct',
+         'Clay Content Override (%)',
+         value=(default_clay|round(2)) if default_clay is not none else '',
+         unit_label='%',
+         help='Optional. Leave blank to use the soils-derived clay percentage.',
+         precision='0.01',
+         min='0',
+         max='100',
+         nullable=True
+       ) }}
+
+    {{ ui.numeric_field(
+         'liquid_limit',
+         'Liquid Limit Override (%)',
+         value=(default_ll|round(2)) if default_ll is not none else '',
+         unit_label='%',
+         help='Optional. Leave blank to use the soils-derived liquid limit.',
+         precision='0.01',
+         min='0',
+         max='100',
+         nullable=True
+       ) }}
+
+    {% set default_datasource = '' %}
+    {% if debris_flow is defined and debris_flow is not none and debris_flow.datasource is not none %}
+      {% set default_datasource = debris_flow.datasource %}
+    {% endif %}
+
+    {% set datasource_options = [
+      ('', 'Automatic (use available precipitation sources)'),
+      ('NOAA', 'NOAA Precipitation Frequency Data Server'),
+      ('Holden WRF Atlas', 'Holden WRF Atlas')
+    ] %}
+
+    {{ ui.select_field(
+         'datasource',
+         'Precipitation Datasource',
+         datasource_options,
+         selected=default_datasource,
+         help='Optional. Choose a specific datasource or leave blank to auto-select.'
+       ) }}
+
     {% call button_row() %}
       <button
         id="btn_run_debris_flow"
+        data-debris-action="run"
         type="button"
         class="pure-button pure-button-primary disable-readonly">
         <img

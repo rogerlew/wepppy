@@ -183,11 +183,11 @@
       </section>
       {% endif %}
 
-      {% if 'debris_flow' in ron.mods and user.has_role('PowerUser') %}
-      <section id="debris-flow" class="wc-stack">
-        {% include 'controls/debris_flow_pure.htm' %}
-      </section>
-      {% endif %}
+{% if 'debris_flow' in ron.mods and debris_flow is not none and user.has_role('PowerUser') %}
+  <section id="debris-flow" class="wc-stack">
+    {% include 'controls/debris_flow_pure.htm' %}
+  </section>
+{% endif %}
 
       <section id="dss-export" class="wc-stack">
         {% include 'controls/dss_export_pure.htm' %}

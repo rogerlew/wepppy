@@ -8,26 +8,34 @@ function coordRound(v) {
 // utility function to be used by ControlBase subclasses to build URLs for pup runs.
 // not to be used elsewhere.
 function url_for_run(url) {
-    // Build the full run-scoped path
-    var runPath = "";
-    if (typeof window.runId === "string" && window.runId && typeof window.config === "string" && window.config) {
-        runPath = "/runs/" + encodeURIComponent(window.runId) + "/" + encodeURIComponent(window.config) + "/";
+    var sitePrefix = "";
+    if (typeof window.site_prefix === "string" && window.site_prefix) {
+        sitePrefix = window.site_prefix.replace(/\/+$/, "");
     }
-    
-    // Normalize the URL to not start with /
-    var normalizedUrl = url;
+
+    var normalizedUrl = url || "";
     if (normalizedUrl.charAt(0) === "/") {
         normalizedUrl = normalizedUrl.substring(1);
     }
-    
-    // Combine run path and URL
-    var fullUrl = runPath + normalizedUrl;
-    
-    // Add pup parameter if needed
+
+    var runScopedPath = normalizedUrl;
+    if (typeof window.runId === "string" && window.runId && typeof window.config === "string" && window.config) {
+        runScopedPath = "runs/" + encodeURIComponent(window.runId) + "/" + encodeURIComponent(window.config) + "/";
+        if (normalizedUrl) {
+            runScopedPath += normalizedUrl;
+        }
+    }
+
+    if (runScopedPath.charAt(0) !== "/") {
+        runScopedPath = "/" + runScopedPath;
+    }
+
+    var fullUrl = sitePrefix + runScopedPath;
+
     if (typeof pup_relpath === 'string' && pup_relpath && fullUrl.indexOf('pup=') === -1) {
         fullUrl += (fullUrl.indexOf('?') === -1 ? '?' : '&') + 'pup=' + encodeURIComponent(pup_relpath);
     }
-    
+
     return fullUrl;
 }
 

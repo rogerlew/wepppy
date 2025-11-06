@@ -14,11 +14,15 @@ var DebrisFlow = (function () {
 
     function ensureHelpers() {
         var dom = window.WCDom;
+        var forms = window.WCForms;
         var http = window.WCHttp;
         var events = window.WCEvents;
 
         if (!dom || typeof dom.ensureElement !== "function") {
             throw new Error("DebrisFlow controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("DebrisFlow controller requires WCForms helpers.");
         }
         if (!http || typeof http.request !== "function") {
             throw new Error("DebrisFlow controller requires WCHttp helpers.");
@@ -27,7 +31,7 @@ var DebrisFlow = (function () {
             throw new Error("DebrisFlow controller requires WCEvents helpers.");
         }
 
-        return { dom: dom, http: http, events: events };
+        return { dom: dom, forms: forms, http: http, events: events };
     }
 
     function createLegacyAdapter(element) {
@@ -96,6 +100,7 @@ var DebrisFlow = (function () {
     function createInstance() {
         var helpers = ensureHelpers();
         var dom = helpers.dom;
+        var forms = helpers.forms;
         var http = helpers.http;
         var eventsApi = helpers.events;
 
@@ -178,12 +183,25 @@ var DebrisFlow = (function () {
             var taskMsg = "Running debris flow model fit";
             resetStatus(taskMsg);
 
+            var payload = forms.serializeForm(formElement, { format: "object" }) || {};
+            var cleanPayload = {};
+            Object.keys(payload).forEach(function (key) {
+                var value = payload[key];
+                if (value === null || value === undefined) {
+                    return;
+                }
+                if (typeof value === "string" && value.trim() === "") {
+                    return;
+                }
+                cleanPayload[key] = value;
+            });
+
             debris.triggerEvent("job:started", { task: "debris:run" });
             emitter.emit("debris:run:started", { jobId: null, task: "debris:run" });
 
             debris.connect_status_stream(debris);
 
-            http.postJson(url_for_run("rq/api/run_debris_flow"), {}, { form: formElement }).then(function (response) {
+            http.postJson(url_for_run("rq/api/run_debris_flow"), cleanPayload, { form: formElement }).then(function (response) {
                 var payload = response.body || {};
                 if (payload.Success === true || payload.success === true) {
                     statusAdapter.html("run_debris_flow_rq job submitted: " + payload.job_id);
@@ -245,6 +263,12 @@ var DebrisFlow = (function () {
             }
             if (typeof debris.set_rq_job_id === "function") {
                 debris.set_rq_job_id(debris, jobId);
+            }
+            if (!jobId) {
+                var hasResultsAttr = formElement.getAttribute("data-debris-has-results");
+                if (hasResultsAttr === "true" && typeof debris.report === "function") {
+                    debris.report();
+                }
             }
             return debris;
         };

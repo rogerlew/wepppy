@@ -57,6 +57,7 @@ from typing import Generator, Dict, Union, Tuple, Optional, List, Any
 import time
 import os
 import inspect
+import math
 
 from enum import IntEnum
 
@@ -114,6 +115,10 @@ from .topaz import Topaz
 from wepppy.all_your_base import NCPU
 
 NCPU = multiprocessing.cpu_count() - 2
+
+# Debris-flow routines need the portion of the basin with slopes steeper than 30%.
+# `hillslopes.parquet` stores slope as a rise/run ratio, so 30% equals 0.30.
+_SLOPE_RATIO_THRESHOLD = 0.30
 
 __all__ = [
     'NCPU',
@@ -655,15 +660,25 @@ class Watershed(NoDbBase):
     def area_gt30(self) -> Optional[float]:
         if self.delineation_backend_is_topaz:
             return Topaz.getInstance(self.wd).area_gt30
-        else:
-            return self._area_gt30
+        cached = getattr(self, "_area_gt30", None)
+        if cached is not None:
+            return cached
+
+        computed = self._compute_area_gt30_from_hillslopes()
+        self._area_gt30 = computed
+        return computed
 
     @property
     def ruggedness(self) -> Optional[float]:
         if self.delineation_backend_is_topaz:
             return Topaz.getInstance(self.wd).ruggedness
-        else:
-            return self._ruggedness
+        cached = getattr(self, "_ruggedness", None)
+        if cached is not None:
+            return cached
+
+        computed = self._compute_ruggedness_from_dem()
+        self._ruggedness = computed
+        return computed
 
     @property
     def impoundment_n(self) -> int:
@@ -1517,6 +1532,72 @@ class Watershed(NoDbBase):
                 return self._sub_length_lookup[str(topaz_id)]
 
         return self._deprecated_length_of(topaz_id)
+
+    def _compute_area_gt30_from_hillslopes(self) -> float:
+        """Determine basin area with slopes ≥30% using hillslopes parquet data."""
+        parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
+        if not _exists(parquet_fn):
+            raise FileNotFoundError(
+                f"hillslopes.parquet not found at {parquet_fn}; cannot compute area_gt30"
+            )
+
+        import duckdb
+
+        query = (
+            f"SELECT COALESCE(SUM(area), 0.0) "
+            f"FROM read_parquet('{parquet_fn}') "
+            f"WHERE slope_scalar >= {_SLOPE_RATIO_THRESHOLD}"
+        )
+
+        try:
+            with duckdb.connect() as con:
+                result = con.execute(query).fetchone()
+        except duckdb.duckdb.IOException:
+            time.sleep(4)
+            with duckdb.connect() as con:
+                result = con.execute(query).fetchone()
+
+        area = result[0] if result else 0.0
+        return float(area or 0.0)
+
+    def _compute_ruggedness_from_dem(self) -> float:
+        """Approximate ruggedness using DEM statistics when TOPAZ values are absent."""
+        dem_path = _join(self.wd, "dem", "dem.tif")
+        if not _exists(dem_path):
+            raise FileNotFoundError(f"dem.tif not found at {dem_path}; cannot compute ruggedness")
+
+        dataset = gdal.Open(dem_path, GA_ReadOnly)
+        if dataset is None:
+            raise RuntimeError(f"Unable to open DEM at {dem_path}")
+
+        try:
+            band = dataset.GetRasterBand(1)
+            if band is None:
+                raise RuntimeError("DEM is missing band 1; cannot compute ruggedness")
+
+            stats = band.GetStatistics(False, True)
+            if not stats or stats[0] is None or stats[1] is None:
+                raise RuntimeError("Failed to compute DEM statistics for ruggedness")
+
+            min_z, max_z = float(stats[0]), float(stats[1])
+
+            geotransform = dataset.GetGeoTransform()
+            if geotransform is None:
+                raise RuntimeError("DEM lacks geotransform; cannot derive pixel area")
+
+            pixel_width = float(geotransform[1])
+            pixel_height = float(geotransform[5])
+            if pixel_width == 0.0 or pixel_height == 0.0:
+                raise RuntimeError("DEM pixel size is zero; cannot compute area")
+
+            pixel_area = abs(pixel_width * pixel_height)
+            raster_area = pixel_area * dataset.RasterXSize * dataset.RasterYSize
+            if raster_area <= 0.0:
+                raise RuntimeError("Computed DEM area is non-positive; cannot compute ruggedness")
+
+            return float((max_z - min_z) / math.sqrt(raster_area))
+        finally:
+            dataset = None
 
     def channel_length(self, topaz_id: Union[str, int]) -> float:
         if hasattr(self, "_chn_length_lookup"):

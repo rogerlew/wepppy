@@ -1,296 +1,404 @@
-{% extends "reports/_page_container.htm" %}
+{% extends "reports/_base_report.htm" %}
 {% block report_title %}Debris Flow{% endblock %}
+
 {% block report_content %}
-<script>
-function rerun_debris_flow() {
-    console.log('run debris flow');
-    var cc = $('#clay_content').val();
-    var ll = $('#liquid_limit').val();
-    var datasource = $('#datasource_selection').val();
-    console.log(cc);
-    console.log(ll);
-    window.location = '?cc=' + cc + '&ll=' + ll + '&datasource=' + datasource;
-}
+{% set datasources = debris_flow.datasources | list if debris_flow.datasources is not none else [] %}
+{% set active_source = debris_flow.datasource %}
+{% set duration_map = debris_flow.durations if debris_flow.durations is not none else {} %}
+{% set rec_map = debris_flow.rec_intervals if debris_flow.rec_intervals is not none else {} %}
+{% set volume_map = debris_flow.volume if debris_flow.volume is not none else {} %}
+{% set prob_map = debris_flow.prob_occurrence if debris_flow.prob_occurrence is not none else {} %}
+{% set intensity_map = debris_flow.I if debris_flow.I is not none else {} %}
+{% set total_map = debris_flow.T if debris_flow.T is not none else {} %}
+{% set durations = duration_map.get(active_source, []) %}
+{% set recurrences = rec_map.get(active_source, []) %}
+{% set volumes_for_source = volume_map.get(active_source) %}
+{% set prob_for_source = prob_map.get(active_source) %}
+{% set intensity_for_source = intensity_map.get(active_source) %}
+{% set total_for_source = total_map.get(active_source) %}
 
-function precisionRound(number, precision) {
-  var factor = Math.pow(10, precision);
-  return Math.round(number * factor) / factor;
-}
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__title">Debris Flow Summary</h2>
+    <p class="wc-text-muted">
+      Cannon et&nbsp;al. (2010) debris-flow probability estimates for the current watershed.
+      Metrics update whenever the debris-flow controller runs.
+    </p>
+  </header>
+  <div class="wc-summary-pane">
+    <dl class="wc-summary-pane__list">
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Watershed Area</dt>
+        <dd class="wc-summary-pane__definition">{{ unitizer(debris_flow.wsarea, 'm^2') | safe }}</dd>
+      </div>
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Area ≥ 30% Slope (A)</dt>
+        <dd class="wc-summary-pane__definition">
+          {{ unitizer(debris_flow.A, 'km^2') | safe }} ({{ unitizer(debris_flow.A_pct, '%') | safe }})
+        </dd>
+      </div>
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Moderate &amp; High Burn (B)</dt>
+        <dd class="wc-summary-pane__definition">
+          {{ unitizer(debris_flow.B, 'km^2') | safe }} ({{ unitizer(debris_flow.B_pct, '%') | safe }})
+        </dd>
+      </div>
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Ruggedness (R)</dt>
+        <dd class="wc-summary-pane__definition">{{ debris_flow.R | round(3) }}</dd>
+      </div>
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Clay Content (C)</dt>
+        <dd class="wc-summary-pane__definition">{{ debris_flow.C | round(2) }} {{ unitizer_units('%') | safe }}</dd>
+      </div>
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Liquid Limit (LL)</dt>
+        <dd class="wc-summary-pane__definition">{{ debris_flow.LL | round(2) }} {{ unitizer_units('%') | safe }}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
 
-function run_user_precip() {
-    var A = {{ debris_flow.A }};
-    var A_pct = {{ debris_flow.A_pct }};
-    var B = {{ debris_flow.B }};
-    var B_pct = {{ debris_flow.B_pct }};
-    var R = {{ debris_flow.R }};
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Model Parameters</h2>
+    <p class="wc-text-muted">
+      Adjust optional overrides and rerun the analysis. Leave fields blank to reuse soils-derived values.
+    </p>
+  </header>
 
-    var C = parseFloat($('#clay_content').val());
-    var LL = parseFloat($('#liquid_limit').val());
+  <div class="wc-table-wrapper wc-table-wrapper--compact">
+    <table class="wc-table wc-table--dense wc-table--compact">
+      <thead>
+        <tr>
+          <th scope="col">Parameter</th>
+          <th scope="col">Value</th>
+          <th scope="col">Units</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Watershed Area</th>
+          <td>{{ unitizer(debris_flow.wsarea, 'm^2') | safe }}</td>
+          <td>{{ unitizer_units('m^2') | safe }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Slope ≥ 30% (A)</th>
+          <td>{{ unitizer(debris_flow.A, 'km^2') | safe }} ({{ unitizer(debris_flow.A_pct, '%') | safe }})</td>
+          <td>{{ unitizer_units('km^2') | safe }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Moderate/High Burn (B)</th>
+          <td>{{ unitizer(debris_flow.B, 'km^2') | safe }} ({{ unitizer(debris_flow.B_pct, '%') | safe }})</td>
+          <td>{{ unitizer_units('km^2') | safe }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Ruggedness (R)</th>
+          <td>{{ debris_flow.R | round(3) }}</td>
+          <td>ratio</td>
+        </tr>
+        <tr>
+          <th scope="row">Clay Content (C)</th>
+          <td>{{ debris_flow.C | round(2) }}</td>
+          <td>{{ unitizer_units('%') | safe }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Liquid Limit (LL)</th>
+          <td>{{ debris_flow.LL | round(2) }}</td>
+          <td>{{ unitizer_units('%') | safe }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-    var I = parseFloat($('#user_I').val());
-    var T = parseFloat($('#user_T').val());
-
-    var v = Math.exp(7.2 +
-                     0.6 * Math.log(A) +
-                     0.7 * Math.pow(B, 0.5) +
-                     0.2 * Math.pow(T, 0.5) +
-                     0.3);
-    var x = -0.7 + 0.03 * A_pct - 1.6 * R + 0.06 * B_pct + 0.07 * I + 0.2 * C - 0.4 * LL;
-    var prob_occurrence = 100.0 * Math.exp(x) / (1.0 + Math.exp(x));
-
-    $('#user_results').show();
-    $('#user_v').text(precisionRound(v,0));
-    $('#user_prob').text(precisionRound(prob_occurrence, 0));
-}
-
-</script>
-<h2>Debris Flow Model Results</h2>
-<form name="debris_flow_parameters">
-<h3>Model Parameters</h3>
-<table class="table table-nonfluid">
-<thead>
-<tr>
-    <th>Parameter</th>
-    <th>Value</th>
-    <th>Units</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-    <td>Watershed Area</td>
-    <td>{{unitizer(debris_flow.wsarea, 'm^2') | safe }}</td>
-    <td>{{ unitizer_units('m^2') | safe }}</td>
-</tr>
-<tr>
-    <td>Area with slope &ge; 30% (A)</td>
-    <td>{{ unitizer(debris_flow.A, 'km^2') | safe }}</td>
-    <td>{{ unitizer_units('km^2') | safe }}</td>
-</tr>
-<tr>
-    <td>Percent A</td>
-    <td>{{ unitizer(debris_flow.A_pct, '%') | safe }}</td>
-    <td>{{ unitizer_units('%') | safe }}</td>
-</tr>
-<tr>
-    <td>Area with moderate or high severity fire (B)</td>
-    <td>{{ unitizer(debris_flow.B, 'km^2') | safe }}</td>
-    <td>{{ unitizer_units('km^2') | safe }}</td>
-</tr>
-<tr>
-    <td>Percent B</td>
-    <td>{{ unitizer(debris_flow.B_pct, '%') | safe }}</td>
-    <td>{{ unitizer_units('%') | safe }}</td>
-</tr>
-<tr>
-    <td>Clay content of top horizon [<a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/clay_rpt.log') }}">log</a>]</td>
-    <td><input type="text" id="clay_content" value="{{ debris_flow.C | round(2) }}"></td>
-    <td>{{ unitizer_units('%') | safe }}</td>
-</tr>
-<tr>
-    <td>Assumed liquid limit of soil (LL) [<a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/ll_rpt.log') }}">log</a>]</td>
-    <td><input type="text" id="liquid_limit" value="{{ debris_flow.LL | round(2) }}"></td>
-    <td>{{ unitizer_units('%') | safe }}</td>
-</tr>
-<tr>
-    <td>Watershed roughness (R)</td>
-    <td>{{debris_flow.R | round(3)}}</td>
-    <td> </td>
-</tr>
-<tr>
-    <td>Precipitation Datasource</td>
-    <td>
-        <select class="form-control disable-readonly" id="datasource_selection">
-            {% for _datasource in debris_flow.datasources%}
-                <option value="{{ _datasource }}" {% if debris_flow.datasource == _datasource %}selected{% endif %}>{{ _datasource }}</option>
+  <form class="pure-form pure-form-stacked wc-stack" id="debris_flow_overrides_form">
+    <fieldset>
+      <legend class="wc-heading__subtitle">Optional Overrides</legend>
+      <label for="clay_content">
+        Clay Content (%)
+        <input id="clay_content"
+               type="number"
+               class="pure-input-1"
+               step="0.01"
+               min="0"
+               max="100"
+               value="{{ debris_flow.C | round(2) }}">
+      </label>
+      <label for="liquid_limit">
+        Liquid Limit (%)
+        <input id="liquid_limit"
+               type="number"
+               class="pure-input-1"
+               step="0.01"
+               min="0"
+               max="100"
+               value="{{ debris_flow.LL | round(2) }}">
+      </label>
+      <label for="datasource_selection">
+        Precipitation Datasource
+        <select id="datasource_selection" class="pure-input-1">
+          {% if datasources %}
+            {% for source in datasources %}
+              <option value="{{ source }}" {% if source == active_source %}selected{% endif %}>{{ source }}</option>
             {% endfor %}
+          {% else %}
+            <option value="" selected>No datasets available</option>
+          {% endif %}
         </select>
-    </td>
-</tr>
-</tbody>
-</table>
-{% if debris_flow.volume is none %}
-    <p><i>Precipitation Frequency Data cannot be found for this Location</i></p>
-{% else %}
-<div class="form-group">
-    <div class="col-sm-4">
-        <button id="run_debris_flow"
-                class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-                type="button"
-                onclick="rerun_debris_flow()">Rerun Debris Flow</button>
+      </label>
+    </fieldset>
+    <div class="wc-button-row">
+      <button type="button" id="btn_rerun_debris_flow" class="pure-button pure-button-primary">Rerun Debris Flow</button>
+      <a class="pure-button pure-button-secondary"
+         href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='debris_flow.log') }}"
+         target="_blank" rel="noopener">
+        View Log
+      </a>
     </div>
-    <div class="col-sm-5">
-        <small></small>
-    </div>
-</div>
-</form>
-<h3>Model Results</h3>
-<table>
-  <tr>
-      <td style="vertical-align:bottom;">Volume</td>
-      <td style="padding-left: 1em;">{{ unitizer_units('m^3') | safe }}&nbsp;</td>
-  </tr>
-  <tr>
-      <td style="vertical-align:bottom;">Probability of Occurence</td>
-      <td style="vertical-align:bottom; padding-left: 1em;">(%)&nbsp;</td>
-  </tr>
-</table>
-<p>Cells with probabilities &ge; 50% are highlighted.</p>
-<table class="table">
-    <thead>
-    <tr>
-        <th>Recurrence Interval (years)</th>
-        {% for duration in debris_flow.durations[debris_flow.datasource] %}
-        <th>{{ duration }}</th>
-        {% endfor %}
-    </tr>
-    </thead>
-    <tbody>
-    {% for rec_interval in debris_flow.rec_intervals[debris_flow.datasource] %}
-        <tr>
-        <td>{{ rec_interval }}</td>
-        {% set rec_loop = loop %}
-        {% for duration in debris_flow.durations[debris_flow.datasource] %}
-            {% set volume = debris_flow.volume[debris_flow.datasource][loop.index - 1][rec_loop.index - 1] %}
-            {% set prob = 100 * debris_flow.prob_occurrence[debris_flow.datasource][loop.index - 1][rec_loop.index - 1] %}
-            <td {% if prob >= 50.0 %} class="alert alert-danger" {% endif %}
-                    title="Within a {{ rec_interval }}-year period, there is a {{ prob | round }}%
-                    probability of having a debris flow event with {{ volume | round }} m^3 in volume.">
-                {{ unitizer(volume, 'm^3') | safe }}&nbsp;<br/>({{ prob | round }})</td>
-        {% endfor %}
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+  </form>
+</section>
 
-<table>
-  <tr>
-      <td style="vertical-align:bottom;">Rainfall intensity</td>
-      <td style="padding-left: 1em;">{{ unitizer_units('mm/hour') | safe }}&nbsp;</td>
-  </tr>
-  <tr>
-      <td style="vertical-align:bottom;">Total precipitation</td>
-      <td style="padding-left: 1em;">{{ unitizer_units('mm', parentheses=True) | safe }}&nbsp;</td>
-  </tr>
-</table>
-<table class="table">
-    <thead>
-    <tr>
-        <th>Recurrence Interval (years)</th>
-        {% for duration in debris_flow.durations[debris_flow.datasource] %}
-        <th>{{ duration }}</th>
-        {% endfor %}
-    </tr>
-    </thead>
-    <tbody>
-    {% for rec_interval in debris_flow.rec_intervals[debris_flow.datasource] %}
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Probability and Volume Estimates</h2>
+    <p class="wc-text-muted">
+      Probabilities reflect the chance of a debris-flow event of the listed volume within the recurrence interval.
+      Cells highlight when probability ≥ 50%.
+    </p>
+  </header>
+
+  {% if not durations or not recurrences or volumes_for_source is none or prob_for_source is none %}
+    <div class="wc-status" data-state="attention">
+      <strong>No precipitation frequency data is available for the selected datasource.</strong>
+      Choose another datasource and rerun the model.
+    </div>
+  {% else %}
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--striped sortable" id="debris_flow_probability_table">
+        <thead>
+          <tr>
+            <th scope="col">Recurrence Interval (years)</th>
+            {% for duration in durations %}
+              <th scope="col">{{ duration }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-sort-position="top">
+            <td></td>
+            {% for duration in durations %}
+              <td>
+                <div>{{ unitizer_units('m^3') | safe }}</div>
+                <div>({{ unitizer_units('%') | safe }})</div>
+              </td>
+            {% endfor %}
+          </tr>
+          {% for rec_interval in recurrences %}
+            <tr>
+              <th scope="row">{{ rec_interval }}</th>
+              {% set rec_loop = loop %}
+              {% for duration in durations %}
+                {% set volume = volumes_for_source[loop.index0][rec_loop.index0] %}
+                {% set probability = 100 * prob_for_source[loop.index0][rec_loop.index0] %}
+                <td title="Probability {{ probability | round(0) }}%">
+                  <div>{{ unitizer(volume, 'm^3') | safe }}</div>
+                  <div>{{ probability | round(0) }}%</div>
+                  {% if probability >= 50 %}
+                    <div class="wc-text-muted">High likelihood</div>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+
+{% if durations and recurrences and intensity_for_source is not none and total_for_source is not none %}
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Storm Intensity and Total Precipitation</h2>
+    <p class="wc-text-muted">
+      Intensity is shown in millimetres per hour; totals are storm depths over the specified duration.
+    </p>
+  </header>
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--striped sortable" id="debris_flow_precipitation_table">
+      <thead>
         <tr>
-        <td>{{ rec_interval }}</td>
-        {% set rec_loop = loop %}
-        {% for duration in debris_flow.durations[debris_flow.datasource] %}
-            {% if duration in debris_flow.durations[debris_flow.datasource] %}
-            {% set intensity = debris_flow.I[debris_flow.datasource][loop.index - 1][rec_loop.index - 1] %}
-            {% set total = debris_flow.T[debris_flow.datasource][loop.index - 1][rec_loop.index - 1] %}
-            <td >{{ unitizer(intensity, 'mm/hour') | safe }}&nbsp;<br/>{{ unitizer(total, 'mm', parentheses=True) | safe }}&nbsp;</td>
-            {% endif %}
-        {% endfor %}
+          <th scope="col">Recurrence Interval (years)</th>
+          {% for duration in durations %}
+            <th scope="col">{{ duration }}</th>
+          {% endfor %}
         </tr>
-    {% endfor %}
-    </tbody>
-</table>
+      </thead>
+      <tbody>
+        <tr data-sort-position="top">
+          <td></td>
+          {% for duration in durations %}
+            <td>
+              <div>{{ unitizer_units('mm/hour') | safe }}</div>
+              <div>{{ unitizer_units('mm', parentheses=True) | safe }}</div>
+            </td>
+          {% endfor %}
+        </tr>
+        {% for rec_interval in recurrences %}
+          <tr>
+            <th scope="row">{{ rec_interval }}</th>
+            {% set rec_loop = loop %}
+            {% for duration in durations %}
+              <td>
+                <div>{{ unitizer(intensity_for_source[loop.index0][rec_loop.index0], 'mm/hour') | safe }}</div>
+                <div>{{ unitizer(total_for_source[loop.index0][rec_loop.index0], 'mm', parentheses=True) | safe }}</div>
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endif %}
-<div>
-<h3>Model Calculations</h3>
-<h5>Volume Calculation:</h5>
-<pre>
-v = exp(7.2 + 0.6 * log(A) + 0.7 * B ** 0.5 + 0.2 * T ** 0.5 + 0.3)
 
-where,
-    A (in km2) is the area of the basin having slopes greater than or equal to 30%,
-    B (in km2) is the area of the basin burned at high and moderate severity,
-    T (in mm) is the total storm rainfall, and 0.3 is a bias correction that changes
-      the predicted estimate from a median to a mean value (Helsel and Hirsch, 2002).
-</pre>
-<h5>Probability of Occurrence Calculation:</h5>
-<pre>
-prob_occurrence = exp(x) / (1.0 + exp(x))
-x = -0.7 + 0.03 * A_pct - 1.6 * R + 0.06 * B_pct + 0.07 * I + 0.2 * C - 0.4 * LL
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">User-specified Storm Scenario</h2>
+    <p class="wc-text-muted">
+      Explore a custom storm using current watershed metrics. Results leverage the same Cannon et&nbsp;al. (2010) equations.
+    </p>
+  </header>
+  <form class="pure-form pure-form-aligned wc-stack" id="user_storm_form">
+    <div class="pure-control-group">
+      <label for="user_I">Intensity (mm/hour)</label>
+      <input id="user_I" type="number" step="0.01" value="30.0" class="pure-input-1-2">
+    </div>
+    <div class="pure-control-group">
+      <label for="user_T">Total Precipitation (mm)</label>
+      <input id="user_T" type="number" step="0.01" value="100.0" class="pure-input-1-2">
+    </div>
+    <div class="pure-controls">
+      <button type="button" id="btn_user_storm" class="pure-button pure-button-primary">Evaluate</button>
+    </div>
+  </form>
+  <div id="user_results" class="wc-summary-pane" hidden>
+    <dl class="wc-summary-pane__list">
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Estimated Volume</dt>
+        <dd class="wc-summary-pane__definition" id="user_v"></dd>
+      </div>
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Probability of Occurrence</dt>
+        <dd class="wc-summary-pane__definition" id="user_prob"></dd>
+      </div>
+    </dl>
+  </div>
+</section>
 
-where,
-    A_pct is the percentage of the basin area with gradients greater than or equal to 30%,
-    R is basin ruggedness,
-    B_pct is the percentage of the basin area burned at high and moderate severity,
-    I is average storm rainfall intensity (in mm/h),
-    C is clay content (in %),
-    LL is the liquid limit.
-</pre>
-<h3>User Specified T and I</h3>
-<form>
-<div style="width:1024px">
-    <div class="form-group row">
-        <div class="col-sm-6">
-            <label for="user_I">Intensity mm/Hour (e.g. 30.0) </label>
-        </div>
-        <div class="col-sm-3">
-            <input id="user_I" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="30.0" placeholder=""
-            aria-label="Max intensity mm per hour">
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-6">
-            <label for="user_I">Total Precipitation mm (e.g. 100.0) </label>
-        </div>
-        <div class="col-sm-3">
-            <input id="user_T" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="100.0" placeholder=""
-            aria-label="Total Precipitation in mm">
-        </div>
-    </div>
-    <div class="form-group">
-    <div class="col-sm-4">
-        <button id="run_debris_flow"
-                class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-                type="button"
-                onclick="run_user_precip()">Run Debris Flow</button>
-    </div>
-    <div class="col-sm-5">
-        <small></small>
-    </div>
-</div>
-</div>
-</form>
-<div id="user_results">
-    <H5>User Specified T and I Results</H5>
-    <div class="form-group row">
-        <div class="col-sm-6">
-            <label>Volume in (m<sup>3</sup>)</label>
-        </div>
-        <div class="col-sm-3">
-            <div id="user_v"></div>
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-6">
-            <label>Probability of Occurrence (%)</label>
-        </div>
-        <div class="col-sm-3">
-            <div id="user_prob"></div>
-        </div>
-    </div>
-</div>
-<h5>Notes on Model</h5>
-    This uses the 2010 model described by Cannon et al. Results may differ from new models such as Staley (2016, 2017, ...).
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Equations &amp; References</h2>
+  </header>
+  <div class="wc-text">
+    <p>Volume calculation:</p>
+    <pre class="wc-pre">v = exp(7.2 + 0.6 * log(A) + 0.7 * B ** 0.5 + 0.2 * T ** 0.5 + 0.3)</pre>
+    <p>Probability of occurrence:</p>
+    <pre class="wc-pre">x = -0.7 + 0.03 * A_pct - 1.6 * R + 0.06 * B_pct + 0.07 * I + 0.2 * C - 0.4 * LL
+prob_occurrence = exp(x) / (1 + exp(x))</pre>
+    <p class="wc-text-muted">
+      Cannon, S.&nbsp;H., Gartner, J.&nbsp;E., Rupert, M.&nbsp;G., &amp; Parrett, C. (2010).
+      Predicting the probability and volume of postwildfire debris flows in the intermountain western United States.
+      <em>Geological Society of America Bulletin</em>, 122(1), 127–144.
+    </p>
+    <p class="wc-text-muted">
+      Additional background:
+      <a href="https://landslides.usgs.gov/hazards/postfire_debrisflow/background2016.php" target="_blank" rel="noopener">
+        USGS Post-Fire Debris-Flow Hazards
+      </a>
+    </p>
+  </div>
+</section>
 
-<h5>Reference</h5>
-<p style="max-width: 720px;">S. H. Cannon, J. E. Gartner M. G. Rupert, C Parrett (January, 2010).
-    Predicting the probability and volume of postwildfire debris flows in the intermountain western United States.
-    <i>Geological Society of America Bulletin 122</i> (1):127-144. DOI10.1130/B26459.1</p>
-<p style="max-width: 720px;">
-    USGS. Post-Fire Debris-Flow <Hazards class=""></Hazards>
-    <a href="https://landslides.usgs.gov/hazards/postfire_debrisflow/background2016.php">
-    https://landslides.usgs.gov/hazards/postfire_debrisflow/background2016.php</a></p>
-</div>
 <script>
-$('#user_results').hide();
+(function () {
+  "use strict";
+
+  var rerunButton = document.getElementById("btn_rerun_debris_flow");
+  var userStormButton = document.getElementById("btn_user_storm");
+  var userResults = document.getElementById("user_results");
+  var userVolume = document.getElementById("user_v");
+  var userProbability = document.getElementById("user_prob");
+
+  function precisionRound(number, precision) {
+    var factor = Math.pow(10, precision);
+    return Math.round(number * factor) / factor;
+  }
+
+  function rerunWithOverrides() {
+    var clay = document.getElementById("clay_content").value || "";
+    var liquidLimit = document.getElementById("liquid_limit").value || "";
+    var datasource = document.getElementById("datasource_selection").value || "";
+
+    var params = new URLSearchParams(window.location.search);
+    if (clay.trim() !== "") {
+      params.set("cc", clay.trim());
+    } else {
+      params.delete("cc");
+    }
+    if (liquidLimit.trim() !== "") {
+      params.set("ll", liquidLimit.trim());
+    } else {
+      params.delete("ll");
+    }
+    if (datasource.trim() !== "") {
+      params.set("datasource", datasource.trim());
+    } else {
+      params.delete("datasource");
+    }
+
+    var target = window.location.pathname;
+    var query = params.toString();
+    if (query) {
+      target += "?" + query;
+    }
+    window.location.assign(target);
+  }
+
+  function evaluateUserStorm() {
+    var intensity = parseFloat(document.getElementById("user_I").value);
+    var total = parseFloat(document.getElementById("user_T").value);
+    if (Number.isNaN(intensity) || Number.isNaN(total)) {
+      return;
+    }
+
+    var A = {{ debris_flow.A | tojson }};
+    var A_pct = {{ debris_flow.A_pct | tojson }};
+    var B = {{ debris_flow.B | tojson }};
+    var B_pct = {{ debris_flow.B_pct | tojson }};
+    var R = {{ debris_flow.R | tojson }};
+    var C = parseFloat(document.getElementById("clay_content").value) || {{ debris_flow.C | tojson }};
+    var LL = parseFloat(document.getElementById("liquid_limit").value) || {{ debris_flow.LL | tojson }};
+
+    var volume = Math.exp(7.2 +
+                          0.6 * Math.log(A) +
+                          0.7 * Math.pow(B, 0.5) +
+                          0.2 * Math.pow(total, 0.5) +
+                          0.3);
+    var x = -0.7 + 0.03 * A_pct - 1.6 * R + 0.06 * B_pct + 0.07 * intensity + 0.2 * C - 0.4 * LL;
+    var probability = 100 * Math.exp(x) / (1 + Math.exp(x));
+
+    userVolume.textContent = precisionRound(volume, 0).toLocaleString();
+    userProbability.textContent = precisionRound(probability, 0) + "%";
+    userResults.removeAttribute("hidden");
+  }
+
+  if (rerunButton) {
+    rerunButton.addEventListener("click", rerunWithOverrides);
+  }
+  if (userStormButton) {
+    userStormButton.addEventListener("click", evaluateUserStorm);
+  }
+})();
 </script>
 {% endblock %}
