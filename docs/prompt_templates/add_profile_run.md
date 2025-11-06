@@ -7,10 +7,10 @@ Use this template to add a new nightly profile test workflow and update the read
 ```
 Add a new profile run workflow with the following details:
 
-- **Title**: Profile Run - SBS NoCT
-- **Profile name**: eaton-noct-gridmet-wepp-2chaninp-watar-anu
-- **Description**: "Eaton Fire (no CT), gridmet, wepp, 2 channels of interest, WATAR (Anurag)"
-- **Run time**: next available 10-minute slot after existing workflows
+- **Title**: Profile Run - RHEM
+- **Profile name**: us-rap-rhem
+- **Description**: "Small US RHEM run with rangeland-cover from RAP"
+- **Run time**: next available 10-minute slot before existing workflows
 
 Tasks:
 1. Create `.github/workflows/profile-run-[slug].yml` based on existing profile workflow patterns and the title (not the profile name)
@@ -23,7 +23,7 @@ Tasks:
 
 - Workflows run sequentially to avoid resource contention on self-hosted runners
 - Current profile workflows occupy 04:30, 04:45, 04:55, 05:05, 05:15 AM PT
-- Use 15-minute intervals between runs
+- Use specified intervals between runs or 15 minutes
 - UTC cron times assume Pacific daylight saving (PT = UTC-7); adjust comment if standard time changes
 - Workflow filename should match pattern: `profile-run-[descriptive-slug].yml`
 - Badge URL in readme should match workflow filename exactly

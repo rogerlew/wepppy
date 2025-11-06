@@ -110,7 +110,9 @@ class RangelandCover(NoDbBase):
         super().__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
-            self._mode = RangelandCoverMode(self.config_get_int('rhem', 'mode'))
+            default_mode = int(RangelandCoverMode.GriddedRAP)
+            mode_value = self.config_get_int('rhem', 'mode', default=default_mode)
+            self._mode = RangelandCoverMode(mode_value)
             self._rap_year = self.config_get_int('rhem', 'rap_year')
 
             self._bunchgrass_cover_default = 15.0
