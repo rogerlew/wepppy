@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict
@@ -331,3 +332,32 @@ def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
     baer_controller = BaerStub.getInstance(run_dir)
     assert baer_controller.sbs_mode == 1
     assert baer_controller.uniform_severity == 9
+
+
+def test_task_upload_sbs_renames_conflicting_basename(disturbed_client, monkeypatch):
+    client, DisturbedStub, BaerStub, RonStub, _, run_dir = disturbed_client
+    baer_dir = Path(run_dir) / "baer"
+    expected_path = baer_dir / "_baer.cropped.tif"
+    assert not expected_path.exists()
+
+    def fake_sanity_check(path: str) -> tuple[int, str]:
+        assert path == str(expected_path)
+        return 0, "ok"
+
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.baer.sbs_map.sbs_map_sanity_check",
+        fake_sanity_check,
+    )
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/upload_sbs/",
+        data={"input_upload_sbs": (BytesIO(b"sbs"), "baer.cropped.tif")},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+    assert expected_path.exists()
+    controller = BaerStub.getInstance(run_dir)
+    assert controller.validated[-1] == expected_path.name

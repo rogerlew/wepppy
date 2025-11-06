@@ -7,9 +7,9 @@ Use this template to add a new nightly profile test workflow and update the read
 ```
 Add a new profile run workflow with the following details:
 
-- **Title**: Profile Run - WEPP Reveg
-- **Profile name**: daymet-reveg
-- **Description**: "Small US WEPP Reveg Run with DAYMET climate"
+- **Title**: Profile Run - NEXRAD (PRISM) DebrisFlow
+- **Profile name**: baer-cropped-wbt-nexrad-prism-rap-wepp-debrisflow
+- **Description**: "Cameron Peak (baer.cropped.tif) WBT NEXRAD, RAP, WEPP, DebrisFlow"
 - **Run time**: next available 10-minute slot before existing workflows
 
 Tasks:

@@ -258,6 +258,9 @@ def task_upload_sbs(runid: str, config: str) -> Response:
     filename = secure_filename(file_storage.filename)
     if not filename:
         return error_factory('input_upload_sbs must have a valid filename')
+    if filename.lower() == 'baer.cropped.tif':
+        # Prevent collisions with derived baer.cropped.tif artifacts generated later.
+        filename = '_baer.cropped.tif'
 
     file_storage.save(_join(baer.baer_dir, filename))
 
