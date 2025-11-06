@@ -21,7 +21,7 @@ from flask import (
     jsonify,
     make_response,
     redirect,
-    render_template,
+    render_template as _flask_render_template,
     request,
     Response,
     send_file,
@@ -76,6 +76,32 @@ __all__ = [
     'os',
     'shutil',
 ]
+
+
+def render_template(template_name: str, *args, **kwargs):
+    """
+    Wrapper around Flask's render_template that still accepts the legacy
+    positional run context signature ``(runid, config, ...)``. Any supplied
+    positional run identifiers are translated into keyword arguments so the
+    underlying Flask helper receives a standard call.
+    """
+    positional = list(args)
+    if positional:
+        # Preserve explicit keyword arguments if callers already provided them.
+        if 'runid' not in kwargs:
+            kwargs['runid'] = positional.pop(0)
+        else:
+            positional.pop(0)
+    if positional:
+        if 'config' not in kwargs:
+            kwargs['config'] = positional.pop(0)
+        else:
+            positional.pop(0)
+    if positional:
+        raise TypeError(
+            f"render_template() received unexpected positional arguments: {positional}"
+        )
+    return _flask_render_template(template_name, **kwargs)
 
 from ._run_context import RunContext, load_run_context, register_run_context_preprocessor
 

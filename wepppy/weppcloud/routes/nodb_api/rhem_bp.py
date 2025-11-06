@@ -46,8 +46,8 @@ def report_rhem_run_summary(runid, config):
 
         return render_template(
             'reports/rhem_run_summary.htm',
-            runid=runid,
-            config=config,
+            runid,
+            config,
             subs_n=subs_n,
             rhempost=rhempost,
             ron=ron,
