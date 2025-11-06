@@ -1,6 +1,7 @@
 import os
 import json
 import shutil
+from contextlib import nullcontext
 
 from os.path import join as _join
 from os.path import split as _split
@@ -574,7 +575,9 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
             updates['bieger2015_widths'] = bieger2015_widths
 
         if watershed.run_group == 'batch':
-            with watershed.locked():
+            locked = getattr(watershed, "locked", None)
+            lock_cm = locked() if callable(locked) else nullcontext()
+            with lock_cm:
                 if 'clip_hillslopes' in updates:
                     watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
                 if 'walk_flowpaths' in updates:
@@ -591,6 +594,10 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
                     watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
             return success_factory('Set watershed inputs for batch processing')
 
+        if updates:
+            for attr, value in updates.items():
+                setattr(watershed, attr, value)
+
         try:
             prep = RedisPrep.getInstance(wd)
             prep.remove_timestamp(TaskEnum.abstract_watershed)
@@ -598,10 +605,14 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
 
             with _redis_conn() as redis_conn:
                 q = Queue(connection=redis_conn)
+                enqueue_kwargs: dict[str, Any] = {}
+                if updates:
+                    enqueue_kwargs["kwargs"] = {"updates": updates}
                 job = q.enqueue_call(
                     build_subcatchments_and_abstract_watershed_rq,
-                    (runid, updates),
+                    (runid,),
                     timeout=TIMEOUT,
+                    **enqueue_kwargs,
                 )
                 prep.set_rq_job_id('build_subcatchments_and_abstract_watershed_rq', job.id)
         except Exception as e:
