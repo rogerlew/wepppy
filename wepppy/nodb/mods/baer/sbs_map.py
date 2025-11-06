@@ -6,149 +6,291 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""Utility helpers for working with Soil Burn Severity (SBS) rasters."""
+
+from __future__ import annotations
+
 import os
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 from collections import Counter
-
 from functools import lru_cache
+from collections.abc import Mapping, Sequence
+from typing import Literal, Optional, Tuple, TypeAlias
 
 import numpy as np
-from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import GDT_Byte
 
 from subprocess import Popen, PIPE, run
 
+from numpy.typing import NDArray
+
 from wepppy.all_your_base import isint
-from wepppy.all_your_base.geo import read_raster, wgs84_proj4, validate_srs
+from wepppy.all_your_base.geo import read_raster, validate_srs
 
 from wepppy.landcover import LandcoverMap
 
+SeverityClass: TypeAlias = Literal["unburned", "low", "mod", "high"]
+RGBColor: TypeAlias = Tuple[int, int, int]
+ColorIndexMap: TypeAlias = dict[SeverityClass, list[int]]
+ColorCounts: TypeAlias = list[tuple[int, int]]
+ColorLookup: TypeAlias = dict[RGBColor, Optional[str]]
+HashableBreaks: TypeAlias = tuple[int | float, ...]
+HashableNoData: TypeAlias = Optional[tuple[int | float, ...]]
 
-def get_sbs_color_table(fn, color_to_severity_map=None):
+__all__ = [
+    "classify",
+    "ct_classify",
+    "get_sbs_color_table",
+    "sbs_map_sanity_check",
+    "SoilBurnSeverityMap",
+]
+
+def get_sbs_color_table(
+    fn: str,
+    color_to_severity_map: Optional[Mapping[RGBColor, str]] = None,
+) -> tuple[Optional[ColorIndexMap], ColorCounts, Optional[ColorLookup]]:
+    """Read the SBS raster color table and map entries to severity classes.
+
+    Args:
+        fn: Path to the SBS raster on disk.
+        color_to_severity_map: Optional mapping from RGB triplets to
+            severity class strings to override the defaults.
+
+    Returns:
+        A tuple of ``(class_index_map, counts, color_map)`` where:
+
+        * ``class_index_map`` maps severity classes to color-table indices
+          (``None`` when the raster does not define a color table).
+        * ``counts`` contains raster value frequencies derived from the band data.
+        * ``color_map`` provides the reverse mapping of RGB colors to severity
+          class names (or ``None`` when no table is present).
+    """
     ds = gdal.Open(fn)
     band = ds.GetRasterBand(1)
     data = band.ReadAsArray(0, 0, ds.RasterXSize, ds.RasterYSize)
-    counts = Counter(list(data.flatten())).most_common()
+    counts: ColorCounts = Counter(list(data.flatten())).most_common()
 
     if color_to_severity_map is None:
-        color_to_severity_map = dict([((0, 100, 0), 'unburned'),
-                                      ((0, 0, 0), 'unburned'),
-                                      ((0, 115, 74), 'unburned'),
-                                      ((0, 175, 166), 'unburned'),
-                                      ((102, 204, 204), 'low'),
-                                      ((102, 205, 205), 'low'),
-                                      ((115, 255, 223), 'low'),
-                                      ((127, 255, 212), 'low'),
-                                      ((0, 255, 255), 'low'),
-                                      ((102, 205, 205), 'low'),
-                                      ((77, 230, 0), 'low'),
-                                      ((255, 255, 0), 'mod'),
-                                      ((255, 232, 32), 'mod'),
-                                      ((255, 0, 0), 'high')])
+        color_to_severity_map = {
+            (0, 100, 0): "unburned",
+            (0, 0, 0): "unburned",
+            (0, 115, 74): "unburned",
+            (0, 175, 166): "unburned",
+            (102, 204, 204): "low",
+            (102, 205, 205): "low",
+            (115, 255, 223): "low",
+            (127, 255, 212): "low",
+            (0, 255, 255): "low",
+            (102, 205, 205): "low",
+            (77, 230, 0): "low",
+            (255, 255, 0): "mod",
+            (255, 232, 32): "mod",
+            (255, 0, 0): "high",
+        }
 
     ct = band.GetRasterColorTable()
     if ct is None:
         return None, counts, None
 
-    color_map = {}
-    d = dict(unburned=[], low=[], mod=[], high=[])
+    color_map: ColorLookup = {}
+    class_index_map: ColorIndexMap = {
+        "unburned": [],
+        "low": [],
+        "mod": [],
+        "high": [],
+    }
     for i in range(ct.GetCount()):
-        entry = [int(v) for v in ct.GetColorEntry(i)]
-        entry = tuple(entry[:3])
+        entry = tuple(int(v) for v in ct.GetColorEntry(i)[:3])
 
-        color_map[entry] = sev = color_to_severity_map.get(entry, None)
+        severity = color_to_severity_map.get(entry)
+        color_map[entry] = severity
 
-        if sev is not None and sev != "":
-            d[sev].append(i)
+        if severity:
+            class_index_map[severity].append(i)
 
     ds = None
 
-    return d, counts, color_map
+    return class_index_map, counts, color_map
 
-def make_hashable(v, breaks, nodata_vals, offset):
-    return (v, tuple(breaks), tuple(nodata_vals) if nodata_vals is not None else None, offset)
+
+def make_hashable(
+    v: int | float,
+    breaks: Sequence[int | float],
+    nodata_vals: Optional[Sequence[int | float]],
+    offset: int,
+) -> tuple[int | float, HashableBreaks, HashableNoData, int]:
+    """Convert classify arguments to an immutable tuple for caching.
+
+    Args:
+        v: Pixel value under evaluation.
+        breaks: Sequence of severity breakpoints.
+        nodata_vals: Optional pixel values representing NoData.
+        offset: Classification offset applied during :func:`classify`.
+
+    Returns:
+        Hashable tuple suitable for use with :func:`functools.lru_cache`.
+    """
+    nodata_tuple: HashableNoData = tuple(nodata_vals) if nodata_vals is not None else None
+    return v, tuple(breaks), nodata_tuple, offset
 
 @lru_cache(maxsize=None)
-def memoized_classify(args):
+def memoized_classify(
+    args: tuple[int | float, HashableBreaks, HashableNoData, int],
+) -> int:
+    """Memoized wrapper for :func:`classify` to speed pixel iteration."""
     v, breaks, nodata_vals, offset = args
     return _classify(v, breaks, nodata_vals, offset)
 
 
-def _classify(v, breaks, nodata_vals, offset=0):
-    i = 0
+def _classify(
+    v: int | float,
+    breaks: Sequence[int | float],
+    nodata_vals: Optional[Sequence[int | float]],
+    offset: int = 0,
+) -> int:
+    """Classify a single pixel value using numeric thresholds.
+
+    Args:
+        v: Raster pixel value to evaluate.
+        breaks: Ordered breakpoints that separate severity classes.
+        nodata_vals: Optional pixel values representing NoData cells.
+        offset: Optional offset applied to the resulting class code.
+
+    Returns:
+        Integer class code adjusted by ``offset``.
+    """
+    idx = 0
 
     if nodata_vals is not None:
         for _no_data in nodata_vals:
             if int(v) == int(_no_data):
-                return i + offset
+                return idx + offset
 
-    for i, brk in enumerate(breaks):
+    for idx, brk in enumerate(breaks):
         if v <= brk:
             break
-    return i + offset
+    return idx + offset
 
-def classify(v, breaks, nodata_vals=None, offset=0):
+
+def classify(
+    v: int | float,
+    breaks: Sequence[int | float],
+    nodata_vals: Optional[Sequence[int | float]] = None,
+    offset: int = 0,
+) -> int:
+    """Classify a raster value using breakpoints plus memoization.
+
+    Args:
+        v: Raster value to classify.
+        breaks: Ordered breakpoints that separate severity classes.
+        nodata_vals: Optional pixel values representing NoData cells.
+        offset: Optional offset applied to the resulting class code.
+
+    Returns:
+        Integer class code adjusted by ``offset``.
+    """
     args = make_hashable(v, breaks, nodata_vals, offset)
     return memoized_classify(args)
 
 
-def make_hashable_ct(v, ct, offset, nodata_vals):
-    ct_tuple = tuple((key, tuple(values)) for key, values in ct.items())
-    return (v, ct_tuple, offset, tuple(nodata_vals) if nodata_vals is not None else None)
+def make_hashable_ct(
+    v: int | float,
+    ct: Mapping[SeverityClass, Sequence[int]],
+    offset: int,
+    nodata_vals: Optional[Sequence[int | float]],
+) -> tuple[int | float, tuple[tuple[SeverityClass, tuple[int, ...]], ...], int, HashableNoData]:
+    """Create a cache key for color-table-based classification.
+
+    Args:
+        v: Pixel value under evaluation.
+        ct: Mapping of severity labels to color-table indices.
+        offset: Classification offset applied during :func:`ct_classify`.
+        nodata_vals: Optional list of NoData values to include in cache key.
+
+    Returns:
+        Immutable tuple describing the classification problem.
+    """
+    ct_tuple = tuple(
+        (key, tuple(sorted(values)))
+        for key, values in sorted(ct.items(), key=lambda item: item[0])
+    )
+    nodata_tuple: HashableNoData = tuple(nodata_vals) if nodata_vals is not None else None
+    return v, ct_tuple, offset, nodata_tuple
+
 
 @lru_cache(maxsize=None)
-def _get_ct_classification_code(v, ct_tuple):
+def _get_ct_classification_code(
+    v: int | float,
+    ct_tuple: tuple[tuple[SeverityClass, tuple[int, ...]], ...],
+) -> Optional[int]:
+    """Look up the SBS classification code for a value using a cached table.
+
+    Args:
+        v: Raster pixel value to map to a class code.
+        ct_tuple: Immutable representation of the color table.
+
+    Returns:
+        Class code in the range ``0-3`` or ``None`` when the pixel is unknown.
     """
-    Internal helper to classify a single value.
-    `ct_tuple` is a hashable representation of the color table.
-    """
-    # Rebuild the dictionary with sets for efficient lookup inside the cached function
     ct = {k: set(int(x) for x in vs) for k, vs in ct_tuple}
     v = int(v)
 
-    class_to_code = {'unburned': 0, 'low': 1, 'mod': 2, 'high': 3}
+    class_to_code = {"unburned": 0, "low": 1, "mod": 2, "high": 3}
     for cls, code in class_to_code.items():
         if v in ct.get(cls, set()):
             return code
-    return None  # Return None for unclassified values
+    return None
 
 
-def ct_classify(v, ct, offset=0, nodata_vals=None):
-    """
-    Classifies a pixel value `v` based on the color table dictionary `ct`.
-    
+def ct_classify(
+    v: int | float,
+    ct: Mapping[SeverityClass, Sequence[int]],
+    offset: int = 0,
+    nodata_vals: Optional[Sequence[int | float]] = None,
+) -> int:
+    """Classify a pixel using an SBS color table.
+
     Args:
-        v: Pixel value to classify
-        ct: Color table dictionary mapping severity classes to pixel value lists
-        offset: Offset to add to classification code (default 0, use 130 for burn classes)
-        nodata_vals: List of nodata values that should map to offset + 0
-        
+        v: Raster pixel value to map to a class.
+        ct: Mapping of severity classes to the pixel values associated with each.
+        offset: Optional offset applied to the numeric class code. A value of 130
+            retains the legacy raster band encodings used across the project.
+        nodata_vals: Optional sequence of pixel values representing NoData cells.
+
     Returns:
-        Classification code (0-3 + offset for valid classes, offset for nodata, 255 for unknown)
+        An integer class code in the range ``[offset, offset + 3]`` for recognized
+        classes, ``offset`` for NoData, or ``255`` when the value is unknown.
     """
-    # Check if value is in nodata_vals first
     if nodata_vals is not None:
         for _no_data in nodata_vals:
             if int(v) == int(_no_data):
-                return offset  # Return offset for nodata (e.g., 130 for unburned)
-    
-    ct_tuple = tuple(sorted((k, tuple(sorted(v))) for k, v in ct.items()))
-    code = _get_ct_classification_code(v, ct_tuple)
+                return offset
+
+    cache_key = make_hashable_ct(v, ct, offset, nodata_vals)
+    code = _get_ct_classification_code(v, cache_key[1])
 
     if code is None:
-        return 255  # Unknown colors get 255
-    else:
-        return code + offset
+        return 255
+    return code + offset
     
-def sbs_map_sanity_check(fname):
+def sbs_map_sanity_check(fname: str) -> tuple[int, str]:
+    """Validate raster suitability for Soil Burn Severity processing.
+
+    Args:
+        fname: Path to the candidate raster.
+
+    Returns:
+        A tuple ``(status_code, message)`` where ``0`` signals success and ``1``
+        indicates a validation failure along with a human-readable explanation.
+    """
     if not _exists(fname):
-        return 1, 'File does not exist'
+        return 1, "File does not exist"
 
     if not validate_srs(fname):
-        return 1, 'Map contains an invalid projection. Try reprojecting to UTM.'
+        return 1, "Map contains an invalid projection. Try reprojecting to UTM."
 
     ds = gdal.Open(fname)
     band = ds.GetRasterBand(1)
@@ -157,30 +299,51 @@ def sbs_map_sanity_check(fname):
     ds = None
 
     if len(classes) > 256:
-        return 1, 'Map has more than 256 classes'
+        return 1, "Map has more than 256 classes"
 
     for v in classes:
         if not isint(v):
-            return 1, 'Map has non-integer classes'
+            return 1, "Map has non-integer classes"
 
-    ct, counts, color_map = get_sbs_color_table(fname, color_to_severity_map=None)
-    if ct is not None:
-        for entry, sev in color_map.items():
-            if sev in ('low', 'mod', 'high'):
-                return 0, 'Map has valid color table'
+    ct, _counts, color_map = get_sbs_color_table(fname, color_to_severity_map=None)
+    if ct is not None and color_map is not None:
+        for _, sev in color_map.items():
+            if sev in ("low", "mod", "high"):
+                return 0, "Map has valid color table"
 
-        return 1, 'Map has no valid color table'
+        return 1, "Map has no valid color table"
 
-    return 0, 'Map has valid classes'
+    return 0, "Map has valid classes"
 
     
 class SoilBurnSeverityMap(LandcoverMap):
-    def __init__(self, fname, breaks=None, nodata_vals=None, color_map=None, ignore_ct=False):
-        if isinstance(nodata_vals, str):
-            raise ValueError('nodata_vals should be a None or list, not a string')
+    """Wraps an SBS raster with helpers for classification and export."""
 
+    def __init__(
+        self,
+        fname: str,
+        breaks: Optional[Sequence[int | float]] = None,
+        nodata_vals: Optional[Sequence[int | float]] = None,
+        color_map: Optional[Mapping[RGBColor, str]] = None,
+        ignore_ct: bool = False,
+    ) -> None:
+        """Instantiate an SBS map wrapper.
+
+        Args:
+            fname: Path to the on-disk raster.
+            breaks: Optional custom severity breakpoints.
+            nodata_vals: Optional pixel values that should map to the NoData class.
+            color_map: Optional mapping from RGB colors to severity labels; defaults
+                to the canonical BAER palette.
+            ignore_ct: When ``True`` forces the code path to treat the raster as
+                lacking a color table, even if one exists.
+        """
+        if isinstance(nodata_vals, str):
+            raise ValueError("nodata_vals should be a None or list, not a string")
+
+        nodata_list: list[int | float]
         if nodata_vals is None:
-            nodata_vals = []
+            nodata_list = []
 
             ds = gdal.Open(fname)
             band = ds.GetRasterBand(1)
@@ -188,39 +351,38 @@ class SoilBurnSeverityMap(LandcoverMap):
             ds = None
 
             if _nodata is not None:
-                if isint(_nodata):
-                    nodata_vals.append(int(_nodata))
-                else:
-                    nodata_vals.append(_nodata)
+                nodata_list.append(int(_nodata) if isint(_nodata) else float(_nodata))
+        else:
+            nodata_list = list(nodata_vals)
 
         assert _exists(fname)
 
-        ct, counts, color_map = get_sbs_color_table(fname, color_to_severity_map=color_map)
+        ct, counts, explicit_color_map = get_sbs_color_table(
+            fname, color_to_severity_map=color_map
+        )
         if ignore_ct:
             ct = None
 
-        classes = set()
-        for v, c in counts:
-            if isint(v):
-                if isinstance(nodata_vals, list):
-                    if int(v) in nodata_vals:
-                        continue
-                classes.add(int(v))
+        classes: set[int | float] = set()
+        for value, _count in counts:
+            if isint(value):
+                if int(value) in nodata_list:
+                    continue
+                classes.add(int(value))
             else:
-                if isinstance(nodata_vals, list):
-                    if v in nodata_vals:
-                        continue
-                classes.add(v)
+                if value in nodata_list:
+                    continue
+                classes.add(value)
 
-        is256 = None
+        is256: Optional[bool] = None
 
-        classes = sorted(classes)
+        sorted_classes = sorted(classes)
+        derived_breaks: Optional[list[int | float]] = list(breaks) if breaks else None
         if ct is None:
-            if breaks is None:
+            if derived_breaks is None:
                 # need to intuit breaks
-
-                min_val = min(classes)
-                max_val = max(classes)
+                min_val = min(sorted_classes)
+                max_val = max(sorted_classes)
 
                 run = 1
                 max_run_val = min_val
@@ -228,50 +390,54 @@ class SoilBurnSeverityMap(LandcoverMap):
                     max_run_val = min_val + run
                     run += 1
 
-                is256 = run > 5 or len(classes) > 7
+                is256 = run > 5 or len(sorted_classes) > 7
 
                 if is256:
-                    breaks = [0, 75, 109, 187]
+                    derived_breaks = [0, 75, 109, 187]
                 else:
-                    breaks = [max_run_val - i for i in range(3, -1, -1)]
+                    derived_breaks = [max_run_val - i for i in range(3, -1, -1)]
 
-                if max_val not in breaks and not is256 and max_val-1 not in classes:
-                    nodata_vals.append(max_val)
-                    classes.remove(max_val)
+                if max_val not in derived_breaks and not is256 and (max_val - 1) not in classes:
+                    nodata_list.append(max_val)
+                    sorted_classes.remove(max_val)
 
         else:
-            breaks = None
+            derived_breaks = None
 
-        self.ct = ct
+        self.ct: Optional[ColorIndexMap] = ct
         self.is256 = bool(is256)
-        self.classes = classes
-        self.counts = counts
-        self.color_map = color_map
-        self.breaks = breaks
-        self._data = None
+        self.classes = sorted_classes
+        self.counts: ColorCounts = counts
+        self.color_map: Optional[ColorLookup] = explicit_color_map
+        self.breaks: Optional[Sequence[int | float]] = derived_breaks
+        self._data: Optional[NDArray[np.uint8]] = None
         self.fname = fname
-        self.nodata_vals = nodata_vals
+        self.nodata_vals = nodata_list
+        self._nodata_vals: Optional[list[int | float]] = None
 
     @property
-    def transform(self):
-        data, transform, proj = read_raster(self.fname, dtype=np.uint8)
+    def transform(self) -> tuple[float, float, float, float, float, float]:
+        """Return the GDAL geotransform for the SBS raster."""
+        _data, transform, _proj = read_raster(self.fname, dtype=np.uint8)
         return transform
 
     @property
-    def proj(self):
-        data, transform, proj = read_raster(self.fname, dtype=np.uint8)
+    def proj(self) -> str:
+        """Return the projection WKT for the SBS raster."""
+        _data, _transform, proj = read_raster(self.fname, dtype=np.uint8)
         return proj
 
     @property
-    def burn_class_counts(self):
-        # Using a Counter to sum the counts based on severity
-        counter = Counter()
+    def burn_class_counts(self) -> dict[str, int]:
+        """Aggregate class counts across severity categories."""
+        counter: Counter[str] = Counter()
         for _, severity, count in self.class_map:
             counter[severity] += count
         return dict(counter)
 
     @property
-    def data(self):
+    def data(self) -> NDArray[np.uint8]:
+        """Return the SBS raster values reclassified into 4 severity buckets."""
         if self._data is not None:
             return self._data
 
@@ -280,7 +446,7 @@ class SoilBurnSeverityMap(LandcoverMap):
         breaks = self.breaks
         nodata_vals = self.nodata_vals
 
-        data, transform, proj = read_raster(fname, dtype=np.uint8)
+        data, _transform, _proj = read_raster(fname, dtype=np.uint8)
         n, m = data.shape
 
         if ct is None:
@@ -290,19 +456,26 @@ class SoilBurnSeverityMap(LandcoverMap):
             assert breaks is not None, breaks
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = classify(data[i, j], breaks,
-                                           nodata_vals, offset=130)
+                    data[i, j] = classify(data[i, j], breaks, nodata_vals, offset=130)
         else:
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = ct_classify(data[i, j], ct,
-                                              offset=130,
-                                              nodata_vals=nodata_vals)
+                    data[i, j] = ct_classify(
+                        data[i, j], ct, offset=130, nodata_vals=nodata_vals
+                    )
 
         self._data = data
         return data
 
-    def export_wgs_map(self, fn):
+    def export_wgs_map(self, fn: str) -> list[list[float]]:
+        """Reproject the SBS raster to WGS84 for web display.
+
+        Args:
+            fn: Destination GeoTIFF path.
+
+        Returns:
+            Bounding box coordinates formatted as ``[[sw_lat, sw_lon], [ne_lat, ne_lon]]``.
+        """
         ds = gdal.Open(self.fname)
         assert ds is not None
         del ds
@@ -349,31 +522,36 @@ class SoilBurnSeverityMap(LandcoverMap):
         return [[sw_y, sw_x], [ne_y, ne_x]]
 
     @property
-    def class_map(self):
+    def class_map(self) -> list[tuple[int, str, int]]:
+        """List original raster values with their severity labels and counts."""
         ct = self.ct
         breaks = self.breaks
         nodata_vals = self.nodata_vals
 
-        _map = dict([('255', 'No Data'),
-                     ('130', 'No Burn'),
-                     ('131', 'Low Severity Burn'),
-                     ('132', 'Moderate Severity Burn'),
-                     ('133', 'High Severity Burn')])
+        severity_lookup = {
+            "255": "No Data",
+            "130": "No Burn",
+            "131": "Low Severity Burn",
+            "132": "Moderate Severity Burn",
+            "133": "High Severity Burn",
+        }
 
         class_map = []
         for v, cnt in self.counts:
             if ct is None:
+                assert breaks is not None
                 k = classify(v, breaks, nodata_vals, offset=130)
             else:
                 k = ct_classify(v, ct, offset=130, nodata_vals=nodata_vals)
 
-            sev = _map[str(k)]
+            sev = severity_lookup[str(k)]
             class_map.append((int(v), sev, cnt))
 
         return sorted(class_map, key=lambda x: x[0])
 
     @property
-    def class_pixel_map(self):
+    def class_pixel_map(self) -> dict[str, str]:
+        """Map raw raster pixel values to their classified code strings."""
         ct = self.ct
         breaks = self.breaks
         nodata_vals = self.nodata_vals
@@ -381,6 +559,7 @@ class SoilBurnSeverityMap(LandcoverMap):
         class_map = {}
         for v, cnt in self.counts:
             if ct is None:
+                assert breaks is not None
                 k = classify(v, breaks, nodata_vals, offset=130)
             else:
                 k = ct_classify(v, ct, offset=130, nodata_vals=nodata_vals)
@@ -392,18 +571,25 @@ class SoilBurnSeverityMap(LandcoverMap):
 
         return class_map
 
-    def _write_color_table(self, color_tbl_path):
+    def _write_color_table(self, color_tbl_path: str) -> None:
+        """Write out a GDAL color-relief table for export helpers.
+
+        Args:
+            color_tbl_path: Destination file for the color table.
+        """
         ct = self.ct
 
         if ct is None:
             breaks = self.breaks
             nodata_vals = self.nodata_vals
 
-            _map = dict([('255', '0 0 0 0'),
-                         ('130', '0 115 74 255'),
-                         ('131', '77 230 0 255'),
-                         ('132', '255 255 0 255'),
-                         ('133', '255 0 0 255')])
+            _map = {
+                "255": "0 0 0 0",
+                "130": "0 115 74 255",
+                "131": "77 230 0 255",
+                "132": "255 255 0 255",
+                "133": "255 0 0 255",
+            }
 
             with open(color_tbl_path, 'w') as fp:
                 for v, cnt in self.counts:
@@ -411,11 +597,13 @@ class SoilBurnSeverityMap(LandcoverMap):
                     fp.write('{} {}\n'.format(v, _map[str(k)]))
                 fp.write("nv 0 0 0 0\n")
         else:
-            _map = dict([('nv', '0 0 0 0'),
-                         ('unburned', '0 115 74 255'),
-                         ('low', '77 230 0 255'),
-                         ('mod', '255 255 0 255'),
-                         ('high', '255 0 0 255')])
+            _map = {
+                "nv": "0 0 0 0",
+                "unburned": "0 115 74 255",
+                "low": "77 230 0 255",
+                "mod": "255 255 0 255",
+                "high": "255 0 0 255",
+            }
 
             d = {}
             for burn_class in ct:
@@ -429,8 +617,15 @@ class SoilBurnSeverityMap(LandcoverMap):
                 fp.write("nv 0 0 0 0\n")
 
 
-    def export_rgb_map(self, wgs_fn, fn, rgb_png):
-        head, tail = _split(fn)
+    def export_rgb_map(self, wgs_fn: str, fn: str, rgb_png: str) -> None:
+        """Generate color-relief output (VRT + PNG) using the derived palette.
+
+        Args:
+            wgs_fn: Path to the WGS84 GeoTIFF produced by :meth:`export_wgs_map`.
+            fn: Destination path for the VRT file.
+            rgb_png: Destination path for the rendered PNG.
+        """
+        head, _ = _split(fn)
 
         color_tbl_path = _join(head, 'color_table.txt')
         self._write_color_table(color_tbl_path)
@@ -457,7 +652,14 @@ class SoilBurnSeverityMap(LandcoverMap):
         assert _exists(disturbed_rgb_png), ' '.join(cmd)
 
 
-    def export_4class_map(self, fn, cellsize=None):
+    def export_4class_map(self, fn: str, cellsize: Optional[float] = None) -> None:
+        """Export a 4-class GeoTIFF with palette encoding for GIS clients.
+
+        Args:
+            fn: Destination GeoTIFF path.
+            cellsize: Optional output cell size, inferred from the source when
+                omitted.
+        """
         if cellsize is None:
             transform = self.transform
             assert round(transform[1], 1) == round(abs(transform[5]), 1)

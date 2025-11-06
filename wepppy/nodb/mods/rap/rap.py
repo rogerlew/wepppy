@@ -261,7 +261,10 @@ class RAP(NoDbBase):
         d: Dict[str, Dict[str, float]] = {}
         for band in RAP_Band:
             name = ' '.join([t[0] + t[1:].lower() for t in band.name.split('_')])
-            d[name] = rap_ds.spatial_stats(band=band, bound_fn=bound_fn)
+            stats = rap_ds.spatial_stats(band=band, bound_fn=bound_fn)
+            if not stats:
+                continue
+            d[name] = stats
 
         return d
 

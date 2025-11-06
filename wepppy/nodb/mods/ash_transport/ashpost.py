@@ -7,17 +7,20 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 
+"""Post-processing and aggregation utilities for ash transport outputs."""
+
+from __future__ import annotations
+
 import os
 from pathlib import Path
-from glob import glob
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
-from glob import glob
 from copy import deepcopy
 
 import shutil
 import math
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Mapping, MutableMapping, Optional, Sequence
 
 # non-standard
 import numpy as np
@@ -44,6 +47,9 @@ from .ashpost_versioning import (
     write_version_manifest,
 )
 
+if TYPE_CHECKING:
+    from wepppy.nodb.mods.ash_transport.ash import Ash
+
 __all__ = [
     'AshPostNoDbLockedException',
     'AshPost',
@@ -55,7 +61,7 @@ out_cols = ['year0', 'year', 'julian', 'days_from_fire (days)',
             'wind_transport (tonne/ha)', 'water_transport (tonne/ha)', 'ash_transport (tonne/ha)',
             'ash_depth (mm)', 'transportable_ash (tonne/ha)']
 
-ASH_POST_FILES = {
+ASH_POST_FILES: Dict[str, str] = {
     'hillslope_annuals': 'hillslope_annuals.parquet',
     'watershed_annuals': 'watershed_annuals.parquet',
     'watershed_daily': 'watershed_daily.parquet',
@@ -63,7 +69,7 @@ ASH_POST_FILES = {
     'watershed_cumulatives': 'watershed_cumulatives.parquet',
 }
 
-COLUMN_DESCRIPTIONS = {
+COLUMN_DESCRIPTIONS: Dict[str, str] = {
     'topaz_id': 'TOPAZ hillslope identifier for the modeled subwatershed.',
     'area': 'Surface area represented by the aggregation.',
     'burn_class': 'Soil burn severity class assigned to the hillslope (1=unburned, 4=high).',
@@ -118,18 +124,25 @@ UINT8_COLUMNS = {
     'burn_class',
 }
 
+ReturnPeriodEntry = Dict[str, Any]
+ReturnPeriods = Dict[int, ReturnPeriodEntry]
+BurnClassReturnPeriods = Dict[int, Dict[str, ReturnPeriods]]
+
 
 def _base_column_name(column: str) -> str:
+    """Extract the base column name without any unit suffix."""
     return column.split(' (')[0]
 
 
 def _infer_units(column: str) -> str | None:
+    """Return the unit suffix embedded in a column name, if present."""
     if '(' in column and column.endswith(')'):
         return column[column.rfind('(') + 1:-1]
     return None
 
 
 def _describe_column(column: str) -> str | None:
+    """Map a column name to a human-readable description."""
     base = _base_column_name(column)
     if base in COLUMN_DESCRIPTIONS:
         return COLUMN_DESCRIPTIONS[base]
@@ -141,6 +154,7 @@ def _describe_column(column: str) -> str | None:
 
 
 def _cast_integral_columns(df: pd.DataFrame) -> None:
+    """Downcast known integral columns to compact unsigned dtypes."""
     for column in UINT16_COLUMNS:
         if column in df.columns:
             df[column] = df[column].astype('uint16')
@@ -149,7 +163,12 @@ def _cast_integral_columns(df: pd.DataFrame) -> None:
             df[column] = df[column].astype('uint8')
 
 
-def _add_per_area_columns(df: pd.DataFrame, source_columns: list[str], area_column: str = 'area (ha)') -> None:
+def _add_per_area_columns(
+    df: pd.DataFrame,
+    source_columns: Sequence[str],
+    area_column: str = 'area (ha)',
+) -> None:
+    """Add per-area columns (tonne/ha, mm) derived from volumetric inputs."""
     if area_column not in df.columns:
         return
     area = df[area_column].to_numpy(dtype=np.float64)
@@ -171,6 +190,7 @@ def _add_per_area_columns(df: pd.DataFrame, source_columns: list[str], area_colu
 
 
 def _write_parquet(df: pd.DataFrame, path: str) -> None:
+    """Persist a DataFrame with schema metadata and AshPost versioning."""
     if not len(df.columns):
         empty_schema = schema_with_version(pa.schema([]))
         table = pa.Table.from_arrays([], schema=empty_schema)
@@ -189,7 +209,14 @@ def _write_parquet(df: pd.DataFrame, path: str) -> None:
     pq.write_table(table, path, compression='snappy')
 
 
-def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_extract):
+def calculate_return_periods(
+    df: pd.DataFrame,
+    measure: str,
+    recurrence: Sequence[int],
+    num_fire_years: float,
+    cols_to_extract: Sequence[str],
+) -> ReturnPeriods:
+    """Compute Weibull return period stats for a single measure."""
 
     measure_rank = measure.replace(' (tonne)', '_rank')\
                           .replace(' (days)', '_rank')
@@ -210,7 +237,7 @@ def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_ex
 
 
     num_events = (df[measure] > 0).sum()
-    return_periods= {}
+    return_periods: ReturnPeriods = {}
     for retperiod in recurrence:
         if retperiod not in rec:
             return_periods[retperiod] = { measure: 0,
@@ -244,7 +271,12 @@ def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_ex
     return return_periods
 
 
-def calculate_cumulative_transport(df, recurrence, ash_post_dir):
+def calculate_cumulative_transport(
+    df: pd.DataFrame,
+    recurrence: Sequence[int],
+    ash_post_dir: str,
+) -> ReturnPeriods:
+    """Aggregate cumulative transport metrics and compute return periods."""
 
     # group the filtered rows by year0 and aggregate the cum_ columns and weighted average of days_from_fire
     agg_d = {'days_from_fire (days)': 'first'}
@@ -266,7 +298,7 @@ def calculate_cumulative_transport(df, recurrence, ash_post_dir):
 
     # calculate return intervals and probabilities for cumulative results
     num_fire_years = len(cum_df)
-    cum_return_periods = {}
+    cum_return_periods: ReturnPeriods = {}
     cols_to_extract = ['year0']
 
     for measure in ['cum_wind_transport (tonne)', 'cum_water_transport (tonne)',
@@ -277,7 +309,13 @@ def calculate_cumulative_transport(df, recurrence, ash_post_dir):
     return cum_return_periods
 
 
-def calculate_hillslope_statistics(df, ash, ash_post_dir, first_year_only=False):
+def calculate_hillslope_statistics(
+    df: pd.DataFrame,
+    ash: "Ash",
+    ash_post_dir: str,
+    first_year_only: bool = False,
+) -> None:
+    """Summarize hillslope-level transport metrics and persist annual stats."""
     agg_d = { 'wind_transport (tonne/ha)': 'sum',
               'water_transport (tonne/ha)': 'sum',
               'ash_transport (tonne/ha)': 'sum' }
@@ -306,7 +344,16 @@ def calculate_hillslope_statistics(df, ash, ash_post_dir, first_year_only=False)
     _write_parquet(df_hillslope_average_annuals, _join(ash_post_dir, ASH_POST_FILES['hillslope_annuals']))
 
 
-def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1, 2, 3], first_year_only=False):
+def calculate_watershed_statisics(
+    df: pd.DataFrame,
+    ash_post_dir: str,
+    recurrence: Sequence[int],
+    burn_classes: Sequence[int] = (1, 2, 3),
+    first_year_only: bool = False,
+) -> tuple[ReturnPeriods, BurnClassReturnPeriods]:
+    """Aggregate watershed transport metrics and compute return periods."""
+    burn_classes = list(burn_classes)
+
     if first_year_only:
         df = df[df['days_from_fire (days)'] <= 365]
 
@@ -479,7 +526,13 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
     return return_periods, burn_class_return_periods
 
 
-def read_hillslope_out_fn(out_fn, meta_data=None, meta_data_types=None, cumulative=False):
+def read_hillslope_out_fn(
+    out_fn: str,
+    meta_data: Optional[Mapping[str, Any]] = None,
+    meta_data_types: Optional[Mapping[str, str]] = None,
+    cumulative: bool = False,
+) -> pd.DataFrame:
+    """Load a single hillslope ash parquet and attach run metadata."""
     global common_cols, out_cols
 
     if cumulative:
@@ -530,7 +583,12 @@ def read_hillslope_out_fn(out_fn, meta_data=None, meta_data_types=None, cumulati
 
 
 
-def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2), verbose=True):
+def watershed_daily_aggregated(
+    wd: str,
+    recurrence: Sequence[int] = (1000, 500, 200, 100, 50, 25, 20, 10, 5, 2),
+    verbose: bool = True,
+) -> Optional[tuple[ReturnPeriods, ReturnPeriods, BurnClassReturnPeriods]]:
+    """Aggregate hillslope outputs across the watershed and compute summaries."""
     #
     # Setup stuff
     #
@@ -627,14 +685,11 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
 
 
 class AshPostNoDbLockedException(Exception):
-    pass
+    """Raised when AshPost operations encounter a locked NoDb instance."""
 
 
 class AshPost(NoDbBase):
-    """
-    Manager that keeps track of project details
-    and coordinates access of NoDb instances.
-    """
+    """Coordinates post-processing of ash transport model outputs."""
     
     __name__ = 'AshPost'
 
@@ -642,27 +697,36 @@ class AshPost(NoDbBase):
 
     filename = 'ashpost.nodb'
 
+    _return_periods: Optional[ReturnPeriods]
+    _cum_return_periods: Optional[ReturnPeriods]
+    _burn_class_return_periods: Optional[BurnClassReturnPeriods]
+
     def __init__(self, wd, cfg_fn, run_group=None, group_name=None):
         super(AshPost, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
 
         with self.locked():
             self._return_periods = None
             self._cum_return_periods = None
+            self._burn_class_return_periods = None
 
     @property
-    def return_periods(self):
+    def return_periods(self) -> Optional[ReturnPeriods]:
+        """Return-period statistics aggregated across the watershed."""
         return self._return_periods
 
     @property
-    def burn_class_return_periods(self):
+    def burn_class_return_periods(self) -> Optional[BurnClassReturnPeriods]:
+        """Return-period statistics stratified by burn class."""
         return self._burn_class_return_periods
 
     @property
-    def cum_return_periods(self):
+    def cum_return_periods(self) -> Optional[ReturnPeriods]:
+        """Cumulative transport return periods across fire years."""
         return self._cum_return_periods
 
     @property
-    def pw0_stats(self):
+    def pw0_stats(self) -> Dict[str, Dict[str, float]]:
+        """Summaries of cumulative transport by burn class."""
 
         meta = self.meta
 
@@ -688,11 +752,11 @@ class AshPost(NoDbBase):
         return pw0_stats
 
     @property
-    def recurrence_intervals(self):
+    def recurrence_intervals(self) -> list[str]:
         rec_int = sorted([int(k) for k in self._return_periods['ash_transport (tonne)']])
         return [str(k) for k in rec_int]
 
-    def run_post(self, recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)):
+    def run_post(self, recurrence: Sequence[int] = (1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)) -> None:
         with self.locked():
             ash_post_path = Path(self.ash_post_dir)
             remove_incompatible_outputs(ash_post_path, version=ASHPOST_VERSION)
@@ -707,24 +771,24 @@ class AshPost(NoDbBase):
         update_catalog_entry(self.wd, 'ash')
         
     @property
-    def meta(self):
+    def meta(self) -> Mapping[str, Any]:
         from wepppy.nodb.mods.ash_transport import Ash
         ash = Ash.getInstance(self.wd)
         return ash.meta
 
     @property
-    def fire_date(self):
+    def fire_date(self) -> YearlessDate:
         from wepppy.nodb.mods.ash_transport import Ash
         ash = Ash.getInstance(self.wd)
         return ash.fire_date
 
     @property
-    def ash_post_dir(self):
+    def ash_post_dir(self) -> str:
         return _join(self.ash_dir, 'post')
 
 
     @property
-    def hillslope_annuals(self):
+    def hillslope_annuals(self) -> Dict[str, Dict[str, Any]]:
         path = _join(self.ash_post_dir, ASH_POST_FILES['hillslope_annuals'])
         if not _exists(path):
             return {}
@@ -737,7 +801,7 @@ class AshPost(NoDbBase):
         return d
 
     @property
-    def watershed_annuals(self):
+    def watershed_annuals(self) -> Dict[str, Dict[str, Any]]:
         path = _join(self.ash_post_dir, ASH_POST_FILES['watershed_annuals'])
         if not _exists(path):
             return {}
@@ -756,7 +820,7 @@ class AshPost(NoDbBase):
         return d
 
     @property
-    def ash_out(self):
+    def ash_out(self) -> Dict[str, Dict[str, Any]]:
         ash_out = self.meta
         hillslope_annuals = self.hillslope_annuals
 

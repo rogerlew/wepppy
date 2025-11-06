@@ -1,19 +1,19 @@
-from typing import Optional
-import enum
-from os.path import join as _join
+"""Multi-year hillslope ash transport models and helpers."""
 
-import json
+from __future__ import annotations
+
 import math
+import os
+import warnings
+from os.path import join as _join
+from typing import Optional, Sequence, Tuple
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
-import warnings
 
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.dateutils import YearlessDate
-from wepppy.all_your_base.stats import weibull_series, probability_of_occurrence
 
 from .wind_transport_thresholds import *
 
@@ -25,35 +25,58 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 from .ash_type import AshType
 
+__all__ = [
+    "AshNoDbLockedException",
+    "AshModel",
+    "WhiteAshModel",
+    "BlackAshModel",
+]
+
 
 class AshNoDbLockedException(Exception):
     pass
 
 
 
-class AshModel(object):
-    """
-    Base class for the hillslope ash models. This class is inherited by
-    the WhiteAshModel and BlackAshModel classes
+class AshModel:
+    """Base class for hillslope ash transport simulations.
+
+    Subclasses provide calibrated parameter defaults for different ash
+    compositions (for example, white versus black ash). The model tracks daily
+    runoff, wind transport, and decomposition following a fire.
+
+    Args:
+        ash_type: AshType flag controlling wind transport thresholds.
+        ini_bulk_den: Initial ash bulk density (grams per cubic centimeter).
+        fin_bulk_den: Bulk density after consolidation (grams per cubic centimeter).
+        bulk_den_fac: Exponential decay factor applied to bulk density.
+        par_den: Particle density for ash solids (grams per cubic centimeter).
+        decomp_fac: Daily decomposition factor applied to remaining ash.
+        ini_erod: Initial erodibility (tonnes per hectare per millimeter of runoff).
+        fin_erod: Residual erodibility once ash consolidates.
+        roughness_limit: Depth threshold (millimeters) remaining after transport.
+        run_wind_transport: Whether to evaluate wind-driven erosion.
     """
 
-    def __init__(self,
-                 ash_type: AshType,
-                 ini_bulk_den=None,
-                 fin_bulk_den=None,
-                 bulk_den_fac=None,
-                 par_den=None,
-                 decomp_fac=None,
-                 ini_erod=None,
-                 fin_erod=None,
-                 roughness_limit=None,
-                 run_wind_transport=False):
+    def __init__(
+        self,
+        ash_type: AshType,
+        ini_bulk_den: Optional[float] = None,
+        fin_bulk_den: Optional[float] = None,
+        bulk_den_fac: Optional[float] = None,
+        par_den: Optional[float] = None,
+        decomp_fac: Optional[float] = None,
+        ini_erod: Optional[float] = None,
+        fin_erod: Optional[float] = None,
+        roughness_limit: Optional[float] = None,
+        run_wind_transport: bool = False,
+    ) -> None:
 
         assert fin_bulk_den >= ini_bulk_den, (fin_bulk_den, ini_bulk_den)
 
         self.ash_type = ash_type
-        self.ini_ash_depth_mm = None
-        self.ini_ash_load_tonneha = None
+        self.ini_ash_depth_mm: Optional[float] = None
+        self.ini_ash_load_tonneha: Optional[float] = None
         self.ini_bulk_den = ini_bulk_den  # Initial bulk density, gm/cm3
         self.fin_bulk_den = fin_bulk_den  # Final bulk density, gm/cm3
         self.bulk_den_fac = bulk_den_fac  # Bulk density factor
@@ -65,17 +88,20 @@ class AshModel(object):
         self.run_wind_transport = run_wind_transport
 
     @property
-    def ini_material_available_mm(self):
+    def ini_material_available_mm(self) -> float:
+        """Initial ash depth available for transport in millimeters."""
         return self.proportion * self.ini_ash_depth_mm
 
     @property
-    def ini_material_available_tonneperha(self):
+    def ini_material_available_tonneperha(self) -> float:
+        """Initial ash load available for transport (tonnes per hectare)."""
         if self.ini_ash_load_tonneha is not None:
             return self.ini_ash_load_tonneha
         else:
             return 10.0 * self.ini_material_available_mm * self.bulk_density
 
-    def lookup_wind_threshold_proportion(self, w):
+    def lookup_wind_threshold_proportion(self, w: float) -> float:
+        """Return wind-driven transport proportion for a daily peak gust."""
         if w == 0.0:
             return 0.0
 
@@ -84,34 +110,45 @@ class AshModel(object):
         elif self.ash_type == AshType.WHITE:
             return lookup_wind_threshold_white_ash_proportion(w)
 
-    def run_model(self, fire_date: YearlessDate, cli_df: pd.DataFrame, hill_wat_df: pd.DataFrame, out_dir, prefix,
-                  recurrence=[100, 50, 25, 20, 10, 5, 2],
-                  area_ha: Optional[float] = None,
-                  ini_ash_depth: Optional[float] = None,  # not used
-                  ini_ash_load: Optional[float] = None, 
-                  run_wind_transport=True):
+        raise ValueError(f"Unsupported ash type {self.ash_type!r}")
 
-        """
-        Runs the ash model for a hillslope
+    def run_model(
+        self,
+        fire_date: YearlessDate,
+        cli_df: pd.DataFrame,
+        hill_wat_df: pd.DataFrame,
+        out_dir: str,
+        prefix: str,
+        recurrence: Sequence[int] = (100, 50, 25, 20, 10, 5, 2),
+        area_ha: Optional[float] = None,
+        ini_ash_depth: Optional[float] = None,  # kept for signature parity
+        ini_ash_load: Optional[float] = None,
+        run_wind_transport: bool = True,
+    ) -> str:
 
-        :param fire_date:
-            month, day of fire as a YearlessDate instance
-        :param cli_df:
-            the climate file produced by CLIGEN as a pandas.Dataframe
-        :param hill_wat_df:
-               daily hillslope water balance dataframe aggregated across OFEs
-        :param out_dir:
-            the directory save the model output
-        :param prefix:
-            prefix for the model output file
-        :param recurrence:
-            list of recurrence intervals
-        :return:
-            returns the output file name, return period results dictionary
+        """Run the ash transport model for each year containing the fire date.
+
+        Args:
+            fire_date: Month/day of the fire expressed without a year.
+            cli_df: Daily climate data (typically CLIGEN output).
+            hill_wat_df: Aggregated daily hillslope water balance dataframe.
+            out_dir: Directory where plots and parquet output are written.
+            prefix: Basename for generated artifacts.
+            recurrence: Historical recurrence intervals (unused placeholder).
+            area_ha: Optional hillslope area; retained for signature parity.
+            ini_ash_depth: Optional initial ash depth override (unused).
+            ini_ash_load: Optional initial ash load override; defaults to
+                :attr:`ini_material_available_tonneperha`.
+            run_wind_transport: Override for the instance wind transport flag.
+
+        Returns:
+            Path to the generated parquet file containing the simulated time
+            series.
         """
 
         self.ini_ash_depth_mm = None
         self.ini_ash_load_tonneha = ini_ash_load
+        self.run_wind_transport = run_wind_transport
 
         assert isfloat(self.par_den), (prefix, self.par_den)
         assert isfloat(self.ini_bulk_den), (prefix, self.ini_bulk_den)
@@ -178,33 +215,12 @@ class AshModel(object):
 
         return out_fn
 
-    def _calc_transportable_ash(self, remaining_ash_tonspha, bulk_density_gmpcm3):
-        """
-        Calculates the amount of transportable ash in a given volume based on the remaining ash and bulk density.
-
-        Parameters
-        ----------
-        remaining_ash_tonspha : float
-            The amount of remaining ash in tonnes per hectare.
-        bulk_density_gmpcm3 : float
-            The bulk density of the ash in grams per cubic centimeter.
-
-        Returns
-        -------
-        Tuple[float, float]
-            A tuple containing the remaining ash in millimeters and the transportable ash in tonnes per hectare.
-
-        Raises
-        ------
-        None
-
-        Examples
-        --------
-        To calculate the transportable ash with remaining ash of 30 tonnes per hectare and bulk density of 0.8 grams per cubic centimeter,
-        the method can be called as follows:
-
-        >>> remaining_mm, transportable_tonspha = _calc_transportable_ash(30, 0.8)
-        """
+    def _calc_transportable_ash(
+        self,
+        remaining_ash_tonspha: float,
+        bulk_density_gmpcm3: float,
+    ) -> Tuple[float, float]:
+        """Convert remaining ash to depth and transportable load."""
         roughness_limit = self.roughness_limit  # mm
         remaining_mm = remaining_ash_tonspha / (10.0 * bulk_density_gmpcm3)
         transportable_mm = np.clip(remaining_mm - roughness_limit, 0, None)
@@ -212,8 +228,16 @@ class AshModel(object):
         return remaining_mm, transportable_tonspha
 
 
-    def _run_ash_model_until_gone(self, fire_date, hill_wat_df, cli_df, ini_ash_load,
-                                  start_index, year0):
+    def _run_ash_model_until_gone(
+        self,
+        fire_date: YearlessDate,
+        hill_wat_df: pd.DataFrame,
+        cli_df: pd.DataFrame,
+        ini_ash_load: float,
+        start_index: int,
+        year0: int,
+    ) -> pd.DataFrame:
+        """Simulate post-fire ash decay for one climate year."""
 
         assert self.roughness_limit >= 0.0, self.roughness_limit
 
@@ -436,6 +460,7 @@ BLACK_ASH_BD = 0.22
 
 
 class WhiteAshModel(AshModel):
+    """AshModel variant calibrated for white ash conditions."""
     __name__ = 'WhiteAshModel'
 
     def __init__(self, bulk_density=WHITE_ASH_BD):
@@ -450,7 +475,8 @@ class WhiteAshModel(AshModel):
             fin_erod=0.1,  # Final erodibility, t/ha
             roughness_limit=1)  # Verify Roughness limit, mm
         
-    def to_dict(self):
+    def to_dict(self) -> dict[str, float | str]:
+        """Serialize calibrated model parameters for inspection."""
         return {
             'ash_type': str(self.ash_type),
             'ini_bulk_den': self.ini_bulk_den,
@@ -465,6 +491,7 @@ class WhiteAshModel(AshModel):
 
 
 class BlackAshModel(AshModel):
+    """AshModel variant calibrated for black ash conditions."""
     __name__ = 'BlackAshModel'
 
     def __init__(self, bulk_density=BLACK_ASH_BD):
@@ -479,7 +506,8 @@ class BlackAshModel(AshModel):
             fin_erod=0.1,  # Final erodibility, t/ha
             roughness_limit=1)   # Verify Roughness limit, mm
         
-    def to_dict(self):
+    def to_dict(self) -> dict[str, float | str]:
+        """Serialize calibrated model parameters for inspection."""
         return {
             'ash_type': str(self.ash_type),
             'ini_bulk_den': self.ini_bulk_den,
