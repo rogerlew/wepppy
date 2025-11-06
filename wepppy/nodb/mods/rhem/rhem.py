@@ -27,17 +27,28 @@ from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from glob import glob
 from os.path import exists as _exists
 from os.path import join as _join
-from time import sleep
+from time import perf_counter, sleep
 
-from typing import Any, Dict, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple, Union
 
 from wepppy.all_your_base import NCPU
-from wepppy.climates.cligen import ClimateFile
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.core import Climate, Soils, Watershed, Wepp
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.rhem import make_hillslope_run, make_parameter_file, run_hillslope
 from wepppy.topo.watershed_abstraction import SlopeFile
+
+StormFileFn = Callable[[str, str], None]
+try:
+    from wepppyo3.climate import make_rhem_storm_file as _pyo3_make_rhem_storm_file
+except ImportError:  # pragma: no cover - optional acceleration
+    _pyo3_make_rhem_storm_file = None
+    from wepppy.climates.cligen import ClimateFile
+
+if TYPE_CHECKING:
+    from wepppy.climates.cligen import ClimateFile
+
+pyo3_make_rhem_storm_file: Optional[StormFileFn] = _pyo3_make_rhem_storm_file
 
 from .rhempost import RhemPost
 
@@ -117,7 +128,14 @@ class Rhem(NoDbBase):
         runs_dir = self.runs_dir
         out_dir = self.output_dir
 
-        for topaz_id in watershed._subs_summary:
+        sub_summaries = watershed._subs_summary
+        if sub_summaries is None:
+            raise RhemNoDbLockedException('Watershed summaries are not available; abstract the watershed first.')
+
+        topaz_ids = list(sub_summaries)
+        sub_n = len(topaz_ids)
+
+        def prepare_single(topaz_id: Union[str, int]) -> None:
             mukey = soils.domsoil_d[topaz_id]
             soil_texture = soils.soils[mukey].texture
 
@@ -130,6 +148,7 @@ class Rhem(NoDbBase):
             cover: CoverValues = covers_map[topaz_id]
 
             scn_name = f'hill_{topaz_id}'
+            start = perf_counter()
             par_fn = make_parameter_file(
                 scn_name=scn_name,
                 out_dir=runs_dir,
@@ -150,13 +169,19 @@ class Rhem(NoDbBase):
                 width=watershed.width_of(topaz_id),
                 model_version='WEPPcloud'
             )
+            self.logger.info(f'    make_parameter_file({topaz_id}) completed in {perf_counter() - start:.2f}s')
 
             stm_fn = _join(runs_dir, f'hill_{topaz_id}.stm')
 
             cli_summary: Dict[str, Any] = climate.sub_summary(topaz_id)
             cli_path = _join(cli_dir, cli_summary['cli_fn'])
-            climate_file = ClimateFile(cli_path)
-            climate_file.make_storm_file(stm_fn)
+            start = perf_counter()
+            if pyo3_make_rhem_storm_file is not None:
+                pyo3_make_rhem_storm_file(cli_path, stm_fn)
+            else:
+                climate_file = ClimateFile(cli_path)
+                climate_file.make_storm_file(stm_fn)
+            self.logger.info(f'    make_storm_file({topaz_id}) completed in {perf_counter() - start:.2f}s')
 
             run_fn = _join(runs_dir, f'hill_{topaz_id}.run')
             make_hillslope_run(
@@ -166,6 +191,33 @@ class Rhem(NoDbBase):
                 _join(out_dir, f'hill_{topaz_id}.sum'),
                 scn_name
             )
+
+        futures: list[Future[None]] = []
+        with ThreadPoolExecutor(NCPU) as pool:
+            for i, topaz_id in enumerate(topaz_ids):
+                self.logger.info(f'  submitting topaz={topaz_id} (hill {i + 1} of {sub_n})')
+                futures.append(pool.submit(prepare_single, topaz_id))
+
+            futures_n = len(futures)
+            count = 0
+            pending: Set[Future[None]] = set(futures)
+            while pending:
+                done, pending = wait(pending, timeout=30, return_when=FIRST_COMPLETED)
+
+                if not done:
+                    self.logger.warning('  RHEM hillslope prep still running after 30 seconds; continuing to wait.')
+                    continue
+
+                for future in done:
+                    try:
+                        future.result()
+                        count += 1
+                        self.logger.info(f'  ({count}/{futures_n}) hillslopes prepped)')
+                    except Exception as exc:
+                        for remaining in pending:
+                            remaining.cancel()
+                        self.logger.error(f'  RHEM hillslope prep failed with an error: {exc}')
+                        raise
 
     def clean(self) -> None:
         runs_dir = self.runs_dir

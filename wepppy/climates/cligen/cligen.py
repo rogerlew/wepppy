@@ -10,6 +10,7 @@ from typing import Union
 from collections.abc import Iterable
 
 import json
+import warnings
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -798,29 +799,6 @@ class ClimateFile(object):
         years = [int(v) for v in sorted(set(df['year']))]
         return max(years) -  min(years) + 1
 
-    def make_storm_file(self, dst_fn):
-        header_template = """\
-{num_rain_events} # The number of rain events
-0 # Breakpoint data? (0 for no, 1 for yes)
-#  id     day  month  year  Rain   Dur    Tp     Ip
-#                           (mm)   (h)
-"""
-        y0 = self.years[0]
-
-        storms = []
-        df = self.as_dataframe()
-        for i, row in df.iterrows():
-            if row.prcp > 0:
-                storms.append([int(row.da), int(row.mo), int(row.year), row.prcp, row.dur, row.tp, row.ip])
-
-        with open(dst_fn, 'w') as fp:
-            fp.write(header_template.format(num_rain_events=len(storms)))
-
-            for i, (da, mo, year, prcp, dur, tp, ip) in enumerate(storms):
-                year = year - y0 + 1
-                fp.write('{0:<8}{1:<6}{2:<6}{3:<6}{4:<7}{5:<7}{6:<7}{7:<7}\n'
-                         .format(i+1, da, mo, year, prcp, dur, tp, ip))
-
     @property
     def input_years(self):
         df = self.as_dataframe()
@@ -828,6 +806,11 @@ class ClimateFile(object):
         return max(years) -  min(years) + 1
 
     def make_storm_file(self, dst_fn):
+        warnings.warn(
+            "ClimateFile.make_storm_file is deprecated; use wepppyo3.climate.make_rhem_storm_file instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         header_template = """\
 {num_rain_events} # The number of rain events
 0 # Breakpoint data? (0 for no, 1 for yes)
