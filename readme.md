@@ -11,7 +11,8 @@
 | [![Docs Quality](https://github.com/rogerlew/wepppy/actions/workflows/docs-quality.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/docs-quality.yml) | Markdown lint, docbench sanity checks, and Rust workspace formatting for the documentation toolchain. |
 | [![Stubtest](https://github.com/rogerlew/wepppy/actions/workflows/stubtest.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/stubtest.yml) | Ensures Python type stubs stay in sync with runtime behavior via `stubtest`. |
 | [![CI Samurai Nightly](https://github.com/rogerlew/wepppy/actions/workflows/ci-samurai-nightly-ssh.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/ci-samurai-nightly-ssh.yml) | Nightly self-hosted agent loop that applies fixes to tracked failures across the test suite. |
-| [![Pytest Coverage Nightly](https://github.com/rogerlew/wepppy/actions/workflows/pytest-coverage-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/pytest-coverage-nightly.yml) | 2 AM PT run executing `pytest --cov` and exporting XML coverage artifacts. |
+| [![Pytest Coverage Nightly](https://github.com/rogerlew/wepppy/actions/workflows/pytest-coverage-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/pytest-coverage-nightly.yml) | 2 AM PT run executing `pytest --cov` and exporting XML coverage artifacts.
+ Failure do to missing datasets for eu currently copying over rsync.|
 | [![NPM Coverage Nightly](https://github.com/rogerlew/wepppy/actions/workflows/npm-coverage-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/npm-coverage-nightly.yml) | 2:30 AM PT Jest run covering the `static-src` controllers with coverage reports. |
 
 
