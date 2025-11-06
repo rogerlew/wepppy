@@ -20,6 +20,7 @@
 
 | Badge | Profile Name | Description | Run Time (PT) |
 | ----- | ------------ | ----------- | ------------- |
+| [![Profile Run - NEXRAD (PRISM) DebrisFlow](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-nexrad-prism-debrisflow.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-nexrad-prism-debrisflow.yml) | baer-cropped-wbt-nexrad-prism-rap-wepp-debrisflow | Cameron Peak (baer.cropped.tif) WBT NEXRAD, RAP, WEPP, DebrisFlow | 04:00 AM |
 | [![Profile Run - WEPP Reveg](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-wepp-reveg.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-wepp-reveg.yml) | us-reveg | Small US WEPP Reveg Run with DAYMET climate | 04:10 AM |
 | [![Profile Run - RHEM](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rhem.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rhem.yml) | us-rap-rhem | Small US RHEM run with rangeland-cover from RAP | 04:20 AM |
 | [![Profile Run - Rattlesnake](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-rattlesnake.yml) | rattlesnake-topaz-vanilla-wepp-watar | Playback test of Rattlesnake - TOPAZ, Vanilla Cligent, WEPP, WATAR (Alex) | 04:30 AM |
